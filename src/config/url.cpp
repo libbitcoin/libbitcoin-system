@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/endpoint.hpp>
+#include <bitcoin/system/config/url.hpp>
 
 #include <sstream>
 #include <bitcoin/system/config/authority.hpp>
-#include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/serial/serial.hpp>
@@ -32,46 +31,57 @@ namespace config {
 // Contructors.
 // ----------------------------------------------------------------------------
 
-endpoint::endpoint() NOEXCEPT
-  : endpoint("localhost", {})
+url::url() NOEXCEPT
+  : url({}, "localhost", {})
 {
 }
 
-endpoint::endpoint(const std::string& uri) THROWS
-  : endpoint()
+url::url(const std::string& uri) THROWS
+  : url()
 {
     std::stringstream(uri) >> *this;
 }
 
-endpoint::endpoint(const std::string& host, uint16_t port) NOEXCEPT
-  : host_(host), port_(port)
+url::url(const std::string& host, uint16_t port) NOEXCEPT
+  : url({}, host, port)
 {
 }
 
-endpoint::endpoint(const asio::endpoint& uri) NOEXCEPT
-  : endpoint(uri.address(), uri.port())
+url::url(const std::string& scheme, const std::string& host,
+    uint16_t port) NOEXCEPT
+  : scheme_(scheme), host_(host), port_(port)
 {
 }
 
-endpoint::endpoint(const asio::address& ip, uint16_t port) NOEXCEPT
-  : endpoint(config::to_host(ip), port)
+url::url(const asio::endpoint& uri) NOEXCEPT
+  : url(uri.address(), uri.port())
 {
 }
 
-endpoint::endpoint(const config::authority& authority) NOEXCEPT
-  : endpoint(authority.ip(), authority.port())
+url::url(const asio::address& ip, uint16_t port) NOEXCEPT
+  : url(config::to_host(ip), port)
+{
+}
+
+url::url(const config::authority& authority) NOEXCEPT
+  : url(authority.ip(), authority.port())
 {
 }
 
 // Properties.
 // ----------------------------------------------------------------------------
 
-const std::string& endpoint::host() const NOEXCEPT
+const std::string& url::scheme() const NOEXCEPT
+{
+    return scheme_;
+}
+
+const std::string& url::host() const NOEXCEPT
 {
     return host_;
 }
 
-uint16_t endpoint::port() const NOEXCEPT
+uint16_t url::port() const NOEXCEPT
 {
     return port_;
 }
@@ -79,13 +89,23 @@ uint16_t endpoint::port() const NOEXCEPT
 // Methods.
 // ----------------------------------------------------------------------------
 
-endpoint endpoint::to_local() const NOEXCEPT
+std::string url::to_uri() const NOEXCEPT
 {
-    const auto host = (host_ == "*" ? "localhost" : host_);
-    return { host, port_ };
+    std::stringstream value{};
+    value << *this;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return value.str();
+    BC_POP_WARNING()
 }
 
-std::string endpoint::to_string() const NOEXCEPT
+url url::to_local() const NOEXCEPT
+{
+    const auto host = (host_ == "*" ? "localhost" : host_);
+    return url(scheme_, host, port_);
+}
+
+// protected
+std::string url::to_authority() const NOEXCEPT
 {
     return is_zero(port()) ? host() : host() + ":" + serialize(port());
 }
@@ -93,33 +113,38 @@ std::string endpoint::to_string() const NOEXCEPT
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool operator==(const endpoint& left, const endpoint& right) NOEXCEPT
+bool operator==(const url& left, const url& right) NOEXCEPT
 {
     return left.host() == right.host()
-        && left.port() == right.port();
+        && left.port() == right.port()
+        && left.scheme() == right.scheme();
 }
 
-bool operator!=(const endpoint& left, const endpoint& right) NOEXCEPT
+bool operator!=(const url& left, const url& right) NOEXCEPT
 {
     return !(left == right);
 }
 
-std::istream& operator>>(std::istream& input, endpoint& argument) THROWS
+std::istream& operator>>(std::istream& input,
+    url& argument) THROWS
 {
     std::string value{};
     input >> value;
 
-    if (!parse_endpoint(argument.host_, argument.port_, value))
+    if (!parse_url(argument.scheme_, argument.host_, argument.port_, value))
         throw istream_exception(value);
 
     return input;
 }
 
 std::ostream& operator<<(std::ostream& output,
-    const endpoint& argument) NOEXCEPT
+    const url& argument) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    output << argument.to_string();
+    output
+        << (argument.scheme().empty() ? "" : argument.scheme() + "://")
+        << (argument.host())
+        << (is_zero(argument.port()) ? "" : ":" + serialize(argument.port()));
     BC_POP_WARNING()
     return output;
 }

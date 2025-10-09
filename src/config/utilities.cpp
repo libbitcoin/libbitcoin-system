@@ -117,7 +117,7 @@ bool parse_authority(asio::address& ip, uint16_t& port, uint8_t& cidr,
 }
 
 // Excludes ipv4 mapped/compat to ipv6.
-bool parse_endpoint(std::string& scheme, std::string& host, uint16_t& port,
+bool parse_url(std::string& scheme, std::string& host, uint16_t& port,
     const std::string& value) NOEXCEPT
 {
     static const std::regex regular
@@ -131,6 +131,22 @@ bool parse_endpoint(std::string& scheme, std::string& host, uint16_t& port,
         && to_string(scheme, (*token)[2].str())
         && to_string(host,   (*token)[3].str())
         && to_integer(port,  (*token)[8].str());
+}
+
+// Excludes ipv4 mapped/compat to ipv6.
+bool parse_endpoint(std::string& host, uint16_t& port,
+    const std::string& value) NOEXCEPT
+{
+    static const std::regex regular
+    {
+        "^(" IPV4 "|" IPV6 "|" HOST ")(" PORT ")?$"
+    };
+
+    std::sregex_iterator token{ value.begin(), value.end(), regular };
+    std::sregex_iterator end{};
+    return token != end
+        && to_string(host, (*token)[1].str())
+        && to_integer(port, (*token)[6].str());
 }
 
 BC_POP_WARNING()

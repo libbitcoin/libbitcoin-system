@@ -423,51 +423,51 @@ BOOST_AUTO_TEST_CASE(utilities__parse_authority__v6_invalids__false)
     BOOST_REQUIRE(!parse_authority(ip, port, cidr, "[::1]/129"));
 }
 
-// parse_endpoint
+// parse_url
 
-BOOST_AUTO_TEST_CASE(utilities__parse_endpoint__full__true_expected)
+BOOST_AUTO_TEST_CASE(utilities__parse_url__full__true_expected)
 {
     std::string scheme{};
     std::string host{};
     uint16_t port{};
-    BOOST_REQUIRE(parse_endpoint(scheme, host, port, "tcp://foo.bar:42"));
+    BOOST_REQUIRE(parse_url(scheme, host, port, "tcp://foo.bar:42"));
     BOOST_REQUIRE_EQUAL(scheme, "tcp");
     BOOST_REQUIRE_EQUAL(host, "foo.bar");
     BOOST_REQUIRE_EQUAL(port, 42u);
 }
 
-BOOST_AUTO_TEST_CASE(utilities__parse_endpoint__host_only__true_expected)
+BOOST_AUTO_TEST_CASE(utilities__parse_url__host_only__true_expected)
 {
     std::string scheme{};
     std::string host{};
     uint16_t port{};
-    BOOST_REQUIRE(parse_endpoint(scheme, host, port, "foo.bar"));
+    BOOST_REQUIRE(parse_url(scheme, host, port, "foo.bar"));
     BOOST_REQUIRE(scheme.empty());
     BOOST_REQUIRE_EQUAL(host, "foo.bar");
     BOOST_REQUIRE_EQUAL(port, 0u);
 }
 
-BOOST_AUTO_TEST_CASE(utilities__parse_endpoint__host_port__true_expected)
+BOOST_AUTO_TEST_CASE(utilities__parse_url__host_port__true_expected)
 {
     std::string scheme{};
     std::string host{};
     uint16_t port{};
-    BOOST_REQUIRE(parse_endpoint(scheme, host, port, "foo.bar:65535"));
+    BOOST_REQUIRE(parse_url(scheme, host, port, "foo.bar:65535"));
     BOOST_REQUIRE(scheme.empty());
     BOOST_REQUIRE_EQUAL(host, "foo.bar");
     BOOST_REQUIRE_EQUAL(port, 65535u);
 }
 
-BOOST_AUTO_TEST_CASE(utilities__parse_endpoint__invalids__false_expected)
+BOOST_AUTO_TEST_CASE(utilities__parse_url__invalids__false_expected)
 {
     std::string scheme{};
     std::string host{};
     uint16_t port{};
-    BOOST_REQUIRE(!parse_endpoint(scheme, host, port, "tcp://foo.bar:65536"));
-    BOOST_REQUIRE(!parse_endpoint(scheme, host, port, "foobar://foo.bar:42"));
-    BOOST_REQUIRE(!parse_endpoint(scheme, host, port, "tcp://:42"));
-    BOOST_REQUIRE(!parse_endpoint(scheme, host, port, ":42"));
-    BOOST_REQUIRE(!parse_endpoint(scheme, host, port, ""));
+    BOOST_REQUIRE(!parse_url(scheme, host, port, "tcp://foo.bar:65536"));
+    BOOST_REQUIRE(!parse_url(scheme, host, port, "foobar://foo.bar:42"));
+    BOOST_REQUIRE(!parse_url(scheme, host, port, "tcp://:42"));
+    BOOST_REQUIRE(!parse_url(scheme, host, port, ":42"));
+    BOOST_REQUIRE(!parse_url(scheme, host, port, ""));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
