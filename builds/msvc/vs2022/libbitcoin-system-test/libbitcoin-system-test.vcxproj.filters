@@ -210,6 +210,9 @@
     <ClCompile Include="..\..\..\..\test\config\printer.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\url.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\utilities.cpp">
       <Filter>src\config</Filter>
     </ClCompile>

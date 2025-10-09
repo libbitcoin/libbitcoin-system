@@ -65,8 +65,10 @@ BC_API asio::address from_host(const std::string& host) THROWS;
 /// Parsers.
 BC_API bool parse_authority(asio::address& ip, uint16_t& port,
     uint8_t& cidr, const std::string& value) NOEXCEPT;
-BC_API bool parse_endpoint(std::string& scheme, std::string& host,
+BC_API bool parse_url(std::string& scheme, std::string& host,
     uint16_t& port, const std::string& value) NOEXCEPT;
+BC_API bool parse_endpoint(std::string& host, uint16_t& port,
+    const std::string& value) NOEXCEPT;
 
 } // namespace config
 } // namespace system

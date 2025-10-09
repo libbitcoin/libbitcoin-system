@@ -39,6 +39,7 @@
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
 
 #endif

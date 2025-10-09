@@ -28,129 +28,115 @@ using namespace boost::program_options;
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__empty__throws_invalid_option)
 {
-    BOOST_REQUIRE_THROW(endpoint url(""), invalid_option_value);
-}
-
-BOOST_AUTO_TEST_CASE(endpoint__construct__no_host__throws_invalid_option_value)
-{
-    BOOST_REQUIRE_THROW(endpoint host("tcp://"), invalid_option_value);
-}
-
-BOOST_AUTO_TEST_CASE(endpoint__construct__port_only__throws_invalid_option_value)
-{
-    BOOST_REQUIRE_THROW(endpoint host(":42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(endpoint instance(""), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__question_mark__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(endpoint host("tcp://foo.bar?foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(endpoint instance("foo.bar?foobar:42"), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__forward_slash__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(endpoint host("tcp://foo.bar/foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(endpoint instance("foo.bar/foobar:42"), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__backslash__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(endpoint host("tcp://foo.bar\\foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(endpoint instance("foo.bar\\foobar:42"), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__host_colon__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(endpoint host("tcp://foo.bar:foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(endpoint instance("foo.bar:foobar:42"), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__ipv6_non_literal__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(endpoint host("tcp://a::bc:def::123:45:6"), invalid_option_value);
+    BOOST_REQUIRE_THROW(endpoint instance("a::bc:def::123:45:6"), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__default__localhost)
 {
-    endpoint host{};
-    BOOST_REQUIRE_EQUAL(host.scheme(), "");
-    BOOST_REQUIRE_EQUAL(host.host(), "localhost");
-    BOOST_REQUIRE_EQUAL(host.port(), 0u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "localhost");
+    endpoint instance{};
+    BOOST_REQUIRE_EQUAL(instance.host(), "localhost");
+    BOOST_REQUIRE_EQUAL(instance.port(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "localhost");
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "localhost");
+    BOOST_REQUIRE_EQUAL(instance.to_string(42), "localhost:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(), "localhost");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(0), "localhost");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(42), "localhost:42");
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__host__expected_values)
 {
-    endpoint host("foo");
-    BOOST_REQUIRE_EQUAL(host.scheme(), "");
-    BOOST_REQUIRE_EQUAL(host.host(), "foo");
-    BOOST_REQUIRE_EQUAL(host.port(), 0u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "foo");
+    endpoint instance("FOO");
+    BOOST_REQUIRE_EQUAL(instance.host(), "FOO");
+    BOOST_REQUIRE_EQUAL(instance.port(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "FOO");
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "FOO");
+    BOOST_REQUIRE_EQUAL(instance.to_string(42), "FOO:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(), "foo");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(0), "foo");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(42), "foo:42");
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__host_port__expected_values)
 {
-    endpoint endpoint("foo.bar:42");
-    BOOST_REQUIRE_EQUAL(endpoint.scheme(), "");
-    BOOST_REQUIRE_EQUAL(endpoint.host(), "foo.bar");
-    BOOST_REQUIRE_EQUAL(endpoint.port(), 42u);
-    BOOST_REQUIRE_EQUAL(endpoint.to_uri(), "foo.bar:42");
+    endpoint instance("foo.bar:42");
+    BOOST_REQUIRE_EQUAL(instance.host(), "foo.bar");
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "foo.bar:42");
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "foo.bar:42");
+    BOOST_REQUIRE_EQUAL(instance.to_string(80), "foo.bar:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(), "foo.bar:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(0), "foo.bar:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(80), "foo.bar:42");
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_host__expected_values)
+BOOST_AUTO_TEST_CASE(endpoint__construct__ipv4_port__expected_values)
 {
-    endpoint host("tcp://foo.bar");
-    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
-    BOOST_REQUIRE_EQUAL(host.host(), "foo.bar");
-    BOOST_REQUIRE_EQUAL(host.port(), 0u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "tcp://foo.bar");
+    endpoint instance("127.0.0.1:42");
+    BOOST_REQUIRE_EQUAL(instance.host(), "127.0.0.1");
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "127.0.0.1:42");
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "127.0.0.1:42");
+    BOOST_REQUIRE_EQUAL(instance.to_string(80), "127.0.0.1:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(), "127.0.0.1:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(0), "127.0.0.1:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(80), "127.0.0.1:42");
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_host_port__expected_values)
+BOOST_AUTO_TEST_CASE(endpoint__construct__ipv6_port__expected_values)
 {
-    endpoint host("tcp://foo.bar:42");
-    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
-    BOOST_REQUIRE_EQUAL(host.host(), "foo.bar");
-    BOOST_REQUIRE_EQUAL(host.port(), 42u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "tcp://foo.bar:42");
-}
-
-BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_ipv4_port__expected_values)
-{
-    endpoint host("tcp://127.0.0.1:42");
-    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
-    BOOST_REQUIRE_EQUAL(host.host(), "127.0.0.1");
-    BOOST_REQUIRE_EQUAL(host.port(), 42u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "tcp://127.0.0.1:42");
-}
-
-BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_ipv6_port__expected_values)
-{
-    endpoint host("tcp://[a::bc:def::123:45:6]:42");
-    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
-    BOOST_REQUIRE_EQUAL(host.host(), "[a::bc:def::123:45:6]");
-    BOOST_REQUIRE_EQUAL(host.port(), 42u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "tcp://[a::bc:def::123:45:6]:42");
+    // Requires lower case hex.
+    endpoint instance("[a::bc:def::123:45:6]:42");
+    BOOST_REQUIRE_EQUAL(instance.host(), "[a::bc:def::123:45:6]");
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "[a::bc:def::123:45:6]:42");
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "[a::bc:def::123:45:6]:42");
+    BOOST_REQUIRE_EQUAL(instance.to_string(80), "[a::bc:def::123:45:6]:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(), "[a::bc:def::123:45:6]:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(0), "[a::bc:def::123:45:6]:42");
+    BOOST_REQUIRE_EQUAL(instance.to_lower(80), "[a::bc:def::123:45:6]:42");
 }
 
 // to_local
 
-BOOST_AUTO_TEST_CASE(endpoint__to_local__scheme_host_port__expected_values)
-{
-    endpoint original("tcp://*:12345");
-    const auto host = original.to_local();
-    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
-    BOOST_REQUIRE_EQUAL(host.host(), "localhost");
-    BOOST_REQUIRE_EQUAL(host.port(), 12345u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "tcp://localhost:12345");
-    BOOST_REQUIRE_EQUAL(original.to_uri(), "tcp://*:12345");
-}
-
 BOOST_AUTO_TEST_CASE(endpoint__to_local__host_port__expected_values)
 {
     endpoint original("*:12345");
-    const auto host = original.to_local();
-    BOOST_REQUIRE_EQUAL(host.scheme(), "");
-    BOOST_REQUIRE_EQUAL(host.host(), "localhost");
-    BOOST_REQUIRE_EQUAL(host.port(), 12345u);
-    BOOST_REQUIRE_EQUAL(host.to_uri(), "localhost:12345");
-    BOOST_REQUIRE_EQUAL(original.to_uri(), "*:12345");
+    const auto instance = original.to_local();
+    BOOST_REQUIRE_EQUAL(instance.host(), "localhost");
+    BOOST_REQUIRE_EQUAL(instance.port(), 12345u);
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "localhost:12345");
+    BOOST_REQUIRE_EQUAL(original.to_string(), "*:12345");
+    BOOST_REQUIRE_EQUAL(original.to_string(0), "*:12345");
+    BOOST_REQUIRE_EQUAL(original.to_string(80), "*:12345");
+    BOOST_REQUIRE_EQUAL(original.to_lower(), "*:12345");
+    BOOST_REQUIRE_EQUAL(original.to_lower(0), "*:12345");
+    BOOST_REQUIRE_EQUAL(original.to_lower(80), "*:12345");
 }
 
 // equality
@@ -165,21 +151,21 @@ BOOST_AUTO_TEST_CASE(endpoint__equality__default_default__true)
 BOOST_AUTO_TEST_CASE(endpoint__equality__distinct__false)
 {
     const endpoint host1{};
-    const endpoint host2("tcp://*:12345");
+    const endpoint host2("*:12345");
     BOOST_REQUIRE(!(host1 == host2));
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__equality__distinct_port__false)
 {
-    const endpoint host1("tcp://foo.bar:12345");
-    const endpoint host2("tcp://foo.bar:1234");
+    const endpoint host1("foo.bar:12345");
+    const endpoint host2("foo.bar:1234");
     BOOST_REQUIRE(!(host1 == host2));
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__equality__same__true)
 {
-    const endpoint host1("tcp://*:12345");
-    const endpoint host2("tcp://*:12345");
+    const endpoint host1("*:12345");
+    const endpoint host2("*:12345");
     BOOST_REQUIRE(host1 == host2);
 }
 
@@ -188,21 +174,21 @@ BOOST_AUTO_TEST_CASE(endpoint__equality__same__true)
 BOOST_AUTO_TEST_CASE(endpoint__inequality__distinct__true)
 {
     const endpoint host1{};
-    const endpoint host2("tcp://*:12345");
+    const endpoint host2("*:12345");
     BOOST_REQUIRE(host1 != host2);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__inequality__distinct_port__true)
 {
-    const endpoint host1("tcp://foo.bar:12345");
-    const endpoint host2("tcp://foo.bar:1234");
+    const endpoint host1("foo.bar:12345");
+    const endpoint host2("foo.bar:1234");
     BOOST_REQUIRE(host1 != host2);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__inequality__same__false)
 {
-    const endpoint host1("tcp://*:12345");
-    const endpoint host2("tcp://*:12345");
+    const endpoint host1("*:12345");
+    const endpoint host2("*:12345");
     BOOST_REQUIRE(!(host1 != host2));
 }
 
@@ -217,22 +203,22 @@ BOOST_AUTO_TEST_CASE(endpoint__equality1__default_default__true)
 
 BOOST_AUTO_TEST_CASE(endpoint__equality1__distinct_port__false)
 {
-    const endpoint host1("tcp://42.42.42.42:12345");
-    const endpoint host2("tcp://42.42.42.42:1234");
+    const endpoint host1("42.42.42.42:12345");
+    const endpoint host2("42.42.42.42:1234");
     BOOST_REQUIRE(!(host1 == host2));
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__equality1__same__true)
 {
-    const endpoint host1("tcp://127.0.0.1:12345");
-    const endpoint host2("tcp://127.0.0.1:12345");
+    const endpoint host1("127.0.0.1:12345");
+    const endpoint host2("127.0.0.1:12345");
     BOOST_REQUIRE(host1 == host2);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__equality1__same_v6__true)
 {
-    const endpoint host1("tcp://[abcd:abcd::abcd:abcd]:12345");
-    const endpoint host2("tcp://[abcd:abcd::abcd:abcd]:12345");
+    const endpoint host1("[abcd:abcd::abcd:abcd]:12345");
+    const endpoint host2("[abcd:abcd::abcd:abcd]:12345");
     BOOST_REQUIRE(host1 == host2);
 }
 
@@ -240,22 +226,22 @@ BOOST_AUTO_TEST_CASE(endpoint__equality1__same_v6__true)
 
 BOOST_AUTO_TEST_CASE(endpoint__inequality1__distinct_port__true)
 {
-    const endpoint host1("tcp://42.42.42.42:12345");
-    const endpoint host2("tcp://42.42.42.42:1234");
+    const endpoint host1("42.42.42.42:12345");
+    const endpoint host2("42.42.42.42:1234");
     BOOST_REQUIRE(host1 != host2);
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__inequality1__same__false)
 {
-    const endpoint host1("tcp://127.0.0.1:12345");
-    const endpoint host2("tcp://127.0.0.1:12345");
+    const endpoint host1("127.0.0.1:12345");
+    const endpoint host2("127.0.0.1:12345");
     BOOST_REQUIRE(!(host1 != host2));
 }
 
 BOOST_AUTO_TEST_CASE(endpoint__inequality1__same_v6__false)
 {
-    const endpoint host1("tcp://[abcd:abcd::abcd:abcd]:12345");
-    const endpoint host2("tcp://[abcd:abcd::abcd:abcd]:12345");
+    const endpoint host1("[abcd:abcd::abcd:abcd]:12345");
+    const endpoint host2("[abcd:abcd::abcd:abcd]:12345");
     BOOST_REQUIRE(!(host1 != host2));
 }
 

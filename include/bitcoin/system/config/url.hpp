@@ -16,68 +16,74 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_ENDPOINT_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_ENDPOINT_HPP
+#ifndef LIBBITCOIN_SYSTEM_CONFIG_URL_HPP
+#define LIBBITCOIN_SYSTEM_CONFIG_URL_HPP
 
 #include <memory>
 #include <bitcoin/system/config/authority.hpp>
-#include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
     
-/// Container for a [scheme, host, port] tuple.
+/// Container for a [scheme, host, port] tuple (URLs).
 /// IPv6 URIs encoded with literal host (en.wikipedia.org/wiki/IPv6_address).
-/// Provided for serialization of network endpoints in URI format.
-class BC_API endpoint
+/// Provided for serialization of network URLs such as for ZeroMQ.
+class BC_API url
 {
 public:
-    typedef std::shared_ptr<endpoint> ptr;
+    typedef std::shared_ptr<url> ptr;
 
-    DEFAULT_COPY_MOVE_DESTRUCT(endpoint);
+    DEFAULT_COPY_MOVE_DESTRUCT(url);
 
-    endpoint() NOEXCEPT;
+    url() NOEXCEPT;
 
     /// The scheme and port may be undefined, in which case the port is
     /// reported as zero and the scheme is reported as an empty string.
     /// The value is of the form: [scheme://]host[:port] (dns name or ip).
-    endpoint(const std::string& uri) THROWS;
-    endpoint(const std::string& host, uint16_t port) NOEXCEPT;
-    endpoint(const asio::endpoint& uri) NOEXCEPT;
-    endpoint(const asio::address& ip, uint16_t port) NOEXCEPT;
-    endpoint(const config::authority& authority) NOEXCEPT;
+    url(const std::string& uri) THROWS;
+    url(const std::string& host, uint16_t port) NOEXCEPT;
+    url(const std::string& scheme, const std::string& host,
+        uint16_t port) NOEXCEPT;
+    url(const asio::endpoint& uri) NOEXCEPT;
+    url(const asio::address& ip, uint16_t port) NOEXCEPT;
+    url(const config::authority& authority) NOEXCEPT;
 
     /// Properties.
     /// -----------------------------------------------------------------------
 
-    /// The host name or ip address of the endpoint.
+    /// The scheme of the url or empty string.
+    const std::string& scheme() const NOEXCEPT;
+
+    /// The host name or ip address of the url.
     const std::string& host() const NOEXCEPT;
 
-    /// The tcp port of the endpoint.
+    /// The tcp port of the url.
     uint16_t port() const NOEXCEPT;
 
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    /// The endpoint is of the form host[:port], empty port if zero (default).
-    /// Specify non-zero default to explicitly serialize in case of default.
-    std::string to_string(uint16_t default_port=0) const NOEXCEPT;
-    std::string to_lower(uint16_t default_port=0) const NOEXCEPT;
+    /// An empty scheme and/or empty (zero) port is omitted.
+    /// The url is of the form: [scheme://]host[:port]
+    std::string to_uri() const NOEXCEPT;
 
-    /// Return a new endpoint that replaces host instances of "*" with
-    /// "localhost". This is intended for clients that wish to connect
-    /// to a service that has been configured to bind to all interfaces.
-    endpoint to_local() const NOEXCEPT;
+    /// Return a new url that replaces host instances of "*" with "localhost".
+    /// This is intended for clients that wish to connect to a service that has
+    /// been configured to bind to all interfaces.
+    url to_local() const NOEXCEPT;
 
     /// Operators.
     /// -----------------------------------------------------------------------
 
     friend std::istream& operator>>(std::istream& input,
-        endpoint& argument) THROWS;
+        url& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& output,
-        const endpoint& argument) NOEXCEPT;
+        const url& argument) NOEXCEPT;
+
+protected:
+    std::string to_authority() const NOEXCEPT;
 
 private:
     // These are not thread safe.
@@ -87,10 +93,10 @@ private:
 };
 
 /// Equality considers all properties (scheme, host, port).
-BC_API bool operator==(const endpoint& left, const endpoint& right) NOEXCEPT;
-BC_API bool operator!=(const endpoint& left, const endpoint& right) NOEXCEPT;
+BC_API bool operator==(const url& left, const url& right) NOEXCEPT;
+BC_API bool operator!=(const url& left, const url& right) NOEXCEPT;
 
-typedef std::vector<endpoint> endpoints;
+typedef std::vector<url> urls;
 
 } // namespace config
 } // namespace system
@@ -99,11 +105,11 @@ typedef std::vector<endpoint> endpoints;
 namespace std
 {
 template<>
-struct hash<bc::system::config::endpoint>
+struct hash<bc::system::config::url>
 {
-    size_t operator()(const bc::system::config::endpoint& value) const NOEXCEPT
+    size_t operator()(const bc::system::config::url& value) const NOEXCEPT
     {
-        return std::hash<std::string>{}(value.to_string());
+        return std::hash<std::string>{}(value.to_uri());
     }
 };
 } // namespace std

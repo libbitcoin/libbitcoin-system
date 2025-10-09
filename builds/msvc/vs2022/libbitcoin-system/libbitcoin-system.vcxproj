@@ -192,6 +192,7 @@
     <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
       <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\url.cpp" />
     <ClCompile Include="..\..\..\..\src\config\utilities.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
@@ -352,6 +353,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\url.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\utilities.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp" />
