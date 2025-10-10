@@ -96,17 +96,22 @@ public:
     uint32_t nonce() const NOEXCEPT;
 
     /// Computed properties.
-    hash_digest hash() const NOEXCEPT;
     uint256_t proof() const NOEXCEPT;
+    hash_digest hash() const NOEXCEPT;
 
-    /// Cache setters/getters, not thread safe.
+    /// Cache and metadata.
     /// -----------------------------------------------------------------------
+    /// getters/setters, const/mutable, not thread safe.
 
-    /// Cache (overrides hash() computation).
+    /// Set to avoid hash() re-computation.
     void set_hash(const hash_digest& hash) const NOEXCEPT;
 
     /// Reference used to avoid copy, sets cache if not set.
     const hash_digest& get_hash() const NOEXCEPT;
+
+    /// Set/get chain_state associated with the header, may be nullptr.
+    void set_state(const chain_state::cptr& state) const NOEXCEPT;
+    const chain_state::cptr& get_state() const NOEXCEPT;
 
     /// Validation.
     /// -----------------------------------------------------------------------
@@ -153,6 +158,9 @@ private:
 
     // Identity hash caching.
     mutable std::optional<hash_digest> hash_{};
+
+    // Chain state caching.
+    mutable chain_state::cptr state_{};
 };
 
 typedef std_vector<header> headers;

@@ -326,6 +326,16 @@ void block::set_hashes(const data_chunk& data) NOEXCEPT
     }
 }
 
+const chain_state::cptr& block::get_state() const NOEXCEPT
+{
+    return header_->get_state();
+}
+
+void block::set_state(const chain_state::cptr& state) const NOEXCEPT
+{
+    header_->set_state(state);
+}
+
 // static/private
 block::sizes block::serialized_size(const transaction_cptrs& txs) NOEXCEPT
 {
