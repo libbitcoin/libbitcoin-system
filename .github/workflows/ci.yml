@@ -94,13 +94,13 @@ jobs:
             detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
-            llvm: "llvm@16"
+            llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE"
             options: "--enable-isystem"
             packager: "brew"
-            packages: "llvm@16 icu4c"
+            packages: "icu4c"
 
           - os: macos-latest
             cxx: "clang++"
@@ -111,13 +111,13 @@ jobs:
             detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
-            llvm: "llvm@16"
+            llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE"
             options: "--enable-isystem"
             packager: "brew"
-            packages: "llvm@16 icu4c"
+            packages: "icu4c"
 
 
     runs-on: ${{ matrix.os }}
@@ -147,7 +147,7 @@ jobs:
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
-          if [[ -n ${{ matrix.llvm }} ]]; then
+          if [[ -n "${{ matrix.llvm }}" ]]; then
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
           fi
 
@@ -365,13 +365,13 @@ jobs:
             detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
-            llvm: "llvm@16"
+            llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE"
             options: ""
             packager: "brew"
-            packages: "llvm@16 icu4c"
+            packages: "icu4c"
 
           - os: macos-latest
             cxx: "clang++"
@@ -382,13 +382,13 @@ jobs:
             detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
-            llvm: "llvm@16"
+            llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE"
             options: ""
             packager: "brew"
-            packages: "llvm@16 icu4c"
+            packages: "icu4c"
 
 
     runs-on: ${{ matrix.os }}
@@ -418,7 +418,7 @@ jobs:
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
-          if [[ -n ${{ matrix.llvm }} ]]; then
+          if [[ -n "${{ matrix.llvm }}" ]]; then
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
           fi
 
@@ -654,7 +654,7 @@ jobs:
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
-          if [[ -n ${{ matrix.llvm }} ]]; then
+          if [[ -n "${{ matrix.llvm }}" ]]; then
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
           fi
 
