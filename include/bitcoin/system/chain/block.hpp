@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
 #include <memory>
+#include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
@@ -105,14 +106,19 @@ public:
     bool is_malleable64() const NOEXCEPT;
     bool is_malleated64() const NOEXCEPT;
 
-    /// Cache setters/getters, not thread safe.
+    /// Cache and metadata.
     /// -----------------------------------------------------------------------
+    /// getters/setters, const/mutable, not thread safe.
 
     /// Cache (overrides hash() computation).
     void set_hashes(const data_chunk& data) NOEXCEPT;
 
     /// Reference used to avoid copy, sets cache if not set.
     const hash_digest& get_hash() const NOEXCEPT;
+
+    /// Set/get chain_state associated with the block.header, may be nullptr.
+    void set_state(const chain_state::cptr& state) const NOEXCEPT;
+    const chain_state::cptr& get_state() const NOEXCEPT;
 
     /// Set/get memory allocation.
     void set_allocation(size_t allocation) const NOEXCEPT;

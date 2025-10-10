@@ -218,37 +218,7 @@ uint32_t header::nonce() const NOEXCEPT
     return nonce_;
 }
 
-void header::set_hash(const hash_digest& hash) const NOEXCEPT
-{
-    hash_ = hash;
-}
-
-// computed
-hash_digest header::hash() const NOEXCEPT
-{
-    if (hash_)
-        return *hash_;
-
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
-    to_data(sink);
-    sink.flush();
-    return digest;
-}
-
-const hash_digest& header::get_hash() const NOEXCEPT
-{
-    if (!hash_)
-        set_hash(hash());
-
-    return *hash_;
-}
-
-// static
+// static/computed
 uint256_t header::proof(uint32_t bits) NOEXCEPT
 {
     auto target = compact::expand(bits);
@@ -277,6 +247,49 @@ uint256_t header::proof() const NOEXCEPT
 {
     // Returns zero if bits_ mantissa is less than one or bits_ is overflowed.
     return proof(bits_);
+}
+
+// computed
+hash_digest header::hash() const NOEXCEPT
+{
+    if (hash_)
+        return *hash_;
+
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest digest;
+    BC_POP_WARNING()
+
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
+    to_data(sink);
+    sink.flush();
+    return digest;
+}
+
+// Cache and metadata.
+// ----------------------------------------------------------------------------
+
+void header::set_hash(const hash_digest& hash) const NOEXCEPT
+{
+    hash_ = hash;
+}
+
+const hash_digest& header::get_hash() const NOEXCEPT
+{
+    if (!hash_)
+        set_hash(hash());
+
+    return *hash_;
+}
+
+const chain_state::cptr& header::get_state() const NOEXCEPT
+{
+    return state_;
+}
+
+void header::set_state(const chain_state::cptr& state) const NOEXCEPT
+{
+    state_ = state;
 }
 
 // Check.
