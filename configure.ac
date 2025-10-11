@@ -298,7 +298,7 @@ AS_IF([test x${enable_avx2} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-mavx -mavx2],
         [AC_DEFINE([WITH_AVX2])
          CXXFLAGS="$CXXFLAGS -mavx -mavx2";
-         AC_SUBST([avx2], [-DWITH_AVX2])],
+         AC_SUBST([avx2], ["-mavx -mavx2"])],
         [AC_MSG_ERROR([-mavx -mavx2 not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -315,7 +315,7 @@ AS_IF([test x${enable_avx512} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-mavx512f -mavx512bw],
         [AC_DEFINE([WITH_AVX512])
          CXXFLAGS="$CXXFLAGS -mavx512f -mavx512bw";
-         AC_SUBST([avx512], [-DWITH_AVX512])],
+         AC_SUBST([avx512], ["-mavx512f -mavx512bw"])],
         [AC_MSG_ERROR([-mavx512f -mavx512bw not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -332,7 +332,7 @@ AS_IF([test x${enable_shani} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4 -msha],
         [AC_DEFINE([WITH_SHANI])
          CXXFLAGS="$CXXFLAGS -msse4 -msha";
-         AC_SUBST([shani], [-DWITH_SHANI])],
+         AC_SUBST([shani], ["-msse4 -msha"])],
         [AC_MSG_ERROR([-msse4 -msha not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -351,7 +351,7 @@ AS_IF([test x${enable_sse41} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4.1],
         [AC_DEFINE([WITH_SSE41])
          CXXFLAGS="$CXXFLAGS -msse4.1";
-         AC_SUBST([sse41], [-DWITH_SSE41])],
+         AC_SUBST([sse41], ["-msse4.1"])],
         [AC_MSG_ERROR([-msse4.1 not supported.])],
         [],
         [AC_LANG_PROGRAM(
