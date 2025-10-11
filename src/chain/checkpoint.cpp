@@ -133,9 +133,7 @@ std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS
 
     hash_digest hash;
     size_t height(zero);
-
-    // std::string avoids boolean override.
-    const auto tokens = split(value, std::string{ ":" });
+    const auto tokens = split(value, ":");
 
     if (tokens.size() != two ||
         !decode_hash(hash, tokens.front()) ||

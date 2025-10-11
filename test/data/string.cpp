@@ -142,14 +142,14 @@ BOOST_AUTO_TEST_CASE(string__split0__true_compress__trimmed_compressed)
 {
     const std::string value{ "\t\r\n abc " };
     const string_list expected{ "abc" };
-    BOOST_REQUIRE_EQUAL(system::split(value, true), expected);
+    BOOST_REQUIRE_EQUAL(system::split(value), expected);
 }
 
 BOOST_AUTO_TEST_CASE(string__split0__false_compress__trimmed)
 {
     const std::string value{ " abc \t\r\n" };
     const string_list expected{ "abc" };
-    BOOST_REQUIRE_EQUAL(system::split(value, false), expected);
+    BOOST_REQUIRE_EQUAL(system::split(value, ascii_whitespace, ascii_whitespace, false), expected);
 }
 
 // split1
@@ -589,7 +589,7 @@ BOOST_AUTO_TEST_CASE(string__replace__with_spaces__expected)
     BOOST_REQUIRE_EQUAL(replace(value, "c", " "), 2u);
     BOOST_REQUIRE_EQUAL(value, expected3);
     const string_list expected4{ "def", "", "", "", "", "def" };
-    BOOST_REQUIRE_EQUAL(split(value, false), expected4);
+    BOOST_REQUIRE_EQUAL(split(value, ascii_whitespace, ascii_whitespace, false), expected4);
 }
 
 // replace_copy

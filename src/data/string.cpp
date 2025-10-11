@@ -151,11 +151,11 @@ string_list split(const std::string& text, const std::string& delimiter,
     return split(text, string_list{ delimiter }, trim_tokens, compress);
 }
 
-string_list split(const std::string& text, bool compress) NOEXCEPT
+string_list split(const std::string& text) NOEXCEPT
 {
     // Splitting is prioritized over trimming, because each token is trimmed.
     // So trimming is not an option when splitting on the trim characters.
-    return split(text, ascii_whitespace, ascii_whitespace, compress);
+    return split(text, ascii_whitespace, ascii_whitespace, true);
 }
 
 bool trim_left(std::string& text, const std::string& token) NOEXCEPT
