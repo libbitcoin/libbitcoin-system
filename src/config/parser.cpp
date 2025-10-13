@@ -95,9 +95,8 @@ bool parser::load_configuration_variables(variables_map& variables,
     const auto path = get_config_option(variables, option_name);
     const auto extended = extended_path(path);
 
-    // If the existence test errors out we pretend there's no file :/.
     std::error_code code{};
-    if (!path.empty() && std::filesystem::exists(extended, code))
+    if (!path.empty() /*&& std::filesystem::exists(extended, code)*/)
     {
         ifstream file{ path };
         if (!file.good())
