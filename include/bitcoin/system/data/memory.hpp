@@ -30,8 +30,15 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
-/// shared_ptr
+/// make_shared (non-const)
 /// ---------------------------------------------------------------------------
+
+/// Create default shared pointer.
+template <typename Type>
+inline std::shared_ptr<Type> make_shared() NOEXCEPT
+{
+    return std::make_shared<Type>();
+}
 
 /// Create shared pointer to non-const from moved instance.
 template <typename Type>
@@ -40,12 +47,15 @@ inline std::shared_ptr<Type> make_shared(Type&& value) NOEXCEPT
     return std::make_shared<Type>(std::forward<Type>(value));
 }
 
-/// Create default shared pointer.
-template <typename Type>
-inline std::shared_ptr<Type> to_shared() NOEXCEPT
+/// Create shared pointer to non-const from vargs instance.
+template <typename Type, typename... Args>
+inline std::shared_ptr<Type> make_shared(Args&& ...args) NOEXCEPT
 {
-    return std::make_shared<Type>();
+    return std::make_shared<Type>(std::forward<Args>(args)...);
 }
+
+/// to_shared (const)
+/// ---------------------------------------------------------------------------
 
 /// Create shared pointer to const from instance pointer.
 template <typename Type>
