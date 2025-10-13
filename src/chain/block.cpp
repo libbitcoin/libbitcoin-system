@@ -48,7 +48,7 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 // ----------------------------------------------------------------------------
 
 block::block() NOEXCEPT
-  : block(make_shared<chain::header>(), make_shared<transaction_cptrs>(),
+  : block(to_shared<chain::header>(), to_shared<transaction_cptrs>(),
       false)
 {
 }
@@ -66,8 +66,8 @@ block::block(const chain::header& header,
 
 block::block(const chain::header::cptr& header,
     const transactions_cptr& txs) NOEXCEPT
-  : block(header ? header : make_shared<chain::header>(),
-      txs ? txs : make_shared<transaction_cptrs>(), true)
+  : block(header ? header : to_shared<chain::header>(),
+      txs ? txs : to_shared<transaction_cptrs>(), true)
 {
 }
 
@@ -208,7 +208,7 @@ const chain::header::cptr block::header_ptr() const NOEXCEPT
 // Roll up inputs for concurrent prevout processing.
 const inputs_cptr block::inputs_ptr() const NOEXCEPT
 {
-    const auto inputs = make_shared<input_cptrs>();
+    const auto inputs = to_shared<input_cptrs>();
     const auto append_ins = [&inputs](const auto& tx) NOEXCEPT
     {
         const auto& tx_ins = tx->inputs_ptr();

@@ -48,7 +48,7 @@ const uint64_t output::not_found = sighash_null_value;
 // Invalid default used in signature hashing (validity ignored).
 // Invalidity is also used to determine that a prevout is not found.
 output::output() NOEXCEPT
-  : output(output::not_found, make_shared<chain::script>(), false)
+  : output(output::not_found, to_shared<chain::script>(), false)
 {
 }
 
@@ -63,7 +63,7 @@ output::output(uint64_t value, const chain::script& script) NOEXCEPT
 }
 
 output::output(uint64_t value, const chain::script::cptr& script) NOEXCEPT
-  : output(value, script ? script : make_shared<chain::script>(), true)
+  : output(value, script ? script : to_shared<chain::script>(), true)
 {
 }
 
