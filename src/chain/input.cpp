@@ -55,7 +55,7 @@ const witness& input::no_witness() NOEXCEPT
 // static/private
 const witness::cptr& input::no_witness_cptr() NOEXCEPT
 {
-    static const auto empty = to_shared<const chain::witness>();
+    static const auto empty = make_shared<const chain::witness>();
     return empty;
 }
 
@@ -76,9 +76,9 @@ const chain::witness::cptr& input::get_witness_cptr() const NOEXCEPT
 // Default metadata is spent, invalid, max_size_t value. 
 input::input() NOEXCEPT
   : input(
-      to_shared<chain::point>(),
-      to_shared<chain::script>(),
-      to_shared<chain::witness>(),
+      make_shared<chain::point>(),
+      make_shared<chain::script>(),
+      make_shared<chain::witness>(),
       0, false)
 {
 }
@@ -88,7 +88,7 @@ input::input(chain::point&& point, chain::script&& script,
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
-      to_shared<chain::witness>(),
+      make_shared<chain::witness>(),
       sequence, true)
 {
 }
@@ -98,7 +98,7 @@ input::input(const chain::point& point, const chain::script& script,
   : input(
       to_shared(point),
       to_shared(script),
-      to_shared<chain::witness>(),
+      make_shared<chain::witness>(),
       sequence, true)
 {
 }
@@ -106,9 +106,9 @@ input::input(const chain::point& point, const chain::script& script,
 input::input(const chain::point::cptr& point,
     const chain::script::cptr& script, uint32_t sequence) NOEXCEPT
   : input(
-      point ? point : to_shared<chain::point>(),
-      script ? script : to_shared<chain::script>(),
-      to_shared<chain::witness>(),
+      point ? point : make_shared<chain::point>(),
+      script ? script : make_shared<chain::script>(),
+      make_shared<chain::witness>(),
       sequence, true)
 {
 }

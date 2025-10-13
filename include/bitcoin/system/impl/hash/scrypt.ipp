@@ -329,7 +329,7 @@ block_mix(rblock_t& rblock) NOEXCEPT
     // Make 2R working blocks (1 rblock).
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
-    const auto ptr = to_shared<rblock_t>();
+    const auto ptr = make_shared<rblock_t>();
     if (!ptr) return false;
     auto& yrblock = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -356,7 +356,7 @@ block_mix(rblock_t& rblock) NOEXCEPT
     // Make 2R working blocks (1 rblock).
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
-    const auto ptr = to_shared<rblock_t>();
+    const auto ptr = make_shared<rblock_t>();
     if (!ptr) return false;
     auto& yrblock = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -375,7 +375,7 @@ block_mix(rblock_t& rblock) NOEXCEPT
     // Make R working blocks (half rblock).
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 64)] bytes heap allocated.
-    const auto ptr = to_shared<std_array<block_t, R>>();
+    const auto ptr = make_shared<std_array<block_t, R>>();
     if (!ptr) return false;
     auto& yblock = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -394,7 +394,7 @@ block_mix(rblock_t& rblock) NOEXCEPT
     // Make R-1 working blocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (sub1(R) * 64)] bytes heap allocated.
-    const auto ptr = to_shared<std_array<block_t, sub1(R)>>();
+    const auto ptr = make_shared<std_array<block_t, sub1(R)>>();
     if (!ptr) return false;
     auto& yblock = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -436,7 +436,7 @@ romix(rblock_t& rblock) NOEXCEPT
     // Make a working set of W rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (W * (R * 128))] bytes heap allocated.
-    const auto ptr = to_shared<wrblock_t>();
+    const auto ptr = make_shared<wrblock_t>();
     if (!ptr) return false;
     auto& wrblocks = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -479,7 +479,7 @@ CLASS::hash(data_array<Size>& out, const data_slice& password,
     // Make a working set of P rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
-    const auto ptr = to_shared<prblock_t>();
+    const auto ptr = make_shared<prblock_t>();
     if (!ptr) return false;
     auto& prblocks = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

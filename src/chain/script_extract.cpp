@@ -35,7 +35,7 @@ namespace chain {
 
 const chunk_cptr& script::witness_program() const NOEXCEPT
 {
-    static const auto empty = to_shared<const data_chunk>();
+    static const auto empty = make_shared<const data_chunk>();
     return is_witness_program_pattern(ops()) ? ops().at(1).data_ptr() : empty;
 }
 
