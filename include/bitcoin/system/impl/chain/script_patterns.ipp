@@ -76,7 +76,6 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 {
     constexpr auto header = to_big_endian(chain::witness_head);
 
-    // C++14: remove && ops[1].data().size() >= header.size() guard.
     // Bytes after commitment optional with no consensus meaning [bip141].
     // Commitment not executable so invalid trailing operations are allowed.
     return ops.size() > 1
