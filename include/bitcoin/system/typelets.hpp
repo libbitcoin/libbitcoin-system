@@ -32,6 +32,16 @@ template <typename Left, typename Right>
 constexpr bool is_same_type = std::is_same_v<std::decay_t<Left>,
     std::decay_t<Right>>;
 
+/// Left is base class of Right, independent of const and volatility.
+template <typename Left, typename Right>
+constexpr bool is_base_type = std::is_base_of_v<std::decay_t<Left>,
+    std::decay_t<Right>>;
+
+/// Types share a common base class or are the same type.
+template <typename Left, typename Right>
+constexpr bool is_common_type = is_base_type<Left, Right> ||
+    is_base_type<Right, Left>;
+
 /// Alias - bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
 /// w/charxx_t types are unsigned. iostream relies on w/char.
 template <typename Type>
@@ -76,8 +86,7 @@ constexpr bool is_integral_integer = is_integral<Type> /*&& is_integer<Type>*/;
 
 /// numeric_limits may be specialized by non-integrals (such as uintx).
 template <typename Type>
-constexpr bool is_floating_point =
-    std::is_floating_point_v<std::decay_t<Type>>;
+constexpr bool is_floating_point = std::is_floating_point_v<std::decay_t<Type>>;
 
 /// Constrained to is_integral types.
 template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
