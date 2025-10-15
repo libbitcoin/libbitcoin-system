@@ -119,6 +119,10 @@ using if_not_base_of = bool_if<
     !std::is_base_of<Base, Type>::value>;
 
 template <typename Left, typename Right>
+using if_common_type = bool_if<
+    is_common_type<Left, Right>>;
+
+template <typename Left, typename Right>
 using if_same_size = bool_if<
     is_same_size<Left, Right>>;
 

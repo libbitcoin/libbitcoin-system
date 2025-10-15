@@ -21,6 +21,8 @@
 class base {};
 class not_derived {};
 class derived : base {};
+class also_derived : base {};
+class more_derived : also_derived {};
 
 // These are implementation defined.
 ////static_assert(is_same_type<unsigned char, uint8_t>);
@@ -54,6 +56,26 @@ static_assert(!is_same_type<std::string, int>);
 static_assert(!is_same_type<base, derived>);
 static_assert(!is_same_type<base, not_derived>);
 static_assert(is_same_type<decltype(is_same_type<int32_t, int32_t>), const bool>);
+
+// Classes only for derivation.
+static_assert(!is_base_type<uint8_t, uint8_t>);
+static_assert(is_base_type<base, base>);
+static_assert(is_base_type<base, derived>);
+static_assert(is_base_type<base, also_derived>);
+static_assert(is_base_type<base, more_derived>);
+static_assert(!is_base_type<base, not_derived>);
+
+// Classes only for derivation.
+static_assert(!is_common_type<uint8_t, uint8_t>);
+static_assert(is_common_type<base, base>);
+static_assert(is_common_type<base, derived>);
+static_assert(is_common_type<base, also_derived>);
+static_assert(is_common_type<base, more_derived>);
+static_assert(!is_common_type<base, not_derived>);
+static_assert(!is_common_type<more_derived, not_derived>);
+static_assert(!is_common_type<not_derived, more_derived>);
+static_assert(is_common_type<more_derived, also_derived>);
+static_assert(is_common_type<also_derived, more_derived>);
 
 // These are implementation defined.
 ////static_assert(is_signed<char>);
