@@ -32,6 +32,7 @@
 #include <stdexcept>        // purged
 #include <string>           // purged
 #include <type_traits>      // purged
+#include <variant>          // purged
 #include <vector>           // purged
 
 // Pulls in all /system headers (except settings.hpp).

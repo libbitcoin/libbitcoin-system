@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_HPP
 
 #include <list>
-#include <variant>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number_boolean.hpp>
@@ -109,14 +108,6 @@ private:
     // -------------------------------------------------------------------------
     mutable tether<data_chunk> tether_;
 };
-
-// For use with std::visit.
-template<class... Overload>
-struct overload : Overload... { using Overload::operator()...; };
-
-// clang++16 still requires.
-// Explicit deduction guide, should not be required in C++20 (namespace scope).
-template<class... Overload> overload(Overload...) -> overload<Overload...>;
 
 } // namespace machine
 } // namespace system

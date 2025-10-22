@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <tuple>
+#include <variant>
 #include <bitcoin/system/allocator.hpp>
 
 namespace libbitcoin {
@@ -200,6 +201,16 @@ private:
 
 BC_POP_WARNING()
 BC_POP_WARNING()
+
+/// Overload pattern.
+/// ---------------------------------------------------------------------------
+/// For use with std::visit.
+template<class... Overload>
+struct overload : Overload... { using Overload::operator()...; };
+
+/// clang++16 still requires.
+/// Explicit deduction guide, should not be required in C++20 (namespace scope).
+template<class... Overload> overload(Overload...) -> overload<Overload...>;
 
 /// Argument placeholders.
 /// ---------------------------------------------------------------------------
