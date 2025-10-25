@@ -188,7 +188,7 @@ constexpr void distinct(Collection& list) NOEXCEPT
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
-    list.shrink_to_fit();
+    ////list.shrink_to_fit();
 }
 
 template <typename Collection>
@@ -222,7 +222,7 @@ inline Left difference(const typename Left::const_iterator& begin,
         if (!contains(right, *min))
             copy.push_back(*min);
     
-    copy.shrink_to_fit();
+    ////copy.shrink_to_fit();
     return copy;
 }
 
