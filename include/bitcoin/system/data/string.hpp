@@ -41,10 +41,10 @@ BC_API std::string join(const string_list& tokens,
 
 /// Split text into tokens (whitespace default) by the specified delimiter(s).
 /// Compression (default) removes all but a last empty token (after trimming).
-BC_API string_list split(const std::string& text) NOEXCEPT;
-BC_API string_list split(const std::string& text,
+BC_API string_list split(const std::string_view& text) NOEXCEPT;
+BC_API string_list split(const std::string_view& text,
     const std::string& delimiter, bool trim=true, bool compress=true) NOEXCEPT;
-BC_API string_list split(const std::string& text,
+BC_API string_list split(const std::string_view& text,
     const string_list& delimiters, const string_list& trim_tokens,
     bool compress=true) NOEXCEPT;
 
@@ -55,17 +55,11 @@ BC_API bool trim_right(std::string& text,
 BC_API void trim(std::string& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
 
-BC_API std::string trim_left_copy(std::string&& text,
+BC_API std::string trim_left_copy(const std::string_view& text,
+    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
+BC_API std::string trim_right_copy(const std::string_view& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
-BC_API std::string trim_left_copy(const std::string& text,
-    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
-BC_API std::string trim_right_copy(std::string&& text,
-    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
-BC_API std::string trim_right_copy(const std::string& text,
-    const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
-BC_API std::string trim_copy(std::string&& text,
-    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
-BC_API std::string trim_copy(const std::string& text,
+BC_API std::string trim_copy(const std::string_view& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
 
 BC_API void reduce(string_list& tokens,

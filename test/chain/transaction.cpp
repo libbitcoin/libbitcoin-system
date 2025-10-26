@@ -1581,8 +1581,8 @@ BOOST_AUTO_TEST_CASE(transaction__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE(json::parse(text) == value);
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BOOST_REQUIRE(json::parse(text) == value);
 
     BOOST_REQUIRE(json::value_from(instance) == value);
     BOOST_REQUIRE(json::value_to<chain::transaction>(value) == instance);

@@ -168,8 +168,8 @@ typedef std_vector<header::cptr> header_cptrs;
 typedef std::shared_ptr<header_cptrs> headers_ptr;
 typedef std::shared_ptr<const header_cptrs> headers_cptr;
 
-DECLARE_JSON_VALUE_CONVERTORS(header);
-DECLARE_JSON_VALUE_CONVERTORS(header::cptr);
+DECLARE_JSON_TAG_INVOKE(header);
+DECLARE_JSON_TAG_INVOKE(header::cptr);
 
 } // namespace chain
 } // namespace system

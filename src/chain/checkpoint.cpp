@@ -190,36 +190,38 @@ const hash_digest& checkpoint::hash() const NOEXCEPT
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 
-namespace json = boost::json;
+// hash_digest gets bypassed (up as an array of numbers) by boost.
+////DEFINE_JSON_TO_TAG(hash_digest)
+////{
+////    hash_digest hash{};
+////    if (decode_hash(hash, value.as_string()))
+////        return hash;
+////
+////    return {};
+////}
+////
+////DEFINE_JSON_FROM_TAG(hash_digest)
+////{
+////    value = encode_hash(instance);
+////}
 
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-checkpoint tag_invoke(json::value_to_tag<checkpoint>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(checkpoint)
 {
-    hash_digest hash;
-    if (!decode_hash(hash, value.at("hash").get_string().c_str()))
-        return {};
-
     return
     {
-        hash,
+        decode_hash<hash_size>(value.at("hash").as_string()),
         value.at("height").to_number<size_t>()
     };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const checkpoint& checkpoint) NOEXCEPT
+DEFINE_JSON_FROM_TAG(checkpoint)
 {
     value =
     {
-        { "hash", encode_hash(checkpoint.hash()) },
-        { "height", checkpoint.height() }
+        { "hash", encode_hash(instance.hash()) },
+        { "height", instance.height() }
     };
 }
-
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

@@ -124,8 +124,8 @@ typedef std::shared_ptr<const output_cptrs> outputs_cptr;
 /// Constant reference optimizers.
 using output_cptr_cref = std::reference_wrapper<const output::cptr>;
 
-DECLARE_JSON_VALUE_CONVERTORS(output);
-DECLARE_JSON_VALUE_CONVERTORS(output::cptr);
+DECLARE_JSON_TAG_INVOKE(output);
+DECLARE_JSON_TAG_INVOKE(output::cptr);
 
 } // namespace chain
 } // namespace system

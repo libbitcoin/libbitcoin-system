@@ -407,7 +407,8 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) NOEXCEPT
 
 // This converts only names, not any data for push codes.
 // This also converts hexadecial representations of opcode ('0x' prefixed).
-bool opcode_from_mnemonic(opcode& out_code, const std::string& value) NOEXCEPT
+bool opcode_from_mnemonic(opcode& out_code,
+    const std::string_view& value) NOEXCEPT
 {
     // Normalize to ASCII lower case.
     const auto norm = ascii_to_lower(value);
@@ -682,13 +683,12 @@ std::string opcode_to_hexadecimal(opcode code) NOEXCEPT
 }
 
 bool opcode_from_hexadecimal(opcode& out_code,
-    const std::string& value) NOEXCEPT
+    const std::string_view& value) NOEXCEPT
 {
-    static const std::string ox = "0x";
-    static const auto prefix = ox.size();
-    static const auto byte = prefix + octet_width;
+    constexpr auto prefix = two;
+    constexpr auto byte = prefix + octet_width;
 
-    if (value.size() != byte || !starts_with(value, ox))
+    if (value.size() != byte || !value.starts_with("0x"))
         return false;
 
     data_chunk out;

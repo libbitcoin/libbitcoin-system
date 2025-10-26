@@ -248,51 +248,33 @@ BC_POP_WARNING()
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 
-namespace json = boost::json;
-
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-output tag_invoke(json::value_to_tag<output>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(output)
 {
     return
     {
-        value.at("value").to_number<uint64_t>(),
-        json::value_to<chain::script>(value.at("script"))
+        value.at("value").as_uint64(),
+        value_to<script>(value.at("script"))
     };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const output& output) NOEXCEPT
+DEFINE_JSON_FROM_TAG(output)
 {
     value =
     {
-        { "value", output.value() },
-        { "script", json::value_from(output.script()) },
+        { "value", instance.value() },
+        { "script", value_from(instance.script()) },
     };
 }
 
-BC_POP_WARNING()
-
-output::cptr tag_invoke(json::value_to_tag<output::cptr>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(output::cptr)
 {
-    return to_shared(tag_invoke(json::value_to_tag<output>{}, value));
+    return to_shared(tag_invoke(to_tag<output>{}, value));
 }
 
-// Shared pointer overload is required for navigation.
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-void tag_invoke(json::value_from_tag tag, json::value& value,
-    const output::cptr& output) NOEXCEPT
+DEFINE_JSON_FROM_TAG(output::cptr)
 {
-    tag_invoke(tag, value, *output);
+    tag_invoke(from_tag{}, value, *instance);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

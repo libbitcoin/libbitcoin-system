@@ -310,14 +310,14 @@ BC_API std::string opcode_to_mnemonic(opcode value,
 
 /// Convert a string to an opcode.
 BC_API bool opcode_from_mnemonic(opcode& out_code,
-    const std::string& value) NOEXCEPT;
+    const std::string_view& value) NOEXCEPT;
 
 /// Convert any opcode to a string hexadecimal representation.
 BC_API std::string opcode_to_hexadecimal(opcode code) NOEXCEPT;
 
 /// Convert any hexadecimal byte to an opcode.
 BC_API bool opcode_from_hexadecimal(opcode& out_code,
-    const std::string& value) NOEXCEPT;
+    const std::string_view& value) NOEXCEPT;
 
 } // namespace chain
 } // namespace system

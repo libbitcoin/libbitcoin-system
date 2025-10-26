@@ -226,9 +226,8 @@ BOOST_AUTO_TEST_CASE(witness___json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    // cannot parse a value, must be an object.
-    ////BOOST_REQUIRE(json::parse(text) == value);
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BOOST_REQUIRE(json::parse(text) == value);
 
     BOOST_REQUIRE(json::value_from(instance) == value);
     BOOST_REQUIRE(json::value_to<chain::witness>(value) == instance);

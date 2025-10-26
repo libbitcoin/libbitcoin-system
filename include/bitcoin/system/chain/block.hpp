@@ -232,8 +232,8 @@ private:
 
 typedef std_vector<block> blocks;
 
-DECLARE_JSON_VALUE_CONVERTORS(block);
-DECLARE_JSON_VALUE_CONVERTORS(block::cptr);
+DECLARE_JSON_TAG_INVOKE(block);
+DECLARE_JSON_TAG_INVOKE(block::cptr);
 
 } // namespace chain
 } // namespace system

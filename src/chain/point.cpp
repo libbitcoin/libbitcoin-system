@@ -196,54 +196,33 @@ bool point::is_null() const NOEXCEPT
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 
-namespace json = boost::json;
-
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-point tag_invoke(json::value_to_tag<point>, const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(point)
 {
-    hash_digest hash;
-    if (!decode_hash(hash, value.at("hash").get_string().c_str()))
-        return {};
-
     return
     {
-        hash,
+        decode_hash<hash_size>(value.at("hash").as_string()),
         value.at("index").to_number<uint32_t>()
     };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const point& point) NOEXCEPT
+DEFINE_JSON_FROM_TAG(point)
 {
     value =
     {
-        { "hash", encode_hash(point.hash()) },
-        { "index", point.index() }
+        { "hash", encode_hash(instance.hash()) },
+        { "index", instance.index() }
     };
 }
 
-BC_POP_WARNING()
-
-point::cptr tag_invoke(json::value_to_tag<point::cptr>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(point::cptr)
 {
-    return to_shared(tag_invoke(json::value_to_tag<point>{}, value));
+    return to_shared(tag_invoke(to_tag<point>{}, value));
 }
 
-// Shared pointer overload is required for navigation.
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-void tag_invoke(json::value_from_tag tag, json::value& value,
-    const point::cptr& output) NOEXCEPT
+DEFINE_JSON_FROM_TAG(point::cptr)
 {
-    tag_invoke(tag, value, *output);
+    tag_invoke(from_tag{}, value, *instance);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

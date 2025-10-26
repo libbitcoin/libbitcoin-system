@@ -159,7 +159,7 @@ operation::operation(reader& source) NOEXCEPT
     assign_data(source);
 }
 
-operation::operation(const std::string& mnemonic) NOEXCEPT
+operation::operation(const std::string_view& mnemonic) NOEXCEPT
   : operation(from_string(mnemonic))
 {
 }
@@ -306,28 +306,28 @@ void operation::to_data(writer& sink) const NOEXCEPT
 // Text.
 // ----------------------------------------------------------------------------
 
-inline bool is_push_token(const std::string& token) NOEXCEPT
+inline bool is_push_token(const std::string_view& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '[' && token.back() == ']';
 }
 
-inline bool is_text_token(const std::string& token) NOEXCEPT
+inline bool is_text_token(const std::string_view& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '\'' && token.back() == '\'';
 }
 
-inline bool is_underflow_token(const std::string& token) NOEXCEPT
+inline bool is_underflow_token(const std::string_view& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '<' && token.back() == '>';
 }
 
-inline std::string remove_token_delimiters(const std::string& token) NOEXCEPT
+inline std::string remove_token_delimiters(const std::string_view& token) NOEXCEPT
 {
     BC_ASSERT(token.size() > one);
-    return std::string(std::next(token.begin()), std::prev(token.end()));
+    return std::string{ std::next(token.begin()), std::prev(token.end()) };
 }
 
-inline string_list split_push_token(const std::string& token) NOEXCEPT
+inline string_list split_push_token(const std::string_view& token) NOEXCEPT
 {
     return split(remove_token_delimiters(token), ".", false, false);
 }
@@ -363,7 +363,7 @@ static bool opcode_from_data_prefix(opcode& out_code,
 }
 
 static bool data_from_decimal(data_chunk& out_data,
-    const std::string& token) NOEXCEPT
+    const std::string_view& token) NOEXCEPT
 {
     // Deserialization to a number can convert random text to zero.
     if (!is_ascii_numeric(token))
@@ -378,7 +378,7 @@ static bool data_from_decimal(data_chunk& out_data,
 }
 
 // private/static
-operation operation::from_string(const std::string& mnemonic) NOEXCEPT
+operation operation::from_string(const std::string_view& mnemonic) NOEXCEPT
 {
     data_chunk chunk;
     auto valid = false;
@@ -564,44 +564,25 @@ BC_POP_WARNING()
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 
-namespace json = boost::json;
-
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-operation tag_invoke(json::value_to_tag<operation>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(operation)
 {
-    return operation{ std::string(value.get_string().c_str()) };
+    return operation{ std::string_view{ value.as_string() } };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const operation& operation) NOEXCEPT
+DEFINE_JSON_FROM_TAG(operation)
 {
-    value = operation.to_string(flags::all_rules);
+    value = instance.to_string(flags::all_rules);
 }
 
-BC_POP_WARNING()
-
-operation::cptr tag_invoke(json::value_to_tag<operation::cptr>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(operation::cptr)
 {
-    return to_shared(tag_invoke(json::value_to_tag<operation>{}, value));
+    return to_shared(tag_invoke(to_tag<operation>{}, value));
 }
 
-// Shared pointer overload is required for navigation.
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-void tag_invoke(json::value_from_tag tag, json::value& value,
-    const operation::cptr& operation) NOEXCEPT
+DEFINE_JSON_FROM_TAG(operation::cptr)
 {
-    tag_invoke(tag, value, *operation);
+    tag_invoke(from_tag{}, value, *instance);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

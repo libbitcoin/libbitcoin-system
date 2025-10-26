@@ -63,7 +63,7 @@ public:
     witness(reader& source, bool prefix) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    witness(const std::string& mnemonic) NOEXCEPT;
+    witness(const std::string_view& mnemonic) NOEXCEPT;
 
     /// Operators.
     /// -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ protected:
 
 private:
     // TODO: move to config serialization wrapper.
-    static witness from_string(const std::string& mnemonic) NOEXCEPT;
+    static witness from_string(const std::string_view& mnemonic) NOEXCEPT;
     void assign_data(reader& source, bool prefix) NOEXCEPT;
 
     // Witness should be stored as shared.
@@ -140,8 +140,8 @@ private:
 
 typedef std_vector<witness> witnesses;
 
-DECLARE_JSON_VALUE_CONVERTORS(witness);
-DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
+DECLARE_JSON_TAG_INVOKE(witness);
+DECLARE_JSON_TAG_INVOKE(witness::cptr);
 
 } // namespace chain
 } // namespace system
