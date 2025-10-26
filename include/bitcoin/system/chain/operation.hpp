@@ -117,8 +117,7 @@ public:
     // TODO: byte size cannot overflow, but can underflow (remains valid).
     // TODO: but mnemonic decoding may be invalid. moving this to config
     // TODO: allows string decoding to throw, consistent with other config.
-    /// Literal string is disallowed, as it conflicts with const data_slice&.
-    explicit operation(const std::string& mnemonic) NOEXCEPT;
+    operation(const std::string_view& mnemonic) NOEXCEPT;
 
     /// Operators.
     /// -----------------------------------------------------------------------
@@ -161,7 +160,7 @@ private:
         bool minimal) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    static operation from_string(const std::string& mnemonic) NOEXCEPT;
+    static operation from_string(const std::string_view& mnemonic) NOEXCEPT;
 
     static const data_chunk& no_data() NOEXCEPT;
     static const chunk_cptr& no_data_cptr() NOEXCEPT;
@@ -189,8 +188,8 @@ private:
 
 typedef std_vector<operation> operations;
 
-DECLARE_JSON_VALUE_CONVERTORS(operation);
-DECLARE_JSON_VALUE_CONVERTORS(operation::cptr);
+DECLARE_JSON_TAG_INVOKE(operation);
+DECLARE_JSON_TAG_INVOKE(operation::cptr);
 
 } // namespace chain
 } // namespace system

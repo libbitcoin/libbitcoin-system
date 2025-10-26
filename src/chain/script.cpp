@@ -129,7 +129,7 @@ script::script(reader& source, bool prefix) NOEXCEPT
     assign_data(source, prefix);
 }
 
-script::script(const std::string& mnemonic) NOEXCEPT
+script::script(const std::string_view& mnemonic) NOEXCEPT
   : script(from_string(mnemonic))
 {
 }
@@ -284,7 +284,7 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
 }
 
 // static/private
-script script::from_string(const std::string& mnemonic) NOEXCEPT
+script script::from_string(const std::string_view& mnemonic) NOEXCEPT
 {
     constexpr auto valid = true;
     auto easier = false;
@@ -305,7 +305,7 @@ script script::from_string(const std::string& mnemonic) NOEXCEPT
     // Create an op list from the split tokens.
     for (const auto& token: tokens)
     {
-        ops.emplace_back(token);
+        ops.emplace_back(std::string_view{ token });
         const auto& op = ops.back();
         easier |= op.is_success();
         failer |= op.is_invalid();
@@ -461,43 +461,26 @@ BC_POP_WARNING()
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 
-namespace json = boost::json;
-
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-script tag_invoke(json::value_to_tag<script>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(script)
 {
-    return script{ std::string(value.get_string().c_str()) };
+    return script{ value.as_string() };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const script& script) NOEXCEPT
+DEFINE_JSON_FROM_TAG(script)
 {
-    value = script.to_string(flags::all_rules);
+    // TODO: inject rules.
+    value = instance.to_string(flags::all_rules);
 }
 
-BC_POP_WARNING()
-
-script::cptr tag_invoke(json::value_to_tag<script::cptr>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(script::cptr)
 {
-    return to_shared(tag_invoke(json::value_to_tag<script>{}, value));
+    return to_shared(tag_invoke(to_tag<script>{}, value));
 }
 
-// Shared pointer overload is required for navigation.
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-void tag_invoke(json::value_from_tag tag, json::value& value,
-    const script::cptr& script) NOEXCEPT
+DEFINE_JSON_FROM_TAG(script::cptr)
 {
-    tag_invoke(tag, value, *script);
+    tag_invoke(from_tag{}, value, *instance);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

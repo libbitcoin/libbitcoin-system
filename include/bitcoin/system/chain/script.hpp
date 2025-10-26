@@ -110,7 +110,7 @@ public:
     script(reader& source, bool prefix) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    script(const std::string& mnemonic) NOEXCEPT;
+    script(const std::string_view& mnemonic) NOEXCEPT;
 
     /// Operators.
     /// -----------------------------------------------------------------------
@@ -174,7 +174,7 @@ private:
     static inline size_t op_size(size_t total, const operation& op) NOEXCEPT;
     static script from_operations(operations&& ops) NOEXCEPT;
     static script from_operations(const operations& ops) NOEXCEPT;
-    static script from_string(const std::string& mnemonic) NOEXCEPT;
+    static script from_string(const std::string_view& mnemonic) NOEXCEPT;
     static size_t op_count(reader& source) NOEXCEPT;
     static size_t serialized_size(const operations& ops) NOEXCEPT;
     void assign_data(reader& source, bool prefix) NOEXCEPT;
@@ -198,8 +198,8 @@ public:
 
 typedef std_vector<script> scripts;
 
-DECLARE_JSON_VALUE_CONVERTORS(script);
-DECLARE_JSON_VALUE_CONVERTORS(script::cptr);
+DECLARE_JSON_TAG_INVOKE(script);
+DECLARE_JSON_TAG_INVOKE(script::cptr);
 
 } // namespace chain
 } // namespace system

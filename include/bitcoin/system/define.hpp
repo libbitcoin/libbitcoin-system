@@ -31,6 +31,7 @@
 #include <limits>           // purged
 #include <stdexcept>        // purged
 #include <string>           // purged
+#include <string_view>      // not purged
 #include <type_traits>      // purged
 #include <variant>          // purged
 #include <vector>           // purged

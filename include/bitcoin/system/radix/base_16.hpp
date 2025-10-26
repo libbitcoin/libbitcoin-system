@@ -55,7 +55,7 @@ constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT;
 
 /// Convert a hexidecimal string to a byte vector.
 /// False if the input is malformed.
-constexpr bool decode_base16(data_chunk& out, const std::string& in) NOEXCEPT;
+constexpr bool decode_base16(data_chunk& out, const std::string_view& in) NOEXCEPT;
 
 /// Convert a hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
@@ -68,6 +68,10 @@ constexpr bool decode_base16(data_array<Size>& out,
 template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
     const std::string_view& in) NOEXCEPT;
+
+/// Returns null_hash on error.
+template <size_t Size>
+constexpr data_array<Size> decode_hash(const std::string_view& in) NOEXCEPT;
 
 /// Literal decodings of hex string, errors reflected as zero-filled data.
 /// ---------------------------------------------------------------------------

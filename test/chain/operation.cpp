@@ -336,28 +336,28 @@ BOOST_AUTO_TEST_CASE(operation__constructor__reader__valid)
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__negative_1__push_negative_1_empty)
 {
-    operation value(std::string("-1"));
+    operation value(std::string_view("-1"));
     BOOST_REQUIRE(value.code() == opcode::push_negative_1);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__0__push_size_0_empty)
 {
-    operation value(std::string("0"));
+    operation value(std::string_view("0"));
     BOOST_REQUIRE(value.code() == opcode::push_size_0);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__1__push_positive_1_empty)
 {
-    operation value(std::string("1"));
+    operation value(std::string_view("1"));
     BOOST_REQUIRE(value.code() == opcode::push_positive_1);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__16__push_positive_16_empty)
 {
-    operation value(std::string("16"));
+    operation value(std::string_view("16"));
     BOOST_REQUIRE(value.code() == opcode::push_positive_16);
     BOOST_REQUIRE(value.data().empty());
 }
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__16__push_positive_16_empty)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__17__push_size_1_expected)
 {
     const data_chunk expected{ 0x11 };
-    operation value(std::string("17"));
+    operation value(std::string_view("17"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__17__push_size_1_expected)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__negative_2__push_size_1_expected)
 {
     const data_chunk expected{ 0x82 };
-    operation value(std::string("-2"));
+    operation value(std::string_view("-2"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -381,7 +381,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__negative_2__push_size_1_expe
 BOOST_AUTO_TEST_CASE(operation__constructor_string__9223372036854775807__push_size_8_expected)
 {
     const data_chunk expected{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f } };
-    operation value(std::string("9223372036854775807"));
+    operation value(std::string_view("9223372036854775807"));
     BOOST_REQUIRE(value.code() == opcode::push_size_8);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__9223372036854775807__push_si
 BOOST_AUTO_TEST_CASE(operation__constructor_string__negative_9223372036854775807__push_size_8_expected)
 {
     const data_chunk expected{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
-    operation value(std::string("-9223372036854775807"));
+    operation value(std::string_view("-9223372036854775807"));
     BOOST_REQUIRE(value.code() == opcode::push_size_8);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__negative_9223372036854775807
 BOOST_AUTO_TEST_CASE(operation__constructor_string__string_empty__push_size_0_empty)
 {
     const data_chunk expected{ 0x61 };
-    operation value(std::string("''"));
+    operation value(std::string_view("''"));
     BOOST_REQUIRE(value.code() == opcode::push_size_0);
     BOOST_REQUIRE(value.data().empty());
 }
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__string_empty__push_size_0_em
 BOOST_AUTO_TEST_CASE(operation__constructor_string__string_a__push_size_1_expected_byte)
 {
     const data_chunk expected{ 0x61 };
-    operation value(std::string("'a'"));
+    operation value(std::string_view("'a'"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__string_a__push_size_1_expect
 BOOST_AUTO_TEST_CASE(operation__constructor_string__string_abc__push_size_3_expected_byte_order)
 {
     const data_chunk expected{ { 0x61, 0x62, 0x63 } };
-    operation value(std::string("'abc'"));
+    operation value(std::string_view("'abc'"));
     BOOST_REQUIRE(value.code() == opcode::push_size_3);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -421,14 +421,14 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__string_abc__push_size_3_expe
 BOOST_AUTO_TEST_CASE(operation__constructor_string__negative_1_character__push_size_1_nominal_encoding)
 {
     const data_chunk expected{ 0x4f };
-    operation value(std::string("'O'"));
+    operation value(std::string_view("'O'"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__empty_underflow__expected)
 {
-    operation value(std::string("<>"));
+    operation value(std::string_view("<>"));
     BOOST_REQUIRE(value.is_invalid());
     BOOST_REQUIRE(value.is_underflow());
     BOOST_REQUIRE(value.data().empty());
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__empty_underflow__expected)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__non_empty_underflow__expected)
 {
     const data_chunk expected{ { 0x61, 0x62, 0x63 } };
-    operation value(std::string("<616263>"));
+    operation value(std::string_view("<616263>"));
     BOOST_REQUIRE(value.is_invalid());
     BOOST_REQUIRE(value.is_underflow());
     BOOST_REQUIRE_EQUAL(value.data(), expected);
@@ -447,56 +447,56 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__non_empty_underflow__expecte
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__push_0__push_size_0)
 {
-    operation value(std::string("push_0"));
+    operation value(std::string_view("push_0"));
     BOOST_REQUIRE(value.code() == opcode::push_size_0);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__push_1__empty)
 {
-    operation value(std::string("push_1"));
+    operation value(std::string_view("push_1"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__push_75__empty)
 {
-    operation value(std::string("push_75"));
+    operation value(std::string_view("push_75"));
     BOOST_REQUIRE(value.code() == opcode::push_size_75);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__push_one__push_one_size_empty)
 {
-    operation value(std::string("push_one"));
+    operation value(std::string_view("push_one"));
     BOOST_REQUIRE(value.code() == opcode::push_one_size);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__push_two__push_two_size_empty)
 {
-    operation value(std::string("push_two"));
+    operation value(std::string_view("push_two"));
     BOOST_REQUIRE(value.code() == opcode::push_two_size);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__push_four__push_four_size_empty)
 {
-    operation value(std::string("push_four"));
+    operation value(std::string_view("push_four"));
     BOOST_REQUIRE(value.code() == opcode::push_four_size);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__7__push_positive_7)
 {
-    operation value(std::string("7"));
+    operation value(std::string_view("7"));
     BOOST_REQUIRE(value.code() == opcode::push_positive_7);
     BOOST_REQUIRE(value.data().empty());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__empty__push_size_0)
 {
-    operation value(std::string("[]"));
+    operation value(std::string_view("[]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_0);
     BOOST_REQUIRE(value.data().empty());
 }
@@ -504,7 +504,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__empty__push_size_0)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__0x07__push_size_1)
 {
     const data_chunk expected{ 0x07 };
-    operation value(std::string("[07]"));
+    operation value(std::string_view("[07]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -512,7 +512,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__0x07__push_size_1)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__0x42__push_size_1)
 {
     const data_chunk expected{ 0x42 };
-    operation value(std::string("[42]"));
+    operation value(std::string_view("[42]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_1);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -520,7 +520,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__0x42__push_size_1)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__0x112233__push_size_3)
 {
     const data_chunk expected{ { 0x11, 0x22, 0x33 } };
-    operation value(std::string("[112233]"));
+    operation value(std::string_view("[112233]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_3);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -528,7 +528,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__0x112233__push_size_3)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__0_0x112233__push_size_3)
 {
     const data_chunk expected{ { 0x11, 0x22, 0x33 } };
-    operation value(std::string("[0.112233]"));
+    operation value(std::string_view("[0.112233]"));
     BOOST_REQUIRE(value.code() == opcode::push_size_3);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -536,7 +536,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__0_0x112233__push_size_3)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__1_0x112233__push_one_size)
 {
     const data_chunk expected{ { 0x11, 0x22, 0x33 } };
-    operation value(std::string("[1.112233]"));
+    operation value(std::string_view("[1.112233]"));
     BOOST_REQUIRE(value.code() == opcode::push_one_size);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__1_0x112233__push_one_size)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__2_0x112233__push_two_size)
 {
     const data_chunk expected{ { 0x11, 0x22, 0x33 } };
-    operation value(std::string("[2.112233]"));
+    operation value(std::string_view("[2.112233]"));
     BOOST_REQUIRE(value.code() == opcode::push_two_size);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
@@ -552,26 +552,26 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__2_0x112233__push_two_size)
 BOOST_AUTO_TEST_CASE(operation__constructor_string__4_0x112233__push_four_size)
 {
     const data_chunk expected{ { 0x11, 0x22, 0x33 } };
-    operation value(std::string("[4.112233]"));
+    operation value(std::string_view("[4.112233]"));
     BOOST_REQUIRE(value.code() == opcode::push_four_size);
     BOOST_REQUIRE_EQUAL(value.data(), expected);
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__5_0x112233__false)
 {
-    operation value(std::string("[5.112233]"));
+    operation value(std::string_view("[5.112233]"));
     BOOST_REQUIRE(!value.is_valid());;
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__empty_0x112233__false)
 {
-    operation value(std::string("[.112233]"));
+    operation value(std::string_view("[.112233]"));
     BOOST_REQUIRE(!value.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__nop2__nop2_checklocktimeverify)
 {
-    operation value(std::string("nop2"));
+    operation value(std::string_view("nop2"));
     BOOST_REQUIRE(value.code() == opcode::nop2);
     BOOST_REQUIRE(value.code() == opcode::checklocktimeverify);
     BOOST_REQUIRE(value.data().empty());
@@ -579,7 +579,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__nop2__nop2_checklocktimeveri
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__checklocktimeverify__nop2_checklocktimeverify)
 {
-    operation value(std::string("checklocktimeverify"));
+    operation value(std::string_view("checklocktimeverify"));
     BOOST_REQUIRE(value.code() == opcode::nop2);
     BOOST_REQUIRE(value.code() == opcode::checklocktimeverify);
     BOOST_REQUIRE(value.data().empty());
@@ -587,7 +587,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__checklocktimeverify__nop2_ch
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__nop3__nop3_checksequenceverify)
 {
-    operation value(std::string("nop3"));
+    operation value(std::string_view("nop3"));
     BOOST_REQUIRE(value.code() == opcode::nop3);
     BOOST_REQUIRE(value.code() == opcode::checksequenceverify);
     BOOST_REQUIRE(value.data().empty());
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_CASE(operation__constructor_string__nop3__nop3_checksequenceveri
 
 BOOST_AUTO_TEST_CASE(operation__constructor_string__checklocktimeverify__nop3_checksequenceverify)
 {
-    operation value(std::string("checksequenceverify"));
+    operation value(std::string_view("checksequenceverify"));
     BOOST_REQUIRE(value.code() == opcode::nop3);
     BOOST_REQUIRE(value.code() == opcode::checksequenceverify);
     BOOST_REQUIRE(value.data().empty());
@@ -970,9 +970,8 @@ BOOST_AUTO_TEST_CASE(operation__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    // cannot parse a value, must be an object.
-    ////BOOST_REQUIRE(json::parse(text) == value);
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BOOST_REQUIRE(json::parse(text) == value);
 
     BOOST_REQUIRE(json::value_from(instance) == value);
     BOOST_REQUIRE(json::value_to<chain::operation>(value) == instance);

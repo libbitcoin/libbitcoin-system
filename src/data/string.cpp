@@ -122,15 +122,15 @@ static string_list splitter(const std::string& text, const std::string& delimite
     return tokens;
 }
 
-string_list split(const std::string& text, const string_list& delimiters,
+string_list split(const std::string_view& text, const string_list& delimiters,
     const string_list& trim_tokens, bool compress) NOEXCEPT
 {
     // Nothing to do.
     if (delimiters.empty() && trim_tokens.empty())
-        return { text };
+        return { std::string{ text } };
 
     // Trim first to preclude outer empty otherwise trimmable outer tokens.
-    auto trimmed = trim_copy(text, trim_tokens);
+    auto trimmed = trim_copy(std::string{ text }, trim_tokens);
 
     // Nothing more to do.
     if (delimiters.empty())
@@ -144,14 +144,14 @@ string_list split(const std::string& text, const string_list& delimiters,
     return splitter(trimmed, delimiters.front(), trim_tokens, compress);
 }
 
-string_list split(const std::string& text, const std::string& delimiter,
+string_list split(const std::string_view& text, const std::string& delimiter,
     bool trim, bool compress) NOEXCEPT
 {
     const auto trim_tokens = trim ? ascii_whitespace : string_list{};
     return split(text, string_list{ delimiter }, trim_tokens, compress);
 }
 
-string_list split(const std::string& text) NOEXCEPT
+string_list split(const std::string_view& text) NOEXCEPT
 {
     // Splitting is prioritized over trimming, because each token is trimmed.
     // So trimming is not an option when splitting on the trim characters.
@@ -218,7 +218,7 @@ void trim(std::string& text, const string_list& trim_tokens) NOEXCEPT
     trim_right(text, trim_tokens);
 }
 
-std::string trim_left_copy(const std::string& text,
+std::string trim_left_copy(const std::string_view& text,
     const string_list& trim_tokens) NOEXCEPT
 {
     std::string copy{ text };
@@ -226,14 +226,7 @@ std::string trim_left_copy(const std::string& text,
     return copy;
 }
 
-std::string trim_left_copy(std::string&& text,
-    const string_list& trim_tokens) NOEXCEPT
-{
-    trim_left(text, trim_tokens);
-    return std::move(text);
-}
-
-std::string trim_right_copy(const std::string& text,
+std::string trim_right_copy(const std::string_view& text,
     const string_list& trim_tokens) NOEXCEPT
 {
     std::string copy{ text };
@@ -241,26 +234,12 @@ std::string trim_right_copy(const std::string& text,
     return copy;
 }
 
-std::string trim_right_copy(std::string&& text,
-    const string_list& trim_tokens) NOEXCEPT
-{
-    trim_right(text, trim_tokens);
-    return std::move(text);
-}
-
-std::string trim_copy(const std::string& text,
+std::string trim_copy(const std::string_view& text,
     const string_list& trim_tokens) NOEXCEPT
 {
     std::string copy{ text };
     trim(copy, trim_tokens);
     return copy;
-}
-
-std::string trim_copy(std::string&& text,
-    const string_list& trim_tokens) NOEXCEPT
-{
-    trim(text, trim_tokens);
-    return std::move(text);
 }
 
 bool ends_with(const std::string& text, const std::string& suffix) NOEXCEPT

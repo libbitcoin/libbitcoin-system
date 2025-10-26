@@ -36,30 +36,30 @@ bool deserialize(Value& out, std::istream& input) NOEXCEPT;
 
 /// Specialize template to avoid trimming of string deserialization.
 /// Strings are pass through unchanged, this provides type generalization.
-inline bool deserialize(std::string& out, const std::string& text) NOEXCEPT;
+inline bool deserialize(std::string& out, const std::string_view& text) NOEXCEPT;
 
 /// Specialize template because basic_ostream treats uint8_t as char.
-inline bool deserialize(uint8_t& out, const std::string& text) NOEXCEPT;
+inline bool deserialize(uint8_t& out, const std::string_view& text) NOEXCEPT;
 
 /// Specialize data_array to base16 (avoids split).
 template <size_t Size>
-bool deserialize(data_array<Size>& out, const std::string& text) NOEXCEPT;
+bool deserialize(data_array<Size>& out, const std::string_view& text) NOEXCEPT;
 
 /// Specialize data_chunk to base16 (avoids split).
-inline bool deserialize(data_chunk& out, const std::string& text) NOEXCEPT;
+inline bool deserialize(data_chunk& out, const std::string_view& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
 template <typename Value, size_t Size>
 bool deserialize(std_array<Value, Size>& out,
-    const std::string& text) NOEXCEPT;
+    const std::string_view& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
 template <typename Value>
-bool deserialize(std_vector<Value>& out, const std::string& text) NOEXCEPT;
+bool deserialize(std_vector<Value>& out, const std::string_view& text) NOEXCEPT;
 
 /// General deserializer.
 template <typename Value>
-bool deserialize(Value& out, const std::string& text) NOEXCEPT;
+bool deserialize(Value& out, const std::string_view& text) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

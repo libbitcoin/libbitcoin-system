@@ -28,12 +28,12 @@ namespace system {
 
 // string functions.
 
-bool is_ascii(const std::string& text) NOEXCEPT
+bool is_ascii(const std::string_view& text) NOEXCEPT
 {
     return std::all_of(text.begin(), text.end(), is_ascii_character);
 }
 
-bool is_ascii_numeric(const std::string& text) NOEXCEPT
+bool is_ascii_numeric(const std::string_view& text) NOEXCEPT
 {
     if (text.empty())
         return true;
@@ -43,7 +43,7 @@ bool is_ascii_numeric(const std::string& text) NOEXCEPT
     return std::all_of(start, text.end(), is_ascii_number);
 }
 
-std::string ascii_to_lower(const std::string& text) NOEXCEPT
+std::string ascii_to_lower(const std::string_view& text) NOEXCEPT
 {
     std::string copy{ text };
     std::transform(text.begin(), text.end(), copy.begin(),
@@ -55,7 +55,7 @@ std::string ascii_to_lower(const std::string& text) NOEXCEPT
     return copy;
 }
 
-std::string ascii_to_upper(const std::string& text) NOEXCEPT
+std::string ascii_to_upper(const std::string_view& text) NOEXCEPT
 {
     std::string copy{ text };
     std::transform(text.begin(), text.end(), copy.begin(),
@@ -68,7 +68,7 @@ std::string ascii_to_upper(const std::string& text) NOEXCEPT
     return copy;
 }
 
-bool has_ascii_whitespace(const std::string& text) NOEXCEPT
+bool has_ascii_whitespace(const std::string_view& text) NOEXCEPT
 {
     return std::any_of(text.begin(), text.end(),
         [](char character) NOEXCEPT
@@ -77,7 +77,7 @@ bool has_ascii_whitespace(const std::string& text) NOEXCEPT
         });
 }
 
-bool has_mixed_ascii_case(const std::string& text) NOEXCEPT
+bool has_mixed_ascii_case(const std::string_view& text) NOEXCEPT
 {
     auto lower = false;
     auto upper = false;

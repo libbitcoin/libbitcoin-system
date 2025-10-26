@@ -94,7 +94,7 @@ witness::witness(reader& source, bool prefix) NOEXCEPT
     assign_data(source, prefix);
 }
 
-witness::witness(const std::string& mnemonic) NOEXCEPT
+witness::witness(const std::string_view& mnemonic) NOEXCEPT
   : witness(from_string(mnemonic))
 {
 }
@@ -253,7 +253,7 @@ inline std::string remove_token_delimiters(const std::string& token) NOEXCEPT
 }
 
 // static/private
-witness witness::from_string(const std::string& mnemonic) NOEXCEPT
+witness witness::from_string(const std::string_view& mnemonic) NOEXCEPT
 {
     // There is always one data element per non-empty string token.
     auto tokens = split(mnemonic);
@@ -333,43 +333,25 @@ BC_POP_WARNING()
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 
-namespace json = boost::json;
-
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-witness tag_invoke(json::value_to_tag<witness>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(witness)
 {
-    return witness{ std::string(value.get_string().c_str()) };
+    return witness{ value.as_string()  };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const witness& witness) NOEXCEPT
+DEFINE_JSON_FROM_TAG(witness)
 {
-    value = witness.to_string();
+    value = instance.to_string();
 }
 
-BC_POP_WARNING()
-
-witness::cptr tag_invoke(json::value_to_tag<witness::cptr>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(witness::cptr)
 {
-    return to_shared(tag_invoke(json::value_to_tag<witness>{}, value));
+    return to_shared(tag_invoke(to_tag<witness>{}, value));
 }
 
-// Shared pointer overload is required for navigation.
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-void tag_invoke(json::value_from_tag tag, json::value& value,
-    const witness::cptr& output) NOEXCEPT
+DEFINE_JSON_FROM_TAG(witness::cptr)
 {
-    tag_invoke(tag, value, *output);
+    tag_invoke(from_tag{}, value, *instance);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

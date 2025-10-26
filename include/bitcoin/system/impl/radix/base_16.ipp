@@ -128,7 +128,7 @@ constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 constexpr bool decode_base16(data_chunk& out,
-    const std::string& in) NOEXCEPT
+    const std::string_view& in) NOEXCEPT
 {
     if (!is_multiple(in.size(), octet_width))
         return false;
@@ -191,6 +191,16 @@ constexpr bool decode_hash(data_array<Size>& out,
     }
 
     return true;
+}
+
+template <size_t Size>
+constexpr data_array<Size> decode_hash(const std::string_view& in) NOEXCEPT
+{
+    data_array<Size> out{};
+    if (!decode_hash(out, in))
+        return {};
+
+    return out;
 }
 
 // Literal decodings of hex string, errors reflected as zero-filled data.

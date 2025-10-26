@@ -367,62 +367,41 @@ code header::accept(const context& ctx) const NOEXCEPT
 
 namespace json = boost::json;
 
-// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-header tag_invoke(json::value_to_tag<header>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(header)
 {
-    hash_digest previous, merkle_root;
-    if (!decode_hash(previous, value.at("previous").get_string().c_str()) ||
-        !decode_hash(merkle_root, value.at("merkle_root").get_string().c_str()))
-        return {};
-
     return
     {
         value.at("version").to_number<uint32_t>(),
-        previous,
-        merkle_root,
+        decode_hash<hash_size>(value.at("previous").as_string()),
+        decode_hash<hash_size>(value.at("merkle_root").as_string()),
         value.at("timestamp").to_number<uint32_t>(),
         value.at("bits").to_number<uint32_t>(),
         value.at("nonce").to_number<uint32_t>()
     };
 }
 
-void tag_invoke(json::value_from_tag, json::value& value,
-    const header& tx) NOEXCEPT
+DEFINE_JSON_FROM_TAG(header)
 {
     value =
     {
-        { "version", tx.version() },
-        { "previous", encode_hash(tx.previous_block_hash()) },
-        { "merkle_root", encode_hash(tx.merkle_root()) },
-        { "timestamp", tx.timestamp() },
-        { "bits", tx.bits() },
-        { "nonce", tx.nonce() }
+        { "version", instance.version() },
+        { "previous", encode_hash(instance.previous_block_hash()) },
+        { "merkle_root", encode_hash(instance.merkle_root()) },
+        { "timestamp", instance.timestamp() },
+        { "bits", instance.bits() },
+        { "nonce", instance.nonce() }
     };
 }
 
-BC_POP_WARNING()
-
-header::cptr tag_invoke(json::value_to_tag<header::cptr>,
-    const json::value& value) NOEXCEPT
+DEFINE_JSON_TO_TAG(header::cptr)
 {
-    return to_shared(tag_invoke(json::value_to_tag<header>{}, value));
+    return to_shared(tag_invoke(to_tag<header>{}, value));
 }
 
-// Shared pointer overload is required for navigation.
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-void tag_invoke(json::value_from_tag tag, json::value& value,
-    const header::cptr& tx) NOEXCEPT
+DEFINE_JSON_FROM_TAG(header::cptr)
 {
-    tag_invoke(tag, value, *tx);
+    tag_invoke(from_tag{}, value, *instance);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

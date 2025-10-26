@@ -103,7 +103,8 @@ std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT;
 
 typedef std::vector<checkpoint> checkpoints;
 
-DECLARE_JSON_VALUE_CONVERTORS(checkpoint);
+////DECLARE_JSON_TAG_INVOKE(hash_digest);
+DECLARE_JSON_TAG_INVOKE(checkpoint);
 
 } // namespace chain
 } // namespace system

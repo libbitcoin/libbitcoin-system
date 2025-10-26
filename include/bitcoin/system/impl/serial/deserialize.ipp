@@ -27,8 +27,6 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 
- // Cannot use a data_slice override as it is not deserializable.
-
 namespace libbitcoin {
 namespace system {
 
@@ -37,17 +35,17 @@ bool deserialize(Value& out, std::istream& input) NOEXCEPT
 {
     // Consumes an entire whitespace-delimited stream.
     const std::istreambuf_iterator<char> begin{ input }, end{};
-    std::string text(begin, end);
-    return deserialize(out, text);
+    std::string text{ begin, end };
+    return deserialize(out, std::string_view{ text });
 }
 
-inline bool deserialize(std::string& out, const std::string& text) NOEXCEPT
+inline bool deserialize(std::string& out, const std::string_view& text) NOEXCEPT
 {
     out.assign(text);
     return true;
 }
 
-inline bool deserialize(uint8_t& out, const std::string& text) NOEXCEPT
+inline bool deserialize(uint8_t& out, const std::string_view& text) NOEXCEPT
 {
     uint16_t value{};
     if (!deserialize(value, text))
@@ -58,21 +56,21 @@ inline bool deserialize(uint8_t& out, const std::string& text) NOEXCEPT
 }
 
 template <size_t Size>
-bool deserialize(data_array<Size>& out, const std::string& text) NOEXCEPT
+bool deserialize(data_array<Size>& out, const std::string_view& text) NOEXCEPT
 {
     return decode_base16(out, text);
 }
 
-inline bool deserialize(data_chunk& out, const std::string& text) NOEXCEPT
+inline bool deserialize(data_chunk& out, const std::string_view& text) NOEXCEPT
 {
     return decode_base16(out, text);
 }
 
 template <typename Value, size_t Size>
-bool deserialize(std_array<Value, Size>& out, const std::string& text) NOEXCEPT
+bool deserialize(std_array<Value, Size>& out, const std::string_view& text) NOEXCEPT
 {
     auto result = true;
-    const auto deserializer = [&result](const std::string& token) NOEXCEPT
+    const auto deserializer = [&result](const std::string_view& token) NOEXCEPT
     {
         Value value{};
         result &= deserialize(value, token);
@@ -85,10 +83,10 @@ bool deserialize(std_array<Value, Size>& out, const std::string& text) NOEXCEPT
 }
 
 template <typename Value>
-bool deserialize(std_vector<Value>& out, const std::string& text) NOEXCEPT
+bool deserialize(std_vector<Value>& out, const std::string_view& text) NOEXCEPT
 {
     auto result = true;
-    const auto deserializer = [&result](const std::string& token) NOEXCEPT
+    const auto deserializer = [&result](const std::string_view& token) NOEXCEPT
     {
         Value value{};
         result &= deserialize(value, token);
@@ -102,7 +100,7 @@ bool deserialize(std_vector<Value>& out, const std::string& text) NOEXCEPT
 }
 
 template <typename Value>
-bool deserialize(Value& out, const std::string& text) NOEXCEPT
+bool deserialize(Value& out, const std::string_view& text) NOEXCEPT
 {
     // Trimming is useful for type conversion, which otherwise fails.
     // So trimming of string types (pass-thru) is avoided by template override.
