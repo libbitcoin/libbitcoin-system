@@ -59,7 +59,7 @@ inline bool make_address(asio::address& ip, const std::string& host) NOEXCEPT
         ip = boost::asio::ip::make_address(trim_copy(host, { "[", "]" }));
         return true;
     }
-    catch (const std::exception&)
+    catch (...)
     {
         return false;
     }
@@ -160,7 +160,10 @@ inline asio::address to_v4(const boost::asio::ip::address_v6& ip6) THROWS
 {
     // Required for equivalence with boost 1.86.
     if (!ip6.is_v4_mapped())
-        throw std::exception{};
+    {
+        using namespace boost::asio::detail;
+        throw_exception(boost::asio::ip::bad_address_cast{});
+    }
 
     const auto bytes = ip6.to_bytes();
     return
@@ -187,7 +190,7 @@ asio::address denormalize(const asio::address& ip) NOEXCEPT
         {
             return { to_v4(ip.to_v6()) };
         }
-        catch (const std::exception&)
+        catch (...)
         {
             return ip;
         }
@@ -207,7 +210,7 @@ inline std::string to_host(const boost::asio::ip::address_v6& ip6) NOEXCEPT
         return ip6.is_v4_mapped() ? to_host(to_v4(ip6)) : ip6.to_string();
         BC_POP_WARNING()
     }
-    catch (const std::exception&)
+    catch (...)
     {
         return { "::" };
     }
@@ -219,7 +222,7 @@ inline std::string to_host(const boost::asio::ip::address_v4& ip4) NOEXCEPT
     {
         return ip4.to_string();
     }
-    catch (const std::exception&)
+    catch (...)
     {
         return { "0.0.0.0" };
     }
@@ -235,7 +238,7 @@ std::string to_host(const asio::address& ip) NOEXCEPT
         return host.is_v4() ? to_host(host.to_v4()) : to_host(host.to_v6());
         BC_POP_WARNING()
     }
-    catch (const std::exception&)
+    catch (...)
     {
         return { "0.0.0.0" };
     }
@@ -287,7 +290,7 @@ bool is_member(const asio::address& ip, const asio::address& subnet,
         if (ip.is_v6() && subnet.is_v6())
             return is_member_v6(ip.to_v6(), subnet.to_v6(), cidr);
     }
-    catch (const std::exception&)
+    catch (...)
     {
     }
 
