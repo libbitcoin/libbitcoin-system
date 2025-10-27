@@ -194,11 +194,11 @@ constexpr bool decode_hash(data_array<Size>& out,
 }
 
 template <size_t Size>
-constexpr data_array<Size> decode_hash(const std::string_view& in) NOEXCEPT
+constexpr data_array<Size> decode_hash(const std::string_view& in) THROWS
 {
     data_array<Size> out{};
     if (!decode_hash(out, in))
-        return {};
+        throw istream_exception{ "decode_hash" };
 
     return out;
 }
