@@ -69,9 +69,9 @@ template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
     const std::string_view& in) NOEXCEPT;
 
-/// Returns null_hash on error.
+/// Throws istream_exception on input error.
 template <size_t Size>
-constexpr data_array<Size> decode_hash(const std::string_view& in) NOEXCEPT;
+constexpr data_array<Size> decode_hash(const std::string_view& in) THROWS;
 
 /// Literal decodings of hex string, errors reflected as zero-filled data.
 /// ---------------------------------------------------------------------------

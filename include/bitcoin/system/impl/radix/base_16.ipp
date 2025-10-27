@@ -95,7 +95,7 @@ constexpr uint8_t encode_octet(
 
 constexpr std::string encode_base16(const data_slice& data) NOEXCEPT
 {
-    std::string out;
+    std::string out{};
     out.resize(data.size() * octet_width);
     auto digit = out.begin();
 
@@ -111,7 +111,7 @@ constexpr std::string encode_base16(const data_slice& data) NOEXCEPT
 // std::string is constexpr
 constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT
 {
-    std::string out;
+    std::string out{};
     out.resize(hash.size() * octet_width);
     auto digit = out.begin();
 
@@ -194,11 +194,11 @@ constexpr bool decode_hash(data_array<Size>& out,
 }
 
 template <size_t Size>
-constexpr data_array<Size> decode_hash(const std::string_view& in) NOEXCEPT
+constexpr data_array<Size> decode_hash(const std::string_view& in) THROWS
 {
     data_array<Size> out{};
     if (!decode_hash(out, in))
-        return {};
+        throw istream_exception{ "decode_hash" };
 
     return out;
 }
@@ -215,7 +215,7 @@ constexpr std::string base16_string(const char(&string)[Size]) NOEXCEPT
 template <size_t Size, if_odd<Size>>
 data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT
 {
-    data_chunk out;
+    data_chunk out{};
     decode_base16(out, string);
     return out;
 }
