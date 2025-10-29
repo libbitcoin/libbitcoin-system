@@ -45,17 +45,18 @@
 
 // Declares ADL free functions for use with boost-json.
 #define DECLARE_JSON_TAG_INVOKE(type) \
-BC_API type tag_invoke(to_tag<type>, const json_value& value) THROWS; \
-BC_API void tag_invoke(from_tag, json_value& value, \
+BC_API type tag_invoke(to_tag<type>, const boost::json::value& value) THROWS; \
+BC_API void tag_invoke(from_tag, boost::json::value& value, \
     const type& instance) THROWS
 
 // Define ADL free functions for use with boost-json.
 #define DEFINE_JSON_TO_TAG(type) \
-    type tag_invoke(to_tag<type>, const json_value& value) THROWS
+    type tag_invoke(to_tag<type>, const boost::json::value& value) THROWS
 #define DEFINE_JSON_FROM_TAG(type) \
     BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED) \
     BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR) \
-    void tag_invoke(from_tag, json_value& value, const type& instance) THROWS \
+    void tag_invoke(from_tag, boost::json::value& value, \
+        const type& instance) THROWS \
     BC_POP_WARNING() \
     BC_POP_WARNING()
 
@@ -83,8 +84,6 @@ inline auto value_from(Args&&... args) THROWS
 template <typename Type>
 using to_tag = boost::json::value_to_tag<Type>;
 typedef boost::json::value_from_tag from_tag;
-typedef boost::json::object json_object;
-typedef boost::json::value json_value;
 
 /// program_options aliases
 typedef boost::program_options::variables_map variables_map;
