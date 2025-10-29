@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <tuple>
+#include <utility>
 #include <variant>
 #include <bitcoin/system/allocator.hpp>
 
@@ -202,7 +203,7 @@ private:
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-/// Overload pattern.
+/// Variant (overload and forwarding).
 /// ---------------------------------------------------------------------------
 /// For use with std::visit.
 template<class... Overload>
@@ -211,6 +212,42 @@ struct overload : Overload... { using Overload::operator()...; };
 /// clang++16 still requires.
 /// Explicit deduction guide, should not be required in C++20 (namespace scope).
 template<class... Overload> overload(Overload...) -> overload<Overload...>;
+
+/// Declare on struct to define constructors that forward to an inner variant.
+#define FORWARD_VARIANT_CONSTRUCT(type, inner) \
+template <class Type, class... Args> \
+constexpr type(std::in_place_type_t<Type >, Args&&... args) NOEXCEPT \
+  : inner(std::in_place_type<Type>, std::forward<Args>(args)...) \
+{ \
+} \
+template <size_t Index, class... Args> \
+constexpr type(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
+  : inner(std::in_place_index<Index>, std::forward<Args>(args)...) \
+{ \
+}
+
+/// Assign to inner variant by emplacing a new alternative in-place.
+#define FORWARD_VARIANT_ASSIGNMENT(type, inner) \
+template <class Type, class... Args> \
+constexpr type& assign(std::in_place_type_t<Type>, Args&&... args) NOEXCEPT \
+{ \
+    inner.emplace<Type>(std::forward<Args>(args)...); \
+    return *this; \
+} \
+template <size_t Index, class... Args> \
+constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
+{ \
+    inner.emplace<Index>(std::forward<Args>(args)...); \
+    return *this; \
+}
+
+/// Generate operator= overloads forwarding assignment for a specific alt type.
+#define FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
+type& operator=(Alternative&& alternative) NOEXCEPT \
+{ \
+    inner.emplace(std::forward<Alternative>(alternative)); \
+    return *this; \
+} 
 
 /// Argument placeholders.
 /// ---------------------------------------------------------------------------
