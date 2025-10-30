@@ -216,7 +216,7 @@ template<class... Overload> overload(Overload...) -> overload<Overload...>;
 /// Declare on struct to define constructors that forward to an inner variant.
 #define FORWARD_VARIANT_CONSTRUCT(type, inner) \
 template <class Type, class... Args> \
-constexpr type(std::in_place_type_t<Type >, Args&&... args) NOEXCEPT \
+constexpr type(std::in_place_type_t<Type>, Args&&... args) NOEXCEPT \
   : inner(std::in_place_type<Type>, std::forward<Args>(args)...) \
 { \
 } \
@@ -245,7 +245,7 @@ constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 #define FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
 type& operator=(Alternative&& alternative) NOEXCEPT \
 { \
-    inner.emplace(std::forward<Alternative>(alternative)); \
+    inner.emplace<Alternative>(std::forward<Alternative>(alternative)); \
     return *this; \
 } 
 
