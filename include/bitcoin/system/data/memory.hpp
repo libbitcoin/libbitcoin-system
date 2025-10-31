@@ -32,12 +32,20 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 /// shared_ptr
 /// ---------------------------------------------------------------------------
+/// Some of these are just used to suppress noexcept warnings.
 
 /// Create shared pointer to non-const from moved instance.
 template <typename Type>
-inline std::shared_ptr<Type> make_shared(Type&& value) NOEXCEPT
+inline std::shared_ptr<Type> move_shared(Type&& value) NOEXCEPT
 {
     return std::make_shared<Type>(std::forward<Type>(value));
+}
+
+/// Create shared pointer to an in-place constructed instance.
+template <typename Type, typename ...Args>
+inline std::shared_ptr<Type> emplace_shared(Args&&... args) NOEXCEPT
+{
+    return std::make_shared<Type>(std::forward<Args>(args)...);
 }
 
 /// Create default shared pointer.

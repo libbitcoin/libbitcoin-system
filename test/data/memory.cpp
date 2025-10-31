@@ -31,17 +31,26 @@ struct type
     int right;
 };
 
+// emplace_shared
+
+using test_string_shared_ptr = std::shared_ptr<std::string>;
+
+BOOST_AUTO_TEST_CASE(memory__emplace_shared__array_move__expected_values)
+{
+    const test_string_shared_ptr ptr = system::emplace_shared<std::string>("test");
+}
+
 // make_shared
 
 using test_array_shared_ptr = std::shared_ptr<data_array<3>>;
 
 BOOST_AUTO_TEST_CASE(memory__make_shared__array_move__expected_values)
 {
-    const test_array_shared_ptr ptr = make_shared<data_array<3>>(data_array<3>{ 1, 2, 3 });
+    const test_array_shared_ptr ptr = system::move_shared<data_array<3>>(data_array<3>{ 1, 2, 3 });
     BOOST_REQUIRE_EQUAL(ptr->at(0), 1);
     BOOST_REQUIRE_EQUAL(ptr->at(1), 2);
     BOOST_REQUIRE_EQUAL(ptr->at(2), 3);
-}
+} 
 
 // to_shared
 
