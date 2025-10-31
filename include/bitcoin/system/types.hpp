@@ -175,7 +175,7 @@ using unsigned_exact_type =
                     iif<Bytes == sizeof(uint64_t), uint64_t,
                         uintx_t<Bytes * 8u>>>>>>;
 
-/// Text capture.
+/// Literal capture.
 /// ---------------------------------------------------------------------------
 
 // Implementation requires c-style array.
@@ -199,6 +199,21 @@ private:
         return data;
     }
 };
+
+template <size_t Size, typename Byte,
+    std::enable_if_t<std::is_same_v<Byte, char>, bool> = true>
+constexpr size_t literal_length(const Byte(&)[Size]) noexcept
+{
+    // Excludes literal string null terminator.
+    return Size - 1;
+}
+
+template <size_t Size, typename Byte,
+    std::enable_if_t<std::is_same_v<Byte, uint8_t>, bool> = true>
+constexpr size_t literal_length(const Byte(&)[Size]) noexcept
+{
+    return Size;
+}
 
 BC_POP_WARNING()
 BC_POP_WARNING()
