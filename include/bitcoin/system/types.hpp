@@ -243,7 +243,7 @@ constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 
 /// Generate operator= overloads forwarding assignment for a specific alt type.
 #define FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
-type& operator=(Alternative&& alternative) NOEXCEPT \
+constexpr type& operator=(Alternative&& alternative) NOEXCEPT \
 { \
     inner.emplace<Alternative>(std::forward<Alternative>(alternative)); \
     return *this; \
