@@ -236,3 +236,22 @@ static_assert(is_same_type<unsigned_exact_type<256>, uintx_t<to_bits(256u)>>);
 static_assert(is_same_type<unsigned_exact_type<512>, uintx_t<to_bits(512u)>>);
 static_assert(is_same_type<unsigned_exact_type<1024>, uintx_t<to_bits(1024u)>>);
 static_assert(is_same_type<unsigned_exact_type<2048>, uintx_t<to_bits(2048u)>>);
+
+// literal_length
+// ----------------------------------------------------------------------------
+
+static_assert(literal_length("") == 0_size);
+static_assert(literal_length("abc") == 3_size);
+static_assert(literal_length("a\0c") == 3_size);
+
+static constexpr const char empty_text[] = "";
+static_assert(literal_length(empty_text) == 0_size);
+
+static constexpr const char double_terminated[] = "abc\0";
+static_assert(literal_length(double_terminated) == 4_size);
+
+static constexpr const char middle_terminated[] = "a\0c";
+static_assert(literal_length(middle_terminated) == 3_size);
+
+static constexpr const uint8_t not_empty_bytes[] = { 0x42, 0x00, 0x42, 0x00 };
+static_assert(literal_length(not_empty_bytes) == 4_size);
