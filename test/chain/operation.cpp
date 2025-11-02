@@ -781,7 +781,7 @@ BOOST_AUTO_TEST_CASE(operation__to_string__empty_underflow__empty)
     operation value(encoded);
     BOOST_REQUIRE(value.is_invalid());
     BOOST_REQUIRE(value.is_underflow());
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "<>");
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "()");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
@@ -791,7 +791,7 @@ BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
     operation value(encoded);
     BOOST_REQUIRE(value.is_invalid());
     BOOST_REQUIRE(value.is_underflow());
-    BOOST_REQUIRE_EQUAL(value.to_string(0), "<02ff>");
+    BOOST_REQUIRE_EQUAL(value.to_string(0), "(02ff)");
 }
 
 BOOST_AUTO_TEST_CASE(operation__to_string__nop2_no_rules__nop2)
