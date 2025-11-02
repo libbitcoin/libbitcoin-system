@@ -501,13 +501,25 @@ DEFINE_JSON_TO_TAG(input)
 
 DEFINE_JSON_FROM_TAG(input)
 {
-    value =
+    if (instance.witness().is_valid())
     {
-        { "point", value_from(instance.point()) },
-        { "script", value_from(instance.script()) },
-        { "witness", value_from(instance.witness()) },
-        { "sequence", instance.sequence() }
-    };
+        value =
+        {
+            { "point", value_from(instance.point()) },
+            { "script", value_from(instance.script()) },
+            { "witness", value_from(instance.witness()) },
+            { "sequence", instance.sequence() }
+        };
+    }
+    else
+    {
+        value =
+        {
+            { "point", value_from(instance.point()) },
+            { "script", value_from(instance.script()) },
+            { "sequence", instance.sequence() }
+        };
+    }
 }
 
 DEFINE_JSON_TO_TAG(input::cptr)
