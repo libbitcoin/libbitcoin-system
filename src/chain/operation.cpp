@@ -465,10 +465,10 @@ static std::string opcode_to_prefix(opcode code,
 std::string operation::to_string(uint32_t active_flags) const NOEXCEPT
 {
     if (!is_valid())
-        return "(?)";
+        return "?";
 
     if (underflow_)
-        return "<" + encode_base16(get_data()) + ">";
+        return "(" + encode_base16(get_data()) + ")";
 
     if (data_empty())
         return opcode_to_mnemonic(code_, active_flags);
