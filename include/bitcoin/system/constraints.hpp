@@ -280,6 +280,16 @@ using if_byte_insertable = bool_if<
     std::is_base_of<std_vector<uint8_t>, Type>::value ||
     std::is_base_of<std::vector<uint8_t>, Type>::value>;
 
+/// define: DEFINE_HAS_METHOD(flush)
+/// usage: bool_if<has_flush_v<Type>>
+#define DEFINE_HAS_METHOD(method) \
+template <typename T, typename = void> \
+struct has_##method : std::false_type {}; \
+template <typename T> \
+struct has_##method<T, std::void_t<decltype(&T::method)>> : std::true_type {}; \
+template <typename Type> \
+static constexpr bool has_##method##_v = has_##method<Type>::value
+
 } // namespace libbitcoin
 
 #endif
