@@ -33,11 +33,20 @@ namespace system {
 
 // constructors
 // ----------------------------------------------------------------------------
+    
+// protected
+template <typename OStream>
+bit_writer<OStream>::bit_writer() NOEXCEPT
+  : base(),
+    byte_(base::pad()),
+    offset_(0)
+{
+}
 
 template <typename OStream>
 bit_writer<OStream>::bit_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink),
-    byte_(byte_writer<OStream>::pad()),
+  : base(sink),
+    byte_(base::pad()),
     offset_(0)
 {
 }
@@ -91,7 +100,7 @@ template <typename OStream>
 void bit_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
-    byte_writer<OStream>::do_flush();
+    base::do_flush();
 }
 
 // private
@@ -101,8 +110,8 @@ void bit_writer<OStream>::do_flush() NOEXCEPT
 template <typename OStream>
 void bit_writer<OStream>::unload() NOEXCEPT
 {
-    byte_writer<OStream>::do_write_bytes(&byte_, one);
-    byte_ = byte_writer<OStream>::pad();
+    base::do_write_bytes(&byte_, one);
+    byte_ = base::pad();
     offset_ = 0;
 }
 

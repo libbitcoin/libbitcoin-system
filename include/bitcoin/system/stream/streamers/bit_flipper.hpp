@@ -23,6 +23,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_FLIPPER_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/stream/make_streamer.hpp>
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
@@ -49,15 +50,14 @@ class bit_flipper
 {
 public:
     DEFAULT_COPY_MOVE(bit_flipper);
+    using ibase = bit_reader<IOStream>;
+    using obase = bit_writer<IOStream>;
 
     /// Constructors.
     bit_flipper(IOStream& stream) NOEXCEPT
-      : bit_reader<IOStream>(stream), bit_writer<IOStream>(stream)
+      : ibase(stream), obase(stream)
     {
-        // Base constructions only capture references.
-        // There are two references to the iostream:
-        // bit_reader -> byte_reader (istream&)
-        // bit_writer -> byte_writer (ostream&)
+        // Base classes only capture pointers, both to the same stream.
     }
 
     /// These overrides eliminate ambiguity resulting from diamond inheritance.
@@ -68,14 +68,27 @@ public:
     operator bool() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.
-        return bit_reader<IOStream>::operator bool();
+        return ibase::operator bool();
     }
 
     bool operator!() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.
-        return bit_reader<IOStream>::operator!();
+        return ibase::operator!();
     }
+
+    void set_stream(IOStream* stream) NOEXCEPT override
+    {
+        // Base classes only capture pointers, both to the same stream.
+        ibase::set_stream(stream);
+        obase::set_stream(stream);
+    }
+
+protected:
+    // For make_streamer<>.
+    bit_flipper() NOEXCEPT : ibase(), obase() {}
+    template <class, template <class> class, class, class>
+    friend class make_streamer;
 };
 
 BC_POP_WARNING()

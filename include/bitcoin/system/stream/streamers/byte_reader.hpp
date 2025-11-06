@@ -23,6 +23,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/stream/make_streamer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 
 namespace libbitcoin {
@@ -38,8 +39,8 @@ public:
     static inline memory_arena default_arena() NOEXCEPT;
 
     /// Constructors.
-    byte_reader(IStream& source,
-        const memory_arena& arena=default_arena()) NOEXCEPT;
+    byte_reader(IStream& source) NOEXCEPT;
+    byte_reader(IStream& source, const memory_arena& arena) NOEXCEPT;
 
     /// Integrals.
     /// -----------------------------------------------------------------------
@@ -204,6 +205,12 @@ protected:
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum = system::maximum<size_t>;
 
+    // For make_streamer<>.
+    byte_reader() NOEXCEPT;
+    virtual void set_stream(IStream* stream) NOEXCEPT;
+    template <class, template <class> class, class, class>
+    friend class make_streamer;
+
     virtual uint8_t do_peek_byte() NOEXCEPT;
     virtual void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT;
     virtual void do_skip_bytes(size_t size) NOEXCEPT;
@@ -221,7 +228,7 @@ private:
     void seeker(typename IStream::pos_type offset) NOEXCEPT;
     size_t line_length(const std::string& end) NOEXCEPT;
 
-    IStream& stream_;
+    IStream* stream_;
     size_t remaining_;
     mutable byte_allocator allocator_;
 };

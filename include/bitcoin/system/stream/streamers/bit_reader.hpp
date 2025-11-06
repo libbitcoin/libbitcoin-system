@@ -23,6 +23,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_READER_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/stream/make_streamer.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
 
@@ -41,6 +42,7 @@ class bit_reader
 {
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(bit_reader);
+    using base = byte_reader<IStream>;
 
     /// Constructors.
     bit_reader(IStream& source) NOEXCEPT;
@@ -60,6 +62,11 @@ public:
     void rewind_bits(size_t bits) NOEXCEPT override;
 
 protected:
+    // For make_streamer<>.
+    bit_reader() NOEXCEPT;
+    template <class, template <class> class, class, class>
+    friend class make_streamer;
+
     uint8_t do_peek_byte() NOEXCEPT override;
     void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
     void do_skip_bytes(size_t size) NOEXCEPT override;

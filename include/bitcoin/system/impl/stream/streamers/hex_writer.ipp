@@ -30,6 +30,14 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
+template <typename OStream>
+hex_writer<OStream>::hex_writer() NOEXCEPT
+  : base()
+{
+}
+
+
 template <typename OStream>
 hex_writer<OStream>::hex_writer(OStream& sink) NOEXCEPT
   : base(sink)

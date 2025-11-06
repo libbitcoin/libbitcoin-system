@@ -23,6 +23,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_WRITER_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/stream/make_streamer.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 
@@ -41,6 +42,7 @@ class bit_writer
 {
 public:
     DEFAULT_COPY_MOVE(bit_writer);
+    using base = byte_writer<OStream>;
 
     /// Constructors.
     bit_writer(OStream& sink) NOEXCEPT;
@@ -55,6 +57,11 @@ public:
     void write_bits(uint64_t value, size_t bits) NOEXCEPT override;
 
 protected:
+    // For make_streamer<>.
+    bit_writer() NOEXCEPT;
+    template <class, template <class> class, class, class>
+    friend class make_streamer;
+
     void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
     void do_flush() NOEXCEPT override;
 

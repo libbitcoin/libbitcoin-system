@@ -40,7 +40,7 @@ public:
 
 protected:
     // For make_streamer<>.
-    hex_writer() NOEXCEPT : base() {};
+    hex_writer() NOEXCEPT;
     template <class, template <class> class, class, class>
     friend class make_streamer;
 

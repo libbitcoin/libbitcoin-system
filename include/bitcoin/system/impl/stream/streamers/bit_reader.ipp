@@ -34,10 +34,19 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
+template <typename IStream>
+bit_reader<IStream>::bit_reader() NOEXCEPT
+  : base(),
+    byte_(base::pad()),
+    offset_(byte_bits)
+{
+}
+
 template <typename IStream>
 bit_reader<IStream>::bit_reader(IStream& source) NOEXCEPT
-  : byte_reader<IStream>(source),
-    byte_(byte_reader<IStream>::pad()),
+  : base(source),
+    byte_(base::pad()),
     offset_(byte_bits)
 {
 }
@@ -144,10 +153,10 @@ void bit_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
 template <typename IStream>
 bool bit_reader<IStream>::get_exhausted() const NOEXCEPT
 {
-    if (byte_reader<IStream>::operator!())
+    if (base::operator!())
         return true;
 
-    return is_zero(shift()) && byte_reader<IStream>::get_exhausted();
+    return is_zero(shift()) && base::get_exhausted();
 }
 
 // private
@@ -158,24 +167,24 @@ void bit_reader<IStream>::load() NOEXCEPT
 {
     // The next bit read will be from this byte.
     offset_ = 0;
-    byte_ = byte_reader<IStream>::pad();
-    byte_reader<IStream>::do_read_bytes(&byte_, one);
+    byte_ = base::pad();
+    base::do_read_bytes(&byte_, one);
 }
 
 template <typename IStream>
 void bit_reader<IStream>::reload() NOEXCEPT
 {
     offset_ = byte_bits;
-    byte_ = byte_reader<IStream>::pad();
-    byte_reader<IStream>::do_rewind_bytes(two);
-    byte_reader<IStream>::do_read_bytes(&byte_, one);
+    byte_ = base::pad();
+    base::do_rewind_bytes(two);
+    base::do_read_bytes(&byte_, one);
 }
 
 // This is the only byte peek.
 template <typename IStream>
 uint8_t bit_reader<IStream>::peek() NOEXCEPT
 {
-    return byte_reader<IStream>::do_peek_byte();
+    return base::do_peek_byte();
 }
 
 template <typename OStream>

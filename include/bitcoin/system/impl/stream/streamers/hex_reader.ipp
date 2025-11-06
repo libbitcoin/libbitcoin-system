@@ -29,6 +29,13 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
+template <typename IStream>
+hex_reader<IStream>::hex_reader() NOEXCEPT
+  : base()
+{
+}
+
 template <typename IStream>
 hex_reader<IStream>::hex_reader(IStream& source) NOEXCEPT
   : base(source)

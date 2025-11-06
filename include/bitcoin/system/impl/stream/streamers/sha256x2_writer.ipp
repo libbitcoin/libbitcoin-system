@@ -29,9 +29,16 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
+template <typename OStream>
+sha256x2_writer<OStream>::sha256x2_writer() NOEXCEPT
+  : base()
+{
+}
+
 template <typename OStream>
 sha256x2_writer<OStream>::sha256x2_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink)
+  : base(sink)
 {
 }
 
@@ -58,7 +65,7 @@ template <typename OStream>
 void sha256x2_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
-    byte_writer<OStream>::do_flush();
+    base::do_flush();
 }
 
 // private
@@ -81,7 +88,7 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
     context_.reset();
 
     // Write hash to stream.
-    byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
+    base::do_write_bytes(hash.data(), hash_size);
 }
 
 } // namespace system

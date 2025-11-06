@@ -41,7 +41,7 @@ public:
 
 protected:
     // For make_streamer<>.
-    hex_reader() NOEXCEPT : base() {};
+    hex_reader() NOEXCEPT;
     template <class, template <class> class, class, class>
     friend class make_streamer;
 

@@ -22,6 +22,8 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/stream/make_streamer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 
 namespace libbitcoin {
@@ -135,9 +137,14 @@ protected:
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum = system::maximum<size_t>;
 
+    // For make_streamer<>.
+    byte_writer() NOEXCEPT;
+    virtual void set_stream(OStream* stream) NOEXCEPT;
+    template <class, template <class> class, class, class>
+    friend class make_streamer;
+
     virtual void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT;
     virtual void do_flush() NOEXCEPT;
-
 private:
     bool valid() const NOEXCEPT;
     void invalid() NOEXCEPT;
@@ -145,7 +152,7 @@ private:
     void flusher() NOEXCEPT;
     size_t getter() NOEXCEPT;
 
-    OStream& stream_;
+    OStream* stream_;
 };
 
 } // namespace system

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 
 #include <memory>
+#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
 
@@ -43,23 +44,14 @@ public:
     using ptr = std::shared_ptr<make_streamer<Device, Base, Stream, Streamer>>;
 
     make_streamer(typename Device::container device) NOEXCEPT
-      : stream_(device), Streamer(stream_)
+      : Streamer(), stream_(device)
     {
+        Streamer::set_stream(&stream_);
     }
 
-protected:
+private:
     Stream stream_;
 };
-
-/////// Helper to create tagged streamer type for use with make_streamer.
-/////// Captures tag, allowing streamer to match the single type template.
-////template <text_t Tag,
-////    template <text_t, typename> class Streamer>
-////struct tag
-////{
-////    template <typename Stream>
-////    using type = Streamer<Tag, Stream>;
-////};
 
 } // namespace system
 } // namespace libbitcoin

@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/stream/make_streamer.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
 namespace libbitcoin {
@@ -33,6 +34,7 @@ class sha256_writer
 {
 public:
     DEFAULT_COPY_MOVE(sha256_writer);
+    using base = byte_writer<OStream>;
 
     /// Constructors.
     sha256_writer(OStream& sink) NOEXCEPT;
@@ -43,6 +45,11 @@ public:
 protected:
     /// The maximum addressable stream position.
     static constexpr size_t maximum = hash_size;
+
+    // For make_streamer<>.
+    sha256_writer() NOEXCEPT;
+    template <class, template <class> class, class, class>
+    friend class make_streamer;
 
     void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
     void do_flush() NOEXCEPT override;
