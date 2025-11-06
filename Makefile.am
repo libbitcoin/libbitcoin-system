@@ -380,6 +380,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/stream/streamers/byte_flipper.cpp \
     test/stream/streamers/byte_reader.cpp \
     test/stream/streamers/byte_writer.cpp \
+    test/stream/streamers/hex_reader.cpp \
+    test/stream/streamers/hex_writer.cpp \
     test/stream/streamers/sha256_writer.cpp \
     test/stream/streamers/sha256t_writer.cpp \
     test/stream/streamers/sha256x2_writer.cpp \
@@ -742,6 +744,8 @@ include_bitcoin_system_impl_stream_streamers_HEADERS = \
     include/bitcoin/system/impl/stream/streamers/bit_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/byte_reader.ipp \
     include/bitcoin/system/impl/stream/streamers/byte_writer.ipp \
+    include/bitcoin/system/impl/stream/streamers/hex_reader.ipp \
+    include/bitcoin/system/impl/stream/streamers/hex_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/sha256_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/sha256t_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/sha256x2_writer.ipp
@@ -871,6 +875,8 @@ include_bitcoin_system_stream_streamers_HEADERS = \
     include/bitcoin/system/stream/streamers/byte_flipper.hpp \
     include/bitcoin/system/stream/streamers/byte_reader.hpp \
     include/bitcoin/system/stream/streamers/byte_writer.hpp \
+    include/bitcoin/system/stream/streamers/hex_reader.hpp \
+    include/bitcoin/system/stream/streamers/hex_writer.hpp \
     include/bitcoin/system/stream/streamers/sha256_writer.hpp \
     include/bitcoin/system/stream/streamers/sha256t_writer.hpp \
     include/bitcoin/system/stream/streamers/sha256x2_writer.hpp

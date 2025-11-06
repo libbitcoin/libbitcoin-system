@@ -859,6 +859,8 @@ if (with-tests)
         "../../test/stream/streamers/byte_flipper.cpp"
         "../../test/stream/streamers/byte_reader.cpp"
         "../../test/stream/streamers/byte_writer.cpp"
+        "../../test/stream/streamers/hex_reader.cpp"
+        "../../test/stream/streamers/hex_writer.cpp"
         "../../test/stream/streamers/sha256_writer.cpp"
         "../../test/stream/streamers/sha256t_writer.cpp"
         "../../test/stream/streamers/sha256x2_writer.cpp"

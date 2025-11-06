@@ -36,6 +36,8 @@
 #include <bitcoin/system/stream/streamers/byte_flipper.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
+#include <bitcoin/system/stream/streamers/hex_reader.hpp>
+#include <bitcoin/system/stream/streamers/hex_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/byteflipper.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
@@ -90,6 +92,18 @@ namespace read
         /// A bit reader that copies from a data_reference via std::istream.
         using copy = make_streamer<copy_source<data_reference>, bit_reader>;
     }
+
+    namespace base16
+    {
+        /// A byte reader that reads base16 from a std::istream.
+        using istream = hex_reader<std::istream>;
+
+        /// A fast byte reader that reads base16 from a system::istream.
+        using fast = hex_reader<system::istream<>>;
+
+        /// A byte reader that copies base16 from a data_reference via std::istream.
+        using copy = make_streamer<copy_source<data_reference>, hex_reader>;
+    }
 }
 
 namespace write
@@ -126,6 +140,24 @@ namespace write
         /// A bit writer that inserts into a container via std::ostream.
         template <typename Container>
         using push = make_streamer<push_sink<Container>, bit_writer>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
+    }
+
+    namespace base16
+    {
+        /// A base16 byte writer that writes to a std::ostream.
+        using ostream = hex_writer<std::ostream>;
+
+        /// A fast base16 writer that writes to a system::ostream.
+        using fast = hex_writer<system::ostream<>>;
+
+        /// A base16 byte writer that copies to a data_slab.
+        using copy = make_streamer<copy_sink<data_slab>, hex_writer>;
+
+        /// A base16 byte writer that inserts into a container.
+        template <typename Container>
+        using push = make_streamer<push_sink<Container>, hex_writer>;
         using text = push<std::string>;
         using data = push<data_chunk>;
     }

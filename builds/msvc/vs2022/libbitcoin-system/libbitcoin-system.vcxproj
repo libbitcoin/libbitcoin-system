@@ -501,6 +501,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\byte_flipper.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\byte_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\byte_writer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\hex_reader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\hex_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\interfaces\bitflipper.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\interfaces\bitreader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\interfaces\bitwriter.hpp" />
@@ -674,6 +676,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\byte_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\byte_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\hex_reader.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\hex_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256t_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256x2_writer.ipp" />
