@@ -44,19 +44,42 @@ byte_reader<IStream>::default_arena() NOEXCEPT
     return bc::default_arena::get();
 }
 
+// protected/friend accessor
+template <typename IStream>
+void byte_reader<IStream>::set_stream(IStream* stream) NOEXCEPT
+{
+    stream_ = stream;
+}
+
 // All public methods must rely on protected for stream state except validity.
 
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
+template <typename IStream>
+byte_reader<IStream>::byte_reader() NOEXCEPT
+  : stream_(nullptr),
+    remaining_(system::maximum<size_t>),
+    allocator_(default_arena())
+{
+    // stream_ set by friend make_streamer<>.
+}
+
+template <typename IStream>
+byte_reader<IStream>::byte_reader(IStream& source) NOEXCEPT
+  : byte_reader(source, default_arena())
+{
+}
+
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source,
     const memory_arena& arena) NOEXCEPT
-  : stream_(source),
+  : stream_(&source),
     remaining_(system::maximum<size_t>),
     allocator_(arena)
 {
-    ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
+    ////BC_ASSERT_MSG(stream_->exceptions() == IStream::goodbit,
     ////    "Input stream must not be configured to throw exceptions.");
 }
 
@@ -666,7 +689,7 @@ uint8_t byte_reader<IStream>::do_peek_byte() NOEXCEPT
     // the call the achieve consistent behavior. The reader will be invalid if
     // the stream is peeked past end, including when empty.
     const auto value =
-        possible_narrow_and_sign_cast<uint8_t>(stream_.peek());
+        possible_narrow_and_sign_cast<uint8_t>(stream_->peek());
 
     validate();
     return valid() ? value : pad();
@@ -679,7 +702,7 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
     if (limiter(size))
         return;
 
-    // It is not generally more efficient to call stream_.get() for one byte.
+    // It is not generally more efficient to call stream_->get() for one byte.
     // Partially-failed reads here will be populated by the stream, not padded.
     // However, both copy_source and stringstream will zero-fill partial reads.
     // Read on empty is inconsistent, so validate the result. The reader will be
@@ -687,7 +710,7 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
 
     // Read past stream end invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum);
-    stream_.read(pointer_cast<char>(buffer),
+    stream_->read(pointer_cast<char>(buffer),
         possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 
     validate();
@@ -739,9 +762,9 @@ bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
         return true;
 
     // Peek to force error on eof, save condition, restore valid stream state.
-    stream_.peek();
+    stream_->peek();
     const auto eof = !valid();
-    stream_.clear();
+    stream_->clear();
 
     return eof;
 }
@@ -754,7 +777,7 @@ template <typename IStream>
 bool byte_reader<IStream>::valid() const NOEXCEPT
 {
     // zero is the istream documented flag for no error.
-    return stream_.rdstate() == IStream::goodbit;
+    return stream_->rdstate() == IStream::goodbit;
 }
 
 template <typename IStream>
@@ -762,7 +785,7 @@ void byte_reader<IStream>::invalid() NOEXCEPT
 {
     // If eofbit is set, failbit is generally set on all operations.
     // badbit is unrecoverable, set the others to ensure consistency.
-    stream_.setstate(IStream::eofbit | IStream::failbit | IStream::badbit);
+    stream_->setstate(IStream::eofbit | IStream::failbit | IStream::badbit);
 }
 
 template <typename IStream>
@@ -780,7 +803,7 @@ template <typename IStream>
 void byte_reader<IStream>::clear() NOEXCEPT
 {
     // Does not reset the current position.
-    stream_.clear();
+    stream_->clear();
 }
 
 template <typename IStream>
@@ -795,7 +818,7 @@ size_t byte_reader<IStream>::getter() NOEXCEPT
     try
     {
         // This does not honor BOOST_EXCEPTION_DISABLE.
-        position = stream_.tellg();
+        position = stream_->tellg();
         validate();
     }
     catch (const typename IStream::failure&)
@@ -844,7 +867,7 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
     try
     {
         // This does not honor BOOST_EXCEPTION_DISABLE.
-        stream_.seekg(offset, IStream::cur);
+        stream_->seekg(offset, IStream::cur);
         validate();
     }
     catch (const typename IStream::failure&)

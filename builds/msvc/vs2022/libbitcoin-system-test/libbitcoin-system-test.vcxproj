@@ -303,6 +303,8 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_flipper.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\hex_reader.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\hex_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256t_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />

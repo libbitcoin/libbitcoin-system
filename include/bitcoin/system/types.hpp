@@ -183,8 +183,9 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 template <size_t Size>
-struct text_t
+class text_t
 {
+public:
     std::array<uint8_t, Size - 1> data;
     CONSTEVAL text_t(const char (&string)[Size]) noexcept
       : data(to_array(string)) {}

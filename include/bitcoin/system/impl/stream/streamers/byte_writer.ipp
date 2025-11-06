@@ -34,14 +34,29 @@ namespace system {
 
 // All public methods must rely on protected for stream state except validity.
 
+// protected/friend accessor
+template <typename OStream>
+void byte_writer<OStream>::set_stream(OStream* stream) NOEXCEPT
+{
+    stream_ = stream;
+}
+
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
+template <typename OStream>
+byte_writer<OStream>::byte_writer() NOEXCEPT
+  : stream_(nullptr)
+{
+    // stream_ set by friend make_streamer<>.
+}
+
 template <typename OStream>
 byte_writer<OStream>::byte_writer(OStream& sink) NOEXCEPT
-  : stream_(sink)
+  : stream_(&sink)
 {
-    ////BC_ASSERT_MSG(stream_.exceptions() == OStream::goodbit,
+    ////BC_ASSERT_MSG(stream_->exceptions() == OStream::goodbit,
     ////    "Output stream must not be configured to throw exceptions.");
 }
 
@@ -304,11 +319,11 @@ template <typename OStream>
 void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
-    // It is not generally more efficient to call stream_.put() for one byte.
+    // It is not generally more efficient to call stream_->put() for one byte.
 
     // Write past stream start invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum);
-    stream_.write(pointer_cast<const char>(data),
+    stream_->write(pointer_cast<const char>(data),
         possible_narrow_and_sign_cast<typename OStream::pos_type>(size));
 
     validate();
@@ -328,7 +343,7 @@ template <typename OStream>
 bool byte_writer<OStream>::valid() const NOEXCEPT
 {
     // zero is the istream documented flag for no error.
-    return stream_.rdstate() == OStream::goodbit;
+    return stream_->rdstate() == OStream::goodbit;
 }
 
 template <typename OStream>
@@ -336,7 +351,7 @@ void byte_writer<OStream>::invalid() NOEXCEPT
 {
     // If eofbit is set, failbit is generally set on all operations.
     // badbit is unrecoverable, set the others to ensure consistency.
-    stream_.setstate(OStream::eofbit | OStream::failbit | OStream::badbit);
+    stream_->setstate(OStream::eofbit | OStream::failbit | OStream::badbit);
 }
 
 template <typename OStream>
@@ -352,7 +367,7 @@ void byte_writer<OStream>::validate() NOEXCEPT
 template <typename OStream>
 void byte_writer<OStream>::flusher() NOEXCEPT
 {
-    stream_.flush();
+    stream_->flush();
     validate();
 }
 
@@ -368,7 +383,7 @@ size_t byte_writer<OStream>::getter() NOEXCEPT
     try
     {
         // This does not honor BOOST_EXCEPTION_DISABLE.
-        position = stream_.tellp();
+        position = stream_->tellp();
         validate();
     }
     catch (const typename OStream::failure&)

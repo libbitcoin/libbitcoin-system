@@ -42,9 +42,19 @@ constexpr bool is_between(uint8_t value, uint8_t low, uint8_t high) NOEXCEPT
     return low <= value && value <= high;
 }
 
-constexpr char to_base16_character(char digit) NOEXCEPT
+constexpr char to_base16_character(uint8_t digit) NOEXCEPT
 {
     return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
+}
+
+constexpr char to_base16_hi_character(uint8_t octet) NOEXCEPT
+{
+    return to_base16_character(shift_right(octet, to_half(byte_bits)));
+}
+
+constexpr char to_base16_lo_character(uint8_t octet) NOEXCEPT
+{
+    return to_base16_character(bit_and(octet, 0x0f_u8));
 }
 
 constexpr uint8_t from_base16_characters(char high, char low) NOEXCEPT
@@ -99,10 +109,10 @@ constexpr std::string encode_base16(const data_slice& data) NOEXCEPT
     out.resize(data.size() * octet_width);
     auto digit = out.begin();
 
-    for (const auto byte: data)
+    for (const auto octet: data)
     {
-        *digit++ = to_base16_character(shift_right(byte, to_half(byte_bits)));
-        *digit++ = to_base16_character(bit_and(byte, 0x0f_u8));
+        *digit++ = to_base16_hi_character(octet);
+        *digit++ = to_base16_lo_character(octet);
     }
 
     return out;
@@ -115,10 +125,10 @@ constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT
     out.resize(hash.size() * octet_width);
     auto digit = out.begin();
 
-    for (const auto byte: std::views::reverse(hash))
+    for (const auto octet: std::views::reverse(hash))
     {
-        *digit++ = to_base16_character(shift_right(byte, to_half(byte_bits)));
-        *digit++ = to_base16_character(bit_and(byte, 0x0f_u8));
+        *digit++ = to_base16_hi_character(octet);
+        *digit++ = to_base16_lo_character(octet);
     }
 
     return out;

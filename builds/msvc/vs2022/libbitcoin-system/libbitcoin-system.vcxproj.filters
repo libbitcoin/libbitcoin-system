@@ -1253,6 +1253,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\byte_writer.hpp">
       <Filter>include\bitcoin\system\stream\streamers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\hex_reader.hpp">
+      <Filter>include\bitcoin\system\stream\streamers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\hex_writer.hpp">
+      <Filter>include\bitcoin\system\stream\streamers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\interfaces\bitflipper.hpp">
       <Filter>include\bitcoin\system\stream\streamers\interfaces</Filter>
     </ClInclude>
@@ -1766,6 +1772,12 @@
       <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\byte_writer.ipp">
+      <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\hex_reader.ipp">
+      <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\hex_writer.ipp">
       <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp">

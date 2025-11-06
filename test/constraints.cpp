@@ -653,3 +653,20 @@ static_assert(is_defined<if_byte_insertable<std_vector<uint8_t>>>);
 ////static_assert(!is_defined<if_byte_insertable<std::u32string>>);
 ////static_assert(!is_defined<if_byte_insertable<std_vector<uint32_t>>>);
 ////static_assert(!is_defined<if_byte_insertable<uint32_t>>);
+
+// HAS_METHOD
+
+struct not_has { void foobar_() {} };
+struct has_args { void foobar(bool, int) {} };
+struct has_base { void foobar() {} };
+struct has_publics_derived : public has_base {};
+struct has_protect_derived : protected has_base {};
+struct has_private_derived : private has_base {};
+
+DEFINE_HAS_METHOD(foobar);
+static_assert(!has_foobar_v<not_has>);
+static_assert(has_foobar_v<has_args>);
+static_assert(has_foobar_v<has_base>);
+static_assert(has_foobar_v<has_publics_derived>);
+static_assert(!has_foobar_v<has_protect_derived>);
+static_assert(!has_foobar_v<has_private_derived>);

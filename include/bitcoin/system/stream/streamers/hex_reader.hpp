@@ -16,53 +16,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_HPP
-#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_HPP
+#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_READER_HPP
+#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_READER_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/make_streamer.hpp>
-#include <bitcoin/system/stream/streamers/byte_writer.hpp>
+#include <bitcoin/system/stream/streamers/byte_reader.hpp>
 
 namespace libbitcoin {
 namespace system {
-    
-/// A hash writer that accepts an ostream.
-template <typename OStream = std::ostream>
-class sha256_writer
-  : public byte_writer<OStream>
+
+/// A base16 reader that accepts an istream.
+template <typename IStream = std::istream>
+class hex_reader
+  : public virtual byte_reader<IStream>
 {
 public:
-    DEFAULT_COPY_MOVE(sha256_writer);
-    using base = byte_writer<OStream>;
+    DEFAULT_COPY_MOVE_DESTRUCT(hex_reader);
+    using base = byte_reader<IStream>;
 
     /// Constructors.
-    sha256_writer(OStream& sink) NOEXCEPT;
-
-    /// Flush on destruct.
-    ~sha256_writer() NOEXCEPT override;
+    hex_reader(IStream& source) NOEXCEPT;
+    hex_reader(IStream& source, const base::memory_arena& arena) NOEXCEPT;
 
 protected:
-    /// The maximum addressable stream position.
-    static constexpr size_t maximum = hash_size;
-
     // For make_streamer<>.
-    sha256_writer() NOEXCEPT;
+    hex_reader() NOEXCEPT;
     template <class, template <class> class, class, class>
     friend class make_streamer;
 
-    void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
-    void do_flush() NOEXCEPT override;
-
-private:
-    void flusher() NOEXCEPT;
-
-    accumulator<sha256> context_{};
+    void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
 };
 
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/stream/streamers/sha256_writer.ipp>
+#include <bitcoin/system/impl/stream/streamers/hex_reader.ipp>
 
 #endif

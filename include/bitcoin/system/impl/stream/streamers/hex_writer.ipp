@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_IPP
-#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_IPP
+#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_WRITER_IPP
+#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_WRITER_IPP
 
+#include <algorithm>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
 namespace libbitcoin {
@@ -29,58 +30,37 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
+// protected
 template <typename OStream>
-sha256_writer<OStream>::sha256_writer() NOEXCEPT
+hex_writer<OStream>::hex_writer() NOEXCEPT
   : base()
 {
 }
 
-template <typename OStream>
-sha256_writer<OStream>::sha256_writer(OStream& sink) NOEXCEPT
-  : base(sink)
-{
-}
 
 template <typename OStream>
-sha256_writer<OStream>::~sha256_writer() NOEXCEPT
+hex_writer<OStream>::hex_writer(OStream& sink) NOEXCEPT
+  : base(sink)
 {
-    // Derived virtual destructor called before base destructor.
-    flusher();
 }
 
 // protected
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-void sha256_writer<OStream>::do_write_bytes(const uint8_t* data,
+void hex_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
-    // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
-    // The stream could be invalidated, but writers shouldn't have to check it.
-    context_.write(size, data);
-}
+    char chars[two];
+    const auto bytes = pointer_cast<uint8_t>(&chars[zero]);
 
-template <typename OStream>
-void sha256_writer<OStream>::do_flush() NOEXCEPT
-{
-    flusher();
-    base::do_flush();
-}
-
-// private
-// ----------------------------------------------------------------------------
-
-template <typename OStream>
-void sha256_writer<OStream>::flusher() NOEXCEPT
-{
-    hash_digest hash{};
-
-    // Finalize streaming hash.
-    context_.flush(hash.data());
-    context_.reset();
-
-    // Write hash to stream.
-    base::do_write_bytes(hash.data(), hash_size);
+    // Iteration avoids writing to dynamically-allocated buffer of size.
+    std::for_each_n(data, size, [&](uint8_t octet) NOEXCEPT
+    {
+        chars[0] = to_base16_hi_character(octet);
+        chars[1] = to_base16_lo_character(octet);
+        base::do_write_bytes(bytes, two);
+    });
 }
 
 } // namespace system
