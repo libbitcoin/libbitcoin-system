@@ -105,11 +105,9 @@ public:
     operation(const chunk_cptr& push_data, bool minimal) NOEXCEPT;
 
     /// These deserialize operations (with codes), not from push-data.
-    operation(stream::in::fast&& stream) NOEXCEPT;
+    operation(const data_slice& data) NOEXCEPT;
     operation(stream::in::fast& stream) NOEXCEPT;
-    operation(std::istream&& stream) NOEXCEPT;
     operation(std::istream& stream) NOEXCEPT;
-    operation(reader&& source) NOEXCEPT;
     operation(reader& source) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
@@ -148,6 +146,8 @@ public:
     size_t serialized_size() const NOEXCEPT;
 
 protected:
+    operation(stream::in::fast&& stream) NOEXCEPT;
+    operation(reader&& source) NOEXCEPT;
     operation(opcode code, const chunk_cptr& push_data_ptr,
         bool underflow) NOEXCEPT;
 

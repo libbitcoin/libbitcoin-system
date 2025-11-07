@@ -769,6 +769,13 @@ bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
     return eof;
 }
 
+template <typename IStream>
+bool byte_reader<IStream>::limited(size_t size) const NOEXCEPT
+{
+    // This exposes limits to asymmetrical derived readers, such as hex_reader.
+    return size > remaining_;
+}
+
 // private
 // ----------------------------------------------------------------------------
 // These may only call other private methods (due to protected overriding).

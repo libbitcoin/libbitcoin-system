@@ -50,6 +50,12 @@ point::point(const hash_digest& hash, uint32_t index) NOEXCEPT
 {
 }
 
+point::point(const data_slice& data) NOEXCEPT
+  : point(stream::in::fast(data))
+{
+}
+
+// protected
 point::point(stream::in::fast&& stream) NOEXCEPT
   : point(read::bytes::fast(stream))
 {
@@ -59,17 +65,12 @@ point::point(stream::in::fast& stream) NOEXCEPT
   : point(read::bytes::fast(stream))
 {
 }
-
-point::point(std::istream&& stream) NOEXCEPT
-  : point(read::bytes::istream(stream))
-{
-}
-
 point::point(std::istream& stream) NOEXCEPT
   : point(read::bytes::istream(stream))
 {
 }
 
+// protected
 point::point(reader&& source) NOEXCEPT
   : point(source)
 {

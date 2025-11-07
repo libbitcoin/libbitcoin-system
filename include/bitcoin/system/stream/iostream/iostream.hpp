@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_IOSTREAM_HPP
 
 #include <ios>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -52,8 +53,7 @@ public:
     static constexpr seekdir end = 2;
 
     /// Construct the object.
-    template <typename Buffer>
-    iostream(Buffer& buffer) NOEXCEPT;
+    iostream(const data_slab& buffer) NOEXCEPT;
     iostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return state flags.

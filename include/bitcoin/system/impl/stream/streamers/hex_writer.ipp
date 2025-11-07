@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
@@ -37,7 +38,6 @@ hex_writer<OStream>::hex_writer() NOEXCEPT
 {
 }
 
-
 template <typename OStream>
 hex_writer<OStream>::hex_writer(OStream& sink) NOEXCEPT
   : base(sink)
@@ -46,12 +46,16 @@ hex_writer<OStream>::hex_writer(OStream& sink) NOEXCEPT
 
 // protected
 // ----------------------------------------------------------------------------
+// Overide all seek/write operations.
 
 template <typename OStream>
 void hex_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
-    char chars[two];
+    BC_ASSERT(!is_null(data));
+    BC_ASSERT(!is_multiply_overflow(size, octet_width));
+
+    char chars[octet_width]{};
     const auto bytes = pointer_cast<uint8_t>(&chars[zero]);
 
     // Iteration avoids writing to dynamically-allocated buffer of size.
@@ -59,7 +63,7 @@ void hex_writer<OStream>::do_write_bytes(const uint8_t* data,
     {
         chars[0] = to_base16_hi_character(octet);
         chars[1] = to_base16_lo_character(octet);
-        base::do_write_bytes(bytes, two);
+        base::do_write_bytes(bytes, octet_width);
     });
 }
 

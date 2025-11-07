@@ -53,10 +53,10 @@ header::header(const std::string& base16) THROWS
 
 std::istream& operator>>(std::istream& stream, header& argument) THROWS
 {
-    std::string base16;
+    std::string base16{};
     stream >> base16;
 
-    data_chunk bytes;
+    data_chunk bytes{};
     if (!decode_base16(bytes, base16))
         throw istream_exception(base16);
 

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_IOSTREAM_IPP
 
 #include <algorithm>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -30,8 +31,7 @@ namespace system {
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 template <typename Character>
-template <typename Buffer>
-iostream<Character>::iostream(Buffer& buffer) NOEXCEPT
+iostream<Character>::iostream(const data_slab& buffer) NOEXCEPT
   : position_(buffer.data()),
     begin_(position_),
     end_(begin_ + buffer.size()),

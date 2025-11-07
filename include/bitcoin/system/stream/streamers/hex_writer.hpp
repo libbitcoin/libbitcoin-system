@@ -44,6 +44,7 @@ protected:
     template <class, template <class> class, class, class>
     friend class make_streamer;
 
+    /// Overide all write operations.
     void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
 };
 

@@ -216,6 +216,7 @@ protected:
     virtual void do_skip_bytes(size_t size) NOEXCEPT;
     virtual void do_rewind_bytes(size_t size) NOEXCEPT;
     virtual bool get_exhausted() const NOEXCEPT;
+    virtual bool limited(size_t size) const NOEXCEPT;
 
 private:
     bool valid() const NOEXCEPT;

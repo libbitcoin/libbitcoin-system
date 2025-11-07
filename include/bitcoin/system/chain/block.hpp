@@ -54,11 +54,9 @@ public:
     block(const chain::header::cptr& header,
         const transactions_cptr& txs) NOEXCEPT;
 
-    block(stream::in::fast&& stream, bool witness) NOEXCEPT;
+    block(const data_slice& data, bool witness) NOEXCEPT;
     block(stream::in::fast& stream, bool witness) NOEXCEPT;
-    block(std::istream&& stream, bool witness) NOEXCEPT;
     block(std::istream& stream, bool witness) NOEXCEPT;
-    block(reader&& source, bool witness) NOEXCEPT;
     block(reader& source, bool witness) NOEXCEPT;
 
     /// Operators.
@@ -150,6 +148,8 @@ public:
     code populate_with_metadata(const context& ctx) const NOEXCEPT;
 
 protected:
+    block(stream::in::fast&& stream, bool witness) NOEXCEPT;
+    block(reader&& source, bool witness) NOEXCEPT;
     block(const chain::header::cptr& header,
         const chain::transactions_cptr& txs, bool valid) NOEXCEPT;
 

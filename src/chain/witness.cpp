@@ -62,6 +62,12 @@ witness::witness(const chunk_cptrs& stack) NOEXCEPT
 {
 }
 
+witness::witness(const data_slice& data, bool prefix) NOEXCEPT
+  : witness(stream::in::fast(data), prefix)
+{
+}
+
+// protected
 witness::witness(stream::in::fast&& stream, bool prefix) NOEXCEPT
   : witness(read::bytes::fast(stream), prefix)
 {
@@ -69,11 +75,6 @@ witness::witness(stream::in::fast&& stream, bool prefix) NOEXCEPT
 
 witness::witness(stream::in::fast& stream, bool prefix) NOEXCEPT
   : witness(read::bytes::fast(stream), prefix)
-{
-}
-
-witness::witness(std::istream&& stream, bool prefix) NOEXCEPT
-  : witness(read::bytes::istream(stream), prefix)
 {
 }
 
@@ -87,6 +88,7 @@ witness::witness(reader&& source, bool prefix) NOEXCEPT
 {
 }
 
+// protected
 witness::witness(reader& source, bool prefix) NOEXCEPT
   : stack_(source.get_arena()), annex_()
 {

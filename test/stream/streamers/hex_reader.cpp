@@ -44,7 +44,7 @@ static std::string expected_base16() NOEXCEPT
     return hex;
 }
 
-BOOST_AUTO_TEST_CASE(hex_reader__stream__genesis_block__expected)
+BOOST_AUTO_TEST_CASE(hex_reader__stream__genesis_header__expected)
 {
     std::istringstream hex{ expected_base16() };
     read::base16::istream hexer{ hex };
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(hex_reader__stream__genesis_block__expected)
     BOOST_REQUIRE(header == genesis().header());
 }
 
-BOOST_AUTO_TEST_CASE(hex_reader__fast__genesis_block__expected)
+BOOST_AUTO_TEST_CASE(hex_reader__fast__genesis_header_expected)
 {
     const auto hex = to_chunk(expected_base16());
     stream::in::fast stream{ hex };
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(hex_reader__fast__genesis_block__expected)
     BOOST_REQUIRE(header == genesis().header());
 }
 
-BOOST_AUTO_TEST_CASE(hex_reader__copy__genesis_block__expected)
+BOOST_AUTO_TEST_CASE(hex_reader__copy__genesis_header__expected)
 {
     const auto hex = to_chunk(expected_base16());
     read::base16::copy hexer{ hex };

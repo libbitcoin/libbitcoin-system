@@ -55,11 +55,9 @@ public:
     point(hash_digest&& hash, uint32_t index) NOEXCEPT;
     point(const hash_digest& hash, uint32_t index) NOEXCEPT;
 
-    point(stream::in::fast&& stream) NOEXCEPT;
+    point(const data_slice& data) NOEXCEPT;
     point(stream::in::fast& stream) NOEXCEPT;
-    point(std::istream&& stream) NOEXCEPT;
     point(std::istream& stream) NOEXCEPT;
-    point(reader&& source) NOEXCEPT;
     point(reader& source) NOEXCEPT;
 
     /// Operators.
@@ -87,6 +85,8 @@ public:
     bool is_null() const NOEXCEPT;
 
 protected:
+    point(stream::in::fast&& stream) NOEXCEPT;
+    point(reader&& source) NOEXCEPT;
     point(hash_digest&& hash, uint32_t index, bool valid) NOEXCEPT;
     point(const hash_digest& hash, uint32_t index, bool valid) NOEXCEPT;
 

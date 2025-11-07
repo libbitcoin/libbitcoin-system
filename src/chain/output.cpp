@@ -67,6 +67,12 @@ output::output(uint64_t value, const chain::script::cptr& script) NOEXCEPT
 {
 }
 
+output::output(const data_slice& data) NOEXCEPT
+  : output(stream::in::fast(data))
+{
+}
+
+// protected
 output::output(stream::in::fast&& stream) NOEXCEPT
   : output(read::bytes::fast(stream))
 {
@@ -77,16 +83,12 @@ output::output(stream::in::fast& stream) NOEXCEPT
 {
 }
 
-output::output(std::istream&& stream) NOEXCEPT
-  : output(read::bytes::istream(stream))
-{
-}
-
 output::output(std::istream& stream) NOEXCEPT
   : output(read::bytes::istream(stream))
 {
 }
 
+// protected
 output::output(reader&& source) NOEXCEPT
   : output(source)
 {

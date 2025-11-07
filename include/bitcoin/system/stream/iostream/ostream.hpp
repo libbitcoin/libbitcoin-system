@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_OSTREAM_HPP
 
 #include <ios>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -47,8 +48,7 @@ public:
     static constexpr iostate badbit  = 4;
 
     /// Construct the object.
-    template <typename Buffer>
-    ostream(Buffer& buffer) NOEXCEPT;
+    ostream(const data_slab& buffer) NOEXCEPT;
     ostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return state flags.

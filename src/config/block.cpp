@@ -51,17 +51,17 @@ block::block(const std::string& base16) THROWS
 
 std::string block::to_string() const NOEXCEPT
 {
-    std::stringstream value;
+    std::stringstream value{};
     value << *this;
     return value.str();
 }
 
 std::istream& operator>>(std::istream& stream, block& argument) THROWS
 {
-    std::string base16;
+    std::string base16{};
     stream >> base16;
 
-    data_chunk bytes;
+    data_chunk bytes{};
     if (!decode_base16(bytes, base16))
         throw istream_exception(base16);
 

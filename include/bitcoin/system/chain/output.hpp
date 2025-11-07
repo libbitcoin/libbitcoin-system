@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -49,11 +50,9 @@ public:
     output(uint64_t value, const chain::script& script) NOEXCEPT;
     output(uint64_t value, const chain::script::cptr& script) NOEXCEPT;
 
-    output(stream::in::fast&& stream) NOEXCEPT;
+    output(const data_slice& data) NOEXCEPT;
     output(stream::in::fast& stream) NOEXCEPT;
-    output(std::istream&& stream) NOEXCEPT;
     output(std::istream& stream) NOEXCEPT;
-    output(reader&& source) NOEXCEPT;
     output(reader& source) NOEXCEPT;
 
     /// Operators.
@@ -95,6 +94,8 @@ public:
     const hash_digest& get_hash() const NOEXCEPT;
 
 protected:
+    output(stream::in::fast&& stream) NOEXCEPT;
+    output(reader&& source) NOEXCEPT;
     output(uint64_t value, const chain::script::cptr& script,
         bool valid) NOEXCEPT;
 

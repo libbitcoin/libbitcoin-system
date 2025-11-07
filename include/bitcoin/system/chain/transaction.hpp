@@ -26,6 +26,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -70,11 +71,9 @@ public:
     transaction(uint32_t version, const inputs_cptr& inputs,
         const outputs_cptr& outputs, uint32_t locktime) NOEXCEPT;
 
-    transaction(stream::in::fast&& stream, bool witness) NOEXCEPT;
+    transaction(const data_slice& data, bool witness) NOEXCEPT;
     transaction(stream::in::fast& stream, bool witness) NOEXCEPT;
-    transaction(std::istream&& stream, bool witness) NOEXCEPT;
     transaction(std::istream& stream, bool witness) NOEXCEPT;
-    transaction(reader&& source, bool witness) NOEXCEPT;
     transaction(reader& source, bool witness) NOEXCEPT;
 
     /// Operators.
@@ -173,6 +172,8 @@ public:
     code confirm(const context& ctx) const NOEXCEPT;
 
 protected:
+    transaction(stream::in::fast&& stream, bool witness) NOEXCEPT;
+    transaction(reader&& source, bool witness) NOEXCEPT;
     transaction(uint32_t version, const inputs_cptr& inputs,
         const outputs_cptr& outputs, uint32_t locktime, bool segregated,
         bool valid) NOEXCEPT;

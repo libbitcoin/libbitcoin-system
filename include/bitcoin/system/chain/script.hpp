@@ -102,11 +102,9 @@ public:
     script(operations&& ops) NOEXCEPT;
     script(const operations& ops) NOEXCEPT;
 
-    script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
+    script(const data_slice& data, bool prefix) NOEXCEPT;
     script(stream::in::fast& stream, bool prefix) NOEXCEPT;
-    script(std::istream&& stream, bool prefix) NOEXCEPT;
     script(std::istream& stream, bool prefix) NOEXCEPT;
-    script(reader&& source, bool prefix) NOEXCEPT;
     script(reader& source, bool prefix) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
@@ -167,6 +165,8 @@ public:
     size_t signature_operations(bool accurate) const NOEXCEPT;
 
 protected:
+    script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
+    script(reader&& source, bool prefix) NOEXCEPT;
     script(const operations& ops, bool valid, bool easier, bool failer,
         bool roller, size_t size) NOEXCEPT;
 

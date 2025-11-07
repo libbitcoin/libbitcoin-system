@@ -55,11 +55,9 @@ public:
     witness(chunk_cptrs&& stack) NOEXCEPT;
     witness(const chunk_cptrs& stack) NOEXCEPT;
 
-    witness(stream::in::fast&& stream, bool prefix) NOEXCEPT;
+    witness(const data_slice& data, bool prefix) NOEXCEPT;
     witness(stream::in::fast& stream, bool prefix) NOEXCEPT;
-    witness(std::istream&& stream, bool prefix) NOEXCEPT;
     witness(std::istream& stream, bool prefix) NOEXCEPT;
-    witness(reader&& source, bool prefix) NOEXCEPT;
     witness(reader& source, bool prefix) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
@@ -120,6 +118,8 @@ public:
         chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT;
 
 protected:
+    witness(stream::in::fast&& stream, bool prefix) NOEXCEPT;
+    witness(reader&& source, bool prefix) NOEXCEPT;
     witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;
     witness(const chunk_cptrs& stack, bool valid) NOEXCEPT;
     witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT;
