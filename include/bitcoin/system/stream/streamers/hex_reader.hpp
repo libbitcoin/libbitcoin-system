@@ -45,7 +45,15 @@ protected:
     template <class, template <class> class, class, class>
     friend class make_streamer;
 
+    /// Overide all read operations.
     void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
+    uint8_t do_peek_byte() NOEXCEPT override;
+
+    /// Overide all seek operations.
+    void set_limit(size_t size) NOEXCEPT override;
+    void do_skip_bytes(size_t size) NOEXCEPT override;
+    void do_rewind_bytes(size_t size) NOEXCEPT override;
+    size_t get_read_position() NOEXCEPT override;
 };
 
 } // namespace system

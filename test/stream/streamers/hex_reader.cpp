@@ -44,7 +44,7 @@ static std::string expected_base16() NOEXCEPT
     return hex;
 }
 
-BOOST_AUTO_TEST_CASE(hex_reader__stream__genesis_block__expected)
+BOOST_AUTO_TEST_CASE(hex_reader__stream__genesis_header__expected)
 {
     std::istringstream hex{ expected_base16() };
     read::base16::istream hexer{ hex };
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(hex_reader__stream__genesis_block__expected)
     BOOST_REQUIRE(header == genesis().header());
 }
 
-BOOST_AUTO_TEST_CASE(hex_reader__fast__genesis_block__expected)
+BOOST_AUTO_TEST_CASE(hex_reader__fast__genesis_header_expected)
 {
     const auto hex = to_chunk(expected_base16());
     stream::in::fast stream{ hex };
@@ -63,13 +63,51 @@ BOOST_AUTO_TEST_CASE(hex_reader__fast__genesis_block__expected)
     BOOST_REQUIRE(header == genesis().header());
 }
 
-BOOST_AUTO_TEST_CASE(hex_reader__copy__genesis_block__expected)
+BOOST_AUTO_TEST_CASE(hex_reader__copy__genesis_header__expected)
 {
     const auto hex = to_chunk(expected_base16());
     read::base16::copy hexer{ hex };
     chain::header header{ hexer };
     BOOST_REQUIRE(hexer);
     BOOST_REQUIRE(header == genesis().header());
+}
+
+// verify seek using full tx parse (scripts use position/skip/rewind/peek).
+
+static const data_slice hex
+{
+    "0100000000000000000000000000000000000000000000000000000000000000"
+    "000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa"
+    "4b1e5e4a29ab5f49ffff001d1dac2b7c01010000000100000000000000000000"
+    "00000000000000000000000000000000000000000000ffffffff4d04ffff001d"
+    "0104455468652054696d65732030332f4a616e2f32303039204368616e63656c"
+    "6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f75742066"
+    "6f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe554827"
+    "1967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4"
+    "f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000"
+};
+
+BOOST_AUTO_TEST_CASE(hex_reader__fast_stream__genesis_block__expected)
+{
+    stream::in::fast source{ hex };
+    read::base16::fast hexer{ source };
+    const chain::block block{ hexer, true };
+    BOOST_REQUIRE(block == genesis());
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__copy_stream__genesis_block__expected)
+{
+    read::base16::copy hexer{ hex };
+    const chain::block block{ hexer, true };
+    BOOST_REQUIRE(block == genesis());
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__istream_stream__genesis_block__expected)
+{
+    std::istringstream stream{ hex.to_string() };
+    read::base16::istream hexer{ stream };
+    const chain::block block{ hexer, true };
+    BOOST_REQUIRE(block == genesis());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

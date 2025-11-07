@@ -48,8 +48,7 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 // ----------------------------------------------------------------------------
 
 block::block() NOEXCEPT
-  : block(to_shared<chain::header>(), to_shared<transaction_cptrs>(),
-      false)
+  : block(to_shared<chain::header>(), to_shared<transaction_cptrs>(), false)
 {
 }
 
@@ -71,6 +70,12 @@ block::block(const chain::header::cptr& header,
 {
 }
 
+block::block(const data_slice& data, bool witness) NOEXCEPT
+  : block(stream::in::fast(data), witness)
+{
+}
+
+// protected
 block::block(stream::in::fast&& stream, bool witness) NOEXCEPT
   : block(read::bytes::fast(stream), witness)
 {
@@ -81,16 +86,12 @@ block::block(stream::in::fast& stream, bool witness) NOEXCEPT
 {
 }
 
-block::block(std::istream&& stream, bool witness) NOEXCEPT
-  : block(read::bytes::istream(stream), witness)
-{
-}
-
 block::block(std::istream& stream, bool witness) NOEXCEPT
   : block(read::bytes::istream(stream), witness)
 {
 }
 
+// protected
 block::block(reader&& source, bool witness) NOEXCEPT
   : block(source, witness)
 {

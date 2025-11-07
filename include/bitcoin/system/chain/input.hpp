@@ -26,6 +26,7 @@
 #include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -66,11 +67,9 @@ public:
     input(const chain::point::cptr& point, const chain::script::cptr& script,
         const chain::witness::cptr& witness, uint32_t sequence) NOEXCEPT;
 
-    input(stream::in::fast&& stream) NOEXCEPT;
+    input(const data_slice& data) NOEXCEPT;
     input(stream::in::fast& stream) NOEXCEPT;
-    input(std::istream&& stream) NOEXCEPT;
     input(std::istream& stream) NOEXCEPT;
-    input(reader&& source) NOEXCEPT;
     input(reader& source) NOEXCEPT;
 
     /// Operators.
@@ -118,6 +117,8 @@ public:
         uint32_t median_time_past) const NOEXCEPT;
 
 protected:
+    input(stream::in::fast&& stream) NOEXCEPT;
+    input(reader&& source) NOEXCEPT;
     input(const chain::point::cptr& point, const chain::script::cptr& script,
         const chain::witness::cptr& witness, uint32_t sequence,
         bool valid) NOEXCEPT;

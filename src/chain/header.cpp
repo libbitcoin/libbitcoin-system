@@ -59,6 +59,12 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 {
 }
 
+header::header(const data_slice& data) NOEXCEPT
+  : header(stream::in::fast(data))
+{
+}
+
+// protected
 header::header(stream::in::fast&& stream) NOEXCEPT
   : header(read::bytes::fast(stream))
 {
@@ -69,16 +75,12 @@ header::header(stream::in::fast& stream) NOEXCEPT
 {
 }
 
-header::header(std::istream&& stream) NOEXCEPT
-  : header(read::bytes::istream(stream))
-{
-}
-
 header::header(std::istream& stream) NOEXCEPT
   : header(read::bytes::istream(stream))
 {
 }
 
+// protected
 header::header(reader&& source) NOEXCEPT
   : header(source)
 {

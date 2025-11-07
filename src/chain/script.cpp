@@ -97,7 +97,13 @@ script::script(const operations& ops) NOEXCEPT
   : script(from_operations(ops))
 {
 }
+    
+script::script(const data_slice& data, bool prefix) NOEXCEPT
+  : script(stream::in::fast(data), prefix)
+{
+}
 
+// protected
 script::script(stream::in::fast&& stream, bool prefix) NOEXCEPT
   : script(read::bytes::fast(stream), prefix)
 {
@@ -108,16 +114,12 @@ script::script(stream::in::fast& stream, bool prefix) NOEXCEPT
 {
 }
 
-script::script(std::istream&& stream, bool prefix) NOEXCEPT
-  : script(read::bytes::istream(stream), prefix)
-{
-}
-
 script::script(std::istream& stream, bool prefix) NOEXCEPT
   : script(read::bytes::istream(stream), prefix)
 {
 }
 
+// protected
 script::script(reader&& source, bool prefix) NOEXCEPT
   : script(source, prefix)
 {

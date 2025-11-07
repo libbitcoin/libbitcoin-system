@@ -63,11 +63,9 @@ public:
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce) NOEXCEPT;
 
-    header(stream::in::fast&& stream) NOEXCEPT;
+    header(const data_slice& data) NOEXCEPT;
     header(stream::in::fast& stream) NOEXCEPT;
-    header(std::istream&& stream) NOEXCEPT;
     header(std::istream& stream) NOEXCEPT;
-    header(reader&& source) NOEXCEPT;
     header(reader& source) NOEXCEPT;
 
     /// Operators.
@@ -122,6 +120,8 @@ public:
     code accept(const context& ctx) const NOEXCEPT;
 
 protected:
+    header(stream::in::fast&& stream) NOEXCEPT;
+    header(reader&& source) NOEXCEPT;
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, bool valid) NOEXCEPT;

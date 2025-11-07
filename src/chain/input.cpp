@@ -139,6 +139,12 @@ input::input(const chain::point::cptr& point, const chain::script::cptr& script,
 {
 }
 
+input::input(const data_slice& data) NOEXCEPT
+  : input(stream::in::fast(data))
+{
+}
+
+// protected
 input::input(stream::in::fast&& stream) NOEXCEPT
   : input(read::bytes::fast(stream))
 {
@@ -149,16 +155,12 @@ input::input(stream::in::fast& stream) NOEXCEPT
 {
 }
 
-input::input(std::istream&& stream) NOEXCEPT
-  : input(read::bytes::istream(stream))
-{
-}
-
 input::input(std::istream& stream) NOEXCEPT
   : input(read::bytes::istream(stream))
 {
 }
 
+// protected
 input::input(reader&& source) NOEXCEPT
   : input(source)
 {

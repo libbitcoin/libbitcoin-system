@@ -129,6 +129,12 @@ operation::operation(const chunk_cptr& push_data, bool minimal) NOEXCEPT
 {
 }
 
+operation::operation(const data_slice& data) NOEXCEPT
+  : operation(stream::in::fast(data))
+{
+}
+
+// protected
 operation::operation(stream::in::fast&& stream) NOEXCEPT
   : operation(read::bytes::fast(stream))
 {
@@ -139,16 +145,12 @@ operation::operation(stream::in::fast& stream) NOEXCEPT
 {
 }
 
-operation::operation(std::istream&& stream) NOEXCEPT
-  : operation(read::bytes::istream(stream))
-{
-}
-
 operation::operation(std::istream& stream) NOEXCEPT
   : operation(read::bytes::istream(stream))
 {
 }
 
+// protected
 operation::operation(reader&& source) NOEXCEPT
   : operation(source)
 {

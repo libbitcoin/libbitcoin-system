@@ -144,8 +144,11 @@ public:
     /// Clear invalid state and set absolute position.
     virtual void set_position(size_t absolute) NOEXCEPT = 0;
 
-    /// Limit stream upper bound to current position plus size (default resets).
-    virtual void set_limit(size_t size=max_size_t) NOEXCEPT = 0;
+    /// Unlimit stream upper bound.
+    virtual void set_limit() NOEXCEPT = 0;
+
+    /// Limit stream upper bound to current position plus size.
+    virtual void set_limit(size_t size) NOEXCEPT = 0;
 
     /// Invalidate the stream.
     virtual void invalidate() NOEXCEPT = 0;

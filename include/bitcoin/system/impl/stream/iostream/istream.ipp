@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_ISTREAM_IPP
 
 #include <algorithm>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -30,8 +31,7 @@ BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 
 template <typename Character>
-template <typename Buffer>
-istream<Character>::istream(const Buffer& buffer) NOEXCEPT
+istream<Character>::istream(const data_slice& buffer) NOEXCEPT
   : position_(buffer.data()),
     begin_(position_),
     end_(begin_ + buffer.size()),

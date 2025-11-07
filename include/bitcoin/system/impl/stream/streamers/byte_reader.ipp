@@ -631,6 +631,12 @@ size_t byte_reader<IStream>::get_read_position() NOEXCEPT
 }
 
 template <typename IStream>
+void byte_reader<IStream>::set_limit() NOEXCEPT
+{
+    limit(system::maximum<size_t>);
+}
+
+template <typename IStream>
 void byte_reader<IStream>::set_limit(size_t size) NOEXCEPT
 {
     limit(size);
@@ -767,6 +773,13 @@ bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
     stream_->clear();
 
     return eof;
+}
+
+template <typename IStream>
+bool byte_reader<IStream>::limited(size_t size) const NOEXCEPT
+{
+    // This exposes limits to asymmetrical derived readers, such as hex_reader.
+    return size > remaining_;
 }
 
 // private

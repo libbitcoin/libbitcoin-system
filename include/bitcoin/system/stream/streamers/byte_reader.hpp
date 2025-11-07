@@ -178,8 +178,11 @@ public:
     /// Clear invalid state and set absolute position.
     void set_position(size_t absolute) NOEXCEPT override;
 
-    /// Limit stream upper bound to current position plus size (default resets).
-    void set_limit(size_t size=max_size_t) NOEXCEPT override;
+    /// Unlimit stream upper bound.
+    virtual void set_limit() NOEXCEPT override;
+
+    /// Limit stream upper bound to current position plus size.
+    virtual void set_limit(size_t size) NOEXCEPT override;
 
     /// Invalidate the stream.
     void invalidate() NOEXCEPT override;
@@ -216,6 +219,7 @@ protected:
     virtual void do_skip_bytes(size_t size) NOEXCEPT;
     virtual void do_rewind_bytes(size_t size) NOEXCEPT;
     virtual bool get_exhausted() const NOEXCEPT;
+    virtual bool limited(size_t size) const NOEXCEPT;
 
 private:
     bool valid() const NOEXCEPT;

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_READER_IPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 
@@ -51,24 +52,29 @@ hex_reader<IStream>::hex_reader(IStream& source,
 
 // protected
 // ----------------------------------------------------------------------------
+// Overide all seek/read/limit operations.
 
 template <typename IStream>
 void hex_reader<IStream>::do_read_bytes(uint8_t* buffer,
     size_t size) NOEXCEPT
 {
-    if (!is_even(size))
+    BC_ASSERT(!is_null(buffer));
+    
+    // Scale for hex pairs and check limit.
+    if (is_multiply_overflow(size, octet_width) ||
+        this->limited(size * octet_width))
     {
         this->invalidate();
         return;
     }
 
-    char chars[two];
+    char chars[octet_width]{};
     const auto bytes = pointer_cast<uint8_t>(&chars[zero]);
 
     // Iteration avoids writing to dynamically-allocated buffer of size.
     for (auto octet = buffer; octet < std::next(buffer, size); ++octet)
     {
-        base::do_read_bytes(bytes, two);
+        base::do_read_bytes(bytes, octet_width);
         if (!is_base16(chars[0]) || !is_base16(chars[1]))
         {
             this->invalidate();
@@ -77,6 +83,59 @@ void hex_reader<IStream>::do_read_bytes(uint8_t* buffer,
 
         *octet = from_base16_characters(chars[0], chars[1]);
     }
+}
+
+template <typename IStream>
+uint8_t hex_reader<IStream>::do_peek_byte() NOEXCEPT
+{
+    uint8_t octet{};
+    do_read_bytes(&octet, sizeof(octet));
+    do_rewind_bytes(sizeof(octet));
+    return octet;
+}
+
+template <typename IStream>
+void hex_reader<IStream>::do_skip_bytes(size_t size) NOEXCEPT
+{
+    if (is_multiply_overflow(size, octet_width) ||
+        this->limited(size * octet_width))
+    {
+        this->invalidate();
+        return;
+    }
+
+    base::do_skip_bytes(size * octet_width);
+}
+
+template <typename IStream>
+void hex_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
+{
+    if (is_multiply_overflow(size, octet_width))
+    {
+        this->invalidate();
+        return;
+    }
+
+    base::do_rewind_bytes(size * octet_width);
+}
+
+template <typename IStream>
+size_t hex_reader<IStream>::get_read_position() NOEXCEPT
+{
+    // Position continues to represent logical bytes, so can be differenced.
+    return base::get_read_position() / octet_width;
+}
+
+template <typename IStream>
+void hex_reader<IStream>::set_limit(size_t size) NOEXCEPT
+{
+    if (is_multiply_overflow(size, octet_width))
+    {
+        this->invalidate();
+        return;
+    }
+
+    base::set_limit(size * octet_width);
 }
 
 } // namespace system
