@@ -52,18 +52,13 @@ hex_reader<IStream>::hex_reader(IStream& source,
 
 // protected
 // ----------------------------------------------------------------------------
-// Overide all seek/read operations.
+// Overide all seek/read/limit operations.
 
 template <typename IStream>
 void hex_reader<IStream>::do_read_bytes(uint8_t* buffer,
     size_t size) NOEXCEPT
 {
     BC_ASSERT(!is_null(buffer));
-    if (!is_even(size))
-    {
-        this->invalidate();
-        return;
-    }
     
     // Scale for hex pairs and check limit.
     if (is_multiply_overflow(size, octet_width) ||
@@ -127,7 +122,20 @@ void hex_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
 template <typename IStream>
 size_t hex_reader<IStream>::get_read_position() NOEXCEPT
 {
+    // Position continues to represent logical bytes, so can be differenced.
     return base::get_read_position() / octet_width;
+}
+
+template <typename IStream>
+void hex_reader<IStream>::set_limit(size_t size) NOEXCEPT
+{
+    if (is_multiply_overflow(size, octet_width))
+    {
+        this->invalidate();
+        return;
+    }
+
+    base::set_limit(size * octet_width);
 }
 
 } // namespace system

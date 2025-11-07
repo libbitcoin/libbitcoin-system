@@ -50,6 +50,7 @@ protected:
     uint8_t do_peek_byte() NOEXCEPT override;
 
     /// Overide all seek operations.
+    void set_limit(size_t size) NOEXCEPT override;
     void do_skip_bytes(size_t size) NOEXCEPT override;
     void do_rewind_bytes(size_t size) NOEXCEPT override;
     size_t get_read_position() NOEXCEPT override;
