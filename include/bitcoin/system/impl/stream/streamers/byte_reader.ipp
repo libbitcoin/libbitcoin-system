@@ -631,6 +631,12 @@ size_t byte_reader<IStream>::get_read_position() NOEXCEPT
 }
 
 template <typename IStream>
+void byte_reader<IStream>::set_limit() NOEXCEPT
+{
+    limit(system::maximum<size_t>);
+}
+
+template <typename IStream>
 void byte_reader<IStream>::set_limit(size_t size) NOEXCEPT
 {
     limit(size);
