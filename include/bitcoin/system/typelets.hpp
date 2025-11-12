@@ -151,6 +151,18 @@ template <typename Larger, typename Smaller, size_t Lanes = one,
     ////std::enable_if_t<Lanes <= (max_size_t / size_of<Smaller>()), bool> = true>
 constexpr size_t capacity = size_of<Larger>() / (Lanes * size_of<Smaller>());
 
+/// std::tuple decay elements.
+/// ---------------------------------------------------------------------------
+
+template <typename Tuple>
+struct decay_tuple;
+
+template <typename ...Args>
+struct decay_tuple<std::tuple<Args...>>
+{
+    using type = std::tuple<std::decay_t<Args>...>;
+};
+
 /// uintx_t detection.
 /// ---------------------------------------------------------------------------
 
