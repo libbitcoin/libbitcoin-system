@@ -417,6 +417,62 @@ static_assert(size_of<std_array<const volatile std_array<std_array<uint32_t, 42>
 static_assert(size_of<std_array<std_array<const volatile std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
 static_assert(size_of<const volatile std_array<const volatile std_array<const volatile std_array<uint32_t, 42>, 24>, 8>&>() == sizeof(uint32_t) * 42 * 24 * 8);
 
+// std::tuple.
+// ----------------------------------------------------------------------------
+// is_same_type decays individual types (but not tuple elements).
+
+static_assert(!is_tuple<uint8_t>);
+static_assert(!is_tuple<std::string>);
+static_assert(!is_tuple<std::array<uint8_t, 42>>);
+static_assert( is_tuple<std::tuple<int, bool>>);
+static_assert( is_tuple<std::tuple<>>);
+static_assert( is_same_type<decltype(is_tuple<std_array<uint8_t, 0>>), const bool>);
+static_assert( is_same_type<decltype(is_tuple<std::tuple<int, bool>&>), const bool>);
+
+using test_tuple = std::tuple<int&, bool&&, const std::string&>;
+static_assert( is_same_type<decay_tuple<test_tuple>, decay_tuple<test_tuple>>);
+static_assert(!is_same_type<test_tuple, decay_tuple<test_tuple>>);
+static_assert(!is_same_type<decay_tuple<test_tuple>, test_tuple>);
+
+static_assert(!std::is_same_v<std::tuple_element<0, test_tuple>::type, int>);
+static_assert(!std::is_same_v<std::tuple_element<1, test_tuple>::type, bool>);
+static_assert(!std::is_same_v<std::tuple_element<2, test_tuple>::type, std::string>);
+
+static_assert(!std::is_same_v<std::tuple_element<0, test_tuple>::type, const int>);
+static_assert(!std::is_same_v<std::tuple_element<1, test_tuple>::type, const bool>);
+static_assert(!std::is_same_v<std::tuple_element<2, test_tuple>::type, const std::string>);
+
+static_assert( std::is_same_v<std::tuple_element<0, test_tuple>::type, int&>);
+static_assert(!std::is_same_v<std::tuple_element<1, test_tuple>::type, bool&>);
+static_assert(!std::is_same_v<std::tuple_element<2, test_tuple>::type, std::string&>);
+
+static_assert(!std::is_same_v<std::tuple_element<0, test_tuple>::type, int&&>);
+static_assert( std::is_same_v<std::tuple_element<1, test_tuple>::type, bool&&>);
+static_assert(!std::is_same_v<std::tuple_element<2, test_tuple>::type, std::string&&>);
+
+using normal_test_tuple = std::tuple<int, bool, std::string>;
+using decayed_test_tuple = decay_tuple<test_tuple>::type;
+static_assert(is_same_type<normal_test_tuple, decayed_test_tuple>);
+
+static_assert(std::is_same_v<std::tuple_element<0, decayed_test_tuple>::type, int>);
+static_assert(std::is_same_v<std::tuple_element<1, decayed_test_tuple>::type, bool>);
+static_assert(std::is_same_v<std::tuple_element<2, decayed_test_tuple>::type, std::string>);
+
+static_assert(!std::is_same_v<std::tuple_element<0, decayed_test_tuple>::type, const int>);
+static_assert(!std::is_same_v<std::tuple_element<1, decayed_test_tuple>::type, const bool>);
+static_assert(!std::is_same_v<std::tuple_element<2, decayed_test_tuple>::type, const std::string>);
+
+static_assert(!std::is_same_v<std::tuple_element<0, decayed_test_tuple>::type, int&>);
+static_assert(!std::is_same_v<std::tuple_element<1, decayed_test_tuple>::type, bool&>);
+static_assert(!std::is_same_v<std::tuple_element<2, decayed_test_tuple>::type, std::string&>);
+
+static_assert(!std::is_same_v<std::tuple_element<0, decayed_test_tuple>::type, int&&>);
+static_assert(!std::is_same_v<std::tuple_element<1, decayed_test_tuple>::type, bool&&>);
+static_assert(!std::is_same_v<std::tuple_element<2, decayed_test_tuple>::type, std::string&&>);
+
+// is_uintx
+// ----------------------------------------------------------------------------
+
 static_assert(is_uintx<uint5_t>);
 static_assert(is_uintx<uint11_t>);
 static_assert(is_uintx<uint48_t>);

@@ -645,6 +645,12 @@ static_assert(is_defined<if_integral_array<std_array<uint8_t, 0>>>);
 ////static_assert(!is_defined<if_integral_array<std_array<base, 0>>>);
 ////static_assert(!is_defined<if_integral_array<uint8_t>>);
 
+static_assert(is_defined<if_tuple<std::tuple<>>>);
+static_assert(is_defined<if_tuple<std::tuple<uint8_t, bool>>>);
+////static_assert(!is_defined<if_tuple<std_array<uint8_t, 0>>>);
+////static_assert(!is_defined<if_tuple<uint8_t>>);
+////static_assert(!is_defined<if_tuple<bool>>);
+
 static_assert(is_defined<if_byte_insertable<std::string>>);
 static_assert(is_defined<if_byte_insertable<std::vector<uint8_t>>>);
 static_assert(is_defined<if_byte_insertable<std_vector<uint8_t>>>);

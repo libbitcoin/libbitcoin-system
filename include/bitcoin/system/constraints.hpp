@@ -259,7 +259,7 @@ template <typename Integer>
 using if_floating_point = bool_if<
     is_floating_point<Integer>>;
 
-/// std::array/std::vector
+/// std::array/std::vector/std::tuple
 
 template <typename Type>
 using if_std_array = bool_if<
@@ -273,6 +273,10 @@ template <typename Type>
 using if_integral_array = bool_if<
     is_std_array<Type> &&
     is_integral_integer<typename Type::value_type>>;
+
+template <typename Type>
+using if_tuple = bool_if<
+    is_tuple<Type>>;
 
 template <typename Type>
 using if_byte_insertable = bool_if<
