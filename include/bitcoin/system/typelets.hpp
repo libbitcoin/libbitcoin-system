@@ -97,7 +97,7 @@ constexpr size_t bits = to_bits(sizeof(Type));
 template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
 
-/// std_array.
+/// std_array/std_vector.
 /// ---------------------------------------------------------------------------
 
 template<typename>
@@ -140,7 +140,7 @@ constexpr size_t size_of()
 
     // Type constraint fails to match as throw is not constexpr.
     if (count > (std::numeric_limits<size_t>::max() / size))
-        throw overflow_exception("type contraint violated");
+        throw overflow_exception("type constraint violated");
 
     return size * count;
 }
@@ -151,8 +151,15 @@ template <typename Larger, typename Smaller, size_t Lanes = one,
     ////std::enable_if_t<Lanes <= (max_size_t / size_of<Smaller>()), bool> = true>
 constexpr size_t capacity = size_of<Larger>() / (Lanes * size_of<Smaller>());
 
-/// std::tuple decay elements.
+/// std::tuple.
 /// ---------------------------------------------------------------------------
+
+template <typename, typename = void>
+struct is_tuple_t : std::false_type {};
+template <typename ...Args>
+struct is_tuple_t<std::tuple<Args...>> : std::true_type {};
+template<typename Type>
+constexpr bool is_tuple = is_tuple_t<Type>::value;
 
 template <typename Tuple>
 struct decay_tuple;

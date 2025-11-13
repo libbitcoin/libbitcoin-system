@@ -417,10 +417,17 @@ static_assert(size_of<std_array<const volatile std_array<std_array<uint32_t, 42>
 static_assert(size_of<std_array<std_array<const volatile std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
 static_assert(size_of<const volatile std_array<const volatile std_array<const volatile std_array<uint32_t, 42>, 24>, 8>&>() == sizeof(uint32_t) * 42 * 24 * 8);
 
-
-// std::tuple decay elements.
+// std::tuple.
 // ----------------------------------------------------------------------------
 // is_same_type decays individual types (but not tuple elements).
+
+static_assert(!is_tuple<uint8_t>);
+static_assert(!is_tuple<std::string>);
+static_assert(!is_tuple<std::array<uint8_t, 42>>);
+static_assert( is_tuple<std::tuple<int, bool>>);
+static_assert( is_tuple<std::tuple<>>);
+static_assert( is_same_type<decltype(is_tuple<std_array<uint8_t, 0>>), const bool>);
+static_assert( is_same_type<decltype(is_tuple<std::tuple<int, bool>&>), const bool>);
 
 using test_tuple = std::tuple<int&, bool&&, const std::string&>;
 static_assert( is_same_type<decay_tuple<test_tuple>, decay_tuple<test_tuple>>);
