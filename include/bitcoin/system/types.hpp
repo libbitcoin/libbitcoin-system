@@ -186,20 +186,26 @@ template <size_t Size>
 class text_t
 {
 public:
-    std::array<uint8_t, Size - 1> data;
     CONSTEVAL text_t(const char (&string)[Size]) noexcept
-      : data(to_array(string)) {}
+      : data(to_array(string))
+    {
+    }
+
+    const std::array<uint8_t, Size - 1> data;
 
 private:
     static CONSTEVAL auto to_array(const char(&string)[Size]) noexcept
     {
-        std::array<uint8_t, Size - 1> data{};
-        for (size_t index = 0; index < Size - 1; ++index)
-            data.at(index) = string[index];
+        std::array<uint8_t, Size - 1> out{};
+        for (size_t index{}; index < Size - 1; ++index)
+            out[index] = string[index];
 
-        return data;
+        return out;
     }
 };
+
+template <size_t Size>
+text_t(const char(&)[Size]) noexcept -> text_t<Size>;
 
 template <size_t Size, typename Byte,
     std::enable_if_t<std::is_same_v<Byte, char>, bool> = true>
