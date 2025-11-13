@@ -130,7 +130,7 @@ BC_POP_WARNING()
 /// Text representations.
 /// ---------------------------------------------------------------------------
 
-template <text_t Text>
+template <data_t Text>
 CONSTEVAL auto operator "" _array() noexcept
 {
     return Text.data;

@@ -183,18 +183,18 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 template <size_t Size>
-class text_t
+class data_t
 {
 public:
-    CONSTEVAL text_t(const char (&string)[Size]) noexcept
-      : data(to_array(string))
+    CONSTEVAL data_t(const char (&string)[Size]) noexcept
+      : data(to_data(string))
     {
     }
 
     const std::array<uint8_t, Size - 1> data;
 
 private:
-    static CONSTEVAL auto to_array(const char(&string)[Size]) noexcept
+    static CONSTEVAL auto to_data(const char(&string)[Size]) noexcept
     {
         std::array<uint8_t, Size - 1> out{};
         for (size_t index{}; index < Size - 1; ++index)
@@ -203,6 +203,31 @@ private:
         return out;
     }
 };
+
+template <size_t Size>
+class text_t
+{
+public:
+    CONSTEVAL text_t(const char (&string)[Size]) noexcept
+      : text(to_text(string))
+    {
+    }
+
+    const std::array<char, Size - 1> text;
+
+private:
+    static CONSTEVAL auto to_text(const char(&string)[Size]) noexcept
+    {
+        std::array<char, Size - 1> out{};
+        for (size_t index{}; index < Size - 1; ++index)
+            out[index] = string[index];
+
+        return out;
+    }
+};
+
+template <size_t Size>
+data_t(const char(&)[Size]) noexcept -> data_t<Size>;
 
 template <size_t Size>
 text_t(const char(&)[Size]) noexcept -> text_t<Size>;
