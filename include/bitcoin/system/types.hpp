@@ -205,6 +205,9 @@ private:
 };
 
 template <size_t Size>
+data_t(const char(&)[Size]) noexcept -> data_t<Size>;
+
+template <size_t Size>
 class text_t
 {
 public:
@@ -225,9 +228,6 @@ private:
         return out;
     }
 };
-
-template <size_t Size>
-data_t(const char(&)[Size]) noexcept -> data_t<Size>;
 
 template <size_t Size>
 text_t(const char(&)[Size]) noexcept -> text_t<Size>;
