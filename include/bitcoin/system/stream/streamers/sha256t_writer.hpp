@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
     
 /// A tagged hash writer that accepts an ostream.
-template <text_t Tag, typename OStream = std::ostream>
+template <data_t Tag, typename OStream = std::ostream>
 class sha256t_writer
   : public byte_writer<OStream>
 {

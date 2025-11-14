@@ -30,20 +30,20 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 // protected
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 sha256t_writer<Tag, OStream>::sha256t_writer() NOEXCEPT
   : base(),
     context_(midstate(), one)
 {
 }
 
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 sha256t_writer<Tag, OStream>::sha256t_writer(OStream& sink) NOEXCEPT
   : base(sink), context_(midstate(), one)
 {
 }
 
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 sha256t_writer<Tag, OStream>::~sha256t_writer() NOEXCEPT
 {
     // Derived virtual destructor called before base destructor.
@@ -53,7 +53,7 @@ sha256t_writer<Tag, OStream>::~sha256t_writer() NOEXCEPT
 // protected
 // ----------------------------------------------------------------------------
 
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 void sha256t_writer<Tag, OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
@@ -62,7 +62,7 @@ void sha256t_writer<Tag, OStream>::do_write_bytes(const uint8_t* data,
     context_.write(size, data);
 }
 
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 void sha256t_writer<Tag, OStream>::do_flush() NOEXCEPT
 {
     flusher();
@@ -73,7 +73,7 @@ void sha256t_writer<Tag, OStream>::do_flush() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 constexpr sha256::state_t sha256t_writer<Tag, OStream>::midstate() NOEXCEPT
 {
     // Cache midstate of tagged hash part that does not change for a given tag.
@@ -85,7 +85,7 @@ constexpr sha256::state_t sha256t_writer<Tag, OStream>::midstate() NOEXCEPT
 
 // Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
 // The stream could invalidate, but writers shouldn't have to check this.
-template <text_t Tag, typename OStream>
+template <data_t Tag, typename OStream>
 void sha256t_writer<Tag, OStream>::flusher() NOEXCEPT
 {
     hash_digest hash{};

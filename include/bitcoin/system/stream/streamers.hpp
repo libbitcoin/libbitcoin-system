@@ -231,23 +231,23 @@ namespace hash
     namespace sha256t
     {
         /// A hash writer that writes a tagged sha256 hash to a std::ostream.
-        template <text_t Tag>
+        template <data_t Tag>
         using ostream = sha256t_writer<Tag, std::ostream>;
 
         /// A fast hash writer that writes a tagged sha256 hash to a system::ostream.
-        template <text_t Tag>
+        template <data_t Tag>
         using fast = sha256t_writer<Tag, system::ostream<>>;
 
         /////// A hash writer that copies a tagged sha256 hash to a data_slab.
-        ////template <text_t Tag>
+        ////template <data_t Tag>
         ////using copy = make_streamer<copy_sink<data_slab>, tag<Tag, sha256t_writer>::type>;
 
         /////// A hash writer that inserts a tagged sha256 hash into a container.
-        ////template <text_t Tag, typename Container>
+        ////template <data_t Tag, typename Container>
         ////using push = make_streamer<push_sink<Container>, tag<Tag, sha256t_writer>::type>;
-        ////template <text_t Tag>
+        ////template <data_t Tag>
         ////using text = push<Tag, std::string>;
-        ////template <text_t Tag>
+        ////template <data_t Tag>
         ////using data = push<Tag, data_chunk>;
     }
 }
