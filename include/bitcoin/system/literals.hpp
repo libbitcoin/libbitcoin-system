@@ -118,10 +118,16 @@ BC_POP_WARNING()
 /// Text representations.
 /// ---------------------------------------------------------------------------
 
-template <data_t Text>
-CONSTEVAL auto operator "" _array() noexcept
+template <data_t Data>
+CONSTEVAL auto operator "" _a() noexcept
 {
-    return Text.data;
+    return Data.data;
+}
+
+template <text_t Text>
+CONSTEVAL auto operator "" _t() noexcept
+{
+    return Text.text;
 }
 
 /// Integer representations.
