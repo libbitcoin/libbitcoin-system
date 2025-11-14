@@ -112,18 +112,6 @@ CONSTEVAL Domain negative(integer_type value) noexcept(false)
     return static_cast<Domain>(~narrowed + narrow{1});
 }
 
-template <size_t Size>
-struct string_holder
-{
-    char str[Size];
-
-    CONSTEVAL string_holder(const char(&string)[Size]) noexcept
-    {
-        for (size_t i = 0; i < Size; ++i)
-            str[i] = string[i];
-    }
-};
-
 BC_POP_WARNING()
 BC_POP_WARNING()
 

@@ -191,7 +191,6 @@ public:
     {
     }
 
-    CONSTEVAL bool operator==(const data_t&) const noexcept = default;
     const std::array<uint8_t, Size - 1> data;
 
 private:
@@ -214,7 +213,6 @@ public:
     {
     }
 
-    CONSTEVAL bool operator==(const text_t&) const noexcept = default;
     const std::array<char, Size - 1> text;
 
 private:
