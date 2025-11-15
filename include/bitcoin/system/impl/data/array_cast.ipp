@@ -35,13 +35,13 @@ BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 
 // Helper to extract Index parameter pack from std::make_index_sequence<Size>.
 template<typename Integer, size_t Size, size_t... Index>
-CONSTEVAL auto to_array(std::index_sequence<Index...>) NOEXCEPT
+consteval auto to_array(std::index_sequence<Index...>) NOEXCEPT
 {
     return std_array<Integer, Size>{ { Index... } };
 }
 
 template<typename Integer, size_t Size>
-CONSTEVAL std_array<Integer, Size> to_sequence() NOEXCEPT
+consteval std_array<Integer, Size> to_sequence() NOEXCEPT
 {
     return to_array<Integer, Size>(std::make_index_sequence<Size>{});
 }

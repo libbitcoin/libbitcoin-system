@@ -37,7 +37,7 @@ namespace sha {
 
 TEMPLATE
 template<size_t Blocks>
-CONSTEVAL typename CLASS::buffer_t CLASS::
+consteval typename CLASS::buffer_t CLASS::
 scheduled_pad() NOEXCEPT
 {
     // This precomputed padding is limited to one word of counter.
@@ -150,7 +150,7 @@ pad_block() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::chunk_t CLASS::
+consteval typename CLASS::chunk_t CLASS::
 chunk_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
@@ -163,7 +163,7 @@ chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::pad_t CLASS::
+consteval typename CLASS::pad_t CLASS::
 stream_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.

@@ -103,7 +103,7 @@ BC_POP_WARNING()
 
 // protected/static
 TEMPLATE
-CONSTEVAL typename CLASS::block_t
+consteval typename CLASS::block_t
 hmac<Algorithm>::
 inner_pad() NOEXCEPT
 {
@@ -116,7 +116,7 @@ inner_pad() NOEXCEPT
 
 // protected/static
 TEMPLATE
-CONSTEVAL typename CLASS::block_t
+consteval typename CLASS::block_t
 hmac<Algorithm>::
 outer_pad() NOEXCEPT
 {

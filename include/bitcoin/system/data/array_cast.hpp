@@ -44,7 +44,7 @@ namespace system {
 
 /// Generate array sequence from [0..sub1(Size)] of Integer.
 template<typename Integer, size_t Size>
-CONSTEVAL std_array<Integer, Size> to_sequence() NOEXCEPT;
+consteval std_array<Integer, Size> to_sequence() NOEXCEPT;
 
 /// Non-function alias for to_sequence().
 template <typename Integer, size_t Size>

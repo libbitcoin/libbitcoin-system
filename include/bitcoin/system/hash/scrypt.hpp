@@ -97,7 +97,7 @@ protected:
     static inline bool romix(rblock_t& rblock) NOEXCEPT;
 
 private:
-    static CONSTEVAL auto& concurrency() NOEXCEPT;
+    static consteval auto& concurrency() NOEXCEPT;
 };
 
 /// Litecoin/BIP38 scrypt arguments.

@@ -70,10 +70,10 @@ protected:
     using offsets_t = std_array<type, screens>;
 
     /// Generate compression offsets at compile time.
-    static CONSTEVAL offsets_t generate_offsets() NOEXCEPT;
+    static consteval offsets_t generate_offsets() NOEXCEPT;
 
     /// Generate compressed mask table at compile time.
-    static CONSTEVAL masks_t generate_masks() NOEXCEPT;
+    static consteval masks_t generate_masks() NOEXCEPT;
 
     /// Read member compressed mask array as if it was a two-dimesional array.
     static constexpr type masks(size_t row, size_t column) NOEXCEPT;

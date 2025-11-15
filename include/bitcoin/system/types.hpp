@@ -186,7 +186,7 @@ template <size_t Size>
 class data_t
 {
 public:
-    CONSTEVAL data_t(const char (&string)[Size]) noexcept
+    consteval data_t(const char (&string)[Size]) noexcept
       : data(to_data(string))
     {
     }
@@ -194,7 +194,7 @@ public:
     const std::array<uint8_t, Size - 1> data;
 
 private:
-    static CONSTEVAL auto to_data(const char(&string)[Size]) noexcept
+    static consteval auto to_data(const char(&string)[Size]) noexcept
     {
         std::array<uint8_t, Size - 1> out{};
         for (size_t index{}; index < Size - 1; ++index)
@@ -211,7 +211,7 @@ template <size_t Size>
 class text_t
 {
 public:
-    CONSTEVAL text_t(const char (&string)[Size]) noexcept
+    consteval text_t(const char (&string)[Size]) noexcept
       : text(to_text(string))
     {
     }
@@ -219,7 +219,7 @@ public:
     const std::array<char, Size - 1> text;
 
 private:
-    static CONSTEVAL auto to_text(const char(&string)[Size]) noexcept
+    static consteval auto to_text(const char(&string)[Size]) noexcept
     {
         std::array<char, Size - 1> out{};
         for (size_t index{}; index < Size - 1; ++index)

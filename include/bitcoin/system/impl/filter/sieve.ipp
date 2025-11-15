@@ -171,7 +171,7 @@ constexpr CLASS::type CLASS::masks(size_t row, size_t column) NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::offsets_t CLASS::generate_offsets() NOEXCEPT
+consteval CLASS::offsets_t CLASS::generate_offsets() NOEXCEPT
 {
     // Generate compression offsets at compile, generally 16 or 32 elements.
     offsets_t offsets{};
@@ -184,7 +184,7 @@ CONSTEVAL CLASS::offsets_t CLASS::generate_offsets() NOEXCEPT
 // Logically sparse, e.g. 16 x 16 = 256 table of uint32_t (1024 bytes).
 // Compressed to one-dimensional 136 element array of uint32_t (544 bytes).
 TEMPLATE
-CONSTEVAL CLASS::masks_t CLASS::generate_masks() NOEXCEPT
+consteval CLASS::masks_t CLASS::generate_masks() NOEXCEPT
 {
     constexpr auto off = generate_offsets();
 

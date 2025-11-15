@@ -41,7 +41,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-CONSTEVAL auto& CLASS::
+consteval auto& CLASS::
 concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)

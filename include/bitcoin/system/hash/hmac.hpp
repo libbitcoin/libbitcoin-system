@@ -50,8 +50,8 @@ protected:
     using byte_t = typename Algorithm::byte_t;
     using block_t = typename Algorithm::block_t;
 
-    static CONSTEVAL block_t inner_pad() NOEXCEPT;
-    static CONSTEVAL block_t outer_pad() NOEXCEPT;
+    static consteval block_t inner_pad() NOEXCEPT;
+    static consteval block_t outer_pad() NOEXCEPT;
     static constexpr block_t& xor_n(block_t& pad, const byte_t* from,
         size_t size) NOEXCEPT;
 

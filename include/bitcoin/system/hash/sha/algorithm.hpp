@@ -236,7 +236,7 @@ protected:
     INLINE static constexpr auto extract(Word a) NOEXCEPT;
 
     template<size_t Round, typename Auto>
-    static CONSTEVAL auto functor() NOEXCEPT;
+    static consteval auto functor() NOEXCEPT;
 
     template <size_t Round>
     INLINE static constexpr void round(auto a, auto& b, auto c, auto d,
@@ -286,7 +286,7 @@ protected:
 
     /// Scheduled padding (new and existing buffer objects).
     template <size_t Blocks>
-    static CONSTEVAL buffer_t scheduled_pad() NOEXCEPT;
+    static consteval buffer_t scheduled_pad() NOEXCEPT;
     template <size_t Blocks>
     static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
     static constexpr void schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT;
@@ -295,8 +295,8 @@ protected:
     /// Unscheduled padding (new objects).
     template <size_t Bytes>
     static constexpr void simple_pad(block_t& block) NOEXCEPT;
-    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
-    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
+    static consteval chunk_t chunk_pad() NOEXCEPT;
+    static consteval pad_t stream_pad() NOEXCEPT;
     static words_t pad_block() NOEXCEPT;
     static words_t pad_blocks(count_t blocks) NOEXCEPT;
 
