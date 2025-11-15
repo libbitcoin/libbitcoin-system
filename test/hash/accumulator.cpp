@@ -81,7 +81,7 @@ struct accessor
         return base::pad_size();
     }
 
-    static CONSTEVAL typename base::block_t stream_pad_() NOEXCEPT
+    static consteval typename base::block_t stream_pad_() NOEXCEPT
     {
         return base::stream_pad();
     }

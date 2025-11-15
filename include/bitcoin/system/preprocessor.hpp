@@ -222,11 +222,6 @@
 /// using poolstl, do not include <execution>.
 #include <bitcoin/system/execution.hpp>
 
-/// C++20 (partial)
-#if defined(HAVE_CONSTEVAL)
-    #define CONSTEVAL consteval
-#else
-    #define CONSTEVAL constexpr
-#endif
+/// C++20 (full)
 
 #endif

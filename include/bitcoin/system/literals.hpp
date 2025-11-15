@@ -21,11 +21,6 @@
 
 #include <bitcoin/system/constants.hpp>
 
-// RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).
-#if !defined(HAVE_CONSTEVAL)
-    #define RUNTIME_LITERALS
-#endif
-
 namespace libbitcoin {
 
 /// This uses no libbitcoin utilities, so that it may have few dependencies and
@@ -46,21 +41,21 @@ using integer_type = unsigned long long int;
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer lower() noexcept
+consteval Integer lower() noexcept
 {
     return std::numeric_limits<Integer>::min();
 }
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer upper() noexcept
+consteval Integer upper() noexcept
 {
     return std::numeric_limits<Integer>::max();
 }
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept
+consteval std::make_unsigned_t<Integer> lower() noexcept
 {
     // unsigned(|signed_min|) = unsigned(signed_min) + 1.
     return static_cast<
@@ -70,7 +65,7 @@ CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept
+consteval std::make_unsigned_t<Integer> upper() noexcept
 {
     // unsigned(|signed_max|) = unsigned(signed_max).
     return static_cast<
@@ -80,7 +75,7 @@ CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept
 
 template <typename Domain, std::enable_if_t<
     std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain positive(integer_type value) noexcept(false)
+consteval Domain positive(integer_type value) noexcept(false)
 {
     using limit = std::make_unsigned_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
@@ -97,7 +92,7 @@ CONSTEVAL Domain positive(integer_type value) noexcept(false)
 
 template <typename Domain, std::enable_if_t<
     std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain negative(integer_type value) noexcept(false)
+consteval Domain negative(integer_type value) noexcept(false)
 {
     using limit = std::make_signed_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
@@ -119,13 +114,13 @@ BC_POP_WARNING()
 /// ---------------------------------------------------------------------------
 
 template <data_t Data>
-CONSTEVAL auto operator "" _a() noexcept
+consteval auto operator "" _a() noexcept
 {
     return Data.data;
 }
 
 template <text_t Text>
-CONSTEVAL auto operator "" _t() noexcept
+consteval auto operator "" _t() noexcept
 {
     return Text.text;
 }
@@ -142,10 +137,10 @@ CONSTEVAL auto operator "" _t() noexcept
 /// suffix, and there would be no reason to do so.
 
 #define DECLARE_INTEGER_LITERAL(name, sign, type) \
-CONSTEVAL type operator "" name(integer_type value) noexcept \
+consteval type operator "" name(integer_type value) noexcept \
 { return sign<type>(value); }
 
-/// Literals suppress exception, causing runtime abort if !defined(CONSTEVAL).
+/// Literals suppress exception, causing runtime abort if !defined(consteval).
 /// This precludes unnecessary warning on each literal in noexcept functions.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 

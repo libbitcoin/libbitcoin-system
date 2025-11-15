@@ -263,27 +263,6 @@
     #define HAVE_CPP20
 #endif
 
-// Support for C++20 features we use varies.
-// en.cppreference.com/w/cpp/compiler_support
-// These are based on the compiler versions we test with, shown below.
-#if defined(HAVE_CPP20)
-    // All versions.
-    #if defined(HAVE_MSC)
-        #define HAVE_CONSTEVAL
-    #elif defined(HAVE_CLANG)
-        // Apple clang version 15
-        #if defined(HAVE_APPLE)
-            #define HAVE_CONSTEVAL
-        // Ubuntu clang version 16
-        #else
-            ////#define HAVE_CONSTEVAL (v17)
-        #endif
-    // gcc version 12
-    #elif defined(HAVE_GNUC)
-        #define HAVE_CONSTEVAL
-    #endif
-#endif
-
 /// These are manually configured here.
 /// ---------------------------------------------------------------------------
 

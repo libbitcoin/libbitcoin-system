@@ -116,7 +116,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     template<size_t Round, typename Auto>
-    static CONSTEVAL auto functor() NOEXCEPT;
+    static consteval auto functor() NOEXCEPT;
 
     template<size_t Round>
     INLINE static constexpr auto round(auto& a, auto b, auto c, auto d,
@@ -148,9 +148,9 @@ private:
     using pad_t = std_array<word_t, subtract(RMD::block_words,
         count_bytes / RMD::word_bytes)>;
 
-    static CONSTEVAL words_t block_pad() NOEXCEPT;
-    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
-    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
+    static consteval words_t block_pad() NOEXCEPT;
+    static consteval chunk_t chunk_pad() NOEXCEPT;
+    static consteval pad_t stream_pad() NOEXCEPT;
 };
 
 } // namespace rmd

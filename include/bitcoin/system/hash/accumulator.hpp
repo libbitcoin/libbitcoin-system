@@ -154,9 +154,9 @@ protected:
     INLINE constexpr size_t pad_size() const NOEXCEPT;
 
     /// Precomputed streaming pad buffer and hashes for empty data.
-    static CONSTEVAL block_t stream_pad() NOEXCEPT;
-    static CONSTEVAL digest_t empty_single() NOEXCEPT;
-    static CONSTEVAL digest_t empty_double() NOEXCEPT;
+    static consteval block_t stream_pad() NOEXCEPT;
+    static consteval digest_t empty_single() NOEXCEPT;
+    static consteval digest_t empty_double() NOEXCEPT;
 
 private:
     size_t size_;

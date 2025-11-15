@@ -74,7 +74,7 @@ f4(auto x, auto y, auto z) NOEXCEPT
 
 TEMPLATE
 template<size_t Round, typename Auto>
-CONSTEVAL auto CLASS::
+consteval auto CLASS::
 functor() NOEXCEPT
 {
     using self = CLASS;
@@ -420,7 +420,7 @@ output(const state_t& state) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-CONSTEVAL typename CLASS::words_t CLASS::
+consteval typename CLASS::words_t CLASS::
 block_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
@@ -435,7 +435,7 @@ block_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::chunk_t CLASS::
+consteval typename CLASS::chunk_t CLASS::
 chunk_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
@@ -450,7 +450,7 @@ chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::pad_t CLASS::
+consteval typename CLASS::pad_t CLASS::
 stream_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.

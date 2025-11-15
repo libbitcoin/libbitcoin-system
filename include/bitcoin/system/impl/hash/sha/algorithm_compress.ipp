@@ -42,7 +42,7 @@ extract(Word a) NOEXCEPT
 
 TEMPLATE
 template<size_t Round, typename Auto>
-CONSTEVAL auto CLASS::
+consteval auto CLASS::
 functor() NOEXCEPT
 {
     using self = CLASS;

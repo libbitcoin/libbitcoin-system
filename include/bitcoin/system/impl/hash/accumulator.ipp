@@ -202,7 +202,7 @@ pad_size() const NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::block_t CLASS::
+consteval typename CLASS::block_t CLASS::
 stream_pad() NOEXCEPT
 {
     // Specifications call for set of first pad bit in the serialized form,
@@ -214,14 +214,14 @@ stream_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::digest_t CLASS::
+consteval typename CLASS::digest_t CLASS::
 empty_single() NOEXCEPT
 {
     return Algorithm::hash(std_array<block_t, zero>{});
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::digest_t CLASS::
+consteval typename CLASS::digest_t CLASS::
 empty_double() NOEXCEPT
 {
     static_assert(half_size == digest_size);
