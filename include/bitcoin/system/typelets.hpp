@@ -170,6 +170,9 @@ struct decay_tuple<std::tuple<Args...>>
     using type = std::tuple<std::decay_t<Args>...>;
 };
 
+template <size_t Size>
+using to_sequence = std::make_index_sequence<Size>;
+
 /// uintx_t detection.
 /// ---------------------------------------------------------------------------
 
