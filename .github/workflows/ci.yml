@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            cxx: "clang++-16"
+            cxx: "clang++-18"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
@@ -28,14 +28,14 @@ jobs:
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-16"
+            cc: "clang-18"
             flags: "-Og -fPIE"
             options: "--enable-isystem --enable-avx2 --enable-sse41"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-24.04
-            cxx: "clang++-16"
+            cxx: "clang++-18"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -45,7 +45,7 @@ jobs:
             icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-16"
+            cc: "clang-18"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-avx2"
             packager: "apt"
@@ -289,7 +289,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            cxx: "clang++-16"
+            cxx: "clang++-18"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
@@ -299,14 +299,14 @@ jobs:
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-16"
+            cc: "clang-18"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse41=on"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-24.04
-            cxx: "clang++-16"
+            cxx: "clang++-18"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -316,7 +316,7 @@ jobs:
             icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-16"
+            cc: "clang-18"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
@@ -574,7 +574,7 @@ jobs:
         include:
           - os: ubuntu-24.04
             preset: "nix-gnu-debug-shared"
-            cxx: "clang++-16"
+            cxx: "clang++-18"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
@@ -584,7 +584,7 @@ jobs:
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-16"
+            cc: "clang-18"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse41=on"
             packager: "apt"
@@ -592,7 +592,7 @@ jobs:
 
           - os: ubuntu-24.04
             preset: "nix-gnu-release-static"
-            cxx: "clang++-16"
+            cxx: "clang++-18"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -602,7 +602,7 @@ jobs:
             icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-16"
+            cc: "clang-18"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
