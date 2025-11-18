@@ -470,7 +470,36 @@ static_assert(!std::is_same_v<std::tuple_element<0, decayed_test_tuple>::type, i
 static_assert(!std::is_same_v<std::tuple_element<1, decayed_test_tuple>::type, bool&&>);
 static_assert(!std::is_same_v<std::tuple_element<2, decayed_test_tuple>::type, std::string&&>);
 
-// is_uintx
+static_assert( is_same_tuple<std::tuple<char* const&, double&&>, std::tuple<char*, double>>);
+static_assert(!is_same_tuple<std::tuple<int, double>, std::tuple<int, float>>);
+static_assert(!is_same_tuple<std::tuple<const char*>, std::tuple<int>>);
+static_assert(!is_same_tuple<std::tuple<int, double>, std::tuple<int>>);
+static_assert(!is_same_tuple<std::tuple<>, std::tuple<int>>);
+static_assert( is_same_tuple<std::tuple<>, std::tuple<>>);
+static_assert( is_same_tuple<std::tuple<int, double>, std::tuple<int, double>>);
+static_assert( is_same_tuple<std::tuple<int[5], void(*)(int)>, std::tuple<int*, void(*)(int)>>);
+static_assert(!is_same_tuple<std::tuple<char*, const char* const&>, std::tuple<char*, char*>>);
+
+static_assert( is_empty_tuple<std::tuple<>>);
+static_assert(!is_empty_tuple<std::tuple<bool>>);
+
+// std::shared_ptr<>
+// ----------------------------------------------------------------------------
+
+static_assert( is_shared_ptr<std::shared_ptr<int>>);
+static_assert(!is_shared_ptr<std::unique_ptr<int>>);
+static_assert(!is_shared_ptr<std::weak_ptr<int>>);
+static_assert(!is_shared_ptr<int*>);
+static_assert(!is_shared_ptr<int>);
+static_assert( is_shared_ptr<const std::shared_ptr<double>>);
+static_assert( is_shared_ptr<const std::shared_ptr<double>&>);
+static_assert( is_shared_ptr<std::shared_ptr<double> const&>);
+static_assert( is_shared_ptr<std::shared_ptr<std::string>>);
+static_assert( is_shared_ptr<std::shared_ptr<const std::string>>);
+static_assert( is_shared_ptr<std::shared_ptr<const std::string&>>);
+static_assert(!is_shared_ptr<std::vector<int>>);
+
+// uintx_t
 // ----------------------------------------------------------------------------
 
 static_assert(is_uintx<uint5_t>);

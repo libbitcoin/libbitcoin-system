@@ -163,12 +163,30 @@ constexpr bool is_tuple = is_tuple_t<Type>::value;
 
 template <typename Tuple>
 struct decay_tuple;
-
 template <typename ...Args>
 struct decay_tuple<std::tuple<Args...>>
 {
     using type = std::tuple<std::decay_t<Args>...>;
 };
+template <typename Tuple>
+using decay_tuple_t = typename decay_tuple<Tuple>::type;
+
+template <typename Left, typename Right>
+constexpr bool is_same_tuple = is_same_type<decay_tuple_t<Left>,
+    decay_tuple_t<Right>>;
+
+template <typename Tuple>
+constexpr bool is_empty_tuple = is_zero(std::tuple_size_v<Tuple>);
+
+/// std::shared_ptr<> detection.
+/// ---------------------------------------------------------------------------
+
+template <typename Type>
+struct is_shared_ptr_t : std::false_type {};
+template <typename Type>
+struct is_shared_ptr_t<std::shared_ptr<Type>> : std::true_type {};
+template <typename Type>
+constexpr bool is_shared_ptr = is_shared_ptr_t<std::decay_t<Type>>::value;
 
 /// uintx_t detection.
 /// ---------------------------------------------------------------------------
