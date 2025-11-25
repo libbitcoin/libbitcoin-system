@@ -278,13 +278,13 @@ constexpr type(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 template <class Type, class... Args> \
 constexpr type& assign(std::in_place_type_t<Type>, Args&&... args) NOEXCEPT \
 { \
-    inner.emplace<Type>(std::forward<Args>(args)...); \
+    inner.template emplace<Type>(std::forward<Args>(args)...); \
     return *this; \
 } \
 template <size_t Index, class... Args> \
 constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 { \
-    inner.emplace<Index>(std::forward<Args>(args)...); \
+    inner.template emplace<Index>(std::forward<Args>(args)...); \
     return *this; \
 }
 
@@ -292,7 +292,7 @@ constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 #define FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
 constexpr type& operator=(Alternative&& alternative) NOEXCEPT \
 { \
-    inner.emplace<Alternative>(std::forward<Alternative>(alternative)); \
+    inner.template emplace<Alternative>(std::forward<Alternative>(alternative)); \
     return *this; \
 } 
 
