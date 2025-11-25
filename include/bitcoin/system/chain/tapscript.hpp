@@ -35,7 +35,7 @@ public:
 
     DEFAULT_COPY_MOVE_DESTRUCT(tapscript);
     
-    inline static bool is_control(const data_chunk& control) NOEXCEPT;
+    static inline bool is_control(const data_chunk& control) NOEXCEPT;
 
     inline tapscript(chunk_cptr&& control) NOEXCEPT;
     inline tapscript(const chunk_cptr& control) NOEXCEPT;
