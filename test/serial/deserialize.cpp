@@ -73,6 +73,7 @@ BOOST_AUTO_TEST_CASE(deserialize__uint8__uint8__base10)
     BOOST_REQUIRE_EQUAL(out, 0u);
     BOOST_REQUIRE(deserialize(out, "255"));
     BOOST_REQUIRE_EQUAL(out, 0xff);
+    BOOST_REQUIRE(!deserialize(out, "256"));
 }
 
 BOOST_AUTO_TEST_CASE(deserialize__uint8__uchar__base10)
@@ -359,6 +360,24 @@ BOOST_AUTO_TEST_CASE(deserialize__uint16__min_max__true)
     BOOST_REQUIRE(deserialize(out, "0"));
     BOOST_REQUIRE_EQUAL(out, 0u);
     BOOST_REQUIRE(deserialize(out, "65535"));
+    BOOST_REQUIRE_EQUAL(out, 0xffff);
+}
+
+BOOST_AUTO_TEST_CASE(deserialize__uint16__min_max_leading_zeros__true)
+{
+    uint16_t out;
+    BOOST_REQUIRE(deserialize(out, "000"));
+    BOOST_REQUIRE_EQUAL(out, 0u);
+    BOOST_REQUIRE(deserialize(out, "0065535"));
+    BOOST_REQUIRE_EQUAL(out, 0xffff);
+}
+
+BOOST_AUTO_TEST_CASE(deserialize__uint16__min_max_padded__true)
+{
+    uint16_t out;
+    BOOST_REQUIRE(deserialize(out, " 0 "));
+    BOOST_REQUIRE_EQUAL(out, 0u);
+    BOOST_REQUIRE(deserialize(out, " 65535 "));
     BOOST_REQUIRE_EQUAL(out, 0xffff);
 }
 
