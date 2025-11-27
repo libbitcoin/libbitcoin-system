@@ -294,7 +294,16 @@ constexpr type& operator=(Alternative&& alternative) NOEXCEPT \
 { \
     inner.template emplace<Alternative>(std::forward<Alternative>(alternative)); \
     return *this; \
-} 
+}
+
+/// Generate operator= overloads forwarding assignment for a specific alt type.
+#define ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
+FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
+constexpr type& operator=(const Alternative& alternative) NOEXCEPT \
+{ \
+    inner = alternative; \
+    return *this; \
+}
 
 /// Argument placeholders.
 /// ---------------------------------------------------------------------------
