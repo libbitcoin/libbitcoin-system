@@ -33,6 +33,14 @@ bool is_ascii(const std::string_view& text) NOEXCEPT
     return std::all_of(text.begin(), text.end(), is_ascii_character);
 }
 
+bool is_ascii_alphabet(const std::string_view& text) NOEXCEPT
+{
+    if (text.empty())
+        return true;
+
+    return std::all_of(text.begin(), text.end(), is_ascii_alpha);
+}
+
 bool is_ascii_numeric(const std::string_view& text) NOEXCEPT
 {
     if (text.empty())

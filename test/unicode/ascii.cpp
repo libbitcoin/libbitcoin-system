@@ -328,6 +328,30 @@ BOOST_AUTO_TEST_CASE(ascii__is_ascii_numeric__decimal_numeric__false)
     BOOST_REQUIRE(!is_ascii_numeric("-.42"));
 }
 
+// is_ascii_alphabet
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alphabet__empty__true)
+{
+    BOOST_REQUIRE(is_ascii_alphabet(""));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alphabet__numeric__false)
+{
+    BOOST_REQUIRE(!is_ascii_alphabet("0123456789"));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alphabet__alphabet_true)
+{
+    BOOST_REQUIRE(is_ascii_alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alphabet__padded_alphabet_false)
+{
+    BOOST_REQUIRE(!is_ascii_alphabet(" abc"));
+    BOOST_REQUIRE(!is_ascii_alphabet("abc "));
+    BOOST_REQUIRE(!is_ascii_alphabet(" abc "));
+}
+
 // ascii_to_lower
 
 BOOST_AUTO_TEST_CASE(ascii__ascii_to_lower__empty__empty)
