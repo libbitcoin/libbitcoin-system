@@ -88,6 +88,7 @@
         #define USE_CONST 26496
         #define USE_CONSTEXPR_FOR_FUNCTION 26497
         #define NO_USE_OF_MOVED_OBJECT 26800
+        #define NO_INCOMPLETE_SWITCH 26818
         #define UNSATISFIED_EXPECTATION 28020
     #endif
 #else
