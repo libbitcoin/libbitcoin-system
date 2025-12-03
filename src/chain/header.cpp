@@ -386,6 +386,8 @@ DEFINE_JSON_FROM_TAG(header)
 {
     value =
     {
+        // hash is meta property
+        { "hash", encode_hash(instance.hash()) },
         { "version", instance.version() },
         { "previous", encode_hash(instance.previous_block_hash()) },
         { "merkle_root", encode_hash(instance.merkle_root()) },

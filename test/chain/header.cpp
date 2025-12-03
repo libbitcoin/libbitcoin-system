@@ -353,6 +353,7 @@ BOOST_AUTO_TEST_CASE(header__json__conversions__expected)
     const std::string text
     {
         "{"
+            "\"hash\":\"d5b1048b2dcb443dd79a15e54de994fa18620d1d99250f2a4123660c68dea664\","
             "\"version\":42,"
             "\"previous\":\"0000000000000000000000000000000000000000000000000000000000000000\","
             "\"merkle_root\":\"0000000000000000000000000000000000000000000000000000000000000001\","

@@ -969,6 +969,8 @@ DEFINE_JSON_FROM_TAG(transaction)
 {
     value =
     {
+        // hash is meta property
+        { "hash", encode_hash(instance.hash(false)) },
         { "version", instance.version() },
         { "inputs", value_from(*instance.inputs_ptr()) },
         { "outputs", value_from(*instance.outputs_ptr()) },
