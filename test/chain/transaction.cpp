@@ -1504,6 +1504,7 @@ BOOST_AUTO_TEST_CASE(transaction__json__conversions__expected)
     const std::string text
     {
         "{"
+            "\"hash\":\"6d74f0162f9c7a3be99cb60cca0c658f3e19fb3462f4c9731d5a0b7495183335\","
             "\"version\":42,"
             "\"inputs\":"
             "["
