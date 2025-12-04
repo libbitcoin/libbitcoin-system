@@ -386,7 +386,7 @@ DEFINE_JSON_FROM_TAG(header)
 {
     value =
     {
-        // hash is meta property
+        // hash is computed property
         { "hash", encode_hash(instance.hash()) },
         { "version", instance.version() },
         { "previous", encode_hash(instance.previous_block_hash()) },
