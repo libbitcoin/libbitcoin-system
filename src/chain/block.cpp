@@ -671,13 +671,17 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
 
 uint64_t block::fees() const NOEXCEPT
 {
+    if (txs_->empty())
+        return {};
+
     // Overflow returns max_uint64.
     const auto value = [](uint64_t total, const auto& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->fee());
     };
 
-    return std::accumulate(txs_->begin(), txs_->end(), uint64_t{}, value);
+    return std::accumulate(std::next(txs_->begin()), txs_->end(),
+        uint64_t{}, value);
 }
 
 uint64_t block::claim() const NOEXCEPT
