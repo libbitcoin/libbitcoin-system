@@ -52,7 +52,6 @@ template <typename OStream>
 void hex_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
-    BC_ASSERT(!is_null(data));
     BC_ASSERT(!is_multiply_overflow(size, octet_width));
 
     char chars[octet_width]{};
