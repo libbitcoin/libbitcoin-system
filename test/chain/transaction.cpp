@@ -425,7 +425,7 @@ BOOST_AUTO_TEST_CASE(transaction__fee__empty__zero)
     BOOST_REQUIRE_EQUAL(instance.fee(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__fee__default_input__max_uint64)
+BOOST_AUTO_TEST_CASE(transaction__fee__default_input__zero)
 {
     const transaction instance
     {
@@ -435,8 +435,7 @@ BOOST_AUTO_TEST_CASE(transaction__fee__default_input__max_uint64)
         0
     };
 
-    // floored_subtract(max_uint64, 0)
-    BOOST_REQUIRE_EQUAL(instance.fee(), max_uint64);
+    BOOST_REQUIRE_EQUAL(instance.fee(), zero);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__fee__default_output__zero)
@@ -449,17 +448,16 @@ BOOST_AUTO_TEST_CASE(transaction__fee__default_output__zero)
         0
     };
 
-    // floored_subtract(0, max_uint64)
     BOOST_REQUIRE_EQUAL(instance.fee(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
+BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__prevouts_minus_outputs)
 {
     constexpr uint64_t value0 = 123;
     constexpr uint64_t value1 = 321;
-    constexpr uint64_t claim0 = 11;
-    constexpr uint64_t claim1 = 11;
-    constexpr uint64_t claim2 = 22;
+    constexpr uint64_t spend0 = 11;
+    constexpr uint64_t spend1 = 11;
+    constexpr uint64_t spend2 = 22;
 
     input input0;
     input input1;
@@ -471,41 +469,41 @@ BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
         0,
         { input0, input1 },
         {
-            { claim0, script{} },
-            { claim1, script{} },
-            { claim2, script{} }
+            { spend0, script{} },
+            { spend1, script{} },
+            { spend2, script{} }
         },
         0
     };
 
-    // floored_subtract(values, claims)
-    BOOST_REQUIRE_EQUAL(instance.fee(), value0 + value1 - claim0 - claim1 - claim2);
+    // floored_subtract(values, spend)
+    BOOST_REQUIRE_EQUAL(instance.fee(), value0 + value1 - spend0 - spend1 - spend2);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__claim__empty_outputs__zero)
+BOOST_AUTO_TEST_CASE(transaction__spend__empty_outputs__zero)
 {
     transaction instance;
-    BOOST_REQUIRE_EQUAL(instance.claim(), 0u);
+    BOOST_REQUIRE_EQUAL(instance.spend(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__claim__two_outputs__sum)
+BOOST_AUTO_TEST_CASE(transaction__spend__two_outputs__sum)
 {
-    const uint64_t claim0 = 123;
-    const uint64_t claim1 = 321;
+    constexpr uint64_t spend0{ 123 };
+    constexpr uint64_t spend1{ 321 };
     const transaction instance
     {
         0,
         {},
         {
-            { claim0, script{} },
-            { claim1, script{} }
+            { spend0, script{} },
+            { spend1, script{} }
         },
         0
     };
 
 
-    // ceilinged_add(claim0, claim1)
-    BOOST_REQUIRE_EQUAL(instance.claim(), claim0 + claim1);
+    // ceilinged_add(spend0, spend1)
+    BOOST_REQUIRE_EQUAL(instance.spend(), spend0 + spend1);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__value__no_inputs__zero)
@@ -514,7 +512,7 @@ BOOST_AUTO_TEST_CASE(transaction__value__no_inputs__zero)
     BOOST_REQUIRE_EQUAL(instance.value(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__value__default_input2__max_uint64)
+BOOST_AUTO_TEST_CASE(transaction__value__default_input2__zero)
 {
     transaction instance
     {
@@ -524,14 +522,13 @@ BOOST_AUTO_TEST_CASE(transaction__value__default_input2__max_uint64)
         0
     };
 
-    // ceilinged_add(max_uint64, max_uint64)
-    BOOST_REQUIRE_EQUAL(instance.value(), max_uint64);
+    BOOST_REQUIRE_EQUAL(instance.value(), zero);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
 {
-    constexpr uint64_t value0 = 123;
-    constexpr uint64_t value1 = 321;
+    constexpr uint64_t value0{ 123 };
+    constexpr uint64_t value1{ 321 };
 
     const input input0;
     const input input1;
