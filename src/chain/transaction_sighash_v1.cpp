@@ -41,17 +41,17 @@ namespace chain {
 
 // static
 // Zero-based opcode position of the last executed op_codeseparator before
-// currently executed signature opcode (0xffffffff if none) [bip342].
+// currently executed signature opcode (0xffffffff if none) [bip342]. Previous
+// versions require the next opcode, but this requires the position. Since the
+// op_codeseparator implementation sets offset to next, it must be decremented.
 uint32_t transaction::subscript_v1(const script& script) NOEXCEPT
 {
     if (script.ops().empty())
         return chain::default_separators;
 
-    const auto start = script.ops().begin();
-    const auto span = std::distance(start, script.offset);
-    const auto slot = possible_narrow_and_sign_cast<uint32_t>(span);
-    const auto none = is_zero(slot) && start->code() != opcode::codeseparator;
-    return none ? chain::default_separators : slot;
+    const auto next = std::distance(script.ops().begin(), script.offset);
+    return is_zero(next) ? chain::default_separators :
+        possible_narrow_and_sign_cast<uint32_t>(sub1(next));
 }
 
 // ext_flags and annex flag are combined into one byte, who knows why.
