@@ -105,7 +105,7 @@ public:
     /// Computed properties.
     size_t weight() const NOEXCEPT;
     uint64_t fee() const NOEXCEPT;
-    uint64_t claim() const NOEXCEPT;
+    uint64_t spend() const NOEXCEPT;
     uint64_t value() const NOEXCEPT;
     bool is_coinbase() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;

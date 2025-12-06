@@ -347,8 +347,8 @@ const outputs_cptr& transaction::outputs_ptr() const NOEXCEPT
 uint64_t transaction::fee() const NOEXCEPT
 {
     // Underflow returns zero (and is_overspent() will be true).
-    // This is value of prevouts spent by inputs minus that claimed by outputs.
-    return floored_subtract(value(), claim());
+    // The value of prevouts referenced by inputs minus that spent by outputs.
+    return floored_subtract(value(), spend());
 }
 
 // Methods.
@@ -650,7 +650,22 @@ bool transaction::is_missing_prevouts() const NOEXCEPT
     return std::any_of(inputs_->begin(), inputs_->end(), missing);
 }
 
-uint64_t transaction::claim() const NOEXCEPT
+// The value() is the sum of own inputs.
+uint64_t transaction::value() const NOEXCEPT
+{
+    // Overflow returns max_uint64. Not populated/coinbase return zero.
+    const auto sum = [](uint64_t total, const auto& input) NOEXCEPT
+    {
+        const auto value = input->prevout ? input->prevout->value() : zero;
+        return ceilinged_add(total, value);
+    };
+
+    // The amount referenced by inputs.
+    return std::accumulate(inputs_->begin(), inputs_->end(), 0_u64, sum);
+}
+
+// The spend() is the sum of own outputs.
+uint64_t transaction::spend() const NOEXCEPT
 {
     // Overflow returns max_uint64.
     const auto sum = [](uint64_t total, const auto& output) NOEXCEPT
@@ -658,28 +673,16 @@ uint64_t transaction::claim() const NOEXCEPT
         return ceilinged_add(total, output->value());
     };
 
-    // The amount claimed by outputs.
+    // The amount spent by outputs.
     return std::accumulate(outputs_->begin(), outputs_->end(), 0_u64, sum);
 }
 
-uint64_t transaction::value() const NOEXCEPT
-{
-    // Overflow, not populated, and coinbase (default) return max_uint64.
-    const auto sum = [](uint64_t total, const auto& input) NOEXCEPT
-    {
-        const auto value = input->prevout ? input->prevout->value() : max_uint64;
-        return ceilinged_add(total, value);
-    };
-
-    // The amount of prevouts (referenced by inputs).
-    return std::accumulate(inputs_->begin(), inputs_->end(), 0_u64, sum);
-}
-
+// Overspent is invalid (spend exceeds value), while underspent is the fee().
 bool transaction::is_overspent() const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    return claim() > value();
+    return spend() > value();
 }
 
 constexpr bool is_non_coinbase_mature(size_t tx_height, size_t height) NOEXCEPT

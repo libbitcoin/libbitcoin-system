@@ -669,26 +669,25 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
 
 // Prevouts required.
 
+// The fees() is the sum of all transaction fees (coinbase is zero).
 uint64_t block::fees() const NOEXCEPT
 {
-    if (txs_->empty())
-        return {};
-
     // Overflow returns max_uint64.
     const auto value = [](uint64_t total, const auto& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->fee());
     };
 
-    return std::accumulate(std::next(txs_->begin()), txs_->end(),
-        uint64_t{}, value);
+    return std::accumulate(txs_->begin(), txs_->end(), 0_u64, value);
 }
 
+// The claim() is the spend of the coinbase transaction.
 uint64_t block::claim() const NOEXCEPT
 {
-    return txs_->empty() ? zero : txs_->front()->value();
+    return txs_->empty() ? zero : txs_->front()->spend();
 }
 
+// The reward() is the sum of all transaction.fee() and the block subsidy.
 uint64_t block::reward(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
