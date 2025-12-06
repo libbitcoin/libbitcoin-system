@@ -264,7 +264,7 @@ DEFINE_JSON_FROM_TAG(output)
     value =
     {
         { "value", instance.value() },
-        { "script", value_from(instance.script()) },
+        { "script", value_from(instance.script()) }
     };
 }
 

@@ -41,6 +41,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/output.hpp>
+#include <bitcoin/system/chain/outpoint.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>

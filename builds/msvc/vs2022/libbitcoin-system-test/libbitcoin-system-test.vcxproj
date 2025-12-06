@@ -135,6 +135,7 @@
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\outpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />

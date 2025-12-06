@@ -46,6 +46,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/header.cpp \
     src/chain/input.cpp \
     src/chain/operation.cpp \
+    src/chain/outpoint.cpp \
     src/chain/output.cpp \
     src/chain/point.cpp \
     src/chain/script.cpp \
@@ -234,6 +235,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/operation.cpp \
+    test/chain/outpoint.cpp \
     test/chain/output.cpp \
     test/chain/point.cpp \
     test/chain/satoshi_words.cpp \
@@ -482,6 +484,7 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/header.hpp \
     include/bitcoin/system/chain/input.hpp \
     include/bitcoin/system/chain/operation.hpp \
+    include/bitcoin/system/chain/outpoint.hpp \
     include/bitcoin/system/chain/output.hpp \
     include/bitcoin/system/chain/point.hpp \
     include/bitcoin/system/chain/prevout.hpp \
