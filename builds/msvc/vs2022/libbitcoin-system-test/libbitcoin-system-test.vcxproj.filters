@@ -147,6 +147,9 @@
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\outpoint.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\output.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>

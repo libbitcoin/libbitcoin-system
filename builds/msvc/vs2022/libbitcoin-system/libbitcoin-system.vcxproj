@@ -138,6 +138,7 @@
       <ObjectFileName>$(IntDir)src_chain_input.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\operation.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\outpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
       <ObjectFileName>$(IntDir)src_chain_output.obj</ObjectFileName>
     </ClCompile>
@@ -323,6 +324,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\operation.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\outpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\prevout.hpp" />
