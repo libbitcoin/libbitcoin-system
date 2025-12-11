@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(outpoint__is_null__default_null__true)
 
 BOOST_AUTO_TEST_CASE(outpoint__serialized_size__always__expected)
 {
-    static_assert(outpoint::serialized_size() == point::serialized_size() + sizeof(uint32_t));
-    BOOST_REQUIRE_EQUAL(outpoint::serialized_size(), point::serialized_size() + sizeof(uint32_t));
+    static_assert(outpoint::serialized_size() == point::serialized_size() + sizeof(uint64_t));
+    BOOST_REQUIRE_EQUAL(outpoint::serialized_size(), point::serialized_size() + sizeof(uint64_t));
 }
 
 // json

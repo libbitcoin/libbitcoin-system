@@ -40,7 +40,7 @@ public:
 
     static constexpr size_t serialized_size() NOEXCEPT
     {
-        return point::serialized_size() + sizeof(uint32_t);
+        return point::serialized_size() + sizeof(uint64_t);
     }
 
     /// Constructors.
