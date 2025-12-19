@@ -81,7 +81,6 @@ public:
     void to_data(std::ostream& stream) const NOEXCEPT;
     void to_data(writer& sink) const NOEXCEPT;
 
-
     /// Properties.
     /// -----------------------------------------------------------------------
     /// Native properties.
@@ -96,6 +95,7 @@ public:
     /// Computed properties.
     uint256_t proof() const NOEXCEPT;
     hash_digest hash() const NOEXCEPT;
+    double difficulty() const NOEXCEPT;
 
     /// Cache and metadata.
     /// -----------------------------------------------------------------------

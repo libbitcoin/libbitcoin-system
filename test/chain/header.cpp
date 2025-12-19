@@ -240,12 +240,18 @@ BOOST_AUTO_TEST_CASE(header__to_data__writer__expected)
 // properties
 // ----------------------------------------------------------------------------
 
-// hash
-
 BOOST_AUTO_TEST_CASE(header__proof__genesis_block__expected)
 {
     const chain::block block{ settings(selection::mainnet).genesis_block };
     BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
+}
+
+// hash
+
+BOOST_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
+{
+    const chain::block block{ settings(selection::mainnet).genesis_block };
+    BOOST_REQUIRE_EQUAL(block.header().difficulty(), 1.0);
 }
 
 // validation (public)
