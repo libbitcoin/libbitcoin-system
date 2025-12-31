@@ -41,5 +41,6 @@
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
+#include <bitcoin/system/config/version.hpp>
 
 #endif

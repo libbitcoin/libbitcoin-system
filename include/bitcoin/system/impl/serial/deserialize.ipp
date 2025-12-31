@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -107,7 +108,14 @@ bool deserialize(Value& out, const std::string_view& text) NOEXCEPT
     // This can convert garbage to zero, use is_ascii_number for pre-assurance.
     try
     {
-        std::istringstream istream(trim_copy(text));
+        auto trimmed = trim_copy(text);
+        if constexpr (is_integer<Value> && !is_signed<Value>)
+        {
+            if (!trimmed.empty() && trimmed.front() == '-')
+                return false;
+        }
+
+        std::istringstream istream(std::move(trimmed));
         istream >> out;
         return !istream.fail();
     }
