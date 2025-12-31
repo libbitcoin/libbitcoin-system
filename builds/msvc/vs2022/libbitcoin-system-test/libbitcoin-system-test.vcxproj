@@ -161,6 +161,7 @@
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\config\url.cpp" />
     <ClCompile Include="..\..\..\..\test\config\utilities.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\version.cpp" />
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />

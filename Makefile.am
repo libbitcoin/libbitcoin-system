@@ -82,6 +82,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/transaction.cpp \
     src/config/url.cpp \
     src/config/utilities.cpp \
+    src/config/version.cpp \
     src/crypto/aes256.cpp \
     src/crypto/der_parser.cpp \
     src/crypto/ec_context.cpp \
@@ -261,6 +262,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/printer.cpp \
     test/config/url.cpp \
     test/config/utilities.cpp \
+    test/config/version.cpp \
     test/crypto/aes256.cpp \
     test/crypto/elliptic_curve.cpp \
     test/crypto/pseudo_random.cpp \
@@ -533,7 +535,8 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/script.hpp \
     include/bitcoin/system/config/transaction.hpp \
     include/bitcoin/system/config/url.hpp \
-    include/bitcoin/system/config/utilities.hpp
+    include/bitcoin/system/config/utilities.hpp \
+    include/bitcoin/system/config/version.hpp
 
 include_bitcoin_system_cryptodir = ${includedir}/bitcoin/system/crypto
 include_bitcoin_system_crypto_HEADERS = \

@@ -195,6 +195,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\url.cpp" />
     <ClCompile Include="..\..\..\..\src\config\utilities.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\version.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp" />
@@ -357,6 +358,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\url.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\utilities.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp" />

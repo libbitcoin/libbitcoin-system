@@ -268,6 +268,29 @@ hash_digest header::hash() const NOEXCEPT
     return digest;
 }
 
+// computed, not used in consensus.
+double header::difficulty() const NOEXCEPT
+{
+    auto shift = bit_and(shift_right(bits_, 24), 0xff_u32);
+    auto difference =
+        static_cast<double>(0x0000ffff_u32) /
+        static_cast<double>(bit_and(bits_, 0x00ffffff_u32));
+
+    while (shift < 29u)
+    {
+        difference *= 256.0;
+        ++shift;
+    }
+
+    while (shift > 29u)
+    {
+        difference /= 256.0;
+        --shift;
+    }
+
+    return difference;
+}
+
 // Cache and metadata.
 // ----------------------------------------------------------------------------
 

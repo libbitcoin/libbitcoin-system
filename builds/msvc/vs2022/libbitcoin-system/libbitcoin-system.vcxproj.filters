@@ -381,6 +381,9 @@
     <ClCompile Include="..\..\..\..\src\config\utilities.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\version.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -819,6 +822,9 @@
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\utilities.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\version.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp">
