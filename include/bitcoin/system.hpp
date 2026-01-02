@@ -86,6 +86,7 @@
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
+#include <bitcoin/system/config/version.hpp>
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
