@@ -118,7 +118,12 @@ public:
         auto ptr = allocate_object<Type>();
         construct_guard<Type> guard{ arena_, ptr };
         construct<Type>(ptr, std::forward<Args>(args)...);
+
+        // Bogus warning (under LTCG only).
+        BC_PUSH_WARNING(UNREACHABLE_CODE)
         guard.arena_ = nullptr;
+        BC_POP_WARNING()
+
         return ptr;
     }
 
