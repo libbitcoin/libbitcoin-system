@@ -659,7 +659,7 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
 // explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
 // default, and specified bip42 behavior (shift overflow to zero) with bip42.
 //*****************************************************************************
-static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
+uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT
 {
     // Guard: quotient domain cannot increase with positive integer divisor.
@@ -692,7 +692,7 @@ uint64_t block::reward(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     // Overflow returns max_uint64.
-    return ceilinged_add(fees(), block_subsidy(height, subsidy_interval,
+    return ceilinged_add(fees(), subsidy(height, subsidy_interval,
         initial_block_subsidy_satoshi, bip42));
 }
 
