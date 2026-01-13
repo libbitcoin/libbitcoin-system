@@ -1,6 +1,39 @@
 /**
+ * Copyright (c) 2011-2025 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include <bitcoin/system/crypto/aes256.hpp>
+
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+
+// local
+// ----------------------------------------------------------------------------
+// Derived in part from:
+ /**
  *   Byte-oriented AES-256 implementation.
- *   All lookup tables replaced with 'on the fly' calculations. 
+ *   All lookup tables replaced with 'on the fly' calculations.
  *
  *   Copyright (c) 2007-2009 Ilya O. Levin, http://www.literatecode.com
  *   Other contributors: Hal Finney
@@ -17,24 +50,10 @@
  *   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <bitcoin/system/crypto/aes256.hpp>
-
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/math/math.hpp>
-
-namespace libbitcoin {
-namespace system {
-namespace aes256 {
-
-struct context
-{
-    secret key;
-    secret enckey;
-    secret deckey;
-};
 
 constexpr size_t rounds = 14;
+constexpr auto block_size = array_count<aes256::block>;
+constexpr auto secret_size = array_count<aes256::secret>;
 
 constexpr data_array<to_bits(secret_size)> sbox
 {
@@ -110,47 +129,48 @@ constexpr data_array<to_bits(secret_size)> sbox_inverse
 
 constexpr uint8_t f_enc_key(uint8_t byte) NOEXCEPT
 {
-    return shift_left(byte) ^ (get_left(byte) ? 0b0001'1011_u8 : zero);
+    constexpr auto mask = 0b0001'1011_u8;
+    return shift_left(byte) ^ (get_left(byte) ? mask : 0_u8);
 }
 
 constexpr uint8_t f_dec_key(uint8_t byte) NOEXCEPT
 {
-    return shift_right(byte) ^ (get_right(byte) ? 0b1000'1101_u8 : zero);
+    constexpr auto mask = 0b1000'1101_u8;
+    return shift_right(byte) ^ (get_right(byte) ? mask : 0_u8);
 }
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-
-constexpr void sub_bytes(block& bytes) NOEXCEPT
+constexpr void sub_bytes(aes256::block& bytes) NOEXCEPT
 {
     auto i = block_size;
     while (to_bool(i--))
         bytes[i] = sbox[bytes[i]];
 }
 
-constexpr void sub_bytes_inverse(block& bytes) NOEXCEPT
+constexpr void sub_bytes_inverse(aes256::block& bytes) NOEXCEPT
 {
     auto i = block_size;
     while (to_bool(i--))
         bytes[i] = sbox_inverse[bytes[i]];
 }
 
-constexpr void add_round_key_lower(block& bytes, secret& key) NOEXCEPT
+constexpr void add_round_key_lower(aes256::block& bytes,
+    aes256::secret& key) NOEXCEPT
 {
     auto i = block_size;
     while (to_bool(i--))
         bytes[i] ^= key[i];
 }
 
-constexpr void add_round_key_upper(block& bytes, secret& key) NOEXCEPT
+constexpr void add_round_key_upper(aes256::block& bytes,
+    aes256::secret& key) NOEXCEPT
 {
     auto i = block_size;
     while (to_bool(i--))
         bytes[i] ^= key[i + block_size];
 }
 
-constexpr void add_round_key_copy(block& bytes, secret& key,
-    secret& copy) NOEXCEPT
+constexpr void add_round_key_copy(aes256::block& bytes, aes256::secret& key,
+    aes256::secret& copy) NOEXCEPT
 {
     auto i = block_size;
     while (to_bool(i--))
@@ -162,11 +182,9 @@ constexpr void add_round_key_copy(block& bytes, secret& key,
     }
 }
 
-constexpr void shift_rows(block& bytes) NOEXCEPT
+constexpr void shift_rows(aes256::block& bytes) NOEXCEPT
 {
-    uint8_t i, j;
-
-    i = bytes[1];
+    auto i = bytes[1];
     bytes[ 1] = bytes[5];
     bytes[ 5] = bytes[9];
     bytes[ 9] = bytes[13];
@@ -176,7 +194,7 @@ constexpr void shift_rows(block& bytes) NOEXCEPT
     bytes[10] = bytes[2];
     bytes[ 2] = i;
 
-    j = bytes[3];
+    auto j = bytes[3];
     bytes[ 3] = bytes[15];
     bytes[15] = bytes[11];
     bytes[11] = bytes[7];
@@ -187,11 +205,9 @@ constexpr void shift_rows(block& bytes) NOEXCEPT
     bytes[ 6] = j;
 }
 
-constexpr void shift_rows_inverse(block& bytes) NOEXCEPT
+constexpr void shift_rows_inverse(aes256::block& bytes) NOEXCEPT
 {
-    uint8_t i, j;
-
-    i = bytes[1];
+    auto i = bytes[1];
     bytes[ 1] = bytes[13];
     bytes[13] = bytes[9];
     bytes[ 9] = bytes[5];
@@ -201,7 +217,7 @@ constexpr void shift_rows_inverse(block& bytes) NOEXCEPT
     bytes[ 2] = bytes[10];
     bytes[10] = i;
 
-    j = bytes[3];
+    auto j = bytes[3];
     bytes[ 3] = bytes[7];
     bytes[ 7] = bytes[11];
     bytes[11] = bytes[15];
@@ -212,18 +228,16 @@ constexpr void shift_rows_inverse(block& bytes) NOEXCEPT
     bytes[14] = j;
 }
 
-constexpr void mix_columns(block& bytes) NOEXCEPT
+constexpr void mix_columns(aes256::block& bytes) NOEXCEPT
 {
-    uint8_t a, b, c, d, e;
-
     for (size_t i = 0; i < block_size; i += 4_size)
     {
-        a = bytes[i + 0];
-        b = bytes[i + 1];
-        c = bytes[i + 2];
-        d = bytes[i + 3];
+        const auto a = bytes[i + 0];
+        const auto b = bytes[i + 1];
+        const auto c = bytes[i + 2];
+        const auto d = bytes[i + 3];
 
-        e = a ^ b ^ c ^ d;
+        const uint8_t e = a ^ b ^ c ^ d;
         bytes[i + 0] ^= e ^ f_enc_key(a ^ b);
         bytes[i + 1] ^= e ^ f_enc_key(b ^ c);
         bytes[i + 2] ^= e ^ f_enc_key(c ^ d);
@@ -231,21 +245,19 @@ constexpr void mix_columns(block& bytes) NOEXCEPT
     }
 }
 
-constexpr void mix_columns_inverse(block& bytes) NOEXCEPT
+constexpr void mix_columns_inverse(aes256::block& bytes) NOEXCEPT
 {
-    uint8_t a, b, c, d, e, x, y, z;
-
-    for (size_t i = 0; i < block_size; i += 4_size)
+    for (size_t i{}; i < block_size; i += 4_size)
     {
-        a = bytes[i + 0];
-        b = bytes[i + 1];
-        c = bytes[i + 2];
-        d = bytes[i + 3];
+        const auto a = bytes[i + 0];
+        const auto b = bytes[i + 1];
+        const auto c = bytes[i + 2];
+        const auto d = bytes[i + 3];
 
-        e = a ^ b ^ c ^ d;
-        z = f_enc_key(e);
-        x = e ^ f_enc_key(f_enc_key(z ^ a ^ c));
-        y = e ^ f_enc_key(f_enc_key(z ^ b ^ d));
+        const uint8_t e = a ^ b ^ c ^ d;
+        const uint8_t z = f_enc_key(e);
+        const uint8_t x = e ^ f_enc_key(f_enc_key(z ^ a ^ c));
+        const uint8_t y = e ^ f_enc_key(f_enc_key(z ^ b ^ d));
 
         bytes[i + 0] ^= x ^ f_enc_key(a ^ b);
         bytes[i + 1] ^= y ^ f_enc_key(b ^ c);
@@ -254,7 +266,7 @@ constexpr void mix_columns_inverse(block& bytes) NOEXCEPT
     }
 }
 
-constexpr void expand_key(secret& key, uint8_t& round) NOEXCEPT
+constexpr void expand_key(aes256::secret& key, uint8_t& round) NOEXCEPT
 {
     key[0] ^= sbox[key[29]] ^ round;
     key[1] ^= sbox[key[30]];
@@ -284,7 +296,7 @@ constexpr void expand_key(secret& key, uint8_t& round) NOEXCEPT
     }
 }
 
-constexpr void expand_key_inverse(secret& key, uint8_t& round) NOEXCEPT
+constexpr void expand_key_inverse(aes256::secret& key, uint8_t& round) NOEXCEPT
 {
     for (size_t i = 28; i > 16_size; i -= 4_size)
     {
@@ -314,25 +326,25 @@ constexpr void expand_key_inverse(secret& key, uint8_t& round) NOEXCEPT
     key[3] ^= sbox[key[28]];
 }
 
-BC_POP_WARNING()
-BC_POP_WARNING()
+// private/static
+// ----------------------------------------------------------------------------
 
-constexpr void initialize(aes256::context& context, const secret& key) NOEXCEPT
+void aes256::initialize(context& context, const secret& key) NOEXCEPT
 {
     context.deckey = key;
     context.enckey = key;
 
     auto round = bit_lo<uint8_t>;
-    for (size_t i = 0; i < sub1(bits<uint8_t>); ++i)
+    for (size_t i{}; i < sub1(bits<uint8_t>); ++i)
         expand_key(context.deckey, round);
 }
 
-constexpr void encrypt_block(aes256::context& context, block& bytes) NOEXCEPT
+void aes256::encrypt_ecb(context& context, block& bytes) NOEXCEPT
 {
     add_round_key_copy(bytes, context.enckey, context.key);
 
     auto round = bit_lo<uint8_t>;
-    for (size_t i = 0; i < sub1(rounds); ++i)
+    for (size_t i{}; i < sub1(rounds); ++i)
     {
         sub_bytes(bytes);
         shift_rows(bytes);
@@ -355,15 +367,14 @@ constexpr void encrypt_block(aes256::context& context, block& bytes) NOEXCEPT
     add_round_key_lower(bytes, context.key);
 }
 
-constexpr void decrypt_block(aes256::context& context, block& bytes) NOEXCEPT
+void aes256::decrypt_ecb(context& context, block& bytes) NOEXCEPT
 {
     add_round_key_copy(bytes, context.deckey, context.key);
-
     shift_rows_inverse(bytes);
     sub_bytes_inverse(bytes);
 
     auto round = bit_hi<uint8_t>;
-    for (size_t i = 0; i < sub1(rounds); ++i)
+    for (size_t i{}; i < sub1(rounds); ++i)
     {
         if (is_even(i))
         {
@@ -383,32 +394,25 @@ constexpr void decrypt_block(aes256::context& context, block& bytes) NOEXCEPT
     add_round_key_lower(bytes, context.key);
 }
 
-////constexpr void zeroize(aes256::context& context) NOEXCEPT
-////{
-////    context.key.fill(0);
-////    context.enckey.fill(0);
-////    context.deckey.fill(0);
-////}
-
-// published
+// public/static
 // ----------------------------------------------------------------------------
 
-void encrypt(block& bytes, const secret& key) NOEXCEPT
+void aes256::encrypt_ecb(block& bytes, const secret& key) NOEXCEPT
 {
-    aes256::context context;
+    context context{};
     initialize(context, key);
-    encrypt_block(context, bytes);
-    ////zeroize(context);
+    encrypt_ecb(context, bytes);
 }
 
-void decrypt(block& bytes, const secret& key) NOEXCEPT
+void aes256::decrypt_ecb(block& bytes, const secret& key) NOEXCEPT
 {
-    aes256::context context;
+    context context;
     initialize(context, key);
-    decrypt_block(context, bytes);
-    ////zeroize(context);
+    decrypt_ecb(context, bytes);
 }
 
-} // namespace aes256
+BC_POP_WARNING()
+BC_POP_WARNING()
+
 } // namespace system
 } // namespace libbitcoin
