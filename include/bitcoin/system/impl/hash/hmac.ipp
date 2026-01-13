@@ -90,7 +90,7 @@ xor_n(block_t& pad, const byte_t* key, size_t size) NOEXCEPT
     // append zeros to the end of K to create a B byte string [skip].
     // XOR (bitwise exclusive-OR) the B byte string ... with [ipad/opad].
     // [not xoring beyond K length is the same as xoring that with zero].
-    for (size_t i = 0; i < size; ++i)
+    for (size_t i{}; i < size; ++i)
         pad[i] ^= key[i];
 
     return pad;
