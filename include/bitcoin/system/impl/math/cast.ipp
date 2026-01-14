@@ -48,7 +48,7 @@ constexpr Restored depromote(Common value) NOEXCEPT
 
 template <typename Restored, typename Common,
     if_integer<Restored>,
-    if_non_integral_integer<Common> >
+    if_non_integral_integer<Common>>
 constexpr Restored depromote(Common value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)

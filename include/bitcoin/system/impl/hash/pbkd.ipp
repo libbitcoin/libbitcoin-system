@@ -36,12 +36,12 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // static/protected
 TEMPLATE
 template <size_t Length>
-constexpr auto CLASS::
+constexpr void CLASS::
 xor_n(data_array<Length>& to, const data_array<Length>& from) NOEXCEPT
 {
     // rfc8018
     // F (P, S, c, i) = U_1 \xor U_2 \xor ... \xor U_c
-    for (size_t i = 0; i < Length; ++i)
+    for (size_t i{}; i < Length; ++i)
         to[i] ^= from[i];
 };
 

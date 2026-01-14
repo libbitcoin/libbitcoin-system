@@ -56,7 +56,7 @@ struct pbkd
 
 protected:
     template <size_t Length>
-    static constexpr auto xor_n(data_array<Length>& to,
+    static constexpr void xor_n(data_array<Length>& to,
         const data_array<Length>& from) NOEXCEPT;
 };
 

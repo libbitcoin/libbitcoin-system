@@ -24,25 +24,34 @@
 
 namespace libbitcoin {
 namespace system {
-namespace aes256 {
-    
-/// This is an implementation of AES256 (in ECB mode).
-/// ECB mode is the simplest block cipher mode but is insecure for most
-/// applications because it doesn't hide patterns in the plaintext.
-/// NIST selected three members of the Rijndael family, each with a block
-/// size of 128 bits, but three different key lengths: 128, 192 and 256 bits.
 
-constexpr size_t block_size = bytes<128>;
-typedef data_array<block_size> block;
+/// Advanced Encryption Standard (AES) 256.
+class BC_API aes256 final
+{
+public:
+    /// AES block is always 128 bits.
+    typedef data_array<bytes<128>> block;
 
-constexpr size_t secret_size = bytes<256>;
-typedef data_array<secret_size> secret;
+    /// AES-256 secret is always 256 bits.
+    typedef data_array<bytes<256>> secret;
 
-/// Perform aes256 encryption/decryption on a data block.
-void encrypt(block& bytes, const secret& key) NOEXCEPT;
-void decrypt(block& bytes, const secret& key) NOEXCEPT;
+    /// nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf
+    static void encrypt_ecb(block& bytes, const secret& key) NOEXCEPT;
+    static void decrypt_ecb(block& bytes, const secret& key) NOEXCEPT;
 
-} // namespace aes256
+private:
+    struct context
+    {
+        secret key;
+        secret enckey;
+        secret deckey;
+    };
+
+    static void initialize(context& context, const secret& key) NOEXCEPT;
+    static void encrypt_ecb(context& context, block& bytes) NOEXCEPT;
+    static void decrypt_ecb(context& context, block& bytes) NOEXCEPT;
+};
+
 } // namespace system
 } // namespace libbitcoin
 
