@@ -38,6 +38,10 @@
     #endif
 
     #if defined(HAVE_MSC)
+        // Warning numbers in the range 4700-4999 are associated with code
+        // generation. For these warnings, the state of the warning in effect
+        // when the compiler reaches the function definition remains in effect
+        // for the rest of the function. - MSDN
         #define NARROWING_CONVERSION 4244
         #define DIAMOND_INHERITANCE 4250
         #define SIZE_NARROWING_CONVERSION 4267
