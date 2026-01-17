@@ -78,6 +78,7 @@
         #define NO_ARRAY_INDEXING 26446
         #define NO_THROW_IN_NOEXCEPT 26447
         #define NO_UNSAFE_COPY_N 26459
+        #define NO_CONST_CAST_REQUIRED 26465
         #define NO_STATIC_CAST 26467
         #define NO_CASTS_FOR_ARITHMETIC_CONVERSION 26472
         #define NO_IDENTITY_CAST 26473
