@@ -109,7 +109,7 @@ AC_ARG_WITH([examples],
 AC_MSG_RESULT([$with_examples])
 AM_CONDITIONAL([WITH_EXAMPLES], [test x$with_examples != xno])
 
-# Implement --with-icu and define BOOST_HAS_ICU and output ${icu}.
+# Implement --with-icu and define WITH_ICU and output ${icu}.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--with-icu option])
 AC_ARG_WITH([icu],
@@ -118,7 +118,7 @@ AC_ARG_WITH([icu],
     [with_icu=$withval],
     [with_icu=no])
 AC_MSG_RESULT([$with_icu])
-AS_CASE([${with_icu}], [yes], AC_DEFINE([BOOST_HAS_ICU]))
+AS_CASE([${with_icu}], [yes], AC_DEFINE([WITH_ICU]))
 AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DWITH_ICU]))
 
 # Implement --enable-avx2.

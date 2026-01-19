@@ -148,12 +148,12 @@ set( with-tests "yes" CACHE BOOL "Compile with unit tests." )
 #------------------------------------------------------------------------------
 set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
-# Implement -Dwith-icu and define BOOST_HAS_ICU and output ${icu}.
+# Implement -Dwith-icu and define WITH_ICU and output ${icu}.
 #------------------------------------------------------------------------------
 set( with-icu "no" CACHE BOOL "Compile with International Components for Unicode." )
 
 if (with-icu)
-    add_definitions( -DBOOST_HAS_ICU )
+    add_definitions( -DWITH_ICU )
 endif()
 
 if (with-icu)

@@ -19,26 +19,40 @@
 #ifndef LIBBITCOIN_SYSTEM_BOOST_HPP
 #define LIBBITCOIN_SYSTEM_BOOST_HPP
 
+///////////////////////////////////////////////////////////////////////////////
+// Include boost only here, so these definitions take hold within boost.
+// Dependent projects must include <bitcoin/system.hpp> before any boost.
+///////////////////////////////////////////////////////////////////////////////
+
 #include <utility>
 
 // Apply any warning suppressions to boost.
-// Any boost includes within headers will not benefit from suppression, as the
-// warnings are included by define.hpp which follows boost includes.
 #include <bitcoin/system/warnings.hpp>
 
-// Include boost only from here, so this exclusion works.
+// Headers only containers.
+#define BOOST_CONTAINER_NO_LIB
+
 // Avoid namespace conflict between boost::placeholders and std::placeholders.
 // This arises when including <functional>, which declares std::placeholders.
 // www.boost.org/doc/libs/1_78_0/boost/bind.hpp
-// Include boost only from here, so placeholders exclusion works.
 #define BOOST_BIND_NO_PLACEHOLDERS
 #include <boost/bind.hpp>
 
+// Include boost only from here, so this definition works.
+#if defined(HAVE_ICU)
+    #define BOOST_HAS_ICU
+#endif
+#include <boost/locale.hpp>
+
+// address::from_string
+////#define BOOST_ASIO_NO_DEPRECATED
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
+
+// Headers only json.
+#define BOOST_JSON_NO_LIB
 #include <boost/json.hpp>
-#include <boost/locale.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/program_options.hpp>
 #include <boost/url.hpp>
