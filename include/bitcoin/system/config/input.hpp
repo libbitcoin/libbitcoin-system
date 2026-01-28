@@ -44,7 +44,7 @@ public:
         const input& argument) NOEXCEPT;
 };
 
-} // namespace explorer
+} // namespace config
 } // namespace system
 } // namespace libbitcoin
 
