@@ -139,7 +139,9 @@
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script.cpp">
+      <ObjectFileName>$(IntDir)test_chain_script.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\stripper.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\taproot.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\tapscript.cpp" />
@@ -212,11 +214,15 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\rmd160.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\rmd160.cpp">
+      <ObjectFileName>$(IntDir)test_hash_performance_baseline_rmd160.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\performance\baseline\sha256.cpp">
       <ObjectFileName>$(IntDir)test_hash_performance_baseline_sha256.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp">
+      <ObjectFileName>$(IntDir)test_hash_performance_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
     </ClCompile>
@@ -236,7 +242,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\vector.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">
+      <ObjectFileName>$(IntDir)test_hash_siphash.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp" />
@@ -262,7 +270,9 @@
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bytes.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\byteswap.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\byteswap.cpp">
+      <ObjectFileName>$(IntDir)test_math_byteswap.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\cast.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
@@ -310,7 +320,9 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256t_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />
-    <ClCompile Include="..\..\..\..\test\test.cpp" />
+    <ClCompile Include="..\..\..\..\test\test.cpp">
+      <ObjectFileName>$(IntDir)test_test.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\typelets.cpp" />
     <ClCompile Include="..\..\..\..\test\types.cpp">
       <ObjectFileName>$(IntDir)test_types.obj</ObjectFileName>
@@ -325,7 +337,9 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\paths.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utreexo\utreexo.cpp" />
+    <ClCompile Include="..\..\..\..\test\utreexo\utreexo.cpp">
+      <ObjectFileName>$(IntDir)test_utreexo_utreexo.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
@@ -371,9 +385,15 @@
     <ClCompile Include="..\..\..\..\test\words\catalogs\mnemonic.cpp">
       <ObjectFileName>$(IntDir)test_words_catalogs_mnemonic.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\words\dictionaries.cpp" />
-    <ClCompile Include="..\..\..\..\test\words\dictionary.cpp" />
-    <ClCompile Include="..\..\..\..\test\words\languages.cpp" />
+    <ClCompile Include="..\..\..\..\test\words\dictionaries.cpp">
+      <ObjectFileName>$(IntDir)test_words_dictionaries.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\dictionary.cpp">
+      <ObjectFileName>$(IntDir)test_words_dictionary.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\languages.cpp">
+      <ObjectFileName>$(IntDir)test_words_languages.obj</ObjectFileName>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
