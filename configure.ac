@@ -451,15 +451,13 @@ AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
 # Require icu-i18n of at least version 55.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_icu}], [yes],
-    [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 55.2],
-        [icu_i18n_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "icu-i18n >= 55.2" 2>/dev/null`"
-         icu_i18n_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "icu-i18n >= 55.2" 2>/dev/null`"],
-        [AC_MSG_ERROR([--with-icu specified but icu-i18n >= 55.2 was not found.])])
+    [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 55.2], [],
+        [
+          AC_MSG_ERROR([--with-icu specified but icu-i18n >= 55.2 was not found.])
+        ])
      AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 55.2'])
      AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
-     AS_IF([test x${icu_i18n_INCLUDEDIR} != "x"],
-        [AC_SUBST([icu_i18n_ISYS_CPPFLAGS], ["-isystem${icu_i18n_INCLUDEDIR} ${icu_i18n_OTHER_CFLAGS}"])],
-        [AC_SUBST([icu_i18n_ISYS_CPPFLAGS], [${icu_i18n_OTHER_CFLAGS}])])
+     AC_SUBST([icu_i18n_ISYS_CPPFLAGS], [`echo ${icu_i18n_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
      AC_MSG_NOTICE([icu_i18n_CPPFLAGS : ${icu_i18n_CPPFLAGS}])
      AC_MSG_NOTICE([icu_i18n_ISYS_CPPFLAGS : ${icu_i18n_ISYS_CPPFLAGS}])
      AC_MSG_NOTICE([icu_i18n_OTHER_CFLAGS : ${icu_i18n_OTHER_CFLAGS}])
@@ -487,15 +485,13 @@ AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])
 
 # Require secp256k1 of at least version 0.5.1.0 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
-PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.5.1.0],
-    [secp256k1_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "libsecp256k1 >= 0.5.1.0" 2>/dev/null`"
-     secp256k1_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "libsecp256k1 >= 0.5.1.0" 2>/dev/null`"],
-    [AC_MSG_ERROR([libsecp256k1 >= 0.5.1.0 is required but was not found.])])
+PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.5.1.0], [],
+    [
+      AC_MSG_ERROR([libsecp256k1 >= 0.5.1.0 is required but was not found.])
+    ])
 AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.5.1.0'])
 AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
-AS_IF([test x${secp256k1_INCLUDEDIR} != "x"],
-    [AC_SUBST([secp256k1_ISYS_CPPFLAGS], ["-isystem${secp256k1_INCLUDEDIR} ${secp256k1_OTHER_CFLAGS}"])],
-    [AC_SUBST([secp256k1_ISYS_CPPFLAGS], [${secp256k1_OTHER_CFLAGS}])])
+AC_SUBST([secp256k1_ISYS_CPPFLAGS], [`echo ${secp256k1_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
 AC_MSG_NOTICE([secp256k1_CPPFLAGS : ${secp256k1_CPPFLAGS}])
 AC_MSG_NOTICE([secp256k1_ISYS_CPPFLAGS : ${secp256k1_ISYS_CPPFLAGS}])
 AC_MSG_NOTICE([secp256k1_OTHER_CFLAGS : ${secp256k1_OTHER_CFLAGS}])

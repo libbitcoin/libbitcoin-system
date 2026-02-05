@@ -198,7 +198,9 @@
     <ClCompile Include="..\..\..\..\src\config\version.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp">
+      <ObjectFileName>$(IntDir)src_crypto_ec_context.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1.cpp" />
@@ -242,15 +244,33 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\payment_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_code.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mask.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mmask.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mqrspec.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrencode.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrinput.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrspec.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\rsecc.c" />
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\split.c" />
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_bitstream.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mask.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_mask.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mmask.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_mmask.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mqrspec.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_mqrspec.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrencode.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_qrencode.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrinput.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_qrinput.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrspec.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_qrspec.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\rsecc.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_rsecc.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\split.c">
+      <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_split.c.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_receiver.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_sender.cpp" />
@@ -271,9 +291,15 @@
     <ClCompile Include="..\..\..\..\src\wallet\keys\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\hd_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\mini_keys.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_private.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_public.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_token.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_private.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_keys_parse_encrypted_keys_parse_encrypted_private.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_public.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_keys_parse_encrypted_keys_parse_encrypted_public.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_token.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_keys_parse_encrypted_keys_parse_encrypted_token.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\keys\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\electrum.cpp">
