@@ -31,6 +31,11 @@
 namespace libbitcoin {
 namespace system {
 
+/// True if one bit is set, false if zero of more than one bit set.
+template <typename Value,
+    if_integral_integer<Value> = true>
+constexpr bool is_power2(Value value) NOEXCEPT;
+
 /// Ceilinged logarithms.
 /// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).

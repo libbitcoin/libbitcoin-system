@@ -82,6 +82,16 @@ constexpr Exponent floored_log_(Base base, Value value) NOEXCEPT
     }
 }
 
+// published (bool)
+// ----------------------------------------------------------------------------
+
+template <typename Value,
+    if_integral_integer<Value>>
+constexpr bool is_power2(Value value) NOEXCEPT
+{
+    return !is_zero(value) && std::has_single_bit(value);
+}
+
 // published (ceilinged)
 // ----------------------------------------------------------------------------
 
