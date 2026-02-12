@@ -18,6 +18,86 @@
 */
 #include "../test.hpp"
 
+// is_power2
+
+////static_assert(!is_power2(-1));
+static_assert(!is_power2(0u));
+static_assert(!is_power2(3u));
+static_assert(!is_power2(5u));
+static_assert(!is_power2(6u));
+static_assert(!is_power2(7u));
+static_assert(!is_power2(9u));
+static_assert(!is_power2(10u));
+static_assert(!is_power2(11u));
+static_assert(!is_power2(12u));
+static_assert(!is_power2(sub1(9223372036854775808u)));
+static_assert(!is_power2(add1(9223372036854775808u)));
+
+static_assert( is_power2(1u));
+static_assert( is_power2(2u));
+static_assert( is_power2(4u));
+static_assert( is_power2(8u));
+static_assert( is_power2(16u));
+static_assert( is_power2(32u));
+static_assert( is_power2(64u));
+static_assert( is_power2(128u));
+static_assert( is_power2(256u));
+static_assert( is_power2(512u));
+static_assert( is_power2(1024u));
+static_assert( is_power2(2048u));
+static_assert( is_power2(4096u));
+static_assert( is_power2(8192u));
+static_assert( is_power2(16384u));
+static_assert( is_power2(32768u));
+static_assert( is_power2(65536u));
+static_assert( is_power2(131072u));
+static_assert( is_power2(262144u));
+static_assert( is_power2(524288u));
+static_assert( is_power2(1048576u));
+static_assert( is_power2(2097152u));
+static_assert( is_power2(4194304u));
+static_assert( is_power2(8388608u));
+static_assert( is_power2(16777216u));
+static_assert( is_power2(33554432u));
+static_assert( is_power2(67108864u));
+static_assert( is_power2(134217728u));
+static_assert( is_power2(268435456u));
+static_assert( is_power2(536870912u));
+static_assert( is_power2(1073741824u));
+static_assert( is_power2(2147483648u));
+static_assert( is_power2(4294967296u));
+static_assert( is_power2(8589934592u));
+static_assert( is_power2(17179869184u));
+static_assert( is_power2(34359738368u));
+static_assert( is_power2(68719476736u));
+static_assert( is_power2(137438953472u));
+static_assert( is_power2(274877906944u));
+static_assert( is_power2(549755813888u));
+static_assert( is_power2(1099511627776u));
+static_assert( is_power2(2199023255552u));
+static_assert( is_power2(4398046511104u));
+static_assert( is_power2(8796093022208u));
+static_assert( is_power2(17592186044416u));
+static_assert( is_power2(35184372088832u));
+static_assert( is_power2(70368744177664u));
+static_assert( is_power2(140737488355328u));
+static_assert( is_power2(281474976710656u));
+static_assert( is_power2(562949953421312u));
+static_assert( is_power2(1125899906842624u));
+static_assert( is_power2(2251799813685248u));
+static_assert( is_power2(4503599627370496u));
+static_assert( is_power2(9007199254740992u));
+static_assert( is_power2(18014398509481984u));
+static_assert( is_power2(36028797018963968u));
+static_assert( is_power2(72057594037927936u));
+static_assert( is_power2(144115188075855872u));
+static_assert( is_power2(288230376151711744u));
+static_assert( is_power2(576460752303423488u));
+static_assert( is_power2(1152921504606846976u));
+static_assert( is_power2(2305843009213693952u));
+static_assert( is_power2(4611686018427387904u));
+static_assert( is_power2(9223372036854775808u));
+
 // ceilinged_log
 
 static_assert(ceilinged_log(-2, 2u) == 0u);
