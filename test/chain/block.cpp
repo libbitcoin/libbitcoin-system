@@ -706,6 +706,78 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
     BOOST_REQUIRE(!instance.is_invalid_merkle_root());
 }
 
+// merkle_branch
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__leaf_zero__empty)
+{
+    BOOST_REQUIRE(block::merkle_branch(0).empty());
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__one__zero)
+{
+    const std::vector<size_t> expected{ 0 };
+    BOOST_REQUIRE(block::merkle_branch(1) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__two_for_odd_length__zero)
+{
+    const std::vector<size_t> expected{ 0 };
+    BOOST_REQUIRE(block::merkle_branch(2) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__three__two_and_zero)
+{
+    const std::vector<size_t> expected{ 2, 0 };
+    BOOST_REQUIRE(block::merkle_branch(3) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__seven__six_four_and_zero)
+{
+    const std::vector<size_t> expected{ 6, 4, 0 };
+    BOOST_REQUIRE(block::merkle_branch(7) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__ten_for_odd__eight_and_zero)
+{
+    const std::vector<size_t> expected{ 8, 0 };
+    BOOST_REQUIRE(block::merkle_branch(10) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__medium_power_of_two__expected)
+{
+    const std::vector<size_t> expected{ 14u, 12u, 8u, 0u };
+    BOOST_REQUIRE(block::merkle_branch(15u) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__power_of_two_minus_one__expected)
+{
+    constexpr auto leaf = 1023u;
+    constexpr auto size = ceilinged_log2(leaf);
+    const auto positions = block::merkle_branch(leaf);
+    BOOST_CHECK_EQUAL(positions.size(), size);
+    BOOST_CHECK_EQUAL(positions.front(), 1022u);
+    BOOST_CHECK_EQUAL(positions.back(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__odd_large_leaf_with_duplication__expected)
+{
+    constexpr auto leaf = 2047u;
+    constexpr auto size = ceilinged_log2(leaf);
+    const auto positions = block::merkle_branch(leaf);
+    BOOST_CHECK_EQUAL(positions.size(), size);
+    BOOST_CHECK_EQUAL(positions.front(), 2046u);
+    BOOST_CHECK_EQUAL(positions.back(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_branch__maximum_non_overflow__expected)
+{
+    constexpr auto maximum = sub1(power2(sub1(bits<size_t>)));
+    const auto positions = block::merkle_branch(maximum);
+    BOOST_CHECK_EQUAL(positions.size(), sub1(bits<size_t>));
+    BOOST_CHECK_EQUAL(positions.front(), sub1(maximum));
+    BOOST_CHECK_EQUAL(positions.back(), 0u);
+}
+
 // is_overweight
 // is_invalid_coinbase_script
 // is_hash_limit_exceeded

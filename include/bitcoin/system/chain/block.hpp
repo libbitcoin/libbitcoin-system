@@ -42,6 +42,7 @@ public:
 
     typedef std::shared_ptr<const block> cptr;
 
+    static std::vector<size_t> merkle_branch(size_t leaf) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
