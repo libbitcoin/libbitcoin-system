@@ -231,7 +231,7 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
     const auto count = txs_->size();
     const auto size = is_odd(count) && count > one ? add1(count) : count;
-    hashes out{ size };
+    hashes out(size);
 
     // Extra allocation for odd count optimizes for merkle root.
     // Vector capacity is never reduced when resizing to smaller size.
