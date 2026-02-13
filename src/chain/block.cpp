@@ -445,6 +445,32 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
     return generate_merkle_root(false) != header_->merkle_root();
 }
 
+// public/static (utility)
+std::vector<size_t> block::merkle_branch(size_t leaf) NOEXCEPT
+{
+    BC_ASSERT(leaf < power2(sub1(bits<size_t>)));
+
+    std::vector<size_t> positions{};
+    if (is_zero(leaf))
+        return positions;
+
+    // Upper bound, actual count may be less due to duplication.
+    positions.reserve(ceilinged_log2(leaf));
+
+    for (auto width = one, leaves = add1(leaf); leaves > one;)
+    {
+        const auto sibling = bit_xor(leaf, one);
+        if (sibling < leaves++)
+            positions.push_back(sibling * width);
+
+        shift_right_into(leaf);
+        shift_right_into(leaves);
+        shift_left_into(width);
+    }
+
+    return positions;
+}
+
 // Accept (contextual).
 // ----------------------------------------------------------------------------
 
