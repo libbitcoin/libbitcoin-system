@@ -710,72 +710,192 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__leaf_zero__empty)
 {
-    BOOST_REQUIRE(block::merkle_branch(0).empty());
+    BOOST_REQUIRE(block::merkle_branch(0, 0).empty());
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__one__zero)
 {
-    const std::vector<size_t> expected{ 0 };
-    BOOST_REQUIRE(block::merkle_branch(1) == expected);
+    const auto result = block::merkle_branch(1, 2);
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__two_for_odd_length__zero)
 {
-    const std::vector<size_t> expected{ 0 };
-    BOOST_REQUIRE(block::merkle_branch(2) == expected);
+    const auto result = block::merkle_branch(2, 3);
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 2u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__three__two_and_zero)
 {
-    const std::vector<size_t> expected{ 2, 0 };
-    BOOST_REQUIRE(block::merkle_branch(3) == expected);
+    const auto result = block::merkle_branch(3, 4);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 2u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 2u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__seven__six_four_and_zero)
 {
-    const std::vector<size_t> expected{ 6, 4, 0 };
-    BOOST_REQUIRE(block::merkle_branch(7) == expected);
+    const auto result = block::merkle_branch(7, 8);
+    BOOST_REQUIRE_EQUAL(result.size(), 3u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 6u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 2u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 2u);
+    BOOST_REQUIRE_EQUAL(result[2].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[2].width, 4u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__ten_for_odd__eight_and_zero)
 {
-    const std::vector<size_t> expected{ 8, 0 };
-    BOOST_REQUIRE(block::merkle_branch(10) == expected);
+    const auto result = block::merkle_branch(10, 11);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 4u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 2u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 8u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__medium_power_of_two__expected)
 {
-    const std::vector<size_t> expected{ 14u, 12u, 8u, 0u };
-    BOOST_REQUIRE(block::merkle_branch(15u) == expected);
+    const block::positions expected{ { 14, 1 }, { 6, 2 }, { 2, 4 }, { 0, 8 } };
+
+    const auto result = block::merkle_branch(15, 16);
+    BOOST_REQUIRE_EQUAL(result.size(), 4u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 14u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 6u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 2u);
+    BOOST_REQUIRE_EQUAL(result[2].sibling, 2u);
+    BOOST_REQUIRE_EQUAL(result[2].width, 4u);
+    BOOST_REQUIRE_EQUAL(result[3].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[3].width, 8u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__power_of_two_minus_one__expected)
 {
     constexpr auto leaf = 1023u;
-    constexpr auto size = ceilinged_log2(leaf);
-    const auto positions = block::merkle_branch(leaf);
-    BOOST_CHECK_EQUAL(positions.size(), size);
-    BOOST_CHECK_EQUAL(positions.front(), 1022u);
-    BOOST_CHECK_EQUAL(positions.back(), 0u);
+    constexpr auto size = sub1(ceilinged_log2(add1(leaf)));
+    const auto branch = block::merkle_branch(leaf, add1(leaf));
+    BOOST_REQUIRE_EQUAL(branch.size(), size);
+    BOOST_REQUIRE_EQUAL(branch.front().sibling, 1022u);
+    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
+    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
+    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__odd_large_leaf_with_duplication__expected)
 {
     constexpr auto leaf = 2047u;
-    constexpr auto size = ceilinged_log2(leaf);
-    const auto positions = block::merkle_branch(leaf);
-    BOOST_CHECK_EQUAL(positions.size(), size);
-    BOOST_CHECK_EQUAL(positions.front(), 2046u);
-    BOOST_CHECK_EQUAL(positions.back(), 0u);
+    constexpr auto size = sub1(ceilinged_log2(add1(leaf)));
+    const auto branch = block::merkle_branch(leaf, add1(leaf));
+    BOOST_REQUIRE_EQUAL(branch.size(), size);
+    BOOST_REQUIRE_EQUAL(branch.front().sibling, 2046u);
+    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
+    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
+    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__maximum_non_overflow__expected)
 {
     constexpr auto maximum = sub1(power2(sub1(bits<size_t>)));
-    const auto positions = block::merkle_branch(maximum);
-    BOOST_CHECK_EQUAL(positions.size(), sub1(bits<size_t>));
-    BOOST_CHECK_EQUAL(positions.front(), sub1(maximum));
-    BOOST_CHECK_EQUAL(positions.back(), 0u);
+    const auto branch = block::merkle_branch(maximum, add1(maximum));
+    BOOST_REQUIRE_EQUAL(branch.size(), sub1(bits<size_t>));
+    BOOST_REQUIRE_EQUAL(branch.front().sibling, sub1(maximum));
+    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
+    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
+    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(sub1(bits<size_t>))));
+}
+
+// TODO: unused.
+hash_digest get_hash(size_t /* height */) NOEXCEPT
+{
+    return {};
+}
+
+// TODO: database query, limited to interval heights, txs table.
+hash_digest get_interval(size_t /* last */) NOEXCEPT
+{
+    return {};
+}
+
+// TODO: database query, chase ancestry.
+hashes get_segment(size_t first, size_t count) NOEXCEPT
+{
+    BC_ASSERT(!is_add_overflow(first, count));
+
+    hashes out{};
+    out.reserve(count);
+    for (auto height = first; height < (first + count); ++height)
+        out.push_back(get_hash(height));
+
+    return out;
+}
+
+void push(hashes& branch, hashes&& hashes, size_t first,
+    size_t count) NOEXCEPT
+{
+    for (const auto& row: block::merkle_branch(first, count))
+    {
+        const auto it = std::next(hashes.begin(), row.sibling * row.width);
+        const auto mover = std::make_move_iterator(it);
+        branch.push_back(merkle_root({ mover, std::next(mover, row.width) }));
+    }
+}
+
+// Compute branch for target given checkpoint and merkle tree (hashes).
+hashes compute_merkle_proof(hashes roots, size_t checkpoint,
+    size_t target) NOEXCEPT
+{
+    constexpr auto depth = 11u;
+    constexpr auto size = power2(depth);
+    const auto local = target % size;
+    const auto index = target / size;
+    const auto start = index * size;
+    const auto end = std::min(sub1(start + size), checkpoint);
+    const auto length = add1(end - start);
+
+    hashes branch{};
+    branch.reserve(ceilinged_log2(length) + ceilinged_log2(roots.size()));
+    push(branch, get_segment(start, length), local, length);
+    push(branch, std::move(roots), index, roots.size());
+    return branch;
+}
+
+hashes compute_merkle_roots(size_t checkpoint) NOEXCEPT
+{
+    constexpr auto depth = 11u;
+    constexpr auto size = power2(depth);
+    const auto total = add1(checkpoint);
+
+    hashes roots{};
+    roots.reserve(ceilinged_divide(total, size));
+    for (size_t start{}; start < total; start += size)
+    {
+        const auto end = std::min(sub1(start + size), checkpoint);
+        const auto length = add1(end - start);
+        roots.push_back(length == size ? get_interval(end) :
+            merkle_root(get_segment(start, length)));
+    }
+
+    return roots;
+}
+
+// Computes root and branch (proof) for a block height up to a checkpoint.
+std::pair<hash_digest, hashes> compute_root_and_branch(size_t checkpoint,
+    size_t height) NOEXCEPT
+{
+    BC_ASSERT(height <= checkpoint);
+
+    auto roots = compute_merkle_roots(checkpoint);
+    auto proof = compute_merkle_proof(roots, checkpoint, height);
+    auto root = merkle_root(std::move(roots));
+    return { std::move(root), std::move(proof) };
 }
 
 // is_overweight
