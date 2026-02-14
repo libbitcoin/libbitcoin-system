@@ -24,7 +24,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Safely determine whether product is a whole mutiple of value.
+/// Safely determine whether product is a whole multiple of value.
 template <typename Integer,
     if_integer<Integer> = true>
 constexpr bool is_multiple(Integer product, Integer value) NOEXCEPT;

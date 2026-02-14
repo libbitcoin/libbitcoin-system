@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(istream__read__full_buffer__goodbit)
 
 // reader
 
-BOOST_AUTO_TEST_CASE(istream__reader__read_8_bytes_big_endian__exected_goodbit)
+BOOST_AUTO_TEST_CASE(istream__reader__read_8_bytes_big_endian__expected_goodbit)
 {
     auto chunk = base16_chunk("010203040506070809");
     istream<> stream{ chunk };

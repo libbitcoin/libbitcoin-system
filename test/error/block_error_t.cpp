@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(block_error_t_tests)
 
 // These test std::error_code equality operator overrides.
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_success__false_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_success__false_expected_message)
 {
     constexpr auto value = error::block_success;
     const auto ec = code(value);
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_success__false_exected_message)
 
 // check header
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_proof_of_work__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_proof_of_work__true_expected_message)
 {
     constexpr auto value = error::invalid_proof_of_work;
     const auto ec = code(value);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_proof_of_work__true_exected_me
     BOOST_REQUIRE_EQUAL(ec.message(), "proof of work invalid");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__futuristic_timestamp__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__futuristic_timestamp__true_expected_message)
 {
     constexpr auto value = error::futuristic_timestamp;
     const auto ec = code(value);
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__futuristic_timestamp__true_exected_mes
 
 // accept header
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__checkpoint_conflict__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__checkpoint_conflict__true_expected_message)
 {
     constexpr auto value = error::checkpoint_conflict;
     const auto ec = code(value);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__checkpoint_conflict__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "block hash rejected by checkpoint");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__insufficient_block_version__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__insufficient_block_version__true_expected_message)
 {
     constexpr auto value = error::insufficient_block_version;
     const auto ec = code(value);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__insufficient_block_version__true_exect
     BOOST_REQUIRE_EQUAL(ec.message(), "block version rejected at current height");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__anachronistic_timestamp__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__anachronistic_timestamp__true_expected_message)
 {
     constexpr auto value = error::anachronistic_timestamp;
     const auto ec = code(value);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__anachronistic_timestamp__true_exected_
     BOOST_REQUIRE_EQUAL(ec.message(), "block timestamp is too early");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_expected_message)
 {
     constexpr auto value = error::incorrect_proof_of_work;
     const auto ec = code(value);
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_exected_
 
 // confirm header
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__orphan_block__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__orphan_block__true_expected_message)
 {
     constexpr auto value = error::orphan_block;
     const auto ec = code(value);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__orphan_block__true_exected_message)
 
 // check block
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_size_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_size_limit__true_expected_message)
 {
     constexpr auto value = error::block_size_limit;
     const auto ec = code(value);
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_size_limit__true_exected_message
     BOOST_REQUIRE_EQUAL(ec.message(), "block size limit exceeded");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__empty_block__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__empty_block__true_expected_message)
 {
     constexpr auto value = error::empty_block;
     const auto ec = code(value);
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__empty_block__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "block has no transactions");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__first_not_coinbase__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__first_not_coinbase__true_expected_message)
 {
     constexpr auto value = error::first_not_coinbase;
     const auto ec = code(value);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__first_not_coinbase__true_exected_messa
     BOOST_REQUIRE_EQUAL(ec.message(), "first transaction not a coinbase");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__extra_coinbases__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__extra_coinbases__true_expected_message)
 {
     constexpr auto value = error::extra_coinbases;
     const auto ec = code(value);
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__extra_coinbases__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "more than one coinbase");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__internal_duplicate__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__internal_duplicate__true_expected_message)
 {
     constexpr auto value = error::internal_duplicate;
     const auto ec = code(value);
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__internal_duplicate__true_exected_messa
     BOOST_REQUIRE_EQUAL(ec.message(), "matching transaction hashes in block");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_internal_double_spend__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_internal_double_spend__true_expected_message)
 {
     constexpr auto value = error::block_internal_double_spend;
     const auto ec = code(value);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_internal_double_spend__true_exec
     BOOST_REQUIRE_EQUAL(ec.message(), "double spend internal to block");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__forward_reference__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__forward_reference__true_expected_message)
 {
     constexpr auto value = error::forward_reference;
     const auto ec = code(value);
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__forward_reference__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "transactions out of order");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_transaction_commitment__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_transaction_commitment__true_expected_message)
 {
     constexpr auto value = error::invalid_transaction_commitment;
     const auto ec = code(value);
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_transaction_commitment__true_e
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid transaction commitment");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_legacy_sigop_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_legacy_sigop_limit__true_expected_message)
 {
     constexpr auto value = error::block_legacy_sigop_limit;
     const auto ec = code(value);
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_legacy_sigop_limit__true_exected
 
 // accept block
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_non_final__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_non_final__true_expected_message)
 {
     constexpr auto value = error::block_non_final;
     const auto ec = code(value);
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_non_final__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "block contains a non-final transaction");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_height_mismatch__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_height_mismatch__true_expected_message)
 {
     constexpr auto value = error::coinbase_height_mismatch;
     const auto ec = code(value);
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_height_mismatch__true_exected
     BOOST_REQUIRE_EQUAL(ec.message(), "block height mismatch in coinbase");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_value_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_value_limit__true_expected_message)
 {
     constexpr auto value = error::coinbase_value_limit;
     const auto ec = code(value);
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__coinbase_value_limit__true_exected_mes
     BOOST_REQUIRE_EQUAL(ec.message(), "coinbase value too high");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_sigop_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_sigop_limit__true_expected_message)
 {
     constexpr auto value = error::block_sigop_limit;
     const auto ec = code(value);
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_sigop_limit__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "too many block signature operations");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_witness_commitment__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_witness_commitment__true_expected_message)
 {
     constexpr auto value = error::invalid_witness_commitment;
     const auto ec = code(value);
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_witness_commitment__true_exect
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid witness commitment");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__block_weight_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_weight_limit__true_expected_message)
 {
     constexpr auto value = error::block_weight_limit;
     const auto ec = code(value);
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_weight_limit__true_exected_messa
     BOOST_REQUIRE_EQUAL(ec.message(), "block weight limit exceeded");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__temporary_hash_limit__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__temporary_hash_limit__true_expected_message)
 {
     constexpr auto value = error::temporary_hash_limit;
     const auto ec = code(value);
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__temporary_hash_limit__true_exected_mes
     BOOST_REQUIRE_EQUAL(ec.message(), "block contains too many hashes");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__unspent_coinbase_collision__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__unspent_coinbase_collision__true_expected_message)
 {
     constexpr auto value = error::unspent_coinbase_collision;
     const auto ec = code(value);

@@ -41,8 +41,10 @@ public:
     DEFAULT_COPY_MOVE_DESTRUCT(block);
 
     typedef std::shared_ptr<const block> cptr;
+    struct position { size_t sibling; size_t width; };
+    using positions = std::vector<position>;
 
-    static std::vector<size_t> merkle_branch(size_t leaf) NOEXCEPT;
+    static positions merkle_branch(size_t leaf, size_t leaves) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;

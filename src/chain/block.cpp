@@ -229,12 +229,11 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 
 hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
-    const auto count = txs_->size();
-    const auto size = is_odd(count) && count > one ? add1(count) : count;
-    hashes out{ size };
-
     // Extra allocation for odd count optimizes for merkle root.
     // Vector capacity is never reduced when resizing to smaller size.
+    const auto count = txs_->size();
+    const auto size = is_odd(count) && count > one ? add1(count) : count;
+    hashes out(size);
     out.resize(count);
 
     const auto hash = [witness](const auto& tx) NOEXCEPT
@@ -404,7 +403,7 @@ bool block::is_forward_reference() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    unordered_set_of_hash_cref hashes{ sub1(txs_->size()) };
+    unordered_set_of_hash_cref hashes(sub1(txs_->size()));
     for (auto tx = txs_->rbegin(); tx != std::prev(txs_->rend()); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
@@ -425,7 +424,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    unordered_set_of_point_cref points{ spends() };
+    unordered_set_of_point_cref points(spends());
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
         for (const auto& in: *(*tx)->inputs_ptr())
             if (!points.emplace(in->point()).second)
@@ -446,29 +445,29 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
 }
 
 // public/static (utility)
-std::vector<size_t> block::merkle_branch(size_t leaf) NOEXCEPT
+block::positions block::merkle_branch(size_t leaf, size_t leaves) NOEXCEPT
 {
-    BC_ASSERT(leaf < power2(sub1(bits<size_t>)));
+    BC_ASSERT(leaves <= power2(sub1(bits<size_t>)));
 
-    std::vector<size_t> positions{};
-    if (is_zero(leaf))
-        return positions;
+    positions branch{};
+    if (is_zero(leaves) || leaf >= leaves)
+        return branch;
 
     // Upper bound, actual count may be less due to duplication.
-    positions.reserve(ceilinged_log2(leaf));
+    branch.reserve(ceilinged_log2(leaves));
 
-    for (auto width = one, leaves = add1(leaf); leaves > one;)
+    for (auto width = one, current = leaves; current > one;)
     {
         const auto sibling = bit_xor(leaf, one);
-        if (sibling < leaves++)
-            positions.push_back(sibling * width);
+        if (sibling < current++)
+            branch.emplace_back(sibling, width);
 
-        shift_right_into(leaf);
-        shift_right_into(leaves);
         shift_left_into(width);
+        shift_right_into(leaf);
+        shift_right_into(current);
     }
 
-    return positions;
+    return branch;
 }
 
 // Accept (contextual).
@@ -506,7 +505,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         return false;
 
     // A set is used to collapse duplicates.
-    unordered_set_of_hash_cref hashes{ txs_->size() };
+    unordered_set_of_hash_cref hashes(txs_->size());
 
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.emplace(txs_->front()->get_hash(false));
@@ -768,7 +767,7 @@ void block::populate() const NOEXCEPT
     if (txs_->empty())
         return;
 
-    unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
+    unordered_map_of_cref_point_to_output_cptr_cref points(outputs());
     uint32_t index{};
 
     // Populate outputs hash table (coinbase included).
@@ -797,7 +796,7 @@ code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
         return error::block_success;
 
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
-    unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
+    unordered_map_of_cref_point_to_output_cptr_cref points(outputs());
     uint32_t index{};
 
     // Populate outputs hash table (coinbase included).

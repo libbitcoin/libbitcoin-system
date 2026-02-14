@@ -710,72 +710,106 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__leaf_zero__empty)
 {
-    BOOST_REQUIRE(block::merkle_branch(0).empty());
+    BOOST_REQUIRE(block::merkle_branch(0, 0).empty());
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__one__zero)
 {
-    const std::vector<size_t> expected{ 0 };
-    BOOST_REQUIRE(block::merkle_branch(1) == expected);
+    const auto result = block::merkle_branch(1, 2);
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__two_for_odd_length__zero)
 {
-    const std::vector<size_t> expected{ 0 };
-    BOOST_REQUIRE(block::merkle_branch(2) == expected);
+    const auto result = block::merkle_branch(2, 3);
+    BOOST_REQUIRE_EQUAL(result.size(), 1u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 2u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__three__two_and_zero)
 {
-    const std::vector<size_t> expected{ 2, 0 };
-    BOOST_REQUIRE(block::merkle_branch(3) == expected);
+    const auto result = block::merkle_branch(3, 4);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 2u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 2u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__seven__six_four_and_zero)
 {
-    const std::vector<size_t> expected{ 6, 4, 0 };
-    BOOST_REQUIRE(block::merkle_branch(7) == expected);
+    const auto result = block::merkle_branch(7, 8);
+    BOOST_REQUIRE_EQUAL(result.size(), 3u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 6u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 2u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 2u);
+    BOOST_REQUIRE_EQUAL(result[2].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[2].width, 4u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__ten_for_odd__eight_and_zero)
 {
-    const std::vector<size_t> expected{ 8, 0 };
-    BOOST_REQUIRE(block::merkle_branch(10) == expected);
+    const auto result = block::merkle_branch(10, 11);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 4u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 2u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 8u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__medium_power_of_two__expected)
 {
-    const std::vector<size_t> expected{ 14u, 12u, 8u, 0u };
-    BOOST_REQUIRE(block::merkle_branch(15u) == expected);
+    const block::positions expected{ { 14, 1 }, { 6, 2 }, { 2, 4 }, { 0, 8 } };
+
+    const auto result = block::merkle_branch(15, 16);
+    BOOST_REQUIRE_EQUAL(result.size(), 4u);
+    BOOST_REQUIRE_EQUAL(result[0].sibling, 14u);
+    BOOST_REQUIRE_EQUAL(result[0].width, 1u);
+    BOOST_REQUIRE_EQUAL(result[1].sibling, 6u);
+    BOOST_REQUIRE_EQUAL(result[1].width, 2u);
+    BOOST_REQUIRE_EQUAL(result[2].sibling, 2u);
+    BOOST_REQUIRE_EQUAL(result[2].width, 4u);
+    BOOST_REQUIRE_EQUAL(result[3].sibling, 0u);
+    BOOST_REQUIRE_EQUAL(result[3].width, 8u);
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__power_of_two_minus_one__expected)
 {
     constexpr auto leaf = 1023u;
-    constexpr auto size = ceilinged_log2(leaf);
-    const auto positions = block::merkle_branch(leaf);
-    BOOST_CHECK_EQUAL(positions.size(), size);
-    BOOST_CHECK_EQUAL(positions.front(), 1022u);
-    BOOST_CHECK_EQUAL(positions.back(), 0u);
+    constexpr auto size = sub1(ceilinged_log2(add1(leaf)));
+    const auto branch = block::merkle_branch(leaf, add1(leaf));
+    BOOST_REQUIRE_EQUAL(branch.size(), size);
+    BOOST_REQUIRE_EQUAL(branch.front().sibling, 1022u);
+    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
+    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
+    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__odd_large_leaf_with_duplication__expected)
 {
     constexpr auto leaf = 2047u;
-    constexpr auto size = ceilinged_log2(leaf);
-    const auto positions = block::merkle_branch(leaf);
-    BOOST_CHECK_EQUAL(positions.size(), size);
-    BOOST_CHECK_EQUAL(positions.front(), 2046u);
-    BOOST_CHECK_EQUAL(positions.back(), 0u);
+    constexpr auto size = sub1(ceilinged_log2(add1(leaf)));
+    const auto branch = block::merkle_branch(leaf, add1(leaf));
+    BOOST_REQUIRE_EQUAL(branch.size(), size);
+    BOOST_REQUIRE_EQUAL(branch.front().sibling, 2046u);
+    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
+    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
+    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
 }
 
 BOOST_AUTO_TEST_CASE(block__merkle_branch__maximum_non_overflow__expected)
 {
     constexpr auto maximum = sub1(power2(sub1(bits<size_t>)));
-    const auto positions = block::merkle_branch(maximum);
-    BOOST_CHECK_EQUAL(positions.size(), sub1(bits<size_t>));
-    BOOST_CHECK_EQUAL(positions.front(), sub1(maximum));
-    BOOST_CHECK_EQUAL(positions.back(), 0u);
+    const auto branch = block::merkle_branch(maximum, add1(maximum));
+    BOOST_REQUIRE_EQUAL(branch.size(), sub1(bits<size_t>));
+    BOOST_REQUIRE_EQUAL(branch.front().sibling, sub1(maximum));
+    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
+    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
+    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(sub1(bits<size_t>))));
 }
 
 // is_overweight
