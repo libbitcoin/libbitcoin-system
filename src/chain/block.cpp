@@ -229,12 +229,11 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 
 hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
+    // Extra allocation for odd count optimizes for merkle root.
+    // Vector capacity is never reduced when resizing to smaller size.
     const auto count = txs_->size();
     const auto size = is_odd(count) && count > one ? add1(count) : count;
     hashes out(size);
-
-    // Extra allocation for odd count optimizes for merkle root.
-    // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
 
     const auto hash = [witness](const auto& tx) NOEXCEPT
@@ -449,10 +448,9 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
 block::positions block::merkle_branch(size_t leaf, size_t leaves) NOEXCEPT
 {
     BC_ASSERT(leaves <= power2(sub1(bits<size_t>)));
-    BC_ASSERT(leaf < leaves);
 
     positions branch{};
-    if (is_zero(leaves))
+    if (is_zero(leaves) || leaf >= leaves)
         return branch;
 
     // Upper bound, actual count may be less due to duplication.
