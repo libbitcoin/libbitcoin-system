@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(script_error_t_tests)
 
 // These test std::error_code equality operator overrides.
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__script_success__false_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__script_success__false_expected_message)
 {
     constexpr auto value = error::script_success;
     const auto ec = code(value);
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__script_success__false_exected_message
     BOOST_REQUIRE_EQUAL(ec.message(), "script success");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__inputs_overflow__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__inputs_overflow__true_expected_message)
 {
     constexpr auto value = error::inputs_overflow;
     const auto ec = code(value);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__inputs_overflow__true_exected_message
     BOOST_REQUIRE_EQUAL(ec.message(), "index exceeds inputs");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script__true_expected_message)
 {
     constexpr auto value = error::invalid_script;
     const auto ec = code(value);
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid script");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__prefail_script__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__prefail_script__true_expected_message)
 {
     constexpr auto value = error::prefail_script;
     const auto ec = code(value);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__prefail_script__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "script contains invalid opcode");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__prevalid_script__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__prevalid_script__true_expected_message)
 {
     constexpr auto value = error::prevalid_script;
     const auto ec = code(value);
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__prevalid_script__true_exected_message
     BOOST_REQUIRE_EQUAL(ec.message(), "script contains success opcode");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_size__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_size__true_expected_message)
 {
     constexpr auto value = error::invalid_script_size;
     const auto ec = code(value);
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_size__true_exected_mes
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid script size");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_push_data_size__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_push_data_size__true_expected_message)
 {
     constexpr auto value = error::invalid_push_data_size;
     const auto ec = code(value);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_push_data_size__true_exected_
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid push data size");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_operation_count__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_operation_count__true_expected_message)
 {
     constexpr auto value = error::invalid_operation_count;
     const auto ec = code(value);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_operation_count__true_exected
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid operation count");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_stack_size__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_stack_size__true_expected_message)
 {
     constexpr auto value = error::invalid_stack_size;
     const auto ec = code(value);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_stack_size__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid stack size");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_stack_scope__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_stack_scope__true_expected_message)
 {
     constexpr auto value = error::invalid_stack_scope;
     const auto ec = code(value);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_stack_scope__true_exected_mes
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid stack scope");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_embed__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_embed__true_expected_message)
 {
     constexpr auto value = error::invalid_script_embed;
     const auto ec = code(value);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_embed__true_exected_me
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid script embed");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__unversioned_script__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__unversioned_script__true_expected_message)
 {
     constexpr auto value = error::unversioned_script;
     const auto ec = code(value);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__unversioned_script__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "unversioned script");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__unexpected_witness__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__unexpected_witness__true_expected_message)
 {
     constexpr auto value = error::unexpected_witness;
     const auto ec = code(value);
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__unexpected_witness__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "unexpected witness");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness__true_expected_message)
 {
     constexpr auto value = error::invalid_witness;
     const auto ec = code(value);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness__true_exected_message
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid witness");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness_stack__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness_stack__true_expected_message)
 {
     constexpr auto value = error::invalid_witness_stack;
     const auto ec = code(value);
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness_stack__true_exected_m
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid witness stack");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_commitment__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_commitment__true_expected_message)
 {
     constexpr auto value = error::invalid_commitment;
     const auto ec = code(value);
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_commitment__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid tapscript commitment");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_witness__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_witness__true_expected_message)
 {
     constexpr auto value = error::dirty_witness;
     const auto ec = code(value);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_witness__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "dirty witness");
 }
 
-BOOST_AUTO_TEST_CASE(script_error_t__code__stack_false__true_exected_message)
+BOOST_AUTO_TEST_CASE(script_error_t__code__stack_false__true_expected_message)
 {
     constexpr auto value = error::stack_false;
     const auto ec = code(value);

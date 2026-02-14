@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(iostream__read__full_buffer__goodbit)
 
 // reader
 
-BOOST_AUTO_TEST_CASE(iostream__reader__read_8_bytes_big_endian__exected_goodbit)
+BOOST_AUTO_TEST_CASE(iostream__reader__read_8_bytes_big_endian__expected_goodbit)
 {
     auto chunk = base16_chunk("010203040506070809");
     iostream<> stream{ chunk };
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(iostream__write__full_buffer__goodbit)
 
 // writer
 
-BOOST_AUTO_TEST_CASE(iostream__writer__write_8_bytes_big_endian__exected_goodbit)
+BOOST_AUTO_TEST_CASE(iostream__writer__write_8_bytes_big_endian__expected_goodbit)
 {
     const auto expected = base16_chunk("010203040506070800");
     auto chunk = base16_chunk("000000000000000000");

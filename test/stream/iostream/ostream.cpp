@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__full_buffer__goodbit)
 
 // writer
 
-BOOST_AUTO_TEST_CASE(ostream__writer__write_8_bytes_big_endian__exected_goodbit)
+BOOST_AUTO_TEST_CASE(ostream__writer__write_8_bytes_big_endian__expected_goodbit)
 {
     const auto expected = base16_chunk("010203040506070800");
     auto chunk = base16_chunk("000000000000000000");

@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(error_t_tests)
 
 // These test std::error_code equality operator overrides.
 
-BOOST_AUTO_TEST_CASE(error_t__code__success__false_exected_message)
+BOOST_AUTO_TEST_CASE(error_t__code__success__false_expected_message)
 {
     constexpr auto value = error::success;
     const auto ec = code(value);
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(error_t__code__success__false_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "success");
 }
 
-BOOST_AUTO_TEST_CASE(error_t__code__not_found__true_exected_message)
+BOOST_AUTO_TEST_CASE(error_t__code__not_found__true_expected_message)
 {
     constexpr auto value = error::not_found;
     const auto ec = code(value);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(error_t__code__not_found__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "object does not exist");
 }
 
-BOOST_AUTO_TEST_CASE(error_t__code__not_implemented__true_exected_message)
+BOOST_AUTO_TEST_CASE(error_t__code__not_implemented__true_expected_message)
 {
     constexpr auto value = error::not_implemented;
     const auto ec = code(value);
