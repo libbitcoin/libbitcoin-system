@@ -563,10 +563,16 @@ bool transaction::is_segregated() const NOEXCEPT
 
 size_t transaction::weight() const NOEXCEPT
 {
-    // Block weight is 3 * base size * + 1 * total size [bip141].
+    // Transaction weight is 3 * base size * + 1 * total size [bip141].
     return ceilinged_add(
         ceilinged_multiply(base_size_contribution, serialized_size(false)),
         ceilinged_multiply(total_size_contribution, serialized_size(true)));
+}
+
+size_t transaction::virtual_size() const NOEXCEPT
+{
+    constexpr auto scale = base_size_contribution + total_size_contribution;
+    return ceilinged_divide(weight(), scale);
 }
 
 bool transaction::is_overweight() const NOEXCEPT
