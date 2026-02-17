@@ -481,6 +481,12 @@ size_t block::weight() const NOEXCEPT
         ceilinged_multiply(total_size_contribution, serialized_size(true)));
 }
 
+size_t block::virtual_size() const NOEXCEPT
+{
+    constexpr auto scale = base_size_contribution + total_size_contribution;
+    return ceilinged_divide(weight(), scale);
+}
+
 bool block::is_overweight() const NOEXCEPT
 {
     return weight() > max_block_weight;

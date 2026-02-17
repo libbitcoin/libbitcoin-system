@@ -111,6 +111,7 @@ public:
     bool is_segregated() const NOEXCEPT;
     hash_digest hash(bool witness) const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
+    size_t virtual_size() const NOEXCEPT;
 
     /// Cache setters/getters, not thread safe.
     /// -----------------------------------------------------------------------

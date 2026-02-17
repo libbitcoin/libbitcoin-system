@@ -100,6 +100,7 @@ public:
     size_t segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+    size_t virtual_size() const NOEXCEPT;
 
     /// Computed malleation properties.
     bool is_malleable() const NOEXCEPT;
