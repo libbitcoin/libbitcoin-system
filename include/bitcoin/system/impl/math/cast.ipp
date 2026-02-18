@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_CAST_IPP
 #define LIBBITCOIN_SYSTEM_MATH_CAST_IPP
 
+#include <cmath>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -208,6 +209,30 @@ constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT
 
 // Floating point casts.
 // ----------------------------------------------------------------------------
+
+template <typename Integer, typename Float,
+    if_integral_integer<Integer>,
+    if_floating_point<Float>>
+constexpr bool to_integer(Integer& out, Float value) NOEXCEPT
+{
+    if (!std::isfinite(value))
+        return false;
+
+    Float integer{};
+    const Float fractional = std::modf(value, &integer);
+    if (fractional != 0.0)
+        return false;
+
+    if (integer > static_cast<Float>(std::numeric_limits<Integer>::max()) ||
+        integer < static_cast<Float>(std::numeric_limits<Integer>::min()))
+        return false;
+
+    // Floating point conversion in c++ requires explicit or implicit cast.
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    out = static_cast<Integer>(integer);
+    BC_POP_WARNING()
+    return true;
+}
 
 template <typename Integer, typename Float,
     if_integral_integer<Integer>,
