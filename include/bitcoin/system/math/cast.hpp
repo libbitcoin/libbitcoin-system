@@ -142,19 +142,53 @@ constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT;
 /// Floating point casts.
 /// ---------------------------------------------------------------------------
 
-/// Cast floating point to integral integer, overflow guarded.
+/// Cast floating point to integral integer (truncated).
+/// True for any finite value that falls within Integer domain.
+/// False if fractional part is non-zero when whole is set true.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>
-constexpr bool to_integer(Integer& out, Float value) NOEXCEPT;
+inline bool to_integer(Integer& out, Float value, bool whole=true) NOEXCEPT;
 
-/// Cast floating point to integral integer, overflow unguarded.
+/// Cast floating point to integral integer (ceilinged).
+/// Any non-finite value returns the integer domain maximum.
+/// Overflow/underflow is clamped to respective integer upper/lower limit.
+template <typename Integer = size_t, typename Float,
+    if_integral_integer<Integer> = true,
+    if_floating_point<Float> = true>
+inline Integer to_ceilinged_integer(Float value) NOEXCEPT;
+
+/// Cast floating point to integral integer (floored).
+/// Any non-finite value returns the integer domain maximum.
+/// Overflow/underflow is clamped to respective integer upper/lower limit.
+template <typename Integer = size_t, typename Float,
+    if_integral_integer<Integer> = true,
+    if_floating_point<Float> = true>
+inline Integer to_floored_integer(Float value) NOEXCEPT;
+
+/// Cast floating point to integral integer (rounded).
+/// Any non-finite value returns the integer domain maximum.
+/// Overflow/underflow is clamped to respective integer upper/lower limit.
+template <typename Integer = size_t, typename Float,
+    if_integral_integer<Integer> = true,
+    if_floating_point<Float> = true>
+inline Integer to_rounded_integer(Float value) NOEXCEPT;
+
+/// Cast floating point to integral integer (truncated).
+/// Any non-finite value returns the integer domain maximum.
+/// Overflow/underflow is clamped to respective integer upper/lower limit.
+template <typename Integer = size_t, typename Float,
+    if_integral_integer<Integer> = true,
+    if_floating_point<Float> = true>
+inline Integer to_truncated_integer(Float value) NOEXCEPT;
+
+/// Cast floating point to integral integer, overflow/underflow UNGUARDED.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>
 constexpr Integer to_integer(Float value) NOEXCEPT;
 
-/// Cast integral integer to floating point, overflow unguarded.
+/// Cast integral integer to floating point, overflow/underflow not possible.
 template <typename Float = double, typename Integer,
     if_floating_point<Float> = true,
     if_integral_integer<Integer> = true>

@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <cfloat>
 
 // promote
 // depromote
@@ -76,281 +77,162 @@ static_assert(is_same_type<decltype(to_floating(1u)), double>);
 static_assert(is_same_type<decltype(to_floating<float>(1u)), float>);
 static_assert(is_same_type<decltype(to_floating<double>(2u)), double>);
 
-// Verify compiler "usual arithmetic conversion" expectations.
-// ----------------------------------------------------------------------------
-// Shift works like a unary op (right operand is not incorporated).
-// Order of operands does not affect (other) binary ops.
-// self-assigning (e.g. >>=, /=) ops obviously do not (cannot) promote.
-// ! and comparison are not mathematical ops.
+// TODO: below can move to static_assert under c++23.
 
-// Unary ops (+/-/~) change to unsigned upon width promotion, not otherwise.
-// + is a unary op and produces promotion.
-// std::common_type does not support unary operators.
-// std::common_type<Left, Right>::type == decltype(left - right)
-// std::common_type<Value>::type != decltype(-value)
-using integer = decltype(-'a');
-using character = std::common_type_t<char>;
-using common_character = std::common_type_t<char, char>;
-static_assert(!is_same_type<integer, character>);
-static_assert(!is_same_type<integer, common_character>);
+BOOST_AUTO_TEST_SUITE(cast_tests)
 
-// Compiler warns on bool safety for -b, ~b, <<b, >>b, /b, %b, b/, b% (assertions disabled).
+template <typename Type>
+using limit = std::numeric_limits<Type>;
 
-// invert
-static_assert(is_same_type<decltype(!char{0}),                   bool>, "boolean");
-static_assert(is_same_type<decltype(!int8_t{0}),                 bool>, "boolean");
-static_assert(is_same_type<decltype(!int16_t{0}),                bool>, "boolean");
-static_assert(is_same_type<decltype(!int32_t{0}),                bool>, "boolean");
-static_assert(is_same_type<decltype(!int64_t{0}),                bool>, "boolean");
-static_assert(is_same_type<decltype(!bool{false}),               bool>, "boolean");
-static_assert(is_same_type<decltype(!uint8_t{0}),                bool>, "boolean");
-static_assert(is_same_type<decltype(!uint16_t{0}),               bool>, "boolean");
-static_assert(is_same_type<decltype(!uint32_t{0}),               bool>, "boolean");
-static_assert(is_same_type<decltype(!uint64_t{0}),               bool>, "boolean");
+// to_integer2/3
 
-// comparison
-static_assert(is_same_type<decltype(uint8_t{0}  == char{0}),     bool>, "boolean");
-static_assert(is_same_type<decltype(uint8_t{0}  != uint8_t{0}),  bool>, "boolean");
-static_assert(is_same_type<decltype(uint8_t{0}  >= uint16_t{0}), bool>, "boolean");
-static_assert(is_same_type<decltype(uint16_t{0} <= uint32_t{0}), bool>, "boolean");
-static_assert(is_same_type<decltype(uint32_t{0} == uint64_t{0}), bool>, "boolean");
-static_assert(is_same_type<decltype(uint64_t{0} == uint64_t{0}), bool>, "boolean");
-static_assert(is_same_type<decltype(uint8_t{0}  == bool{false}), bool>, "boolean");
-static_assert(is_same_type<decltype(bool{false} == uint32_t{0}), bool>, "boolean");
-static_assert(is_same_type<decltype(uint8_t{0}  == int8_t{0}),   bool>, "boolean");
-static_assert(is_same_type<decltype(uint8_t{0}  == int16_t{0}),  bool>, "boolean");
-static_assert(is_same_type<decltype(uint16_t{0} == int32_t{0}),  bool>, "boolean");
-static_assert(is_same_type<decltype(uint32_t{0} == int64_t{0}),  bool>, "boolean");
-static_assert(is_same_type<decltype(int64_t{0}  == uint32_t{0}), bool>, "boolean");
+BOOST_AUTO_TEST_CASE(cast__to_integer__non_finites__false)
+{
+    size_t value{};
+    BOOST_REQUIRE(!to_integer(value, limit<float>::quiet_NaN()));
+    BOOST_REQUIRE(!to_integer(value, limit<float>::infinity()));
+    BOOST_REQUIRE(!to_integer(value, -limit<float>::infinity()));
+    BOOST_REQUIRE(!to_integer(value, limit<float>::quiet_NaN(), false));
+    BOOST_REQUIRE(!to_integer(value, limit<float>::infinity(), false));
+    BOOST_REQUIRE(!to_integer(value, -limit<float>::infinity(), false));
+}
 
-// positive
-static_assert(is_same_type<decltype(+char{1}),                   int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(+int8_t{1}),                 int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(+int16_t{1}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(+int32_t{1}),                int32_t>,  "unpromoted (>=32");
-static_assert(is_same_type<decltype(+int64_t{1}),                int64_t>,  "unpromoted (>=32");
-static_assert(is_same_type<decltype(+bool{false}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(+uint8_t{1}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(+uint16_t{1}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(+uint32_t{1}),               uint32_t>, "unpromoted (>=32");
-static_assert(is_same_type<decltype(+uint64_t{1}),               uint64_t>, "unpromoted (>=32");
+BOOST_AUTO_TEST_CASE(cast__to_integer__finites__expected)
+{
+    size_t value{};
+    BOOST_REQUIRE(to_integer(value, 1.0, true));
+    BOOST_REQUIRE_EQUAL(value, 1u);
+    BOOST_REQUIRE(to_integer(value, 2.0, false));
+    BOOST_REQUIRE_EQUAL(value, 2u);
+    BOOST_REQUIRE(to_integer(value, 3.1, false));
+    BOOST_REQUIRE_EQUAL(value, 3u);
+    BOOST_REQUIRE(!to_integer(value, 3.1, true));
+}
 
-// negate (signed)
-static_assert(is_same_type<decltype(-char{1}),                   int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-int8_t{1}),                 int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-int16_t{1}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-int32_t{1}),                int32_t>,  "unpromoted (>=32");
-static_assert(is_same_type<decltype(-int64_t{1}),                int64_t>,  "unpromoted (>=32");
-////static_assert(is_same_type<decltype(-bool{false}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-uint8_t{1}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-uint16_t{1}),               int>,      "promoted   (<32)");
-////static_assert(is_same_type<decltype(-uint32_t{1}),               uint32_t>, "unpromoted (>=32");
-////static_assert(is_same_type<decltype(-uint64_t{1}),               uint64_t>, "unpromoted (>=32");
+// to_ceilinged_integer
 
-// negate (unsigned)
-static_assert(is_same_type<decltype(-char{1u}),                  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-int8_t{1u}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-int16_t{1u}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-int32_t{1u}),               int32_t>,  "unpromoted (>=32");
-static_assert(is_same_type<decltype(-int64_t{1u}),               int64_t>,  "unpromoted (>=32");
-////static_assert(is_same_type<decltype(-bool{false}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-uint8_t{1u}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(-uint16_t{1u}),              int>,      "promoted   (<32)");
-////static_assert(is_same_type<decltype(-uint32_t{1u}),              uint32_t>, "unpromoted (>=32");
-////static_assert(is_same_type<decltype(-uint64_t{1u}),              uint64_t>, "unpromoted (>=32");
+BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__non_finites__max)
+{
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-limit<double>::infinity()), max_size_t);
+}
 
-// ones_complement
-static_assert(is_same_type<decltype(~char{0}),                   int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(~int8_t{0}),                 int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(~int16_t{0}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(~int32_t{0}),                int32_t>,  "unpromoted (>=32");
-static_assert(is_same_type<decltype(~int64_t{0}),                int64_t>,  "unpromoted (>=32");
-////static_assert(is_same_type<decltype(~bool{false}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(~uint8_t{0}),                int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(~uint16_t{0}),               int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(~uint32_t{0}),               uint32_t>, "unpromoted (>=32");
-static_assert(is_same_type<decltype(~uint64_t{0}),               uint64_t>, "unpromoted (>=32");
+BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__overflow_underflow__clamped)
+{
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::max()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-limit<double>::max()), min_size_t);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(limit<double>::max()), max_int64);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-limit<double>::max()), min_int64);
+}
 
-// shift_left
-static_assert(is_same_type<decltype(uint8_t{0}  << char{0}),     int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  << uint8_t{0}),  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  << uint16_t{0}), int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint16_t{0} << uint32_t{0}), int >,     "promoted   (<32)");
-static_assert(is_same_type<decltype(uint32_t{0} << uint64_t{0}), uint32_t>, "unpromoted (>=32");
-static_assert(is_same_type<decltype(uint64_t{0} << uint64_t{0}), uint64_t>, "unpromoted (>=32");
-////static_assert(is_same_type<decltype(uint8_t{0}  << bool{false}), int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(bool{false} << uint32_t{0}), int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  << int8_t{0}),   int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  << int16_t{0}),  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint16_t{0} << int32_t{0}),  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint32_t{0} << int64_t{0}),  uint32_t>, "unpromoted (>=32");
-static_assert(is_same_type<decltype(int64_t{0}  << uint32_t{0}), int64_t>,  "unpromoted (>=32");
+BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__finites__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(0.0), 0u);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.0), 1u);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.1), 2u);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.9), 2u);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-0.1), 0u);  // Ceil to 0 for unsigned
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.0), -1);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.1), -1);
+    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.9), -1);
+}
 
-// shift_right
-static_assert(is_same_type<decltype(uint8_t{0}  >> char{0}),     int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  >> uint8_t{0}),  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  >> uint16_t{0}), int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint16_t{0} >> uint32_t{0}), int >,     "promoted   (<32)");
-static_assert(is_same_type<decltype(uint32_t{0} >> uint64_t{0}), uint32_t>, "unpromoted (>=32");
-static_assert(is_same_type<decltype(uint64_t{0} >> uint64_t{0}), uint64_t>, "unpromoted (>=32");
-////static_assert(is_same_type<decltype(uint8_t{0}  >> bool{false}), int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(bool{false} >> uint32_t{0}), int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  >> int8_t{0}),   int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint8_t{0}  >> int16_t{0}),  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint16_t{0} >> int32_t{0}),  int>,      "promoted   (<32)");
-static_assert(is_same_type<decltype(uint32_t{0} >> int64_t{0}),  uint32_t>, "unpromoted (>=32");
-static_assert(is_same_type<decltype(int64_t{0}  >> uint32_t{0}), int64_t>,  "unpromoted (>=32");
+// to_floored_integer
 
-// bit_and
-static_assert(is_same_type<decltype(uint8_t{0}  & char{0}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  & uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  & uint16_t{0}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} & uint32_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} & uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} & uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint8_t{0}  & bool{false}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  & int8_t{0}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  & int16_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} & int32_t{0}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} & int64_t{0}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  & uint32_t{0}), int64_t>,  "unsigned (two >=32, u/s)");
+BOOST_AUTO_TEST_CASE(cast__to_floored_integer__non_finites__max)
+{
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-limit<double>::infinity()), max_size_t);
+}
 
-// bit_or
-static_assert(is_same_type<decltype(uint8_t{0}  | char{0}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  | uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  | uint16_t{0}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} | uint32_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} | uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} | uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint8_t{0}  | bool{false}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  | int8_t{0}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  | int16_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} | int32_t{0}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} | int64_t{0}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  | uint32_t{0}), int64_t>,  "unsigned (two >=32, u/s)");
+BOOST_AUTO_TEST_CASE(cast__to_floored_integer__overflow_underflow__clamped)
+{
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::max()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-limit<double>::max()), min_size_t);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(limit<double>::max()), max_int64);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-limit<double>::max()), min_int64);
+}
 
-// bit_xor
-static_assert(is_same_type<decltype(uint8_t{0}  ^ char{0}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  ^ uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  ^ uint16_t{0}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} ^ uint32_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} ^ uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} ^ uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint8_t{0}  ^ bool{false}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  ^ int8_t{0}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  ^ int16_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} ^ int32_t{0}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} ^ int64_t{0}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  ^ uint32_t{0}), int64_t>,  "unsigned (two >=32, u/s)");
+BOOST_AUTO_TEST_CASE(cast__to_floored_integer__finites__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(0.0), 0u);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(1.0), 1u);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(1.1), 1u);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(1.9), 1u);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-0.1), 0u);  // Floor to -1, but clamped to 0
+    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.0), -1);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.1), -2);
+    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.9), -2);
+}
 
-// add
-static_assert(is_same_type<decltype(uint8_t{0}  + char{0}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  + uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  + uint16_t{0}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} + uint32_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} + uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} + uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint8_t{0}  + bool{false}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  + int8_t{0}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  + int16_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} + int32_t{0}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} + int64_t{0}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  + uint32_t{0}), int64_t>,  "unsigned (two >=32, u/s)");
+// to_rounded_integer
 
-// subtract
-static_assert(is_same_type<decltype(uint8_t{0}  - char{0}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  - uint16_t{0}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} - uint32_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} - uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} - uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint8_t{0}  - bool{false}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  - int8_t{0}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  - int16_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} - int32_t{0}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} - int64_t{0}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  - uint32_t{0}), int64_t>,  "unsigned (two >=32, u/s)");
+BOOST_AUTO_TEST_CASE(cast__to_rounded_integer__non_finites__max)
+{
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-limit<double>::infinity()), max_size_t);
+}
 
-// subtract (reversed)
-static_assert(is_same_type<decltype(char{0}     - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint32_t{0} - uint16_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} - uint32_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} - uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(bool{false} - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int8_t{0}   - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int16_t{0}  - uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int32_t{0}  - uint16_t{0}), int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(int64_t{0}  - uint32_t{0}), int64_t>,  "unsigned (two >=32, s-u)");
-static_assert(is_same_type<decltype(uint32_t{0} - int64_t{0}),  int64_t>,  "unsigned (two >=32, u-s)");
+BOOST_AUTO_TEST_CASE(cast__to_rounded_integer__overflow_underflow__clamped)
+{
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::max()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-limit<double>::max()), min_size_t);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<int64_t>(limit<double>::max()), max_int64);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<int64_t>(-limit<double>::max()), min_int64);
+}
 
-// multiply
-static_assert(is_same_type<decltype(uint8_t{0}  * char{0}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  * uint8_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  * uint16_t{0}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} * uint32_t{0}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} * uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} * uint64_t{0}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint8_t{0}  * bool{false}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  * int8_t{0}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  * int16_t{0}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} * int32_t{0}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} * int64_t{0}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  * uint32_t{0}), int64_t>,  "unsigned (two >=32, u/s)");
+BOOST_AUTO_TEST_CASE(cast__to_rounded_integer__finites__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(0.0), 0u);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.0), 1u);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.1), 1u);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.4), 1u);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.5), 2u);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.6), 2u);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-0.1), 0u);  // Round to 0
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-0.5), 0u);  // Round to -1, clamped to 0
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.0), -1);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.1), -1);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.4), -1);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.5), -2);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.6), -2);
+    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-2.5), -3);  // Halfway away from min_size_t
+}
 
-// divide
-static_assert(is_same_type<decltype(uint8_t{0}  / char{1}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  / uint16_t{1}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} / uint32_t{1}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} / uint64_t{1}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} / uint64_t{1}), uint64_t>, "widest   (two >=32)");
-////static_assert(is_same_type<decltype(uint8_t{0}  / bool{true}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  / int8_t{1}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  / int16_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} / int32_t{1}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} / int64_t{1}),  int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(int64_t{0}  / uint32_t{1}), int64_t>,  "unsigned (two >=32, u/s)");
+// to_truncated_integer
 
-// divide (reversed)
-static_assert(is_same_type<decltype(char{0}     / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint32_t{0} / uint16_t{1}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} / uint32_t{1}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} / uint64_t{1}), uint64_t>, "widest   (two >=32)");
-////static_assert(is_same_type<decltype(bool{false} / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int8_t{0}   / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int16_t{0}  / uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int32_t{0}  / uint16_t{1}), int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(int64_t{0}  / uint32_t{1}), int64_t>,  "unsigned (two >=32, s/u)");
-static_assert(is_same_type<decltype(uint32_t{0} / int64_t{1}),  int64_t>,  "unsigned (two >=32, u/s)");
+BOOST_AUTO_TEST_CASE(cast__to_truncated_integer__non_finites__max)
+{
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-limit<double>::infinity()), max_size_t);
+}
 
-// modulo
-static_assert(is_same_type<decltype(uint8_t{0}  % char{1}),     int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  % uint16_t{1}), int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} % uint32_t{1}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} % uint64_t{1}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} % uint64_t{1}), uint64_t>, "widest   (two >=32)");
-////static_assert(is_same_type<decltype(uint8_t{0}  % bool{true}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  % int8_t{1}),   int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  % int16_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} % int32_t{1}),  int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint32_t{0} % int64_t{1}),  int64_t>,  "unsigned (two >=32, s%u)");
-static_assert(is_same_type<decltype(int64_t{0}  % uint32_t{1}), int64_t>,  "unsigned (two >=32, u%s)");
+BOOST_AUTO_TEST_CASE(cast__to_truncated_integer__overflow_underflow__clamped)
+{
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::max()), max_size_t);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-limit<double>::max()), min_size_t);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(limit<double>::max()), max_signed_size_t);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-limit<double>::max()), min_signed_size_t);
+}
 
-// modulo (reversed)
-static_assert(is_same_type<decltype(char{0}     % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint8_t{0}  % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint16_t{0} % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(uint32_t{0} % uint16_t{1}), uint32_t>, "widest   (one >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} % uint32_t{1}), uint64_t>, "widest   (two >=32)");
-static_assert(is_same_type<decltype(uint64_t{0} % uint64_t{1}), uint64_t>, "widest   (two >=32)");
-////static_assert(is_same_type<decltype(bool{false} % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int8_t{0}   % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int16_t{0}  % uint8_t{1}),  int>,      "promoted (two <32)");
-static_assert(is_same_type<decltype(int32_t{0}  % uint16_t{1}), int32_t>,  "widest   (one >=32)");
-static_assert(is_same_type<decltype(int64_t{0}  % uint32_t{1}), int64_t>,  "unsigned (two >=32, s%u)");
-static_assert(is_same_type<decltype(uint32_t{0} % int64_t{1}),  int64_t>,  "unsigned (two >=32, u%s)");
+BOOST_AUTO_TEST_CASE(cast__to_truncated_integer__finites__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(0.0), 0u);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.0), 1u);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.1), 1u);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.9), 1u);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-0.1), 0u);  // Trunc to 0
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.0), -1);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.1), -1);
+    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.9), -1);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
