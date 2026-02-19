@@ -209,29 +209,69 @@ constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT
 
 // Floating point casts.
 // ----------------------------------------------------------------------------
+// inlines below be not constant until c++23.
 
 template <typename Integer, typename Float,
     if_integral_integer<Integer>,
     if_floating_point<Float>>
-constexpr bool to_integer(Integer& out, Float value) NOEXCEPT
+inline bool to_integer(Integer& out, Float value, bool whole) NOEXCEPT
 {
     if (!std::isfinite(value))
         return false;
 
+    // TODO: Could use tolerance for fp epsilon to handle representation error.
     Float integer{};
-    const Float fractional = std::modf(value, &integer);
-    if (fractional != 0.0)
+    if ((std::modf(value, &integer) != 0.0) && whole)
         return false;
 
     if (integer > static_cast<Float>(std::numeric_limits<Integer>::max()) ||
         integer < static_cast<Float>(std::numeric_limits<Integer>::min()))
         return false;
 
-    // Floating point conversion in c++ requires explicit or implicit cast.
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    out = static_cast<Integer>(integer);
-    BC_POP_WARNING()
+    out = to_integer<Integer>(integer);
     return true;
+}
+
+template <typename Integer, typename Float,
+    if_integral_integer<Integer>,
+    if_floating_point<Float>>
+inline Integer to_ceilinged_integer(Float value) NOEXCEPT
+{
+    return to_truncated_integer<Integer>(std::ceil(value));
+}
+
+template <typename Integer, typename Float,
+    if_integral_integer<Integer>,
+    if_floating_point<Float>>
+inline Integer to_floored_integer(Float value) NOEXCEPT
+{
+    return to_truncated_integer<Integer>(std::floor(value));
+}
+
+template <typename Integer, typename Float,
+    if_integral_integer<Integer>,
+    if_floating_point<Float>>
+inline Integer to_rounded_integer(Float value) NOEXCEPT
+{
+    return to_truncated_integer<Integer>(std::round(value));
+}
+
+template <typename Integer, typename Float,
+    if_integral_integer<Integer>,
+    if_floating_point<Float>>
+inline Integer to_truncated_integer(Float value) NOEXCEPT
+{
+    if (!std::isfinite(value))
+        return std::numeric_limits<Integer>::max();
+
+    const auto integer = std::trunc(value);
+    if (integer > static_cast<Float>(std::numeric_limits<Integer>::max()))
+        return std::numeric_limits<Integer>::max();
+
+    if (integer < static_cast<Float>(std::numeric_limits<Integer>::min()))
+        return std::numeric_limits<Integer>::min();
+
+    return to_integer<Integer>(integer);
 }
 
 template <typename Integer, typename Float,

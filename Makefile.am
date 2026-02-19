@@ -349,6 +349,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/byteswap.cpp \
     test/math/cast.cpp \
     test/math/division.cpp \
+    test/math/expectations.cpp \
     test/math/limits.cpp \
     test/math/logarithm.cpp \
     test/math/multiplication.cpp \

@@ -255,6 +255,8 @@ using if_little_endian_integral_integer = bool_if<
     is_integral_integer<Integer> &&
     is_little_endian>;
 
+/// Floating pont types (native, floating point, non-bool).
+
 template <typename Integer>
 using if_floating_point = bool_if<
     is_floating_point<Integer>>;

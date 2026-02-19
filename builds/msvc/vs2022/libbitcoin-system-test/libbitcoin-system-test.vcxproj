@@ -275,6 +275,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\cast.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\expectations.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\logarithm.cpp" />
     <ClCompile Include="..\..\..\..\test\math\multiplication.cpp" />
