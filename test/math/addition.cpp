@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
- // creates addition_tests namespace
+// creates addition_tests namespace
 BOOST_AUTO_TEST_SUITE(addition_tests)
 
 constexpr uint32_t pos_uint32 = 42;
