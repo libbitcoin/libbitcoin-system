@@ -54,6 +54,12 @@ template <typename Value = size_t, typename Exponent,
     if_unsigned_integer<Exponent> = true>
 constexpr Value power2(Exponent exponent) NOEXCEPT;
 
+/// Floating point constexpr optimization for integer exponent.
+template <typename Float, typename Exponent,
+    if_floating_point<Float> = true,
+    if_unsigned_integer<Exponent> = true>
+constexpr Float power(Float base, Exponent exponent) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 

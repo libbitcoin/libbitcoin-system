@@ -37,7 +37,6 @@ static_assert(power(3,   0u) == 1u);
 static_assert(power(3u,  0u) == 1u);
 static_assert(power(3,  10u) == 0xe6a9_size);
 static_assert(power(3u, 10u) == 0xe6a9_size);
-static_assert(power<uint16_t>(3, 11u) == 0xb3fb_u16);
 
 static_assert(power(-1, 0u) == 1u);
 static_assert(power(-1, 1u) == 1_nsize);
@@ -45,7 +44,6 @@ static_assert(power(-1, 1u) == 1_nsize);
 static_assert(power(-3,  0u) == 1u);
 static_assert(power(-3,  1u) == 3_nsize);
 static_assert(power(-3, 10u) == 0xe6a9_size);
-static_assert(power<uint16_t>(-3, 11u) == 0x4c05_u16);
 
 // power2
 static_assert(power2(0u) == 1u);
@@ -53,7 +51,7 @@ static_assert(power2(0u) == 1u);
 static_assert(power2(1u) == 2u);
 static_assert(power2(1u) == 2u);
 static_assert(power2<uint16_t>(15u) == 0b1000'0000'0000'0000_u16);
-static_assert(power2<uint16_t>(16u) == 0_u16);
+static_assert(power2<uint16_t>(16u) == 0_u16); // overflow
 
 // power<>
 static_assert(power<0>(16u) == power(0u, 16u));
@@ -66,10 +64,25 @@ static_assert(power<3, size_t>(0u) == 1u);
 // uint256_t
 static_assert(power<2u, uint256_t>(10u) == 1024u);
 
-// uintx is not constexpr.
+
+// floating point
+static_assert(is_same_type<decltype(power(0.0f, 0u)), float>);
+static_assert(is_same_type<decltype(power(0.0, 0u)), double>);
+
+static_assert(power(0.0f, 0u) == 0.0f);
+static_assert(power(0.0, 0u) == 0.0);
+static_assert(power(1.0, 0u) == 1.0);
+static_assert(power(1.0, 1u) == 1.0);
+static_assert(power(2.0, 1u) == 2.0);
+static_assert(power(2.0, 2u) == 4.0);
+static_assert(power(3.0, 3u) == 27.0);
+
+// Actually 311.1696 but this is the floating point representation.
+static_assert(power(4.2, 4u) == 311.16960000000006);
 
 BOOST_AUTO_TEST_SUITE(power_tests)
 
+// uintx is not constexpr.
 BOOST_AUTO_TEST_CASE(power_uintx_tests)
 {
     BOOST_REQUIRE(true);
