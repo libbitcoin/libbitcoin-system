@@ -112,6 +112,23 @@ constexpr Value power2(Exponent exponent) NOEXCEPT
         possible_narrow_and_sign_cast<unsigned>(exponent));
 }
 
+template <typename Float, typename Exponent,
+    if_floating_point<Float>,
+    if_unsigned_integer<Exponent>>
+constexpr Float power(Float base, Exponent exponent) NOEXCEPT
+{
+    // 0^0 is undefined, return 0.
+    if ((base == 0.0) && is_zero(exponent))
+        return 0.0;
+
+    Float product{ 1.0 };
+    while (exponent-- > 0u)
+        if ((product *= base) == 0.0)
+            break;
+
+    return product;
+}
+
 } // namespace system
 } // namespace libbitcoin
 

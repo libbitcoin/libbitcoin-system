@@ -66,10 +66,25 @@ static_assert(power<3, size_t>(0u) == 1u);
 // uint256_t
 static_assert(power<2u, uint256_t>(10u) == 1024u);
 
-// uintx is not constexpr.
+
+// floating point
+static_assert(is_same_type<decltype(power(0.0f, 0u)), float>);
+static_assert(is_same_type<decltype(power(0.0, 0u)), double>);
+
+static_assert(power(0.0f, 0u) == 0.0f);
+static_assert(power(0.0, 0u) == 0.0);
+static_assert(power(1.0, 0u) == 1.0);
+static_assert(power(1.0, 1u) == 1.0);
+static_assert(power(2.0, 1u) == 2.0);
+static_assert(power(2.0, 2u) == 4.0);
+static_assert(power(3.0, 3u) == 27.0);
+
+// Actually 311.1696 but this is the floating point representation.
+static_assert(power(4.2, 4u) == 311.16960000000006);
 
 BOOST_AUTO_TEST_SUITE(power_tests)
 
+// uintx is not constexpr.
 BOOST_AUTO_TEST_CASE(power_uintx_tests)
 {
     BOOST_REQUIRE(true);
