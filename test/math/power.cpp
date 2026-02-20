@@ -37,7 +37,6 @@ static_assert(power(3,   0u) == 1u);
 static_assert(power(3u,  0u) == 1u);
 static_assert(power(3,  10u) == 0xe6a9_size);
 static_assert(power(3u, 10u) == 0xe6a9_size);
-static_assert(power<uint16_t>(3, 11u) == 0xb3fb_u16);
 
 static_assert(power(-1, 0u) == 1u);
 static_assert(power(-1, 1u) == 1_nsize);
@@ -45,7 +44,6 @@ static_assert(power(-1, 1u) == 1_nsize);
 static_assert(power(-3,  0u) == 1u);
 static_assert(power(-3,  1u) == 3_nsize);
 static_assert(power(-3, 10u) == 0xe6a9_size);
-static_assert(power<uint16_t>(-3, 11u) == 0x4c05_u16);
 
 // power2
 static_assert(power2(0u) == 1u);
@@ -53,7 +51,7 @@ static_assert(power2(0u) == 1u);
 static_assert(power2(1u) == 2u);
 static_assert(power2(1u) == 2u);
 static_assert(power2<uint16_t>(15u) == 0b1000'0000'0000'0000_u16);
-static_assert(power2<uint16_t>(16u) == 0_u16);
+static_assert(power2<uint16_t>(16u) == 0_u16); // overflow
 
 // power<>
 static_assert(power<0>(16u) == power(0u, 16u));

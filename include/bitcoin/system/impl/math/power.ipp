@@ -33,6 +33,7 @@ namespace system {
 
 // Called by bc::base85 (for number coding).
 // Called by wallet::electrum_v1 (for number coding).
+// Overflow is allowed behavior as this models a mathematical operator.
 template <typename Value, typename Base, typename Exponent,
     if_integer<Value> = true,
     if_integer<Base> = true,
@@ -42,19 +43,11 @@ constexpr Value power_(Base base, Exponent exponent) NOEXCEPT
     if (is_power_overflow(base, exponent))
         return 0;
 
-    if (is_zero(exponent))
-        return 1;
+    Value product{ 1 };
+    while (exponent-- > 0u)
+        product *= possible_narrow_and_sign_cast<Value>(base);
 
-    auto value = possible_narrow_and_sign_cast<Value>(base);
-
-    // Overflow is allowed behavior as this models a mathematical operator.
-    BC_PUSH_WARNING(NARROWING_CONVERSION)
-    BC_PUSH_WARNING(SIZE_NARROWING_CONVERSION)
-    while (--exponent > 0u) { value *= base; }
-    BC_POP_WARNING()
-    BC_POP_WARNING()
-
-    return value;
+    return product;
 }
 
 // published
