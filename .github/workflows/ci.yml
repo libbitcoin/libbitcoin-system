@@ -220,7 +220,7 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
           lcov --list coverage.info
 
@@ -494,7 +494,7 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
           lcov --list coverage.info
 
@@ -731,7 +731,7 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
           lcov --list coverage.info
 
