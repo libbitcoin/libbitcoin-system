@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_MAGIC_NUMBERS_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -97,6 +98,23 @@ constexpr uint8_t tapscript_version = 0b1100'0000; // 0xc0
 /// ---------------------------------------------------------------------------
 
 constexpr size_t max_null_data_size = 80;
+
+/// Utilities.
+/// ---------------------------------------------------------------------------
+
+constexpr size_t weighted_size(size_t nominal, size_t witnessed) NOEXCEPT
+{
+    return ceilinged_add(
+        ceilinged_multiply(base_size_contribution, nominal),
+        ceilinged_multiply(total_size_contribution, witnessed));
+}
+
+constexpr size_t virtual_size(size_t nominal, size_t witnessed) NOEXCEPT
+{
+    // Block weight is 3 * nominal size * + 1 * witness size [bip141].
+    constexpr auto scale = base_size_contribution + total_size_contribution;
+    return ceilinged_divide(weighted_size(nominal, witnessed), scale);
+}
 
 } // namespace chain
 } // namespace system
