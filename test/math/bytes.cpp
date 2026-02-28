@@ -20,6 +20,8 @@
 
 BOOST_AUTO_TEST_SUITE(bytes_tests)
 
+constexpr auto foo = byte_width(1_u8);
+
  // byte_width (unsigned/positive)
 static_assert(byte_width(0_u8) == 0);
 static_assert(byte_width(1_u8) == 1);
