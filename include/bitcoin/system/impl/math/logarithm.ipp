@@ -53,7 +53,7 @@ constexpr Exponent ceilinged_log_(Base base, Value value) NOEXCEPT
         const auto factor = possible_narrow_and_sign_cast<Value>(base);
 
         Exponent exponent = 0;
-        while (value > 0) { ++exponent; value /= factor; }
+        while (value > 1) { ++exponent; value /= factor; }
         return exponent;
     }
 }
@@ -125,7 +125,7 @@ constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
 
     // base2 integral optimization over normal form.
     return possible_narrow_and_sign_cast<Exponent>(
-        std::bit_width(to_unsigned(value)));
+        std::bit_width(sub1(to_unsigned(value))));
 }
 
 // Called by bc::bit_width.
@@ -134,12 +134,12 @@ template <typename Exponent, typename Value,
     if_non_integral_integer<Value>>
 constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
 {
-    if (is_log_overflow<2>(value))
+    if (is_log_overflow<2>(value) || is_one(value))
         return 0;
 
     // base2 uintx optimization over normal form.
     return possible_narrow_and_sign_cast<Exponent>(
-        add1(mp::msb(value)));
+        add1(mp::msb(value - 1)));
 }
 
 // Called by bc::byte_width.
@@ -159,24 +159,24 @@ constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
 
     if constexpr (size == sizeof(uint64_t))
     {
-        if (compare > 0x00ffffffffffffff_u64) return 8;
-        if (compare > 0x0000ffffffffffff_u64) return 7;
-        if (compare > 0x000000ffffffffff_u64) return 6;
-        if (compare > 0x00000000ffffffff_u64) return 5;
+        if (compare > 0x0100000000000000_u64) return 8;
+        if (compare > 0x0001000000000000_u64) return 7;
+        if (compare > 0x0000010000000000_u64) return 6;
+        if (compare > 0x0000000100000000_u64) return 5;
     }
 
     if constexpr (size >= sizeof(uint32_t))
     {
-        if (compare > 0x00ffffff_u32) return 4;
-        if (compare > 0x0000ffff_u32) return 3;
+        if (compare > 0x01000000_u32) return 4;
+        if (compare > 0x00010000_u32) return 3;
     }
 
     if constexpr (size >= sizeof(uint16_t))
     {
-        if (compare > 0x00ff_u16) return 2;
+        if (compare > 0x0100_u16) return 2;
     }
 
-    return (compare > 0x00_u8) ? 1 : 0;
+    return (compare > 0x01_u8) ? 1 : 0;
 }
 
 // Called by bc::byte_width.

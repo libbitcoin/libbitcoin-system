@@ -780,7 +780,7 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__medium_power_of_two__expected)
 BOOST_AUTO_TEST_CASE(block__merkle_branch__power_of_two_minus_one__expected)
 {
     constexpr auto leaf = 1023u;
-    constexpr auto size = sub1(ceilinged_log2(add1(leaf)));
+    constexpr auto size = ceilinged_log2(add1(leaf));
     const auto branch = block::merkle_branch(leaf, add1(leaf));
     BOOST_REQUIRE_EQUAL(branch.size(), size);
     BOOST_REQUIRE_EQUAL(branch.front().sibling, 1022u);
@@ -792,7 +792,7 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__power_of_two_minus_one__expected)
 BOOST_AUTO_TEST_CASE(block__merkle_branch__odd_large_leaf_with_duplication__expected)
 {
     constexpr auto leaf = 2047u;
-    constexpr auto size = sub1(ceilinged_log2(add1(leaf)));
+    constexpr auto size = ceilinged_log2(add1(leaf));
     const auto branch = block::merkle_branch(leaf, add1(leaf));
     BOOST_REQUIRE_EQUAL(branch.size(), size);
     BOOST_REQUIRE_EQUAL(branch.front().sibling, 2046u);

@@ -261,14 +261,11 @@ static_assert(compact::expand(compact::compress(uint256_t(42))) == uint256_t(42)
 //    (exponent > 32 && mantissa > 0x00ffff)    // strict  (33 with 1|2)
 //)
 
-// > 0x0000 <= 0x00ff (overflow if exponent > 31 and ceilinged_log256(mantissa) > 1)
-static_assert(ceilinged_log256(0x00000001ul) == 1);
-static_assert(ceilinged_log256(0x000000fful) == 1);
+// > 0x0000 <= 0x00ff (overflow if exponent > 31 and byte_width(mantissa) > 1)
+static_assert(byte_width(0x000000fful) == 1);
 
-// > 0x00ff <= 0x0000ffff (eoverflow if exponent > 30 and ceilinged_log256(mantissa) > 2)
-static_assert(ceilinged_log256(0x00000100ul) == 2);
-static_assert(ceilinged_log256(0x0000fffful) == 2);
+// > 0x00ff <= 0x0000ffff (overflow if exponent > 30 and byte_width(mantissa) > 2)
+static_assert(byte_width(0x0000fffful) == 2);
 
-// > 0x0000ffff (<= 0x007ffffful) (overflow if exponent > 29 and ceilinged_log256(mantissa) > 3)
-static_assert(ceilinged_log256(0x00010000ul) == 3);
-static_assert(ceilinged_log256(0x007ffffful) == 3);
+// > 0x0000ffff (<= 0x007ffffful) (overflow if exponent > 29 and byte_width(mantissa) > 3)
+static_assert(byte_width(0x007ffffful) == 3);

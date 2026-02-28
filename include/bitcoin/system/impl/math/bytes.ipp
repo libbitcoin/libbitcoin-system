@@ -38,7 +38,7 @@ constexpr size_t byte_width(Integral value) NOEXCEPT
     // (zero-based position of msb) + 7 / 8.
     // (bit_width(value) + 7) / 8
     // (ceilinged_log2(value) + 7) / 8
-    return ceilinged_log256(value);
+    return is_zero(value) ? zero : add1(floored_log256(value));
 }
 
 // Called by machine::number (for little-endian chunk sizing).
