@@ -63,8 +63,8 @@ PRESUMED_CI_PROJECT_PATH=$(pwd)
 
 # ICU archive.
 #------------------------------------------------------------------------------
-ICU_URL="https://github.com/unicode-org/icu/releases/download/release-55-2/icu4c-55_2-src.tgz"
-ICU_ARCHIVE="icu4c-55_2-src.tgz"
+ICU_URL="https://github.com/unicode-org/icu/releases/download/release-78.2/icu4c-78.2-sources.tgz"
+ICU_ARCHIVE="icu4c-78.2-sources.tgz"
 
 # Boost archive.
 #------------------------------------------------------------------------------
@@ -494,11 +494,14 @@ initialize_icu_packages()
         # Update PKG_CONFIG_PATH for ICU package installations on OSX.
         # OSX provides libicucore.dylib with no pkgconfig and doesn't support
         # renaming or important features, so we can't use that.
-        local HOMEBREW_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
+        local HOMEBREW_USR_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
+        local HOMEBREW_OPT_ICU_PKG_CONFIG="/opt/homebrew/opt/icu4c/lib/pkgconfig"
         local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
 
-        if [[ -d "$HOMEBREW_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_ICU_PKG_CONFIG"
+        if [[ -d "$HOMEBREW_USR_ICU_PKG_CONFIG" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_USR_ICU_PKG_CONFIG"
+        elif [[ -d "$HOMEBREW_OPT_ICU_PKG_CONFIG" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_OPT_ICU_PKG_CONFIG"
         elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
             export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
         fi
@@ -880,7 +883,7 @@ build_from_tarball_boost()
     # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
-        "cxxstd=11" \
+        "cxxstd=20" \
         "variant=release" \
         "threading=multi" \
         "$BOOST_TOOLSET" \

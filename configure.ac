@@ -412,42 +412,6 @@ AS_CASE([${with_tests}], [yes],
      AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])],
     [AC_SUBST([boost_unit_test_framework_LIBS], [])])
 
-# Require pthread if not on android and output ${pthread_CPPFLAGS/LIBS}.
-#------------------------------------------------------------------------------
-# Hard wired -lpthread because AX_PTHREAD does not do it.
-AS_CASE([${host_os}],
-    [*android*],
-    [AC_SUBST([pthread_LIBS], [])],
-    [AX_PTHREAD(
-        [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
-         AC_SUBST([pthread_ISYS_CPPFLAGS], [`echo ${PTHREAD_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`])
-         AC_SUBST([pthread_LIBS], [-lpthread])
-         AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])
-         AC_MSG_NOTICE([pthread_ISYS_CPPFLAGS : ${pthread_ISYS_CPPFLAGS}])],
-        [AC_MSG_ERROR([pthread library is required but was not found.])])
-
-    AS_CASE([${enable_isystem}],[yes],
-        [AC_SUBST([pthread_BUILD_CPPFLAGS], [${pthread_ISYS_CPPFLAGS}])],
-        [AC_SUBST([pthread_BUILD_CPPFLAGS], [${pthread_CPPFLAGS}])])
-
-    AC_MSG_NOTICE([pthread_BUILD_CPPFLAGS : ${pthread_BUILD_CPPFLAGS}])])
-
-AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])
-
-# Require rt if on linux if not on android and output ${rt_LIBS}.
-#------------------------------------------------------------------------------
-
-AS_CASE([${host_os}],
-    [*android*],
-    [AC_SUBST([rt_LIBS], [])],
-    [*linux*],
-    [AC_CHECK_LIB([rt], [clock_gettime],
-        [AC_SUBST([rt_LIBS], [-lrt])],
-        [AC_MSG_ERROR([rt library is required but was not found.])])],
-    [AC_SUBST([rt_LIBS], [])])
-
-AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
-
 # Require icu-i18n of at least version 55.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_icu}], [yes],
@@ -470,18 +434,6 @@ AS_CASE([${enable_isystem}],[yes],
     [AC_SUBST([icu_i18n_BUILD_CPPFLAGS], [${icu_i18n_CPPFLAGS}])])
 
 AC_MSG_NOTICE([icu_i18n_BUILD_CPPFLAGS : ${icu_i18n_BUILD_CPPFLAGS}])
-
-# Require dl if on linux and output ${dl_LIBS}.
-#------------------------------------------------------------------------------
-
-AS_CASE([${host_os}],
-    [*linux*],
-    [AC_CHECK_LIB([dl], [dlopen],
-        [AC_SUBST([dl_LIBS], [-ldl])],
-        [AC_MSG_ERROR([dl library is required but was not found.])])],
-    [AC_SUBST([dl_LIBS], [])])
-
-AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])
 
 # Require secp256k1 of at least version 0.5.1.0 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
