@@ -93,7 +93,7 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
+            icu: "--with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
@@ -110,14 +110,14 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
+            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE"
             options: "--enable-isystem"
             packager: "brew"
-            packages: "icu4c"
+            packages: ""
 
 
     runs-on: ${{ matrix.os }}
@@ -364,7 +364,7 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
+            icu: "--with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
@@ -381,14 +381,14 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
+            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE"
             options: ""
             packager: "brew"
-            packages: "icu4c"
+            packages: ""
 
 
     runs-on: ${{ matrix.os }}
