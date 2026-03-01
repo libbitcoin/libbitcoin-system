@@ -44,10 +44,11 @@ public:
     struct position { size_t sibling; size_t width; };
     using positions = std::vector<position>;
 
-    static positions merkle_branch(size_t leaf, size_t leaves) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
+    static positions merkle_branch(size_t leaf, size_t leaves,
+        bool compress=false) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------

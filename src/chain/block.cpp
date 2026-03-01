@@ -445,7 +445,8 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
 }
 
 // public/static (utility)
-block::positions block::merkle_branch(size_t leaf, size_t leaves) NOEXCEPT
+block::positions block::merkle_branch(size_t leaf, size_t leaves,
+    bool compress) NOEXCEPT
 {
     BC_ASSERT(leaves <= power2(sub1(bits<size_t>)));
 
@@ -453,15 +454,16 @@ block::positions block::merkle_branch(size_t leaf, size_t leaves) NOEXCEPT
     if (is_zero(leaves) || leaf >= leaves)
         return branch;
 
-    // Upper bound, actual count may be less due to duplication.
+    // Upper bound, actual count may be less given compression.
     branch.reserve(ceilinged_log2(leaves));
 
     for (auto width = one, current = leaves; current > one;)
     {
         const auto sibling = bit_xor(leaf, one);
-        if (sibling < current++)
+        if (!compress || sibling < current)
             branch.emplace_back(sibling, width);
 
+        ++current;
         shift_left_into(width);
         shift_right_into(leaf);
         shift_right_into(current);
