@@ -109,18 +109,6 @@ AC_ARG_WITH([examples],
 AC_MSG_RESULT([$with_examples])
 AM_CONDITIONAL([WITH_EXAMPLES], [test x$with_examples != xno])
 
-# Implement --with-icu and define WITH_ICU and output ${icu}.
-#------------------------------------------------------------------------------
-AC_MSG_CHECKING([--with-icu option])
-AC_ARG_WITH([icu],
-    AS_HELP_STRING([--with-icu],
-        [Compile with International Components for Unicode. @<:@default=no@:>@]),
-    [with_icu=$withval],
-    [with_icu=no])
-AC_MSG_RESULT([$with_icu])
-AS_CASE([${with_icu}], [yes], AC_DEFINE([WITH_ICU]))
-AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DWITH_ICU]))
-
 # Implement --enable-avx2.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-avx2 option])
@@ -411,29 +399,6 @@ AS_CASE([${with_tests}], [yes],
      AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])
      AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])],
     [AC_SUBST([boost_unit_test_framework_LIBS], [])])
-
-# Require icu-i18n of at least version 55.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
-#------------------------------------------------------------------------------
-AS_CASE([${with_icu}], [yes],
-    [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 55.2], [],
-        [
-          AC_MSG_ERROR([--with-icu specified but icu-i18n >= 55.2 was not found.])
-        ])
-     AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 55.2'])
-     AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
-     AC_SUBST([icu_i18n_ISYS_CPPFLAGS], [`echo ${icu_i18n_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
-     AC_MSG_NOTICE([icu_i18n_CPPFLAGS : ${icu_i18n_CPPFLAGS}])
-     AC_MSG_NOTICE([icu_i18n_ISYS_CPPFLAGS : ${icu_i18n_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([icu_i18n_OTHER_CFLAGS : ${icu_i18n_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([icu_i18n_INCLUDEDIR : ${icu_i18n_INCLUDEDIR}])
-     AC_MSG_NOTICE([icu_i18n_LIBS : ${icu_i18n_LIBS}])],
-    [AC_SUBST([icu_i18n_PKG], [])])
-
-AS_CASE([${enable_isystem}],[yes],
-    [AC_SUBST([icu_i18n_BUILD_CPPFLAGS], [${icu_i18n_ISYS_CPPFLAGS}])],
-    [AC_SUBST([icu_i18n_BUILD_CPPFLAGS], [${icu_i18n_CPPFLAGS}])])
-
-AC_MSG_NOTICE([icu_i18n_BUILD_CPPFLAGS : ${icu_i18n_BUILD_CPPFLAGS}])
 
 # Require secp256k1 of at least version 0.5.1.0 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------

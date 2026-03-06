@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2026 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin-system developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -20,30 +20,12 @@
 
 BOOST_AUTO_TEST_SUITE(normalization_tests)
 
-#ifdef HAVE_ICU
-
-// Non-ASCII test cases without HAVE_ICU defined
+// BIP-38 normalization vectors
 // ----------------------------------------------------------------------------
-
-// casing
-
-BOOST_AUTO_TEST_CASE(normalization__to_upper__ideographic_space__unchanged)
-{
-    std::string space = ideographic_space;
-    BOOST_REQUIRE(to_upper(space));
-    BOOST_REQUIRE_EQUAL(space, ideographic_space);
-}
-
-BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
-{
-    std::string space = ideographic_space;
-    BOOST_REQUIRE(to_lower(space));
-    BOOST_REQUIRE_EQUAL(space, ideographic_space);
-}
-
-// normal forms
-
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki
+// Input bytes: U+03D2 U+0301 U+0000 U+10000 U+1F4A9
+// (Greek upsilon-hook + combining acute + null + Linear B + pile-of-poo)
+
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__bip38__expected)
 {
     auto decomposed = to_string(base16_chunk("cf92cc8100f0909080f09f92a9"));
@@ -72,57 +54,215 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__bip38__expec
     BOOST_REQUIRE_EQUAL(encode_base16(composed), "cea5cc8100f0909080f09f92a9");
 }
 
-#else
-
-// Non-ASCII test cases without HAVE_ICU defined.
+// Casing — non-ASCII
 // ----------------------------------------------------------------------------
 
-// casing
-
-BOOST_AUTO_TEST_CASE(normalization__to_lower__upper_ascii__false)
+BOOST_AUTO_TEST_CASE(normalization__to_upper__ideographic_space__unchanged)
 {
-    std::string non_ascii{ char(0xff) };
-    BOOST_REQUIRE(!to_lower(non_ascii));
+    std::string space = ideographic_space;
+    BOOST_REQUIRE(to_upper(space));
+    BOOST_REQUIRE_EQUAL(space, ideographic_space);
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_upper__lower_ascii__false)
+BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
 {
-    std::string non_ascii{ char(0xff) };
-    BOOST_REQUIRE(!to_lower(non_ascii));
+    std::string space = ideographic_space;
+    BOOST_REQUIRE(to_lower(space));
+    BOOST_REQUIRE_EQUAL(space, ideographic_space);
 }
 
-// normal forms
-
-BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__non_ascii__false)
+// to_lower: Unicode full case folding (non-ASCII)
+BOOST_AUTO_TEST_CASE(normalization__to_lower__german_sharp_s__folds_to_ss)
 {
-    std::string non_ascii{ char(0xff) };
-    BOOST_REQUIRE(!to_lower(non_ascii));
+    // U+00DF ß → ss (multi-char fold)
+    auto value = to_string(base16_chunk("c39f")); // ß in UTF-8
+    BOOST_REQUIRE(to_lower(value));
+    BOOST_REQUIRE_EQUAL(value, "ss");
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__non_ascii__false)
+BOOST_AUTO_TEST_CASE(normalization__to_lower__greek_sigma__folds)
 {
-    std::string non_ascii{ char(0xff) };
-    BOOST_REQUIRE(!to_canonical_decomposition(non_ascii));
+    // U+03A3 Σ → U+03C3 σ
+    auto value = to_string(base16_chunk("cea3"));
+    BOOST_REQUIRE(to_lower(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "cf83");
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__non_ascii__false)
+BOOST_AUTO_TEST_CASE(normalization__to_lower__ohm_sign__folds_to_omega)
 {
-    std::string non_ascii{ char(0xff) };
-    BOOST_REQUIRE(!to_compatibility_composition(non_ascii));
+    // U+2126 Ω (Ohm) → U+03C9 ω
+    auto value = to_string(base16_chunk("e284a6"));
+    BOOST_REQUIRE(to_lower(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "cf89");
 }
 
-BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__non_ascii__false)
+BOOST_AUTO_TEST_CASE(normalization__to_lower__cafe__folds)
 {
-    std::string non_ascii{ char(0xff) };
-    BOOST_REQUIRE(!to_compatibility_decomposition(non_ascii));
+    // "CAFÉ" → "café"
+    auto value = to_string(base16_chunk("434146c389")); // CAFÉ
+    BOOST_REQUIRE(to_lower(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "636166c3a9");  // café
 }
 
-#endif // HAVE_ICU
+// Unicode normalization conformance — canonical forms
+// ----------------------------------------------------------------------------
+// Selected from unicode.org/Public/UCD/latest/ucd/NormalizationTest.txt
 
-// ASCII test cases (valid with or without HAVE_ICU defined).
+BOOST_AUTO_TEST_CASE(normalization__nfd__e_with_acute_precomposed__decomposes)
+{
+    // U+00E9 é → U+0065 e + U+0301 combining-acute
+    auto value = to_string(base16_chunk("c3a9"));
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "65cc81");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__e_plus_acute__composes)
+{
+    // U+0065 e + U+0301 → U+00E9 é
+    auto value = to_string(base16_chunk("65cc81"));
+    BOOST_REQUIRE(to_canonical_composition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "c3a9");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfd__c_with_cedilla__decomposes)
+{
+    // U+00C7 Ç → U+0043 C + U+0327 combining-cedilla
+    auto value = to_string(base16_chunk("c387"));
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "43cca7");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfd__d_with_dot_above__decomposes)
+{
+    // U+1E0A Ḋ → U+0044 D + U+0307 combining-dot-above
+    auto value = to_string(base16_chunk("e1b88a"));
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "44cc87");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfd__ohm_sign__maps_to_omega)
+{
+    // U+2126 Ω (Ohm sign) has canonical decomp → U+03A9 Ω (Greek)
+    auto value = to_string(base16_chunk("e284a6")); // U+2126
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "cea9"); // U+03A9
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__nfd_then_nfc__round_trips)
+{
+    const std::string original = to_string(base16_chunk("c3a9c387e1b88a"));
+    auto value = original;
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_NE(value, original);
+    BOOST_REQUIRE(to_canonical_composition(value));
+    BOOST_REQUIRE_EQUAL(value, original);
+}
+
+// Unicode normalization conformance — Hangul
 // ----------------------------------------------------------------------------
 
-// to_lower
+BOOST_AUTO_TEST_CASE(normalization__nfd__hangul_lv_syllable__decomposes_to_l_v)
+{
+    // U+AC00 가 → U+1100 ᄀ + U+1161 ᅡ
+    auto value = to_string(base16_chunk("eab080")); // 가
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "e18480e185a1"); // ᄀ + ᅡ
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfd__hangul_lvt_syllable__decomposes_to_l_v_t)
+{
+    // U+AC01 각 → U+1100 ᄀ + U+1161 ᅡ + U+11A8 ᆨ
+    auto value = to_string(base16_chunk("eab081")); // 각
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "e18480e185a1e186a8");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__l_plus_v__composes_to_hangul_lv)
+{
+    // U+1100 + U+1161 → U+AC00 가
+    auto value = to_string(base16_chunk("e18480e185a1"));
+    BOOST_REQUIRE(to_canonical_composition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "eab080");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__lv_plus_t__composes_to_hangul_lvt)
+{
+    // U+AC00 가 + U+11A8 ᆨ → U+AC01 각
+    auto value = to_string(base16_chunk("eab080e186a8"));
+    BOOST_REQUIRE(to_canonical_composition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "eab081");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfd_nfc__hangul_round_trips)
+{
+    // Decompose then recompose a full sentence with mixed Hangul syllables.
+    const std::string original = to_string(base16_chunk(
+        "eab080eab09d"));  // 가 각
+    auto value = original;
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE(to_canonical_composition(value));
+    BOOST_REQUIRE_EQUAL(value, original);
+}
+
+// Unicode normalization conformance — compatibility forms
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(normalization__nfkd__fi_ligature__decomposes_to_fi)
+{
+    // U+FB01 ﬁ (fi ligature) → U+0066 f + U+0069 i
+    auto value = to_string(base16_chunk("efac81"));
+    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    BOOST_REQUIRE_EQUAL(value, "fi");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfkd__ideographic_space__becomes_ascii_space)
+{
+    // U+3000 (ideographic space) NFKD → U+0020 (space)
+    const auto ideographic = ideographic_space;
+    auto value = ideographic;
+    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    BOOST_REQUIRE_EQUAL(value, " ");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfkd__sharp_s__unchanged)
+{
+    // U+00DF ß has no compatibility decomposition (stays as-is in NFKD)
+    auto value = to_string(base16_chunk("c39f"));
+    const auto expected = value;
+    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+// Mnemonic normalization test (BIP-39 / Electrum passphrase path)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(normalization__mnemonic__ideographic_space__normalizes_to_ascii_space)
+{
+    // BIP-39 Japanese wordlist uses ideographic space as separator.
+    // NFKD converts it to ASCII space.
+    const auto ascii_delimited  = "あいこくしん" + ascii_space  + "あいさつ";
+    const auto ideo_delimited   = "あいこくしん" + ideographic_space + "あいさつ";
+    auto normal = ideo_delimited;
+    BOOST_REQUIRE(to_compatibility_decomposition(normal));
+    BOOST_REQUIRE_NE(normal, ideo_delimited);
+    BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
+}
+
+// Canonical ordering
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(normalization__nfd__out_of_order_combining__sorted)
+{
+    // e + U+0323 (combining dot below, CCC=220) + U+0301 (combining acute, CCC=230)
+    // NFD canonical ordering: CCC 220 < 230, so dot-below comes first.
+    // Input: e + acute + dot-below (wrong order) → e + dot-below + acute (correct)
+    auto value = to_string(base16_chunk("65cc81cca3")); // e + acute + dot-below (wrong order)
+    BOOST_REQUIRE(to_canonical_decomposition(value));
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "65cca3cc81"); // e dot-below acute
+}
+
+// ASCII test cases (valid with or without any configuration)
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__empty__empty)
 {
@@ -153,8 +293,6 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__mixed_ascii__lowered)
     BOOST_REQUIRE_EQUAL(mixed, "abcdefghijklmnopqrstuvwxyz");
 }
 
-// to_upper
-
 BOOST_AUTO_TEST_CASE(normalization__to_upper__empty__empty)
 {
     std::string empty{ "" };
@@ -183,8 +321,6 @@ BOOST_AUTO_TEST_CASE(normalization__to_upper__mixed_ascii__uppered)
     BOOST_REQUIRE(to_upper(mixed));
     BOOST_REQUIRE_EQUAL(mixed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
-
-// normal forms
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__empty__empty)
 {
@@ -246,20 +382,8 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__ascii__uncha
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
-#ifdef HAVE_ICU
-BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentence__ascii_space)
-{
-    // The ideographic_space normalizes to ascii_space.
-    const auto ascii_delimited = "あいこくしん" + ascii_space + "あいさつ";
-    const auto ideographic_delimited = "あいこくしん" + ideographic_space + "あいさつ";
-    auto normal = ideographic_delimited;
-    BOOST_REQUIRE(to_compatibility_decomposition(normal));
-    BOOST_REQUIRE_NE(normal, ideographic_delimited);
-    BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
-}
-#endif
-
 // is_separator
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(ascii__is_separator__all_separators__true)
 {
@@ -290,21 +414,16 @@ BOOST_AUTO_TEST_CASE(ascii__is_separator__dash__false)
 }
 
 // is_whitespace
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(ascii__is_whitespace__all_whitespace__true)
 {
-    // ASCII/Unicode whitespace characters (C whitespace).
     BOOST_REQUIRE(is_whitespace(0x00000009));
     BOOST_REQUIRE(is_whitespace(0x0000000a));
     BOOST_REQUIRE(is_whitespace(0x0000000b));
     BOOST_REQUIRE(is_whitespace(0x0000000c));
     BOOST_REQUIRE(is_whitespace(0x0000000d));
     BOOST_REQUIRE(is_whitespace(0x00000020));
-
-    // ASCII/Unicode whitespace separator-space characters.
-    BOOST_REQUIRE(is_whitespace(0x000000a0));
-
-    // Unicode separator-space characters.
     BOOST_REQUIRE(is_whitespace(0x000000a0));
     BOOST_REQUIRE(is_whitespace(0x00001680));
     BOOST_REQUIRE(is_whitespace(0x00002000));
@@ -318,8 +437,6 @@ BOOST_AUTO_TEST_CASE(ascii__is_whitespace__all_whitespace__true)
     BOOST_REQUIRE(is_whitespace(0x00002008));
     BOOST_REQUIRE(is_whitespace(0x00002009));
     BOOST_REQUIRE(is_whitespace(0x0000200a));
-
-    // Unicode other whitespace characters.
     BOOST_REQUIRE(is_whitespace(0x00000085));
     BOOST_REQUIRE(is_whitespace(0x00002028));
     BOOST_REQUIRE(is_whitespace(0x00002029));
@@ -331,6 +448,7 @@ BOOST_AUTO_TEST_CASE(ascii__is_whitespace__dash__false)
 }
 
 // to_non_combining_form
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__empty__empty)
 {
@@ -370,6 +488,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_non_combining_form__combining_circumflex_
 }
 
 // to_non_diacritic_form
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__to_non_diacritic_form__empty__empty)
 {
@@ -410,6 +529,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_non_diacritic_form__circumflex_accent_and
 }
 
 // to_compressed_form (Electrum)
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__to_compressed_form__empty__empty)
 {
@@ -515,7 +635,8 @@ BOOST_AUTO_TEST_CASE(normalization__to_compressed_cjk__single_and_double_contain
 
 constexpr size_t maximum_code_point = 0x0010ffff;
 
-// is_separator
+// is_separator count
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__is_separator__points__17)
 {
@@ -527,7 +648,8 @@ BOOST_AUTO_TEST_CASE(normalization__is_separator__points__17)
     BOOST_REQUIRE_EQUAL(points, char32_separators_count);
 }
 
-// is_whitespace
+// is_whitespace count
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__is_whitespace__points__25)
 {
@@ -540,6 +662,7 @@ BOOST_AUTO_TEST_CASE(normalization__is_whitespace__points__25)
 }
 
 // is_chinese_japanese_or_korean
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__chinese_japanese_or_korean__points__90286)
 {
@@ -563,8 +686,8 @@ BOOST_AUTO_TEST_CASE(normalization__is_chinese_japanese_or_korean__points__90286
     BOOST_REQUIRE_EQUAL(points, 90286u);
 }
 
-
 // is_diacritic
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(normalization__diacritics__points_836)
 {
@@ -589,9 +712,10 @@ BOOST_AUTO_TEST_CASE(normalization__is_diacritic__points__836)
 }
 
 // is_combining
+// ----------------------------------------------------------------------------
 
 // The combining points count reported (872) by Unicode publication is off by 10.
-// Our internal count is based on Python's Uncode sources, which are authoritative
+// Our internal count is based on Python's Unicode sources, which are authoritative
 // for Electrum normalization, and is the standard on which we rely for BIP39
 // normalization.
 BOOST_AUTO_TEST_CASE(normalization__is_combining__points__882)
@@ -623,7 +747,6 @@ BOOST_AUTO_TEST_CASE(normalization__has_whitespace__empty__false)
 
 BOOST_AUTO_TEST_CASE(normalization__has_whitespace__spaces__true)
 {
-    // ASCII whitespace characters (C whitespace).
     BOOST_REQUIRE(has_whitespace("\t"));
     BOOST_REQUIRE(has_whitespace("\n"));
     BOOST_REQUIRE(has_whitespace("\v"));

@@ -25,7 +25,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-18"
@@ -42,7 +41,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-18"
@@ -59,7 +57,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
@@ -76,7 +73,6 @@ jobs:
             coverage: "cov"
             detectcpuflags: "detect"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc"
@@ -93,14 +89,13 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE"
             options: "--enable-isystem"
             packager: "brew"
-            packages: "icu4c"
+            packages: ""
 
           - os: macos-latest
             cxx: "clang++"
@@ -110,7 +105,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
@@ -214,7 +208,6 @@ jobs:
           ${{ env.ASSERT_NDEBUG }}
           ${{ env.CPU_SUPPORTED_FLAGS }}
           ${{ matrix.boost }}
-          ${{ matrix.icu }}
           ${{ matrix.secp256k1 }}
 
       - name: Coveralls Calculation
@@ -296,7 +289,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-18"
@@ -313,7 +305,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-18"
@@ -330,7 +321,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
@@ -347,7 +337,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
@@ -364,14 +353,13 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE"
             options: ""
             packager: "brew"
-            packages: "icu4c"
+            packages: ""
 
           - os: macos-latest
             cxx: "clang++"
@@ -381,7 +369,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang"
@@ -488,7 +475,6 @@ jobs:
           ${{ env.ASSERT_NDEBUG }}
           ${{ env.CPU_SUPPORTED_FLAGS }}
           ${{ matrix.boost }}
-          ${{ matrix.icu }}
           ${{ matrix.secp256k1 }}
 
       - name: Coveralls Calculation
@@ -581,7 +567,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-18"
@@ -599,7 +584,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-18"
@@ -617,7 +601,6 @@ jobs:
             coverage: "nocov"
             detectcpuflags: "ignore"
             boost: "--build-boost"
-            icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
@@ -725,7 +708,6 @@ jobs:
           ${{ env.ASSERT_NDEBUG }}
           ${{ env.CPU_SUPPORTED_FLAGS }}
           ${{ matrix.boost }}
-          ${{ matrix.icu }}
           ${{ matrix.secp256k1 }}
 
       - name: Coveralls Calculation

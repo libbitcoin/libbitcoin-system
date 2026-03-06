@@ -31,17 +31,10 @@ const auto combinings_es = 334;
 const auto combinings_fr = 366;
 const auto combinings_ja = 644;
 
-#ifdef HAVE_ICU
 const auto abnormals_es = 334;
 const auto abnormals_ja = 644;
 const auto divergences_es = 334;
 const auto divergences_ja = 644;
-#else
-const auto abnormals_es = 0;
-const auto abnormals_ja = 0;
-const auto divergences_es = 334;
-const auto divergences_ja = 644;
-#endif
 
 // count
 

@@ -38,10 +38,8 @@
 #define BOOST_BIND_NO_PLACEHOLDERS
 #include <boost/bind.hpp>
 
-// Include boost only from here, so this definition works.
-#if defined(HAVE_ICU)
-    #define BOOST_HAS_ICU
-#endif
+// Boost.Locale is still used by conversion.cpp and environment.cpp.
+// ICU backend is no longer required — normalization uses embedded tables.
 #include <boost/locale.hpp>
 
 // address::from_string

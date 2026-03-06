@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2026 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin-system developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,22 +19,15 @@
 #include <bitcoin/system/unicode/normalization.hpp>
 
 #include <algorithm>
-#include <mutex>
-#ifdef HAVE_MSC
-#else
-    #include <mutex>
-#endif
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
+#include <bitcoin/system/unicode/unicode_tables.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// Avoid codecvt as it is deprecated in C++17.
-using namespace boost::locale;
 
 // Local helpers.
 // ----------------------------------------------------------------------------
@@ -45,195 +38,310 @@ constexpr bool is_contained(char32_t value,
     return interval.first <= value && value <= interval.second;
 }
 
-#ifdef HAVE_MSC
+// Hangul syllable constants (algorithmic decomposition/composition).
+// unicode.org/reports/tr15/#Hangul
+constexpr char32_t hangul_sbase  = 0xAC00u;
+constexpr char32_t hangul_lbase  = 0x1100u;
+constexpr char32_t hangul_vbase  = 0x1161u;
+constexpr char32_t hangul_tbase  = 0x11A7u;
+constexpr uint32_t hangul_lcount = 19u;
+constexpr uint32_t hangul_vcount = 21u;
+constexpr uint32_t hangul_tcount = 28u;
+constexpr uint32_t hangul_ncount = hangul_vcount * hangul_tcount; // 588
+constexpr uint32_t hangul_scount = hangul_lcount * hangul_ncount; // 11172
 
-// Workarounds for lack of Windows ICU support in boost-locale packages.
-// The ICU library was first added to Windows 10 in [10.0.15063].
-// docs.microsoft.com/en-us/windows/win32/intl/international-components-for-unicode--icu-
-// Windows XP, Windows Server 2003: No longer supported.
-// The required header file and DLL are part of the Microsoft Internationalized
-// Domain Name(IDN) Mitigation APIs, which are no longer available for download.
+// Unicode normalization helpers.
+// ----------------------------------------------------------------------------
 
-static NORM_FORM to_win32_normal_form(norm_type form) NOEXCEPT
+// Get canonical combining class (0 = starter).
+static uint8_t get_ccc(char32_t point) NOEXCEPT
 {
-    switch (form)
-    {
-        case norm_type::norm_nfkd:
-            return NormalizationKD;
-        case norm_type::norm_nfkc:
-            return NormalizationKC;
-        case norm_type::norm_nfd:
-            return NormalizationD;
+    if (point > 0x10FFFFu)
+        return 0;
+    const auto data1 = unicode_data1[(point >> 7)];
+    const auto data2 = unicode_data2[(data1 << 7) + (point & 0x7Fu)];
+    return combining_index[data2];
+}
 
-        // NFC is the boost::locale default and this is the full enumeration.
-        case norm_type::norm_nfc:
-        default:
-            return NormalizationC;
+// Decompose one code point into out (recursive, single-step per table entry).
+static void decompose_one(std::u32string& out, char32_t cp,
+    bool compat) NOEXCEPT
+{
+    // Hangul: algorithmic decomposition (same for NFD and NFKD).
+    if (cp >= hangul_sbase && cp < hangul_sbase + hangul_scount)
+    {
+        const auto si = static_cast<uint32_t>(cp - hangul_sbase);
+        out.push_back(hangul_lbase + si / hangul_ncount);
+        out.push_back(hangul_vbase + (si % hangul_ncount) / hangul_tcount);
+        const auto ti = si % hangul_tcount;
+        if (ti != 0u)
+            out.push_back(hangul_tbase + ti);
+        return;
+    }
+
+    // Two-level trie lookup.
+    if (cp > 0x10FFFFu)
+    {
+        out.push_back(cp);
+        return;
+    }
+    const auto block = decomp_index1[cp >> decomp_shift];
+    const auto idx   = decomp_index2[
+        (static_cast<size_t>(block) << decomp_shift) + (cp & 0x7Fu)];
+
+    if (idx == 0u)
+    {
+        out.push_back(cp);
+        return;
+    }
+
+    const auto header    = decomp_pool[idx];
+    const auto is_compat = (header & 0x80000000u) != 0u;
+    const auto count     = (header >> 24) & 0x7Fu;
+
+    // In NFD mode skip compatibility-only mappings.
+    if (is_compat && !compat)
+    {
+        out.push_back(cp);
+        return;
+    }
+
+    // Recurse into each component.
+    for (uint32_t i = 0u; i < count; ++i)
+        decompose_one(out, static_cast<char32_t>(decomp_pool[idx + 1u + i]),
+            compat);
+}
+
+// Apply canonical ordering (UAX #15 section 3.11):
+// Within each "combining sequence" (runs of CCC > 0), sort by CCC, stable.
+static void canonical_order(std::u32string& seq) NOEXCEPT
+{
+    const auto n = seq.size();
+    if (n < 2u)
+        return;
+
+    // Identify runs of combining characters and stable-sort each.
+    size_t run_start = 0u;
+    while (run_start < n)
+    {
+        // Skip starters.
+        while (run_start < n && get_ccc(seq[run_start]) == 0u)
+            ++run_start;
+
+        // Find end of this combining run.
+        size_t run_end = run_start;
+        while (run_end < n && get_ccc(seq[run_end]) != 0u)
+            ++run_end;
+
+        if (run_end > run_start + 1u)
+        {
+            std::stable_sort(seq.begin() + run_start, seq.begin() + run_end,
+                [](char32_t a, char32_t b) NOEXCEPT
+                {
+                    return get_ccc(a) < get_ccc(b);
+                });
+        }
+        run_start = run_end;
     }
 }
 
-static bool normal_form(std::string& out, const std::string& in,
-    norm_type form) NOEXCEPT
+// Canonical composition lookup (returns 0 if no composition found).
+static char32_t comp_lookup(char32_t a, char32_t b) NOEXCEPT
 {
-#ifndef HAVE_ICU
-    return false;
-#endif
-
-    const auto wide = to_utf16(in);
-    const auto size = wide.size();
-    const auto source = wide.c_str();
-    const auto norm = to_win32_normal_form(form);
-
-    // Guard cast to int.
-    if (is_limited<int>(size))
-        return false;
-
-    const auto length = static_cast<int>(size);
-    auto result = NormalizeString(norm, source, length, NULL, 0);
-
-    // NormalizeString would overflow buffer (or length is empty).
-    if (result <= 0)
-        return false;
-
-    auto buffer = std::wstring(result, 0);
-    result = NormalizeString(norm, source, length, &buffer.front(), result);
-
-    // Conversion failed.
-    if (result <= 0)
-        return false;
-
-    out = to_utf8(buffer.substr(0, result));
-    return true;
-}
-
-bool to_lower(std::string& out, const std::string& in) NOEXCEPT
-{
-#ifndef HAVE_ICU
-    return false;
-#endif
-
-    auto wide = to_utf16(in);
-    const auto size = wide.size();
-
-    // Guard against DWORD overflow.
-    if (is_limited<DWORD>(size))
-        return false;
-
-    // std_vector ensures contiguous bytes.
-    const auto length = static_cast<DWORD>(size);
-
-    // CharLowerBuffW ensures conversion in place.
-    if (CharLowerBuffW(&wide.front(), length) != length)
-        return false;
-
-    out = to_utf8(wide);
-    return true;
-}
-
-bool to_upper(std::string& out, const std::string& in) NOEXCEPT
-{
-#ifndef HAVE_ICU
-    return false;
-#endif
-
-    auto wide = to_utf16(in);
-    const auto size = wide.size();
-
-    // Guard against DWORD overflow.
-    if (is_limited<DWORD>(size))
-        return false;
-
-    // std_vector ensures contiguous bytes.
-    const auto length = static_cast<DWORD>(size);
-
-    // CharUpperBuffW ensures conversion in place.
-    if (CharUpperBuffW(&wide.front(), length) != length)
-        return false;
-
-    out = to_utf8(wide);
-    return true;
-}
-
-#else // HAVE_MSC
-
-constexpr auto icu_backend_name = "icu";
-constexpr auto utf8_locale_name = "en_US.UTF8";
-
-static bool get_backend_manager(localization_backend_manager& out) NOEXCEPT
-{
-    static std::once_flag mutex;
-    static bool initialized;
-
-    // Thread safe, creates global on first call.
-    // Returns reference to the global backend manager.
-    out = localization_backend_manager::global();
-
-    // Set the static initialization state.
-    const auto validate = [&]() NOEXCEPT
+    // Hangul L + V → LV
+    if (a >= hangul_lbase && a < hangul_lbase + hangul_lcount &&
+        b >= hangul_vbase && b < hangul_vbase + hangul_vcount)
     {
-        // Not thread safe, use call_once.
-        const auto all = out.get_all_backends();
+        return hangul_sbase
+            + (a - hangul_lbase) * hangul_ncount
+            + (b - hangul_vbase) * hangul_tcount;
+    }
 
-        // Guards backend_manager.select(BC_LOCALE_BACKEND) silent failure.
-        initialized = std::find(all.cbegin(), all.cend(),
-            icu_backend_name) != all.cend();
-    };
+    // Hangul LV + T → LVT
+    if (a >= hangul_sbase && a < hangul_sbase + hangul_scount &&
+        (a - hangul_sbase) % hangul_tcount == 0u &&
+        b >  hangul_tbase  && b < hangul_tbase + hangul_tcount)
+    {
+        return a + (b - hangul_tbase);
+    }
 
-    // One time verifier of the localization backend manager.
-    std::call_once(mutex, validate);
-    return initialized;
+    // Binary search in comp_pairs (sorted by [a, b]).
+    size_t lo = 0u, hi = comp_pairs_count;
+    while (lo < hi)
+    {
+        const size_t mid  = (lo + hi) / 2u;
+        const size_t base = mid * 3u;
+        const auto   ca   = comp_pairs[base];
+        const auto   cb   = comp_pairs[base + 1u];
+        if (ca < a || (ca == a && cb < b))
+            lo = mid + 1u;
+        else if (ca > a || (ca == a && cb > b))
+            hi = mid;
+        else
+            return static_cast<char32_t>(comp_pairs[base + 2u]);
+    }
+    return 0u;
 }
 
-static bool normal_form(std::string& out, const std::string& in,
-    norm_type form) NOEXCEPT
+// Apply canonical composition pass (UAX #15 canonical composition algorithm).
+static void compose(std::u32string& seq) NOEXCEPT
 {
-#ifndef HAVE_ICU
-    return false;
-#endif
+    const size_t n = seq.size();
+    if (n < 2u)
+        return;
 
-    localization_backend_manager manager;
-    if (!get_backend_manager(manager))
-        return false;
+    // We scan for each starter and try to compose with following combiners.
+    size_t i = 0u;
+    while (i < seq.size())
+    {
+        if (get_ccc(seq[i]) != 0u)
+        {
+            ++i;
+            continue;
+        }
 
-    manager.select(icu_backend_name);
-    const generator locale(manager);
-    out = normalize(in, form, locale(utf8_locale_name));
+        // seq[i] is a starter; scan forward for composable characters.
+        uint8_t last_ccc = 0u;
+        size_t j = i + 1u;
+        while (j < seq.size())
+        {
+            const uint8_t ccc = get_ccc(seq[j]);
+
+            // A combining character is "blocked" if a character with equal or
+            // higher CCC appeared between the starter and this character.
+            const bool blocked = (last_ccc > 0u && last_ccc >= ccc);
+
+            if (ccc == 0u)
+            {
+                // seq[j] is also a starter. Try composition (e.g. Hangul L+V,
+                // LV+T); if they compose, continue scanning; otherwise stop.
+                if (!blocked)
+                {
+                    const char32_t c = comp_lookup(seq[i], seq[j]);
+                    if (c != 0u)
+                    {
+                        seq[i] = c;
+                        seq.erase(seq.begin() + static_cast<std::ptrdiff_t>(j));
+                        last_ccc = 0u;
+                        continue;
+                    }
+                }
+                break; // Next starter that won't compose — stop.
+            }
+
+            if (!blocked)
+            {
+                const char32_t c = comp_lookup(seq[i], seq[j]);
+                if (c != 0u)
+                {
+                    seq[i] = c;
+                    seq.erase(seq.begin() + static_cast<std::ptrdiff_t>(j));
+                    last_ccc = 0u; // Restart scan from just after new starter.
+                    continue;
+                }
+            }
+
+            last_ccc = ccc;
+            ++j;
+        }
+        ++i;
+    }
+}
+
+// Full normalization (decompose → order → optionally compose).
+static bool normal_form(std::string& value, bool compat,
+    bool recompose) NOEXCEPT
+{
+    const auto u32 = to_utf32(value);
+    std::u32string out;
+    out.reserve(u32.size() * 2u); // Most decompositions are small.
+
+    for (const char32_t cp : u32)
+        decompose_one(out, cp, compat);
+
+    canonical_order(out);
+
+    if (recompose)
+        compose(out);
+
+    value = to_utf8(out);
     return true;
 }
 
-bool to_lower(std::string& out, const std::string& in) NOEXCEPT
+// Case folding helpers.
+// ----------------------------------------------------------------------------
+
+// Binary search in case_fold_pairs (sorted by from_cp).
+// Returns folded code points written into out[], returns count (1-3).
+static uint32_t fold_lower_one(char32_t cp, char32_t out[3]) NOEXCEPT
 {
-#ifndef HAVE_ICU
-    return false;
-#endif
-
-    localization_backend_manager manager;
-    if (!get_backend_manager(manager))
-        return false;
-
-    manager.select(icu_backend_name);
-    const generator locale(manager);
-    out = boost::locale::to_lower(in, locale(utf8_locale_name));
-    return true;
+    size_t lo = 0u, hi = case_fold_pairs_count;
+    while (lo < hi)
+    {
+        const size_t mid  = (lo + hi) / 2u;
+        const size_t base = mid * 5u;
+        const auto   from = case_fold_pairs[base];
+        if (from < static_cast<uint32_t>(cp))
+            lo = mid + 1u;
+        else if (from > static_cast<uint32_t>(cp))
+            hi = mid;
+        else
+        {
+            const uint32_t n = case_fold_pairs[base + 1u];
+            out[0] = static_cast<char32_t>(case_fold_pairs[base + 2u]);
+            out[1] = static_cast<char32_t>(case_fold_pairs[base + 3u]);
+            out[2] = static_cast<char32_t>(case_fold_pairs[base + 4u]);
+            return n;
+        }
+    }
+    out[0] = cp;
+    return 1u; // Identity (already lowercase or caseless).
 }
 
-bool to_upper(std::string& out, const std::string& in) NOEXCEPT
+static uint32_t fold_upper_one(char32_t cp, char32_t out[3]) NOEXCEPT
 {
-#ifndef HAVE_ICU
-    return false;
-#endif
-
-    localization_backend_manager manager;
-    if (!get_backend_manager(manager))
-        return false;
-
-    manager.select(icu_backend_name);
-    const generator locale(manager);
-    out = boost::locale::to_upper(in, locale(utf8_locale_name));
-    return true;
+    size_t lo = 0u, hi = upper_pairs_count;
+    while (lo < hi)
+    {
+        const size_t mid  = (lo + hi) / 2u;
+        const size_t base = mid * 5u;
+        const auto   from = upper_pairs[base];
+        if (from < static_cast<uint32_t>(cp))
+            lo = mid + 1u;
+        else if (from > static_cast<uint32_t>(cp))
+            hi = mid;
+        else
+        {
+            const uint32_t n = upper_pairs[base + 1u];
+            out[0] = static_cast<char32_t>(upper_pairs[base + 2u]);
+            out[1] = static_cast<char32_t>(upper_pairs[base + 3u]);
+            out[2] = static_cast<char32_t>(upper_pairs[base + 4u]);
+            return n;
+        }
+    }
+    out[0] = cp;
+    return 1u;
 }
 
-#endif // HAVE_MSC
+static bool apply_case(std::string& out, const std::string& in,
+    bool lower) NOEXCEPT
+{
+    const auto u32 = to_utf32(in);
+    std::u32string result;
+    result.reserve(u32.size());
+
+    char32_t buf[3]{};
+    for (const char32_t cp : u32)
+    {
+        const uint32_t n = lower ? fold_lower_one(cp, buf)
+                                 : fold_upper_one(cp, buf);
+        for (uint32_t i = 0u; i < n; ++i)
+            result.push_back(buf[i]);
+    }
+
+    out = to_utf8(result);
+    return true;
+}
 
 // ICU dependency (ascii supported, otherwise false if HAVE_ICU not defined).
 // ----------------------------------------------------------------------------
@@ -246,7 +354,7 @@ bool to_lower(std::string& value) NOEXCEPT
         return true;
     }
 
-    return to_lower(value, value);
+    return apply_case(value, value, true);
 }
 
 bool to_upper(std::string& value) NOEXCEPT
@@ -257,27 +365,27 @@ bool to_upper(std::string& value) NOEXCEPT
         return true;
     }
 
-    return to_upper(value, value);
+    return apply_case(value, value, false);
 }
 
 bool to_canonical_composition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfc);
+    return is_ascii(value) || normal_form(value, false, true);
 }
 
 bool to_canonical_decomposition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfd);
+    return is_ascii(value) || normal_form(value, false, false);
 }
 
 bool to_compatibility_composition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkc);
+    return is_ascii(value) || normal_form(value, true, true);
 }
 
 bool to_compatibility_decomposition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkd);
+    return is_ascii(value) || normal_form(value, true, false);
 }
 
 // No ICU dependency.

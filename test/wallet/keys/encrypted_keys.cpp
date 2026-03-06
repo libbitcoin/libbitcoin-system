@@ -26,8 +26,6 @@ using namespace bc::system::wallet;
 // 4 seconds of test here.
 #if defined(HAVE_SLOW_TESTS)
 
-#if defined(HAVE_ICU)
-
 BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
 {
     const auto encoded_password = base16_array("cf92cc8100f0909080f09f92a9");
@@ -432,8 +430,6 @@ BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_9__expected)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif // HAVE_ICU
-
 // ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair)
@@ -596,8 +592,6 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_ICU)
-
 BOOST_AUTO_TEST_SUITE(encrypted__round_trips)
 
 BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_version_and_compression)
@@ -701,8 +695,6 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif // HAVE_ICU
 
 #endif // HAVE_SLOW_TESTS
 

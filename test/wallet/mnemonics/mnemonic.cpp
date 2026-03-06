@@ -513,14 +513,8 @@ BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__sizes__expected)
 
 BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__denormalization__expected)
 {
-#ifdef HAVE_ICU
     const ptrdiff_t abnormals_en = 0;
     const ptrdiff_t abnormals_ja = 22;
-#else
-    const ptrdiff_t abnormals_en = 0;
-    const ptrdiff_t abnormals_ja = 0;
-#endif
-    // When HAVE_ICU is undefined normalization cannot be verified.
     BOOST_CHECK_EQUAL(abnormals(vectors_en, ascii_space), abnormals_en);
     BOOST_CHECK_EQUAL(abnormals(vectors_ja, ideographic_space), abnormals_ja);
 }
@@ -593,23 +587,16 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__vectors_ja__expected)
         BOOST_CHECK(instance);
         BOOST_CHECK(instance.lingo() == language::ja);
         BOOST_CHECK_EQUAL(instance.entropy(), vector.entropy());
-#ifdef HAVE_ICU
-        // Passphrases are all non-ascii, but 22 of 24 mnemonics are
-        // denormalized, so this will fail when HAVE_ICU is undefined.
         BOOST_CHECK_EQUAL(instance.sentence(), vector.sentence(ideographic_space));
         BOOST_CHECK_EQUAL(instance.words(), vector.words());
 
         // This one check fails under vectorization (sha512, so only 64 bit).
         BOOST_CHECK_EQUAL(instance.to_key(vector.passphrase), vector.hd_key());
-#endif
     }
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_ja__expected)
 {
-#ifdef HAVE_ICU
-    // Passphrases are all ascii, but 22 of 24 mnemonics are denormalized, so this
-    // will fail when HAVE_ICU is undefined.
     for (const auto& vector: vectors_ja)
     {
         const mnemonic instance(vector.mnemonic);
@@ -622,7 +609,6 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_ja__expected)
         // This one check fails under vectorization (sha512, so only 64 bit).
         BOOST_CHECK_EQUAL(instance.to_key(vector.passphrase), vector.hd_key());
     }
-#endif
 }
 
 #endif // VERIFIED_VECTORS

@@ -232,6 +232,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\code_points.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\conversion.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\normalization.cpp" />
+    <ClCompile Include="..\..\..\..\src\unicode\unicode_tables.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\environment.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\ifstream.cpp" />
@@ -550,6 +551,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\conversion.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\normalization.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\unicode_tables.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\console_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\environment.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\ifstream.hpp" />
