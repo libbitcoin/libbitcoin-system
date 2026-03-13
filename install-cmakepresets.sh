@@ -8,16 +8,6 @@
 # Script to build and install libbitcoin-system.
 #
 # Script options:
-# --with-icu               Compile with International Components for Unicode.
-#                            Since the addition of BIP-39 and later BIP-38
-#                            support, libbitcoin conditionally incorporates ICU
-#                            to provide BIP-38 and BIP-39 passphrase
-#                            normalization features. Currently
-#                            libbitcoin-explorer is the only other library that
-#                            accesses this feature, so if you do not intend to
-#                            use passphrase normalization this dependency can
-#                            be avoided.
-# --build-icu              Builds ICU libraries.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --preset=<label>         CMakePreset label.
@@ -252,6 +242,8 @@ parse_command_line_options()
             (--disable-shared)      DISABLE_SHARED="yes";;
             (--disable-static)      DISABLE_STATIC="yes";;
 
+            # Common project options.
+
             # Custom build options.
             (--build-boost)                            BUILD_BOOST="yes";;
             (--build-secp256k1)                        BUILD_SECP256K1="yes";;
@@ -407,7 +399,6 @@ handle_custom_options()
             export CMAKE_LIBRARY_PATH="${PREFIX}/lib:${CMAKE_LIBRARY_PATH}"
         fi
     fi
-
 }
 
 remove_build_options()
@@ -767,6 +758,23 @@ build_from_github_cmake()
     cmake_project_directory "$REPO" "$PRESET" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
+# Because boost ICU static lib detection assumes in incorrect ICU path.
+circumvent_boost_icu_detection()
+{
+    # Boost expects a directory structure for ICU which is incorrect.
+    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
+    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
+
+    local SUCCESS="int main() { return 0; }"
+    local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
+    local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
+
+    printf "%s" "$SUCCESS" > $REGEX_TEST
+    printf "%s" "$SUCCESS" > $LOCALE_TEST
+
+    # display_message "Hack: ICU detection modified, will always indicate found."
+}
+
 # Because boost doesn't support autoconfig and doesn't like empty settings.
 initialize_boost_configuration()
 {
@@ -786,6 +794,32 @@ initialize_boost_configuration()
         STDLIB_FLAG="-stdlib=lib$STDLIB"
         BOOST_CXXFLAGS="cxxflags=$STDLIB_FLAG"
         BOOST_LINKFLAGS="linkflags=$STDLIB_FLAG"
+    fi
+}
+
+# Because boost doesn't use pkg-config.
+# The hacks below are still required as of boost 1.72.0.
+initialize_boost_icu_configuration()
+{
+    BOOST_ICU_ICONV="on"
+    BOOST_ICU_POSIX="on"
+
+    if [[ $WITH_ICU ]]; then
+        # Restrict other locale options when compiling boost with icu.
+        BOOST_ICU_ICONV="off"
+        BOOST_ICU_POSIX="off"
+
+        # Work around boost ICU static lib discovery bug.
+        circumvent_boost_icu_detection
+
+        # Extract ICU prefix directory from package config variable.
+        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
+
+        # Extract ICU libs from package config variables and augment with -ldl.
+        ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
+
+        # This is a hack for boost m4 scripts that fail with ICU dependency.
+        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
     fi
 }
 
@@ -811,6 +845,7 @@ build_from_tarball_boost()
     push_directory "$TARGET"
 
     initialize_boost_configuration
+    initialize_boost_icu_configuration
 
     guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
     CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
@@ -829,8 +864,12 @@ build_from_tarball_boost()
     display_message "boost cxxflags        : $BOOST_CXXFLAGS"
     display_message "boost linkflags       : $BOOST_LINKFLAGS"
     display_message "link                  : $BOOST_LINK"
+    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
+    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sNO_ZSTD             : 1"
+    display_message "-sICU_PATH            : $ICU_PREFIX"
+  # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
@@ -842,7 +881,14 @@ build_from_tarball_boost()
 
     ./bootstrap.sh \
         "--with-bjam=./b2" \
-        "--prefix=$PREFIX"
+        "--prefix=$PREFIX" \
+        "--with-icu=$ICU_PREFIX"
+
+    # boost_regex:
+    # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
+    # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
+    # github.com/libbitcoin/libbitcoin-system/issues/1192
+    # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \
         "cxxstd=20" \
@@ -853,8 +899,11 @@ build_from_tarball_boost()
         "$BOOST_LINKFLAGS" \
         "link=$BOOST_LINK" \
         "warnings=off" \
+        "boost.locale.iconv=$BOOST_ICU_ICONV" \
+        "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sNO_ZSTD=1" \
+        "-sICU_PATH=$ICU_PREFIX" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
