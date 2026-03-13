@@ -90,10 +90,9 @@ long_hash mnemonic::seeder(const string_list& words,
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "mnemonic";
 
-    // Passphrase is limited to ascii (normal) if HAVE_ICU undefind.
     std::string phrase{ passphrase };
 
-    LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
+    LCOV_EXCL_START("Always succeeds (normalization always available).")
 
     // Unlike Electrum, BIP39 does not perform any further normalization.
     if (!to_compatibility_decomposition(phrase))
@@ -101,7 +100,7 @@ long_hash mnemonic::seeder(const string_list& words,
 
     LCOV_EXCL_STOP()
 
-    // Words are in normal (lower, nfkd) form, even without ICU.
+    // Words are in normal (lower, nfkd) form.
     return pbkd<sha512>::key<long_hash_size>(system::join(words),
         passphrase_prefix + phrase, hmac_iterations);
 }

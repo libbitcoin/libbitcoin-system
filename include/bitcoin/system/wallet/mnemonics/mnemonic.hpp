@@ -83,7 +83,6 @@ public:
 
     /// wiki.trezor.io/recovery_seed
     /// Derive the "master binary seed" from the "recovery seed" and passphrase.
-    /// Returns null result with non-ascii passphrase and HAVE_ICU undefind.
     long_hash to_seed(const std::string& passphrase="") const NOEXCEPT;
 
     /// wiki.trezor.io/account_private_key
@@ -91,7 +90,6 @@ public:
     /// This is also known as the wallet "root key" or "master private key".
     /// hd_private.to_public() is the "master public key".
     /// The "master binary seed" cannot be obtained from the key.
-    /// Returns invalid result with non-ascii passphrase and HAVE_ICU undefind.
     hd_private to_key(const std::string& passphrase="",
         const context& context=btc_mainnet_p2kh) const NOEXCEPT;
 

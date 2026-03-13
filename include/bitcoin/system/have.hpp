@@ -84,11 +84,6 @@
 /// WITH_ build symbols.
 /// ---------------------------------------------------------------------------
 
-/// Build configured (always available on msvc).
-#if defined(HAVE_MSC) || defined(WITH_ICU)
-    #define HAVE_ICU
-#endif
-
 /// vc++: There are no flags for SHANI/CRYPTO, so use custom WITH_SHA option.
 #if defined(HAVE_MSC) && defined(WITH_SHA)
     #if defined(HAVE_XCPU)

@@ -216,8 +216,6 @@ BOOST_AUTO_TEST_CASE(languages__try_normalize__padded_mixed_ascii__lowered_trimm
     BOOST_REQUIRE_EQUAL(accessor::try_normalize(words), expected);
 }
 
-#ifdef HAVE_ICU
-
 BOOST_AUTO_TEST_CASE(languages__try_normalize__with_icu__lowered_normalized)
 {
     string_list words{ base16_string("c3a16261636f"), "XyZ" };
@@ -225,18 +223,6 @@ BOOST_AUTO_TEST_CASE(languages__try_normalize__with_icu__lowered_normalized)
     const auto result = accessor::try_normalize(words);
     BOOST_REQUIRE_EQUAL(result, expected);
 }
-
-#else
-
-BOOST_AUTO_TEST_CASE(languages__try_normalize__without_icu__ascii_lowered_not_normalized)
-{
-    string_list words{ base16_string("c3a16261636f"), "XyZ" };
-    const string_list expected{ words[0], ascii_to_lower(words[1]) };
-    const auto result = accessor::try_normalize(words);
-    BOOST_REQUIRE_EQUAL(result, expected);
-}
-
-#endif
 
 // construct/properties/bool
 

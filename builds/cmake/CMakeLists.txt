@@ -148,17 +148,9 @@ set( with-tests "yes" CACHE BOOL "Compile with unit tests." )
 #------------------------------------------------------------------------------
 set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
-# Implement -Dwith-icu and define WITH_ICU and output ${icu}.
+# Implement -Dwith-normalization-demo and declare with-normalization-demo.
 #------------------------------------------------------------------------------
-set( with-icu "no" CACHE BOOL "Compile with International Components for Unicode." )
-
-if (with-icu)
-    add_definitions( -DWITH_ICU )
-endif()
-
-if (with-icu)
-    set( icu "-DWITH_ICU" )
-endif()
+set( with-normalization-demo "no" CACHE BOOL "Compile the Unicode normalization demo (examples/normalization_demo.cpp)." )
 
 # Implement -Denable-avx2.
 #------------------------------------------------------------------------------
@@ -340,12 +332,6 @@ set( Boost_LIBRARY_DIR $<IF:$<BOOL:${enable-ndebug}>,"${Boost_LIBRARY_DIR_RELEAS
 set( boost_CPPFLAGS "-I${Boost_INCLUDE_DIR}" )
 set( boost_LDFLAGS "-L${Boost_LIBRARY_DIR}" )
 
-# Find icu-i18n
-#------------------------------------------------------------------------------
-if (with-icu)
-    find_package( Icu-I18N 55.2 REQUIRED )
-endif()
-
 # Find secp256k1
 #------------------------------------------------------------------------------
 find_package( Secp256K1 0.5.1.0 REQUIRED )
@@ -353,10 +339,8 @@ find_package( Secp256K1 0.5.1.0 REQUIRED )
 # Define project common includes for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_INCLUDE_DIRS} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 else()
-    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 endif()
 
@@ -364,16 +348,13 @@ endif()
 #------------------------------------------------------------------------------
 include_directories( SYSTEM
     ${Boost_INCLUDE_DIR}
-    ${icu_i18n_FOR_BUILD_INCLUDE_DIRS}
     ${secp256k1_FOR_BUILD_INCLUDE_DIRS} )
 
 # Define project common library directories for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    set( icu_i18n_FOR_BUILD_LIBRARY_DIRS ${icu_i18n_LIBRARY_DIRS} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_LIBRARY_DIRS ${secp256k1_LIBRARY_DIRS} CACHE STRING "Placeholder" )
 else()
-    set( icu_i18n_FOR_BUILD_LIBRARY_DIRS ${icu_i18n_STATIC_LIBRARY_DIRS} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_LIBRARY_DIRS ${secp256k1_STATIC_LIBRARY_DIRS} CACHE STRING "Placeholder" )
 endif()
 
@@ -381,7 +362,6 @@ endif()
 #------------------------------------------------------------------------------
 link_directories(
     ${Boost_LIBRARY_DIRS}
-    ${icu_i18n_FOR_BUILD_LIBRARY_DIRS}
     ${secp256k1_FOR_BUILD_LIBRARY_DIRS} )
 
 # Define project common linker flags.
@@ -408,10 +388,8 @@ endif()
 # Define common library usage for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_LIBRARIES} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_LIBRARIES} CACHE STRING "Placeholder" )
 else()
-    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
 endif()
 
@@ -423,11 +401,7 @@ link_libraries(
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_URL_LIBRARY}
-    ${icu_i18n_FOR_BUILD_LIBRARIES}
     ${secp256k1_FOR_BUILD_LIBRARIES} )
-
-add_definitions(
-    ${icu} )
 
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
@@ -512,6 +486,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/unicode/code_points.cpp"
     "../../src/unicode/conversion.cpp"
     "../../src/unicode/normalization.cpp"
+    "../../src/unicode/unicode_tables.cpp"
     "../../src/unicode/utf8_everywhere/console_streambuf.cpp"
     "../../src/unicode/utf8_everywhere/environment.cpp"
     "../../src/unicode/utf8_everywhere/ifstream.cpp"
@@ -587,10 +562,8 @@ add_library( ${CANONICAL_LIB_NAME}
 # ${CANONICAL_LIB_NAME} project specific include directory normalization for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_INCLUDE_DIRS} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 else()
-    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 endif()
 
@@ -599,7 +572,6 @@ endif()
 target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
     "../../include"
     ${Boost_INCLUDE_DIR}
-    ${icu_i18n_FOR_BUILD_INCLUDE_DIRS}
     ${secp256k1_FOR_BUILD_INCLUDE_DIRS} )
 
 target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
@@ -608,10 +580,8 @@ target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 # ${CANONICAL_LIB_NAME} project specific libraries noramalization for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_LIBRARIES} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_LIBRARIES} CACHE STRING "Placeholder" )
 else()
-    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
     set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
 endif()
 
@@ -623,7 +593,6 @@ target_link_libraries( ${CANONICAL_LIB_NAME}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_URL_LIBRARY}
-    ${icu_i18n_FOR_BUILD_LIBRARIES}
     ${secp256k1_FOR_BUILD_LIBRARIES} )
 
 # Define libbitcoin-system-examples project.
@@ -641,6 +610,28 @@ if (with-examples)
 #------------------------------------------------------------------------------
     target_link_libraries( libbitcoin-system-examples
         ${CANONICAL_LIB_NAME} )
+
+endif()
+
+# Define libbitcoin-system-normalization-demo project.
+#------------------------------------------------------------------------------
+if (with-normalization-demo)
+    add_executable( libbitcoin-system-normalization-demo
+        "../../examples/normalization_demo.cpp" )
+
+#     libbitcoin-system-normalization-demo project specific include directories.
+#------------------------------------------------------------------------------
+    target_include_directories( libbitcoin-system-normalization-demo PRIVATE
+        "../../include" )
+
+#     libbitcoin-system-normalization-demo project specific libraries/linker flags.
+#------------------------------------------------------------------------------
+    target_link_libraries( libbitcoin-system-normalization-demo
+        ${CANONICAL_LIB_NAME} )
+
+    if(BUILD_EXTERNAL_DEPS)
+        add_dependencies( libbitcoin-system-normalization-demo boost_build secp256k1_build )
+    endif()
 
 endif()
 
@@ -936,4 +927,3 @@ install( TARGETS ${CANONICAL_LIB_NAME}
 #------------------------------------------------------------------------------
 install( DIRECTORY "../../include/bitcoin"
     DESTINATION include )
-

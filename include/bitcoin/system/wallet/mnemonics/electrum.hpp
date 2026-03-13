@@ -84,7 +84,6 @@ public:
 
     /// Returns true if the seed of the words has the given prefix.
     /// Will also match 'old', 'bip39' and 'none', as specified.
-    /// Non-ascii words must be nfkd/lower prenormalized if HAVE_ICU undefind.
     static bool is_prefix(const string_list& words,
         seed_prefix prefix) NOEXCEPT;
     static bool is_prefix(const std::string& sentence,
@@ -92,7 +91,6 @@ public:
 
     /// Obtain the enumerated prefix corresponding to the words.
     /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
-    /// Non-ascii words must be nfkd/lower prenormalized if HAVE_ICU undefind.
     /// A prefix other than 'none' implies the words represent a valid seed.
     static seed_prefix to_prefix(const string_list& words) NOEXCEPT;
     static seed_prefix to_prefix(const std::string& sentence) NOEXCEPT;
@@ -135,7 +133,6 @@ public:
     /// Derive raw form "root seed" from mnemonic entropy and passphrase.
     /// The "root seed" is also referred to by electrum as the "master key".
     /// Returns null result if current prefix is 'none', 'bip39, or 'old'.
-    /// Returns null result with non-ascii passphrase and HAVE_ICU undefind.
     long_hash to_seed(const std::string& passphrase="") const NOEXCEPT;
 
     /// Derive hd form "root seed" from mnemonic entropy and passphrase.
@@ -144,7 +141,6 @@ public:
     /// hd_private.secret() + .chain_code() is the raw form "root seed".
     /// Context affects the hd form but does not affect the contained seed.
     /// Returns invalid result if current prefix is 'none', 'bip39, or 'old'.
-    /// Returns invalid result with non-ascii passphrase and HAVE_ICU undefind.
     hd_private to_key(const std::string& passphrase="",
         const context& context=btc_mainnet_p2kh) const NOEXCEPT;
 

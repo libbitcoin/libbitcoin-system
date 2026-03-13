@@ -67,11 +67,6 @@ BUILD_SRC_DIR="build-libbitcoin-system"
 
 PRESUMED_CI_PROJECT_PATH=$(pwd)
 
-# ICU archive.
-#------------------------------------------------------------------------------
-ICU_URL="https://github.com/unicode-org/icu/releases/download/release-78.2/icu4c-78.2-sources.tgz"
-ICU_ARCHIVE="icu4c-78.2-sources.tgz"
-
 # Boost archive.
 #------------------------------------------------------------------------------
 BOOST_URL="https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2"
@@ -229,16 +224,6 @@ display_help()
     display_message "Usage: ./install.sh [OPTION]..."
     display_message "Manage the installation of libbitcoin-system."
     display_message "Script options:"
-    display_message "  --with-icu               Compile with International Components for Unicode."
-    display_message "                             Since the addition of BIP-39 and later BIP-38 "
-    display_message "                             support, libbitcoin conditionally incorporates ICU "
-    display_message "                             to provide BIP-38 and BIP-39 passphrase "
-    display_message "                             normalization features. Currently "
-    display_message "                             libbitcoin-explorer is the only other library that "
-    display_message "                             accesses this feature, so if you do not intend to "
-    display_message "                             use passphrase normalization this dependency can "
-    display_message "                             be avoided."
-    display_message "  --build-icu              Build ICU libraries."
     display_message "  --build-boost            Build Boost libraries."
     display_message "  --build-secp256k1        Build libsecp256k1 libraries."
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
@@ -267,11 +252,7 @@ parse_command_line_options()
             (--disable-shared)      DISABLE_SHARED="yes";;
             (--disable-static)      DISABLE_STATIC="yes";;
 
-            # Common project options.
-            (--with-icu)            WITH_ICU="yes";;
-
             # Custom build options.
-            (--build-icu)                              BUILD_ICU="yes";;
             (--build-boost)                            BUILD_BOOST="yes";;
             (--build-secp256k1)                        BUILD_SECP256K1="yes";;
 
@@ -427,11 +408,6 @@ handle_custom_options()
         fi
     fi
 
-    # Process ICU
-    if [[ $WITH_ICU ]]; then
-        CUMULATIVE_FILTERED_ARGS+=" --with-icu"
-        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-icu=yes"
-    fi
 }
 
 remove_build_options()
@@ -507,8 +483,6 @@ display_configuration()
     display_message "CXXFLAGS              : $CXXFLAGS"
     display_message "LDFLAGS               : $LDFLAGS"
     display_message "LDLIBS                : $LDLIBS"
-    display_message "WITH_ICU              : $WITH_ICU"
-    display_message "BUILD_ICU             : $BUILD_ICU"
     display_message "BUILD_BOOST           : $BUILD_BOOST"
     display_message "BUILD_SECP256K1       : $BUILD_SECP256K1"
     display_message "BOOST_ROOT            : $BOOST_ROOT"
@@ -793,23 +767,6 @@ build_from_github_cmake()
     cmake_project_directory "$REPO" "$PRESET" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
-# Because boost ICU static lib detection assumes in incorrect ICU path.
-circumvent_boost_icu_detection()
-{
-    # Boost expects a directory structure for ICU which is incorrect.
-    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
-    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
-
-    local SUCCESS="int main() { return 0; }"
-    local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
-    local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
-
-    printf "%s" "$SUCCESS" > $REGEX_TEST
-    printf "%s" "$SUCCESS" > $LOCALE_TEST
-
-    # display_message "Hack: ICU detection modified, will always indicate found."
-}
-
 # Because boost doesn't support autoconfig and doesn't like empty settings.
 initialize_boost_configuration()
 {
@@ -829,32 +786,6 @@ initialize_boost_configuration()
         STDLIB_FLAG="-stdlib=lib$STDLIB"
         BOOST_CXXFLAGS="cxxflags=$STDLIB_FLAG"
         BOOST_LINKFLAGS="linkflags=$STDLIB_FLAG"
-    fi
-}
-
-# Because boost doesn't use pkg-config.
-# The hacks below are still required as of boost 1.72.0.
-initialize_boost_icu_configuration()
-{
-    BOOST_ICU_ICONV="on"
-    BOOST_ICU_POSIX="on"
-
-    if [[ $WITH_ICU ]]; then
-        # Restrict other locale options when compiling boost with icu.
-        BOOST_ICU_ICONV="off"
-        BOOST_ICU_POSIX="off"
-
-        # Work around boost ICU static lib discovery bug.
-        circumvent_boost_icu_detection
-
-        # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
-
-        # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
-
-        # This is a hack for boost m4 scripts that fail with ICU dependency.
-        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
     fi
 }
 
@@ -880,7 +811,6 @@ build_from_tarball_boost()
     push_directory "$TARGET"
 
     initialize_boost_configuration
-    initialize_boost_icu_configuration
 
     guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
     CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
@@ -899,12 +829,8 @@ build_from_tarball_boost()
     display_message "boost cxxflags        : $BOOST_CXXFLAGS"
     display_message "boost linkflags       : $BOOST_LINKFLAGS"
     display_message "link                  : $BOOST_LINK"
-    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
-    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sNO_ZSTD             : 1"
-    display_message "-sICU_PATH            : $ICU_PREFIX"
-  # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
@@ -916,14 +842,7 @@ build_from_tarball_boost()
 
     ./bootstrap.sh \
         "--with-bjam=./b2" \
-        "--prefix=$PREFIX" \
-        "--with-icu=$ICU_PREFIX"
-
-    # boost_regex:
-    # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
-    # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
-    # github.com/libbitcoin/libbitcoin-system/issues/1192
-    # "-sICU_LINK=${ICU_LIBS[*]}"
+        "--prefix=$PREFIX"
 
     ./b2 install \
         "cxxstd=20" \
@@ -934,11 +853,8 @@ build_from_tarball_boost()
         "$BOOST_LINKFLAGS" \
         "link=$BOOST_LINK" \
         "warnings=off" \
-        "boost.locale.iconv=$BOOST_ICU_ICONV" \
-        "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sNO_ZSTD=1" \
-        "-sICU_PATH=$ICU_PREFIX" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
@@ -956,11 +872,6 @@ build_from_tarball_boost()
 #==============================================================================
 build_all()
 {
-    unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
-    build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
-    export CPPFLAGS=$SAVE_CPPFLAGS
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
@@ -1009,11 +920,6 @@ remove_install_options
 
 # Define build flags.
 #==============================================================================
-# Define icu flags.
-#------------------------------------------------------------------------------
-ICU_FLAGS=(
-"-w")
-
 # Define boost flags.
 #------------------------------------------------------------------------------
 BOOST_FLAGS=(
@@ -1027,19 +933,6 @@ SECP256K1_FLAGS=(
 
 # Define build options.
 #==============================================================================
-# Define icu options.
-#------------------------------------------------------------------------------
-ICU_OPTIONS=(
-"--enable-draft" \
-"--enable-rpath" \
-"--enable-tools" \
-"--disable-extras" \
-"--disable-icuio" \
-"--disable-layout" \
-"--disable-layoutex" \
-"--disable-tests" \
-"--disable-samples")
-
 # Define boost options.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS=(

@@ -32,9 +32,9 @@ doc_DATA = \
 # src/libbitcoin-system.la => ${libdir}
 #------------------------------------------------------------------------------
 lib_LTLIBRARIES = src/libbitcoin-system.la
-src_libbitcoin_system_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPPFLAGS} ${icu_i18n_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
+src_libbitcoin_system_la_CPPFLAGS = -I${srcdir}/include ${boost_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
 src_libbitcoin_system_la_LDFLAGS = ${boost_LDFLAGS}
-src_libbitcoin_system_la_LIBADD = ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_thread_LIBS} ${boost_url_LIBS} ${icu_i18n_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_system_la_LIBADD = ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_thread_LIBS} ${boost_url_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_system_la_SOURCES = \
     src/arena.cpp \
     src/define.cpp \
@@ -116,6 +116,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/unicode/code_points.cpp \
     src/unicode/conversion.cpp \
     src/unicode/normalization.cpp \
+    src/unicode/unicode_tables.cpp \
     src/unicode/utf8_everywhere/console_streambuf.cpp \
     src/unicode/utf8_everywhere/environment.cpp \
     src/unicode/utf8_everywhere/ifstream.cpp \
@@ -193,9 +194,9 @@ src_libbitcoin_system_la_SOURCES = \
 if WITH_EXAMPLES
 
 noinst_PROGRAMS = examples/libbitcoin-system-examples
-examples_libbitcoin_system_examples_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPPFLAGS} ${icu_i18n_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
+examples_libbitcoin_system_examples_CPPFLAGS = -I${srcdir}/include ${boost_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
 examples_libbitcoin_system_examples_LDFLAGS = ${boost_LDFLAGS}
-examples_libbitcoin_system_examples_LDADD = src/libbitcoin-system.la ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_thread_LIBS} ${boost_url_LIBS} ${icu_i18n_LIBS} ${secp256k1_LIBS}
+examples_libbitcoin_system_examples_LDADD = src/libbitcoin-system.la ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_thread_LIBS} ${boost_url_LIBS} ${secp256k1_LIBS}
 examples_libbitcoin_system_examples_SOURCES = \
     examples/main.cpp
 
@@ -208,9 +209,9 @@ if WITH_TESTS
 TESTS = libbitcoin-system-test_runner.sh
 
 check_PROGRAMS = test/libbitcoin-system-test
-test_libbitcoin_system_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPPFLAGS} ${icu_i18n_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
+test_libbitcoin_system_test_CPPFLAGS = -I${srcdir}/include ${boost_BUILD_CPPFLAGS} ${secp256k1_BUILD_CPPFLAGS}
 test_libbitcoin_system_test_LDFLAGS = ${boost_LDFLAGS}
-test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_framework_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_thread_LIBS} ${boost_url_LIBS} ${icu_i18n_LIBS} ${secp256k1_LIBS}
+test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_framework_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_thread_LIBS} ${boost_url_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_system_test_SOURCES = \
     test/allocator.cpp \
     test/arena.cpp \
@@ -903,7 +904,8 @@ include_bitcoin_system_unicode_HEADERS = \
     include/bitcoin/system/unicode/code_points.hpp \
     include/bitcoin/system/unicode/conversion.hpp \
     include/bitcoin/system/unicode/normalization.hpp \
-    include/bitcoin/system/unicode/unicode.hpp
+    include/bitcoin/system/unicode/unicode.hpp \
+    include/bitcoin/system/unicode/unicode_tables.hpp
 
 include_bitcoin_system_unicode_utf8_everywheredir = ${includedir}/bitcoin/system/unicode/utf8_everywhere
 include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
