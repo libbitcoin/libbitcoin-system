@@ -280,12 +280,11 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
 // create_token
 // ----------------------------------------------------------------------------
 
-// This call requires an ICU build, the other excluded calls are dependencies.
 static data_chunk normal(const std::string& passphrase) NOEXCEPT
 {
     std::string copy{ passphrase };
 
-    LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
+    LCOV_EXCL_START("Always succeeds (normalization always available).")
     return to_canonical_composition(copy) ? to_chunk(copy) : data_chunk{};
     LCOV_EXCL_STOP()
 }

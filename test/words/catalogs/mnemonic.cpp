@@ -134,7 +134,6 @@ BOOST_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__unsorted__false)
 // This also removes the ICU dependency for these languages.
 BOOST_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 {
-    // The result is definitive only when HAVE_ICU is defined.
     BOOST_CHECK(!abnormal(mnemonic::en));
     BOOST_CHECK(!abnormal(mnemonic::es));
     BOOST_CHECK(!abnormal(mnemonic::it));

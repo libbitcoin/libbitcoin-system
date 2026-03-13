@@ -45,8 +45,19 @@ LICENSE_HEADER = """\
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
-def format_array(name, typ, data, cols=16):
-    """Format a C++ array definition."""
+def format_array(name, typ, data, cols=None):
+    """Format a C++ array definition with rows ≤ 80 columns."""
+    if typ == "uint32_t":
+        item_width = 12  # len("0x00000000u")
+    elif typ == "uint16_t":
+        item_width = 8   # len("0x0000u")
+    else:
+        item_width = 6   # len("0x00u")
+
+    if cols is None:
+        # indent(4) + item_width + (cols-1)*(item_width+2) + trailing_comma(1) <= 80
+        cols = max(1, (75 - item_width) // (item_width + 2) + 1)
+
     lines = [f"const {typ} {name}[]"]
     lines.append("{")
     for i in range(0, len(data), cols):
@@ -223,18 +234,18 @@ def generate_cpp(pool, index1, index2, comp_pairs, lower_entries, upper_entries)
     lines.append("// header = (is_compat << 31) | (count << 24)")
     lines.append("// is_compat: 1=compatibility decomp, 0=canonical decomp")
     lines.append("// index 0 = sentinel (no decomposition = identity)")
-    lines.append(format_array("decomp_pool", "uint32_t", pool, 8))
+    lines.append(format_array("decomp_pool", "uint32_t", pool))
     lines.append("")
 
     # ── decomposition trie level 1 ───────────────────────────────────────────
     lines.append("// Level-1 decomposition trie (indexed by code_point >> 7).")
     lines.append("// Value * 128 + (code_point & 0x7f) indexes decomp_index2.")
-    lines.append(format_array("decomp_index1", "uint16_t", index1, 16))
+    lines.append(format_array("decomp_index1", "uint16_t", index1))
     lines.append("")
 
     # ── decomposition trie level 2 ───────────────────────────────────────────
     lines.append("// Level-2 decomposition trie. Value = index into decomp_pool (0 = none).")
-    lines.append(format_array("decomp_index2", "uint16_t", index2, 16))
+    lines.append(format_array("decomp_index2", "uint16_t", index2))
     lines.append("")
 
     # ── composition pairs ────────────────────────────────────────────────────
@@ -245,7 +256,7 @@ def generate_cpp(pool, index1, index2, comp_pairs, lower_entries, upper_entries)
     lines.append("// Composition pair table: triples of (starter, combining, composed).")
     lines.append("// Sorted by (starter, combining) for binary search.")
     lines.append("// Hangul composition (U+AC00..U+D7A3) handled algorithmically.")
-    lines.append(format_array("comp_pairs", "uint32_t", flat_comp, 6))
+    lines.append(format_array("comp_pairs", "uint32_t", flat_comp))
     lines.append("")
 
     # ── case fold table ──────────────────────────────────────────────────────
@@ -257,7 +268,7 @@ def generate_cpp(pool, index1, index2, comp_pairs, lower_entries, upper_entries)
     lines.append("// Case fold table: quintuples of (from, n, to[0], to[1], to[2]).")
     lines.append("// Implements Unicode full case folding (C+F folds, no Turkish T folds).")
     lines.append("// Sorted by from for binary search.")
-    lines.append(format_array("case_fold_pairs", "uint32_t", flat_lower, 5))
+    lines.append(format_array("case_fold_pairs", "uint32_t", flat_lower))
     lines.append("")
 
     flat_upper = []
@@ -267,7 +278,7 @@ def generate_cpp(pool, index1, index2, comp_pairs, lower_entries, upper_entries)
     lines.append("// Simple uppercase table: quintuples of (from, n=1, to[0], 0, 0).")
     lines.append("// Only 1:1 mappings (ignores rare multi-char upper results).")
     lines.append("// Sorted by from for binary search.")
-    lines.append(format_array("upper_pairs", "uint32_t", flat_upper, 5))
+    lines.append(format_array("upper_pairs", "uint32_t", flat_upper))
     lines.append("")
 
     lines.append("} // namespace system")

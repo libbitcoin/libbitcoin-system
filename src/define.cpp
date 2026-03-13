@@ -211,10 +211,6 @@ DEFINED("HAVE_MEMORY_PRIORITY")
 DEFINED("HAVE_EXECUTION")
 #endif
 
-#ifdef HAVE_ICU
-DEFINED("HAVE_ICU")
-#endif
-
 // These messages are suppressed without this.
 #ifdef HAVE_MESSAGES
 DEFINED("HAVE_MESSAGES")

@@ -665,7 +665,6 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__mismatched_language__false)
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__uppercase_standard_italian__true)
 {
-    // HAVE_ICU not required for ascii case normalization.
     const auto instance = accessor::from_words(split(ascii_to_upper(mnemonic_standard)), language::it);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.prefix() == prefix::standard);

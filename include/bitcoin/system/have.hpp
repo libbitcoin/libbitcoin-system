@@ -84,9 +84,6 @@
 /// WITH_ build symbols.
 /// ---------------------------------------------------------------------------
 
-/// Unicode normalization is always available (embedded tables, no ICU needed).
-#define HAVE_ICU
-
 /// vc++: There are no flags for SHANI/CRYPTO, so use custom WITH_SHA option.
 #if defined(HAVE_MSC) && defined(WITH_SHA)
     #if defined(HAVE_XCPU)

@@ -115,7 +115,6 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 // This verifies the number of abnormals in the two divergent dictionaries.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
 {
-    // The result is definitive only when HAVE_ICU is defined.
     BOOST_CHECK_EQUAL(abnormals(electrum_es), abnormals_es);
     BOOST_CHECK_EQUAL(abnormals(electrum_ja), abnormals_ja);
 }
