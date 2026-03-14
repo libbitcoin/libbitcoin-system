@@ -30,7 +30,7 @@ namespace system {
 // header = (is_compat << 31) | (count << 24)
 // is_compat: 1=compatibility decomp, 0=canonical decomp
 // index 0 = sentinel (no decomposition = identity)
-const uint32_t decomp_pool[]
+const uint32_t decomposition_pool[]
 {
     0x00000000u, 0x81000000u, 0x00000020u, 0x82000000u, 0x00000020u,
     0x00000308u, 0x81000000u, 0x00000061u, 0x82000000u, 0x00000020u,
@@ -2099,8 +2099,8 @@ const uint32_t decomp_pool[]
 };
 
 // Level-1 decomposition trie (indexed by code_point >> 7).
-// Value * 128 + (code_point & 0x7f) indexes decomp_index2.
-const uint16_t decomp_index1[]
+// Value * 128 + (code_point & 0x7f) indexes decomposition_index2.
+const uint16_t decomposition_index1[]
 {
     0x0000u, 0x0001u, 0x0002u, 0x0003u, 0x0004u, 0x0005u, 0x0006u,
     0x0007u, 0x0008u, 0x0009u, 0x0000u, 0x000au, 0x000bu, 0x000cu,
@@ -3348,8 +3348,8 @@ const uint16_t decomp_index1[]
     0x0000u, 0x0000u, 0x0000u,
 };
 
-// Level-2 decomposition trie. Value = index into decomp_pool (0 = none).
-const uint16_t decomp_index2[]
+// Level-2 decomposition trie. Value = index into decomposition_pool (0 = none).
+const uint16_t decomposition_index2[]
 {
     0x0000u, 0x0000u, 0x0000u, 0x0000u, 0x0000u, 0x0000u, 0x0000u,
     0x0000u, 0x0000u, 0x0000u, 0x0000u, 0x0000u, 0x0000u, 0x0000u,
@@ -5295,7 +5295,7 @@ const uint16_t decomp_index2[]
 // Composition pair table: triples of (starter, combining, composed).
 // Sorted by (starter, combining) for binary search.
 // Hangul composition (U+AC00..U+D7A3) handled algorithmically.
-const uint32_t comp_pairs[]
+const uint32_t composition_pairs[]
 {
     0x0000003cu, 0x00000338u, 0x0000226eu, 0x0000003du, 0x00000338u,
     0x00002260u, 0x0000003eu, 0x00000338u, 0x0000226fu, 0x00000041u,

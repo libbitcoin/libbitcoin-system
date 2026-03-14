@@ -29,28 +29,28 @@ BOOST_AUTO_TEST_SUITE(normalization_tests)
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__bip38__expected)
 {
     auto decomposed = to_string(base16_chunk("cf92cc8100f0909080f09f92a9"));
-    BOOST_REQUIRE(to_canonical_composition(decomposed));
+    to_canonical_composition(decomposed);
     BOOST_REQUIRE_EQUAL(encode_base16(decomposed), "cf9300f0909080f09f92a9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__bip38__expected)
 {
     auto composed = to_string(base16_chunk("cf9300f0909080f09f92a9"));
-    BOOST_REQUIRE(to_canonical_decomposition(composed));
+    to_canonical_decomposition(composed);
     BOOST_REQUIRE_EQUAL(encode_base16(composed), "cf92cc8100f0909080f09f92a9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__bip38__expected)
 {
     auto decomposed = to_string(base16_chunk("cea5cc8100f0909080f09f92a9"));
-    BOOST_REQUIRE(to_compatibility_composition(decomposed));
+    to_compatibility_composition(decomposed);
     BOOST_REQUIRE_EQUAL(encode_base16(decomposed), "ce8e00f0909080f09f92a9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__bip38__expected)
 {
     auto composed = to_string(base16_chunk("ce8e00f0909080f09f92a9"));
-    BOOST_REQUIRE(to_compatibility_decomposition(composed));
+    to_compatibility_decomposition(composed);
     BOOST_REQUIRE_EQUAL(encode_base16(composed), "cea5cc8100f0909080f09f92a9");
 }
 
@@ -60,14 +60,14 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__bip38__expec
 BOOST_AUTO_TEST_CASE(normalization__to_upper__ideographic_space__unchanged)
 {
     std::string space = ideographic_space;
-    BOOST_REQUIRE(to_upper(space));
+    to_upper(space);
     BOOST_REQUIRE_EQUAL(space, ideographic_space);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
 {
     std::string space = ideographic_space;
-    BOOST_REQUIRE(to_lower(space));
+    to_lower(space);
     BOOST_REQUIRE_EQUAL(space, ideographic_space);
 }
 
@@ -75,8 +75,9 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__ideographic_space__unchanged)
 BOOST_AUTO_TEST_CASE(normalization__to_lower__german_sharp_s__folds_to_ss)
 {
     // U+00DF ß → ss (multi-char fold)
-    auto value = to_string(base16_chunk("c39f")); // ß in UTF-8
-    BOOST_REQUIRE(to_lower(value));
+    // ß in UTF-8
+    auto value = to_string(base16_chunk("c39f"));
+    to_lower(value);
     BOOST_REQUIRE_EQUAL(value, "ss");
 }
 
@@ -84,7 +85,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__greek_sigma__folds)
 {
     // U+03A3 Σ → U+03C3 σ
     auto value = to_string(base16_chunk("cea3"));
-    BOOST_REQUIRE(to_lower(value));
+    to_lower(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "cf83");
 }
 
@@ -92,16 +93,19 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__ohm_sign__folds_to_omega)
 {
     // U+2126 Ω (Ohm) → U+03C9 ω
     auto value = to_string(base16_chunk("e284a6"));
-    BOOST_REQUIRE(to_lower(value));
+    to_lower(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "cf89");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__cafe__folds)
 {
     // "CAFÉ" → "café"
-    auto value = to_string(base16_chunk("434146c389")); // CAFÉ
-    BOOST_REQUIRE(to_lower(value));
-    BOOST_REQUIRE_EQUAL(encode_base16(value), "636166c3a9");  // café
+    // CAFÉ
+    auto value = to_string(base16_chunk("434146c389"));
+    to_lower(value);
+
+    // café
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "636166c3a9");
 }
 
 // Unicode normalization conformance — canonical forms
@@ -112,7 +116,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfd__e_with_acute_precomposed__decomposes)
 {
     // U+00E9 é → U+0065 e + U+0301 combining-acute
     auto value = to_string(base16_chunk("c3a9"));
-    BOOST_REQUIRE(to_canonical_decomposition(value));
+    to_canonical_decomposition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "65cc81");
 }
 
@@ -120,7 +124,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfc__e_plus_acute__composes)
 {
     // U+0065 e + U+0301 → U+00E9 é
     auto value = to_string(base16_chunk("65cc81"));
-    BOOST_REQUIRE(to_canonical_composition(value));
+    to_canonical_composition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "c3a9");
 }
 
@@ -128,7 +132,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfd__c_with_cedilla__decomposes)
 {
     // U+00C7 Ç → U+0043 C + U+0327 combining-cedilla
     auto value = to_string(base16_chunk("c387"));
-    BOOST_REQUIRE(to_canonical_decomposition(value));
+    to_canonical_decomposition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "43cca7");
 }
 
@@ -136,25 +140,28 @@ BOOST_AUTO_TEST_CASE(normalization__nfd__d_with_dot_above__decomposes)
 {
     // U+1E0A Ḋ → U+0044 D + U+0307 combining-dot-above
     auto value = to_string(base16_chunk("e1b88a"));
-    BOOST_REQUIRE(to_canonical_decomposition(value));
+    to_canonical_decomposition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "44cc87");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__nfd__ohm_sign__maps_to_omega)
 {
     // U+2126 Ω (Ohm sign) has canonical decomp → U+03A9 Ω (Greek)
-    auto value = to_string(base16_chunk("e284a6")); // U+2126
-    BOOST_REQUIRE(to_canonical_decomposition(value));
-    BOOST_REQUIRE_EQUAL(encode_base16(value), "cea9"); // U+03A9
+    // U+2126
+    auto value = to_string(base16_chunk("e284a6"));
+    to_canonical_decomposition(value);
+
+    // U+03A9
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "cea9");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__nfc__nfd_then_nfc__round_trips)
 {
     const std::string original = to_string(base16_chunk("c3a9c387e1b88a"));
     auto value = original;
-    BOOST_REQUIRE(to_canonical_decomposition(value));
+    to_canonical_decomposition(value);
     BOOST_REQUIRE_NE(value, original);
-    BOOST_REQUIRE(to_canonical_composition(value));
+    to_canonical_composition(value);
     BOOST_REQUIRE_EQUAL(value, original);
 }
 
@@ -164,16 +171,20 @@ BOOST_AUTO_TEST_CASE(normalization__nfc__nfd_then_nfc__round_trips)
 BOOST_AUTO_TEST_CASE(normalization__nfd__hangul_lv_syllable__decomposes_to_l_v)
 {
     // U+AC00 가 → U+1100 ᄀ + U+1161 ᅡ
-    auto value = to_string(base16_chunk("eab080")); // 가
-    BOOST_REQUIRE(to_canonical_decomposition(value));
-    BOOST_REQUIRE_EQUAL(encode_base16(value), "e18480e185a1"); // ᄀ + ᅡ
+    // 가
+    auto value = to_string(base16_chunk("eab080"));
+    to_canonical_decomposition(value);
+
+    // ᄀ + ᅡ
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "e18480e185a1");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__nfd__hangul_lvt_syllable__decomposes_to_l_v_t)
 {
     // U+AC01 각 → U+1100 ᄀ + U+1161 ᅡ + U+11A8 ᆨ
-    auto value = to_string(base16_chunk("eab081")); // 각
-    BOOST_REQUIRE(to_canonical_decomposition(value));
+    // 각
+    auto value = to_string(base16_chunk("eab081"));
+    to_canonical_decomposition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "e18480e185a1e186a8");
 }
 
@@ -181,7 +192,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfc__l_plus_v__composes_to_hangul_lv)
 {
     // U+1100 + U+1161 → U+AC00 가
     auto value = to_string(base16_chunk("e18480e185a1"));
-    BOOST_REQUIRE(to_canonical_composition(value));
+    to_canonical_composition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "eab080");
 }
 
@@ -189,18 +200,18 @@ BOOST_AUTO_TEST_CASE(normalization__nfc__lv_plus_t__composes_to_hangul_lvt)
 {
     // U+AC00 가 + U+11A8 ᆨ → U+AC01 각
     auto value = to_string(base16_chunk("eab080e186a8"));
-    BOOST_REQUIRE(to_canonical_composition(value));
+    to_canonical_composition(value);
     BOOST_REQUIRE_EQUAL(encode_base16(value), "eab081");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__nfd_nfc__hangul_round_trips)
 {
     // Decompose then recompose a full sentence with mixed Hangul syllables.
-    const std::string original = to_string(base16_chunk(
-        "eab080eab09d"));  // 가 각
+    // 가 각
+    const std::string original = to_string(base16_chunk("eab080eab09d"));
     auto value = original;
-    BOOST_REQUIRE(to_canonical_decomposition(value));
-    BOOST_REQUIRE(to_canonical_composition(value));
+    to_canonical_decomposition(value);
+    to_canonical_composition(value);
     BOOST_REQUIRE_EQUAL(value, original);
 }
 
@@ -211,7 +222,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfkd__fi_ligature__decomposes_to_fi)
 {
     // U+FB01 ﬁ (fi ligature) → U+0066 f + U+0069 i
     auto value = to_string(base16_chunk("efac81"));
-    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    to_compatibility_decomposition(value);
     BOOST_REQUIRE_EQUAL(value, "fi");
 }
 
@@ -220,7 +231,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfkd__ideographic_space__becomes_ascii_space
     // U+3000 (ideographic space) NFKD → U+0020 (space)
     const auto ideographic = ideographic_space;
     auto value = ideographic;
-    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    to_compatibility_decomposition(value);
     BOOST_REQUIRE_EQUAL(value, " ");
 }
 
@@ -229,7 +240,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfkd__sharp_s__unchanged)
     // U+00DF ß has no compatibility decomposition (stays as-is in NFKD)
     auto value = to_string(base16_chunk("c39f"));
     const auto expected = value;
-    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    to_compatibility_decomposition(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
@@ -243,7 +254,7 @@ BOOST_AUTO_TEST_CASE(normalization__mnemonic__ideographic_space__normalizes_to_a
     const auto ascii_delimited  = "あいこくしん" + ascii_space  + "あいさつ";
     const auto ideo_delimited   = "あいこくしん" + ideographic_space + "あいさつ";
     auto normal = ideo_delimited;
-    BOOST_REQUIRE(to_compatibility_decomposition(normal));
+    to_compatibility_decomposition(normal);
     BOOST_REQUIRE_NE(normal, ideo_delimited);
     BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
 }
@@ -256,9 +267,9 @@ BOOST_AUTO_TEST_CASE(normalization__nfd__out_of_order_combining__sorted)
     // e + U+0323 (combining dot below, CCC=220) + U+0301 (combining acute, CCC=230)
     // NFD canonical ordering: CCC 220 < 230, so dot-below comes first.
     // Input: e + acute + dot-below (wrong order) → e + dot-below + acute (correct)
-    auto value = to_string(base16_chunk("65cc81cca3")); // e + acute + dot-below (wrong order)
-    BOOST_REQUIRE(to_canonical_decomposition(value));
-    BOOST_REQUIRE_EQUAL(encode_base16(value), "65cca3cc81"); // e dot-below acute
+    auto value = to_string(base16_chunk("65cc81cca3"));
+    to_canonical_decomposition(value);
+    BOOST_REQUIRE_EQUAL(encode_base16(value), "65cca3cc81");
 }
 
 // ASCII test cases (valid with or without any configuration)
@@ -267,7 +278,7 @@ BOOST_AUTO_TEST_CASE(normalization__nfd__out_of_order_combining__sorted)
 BOOST_AUTO_TEST_CASE(normalization__to_lower__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_lower(empty));
+    to_lower(empty);
     BOOST_REQUIRE(empty.empty());
 }
 
@@ -275,35 +286,35 @@ BOOST_AUTO_TEST_CASE(normalization__to_lower__lower_ascii__unchanged)
 {
     std::string lower{ "abcdefghijklmnopqrstuvwxyz" };
     const auto expected = lower;
-    BOOST_REQUIRE(to_lower(lower));
+    to_lower(lower);
     BOOST_REQUIRE_EQUAL(lower, expected);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__upper_ascii__lowered)
 {
     std::string upper{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
-    BOOST_REQUIRE(to_lower(upper));
+    to_lower(upper);
     BOOST_REQUIRE_EQUAL(upper, "abcdefghijklmnopqrstuvwxyz");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_lower__mixed_ascii__lowered)
 {
     std::string mixed{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
-    BOOST_REQUIRE(to_lower(mixed));
+    to_lower(mixed);
     BOOST_REQUIRE_EQUAL(mixed, "abcdefghijklmnopqrstuvwxyz");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_upper__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_upper(empty));
+    to_upper(empty);
     BOOST_REQUIRE(empty.empty());
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_upper__lower_ascii__uppered)
 {
     std::string lower{ "abcdefghijklmnopqrstuvwxyz" };
-    BOOST_REQUIRE(to_upper(lower));
+    to_upper(lower);
     BOOST_REQUIRE_EQUAL(lower, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
@@ -311,21 +322,21 @@ BOOST_AUTO_TEST_CASE(normalization__to_upper__upper_ascii__unchanged)
 {
     std::string upper{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
     const auto expected = upper;
-    BOOST_REQUIRE(to_upper(upper));
+    to_upper(upper);
     BOOST_REQUIRE_EQUAL(upper, expected);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_upper__mixed_ascii__uppered)
 {
     std::string mixed{ "abcdefghijklmnopqrstuvwxyz" };
-    BOOST_REQUIRE(to_upper(mixed));
+    to_upper(mixed);
     BOOST_REQUIRE_EQUAL(mixed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_canonical_composition(empty));
+    to_canonical_composition(empty);
     BOOST_REQUIRE(empty.empty());
 }
 
@@ -333,14 +344,14 @@ BOOST_AUTO_TEST_CASE(normalization__to_canonical_composition__ascii__unchanged)
 {
     std::string value{ "abc" };
     const auto expected = value;
-    BOOST_REQUIRE(to_canonical_composition(value));
+    to_canonical_composition(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_canonical_decomposition(empty));
+    to_canonical_decomposition(empty);
     BOOST_REQUIRE(empty.empty());
 }
 
@@ -348,14 +359,14 @@ BOOST_AUTO_TEST_CASE(normalization__to_canonical_decomposition__ascii__unchanged
 {
     std::string value{ "abc" };
     const auto expected = value;
-    BOOST_REQUIRE(to_canonical_decomposition(value));
+    to_canonical_decomposition(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_compatibility_composition(empty));
+    to_compatibility_composition(empty);
     BOOST_REQUIRE(empty.empty());
 }
 
@@ -363,14 +374,14 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_composition__ascii__unchang
 {
     std::string value{ "abc" };
     const auto expected = value;
-    BOOST_REQUIRE(to_compatibility_composition(value));
+    to_compatibility_composition(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
 BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__empty__empty)
 {
     std::string empty{ "" };
-    BOOST_REQUIRE(to_compatibility_decomposition(empty));
+    to_compatibility_decomposition(empty);
     BOOST_REQUIRE(empty.empty());
 }
 
@@ -378,8 +389,19 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__ascii__uncha
 {
     std::string value{ "abc" };
     const auto expected = value;
-    BOOST_REQUIRE(to_compatibility_decomposition(value));
+    to_compatibility_decomposition(value);
     BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentence__ascii_space)
+{
+    // The ideographic_space normalizes to ascii_space.
+    const auto ascii_delimited = "あいこくしん" + ascii_space + "あいさつ";
+    const auto ideographic_delimited = "あいこくしん" + ideographic_space + "あいさつ";
+    auto normal = ideographic_delimited;
+    to_compatibility_decomposition(normal);
+    BOOST_REQUIRE_NE(normal, ideographic_delimited);
+    BOOST_REQUIRE_EQUAL(normal, ascii_delimited);
 }
 
 // is_separator

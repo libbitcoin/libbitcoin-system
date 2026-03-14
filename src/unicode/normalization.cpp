@@ -29,379 +29,423 @@
 namespace libbitcoin {
 namespace system {
 
-// Local helpers.
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+
+// Constants.
 // ----------------------------------------------------------------------------
 
-constexpr bool is_contained(char32_t value,
-    const char32_interval& interval) NOEXCEPT
+constexpr char32_t max_unicode_point = 0x10ffff;
+
+// Hangul syllable constants (unicode.org/reports/tr15/#Hangul).
+namespace hangul
 {
-    return interval.first <= value && value <= interval.second;
+    constexpr char32_t syllable_base = 0xac00;
+    constexpr char32_t leading_base = 0x1100;
+    constexpr char32_t vowel_base = 0x1161;
+    constexpr char32_t trailing_base = 0x11a7;
+    constexpr uint32_t leading_count = 19;
+    constexpr uint32_t vowel_count = 21;
+    constexpr uint32_t trailing_count = 28;
+    constexpr uint32_t nucleus_count = vowel_count * trailing_count;
+    constexpr uint32_t syllable_count = leading_count * nucleus_count;
 }
-
-constexpr char32_t unicode_max_code_point = 0x10ffffu;
-
-// Hangul syllable constants (algorithmic decomposition/composition).
-// unicode.org/reports/tr15/#Hangul
-constexpr char32_t hangul_syllable_base  = 0xac00u;
-constexpr char32_t hangul_leading_base   = 0x1100u;
-constexpr char32_t hangul_vowel_base     = 0x1161u;
-constexpr char32_t hangul_trailing_base  = 0x11a7u;
-constexpr uint32_t hangul_leading_count  = 19;
-constexpr uint32_t hangul_vowel_count    = 21;
-constexpr uint32_t hangul_trailing_count = 28;
-constexpr uint32_t hangul_nucleus_count  = hangul_vowel_count * hangul_trailing_count; // 588
-constexpr uint32_t hangul_syllable_count = hangul_leading_count * hangul_nucleus_count; // 11172
 
 // Unicode normalization helpers.
 // ----------------------------------------------------------------------------
 
-// Get canonical combining class (0 = starter).
-static uint8_t get_ccc(char32_t point) NOEXCEPT
+constexpr size_t components(uint32_t header) NOEXCEPT
 {
-    if (point > unicode_max_code_point)
-        return 0;
-    // Two-level trie: level-1 selects the 128-entry block, level-2 resolves the entry.
-    const auto data1 = unicode_data1[shift_right(point, 7)];
-    const auto data2 = unicode_data2[shift_left(possible_wide_cast<size_t>(data1), 7)
-        + bit_and(point, unmask_right<char32_t>(7))];
-    return combining_index[data2];
+    // Bits 24-30 is the number of decomposition components.
+    constexpr size_t discard = 24;
+    constexpr size_t visible = add1(30 - discard);
+    return bit_and(shift_right(header, discard),
+        unmask_right<uint32_t>(visible));
 }
 
-// Decompose one code point into out (recursive, single-step per table entry).
+constexpr bool is_compatible(uint32_t header) NOEXCEPT
+{
+    // Most significant bit flags a compatibility-only (NFKD) mapping.
+    return get_left(header);
+}
+
+static uint32_t decompose(char32_t point) NOEXCEPT
+{
+    constexpr size_t shift = 7;
+
+    // Two-level trie: level-1 selects 128-entry block, level-2 resolves entry.
+    const auto block = decomposition_index1[shift_right(point, shift)];
+    return decomposition_index2[shift_left<uint32_t>(block, shift) +
+        bit_and(point, unmask_right<char32_t>(shift))];
+}
+
 static void decompose_one(std::u32string& out, char32_t point,
     bool compatible) NOEXCEPT
 {
+    using namespace hangul;
+
     // Hangul: algorithmic decomposition (same for NFD and NFKD).
-    if (point >= hangul_syllable_base && point < hangul_syllable_base + hangul_syllable_count)
+    if (point >= syllable_base &&
+        point < syllable_base + syllable_count)
     {
-        const auto syllable_index = possible_narrow_cast<uint32_t>(point - hangul_syllable_base);
-        out.push_back(hangul_leading_base + syllable_index / hangul_nucleus_count);
-        out.push_back(hangul_vowel_base + (syllable_index % hangul_nucleus_count) / hangul_trailing_count);
-        const auto trailing_index = syllable_index % hangul_trailing_count;
-        if (is_nonzero(trailing_index))
-            out.push_back(hangul_trailing_base + trailing_index);
+        const auto syllable = point - syllable_base;
+        out.push_back(leading_base + syllable / nucleus_count);
+
+        const auto modulo = (syllable % nucleus_count);
+        out.push_back(vowel_base + modulo / trailing_count);
+
+        const auto trailing = syllable % trailing_count;
+        if (is_nonzero(trailing))
+            out.push_back(trailing_base + trailing);
+
         return;
     }
 
-    // Two-level trie lookup.
-    if (point > unicode_max_code_point)
+    if (point > max_unicode_point)
     {
         out.push_back(point);
         return;
     }
-    // Two-level trie: level-1 selects the block, level-2 resolves the entry.
-    const auto block = decomp_index1[shift_right(point, decomp_shift)];
-    const auto index = decomp_index2[
-        shift_left(possible_wide_cast<size_t>(block), decomp_shift)
-        + bit_and(point, unmask_right<char32_t>(decomp_shift))];
 
+    const auto index = decompose(point);
     if (is_zero(index))
     {
         out.push_back(point);
         return;
     }
 
-    const auto header        = decomp_pool[index];
-    // Most significant bit flags a compatibility-only (NFKD) mapping.
-    const auto is_compatible = get_left(header);
-    // Bits 24-30: number of decomposition components (max 127).
-    const auto count = bit_and(shift_right(header, 24), unmask_right<uint32_t>(7));
+    const auto header = decomposition_pool[index];
 
-    // In NFD mode skip compatibility-only mappings.
-    if (is_compatible && !compatible)
+    // Skip compatibility-only mappings in NFD mode.
+    if (is_compatible(header) && !compatible)
     {
         out.push_back(point);
         return;
     }
 
     // Recurse into each component.
-    for (size_t component{}; component < count; ++component)
-        decompose_one(out, possible_narrow_cast<char32_t>(decomp_pool[add1(index) + component]),
+    for (size_t component{}; component < components(header); ++component)
+        decompose_one(out, decomposition_pool[add1(index) + component],
             compatible);
 }
 
-// Apply canonical ordering (UAX #15 section 3.11):
-// Within each "combining sequence" (runs of CCC > 0), sort by CCC, stable.
+static uint8_t get_canonical(char32_t point) NOEXCEPT
+{
+    if (point > max_unicode_point)
+        return {};
+
+    // Two-level trie: level-1 selects 128-entry block, level-2 resolves entry.
+    const auto data1 = unicode_data1[shift_right(point, 7)];
+    const auto data2 = unicode_data2[shift_left<uint32_t>(data1, 7) +
+        bit_and(point, unmask_right<char32_t>(7))];
+
+    return combining_index[data2];
+}
+
+// Apply canonical ordering (UAX #15 section 3.11).
 static void canonical_order(std::u32string& sequence) NOEXCEPT
 {
     const auto size = sequence.size();
-    if (size < 2u)
+    if (size < two)
         return;
 
-    // Identify runs of combining characters and stable-sort each.
-    size_t run_start{};
-    while (run_start < size)
+    size_t start{};
+    while (start < size)
     {
         // Skip starters.
-        while (run_start < size && is_zero(get_ccc(sequence[run_start])))
-            ++run_start;
+        while (start < size && is_zero(get_canonical(sequence[start])))
+            ++start;
 
-        // Find end of this combining run.
-        size_t run_end = run_start;
-        while (run_end < size && is_nonzero(get_ccc(sequence[run_end])))
-            ++run_end;
+        // Find end of combining run.
+        auto end{ start };
+        while (end < size && !is_zero(get_canonical(sequence[end])))
+            ++end;
 
-        if (run_end > run_start + 1u)
+        // Stable-sort combining characters.
+        if (end > add1(start))
         {
-            std::stable_sort(sequence.begin() + run_start, sequence.begin() + run_end,
-                [](char32_t a, char32_t b) NOEXCEPT
-                {
-                    return get_ccc(a) < get_ccc(b);
-                });
+            const auto at = std::next(sequence.begin(), start);
+            const auto to = std::next(sequence.begin(), end);
+            std::stable_sort(at, to, [](auto left, auto right) NOEXCEPT
+            {
+                return get_canonical(left) < get_canonical(right);
+            });
         }
-        run_start = run_end;
+
+        start = end;
     }
 }
 
-// Canonical composition lookup (returns 0 if no composition found).
-static char32_t comp_lookup(char32_t a, char32_t b) NOEXCEPT
+// Canonical composition lookup (0 if no composition found).
+static char32_t composition_lookup(char32_t a, char32_t b) NOEXCEPT
 {
-    // Hangul L + V → LV
-    if (a >= hangul_leading_base && a < hangul_leading_base + hangul_leading_count &&
-        b >= hangul_vowel_base && b < hangul_vowel_base + hangul_vowel_count)
+    using namespace hangul;
+
+    // Hangul L + V -> LV
+    if ((a >= leading_base) &&
+        (a < leading_base + leading_count) &&
+        (b >= vowel_base) &&
+        (b < vowel_base + vowel_count))
     {
-        return hangul_syllable_base
-            + (a - hangul_leading_base) * hangul_nucleus_count
-            + (b - hangul_vowel_base) * hangul_trailing_count;
+        return syllable_base
+            + ((a - leading_base) * nucleus_count)
+            + ((b - vowel_base) * trailing_count);
     }
 
-    // Hangul LV + T → LVT
-    if (a >= hangul_syllable_base && a < hangul_syllable_base + hangul_syllable_count &&
-        is_zero((a - hangul_syllable_base) % hangul_trailing_count) &&
-        b >  hangul_trailing_base  && b < hangul_trailing_base + hangul_trailing_count)
+    // Hangul LV + T -> LVT
+    if ((a >= syllable_base) &&
+        (a < syllable_base + syllable_count) &&
+        (is_zero((a - syllable_base) % trailing_count)) &&
+        (b > trailing_base) &&
+        (b < trailing_base + trailing_count))
     {
-        return a + (b - hangul_trailing_base);
+        return a + (b - trailing_base);
     }
 
-    // Binary search in comp_pairs (sorted by [a, b]).
-    size_t lo{}, hi = comp_pairs_count;
+    // Binary search in composition_pairs (sorted by [a, b]).
+    size_t lo{}, hi{ composition_pairs_count };
     while (lo < hi)
     {
-        const size_t mid  = (lo + hi) / 2u;
-        const size_t base = mid * 3u;
-        const auto   ca   = comp_pairs[base];
-        const auto   cb   = comp_pairs[base + 1u];
-        if (ca < a || (ca == a && cb < b))
-            lo = mid + 1u;
-        else if (ca > a || (ca == a && cb > b))
-            hi = mid;
+        const auto middle = to_half(lo + hi);
+        const auto base = middle * 3u;
+        const auto alpha = composition_pairs[base];
+        const auto bravo = composition_pairs[add1(base)];
+
+        if (alpha < a || (alpha == a && bravo < b))
+        {
+            lo = add1(middle);
+        }
+        else if (alpha > a || (alpha == a && bravo > b))
+        {
+            hi = middle;
+        }
         else
-            return possible_narrow_cast<char32_t>(comp_pairs[base + 2u]);
+        {
+            return composition_pairs[base + 2u];
+        }
     }
-    return 0u;
+
+    return {};
 }
 
 // Apply canonical composition pass (UAX #15 canonical composition algorithm).
 static void compose(std::u32string& sequence) NOEXCEPT
 {
     const size_t size = sequence.size();
-    if (size < 2u)
+    if (size < two)
         return;
 
-    // We scan for each starter and try to compose with following combiners.
-    size_t index{};
-    while (index < sequence.size())
+    for (size_t index{}; index < sequence.size();)
     {
-        if (is_nonzero(get_ccc(sequence[index])))
+        // Skip non-starters.
+        if (!is_zero(get_canonical(sequence[index])))
         {
             ++index;
             continue;
         }
 
-        // sequence[index] is a starter; scan forward for composable characters.
-        uint8_t last_ccc{};
-        size_t inner = add1(index);
-        while (inner < sequence.size())
+        uint8_t last{};
+
+        // Scan for composable characters.
+        for (auto inner{ add1(index) }; inner < sequence.size();)
         {
-            const uint8_t ccc = get_ccc(sequence[inner]);
+            const auto current = get_canonical(sequence[inner]);
 
-            // A combining character is "blocked" if a character with equal or
-            // higher CCC appeared between the starter and this character.
-            const bool blocked = (last_ccc > 0u && last_ccc >= ccc);
+            // Combining char "blocked" if char >= ccc between it and starter.
+            const auto blocked = is_nonzero(last) && last >= current;
 
-            if (is_zero(ccc))
+            if (is_zero(current))
             {
-                // sequence[inner] is also a starter. Try composition (e.g. Hangul L+V,
-                // LV+T); if they compose, continue scanning; otherwise stop.
                 if (!blocked)
                 {
-                    const char32_t c = comp_lookup(sequence[index], sequence[inner]);
-                    if (is_nonzero(c))
+                    // sequence[inner] is also a starter, try composition.
+                    const auto point = composition_lookup(sequence[index],
+                        sequence[inner]);
+
+                    if (is_nonzero(point))
                     {
-                        sequence[index] = c;
-                        sequence.erase(sequence.begin() + sign_cast<std::ptrdiff_t>(inner));
-                        last_ccc = 0;
+                        sequence[index] = point;
+                        sequence.erase(std::next(sequence.begin(), inner));
+                        last = {};
                         continue;
                     }
                 }
-                break; // Next starter that won't compose — stop.
+
+                // Stop on next starter that won't compose.
+                break;
             }
 
             if (!blocked)
             {
-                const char32_t c = comp_lookup(sequence[index], sequence[inner]);
-                if (is_nonzero(c))
+                const auto point = composition_lookup(sequence[index],
+                    sequence[inner]);
+
+                if (is_nonzero(point))
                 {
-                    sequence[index] = c;
-                    sequence.erase(sequence.begin() + sign_cast<std::ptrdiff_t>(inner));
-                    last_ccc = 0; // Restart scan from just after new starter.
+                    sequence[index] = point;
+                    sequence.erase(std::next(sequence.begin(), inner));
+                    last = {};
                     continue;
                 }
             }
 
-            last_ccc = ccc;
+            last = current;
             ++inner;
         }
+
         ++index;
     }
 }
 
-// Full normalization (decompose → order → optionally compose).
-static bool normal_form(std::string& value, bool compatible,
+static void normal_form(std::string& value, bool compatible,
     bool recompose) NOEXCEPT
 {
-    const auto u32 = to_utf32(value);
-    std::u32string out;
-    out.reserve(u32.size() * 2u); // Most decompositions are small.
+    const auto points = to_utf32(value);
+    std::u32string out{};
 
-    for (const char32_t point : u32)
+    // Most decompositions are small so reserve * two.
+    out.reserve(points.size() * two);
+    for (const auto point: points)
         decompose_one(out, point, compatible);
 
     canonical_order(out);
-
     if (recompose)
         compose(out);
 
     value = to_utf8(out);
-    return true;
 }
 
 // Case folding helpers.
 // ----------------------------------------------------------------------------
 
+// msvc is flagging array below indexation as pointer math.
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+
 // Binary search in case_fold_pairs (sorted by from_cp).
 // Returns folded code points written into out[], returns count (1-3).
 static uint32_t fold_lower_one(char32_t point, char32_t out[3]) NOEXCEPT
 {
-    size_t lo{}, hi = case_fold_pairs_count;
+    size_t lo{}, hi{ case_fold_pairs_count };
     while (lo < hi)
     {
-        const size_t mid  = (lo + hi) / 2u;
-        const size_t base = mid * 5u;
-        const auto   from = case_fold_pairs[base];
-        if (from < possible_narrow_cast<uint32_t>(point))
-            lo = mid + 1u;
-        else if (from > possible_narrow_cast<uint32_t>(point))
-            hi = mid;
-        else
-        {
-            const uint32_t count = case_fold_pairs[base + 1u];
-            out[0] = possible_narrow_cast<char32_t>(case_fold_pairs[base + 2u]);
-            out[1] = possible_narrow_cast<char32_t>(case_fold_pairs[base + 3u]);
-            out[2] = possible_narrow_cast<char32_t>(case_fold_pairs[base + 4u]);
-            return count;
-        }
-    }
-    out[0] = point;
-    return 1u; // Identity (already lowercase or caseless).
-}
+        const auto middle = to_half(lo + hi);
+        const auto base = middle * 5u;
+        const auto from = case_fold_pairs[base];
 
-static uint32_t fold_upper_one(char32_t point, char32_t out[3]) NOEXCEPT
-{
-    size_t lo{}, hi = upper_pairs_count;
-    while (lo < hi)
-    {
-        const size_t mid  = (lo + hi) / 2u;
-        const size_t base = mid * 5u;
-        const auto   from = upper_pairs[base];
-        if (from < possible_narrow_cast<uint32_t>(point))
-            lo = mid + 1u;
-        else if (from > possible_narrow_cast<uint32_t>(point))
-            hi = mid;
+        if (from < point)
+        {
+            lo = add1(middle);
+        }
+        else if (from > point)
+        {
+            hi = middle;
+        }
         else
         {
-            const uint32_t count = upper_pairs[base + 1u];
-            out[0] = possible_narrow_cast<char32_t>(upper_pairs[base + 2u]);
-            out[1] = possible_narrow_cast<char32_t>(upper_pairs[base + 3u]);
-            out[2] = possible_narrow_cast<char32_t>(upper_pairs[base + 4u]);
+            const auto count = case_fold_pairs[add1(base)];
+            out[0] = case_fold_pairs[base + 2u];
+            out[1] = case_fold_pairs[base + 3u];
+            out[2] = case_fold_pairs[base + 4u];
             return count;
         }
     }
+
     out[0] = point;
     return 1u;
 }
 
-static bool apply_case(std::string& out, const std::string& in,
-    bool lower) NOEXCEPT
+static uint32_t fold_upper_one(char32_t point, char32_t out[3]) NOEXCEPT
 {
-    const auto u32 = to_utf32(in);
-    std::u32string result;
-    result.reserve(u32.size());
-
-    char32_t buf[3]{};
-    for (const char32_t point : u32)
+    size_t lo{}, hi{ upper_pairs_count };
+    while (lo < hi)
     {
-        const uint32_t count = lower ? fold_lower_one(point, buf)
-                                     : fold_upper_one(point, buf);
-        for (size_t index{}; index < count; ++index)
-            result.push_back(buf[index]);
+        const auto middle  = to_half(lo + hi);
+        const auto base = middle * 5_size;
+        const auto from = upper_pairs[base];
+
+        if (from < point)
+        {
+            lo = add1(middle);
+        }
+        else if (from > point)
+        {
+            hi = middle;
+        }
+        else
+        {
+            const auto count = upper_pairs[add1(base)];
+            out[0] = upper_pairs[base + 2u];
+            out[1] = upper_pairs[base + 3u];
+            out[2] = upper_pairs[base + 4u];
+            return count;
+        }
     }
 
-    out = to_utf8(result);
-    return true;
+    out[0] = point;
+    return 1u;
 }
 
-// Unicode case folding (embedded tables).
+BC_POP_WARNING()
+
+static std::string apply_case(const std::string& in, bool lower) NOEXCEPT
+{
+    const auto points = to_utf32(in);
+    std::u32string out{};
+    out.reserve(points.size());
+
+    char32_t buffer[3]{};
+    for (const auto point: points)
+    {
+        const auto count = lower ?
+            fold_lower_one(point, &buffer[0]) :
+            fold_upper_one(point, &buffer[0]);
+
+        for (size_t index{}; index < count; ++index)
+            out.push_back(buffer[index]);
+    }
+
+    return to_utf8(out);
+}
+
+// Unicode case folding.
 // ----------------------------------------------------------------------------
 
-bool to_lower(std::string& value) NOEXCEPT
+void to_lower(std::string& value) NOEXCEPT
 {
-    if (is_ascii(value))
-    {
-        value = ascii_to_lower(value);
-        return true;
-    }
-
-    return apply_case(value, value, true);
+    value = is_ascii(value) ? ascii_to_lower(value) : apply_case(value, true);
 }
 
-bool to_upper(std::string& value) NOEXCEPT
+void to_upper(std::string& value) NOEXCEPT
 {
-    if (is_ascii(value))
-    {
-        value = ascii_to_upper(value);
-        return true;
-    }
-
-    return apply_case(value, value, false);
+    value = is_ascii(value) ? ascii_to_upper(value) : apply_case(value, false);
 }
 
-bool to_canonical_composition(std::string& value) NOEXCEPT
+void to_canonical_composition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, false, true);
+    if (!is_ascii(value)) normal_form(value, false, true);
 }
 
-bool to_canonical_decomposition(std::string& value) NOEXCEPT
+void to_canonical_decomposition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, false, false);
+    if (!is_ascii(value)) normal_form(value, false, false);
 }
 
-bool to_compatibility_composition(std::string& value) NOEXCEPT
+void to_compatibility_composition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, true, true);
+    if (!is_ascii(value)) normal_form(value, true, true);
 }
 
-bool to_compatibility_decomposition(std::string& value) NOEXCEPT
+void to_compatibility_decomposition(std::string& value) NOEXCEPT
 {
-    return is_ascii(value) || normal_form(value, true, false);
+    if (!is_ascii(value)) normal_form(value, true, false);
 }
 
-// No ICU dependency.
+// Character tests (no conversions).
 // ----------------------------------------------------------------------------
 
 bool is_unicode(char32_t point) NOEXCEPT
 {
-    return point <= unicode_max_code_point;
+    return point <= max_unicode_point;
 }
 
 bool is_separator(char32_t point) NOEXCEPT
@@ -430,15 +474,15 @@ bool is_whitespace(char32_t point) NOEXCEPT
 
 bool is_combining(char32_t point) NOEXCEPT
 {
-    if (!is_unicode(point))
-        return false;
-
     // github.com/python/cpython/blob/main/Modules/unicodedata.c
-    // Two-level trie: level-1 selects the 128-entry block, level-2 resolves the entry.
-    const auto data1 = unicode_data1[shift_right(point, 7)];
-    const auto data2 = unicode_data2[shift_left(possible_wide_cast<size_t>(data1), 7)
-        + bit_and(point, unmask_right<char32_t>(7))];
-    return !is_zero(combining_index[data2]);
+    return is_unicode(point) && !is_zero(get_canonical(point));
+}
+
+// local
+constexpr bool is_contained(char32_t value,
+    const char32_interval& interval) NOEXCEPT
+{
+    return interval.first <= value && value <= interval.second;
 }
 
 bool is_diacritic(char32_t point) NOEXCEPT
@@ -471,11 +515,15 @@ bool has_whitespace(const std::string& value) NOEXCEPT
         return false;
 
     const auto points = to_utf32(value);
-    return std::any_of(points.begin(), points.end(), [](char32_t character)
-    {
-        return is_whitespace(character);
-    });
+    return std::any_of(points.begin(), points.end(),
+        [](char32_t character) NOEXCEPT
+        {
+            return is_whitespace(character);
+        });
 }
+
+// Conversions.
+// ----------------------------------------------------------------------------
 
 std::string to_non_combining_form(const std::string& value) NOEXCEPT
 {
@@ -517,7 +565,7 @@ std::string to_compressed_form(const std::string& value) NOEXCEPT
 
     // Remove a single ascii whitespace between CJK characters.
     // Front and back cannot be between two characters, so skip them.
-    for (size_t point = 1; point < sub1(points.size()); point++)
+    for (auto point{ one }; point < sub1(points.size()); point++)
     {
         if (!(is_ascii_whitespace(points[point]) &&
             is_chinese_japanese_or_korean(points[sub1(point)]) &&
@@ -531,6 +579,9 @@ std::string to_compressed_form(const std::string& value) NOEXCEPT
     compressed += points.back();
     return to_utf8(compressed);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

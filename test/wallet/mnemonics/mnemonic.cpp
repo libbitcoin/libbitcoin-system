@@ -513,8 +513,8 @@ BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__sizes__expected)
 
 BOOST_AUTO_TEST_CASE(mnemonic__verify_vectors__denormalization__expected)
 {
-    const ptrdiff_t abnormals_en = 0;
-    const ptrdiff_t abnormals_ja = 22;
+    constexpr ptrdiff_t abnormals_en = 0;
+    constexpr ptrdiff_t abnormals_ja = 22;
     BOOST_CHECK_EQUAL(abnormals(vectors_en, ascii_space), abnormals_en);
     BOOST_CHECK_EQUAL(abnormals(vectors_ja, ideographic_space), abnormals_ja);
 }

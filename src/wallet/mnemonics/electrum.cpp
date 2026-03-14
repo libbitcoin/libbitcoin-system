@@ -163,18 +163,13 @@ long_hash electrum::seeder(const string_list& words,
 {
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "electrum";
-
     std::string phrase{ passphrase };
-
-    LCOV_EXCL_START("Always succeeds (normalization always available).")
 
     // Conforms to the Unicode Standard for nfkd and case lowering.
     // seed = unicodedata.normalize('NFKD', seed)
     // seed = seed.lower()
-    if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
-        return {};
-
-    LCOV_EXCL_STOP()
+    to_compatibility_decomposition(phrase);
+    to_lower(phrase);
 
     // Python's unicodedata.combining returns true if the character is of the
     // canonical combining class (which may or may not be a diacritic).
