@@ -29,19 +29,17 @@
 namespace libbitcoin {
 namespace system {
 
-constexpr int decomp_shift = 7;
-
-constexpr size_t decomp_pool_count = 10320;
-constexpr size_t decomp_index1_count = 8704;
-constexpr size_t decomp_index2_count = 13568;
-constexpr size_t comp_pairs_count = 941;
+constexpr size_t decomposition_pool_count = 10320;
+constexpr size_t decomposition_index1_count = 8704;
+constexpr size_t decomposition_index2_count = 13568;
+constexpr size_t composition_pairs_count = 941;
 constexpr size_t case_fold_pairs_count = 1530;
 constexpr size_t upper_pairs_count = 1423;
 
-extern const uint32_t decomp_pool[decomp_pool_count];
-extern const uint16_t decomp_index1[decomp_index1_count];
-extern const uint16_t decomp_index2[decomp_index2_count];
-extern const uint32_t comp_pairs[comp_pairs_count * 3];
+extern const uint32_t decomposition_pool[decomposition_pool_count];
+extern const uint16_t decomposition_index1[decomposition_index1_count];
+extern const uint16_t decomposition_index2[decomposition_index2_count];
+extern const uint32_t composition_pairs[composition_pairs_count * 3];
 extern const uint32_t case_fold_pairs[case_fold_pairs_count * 5];
 extern const uint32_t upper_pairs[upper_pairs_count * 5];
 

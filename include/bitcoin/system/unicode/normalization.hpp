@@ -25,15 +25,15 @@ namespace libbitcoin {
 namespace system {
 
 /// Change case of text, complies with section 3.13 of Unicode Standard.
-BC_API bool to_lower(std::string& value) NOEXCEPT;
-BC_API bool to_upper(std::string& value) NOEXCEPT;
+BC_API void to_lower(std::string& value) NOEXCEPT;
+BC_API void to_upper(std::string& value) NOEXCEPT;
 
 /// Convert text to Unicode normal form (Unicode Standard).
 /// Failure indicated by empty string return for non-empty value.
-BC_API bool to_canonical_composition(std::string& value) NOEXCEPT;
-BC_API bool to_canonical_decomposition(std::string& value) NOEXCEPT;
-BC_API bool to_compatibility_composition(std::string& value) NOEXCEPT;
-BC_API bool to_compatibility_decomposition(std::string& value) NOEXCEPT;
+BC_API void to_canonical_composition(std::string& value) NOEXCEPT;
+BC_API void to_canonical_decomposition(std::string& value) NOEXCEPT;
+BC_API void to_compatibility_composition(std::string& value) NOEXCEPT;
+BC_API void to_compatibility_decomposition(std::string& value) NOEXCEPT;
 
 /// Character tests.
 BC_API bool is_unicode(char32_t point) NOEXCEPT;

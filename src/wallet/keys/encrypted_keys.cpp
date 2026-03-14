@@ -283,10 +283,8 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
 static data_chunk normal(const std::string& passphrase) NOEXCEPT
 {
     std::string copy{ passphrase };
-
-    LCOV_EXCL_START("Always succeeds (normalization always available).")
-    return to_canonical_composition(copy) ? to_chunk(copy) : data_chunk{};
-    LCOV_EXCL_STOP()
+    to_canonical_composition(copy);
+    return to_chunk(copy);
 }
 
 static bool create_token(encrypted_token& out_token,

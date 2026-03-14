@@ -89,16 +89,10 @@ long_hash mnemonic::seeder(const string_list& words,
 {
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "mnemonic";
-
     std::string phrase{ passphrase };
 
-    LCOV_EXCL_START("Always succeeds (normalization always available).")
-
     // Unlike Electrum, BIP39 does not perform any further normalization.
-    if (!to_compatibility_decomposition(phrase))
-        return {};
-
-    LCOV_EXCL_STOP()
+    to_compatibility_decomposition(phrase);
 
     // Words are in normal (lower, nfkd) form.
     return pbkd<sha512>::key<long_hash_size>(system::join(words),
