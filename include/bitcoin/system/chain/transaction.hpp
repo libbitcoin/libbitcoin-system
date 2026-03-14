@@ -351,9 +351,6 @@ typedef std_vector<transaction::cptr> transaction_cptrs;
 typedef std::shared_ptr<transaction_cptrs> transactions_ptr;
 typedef std::shared_ptr<const transaction_cptrs> transactions_cptr;
 
-DECLARE_JSON_TAG_INVOKE(transaction);
-DECLARE_JSON_TAG_INVOKE(transaction::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

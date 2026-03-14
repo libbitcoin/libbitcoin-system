@@ -198,9 +198,6 @@ public:
 
 typedef std_vector<script> scripts;
 
-DECLARE_JSON_TAG_INVOKE(script);
-DECLARE_JSON_TAG_INVOKE(script::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

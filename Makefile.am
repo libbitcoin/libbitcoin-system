@@ -60,6 +60,17 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/witness.cpp \
     src/chain/witness_extract.cpp \
     src/chain/enums/opcode.cpp \
+    src/chain/json/block.cpp \
+    src/chain/json/checkpoint.cpp \
+    src/chain/json/header.cpp \
+    src/chain/json/input.cpp \
+    src/chain/json/operation.cpp \
+    src/chain/json/outpoint.cpp \
+    src/chain/json/output.cpp \
+    src/chain/json/point.cpp \
+    src/chain/json/script.cpp \
+    src/chain/json/transaction.cpp \
+    src/chain/json/witness.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -249,6 +260,17 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/transaction.cpp \
     test/chain/witness.cpp \
     test/chain/enums/opcode.cpp \
+    test/chain/json/block.cpp \
+    test/chain/json/checkpoint.cpp \
+    test/chain/json/header.cpp \
+    test/chain/json/input.cpp \
+    test/chain/json/operation.cpp \
+    test/chain/json/outpoint.cpp \
+    test/chain/json/output.cpp \
+    test/chain/json/point.cpp \
+    test/chain/json/script.cpp \
+    test/chain/json/transaction.cpp \
+    test/chain/json/witness.cpp \
     test/config/authority.cpp \
     test/config/base16.cpp \
     test/config/base2.cpp \
@@ -502,6 +524,7 @@ include_bitcoin_system_chain_HEADERS = \
 include_bitcoin_system_chain_enumsdir = ${includedir}/bitcoin/system/chain/enums
 include_bitcoin_system_chain_enums_HEADERS = \
     include/bitcoin/system/chain/enums/coverage.hpp \
+    include/bitcoin/system/chain/enums/enums.hpp \
     include/bitcoin/system/chain/enums/extension.hpp \
     include/bitcoin/system/chain/enums/flags.hpp \
     include/bitcoin/system/chain/enums/key_version.hpp \
@@ -512,6 +535,21 @@ include_bitcoin_system_chain_enums_HEADERS = \
     include/bitcoin/system/chain/enums/script_pattern.hpp \
     include/bitcoin/system/chain/enums/script_version.hpp \
     include/bitcoin/system/chain/enums/selection.hpp
+
+include_bitcoin_system_chain_jsondir = ${includedir}/bitcoin/system/chain/json
+include_bitcoin_system_chain_json_HEADERS = \
+    include/bitcoin/system/chain/json/block.hpp \
+    include/bitcoin/system/chain/json/checkpoint.hpp \
+    include/bitcoin/system/chain/json/header.hpp \
+    include/bitcoin/system/chain/json/input.hpp \
+    include/bitcoin/system/chain/json/json.hpp \
+    include/bitcoin/system/chain/json/operation.hpp \
+    include/bitcoin/system/chain/json/outpoint.hpp \
+    include/bitcoin/system/chain/json/output.hpp \
+    include/bitcoin/system/chain/json/point.hpp \
+    include/bitcoin/system/chain/json/script.hpp \
+    include/bitcoin/system/chain/json/transaction.hpp \
+    include/bitcoin/system/chain/json/witness.hpp
 
 include_bitcoin_system_configdir = ${includedir}/bitcoin/system/config
 include_bitcoin_system_config_HEADERS = \

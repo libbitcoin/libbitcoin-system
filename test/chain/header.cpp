@@ -351,41 +351,4 @@ BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_greater_than_2_h
     BOOST_REQUIRE(instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
 }
 
-// json
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(header__json__conversions__expected)
-{
-    const std::string text
-    {
-        "{"
-            "\"hash\":\"d5b1048b2dcb443dd79a15e54de994fa18620d1d99250f2a4123660c68dea664\","
-            "\"version\":42,"
-            "\"previous\":\"0000000000000000000000000000000000000000000000000000000000000000\","
-            "\"merkle_root\":\"0000000000000000000000000000000000000000000000000000000000000001\","
-            "\"timestamp\":43,"
-            "\"bits\":44,"
-            "\"nonce\":45"
-        "}"
-    };
-
-    const chain::header instance
-    {
-        42,
-        null_hash,
-        one_hash,
-        43,
-        44,
-        45
-    };
-
-    const auto value = json::value_from(instance);
-
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
-
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<chain::header>(value) == instance);
-}
-
 BOOST_AUTO_TEST_SUITE_END()

@@ -148,10 +148,6 @@ set( with-tests "yes" CACHE BOOL "Compile with unit tests." )
 #------------------------------------------------------------------------------
 set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
-# Implement -Dwith-normalization-demo and declare with-normalization-demo.
-#------------------------------------------------------------------------------
-set( with-normalization-demo "no" CACHE BOOL "Compile the Unicode normalization demo (examples/normalization_demo.cpp)." )
-
 # Implement -Denable-avx2.
 #------------------------------------------------------------------------------
 set( enable-avx2 "no" CACHE BOOL "Compile with avx2 intrinsics (specifically -mavx -mavx2)." )
@@ -430,6 +426,17 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/chain/witness.cpp"
     "../../src/chain/witness_extract.cpp"
     "../../src/chain/enums/opcode.cpp"
+    "../../src/chain/json/block.cpp"
+    "../../src/chain/json/checkpoint.cpp"
+    "../../src/chain/json/header.cpp"
+    "../../src/chain/json/input.cpp"
+    "../../src/chain/json/operation.cpp"
+    "../../src/chain/json/outpoint.cpp"
+    "../../src/chain/json/output.cpp"
+    "../../src/chain/json/point.cpp"
+    "../../src/chain/json/script.cpp"
+    "../../src/chain/json/transaction.cpp"
+    "../../src/chain/json/witness.cpp"
     "../../src/config/authority.cpp"
     "../../src/config/base16.cpp"
     "../../src/config/base2.cpp"
@@ -613,28 +620,6 @@ if (with-examples)
 
 endif()
 
-# Define libbitcoin-system-normalization-demo project.
-#------------------------------------------------------------------------------
-if (with-normalization-demo)
-    add_executable( libbitcoin-system-normalization-demo
-        "../../examples/normalization_demo.cpp" )
-
-#     libbitcoin-system-normalization-demo project specific include directories.
-#------------------------------------------------------------------------------
-    target_include_directories( libbitcoin-system-normalization-demo PRIVATE
-        "../../include" )
-
-#     libbitcoin-system-normalization-demo project specific libraries/linker flags.
-#------------------------------------------------------------------------------
-    target_link_libraries( libbitcoin-system-normalization-demo
-        ${CANONICAL_LIB_NAME} )
-
-    if(BUILD_EXTERNAL_DEPS)
-        add_dependencies( libbitcoin-system-normalization-demo boost_build secp256k1_build )
-    endif()
-
-endif()
-
 # Define libbitcoin-system-test project.
 #------------------------------------------------------------------------------
 if (with-tests)
@@ -675,6 +660,17 @@ if (with-tests)
         "../../test/chain/transaction.cpp"
         "../../test/chain/witness.cpp"
         "../../test/chain/enums/opcode.cpp"
+        "../../test/chain/json/block.cpp"
+        "../../test/chain/json/checkpoint.cpp"
+        "../../test/chain/json/header.cpp"
+        "../../test/chain/json/input.cpp"
+        "../../test/chain/json/operation.cpp"
+        "../../test/chain/json/outpoint.cpp"
+        "../../test/chain/json/output.cpp"
+        "../../test/chain/json/point.cpp"
+        "../../test/chain/json/script.cpp"
+        "../../test/chain/json/transaction.cpp"
+        "../../test/chain/json/witness.cpp"
         "../../test/config/authority.cpp"
         "../../test/config/base16.cpp"
         "../../test/config/base2.cpp"
@@ -927,3 +923,4 @@ install( TARGETS ${CANONICAL_LIB_NAME}
 #------------------------------------------------------------------------------
 install( DIRECTORY "../../include/bitcoin"
     DESTINATION include )
+

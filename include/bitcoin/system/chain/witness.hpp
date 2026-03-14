@@ -140,9 +140,6 @@ private:
 
 typedef std_vector<witness> witnesses;
 
-DECLARE_JSON_TAG_INVOKE(witness);
-DECLARE_JSON_TAG_INVOKE(witness::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

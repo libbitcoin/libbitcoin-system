@@ -460,30 +460,6 @@ size_t script::serialized_size(bool prefix) const NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(script)
-{
-    return script{ value.as_string() };
-}
-
-DEFINE_JSON_FROM_TAG(script)
-{
-    // TODO: inject rules.
-    value = instance.to_string(flags::all_rules);
-}
-
-DEFINE_JSON_TO_TAG(script::cptr)
-{
-    return to_shared(tag_invoke(to_tag<script>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(script::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
