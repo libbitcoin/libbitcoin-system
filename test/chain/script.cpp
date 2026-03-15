@@ -1036,33 +1036,4 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify9);
 }
 
-// json
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(script__json__conversions__expected)
-{
-    const std::string text
-    {
-        "\"pick roll return\""
-    };
-
-    const chain::script instance
-    {
-        chain::operations
-        {
-            { opcode::pick },
-            { opcode::roll },
-            { opcode::op_return }
-        }
-    };
-
-    const auto value = json::value_from(instance);
-
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
-
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<chain::script>(value) == instance);
-}
-
 BOOST_AUTO_TEST_SUITE_END()

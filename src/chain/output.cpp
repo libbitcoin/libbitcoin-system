@@ -247,37 +247,6 @@ bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(output)
-{
-    return
-    {
-        value.at("value").as_uint64(),
-        value_to<script>(value.at("script"))
-    };
-}
-
-DEFINE_JSON_FROM_TAG(output)
-{
-    value =
-    {
-        { "value", instance.value() },
-        { "script", value_from(instance.script()) }
-    };
-}
-
-DEFINE_JSON_TO_TAG(output::cptr)
-{
-    return to_shared(tag_invoke(to_tag<output>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(output::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

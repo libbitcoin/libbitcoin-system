@@ -126,7 +126,9 @@
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\chain_state.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\checkpoint.cpp">
+      <ObjectFileName>$(IntDir)src_chain_checkpoint.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\context.cpp">
       <ObjectFileName>$(IntDir)src_chain_context.obj</ObjectFileName>
     </ClCompile>
@@ -137,8 +139,45 @@
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
       <ObjectFileName>$(IntDir)src_chain_input.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\operation.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\outpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\json\block.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_block.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\checkpoint.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_checkpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\header.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_header.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\input.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_input.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\operation.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_operation.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\outpoint.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_outpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\output.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_output.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\point.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_point.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\script.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_script.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\transaction.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_transaction.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\json\witness.cpp">
+      <ObjectFileName>$(IntDir)src_chain_json_witness.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\operation.cpp">
+      <ObjectFileName>$(IntDir)src_chain_operation.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\outpoint.cpp">
+      <ObjectFileName>$(IntDir)src_chain_outpoint.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\output.cpp">
       <ObjectFileName>$(IntDir)src_chain_output.obj</ObjectFileName>
     </ClCompile>
@@ -157,7 +196,9 @@
     <ClCompile Include="..\..\..\..\src\chain\transaction_sighash.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v0.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v1.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\witness.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
+      <ObjectFileName>$(IntDir)src_chain_witness.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness_extract.cpp" />
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
@@ -339,6 +380,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\enums.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\extension.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\flags.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\key_version.hpp" />
@@ -351,6 +393,18 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\selection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\checkpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\header.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\input.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\json.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\operation.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\outpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\output.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\point.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\transaction.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\witness.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\outpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\output.hpp" />

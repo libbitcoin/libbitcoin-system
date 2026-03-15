@@ -117,9 +117,6 @@ BC_API bool operator<(const point_cref& left, const point_cref& right) NOEXCEPT;
 BC_API bool operator==(const point_cref& left, const point_cref& right) NOEXCEPT;
 BC_API bool operator!=(const point_cref& left, const point_cref& right) NOEXCEPT;
 
-DECLARE_JSON_TAG_INVOKE(point);
-DECLARE_JSON_TAG_INVOKE(point::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

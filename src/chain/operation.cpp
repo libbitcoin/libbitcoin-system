@@ -563,28 +563,6 @@ uint32_t operation::read_data_size(opcode code, reader& source) NOEXCEPT
 
 BC_POP_WARNING()
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(operation)
-{
-    return operation{ std::string_view{ value.as_string() } };
-}
-
-DEFINE_JSON_FROM_TAG(operation)
-{
-    value = instance.to_string(flags::all_rules);
-}
-
-DEFINE_JSON_TO_TAG(operation::cptr)
-{
-    return to_shared(tag_invoke(to_tag<operation>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(operation::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

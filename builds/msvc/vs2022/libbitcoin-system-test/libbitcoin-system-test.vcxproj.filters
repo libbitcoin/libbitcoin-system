@@ -16,6 +16,9 @@
     <Filter Include="src\chain\enums">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\chain\json">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\config">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
@@ -38,22 +41,22 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\hash\performance">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash\performance\baseline">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash\rmd">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\hash\sha">
+    <Filter Include="src\hash\performance\baseline">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\rmd">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\sha">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\intrinsics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\intrinsics\platforms">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\machine">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
@@ -71,19 +74,19 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\devices">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream\iostream">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000A1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\stream\streamers">
+    <Filter Include="src\stream\iostream">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stream\streamers">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000C1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000C1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\utreexo">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
@@ -92,19 +95,19 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000E1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words\catalogs">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +146,39 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\input.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\block.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\checkpoint.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\header.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\input.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\operation.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\outpoint.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\output.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\point.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\script.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\transaction.cpp">
+      <Filter>src\chain\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\witness.cpp">
+      <Filter>src\chain\json</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\operation.cpp">
       <Filter>src\chain</Filter>

@@ -126,18 +126,65 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\block_malleable.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\checkpoint.cpp">
+      <ObjectFileName>$(IntDir)test_chain_checkpoint.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\context.cpp">
       <ObjectFileName>$(IntDir)test_chain_context.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\outpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\header.cpp">
+      <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\input.cpp">
+      <ObjectFileName>$(IntDir)test_chain_input.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\block.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_block.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\checkpoint.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_checkpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\header.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_header.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\input.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_input.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\operation.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_operation.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\outpoint.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_outpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\output.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_output.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\point.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_point.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\script.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_script.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\transaction.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_transaction.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\json\witness.cpp">
+      <ObjectFileName>$(IntDir)test_chain_json_witness.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\operation.cpp">
+      <ObjectFileName>$(IntDir)test_chain_operation.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\outpoint.cpp">
+      <ObjectFileName>$(IntDir)test_chain_outpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\output.cpp">
+      <ObjectFileName>$(IntDir)test_chain_output.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\point.cpp">
+      <ObjectFileName>$(IntDir)test_chain_point.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp">
       <ObjectFileName>$(IntDir)test_chain_script.obj</ObjectFileName>
@@ -145,8 +192,12 @@
     <ClCompile Include="..\..\..\..\test\chain\stripper.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\taproot.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\tapscript.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\witness.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
+      <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
+      <ObjectFileName>$(IntDir)test_chain_witness.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base2.cpp" />

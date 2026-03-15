@@ -100,9 +100,6 @@ bool operator<(const outpoint& left, const outpoint& right) NOEXCEPT;
 
 typedef std_vector<outpoint> outpoints;
 
-DECLARE_JSON_TAG_INVOKE(outpoint);
-DECLARE_JSON_TAG_INVOKE(outpoint::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

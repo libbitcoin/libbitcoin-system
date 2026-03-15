@@ -162,37 +162,6 @@ bool outpoint::is_null() const NOEXCEPT
     return point_.is_null();
 }
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(outpoint)
-{
-    return
-    {
-        value_to<point>(value.at("point")),
-        value.at("value").to_number<uint64_t>()
-    };
-}
-
-DEFINE_JSON_FROM_TAG(outpoint)
-{
-    value =
-    {
-        { "point", value_from(instance.point()) },
-        { "value", instance.value() }
-    };
-}
-
-DEFINE_JSON_TO_TAG(outpoint::cptr)
-{
-    return to_shared(tag_invoke(to_tag<outpoint>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(outpoint::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

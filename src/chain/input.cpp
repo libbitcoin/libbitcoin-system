@@ -487,53 +487,6 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 
 BC_POP_WARNING()
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(input)
-{
-    return
-    {
-        value_to<point>(value.at("point")),
-        value_to<script>(value.at("script")),
-        value_to<witness>(value.at("witness")),
-        value.at("sequence").to_number<uint32_t>()
-    };
-}
-
-DEFINE_JSON_FROM_TAG(input)
-{
-    if (instance.witness().is_valid())
-    {
-        value =
-        {
-            { "point", value_from(instance.point()) },
-            { "script", value_from(instance.script()) },
-            { "witness", value_from(instance.witness()) },
-            { "sequence", instance.sequence() }
-        };
-    }
-    else
-    {
-        value =
-        {
-            { "point", value_from(instance.point()) },
-            { "script", value_from(instance.script()) },
-            { "sequence", instance.sequence() }
-        };
-    }
-}
-
-DEFINE_JSON_TO_TAG(input::cptr)
-{
-    return to_shared(tag_invoke(to_tag<input>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(input::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

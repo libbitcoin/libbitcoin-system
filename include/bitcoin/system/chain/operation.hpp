@@ -188,9 +188,6 @@ private:
 
 typedef std_vector<operation> operations;
 
-DECLARE_JSON_TAG_INVOKE(operation);
-DECLARE_JSON_TAG_INVOKE(operation::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

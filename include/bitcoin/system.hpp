@@ -53,6 +53,7 @@
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
+#include <bitcoin/system/chain/enums/enums.hpp>
 #include <bitcoin/system/chain/enums/extension.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/key_version.hpp>
@@ -63,6 +64,18 @@
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/enums/selection.hpp>
+#include <bitcoin/system/chain/json/block.hpp>
+#include <bitcoin/system/chain/json/checkpoint.hpp>
+#include <bitcoin/system/chain/json/header.hpp>
+#include <bitcoin/system/chain/json/input.hpp>
+#include <bitcoin/system/chain/json/json.hpp>
+#include <bitcoin/system/chain/json/operation.hpp>
+#include <bitcoin/system/chain/json/outpoint.hpp>
+#include <bitcoin/system/chain/json/output.hpp>
+#include <bitcoin/system/chain/json/point.hpp>
+#include <bitcoin/system/chain/json/script.hpp>
+#include <bitcoin/system/chain/json/transaction.hpp>
+#include <bitcoin/system/chain/json/witness.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>
@@ -239,6 +252,7 @@
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/unicode_tables.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>

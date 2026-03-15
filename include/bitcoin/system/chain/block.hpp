@@ -239,9 +239,6 @@ private:
 
 typedef std_vector<block> blocks;
 
-DECLARE_JSON_TAG_INVOKE(block);
-DECLARE_JSON_TAG_INVOKE(block::cptr);
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

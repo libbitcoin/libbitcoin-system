@@ -194,37 +194,6 @@ bool point::is_null() const NOEXCEPT
     return (index_ == null_index) && (hash_ == null_hash);
 }
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(point)
-{
-    return
-    {
-        decode_hash<hash_size>(value.at("hash").as_string()),
-        value.at("index").to_number<uint32_t>()
-    };
-}
-
-DEFINE_JSON_FROM_TAG(point)
-{
-    value =
-    {
-        { "hash", encode_hash(instance.hash()) },
-        { "index", instance.index() }
-    };
-}
-
-DEFINE_JSON_TO_TAG(point::cptr)
-{
-    return to_shared(tag_invoke(to_tag<point>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(point::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

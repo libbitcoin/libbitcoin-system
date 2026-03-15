@@ -187,42 +187,6 @@ const hash_digest& checkpoint::hash() const NOEXCEPT
     return hash_;
 }
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-// hash_digest gets bypassed (up as an array of numbers) by boost.
-////DEFINE_JSON_TO_TAG(hash_digest)
-////{
-////    hash_digest hash{};
-////    if (decode_hash(hash, value.as_string()))
-////        return hash;
-////
-////    return {};
-////}
-////
-////DEFINE_JSON_FROM_TAG(hash_digest)
-////{
-////    value = encode_hash(instance);
-////}
-
-DEFINE_JSON_TO_TAG(checkpoint)
-{
-    return
-    {
-        decode_hash<hash_size>(value.at("hash").as_string()),
-        value.at("height").to_number<size_t>()
-    };
-}
-
-DEFINE_JSON_FROM_TAG(checkpoint)
-{
-    value =
-    {
-        { "hash", encode_hash(instance.hash()) },
-        { "height", instance.height() }
-    };
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

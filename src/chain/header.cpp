@@ -387,49 +387,6 @@ code header::accept(const context& ctx) const NOEXCEPT
     return error::block_success;
 }
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-namespace json = boost::json;
-
-DEFINE_JSON_TO_TAG(header)
-{
-    return
-    {
-        value.at("version").to_number<uint32_t>(),
-        decode_hash<hash_size>(value.at("previous").as_string()),
-        decode_hash<hash_size>(value.at("merkle_root").as_string()),
-        value.at("timestamp").to_number<uint32_t>(),
-        value.at("bits").to_number<uint32_t>(),
-        value.at("nonce").to_number<uint32_t>()
-    };
-}
-
-DEFINE_JSON_FROM_TAG(header)
-{
-    value =
-    {
-        // hash is computed property
-        { "hash", encode_hash(instance.hash()) },
-        { "version", instance.version() },
-        { "previous", encode_hash(instance.previous_block_hash()) },
-        { "merkle_root", encode_hash(instance.merkle_root()) },
-        { "timestamp", instance.timestamp() },
-        { "bits", instance.bits() },
-        { "nonce", instance.nonce() }
-    };
-}
-
-DEFINE_JSON_TO_TAG(header::cptr)
-{
-    return to_shared(tag_invoke(to_tag<header>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(header::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

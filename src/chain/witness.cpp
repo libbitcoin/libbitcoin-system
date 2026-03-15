@@ -332,29 +332,6 @@ size_t witness::serialized_size(bool prefix) const NOEXCEPT
 
 BC_POP_WARNING()
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(witness)
-{
-    return witness{ value.as_string()  };
-}
-
-DEFINE_JSON_FROM_TAG(witness)
-{
-    value = instance.to_string();
-}
-
-DEFINE_JSON_TO_TAG(witness::cptr)
-{
-    return to_shared(tag_invoke(to_tag<witness>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(witness::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

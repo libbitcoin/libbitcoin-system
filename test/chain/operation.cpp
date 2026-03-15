@@ -935,46 +935,22 @@ BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
 // utilities (member)
 // ----------------------------------------------------------------------------
 
-////bool is_relaxed_push() const NOEXCEPT;
-////bool is_push() const NOEXCEPT;
-////bool is_payload() const NOEXCEPT;
-////bool is_positive() const NOEXCEPT;
-////bool is_nonnegative() const NOEXCEPT;
-////bool is_number() const NOEXCEPT;
-////bool is_roller() const NOEXCEPT;
-////bool is_counted() const NOEXCEPT;
-////bool is_success() const NOEXCEPT;
-////bool is_invalid() const NOEXCEPT;
-////bool is_conditional() const NOEXCEPT;
-////bool is_reserved() const NOEXCEPT;
-////bool is_minimal_push() const NOEXCEPT;
-////bool is_nominal_push() const NOEXCEPT;
-////bool is_underclaimed() const NOEXCEPT;
-////bool is_oversized() const NOEXCEPT;
-////bool is_underflow() const NOEXCEPT;
-
-// json
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(operation__json__conversions__expected)
-{
-    const std::string text
-    {
-        "\"return\""
-    };
-
-    const chain::operation instance
-    {
-        opcode::op_return
-    };
-
-    const auto value = json::value_from(instance);
-
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
-
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<chain::operation>(value) == instance);
-}
+//bool is_relaxed_push() const NOEXCEPT;
+//bool is_push() const NOEXCEPT;
+//bool is_payload() const NOEXCEPT;
+//bool is_positive() const NOEXCEPT;
+//bool is_nonnegative() const NOEXCEPT;
+//bool is_number() const NOEXCEPT;
+//bool is_roller() const NOEXCEPT;
+//bool is_counted() const NOEXCEPT;
+//bool is_success() const NOEXCEPT;
+//bool is_invalid() const NOEXCEPT;
+//bool is_conditional() const NOEXCEPT;
+//bool is_reserved() const NOEXCEPT;
+//bool is_minimal_push() const NOEXCEPT;
+//bool is_nominal_push() const NOEXCEPT;
+//bool is_underclaimed() const NOEXCEPT;
+//bool is_oversized() const NOEXCEPT;
+//bool is_underflow() const NOEXCEPT;
 
 BOOST_AUTO_TEST_SUITE_END()

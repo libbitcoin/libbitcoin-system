@@ -1020,37 +1020,6 @@ code block::connect(const context& ctx) const NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-// JSON value convertors.
-// ----------------------------------------------------------------------------
-
-DEFINE_JSON_TO_TAG(block)
-{
-    return
-    {
-        value_to<header>(value.at("header")),
-        value_to<transactions>(value.at("transactions"))
-    };
-}
-
-DEFINE_JSON_FROM_TAG(block)
-{
-    value =
-    {
-        { "header", value_from(instance.header()) },
-        { "transactions", value_from(*instance.transactions_ptr()) },
-    };
-}
-
-DEFINE_JSON_TO_TAG(block::cptr)
-{
-    return to_shared(tag_invoke(to_tag<block>{}, value));
-}
-
-DEFINE_JSON_FROM_TAG(block::cptr)
-{
-    tag_invoke(from_tag{}, value, *instance);
-}
-
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
