@@ -70,6 +70,7 @@ class BC_API witness_address
     {
         version0_p2kh,
         version0_p2sh,
+        version1_taproot,
         unknown,
         invalid
     };
@@ -95,6 +96,7 @@ class BC_API witness_address
     static const size_t program_maximum_size;
     static const size_t version0_p2kh_program_size;
     static const size_t version0_p2sh_program_size;
+    static const size_t version1_taproot_program_size;
 
     // TODO: script address extraction, see payment_address.
 
@@ -110,8 +112,8 @@ class BC_API witness_address
     /// Constructors.
     witness_address() NOEXCEPT;
     witness_address(const std::string& address, bool strict=false) NOEXCEPT;
-    witness_address(const data_slice& program, const std::string& prefix,
-        uint8_t version) NOEXCEPT;
+    witness_address(const data_slice& program, uint8_t version,
+        const std::string& prefix=mainnet) NOEXCEPT;
 
     // version0_p2kh
     witness_address(const short_hash& public_key_hash,
@@ -158,7 +160,7 @@ protected:
     static witness_address from_address(const std::string& address,
         bool strict) NOEXCEPT;
     static witness_address from_parameters(const data_slice& program,
-        const std::string& prefix, uint8_t version) NOEXCEPT;
+        uint8_t version, const std::string& prefix) NOEXCEPT;
 
     // version0_p2kh
     static witness_address from_short(const short_hash& hash,

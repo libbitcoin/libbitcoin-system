@@ -286,10 +286,9 @@ std::string witness::to_string() const NOEXCEPT
 
     auto first = true;
     std::ostringstream text{};
-
-    // Throwing stream aborts.
     for (const auto& element: stack())
     {
+        // Throwing stream aborts.
         text << (first ? "[" : " [") << encode_base16(*element) << "]";
         first = false;
     }
