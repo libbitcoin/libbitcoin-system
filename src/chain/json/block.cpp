@@ -21,11 +21,17 @@
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
+// native
+// ----------------------------------------------------------------------------
 
 DEFINE_JSON_TO_TAG(block)
 {
@@ -53,6 +59,64 @@ DEFINE_JSON_TO_TAG(block::cptr)
 DEFINE_JSON_FROM_TAG(block::cptr)
 {
     tag_invoke(from_tag{}, value, *instance);
+}
+
+// bitcoind
+// ----------------------------------------------------------------------------
+// There is no json mapping for a block as hex.
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, block)
+{
+    const auto& block = instance.value;
+    value =
+    {
+        { "hash", encode_hash(block.hash()) },
+        { "size", block.serialized_size(true) },
+        { "strippedsize", block.serialized_size(false) },
+        { "weight", block.weight() },
+        { "version", block.header().version() },
+        { "versionHex", encode_base16(to_big_endian(block.header().version())) },
+        { "merkleroot", encode_hash(block.header().merkle_root()) },
+        { "time", block.header().timestamp() },
+        { "nonce", block.header().nonce() },
+        { "bits", encode_base16(to_big_endian(block.header().bits())) },
+        { "difficulty", block.header().difficulty() },
+        { "nTx", block.transactions() },
+
+        // txs not populated in bitcoind_tag encoding.
+        ////{ "tx", ... }
+
+        // Disabled properties are chain, not block (add with context).
+        // "confirmations" and "nextblockhash" are not fixed for a block.
+        // Each header's "chainwork" is not archived, so query is exhaustive.
+        ////{ "height", 0 },
+        ////{ "confirmations", 0 },
+        ////{ "mediantime", 0 },
+        ////{ "chainwork", "" },
+        ////{ "previousblockhash", "" },
+        ////{ "nextblockhash", "" }
+    };
+}
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_hashed_tag, block)
+{
+    const auto& block = instance.value;
+    value = value_from(bitcoind(block));
+    value.as_object()["tx"] = value_from(bitcoind_hashed(*block.transactions_ptr()));
+}
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_embedded_tag, block)
+{
+    const auto& block = instance.value;
+    value = value_from(bitcoind(block));
+    value.as_object()["tx"] = value_from(bitcoind_embedded(*block.transactions_ptr()));
+}
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_verbose_tag, block)
+{
+    const auto& block = instance.value;
+    value = value_from(bitcoind(block));
+    value.as_object()["tx"] = value_from(bitcoind(*block.transactions_ptr()));
 }
 
 } // namespace chain

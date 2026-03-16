@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/input.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -28,6 +29,11 @@ namespace chain {
 
 DECLARE_JSON_TAG_INVOKE(input);
 DECLARE_JSON_TAG_INVOKE(input::cptr);
+
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, input);
+
+// The tag wrapper masks the vector, so this must be explicit.
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, input_cptrs);
 
 } // namespace chain
 } // namespace system

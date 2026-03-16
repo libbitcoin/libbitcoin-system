@@ -18,9 +18,11 @@
  */
 #include <bitcoin/system/chain/json/json.hpp>
 
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -52,6 +54,45 @@ DEFINE_JSON_TO_TAG(output::cptr)
 DEFINE_JSON_FROM_TAG(output::cptr)
 {
     tag_invoke(from_tag{}, value, *instance);
+}
+
+// bitcoind
+// ----------------------------------------------------------------------------
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output)
+{
+    using namespace boost::json;
+    const auto& out = instance.value;
+    const auto satoshis = out.value() / to_floating(satoshi_per_bitcoin);
+    auto script = value_from(bitcoind(out.script())).as_object();
+
+    // Removed in bitcoind v22.0 (because not useful).
+    ////script["reqSigs"] = 1;
+
+    // TODO: use this universal address format when standard not found.
+    script["type"] = "nonstandard";
+    script["addresses"] = array{ encode_hash(out.script().hash()) };
+
+    value =
+    {
+        { "value", satoshis},
+        { "scriptPubKey", std::move(script) }
+
+        // In what parallel universe does serializing position make sense?
+        ////{ "n", injected from loop }
+    };
+}
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output_cptrs)
+{
+    const auto& outs = instance.value;
+    value = boost::json::array(outs.size());
+    auto& values = value.as_array();
+    for (size_t n{}; n < outs.size(); ++n)
+    {
+        values.at(n) = value_from(bitcoind(*outs.at(n)));
+        values.at(n).as_object()["n"] = n;
+    }
 }
 
 } // namespace chain

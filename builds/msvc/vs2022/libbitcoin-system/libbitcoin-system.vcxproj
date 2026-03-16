@@ -398,6 +398,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\json.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\macros.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\operation.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\outpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\output.hpp" />

@@ -284,12 +284,18 @@ std::string witness::to_string() const NOEXCEPT
     if (!valid_)
         return "(?)";
 
-    std::string text;
-    for (const auto& element: stack_)
-        text += "[" + encode_base16(*element) + "] ";
+    auto first = true;
+    std::ostringstream text{};
 
-    trim_right(text);
-    return text;
+    // Throwing stream aborts.
+    for (const auto& element: stack())
+    {
+        text << (first ? "[" : " [") << encode_base16(*element) << "]";
+        first = false;
+    }
+
+    // An invalid operation has a specialized serialization.
+    return text.str();
 }
 
 // Properties.

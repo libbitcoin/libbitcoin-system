@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/chain/json/json.hpp>
 
+#include <ranges>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -43,6 +44,21 @@ DEFINE_JSON_TO_TAG(witness::cptr)
 DEFINE_JSON_FROM_TAG(witness::cptr)
 {
     tag_invoke(from_tag{}, value, *instance);
+}
+
+// bitcoind
+// ----------------------------------------------------------------------------
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, witness)
+{
+    const auto& witness = instance.value;
+    const auto& stack = witness.stack();
+    value = boost::json::array(stack.size());
+    std::ranges::transform(stack, value.as_array().begin(),
+        [](const chunk_cptr& element) NOEXCEPT
+        {
+            return value_from(encode_base16(*element));
+        });
 }
 
 } // namespace chain

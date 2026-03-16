@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/chain/json/json.hpp>
 
+#include <ranges>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -70,6 +71,46 @@ DEFINE_JSON_TO_TAG(input::cptr)
 DEFINE_JSON_FROM_TAG(input::cptr)
 {
     tag_invoke(from_tag{}, value, *instance);
+}
+
+// bitcoind
+// ----------------------------------------------------------------------------
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input)
+{
+    const auto& in = instance.value;
+    if (in.is_coinbase())
+    {
+        value =
+        {
+            { "coinbase", encode_base16(in.script().to_data(false)) },
+            { "sequence", in.sequence() }
+        };
+    }
+    else
+    {
+        value =
+        {
+            { "txid", encode_hash(in.point().hash()) },
+            { "vout", in.point().index() },
+            { "scriptSig", value_from(bitcoind(in.script())) },
+            { "sequence", in.sequence() }
+        };
+
+        if (!in.witness().stack().empty())
+            value.as_object()["txinwitness"] = value_from(bitcoind(in.witness()));
+    }
+}
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input_cptrs)
+{
+    const auto& ins = instance.value;
+    value = boost::json::array(ins.size());
+    std::ranges::transform(ins, value.as_array().begin(),
+        [](const chain::input::cptr& in) NOEXCEPT
+        {
+            return value_from(bitcoind(*in));
+        });
 }
 
 } // namespace chain

@@ -354,7 +354,7 @@ void script::to_data(writer& sink, bool prefix) const NOEXCEPT
 std::string script::to_string(uint32_t active_flags) const NOEXCEPT
 {
     auto first = true;
-    std::ostringstream text;
+    std::ostringstream text{};
 
     // Throwing stream aborts.
     for (const auto& op: ops())

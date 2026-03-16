@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/block.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -28,6 +29,11 @@ namespace chain {
 
 DECLARE_JSON_TAG_INVOKE(block);
 DECLARE_JSON_TAG_INVOKE(block::cptr);
+
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, block);
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_hashed_tag, block);
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_verbose_tag, block);
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_embedded_tag, block);
 
 } // namespace chain
 } // namespace system

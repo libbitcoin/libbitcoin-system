@@ -782,6 +782,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\json.hpp">
       <Filter>include\bitcoin\system\chain\json</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\macros.hpp">
+      <Filter>include\bitcoin\system\chain\json</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\operation.hpp">
       <Filter>include\bitcoin\system\chain\json</Filter>
     </ClInclude>
