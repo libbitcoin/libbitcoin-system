@@ -23,6 +23,7 @@
 #include <bitcoin/system/chain/json/checkpoint.hpp>
 #include <bitcoin/system/chain/json/header.hpp>
 #include <bitcoin/system/chain/json/input.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 #include <bitcoin/system/chain/json/operation.hpp>
 #include <bitcoin/system/chain/json/outpoint.hpp>
 #include <bitcoin/system/chain/json/output.hpp>

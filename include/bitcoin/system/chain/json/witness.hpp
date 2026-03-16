@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_JSON_WITNESS_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 
 namespace libbitcoin {
@@ -28,6 +29,8 @@ namespace chain {
 
 DECLARE_JSON_TAG_INVOKE(witness);
 DECLARE_JSON_TAG_INVOKE(witness::cptr);
+
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, witness);
 
 } // namespace chain
 } // namespace system

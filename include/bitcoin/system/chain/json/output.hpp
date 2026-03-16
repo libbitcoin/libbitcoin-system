@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_JSON_OUTPUT_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 #include <bitcoin/system/chain/output.hpp>
 
 namespace libbitcoin {
@@ -28,6 +29,11 @@ namespace chain {
 
 DECLARE_JSON_TAG_INVOKE(output);
 DECLARE_JSON_TAG_INVOKE(output::cptr);
+
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, output);
+
+// The tag wrapper masks the vector, so this must be explicit.
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, output_cptrs);
 
 } // namespace chain
 } // namespace system

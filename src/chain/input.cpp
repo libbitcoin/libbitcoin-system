@@ -384,6 +384,11 @@ bool input::is_roller() const NOEXCEPT
     return script_->is_roller() || (prevout && prevout->script().is_roller());
 }
 
+bool input::is_coinbase() const NOEXCEPT
+{
+    return point_->is_null();
+}
+
 // static
 bool input::is_relative_locktime_applied(uint32_t sequence) NOEXCEPT
 {

@@ -47,6 +47,20 @@ DEFINE_JSON_FROM_TAG(script::cptr)
     tag_invoke(from_tag{}, value, *instance);
 }
 
+// bitcoind
+// ----------------------------------------------------------------------------
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, script)
+{
+    const auto& script = instance.value;
+    value =
+    {
+        // TODO: this is native encoding (and how does bitcoind handle forks).
+        { "asm", script.to_string(flags::all_rules) },
+        { "hex", encode_base16(script.to_data(false)) }
+    };
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

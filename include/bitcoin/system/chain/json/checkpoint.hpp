@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/checkpoint.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 
 namespace libbitcoin {
 namespace system {

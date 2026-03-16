@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_JSON_OPERATION_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/chain/json/macros.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 
 namespace libbitcoin {
