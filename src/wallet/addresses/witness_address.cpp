@@ -34,6 +34,7 @@ namespace wallet {
 
 constexpr char separator = '1';
 constexpr uint8_t version0 = 0;
+constexpr uint8_t version1 = 1;
 constexpr uint8_t version_maximum = 16;
 constexpr uint8_t version_invalid = max_uint8;
 
@@ -50,6 +51,7 @@ const size_t witness_address::program_minimum_size = 2;
 const size_t witness_address::program_maximum_size = 40;
 const size_t witness_address::version0_p2kh_program_size = 20;
 const size_t witness_address::version0_p2sh_program_size = 32;
+const size_t witness_address::version1_taproot_program_size = 32;
 const size_t witness_address::checksum_length = 6;
 
 // Contructors.
@@ -68,10 +70,10 @@ witness_address::witness_address(const std::string& address,
 {
 }
 
-// fully specified by parameter
+// fully specified by parameter (v1 here)
 witness_address::witness_address(const data_slice& program,
-    const std::string& prefix, uint8_t version) NOEXCEPT
-  : witness_address(from_parameters(program, prefix, version))
+    uint8_t version, const std::string& prefix) NOEXCEPT
+  : witness_address(from_parameters(program, version, prefix))
 {
 }
 
@@ -130,7 +132,7 @@ inline bool is_valid_program(const data_slice& program) NOEXCEPT
 }
 
 // local
-inline bool is_valid_version(uint8_t version) NOEXCEPT
+constexpr bool is_valid_version(uint8_t version) NOEXCEPT
 {
     return version <= version_maximum;
 }
@@ -197,6 +199,16 @@ witness_address::program_type witness_address::parse_program(uint8_t version,
                     return program_type::invalid;
             }
         }
+        case version1:
+        {
+            switch (program.size())
+            {
+                case version1_taproot_program_size:
+                    return program_type::version1_taproot;
+                default:
+                    return program_type::invalid;
+            }
+        }
         default:
         {
             return strict ? program_type::invalid : program_type::unknown;
@@ -226,7 +238,7 @@ witness_address::parse_result witness_address::parse_address(
         return parse_result::prefix_missing;
 
     // Split the parts and discard the separator character.
-    out_prefix = lowered.substr(0, split);
+    out_prefix = lowered.substr(zero, split);
     const auto payload = lowered.substr(add1(split));
 
     // Parsing lowered prefix, so all upper will pass as all lower.
@@ -284,20 +296,18 @@ witness_address witness_address::from_address(const std::string& address,
 
 // fully specified by parameter
 witness_address witness_address::from_parameters(const data_slice& program,
-    const std::string& prefix, uint8_t version) NOEXCEPT
+    uint8_t version, const std::string& prefix) NOEXCEPT
 {
+    if (parse_prefix(prefix, false) != parse_result::valid)
+        return {};
+
     switch (parse_program(version, program, false))
     {
         case program_type::version0_p2kh:
-            return from_short(unsafe_array_cast<uint8_t, short_hash_size>(
-                program.data()), prefix);
         case program_type::version0_p2sh:
-            return from_long(unsafe_array_cast<uint8_t, hash_size>(
-                program.data()), prefix);
+        case program_type::version1_taproot:
         case program_type::unknown:
-            return parse_prefix(prefix, false) == parse_result::valid ?
-                witness_address{ prefix, version, to_chunk(program) } :
-                witness_address{};
+            return { prefix, version, to_chunk(program) };
         case program_type::invalid:
         default:
             return {};

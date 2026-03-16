@@ -75,42 +75,52 @@ BOOST_AUTO_TEST_CASE(witness_address__string_construct__valid_version0_strict__v
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__minimal_program_abc_17__invalid)
 {
-    BOOST_REQUIRE(!witness_address(data_chunk(2, 0x00), "abc", 17));
+    BOOST_REQUIRE(!witness_address(data_chunk(2, 0x00), 17, "abc"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__minimal_program_abc_16__valid)
 {
-    BOOST_REQUIRE(witness_address(data_chunk(2, 0x00), "abc", 16));
+    BOOST_REQUIRE(witness_address(data_chunk(2, 0x00), 16, "abc"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__maximal_program_abc_16__valid)
 {
-    BOOST_REQUIRE(witness_address(data_chunk(40, 0x00), "abc", 1));
+    BOOST_REQUIRE(witness_address(data_chunk(40, 0x00), 16, "abc"));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__oversized_program_abc_16__valid)
+BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__oversized_program_abc_16__invalid)
 {
-    BOOST_REQUIRE(!witness_address(data_chunk(40 + 1, 0x00), "abc", 1));
+    BOOST_REQUIRE(!witness_address(data_chunk(40 + 1, 0x00), 16, "abc"));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__minimal_program_abc_1__valid)
+BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__minimal_program_abc_2__valid)
 {
-    BOOST_REQUIRE(witness_address(data_chunk(2, 0x00), "abc", 1));
+    BOOST_REQUIRE(witness_address(data_chunk(2, 0x00), 2, "abc"));
+}
+
+BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__minimal_program_abc_1__invalid)
+{
+    BOOST_REQUIRE(!witness_address(data_chunk(2, 0x00), 1, "abc"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__minimal_program_abc_0__invalid)
 {
-    BOOST_REQUIRE(!witness_address(data_chunk(2, 0x00), "abc", 0));
+    BOOST_REQUIRE(!witness_address(data_chunk(2, 0x00), 0, "abc"));
+}
+
+BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__null_hash_abc_1__valid)
+{
+    BOOST_REQUIRE(witness_address(null_hash, 1, "abc"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__null_short_hash_abc_0__valid)
 {
-    BOOST_REQUIRE(witness_address(null_short_hash, "abc", 0));
+    BOOST_REQUIRE(witness_address(null_short_hash, 0, "abc"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__null_short_hash_invalid_prefix_0__invalid)
 {
-    BOOST_REQUIRE(!witness_address(null_short_hash, "\x80", 0));
+    BOOST_REQUIRE(!witness_address(null_short_hash, 0, "\x80"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__short_hash_construct__null_short_hash__valid)
@@ -120,12 +130,12 @@ BOOST_AUTO_TEST_CASE(witness_address__short_hash_construct__null_short_hash__val
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__null_hash_abc_0__valid)
 {
-    BOOST_REQUIRE(witness_address(null_hash, "abc", 0));
+    BOOST_REQUIRE(witness_address(null_hash, 0, "abc"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__null_hash_invalid_prefix_0__invalid)
 {
-    BOOST_REQUIRE(!witness_address(null_hash, "\x80", 0));
+    BOOST_REQUIRE(!witness_address(null_hash, 0, "\x80"));
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__parameter_construct__null_hash__valid)
@@ -374,15 +384,15 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_program__version16_long__invalid)
     BOOST_REQUIRE(witness_address::parse_program(16, data_chunk(40 + 1, 0x00)) == type::invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_non_zero_valid__unknown)
+BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_unknown_valid__unknown)
 {
-    BOOST_REQUIRE(witness_address::parse_program(1, null_hash) == type::unknown);
+    BOOST_REQUIRE(witness_address::parse_program(2, null_hash) == type::unknown);
     BOOST_REQUIRE(witness_address::parse_program(16, null_hash) == type::unknown);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_non_zero_valid_strict__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_unknown_valid_strict__invalid)
 {
-    BOOST_REQUIRE(witness_address::parse_program(1, null_hash, true) == type::invalid);
+    BOOST_REQUIRE(witness_address::parse_program(2, null_hash, true) == type::invalid);
     BOOST_REQUIRE(witness_address::parse_program(16, null_hash, true) == type::invalid);
 }
 
@@ -949,17 +959,19 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address2__expected)
     BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262]");
 }
 
+// This test became invalid under taproot, given that the program size is not 32 bytes, so the version was increased from 1 to 2.
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address3__expected)
 {
     // This returns valid under bech32 and checksum_invalid under bech32m.
     ////const witness_address address("bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx");
     const auto program = base16_array("751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6");
-    const witness_address address(program, "bc", 1);
-    BOOST_REQUIRE_EQUAL(address.encoded(), "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y");
-    BOOST_REQUIRE_EQUAL(address.version(), 1u);
+    const witness_address address(program, 2, "bc");
+    ////BOOST_REQUIRE_EQUAL(address.encoded(), "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y");
+    BOOST_REQUIRE_EQUAL(address.encoded(), "bc1zw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k6smc24");
+    BOOST_REQUIRE_EQUAL(address.version(), 2u);
     BOOST_REQUIRE(address.identifier() == type::unknown);
     BOOST_REQUIRE_EQUAL(address.program(), to_chunk(program));
-    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "1 [751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]");
+    BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "2 [751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]");
 }
 
 BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address4__expected)
@@ -967,7 +979,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address4__expected)
     // This returns valid under bech32 and checksum_invalid under bech32m.
     ////const witness_address address("BC1SW50QA3JX3S");
     const auto program = base16_array("751e");
-    const witness_address address(program, "bc", 16);
+    const witness_address address(program, 16, "bc");
     BOOST_REQUIRE_EQUAL(ascii_to_upper(address.encoded()), "BC1SW50QGDZ25J");
     BOOST_REQUIRE_EQUAL(address.version(), 16u);
     BOOST_REQUIRE(address.identifier() == type::unknown);
@@ -980,7 +992,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address5__expected)
     // This returns valid under bech32 and checksum_invalid under bech32m.
     ////const witness_address address("bc1zw508d6qejxtdg4y5r3zarvaryvg6kdaj");
     const auto program = base16_array("751e76e8199196d454941c45d1b3a323");
-    const witness_address address(program, "bc", 2);
+    const witness_address address(program, 2, "bc");
     BOOST_REQUIRE_EQUAL(address.encoded(), "bc1zw508d6qejxtdg4y5r3zarvaryvaxxpcs");
     BOOST_REQUIRE_EQUAL(address.version(), 2u);
     BOOST_REQUIRE(address.identifier() == type::unknown);

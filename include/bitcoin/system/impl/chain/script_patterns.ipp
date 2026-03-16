@@ -123,41 +123,6 @@ constexpr bool script::is_pay_op_return_pattern(const operations& ops) NOEXCEPT
         && ops[0].code() == opcode::op_return;
 }
 
-// The current 16 (or 20) limit does not affect server indexing because bare
-// multisig is not indexable and p2sh multisig is byte-limited to 15 sigs.
-// The satoshi client policy limit is 3 signatures for bare multisig.
-constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
-{
-    constexpr auto op_1 = static_cast<uint8_t>(opcode::push_positive_1);
-    constexpr auto op_16 = static_cast<uint8_t>(opcode::push_positive_16);
-
-    const auto op_count = ops.size();
-
-    if (op_count < 4 || ops[op_count - 1].code() != opcode::checkmultisig)
-        return false;
-
-    const auto op_m = static_cast<uint8_t>(ops[0].code());
-    const auto op_n = static_cast<uint8_t>(ops[op_count - 2].code());
-
-    if (op_m < op_1 || op_m > op_n || op_n < op_1 || op_n > op_16)
-        return false;
-
-    const auto number = op_n - op_1 + 1u;
-    const auto points = op_count - 3u;
-
-    if (number != points)
-        return false;
-
-    for (auto op = std::next(ops.begin());
-        op != std::prev(ops.end(), 2); ++op)
-    {
-        if (!is_public_key(op->data()))
-            return false;
-    }
-
-    return true;
-}
-
 // The satoshi client considers this non-standard for policy.
 constexpr bool script::is_pay_public_key_pattern(
     const operations& ops) NOEXCEPT
@@ -204,14 +169,19 @@ constexpr bool script::is_pay_witness_key_hash_pattern(
         && ops[1].code() == opcode::push_size_20;
 }
 
-// ****************************************************************************
-// CONSENSUS: this pattern is used to activate bip141 validation rules.
-// ****************************************************************************
 constexpr bool script::is_pay_witness_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
         && ops[0].code() == opcode::push_size_0
+        && ops[1].code() == opcode::push_size_32;
+}
+
+constexpr bool script::is_pay_witness_taproot_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 2
+        && ops[0].code() == opcode::push_size_1
         && ops[1].code() == opcode::push_size_32;
 }
 
@@ -385,6 +355,16 @@ inline operations script::to_pay_witness_script_hash_pattern(
     return
     {
         { opcode::push_size_0 },
+        { to_chunk(hash), false }
+    };
+}
+
+inline operations script::to_pay_witness_taproot_pattern(
+    const hash_digest& hash) NOEXCEPT
+{
+    return
+    {
+        { opcode::push_size_1 },
         { to_chunk(hash), false }
     };
 }

@@ -33,7 +33,7 @@ DEFINE_JSON_TO_TAG(script)
 
 DEFINE_JSON_FROM_TAG(script)
 {
-    // TODO: inject rules.
+    // TODO: how to inject rules.
     value = instance.to_string(flags::all_rules);
 }
 
@@ -55,8 +55,8 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, script)
     const auto& script = instance.value;
     value =
     {
-        // TODO: this is native encoding (and how does bitcoind handle forks).
-        { "asm", script.to_string(flags::all_rules) },
+        // TODO: how to inject rules.
+        { "asm", script.to_string(flags::all_rules, true) },
         { "hex", encode_base16(script.to_data(false)) }
     };
 }

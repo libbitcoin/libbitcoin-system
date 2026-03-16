@@ -313,7 +313,7 @@ pop_ternary32(int32_t& upper, int32_t& lower,
 // This value is only used for stack indexing (key/sig counts & pick/roll).
 // The upper bound of int32_t always exceeds the possible stack size, which
 // is checked downstream. Similarly, a negative causes a downstream script
-// failure. As such it is sufficient to fail on non-idexability here,
+// failure. As such it is sufficient to fail on non-indexability here,
 // allowing the value to be returned as a valid and unsigned stack index.
 // ****************************************************************************
 TEMPLATE

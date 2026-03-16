@@ -53,6 +53,18 @@ enum class script_pattern
     /// Signature script: <sig>[sig][sig...] <redeemScript>
     pay_script_hash,
 
+    /// Pay to Witness Public Key Hash [BIP141]
+    /// Pubkey script: OP_0 <20-byte key hash>
+    pay_witness_key_hash,
+
+    /// Pay to Witness Script Hash [BIP141]
+    /// Pubkey script: OP_0 <32-byte script hash>
+    pay_witness_script_hash,
+
+    /// Pay to Taproot [BIP341]
+    /// Pubkey script: OP_1 <32-byte output key>
+    pay_witness_v1_taproot,
+
     /// Sign Multisig script [BIP11]
     sign_multisig,
 
@@ -71,6 +83,7 @@ enum class script_pattern
     /// The script may be valid but does not conform to the common templates.
     /// Such scripts are always accepted if they are mined into blocks, but
     /// transactions with uncommon scripts may not be forwarded by peers.
+    /// This is not a "standardness" concept, just an unrecognized pattern.
     non_standard
 };
 

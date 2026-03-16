@@ -39,7 +39,7 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // static
-// TODO: would be inlined but machine is a circular include.
+// This would be inlined but machine is a circular include.
 //*****************************************************************************
 // CONSENSUS: BIP34 requires coinbase input script to begin with one byte
 // that indicates height size. This is inconsistent with an extreme future
@@ -52,6 +52,40 @@ bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
     return !ops.empty()
         && ops[0].is_nominal_push()
         && ops[0].data() == chunk::from_integer(to_signed(height));
+}
+
+// static
+// This would be constexpr but machine is a circular include.
+// op_check_multisig is limited to 20 signatures (max_script_public_keys).
+bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
+{
+    if (ops.size() < 4u || ops.back().code() != opcode::checkmultisig)
+        return false;
+
+    const auto signatures = [](const operation& op) NOEXCEPT
+    {
+        using namespace machine::number;
+        if (op.is_positive())
+            return operation::opcode_to_positive(op.code());
+
+        int32_t count{};
+        if (op.is_payload() && integer<4>::from_chunk(count, op.data()) &&
+            !is_limited(count, one, max_script_public_keys))
+            return narrow_sign_cast<uint8_t>(count);
+
+        return 0_u8;
+    };
+
+    const auto m = signatures(ops.front());
+    const auto n = signatures(ops[ops.size() - 2u]);
+    if (is_zero(m) || is_zero(n) || (m > n) || (n != ops.size() - 3u))
+        return false;
+
+    for (auto op = std::next(ops.begin()); op != std::prev(ops.end(), 2); ++op)
+        if (!is_public_key(op->data()))
+            return false;
+
+    return true;
 }
 
 // Constructors.
@@ -131,8 +165,8 @@ script::script(reader& source, bool prefix) NOEXCEPT
     assign_data(source, prefix);
 }
 
-script::script(const std::string_view& mnemonic) NOEXCEPT
-  : script(from_string(mnemonic))
+script::script(const std::string_view& mnemonic, bool bitcoind) NOEXCEPT
+  : script(from_string(mnemonic, bitcoind))
 {
 }
 
@@ -286,8 +320,11 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
 }
 
 // static/private
-script script::from_string(const std::string_view& mnemonic) NOEXCEPT
+script script::from_string(const std::string_view& mnemonic,
+    bool /* bitcoind */) NOEXCEPT
 {
+    // TODO: incorporate bitcoind option.
+
     constexpr auto valid = true;
     auto easier = false;
     auto failer = false;
@@ -303,8 +340,6 @@ script script::from_string(const std::string_view& mnemonic) NOEXCEPT
 
     operations ops{};
     ops.reserve(tokens.size());
-
-    // Create an op list from the split tokens.
     for (const auto& token: tokens)
     {
         ops.emplace_back(std::string_view{ token });
@@ -351,14 +386,16 @@ void script::to_data(writer& sink, bool prefix) const NOEXCEPT
         op->to_data(sink);
 }
 
-std::string script::to_string(uint32_t active_flags) const NOEXCEPT
+std::string script::to_string(uint32_t active_flags,
+    bool /* bitcoind */) const NOEXCEPT
 {
+    // TODO: incorporate bitcoind option.
+
     auto first = true;
     std::ostringstream text{};
-
-    // Throwing stream aborts.
     for (const auto& op: ops())
     {
+        // Throwing stream aborts.
         text << (first ? "" : " ") << op.to_string(active_flags);
         first = false;
     }

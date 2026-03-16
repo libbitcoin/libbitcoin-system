@@ -79,9 +79,17 @@ script_pattern script::output_pattern() const NOEXCEPT
     if (is_pay_public_key_pattern(ops()))
         return script_pattern::pay_public_key;
 
-    // Limited to 16 signatures though op_check_multisig allows 20.
     if (is_pay_multisig_pattern(ops()))
         return script_pattern::pay_multisig;
+
+    if (is_pay_witness_key_hash_pattern(ops()))
+        return script_pattern::pay_witness_key_hash;
+
+    if (is_pay_witness_script_hash_pattern(ops()))
+        return script_pattern::pay_witness_script_hash;
+
+    if (is_pay_witness_taproot_pattern(ops()))
+        return script_pattern::pay_witness_v1_taproot;
 
     return script_pattern::non_standard;
 }

@@ -46,6 +46,7 @@
 //is_pay_witness_pattern
 //is_pay_witness_key_hash_pattern
 //is_pay_witness_script_hash_pattern
+//is_pay_witness_taproot_pattern
 //
 //is_sign_multisig_pattern
 //is_sign_public_key_pattern
@@ -125,6 +126,55 @@ static const std::string script_17_of_17_multisig =
     "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
     "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
     "16 checkmultisig";
+
+static const std::string script_20_of_20_multisig =
+    "[14] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[14] checkmultisig";
+
+static const std::string script_20_of_21_multisig =
+    "[14] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] "
+    "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] "
+    "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] "
+    "[15] checkmultisig";
 
 // Test helpers.
 // -----------------------------------------------------------------------------
@@ -443,9 +493,18 @@ BOOST_AUTO_TEST_CASE(script__pattern__16_of_16_multisig__pay_multisig)
     BOOST_REQUIRE(instance.pattern() == chain::script_pattern::pay_multisig);
 }
 
-BOOST_AUTO_TEST_CASE(script__pattern__17_of_17_multisig__non_standard)
+BOOST_AUTO_TEST_CASE(script__pattern__20_of_20_multisig__pay_multisig)
 {
-    const script instance(script_17_of_17_multisig);
+    const script instance(script_20_of_20_multisig);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_multisig);
+    BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::non_standard);
+    BOOST_REQUIRE(instance.pattern() == chain::script_pattern::pay_multisig);
+}
+
+BOOST_AUTO_TEST_CASE(script__pattern__20_of_21_multisig__non_standard)
+{
+    const script instance(script_20_of_21_multisig);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::non_standard);
     BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::non_standard);
