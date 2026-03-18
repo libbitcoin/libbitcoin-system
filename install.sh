@@ -401,27 +401,6 @@ display_configuration()
 
 # Define build functions.
 #==============================================================================
-# Because PKG_CONFIG_PATH doesn't get updated by Homebrew or MacPorts.
-initialize_icu_packages()
-{
-    if [[ ($OS == Darwin) ]]; then
-        # Update PKG_CONFIG_PATH for ICU package installations on OSX.
-        # OSX provides libicucore.dylib with no pkgconfig and doesn't support
-        # renaming or important features, so we can't use that.
-        local HOMEBREW_USR_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
-        local HOMEBREW_OPT_ICU_PKG_CONFIG="/opt/homebrew/opt/icu4c/lib/pkgconfig"
-        local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
-
-        if [[ -d "$HOMEBREW_USR_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_USR_ICU_PKG_CONFIG"
-        elif [[ -d "$HOMEBREW_OPT_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_OPT_ICU_PKG_CONFIG"
-        elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
-        fi
-    fi
-}
-
 extract_from_tarball()
 {
     local TARGET_DIR=$1
@@ -491,22 +470,7 @@ build_from_tarball()
     local SAVE_LDFLAGS="$LDFLAGS"
     local SAVE_CPPFLAGS="$CPPFLAGS"
 
-    # For some platforms we need to set ICU pkg-config path.
-    # TODO: clean this up?
-    if [[ ! ($BUILD) ]]; then
-        if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
-            display_heading_message "Rationalize ICU detection."
-            initialize_icu_packages
-        fi
-        return
-    fi
-
     display_heading_message "Preparing to build $ARCHIVE"
-
-    # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
-        export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
 
     local TARGET="build-$ARCHIVE"
     push_directory "$TARGET"
@@ -596,22 +560,6 @@ build_from_github()
     make_project_directory "$REPO" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
-# Because boost ICU static lib detection assumes in incorrect ICU path.
-circumvent_boost_icu_detection()
-{
-    # Boost expects a directory structure for ICU which is incorrect.
-    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
-    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
-
-    local SUCCESS="int main() { return 0; }"
-    local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
-    local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
-
-    printf "%s" "$SUCCESS" > $REGEX_TEST
-    printf "%s" "$SUCCESS" > $LOCALE_TEST
-
-    # display_message "Hack: ICU detection modified, will always indicate found."
-}
 
 # Because boost doesn't support autoconfig and doesn't like empty settings.
 initialize_boost_configuration()
@@ -634,33 +582,6 @@ initialize_boost_configuration()
         BOOST_LINKFLAGS="linkflags=$STDLIB_FLAG"
     fi
 }
-
-# Because boost doesn't use pkg-config.
-# The hacks below are still required as of boost 1.72.0.
-initialize_boost_icu_configuration()
-{
-    BOOST_ICU_ICONV="on"
-    BOOST_ICU_POSIX="on"
-
-    if [[ $WITH_ICU ]]; then
-        # Restrict other locale options when compiling boost with icu.
-        BOOST_ICU_ICONV="off"
-        BOOST_ICU_POSIX="off"
-
-        # Work around boost ICU static lib discovery bug.
-        circumvent_boost_icu_detection
-
-        # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
-
-        # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
-
-        # This is a hack for boost m4 scripts that fail with ICU dependency.
-        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
-    fi
-}
-
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
@@ -683,7 +604,6 @@ build_from_tarball_boost()
     push_directory "$TARGET"
 
     initialize_boost_configuration
-    initialize_boost_icu_configuration
 
     guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
     CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
@@ -702,11 +622,8 @@ build_from_tarball_boost()
     display_message "boost cxxflags        : $BOOST_CXXFLAGS"
     display_message "boost linkflags       : $BOOST_LINKFLAGS"
     display_message "link                  : $BOOST_LINK"
-    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
-    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sNO_ZSTD             : 1"
-    display_message "-sICU_PATH            : $ICU_PREFIX"
   # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
@@ -719,8 +636,7 @@ build_from_tarball_boost()
 
     ./bootstrap.sh \
         "--with-bjam=./b2" \
-        "--prefix=$PREFIX" \
-        "--with-icu=$ICU_PREFIX"
+        "--prefix=$PREFIX"
 
     # boost_regex:
     # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
@@ -737,11 +653,8 @@ build_from_tarball_boost()
         "$BOOST_LINKFLAGS" \
         "link=$BOOST_LINK" \
         "warnings=off" \
-        "boost.locale.iconv=$BOOST_ICU_ICONV" \
-        "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sNO_ZSTD=1" \
-        "-sICU_PATH=$ICU_PREFIX" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
