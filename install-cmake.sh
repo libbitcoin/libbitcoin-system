@@ -329,10 +329,10 @@ handle_custom_options()
         exit 1
     elif [[ $DISABLE_NDEBUG ]]; then
         CUMULATIVE_FILTERED_ARGS="--disable-ndebug"
-        CUMULATIVE_FILTERED_ARGS_CMAKE="-Denable-ndebug=no"
+        CUMULATIVE_FILTERED_ARGS_CMAKE="-DCMAKE_BUILD_TYPE=Debug"
     else
         CUMULATIVE_FILTERED_ARGS="--enable-ndebug"
-        CUMULATIVE_FILTERED_ARGS_CMAKE="-Denable-ndebug=yes"
+        CUMULATIVE_FILTERED_ARGS_CMAKE="-DCMAKE_BUILD_TYPE=Release"
     fi
 
     # Process link declaration
@@ -377,6 +377,7 @@ remove_install_options()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--disable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose=*/}")
 }
 
 set_prefix()
@@ -452,27 +453,6 @@ display_configuration()
 
 # Define build functions.
 #==============================================================================
-# Because PKG_CONFIG_PATH doesn't get updated by Homebrew or MacPorts.
-initialize_icu_packages()
-{
-    if [[ ($OS == Darwin) ]]; then
-        # Update PKG_CONFIG_PATH for ICU package installations on OSX.
-        # OSX provides libicucore.dylib with no pkgconfig and doesn't support
-        # renaming or important features, so we can't use that.
-        local HOMEBREW_USR_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
-        local HOMEBREW_OPT_ICU_PKG_CONFIG="/opt/homebrew/opt/icu4c/lib/pkgconfig"
-        local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
-
-        if [[ -d "$HOMEBREW_USR_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_USR_ICU_PKG_CONFIG"
-        elif [[ -d "$HOMEBREW_OPT_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_OPT_ICU_PKG_CONFIG"
-        elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
-        fi
-    fi
-}
-
 extract_from_tarball()
 {
     local TARGET_DIR=$1
@@ -542,22 +522,7 @@ build_from_tarball()
     local SAVE_LDFLAGS="$LDFLAGS"
     local SAVE_CPPFLAGS="$CPPFLAGS"
 
-    # For some platforms we need to set ICU pkg-config path.
-    # TODO: clean this up?
-    if [[ ! ($BUILD) ]]; then
-        if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
-            display_heading_message "Rationalize ICU detection."
-            initialize_icu_packages
-        fi
-        return
-    fi
-
     display_heading_message "Preparing to build $ARCHIVE"
-
-    # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
-        export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
 
     local TARGET="build-$ARCHIVE"
     push_directory "$TARGET"
@@ -673,15 +638,25 @@ cmake_tests()
 cmake_project_directory()
 {
     local PROJ_NAME=$1
-    local JOBS=$2
-    local TEST=$3
-    shift 3
+    local CMAKE_PATH=$2
+    local JOBS=$3
+    local TEST=$4
+    shift 4
 
     push_directory "$PROJ_NAME"
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=$(pwd)
 
-    cmake -LA $@ builds/cmake
+    create_directory "build-cmake"
+    push_directory "build-cmake"
+
+    VERBOSITY=""
+    if [[ $DISPLAY_VERBOSE ]]; then
+        VERBOSITY="-DCMAKE_VERBOSE_MAKEFILE=ON"
+    fi
+
+    cmake ${VERBOSITY} -LA $@ "../${CMAKE_PATH}"
+
     make_jobs "$JOBS"
 
     if [[ $TEST == true ]]; then
@@ -690,17 +665,19 @@ cmake_project_directory()
 
     make install
     configure_links
-    pop_directory
+    pop_directory # build-cmake
+    pop_directory # PROJ_NAME
 }
 
 build_from_github_cmake()
 {
     local REPO=$1
-    local JOBS=$2
-    local TEST=$3
-    local BUILD=$4
-    local OPTIONS=$5
-    shift 5
+    local CMAKE_PATH=$2
+    local JOBS=$3
+    local TEST=$4
+    local BUILD=$5
+    local OPTIONS=$6
+    shift 6
 
     if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
         return
@@ -712,25 +689,9 @@ build_from_github_cmake()
     display_heading_message "Preparing to build $REPO"
 
     # Build the local repository clone.
-    cmake_project_directory "$REPO" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
+    cmake_project_directory "$REPO" "$CMAKE_PATH" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
-# Because boost ICU static lib detection assumes in incorrect ICU path.
-circumvent_boost_icu_detection()
-{
-    # Boost expects a directory structure for ICU which is incorrect.
-    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
-    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
-
-    local SUCCESS="int main() { return 0; }"
-    local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
-    local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
-
-    printf "%s" "$SUCCESS" > $REGEX_TEST
-    printf "%s" "$SUCCESS" > $LOCALE_TEST
-
-    # display_message "Hack: ICU detection modified, will always indicate found."
-}
 
 # Because boost doesn't support autoconfig and doesn't like empty settings.
 initialize_boost_configuration()
@@ -753,33 +714,6 @@ initialize_boost_configuration()
         BOOST_LINKFLAGS="linkflags=$STDLIB_FLAG"
     fi
 }
-
-# Because boost doesn't use pkg-config.
-# The hacks below are still required as of boost 1.72.0.
-initialize_boost_icu_configuration()
-{
-    BOOST_ICU_ICONV="on"
-    BOOST_ICU_POSIX="on"
-
-    if [[ $WITH_ICU ]]; then
-        # Restrict other locale options when compiling boost with icu.
-        BOOST_ICU_ICONV="off"
-        BOOST_ICU_POSIX="off"
-
-        # Work around boost ICU static lib discovery bug.
-        circumvent_boost_icu_detection
-
-        # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=$(pkg-config icu-i18n --variable=prefix)
-
-        # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS="$(pkg-config icu-i18n --libs) -ldl"
-
-        # This is a hack for boost m4 scripts that fail with ICU dependency.
-        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
-    fi
-}
-
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
@@ -802,7 +736,6 @@ build_from_tarball_boost()
     push_directory "$TARGET"
 
     initialize_boost_configuration
-    initialize_boost_icu_configuration
 
     guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
     CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
@@ -821,11 +754,8 @@ build_from_tarball_boost()
     display_message "boost cxxflags        : $BOOST_CXXFLAGS"
     display_message "boost linkflags       : $BOOST_LINKFLAGS"
     display_message "link                  : $BOOST_LINK"
-    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
-    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sNO_ZSTD             : 1"
-    display_message "-sICU_PATH            : $ICU_PREFIX"
   # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
@@ -838,8 +768,7 @@ build_from_tarball_boost()
 
     ./bootstrap.sh \
         "--with-bjam=./b2" \
-        "--prefix=$PREFIX" \
-        "--with-icu=$ICU_PREFIX"
+        "--prefix=$PREFIX"
 
     # boost_regex:
     # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
@@ -856,11 +785,8 @@ build_from_tarball_boost()
         "$BOOST_LINKFLAGS" \
         "link=$BOOST_LINK" \
         "warnings=off" \
-        "boost.locale.iconv=$BOOST_ICU_ICONV" \
-        "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
         "-sNO_ZSTD=1" \
-        "-sICU_PATH=$ICU_PREFIX" \
         "-j $JOBS" \
         "-d0" \
         "-q" \
@@ -886,17 +812,17 @@ build_all()
     create_from_github bitcoin-core secp256k1 ${SECP256K1_BRANCH} "$BUILD_SECP256K1"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${SECP256K1_FLAGS[@]}"
-    build_from_github secp256k1 "$PARALLEL" false "$BUILD_SECP256K1" "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
+    build_from_github_cmake secp256k1 "." "$PARALLEL" false "$BUILD_SECP256K1" "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     export CPPFLAGS=$SAVE_CPPFLAGS
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${BITCOIN_SYSTEM_FLAGS[@]}"
     if [[ ! ($CI == true) ]]; then
         create_from_github libbitcoin libbitcoin-system ${BITCOIN_SYSTEM_BRANCH} "yes"
-        build_from_github_cmake libbitcoin-system "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    build_from_github_cmake libbitcoin-system "builds/cmake" "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github_cmake libbitcoin-system "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        build_from_github_cmake libbitcoin-system "builds/cmake" "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
         pop_directory
         pop_directory
     fi
@@ -950,10 +876,10 @@ BOOST_OPTIONS=(
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=(
-"--disable-tests" \
-"--enable-experimental" \
-"--enable-module-recovery" \
-"--enable-module-schnorrsig")
+"-DSECP256K1_BUILD_TESTS=OFF" \
+"-DSECP256K1_EXPERIMENTAL=ON" \
+"-DSECP256K1_ENABLE_MODULE_RECOVERY=ON" \
+"-DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON")
 
 # Define bitcoin-system options.
 #------------------------------------------------------------------------------
