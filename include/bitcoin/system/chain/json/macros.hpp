@@ -45,27 +45,27 @@ struct wrapped
 template<class Type>
 inline auto native(const Type& value) NOEXCEPT
 {
-    return wrapped<native_tag, Type>{value};
+    return wrapped<native_tag, Type>{ value };
 }
 template<class Type>
 inline auto bitcoind(const Type& value) NOEXCEPT
 {
-    return wrapped<bitcoind_tag, Type>{value};
+    return wrapped<bitcoind_tag, Type>{ value };
 }
 template<class Type>
 inline auto bitcoind_hashed(const Type& value) NOEXCEPT
 {
-    return wrapped<bitcoind_hashed_tag, Type>{value};
+    return wrapped<bitcoind_hashed_tag, Type>{ value };
 }
 template<class Type>
 inline auto bitcoind_verbose(const Type& value) NOEXCEPT
 {
-    return wrapped<bitcoind_verbose_tag, Type>{value};
+    return wrapped<bitcoind_verbose_tag, Type>{ value };
 }
 template<class Type>
 inline auto bitcoind_embedded(const Type& value) NOEXCEPT
 {
-    return wrapped<bitcoind_embedded_tag, Type>{value};
+    return wrapped<bitcoind_embedded_tag, Type>{ value };
 }
 
 /// json aliases
