@@ -90,7 +90,7 @@ create_directory()
     local DIRECTORY="$1"
 
     rm -rf "$DIRECTORY"
-    mkdir "$DIRECTORY"
+    mkdir -p "$DIRECTORY"
 }
 
 display_heading_message()
