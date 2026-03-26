@@ -41,14 +41,10 @@ public:
     DEFAULT_COPY_MOVE_DESTRUCT(block);
 
     typedef std::shared_ptr<const block> cptr;
-    struct position { size_t sibling; size_t width; };
-    using positions = std::vector<position>;
 
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
-    static positions merkle_branch(size_t leaf, size_t leaves,
-        bool compress=false) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -89,6 +85,7 @@ public:
     const inputs_cptr inputs_ptr() const NOEXCEPT;
     const transactions_cptr& transactions_ptr() const NOEXCEPT;
     hashes transaction_hashes(bool witness) const NOEXCEPT;
+    hashes merkle_branch(size_t position, bool witness) const NOEXCEPT;
 
     /// Computed properties.
     size_t outputs() const NOEXCEPT;
