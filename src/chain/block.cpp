@@ -444,29 +444,19 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
     return generate_merkle_root(false) != header_->merkle_root();
 }
 
-// public/static (utility)
-block::positions block::merkle_branch(size_t leaf, size_t leaves,
-    bool compress) NOEXCEPT
+hashes block::merkle_branch(size_t position, bool witness) const NOEXCEPT
 {
-    BC_ASSERT(leaves <= power2(sub1(bits<size_t>)));
+    auto level = transaction_hashes(witness);
+    if (position >= level.size())
+        return {};
 
-    positions branch{};
-    if (is_zero(leaves) || leaf >= leaves)
-        return branch;
-
-    // Upper bound, actual count may be less given compression.
-    branch.reserve(ceilinged_log2(leaves));
-
-    for (auto width = one, current = leaves; current > one;)
+    hashes branch{};
+    branch.reserve(ceilinged_log2(level.size()));
+    for (auto at = position; level.size() > one; at = to_half(at))
     {
-        const auto sibling = bit_xor(leaf, one);
-        if (!compress || sibling < current)
-            branch.emplace_back(sibling, width);
-
-        ++current;
-        shift_left_into(width);
-        shift_right_into(leaf);
-        shift_right_into(current);
+        if (is_odd(level.size())) level.push_back(level.back());
+        branch.push_back(level.at(is_even(at) ? add1(at) : sub1(at)));
+        sha256::merkle_hash(level);
     }
 
     return branch;

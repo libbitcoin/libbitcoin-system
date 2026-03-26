@@ -708,180 +708,116 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
 
 // merkle_branch
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__leaf_zero__empty)
+BOOST_AUTO_TEST_CASE(block__merkle_branch__single_tx__empty)
 {
-    BOOST_REQUIRE(block::merkle_branch(0, 0, true).empty());
-    BOOST_REQUIRE(block::merkle_branch(0, 0, false).empty());
+    const auto genesis = settings(selection::mainnet).genesis_block;
+    const auto branch = genesis.merkle_branch(0, false);
+    BOOST_REQUIRE(branch.empty());
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__one__zero)
+BOOST_AUTO_TEST_CASE(block__merkle_branch__position_out_of_range__empty)
 {
-    auto branch = block::merkle_branch(1, 2, true);
-    BOOST_REQUIRE_EQUAL(branch.size(), 1u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-
-    branch = block::merkle_branch(1, 2, false);
-    BOOST_REQUIRE_EQUAL(branch.size(), 1u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
+    const auto genesis = settings(selection::mainnet).genesis_block;
+    BOOST_REQUIRE(genesis.merkle_branch(1, false).empty());
+    BOOST_REQUIRE(genesis.merkle_branch(999, false).empty());
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__two_for_odd_length__zero)
+BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__expected)
 {
-    auto branch = block::merkle_branch(2, 3, true);
-    BOOST_REQUIRE_EQUAL(branch.size(), 1u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 2u);
+    const auto& block = expected_block::get();
+    const auto branch0 = block.merkle_branch(0, false);
+    const auto branch1 = block.merkle_branch(1, false);
+    const auto branch2 = block.merkle_branch(2, false);
 
-    branch = block::merkle_branch(2, 3, false);
-    BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 3u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
+    const auto expected_size = ceilinged_log2(block.transactions());
+    BOOST_CHECK_EQUAL(branch0.size(), expected_size);
+    BOOST_CHECK_EQUAL(branch1.size(), expected_size);
+    BOOST_CHECK_EQUAL(branch2.size(), expected_size);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__three__two_and_zero)
+BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__correct_siblings)
 {
-    auto branch = block::merkle_branch(3, 4, true);
-    BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 2u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
+    const auto& block = expected_block::get();
+    const auto& txs = expected_transactions::get();
+    const auto expected_size = ceilinged_log2(block.transactions());
+    const auto tx0_hash = txs[0].hash(false);
+    const auto tx1_hash = txs[1].hash(false);
+    const auto tx2_hash = txs[2].hash(false);
 
-    branch = block::merkle_branch(3, 4, false);
-    BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 2u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
+    const auto branch0 = block.merkle_branch(0, false);
+    BOOST_REQUIRE_EQUAL(branch0.size(), expected_size);
+    BOOST_CHECK_EQUAL(branch0[0], tx1_hash);
+    BOOST_CHECK_EQUAL(branch0[1], bitcoin_hash(tx2_hash, tx2_hash));
+
+    const auto branch1 = block.merkle_branch(1, false);
+    BOOST_REQUIRE_EQUAL(branch1.size(), expected_size);
+    BOOST_CHECK_EQUAL(branch1[0], tx0_hash);
+    BOOST_CHECK_EQUAL(branch1[1], bitcoin_hash(tx2_hash, tx2_hash));
+
+    const auto branch2 = block.merkle_branch(2, false);
+    BOOST_REQUIRE_EQUAL(branch2.size(), expected_size);
+    BOOST_CHECK_EQUAL(branch2[0], tx2_hash);
+    BOOST_CHECK_EQUAL(branch2[1], bitcoin_hash(tx0_hash, tx1_hash));
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__seven__six_four_and_zero)
+// These aren't actually witness txs, so result is the same as non-witness.
+BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions_witness__expected)
 {
-    auto branch = block::merkle_branch(7, 8, true);
-    BOOST_REQUIRE_EQUAL(branch.size(), 3u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 6u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 2u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[2].width, 4u);
-
-    branch = block::merkle_branch(7, 8, false);
-    BOOST_REQUIRE_EQUAL(branch.size(), 3u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 6u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 2u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[2].width, 4u);
+    const auto& block = expected_block::get();
+    const auto non_witness = block.merkle_branch(1, false);
+    const auto with_witness = block.merkle_branch(1, true);
+    BOOST_CHECK_EQUAL(non_witness, with_witness);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__ten_for_odd__eight_and_zero)
+hash_digest verify_merkle_proof(hash_digest current, const hashes& branch,
+    size_t position) NOEXCEPT
 {
-    auto branch = block::merkle_branch(10, 11, true);
-    BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 4u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 2u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 8u);
+    for (const auto& sibling: branch)
+    {
+        if (is_even(position))
+            current = bitcoin_hash(current, sibling);
+        else
+            current = bitcoin_hash(sibling, current);
 
-    branch = block::merkle_branch(10, 11, false);
-    BOOST_REQUIRE_EQUAL(branch.size(), 4u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 11u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 4u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].sibling, 3u);
-    BOOST_REQUIRE_EQUAL(branch[2].width, 4u);
-    BOOST_REQUIRE_EQUAL(branch[3].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[3].width, 8u);
+        position = to_half(position);
+    }
+
+    return current;
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__medium_power_of_two__expected)
+BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
 {
-    const block::positions expected{ { 14, 1 }, { 6, 2 }, { 2, 4 }, { 0, 8 } };
+    const auto& block = expected_block::get();
+    const auto& txs = expected_transactions::get();
 
-    auto branch = block::merkle_branch(15, 16, true);
-    BOOST_REQUIRE_EQUAL(branch.size(), 4u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 14u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 6u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].sibling, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].width, 4u);
-    BOOST_REQUIRE_EQUAL(branch[3].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[3].width, 8u);
+    const auto tx0_hash = txs[0].hash(false);
+    const auto tx1_hash = txs[1].hash(false);
+    const auto tx2_hash = txs[2].hash(false);
 
-    branch = block::merkle_branch(15, 16, false);
-    BOOST_REQUIRE_EQUAL(branch.size(), 4u);
-    BOOST_REQUIRE_EQUAL(branch[0].sibling, 14u);
-    BOOST_REQUIRE_EQUAL(branch[0].width, 1u);
-    BOOST_REQUIRE_EQUAL(branch[1].sibling, 6u);
-    BOOST_REQUIRE_EQUAL(branch[1].width, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].sibling, 2u);
-    BOOST_REQUIRE_EQUAL(branch[2].width, 4u);
-    BOOST_REQUIRE_EQUAL(branch[3].sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch[3].width, 8u);
-}
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__power_of_two_minus_one__expected)
-{
-    constexpr auto leaf = 1023u;
-    constexpr auto size = ceilinged_log2(add1(leaf));
-    auto branch = block::merkle_branch(leaf, add1(leaf), true);
-    BOOST_REQUIRE_EQUAL(branch.size(), size);
-    BOOST_REQUIRE_EQUAL(branch.front().sibling, 1022u);
-    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
-    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
+    // Test transaction at position 0
+    {
+        const auto branch = block.merkle_branch(0, false);
+        BOOST_REQUIRE_EQUAL(branch.size(), 2);
+        BOOST_CHECK_EQUAL(branch[0], tx1_hash);
+        BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
+    }
 
-    branch = block::merkle_branch(leaf, add1(leaf), false);
-    BOOST_REQUIRE_EQUAL(branch.size(), size);
-    BOOST_REQUIRE_EQUAL(branch.front().sibling, 1022u);
-    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
-    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
-}
+    // Test transaction at position 1
+    {
+        const auto branch = block.merkle_branch(1, false);
+        BOOST_REQUIRE_EQUAL(branch.size(), 2);
+        BOOST_CHECK_EQUAL(branch[0], tx0_hash);
+        BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
+    }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__odd_large_leaf_with_duplication__expected)
-{
-    constexpr auto leaf = 2047u;
-    constexpr auto size = ceilinged_log2(add1(leaf));
-    auto branch = block::merkle_branch(leaf, add1(leaf), true);
-    BOOST_REQUIRE_EQUAL(branch.size(), size);
-    BOOST_REQUIRE_EQUAL(branch.front().sibling, 2046u);
-    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
-    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
-
-    branch = block::merkle_branch(leaf, add1(leaf), false);
-    BOOST_REQUIRE_EQUAL(branch.size(), size);
-    BOOST_REQUIRE_EQUAL(branch.front().sibling, 2046u);
-    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
-    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(size)));
-}
-
-BOOST_AUTO_TEST_CASE(block__merkle_branch__maximum_non_overflow__expected)
-{
-    constexpr auto maximum = sub1(power2(sub1(bits<size_t>)));
-    auto branch = block::merkle_branch(maximum, add1(maximum), true);
-    BOOST_REQUIRE_EQUAL(branch.size(), sub1(bits<size_t>));
-    BOOST_REQUIRE_EQUAL(branch.front().sibling, sub1(maximum));
-    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
-    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(sub1(bits<size_t>))));
-
-    branch = block::merkle_branch(maximum, add1(maximum), false);
-    BOOST_REQUIRE_EQUAL(branch.size(), sub1(bits<size_t>));
-    BOOST_REQUIRE_EQUAL(branch.front().sibling, sub1(maximum));
-    BOOST_REQUIRE_EQUAL(branch.front().width, 1u);
-    BOOST_REQUIRE_EQUAL(branch.back().sibling, 0u);
-    BOOST_REQUIRE_EQUAL(branch.back().width, power2(sub1(sub1(bits<size_t>))));
+    // Test transaction at position 2 (duplicated leaf case)
+    {
+        const auto branch = block.merkle_branch(2, false);
+        BOOST_REQUIRE_EQUAL(branch.size(), 2);
+        BOOST_CHECK_EQUAL(branch[0], tx2_hash);
+        BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx0_hash, tx1_hash));
+    }
 }
 
 // is_overweight
