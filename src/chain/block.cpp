@@ -444,22 +444,27 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
     return generate_merkle_root(false) != header_->merkle_root();
 }
 
-hashes block::merkle_branch(size_t position, bool witness) const NOEXCEPT
+// static
+hashes block::merkle_branch(size_t position, hashes&& leaves) NOEXCEPT
 {
-    auto level = transaction_hashes(witness);
-    if (position >= level.size())
+    if (position >= leaves.size())
         return {};
 
     hashes branch{};
-    branch.reserve(ceilinged_log2(level.size()));
-    for (auto at = position; level.size() > one; at = to_half(at))
+    branch.reserve(ceilinged_log2(leaves.size()));
+    for (auto at = position; leaves.size() > one; at = to_half(at))
     {
-        if (is_odd(level.size())) level.push_back(level.back());
-        branch.push_back(level.at(is_even(at) ? add1(at) : sub1(at)));
-        sha256::merkle_hash(level);
+        if (is_odd(leaves.size())) leaves.push_back(leaves.back());
+        branch.push_back(leaves.at(is_even(at) ? add1(at) : sub1(at)));
+        sha256::merkle_hash(leaves);
     }
 
     return branch;
+}
+
+hashes block::merkle_branch(size_t position, bool witness) const NOEXCEPT
+{
+    return merkle_branch(position, transaction_hashes(witness));
 }
 
 // Accept (contextual).
