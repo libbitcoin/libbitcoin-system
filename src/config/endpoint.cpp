@@ -55,7 +55,7 @@ endpoint::endpoint(const asio::endpoint& uri) NOEXCEPT
 }
 
 endpoint::endpoint(const asio::address& ip, uint16_t port) NOEXCEPT
-  : endpoint(config::to_host(ip), port)
+  : endpoint(config::to_literal(ip), port)
 {
 }
 
