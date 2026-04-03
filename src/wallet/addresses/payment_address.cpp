@@ -310,14 +310,6 @@ payment_address payment_address::extract_output(
                 p2sh_prefix
             };
         case chain::script_pattern::pay_public_key:
-            return
-            {
-                // pay_public_key is not p2kh but we conflate for tracking.
-                ec_public{ script.ops().front().data() },
-                p2kh_prefix
-            };
-
-        // Bare multisig and null data do not associate a payment address.
         case chain::script_pattern::pay_multisig:
         case chain::script_pattern::pay_null_data:
         case chain::script_pattern::non_standard:
