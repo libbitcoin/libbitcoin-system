@@ -159,9 +159,9 @@ public:
     /// Guards (for tx pool without compact blocks).
     /// -----------------------------------------------------------------------
 
-    code guard_check() const NOEXCEPT;
-    code guard_check(const context& ctx) const NOEXCEPT;
-    code guard_accept(const context& ctx) const NOEXCEPT;
+    code check_guard() const NOEXCEPT;
+    code check_guard(const context& ctx) const NOEXCEPT;
+    code accept_guard(const context& ctx) const NOEXCEPT;
 
     /// Validation (consensus checks).
     /// -----------------------------------------------------------------------

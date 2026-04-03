@@ -803,7 +803,7 @@ bool transaction::is_confirmed_double_spend(size_t height) const NOEXCEPT
 // Pools do not have coinbases.
 // Redundant with block is_internal_double_spend check.
 // Redundant with block max_block_size check.
-code transaction::guard_check() const NOEXCEPT
+code transaction::check_guard() const NOEXCEPT
 {
     if (is_coinbase())
         return error::coinbase_transaction;
@@ -816,7 +816,7 @@ code transaction::guard_check() const NOEXCEPT
 }
 
 // Redundant with block max_block_weight accept.
-code transaction::guard_check(const context& ctx) const NOEXCEPT
+code transaction::check_guard(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(flags::bip141_rule);
 
@@ -829,7 +829,7 @@ code transaction::guard_check(const context& ctx) const NOEXCEPT
 }
 
 // Redundant with block max_block_sigops accept.
-code transaction::guard_accept(const context& ctx) const NOEXCEPT
+code transaction::accept_guard(const context& ctx) const NOEXCEPT
 {
     const auto bip16 = ctx.is_enabled(flags::bip16_rule);
     const auto bip141 = ctx.is_enabled(flags::bip141_rule);
