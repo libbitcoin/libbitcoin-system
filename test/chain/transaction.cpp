@@ -94,78 +94,20 @@ class accessor
 public:
     // Use base class constructors.
     using transaction::transaction;
-
-    bool is_internal_double_spend() const
-    {
-        return transaction::is_internal_double_spend();
-    }
-
-    bool is_oversized() const
-    {
-        return transaction::is_oversized();
-    }
-
-    bool is_overweight() const
-    {
-        return transaction::is_overweight();
-    }
-
-    bool is_signature_operations_limit(bool bip16, bool bip141) const
-    {
-        return transaction::is_signature_operations_limited(bip16, bip141);
-    }
-
-    bool is_empty() const
-    {
-        return transaction::is_empty();
-    }
-
-    bool is_null_non_coinbase() const
-    {
-        return transaction::is_null_non_coinbase();
-    }
-
-    bool is_invalid_coinbase_size() const
-    {
-        return transaction::is_invalid_coinbase_size();
-    }
-
-    bool is_absolute_locked(size_t height, uint32_t timestamp,
-        uint32_t median_time_past, bool bip113) const
-    {
-        return transaction::is_absolute_locked(height, timestamp, median_time_past,
-            bip113);
-    }
-
-    bool is_missing_prevouts() const
-    {
-        return transaction::is_missing_prevouts();
-    }
-
-    bool is_overspent() const
-    {
-        return transaction::is_overspent();
-    }
-
-    bool is_immature(size_t height) const
-    {
-        return transaction::is_immature(height);
-    }
-
-    bool is_relative_locked(size_t height, uint32_t median_time_past) const
-    {
-        return transaction::is_relative_locked(height, median_time_past);
-    }
-
-    bool is_unconfirmed_spend(size_t height) const
-    {
-        return transaction::is_unconfirmed_spend(height);
-    }
-
-    bool is_confirmed_double_spend(size_t height) const
-    {
-        return transaction::is_confirmed_double_spend(height);
-    }
+    using transaction::is_internal_double_spend;
+    using transaction::is_oversized;
+    using transaction::is_overweight;
+    using transaction::is_signature_operations_limited;
+    using transaction::is_empty;
+    using transaction::is_absolute_locked;
+    using transaction::is_null_non_coinbase;
+    using transaction::is_invalid_coinbase_size;
+    using transaction::is_missing_prevouts;
+    using transaction::is_overspent;
+    using transaction::is_immature;
+    using transaction::is_relative_locked;
+    using transaction::is_unconfirmed_spend;
+    using transaction::is_confirmed_double_spend;
 };
 
 // constructors
@@ -805,7 +747,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_internal_double_spend__nonunique_points__tr
 
 // is_oversized
 // is_overweight
-// is_signature_operations_limit
+// is_signature_operations_limited
 
 BOOST_AUTO_TEST_CASE(transaction__is_empty__default__true)
 {
@@ -1041,7 +983,6 @@ BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_zero__false)
 
     BOOST_REQUIRE(!instance.is_absolute_locked(height, time, past, bip113));
 }
-
 
 BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_less_block_time_greater_threshold__false)
 {

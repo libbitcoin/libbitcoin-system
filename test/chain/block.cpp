@@ -74,78 +74,20 @@ class accessor
 public:
     // Use base class constructors.
     using block::block;
-
-    bool is_empty() const NOEXCEPT
-    {
-        return block::is_empty();
-    }
-
-    bool is_oversized() const NOEXCEPT
-    {
-        return block::is_oversized();
-    }
-
-    bool is_first_non_coinbase() const NOEXCEPT
-    {
-        return block::is_first_non_coinbase();
-    }
-
-    bool is_extra_coinbases() const NOEXCEPT
-    {
-        return block::is_extra_coinbases();
-    }
-
-    bool is_forward_reference() const NOEXCEPT
-    {
-        return block::is_forward_reference();
-    }
-
-    bool is_internal_double_spend() const NOEXCEPT
-    {
-        return block::is_internal_double_spend();
-    }
-
-    bool is_invalid_merkle_root() const NOEXCEPT
-    {
-        return block::is_invalid_merkle_root();
-    }
-
-    bool is_overweight() const NOEXCEPT
-    {
-        return block::is_overweight();
-    }
-
-    bool is_invalid_coinbase_script(size_t height) const NOEXCEPT
-    {
-        return block::is_invalid_coinbase_script(height);
-    }
-
-    bool is_hash_limit_exceeded() const NOEXCEPT
-    {
-        return block::is_hash_limit_exceeded();
-    }
-
-    bool is_invalid_witness_commitment() const NOEXCEPT
-    {
-        return block::is_invalid_witness_commitment();
-    }
-
-    bool is_overspent(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
-    {
-        return block::is_overspent(height, subsidy_interval,
-            initial_block_subsidy_satoshi, bip42);
-    }
-
-    size_t is_signature_operations_limited(bool bip16, bool bip141) const NOEXCEPT
-    {
-        return block::is_signature_operations_limited(bip16, bip141);
-    }
-
-    bool is_unspent_coinbase_collision() const NOEXCEPT
-    {
-        return block::is_unspent_coinbase_collision();
-    }
+    using block::is_empty;
+    using block::is_oversized;
+    using block::is_first_non_coinbase;
+    using block::is_extra_coinbases;
+    using block::is_forward_reference;
+    using block::is_extra_coinbases;
+    using block::is_internal_double_spend;
+    using block::is_invalid_merkle_root;
+    using block::is_overweight;
+    using block::is_invalid_coinbase_script;
+    using block::is_hash_limit_exceeded;
+    using block::is_invalid_witness_commitment;
+    using block::is_overspent;
+    using block::is_signature_operations_limited;
 };
 
 // constructors

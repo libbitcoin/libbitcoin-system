@@ -157,7 +157,7 @@ void witness::skip(reader& source, bool prefix) NOEXCEPT
     {
         const auto count = source.read_size(max_block_weight);
 
-        for (size_t element = 0; element < count; ++element)
+        for (size_t element{}; element < count; ++element)
             source.read_bytes(source.read_size(max_block_weight));
     }
     else
@@ -191,7 +191,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
         const auto count = source.read_size(max_block_weight);
         stack_.reserve(count);
 
-        for (size_t element = 0; element < count; ++element)
+        for (size_t element{}; element < count; ++element)
             if (!push_witness())
                 break;
     }

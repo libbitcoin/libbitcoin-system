@@ -43,17 +43,8 @@ class accessor
 public:
     // Use base class constructors.
     using header::header;
-
-    bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
-        bool scrypt=false) const
-    {
-        return header::is_invalid_proof_of_work(proof_of_work_limit, scrypt);
-    }
-
-    bool is_futuristic_timestamp(uint32_t timestamp_limit_seconds) const
-    {
-        return header::is_futuristic_timestamp(timestamp_limit_seconds);
-    }
+    using header::is_invalid_proof_of_work;
+    using header::is_futuristic_timestamp;
 };
 
 static_assert(header::serialized_size() == 80_size);
