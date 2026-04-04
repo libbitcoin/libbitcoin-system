@@ -427,9 +427,8 @@ bool input::is_relative_locked(size_t height,
     uint32_t median_time_past) const NOEXCEPT
 {
     // Prevout must be found and height/median_time_past metadata populated.
-    ////BC_ASSERT(!is_zero(metadata.height));
     return is_relative_locked(sequence_, height, median_time_past,
-        metadata.height, metadata.median_time_past);
+        metadata.prevout_height, metadata.median_time_past);
 }
 
 bool input::reserved_hash(hash_cref& out) const NOEXCEPT

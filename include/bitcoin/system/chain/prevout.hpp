@@ -35,12 +35,13 @@ public:
     ///************************************************************************
     union
     {
-        /// The confirmed chain height of the prevout (zero if not found).
-        /// Unused if the input owning this prevout is null (coinbase).
-        size_t height;
+        /// Unused for coinbase.
+        /// The confirmed height of the prevout or max_uint32.
+        size_t prevout_height{ max_uint32 };
 
-        /// node: populated with a database identifier for the parent tx.
-        uint32_t parent{ zero };
+        /// node: populated with database identifier for the parent tx.
+        /// Link::terminal must derive from default of max_uint32.
+        uint32_t parent_tx;
     };
 
     ///************************************************************************
@@ -49,35 +50,27 @@ public:
     ///************************************************************************
     union
     {
-        /// The median time past at height (max_uint32 if not found/confirmed).
-        /// Unused if the input owning this prevout is null (coinbase).
+        /// Unused for coinbase.
+        /// The median time past at confirmed prevout block or max_uint32.
         uint32_t median_time_past{ max_uint32 };
 
-        /// node: set to the database record of the input association.
-        /// node: it is necessary that Link::terminal derives from max_uint32.
-        uint32_t link;
+        /// node: populated with database identifier for the input/point.
+        /// Link::terminal must derive from default of max_uint32.
+        uint32_t point_link;
     };
 
     ///************************************************************************
     /// CONSENSUS: 
     /// An unspent coinbase collision is immature (unspendable) and spent
     /// collision is mature [bip30]. CB collision presumed precluded by bip34.
+    /// This is NOT guarded by system::chain confirmation checks.
     ///************************************************************************
-    union
-    {
-        /// If input owning this prevout is null (coinbase), this implies that
-        /// all outputs of any duplicate txs are fully spent at height.
-        /// If the input owning this prevout is not null (not coinbase), this
-        /// indicates whether the prevout is spent at height (double spend).
-        bool spent{ true };
+    /// The confirmed height of the spender or max_uint32.
+    uint32_t spender_height{ max_uint32 };
 
-        /// node: indicates that the input spends output inside same block.
-        bool inside;
-    };
-
-    /// node: set via block.populate() as internal spends do not
-    /// require prevout block association for relative locktime checks.
-    /// So median_time_past is not required as locked is determined here.
+    /// node: set via block.populate() as internal spends do not require
+    /// prevout block association for relative locktime checks. So
+    /// median_time_past is not required as locked is determined here.
     bool locked{ true };
 
     /// The previous output is of a coinbase transaction.

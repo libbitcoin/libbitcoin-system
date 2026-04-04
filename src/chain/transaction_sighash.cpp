@@ -94,7 +94,7 @@ void transaction::signature_hash_single(writer& sink,
         const auto index = input_index(input);
         sink.write_variable(add1(index));
 
-        for (size_t output = 0; output < index; ++output)
+        for (size_t output{}; output < index; ++output)
             sink.write_bytes(null_output());
 
         // Guarded by unversioned_sighash().

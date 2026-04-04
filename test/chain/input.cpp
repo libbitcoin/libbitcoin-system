@@ -245,8 +245,8 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__enabled_block_sequence_age_equal
     constexpr auto sequence_enabled_block_type_minimum = age;
     const input instance(point{}, {}, sequence_enabled_block_type_minimum);
     BOOST_REQUIRE(!instance.prevout);
-    instance.metadata.height = 42;
-    BOOST_REQUIRE(!instance.is_relative_locked(instance.metadata.height + age, 0));
+    instance.metadata.prevout_height = 42;
+    BOOST_REQUIRE(!instance.is_relative_locked(instance.metadata.prevout_height + age, 0));
 }
 
 BOOST_AUTO_TEST_CASE(input__is_relative_locked__enabled_block_type_sequence_age_above_minimum__false)
@@ -255,8 +255,8 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__enabled_block_type_sequence_age_
     constexpr auto sequence_enabled_block_type_minimum = sub1(age);
     const input instance(point{}, {}, sequence_enabled_block_type_minimum);
     BOOST_REQUIRE(!instance.prevout);
-    instance.metadata.height = 42;
-    BOOST_REQUIRE(!instance.is_relative_locked(instance.metadata.height + age, 0));
+    instance.metadata.prevout_height = 42;
+    BOOST_REQUIRE(!instance.is_relative_locked(instance.metadata.prevout_height + age, 0));
 }
 
 BOOST_AUTO_TEST_CASE(input__is_relative_locked__enabled_block_type_sequence_age_below_minimum__true)
@@ -265,8 +265,8 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__enabled_block_type_sequence_age_
     constexpr auto sequence_enabled_block_type_minimum = add1(age);
     const input instance(point{}, {}, sequence_enabled_block_type_minimum);
     BOOST_REQUIRE(!instance.prevout);
-    instance.metadata.height = 42;
-    BOOST_REQUIRE(instance.is_relative_locked(instance.metadata.height + age, 0));
+    instance.metadata.prevout_height = 42;
+    BOOST_REQUIRE(instance.is_relative_locked(instance.metadata.prevout_height + age, 0));
 }
 
 BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_block_type_sequence_age_below_minimum__false)
@@ -275,8 +275,8 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_block_type_sequence_age
     constexpr auto sequence_disabled_block_type_minimum = bit_right<uint32_t>(relative_locktime_disabled_bit) | add1(age);
     const input instance(point{}, {}, sequence_disabled_block_type_minimum);
     BOOST_REQUIRE(!instance.prevout);
-    instance.metadata.height = 42;
-    BOOST_REQUIRE(!instance.is_relative_locked(instance.metadata.height + age, 0));
+    instance.metadata.prevout_height = 42;
+    BOOST_REQUIRE(!instance.is_relative_locked(instance.metadata.prevout_height + age, 0));
 }
 
 BOOST_AUTO_TEST_CASE(input__is_relative_locked__enabled_time_type_sequence_age_equals_minimum__false)
