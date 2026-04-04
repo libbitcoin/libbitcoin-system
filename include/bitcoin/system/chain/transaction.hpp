@@ -50,8 +50,8 @@ public:
     static bool is_relative_locktime_applied(bool coinbase, uint32_t version,
         uint32_t sequence) NOEXCEPT;
 
-    /// Not genesis and at least 100 blocks deep.
-    static bool is_coinbase_mature(size_t coinbase_height,
+    /// Genesis or less than 100 blocks deep.
+    static bool is_coinbase_immature(size_t coinbase_height,
         size_t height) NOEXCEPT;
 
     /// Optimized non-witness hash derivation using witness-serialized tx.

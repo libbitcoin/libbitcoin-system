@@ -691,9 +691,10 @@ bool transaction::is_overspent() const NOEXCEPT
     return spend() > value();
 }
 
-constexpr bool is_non_coinbase_mature(size_t tx_height, size_t height) NOEXCEPT
+constexpr bool is_non_coinbase_immature(size_t prevout_height,
+    size_t height) NOEXCEPT
 {
-    return tx_height <= height;
+    return height < prevout_height;
 }
 
 // static
@@ -701,11 +702,11 @@ constexpr bool is_non_coinbase_mature(size_t tx_height, size_t height) NOEXCEPT
 // CONSENSUS: Coinbase output matures at 100 blocks depth.
 // CONSENSUS: Genesis coinbase is forever immature (exception).
 //*****************************************************************************
-bool transaction::is_coinbase_mature(size_t coinbase_height,
+bool transaction::is_coinbase_immature(size_t coinbase_height,
     size_t height) NOEXCEPT
 {
-    return !is_zero(coinbase_height) &&
-        ceilinged_add(coinbase_height, coinbase_maturity) <= height;
+    return is_zero(coinbase_height) || (height < ceilinged_add(coinbase_height,
+        coinbase_maturity));
 }
 
 bool transaction::is_immature(size_t height) const NOEXCEPT
@@ -713,14 +714,15 @@ bool transaction::is_immature(size_t height) const NOEXCEPT
     BC_ASSERT(!is_coinbase());
 
     // Spends internal to a block are handled by block validation.
-    const auto mature = [=](const auto& input) NOEXCEPT
+    const auto immature = [=](const auto& input) NOEXCEPT
     {
+        const auto prevout_height = input->metadata.prevout_height;
         return input->metadata.coinbase ?
-            is_coinbase_mature(input->metadata.prevout_height, height) :
-            is_non_coinbase_mature(input->metadata.prevout_height, height);
+            is_coinbase_immature(prevout_height, height) :
+            is_non_coinbase_immature(prevout_height, height);
     };
 
-    return !std::all_of(inputs_->begin(), inputs_->end(), mature);
+    return std::any_of(inputs_->begin(), inputs_->end(), immature);
 }
 
 // static
