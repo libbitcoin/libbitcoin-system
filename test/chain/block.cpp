@@ -79,7 +79,6 @@ public:
     using block::is_first_non_coinbase;
     using block::is_extra_coinbases;
     using block::is_forward_reference;
-    using block::is_extra_coinbases;
     using block::is_internal_double_spend;
     using block::is_invalid_merkle_root;
     using block::is_overweight;

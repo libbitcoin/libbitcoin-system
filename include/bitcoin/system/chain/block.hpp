@@ -198,9 +198,6 @@ protected:
     bool is_signature_operations_limited(bool bip16,
         bool bip141) const NOEXCEPT;
 
-    /// Requires input.metadata.spent (prevout confirmation).
-    bool is_unspent_coinbase_collision() const NOEXCEPT;
-
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 

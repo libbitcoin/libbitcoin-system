@@ -750,20 +750,6 @@ bool block::is_signature_operations_limited(bool bip16,
     return signature_operations(bip16, bip141) > limit;
 }
 
-//*****************************************************************************
-// CONSENSUS: check excluded under bip30 exception blocks and bip30_deactivate
-// until bip30_reactivate. Those conditions are rolled up into the bip30 flag.
-//*****************************************************************************
-bool block::is_unspent_coinbase_collision() const NOEXCEPT
-{
-    if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
-        return false;
-
-    // May only commit duplicate coinbase that is already confirmed spent.
-    // Metadata population defaults coinbase to spent (not a collision).
-    return !txs_->front()->inputs_ptr()->front()->metadata.spent;
-}
-
 // Search is unordered, forward refs (and duplicates) caught by block.check.
 void block::populate() const NOEXCEPT
 {
@@ -798,6 +784,8 @@ code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
     if (txs_->empty())
         return error::block_success;
 
+    const auto& self = txs_->front()->get_hash(false);
+    constexpr auto matures = !is_zero(coinbase_maturity);
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
     unordered_map_of_cref_point_to_output_cptr_cref points(outputs());
     uint32_t index{};
@@ -807,27 +795,24 @@ code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
         for (const auto& out: *(*tx)->outputs_ptr())
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
-    // Populate input prevouts from hash table and obtain maturity.
+    // Populate prevouts from hash table, determine get locked and maturity.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
             // Map chain::point to cref_point for search, should optimize away.
-            const auto point = points.find({ in->point().hash(),
-                in->point().index() });
+            const cref_point key{ in->point().hash(), in->point().index() };
 
-            if (point != points.end())
+            if (const auto it = points.find(key); it != points.end())
             {
-                // Zero maturity coinbase spend is immature.
+                const auto immature = (matures && in->point().hash() == self);
                 const auto lock = (bip68 && (*tx)->is_internally_locked(*in));
-                const auto immature = !is_zero(coinbase_maturity) &&
-                    (in->point().hash() == txs_->front()->get_hash(false));
+                in->prevout = it->second;
 
-                in->prevout = point->second;
+                // If invalid shortcircuit population and return above error.
                 if ((in->metadata.locked = (immature || lock)))
                 {
-                    // Shortcircuit population and return above error.
-                    return immature ? error::coinbase_maturity : 
+                    return immature ? error::coinbase_maturity :
                         error::relative_time_locked;
                 }
             }
@@ -996,11 +981,6 @@ code block::accept(const context& ctx, size_t subsidy_interval,
 // This assumes that prevout and metadata caching are completed on all inputs.
 code block::confirm(const context& ctx) const NOEXCEPT
 {
-    const auto bip30 = ctx.is_enabled(bip30_rule);
-
-    if (bip30 && is_unspent_coinbase_collision())
-        return error::unspent_coinbase_collision;
-
     return confirm_transactions(ctx);
 }
 

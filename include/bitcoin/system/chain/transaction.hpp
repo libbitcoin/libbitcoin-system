@@ -224,17 +224,17 @@ protected:
     /// Confirm (requires confirmation order).
     /// -----------------------------------------------------------------------
 
-    /// Requires input.metadata.height/median_time_past (prevout confirmation).
+    /// Requires input.metadata.prevout_height/median_time_past.
     bool is_relative_locked(size_t height,
         uint32_t median_time_past) const NOEXCEPT;
 
-    /// Requires input.metadata.height (prevout confirmation).
+    /// Requires input.metadata.prevout_height.
     bool is_immature(size_t height) const NOEXCEPT;
 
-    /// Requires input.metadata.height (prevout confirmation).
+    /// Requires input.metadata.prevout_height.
     bool is_unconfirmed_spend(size_t height) const NOEXCEPT;
 
-    /// Requires input.metadata.height/spent (prevout confirmation).
+    /// Requires input.metadata.spender_height.
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
 
 private:

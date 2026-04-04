@@ -716,8 +716,8 @@ bool transaction::is_immature(size_t height) const NOEXCEPT
     const auto mature = [=](const auto& input) NOEXCEPT
     {
         return input->metadata.coinbase ?
-            is_coinbase_mature(input->metadata.height, height) :
-            is_non_coinbase_mature(input->metadata.height, height);
+            is_coinbase_mature(input->metadata.prevout_height, height) :
+            is_non_coinbase_mature(input->metadata.prevout_height, height);
     };
 
     return !std::all_of(inputs_->begin(), inputs_->end(), mature);
@@ -744,7 +744,7 @@ bool transaction::is_internally_locked(const input& in) const NOEXCEPT
         return false;
 
     // Internal spends have no relative height/mtp (own metadata vs. itself).
-    return in.is_relative_locked(in.metadata.height,
+    return in.is_relative_locked(in.metadata.prevout_height,
         in.metadata.median_time_past);
 }
 
@@ -767,18 +767,15 @@ bool transaction::is_relative_locked(size_t height,
     return std::any_of(inputs_->begin(), inputs_->end(), locked);
 }
 
-// Spends internal to a block are handled by block validation.
 bool transaction::is_unconfirmed_spend(size_t height) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    // Zero is either genesis or not found.
-    // Test maturity first to obtain proper error code.
-    // Spends internal to a block are handled by block validation.
     const auto unconfirmed = [=](const auto& input) NOEXCEPT
     {
-        const auto prevout_height = input->metadata.height;
-        return is_zero(prevout_height) && !(height > prevout_height);
+        // Spends internal to a block are handled by block validation.
+        // The lack of equality check here prevents conflict with self.
+        return height < input->metadata.prevout_height;
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), unconfirmed);
@@ -788,10 +785,11 @@ bool transaction::is_confirmed_double_spend(size_t height) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    // Spends internal to a block are handled by block validation.
     const auto spent = [=](const auto& input) NOEXCEPT
     {
-        return input->metadata.spent && height > input->metadata.height;
+        // Spends internal to a block are handled by block validation.
+        // The lack of equality check here prevents conflict with self.
+        return height > input->metadata.spender_height;
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), spent);

@@ -113,7 +113,7 @@ public:
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
-    /// Requires metadata.height and median_time_past (otherwise returns true).
+    /// Requires metadata.prevout_height and median_time_past (otherwise true).
     bool is_relative_locked(size_t height,
         uint32_t median_time_past) const NOEXCEPT;
 
@@ -156,9 +156,8 @@ private:
 
 public:
     /// Public mutable metadata access, copied but not compared for equality.
-    /// Defaults are set so non-population issues usually imply invalidity.
     mutable chain::output::cptr prevout{};
-    mutable chain::prevout metadata{ zero, max_uint32, true, true, true };
+    mutable chain::prevout metadata{};
 };
 
 typedef std_vector<input> inputs;

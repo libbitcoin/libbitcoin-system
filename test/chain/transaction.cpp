@@ -1126,7 +1126,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__no_inputs__false)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.height = 0;
+    input.metadata.prevout_height = 0;
     input.metadata.coinbase = true;
     const accessor instance
     {
@@ -1142,7 +1142,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_genesis__true)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.height = 1;
+    input.metadata.prevout_height = 1;
     input.metadata.coinbase = true;
     const accessor instance
     {
@@ -1158,7 +1158,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_coinbase__true)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.height = 1;
+    input.metadata.prevout_height = 1;
     input.metadata.coinbase = false;
     const accessor instance
     {
@@ -1174,7 +1174,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__premature_non_coinbase__false)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.height = 1;
+    input.metadata.prevout_height = 1;
     input.metadata.coinbase = true;
     const accessor instance
     {
@@ -1190,7 +1190,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_coinbase__false)
 BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.height = 1;
+    input.metadata.prevout_height = 1;
     input.metadata.coinbase = false;
     const accessor instance
     {
@@ -1279,26 +1279,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__empty_inputs__false
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__false)
 {
-    // input.metadata.spent defaults to true.
+    // input.metadata.spender_height defaults to max (spent above height).
     const accessor instance
     {
         0,
         inputs{ {}, {} },
-        {},
-        0
-    };
-
-    BOOST_REQUIRE(instance.is_confirmed_double_spend(42));
-}
-
-BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__false)
-{
-    const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.spent = false;
-    const accessor instance
-    {
-        0,
-        { input },
         {},
         0
     };
@@ -1309,7 +1294,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__fals
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__true)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.metadata.spent = true;
+    input.metadata.spender_height = 41;
     const accessor instance
     {
         0,
