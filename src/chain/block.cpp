@@ -751,35 +751,7 @@ bool block::is_signature_operations_limited(bool bip16,
 }
 
 // Search is unordered, forward refs (and duplicates) caught by block.check.
-void block::populate() const NOEXCEPT
-{
-    if (txs_->empty())
-        return;
-
-    unordered_map_of_cref_point_to_output_cptr_cref points(outputs());
-    uint32_t index{};
-
-    // Populate outputs hash table (coinbase included).
-    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
-        for (const auto& out: *(*tx)->outputs_ptr())
-            points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
-
-    // Populate input prevouts from hash table.
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-    {
-        for (const auto& in: *(*tx)->inputs_ptr())
-        {
-            // Map chain::point to cref_point for search, should optimize away.
-            const auto point = points.find({ in->point().hash(),
-                in->point().index() });
-
-            if (point != points.end())
-                in->prevout = point->second;
-        }
-    }
-}
-
-code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
+code block::populate(const chain::context& ctx) const NOEXCEPT
 {
     if (txs_->empty())
         return error::block_success;
@@ -802,19 +774,15 @@ code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
         {
             // Map chain::point to cref_point for search, should optimize away.
             const cref_point key{ in->point().hash(), in->point().index() };
-
             if (const auto it = points.find(key); it != points.end())
             {
-                const auto immature = (matures && in->point().hash() == self);
-                const auto lock = (bip68 && (*tx)->is_internally_locked(*in));
-                in->prevout = it->second;
+                if (matures && in->point().hash() == self)
+                    return error::coinbase_maturity;
 
-                // If invalid shortcircuit population and return above error.
-                if ((in->metadata.locked = (immature || lock)))
-                {
-                    return immature ? error::coinbase_maturity :
-                        error::relative_time_locked;
-                }
+                if (bip68 && (*tx)->is_internally_locked(*in))
+                    return error::relative_time_locked;
+
+                in->prevout = it->second;
             }
         }
     }

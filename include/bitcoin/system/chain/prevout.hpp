@@ -25,57 +25,28 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Defaults are set so non-population issues usually imply invalidity.
 class BC_API prevout final
 {
 public:
-    ///************************************************************************
-    /// CONSENSUS: 
-    /// A height of zero is immature (unspendable) despite unspent state.
-    ///************************************************************************
-    union
-    {
-        /// Unused for coinbase.
-        /// The confirmed height of the prevout or max_uint32.
-        size_t prevout_height{ max_uint32 };
+    /// chain/node: prevout is of a coinbase tx.
+    bool coinbase{ true };
 
-        /// node: populated with database identifier for the parent tx.
-        /// Link::terminal must derive from default of max_uint32.
-        uint32_t parent_tx;
-    };
+    /// chain: confirmed prevout mtp or max_uint32.
+    uint32_t median_time_past{ max_uint32 };
 
-    ///************************************************************************
-    /// CONSENSUS: 
-    /// A mtp of max_uint32 fails locktime maturity (until time overflow).
-    ///************************************************************************
-    union
-    {
-        /// Unused for coinbase.
-        /// The median time past at confirmed prevout block or max_uint32.
-        uint32_t median_time_past{ max_uint32 };
+    /// chain: confirmed prevout height or max_uint32.
+    size_t prevout_height{ max_uint32 };
 
-        /// node: populated with database identifier for the input/point.
-        /// Link::terminal must derive from default of max_uint32.
-        uint32_t point_link;
-    };
-
-    ///************************************************************************
-    /// CONSENSUS: 
-    /// An unspent coinbase collision is immature (unspendable) and spent
-    /// collision is mature [bip30]. CB collision presumed precluded by bip34.
-    /// This is NOT guarded by system::chain confirmation checks.
-    ///************************************************************************
-    /// The confirmed height of the spender or max_uint32.
+    /// chain: confirmed spender height or max_uint32.
     uint32_t spender_height{ max_uint32 };
 
-    /// node: set via block.populate() as internal spends do not require
-    /// prevout block association for relative locktime checks. So
-    /// median_time_past is not required as locked is determined here.
-    bool locked{ true };
+    /// node: database identifier for the parent tx.
+    /// Link::terminal must align with link defaults of max_uint32.
+    uint32_t parent_tx{ max_uint32 };
 
-    /// The previous output is of a coinbase transaction.
-    /// node: populated, does not require prevout block association.
-    bool coinbase{ true };
+    /// node: database identifier for input/point.
+    /// Link::terminal must align with link defaults of max_uint32.
+    uint32_t point_link{ max_uint32 };
 };
 
 } // namespace chain
