@@ -145,12 +145,8 @@ public:
     code confirm(const context& ctx) const NOEXCEPT;
 
     /// Populate previous outputs internal to the block.
-    void populate() const NOEXCEPT;
-
-    /// Populate previous outputs and metadata.locked internal to the block.
-    /// Execution is shortcircuited for error with that metadata.locked set.
-    /// False if any populated prevout is immature in the block context.
-    code populate_with_metadata(const context& ctx) const NOEXCEPT;
+    /// Fails if any populated prevout is internally immature or locked.
+    code populate(const context& ctx) const NOEXCEPT;
 
 protected:
     block(stream::in::fast&& stream, bool witness) NOEXCEPT;
