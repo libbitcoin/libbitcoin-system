@@ -471,6 +471,10 @@ const operations& script::ops() const NOEXCEPT
 // Consensus (witness::extract_script) and Electrum server payments key.
 hash_digest script::hash() const NOEXCEPT
 {
+    // A failed parse or default initialized script will hash to null_hash.
+    if (!is_valid())
+        return {};
+
     hash_digest hash{};
     stream::out::fast stream{ hash };
     hash::sha256::fast sink(stream);
