@@ -3529,7 +3529,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
     const wallet::payment_address address
     {
         base16_array("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
-        wallet::payment_address::testnet_p2kh
+        wallet::payment_address::mainnet_p2kh
     };
 
     BOOST_REQUIRE(neutrino::match_filter(filter, address));
@@ -3546,7 +3546,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
     const wallet::payment_address address
     {
         base16_array("001fa005900cf004b00100ba700021000b00500f"),
-        wallet::payment_address::testnet_p2kh
+        wallet::payment_address::mainnet_p2kh
     };
 
     BOOST_REQUIRE(!neutrino::match_filter(filter, address));
@@ -3560,19 +3560,19 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
         base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")
     };
 
+    constexpr auto testnet_p2kh = wallet::payment_address::testnet_p2kh;
+    constexpr auto testnet_p2sh = wallet::payment_address::testnet_p2kh;
     const wallet::payment_address::list addresses
     {
         {
-            base16_array("001fa7459a6cfc64bdc100ba700a21003b005000"),
-            wallet::payment_address::testnet_p2kh
+            base16_array("001fa7459a6cfc64bdc100ba700a21003b005000"), testnet_p2kh
         },
         {
-            base16_array("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
-            wallet::payment_address::testnet_p2kh
+            base16_array("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"), testnet_p2kh
         }
     };
 
-    BOOST_REQUIRE(neutrino::match_filter(filter, addresses));
+    BOOST_REQUIRE(neutrino::match_filter(filter, addresses, testnet_p2kh, testnet_p2sh));
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
@@ -3587,7 +3587,7 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
     {
         {
             base16_array("001fa7459a6cfc64bdc100ba700a21003b005000"),
-            wallet::payment_address::testnet_p2kh
+            wallet::payment_address::mainnet_p2kh
         }
     };
 

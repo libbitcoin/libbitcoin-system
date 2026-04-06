@@ -41,11 +41,11 @@ class BC_API payment_address
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(payment_address);
 
-    static const uint8_t mainnet_p2kh;
-    static const uint8_t mainnet_p2sh;
+    static constexpr uint8_t mainnet_p2kh = 0x00;
+    static constexpr uint8_t mainnet_p2sh = 0x05;
 
-    static const uint8_t testnet_p2kh;
-    static const uint8_t testnet_p2sh;
+    static constexpr uint8_t testnet_p2kh = 0x6f;
+    static constexpr uint8_t testnet_p2sh = 0xc4;
 
     typedef std_vector<payment_address> list;
     typedef std::shared_ptr<payment_address> ptr;
@@ -90,7 +90,12 @@ public:
     /// Properties.
     uint8_t prefix() const NOEXCEPT;
     short_hash hash() const NOEXCEPT;
-    chain::script output_script() const NOEXCEPT;
+
+    /// Script is extracted to p2pk or p2sh by matching its prefix to the
+    /// args provided here. So for testnet and other alts these are required.
+    chain::script output_script(
+        uint8_t p2kh_prefix=mainnet_p2kh,
+        uint8_t p2sh_prefix=mainnet_p2sh) const NOEXCEPT;
 
     /// Methods.
     const payment& to_payment() const NOEXCEPT;
