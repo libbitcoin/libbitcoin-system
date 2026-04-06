@@ -31,12 +31,6 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-const uint8_t payment_address::mainnet_p2kh = 0x00;
-const uint8_t payment_address::mainnet_p2sh = 0x05;
-
-const uint8_t payment_address::testnet_p2kh = 0x6f;
-const uint8_t payment_address::testnet_p2sh = 0xc4;
-
 payment_address::payment_address() NOEXCEPT
   : payment_()
 {
@@ -159,19 +153,17 @@ short_hash payment_address::hash() const NOEXCEPT
     return payment_.payload();
 }
 
-chain::script payment_address::output_script() const NOEXCEPT
+chain::script payment_address::output_script(uint8_t p2kh_prefix,
+    uint8_t p2sh_prefix) const NOEXCEPT
 {
-    switch (prefix())
-    {
-        case mainnet_p2kh:
-        case testnet_p2kh:
-            return chain::script::to_pay_key_hash_pattern(hash());
+    const auto byte = prefix();
 
-        case mainnet_p2sh:
-        case testnet_p2sh:
-            return chain::script::to_pay_script_hash_pattern(hash());
-    }
+    if (byte == p2kh_prefix)
+        return chain::script::to_pay_key_hash_pattern(hash());
 
+    if (byte == p2sh_prefix)
+        return chain::script::to_pay_script_hash_pattern(hash());
+    
     return {};
 }
 

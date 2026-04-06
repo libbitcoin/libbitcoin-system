@@ -53,11 +53,17 @@ BC_API bool match_filter(const block_filter& filter,
 BC_API bool match_filter(const block_filter& filter,
     const chain::scripts& scripts) NOEXCEPT;
 
+/// Prefix values indicate how to convert the address if not btc mainnet.
 BC_API bool match_filter(const block_filter& filter,
-    const wallet::payment_address& address) NOEXCEPT;
+    const wallet::payment_address& address,
+    uint8_t p2kh_prefix=wallet::payment_address::mainnet_p2kh,
+    uint8_t p2sh_prefix=wallet::payment_address::mainnet_p2sh) NOEXCEPT;
 
+/// Prefix values indicate how to convert the address if not btc mainnet.
 BC_API bool match_filter(const block_filter& filter,
-    const wallet::payment_address::list& addresses) NOEXCEPT;
+    const wallet::payment_address::list& addresses,
+    uint8_t p2kh_prefix=wallet::payment_address::mainnet_p2kh,
+    uint8_t p2sh_prefix=wallet::payment_address::mainnet_p2sh) NOEXCEPT;
 
 } // namespace neutrino
 } // namespace system

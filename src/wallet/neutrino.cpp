@@ -147,23 +147,24 @@ bool match_filter(const block_filter& filter,
 }
 
 bool match_filter(const block_filter& filter,
-    const wallet::payment_address& address) NOEXCEPT
+    const wallet::payment_address& address, uint8_t p2kh_prefixh,
+    uint8_t p2sh_prefix) NOEXCEPT
 {
-    return match_filter(filter, address.output_script());
+    return match_filter(filter, address.output_script(p2kh_prefixh, p2sh_prefix));
 }
 
 bool match_filter(const block_filter& filter,
-    const wallet::payment_address::list& addresses) NOEXCEPT
+    const wallet::payment_address::list& addresses, uint8_t p2kh_prefixh,
+    uint8_t p2sh_prefix) NOEXCEPT
 {
     if (addresses.empty())
         return false;
 
     chain::scripts stack(addresses.size());
-
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
-        [](const wallet::payment_address& address) NOEXCEPT
+        [=](const wallet::payment_address& address) NOEXCEPT
         {
-            return address.output_script();
+            return address.output_script(p2kh_prefixh, p2sh_prefix);
         });
 
     return match_filter(filter, stack);
