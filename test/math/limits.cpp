@@ -177,6 +177,37 @@ static_assert(minimum<uint64_t> == min_uint64);
 static_assert(minimum<uintx_t<42>> == zero);
 static_assert(is_same_type<decltype(minimum<int64_t>), const int64_t>);
 
+// is_min
+
+static_assert(is_min<int8_t >(min_int8));
+static_assert(is_min<int8_t >(min_int8));
+static_assert(is_min<int16_t>(min_int16));
+static_assert(is_min<int32_t>(min_int32));
+static_assert(is_min<int64_t>(min_int64));
+static_assert(is_min<uint8_t >(min_uint8));
+static_assert(is_min<uint16_t>(min_uint16));
+static_assert(is_min<uint32_t>(min_uint32));
+static_assert(is_min<uint64_t>(min_uint64));
+static_assert(!is_min<int8_t >(max_int8));
+static_assert(!is_min<int16_t>(max_int16));
+static_assert(!is_min<int32_t>(max_int32));
+static_assert(!is_min<int64_t>(max_int64));
+static_assert(!is_min<uint8_t >(max_uint8));
+static_assert(!is_min<uint16_t>(max_uint16));
+static_assert(!is_min<uint32_t>(max_uint32));
+static_assert(!is_min<uint64_t>(max_uint64));
+static_assert(!is_min<int8_t >(add1(min_int8)));
+static_assert(!is_min<int8_t >(add1(min_int8)));
+static_assert(!is_min<int16_t>(add1(min_int16)));
+static_assert(!is_min<int32_t>(add1(min_int32)));
+static_assert(!is_min<int64_t>(add1(min_int64)));
+static_assert(!is_min<uint8_t >(add1(min_uint8)));
+static_assert(!is_min<uint16_t>(add1(min_uint16)));
+static_assert(!is_min<uint32_t>(add1(min_uint32)));
+static_assert(!is_min<uint64_t>(add1(min_uint64)));
+static_assert(is_min<uintx_t<42>>(zero));
+static_assert(is_same_type<decltype(is_min<int64_t>(0)), bool>);
+
 // maximum<T>
 
 static_assert(maximum<int8_t > == max_int8);
@@ -189,6 +220,36 @@ static_assert(maximum<uint32_t> == max_uint32);
 static_assert(maximum<uint64_t> == max_uint64);
 static_assert(maximum<uintx_t<42>> == sub1(power2<uintx_t<42>>(42u)));
 static_assert(is_same_type<decltype(maximum<int16_t>), const int16_t>);
+
+// is_max
+
+static_assert(is_max<int8_t >(max_int8));
+static_assert(is_max<int16_t>(max_int16));
+static_assert(is_max<int32_t>(max_int32));
+static_assert(is_max<int64_t>(max_int64));
+static_assert(is_max<uint8_t >(max_uint8));
+static_assert(is_max<uint16_t>(max_uint16));
+static_assert(is_max<uint32_t>(max_uint32));
+static_assert(is_max<uint64_t>(max_uint64));
+static_assert(!is_max<int8_t >(min_int8));
+static_assert(!is_max<int8_t >(min_int8));
+static_assert(!is_max<int16_t>(min_int16));
+static_assert(!is_max<int32_t>(min_int32));
+static_assert(!is_max<int64_t>(min_int64));
+static_assert(!is_max<uint8_t >(min_uint8));
+static_assert(!is_max<uint16_t>(min_uint16));
+static_assert(!is_max<uint32_t>(min_uint32));
+static_assert(!is_max<uint64_t>(min_uint64));
+static_assert(!is_max<int8_t >(sub1(max_int8)));
+static_assert(!is_max<int16_t>(sub1(max_int16)));
+static_assert(!is_max<int32_t>(sub1(max_int32)));
+static_assert(!is_max<int64_t>(sub1(max_int64)));
+static_assert(!is_max<uint8_t >(sub1(max_uint8)));
+static_assert(!is_max<uint16_t>(sub1(max_uint16)));
+static_assert(!is_max<uint32_t>(sub1(max_uint32)));
+static_assert(!is_max<uint64_t>(sub1(max_uint64)));
+static_assert(is_max<uintx_t<42>>(sub1(power2<uintx_t<42>>(42u))));
+static_assert(is_same_type<decltype(is_max<int16_t>(0)), bool>);
 
 // absolute_min<T>
 

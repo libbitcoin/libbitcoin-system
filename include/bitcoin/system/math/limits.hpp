@@ -72,6 +72,12 @@ constexpr Integer maximum = std::numeric_limits<Integer>::max();
 template <typename Integer, if_integer<Integer> = true>
 constexpr Integer minimum = std::numeric_limits<Integer>::min();
 
+/// Is the maximum/minimum value of a integral integer?
+template <typename Integer, if_integer<Integer> = true>
+constexpr bool is_max(Integer value) NOEXCEPT;
+template <typename Integer, if_integer<Integer> = true>
+constexpr bool is_min(Integer value) NOEXCEPT;
+
 // dispatch for absolute_min/unsigned_max
 template <typename Signed, if_signed_integral_integer<Signed> = true>
 constexpr to_unsigned_type<Signed> absolute_minimum() NOEXCEPT;
