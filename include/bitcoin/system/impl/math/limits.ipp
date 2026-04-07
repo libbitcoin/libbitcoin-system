@@ -78,6 +78,18 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT
 // Integral bounds (dispatch for absolute_min/unsigned_max).
 // ----------------------------------------------------------------------------
 
+template <typename Integer, if_integer<Integer>>
+constexpr bool is_max(Integer value) NOEXCEPT
+{
+    return value == system::maximum<Integer>;
+}
+
+template <typename Integer, if_integer<Integer>>
+constexpr bool is_min(Integer value) NOEXCEPT
+{
+    return value == system::minimum<Integer>;
+}
+
 template <typename Signed, if_signed_integral_integer<Signed>>
 constexpr to_unsigned_type<Signed> absolute_minimum() NOEXCEPT
 {
