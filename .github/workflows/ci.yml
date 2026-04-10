@@ -5,819 +5,432 @@
 #
 ###############################################################################
 
-name: Continuous Integration Build
+name: Continuous Integration
 
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-  autotools:
 
+  gnu:
     strategy:
       fail-fast: false
 
       matrix:
         include:
-          - os: ubuntu-24.04
-            cxx: "clang++-18"
+          - image: macos-latest
+            config: "release"
             link: "dynamic"
-            optimization: "debug"
-            assert: "debug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-18"
-            flags: "-Og -fPIE"
-            options: "--enable-isystem --enable-avx2 --enable-sse41"
-            packager: "apt"
-            packages: ""
+            options: "--enable-isystem"
 
-          - os: ubuntu-24.04
-            cxx: "clang++-18"
+          - image: macos-latest
+            config: "release"
             link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-18"
-            flags: "-Os -fPIE"
-            options: "--enable-isystem --enable-avx2"
-            packager: "apt"
-            packages: ""
+            options: "--enable-isystem"
 
-          - os: ubuntu-24.04
-            cxx: "g++-12"
+          - image: ubuntu-24.04
+            config: "debug"
             link: "dynamic"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
             cc: "gcc-12"
-            flags: "-Os -fPIE"
-            options: "--enable-isystem --enable-sse41"
-            packager: "apt"
-            packages: ""
-
-          - os: ubuntu-24.04
-            cxx: "g++"
-            link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "cov"
-            detectcpuflags: "detect"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
             cc: "gcc"
-            flags: "-Os -g --coverage -fPIE"
-            options: "--enable-isystem"
-            packager: "apt"
-            packages: "lcov"
-
-          - os: macos-latest
-            cxx: "clang++"
-            link: "dynamic"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
+            cxx: "g++"
+            flags: "--coverage"
+            coverage: "lcov"
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang"
-            flags: "-Os -fPIE"
             options: "--enable-isystem"
-            packager: "brew"
-            packages: ""
 
-          - os: macos-latest
-            cxx: "clang++"
-            link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
-            cc: "clang"
-            flags: "-Os -fvisibility=hidden -fPIE"
-            options: "--enable-isystem"
-            packager: "brew"
-            packages: ""
-
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.image }}
 
     env:
       CC: '${{ matrix.cc }}'
       CXX: '${{ matrix.cxx }}'
       CFLAGS: '${{ matrix.flags }}'
       CXXFLAGS: '${{ matrix.flags }}'
-      CI_REPOSITORY: '${{ github.repository }}'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Prepare toolchain [generic]
+      - name: Sources directory path assignment
+        shell: bash
         run: |
-          git config --global init.defaultBranch master
+          cd ..
+          echo SRC_PATH="$(pwd)" >> $GITHUB_ENV
 
-      - name: Prepare toolchain [apt]
-        if: ${{ matrix.packager == 'apt' }}
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
 
-      - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
         run: |
-          brew install autoconf automake libtool ${{ matrix.packages }}
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
           if [[ -n "${{ matrix.llvm }}" ]]; then
-              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
           fi
 
-      - name: Determine CPU flags
+      - name: Environmental Computation
         shell: bash
         run: |
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
-              echo "CPU_SUPPORT_SSE41=--enable-sse41" >> $GITHUB_ENV
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
           fi
 
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
-              echo "CPU_SUPPORT_AVX2=--enable-avx2" >> $GITHUB_ENV
-          fi
-
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
-              echo "CPU_SUPPORT_AVX512=--enable-avx512" >> $GITHUB_ENV
-          fi
-
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
-              echo "CPU_SUPPORT_SHANI=--enable-shani" >> $GITHUB_ENV
-          fi
-
-          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
-              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
-          fi
-
-      - name: Denormalize parameterization
+      - name: Execute installation
         shell: bash
-        run: |
-          WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
-          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-            echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
-          else
-            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
-          else
-            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
-          fi
-
-      - name: Display Compiler details
-        shell: bash
-        run: |
-          ${CC} -v
-          ${CXX} -v
-
-      - name: Display CPU details
-        if: ${{ (runner.os == 'Linux') }}
-        shell: bash
-        run: |
-          lscpu
-
-      - name: Execute install.sh
         run: >
-          ./install.sh
-          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
-          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
-          ${{ env.LINKAGE }}
-          ${{ env.ASSERT_NDEBUG }}
-          ${{ env.CPU_SUPPORTED_FLAGS }}
+          ./builds/gnu/install-gnu.sh
+          --build-use-local-src
+          --build-src-dir="${{ env.SRC_PATH }}"
+          --prefix="${{ env.SRC_PATH }}/prefix"
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
+          ${{ matrix.options }}
 
-      - name: Coveralls Calculation
-        if: ${{ matrix.coverage == 'cov' }}
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
-          lcov --list coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/address/qrencode/*" --output-file coverage.info
 
-      - name: Coveralls.io Upload
-        if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@v2.3.0
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
           files: "./coverage.info"
           github-token: ${{ secrets.github_token }}
-
-      - name: Failure display available binaries
-        if: ${{ failure() }}
-        run: |
-          ls -la /usr/bin
-
-      - name: Failure display selected compiler version
-        if: ${{ failure() }}
-        run: |
-          ${CC} -v
-          ${CXX} -v
-
-      - name: Failure display default compiler version
-        if: ${{ failure() }}
-        run: |
-          clang -v
-          gcc -v
-
-      - name: Failure display env
-        if: ${{ failure() }}
-        run: |
-          env
-
-      - name: Failure list libdir
-        if: ${{ failure() }}
-        run: |
-          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
-
-      - name: Failure display boost bootstrap.log [--build-boost]
-        if: ${{ failure() && (matrix.boost == '--build-boost') }}
-        run: |
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
-
-
-      - name: Failure display otool output
-        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
-        run: |
-          otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
-      - name: Failure display DYLD_PRINT_LIBRARIES
-        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
-        run: |
-          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
-      - name: Failure display pkgconfig
-        if: ${{ failure() }}
-        run: |
-          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
-          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
 
   cmake:
-
     strategy:
       fail-fast: false
 
       matrix:
         include:
-          - os: ubuntu-24.04
-            cxx: "clang++-18"
+          - image: macos-latest
+            config: "release"
             link: "dynamic"
-            optimization: "debug"
-            assert: "debug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
-            cc: "clang-18"
-            flags: "-Og -fPIE"
-            options: "-Denable-avx2=on -Denable-sse41=on"
-            packager: "apt"
-            packages: ""
-
-          - os: ubuntu-24.04
-            cxx: "clang++-18"
-            link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
-            cc: "clang-18"
-            flags: "-Os -fPIE"
-            options: "-Denable-avx2=on"
-            packager: "apt"
-            packages: ""
-
-          - os: ubuntu-24.04
-            cxx: "g++-12"
-            link: "dynamic"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
-            cc: "gcc-12"
-            flags: "-Os -fPIE"
-            options: "-Denable-sse41=on"
-            packager: "apt"
-            packages: ""
-
-          - os: ubuntu-24.04
-            cxx: "g++-12"
-            link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
-            cc: "gcc-12"
-            flags: "-Os -fPIE"
-            options: ""
-            packager: "apt"
-            packages: ""
-
-          - os: macos-latest
-            cxx: "clang++"
-            link: "dynamic"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
             cc: "clang"
-            flags: "-Os -fPIE"
-            options: ""
-            packager: "brew"
-            packages: ""
-
-          - os: macos-latest
             cxx: "clang++"
-            link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
+            flags: "-DNDEBUG"
+            coverage: ""
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
+            options: "--verbose"
+
+          - image: macos-latest
+            config: "release"
+            link: "static"
             cc: "clang"
-            flags: "-Os -fvisibility=hidden -fPIE"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--verbose"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
             options: ""
-            packager: "brew"
-            packages: ""
 
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
 
-    runs-on: ${{ matrix.os }}
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc"
+            cxx: "g++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+    runs-on: ${{ matrix.image }}
 
     env:
       CC: '${{ matrix.cc }}'
       CXX: '${{ matrix.cxx }}'
       CFLAGS: '${{ matrix.flags }}'
       CXXFLAGS: '${{ matrix.flags }}'
-      CI_REPOSITORY: '${{ github.repository }}'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Prepare toolchain [generic]
+      - name: Sources directory path assignment
+        shell: bash
         run: |
-          git config --global init.defaultBranch master
+          cd ..
+          echo SRC_PATH="$(pwd)" >> $GITHUB_ENV
 
-      - name: Prepare toolchain [apt]
-        if: ${{ matrix.packager == 'apt' }}
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
 
-      - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
         run: |
-          brew install autoconf automake libtool ${{ matrix.packages }}
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
           if [[ -n "${{ matrix.llvm }}" ]]; then
-              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
           fi
 
-      - name: Determine CPU flags
+      - name: Environmental Computation
         shell: bash
         run: |
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
-              echo "CPU_SUPPORT_SSE41=-Denable-sse41=on" >> $GITHUB_ENV
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
           fi
 
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
-              echo "CPU_SUPPORT_AVX2=-Denable-avx2=on" >> $GITHUB_ENV
-          fi
-
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
-              echo "CPU_SUPPORT_AVX512=-Denable-avx512=on" >> $GITHUB_ENV
-          fi
-
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
-              echo "CPU_SUPPORT_SHANI=-Denable-shani=on" >> $GITHUB_ENV
-          fi
-
-          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
-              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
-          fi
-
-      - name: Denormalize parameterization
+      - name: Execute installation
         shell: bash
-        run: |
-          WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
-          if [[ ${{ matrix.packager }} == 'brew' ]]; then
-            echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-            echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
-          else
-            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
-          else
-            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
-          fi
-
-      - name: Display Compiler details
-        shell: bash
-        run: |
-          ${CC} -v
-          ${CXX} -v
-
-      - name: Display CPU details
-        if: ${{ (runner.os == 'Linux') }}
-        shell: bash
-        run: |
-          lscpu
-
-      - name: Execute install-cmake.sh
         run: >
-          ./install-cmake.sh
-          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
-          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
-          ${{ env.LINKAGE }}
-          ${{ env.ASSERT_NDEBUG }}
-          ${{ env.CPU_SUPPORTED_FLAGS }}
+          ./builds/cmake/install-cmake.sh
+          --build-use-local-src
+          --build-src-dir="${{ env.SRC_PATH }}"
+          --prefix="${{ env.SRC_PATH }}/prefix"
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
+          ${{ matrix.options }}
 
-      - name: Coveralls Calculation
-        if: ${{ matrix.coverage == 'cov' }}
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
-          lcov --list coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/address/qrencode/*" --output-file coverage.info
 
-      - name: Coveralls.io Upload
-        if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@v2.3.0
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
           files: "./coverage.info"
           github-token: ${{ secrets.github_token }}
 
-      - name: Failure display available binaries
-        if: ${{ failure() }}
-        run: |
-          ls -la /usr/bin
-
-      - name: Failure display selected compiler version
-        if: ${{ failure() }}
-        run: |
-          ${CC} -v
-          ${CXX} -v
-
-      - name: Failure display default compiler version
-        if: ${{ failure() }}
-        run: |
-          clang -v
-          gcc -v
-
-      - name: Failure display env
-        if: ${{ failure() }}
-        run: |
-          env
-
-      - name: Failure list libdir
-        if: ${{ failure() }}
-        run: |
-          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
-
-      - name: Failure display boost bootstrap.log [--build-boost]
-        if: ${{ failure() && (matrix.boost == '--build-boost') }}
-        run: |
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
-
-
-      - name: Failure display otool output
-        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
-        run: |
-          otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
-      - name: Failure display DYLD_PRINT_LIBRARIES
-        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
-        run: |
-          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
-      - name: Failure display pkgconfig
-        if: ${{ failure() }}
-        run: |
-          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
-          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
-
-      - name: Failure display cmake specific libraries
-        if: ${{ failure() }}
-        run: |
-          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/cmake
-
-      - name: Failure display cmake LastTest.log
-        if: ${{ failure() }}
-        run: |
-          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
-
-  preset:
-
+  presets:
     strategy:
       fail-fast: false
 
       matrix:
         include:
-          - os: ubuntu-24.04
+          - image: ubuntu-24.04
             preset: "nix-gnu-debug-shared"
-            cxx: "clang++-18"
-            link: "dynamic"
-            optimization: "debug"
-            assert: "debug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
             cc: "clang-18"
-            flags: "-Og -fPIE"
-            options: "-Denable-avx2=on -Denable-sse41=on"
-            packager: "apt"
-            packages: ""
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
 
-          - os: ubuntu-24.04
+          - image: ubuntu-24.04
             preset: "nix-gnu-release-static"
-            cxx: "clang++-18"
-            link: "static"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
-            boost: "--build-boost"
-            llvm: ""
-            secp256k1: "--build-secp256k1"
             cc: "clang-18"
-            flags: "-Os -fPIE"
-            options: "-Denable-avx2=on"
-            packager: "apt"
-            packages: ""
-
-          - os: ubuntu-24.04
-            preset: "nix-gnu-release-shared"
-            cxx: "g++-12"
-            link: "dynamic"
-            optimization: "size"
-            assert: "ndebug"
-            coverage: "nocov"
-            detectcpuflags: "ignore"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
             boost: "--build-boost"
-            llvm: ""
             secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
             cc: "gcc-12"
-            flags: "-Os -fPIE"
-            options: "-Denable-sse41=on"
-            packager: "apt"
-            packages: ""
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
 
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.image }}
 
     env:
       CC: '${{ matrix.cc }}'
       CXX: '${{ matrix.cxx }}'
       CFLAGS: '${{ matrix.flags }}'
       CXXFLAGS: '${{ matrix.flags }}'
-      CI_REPOSITORY: '${{ github.repository }}'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Prepare toolchain [generic]
+      - name: Sources directory path assignment
+        shell: bash
         run: |
-          git config --global init.defaultBranch master
+          cd ..
+          echo SRC_PATH="$(pwd)" >> $GITHUB_ENV
 
-      - name: Prepare toolchain [apt]
-        if: ${{ matrix.packager == 'apt' }}
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
 
-      - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
         run: |
-          brew install autoconf automake libtool ${{ matrix.packages }}
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
           if [[ -n "${{ matrix.llvm }}" ]]; then
-              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
           fi
 
-      - name: Determine CPU flags
+      - name: Environmental Computation
         shell: bash
         run: |
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
-              echo "CPU_SUPPORT_SSE41=-Denable-sse41=on" >> $GITHUB_ENV
+          if [[ "${{ matrix.preset }}" == *shared* ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
           fi
 
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
-              echo "CPU_SUPPORT_AVX2=-Denable-avx2=on" >> $GITHUB_ENV
-          fi
-
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
-              echo "CPU_SUPPORT_AVX512=-Denable-avx512=on" >> $GITHUB_ENV
-          fi
-
-          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
-              echo "CPU_SUPPORT_SHANI=-Denable-shani=on" >> $GITHUB_ENV
-          fi
-
-          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
-              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
-          fi
-
-      - name: Denormalize parameterization
+      - name: Execute installation
         shell: bash
-        run: |
-          WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
-          if [[ ${{ matrix.packager }} == 'brew' ]]; then
-            echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-            echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
-          else
-            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
-          else
-            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
-          fi
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
-          fi
-
-      - name: Display Compiler details
-        shell: bash
-        run: |
-          ${CC} -v
-          ${CXX} -v
-
-      - name: Display CPU details
-        if: ${{ (runner.os == 'Linux') }}
-        shell: bash
-        run: |
-          lscpu
-
-      - name: Execute install-cmakepresets.sh
         run: >
-          ./install-cmakepresets.sh
-          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
-          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix/${{ matrix.preset }}
-          --preset=${{ matrix.preset }}
-          ${{ env.LINKAGE }}
-          ${{ env.ASSERT_NDEBUG }}
-          ${{ env.CPU_SUPPORTED_FLAGS }}
+          ./builds/cmake/install-presets.sh
+          --build-use-local-src
+          --build-src-dir="${{ env.SRC_PATH }}"
+          --build-preset="${{ matrix.preset }}"
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
+          ${{ matrix.options }}
 
-      - name: Coveralls Calculation
-        if: ${{ matrix.coverage == 'cov' }}
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
-          lcov --list coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/address/qrencode/*" --output-file coverage.info
 
-      - name: Coveralls.io Upload
-        if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@v2.3.0
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
           files: "./coverage.info"
           github-token: ${{ secrets.github_token }}
 
-      - name: Failure display available binaries
-        if: ${{ failure() }}
-        run: |
-          ls -la /usr/bin
-
-      - name: Failure display selected compiler version
-        if: ${{ failure() }}
-        run: |
-          ${CC} -v
-          ${CXX} -v
-
-      - name: Failure display default compiler version
-        if: ${{ failure() }}
-        run: |
-          clang -v
-          gcc -v
-
-      - name: Failure display env
-        if: ${{ failure() }}
-        run: |
-          env
-
-      - name: Failure list libdir
-        if: ${{ failure() }}
-        run: |
-          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
-
-      - name: Failure display boost bootstrap.log [--build-boost]
-        if: ${{ failure() && (matrix.boost == '--build-boost') }}
-        run: |
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
-
-
-      - name: Failure display otool output
-        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
-        run: |
-          otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
-      - name: Failure display DYLD_PRINT_LIBRARIES
-        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
-        run: |
-          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
-      - name: Failure display pkgconfig
-        if: ${{ failure() }}
-        run: |
-          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
-          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
-
-      - name: Failure display cmake specific libraries
-        if: ${{ failure() }}
-        run: |
-          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/cmake
-
-      - name: Failure display cmake LastTest.log
-        if: ${{ failure() }}
-        run: |
-          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
-
-  msbuild:
+  msvc:
     strategy:
       fail-fast: false
 
       matrix:
         include:
-          - os: windows-latest
-            configuration: "StaticRelease"
-            platform: "Win32"
-            version: "vs2022"
-            tests: "*"
-
-          - os: windows-latest
-            configuration: "StaticDebug"
-            platform: "Win32"
-            version: "vs2022"
-            tests: "*"
-
-          - os: windows-latest
+          - image: windows-latest
             configuration: "StaticRelease"
             platform: "x64"
             version: "vs2022"
             tests: "*"
 
-          - os: windows-latest
+          - image: windows-latest
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2022"
             tests: "*"
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.image }}
 
     steps:
-      - name: Add msbuild to PATH
+      - name: Set msbuild path
         uses: microsoft/setup-msbuild@v3
         with:
           msbuild-architecture: x64
@@ -825,30 +438,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Initialize SDK
-        shell: powershell
-        run: |
-          try {
-            Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
-
-            $FeatureList = "OptionId.WindowsDesktopSoftwareDevelopmentKit OptionId.NetFxSoftwareDevelopmentKit"
-            $Args = "/q /norestart /features $FeatureList"
-            $setup = Start-Process -PassThru -FilePath "sdksetup.exe" -ArgumentList $Args
-
-            $setup.WaitForExit()
-            if ($setup.ExitCode -ne 0) {
-              Write-Host "Test execution failure: " $setup.ExitCode -ForegroundColor Red;
-              exit $setup.ExitCode;
-            }
-          }
-          catch {
-            $ERR = $_;
-            Write-Host "Initialization failure: " $ERR -ForegroundColor Red;
-            exit $ERR;
-          }
-
       - name: Execute build
-        run: .\build.cmd .. ${{ matrix.platform }} ${{ matrix.configuration }} x64 ${{ matrix.version }}
+        shell: cmd
+        run: >
+          .\builds\msvc\build-msvc.cmd
+          --build-src-dir "%RUNNER_WORKSPACE%"
+          --build-config ${{ matrix.configuration }}
+          --build-platform ${{ matrix.platform }}
+          --build-version ${{ matrix.version }}
+          --build-use-local-src
 
       - name: Execute tests
         shell: powershell

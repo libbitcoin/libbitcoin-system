@@ -11,12 +11,16 @@
                 "type": "inList",
                 "string": "${hostSystemName}",
                 "list": [
-                  "Darwin",
-                  "Linux"
+                    "Darwin",
+                    "Linux"
                 ]
             },
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": {
+                  "type": "PATH",
+                  "value": "${sourceParentDir}/../../../prefix/${presetName}"
+                },
+                "CMAKE_INSTALL_PREFIX_PATH": {
                   "type": "PATH",
                   "value": "${sourceParentDir}/../../../prefix/${presetName}"
                 },
@@ -31,12 +35,9 @@
             "description": "Factored debug settings.",
             "hidden": true,
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g --coverage",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage",
-                "enable-ndebug": {
-                  "type": "BOOL",
-                  "value": "OFF"
-                }
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage"
             }
         },
         {
@@ -44,12 +45,9 @@
             "description": "Factored release settings.",
             "hidden": true,
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3",
-                "enable-ndebug": {
-                  "type": "BOOL",
-                  "value": "ON"
-                }
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3"
             }
         },
         {
@@ -124,9 +122,9 @@
             "name": "nix-target-list",
             "hidden": true,
             "targets": [
-                "bitcoin-system",
-                "libbitcoin-system-examples",
-                "libbitcoin-system-test"
+                "libbitcoin-system",
+                "libbitcoin-system-test",
+                "examples"
             ]
         },
         {
