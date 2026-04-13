@@ -77,7 +77,7 @@ jobs:
             link: "static"
             cc: "gcc"
             cxx: "g++"
-            flags: "--coverage"
+            flags: "--coverage -fprofile-update=atomic"
             coverage: "lcov"
             boost: "--build-boost"
             secp256k1: "--build-secp256k1"
