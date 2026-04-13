@@ -26,7 +26,7 @@ option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel SHA Extensions." OFF )
-option( with-test "Build test." ON )
+option( with-tests "Build tests." ON )
 option( with-examples "Build examples." ON )
 
 #------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ set_target_properties( libbitcoin-system
 #------------------------------------------------------------------------------
 # libbitcoin-system-test tests
 #------------------------------------------------------------------------------
-if ( with-test )
+if ( with-tests )
   add_executable( libbitcoin-system-test )
 
   enable_testing()
