@@ -30,10 +30,10 @@ if "!NUGET_EXE!" == "" (
 )
 
 if "!libbitcoin_system_OWNER!" == "" (
-    set "libbitcoin_system_OWNER=pmienk"
+    set "libbitcoin_system_OWNER=libbitcoin"
 )
 if "!libbitcoin_system_TAG!" == "" (
-    set "libbitcoin_system_TAG=installer-rewrite"
+    set "libbitcoin_system_TAG=master"
 )
 
 :main
