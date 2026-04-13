@@ -135,6 +135,12 @@ if "!libbitcoin_system_TAG!" == "" (
     if %ERRORLEVEL% neq 0 (
         exit /b %ERRORLEVEL%
     )
+
+    call :msg_success "Build process completed successfully."
+    if not defined CI (
+        pause
+    )
+
     exit /b 0
 
 :parse_input

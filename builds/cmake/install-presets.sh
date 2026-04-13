@@ -943,34 +943,34 @@ COLOR_RESET='\e[0m'
 
 msg_heading()
 {
-    printf "\n********************** %s **********************\n" "$@"
+    printf "\n********************** %b **********************\n" "$@"
 }
 
 msg_verbose()
 {
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
-        printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "$@"
+        printf "${COLOR_CYAN}%b${COLOR_RESET}\n" "$@"
     fi
 }
 
 msg()
 {
-    printf "%s\n" "$@"
+    printf "%b\n" "$@"
 }
 
 msg_success()
 {
-    printf "${COLOR_GREEN}%s${COLOR_RESET}\n" "$@"
+    printf "${COLOR_GREEN}%b${COLOR_RESET}\n" "$@"
 }
 
 msg_warn()
 {
-    printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "$@"
+    printf "${COLOR_YELLOW}%b${COLOR_RESET}\n" "$@"
 }
 
 msg_error()
 {
-    >&2 printf "${COLOR_RED}%s${COLOR_RESET}\n" "$@"
+    >&2 printf "${COLOR_RED}%b${COLOR_RESET}\n" "$@"
 }
 
 main "$@"
