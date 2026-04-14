@@ -186,6 +186,9 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         }
         else
         {
+            // Transaction is read as non-segregated (witnesses skipped).
+            segregated_ = false;
+
             // Default witness is populated on input construct.
             for (size_t in{}; in < inputs_->size(); ++in)
                 witness::skip(source, true);
@@ -558,6 +561,7 @@ bool transaction::segregated(const input_cptrs& inputs) NOEXCEPT
 
 bool transaction::is_segregated() const NOEXCEPT
 {
+    // Cache, implies no non-empty witness.
     return segregated_;
 }
 
