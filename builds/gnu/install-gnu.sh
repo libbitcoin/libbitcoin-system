@@ -162,7 +162,7 @@ main()
     if [[ -z "${BUILD_LINK}" ]]; then
         msg_verbose "No build-link specified."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
-        msg_error "Provided build-link ${BUILD_LINK}' not a valid value."
+        msg_error "Provided build-link '${BUILD_LINK}' not a valid value."
         help
         exit 1
     fi
@@ -273,7 +273,7 @@ main()
             export CFLAGS="${BUILD_FLAGS}"
             msg_verbose "Exporting CFLAGS '${CFLAGS}'"
         else
-            msg_verbose "CFLAGS intitally '${CFLAGS}'"
+            msg_verbose "CFLAGS initially '${CFLAGS}'"
             SANITIZED_CFLAGS=$(strip_optimization "$CFLAGS")
             export CFLAGS="${SANITIZED_CFLAGS} ${BUILD_FLAGS}"
             msg_verbose "CFLAGS modified to '${CFLAGS}'"
@@ -283,7 +283,7 @@ main()
             export CXXFLAGS="${BUILD_FLAGS}"
             msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         else
-            msg_verbose "CXXFLAGS intitally '${CXXFLAGS}'"
+            msg_verbose "CXXFLAGS initially '${CXXFLAGS}'"
             SANITIZED_CXXFLAGS=$(strip_optimization "$CXXFLAGS")
             export CXXFLAGS="${SANITIZED_CXXFLAGS} ${BUILD_FLAGS}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
@@ -425,7 +425,7 @@ source_archive()
     fi
 
     if [ -d "${PROJECT}" ]; then
-        msg_warn "Encounted existing '${PROJECT}' directory, removing..."
+        msg_warn "Encountered existing '${PROJECT}' directory, removing..."
         remove_directory_force "${PROJECT}"
     fi
 
@@ -480,7 +480,7 @@ source_github()
     fi
 
     if [ -d "${REPOSITORY}" ]; then
-        msg_warn "Encounted existing '${REPOSITORY}' directory, removing..."
+        msg_warn "Encountered existing '${REPOSITORY}' directory, removing..."
         remove_directory_force "${REPOSITORY}"
     fi
 
@@ -516,7 +516,7 @@ install_make()
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
 
-    msg_success "'${PROJECT}' installation compelete."
+    msg_success "'${PROJECT}' installation complete."
 }
 
 test_make()
@@ -560,7 +560,7 @@ test_make()
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
 
-    msg_success "'${PROJECT}' test compelete."
+    msg_success "'${PROJECT}' test complete."
 }
 
 build_boost()
@@ -616,7 +616,7 @@ build_boost()
     msg "-sNO_BZIP2            : 1"
     msg "-sNO_ZSTD             : 1"
     msg "-j                    : ${PARALLEL}"
-    msg "-d0                   : [supress informational messages]"
+    msg "-d0                   : [suppress informational messages]"
     msg "-q                    : [stop at the first error]"
     msg "--reconfigure         : [ignore cached configuration]"
     msg "--prefix              : ${PREFIX}"
