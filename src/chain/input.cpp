@@ -313,19 +313,25 @@ size_t input::witnessed_size() const NOEXCEPT
     return size_.witnessed;
 }
 
-////void input::set_witness(reader& source) NOEXCEPT
+////bool input::set_witness(reader& source) NOEXCEPT
 ////{
 ////    witness_ = to_shared<chain::witness>(source, true);
 ////    size_.witnessed = ceilinged_add(size_.nominal,
 ////        witness_->serialized_size(true));
+////
+////    // Valid implies non-empty.
+////    return witness_->is_valid();
 ////}
 
-void input::set_witness(reader& source) NOEXCEPT
+bool input::set_witness(reader& source) NOEXCEPT
 {
     auto& allocator = source.get_allocator();
     witness_.reset(CREATE(chain::witness, allocator, source, true));
     size_.witnessed = ceilinged_add(size_.nominal,
         witness_->serialized_size(true));
+
+    // Valid implies non-empty.
+    return witness_->is_valid();
 }
 
 // Properties.

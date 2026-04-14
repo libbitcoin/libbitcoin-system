@@ -137,7 +137,7 @@ private:
     friend class transaction;
     size_t nominal_size() const NOEXCEPT;
     size_t witnessed_size() const NOEXCEPT;
-    void set_witness(reader& source) NOEXCEPT;
+    bool set_witness(reader& source) NOEXCEPT;
 
     const chain::witness& get_witness() const NOEXCEPT;
     const chain::witness::cptr& get_witness_cptr() const NOEXCEPT;
