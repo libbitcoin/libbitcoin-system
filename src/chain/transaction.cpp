@@ -181,8 +181,15 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         // Read or skip witnesses as specified.
         if (witness)
         {
+            auto superfluous{ true };
             for (auto& input: *inputs_)
-                to_non_const_raw_ptr(input)->set_witness(source);
+                if (to_non_const_raw_ptr(input)->set_witness(source))
+                    superfluous = false;
+
+            // Transaction is non-segregated if all witnesses are empty.
+            // Validatable, but treat superfluous as invalid serialization.
+            if (superfluous)
+                source.invalidate();
         }
         else
         {
