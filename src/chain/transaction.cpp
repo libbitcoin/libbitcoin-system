@@ -181,11 +181,21 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         // Read or skip witnesses as specified.
         if (witness)
         {
+            auto superfluous{ true };
             for (auto& input: *inputs_)
-                to_non_const_raw_ptr(input)->set_witness(source);
+                if (to_non_const_raw_ptr(input)->set_witness(source))
+                    superfluous = false;
+
+            // Transaction is non-segregated if all witnesses are empty.
+            // Validatable, but treat superfluous as invalid serialization.
+            if (superfluous)
+                source.invalidate();
         }
         else
         {
+            // Transaction is read as non-segregated (witnesses skipped).
+            segregated_ = false;
+
             // Default witness is populated on input construct.
             for (size_t in{}; in < inputs_->size(); ++in)
                 witness::skip(source, true);
@@ -558,6 +568,7 @@ bool transaction::segregated(const input_cptrs& inputs) NOEXCEPT
 
 bool transaction::is_segregated() const NOEXCEPT
 {
+    // Cache, implies no non-empty witness.
     return segregated_;
 }
 
