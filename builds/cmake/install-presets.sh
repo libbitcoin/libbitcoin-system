@@ -46,7 +46,7 @@ if [[ -z ${secp256k1_TAG} ]]; then
 fi
 
 if [[ -z ${libbitcoin_system_OWNER} ]]; then
-    libbitcoin_system_OWNER="pmienk"
+    libbitcoin_system_OWNER="libbitcoin"
 fi
 if [[ -z ${libbitcoin_system_TAG} ]]; then
     libbitcoin_system_TAG="master"
