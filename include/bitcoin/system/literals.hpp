@@ -137,7 +137,7 @@ consteval auto operator "" _t() noexcept
 /// suffix, and there would be no reason to do so.
 
 #define DECLARE_INTEGER_LITERAL(name, sign, type) \
-consteval type operator "" name(integer_type value) noexcept \
+consteval type operator ""##name(integer_type value) noexcept \
 { return sign<type>(value); }
 
 /// Literals suppress exception, causing runtime abort if !defined(consteval).
