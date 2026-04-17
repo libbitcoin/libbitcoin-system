@@ -124,7 +124,7 @@
             "targets": [
                 "libbitcoin-system",
                 "libbitcoin-system-test",
-                "examples"
+                "libbitcoin-system-examples"
             ]
         },
         {

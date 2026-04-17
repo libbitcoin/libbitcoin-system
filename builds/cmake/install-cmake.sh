@@ -77,6 +77,7 @@ main()
             (--build-full-repositories) BUILD_FULL_REPOSITORIES="yes";;
             (--build-use-local-src)     BUILD_USE_LOCAL_SRC="yes";;
             (--build-parallel=*)        PARALLEL="${OPTION#*=}";;
+            (--build-skip-tests)        BUILD_SKIP_TESTS="yes";;
             (--prefix=*)                PREFIX="${OPTION#*=}";;
             (--verbose)                 DISPLAY_VERBOSE="yes";;
             (--help|-h)                 DISPLAY_HELP="yes";;
@@ -295,8 +296,7 @@ main()
             msg_verbose "Exporting CFLAGS '${CFLAGS}'"
         else
             msg_verbose "CFLAGS initially '${CFLAGS}'"
-            SANITIZED_CFLAGS=$(strip_optimization "$CFLAGS")
-            export CFLAGS="${SANITIZED_CFLAGS} ${BUILD_FLAGS}"
+            export CFLAGS="${CFLAGS} ${BUILD_FLAGS}"
             msg_verbose "CFLAGS modified to '${CFLAGS}'"
         fi
 
@@ -305,8 +305,7 @@ main()
             msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         else
             msg_verbose "CXXFLAGS initially '${CXXFLAGS}'"
-            SANITIZED_CXXFLAGS=$(strip_optimization "$CXXFLAGS")
-            export CXXFLAGS="${SANITIZED_CXXFLAGS} ${BUILD_FLAGS}"
+            export CXXFLAGS="${CXXFLAGS} ${BUILD_FLAGS}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
@@ -415,7 +414,9 @@ main()
     local SAVE_CPPFLAGS="${CPPFLAGS}"
     export CPPFLAGS="${CPPFLAGS} ${libbitcoin_system_FLAGS[@]}"
     build_cmake "libbitcoin-system" "builds/cmake" "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
-    test_make "libbitcoin-system" "test" "${PARALLEL}"
+    if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+        test_make "libbitcoin-system" "test" "${PARALLEL}"
+    fi
     install_make "libbitcoin-system"
     export CPPFLAGS="${SAVE_CPPFLAGS}"
 
@@ -727,6 +728,7 @@ display_build_variables()
     msg "BUILD_LINK                      : ${BUILD_LINK}"
     msg "BUILD_FULL_REPOSITORIES         : ${BUILD_FULL_REPOSITORIES}"
     msg "BUILD_USE_LOCAL_SRC             : ${BUILD_USE_LOCAL_SRC}"
+    msg "BUILD_SKIP_TESTS                : ${BUILD_SKIP_TESTS}"
     msg "PARALLEL                        : ${PARALLEL}"
     msg "PREFIX                          : ${PREFIX}"
     msg "DISPLAY_VERBOSE                 : ${DISPLAY_VERBOSE}"
@@ -815,16 +817,6 @@ enable_exit_on_error()
 disable_exit_on_error()
 {
     eval "${OPTS_DISABLE}"
-}
-
-strip_optimization()
-{
-    echo "$1" | sed -E '
-        s/-O([0-3]|s|fast|g|z|size|speed)?b?/ /g
-        s/-g([0-3]|gdb|dwarf[0-9]*)?b?/ /g
-        s/[[:space:]]+/ /g
-        s/^ | $//g
-    '
 }
 
 create_directory()

@@ -25,7 +25,7 @@ endif()
 option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
-option( enable-shani "Use Intel SHA Extensions." OFF )
+option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
 option( with-tests "Build tests." ON )
 option( with-examples "Build examples." ON )
 
@@ -338,17 +338,17 @@ if ( with-tests )
 endif()
 
 #------------------------------------------------------------------------------
-# examples executable
+# libbitcoin-system-examples executable
 #------------------------------------------------------------------------------
 if ( with-examples )
-  add_executable( examples )
+  add_executable( libbitcoin-system-examples )
 
-  target_compile_features( examples
+  target_compile_features( libbitcoin-system-examples
     PUBLIC
       cxx_std_20
   )
 
-  target_compile_options( examples
+  target_compile_options( libbitcoin-system-examples
     PRIVATE
       -Wall
       -Wextra
@@ -364,22 +364,22 @@ if ( with-examples )
       -fstack-protector-all
   )
 
-  file( GLOB_RECURSE examples_SOURCES CONFIGURE_DEPENDS
+  file( GLOB_RECURSE libbitcoin_system_examples_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/*.cpp"
   )
 
-  target_sources( examples
+  target_sources( libbitcoin-system-examples
     PRIVATE
-      ${examples_SOURCES}
+      ${libbitcoin_system_examples_SOURCES}
   )
 
-  target_link_libraries( examples
+  target_link_libraries( libbitcoin-system-examples
     PRIVATE
       bitcoin::system
   )
 
-  set_target_properties( examples
+  set_target_properties( libbitcoin-system-examples
     PROPERTIES
       VERSION ${PROJECT_VERSION}
       SOVERSION ${PROJECT_VERSION_MAJOR}
