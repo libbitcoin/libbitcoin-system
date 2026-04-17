@@ -153,6 +153,7 @@ jobs:
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
         shell: bash
+        working-directory: 'libbitcoin-system'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
@@ -162,7 +163,7 @@ jobs:
         uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
-          files: "./coverage.info"
+          files: "libbitcoin-system/coverage.info"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
@@ -325,6 +326,7 @@ jobs:
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
         shell: bash
+        working-directory: 'libbitcoin-system'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
@@ -334,7 +336,7 @@ jobs:
         uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
-          files: "./coverage.info"
+          files: "libbitcoin-system/coverage.info"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
@@ -457,6 +459,7 @@ jobs:
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
         shell: bash
+        working-directory: 'libbitcoin-system'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
@@ -466,7 +469,7 @@ jobs:
         uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
-          files: "./coverage.info"
+          files: "libbitcoin-system/coverage.info"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
