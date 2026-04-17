@@ -92,14 +92,21 @@ jobs:
       CXXFLAGS: '${{ matrix.flags }}'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Sources directory path assignment
-        shell: bash
+      - name: Get branch name
+        id: get-branch
         run: |
-          cd ..
-          echo SRC_PATH="$(pwd)" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -124,16 +131,17 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.link }}" == "dynamic" ]]; then
-              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Execute installation
         shell: bash
+        working-directory: 'libbitcoin-system'
         run: >
           ./builds/gnu/install-gnu.sh
           --build-use-local-src
-          --build-src-dir="${{ env.SRC_PATH }}"
-          --prefix="${{ env.SRC_PATH }}/prefix"
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -147,7 +155,7 @@ jobs:
         shell: bash
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/address/qrencode/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -156,6 +164,24 @@ jobs:
           format: lcov
           files: "./coverage.info"
           github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.log"
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*test.log
+          retention-days: 1
+          if-no-files-found: warn
 
   cmake:
     strategy:
@@ -238,14 +264,21 @@ jobs:
       CXXFLAGS: '${{ matrix.flags }}'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Sources directory path assignment
-        shell: bash
+      - name: Get branch name
+        id: get-branch
         run: |
-          cd ..
-          echo SRC_PATH="$(pwd)" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -270,16 +303,17 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.link }}" == "dynamic" ]]; then
-              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Execute installation
         shell: bash
+        working-directory: 'libbitcoin-system'
         run: >
           ./builds/cmake/install-cmake.sh
           --build-use-local-src
-          --build-src-dir="${{ env.SRC_PATH }}"
-          --prefix="${{ env.SRC_PATH }}/prefix"
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -293,7 +327,7 @@ jobs:
         shell: bash
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/address/qrencode/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -302,6 +336,24 @@ jobs:
           format: lcov
           files: "./coverage.info"
           github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.log"
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*test.log
+          retention-days: 1
+          if-no-files-found: warn
 
   presets:
     strategy:
@@ -348,14 +400,21 @@ jobs:
       CXXFLAGS: '${{ matrix.flags }}'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Sources directory path assignment
-        shell: bash
+      - name: Get branch name
+        id: get-branch
         run: |
-          cd ..
-          echo SRC_PATH="$(pwd)" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -380,15 +439,16 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.preset }}" == *shared* ]]; then
-              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Execute installation
         shell: bash
+        working-directory: 'libbitcoin-system'
         run: >
           ./builds/cmake/install-presets.sh
           --build-use-local-src
-          --build-src-dir="${{ env.SRC_PATH }}"
+          --build-src-dir="${{ github.workspace }}"
           --build-preset="${{ matrix.preset }}"
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
@@ -399,7 +459,7 @@ jobs:
         shell: bash
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/address/qrencode/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -408,6 +468,24 @@ jobs:
           format: lcov
           files: "./coverage.info"
           github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.log"
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*test.log
+          retention-days: 1
+          if-no-files-found: warn
 
   msvc:
     strategy:
@@ -430,19 +508,34 @@ jobs:
     runs-on: ${{ matrix.image }}
 
     steps:
+      - name: Get branch name
+        id: get-branch
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set msbuild path
         uses: microsoft/setup-msbuild@v3
         with:
           msbuild-architecture: x64
 
-      - name: Checkout repository
+      - name: Checkout repository [libbitcoin-system]
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
 
       - name: Execute build
         shell: cmd
+        working-directory: 'libbitcoin-system'
         run: >
           .\builds\msvc\build-msvc.cmd
-          --build-src-dir "%RUNNER_WORKSPACE%"
+          --build-src-dir "${{ github.workspace }}"
           --build-config ${{ matrix.configuration }}
           --build-platform ${{ matrix.platform }}
           --build-version ${{ matrix.version }}
@@ -450,9 +543,10 @@ jobs:
 
       - name: Execute tests
         shell: powershell
+        working-directory: 'libbitcoin-system'
         run: |
           Write-Host "Locating test executables..." -ForegroundColor Yellow;
-          $BC_TEST_EXES = @(Get-ChildItem -Path "$env:${{ github.workspace }}\bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
+          $BC_TEST_EXES = @(Get-ChildItem -Path "bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
           If ($BC_TEST_EXES.Count -ne 1) {
             Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
             exit 1;
