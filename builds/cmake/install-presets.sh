@@ -586,14 +586,17 @@ test_make()
 
     # Test runners emit to the test.log file.
     if [[ -e "test.log" ]]; then
+        msg_warn "test.log - begin"
         cat "test.log"
+        msg_warn "test.log - end"
+    fi
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
     fi
 
     enable_exit_on_error
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        exit ${RESULT}
-    fi
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
