@@ -210,19 +210,22 @@ inline Left difference(const Left& left, const Right& right) NOEXCEPT
     return difference<Left>(std::begin(left), std::end(left), right);
 }
 
+// ****************************************************************************
+// Consensus: used in subscript, order must be preserved (verified in test).
+// ****************************************************************************
 template <typename Left, typename Right>
 inline Left difference(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) NOEXCEPT
 {
     Left copy{};
     copy.reserve(std::distance(begin, end));
-    
+
     // Linear copy since creating a copy, more efficient than multiple erases.
+    // Not efficient for large sets: O(n^2) due to nested contains().
     for (auto min = begin; min != end; ++min)
         if (!contains(right, *min))
             copy.push_back(*min);
     
-    ////copy.shrink_to_fit();
     return copy;
 }
 
