@@ -41,7 +41,8 @@ class bit_writer
     public virtual bitwriter
 {
 public:
-    DEFAULT_COPY_MOVE(bit_writer);
+    DELETE_COPY(bit_writer);
+    DEFAULT_MOVE(bit_writer);
     using base = byte_writer<OStream>;
 
     /// Constructors.

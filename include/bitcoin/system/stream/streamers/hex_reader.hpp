@@ -32,7 +32,9 @@ class hex_reader
   : public virtual byte_reader<IStream>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(hex_reader);
+    DELETE_COPY(hex_reader);
+    DEFAULT_MOVE(hex_reader);
+    virtual ~hex_reader() = default;
     using base = byte_reader<IStream>;
 
     /// Constructors.

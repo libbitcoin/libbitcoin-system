@@ -49,7 +49,8 @@ class bit_flipper
     public virtual bitflipper
 {
 public:
-    DEFAULT_COPY_MOVE(bit_flipper);
+    DELETE_COPY(bit_flipper);
+    DEFAULT_MOVE(bit_flipper);
     using ibase = bit_reader<IOStream>;
     using obase = bit_writer<IOStream>;
 

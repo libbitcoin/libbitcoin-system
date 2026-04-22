@@ -32,7 +32,9 @@ class hex_writer
   : public byte_writer<OStream>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(hex_writer);
+    DELETE_COPY(hex_writer);
+    DEFAULT_MOVE(hex_writer);
+    virtual ~hex_writer() = default;
     using base = byte_writer<OStream>;
 
     /// Constructors.

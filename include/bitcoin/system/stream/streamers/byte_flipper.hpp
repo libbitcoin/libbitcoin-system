@@ -39,7 +39,8 @@ class byte_flipper
     public virtual byteflipper
 {
 public:
-    DEFAULT_COPY_MOVE(byte_flipper);
+    DELETE_COPY(byte_flipper);
+    DEFAULT_MOVE(byte_flipper);
     using ibase = byte_reader<IOStream>;
     using obase = byte_writer<IOStream>;
 
