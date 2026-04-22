@@ -30,6 +30,8 @@ namespace chain {
 DECLARE_JSON_TAG_INVOKE(header);
 DECLARE_JSON_TAG_INVOKE(header::cptr);
 
+DECLARE_JSON_TAGGED_INVOKE(electrumx_tag, header);
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
