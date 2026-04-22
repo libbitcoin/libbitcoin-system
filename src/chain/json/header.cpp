@@ -43,7 +43,7 @@ DEFINE_JSON_FROM_TAG(header)
 {
     value =
     {
-        // hash is computed property
+        // hash is computed property.
         { "hash", encode_hash(instance.hash()) },
         { "version", instance.version() },
         { "previous", encode_hash(instance.previous_block_hash()) },
@@ -62,6 +62,25 @@ DEFINE_JSON_TO_TAG(header::cptr)
 DEFINE_JSON_FROM_TAG(header::cptr)
 {
     tag_invoke(from_tag{}, value, *instance);
+}
+
+// electrumx
+// ----------------------------------------------------------------------------
+
+DEFINE_JSON_FROM_TAGGED(electrumx_tag, header)
+{
+    const auto& head = instance.value;
+    value =
+    {
+        { "bits", head.bits() },
+        { "merkle_root", encode_hash(head.merkle_root()) },
+        { "nonce", head.nonce() },
+        { "prev_block_hash", encode_hash(head.previous_block_hash()) },
+        { "timestamp", head.timestamp() },
+        { "version", head.version() }
+
+        ////{ "block_height", 0 }
+    };
 }
 
 } // namespace chain

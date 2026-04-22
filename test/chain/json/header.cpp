@@ -57,4 +57,32 @@ BOOST_AUTO_TEST_CASE(header__json__conversions__expected)
     BOOST_REQUIRE(json::value_to<header>(value) == instance);
 }
 
+BOOST_AUTO_TEST_CASE(block__json__electrumx__expected)
+{
+    const header instance
+    {
+        42,
+        null_hash,
+        one_hash,
+        43,
+        44,
+        45
+    };
+
+    const std::string_view text
+    {
+        "{"
+            R"("bits":44,)"
+            R"("merkle_root":"0000000000000000000000000000000000000000000000000000000000000001",)"
+            R"("nonce":45,)"
+            R"("prev_block_hash":"0000000000000000000000000000000000000000000000000000000000000000",)"
+            R"("timestamp":43,)"
+            R"("version":42)"
+        "}"
+    };
+
+    const auto value = json::value_from(electrumx(instance));
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

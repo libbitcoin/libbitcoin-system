@@ -29,6 +29,7 @@ struct bitcoind_tag {};
 struct bitcoind_hashed_tag {};
 struct bitcoind_verbose_tag {};
 struct bitcoind_embedded_tag {};
+struct electrumx_tag {};
 
 /// Reference wrapper.
 template<class Tag, class Type>
@@ -66,6 +67,11 @@ template<class Type>
 inline auto bitcoind_embedded(const Type& value) NOEXCEPT
 {
     return wrapped<bitcoind_embedded_tag, Type>{ value };
+}
+template<class Type>
+inline auto electrumx(const Type& value) NOEXCEPT
+{
+    return wrapped<electrumx_tag, Type>{ value };
 }
 
 /// json aliases
