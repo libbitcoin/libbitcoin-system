@@ -33,7 +33,8 @@ class sha256_writer
   : public byte_writer<OStream>
 {
 public:
-    DEFAULT_COPY_MOVE(sha256_writer);
+    DELETE_COPY(sha256_writer);
+    DEFAULT_MOVE(sha256_writer);
     using base = byte_writer<OStream>;
 
     /// Constructors.

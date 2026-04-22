@@ -35,7 +35,9 @@ class byte_reader
   : public virtual bytereader
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(byte_reader);
+    DELETE_COPY(byte_reader);
+    DEFAULT_MOVE(byte_reader);
+    virtual ~byte_reader() = default;
     static inline memory_arena default_arena() NOEXCEPT;
 
     /// Constructors.

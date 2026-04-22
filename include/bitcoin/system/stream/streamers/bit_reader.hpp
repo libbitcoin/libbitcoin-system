@@ -41,7 +41,9 @@ class bit_reader
     public virtual bitreader
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(bit_reader);
+    DELETE_COPY(bit_reader);
+    DEFAULT_MOVE(bit_reader);
+    virtual ~bit_reader() = default;
     using base = byte_reader<IStream>;
 
     /// Constructors.
