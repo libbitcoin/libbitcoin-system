@@ -88,7 +88,7 @@ BC_API data_chunk to_chunk(const data_slice& bytes) NOEXCEPT;
 /// Concatenate several data slices into a single data_chunk.
 /// extra_reserve reserves but does not allocate additional bytes.
 BC_API data_chunk build_chunk(const data_loaf& slices,
-    size_t extra_reserve=0) NOEXCEPT;
+    size_t extra_reserve=zero) NOEXCEPT;
 
 /// Concatenate two data_slices into a single data chunk.
 BC_API data_chunk splice(const data_slice& left,

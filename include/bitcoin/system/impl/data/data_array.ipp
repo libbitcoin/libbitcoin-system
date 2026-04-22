@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <ranges>
 #include <utility>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
@@ -43,8 +44,8 @@ template <size_t Size, if_nonzero<Size>>
 constexpr data_array<sub1(Size)> to_array(const char(&string)[Size]) NOEXCEPT
 {
     data_array<sub1(Size)> out{};
-    for (auto i = zero; i < sub1(Size); ++i)
-        out[i] = string[i];
+    for (size_t index{}; index < sub1(Size); ++index)
+        out[index] = string[index];
 
     return out;
 }
@@ -55,7 +56,7 @@ const data_stack to_stack(
     const std_vector<data_array<Size>>& values) NOEXCEPT
 {
     data_stack chunks(values.size());
-    std::transform(values.begin(), values.end(), chunks.begin(),
+    std::ranges::transform(values, chunks.begin(),
         [](const data_array<Size>& value) NOEXCEPT
         {
             return to_chunk(value);
@@ -67,18 +68,17 @@ const data_stack to_stack(
 template <size_t Size>
 constexpr data_array<Size> build_array(const data_loaf& slices) NOEXCEPT
 {
-    data_array<Size> out;
+    data_array<Size> out{};
     auto position = out.begin();
     for (const auto& slice: slices)
     {
-        const auto remaining = limit<data_slice::size_type>(
-            std::distance(position, out.end()));
+        const auto distance = std::distance(position, out.end());
+        const auto remaining = limit<data_slice::size_type>(distance);
         const auto size = std::min(remaining, slice.size());
         std::copy_n(slice.begin(), size, position);
         std::advance(position, size);
     }
 
-    // C++17: Parallel policy for std::fill.
     // Pad any unfilled remainder of the array with zeros.
     std::fill(position, out.end(), 0_u8);
     return out;
@@ -110,7 +110,9 @@ template <size_t Start, size_t End, size_t Size,
     if_not_lesser<End, Start>>
 constexpr data_array<End - Start> slice(const data_array<Size>& bytes) NOEXCEPT
 {
-    data_array<End - Start> out;
+    // bogus gcc 13.2.0 warning.
+    // github.com/libbitcoin/libbitcoin-system/issues/1538
+    data_array<End - Start> out{};
     std::copy(std::next(bytes.begin(), Start), std::next(bytes.begin(), End),
         out.begin());
     return out;
@@ -120,7 +122,7 @@ template <size_t Left, size_t Right>
 constexpr data_array<Left + Right> splice(const data_array<Left>& left,
     const data_array<Right>& right) NOEXCEPT
 {
-    data_array<Left + Right> out;
+    data_array<Left + Right> out{};
     std::copy(right.begin(), right.end(),
         std::copy(left.begin(), left.end(), out.begin()));
 
@@ -131,7 +133,7 @@ template <size_t Left, size_t Middle, size_t Right>
 constexpr data_array<Left + Middle + Right> splice(const data_array<Left>& left,
     const data_array<Middle>& middle, const data_array<Right>& right) NOEXCEPT
 {
-    data_array<Left + Middle + Right> out;
+    data_array<Left + Middle + Right> out{};
     std::copy(right.begin(), right.end(),
         std::copy(middle.begin(), middle.end(),
             std::copy(left.begin(), left.end(), out.begin())));
@@ -143,7 +145,7 @@ template <size_t Size, if_even<Size>>
 constexpr split_parts<to_half(Size)> split(const data_array<Size>& bytes) NOEXCEPT
 {
     constexpr auto half = to_half(Size);
-    split_parts<half> out;
+    split_parts<half> out{};
     std::copy_n(bytes.begin(), half, out.first.begin());
     std::copy_n(std::next(bytes.begin(), half), half, out.second.begin());
     return out;
@@ -162,9 +164,9 @@ template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size
 constexpr data_array<Size> xor_offset(const data_array<Size1>& bytes1,
     const data_array<Size2>& bytes2) NOEXCEPT
 {
-    data_array<Size> out;
-    for (size_t index = 0; index < Size; index++)
-        out[index] = bytes1[index + Offset1] ^ bytes2[index + Offset2];
+    data_array<Size> out{};
+    for (size_t index{}; index < Size; ++index)
+        out[index] = bit_xor(bytes1[index + Offset1], bytes2[index + Offset2]);
 
     return out;
 }
