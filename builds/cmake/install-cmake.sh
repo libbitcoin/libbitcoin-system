@@ -8,23 +8,35 @@
 # Script managing the build and installation of libbitcoin-system and its dependencies.
 #
 # Script options:
+# -Denable-avx2=<ON/OFF>      Use Intel AVX2 intrinsics.
+#                               Default: OFF
+# -Denable-avx512=<ON/OFF>    Use Intel AVX512 intrinsics.
+#                               Default: OFF
+# -Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions.
+#                               Default: OFF
+# -Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions.
+#                               Default: OFF
 # --build-boost               Build Boost libraries
 # --build-secp256k1           Build libsecp256k1 libraries
-# --build-src-dir=<path>      Location of sources.
-# --build-obj-dir=<path>      Location of intermedia objects.
-# --build-obj-dir-relative    Use build-obj-dir as relative to project sources.
+# --build-src-dir=<path>      Location for sources.
+#                               Default: $(pwd)
+# --build-obj-dir=<path>      Location for intermediate objects.
+#                               Default: obj
+# --build-obj-dir-relative    Interpret build-obj-dir as relative to project sources.
 # --build-config=<mode>       Specifies the build configuration.
-#                               Valid values: { debug, release }
+#                               Values: { debug, release }
 #                               Toolchain default behavior will occur if no value specified.
-# --build-link=<mode>         Specifies link mode.
-#                               Valid values: { dynamic, static }
+# --build-link=<mode>         Specifies the link mode.
+#                               Values: { dynamic, static }
 #                               Toolchain default behavior will occur if no value specified.
 # --build-full-repositories   Sync full github repositories.
-#                               Default clones depth 1, single branch
+#                               Default: git clone --depth 1 --single-branch
+# --build-post-install-clean  Clean dependencies after installation (saves space).
+# --build-skip-tests          Skip test compilation and execution.
 # --build-parallel=<int>      Number of jobs to run simultaneously.
-#                               Default: discovery
-# --build-use-local-src       Use existing sources in build-src-dir path.
-# --prefix=<path>             Library install location.
+#                               Default: supported platforms use nproc/sysctl
+# --build-use-local-src       Use existing sources in relevant paths.
+# --prefix=<path>             Installation destination.
 #                               Default: /usr/local
 # --verbose                   Display verbose script output.
 # --help, -h                  Display usage, overriding script execution.
@@ -75,9 +87,10 @@ main()
             (--build-config=*)          BUILD_CONFIG="${OPTION#*=}";;
             (--build-link=*)            BUILD_LINK="${OPTION#*=}";;
             (--build-full-repositories) BUILD_FULL_REPOSITORIES="yes";;
-            (--build-use-local-src)     BUILD_USE_LOCAL_SRC="yes";;
-            (--build-parallel=*)        PARALLEL="${OPTION#*=}";;
+            (--build-post-install-clean)BUILD_POST_INSTALL_CLEAN="yes";;
             (--build-skip-tests)        BUILD_SKIP_TESTS="yes";;
+            (--build-parallel=*)        PARALLEL="${OPTION#*=}";;
+            (--build-use-local-src)     BUILD_USE_LOCAL_SRC="yes";;
             (--prefix=*)                PREFIX="${OPTION#*=}";;
             (--verbose)                 DISPLAY_VERBOSE="yes";;
             (--help|-h)                 DISPLAY_HELP="yes";;
@@ -90,14 +103,33 @@ main()
 
     CONFIGURE_OPTIONS_ORIGINAL=("$@")
     CONFIGURE_OPTIONS=("$@")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-boost/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-secp256k1/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-src-dir=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir-relative/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-config=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-link=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-full-repositories/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-post-install-clean/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-skip-tests/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-parallel=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-use-local-src/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--help/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-h/}")
     msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
     msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         display_build_variables
+    fi
+
+    # handle help
+    if [[ "${DISPLAY_HELP}" == "yes" ]]; then
+        help
+        return 0
     fi
 
 
@@ -111,63 +143,57 @@ main()
         msg_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
     fi
 
-    if [[ -d "${BUILD_SRC_DIR}" ]]; then
-        push_directory "${BUILD_SRC_DIR}"
-        BUILD_SRC_DIR="$(pwd)"
-        pop_directory
-        msg_verbose "Determined absolute path for build-src-dir '${BUILD_SRC_DIR}'."
-    else
+    if ! [[ -d "${BUILD_SRC_DIR}" ]]; then
         create_directory "${BUILD_SRC_DIR}"
-        push_directory "${BUILD_SRC_DIR}"
-        BUILD_SRC_DIR="$(pwd)"
-        pop_directory
-        msg_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
+        msg_verbose "Created --build-src-dir '${BUILD_SRC_DIR}'."
     fi
+
+    push_directory "${BUILD_SRC_DIR}"
+    BUILD_SRC_DIR="$(pwd)"
+    pop_directory
+    msg_verbose "Determined absolute path for --build-src-dir '${BUILD_SRC_DIR}'."
 
     # --build-obj-dir
     if [[ -z "${BUILD_OBJ_DIR}" ]]; then
         if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
             BUILD_OBJ_DIR="obj"
-            msg_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
+            msg_verbose "No --build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
         else
             BUILD_OBJ_DIR="$(pwd)/obj"
-            msg_verbose "No build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
+            msg_verbose "No --build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
         fi
     fi
 
     if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        msg_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
+        msg_verbose "Deferring relative path action for --build-obj-dir '${BUILD_OBJ_DIR}'."
     else
-        if [[ -d "${BUILD_OBJ_DIR}" ]]; then
-            push_directory "${BUILD_OBJ_DIR}"
-            BUILD_OBJ_DIR="$(pwd)"
-            pop_directory
-            msg_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
-       else
+        if ! [[ -d "${BUILD_OBJ_DIR}" ]]; then
             create_directory "${BUILD_OBJ_DIR}"
-            push_directory "${BUILD_OBJ_DIR}"
-            BUILD_OBJ_DIR="$(pwd)"
-            pop_directory
-            msg_verbose "Created build-obj-dir '${BUILD_OBJ_DIR}'."
+            msg_verbose "Created --build-obj-dir '${BUILD_OBJ_DIR}'."
         fi
+
+        push_directory "${BUILD_OBJ_DIR}"
+        BUILD_OBJ_DIR="$(pwd)"
+        pop_directory
+        msg_verbose "Determined absolute path for --build-obj-dir '${BUILD_OBJ_DIR}'."
     fi
 
     # --build-config
     if [[ -z "${BUILD_CONFIG}" ]]; then
-        msg_verbose "No build-config specified."
+        msg_verbose "No --build-config specified."
     elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
-        msg_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
+        msg_error "Provided --build-config '${BUILD_CONFIG}' not a valid value."
         help
         exit 1
     else
-        msg_verbose "Using provided build-config '${BUILD_CONFIG}'"
+        msg_verbose "Using provided --build-config '${BUILD_CONFIG}'"
     fi
 
     # --build-link
     if [[ -z "${BUILD_LINK}" ]]; then
-        msg_verbose "No build-link specified."
+        msg_verbose "No --build-link specified."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
-        msg_error "Provided build-link '${BUILD_LINK}' not a valid value."
+        msg_error "Provided --build-link '${BUILD_LINK}' not a valid value."
         help
         exit 1
     fi
@@ -176,7 +202,7 @@ main()
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
         PREFIX="/usr/local"
-        msg_verbose "No prefix specified, defaulting to '${PREFIX}'."
+        msg_verbose "No --prefix specified, defaulting to '${PREFIX}'."
     else
         # Incorporate the custom libdir into each object, for link time resolution
         if [[ -z "${LD_RUN_PATH}" ]]; then
@@ -235,7 +261,7 @@ main()
             PARALLEL=$(sysctl -n hw.ncpu)
         else
             msg_error "Unsupported system: '${OS}'"
-            msg_error "  Unable to determine value for '--parallel='"
+            msg_error "  Unable to determine value for --build-parallel"
             msg_error "  Please specify explicitly to continue."
             msg_error ""
             help
@@ -349,12 +375,6 @@ main()
     CONFIGURE_OPTIONS=( "${REMAP[@]}" )
     unset REMAP
 
-    # handle help
-    if [[ "${DISPLAY_HELP}" == "yes" ]]; then
-        help
-        return 0
-    fi
-
     msg_heading "Configuration"
     display_build_variables
 
@@ -407,6 +427,9 @@ main()
         export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
         build_cmake "secp256k1" "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
         install_make "secp256k1"
+        if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+            clean_make "secp256k1"
+        fi
         export CPPFLAGS="${SAVE_CPPFLAGS}"
     fi
 
@@ -418,6 +441,9 @@ main()
         test_make "libbitcoin-system" "test" "${PARALLEL}"
     fi
     install_make "libbitcoin-system"
+    if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+        clean_make "libbitcoin-system"
+    fi
     export CPPFLAGS="${SAVE_CPPFLAGS}"
 
     msg_success "Completed successfully."
@@ -563,11 +589,16 @@ test_make()
 
     local RESULT=$?
 
-    # Test runners emit to the test.log file.
+    if [[ -e "Testing/Temporary/LastTest.log" ]]; then
+        msg_warn "begin error log: Testing/Temporary/LastTest.log"
+        cat "Testing/Temporary/LastTest.log"
+        msg_warn "  end error log: Testing/Temporary/LastTest.log"
+    fi
+
     if [[ -e "test.log" ]]; then
-        msg_warn "test.log - begin"
+        msg_warn "begin error log: test.log"
         cat "test.log"
-        msg_warn "test.log - end"
+        msg_warn "  end error log: test.log"
     fi
 
     if [[ ${RESULT} -ne 0 ]]; then
@@ -581,6 +612,38 @@ test_make()
     pop_directory # BUILD_SRC_DIR/PROJECT
 
     msg_success "'${PROJECT}' test complete."
+}
+
+clean_make()
+{
+    local PROJECT="$1"
+    shift 1
+
+    msg "Preparing to clean ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    make clean
+
+    local RESULT=$?
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' clean complete."
 }
 
 build_boost()
@@ -730,6 +793,7 @@ display_build_variables()
     msg "BUILD_CONFIG                    : ${BUILD_CONFIG}"
     msg "BUILD_LINK                      : ${BUILD_LINK}"
     msg "BUILD_FULL_REPOSITORIES         : ${BUILD_FULL_REPOSITORIES}"
+    msg "BUILD_POST_INSTALL_CLEAN        : ${BUILD_POST_INSTALL_CLEAN}"
     msg "BUILD_USE_LOCAL_SRC             : ${BUILD_USE_LOCAL_SRC}"
     msg "BUILD_SKIP_TESTS                : ${BUILD_SKIP_TESTS}"
     msg "PARALLEL                        : ${PARALLEL}"
@@ -776,23 +840,35 @@ help()
     msg "Script managing the build and installation of libbitcoin-system and its dependencies."
     msg ""
     msg "Script options:"
+    msg "-Denable-avx2=<ON/OFF>      Use Intel AVX2 intrinsics."
+    msg "                              Default: OFF"
+    msg "-Denable-avx512=<ON/OFF>    Use Intel AVX512 intrinsics."
+    msg "                              Default: OFF"
+    msg "-Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions."
+    msg "                              Default: OFF"
+    msg "-Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions."
+    msg "                              Default: OFF"
     msg "--build-boost               Build Boost libraries"
     msg "--build-secp256k1           Build libsecp256k1 libraries"
-    msg "--build-src-dir=<path>      Location of sources."
-    msg "--build-obj-dir=<path>      Location of intermedia objects."
-    msg "--build-obj-dir-relative    Use build-obj-dir as relative to project sources."
+    msg "--build-src-dir=<path>      Location for sources."
+    msg "                              Default: $(pwd)"
+    msg "--build-obj-dir=<path>      Location for intermediate objects."
+    msg "                              Default: obj"
+    msg "--build-obj-dir-relative    Interpret build-obj-dir as relative to project sources."
     msg "--build-config=<mode>       Specifies the build configuration."
-    msg "                              Valid values: { debug, release }"
+    msg "                              Values: { debug, release }"
     msg "                              Toolchain default behavior will occur if no value specified."
-    msg "--build-link=<mode>         Specifies link mode."
-    msg "                              Valid values: { dynamic, static }"
+    msg "--build-link=<mode>         Specifies the link mode."
+    msg "                              Values: { dynamic, static }"
     msg "                              Toolchain default behavior will occur if no value specified."
     msg "--build-full-repositories   Sync full github repositories."
-    msg "                              Default clones depth 1, single branch"
+    msg "                              Default: git clone --depth 1 --single-branch"
+    msg "--build-post-install-clean  Clean dependencies after installation (saves space)."
+    msg "--build-skip-tests          Skip test compilation and execution."
     msg "--build-parallel=<int>      Number of jobs to run simultaneously."
-    msg "                              Default: discovery"
-    msg "--build-use-local-src       Use existing sources in build-src-dir path."
-    msg "--prefix=<path>             Library install location."
+    msg "                              Default: supported platforms use nproc/sysctl"
+    msg "--build-use-local-src       Use existing sources in relevant paths."
+    msg "--prefix=<path>             Installation destination."
     msg "                              Default: /usr/local"
     msg "--verbose                   Display verbose script output."
     msg "--help, -h                  Display usage, overriding script execution."

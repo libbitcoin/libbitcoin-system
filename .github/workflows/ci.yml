@@ -142,6 +142,7 @@ jobs:
           --build-use-local-src
           --build-src-dir="${{ github.workspace }}"
           --prefix="${{ github.workspace }}/prefix"
+          --build-post-install-clean
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -171,8 +172,14 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors"
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors"
+          fi
           if [[ -e "libbitcoin-system/obj/test.log" ]]; then
-            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.log"
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors"
           fi
 
       - name: Test artifact upload
@@ -180,7 +187,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: testlogs
-          path: ${{ github.workspace }}/*test.log
+          path: ${{ github.workspace }}/*.errors
           retention-days: 1
           if-no-files-found: warn
 
@@ -315,6 +322,7 @@ jobs:
           --build-use-local-src
           --build-src-dir="${{ github.workspace }}"
           --prefix="${{ github.workspace }}/prefix"
+          --build-post-install-clean
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -344,8 +352,14 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors"
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors"
+          fi
           if [[ -e "libbitcoin-system/obj/test.log" ]]; then
-            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.log"
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors"
           fi
 
       - name: Test artifact upload
@@ -353,7 +367,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: testlogs
-          path: ${{ github.workspace }}/*test.log
+          path: ${{ github.workspace }}/*.errors
           retention-days: 1
           if-no-files-found: warn
 
@@ -477,8 +491,14 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors"
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors"
+          fi
           if [[ -e "libbitcoin-system/obj/test.log" ]]; then
-            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.log"
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors"
           fi
 
       - name: Test artifact upload
@@ -486,7 +506,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: testlogs
-          path: ${{ github.workspace }}/*test.log
+          path: ${{ github.workspace }}/*.errors
           retention-days: 1
           if-no-files-found: warn
 
