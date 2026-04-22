@@ -14,13 +14,16 @@ REM Script options:
 REM --build-config config       Build configuration.
 REM --build-platform platform   Build platform.
 REM --build-version version     Build MSVC version.
-REM --build-src-dir path        Location of sources.
-REM --build-full-repositories   Sync full github repositories.
-REM --build-use-local-src       Use existing sources in build-src-dir path.
 REM --build-mode mode           Determines action on target.
 REM                               Default: Rebuild
 REM --build-symbols mode        Determines treatment of symbols.
-REM                               Values: default, disabled, public-only
+REM                               Values: { default, disabled, public-only }
+REM --build-src-dir path        Location for sources.
+REM                               Default: !CD!
+REM --build-full-repositories   Sync full github repositories.
+REM                               Default: git clone --depth 1 --single-branch
+REM --build-skip-tests          Skip test compilation and execution.
+REM --build-use-local-src       Use existing sources in relevant paths.
 REM --verbose                   Display verbose script output.
 REM --help, -h                  Display usage, overriding script execution.
 REM
@@ -50,7 +53,7 @@ if "!libbitcoin_system_TAG!" == "" (
         call :display_constants
     )
 
-    if "!SHOW_HELP!" == "yes" (
+    if "!DISPLAY_HELP!" == "yes" (
         call :help
         exit /b 0
     )
@@ -174,9 +177,6 @@ if "!libbitcoin_system_TAG!" == "" (
 :parse_input
     if "%~1" == "" (
         goto :end_parse_input
-    ) else if "%~1" == "--build-src-dir" (
-        set "BUILD_SRC_DIR=%~2"
-        shift
     ) else if "%~1" == "--build-config" (
         set "BUILD_CONFIG=%~2"
         shift
@@ -186,26 +186,27 @@ if "!libbitcoin_system_TAG!" == "" (
     ) else if "%~1" == "--build-version" (
         set "BUILD_VERSION=%~2"
         shift
-    ) else if "%!1" == "--build-mode" (
+    ) else if "%~1" == "--build-mode" (
         set "BUILD_MODE=%~2"
         shift
-    ) else if "%!1" == "--build-symbols" (
+    ) else if "%~1" == "--build-symbols" (
         set "BUILD_SYMBOLS=%~2"
+        shift
+    ) else if "%~1" == "--build-src-dir" (
+        set "BUILD_SRC_DIR=%~2"
         shift
     ) else if "%~1" == "--build-full-repositories" (
         set "BUILD_FULL_REPOSITORIES=yes"
-    ) else if "%~1" == "--build-use-local-src" (
-        set "BUILD_USE_LOCAL_SRC=yes"
     ) else if "%~1" == "--build-skip-tests" (
         set "BUILD_SKIP_TESTS=yes"
+    ) else if "%~1" == "--build-use-local-src" (
+        set "BUILD_USE_LOCAL_SRC=yes"
     ) else if "%~1" == "--verbose" (
         set "DISPLAY_VERBOSE=yes"
-    ) else if "%~1" == "-v" (
-        set "DISPLAY_VERBOSE=yes"
     ) else if "%~1" == "--help" (
-        set "SHOW_HELP=yes"
+        set "DISPLAY_HELP=yes"
     ) else if "%~1" == "-h" (
-        set "SHOW_HELP=yes"
+        set "DISPLAY_HELP=yes"
     ) else (
         if "!UNHANDLED_ARGS!" == "" (
             set "UNHANDLED_ARGS=%1"
@@ -329,7 +330,7 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "BUILD_MODE                      : !BUILD_MODE!"
     call :msg "BUILD_SYMBOLS                   : !BUILD_SYMBOLS!"
     call :msg "DISPLAY_VERBOSE                 : !DISPLAY_VERBOSE!"
-    call :msg "SHOW_HELP                       : !SHOW_HELP!"
+    call :msg "DISPLAY_HELP                    : !DISPLAY_HELP!"
     exit /b %ERRORLEVEL%
 
 
@@ -350,13 +351,16 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "--build-config config       Build configuration."
     call :msg "--build-platform platform   Build platform."
     call :msg "--build-version version     Build MSVC version."
-    call :msg "--build-src-dir path        Location of sources."
-    call :msg "--build-full-repositories   Sync full github repositories."
-    call :msg "--build-use-local-src       Use existing sources in build-src-dir path."
     call :msg "--build-mode mode           Determines action on target."
     call :msg "                              Default: Rebuild"
     call :msg "--build-symbols mode        Determines treatment of symbols."
-    call :msg "                              Values: default, disabled, public-only"
+    call :msg "                              Values: { default, disabled, public-only }"
+    call :msg "--build-src-dir path        Location for sources."
+    call :msg "                              Default: !CD!"
+    call :msg "--build-full-repositories   Sync full github repositories."
+    call :msg "                              Default: git clone --depth 1 --single-branch"
+    call :msg "--build-skip-tests          Skip test compilation and execution."
+    call :msg "--build-use-local-src       Use existing sources in relevant paths."
     call :msg "--verbose                   Display verbose script output."
     call :msg "--help, -h                  Display usage, overriding script execution."
     exit /b %ERRORLEVEL%
