@@ -37,7 +37,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g --coverage -fprofile-update=atomic",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage -fprofile-update=atomi -fprofile-update=atomic"
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage -fprofile-update=atomic"
             }
         },
         {
