@@ -38,6 +38,7 @@
 # --build-use-local-src       Use existing sources in relevant paths.
 # --prefix=<path>             Installation destination.
 #                               Default: /usr/local
+# --noninteractive            Disable any prompt using default.
 # --verbose                   Display verbose script output.
 # --help, -h                  Display usage, overriding script execution.
 #
@@ -92,6 +93,7 @@ main()
             (--build-parallel=*)        PARALLEL="${OPTION#*=}";;
             (--build-use-local-src)     BUILD_USE_LOCAL_SRC="yes";;
             (--prefix=*)                PREFIX="${OPTION#*=}";;
+            (--noninteractive)          NONINTERACTIVE="yes";;
             (--verbose)                 DISPLAY_VERBOSE="yes";;
             (--help|-h)                 DISPLAY_HELP="yes";;
         esac
@@ -112,6 +114,7 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-parallel=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-use-local-src/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--noninteractive/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--help/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-h/}")
@@ -452,8 +455,19 @@ source_archive()
     fi
 
     if [ -d "${PROJECT}" ]; then
-        msg_warn "Encountered existing '${PROJECT}' directory, removing..."
-        remove_directory_force "${PROJECT}"
+        msg_warn "Encountered existing '${PROJECT}' directory..."
+        if [[ "${NONINTERACTIVE}" == "yes" ]]; then
+            CONFIRM="N"
+        else
+            read -p "Replace '${PROJECT}' directory with intended contents? [y/N] " CONFIRM
+        fi
+
+        if [[ "${CONFIRM,,}" == "y" ]]; then
+            remove_directory_force "${PROJECT}"
+        else
+            msg_error "Aborted installation."
+            exit 0
+        fi
     fi
 
     msg "Retrieving ${PROJECT}..."
@@ -481,6 +495,18 @@ source_archive()
     msg_success "Completed download and extraction successfully."
 }
 
+github_repository_status()
+{
+    local REPOSITORY="$1"
+
+    push_directory "${REPOSITORY}"
+    local DISCOVERED_COMMIT=$(git rev-parse HEAD)
+    local DISCOVERED_URL=$(git config --get remote.origin.url)
+    pop_directory # REPOSITORY
+    msg_warn "  commit : ${DISCOVERED_COMMIT}"
+    msg_warn "  url    : ${DISCOVERED_URL}"
+}
+
 source_github()
 {
     local OWNER="$1"
@@ -502,21 +528,33 @@ source_github()
     if [ -d "${REPOSITORY}" ] &&
        [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
         msg_warn "Reusing existing '${REPOSITORY}'..."
+        github_repository_status "${REPOSITORY}"
         pop_directory # BUILD_SRC_DIR
         return 0
     fi
 
     if [ -d "${REPOSITORY}" ]; then
-        msg_warn "Encountered existing '${REPOSITORY}' directory, removing..."
-        remove_directory_force "${REPOSITORY}"
+        msg_warn "Encountered existing '${REPOSITORY}' directory..."
+        if [[ "${NONINTERACTIVE}" == "yes" ]]; then
+            CONFIRM="N"
+        else
+            read -p "Replace '${REPOSITORY}' directory with intended contents? [y/N] " CONFIRM
+        fi
+
+        if [[ "${CONFIRM,,}" == "y" ]]; then
+            remove_directory_force "${REPOSITORY}"
+        else
+            msg_error "Aborted installation."
+            exit 0
+        fi
     fi
 
     msg "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
 
     ${GIT_CLONE} ${CLONE_OPTIONS} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
 
-    # pop BUILD_SRC_DIR
-    pop_directory
+    github_repository_status "${REPOSITORY}"
+    pop_directory # pop BUILD_SRC_DIR
 }
 
 install_make()
@@ -855,6 +893,7 @@ help()
     msg "--build-use-local-src       Use existing sources in relevant paths."
     msg "--prefix=<path>             Installation destination."
     msg "                              Default: /usr/local"
+    msg "--noninteractive            Disable any prompt using default."
     msg "--verbose                   Display verbose script output."
     msg "--help, -h                  Display usage, overriding script execution."
     msg ""

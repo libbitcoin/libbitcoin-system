@@ -41,17 +41,6 @@ jobs:
 
           - image: ubuntu-24.04
             config: "debug"
-            link: "dynamic"
-            cc: "clang-18"
-            cxx: "clang++-18"
-            flags: ""
-            coverage: ""
-            boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
-            options: "--enable-isystem"
-
-          - image: ubuntu-24.04
-            config: "release"
             link: "static"
             cc: "clang-18"
             cxx: "clang++-18"
@@ -64,6 +53,17 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
             cc: "gcc-12"
             cxx: "g++-12"
             flags: ""
@@ -173,13 +173,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
-            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors"
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
           fi
           if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
-            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors"
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
           fi
           if [[ -e "libbitcoin-system/obj/test.log" ]]; then
-            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors"
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
           fi
 
       - name: Test artifact upload
@@ -202,11 +202,11 @@ jobs:
             link: "dynamic"
             cc: "clang"
             cxx: "clang++"
-            flags: "-DNDEBUG"
+            flags: ""
             coverage: ""
             boost: "--build-boost"
             secp256k1: "--build-secp256k1"
-            options: "--verbose"
+            options: ""
 
           - image: macos-latest
             config: "release"
@@ -217,21 +217,10 @@ jobs:
             coverage: ""
             boost: "--build-boost"
             secp256k1: "--build-secp256k1"
-            options: "--verbose"
-
-          - image: ubuntu-24.04
-            config: "debug"
-            link: "dynamic"
-            cc: "clang-18"
-            cxx: "clang++-18"
-            flags: ""
-            coverage: ""
-            boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
             options: ""
 
           - image: ubuntu-24.04
-            config: "release"
+            config: "debug"
             link: "static"
             cc: "clang-18"
             cxx: "clang++-18"
@@ -244,6 +233,17 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
             cc: "gcc-12"
             cxx: "g++-12"
             flags: ""
@@ -353,13 +353,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
-            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors"
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
           fi
           if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
-            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors"
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
           fi
           if [[ -e "libbitcoin-system/obj/test.log" ]]; then
-            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors"
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
           fi
 
       - name: Test artifact upload
@@ -378,29 +378,9 @@ jobs:
       matrix:
         include:
           - image: ubuntu-24.04
-            preset: "nix-gnu-debug-shared"
+            preset: "nix-gnu-debug-static"
             cc: "clang-18"
             cxx: "clang++-18"
-            flags: ""
-            coverage: ""
-            boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
-            options: ""
-
-          - image: ubuntu-24.04
-            preset: "nix-gnu-release-static"
-            cc: "clang-18"
-            cxx: "clang++-18"
-            flags: ""
-            coverage: ""
-            boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
-            options: ""
-
-          - image: ubuntu-24.04
-            preset: "nix-gnu-release-shared"
-            cc: "gcc-12"
-            cxx: "g++-12"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -492,13 +472,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
-            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors"
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
           fi
           if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
-            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors"
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
           fi
           if [[ -e "libbitcoin-system/obj/test.log" ]]; then
-            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors"
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
           fi
 
       - name: Test artifact upload
