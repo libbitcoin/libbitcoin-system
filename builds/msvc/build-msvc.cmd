@@ -25,6 +25,7 @@ REM --build-full-repositories   Sync full github repositories.
 REM                               Default: git clone --depth 1 --single-branch
 REM --build-skip-tests          Skip test compilation and execution.
 REM --build-use-local-src       Use existing sources in relevant paths.
+REM --noninteractive            Disable any prompt using default.
 REM --verbose                   Display verbose script output.
 REM --help, -h                  Display usage, overriding script execution.
 REM
@@ -210,6 +211,8 @@ if "!libbitcoin_system_TAG!" == "" (
         set "BUILD_SKIP_TESTS=yes"
     ) else if "%~1" == "--build-use-local-src" (
         set "BUILD_USE_LOCAL_SRC=yes"
+    ) else if "%~1" == "--noninteractive" (
+        set "NONINTERACTIVE=yes"
     ) else if "%~1" == "--verbose" (
         set "DISPLAY_VERBOSE=yes"
     ) else if "%~1" == "--help" (
@@ -230,6 +233,27 @@ if "!libbitcoin_system_TAG!" == "" (
 :end_parse_input
     exit /b 0
 
+:github_repository_status
+    set "REPO=%~1"
+    call :push_directory "!REPO!"
+    for /F "tokens=*" %%A in ('git rev-parse HEAD') do (
+        set "DISCOVERED_COMMIT=%%A"
+    )
+    if %ERRORLEVEL% neq 0 (
+        exit /b %ERRORLEVEL%
+    )
+
+    for /F "tokens=*" %%A in ('git config --get remote.origin.url') do (
+        set "DISCOVERED_URL=%%A"
+    )
+    if %ERRORLEVEL% neq 0 (
+        exit /b %ERRORLEVEL%
+    )
+
+    call :msg_warn "  commit : !DISCOVERED_COMMIT!"
+    call :msg_warn "  url    : !DISCOVERED_URL!"
+    call :pop_directory
+    exit /b 0
 
 :source_github
     set "OWNER=%~1"
@@ -250,14 +274,32 @@ if "!libbitcoin_system_TAG!" == "" (
     if exist "%REPOSITORY%" (
         if "!BUILD_USE_LOCAL_SRC!" == "yes" (
             call :msg_warn "Reusing existing '%REPOSITORY%'..."
+            call :github_repository_status "%REPOSITORY%"
+            if %ERRORLEVEL% neq 0 (
+                exit /b %ERRORLEVEL%
+            )
             call :pop_directory
             exit /b %ERRORLEVEL%
         )
 
-        call :msg_warn "Encountered existing '%REPOSITORY%' directory, removing..."
-        call :remove_directory_force "%REPOSITORY%"
-        if %ERRORLEVEL% neq 0 (
-            exit /b %ERRORLEVEL%
+        call :msg_warn "Encountered existing '%REPOSITORY%' directory..."
+        if "!NONINTERACTIVE!" == "yes" (
+            set "CONFIRM=N"
+        ) else (
+            set /p "CONFIRM=Replace '%REPOSITORY%' directory with intended contents? [y/N] "
+        )
+
+        if /I "%CONFIRM%"=="y" (
+            call :remove_directory_force "%REPOSITORY%"
+            if %ERRORLEVEL% neq 0 (
+                exit /b %ERRORLEVEL%
+            )
+        ) else (
+            msg_error "Aborted build."
+            if not defined CI (
+                pause
+            )
+            exit 0
         )
     )
 
@@ -269,6 +311,10 @@ if "!libbitcoin_system_TAG!" == "" (
         exit /b 1
     )
 
+    call :github_repository_status "%REPOSITORY%"
+    if %ERRORLEVEL% neq 0 (
+        exit /b %ERRORLEVEL%
+    )
     call :pop_directory
     exit /b %ERRORLEVEL%
 
@@ -392,6 +438,7 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "                              Default: git clone --depth 1 --single-branch"
     call :msg "--build-skip-tests          Skip test compilation and execution."
     call :msg "--build-use-local-src       Use existing sources in relevant paths."
+    call :msg "--noninteractive            Disable any prompt using default."
     call :msg "--verbose                   Display verbose script output."
     call :msg "--help, -h                  Display usage, overriding script execution."
     exit /b %ERRORLEVEL%
