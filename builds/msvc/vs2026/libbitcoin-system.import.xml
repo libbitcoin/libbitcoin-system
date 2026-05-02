@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
+  <Rule Name="libbitcoin-system-linkage-uiextension" PageTemplate="tool" DisplayName="Local Dependencies" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="libbitcoin-system" DisplayName="libbitcoin-system" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Linkage-libbitcoin-system" DisplayName="Linkage" Description="How Libbitcoin System will be linked into the output of this project" Category="libbitcoin-system">
+      <EnumValue Name="" DisplayName="Not linked" />
+      <EnumValue Name="dynamic" DisplayName="Dynamic (DLL)" />
+      <EnumValue Name="static" DisplayName="Static (LIB)" />
+      <EnumValue Name="ltcg" DisplayName="Static using link time compile generation (LTCG)" />
+    </EnumProperty>
+  </Rule>
+  <Rule Name="libbitcoin-system-options-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <!--<Category Name="512" DisplayName="512" />-->
+      <!--<Category Name="256" DisplayName="256" />-->
+      <!--<Category Name="128" DisplayName="128" />-->
+      <Category Name="sha" DisplayName="sha" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Option-sha" DisplayName="Enable SHA Native Hashing" Description="Requires SHANI (xcpu) or Neon (arm) CPU." Category="sha">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <!--<EnumProperty Name="Option-512" DisplayName="Enable 512 Bit Vectorization" Description="Requires AVX512 (xcpu) or SVE (arm) CPU." Category="512">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-256" DisplayName="Enable 256 Bit Vectorization" Description="Requires AVX2 (xcpu) or SVE (arm) CPU." Category="256">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-128" DisplayName="Enable 128 Bit Vectorization" Description="Requires SSE4.1 (xcpu) or Neon (arm) CPU." Category="128">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>-->
+  </Rule>  
+</ProjectSchemaDefinitions>
