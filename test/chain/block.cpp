@@ -739,7 +739,7 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
     // Test transaction at position 0
     {
         const auto branch = block.merkle_branch(0, false);
-        BOOST_REQUIRE_EQUAL(branch.size(), 2);
+        BOOST_REQUIRE_EQUAL(branch.size(), 2u);
         BOOST_CHECK_EQUAL(branch[0], tx1_hash);
         BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
     }
@@ -747,7 +747,7 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
     // Test transaction at position 1
     {
         const auto branch = block.merkle_branch(1, false);
-        BOOST_REQUIRE_EQUAL(branch.size(), 2);
+        BOOST_REQUIRE_EQUAL(branch.size(), 2u);
         BOOST_CHECK_EQUAL(branch[0], tx0_hash);
         BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
     }
@@ -755,7 +755,7 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
     // Test transaction at position 2 (duplicated leaf case)
     {
         const auto branch = block.merkle_branch(2, false);
-        BOOST_REQUIRE_EQUAL(branch.size(), 2);
+        BOOST_REQUIRE_EQUAL(branch.size(), 2u);
         BOOST_CHECK_EQUAL(branch[0], tx2_hash);
         BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx0_hash, tx1_hash));
     }
