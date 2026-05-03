@@ -507,14 +507,13 @@ jobs:
             platform: "x64"
             version: "vs2022"
             tests: "*"
-
-          - image: windows-latest
+          - image: windows-2025-vs2026
             configuration: "StaticRelease"
             platform: "x64"
             version: "vs2026"
             tests: "*"
 
-          - image: windows-latest
+          - image: windows-2025-vs2026
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2026"
