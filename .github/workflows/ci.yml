@@ -508,6 +508,18 @@ jobs:
             version: "vs2022"
             tests: "*"
 
+          - image: windows-latest
+            configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+
+          - image: windows-latest
+            configuration: "StaticDebug"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+
     runs-on: ${{ matrix.image }}
 
     steps:
