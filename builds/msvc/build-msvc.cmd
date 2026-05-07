@@ -451,8 +451,8 @@ if "!libbitcoin_system_TAG!" == "" (
         if "!CD_MODE!" == "-f" (
             call :msg_warn "Reinitializing '%CD_DIRECTORY%'..."
             rmdir /S /Q "!CD_DIRECTORY!"
-            if %ERRORLEVEL% neq 0 (
-                exit /b %ERRORLEVEL%
+            if !ERRORLEVEL! neq 0 (
+                exit /b !ERRORLEVEL!
             )
 
             mkdir "!CD_DIRECTORY!"
@@ -462,40 +462,40 @@ if "!libbitcoin_system_TAG!" == "" (
     ) else (
         call :msg "Initializing '!CD_DIRECTORY!'..."
     )
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :create_directory_force
     call :create_directory "%~1" -f
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :pop_directory
     call :msg_verbose "*** move  pre: '!CD!'"
     popd
-    if %ERRORLEVEL% neq 0 (
-        exit /b %ERRORLEVEL%
+    if !ERRORLEVEL! neq 0 (
+        exit /b !ERRORLEVEL!
     )
     call :msg_verbose "*** move post: '!CD!'"
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :push_directory
     call :msg_verbose "*** move  pre: '!CD!'"
     pushd %1
-    if %ERRORLEVEL% neq 0 (
-        exit /b %ERRORLEVEL%
+    if !ERRORLEVEL! neq 0 (
+        exit /b !ERRORLEVEL!
     )
     call :msg_verbose "*** move post: '!CD!'"
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :remove_directory_force
     call :msg_verbose "*** removing: '%~1'"
     rmdir /S /Q "%~1"
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg_heading
     call :msg "***************************************************************************"
     call :msg "%~1"
     call :msg "***************************************************************************"
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg
     if "%~1" == "" (
@@ -503,26 +503,26 @@ if "!libbitcoin_system_TAG!" == "" (
     ) else (
         echo %~1
     )
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg_empty
     echo.
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg_verbose
     if "!DISPLAY_VERBOSE!" == "yes" (
         echo [96m%~1[0m
     )
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg_success
     echo [92m%~1[0m
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg_warn
     echo [93m%~1[0m
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 
 :msg_error
     echo [91m%~1[0m
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
