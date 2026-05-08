@@ -876,15 +876,15 @@ code block::identify(const context& ctx) const NOEXCEPT
 // Use of get_hash() in is_forward_reference makes this thread-unsafe.
 code block::check() const NOEXCEPT
 {
-    // empty_block is subset of first_not_coinbase.
     // type64 malleated is a subset of first_not_coinbase.
     // type32 malleated is a subset of is_internal_double_spend.
     if (is_oversized())
         return error::block_size_limit;
+    if (is_empty())
+        return error::empty_block;
     if (is_first_non_coinbase())
-        return (is_empty() ? error::empty_block :
-            (is_malleated() ? error::invalid_transaction_commitment :
-                error::first_not_coinbase));
+        return (is_malleated() ? error::invalid_transaction_commitment :
+                error::first_not_coinbase);
     if (is_extra_coinbases())
         return error::extra_coinbases;
     if (is_forward_reference())
