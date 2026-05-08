@@ -407,6 +407,11 @@ BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
 // ----------------------------------------------------------------------------
 
 // check
+BOOST_AUTO_TEST_CASE(block__check__empty__empty_block)
+{
+    const block instance{};
+    BOOST_REQUIRE_EQUAL(instance.check(), error::empty_block);
+}
 // accept
 // connect
 
