@@ -1,0 +1,1479 @@
+###############################################################################
+#  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+
+name: Expanded Continuous Integration
+
+on: [ workflow_dispatch ]
+
+jobs:
+
+  gnu:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - image: macos-latest
+            config: "debug"
+            link: "dynamic"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: macos-latest
+            config: "debug"
+            link: "static"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: macos-latest
+            config: "release"
+            link: "dynamic"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: macos-latest
+            config: "release"
+            link: "static"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: "--coverage -fprofile-update=atomic"
+            coverage: "lcov"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem"
+
+    runs-on: ${{ matrix.image }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Get branch name
+        id: get-branch
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
+
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
+             [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-16"* ]]; then
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+            sudo apt-get update
+          fi
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
+
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
+        run: |
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
+          if [[ -n "${{ matrix.llvm }}" ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
+          fi
+
+      - name: Environmental Computation
+        shell: bash
+        run: |
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
+          fi
+
+      - name: Execute installation
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: >
+          ./builds/gnu/install-gnu.sh
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
+          --build-post-install-clean
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+          ${{ matrix.boost }}
+          ${{ matrix.secp256k1 }}
+          ${{ matrix.options }}
+
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: |
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
+
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
+        with:
+          format: lcov
+          files: "libbitcoin-system/coverage.info"
+          github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*.errors
+          retention-days: 1
+          if-no-files-found: warn
+
+  cmake:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - image: macos-latest
+            config: "debug"
+            link: "dynamic"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: macos-latest
+            config: "debug"
+            link: "static"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: macos-latest
+            config: "release"
+            link: "dynamic"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: macos-latest
+            config: "release"
+            link: "static"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "dynamic"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+    runs-on: ${{ matrix.image }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Get branch name
+        id: get-branch
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
+
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
+             [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-16"* ]]; then
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+            sudo apt-get update
+          fi
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
+
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
+        run: |
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
+          if [[ -n "${{ matrix.llvm }}" ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
+          fi
+
+      - name: Environmental Computation
+        shell: bash
+        run: |
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
+          fi
+
+      - name: Execute installation
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: >
+          ./builds/cmake/install-cmake.sh
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
+          --build-post-install-clean
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+          ${{ matrix.boost }}
+          ${{ matrix.secp256k1 }}
+          ${{ matrix.options }}
+
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: |
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
+
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
+        with:
+          format: lcov
+          files: "libbitcoin-system/coverage.info"
+          github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*.errors
+          retention-days: 1
+          if-no-files-found: warn
+
+  presets:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "clang-19"
+            cxx: "clang++-19"
+            flags: ""
+            coverage: ""
+            package: "clang-19 clang++-19"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "gcc-12"
+            cxx: "g++-12"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "gcc-15"
+            cxx: "g++-15"
+            flags: ""
+            coverage: ""
+            package: "g++-15 gcc-15"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-shared"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-debug-static"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-shared"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+          - image: ubuntu-24.04
+            preset: "nix-gnu-release-static"
+            cc: "gcc-16"
+            cxx: "g++-16"
+            flags: ""
+            coverage: ""
+            package: "g++-16 gcc-16"
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: ""
+
+    runs-on: ${{ matrix.image }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Get branch name
+        id: get-branch
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
+
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
+             [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-16"* ]]; then
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+            sudo apt-get update
+          fi
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
+
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
+        run: |
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
+          if [[ -n "${{ matrix.llvm }}" ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
+          fi
+
+      - name: Environmental Computation
+        shell: bash
+        run: |
+          if [[ "${{ matrix.preset }}" == *shared* ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
+          fi
+
+      - name: Execute installation
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: >
+          ./builds/cmake/install-presets.sh
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+          --build-preset="${{ matrix.preset }}"
+          ${{ matrix.boost }}
+          ${{ matrix.secp256k1 }}
+          ${{ matrix.options }}
+
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: |
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/address/qrencode/*" --output-file coverage.info
+
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
+        with:
+          format: lcov
+          files: "libbitcoin-system/coverage.info"
+          github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*.errors
+          retention-days: 1
+          if-no-files-found: warn
+
+  msvc:
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - image: windows-latest
+            configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2022"
+            tests: "*"
+
+          - image: windows-latest
+            configuration: "StaticDebug"
+            platform: "x64"
+            version: "vs2022"
+            tests: "*"
+
+          - image: windows-2025-vs2026
+            configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+
+          - image: windows-2025-vs2026
+            configuration: "StaticDebug"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+
+    runs-on: ${{ matrix.image }}
+
+    steps:
+      - name: Get branch name
+        id: get-branch
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set msbuild path
+        uses: microsoft/setup-msbuild@v3
+        with:
+          msbuild-architecture: x64
+
+      - name: Checkout repository [libbitcoin-system]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
+
+      - name: Execute build
+        shell: cmd
+        working-directory: 'libbitcoin-system'
+        run: >
+          .\builds\msvc\build-msvc.cmd
+          --build-src-dir "${{ github.workspace }}"
+          --build-config ${{ matrix.configuration }}
+          --build-platform ${{ matrix.platform }}
+          --build-version ${{ matrix.version }}
+          --build-use-local-src
+
+      - name: Execute tests
+        shell: powershell
+        working-directory: 'libbitcoin-system'
+        run: |
+          Write-Host "Locating test executables..." -ForegroundColor Yellow;
+          $BC_TEST_EXES = @(Get-ChildItem -Path "bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
+          If ($BC_TEST_EXES.Count -ne 1) {
+            Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+            exit 1;
+          }
+          Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+          $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          try {
+            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+          Write-Host "Test execution complete." -ForegroundColor Green;
