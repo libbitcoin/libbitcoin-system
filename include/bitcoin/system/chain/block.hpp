@@ -154,6 +154,7 @@ protected:
     block(const chain::header::cptr& header,
         const chain::transactions_cptr& txs, bool valid) NOEXCEPT;
 
+    code malleated_or(const code& ec) const NOEXCEPT;
     code check_with_malleated() const NOEXCEPT;
     size_t malleated32_size() const NOEXCEPT;
     bool is_malleated32(size_t width) const NOEXCEPT;

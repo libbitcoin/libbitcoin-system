@@ -374,6 +374,9 @@ bool block::is_oversized() const NOEXCEPT
     return serialized_size(false) > max_block_size;
 }
 
+// This also precludes the block merkle calculation DoS exploit as it is
+// considered computationally infeasible to produce malleable64 with a
+// valid (null) coinbase input point.
 bool block::is_first_non_coinbase() const NOEXCEPT
 {
     return !txs_->empty() && !txs_->front()->is_coinbase();
@@ -609,6 +612,11 @@ bool block::is_malleated64() const NOEXCEPT
 {
     return !txs_->empty() && !txs_->front()->is_coinbase() &&
         is_malleable64(*txs_);
+}
+
+code block::malleated_or(const code& ec) const NOEXCEPT
+{
+    return is_malleated() ? error::invalid_transaction_commitment : ec;
 }
 
 bool block::is_segregated() const NOEXCEPT
@@ -878,20 +886,18 @@ code block::check() const NOEXCEPT
 {
     // type64 malleated is a subset of first_not_coinbase.
     // type32 malleated is a subset of is_internal_double_spend.
-    if (is_oversized())
-        return error::block_size_limit;
     if (is_empty())
         return error::empty_block;
+    if (is_oversized())
+        return error::block_size_limit;
     if (is_first_non_coinbase())
-        return (is_malleated() ? error::invalid_transaction_commitment :
-                error::first_not_coinbase);
+        return malleated_or(error::first_not_coinbase);
     if (is_extra_coinbases())
         return error::extra_coinbases;
     if (is_forward_reference())
         return error::forward_reference;
     if (is_internal_double_spend())
-        return is_malleated() ? error::invalid_transaction_commitment : 
-            error::block_internal_double_spend;
+        return malleated_or(error::block_internal_double_spend);
     if (is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
