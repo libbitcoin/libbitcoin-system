@@ -301,7 +301,7 @@ enum class opcode : uint8_t
     reserved_252 = 252,         // is_reserved, is_success[bip342]
     reserved_253 = 253,         // is_reserved, is_success[bip342]
     reserved_254 = 254,         // is_reserved, is_success[bip342]
-    reserved_255 = 255
+    reserved_255 = 255          // is_reserved
 };
 
 /// Convert the opcode to a mnemonic string.
