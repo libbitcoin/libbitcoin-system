@@ -1,24 +1,23 @@
+###############################################################################
+#  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+
+# c/c++ compiled objects
+*.o
+
+# python bytecode
+*.pyc
+
+# gnu
 .deps
+Makefile
+Makefile.in
 .libs
 *.la
 *.lo
-*.o
-*.pyc
-Makefile
-Makefile.in
-libbitcoin.pc
-
-bin
-obj
-build
-.*.swp
-*~
-/*.kdev4
-/.cproject
-/.project
-/.settings
-/nbproject
-
 /aclocal.m4
 /autom4te.cache
 /build-aux
@@ -26,7 +25,47 @@ build
 /configure
 /libtool
 .dirstamp
+
+# pkg-config pc file from .pc.in
+*.pc
+
+# msbuild/msvc
 /.vs
-*.db-wal
-*.db-shm
 *.db
+*.db-shm
+*.db-wal
+*.vsidx
+*.lock
+
+# backup files
+*~
+
+# vim swap files
+.*.swp
+
+# common build directories
+bin
+build
+obj
+
+# KDevelop IDE
+/*.kdev4
+
+# Eclipse/CDT
+/.cproject
+
+# Eclipse/CDT
+/.project
+
+# Eclipse/CDT
+/.settings
+
+# NetBeans
+/nbproject
+
+# GitNexus tool.
+.gitnexus
+AI agent tooling
+.claude
+AGENTS.md
+CLAUDE.md
