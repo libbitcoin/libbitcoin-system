@@ -133,7 +133,7 @@ op_if() NOEXCEPT
 {
     auto value = false;
 
-    if (state::is_succeess())
+    if (state::is_success())
     {
         if (state::is_stack_empty())
             return error::op_if1;
@@ -152,7 +152,7 @@ op_notif() NOEXCEPT
 {
     auto value = false;
 
-    if (state::is_succeess())
+    if (state::is_success())
     {
         if (state::is_stack_empty())
             return error::op_notif1;
