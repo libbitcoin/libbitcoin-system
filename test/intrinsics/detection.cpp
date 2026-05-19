@@ -70,4 +70,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_shani__always__match)
         get_right(ebx, cpu7_0::shani_ebx_bit), try_shani());
 }
 
+// try_neon
+// try_crypto
+
 BOOST_AUTO_TEST_SUITE_END()

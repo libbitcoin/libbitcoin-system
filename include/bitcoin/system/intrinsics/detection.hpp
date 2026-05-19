@@ -19,6 +19,16 @@
 #ifndef LIBBITCOIN_SYSTEM_INTRINSICS_DETECTION_HPP
 #define LIBBITCOIN_SYSTEM_INTRINSICS_DETECTION_HPP
 
+#if defined(HAVE_ARM)
+    #if defined(HAVE_LINUX)
+        #include <sys/auxv.h>
+        #include <asm/hwcap.h>
+    #endif
+    #if defined(HAVE_APPLE)
+        #include <sys/sysctl.h>
+    #endif
+#endif
+
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 
@@ -108,6 +118,63 @@ inline bool try_sse41() NOEXCEPT
     uint32_t eax{}, ebx{}, ecx{}, edx{};
     return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
+}
+
+/// Runtime checks for ARM NEON and CRYPTO availability.
+/// ---------------------------------------------------------------------------
+
+inline bool try_neon() NOEXCEPT
+{
+#if defined(HAVE_ARM)
+    #if defined(HAVE_LINUX)
+        #if defined(HAVE_ARM64)
+            constexpr auto hwcap = HWCAP_ASIMD;
+        #else
+            constexpr auto hwcap = HWCAP_NEON;
+        #endif
+        const auto caps = getauxval(AT_HWCAP);
+        return to_bool(bit_and<uint64_t>(caps, hwcap));
+    #elif defined(HAVE_APPLE)
+        int value{};
+        auto size = sizeof(int);
+        sysctlbyname("hw.optional.neon", &value, &size, nullptr, zero);
+        return to_bool(value);
+    #elif defined(HAVE_MSVC)
+        constexpr auto neon_flag = PF_ARM_NEON_INSTRUCTIONS_AVAILABLE;
+        return to_bool(::IsProcessorFeaturePresent(neon_flag));
+    #else
+        return false;
+    #endif
+#else
+    return false;
+#endif
+}
+
+inline bool try_crypto() NOEXCEPT
+{
+#if defined(HAVE_ARM)
+    #if defined(HAVE_LINUX)
+        const auto caps = getauxval(AT_HWCAP);
+        return
+            to_bool(bit_and<uint64_t>(caps, HWCAP_AES)) &&
+            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA1)) &&
+            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA2));
+    #elif defined(HAVE_APPLE)
+        int aes{}, sha1{}, sha256{};
+        auto size = sizeof(int);
+        sysctlbyname("hw.optional.armv8_aes", &aes, &size, nullptr, zero);
+        sysctlbyname("hw.optional.armv8_sha1", &sha1, &size, nullptr, zero);
+        sysctlbyname("hw.optional.armv8_sha256",&sha256, &size, nullptr, zero);
+        return to_bool(aes) && to_bool(sha1) && to_bool(sha256);
+    #elif defined(HAVE_MSVC)
+        constexpr auto crypto_flag = PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE;
+        return to_bool(::IsProcessorFeaturePresent(crypto_flag));
+    #else
+        return false;
+    #endif
+#else
+    return false;
+#endif
 }
 
 } // namespace system
