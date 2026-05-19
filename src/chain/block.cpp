@@ -882,7 +882,7 @@ code block::identify(const context& ctx) const NOEXCEPT
 // The block header is checked/accepted independently.
 
 // Use of get_hash() in is_forward_reference makes this thread-unsafe.
-code block::check() const NOEXCEPT
+code block::check(bool identity) const NOEXCEPT
 {
     // type64 malleated is a subset of first_not_coinbase.
     // type32 malleated is a subset of is_internal_double_spend.
@@ -898,7 +898,7 @@ code block::check() const NOEXCEPT
         return error::forward_reference;
     if (is_internal_double_spend())
         return malleated_or(error::block_internal_double_spend);
-    if (is_invalid_merkle_root())
+    if (identity && is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
     return check_transactions();
@@ -911,7 +911,7 @@ code block::check() const NOEXCEPT
 
 // Use of get_hash() in is_hash_limit_exceeded makes this thread-unsafe.
 // bip141 should be disabled when the node is not accepting witness data.
-code block::check(const context& ctx) const NOEXCEPT
+code block::check(const context& ctx, bool identity) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
@@ -923,7 +923,7 @@ code block::check(const context& ctx) const NOEXCEPT
         return error::coinbase_height_mismatch;
     if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
-    if (bip141 && is_invalid_witness_commitment())
+    if (bip141 && identity && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
 
     return check_transactions(ctx);
