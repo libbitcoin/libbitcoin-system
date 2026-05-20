@@ -570,7 +570,7 @@ is_balanced() const NOEXCEPT
 
 TEMPLATE
 INLINE bool CLASS::
-is_succeess() const NOEXCEPT
+is_success() const NOEXCEPT
 {
     // Optimization changes O(n) search [for every operation] to O(1).
     // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
@@ -582,7 +582,7 @@ INLINE bool CLASS::
 if_(const operation& op) const NOEXCEPT
 {
     // Conditional op execution is not predicated on conditional stack.
-    return op.is_conditional() || is_succeess();
+    return op.is_conditional() || is_success();
 }
 
 //  Accumulator.

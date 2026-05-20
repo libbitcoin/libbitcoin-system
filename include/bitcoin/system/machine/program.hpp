@@ -150,7 +150,7 @@ protected:
     INLINE void else_if_() NOEXCEPT;
     INLINE void end_if_() NOEXCEPT;
     INLINE bool is_balanced() const NOEXCEPT;
-    INLINE bool is_succeess() const NOEXCEPT;
+    INLINE bool is_success() const NOEXCEPT;
     INLINE bool if_(const operation& op) const NOEXCEPT;
 
     /// Accumulators.

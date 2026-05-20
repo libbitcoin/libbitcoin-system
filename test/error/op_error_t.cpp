@@ -605,6 +605,8 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_hash256__true_expected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "op_hash256");
 }
 
+// op_check_sig/verify
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify1__true_expected_message)
 {
     constexpr auto value = error::op_check_sig_verify1;
@@ -650,42 +652,6 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify5__true_expected_messa
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify5");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify6__true_expected_message)
-{
-    constexpr auto value = error::op_check_sig_verify6;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify6");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify7__true_expected_message)
-{
-    constexpr auto value = error::op_check_sig_verify7;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify7");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify8__true_expected_message)
-{
-    constexpr auto value = error::op_check_sig_verify8;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify8");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify9__true_expected_message)
-{
-    constexpr auto value = error::op_check_sig_verify9;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify9");
-}
-
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_empty_key__true_expected_message)
 {
     constexpr auto value = error::op_check_sig_empty_key;
@@ -693,6 +659,42 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_empty_key__true_expected_mes
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_empty_key");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_schnorr1__true_expected_message)
+{
+    constexpr auto value = error::op_check_sig_schnorr1;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_schnorr1");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_schnorr2__true_expected_message)
+{
+    constexpr auto value = error::op_check_sig_schnorr2;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_schnorr2");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_schnorr3__true_expected_message)
+{
+    constexpr auto value = error::op_check_sig_schnorr3;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_schnorr3");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_budget__true_expected_message)
+{
+    constexpr auto value = error::op_check_sig_budget;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_budget");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_parse_signature__true_expected_message)
@@ -703,6 +705,8 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_parse_signature__true_expect
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_parse_signature");
 }
+
+// op_check_multisig/verify
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify1__true_expected_message)
 {
@@ -812,6 +816,8 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_parse_signature__true_e
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_parse_signature");
 }
 
+// op_check_locktime_verify
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_locktime_verify1__true_expected_message)
 {
     constexpr auto value = error::op_check_locktime_verify1;
@@ -847,6 +853,8 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_locktime_verify4__true_expected_
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_locktime_verify4");
 }
+
+// op_check_sequence_verify
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sequence_verify1__true_expected_message)
 {
@@ -893,76 +901,69 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sequence_verify5__true_expected_
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sequence_verify5");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add__true_expected_message)
+// op_check_sig_add
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add1__true_expected_message)
 {
-    constexpr auto value = error::op_check_sig_add;
+    constexpr auto value = error::op_check_sig_add1;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add1");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig1__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add2__true_expected_message)
 {
-    constexpr auto value = error::op_check_schnorr_sig1;
+    constexpr auto value = error::op_check_sig_add2;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig1");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add2");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig2__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add3__true_expected_message)
 {
-    constexpr auto value = error::op_check_schnorr_sig2;
+    constexpr auto value = error::op_check_sig_add3;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig2");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add3");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig3__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add4__true_expected_message)
 {
-    constexpr auto value = error::op_check_schnorr_sig3;
+    constexpr auto value = error::op_check_sig_add4;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig3");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add4");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig4__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add5__true_expected_message)
 {
-    constexpr auto value = error::op_check_schnorr_sig4;
+    constexpr auto value = error::op_check_sig_add5;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig4");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add5");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig5__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add6__true_expected_message)
 {
-    constexpr auto value = error::op_check_schnorr_sig5;
+    constexpr auto value = error::op_check_sig_add6;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig5");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add6");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig6__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_add7__true_expected_message)
 {
-    constexpr auto value = error::op_check_schnorr_sig6;
+    constexpr auto value = error::op_check_sig_add7;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig6");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig7__true_expected_message)
-{
-    constexpr auto value = error::op_check_schnorr_sig7;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig7");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_add7");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
