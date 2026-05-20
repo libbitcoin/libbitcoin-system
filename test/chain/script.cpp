@@ -641,6 +641,18 @@ BOOST_AUTO_TEST_CASE(script__multisig__bip66_invalid_der)
     }
 }
 
+BOOST_AUTO_TEST_CASE(script__multisig__soft_errors__push_false)
+{
+    for (const auto& test: valid_soft_error_multisig_scripts)
+    {
+        const auto tx = test_tx(test);
+        const auto name = test_name(test);
+        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
+
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) ==
+            error::stack_false, name);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(script__context_free__valid)
 {
