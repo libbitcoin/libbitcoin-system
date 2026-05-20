@@ -990,7 +990,15 @@ inline error::op_error_t CLASS::
 op_check_sig() NOEXCEPT
 {
     const auto ec = op_check_sig_verify();
-    if (ec == error::op_check_sig_empty_key)
+
+    // BIP342: MUST fail and end conditions.
+    const auto bip342 = state::is_enabled(flags::bip342_rule);
+    if (bip342 && (
+        ec == error::op_check_sig_empty_key ||
+        ec == error::op_check_sig_schnorr1 ||
+        ec == error::op_check_sig_schnorr2 ||
+        ec == error::op_check_sig_schnorr3 ||
+        ec == error::op_check_sig_budget))
         return ec;
 
     // BIP66: if DER encoding invalid script MUST fail and end.
@@ -1163,7 +1171,7 @@ op_check_multisig_verify() NOEXCEPT
         // BIP66: if DER encoding invalid script MUST fail and end.
         ec_signature sig;
         if (!ecdsa::parse_signature(sig, der, bip66))
-            return error::op_check_sig_parse_signature;
+            return error::op_check_multisig_parse_signature;
 
         // Signature hash caching (bypass signature hash if same as previous).
         if (state::uncached(sighash_flags))
