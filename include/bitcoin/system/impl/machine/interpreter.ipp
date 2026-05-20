@@ -991,6 +991,11 @@ op_check_sig() NOEXCEPT
 {
     const auto ec = op_check_sig_verify();
 
+    // BIP66: if DER encoding invalid script MUST fail and end.
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
+    if (bip66 && ec == error::op_check_sig_parse_signature)
+        return ec;
+
     // BIP342: MUST fail and end conditions.
     const auto bip342 = state::is_enabled(flags::bip342_rule);
     if (bip342 && (
@@ -999,11 +1004,6 @@ op_check_sig() NOEXCEPT
         ec == error::op_check_sig_schnorr2 ||
         ec == error::op_check_sig_schnorr3 ||
         ec == error::op_check_sig_budget))
-        return ec;
-
-    // BIP66: if DER encoding invalid script MUST fail and end.
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
-    if (bip66 && ec == error::op_check_sig_parse_signature)
         return ec;
 
     state::push_bool(ec == error::op_success);
@@ -1019,13 +1019,13 @@ op_check_sig_verify() NOEXCEPT
 
     const auto key = state::pop_chunk_();
     const auto endorsement = state::pop_chunk_();
+
     if (key->empty())
         return error::op_check_sig_empty_key;
 
     // BIP342:
     if (state::is_enabled(flags::bip342_rule))
     {
-        // If signature is empty, script MUST fail and end (or push false).
         if (endorsement->empty())
             return error::op_check_sig_verify2;
 
@@ -1037,21 +1037,20 @@ op_check_sig_verify() NOEXCEPT
             uint8_t sighash_flags;
             const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
             if (sighash_flags == chain::coverage::invalid)
-                return error::op_check_sig_verify3;
+                return error::op_check_sig_schnorr1;
 
             // Generate signature hash.
             hash_digest hash{};
             if (!state::signature_hash(hash, sighash_flags))
-                return error::op_check_sig_verify4;
+                return error::op_check_sig_schnorr2;
 
             // Verify schnorr signature against public key and signature hash.
             if (!schnorr::verify_signature(*key, hash, sig))
-                return error::op_check_sig_verify5;
-
-            // If signature not empty, opcode counted toward sigops budget.
-            if (!state::sigops_increment())
-                return error::op_check_sig_verify6;
+                return error::op_check_sig_schnorr3;
         }
+
+        if (!state::sigops_increment())
+            return error::op_check_sig_budget;
 
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
         // During script execution of signature opcodes these behave exactly as
@@ -1060,7 +1059,7 @@ op_check_sig_verify() NOEXCEPT
     }
 
     if (endorsement->empty())
-        return error::op_check_sig_verify7;
+        return error::op_check_sig_verify3;
 
     // Split endorsement into DER signature and signature hash flags.
     uint8_t sighash_flags;
@@ -1076,11 +1075,11 @@ op_check_sig_verify() NOEXCEPT
     hash_digest hash{};
     const auto subscript = state::subscript(endorsement);
     if (!state::signature_hash(hash, *subscript, sighash_flags))
-        return error::op_check_sig_verify8;
+        return error::op_check_sig_verify4;
 
     // Verify ECDSA signature against public key and signature hash.
     if (!ecdsa::verify_signature(*key, hash, sig))
-        return error::op_check_sig_verify9;
+        return error::op_check_sig_verify5;
 
     // TODO: use sighash and key to generate signature in sign mode.
     return error::op_success;
@@ -1282,20 +1281,20 @@ op_check_sig_add() NOEXCEPT
 
     // If fewer than 3 elements on stack, script MUST fail and end.
     if (state::stack_size() < 3u)
-        return error::op_check_schnorr_sig1;
+        return error::op_check_sig_add1;
 
     // Public key (top) is popped.
     const auto key = state::pop_chunk_();
 
     // If public key is empty, script MUST fail and end.
     if (key->empty())
-        return error::op_check_schnorr_sig2;
+        return error::op_check_sig_add2;
 
     // Number (second to top) is popped.
     // If number is larger than 4 bytes, script MUST fail and end.
     int32_t number;
     if (!state::pop_signed32_(number))
-        return error::op_check_schnorr_sig3;
+        return error::op_check_sig_add3;
 
     // Signature (third to top) is popped.
     const auto endorsement = state::pop_chunk_();
@@ -1311,20 +1310,20 @@ op_check_sig_add() NOEXCEPT
     uint8_t sighash_flags;
     const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
     if (sighash_flags == chain::coverage::invalid)
-        return error::op_check_schnorr_sig4;
+        return error::op_check_sig_add4;
 
     // Generate signature hash.
     hash_digest hash{};
     if (!state::signature_hash(hash, sighash_flags))
-        return error::op_check_schnorr_sig5;
+        return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
     if (!schnorr::verify_signature(*key, hash, sig))
-        return error::op_check_schnorr_sig6;
+        return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.
     if (!state::sigops_increment())
-        return error::op_check_schnorr_sig7;
+        return error::op_check_sig_add7;
 
     // If signature not empty (and successful), [number+1] pushed.
     state::push_signed64(add1<int64_t>(number));
