@@ -1149,12 +1149,8 @@ op_check_multisig_verify() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_check_multisig_verify8;
 
-    //*************************************************************************
-    // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
-    //*************************************************************************
+    // BIP147: Satoshi bug, discard stack element, malleable until active.
     const auto bip147 = state::is_enabled(flags::bip147_rule);
-
-    // This check is unique in that a chunk must be empty to be false.
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
@@ -1187,7 +1183,7 @@ op_check_multisig_verify() NOEXCEPT
         // Signature hash caching (bypass signature hash if same as previous).
         if (state::uncached(sighash_flags))
             if (!state::set_hash(*subscript, sighash_flags))
-                return error::op_check_multisig_verify10;
+                continue;
 
         // Verify ECDSA signature against public key and cache signature hash.
         if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
@@ -1196,7 +1192,7 @@ op_check_multisig_verify() NOEXCEPT
 
     // All endorsements must be verified against a key.
     if (it != endorsements.end())
-        return error::op_check_multisig_verify11;
+        return error::op_check_multisig_mismatch;
 
     // TODO: use sighash and key to generate signature in sign mode.
     return error::op_success;
