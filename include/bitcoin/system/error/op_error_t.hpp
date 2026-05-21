@@ -119,8 +119,7 @@ enum op_error_t : uint8_t
     op_check_multisig_verify7,
     op_check_multisig_verify8,
     op_check_multisig_verify9,
-    op_check_multisig_verify10,
-    op_check_multisig_verify11,
+    op_check_multisig_mismatch,
     op_check_multisig_parse_signature,
 
     op_check_locktime_verify1,

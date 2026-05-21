@@ -789,22 +789,13 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify9__true_expected_
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify9");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify10__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_mismatch__true_expected_message)
 {
-    constexpr auto value = error::op_check_multisig_verify10;
+    constexpr auto value = error::op_check_multisig_mismatch;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify10");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify11__true_expected_message)
-{
-    constexpr auto value = error::op_check_multisig_verify11;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify11");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_mismatch");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_parse_signature__true_expected_message)
