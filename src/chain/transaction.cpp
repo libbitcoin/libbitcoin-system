@@ -152,32 +152,33 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
     auto& allocator = source.get_allocator();
     auto ins = to_non_const_raw_ptr(inputs_);
     auto count = source.read_size(max_block_size);
-    ins->reserve(count);
-    for (size_t in{}; in < count; ++in)
-        ins->emplace_back(CREATE(input, allocator, source));
 
     // Expensive repeated recomputation, so cache segregated state.
     // Detect witness as no inputs (marker) and expected flag [bip144].
-    segregated_ = 
-        inputs_->size() == witness_marker &&
+    segregated_ =
+        count == witness_marker &&
         source.peek_byte() == witness_enabled;
 
     if (segregated_)
     {
         // Skip over the peeked witness flag.
         source.skip_byte();
-
         count = source.read_size(max_block_size);
-        ins->reserve(count);
-        for (size_t in{}; in < count; ++in)
-            ins->emplace_back(CREATE(input, allocator, source));
+    }
 
-        auto outs = to_non_const_raw_ptr(outputs_);
-        count = source.read_size(max_block_size);
-        outs->reserve(count);
-        for (size_t out{}; out < count; ++out)
-            outs->emplace_back(CREATE(output, allocator, source));
+    ins->reserve(count);
+    for (size_t in{}; in < count; ++in)
+        ins->emplace_back(CREATE(input, allocator, source));
 
+    auto outs = to_non_const_raw_ptr(outputs_);
+    count = source.read_size(max_block_size);
+
+    outs->reserve(count);
+    for (size_t out{}; out < count; ++out)
+        outs->emplace_back(CREATE(output, allocator, source));
+
+    if (segregated_)
+    {
         // Read or skip witnesses as specified.
         if (witness)
         {
@@ -200,14 +201,6 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
             for (size_t in{}; in < inputs_->size(); ++in)
                 witness::skip(source, true);
         }
-    }
-    else
-    {
-        auto outs = to_non_const_raw_ptr(outputs_);
-        count = source.read_size(max_block_size);
-        outs->reserve(count);
-        for (size_t out{}; out < count; ++out)
-            outs->emplace_back(CREATE(output, allocator, source));
     }
 
     locktime_ = source.read_4_bytes_little_endian();
