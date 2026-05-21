@@ -1099,6 +1099,18 @@ op_check_multisig() NOEXCEPT
     if (bip66 && ec == error::op_check_multisig_parse_signature)
         return ec;
 
+    // Structural(hard) errors MUST fail and end script.
+    if ( ec == error::op_check_multisig_verify1 ||
+         ec == error::op_check_multisig_verify2 ||
+         ec == error::op_check_multisig_verify3 ||
+         ec == error::op_check_multisig_verify4 ||
+         ec == error::op_check_multisig_verify5 ||
+         ec == error::op_check_multisig_verify6 ||
+         ec == error::op_check_multisig_verify7 ||
+         ec == error::op_check_multisig_verify8 ||
+         ec == error::op_check_multisig_verify9)
+        return ec;
+
     state::push_bool(ec == error::op_success);
     return error::op_success;
 }
