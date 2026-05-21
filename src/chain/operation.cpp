@@ -218,7 +218,7 @@ void operation::assign_data(reader& source) NOEXCEPT
     const auto size = read_data_size(code_, source);
 
     // read_bytes only guarded from excessive allocation by stream limit.
-    if (size > max_block_size)
+    if (size > max_block_weight)
         source.invalidate();
 
     // An invalid source.read_bytes_raw returns nullptr.
