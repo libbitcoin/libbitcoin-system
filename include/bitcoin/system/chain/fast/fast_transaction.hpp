@@ -51,6 +51,11 @@ public:
     bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
+    /// Object writers.
+    void write_input_script(flipper& sink, reader& source) const NOEXCEPT;
+    void write_output_script(flipper& sink, reader& source) const NOEXCEPT;
+    void write_input_witness(flipper& sink, reader& source) const NOEXCEPT;
+
 private:
     // witness commitment
     static constexpr size_t reserved_pattern_size = 2;

@@ -113,6 +113,7 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
 
 // public
 // ----------------------------------------------------------------------------
+// properties
 
 bool fast_transaction::is_coinbase() const NOEXCEPT
 {
@@ -148,6 +149,10 @@ size_t fast_transaction::serialized_size(bool witness) const NOEXCEPT
     return witness ? size_ : (size_ - witness_size_ - sentinels);
 }
 
+// public
+// ----------------------------------------------------------------------------
+// methods
+
 bool fast_transaction::get_witness_commitment(
     hash_cref& commitment) const NOEXCEPT
 {
@@ -175,6 +180,10 @@ bool fast_transaction::get_witness_commitment(
     return true;
 }
 
+// public
+// ----------------------------------------------------------------------------
+// writers
+
 bool fast_transaction::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
@@ -185,6 +194,40 @@ bool fast_transaction::get_witness_reservation(
     const auto offset = std::next(witness, reserved_pattern_size);
     reservation = unsafe_array_cast<uint8_t, hash_size>(offset);
     return true;
+}
+
+void fast_transaction::write_input_script(flipper& sink,
+    reader& source) const NOEXCEPT
+{
+    source.skip_bytes(chain::point::serialized_size());
+
+    const auto size = source.read_size(max_bytes);
+    sink.write_variable(size);
+    sink.write_bytes(source.read_bytes(size));
+}
+
+void fast_transaction::write_output_script(flipper& sink,
+    reader& source) const NOEXCEPT
+{
+    source.skip_variable();
+
+    const auto size = source.read_size(max_bytes);
+    sink.write_variable(size);
+    sink.write_bytes(source.read_bytes(size));
+}
+
+void fast_transaction::write_input_witness(flipper& sink,
+    reader& source) const NOEXCEPT
+{
+    const auto stack = source.read_size(max_bytes);
+    sink.write_variable(stack);
+
+    for (size_t element{}; element < stack; ++element)
+    {
+        const auto size = source.read_size(max_bytes);
+        sink.write_variable(size);
+        sink.write_bytes(source.read_bytes(size));
+    }
 }
 
 // private/static
