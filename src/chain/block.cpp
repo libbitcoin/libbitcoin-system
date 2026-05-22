@@ -570,6 +570,17 @@ size_t block::malleated32_size() const NOEXCEPT
     return zero;
 }
 
+// static
+bool block::is_malleable32(size_t set, size_t width) NOEXCEPT
+{
+    // Malleable when set is odd at width depth and not before and not one.
+    // This is the only case in which Merkle clones the last item in a set.
+    for (auto depth = one; depth <= width; depth *= two, set = to_half(set))
+        if (is_odd(set)) return depth == width && !is_one(set);
+
+    return false;
+}
+
 // protected
 // True if the last width set of tx hashes repeats.
 bool block::is_malleated32(size_t width) const NOEXCEPT

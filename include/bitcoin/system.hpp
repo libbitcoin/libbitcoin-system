@@ -64,6 +64,8 @@
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/enums/selection.hpp>
+#include <bitcoin/system/chain/fast/fast_block.hpp>
+#include <bitcoin/system/chain/fast/fast_transaction.hpp>
 #include <bitcoin/system/chain/json/block.hpp>
 #include <bitcoin/system/chain/json/checkpoint.hpp>
 #include <bitcoin/system/chain/json/header.hpp>

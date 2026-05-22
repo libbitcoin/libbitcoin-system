@@ -27,6 +27,8 @@
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/enums.hpp>
+#include <bitcoin/system/chain/fast/fast_block.hpp>
+#include <bitcoin/system/chain/fast/fast_transaction.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/json/json.hpp>

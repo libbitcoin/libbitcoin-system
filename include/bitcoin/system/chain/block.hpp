@@ -42,6 +42,7 @@ public:
 
     typedef std::shared_ptr<const block> cptr;
 
+    static bool is_malleable32(size_t set, size_t width) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static hashes merkle_branch(size_t position, hashes&& leaves) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
@@ -158,15 +159,6 @@ protected:
     code check_with_malleated() const NOEXCEPT;
     size_t malleated32_size() const NOEXCEPT;
     bool is_malleated32(size_t width) const NOEXCEPT;
-    static constexpr bool is_malleable32(size_t set, size_t width) NOEXCEPT
-    {
-        // Malleable when set is odd at width depth and not before and not one.
-        // This is the only case in which Merkle clones the last item in a set.
-        for (auto depth = one; depth <= width; depth *= two, set = to_half(set))
-            if (is_odd(set)) return depth == width && !is_one(set);
-
-        return false;
-    }
 
     /// Check (context free).
     /// -----------------------------------------------------------------------

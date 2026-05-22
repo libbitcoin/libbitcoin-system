@@ -133,6 +133,8 @@
       <ObjectFileName>$(IntDir)src_chain_context.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\enums\opcode.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\fast\fast_block.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\fast\fast_transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <ObjectFileName>$(IntDir)src_chain_header.obj</ObjectFileName>
     </ClCompile>
@@ -391,6 +393,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\script_pattern.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\script_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\selection.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\fast\fast_block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\fast\fast_transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\json\block.hpp" />

@@ -134,6 +134,8 @@
       <ObjectFileName>$(IntDir)test_chain_context.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\fast\fast_block.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\fast\fast_transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
       <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
     </ClCompile>
