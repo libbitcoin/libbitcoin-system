@@ -846,7 +846,8 @@ const script_test_list invalid_context_free_scripts
     { "nop", "sha256 1", "" },
     { "nop", "hash160 1", "" },
     { "nop", "hash256 1", "" },
-    { "0x00", "'00' equal", "basic op_0 execution" }
+    { "0x00", "'00' equal", "basic op_0 execution" },
+    { "", "0xac 1", "op_checksig with empty stack must fail" }
 }};
 
 // These parse errors cannot happen in the libbitcoin syntax.
