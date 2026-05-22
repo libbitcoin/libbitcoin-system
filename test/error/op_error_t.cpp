@@ -607,6 +607,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_hash256__true_expected_message)
 
 // op_check_sig/verify
 
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_low_stack__true_expected_message)
+{
+    constexpr auto value = error::op_check_sig_low_stack;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_low_stack");
+}
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify1__true_expected_message)
 {
     constexpr auto value = error::op_check_sig_verify1;
@@ -641,15 +650,6 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify4__true_expected_messa
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify4");
-}
-
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify5__true_expected_message)
-{
-    constexpr auto value = error::op_check_sig_verify5;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify5");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_empty_key__true_expected_message)
