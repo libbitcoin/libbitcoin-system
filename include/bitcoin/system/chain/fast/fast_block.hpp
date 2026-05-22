@@ -34,39 +34,42 @@ class BC_API fast_block final
 public:
     DELETE_COPY_MOVE(fast_block);
 
+    /// Segregation is handled and suppressed when witness is false.
     fast_block(data_chunk&& buffer, bool witness) NOEXCEPT;
 
-    /// Methods.
+    /// Deserialization.
     bool is_valid() const NOEXCEPT;
-    bool is_malleated() const NOEXCEPT;
-    bool is_segregated() const NOEXCEPT;
-    bool is_invalid_merkle_root() const NOEXCEPT;
-    bool is_invalid_witness_commitment() const NOEXCEPT;
 
     /// Validation.
     code identify() const NOEXCEPT;
     code identify(const context& ctx) const NOEXCEPT;
 
 protected:
+    /// Validation helpers.
+    bool is_malleated() const NOEXCEPT;
+    bool is_segregated() const NOEXCEPT;
+    bool is_invalid_merkle_root() const NOEXCEPT;
+    bool is_invalid_witness_commitment() const NOEXCEPT;
+
+private:
     using fast_transactions = std::vector<fast_transaction>;
 
-    /// Methods.
+    // Malleation.
     static bool is_malleable64(const fast_transactions& txs) NOEXCEPT;
     bool is_malleated32() const NOEXCEPT;
     bool is_malleated64() const NOEXCEPT;
     size_t malleated32_size() const NOEXCEPT;
     bool is_malleated32(size_t width) const NOEXCEPT;
 
-    /// Properties.
+    // Merkle roots.
     hash_digest header_merkle_root() const NOEXCEPT;
     hashes transaction_hashes(bool witness) const NOEXCEPT;
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
-    bool committed_hash(hash_cref& out) const NOEXCEPT;
+
+    // Witness commitment.
     bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
-    bool reserved_hash(hash_cref& out) const NOEXCEPT;
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
-private:
     bool witness_;
     data_chunk buffer_;
     fast_transactions txs_{};

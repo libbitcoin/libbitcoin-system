@@ -52,17 +52,14 @@ public:
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
 private:
-    static constexpr size_t version_size = sizeof(uint32_t);
-    static constexpr size_t sequence_size = sizeof(uint32_t);
-    static constexpr size_t locktime_size = sizeof(uint32_t);
-    static constexpr size_t sentinels_size = sizeof(witness_marker) +
-        sizeof(witness_enabled);
-
-    static bool is_reserved_pattern(const uint8_t* stack,
-        size_t size) NOEXCEPT;
+    // witness commitment
+    static constexpr size_t reserved_pattern_size = 2;
+    static constexpr size_t commitment_pattern_size = 6;
+    static bool is_reserved_pattern(const uint8_t* stack, size_t size) NOEXCEPT;
     static bool is_commitment_pattern(const uint8_t* script,
         size_t size) NOEXCEPT;
 
+    // buffer offsets
     const uint8_t* to_inputs() const NOEXCEPT;
     const uint8_t* to_outputs() const NOEXCEPT;
     const uint8_t* to_witnesses() const NOEXCEPT;

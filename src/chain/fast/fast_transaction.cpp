@@ -30,10 +30,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-
 // constructor
 // ----------------------------------------------------------------------------
 
@@ -43,9 +39,6 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
     constexpr auto version_size = sizeof(uint32_t);
     constexpr auto sequence_size = sizeof(uint32_t);
     constexpr auto locktime_size = sizeof(uint32_t);
-    constexpr auto sentinels_size = sizeof(witness_marker) +
-        sizeof(witness_enabled);
-
     const auto tx_start = source.get_read_position();
     source.skip_bytes(version_size);
 
@@ -101,13 +94,15 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
     source.skip_bytes(locktime_size);
     start_ptr_ = std::next(buffer.data(), tx_start);
     size_ = source.get_read_position() - tx_start;
+    witness_size_ = size_ - witness_offset - locktime_size;
 
     if (segregated)
     {
-        witness_size_ = size_ - witness_offset - locktime_size;
-        const auto nominal_size = size_ - witness_size_ - sentinels_size;
-        txid_ = transaction::desegregated_hash(size_, nominal_size, start_ptr_);
-        if (witness) wtxid_ = bitcoin_hash(size_, start_ptr_);
+        txid_ = transaction::desegregated_hash(serialized_size(true),
+            serialized_size(false), start_ptr_);
+
+        if (witness)
+            wtxid_ = bitcoin_hash(size_, start_ptr_);
     }
     else
     {
@@ -115,7 +110,7 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
     }
 }
 
-// properties
+// public
 // ----------------------------------------------------------------------------
 
 bool fast_transaction::is_coinbase() const NOEXCEPT
@@ -148,7 +143,8 @@ const hash_digest& fast_transaction::witness_id() const NOEXCEPT
 
 size_t fast_transaction::serialized_size(bool witness) const NOEXCEPT
 {
-    return witness ? size_ : (size_ - witness_size_);
+    constexpr auto sentinels = sizeof(witness_marker) + sizeof(witness_enabled);
+    return witness ? size_ : (size_ - witness_size_ - sentinels);
 }
 
 bool fast_transaction::get_witness_commitment(
@@ -173,7 +169,8 @@ bool fast_transaction::get_witness_commitment(
     if (!is_commitment_pattern(script, size))
         return false;
 
-    commitment = unsafe_array_cast<uint8_t, hash_size>(std::next(script, 6));
+    const auto offset = std::next(script, commitment_pattern_size);
+    commitment = unsafe_array_cast<uint8_t, hash_size>(offset);
     return true;
 }
 
@@ -184,17 +181,23 @@ bool fast_transaction::get_witness_reservation(
     if (!is_reserved_pattern(witness, witness_size_))
         return false;
 
-    reservation = unsafe_array_cast<uint8_t, hash_size>(std::next(witness, 2));
+    const auto offset = std::next(witness, reserved_pattern_size);
+    reservation = unsafe_array_cast<uint8_t, hash_size>(offset);
     return true;
 }
 
 // private/static
 // ----------------------------------------------------------------------------
+// witness commitment
+
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 bool fast_transaction::is_commitment_pattern(const uint8_t* script,
     size_t size) NOEXCEPT
 {
-    if (6u + hash_size > size)
+    if (commitment_pattern_size + hash_size > size)
         return false;
 
     constexpr auto header = to_big_endian(chain::witness_head);
@@ -209,7 +212,7 @@ bool fast_transaction::is_commitment_pattern(const uint8_t* script,
 bool fast_transaction::is_reserved_pattern(const uint8_t* stack,
     size_t size) NOEXCEPT
 {
-    if (2u + hash_size > size)
+    if (reserved_pattern_size + hash_size > size)
         return false;
 
     // First byte is stack size, second byte is size of single stack element.
@@ -217,30 +220,29 @@ bool fast_transaction::is_reserved_pattern(const uint8_t* stack,
         && stack[1] == hash_size;
 }
 
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
 // private
 // ----------------------------------------------------------------------------
+// buffer offsets
 
 const uint8_t* fast_transaction::to_inputs() const NOEXCEPT
 {
-    BC_ASSERT(!is_null(start_ptr_));
     return std::next(start_ptr_, in_offset_);
 }
 
 const uint8_t* fast_transaction::to_outputs() const NOEXCEPT
 {
-    BC_ASSERT(!is_null(start_ptr_));
     return std::next(start_ptr_, out_offset_);
 }
 
 const uint8_t* fast_transaction::to_witnesses() const NOEXCEPT
 {
-    BC_ASSERT(!is_null(start_ptr_));
-    return std::next(start_ptr_, size_ - witness_size_ - sizeof(uint32_t));
+    constexpr auto locktime_size = sizeof(uint32_t);
+    return std::next(start_ptr_, size_ - witness_size_ - locktime_size);
 }
-
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

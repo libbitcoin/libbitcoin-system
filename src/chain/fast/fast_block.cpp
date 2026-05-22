@@ -41,7 +41,7 @@ using namespace system;
 fast_block::fast_block(data_chunk&& buffer, bool witness) NOEXCEPT
   : witness_{ witness }, buffer_{ std::move(buffer) }
 {
-    stream::in::fast istream(buffer);
+    stream::in::fast istream(buffer_);
     read::bytes::fast in(istream);
     in.skip_bytes(header::serialized_size());
 
@@ -49,18 +49,47 @@ fast_block::fast_block(data_chunk&& buffer, bool witness) NOEXCEPT
     txs_.reserve(txs);
 
     for (size_t tx{}; tx < txs; ++tx)
-        txs_.emplace_back(in, buffer, witness);
+        txs_.emplace_back(in, buffer_, witness);
 
     if (!in)
         txs_.clear();
 }
 
-// methods
+// public
 // ----------------------------------------------------------------------------
 
 bool fast_block::is_valid() const NOEXCEPT
 {
     return !txs_.empty();
+}
+
+code fast_block::identify() const NOEXCEPT
+{
+    if (txs_.empty())
+        return error::empty_block;
+
+    if (is_malleated() || is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
+
+    return error::block_success;
+}
+
+code fast_block::identify(const context& ctx) const NOEXCEPT
+{
+    const auto bip141 = ctx.is_enabled(bip141_rule);
+
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
+
+    return error::block_success;
+}
+
+// protected
+// ----------------------------------------------------------------------------
+
+bool fast_block::is_malleated() const NOEXCEPT
+{
+    return is_malleated64() || is_malleated32();
 }
 
 bool fast_block::is_segregated() const NOEXCEPT
@@ -72,17 +101,51 @@ bool fast_block::is_segregated() const NOEXCEPT
         });
 }
 
-// is_malleated
-// ----------------------------------------------------------------------------
-
-bool fast_block::is_malleated() const NOEXCEPT
+bool fast_block::is_invalid_merkle_root() const NOEXCEPT
 {
-    return is_malleated64() || is_malleated32();
+    return generate_merkle_root(false) != header_merkle_root();
+}
+
+bool fast_block::is_invalid_witness_commitment() const NOEXCEPT
+{
+    if (txs_.empty())
+        return false;
+
+    hash_cref commit{ null_hash };
+    if (!get_witness_commitment(commit))
+        return is_segregated();
+
+    hash_cref reserve{ null_hash };
+    if (!get_witness_reservation(reserve))
+        return true;
+
+    return commit != sha256::double_hash(generate_merkle_root(true), reserve);
+}
+
+// malleation
+// ----------------------------------------------------------------------------
+// private
+
+// static
+bool fast_block::is_malleable64(const fast_transactions& txs) NOEXCEPT
+{
+    return !txs.empty() && std::all_of(txs.begin(), txs.end(),
+        [](const auto& tx) NOEXCEPT
+        {
+            return tx.serialized_size(false) == two * hash_size;
+        });
 }
 
 bool fast_block::is_malleated32() const NOEXCEPT
 {
     return !is_zero(malleated32_size());
+}
+
+bool fast_block::is_malleated64() const NOEXCEPT
+{
+    // First tx check is not sufficient, null point must be checked.
+    return !txs_.empty() && !txs_.front().is_coinbase() &&
+        is_malleable64(txs_);
 }
 
 size_t fast_block::malleated32_size() const NOEXCEPT
@@ -112,74 +175,9 @@ bool fast_block::is_malleated32(size_t width) const NOEXCEPT
     return true;
 }
 
-bool fast_block::is_malleated64() const NOEXCEPT
-{
-    // First tx check is not sufficient, null point must be checked.
-    return !txs_.empty() && !txs_.front().is_coinbase() &&
-        is_malleable64(txs_);
-}
-
-// static
-bool fast_block::is_malleable64(const fast_transactions& txs) NOEXCEPT
-{
-    return !txs.empty() && std::all_of(txs.begin(), txs.end(),
-        [](const auto& tx) NOEXCEPT
-        {
-            return tx.serialized_size(false) == two * hash_size;
-        });
-}
-
-// commitments
+// merkle roots
 // ----------------------------------------------------------------------------
-
-bool fast_block::is_invalid_merkle_root() const NOEXCEPT
-{
-    return generate_merkle_root(false) != header_merkle_root();
-}
-
-bool fast_block::is_invalid_witness_commitment() const NOEXCEPT
-{
-    if (txs_.empty())
-        return false;
-
-    hash_cref commit{ null_hash };
-    if (!get_witness_commitment(commit))
-        return is_segregated();
-
-    hash_cref reserve{ null_hash };
-    if (!get_witness_reservation(reserve))
-        return true;
-
-    return commit != sha256::double_hash(generate_merkle_root(true), reserve);
-}
-
-// identify
-// ----------------------------------------------------------------------------
-
-code fast_block::identify() const NOEXCEPT
-{
-    if (txs_.empty())
-        return error::empty_block;
-
-    if (is_malleated() || is_invalid_merkle_root())
-        return error::invalid_transaction_commitment;
-
-    return error::block_success;
-}
-
-code fast_block::identify(const context& ctx) const NOEXCEPT
-{
-    const auto bip141 = ctx.is_enabled(bip141_rule);
-
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
-
-    return error::block_success;
-}
-
-// properties
-// ----------------------------------------------------------------------------
-// protected
+// private
 
 hash_digest fast_block::header_merkle_root() const NOEXCEPT
 {
@@ -205,6 +203,10 @@ hash_digest fast_block::generate_merkle_root(bool witness) const NOEXCEPT
 {
     return sha256::merkle_root(transaction_hashes(witness));
 }
+
+// witness commitment
+// ----------------------------------------------------------------------------
+// private
 
 bool fast_block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
 {
