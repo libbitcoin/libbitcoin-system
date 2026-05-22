@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_FAST_BLOCK_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_FAST_BLOCK_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_BLOCK_VIEW_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_VIEW_HPP
 
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/fast/fast_transaction.hpp>
+#include <bitcoin/system/chain/views/transaction_view.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -29,13 +29,13 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-class BC_API fast_block final
+class BC_API block_view final
 {
 public:
-    DELETE_COPY_MOVE(fast_block);
+    DELETE_COPY_MOVE(block_view);
 
     /// Segregation is handled and suppressed when witness is false.
-    fast_block(data_chunk&& buffer, bool witness) NOEXCEPT;
+    block_view(data_chunk&& buffer, bool witness) NOEXCEPT;
 
     /// Deserialization.
     bool is_valid() const NOEXCEPT;
@@ -52,10 +52,10 @@ protected:
     bool is_invalid_witness_commitment() const NOEXCEPT;
 
 private:
-    using fast_transactions = std::vector<fast_transaction>;
+    using transaction_views = std::vector<transaction_view>;
 
     // Malleation.
-    static bool is_malleable64(const fast_transactions& txs) NOEXCEPT;
+    static bool is_malleable64(const transaction_views& txs) NOEXCEPT;
     bool is_malleated32() const NOEXCEPT;
     bool is_malleated64() const NOEXCEPT;
     size_t malleated32_size() const NOEXCEPT;
@@ -72,7 +72,7 @@ private:
 
     bool witness_;
     data_chunk buffer_;
-    fast_transactions txs_{};
+    transaction_views txs_{};
 };
 
 } // namespace chain

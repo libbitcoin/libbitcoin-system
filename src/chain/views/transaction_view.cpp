@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/chain/fast/fast_transaction.hpp>
+#include <bitcoin/system/chain/views/transaction_view.hpp>
 
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
@@ -33,7 +33,7 @@ namespace chain {
 // constructor
 // ----------------------------------------------------------------------------
 
-fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
+transaction_view::transaction_view(reader& source, const data_chunk& buffer,
     bool witness) NOEXCEPT
 {
     constexpr auto version_size = sizeof(uint32_t);
@@ -115,7 +115,7 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
 // ----------------------------------------------------------------------------
 // properties
 
-bool fast_transaction::is_coinbase() const NOEXCEPT
+bool transaction_view::is_coinbase() const NOEXCEPT
 {
     if (is_zero(in_count_))
         return false;
@@ -128,22 +128,22 @@ bool fast_transaction::is_coinbase() const NOEXCEPT
         unsafe_from_little_endian<uint32_t>(index) == chain::point::null_index;
 }
 
-bool fast_transaction::is_witnessed() const NOEXCEPT
+bool transaction_view::is_witnessed() const NOEXCEPT
 {
     return to_bool(witness_size_);
 }
 
-const hash_digest& fast_transaction::id() const NOEXCEPT
+const hash_digest& transaction_view::id() const NOEXCEPT
 {
     return txid_;
 }
 
-const hash_digest& fast_transaction::witness_id() const NOEXCEPT
+const hash_digest& transaction_view::witness_id() const NOEXCEPT
 {
     return wtxid_;
 }
 
-size_t fast_transaction::serialized_size(bool witness) const NOEXCEPT
+size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
 {
     constexpr auto sentinels = sizeof(witness_marker) + sizeof(witness_enabled);
     return witness ? size_ : (size_ - witness_size_ - sentinels);
@@ -153,7 +153,7 @@ size_t fast_transaction::serialized_size(bool witness) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // methods
 
-bool fast_transaction::get_witness_commitment(
+bool transaction_view::get_witness_commitment(
     hash_cref& commitment) const NOEXCEPT
 {
     if (is_zero(out_count_))
@@ -180,11 +180,7 @@ bool fast_transaction::get_witness_commitment(
     return true;
 }
 
-// public
-// ----------------------------------------------------------------------------
-// writers
-
-bool fast_transaction::get_witness_reservation(
+bool transaction_view::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
     const auto witness = to_witnesses();
@@ -196,7 +192,11 @@ bool fast_transaction::get_witness_reservation(
     return true;
 }
 
-void fast_transaction::write_input_script(flipper& sink,
+// public
+// ----------------------------------------------------------------------------
+// writers
+
+void transaction_view::write_input_script(flipper& sink,
     reader& source) const NOEXCEPT
 {
     source.skip_bytes(chain::point::serialized_size());
@@ -206,7 +206,7 @@ void fast_transaction::write_input_script(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
-void fast_transaction::write_output_script(flipper& sink,
+void transaction_view::write_output_script(flipper& sink,
     reader& source) const NOEXCEPT
 {
     source.skip_variable();
@@ -216,7 +216,7 @@ void fast_transaction::write_output_script(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
-void fast_transaction::write_input_witness(flipper& sink,
+void transaction_view::write_input_witness(flipper& sink,
     reader& source) const NOEXCEPT
 {
     const auto stack = source.read_size(max_bytes);
@@ -238,7 +238,7 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-bool fast_transaction::is_commitment_pattern(const uint8_t* script,
+bool transaction_view::is_commitment_pattern(const uint8_t* script,
     size_t size) NOEXCEPT
 {
     if (commitment_pattern_size + hash_size > size)
@@ -253,7 +253,7 @@ bool fast_transaction::is_commitment_pattern(const uint8_t* script,
         && script[5] == header[3];
 }
 
-bool fast_transaction::is_reserved_pattern(const uint8_t* stack,
+bool transaction_view::is_reserved_pattern(const uint8_t* stack,
     size_t size) NOEXCEPT
 {
     if (reserved_pattern_size + hash_size > size)
@@ -272,17 +272,17 @@ BC_POP_WARNING()
 // ----------------------------------------------------------------------------
 // buffer offsets
 
-const uint8_t* fast_transaction::to_inputs() const NOEXCEPT
+const uint8_t* transaction_view::to_inputs() const NOEXCEPT
 {
     return std::next(start_ptr_, in_offset_);
 }
 
-const uint8_t* fast_transaction::to_outputs() const NOEXCEPT
+const uint8_t* transaction_view::to_outputs() const NOEXCEPT
 {
     return std::next(start_ptr_, out_offset_);
 }
 
-const uint8_t* fast_transaction::to_witnesses() const NOEXCEPT
+const uint8_t* transaction_view::to_witnesses() const NOEXCEPT
 {
     constexpr auto locktime_size = sizeof(uint32_t);
     return std::next(start_ptr_, size_ - witness_size_ - locktime_size);

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_FAST_TRANSACTION_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_FAST_TRANSACTION_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_VIEW_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_VIEW_HPP
 
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -29,15 +29,15 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-class BC_API fast_transaction final
+class BC_API transaction_view final
 {
 public:
-    DELETE_COPY(fast_transaction);
-    DEFAULT_MOVE(fast_transaction);
+    DELETE_COPY(transaction_view);
+    DEFAULT_MOVE(transaction_view);
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
-    fast_transaction(reader& source, const data_chunk& buffer,
+    transaction_view(reader& source, const data_chunk& buffer,
         bool witness) NOEXCEPT;
 
     /// Properties.

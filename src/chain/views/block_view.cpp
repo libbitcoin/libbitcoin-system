@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/chain/fast/fast_block.hpp>
+#include <bitcoin/system/chain/views/block_view.hpp>
 
 #include <algorithm>
 #include <iterator>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/fast/fast_transaction.hpp>
 #include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/chain/views/transaction_view.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -37,7 +37,7 @@ using namespace system;
 // constructor
 // ----------------------------------------------------------------------------
 
-fast_block::fast_block(data_chunk&& buffer, bool witness) NOEXCEPT
+block_view::block_view(data_chunk&& buffer, bool witness) NOEXCEPT
   : witness_{ witness }, buffer_{ std::move(buffer) }
 {
     stream::in::fast istream(buffer_);
@@ -57,12 +57,12 @@ fast_block::fast_block(data_chunk&& buffer, bool witness) NOEXCEPT
 // public
 // ----------------------------------------------------------------------------
 
-bool fast_block::is_valid() const NOEXCEPT
+bool block_view::is_valid() const NOEXCEPT
 {
     return !txs_.empty();
 }
 
-code fast_block::identify() const NOEXCEPT
+code block_view::identify() const NOEXCEPT
 {
     if (txs_.empty())
         return error::empty_block;
@@ -73,7 +73,7 @@ code fast_block::identify() const NOEXCEPT
     return error::block_success;
 }
 
-code fast_block::identify(const context& ctx) const NOEXCEPT
+code block_view::identify(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
@@ -86,12 +86,12 @@ code fast_block::identify(const context& ctx) const NOEXCEPT
 // protected
 // ----------------------------------------------------------------------------
 
-bool fast_block::is_malleated() const NOEXCEPT
+bool block_view::is_malleated() const NOEXCEPT
 {
     return is_malleated64() || is_malleated32();
 }
 
-bool fast_block::is_segregated() const NOEXCEPT
+bool block_view::is_segregated() const NOEXCEPT
 {
     return witness_ && std::any_of(txs_.begin(), txs_.end(),
         [](const auto& tx) NOEXCEPT
@@ -100,12 +100,12 @@ bool fast_block::is_segregated() const NOEXCEPT
         });
 }
 
-bool fast_block::is_invalid_merkle_root() const NOEXCEPT
+bool block_view::is_invalid_merkle_root() const NOEXCEPT
 {
     return generate_merkle_root(false) != header_merkle_root();
 }
 
-bool fast_block::is_invalid_witness_commitment() const NOEXCEPT
+bool block_view::is_invalid_witness_commitment() const NOEXCEPT
 {
     if (txs_.empty())
         return false;
@@ -126,7 +126,7 @@ bool fast_block::is_invalid_witness_commitment() const NOEXCEPT
 // private
 
 // static
-bool fast_block::is_malleable64(const fast_transactions& txs) NOEXCEPT
+bool block_view::is_malleable64(const transaction_views& txs) NOEXCEPT
 {
     return !txs.empty() && std::all_of(txs.begin(), txs.end(),
         [](const auto& tx) NOEXCEPT
@@ -135,19 +135,19 @@ bool fast_block::is_malleable64(const fast_transactions& txs) NOEXCEPT
         });
 }
 
-bool fast_block::is_malleated32() const NOEXCEPT
+bool block_view::is_malleated32() const NOEXCEPT
 {
     return !is_zero(malleated32_size());
 }
 
-bool fast_block::is_malleated64() const NOEXCEPT
+bool block_view::is_malleated64() const NOEXCEPT
 {
     // First tx check is not sufficient, null point must be checked.
     return !txs_.empty() && !txs_.front().is_coinbase() &&
         is_malleable64(txs_);
 }
 
-size_t fast_block::malleated32_size() const NOEXCEPT
+size_t block_view::malleated32_size() const NOEXCEPT
 {
     const auto malleated = txs_.size();
     for (auto mally = one; mally <= to_half(malleated); mally *= two)
@@ -158,7 +158,7 @@ size_t fast_block::malleated32_size() const NOEXCEPT
     return zero;
 }
 
-bool fast_block::is_malleated32(size_t width) const NOEXCEPT
+bool block_view::is_malleated32(size_t width) const NOEXCEPT
 {
     const auto malleated = txs_.size();
     if (is_zero(width) || width > to_half(malleated))
@@ -178,7 +178,7 @@ bool fast_block::is_malleated32(size_t width) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // private
 
-hash_digest fast_block::header_merkle_root() const NOEXCEPT
+hash_digest block_view::header_merkle_root() const NOEXCEPT
 {
     if (txs_.empty() || buffer_.empty())
         return null_hash;
@@ -188,7 +188,7 @@ hash_digest fast_block::header_merkle_root() const NOEXCEPT
     return unsafe_array_cast<uint8_t, hash_size>(start);
 }
 
-hashes fast_block::transaction_hashes(bool witness) const NOEXCEPT
+hashes block_view::transaction_hashes(bool witness) const NOEXCEPT
 {
     hashes hashes{};
     hashes.reserve(txs_.size());
@@ -198,7 +198,7 @@ hashes fast_block::transaction_hashes(bool witness) const NOEXCEPT
     return hashes;
 }
 
-hash_digest fast_block::generate_merkle_root(bool witness) const NOEXCEPT
+hash_digest block_view::generate_merkle_root(bool witness) const NOEXCEPT
 {
     return sha256::merkle_root(transaction_hashes(witness));
 }
@@ -207,12 +207,12 @@ hash_digest fast_block::generate_merkle_root(bool witness) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // private
 
-bool fast_block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
+bool block_view::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
 {
     return !txs_.empty() && txs_.front().get_witness_commitment(commitment);
 }
 
-bool fast_block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
+bool block_view::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
 {
     return !txs_.empty() && txs_.front().get_witness_reservation(reservation);
 }

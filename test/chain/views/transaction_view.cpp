@@ -18,6 +18,6 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(fast_transaction_tests)
+BOOST_AUTO_TEST_SUITE(transaction_view_tests)
 
 BOOST_AUTO_TEST_SUITE_END()
