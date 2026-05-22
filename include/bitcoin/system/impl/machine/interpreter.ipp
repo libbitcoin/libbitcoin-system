@@ -991,6 +991,10 @@ op_check_sig() NOEXCEPT
 {
     const auto ec = op_check_sig_verify();
 
+    // If stack has less than 2 items, script MUST fail and end.
+    if ( ec == error::op_check_sig_verify1)
+        return ec;
+
     // BIP66: if DER encoding invalid script MUST fail and end.
     const auto bip66 = state::is_enabled(flags::bip66_rule);
     if (bip66 && ec == error::op_check_sig_parse_signature)
