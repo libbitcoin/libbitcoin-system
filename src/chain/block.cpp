@@ -135,7 +135,7 @@ bool block::operator!=(const block& other) const NOEXCEPT
 void block::assign_data(reader& source, bool witness) NOEXCEPT
 {
     auto& allocator = source.get_allocator();
-    const auto count = source.read_size(max_block_size);
+    const auto count = source.read_size(max_count);
     auto txs = to_non_const_raw_ptr(txs_);
     txs->reserve(count);
 

@@ -151,30 +151,30 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
 {
     auto& allocator = source.get_allocator();
     auto ins = to_non_const_raw_ptr(inputs_);
-    auto count = source.read_size(max_block_size);
+    auto in_count = source.read_size(max_count);
 
     // Expensive repeated recomputation, so cache segregated state.
     // Detect witness as no inputs (marker) and expected flag [bip144].
     segregated_ =
-        count == witness_marker &&
+        in_count == witness_marker &&
         source.peek_byte() == witness_enabled;
 
     if (segregated_)
     {
         // Skip over the peeked witness flag.
         source.skip_byte();
-        count = source.read_size(max_block_size);
+        in_count = source.read_size(max_count);
     }
 
-    ins->reserve(count);
-    for (size_t in{}; in < count; ++in)
+    ins->reserve(in_count);
+    for (size_t in{}; in < in_count; ++in)
         ins->emplace_back(CREATE(input, allocator, source));
 
     auto outs = to_non_const_raw_ptr(outputs_);
-    count = source.read_size(max_block_size);
+    const auto out_count = source.read_size(max_count);
 
-    outs->reserve(count);
-    for (size_t out{}; out < count; ++out)
+    outs->reserve(out_count);
+    for (size_t out{}; out < out_count; ++out)
         outs->emplace_back(CREATE(output, allocator, source));
 
     if (segregated_)

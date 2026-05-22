@@ -42,7 +42,7 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
     const auto tx_start = source.get_read_position();
     source.skip_bytes(version_size);
 
-    in_count_ = source.read_size(max_block_size);
+    in_count_ = source.read_size(max_count);
     const auto segregated =
         in_count_ == witness_marker &&
         source.peek_byte() == witness_enabled;
@@ -50,23 +50,23 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
     if (segregated)
     {
         source.skip_byte();
-        in_count_ = source.read_size(max_block_size);
+        in_count_ = source.read_size(max_count);
     }
 
     in_offset_ = source.get_read_position() - tx_start;
     for (size_t input{}; input < in_count_; ++input)
     {
         source.skip_bytes(chain::point::serialized_size());
-        source.skip_bytes(source.read_size(max_block_size));
+        source.skip_bytes(source.read_size(max_bytes));
         source.skip_bytes(sequence_size);
     }
 
-    out_count_ = source.read_size(max_block_size);
+    out_count_ = source.read_size(max_count);
     out_offset_ = source.get_read_position() - tx_start;
     for (size_t output{}; output < out_count_; ++output)
     {
         source.skip_variable();
-        source.skip_bytes(source.read_size(max_block_size));
+        source.skip_bytes(source.read_size(max_bytes));
     }
 
     const auto witness_offset = source.get_read_position() - tx_start;
@@ -77,12 +77,13 @@ fast_transaction::fast_transaction(reader& source, const data_chunk& buffer,
         {
             for (size_t input{}; input < in_count_; ++input)
             {
-                const auto wits = source.read_size(max_block_size);
-                if (is_zero(wits))
+                // Witness stack size cannot use the count limiter.
+                const auto stack = source.read_size(max_bytes);
+                if (is_zero(stack))
                     source.invalidate();
 
-                for (size_t wit{}; wit < wits; ++wit)
-                    source.skip_bytes(source.read_size(max_block_size));
+                for (size_t element{}; element < stack; ++element)
+                    source.skip_bytes(source.read_size(max_bytes));
             }
         }
         else
@@ -160,11 +161,11 @@ bool fast_transaction::get_witness_commitment(
     for (size_t out{}; out < sub1(out_count_); ++out)
     {
         reader.skip_variable();
-        reader.skip_bytes(reader.read_size(max_block_weight));
+        reader.skip_bytes(reader.read_size(max_bytes));
     }
 
     reader.skip_variable();
-    const auto size = reader.read_size(max_block_weight);
+    const auto size = reader.read_size(max_bytes);
     const auto script = std::next(output, reader.get_read_position());
     if (!is_commitment_pattern(script, size))
         return false;

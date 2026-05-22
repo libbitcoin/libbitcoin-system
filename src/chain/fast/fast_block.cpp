@@ -45,7 +45,7 @@ fast_block::fast_block(data_chunk&& buffer, bool witness) NOEXCEPT
     read::bytes::fast in(istream);
     in.skip_bytes(header::serialized_size());
 
-    const auto txs = in.read_size(max_block_size);
+    const auto txs = in.read_size(max_count);
     txs_.reserve(txs);
 
     for (size_t tx{}; tx < txs; ++tx)

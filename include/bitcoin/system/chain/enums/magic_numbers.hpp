@@ -99,6 +99,15 @@ constexpr uint8_t tapscript_version = 0b1100'0000; // 0xc0
 
 constexpr size_t max_null_data_size = 80;
 
+/// DoS guards (deserialization limits to memory allocation).
+/// ---------------------------------------------------------------------------
+
+/// Applies to block.txs, tx.inputs/witnesses, and tx.outputs.
+constexpr auto max_count = max_block_size;
+
+/// Applies to input.witness (stack size), script, 
+constexpr auto max_bytes = max_block_weight;
+
 /// Utilities.
 /// ---------------------------------------------------------------------------
 
