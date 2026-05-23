@@ -74,9 +74,6 @@ private:
     static bool is_commitment_pattern(const uint8_t* script,
         size_t size) NOEXCEPT;
 
-    // witness data in the buffer
-    bool is_witnessed() const NOEXCEPT;
-
     // buffer offsets
     const uint8_t* at_inputs() const NOEXCEPT;
     const uint8_t* at_outputs() const NOEXCEPT;

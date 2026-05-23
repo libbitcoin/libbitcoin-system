@@ -62,6 +62,15 @@ bool block_view::is_valid() const NOEXCEPT
     return !txs_.empty();
 }
 
+bool block_view::is_segregated() const NOEXCEPT
+{
+    return witness_ && std::any_of(txs_.begin(), txs_.end(),
+        [](const auto& tx) NOEXCEPT
+        {
+            return tx.is_segregated();
+        });
+}
+
 hash_digest block_view::hash() const NOEXCEPT
 {
     return bitcoin_hash(header::serialized_size(), buffer_.data());
@@ -119,15 +128,6 @@ code block_view::identify(const context& ctx) const NOEXCEPT
 bool block_view::is_malleated() const NOEXCEPT
 {
     return is_malleated64() || is_malleated32();
-}
-
-bool block_view::is_segregated() const NOEXCEPT
-{
-    return witness_ && std::any_of(txs_.begin(), txs_.end(),
-        [](const auto& tx) NOEXCEPT
-        {
-            return tx.is_segregated();
-        });
 }
 
 bool block_view::is_invalid_merkle_root() const NOEXCEPT

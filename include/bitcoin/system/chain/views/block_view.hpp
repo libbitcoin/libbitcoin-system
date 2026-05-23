@@ -39,6 +39,7 @@ public:
 
     /// Deserialization.
     bool is_valid() const NOEXCEPT;
+    bool is_segregated() const NOEXCEPT;
 
     /// Properties (get_hash/hash are both dynamically computed).
     hash_digest hash() const NOEXCEPT;
@@ -54,7 +55,6 @@ public:
 protected:
     /// Validation helpers.
     bool is_malleated() const NOEXCEPT;
-    bool is_segregated() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;
 

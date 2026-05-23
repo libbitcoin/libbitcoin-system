@@ -137,15 +137,8 @@ bool transaction_view::is_coinbase() const NOEXCEPT
 
 bool transaction_view::is_segregated() const NOEXCEPT
 {
-    // is_witnessed and witness was specified.
+    // Parsed buffer contained witnesses, and witness was specified by caller.
     return wtxid_ != null_hash;
-}
-
-// private
-bool transaction_view::is_witnessed() const NOEXCEPT
-{
-    // witness data is in the buffer.
-    return to_bool(witness_size_);
 }
 
 size_t transaction_view::inputs() const NOEXCEPT
@@ -355,20 +348,20 @@ BC_POP_WARNING()
 const uint8_t* transaction_view::at_inputs() const NOEXCEPT
 {
     BC_ASSERT(!is_empty());
-    return std::next(start_ptr_, in_offset_);
+    return std::next(tx_ptr_, in_offset_);
 }
 
 const uint8_t* transaction_view::at_outputs() const NOEXCEPT
 {
     BC_ASSERT(!is_empty());
-    return std::next(start_ptr_, out_offset_);
+    return std::next(tx_ptr_, out_offset_);
 }
 
 const uint8_t* transaction_view::at_witnesses() const NOEXCEPT
 {
     BC_ASSERT(!is_empty());
     constexpr auto locktime_size = sizeof(uint32_t);
-    return std::next(start_ptr_, size_ - witness_size_ - locktime_size);
+    return std::next(tx_ptr_, size_ - witness_size_ - locktime_size);
 }
 
 } // namespace chain
