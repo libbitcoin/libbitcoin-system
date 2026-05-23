@@ -290,6 +290,7 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
 
     if (prefix)
     {
+        // `expected` is not allocated and limit does not change stream end.
         expected = source.read_size();
         source.set_limit(expected);
     }

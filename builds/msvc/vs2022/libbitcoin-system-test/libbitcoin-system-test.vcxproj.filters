@@ -16,10 +16,10 @@
     <Filter Include="src\chain\enums">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\fast">
+    <Filter Include="src\chain\json">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\json">
+    <Filter Include="src\chain\views">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\config">
@@ -144,12 +144,6 @@
     <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp">
       <Filter>src\chain\enums</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\fast\fast_block.cpp">
-      <Filter>src\chain\fast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\fast\fast_transaction.cpp">
-      <Filter>src\chain\fast</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\header.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -218,6 +212,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\views\block_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\views\transaction_view.cpp">
+      <Filter>src\chain\views</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
       <Filter>src\chain</Filter>

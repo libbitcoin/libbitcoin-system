@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_FAST_TRANSACTION_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_FAST_TRANSACTION_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_VIEW_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_VIEW_HPP
 
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -29,27 +29,42 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-class BC_API fast_transaction final
+class BC_API transaction_view final
 {
 public:
-    DELETE_COPY(fast_transaction);
-    DEFAULT_MOVE(fast_transaction);
+    DELETE_COPY(transaction_view);
+    DEFAULT_MOVE(transaction_view);
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
-    fast_transaction(reader& source, const data_chunk& buffer,
+    transaction_view(reader& source, const data_chunk& buffer,
         bool witness) NOEXCEPT;
 
     /// Properties.
+    bool is_empty() const NOEXCEPT;
     bool is_coinbase() const NOEXCEPT;
-    bool is_witnessed() const NOEXCEPT;
-    const hash_digest& id() const NOEXCEPT;
-    const hash_digest& witness_id() const NOEXCEPT;
+    bool is_segregated() const NOEXCEPT;
+    size_t inputs() const NOEXCEPT;
+    size_t outputs() const NOEXCEPT;
+    uint32_t version() const NOEXCEPT;
+    uint32_t locktime() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
+    const hash_digest& hash(bool witness) const NOEXCEPT;
 
     /// Methods.
     bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
+
+    /// Streamers.
+    void write_input_script(flipper& sink, reader& source) const NOEXCEPT;
+    void write_input(flipper& sink, reader& source) const NOEXCEPT;
+    void write_output(flipper& sink, reader& source) const NOEXCEPT;
+    void write_witness(flipper& sink, reader& source) const NOEXCEPT;
+
+    /// istreams.
+    stream::in::fast get_inputs_stream() const NOEXCEPT;
+    stream::in::fast get_outputs_stream() const NOEXCEPT;
+    stream::in::fast get_witnesses_stream() const NOEXCEPT;
 
 private:
     // witness commitment
@@ -59,10 +74,13 @@ private:
     static bool is_commitment_pattern(const uint8_t* script,
         size_t size) NOEXCEPT;
 
+    // witness data in the buffer
+    bool is_witnessed() const NOEXCEPT;
+
     // buffer offsets
-    const uint8_t* to_inputs() const NOEXCEPT;
-    const uint8_t* to_outputs() const NOEXCEPT;
-    const uint8_t* to_witnesses() const NOEXCEPT;
+    const uint8_t* at_inputs() const NOEXCEPT;
+    const uint8_t* at_outputs() const NOEXCEPT;
+    const uint8_t* at_witnesses() const NOEXCEPT;
 
     // Pointer to tx in buffer.
     const uint8_t* start_ptr_{};
@@ -87,6 +105,8 @@ private:
     // Null hash if not segregated or stripped.
     hash_digest wtxid_{};
 };
+
+using transaction_views = std::vector<transaction_view>;
 
 } // namespace chain
 } // namespace system

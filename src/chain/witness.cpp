@@ -155,15 +155,15 @@ void witness::skip(reader& source, bool prefix) NOEXCEPT
 {
     if (prefix)
     {
-        const auto count = source.read_size(max_block_weight);
+        const auto count = source.read_size(max_bytes);
 
         for (size_t element{}; element < count; ++element)
-            source.read_bytes(source.read_size(max_block_weight));
+            source.read_bytes(source.read_size(max_bytes));
     }
     else
     {
         while (!source.is_exhausted())
-            source.read_bytes(source.read_size(max_block_weight));
+            source.read_bytes(source.read_size(max_bytes));
     }
 }
 
@@ -176,7 +176,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
     const auto push_witness = [&allocator, &source, this]() NOEXCEPT
     {
         // If read_bytes_raw returns nullptr invalid source is implied.
-        const auto size = source.read_size(max_block_weight);
+        const auto size = source.read_size(max_bytes);
         const auto bytes = source.read_bytes_raw(size);
         if (is_null(bytes))
             return false;
@@ -188,10 +188,11 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
 
     if (prefix)
     {
-        const auto count = source.read_size(max_block_weight);
-        stack_.reserve(count);
+        // Witness stack size cannot use the count limiter.
+        const auto stack = source.read_size(max_bytes);
+        stack_.reserve(stack);
 
-        for (size_t element{}; element < count; ++element)
+        for (size_t element{}; element < stack; ++element)
             if (!push_witness())
                 break;
     }

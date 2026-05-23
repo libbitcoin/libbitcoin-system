@@ -22,10 +22,10 @@
     <Filter Include="include\bitcoin\system\chain\enums">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\chain\fast">
+    <Filter Include="include\bitcoin\system\chain\json">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\chain\json">
+    <Filter Include="include\bitcoin\system\chain\views">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\config">
@@ -190,10 +190,10 @@
     <Filter Include="src\chain\enums">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\fast">
+    <Filter Include="src\chain\json">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\json">
+    <Filter Include="src\chain\views">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\config">
@@ -279,12 +279,6 @@
     <ClCompile Include="..\..\..\..\src\chain\enums\opcode.cpp">
       <Filter>src\chain\enums</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\fast\fast_block.cpp">
-      <Filter>src\chain\fast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\fast\fast_transaction.cpp">
-      <Filter>src\chain\fast</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\header.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -359,6 +353,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v1.cpp">
       <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\views\block_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\views\transaction_view.cpp">
+      <Filter>src\chain\views</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
       <Filter>src\chain</Filter>
@@ -773,12 +773,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\selection.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\fast\fast_block.hpp">
-      <Filter>include\bitcoin\system\chain\fast</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\fast\fast_transaction.hpp">
-      <Filter>include\bitcoin\system\chain\fast</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\header.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
@@ -853,6 +847,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\block_view.hpp">
+      <Filter>include\bitcoin\system\chain\views</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\transaction_view.hpp">
+      <Filter>include\bitcoin\system\chain\views</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp">
       <Filter>include\bitcoin\system\chain</Filter>

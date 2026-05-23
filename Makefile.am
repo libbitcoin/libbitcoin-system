@@ -60,8 +60,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/witness.cpp \
     src/chain/witness_extract.cpp \
     src/chain/enums/opcode.cpp \
-    src/chain/fast/fast_block.cpp \
-    src/chain/fast/fast_transaction.cpp \
     src/chain/json/block.cpp \
     src/chain/json/checkpoint.cpp \
     src/chain/json/header.cpp \
@@ -73,6 +71,8 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/json/script.cpp \
     src/chain/json/transaction.cpp \
     src/chain/json/witness.cpp \
+    src/chain/views/block_view.cpp \
+    src/chain/views/transaction_view.cpp \
     src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -262,8 +262,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/transaction.cpp \
     test/chain/witness.cpp \
     test/chain/enums/opcode.cpp \
-    test/chain/fast/fast_block.cpp \
-    test/chain/fast/fast_transaction.cpp \
     test/chain/json/block.cpp \
     test/chain/json/checkpoint.cpp \
     test/chain/json/header.cpp \
@@ -275,6 +273,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/json/script.cpp \
     test/chain/json/transaction.cpp \
     test/chain/json/witness.cpp \
+    test/chain/views/block_view.cpp \
+    test/chain/views/transaction_view.cpp \
     test/config/authority.cpp \
     test/config/base16.cpp \
     test/config/base2.cpp \
@@ -540,11 +540,6 @@ include_bitcoin_system_chain_enums_HEADERS = \
     include/bitcoin/system/chain/enums/script_version.hpp \
     include/bitcoin/system/chain/enums/selection.hpp
 
-include_bitcoin_system_chain_fastdir = ${includedir}/bitcoin/system/chain/fast
-include_bitcoin_system_chain_fast_HEADERS = \
-    include/bitcoin/system/chain/fast/fast_block.hpp \
-    include/bitcoin/system/chain/fast/fast_transaction.hpp
-
 include_bitcoin_system_chain_jsondir = ${includedir}/bitcoin/system/chain/json
 include_bitcoin_system_chain_json_HEADERS = \
     include/bitcoin/system/chain/json/block.hpp \
@@ -560,6 +555,11 @@ include_bitcoin_system_chain_json_HEADERS = \
     include/bitcoin/system/chain/json/script.hpp \
     include/bitcoin/system/chain/json/transaction.hpp \
     include/bitcoin/system/chain/json/witness.hpp
+
+include_bitcoin_system_chain_viewsdir = ${includedir}/bitcoin/system/chain/views
+include_bitcoin_system_chain_views_HEADERS = \
+    include/bitcoin/system/chain/views/block_view.hpp \
+    include/bitcoin/system/chain/views/transaction_view.hpp
 
 include_bitcoin_system_configdir = ${includedir}/bitcoin/system/config
 include_bitcoin_system_config_HEADERS = \
