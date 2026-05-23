@@ -37,8 +37,8 @@ using namespace system;
 // constructor
 // ----------------------------------------------------------------------------
 
-block_view::block_view(data_chunk&& buffer, bool witness) NOEXCEPT
-  : witness_{ witness }, buffer_{ std::move(buffer) }
+block_view::block_view(const data_chunk& block_buffer, bool witness) NOEXCEPT
+  : witness_{ witness }, buffer_{ block_buffer }
 {
     stream::in::fast istream(buffer_);
     read::bytes::fast in(istream);
@@ -63,6 +63,11 @@ bool block_view::is_valid() const NOEXCEPT
 }
 
 hash_digest block_view::hash() const NOEXCEPT
+{
+    return bitcoin_hash(header::serialized_size(), buffer_.data());
+}
+
+hash_digest block_view::get_hash() const NOEXCEPT
 {
     return bitcoin_hash(header::serialized_size(), buffer_.data());
 }

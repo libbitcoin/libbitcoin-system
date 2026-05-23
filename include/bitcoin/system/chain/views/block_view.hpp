@@ -34,14 +34,15 @@ class BC_API block_view final
 public:
     DELETE_COPY_MOVE(block_view);
 
-    /// Segregation is handled and suppressed when witness is false.
-    block_view(data_chunk&& buffer, bool witness) NOEXCEPT;
+    /// Segregation is managed and suppressed when witness is false.
+    block_view(const data_chunk& block_buffer, bool witness) NOEXCEPT;
 
     /// Deserialization.
     bool is_valid() const NOEXCEPT;
 
-    /// Properties (hash() is dynamically computed).
+    /// Properties (get_hash/hash are both dynamically computed).
     hash_digest hash() const NOEXCEPT;
+    hash_digest get_hash() const NOEXCEPT;
     size_t transactions() const NOEXCEPT;
     const transaction_views& views() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
@@ -76,7 +77,7 @@ private:
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
     bool witness_;
-    data_chunk buffer_;
+    const data_chunk& buffer_;
     transaction_views txs_{};
 };
 

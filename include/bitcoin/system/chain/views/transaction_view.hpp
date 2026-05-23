@@ -37,7 +37,7 @@ public:
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
-    transaction_view(reader& source, const data_chunk& buffer,
+    transaction_view(reader& tx_source, const data_chunk& block_buffer,
         bool witness) NOEXCEPT;
 
     /// Properties.
@@ -83,7 +83,7 @@ private:
     const uint8_t* at_witnesses() const NOEXCEPT;
 
     // Pointer to tx in buffer.
-    const uint8_t* start_ptr_{};
+    const uint8_t* tx_ptr_{};
 
     // Offset of first tx input in buffer.
     size_t in_offset_{};
