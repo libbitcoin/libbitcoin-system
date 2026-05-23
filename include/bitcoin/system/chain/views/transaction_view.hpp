@@ -32,8 +32,7 @@ namespace chain {
 class BC_API transaction_view final
 {
 public:
-    DELETE_COPY(transaction_view);
-    DEFAULT_MOVE(transaction_view);
+    DEFAULT_COPY_MOVE(transaction_view);
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
