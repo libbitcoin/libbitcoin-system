@@ -40,6 +40,12 @@ public:
     /// Deserialization.
     bool is_valid() const NOEXCEPT;
 
+    /// Properties (hash() is dynamically computed).
+    hash_digest hash() const NOEXCEPT;
+    size_t transactions() const NOEXCEPT;
+    const transaction_views& views() const NOEXCEPT;
+    size_t serialized_size(bool witness) const NOEXCEPT;
+
     /// Validation.
     code identify() const NOEXCEPT;
     code identify(const context& ctx) const NOEXCEPT;
@@ -52,7 +58,6 @@ protected:
     bool is_invalid_witness_commitment() const NOEXCEPT;
 
 private:
-    using transaction_views = std::vector<transaction_view>;
 
     // Malleation.
     static bool is_malleable64(const transaction_views& txs) NOEXCEPT;

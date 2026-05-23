@@ -62,6 +62,31 @@ bool block_view::is_valid() const NOEXCEPT
     return !txs_.empty();
 }
 
+hash_digest block_view::hash() const NOEXCEPT
+{
+    return bitcoin_hash(header::serialized_size(), buffer_.data());
+}
+
+size_t block_view::transactions() const NOEXCEPT
+{
+    return txs_.size();
+}
+
+const transaction_views& block_view::views() const NOEXCEPT
+{
+    return txs_;
+}
+
+size_t block_view::serialized_size(bool witness) const NOEXCEPT
+{
+    auto total = header::serialized_size() + variable_size(txs_.size());
+
+    for (const auto& tx: txs_)
+        total += tx.serialized_size(witness);
+
+    return total;
+}
+
 code block_view::identify() const NOEXCEPT
 {
     if (txs_.empty())
@@ -96,7 +121,7 @@ bool block_view::is_segregated() const NOEXCEPT
     return witness_ && std::any_of(txs_.begin(), txs_.end(),
         [](const auto& tx) NOEXCEPT
         {
-            return tx.is_witnessed();
+            return tx.is_segregated();
         });
 }
 
@@ -168,7 +193,7 @@ bool block_view::is_malleated32(size_t width) const NOEXCEPT
     auto legit = std::next(mally, width);
 
     while (!is_zero(width--))
-        if ((*mally++).id() != (*legit++).id())
+        if ((*mally++).hash(false) != (*legit++).hash(false))
             return false;
 
     return true;
@@ -193,7 +218,7 @@ hashes block_view::transaction_hashes(bool witness) const NOEXCEPT
     hashes hashes{};
     hashes.reserve(txs_.size());
     for (const auto& tx: txs_)
-        hashes.emplace_back(witness ? tx.witness_id() : tx.id());
+        hashes.emplace_back(tx.hash(witness));
 
     return hashes;
 }

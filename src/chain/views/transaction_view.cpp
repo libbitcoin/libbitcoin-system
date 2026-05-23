@@ -30,15 +30,18 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+constexpr auto value_size = sizeof(uint64_t);
+constexpr auto version_size = sizeof(uint32_t);
+constexpr auto sequence_size = sizeof(uint32_t);
+constexpr auto locktime_size = sizeof(uint32_t);
+constexpr auto point_size = chain::point::serialized_size();
+
 // constructor
 // ----------------------------------------------------------------------------
 
 transaction_view::transaction_view(reader& source, const data_chunk& buffer,
     bool witness) NOEXCEPT
 {
-    constexpr auto version_size = sizeof(uint32_t);
-    constexpr auto sequence_size = sizeof(uint32_t);
-    constexpr auto locktime_size = sizeof(uint32_t);
     const auto tx_start = source.get_read_position();
     source.skip_bytes(version_size);
 
@@ -56,7 +59,7 @@ transaction_view::transaction_view(reader& source, const data_chunk& buffer,
     in_offset_ = source.get_read_position() - tx_start;
     for (size_t input{}; input < in_count_; ++input)
     {
-        source.skip_bytes(chain::point::serialized_size());
+        source.skip_bytes(point_size);
         source.skip_bytes(source.read_size(max_bytes));
         source.skip_bytes(sequence_size);
     }
@@ -65,7 +68,7 @@ transaction_view::transaction_view(reader& source, const data_chunk& buffer,
     out_offset_ = source.get_read_position() - tx_start;
     for (size_t output{}; output < out_count_; ++output)
     {
-        source.skip_variable();
+        source.skip_bytes(value_size);
         source.skip_bytes(source.read_size(max_bytes));
     }
 
@@ -115,38 +118,68 @@ transaction_view::transaction_view(reader& source, const data_chunk& buffer,
 // ----------------------------------------------------------------------------
 // properties
 
+bool transaction_view::is_empty() const NOEXCEPT
+{
+    return !is_zero(inputs()) && !is_zero(outputs());
+}
+
 bool transaction_view::is_coinbase() const NOEXCEPT
 {
-    if (is_zero(in_count_))
+    if (is_zero(inputs()))
         return false;
 
     // Input is guaranteed to be at least point-sized by construction.
-    const auto point = to_inputs();
+    const auto point = at_inputs();
     const auto index = std::next(point, hash_size);
-
     return unsafe_array_cast<uint8_t, hash_size>(point) == null_hash &&
         unsafe_from_little_endian<uint32_t>(index) == chain::point::null_index;
 }
 
+bool transaction_view::is_segregated() const NOEXCEPT
+{
+    // is_witnessed and witness was specified.
+    return wtxid_ != null_hash;
+}
+
+// private
 bool transaction_view::is_witnessed() const NOEXCEPT
 {
+    // witness data is in the buffer.
     return to_bool(witness_size_);
 }
 
-const hash_digest& transaction_view::id() const NOEXCEPT
+size_t transaction_view::inputs() const NOEXCEPT
 {
-    return txid_;
+    return in_count_;
 }
 
-const hash_digest& transaction_view::witness_id() const NOEXCEPT
+size_t transaction_view::outputs() const NOEXCEPT
 {
-    return wtxid_;
+    return out_count_;
+}
+
+uint32_t transaction_view::version() const NOEXCEPT
+{
+    BC_ASSERT(!is_empty());
+    return unsafe_from_little_endian<uint32_t>(start_ptr_);
+}
+
+uint32_t transaction_view::locktime() const NOEXCEPT
+{
+    BC_ASSERT(!is_empty());
+    const auto offset = std::next(start_ptr_, size_ - locktime_size);
+    return unsafe_from_little_endian<uint32_t>(offset);
 }
 
 size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
 {
     constexpr auto sentinels = sizeof(witness_marker) + sizeof(witness_enabled);
     return witness ? size_ : (size_ - witness_size_ - sentinels);
+}
+
+const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
+{
+    return witness ? wtxid_ : txid_;
 }
 
 // public
@@ -159,7 +192,7 @@ bool transaction_view::get_witness_commitment(
     if (is_zero(out_count_))
         return false;
 
-    const auto output = to_outputs();
+    const auto output = at_outputs();
     stream::in::fast istream(output, size_ - out_offset_);
     read::bytes::fast reader(istream);
 
@@ -183,7 +216,7 @@ bool transaction_view::get_witness_commitment(
 bool transaction_view::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
-    const auto witness = to_witnesses();
+    const auto witness = at_witnesses();
     if (!is_reserved_pattern(witness, witness_size_))
         return false;
 
@@ -194,40 +227,87 @@ bool transaction_view::get_witness_reservation(
 
 // public
 // ----------------------------------------------------------------------------
-// writers
+// streamers/istreams
 
+// Store writer doesn't write point with input.
 void transaction_view::write_input_script(flipper& sink,
     reader& source) const NOEXCEPT
 {
-    source.skip_bytes(chain::point::serialized_size());
+    // skip point
+    source.skip_bytes(point_size);
 
+    // script size
     const auto size = source.read_size(max_bytes);
     sink.write_variable(size);
+
+    // script
     sink.write_bytes(source.read_bytes(size));
 }
 
-void transaction_view::write_output_script(flipper& sink,
+void transaction_view::write_input(flipper& sink,
     reader& source) const NOEXCEPT
 {
-    source.skip_variable();
+    // point
+    sink.write_bytes(source.read_bytes(point_size));
 
+    // script size
     const auto size = source.read_size(max_bytes);
     sink.write_variable(size);
+
+    // script
     sink.write_bytes(source.read_bytes(size));
 }
 
-void transaction_view::write_input_witness(flipper& sink,
+// Store writes value as variable size (caution).
+void transaction_view::write_output(flipper& sink,
     reader& source) const NOEXCEPT
 {
+    // value
+    sink.write_bytes(source.read_bytes(value_size));
+
+    // script size
+    const auto size = source.read_size(max_bytes);
+    sink.write_variable(size);
+
+    // script
+    sink.write_bytes(source.read_bytes(size));
+}
+
+void transaction_view::write_witness(flipper& sink,
+    reader& source) const NOEXCEPT
+{
+    // stack size
     const auto stack = source.read_size(max_bytes);
     sink.write_variable(stack);
 
+    // stack
     for (size_t element{}; element < stack; ++element)
     {
+        // element size
         const auto size = source.read_size(max_bytes);
         sink.write_variable(size);
+
+        // element
         sink.write_bytes(source.read_bytes(size));
     }
+}
+
+stream::in::fast transaction_view::get_inputs_stream() const NOEXCEPT
+{
+    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(size_ - in_offset_);
+    return { at_inputs(), limit };
+}
+
+stream::in::fast transaction_view::get_outputs_stream() const NOEXCEPT
+{
+    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(size_ - out_offset_);
+    return { at_outputs(), limit };
+}
+
+stream::in::fast transaction_view::get_witnesses_stream() const NOEXCEPT
+{
+    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(witness_size_);
+    return { at_witnesses(), limit };
 }
 
 // private/static
@@ -272,18 +352,21 @@ BC_POP_WARNING()
 // ----------------------------------------------------------------------------
 // buffer offsets
 
-const uint8_t* transaction_view::to_inputs() const NOEXCEPT
+const uint8_t* transaction_view::at_inputs() const NOEXCEPT
 {
+    BC_ASSERT(!is_empty());
     return std::next(start_ptr_, in_offset_);
 }
 
-const uint8_t* transaction_view::to_outputs() const NOEXCEPT
+const uint8_t* transaction_view::at_outputs() const NOEXCEPT
 {
+    BC_ASSERT(!is_empty());
     return std::next(start_ptr_, out_offset_);
 }
 
-const uint8_t* transaction_view::to_witnesses() const NOEXCEPT
+const uint8_t* transaction_view::at_witnesses() const NOEXCEPT
 {
+    BC_ASSERT(!is_empty());
     constexpr auto locktime_size = sizeof(uint32_t);
     return std::next(start_ptr_, size_ - witness_size_ - locktime_size);
 }
