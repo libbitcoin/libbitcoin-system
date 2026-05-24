@@ -55,10 +55,10 @@ public:
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
     /// Streamers.
-    void write_input_script(flipper& sink, reader& source) const NOEXCEPT;
-    void write_input(flipper& sink, reader& source) const NOEXCEPT;
-    void write_output(flipper& sink, reader& source) const NOEXCEPT;
-    void write_witness(flipper& sink, reader& source) const NOEXCEPT;
+    static void write_input_script(flipper& sink, reader& source) NOEXCEPT;
+    static void write_input(flipper& sink, reader& source) NOEXCEPT;
+    static void write_output(flipper& sink, reader& source) NOEXCEPT;
+    static void write_witness(flipper& sink, reader& source) NOEXCEPT;
 
     /// istreams.
     stream::in::fast get_inputs_stream() const NOEXCEPT;

@@ -222,9 +222,10 @@ bool transaction_view::get_witness_reservation(
 // ----------------------------------------------------------------------------
 // streamers/istreams
 
+// static
 // Store writer doesn't write point with input.
 void transaction_view::write_input_script(flipper& sink,
-    reader& source) const NOEXCEPT
+    reader& source) NOEXCEPT
 {
     // skip point
     source.skip_bytes(point_size);
@@ -237,8 +238,8 @@ void transaction_view::write_input_script(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
-void transaction_view::write_input(flipper& sink,
-    reader& source) const NOEXCEPT
+// static
+void transaction_view::write_input(flipper& sink, reader& source) NOEXCEPT
 {
     // point
     sink.write_bytes(source.read_bytes(point_size));
@@ -251,9 +252,9 @@ void transaction_view::write_input(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
+// static
 // Store writes value as variable size (caution).
-void transaction_view::write_output(flipper& sink,
-    reader& source) const NOEXCEPT
+void transaction_view::write_output(flipper& sink, reader& source) NOEXCEPT
 {
     // value
     sink.write_bytes(source.read_bytes(value_size));
@@ -266,8 +267,8 @@ void transaction_view::write_output(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
-void transaction_view::write_witness(flipper& sink,
-    reader& source) const NOEXCEPT
+// static
+void transaction_view::write_witness(flipper& sink, reader& source) NOEXCEPT
 {
     // stack size
     const auto stack = source.read_size(max_bytes);
