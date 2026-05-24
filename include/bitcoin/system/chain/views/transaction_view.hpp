@@ -32,12 +32,11 @@ namespace chain {
 class BC_API transaction_view final
 {
 public:
-    DELETE_COPY(transaction_view);
-    DEFAULT_MOVE(transaction_view);
+    DEFAULT_COPY_MOVE(transaction_view);
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
-    transaction_view(reader& source, const data_chunk& buffer,
+    transaction_view(reader& tx_source, const data_chunk& block_buffer,
         bool witness) NOEXCEPT;
 
     /// Properties.
@@ -56,10 +55,10 @@ public:
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
     /// Streamers.
-    void write_input_script(flipper& sink, reader& source) const NOEXCEPT;
-    void write_input(flipper& sink, reader& source) const NOEXCEPT;
-    void write_output(flipper& sink, reader& source) const NOEXCEPT;
-    void write_witness(flipper& sink, reader& source) const NOEXCEPT;
+    static void write_input_script(flipper& sink, reader& source) NOEXCEPT;
+    static void write_input(flipper& sink, reader& source) NOEXCEPT;
+    static void write_output(flipper& sink, reader& source) NOEXCEPT;
+    static void write_witness(flipper& sink, reader& source) NOEXCEPT;
 
     /// istreams.
     stream::in::fast get_inputs_stream() const NOEXCEPT;
@@ -74,16 +73,13 @@ private:
     static bool is_commitment_pattern(const uint8_t* script,
         size_t size) NOEXCEPT;
 
-    // witness data in the buffer
-    bool is_witnessed() const NOEXCEPT;
-
     // buffer offsets
     const uint8_t* at_inputs() const NOEXCEPT;
     const uint8_t* at_outputs() const NOEXCEPT;
     const uint8_t* at_witnesses() const NOEXCEPT;
 
     // Pointer to tx in buffer.
-    const uint8_t* start_ptr_{};
+    const uint8_t* tx_ptr_{};
 
     // Offset of first tx input in buffer.
     size_t in_offset_{};

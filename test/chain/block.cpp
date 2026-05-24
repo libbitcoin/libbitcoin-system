@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include "../mocks/blocks.hpp"
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
@@ -146,122 +147,9 @@ BOOST_AUTO_TEST_CASE(block__constructor__data__expected)
     BOOST_REQUIRE(!block.is_invalid_merkle_root());
 }
 
-const block& get_block() NOEXCEPT
-{
-    constexpr auto root = base16_hash("0f3842895590aae2727ca1b35c755d1d9e577a8f2640d972f9989bdcddc9c1e5");
-    constexpr uint32_t block_version{ 0 };
-    constexpr hash_digest previous_block_hash{ 1 };
-    constexpr hash_digest merkle_root{ root };
-    constexpr uint32_t timestamp{ 3 };
-    constexpr uint32_t bits{ 4 };
-    constexpr uint32_t nonce{ 5 };
-    constexpr uint32_t tx_version{ 6 };
-    constexpr uint32_t locktime{ 7 };
-    constexpr uint32_t sequence{ 8 };
-    constexpr uint64_t value{ 9 };
-    constexpr bool minimal{ true };
-
-    static const block instance
-    {
-        header // ptr<header>
-        {
-            block_version,
-            previous_block_hash,
-            merkle_root,
-            timestamp,
-            bits,
-            nonce
-        },
-        transactions // ptr<vector<tx>>
-        {
-            // coinbase
-            transaction  // first tx
-            {
-                tx_version,
-                inputs
-                {
-                    input // exactly one input
-                    {
-                        point // null point
-                        {
-                            null_hash,
-                            point::null_index
-                        },
-                        script // minumum 2 bytes
-                        {
-                            operations // vector
-                            {
-                                operation
-                                {
-                                    opcode::nop1 // ptr<nullptr>
-                                },
-                                operation
-                                {
-                                    opcode::nop2 // ptr<nullptr>
-                                },
-                                operation
-                                {
-                                    data_chunk{ 0x42 , 0x24 }, // ptr<data_chunk>
-                                    minimal
-                                },
-                                operation
-                                {
-                                    data_chunk{ 0xfe , 0xed }, // ptr<data_chunk>
-                                    minimal
-                                }
-                            }
-                        },
-                        witness
-                        {
-                        },
-                        sequence
-                    },
-                    input
-                    {
-                        point    // ptr<point>
-                        {
-                            null_hash,
-                            point::null_index
-                        },
-                        script   // ptr<script>
-                        {
-                        },
-                        witness  // ptr<witness>
-                        {
-                            data_stack // vector
-                            {
-                                data_chunk{}, // ptr<data_chunk>
-                                data_chunk{}  // ptr<data_chunk>
-                            }
-                        },
-                        sequence
-                    }
-                },
-                outputs
-                {
-                    output // at least one output
-                    {
-                        value,  // no more than reward
-                        script{}
-                    },
-                    output // at least one output
-                    {
-                        value,  // no more than reward
-                        script{}
-                    }
-                },
-                locktime
-            }
-        }
-    };
-
-    return instance;
-}
-
 BOOST_AUTO_TEST_CASE(block__constructor__fast__success)
 {
-    const auto block1 = get_block();
-    const auto data = block1.to_data(true);
+    const auto data = test::mock_block.to_data(true);
     test::reporting_arena<false> arena{};
     stream::in::fast stream(data);
     read::bytes::fast source(stream, &arena);
@@ -389,12 +277,12 @@ BOOST_AUTO_TEST_CASE(block__spends__genesis__zero)
 
 BOOST_AUTO_TEST_CASE(block__spends__coinbase_only__zero)
 {
-    BOOST_REQUIRE(is_zero(get_block().spends()));
+    BOOST_REQUIRE(is_zero(test::mock_block.spends()));
 }
 
 BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
 {
-    const block instance;
+    const block instance{};
     BOOST_REQUIRE_EQUAL(instance.hash(), instance.header().hash());
 }
 

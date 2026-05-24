@@ -37,10 +37,10 @@ using namespace system;
 // constructor
 // ----------------------------------------------------------------------------
 
-block_view::block_view(data_chunk&& buffer, bool witness) NOEXCEPT
-  : witness_{ witness }, buffer_{ std::move(buffer) }
+block_view::block_view(data_chunk&& block_buffer, bool witness) NOEXCEPT
+  : witness_{ witness }, buffer_{ to_shared(std::move(block_buffer)) }
 {
-    stream::in::fast istream(buffer_);
+    stream::in::fast istream(*buffer_);
     read::bytes::fast in(istream);
     in.skip_bytes(header::serialized_size());
 
@@ -48,10 +48,47 @@ block_view::block_view(data_chunk&& buffer, bool witness) NOEXCEPT
     txs_.reserve(txs);
 
     for (size_t tx{}; tx < txs; ++tx)
-        txs_.emplace_back(in, buffer_, witness);
+        txs_.emplace_back(in, *buffer_, witness);
 
+    // How are we getting empty tx and not seeing error here.
     if (!in)
         txs_.clear();
+}
+
+// serialization
+// ----------------------------------------------------------------------------
+
+data_chunk block_view::to_data(bool witness) const NOEXCEPT
+{
+    data_chunk data(serialized_size(witness));
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out, witness);
+    return data;
+}
+
+void block_view::to_data(std::ostream& stream, bool witness) const NOEXCEPT
+{
+    write::bytes::ostream out(stream);
+    to_data(out, witness);
+}
+
+void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
+{
+    if (witness)
+    {
+        sink.write_bytes(*buffer_);
+        return;
+    }
+
+    // TODO: write header from first bytes in buffer.
+    ////header_->to_data(sink);
+    ////sink.write_variable(txs_->size());
+
+    // TODO: add writers to tx, skip witness as applicable.
+    ////for (const auto& tx: *txs_)
+    ////    tx->to_data(sink, witness);
+    BC_ASSERT_MSG(false, "not implemented");
 }
 
 // public
@@ -62,9 +99,18 @@ bool block_view::is_valid() const NOEXCEPT
     return !txs_.empty();
 }
 
+bool block_view::is_segregated() const NOEXCEPT
+{
+    return witness_ && std::any_of(txs_.begin(), txs_.end(),
+        [](const auto& tx) NOEXCEPT
+        {
+            return tx.is_segregated();
+        });
+}
+
 hash_digest block_view::hash() const NOEXCEPT
 {
-    return bitcoin_hash(header::serialized_size(), buffer_.data());
+    return bitcoin_hash(header::serialized_size(), buffer_->data());
 }
 
 size_t block_view::transactions() const NOEXCEPT
@@ -79,10 +125,12 @@ const transaction_views& block_view::views() const NOEXCEPT
 
 size_t block_view::serialized_size(bool witness) const NOEXCEPT
 {
-    auto total = header::serialized_size() + variable_size(txs_.size());
+    if (witness)
+        return buffer_->size();
 
+    auto total = header::serialized_size() + variable_size(txs_.size());
     for (const auto& tx: txs_)
-        total += tx.serialized_size(witness);
+        total += tx.serialized_size(false);
 
     return total;
 }
@@ -114,15 +162,6 @@ code block_view::identify(const context& ctx) const NOEXCEPT
 bool block_view::is_malleated() const NOEXCEPT
 {
     return is_malleated64() || is_malleated32();
-}
-
-bool block_view::is_segregated() const NOEXCEPT
-{
-    return witness_ && std::any_of(txs_.begin(), txs_.end(),
-        [](const auto& tx) NOEXCEPT
-        {
-            return tx.is_segregated();
-        });
 }
 
 bool block_view::is_invalid_merkle_root() const NOEXCEPT
@@ -205,11 +244,11 @@ bool block_view::is_malleated32(size_t width) const NOEXCEPT
 
 hash_digest block_view::header_merkle_root() const NOEXCEPT
 {
-    if (txs_.empty() || buffer_.empty())
+    if (txs_.empty() || buffer_->empty())
         return null_hash;
 
     constexpr auto offset = sizeof(uint32_t) + hash_size;
-    const auto start = std::next(buffer_.data(), offset);
+    const auto start = std::next(buffer_->data(), offset);
     return unsafe_array_cast<uint8_t, hash_size>(start);
 }
 

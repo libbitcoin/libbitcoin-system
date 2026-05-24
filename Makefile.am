@@ -384,6 +384,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/power.cpp \
     test/math/rotate.cpp \
     test/math/sign.cpp \
+    test/mocks/blocks.cpp \
+    test/mocks/blocks.hpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
     test/radix/base_2048.cpp \
