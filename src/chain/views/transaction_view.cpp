@@ -218,11 +218,10 @@ bool transaction_view::get_witness_reservation(
     return true;
 }
 
-// public
+// public/static
 // ----------------------------------------------------------------------------
-// streamers/istreams
+// streamers
 
-// static
 // Store writer doesn't write point with input.
 void transaction_view::write_input_script(flipper& sink,
     reader& source) NOEXCEPT
@@ -238,7 +237,6 @@ void transaction_view::write_input_script(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
-// static
 void transaction_view::write_input(flipper& sink, reader& source) NOEXCEPT
 {
     // point
@@ -252,7 +250,6 @@ void transaction_view::write_input(flipper& sink, reader& source) NOEXCEPT
     sink.write_bytes(source.read_bytes(size));
 }
 
-// static
 // Store writes value as variable size (caution).
 void transaction_view::write_output(flipper& sink, reader& source) NOEXCEPT
 {
@@ -267,7 +264,6 @@ void transaction_view::write_output(flipper& sink, reader& source) NOEXCEPT
     sink.write_bytes(source.read_bytes(size));
 }
 
-// static
 void transaction_view::write_witness(flipper& sink, reader& source) NOEXCEPT
 {
     // stack size
@@ -285,6 +281,10 @@ void transaction_view::write_witness(flipper& sink, reader& source) NOEXCEPT
         sink.write_bytes(source.read_bytes(size));
     }
 }
+
+// public
+// ----------------------------------------------------------------------------
+// istreams
 
 stream::in::fast transaction_view::get_inputs_stream() const NOEXCEPT
 {
