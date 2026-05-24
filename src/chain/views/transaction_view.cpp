@@ -125,8 +125,7 @@ bool transaction_view::is_empty() const NOEXCEPT
 
 bool transaction_view::is_coinbase() const NOEXCEPT
 {
-    if (is_zero(inputs()))
-        return false;
+    BC_ASSERT(!is_empty());
 
     // Input is guaranteed to be at least point-sized by construction.
     const auto point = at_inputs();
@@ -182,8 +181,7 @@ const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
 bool transaction_view::get_witness_commitment(
     hash_cref& commitment) const NOEXCEPT
 {
-    if (is_zero(out_count_))
-        return false;
+    BC_ASSERT(!is_empty());
 
     const auto output = at_outputs();
     stream::in::fast istream(output, size_ - out_offset_);
@@ -209,6 +207,8 @@ bool transaction_view::get_witness_commitment(
 bool transaction_view::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
+    BC_ASSERT(!is_empty());
+
     const auto witness = at_witnesses();
     if (!is_reserved_pattern(witness, witness_size_))
         return false;
