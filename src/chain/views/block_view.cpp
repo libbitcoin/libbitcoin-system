@@ -50,6 +50,7 @@ block_view::block_view(data_chunk&& block_buffer, bool witness) NOEXCEPT
     for (size_t tx{}; tx < txs; ++tx)
         txs_.emplace_back(in, *buffer_, witness);
 
+    // How are we getting empty tx and not seeing error here.
     if (!in)
         txs_.clear();
 }
