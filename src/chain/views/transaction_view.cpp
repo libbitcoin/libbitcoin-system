@@ -92,7 +92,8 @@ transaction_view::transaction_view(reader& tx_source,
         }
         else
         {
-            witness::skip(tx_source, true);
+            for (size_t input{}; input < in_count_; ++input)
+                witness::skip(tx_source, true);
         }
     }
 
@@ -171,7 +172,9 @@ uint32_t transaction_view::locktime() const NOEXCEPT
 
 size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
 {
-    return witness ? size_ : size_ - witness_size_;
+    const auto segregated = to_bool(witness_size_);
+    constexpr auto sentinels = sizeof(witness_marker) + sizeof(witness_enabled);
+    return segregated && !witness ? size_ - (witness_size_ + sentinels) : size_;
 }
 
 const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
