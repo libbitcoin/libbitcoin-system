@@ -83,9 +83,6 @@ transaction_view::transaction_view(reader& tx_source,
             {
                 // Witness stack size cannot use the count limiter.
                 const auto stack = tx_source.read_size(max_bytes);
-                if (is_zero(stack))
-                    tx_source.invalidate();
-
                 for (size_t element{}; element < stack; ++element)
                     tx_source.skip_bytes(tx_source.read_size(max_bytes));
             }
