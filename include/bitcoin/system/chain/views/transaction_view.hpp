@@ -40,7 +40,7 @@ public:
         bool witness) NOEXCEPT;
 
     /// Properties.
-    bool is_empty() const NOEXCEPT;
+    bool is_valid() const NOEXCEPT;
     bool is_coinbase() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;
     size_t inputs() const NOEXCEPT;
@@ -56,8 +56,6 @@ public:
 
     /// Streamers.
     static void write_input_script(flipper& sink, reader& source) NOEXCEPT;
-    static void write_input(flipper& sink, reader& source) NOEXCEPT;
-    static void write_output(flipper& sink, reader& source) NOEXCEPT;
     static void write_witness(flipper& sink, reader& source) NOEXCEPT;
 
     /// istreams.

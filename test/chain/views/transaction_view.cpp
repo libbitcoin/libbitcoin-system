@@ -17,7 +17,102 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include "../../mocks/blocks.hpp"
 
 BOOST_AUTO_TEST_SUITE(transaction_view_tests)
+
+BOOST_AUTO_TEST_CASE(transaction_view__construct__empty__invalid)
+{
+    auto block = to_chunk(test::header0_data);
+    block.push_back(0x42);
+    stream::in::fast istream{ block };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    BOOST_CHECK_EQUAL(reader.read_variable(), 0x42u);
+
+    const chain::transaction_view view{ reader, block, true };
+    BOOST_CHECK(!view.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__construct__genesis__valid)
+{
+    const auto block = test::genesis.to_data(true);
+    const auto& tx = *test::genesis.transactions_ptr()->front();
+    stream::in::fast istream{ block };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    BOOST_CHECK_EQUAL(reader.read_variable(), 1u);
+
+    const chain::transaction_view view{ reader, block, true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK(view.is_coinbase());
+    BOOST_CHECK(!view.is_segregated());
+    BOOST_CHECK_EQUAL(view.inputs(), 1u);
+    BOOST_CHECK_EQUAL(view.outputs(), 1u);
+    BOOST_CHECK_EQUAL(view.version(), 1u);
+    BOOST_CHECK_EQUAL(view.locktime(), 0u);
+    BOOST_CHECK_EQUAL(view.hash(true), tx.hash(true));
+    BOOST_CHECK_EQUAL(view.hash(false), tx.hash(false));
+    BOOST_CHECK_EQUAL(view.serialized_size(true), tx.serialized_size(true));
+    BOOST_CHECK_EQUAL(view.serialized_size(false), tx.serialized_size(false));
+
+    BOOST_CHECK_EQUAL(view.get_inputs_stream().rdstate(), 0);
+    BOOST_CHECK_EQUAL(view.get_outputs_stream().rdstate(), 0);
+    BOOST_CHECK_EQUAL(view.get_witnesses_stream().rdstate(), 0);
+
+    hash_cref commitment{ null_hash };
+    BOOST_CHECK(!view.get_witness_commitment(commitment));
+
+    hash_cref reservation{ null_hash };
+    BOOST_CHECK(!view.get_witness_reservation(reservation));
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__genesis__expected)
+{
+    const auto block = test::genesis.to_data(true);
+    const auto& tx = *test::genesis.transactions_ptr()->front();
+    const auto expected = tx.inputs_ptr()->front()->script().to_data(true);
+
+    stream::in::fast istream{ block };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    reader.read_variable();
+
+    const chain::transaction_view view{ reader, block, true };
+    BOOST_CHECK(view.is_valid());
+
+    data_chunk script(expected.size(), 0xff);
+    stream::flip::fast ostream{ script };
+    flip::bytes::fast sink{ ostream };
+    auto stream = view.get_inputs_stream();
+    read::bytes::fast source{ stream };
+
+    chain::transaction_view::write_input_script(sink, source);
+    BOOST_CHECK_EQUAL(script, expected);
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__write_witness__genesis__expected)
+{
+    const auto block = test::genesis.to_data(true);
+    const auto& tx = *test::genesis.transactions_ptr()->front();
+    const auto expected = tx.inputs_ptr()->front()->witness().to_data(true);
+
+    stream::in::fast istream{ block };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    reader.read_variable();
+
+    const chain::transaction_view view{ reader, block, true };
+    BOOST_CHECK(view.is_valid());
+
+    data_chunk witness(expected.size(), 0xff);
+    stream::flip::fast ostream{ witness };
+    flip::bytes::fast sink{ ostream };
+    auto stream = view.get_witnesses_stream();
+    read::bytes::fast source{ stream };
+
+    chain::transaction_view::write_witness(sink, source);
+    BOOST_CHECK_EQUAL(witness, expected);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
