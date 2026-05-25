@@ -233,7 +233,7 @@ void transaction_view::write_input_script(flipper& sink,
     source.skip_bytes(point_size);
 
     // script size
-    const auto size = source.read_size(max_bytes);
+    const auto size = source.read_size();
     sink.write_variable(size);
 
     // script
@@ -243,19 +243,39 @@ void transaction_view::write_input_script(flipper& sink,
 void transaction_view::write_witness(flipper& sink, reader& source) NOEXCEPT
 {
     // stack size
-    const auto stack = source.read_size(max_bytes);
+    const auto stack = source.read_size();
     sink.write_variable(stack);
 
     // stack
     for (size_t element{}; element < stack; ++element)
     {
         // element size
-        const auto size = source.read_size(max_bytes);
+        const auto size = source.read_size();
         sink.write_variable(size);
 
         // element
         sink.write_bytes(source.read_bytes(size));
     }
+}
+
+size_t transaction_view::read_witness_size(reader& source) NOEXCEPT
+{
+    // stack size
+    const auto stack = source.read_size();
+    auto total = variable_size(stack);
+
+    // stack
+    for (size_t element{}; element < stack; ++element)
+    {
+        // element size
+        const auto size = source.read_size();
+        total += variable_size(size) + size;
+
+        // element
+        source.skip_bytes(size);
+    }
+
+    return total;
 }
 
 // public

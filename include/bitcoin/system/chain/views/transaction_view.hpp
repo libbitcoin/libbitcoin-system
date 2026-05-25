@@ -57,6 +57,7 @@ public:
     /// Streamers.
     static void write_input_script(flipper& sink, reader& source) NOEXCEPT;
     static void write_witness(flipper& sink, reader& source) NOEXCEPT;
+    static size_t read_witness_size(reader& source) NOEXCEPT;
 
     /// istreams.
     stream::in::fast get_inputs_stream() const NOEXCEPT;
