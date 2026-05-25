@@ -61,7 +61,6 @@ protected:
     bool is_invalid_witness_commitment() const NOEXCEPT;
 
 private:
-
     // Malleation.
     static bool is_malleable64(const transaction_views& txs) NOEXCEPT;
     bool is_malleated32() const NOEXCEPT;
