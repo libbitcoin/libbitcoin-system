@@ -205,30 +205,35 @@ size_t transaction_view::output_table_size() const NOEXCEPT
 // ----------------------------------------------------------------------------
 // methods
 
+// Last output of commitment pattern holds the committed value [bip141].
 bool transaction_view::get_witness_commitment(
     hash_cref& commitment) const NOEXCEPT
 {
     const auto output = at_outputs();
     stream::in::fast istream(output, outputs_size());
     read::bytes::fast reader(istream);
+    bool found{};
 
-    for (size_t out{}; out < sub1(out_count_); ++out)
+    for (size_t out{}; out < out_count_; ++out)
     {
         reader.skip_bytes(value_size);
-        reader.skip_bytes(reader.read_size(max_bytes));
+        const auto size = reader.read_size();
+        const auto script = std::next(output, reader.get_read_position());
+
+        if (is_commitment_pattern(script, size))
+        {
+            const auto offset = std::next(script, commitment_pattern_size);
+            commitment = unsafe_array_cast<uint8_t, hash_size>(offset);
+            found = true;
+        }
+
+        reader.skip_bytes(size);
     }
 
-    reader.skip_bytes(value_size);
-    const auto size = reader.read_size(max_bytes);
-    const auto script = std::next(output, reader.get_read_position());
-    if (!is_commitment_pattern(script, size))
-        return false;
-
-    const auto offset = std::next(script, commitment_pattern_size);
-    commitment = unsafe_array_cast<uint8_t, hash_size>(offset);
-    return true;
+    return found;
 }
 
+// Coinbase input witness must be 32 byte witness reserved value [bip141].
 bool transaction_view::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
