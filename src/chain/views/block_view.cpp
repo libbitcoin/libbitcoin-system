@@ -73,13 +73,13 @@ void block_view::to_data(std::ostream& stream, bool witness) const NOEXCEPT
     to_data(out, witness);
 }
 
-void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
+void block_view::to_data(writer& , bool ) const NOEXCEPT
 {
-    if (witness)
-    {
-        sink.write_bytes(*buffer_);
-        return;
-    }
+    ////if (witness)
+    ////{
+    ////    sink.write_bytes(*buffer_);
+    ////    return;
+    ////}
 
     // TODO: write header from first bytes in buffer.
     ////header_->to_data(sink);
