@@ -37,11 +37,12 @@ public:
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
     transaction_view(reader& tx_source, const data_chunk& block_buffer,
-        bool witness) NOEXCEPT;
+        bool coinbase, bool witness) NOEXCEPT;
 
     /// Properties.
     bool is_valid() const NOEXCEPT;
     bool is_coinbase() const NOEXCEPT;
+    bool is_null_point() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;
     size_t inputs() const NOEXCEPT;
     size_t outputs() const NOEXCEPT;
@@ -85,6 +86,8 @@ private:
     size_t inputs_size() const NOEXCEPT;
     size_t outputs_size() const NOEXCEPT;
     size_t witnesses_size() const NOEXCEPT;
+    size_t unstripped_size() const NOEXCEPT;
+    size_t stripped_size() const NOEXCEPT;
 
     // Pointer to tx in buffer.
     const uint8_t* tx_ptr_{};
@@ -110,8 +113,14 @@ private:
     // Transaction hash.
     hash_digest txid_{};
 
-    // Null hash if not segregated or stripped.
+    // Null hash if !segregated or stripped or coinbase.
     hash_digest wtxid_{};
+
+    // The transaction is segregated and not stripped.
+    bool segregated_{};
+
+    // The transaction is the first in its block.
+    bool coinbase_{};
 };
 
 using transaction_views = std::vector<transaction_view>;

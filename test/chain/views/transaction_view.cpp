@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__empty__invalid)
     reader.skip_bytes(chain::header::serialized_size());
     BOOST_CHECK_EQUAL(reader.read_variable(), 0x42u);
 
-    const chain::transaction_view view{ reader, block, true };
+    const chain::transaction_view view{ reader, block, false, true };
     BOOST_CHECK(!view.is_valid());
 }
 
@@ -45,9 +45,10 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__genesis__valid)
     reader.skip_bytes(chain::header::serialized_size());
     BOOST_CHECK_EQUAL(reader.read_variable(), 1u);
 
-    const chain::transaction_view view{ reader, block, true };
+    const chain::transaction_view view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(view.is_coinbase());
+    BOOST_CHECK(view.is_null_point());
     BOOST_CHECK(!view.is_segregated());
     BOOST_CHECK_EQUAL(view.inputs(), 1u);
     BOOST_CHECK_EQUAL(view.outputs(), 1u);
@@ -71,22 +72,28 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__genesis__valid)
 
 BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_witness__valid)
 {
+    // Serialized to buffer WITH witness data.
     const auto transaction = test::tx4.to_data(true);
     const auto& tx = test::tx4;
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, true };
+    // Parse buffer for a witness node (logically unstripped).
+    constexpr auto witnessed = true;
+    const chain::transaction_view view{ reader, transaction, false, witnessed };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(!view.is_coinbase());
+    BOOST_CHECK(!view.is_null_point());
     BOOST_CHECK(view.is_segregated());
     BOOST_CHECK_EQUAL(view.inputs(), 2u);
     BOOST_CHECK_EQUAL(view.outputs(), 1u);
     BOOST_CHECK_EQUAL(view.version(), 0xa5u);
     BOOST_CHECK_EQUAL(view.locktime(), 0x85u);
-    BOOST_CHECK_EQUAL(view.hash(true), tx.hash(true));
+
+    // hash and expectations must be witnessed.
+    BOOST_CHECK_EQUAL(view.hash(true), tx.hash(witnessed));
     BOOST_CHECK_EQUAL(view.hash(false), tx.hash(false));
-    BOOST_CHECK_EQUAL(view.serialized_size(true), tx.serialized_size(true));
+    BOOST_CHECK_EQUAL(view.serialized_size(true), tx.serialized_size(witnessed));
     BOOST_CHECK_EQUAL(view.serialized_size(false), tx.serialized_size(false));
 
     BOOST_CHECK_EQUAL(view.get_inputs_stream().rdstate(), 0);
@@ -100,27 +107,66 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_witness__valid)
     BOOST_CHECK(!view.get_witness_reservation(reservation));
 }
 
-BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_non_witness__valid)
+BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_stripped__valid)
 {
+    // Serialized to buffer WITH witness data.
     const auto transaction = test::tx4.to_data(true);
     const auto& tx = test::tx4;
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    // Parse for a non-witness node.
-    const chain::transaction_view view{ reader, transaction, false };
+    // Parse buffer for a non-witness node (logically stripped).
+    constexpr auto stripped = false;
+    const chain::transaction_view view{ reader, transaction, false, stripped };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(!view.is_coinbase());
+    BOOST_CHECK(!view.is_null_point());
     BOOST_CHECK(!view.is_segregated());
     BOOST_CHECK_EQUAL(view.inputs(), 2u);
     BOOST_CHECK_EQUAL(view.outputs(), 1u);
     BOOST_CHECK_EQUAL(view.version(), 0xa5u);
     BOOST_CHECK_EQUAL(view.locktime(), 0x85u);
 
-    // hash expectation must be non-witness.
+    // hash and expectations must be non-witnessed (stripped).
+    BOOST_CHECK_EQUAL(view.hash(true), tx.hash(stripped));
+    BOOST_CHECK_EQUAL(view.hash(false), tx.hash(false));
+    BOOST_CHECK_EQUAL(view.serialized_size(true), tx.serialized_size(stripped));
+    BOOST_CHECK_EQUAL(view.serialized_size(false), tx.serialized_size(false));
+
+    BOOST_CHECK_EQUAL(view.get_inputs_stream().rdstate(), 0);
+    BOOST_CHECK_EQUAL(view.get_outputs_stream().rdstate(), 0);
+    BOOST_CHECK_EQUAL(view.get_witnesses_stream().rdstate(), 0);
+
+    // Witness but not coinbase.
+    hash_cref commitment{ null_hash };
+    hash_cref reservation{ null_hash };
+    BOOST_CHECK(!view.get_witness_commitment(commitment));
+    BOOST_CHECK(!view.get_witness_reservation(reservation));
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_non_witnessed__valid)
+{
+    // Serialized to buffer WITHOUT witness data.
+    const auto transaction = test::tx4.to_data(false);
+    const auto& tx = test::tx4;
+    stream::in::fast istream{ transaction };
+    read::bytes::fast reader{ istream };
+
+    // Parse buffer for a witness node (but doesn't exist).
+    const chain::transaction_view view{ reader, transaction, false, false };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK(!view.is_coinbase());
+    BOOST_CHECK(!view.is_null_point());
+    BOOST_CHECK(!view.is_segregated());
+    BOOST_CHECK_EQUAL(view.inputs(), 2u);
+    BOOST_CHECK_EQUAL(view.outputs(), 1u);
+    BOOST_CHECK_EQUAL(view.version(), 0xa5u);
+    BOOST_CHECK_EQUAL(view.locktime(), 0x85u);
+
+    // hash and expectations must be non-witness (doesn't exist).
     BOOST_CHECK_EQUAL(view.hash(true), tx.hash(false));
     BOOST_CHECK_EQUAL(view.hash(false), tx.hash(false));
-    BOOST_CHECK_EQUAL(view.serialized_size(true), tx.serialized_size(true));
+    BOOST_CHECK_EQUAL(view.serialized_size(true), tx.serialized_size(false));
     BOOST_CHECK_EQUAL(view.serialized_size(false), tx.serialized_size(false));
 
     BOOST_CHECK_EQUAL(view.get_inputs_stream().rdstate(), 0);
@@ -146,7 +192,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__genesis__expected)
     reader.skip_bytes(chain::header::serialized_size());
     reader.read_variable();
 
-    const chain::transaction_view view{ reader, block, true };
+    const chain::transaction_view view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk script(expected.size(), 0xff);
@@ -167,7 +213,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__tx4_witness__expected
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, true };
+    const chain::transaction_view view{ reader, transaction, false, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk script(expected.size(), 0xff);
@@ -193,7 +239,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__genesis__expected)
     reader.skip_bytes(chain::header::serialized_size());
     reader.read_variable();
 
-    const chain::transaction_view view{ reader, block, true };
+    const chain::transaction_view view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk witness(expected.size(), 0xff);
@@ -214,7 +260,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__tx4_witness__expected)
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, true };
+    const chain::transaction_view view{ reader, transaction, false, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk witness(expected.size(), 0xff);
