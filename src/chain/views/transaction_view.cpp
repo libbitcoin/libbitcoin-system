@@ -61,16 +61,20 @@ transaction_view::transaction_view(reader& tx_source,
     for (size_t input{}; input < in_count_; ++input)
     {
         tx_source.skip_bytes(point_size);
-        tx_source.skip_bytes(tx_source.read_size(max_bytes));
-        tx_source.skip_bytes(sequence_size);
+        const auto script_size = tx_source.read_size(max_bytes);
+        tx_source.skip_bytes(script_size + sequence_size);
+        input_table_size_ += variable_size(script_size) + script_size;
     }
 
     out_count_ = tx_source.read_size(max_count);
     out_offset_ = tx_source.get_read_position() - tx_start;
     for (size_t output{}; output < out_count_; ++output)
     {
-        tx_source.skip_bytes(value_size);
-        tx_source.skip_bytes(tx_source.read_size(max_bytes));
+        const auto value = tx_source.read_8_bytes_little_endian();
+        const auto script_size = tx_source.read_size(max_bytes);
+        tx_source.skip_bytes(script_size);
+        output_table_size_ += variable_size(value) +
+            variable_size(script_size) + script_size;
     }
 
     const auto witness_offset = tx_source.get_read_position() - tx_start;
@@ -96,7 +100,9 @@ transaction_view::transaction_view(reader& tx_source,
 
     tx_source.skip_bytes(locktime_size);
     size_ = tx_source.get_read_position() - tx_start;
-    witness_size_ = size_ - witness_offset - locktime_size;
+    witnesses_size_ = size_ - (witness_offset + locktime_size);
+    input_table_size_ += segregated && witness ? witnesses_size_ : in_count_;
+
     if (is_zero(in_count_) || is_zero(out_count_))
         tx_source.invalidate();
 
@@ -169,14 +175,29 @@ uint32_t transaction_view::locktime() const NOEXCEPT
 
 size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
 {
-    const auto segregated = to_bool(witness_size_);
     constexpr auto sentinels = sizeof(witness_marker) + sizeof(witness_enabled);
-    return segregated && !witness ? size_ - (witness_size_ + sentinels) : size_;
+    const auto segregated = to_bool(witnesses_size());
+    return segregated && !witness ? size_ - (witnesses_size() + sentinels) :
+        size_;
 }
 
 const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
 {
     return witness && is_segregated() ? wtxid_ : txid_;
+}
+
+// public
+// ----------------------------------------------------------------------------
+// store helpers
+
+size_t transaction_view::input_table_size() const NOEXCEPT
+{
+    return input_table_size_;
+}
+
+size_t transaction_view::output_table_size() const NOEXCEPT
+{
+    return output_table_size_;
 }
 
 // public
@@ -187,16 +208,16 @@ bool transaction_view::get_witness_commitment(
     hash_cref& commitment) const NOEXCEPT
 {
     const auto output = at_outputs();
-    stream::in::fast istream(output, size_ - out_offset_);
+    stream::in::fast istream(output, outputs_size());
     read::bytes::fast reader(istream);
 
     for (size_t out{}; out < sub1(out_count_); ++out)
     {
-        reader.skip_variable();
+        reader.skip_bytes(value_size);
         reader.skip_bytes(reader.read_size(max_bytes));
     }
 
-    reader.skip_variable();
+    reader.skip_bytes(value_size);
     const auto size = reader.read_size(max_bytes);
     const auto script = std::next(output, reader.get_read_position());
     if (!is_commitment_pattern(script, size))
@@ -211,7 +232,7 @@ bool transaction_view::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
     const auto witness = at_witnesses();
-    if (!is_reserved_pattern(witness, witness_size_))
+    if (!is_reserved_pattern(witness, witnesses_size()))
         return false;
 
     const auto offset = std::next(witness, reserved_pattern_size);
@@ -281,19 +302,19 @@ size_t transaction_view::read_witness_size(reader& source) NOEXCEPT
 
 stream::in::fast transaction_view::get_inputs_stream() const NOEXCEPT
 {
-    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(size_ - in_offset_);
+    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(inputs_size());
     return { at_inputs(), limit };
 }
 
 stream::in::fast transaction_view::get_outputs_stream() const NOEXCEPT
 {
-    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(size_ - out_offset_);
+    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(outputs_size());
     return { at_outputs(), limit };
 }
 
 stream::in::fast transaction_view::get_witnesses_stream() const NOEXCEPT
 {
-    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(witness_size_);
+    const auto limit = possible_narrow_sign_cast<ptrdiff_t>(witnesses_size());
     return { at_witnesses(), limit };
 }
 
@@ -354,8 +375,27 @@ const uint8_t* transaction_view::at_outputs() const NOEXCEPT
 const uint8_t* transaction_view::at_witnesses() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
-    constexpr auto locktime_size = sizeof(uint32_t);
-    return std::next(tx_ptr_, size_ - witness_size_ - locktime_size);
+    const auto wintess_offset = size_ - (witnesses_size() + locktime_size);
+    return std::next(tx_ptr_, wintess_offset);
+}
+
+// private
+// ----------------------------------------------------------------------------
+// computed sizes
+
+size_t transaction_view::inputs_size() const NOEXCEPT
+{
+    return size_ - in_offset_ - (witnesses_size_ + locktime_size);
+}
+
+size_t transaction_view::outputs_size() const NOEXCEPT
+{
+    return size_ - out_offset_ - (witnesses_size_ + locktime_size);
+}
+
+size_t transaction_view::witnesses_size() const NOEXCEPT
+{
+    return witnesses_size_;
 }
 
 } // namespace chain

@@ -50,6 +50,10 @@ public:
     size_t serialized_size(bool witness) const NOEXCEPT;
     const hash_digest& hash(bool witness) const NOEXCEPT;
 
+    /// Store helpers.
+    size_t input_table_size() const NOEXCEPT;
+    size_t output_table_size() const NOEXCEPT;
+
     /// Methods.
     bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
@@ -77,6 +81,11 @@ private:
     const uint8_t* at_outputs() const NOEXCEPT;
     const uint8_t* at_witnesses() const NOEXCEPT;
 
+    // computed sizes
+    size_t inputs_size() const NOEXCEPT;
+    size_t outputs_size() const NOEXCEPT;
+    size_t witnesses_size() const NOEXCEPT;
+
     // Pointer to tx in buffer.
     const uint8_t* tx_ptr_{};
 
@@ -92,7 +101,11 @@ private:
     size_t size_{};
 
     // Size of tx witnesses only (without marker/sentinel).
-    size_t witness_size_{};
+    size_t witnesses_size_{};
+
+    // Store helpers.
+    size_t input_table_size_{};
+    size_t output_table_size_{};
 
     // Transaction hash.
     hash_digest txid_{};
