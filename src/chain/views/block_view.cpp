@@ -45,12 +45,15 @@ block_view::block_view(data_chunk&& block_buffer, bool witness) NOEXCEPT
     in.skip_bytes(header::serialized_size());
 
     const auto txs = in.read_size(max_count);
+    if (is_zero(txs))
+        return;
+
     txs_.reserve(txs);
+    txs_.emplace_back(in, *buffer_, true, witness);
 
-    for (size_t tx{}; tx < txs; ++tx)
-        txs_.emplace_back(in, *buffer_, witness);
+    for (auto tx = one; tx < txs; ++tx)
+        txs_.emplace_back(in, *buffer_, false, witness);
 
-    // How are we getting empty tx and not seeing error here.
     if (!in)
         txs_.clear();
 }
@@ -73,18 +76,18 @@ void block_view::to_data(std::ostream& stream, bool witness) const NOEXCEPT
     to_data(out, witness);
 }
 
-void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
+void block_view::to_data(writer& , bool ) const NOEXCEPT
 {
-    if (witness)
-    {
-        sink.write_bytes(*buffer_);
-        return;
-    }
-
+    ////if (witness)
+    ////{
+    ////    sink.write_bytes(*buffer_);
+    ////    return;
+    ////}
+    ////
     // TODO: write header from first bytes in buffer.
     ////header_->to_data(sink);
     ////sink.write_variable(txs_->size());
-
+    ////
     // TODO: add writers to tx, skip witness as applicable.
     ////for (const auto& tx: *txs_)
     ////    tx->to_data(sink, witness);
@@ -207,7 +210,7 @@ bool block_view::is_malleated32() const NOEXCEPT
 bool block_view::is_malleated64() const NOEXCEPT
 {
     // First tx check is not sufficient, null point must be checked.
-    return !txs_.empty() && !txs_.front().is_coinbase() &&
+    return !txs_.empty() && !txs_.front().is_null_point() &&
         is_malleable64(txs_);
 }
 
