@@ -66,10 +66,10 @@ public:
         const hash_cptr& tapleaf) NOEXCEPT;
 
     /// Program result.
-    bool is_true(bool clean) const NOEXCEPT;
+    virtual bool is_true(bool clean) const NOEXCEPT;
 
     /// Transaction must pop top input stack element [bip16].
-    const data_chunk& pop() NOEXCEPT;
+    virtual const data_chunk& pop() NOEXCEPT;
 
 protected:
     using flags = chain::flags;
@@ -80,83 +80,83 @@ protected:
     using op_iterator = chain::operations::const_iterator;
     using hash_cache = std::unordered_map<uint8_t, hash_digest>;
 
-    INLINE static bool equal_chunks(const stack_variant& left,
+    static INLINE bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;
 
     /// Constants.
     /// -----------------------------------------------------------------------
-    INLINE script_error_t initialize() const NOEXCEPT;
-    INLINE op_iterator begin() const NOEXCEPT;
-    INLINE op_iterator end() const NOEXCEPT;
-    INLINE const transaction& tx() const NOEXCEPT;
-    INLINE const chain::input& input() const NOEXCEPT;
-    INLINE bool is_enabled(flags flag) const NOEXCEPT;
+    virtual INLINE script_error_t initialize() const NOEXCEPT;
+    virtual INLINE op_iterator begin() const NOEXCEPT;
+    virtual INLINE op_iterator end() const NOEXCEPT;
+    virtual INLINE const transaction& tx() const NOEXCEPT;
+    virtual INLINE const chain::input& input() const NOEXCEPT;
+    virtual INLINE bool is_enabled(flags flag) const NOEXCEPT;
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
     /// Underscored names reflect lack of guard against empty stack.
 
     /// Primary stack (push).
-    INLINE void push_chunk(data_chunk&& datum) NOEXCEPT;
-    INLINE void push_chunk(const chunk_cptr& datum) NOEXCEPT;
-    INLINE void push_bool(bool value) NOEXCEPT;
-    INLINE void push_signed64(int64_t value) NOEXCEPT;
-    INLINE void push_length(size_t value) NOEXCEPT;
+    virtual INLINE void push_chunk(data_chunk&& datum) NOEXCEPT;
+    virtual INLINE void push_chunk(const chunk_cptr& datum) NOEXCEPT;
+    virtual INLINE void push_bool(bool value) NOEXCEPT;
+    virtual INLINE void push_signed64(int64_t value) NOEXCEPT;
+    virtual INLINE void push_length(size_t value) NOEXCEPT;
 
     /// Primary stack (pop).
-    INLINE chunk_xptr pop_chunk_() NOEXCEPT;
-    INLINE bool pop_strict_bool_() NOEXCEPT;
-    INLINE bool pop_bool_(bool& value, bool minimal) NOEXCEPT;
-    INLINE bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
-    INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
-    INLINE bool pop_signed32_(int32_t& value) NOEXCEPT;
-    INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
-    INLINE bool pop_ternary32(int32_t& upper, int32_t& lower, 
+    virtual INLINE chunk_xptr pop_chunk_() NOEXCEPT;
+    virtual INLINE bool pop_strict_bool_() NOEXCEPT;
+    virtual INLINE bool pop_bool_(bool& value, bool minimal) NOEXCEPT;
+    virtual INLINE bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
+    virtual INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
+    virtual INLINE bool pop_signed32_(int32_t& value) NOEXCEPT;
+    virtual INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
+    virtual INLINE bool pop_ternary32(int32_t& upper, int32_t& lower,
         int32_t& value) NOEXCEPT;
-    INLINE bool pop_index32(size_t& index) NOEXCEPT;
+    virtual INLINE bool pop_index32(size_t& index) NOEXCEPT;
 
     /// Primary stack (peek).
-    INLINE bool peek_bool_() const NOEXCEPT;
-    INLINE bool peek_unsigned32(uint32_t& value) const NOEXCEPT;
-    INLINE bool peek_unsigned40(uint64_t& value) const NOEXCEPT;
-    INLINE size_t peek_size() const NOEXCEPT;
+    virtual INLINE bool peek_bool_() const NOEXCEPT;
+    virtual INLINE bool peek_unsigned32(uint32_t& value) const NOEXCEPT;
+    virtual INLINE bool peek_unsigned40(uint64_t& value) const NOEXCEPT;
+    virtual INLINE size_t peek_size() const NOEXCEPT;
 
     /// Primary stack (variant - index).
-    INLINE void swap_(size_t left_index, size_t right_index) NOEXCEPT;
-    INLINE void erase_(size_t index) NOEXCEPT;
-    INLINE const stack_variant& peek_() const NOEXCEPT;
-    INLINE const stack_variant& peek_(size_t index) const NOEXCEPT;
+    virtual INLINE void swap_(size_t left_index, size_t right_index) NOEXCEPT;
+    virtual INLINE void erase_(size_t index) NOEXCEPT;
+    virtual INLINE const stack_variant& peek_() const NOEXCEPT;
+    virtual INLINE const stack_variant& peek_(size_t index) const NOEXCEPT;
 
     /// Primary stack (variant - top).
-    INLINE void drop_() NOEXCEPT;
-    INLINE void push_variant(const stack_variant& vary) NOEXCEPT;
-    INLINE stack_variant pop_() NOEXCEPT;
+    virtual INLINE void drop_() NOEXCEPT;
+    virtual INLINE void push_variant(const stack_variant& vary) NOEXCEPT;
+    virtual INLINE stack_variant pop_() NOEXCEPT;
 
     /// Primary stack state (untyped).
-    INLINE size_t stack_size() const NOEXCEPT;
-    INLINE bool is_stack_empty() const NOEXCEPT;
-    INLINE bool is_stack_overflow() const NOEXCEPT;
+    virtual INLINE size_t stack_size() const NOEXCEPT;
+    virtual INLINE bool is_stack_empty() const NOEXCEPT;
+    virtual INLINE bool is_stack_overflow() const NOEXCEPT;
 
     /// Alternate stack.
     /// -----------------------------------------------------------------------
-    INLINE bool is_alternate_empty() const NOEXCEPT;
-    INLINE void push_alternate(stack_variant&& vary) NOEXCEPT;
-    INLINE stack_variant pop_alternate_() NOEXCEPT;
+    virtual INLINE bool is_alternate_empty() const NOEXCEPT;
+    virtual INLINE void push_alternate(stack_variant&& vary) NOEXCEPT;
+    virtual INLINE stack_variant pop_alternate_() NOEXCEPT;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
-    INLINE void begin_if(bool value) NOEXCEPT;
-    INLINE void else_if_() NOEXCEPT;
-    INLINE void end_if_() NOEXCEPT;
-    INLINE bool is_balanced() const NOEXCEPT;
-    INLINE bool is_success() const NOEXCEPT;
-    INLINE bool if_(const operation& op) const NOEXCEPT;
+    virtual INLINE void begin_if(bool value) NOEXCEPT;
+    virtual INLINE void else_if_() NOEXCEPT;
+    virtual INLINE void end_if_() NOEXCEPT;
+    virtual INLINE bool is_balanced() const NOEXCEPT;
+    virtual INLINE bool is_success() const NOEXCEPT;
+    virtual INLINE bool if_(const operation& op) const NOEXCEPT;
 
     /// Accumulators.
     /// -----------------------------------------------------------------------
-    INLINE bool sigops_increment() NOEXCEPT;
-    INLINE bool ops_increment(const operation& op) NOEXCEPT;
-    INLINE bool ops_increment(size_t public_keys) NOEXCEPT;
+    virtual INLINE bool sigops_increment() NOEXCEPT;
+    virtual INLINE bool ops_increment(const operation& op) NOEXCEPT;
+    virtual INLINE bool ops_increment(size_t public_keys) NOEXCEPT;
 
     /// Endorsement parsing.
     /// -----------------------------------------------------------------------
@@ -173,25 +173,27 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Set subscript position to next op.
-    INLINE void set_subscript(const op_iterator& op) NOEXCEPT;
+    virtual INLINE void set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and op_codeseparator from returned subscript.
-    inline script::cptr subscript(const chunk_xptrs& endorsements) const NOEXCEPT;
-    INLINE script::cptr subscript(const chunk_xptr& endorsement) const NOEXCEPT;
+    virtual inline script::cptr subscript(
+        const chunk_xptrs& endorsements) const NOEXCEPT;
+    virtual INLINE script::cptr subscript(
+        const chunk_xptr& endorsement) const NOEXCEPT;
 
     /// Signature hashing.
     /// -----------------------------------------------------------------------
-    INLINE bool signature_hash(hash_digest& out,
+    virtual INLINE bool signature_hash(hash_digest& out,
         uint8_t sighash_flags) const NOEXCEPT;
-    INLINE bool signature_hash(hash_digest& out, const script& subscript,
+    virtual INLINE bool signature_hash(hash_digest& out, const script& subscript,
         uint8_t sighash_flags) const NOEXCEPT;
 
     /// Multisig signature hash caching.
     /// -----------------------------------------------------------------------
-    INLINE void initialize_cache() NOEXCEPT;
-    INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
-    INLINE const hash_digest& cached_hash() const NOEXCEPT;
-    INLINE bool set_hash(const chain::script& subscript,
+    virtual INLINE void initialize_cache() NOEXCEPT;
+    virtual INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
+    virtual INLINE const hash_digest& cached_hash() const NOEXCEPT;
+    virtual INLINE bool set_hash(const chain::script& subscript,
         uint8_t sighash_flags) NOEXCEPT;
 
 private:

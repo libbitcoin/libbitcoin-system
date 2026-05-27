@@ -57,32 +57,32 @@ public:
     INLINE stack(Container&& container) NOEXCEPT;
 
     /// Pure stack abstraction.
-    INLINE const stack_variant& top() const NOEXCEPT;
-    INLINE stack_variant pop() NOEXCEPT;
-    INLINE void drop() NOEXCEPT;
-    INLINE bool empty() const NOEXCEPT;
-    INLINE size_t size() const NOEXCEPT;
-    INLINE void push(data_chunk&& value) NOEXCEPT;
-    INLINE void push(stack_variant&& value) NOEXCEPT;
-    INLINE void push(const stack_variant& value) NOEXCEPT;
-    INLINE void emplace_boolean(bool value) NOEXCEPT;
-    INLINE void emplace_integer(int64_t value) NOEXCEPT;
-    INLINE void emplace_chunk(const chunk_xptr& value) NOEXCEPT;
+    virtual INLINE const stack_variant& top() const NOEXCEPT;
+    virtual INLINE stack_variant pop() NOEXCEPT;
+    virtual INLINE void drop() NOEXCEPT;
+    virtual INLINE bool empty() const NOEXCEPT;
+    virtual INLINE size_t size() const NOEXCEPT;
+    virtual INLINE void push(data_chunk&& value) NOEXCEPT;
+    virtual INLINE void push(stack_variant&& value) NOEXCEPT;
+    virtual INLINE void push(const stack_variant& value) NOEXCEPT;
+    virtual INLINE void emplace_boolean(bool value) NOEXCEPT;
+    virtual INLINE void emplace_integer(int64_t value) NOEXCEPT;
+    virtual INLINE void emplace_chunk(const chunk_xptr& value) NOEXCEPT;
 
     /// Positional (stack cheats).
-    INLINE void erase(size_t index) NOEXCEPT;
-    INLINE void swap(size_t left_index, size_t right_index) NOEXCEPT;
-    INLINE const stack_variant& peek(size_t index) const NOEXCEPT;
-    INLINE bool peek_signed4(int32_t& value) const NOEXCEPT;
-    INLINE bool peek_signed5(int64_t& value) const NOEXCEPT;
+    virtual INLINE void erase(size_t index) NOEXCEPT;
+    virtual INLINE void swap(size_t left_index, size_t right_index) NOEXCEPT;
+    virtual INLINE const stack_variant& peek(size_t index) const NOEXCEPT;
+    virtual INLINE bool peek_signed4(int32_t& value) const NOEXCEPT;
+    virtual INLINE bool peek_signed5(int64_t& value) const NOEXCEPT;
 
     /// Variant data conversions.
     /// -----------------------------------------------------------------------
-    bool peek_bool() const NOEXCEPT;
-    bool peek_strict_bool() const NOEXCEPT;
-    bool peek_minimal_bool(bool& value) const NOEXCEPT;
-    size_t peek_size() const NOEXCEPT;
-    chunk_xptr peek_chunk() const NOEXCEPT;
+    virtual bool peek_bool() const NOEXCEPT;
+    virtual bool peek_strict_bool() const NOEXCEPT;
+    virtual bool peek_minimal_bool(bool& value) const NOEXCEPT;
+    virtual size_t peek_size() const NOEXCEPT;
+    virtual chunk_xptr peek_chunk() const NOEXCEPT;
     static bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;
 
