@@ -37,8 +37,7 @@ namespace machine {
 // 'tx' must remain in scope, this holds state referenced by weak pointers.
 // This expectation is guaranteed by the retained tx reference.
 TEMPLATE
-inline CLASS::
-program(const transaction& tx, const input_iterator& input,
+CLASS::program(const transaction& tx, const input_iterator& input,
     uint32_t active_flags) NOEXCEPT
   : transaction_(tx),
     input_(input),
@@ -56,8 +55,7 @@ program(const transaction& tx, const input_iterator& input,
 // This expectation is guaranteed by the retained transaction_ member reference
 // and copied program tether (which is not tx state).
 TEMPLATE
-inline CLASS::
-program(const program& other, const script::cptr& script) NOEXCEPT
+CLASS::program(const program& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
@@ -71,8 +69,7 @@ program(const program& other, const script::cptr& script) NOEXCEPT
 
 // Legacy p2sh or prevout script run (moved input stack/tether - use last).
 TEMPLATE
-inline CLASS::
-program(program&& other, const script::cptr& script) NOEXCEPT
+CLASS::program(program&& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
@@ -89,8 +86,7 @@ program(program&& other, const script::cptr& script) NOEXCEPT
 // hold chunk state weak references. A witness pointer is explicitly retained
 // to guarantee the lifetime of its elements.
 TEMPLATE
-inline CLASS::
-program(const transaction& tx, const input_iterator& input,
+CLASS::program(const transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags,
     script_version version, const chunk_cptrs_ptr& witness) NOEXCEPT
   : transaction_(tx),
@@ -111,8 +107,7 @@ program(const transaction& tx, const input_iterator& input,
 // Budget is initialized add1(50) to make it zero-based, avoiding signed type.
 // This program is never used to construct another, so masked flags_ never mix.
 TEMPLATE
-inline CLASS::
-program(const transaction& tx, const input_iterator& input,
+CLASS::program(const transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags,
     script_version version, const chunk_cptrs_ptr& witness,
     const hash_cptr& tapleaf) NOEXCEPT

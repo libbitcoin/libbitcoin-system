@@ -45,32 +45,31 @@ public:
     using input_iterator = chain::input_cptrs::const_iterator;
 
     /// Input script (default/empty stack).
-    inline program(const transaction& transaction,
-        const input_iterator& input, uint32_t active_flags) NOEXCEPT;
+    program(const transaction& transaction, const input_iterator& input,
+        uint32_t active_flags) NOEXCEPT;
 
     /// Legacy p2sh or prevout script (copied input stack).
-    inline program(const program& other, const script::cptr& script) NOEXCEPT;
+    program(const program& other, const script::cptr& script) NOEXCEPT;
 
     /// Legacy p2sh or prevout script (moved input stack).
-    inline program(program&& other, const script::cptr& script) NOEXCEPT;
+    program(program&& other, const script::cptr& script) NOEXCEPT;
 
     /// Witness v0 (segwit) script.
-    inline program(const transaction& transaction,
-        const input_iterator& input, const script::cptr& script,
-        uint32_t active_flags, script_version version,
-        const chunk_cptrs_ptr& stack) NOEXCEPT;
+    program(const transaction& transaction, const input_iterator& input,
+        const script::cptr& script, uint32_t active_flags,
+        script_version version, const chunk_cptrs_ptr& stack) NOEXCEPT;
 
     /// Witness v1 (tapscript) script.
-    inline program(const transaction& transaction,
-        const input_iterator& input, const script::cptr& script,
-        uint32_t active_flags, script_version version,
-        const chunk_cptrs_ptr& stack, const hash_cptr& tapleaf) NOEXCEPT;
+    program(const transaction& transaction, const input_iterator& input,
+        const script::cptr& script, uint32_t active_flags,
+        script_version version, const chunk_cptrs_ptr& stack,
+        const hash_cptr& tapleaf) NOEXCEPT;
 
     /// Program result.
-    inline bool is_true(bool clean) const NOEXCEPT;
+    bool is_true(bool clean) const NOEXCEPT;
 
     /// Transaction must pop top input stack element [bip16].
-    inline const data_chunk& pop() NOEXCEPT;
+    const data_chunk& pop() NOEXCEPT;
 
 protected:
     using flags = chain::flags;

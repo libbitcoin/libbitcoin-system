@@ -78,19 +78,19 @@ public:
 
     /// Variant data conversions.
     /// -----------------------------------------------------------------------
-    inline bool peek_bool() const NOEXCEPT;
-    inline bool peek_strict_bool() const NOEXCEPT;
-    inline bool peek_minimal_bool(bool& value) const NOEXCEPT;
-    inline size_t peek_size() const NOEXCEPT;
-    inline chunk_xptr peek_chunk() const NOEXCEPT;
-    static inline bool equal_chunks(const stack_variant& left,
+    bool peek_bool() const NOEXCEPT;
+    bool peek_strict_bool() const NOEXCEPT;
+    bool peek_minimal_bool(bool& value) const NOEXCEPT;
+    size_t peek_size() const NOEXCEPT;
+    chunk_xptr peek_chunk() const NOEXCEPT;
+    static bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;
 
 private:
     template<size_t Bytes, typename Integer,
         if_not_lesser<sizeof(Integer), Bytes> = true,
         if_signed_integral_integer<Integer> = true>
-    inline bool peek_signed(Integer& value) const NOEXCEPT;
+    bool peek_signed(Integer& value) const NOEXCEPT;
 
     static constexpr auto linked_ = is_same_type<Container, linked_stack>;
     static constexpr auto vector_ = is_same_type<Container, contiguous_stack>;
