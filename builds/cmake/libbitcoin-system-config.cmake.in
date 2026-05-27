@@ -12,7 +12,9 @@ include( "${CMAKE_CURRENT_LIST_DIR}/libbitcoin-system-targets.cmake" )
 
 find_dependency( Boost 1.86.0 REQUIRED
   COMPONENTS
+    container
     iostreams
+    json
     locale
     program_options
     thread

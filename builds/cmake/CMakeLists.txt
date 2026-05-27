@@ -43,7 +43,9 @@ endif()
 
 find_package( Boost 1.86.0 REQUIRED
   COMPONENTS
+    container
     iostreams
+    json
     locale
     program_options
     thread
@@ -259,7 +261,9 @@ target_include_directories( libbitcoin-system
 
 target_link_libraries( libbitcoin-system
   PUBLIC
+    Boost::container
     Boost::iostreams
+    Boost::json
     Boost::locale
     Boost::program_options
     Boost::thread
