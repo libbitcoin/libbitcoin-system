@@ -87,8 +87,8 @@ header::header(reader&& source) NOEXCEPT
 }
 
 header::header(reader& source) NOEXCEPT
+  : header(from_data(source))
 {
-    assign_data(source);
 }
 
 // protected
@@ -140,18 +140,19 @@ bool header::operator!=(const header& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-// private
-void header::assign_data(reader& source) NOEXCEPT
+// static/private
+header header::from_data(reader& source) NOEXCEPT
 {
-    // Hashes are copied directly into to header-allocated space.
-    // Integrals are stack-allocated and copied to header-allocated space.
-    version_ = source.read_4_bytes_little_endian();
-    source.read_bytes(previous_block_hash_.data(), hash_size);
-    source.read_bytes(merkle_root_.data(), hash_size);
-    timestamp_ = source.read_4_bytes_little_endian();
-    bits_ = source.read_4_bytes_little_endian();
-    nonce_ = source.read_4_bytes_little_endian();
-    valid_ = source;
+    return
+    {
+        source.read_4_bytes_little_endian(),
+        source.read_hash(),
+        source.read_hash(),
+        source.read_4_bytes_little_endian(),
+        source.read_4_bytes_little_endian(),
+        source.read_4_bytes_little_endian(),
+        source
+    };
 }
 
 // Serialization.

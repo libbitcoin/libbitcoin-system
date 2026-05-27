@@ -370,7 +370,7 @@ static_assert(is_same_type<decltype(is_std_array<std_array<uint8_t, 0>>), const 
 static_assert(is_same_type<decltype(is_std_array<const volatile std_array<uint8_t, 0>&>), const bool>);
 
 static_assert(is_std_vector<std::vector<uint8_t>>);
-static_assert(!is_std_vector<std_vector<uint8_t>>);
+static_assert(is_std_vector<std_vector<uint8_t>>);
 static_assert(!is_std_vector<std_array<uint8_t, 42>>);
 static_assert(!is_std_vector<std::array<uint8_t, 42>>);
 static_assert(!is_std_vector<uint8_t>);
@@ -378,7 +378,7 @@ static_assert(is_same_type<decltype(is_std_vector<std::vector<uint8_t>>), const 
 static_assert(is_same_type<decltype(is_std_vector<const volatile std::vector<uint8_t>&>), const bool>);
 
 static_assert(is_pmr_vector<std_vector<uint8_t>>);
-static_assert(!is_pmr_vector<std::vector<uint8_t>>);
+static_assert(is_pmr_vector<std::vector<uint8_t>>);
 static_assert(!is_pmr_vector<std_array<uint8_t, 42>>);
 static_assert(!is_pmr_vector<std::array<uint8_t, 42>>);
 static_assert(!is_pmr_vector<uint8_t>);

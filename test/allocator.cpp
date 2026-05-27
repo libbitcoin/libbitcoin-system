@@ -72,14 +72,16 @@ struct hierarchy
 
 struct hierarchy_arena
 {
+    using chunky = std::vector<uint8_t, allocator<uint8_t>>;
+
     hierarchy_arena(arena* alloc, const compound& arg1={},
-        const data_chunk& arg2={}) NOEXCEPT
+        const chunky& arg2={}) NOEXCEPT
       : contained(arg1), chunk(arg2, alloc)
     {
     }
 
     compound contained;
-    data_chunk chunk;
+    chunky chunk;
 };
 
 // std_vector and data_chunk are automatically allocator-injected.
@@ -89,8 +91,8 @@ static_assert(!std::uses_allocator_v<hierarchy, arena>);
 static_assert(!std::uses_allocator_v<std::vector<uint8_t>, allocator<>>);
 static_assert(!std::uses_allocator_v<std::array<uint8_t, 42>, allocator<>>);
 static_assert(!std::uses_allocator_v<std::shared_ptr<uint8_t>, allocator<>>);
-static_assert(std::uses_allocator_v<std_vector<uint8_t>, allocator<>>);
-static_assert(std::uses_allocator_v<data_chunk, allocator<>>);
+////static_assert(std::uses_allocator_v<std_vector<uint8_t>, allocator<>>);
+////static_assert(std::uses_allocator_v<data_chunk, allocator<>>);
 
 ///////////////////////////////////////////////////////////////////////////////
 

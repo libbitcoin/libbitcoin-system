@@ -160,9 +160,8 @@ script::script(reader&& source, bool prefix) NOEXCEPT
 }
 
 script::script(reader& source, bool prefix) NOEXCEPT
-  : ops_(source.get_arena())
+  : script(from_data(source, prefix))
 {
-    assign_data(source, prefix);
 }
 
 script::script(const std::string_view& mnemonic, bool bitcoind) NOEXCEPT
@@ -232,7 +231,7 @@ size_t script::op_count(reader& source) NOEXCEPT
         return zero;
 
     const auto start = source.get_read_position();
-    auto count = zero;
+    size_t count{};
 
     // This is expensive (1.1%) but far less than vector reallocs (11.6%).
     while (operation::count_op(source))
@@ -246,9 +245,9 @@ size_t script::op_count(reader& source) NOEXCEPT
 script script::from_operations(operations&& ops) NOEXCEPT
 {
     constexpr auto valid = true;
-    auto easier = false;
-    auto failer = false;
-    auto roller = false;
+    bool easier{};
+    bool failer{};
+    bool roller{};
 
     for (const auto& op: ops)
     {
@@ -265,9 +264,9 @@ script script::from_operations(operations&& ops) NOEXCEPT
 script script::from_operations(const operations& ops) NOEXCEPT
 {
     constexpr auto valid = true;
-    auto easier = false;
-    auto failer = false;
-    auto roller = false;
+    bool easier{};
+    bool failer{};
+    bool roller{};
 
     for (const auto& op : ops)
     {
@@ -280,12 +279,12 @@ script script::from_operations(const operations& ops) NOEXCEPT
     return { ops, valid, easier, failer, roller, size };
 }
 
-// private
-void script::assign_data(reader& source, bool prefix) NOEXCEPT
+// static/private
+script script::from_data(reader& source, bool prefix) NOEXCEPT
 {
-    easier_ = false;
-    failer_ = false;
-    roller_ = false;
+    bool easier{};
+    bool failer{};
+    bool roller{};
     size_t expected{};
 
     if (prefix)
@@ -295,29 +294,29 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    ops_.reserve(op_count(source));
+    operations ops{};
+    ops.reserve(op_count(source));
     const auto start = source.get_read_position();
 
     while (!source.is_exhausted())
     {
-        ops_.emplace_back(source);
-        const auto& op = ops_.back();
-        easier_ |= op.is_success();
-        failer_ |= op.is_invalid();
-        roller_ |= op.is_roller();
+        ops.emplace_back(source);
+        const auto& op = ops.back();
+        easier |= op.is_success();
+        failer |= op.is_invalid();
+        roller |= op.is_roller();
     }
 
-    size_ = source.get_read_position() - start;
+    const auto size = source.get_read_position() - start;
 
     if (prefix)
     {
         source.set_limit();
-        if (size_ != expected)
+        if (size != expected)
             source.invalidate();
     }
 
-    valid_ = source;
-    offset = ops_.begin();
+    return { std::move(ops), source, easier, failer, roller, size };
 }
 
 // static/private
@@ -327,9 +326,9 @@ script script::from_string(const std::string_view& mnemonic,
     // TODO: incorporate bitcoind option.
 
     constexpr auto valid = true;
-    auto easier = false;
-    auto failer = false;
-    auto roller = false;
+    bool easier{};
+    bool failer{};
+    bool roller{};
 
     // There is always one operation per non-empty string token.
     auto tokens = split(mnemonic);

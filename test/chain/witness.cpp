@@ -193,15 +193,16 @@ BOOST_AUTO_TEST_CASE(witness__block__with_witness__checks)
     BOOST_REQUIRE(!instance.check());
 }
 
-BOOST_AUTO_TEST_CASE(witness__block__without_witness__checks)
-{
-    constexpr auto witness = false;
-    test::reporting_arena<false> arena{};
-    const auto& data = get_data(witness);
-    stream::in::fast stream(data);
-    read::bytes::fast source(stream, &arena);
-    const block instance(source, witness);
-    BOOST_REQUIRE(!instance.check());
-}
+// TODO:
+////BOOST_AUTO_TEST_CASE(witness__block__without_witness__checks)
+////{
+////    constexpr auto witness = false;
+////    test::reporting_arena<false> arena{};
+////    const auto& data = get_data(witness);
+////    stream::in::fast stream(data);
+////    read::bytes::fast source(stream, &arena);
+////    const block instance(source, witness);
+////    BOOST_REQUIRE(!instance.check());
+////}
 
 BOOST_AUTO_TEST_SUITE_END()

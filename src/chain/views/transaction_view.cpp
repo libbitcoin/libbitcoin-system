@@ -41,69 +41,76 @@ constexpr auto sentinels_size = sizeof(witness_marker) +
 // constructor
 // ----------------------------------------------------------------------------
 
-transaction_view::transaction_view(reader& tx_source,
+transaction_view::transaction_view(reader& source,
     const data_chunk& block_buffer, bool coinbase, bool witness) NOEXCEPT
   : coinbase_{ coinbase }
 {
-    const auto tx_start = tx_source.get_read_position();
+    const auto tx_start = source.get_read_position();
     tx_ptr_ = std::next(block_buffer.data(), tx_start);
 
     // tx.version
-    tx_source.skip_bytes(version_size);
+    source.skip_bytes(version_size);
 
-    in_count_ = tx_source.read_size(max_count);
+    in_count_ = source.read_size(max_count);
     const auto has_witness =
         in_count_ == witness_marker &&
-        tx_source.peek_byte() == witness_enabled;
+        source.peek_byte() == witness_enabled;
 
     if (has_witness)
     {
-        tx_source.skip_byte();
-        in_count_ = tx_source.read_size(max_count);
+        source.skip_byte();
+        in_count_ = source.read_size(max_count);
     }
 
     // tx.inputs
-    in_offset_ = tx_source.get_read_position() - tx_start;
+    in_offset_ = source.get_read_position() - tx_start;
     for (size_t input{}; input < in_count_; ++input)
     {
-        tx_source.skip_bytes(point_size);
-        const auto script_size = tx_source.read_size(max_bytes);
-        tx_source.skip_bytes(script_size + sequence_size);
+        source.skip_bytes(point_size);
+        const auto script_size = source.read_size(max_bytes);
+        source.skip_bytes(script_size + sequence_size);
         input_table_size_ += variable_size(script_size) + script_size;
     }
 
     // tx.outputs
-    out_count_ = tx_source.read_size(max_count);
-    out_offset_ = tx_source.get_read_position() - tx_start;
+    out_count_ = source.read_size(max_count);
+    out_offset_ = source.get_read_position() - tx_start;
     for (size_t output{}; output < out_count_; ++output)
     {
-        const auto value = tx_source.read_8_bytes_little_endian();
-        const auto script_size = tx_source.read_size(max_bytes);
-        tx_source.skip_bytes(script_size);
+        const auto value = source.read_8_bytes_little_endian();
+        const auto script_size = source.read_size(max_bytes);
+        source.skip_bytes(script_size);
         output_table_size_ += variable_size(value) +
             variable_size(script_size) + script_size;
     }
 
     // tx.witnessses
-    const auto wit_offset = tx_source.get_read_position() - tx_start;
+    const auto wit_offset = source.get_read_position() - tx_start;
     if (has_witness)
     {
+        auto superfluous{ true };
         for (size_t input{}; input < in_count_; ++input)
-            witness::skip(tx_source, true);
+            if (witness::skip(source, true))
+                superfluous = false;
+
+        // Transaction is non-segregated if all witnesses are empty.
+        // Validatable, but treat superfluous as invalid serialization.
+        if (superfluous)
+            source.invalidate();
     }
 
     // tx.locktime
-    tx_source.skip_bytes(locktime_size);
+    source.skip_bytes(locktime_size);
 
-    size_ = tx_source.get_read_position() - tx_start;
+    size_ = source.get_read_position() - tx_start;
     segregated_ = has_witness && witness;
     witnesses_size_ = size_ - (wit_offset + locktime_size);
     input_table_size_ += segregated_ ? witnesses_size_ : in_count_;
     if (is_zero(in_count_) || is_zero(out_count_))
-        tx_source.invalidate();
+        source.invalidate();
 
     // invalid
-    if (!tx_source)
+    if (!source)
     {
         tx_ptr_ = nullptr;
         return;

@@ -124,10 +124,6 @@ public:
     void set_state(const chain_state::cptr& state) const NOEXCEPT;
     const chain_state::cptr& get_state() const NOEXCEPT;
 
-    /// Set/get memory allocation.
-    void set_allocation(size_t allocation) const NOEXCEPT;
-    size_t get_allocation() const NOEXCEPT;
-
     /// Identity.
     /// -----------------------------------------------------------------------
 
@@ -190,7 +186,6 @@ protected:
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 
-    void assign_data(reader& source, bool witness) NOEXCEPT;
     static block from_data(reader& source, bool witness) NOEXCEPT;
     static sizes serialized_size(const transaction_cptrs& txs) NOEXCEPT;
 
@@ -218,7 +213,6 @@ private:
     // Cache.
     bool valid_;
     sizes size_;
-    mutable size_t allocation_{};
 };
 
 typedef std_vector<block> blocks;

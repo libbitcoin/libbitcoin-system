@@ -98,10 +98,8 @@ block::block(reader&& source, bool witness) NOEXCEPT
 }
 
 block::block(reader& source, bool witness) NOEXCEPT
-  : header_(CREATE(chain::header, source.get_allocator(), source)),
-    txs_(CREATE(transaction_cptrs, source.get_allocator()))
+  : block(from_data(source, witness))
 {
-    assign_data(source, witness);
 }
 
 // protected
@@ -131,29 +129,28 @@ bool block::operator!=(const block& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-// private
-void block::assign_data(reader& source, bool witness) NOEXCEPT
+// private/static
+block block::from_data(reader& source, bool witness) NOEXCEPT
 {
-    auto& allocator = source.get_allocator();
-    const auto count = source.read_size(max_count);
-    auto txs = to_non_const_raw_ptr(txs_);
-    txs->reserve(count);
+    const auto read_transactions = [witness](reader& source) NOEXCEPT
+    {
+        auto txs = to_shared<transaction_cptrs>();
+        const auto count = source.read_size(max_count);
+        txs->reserve(count);
 
-    for (size_t tx{}; tx < count; ++tx)
-        txs->emplace_back(CREATE(transaction, allocator, source, witness));
+        for (size_t tx{}; tx < count; ++tx)
+            txs->push_back(to_shared<transaction>(source, witness));
 
-    size_ = serialized_size(*txs_);
-    valid_ = source;
-}
+        // This is a pointer copy (non-const to const).
+        return txs;
+    };
 
-void block::set_allocation(size_t allocation) const NOEXCEPT
-{
-    allocation_ = allocation;
-}
-
-size_t block::get_allocation() const NOEXCEPT
-{
-    return allocation_;
+    return
+    {
+        to_shared<chain::header>(source),
+        read_transactions(source),
+        source
+    };
 }
 
 // Serialization.

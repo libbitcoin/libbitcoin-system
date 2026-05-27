@@ -41,7 +41,7 @@ using std_array = std::array<Type, Size>;
 /// Since string and other containers are not widely used in high performance
 /// scenarios requiring performant memory allocation, they are not specialized.
 template <typename Type>
-using std_vector = std::vector<Type, allocator<Type>>;
+using std_vector = std::vector<Type /*, allocator<Type>*/>;
 
 /// Const and non-const reference wrappers.
 template <typename Type>

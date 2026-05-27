@@ -36,7 +36,7 @@ public:
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
-    transaction_view(reader& tx_source, const data_chunk& block_buffer,
+    transaction_view(reader& source, const data_chunk& block_buffer,
         bool coinbase, bool witness) NOEXCEPT;
 
     /// Properties.

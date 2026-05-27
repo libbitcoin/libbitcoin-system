@@ -168,12 +168,7 @@ input::input(reader&& source) NOEXCEPT
 
 // Witness is deserialized and assigned by transaction.
 input::input(reader& source) NOEXCEPT
-  : point_(CREATE(chain::point, source.get_allocator(), source)),
-    script_(CREATE(chain::script, source.get_allocator(), source, true)),
-    witness_(CREATE(chain::witness, source.get_allocator())),
-    sequence_(source.read_4_bytes_little_endian()),
-    valid_(source),
-    size_(serialized_size(*script_))
+  : input(from_data(source))
 {
 }
 
@@ -228,6 +223,20 @@ bool operator!=(const cref_point& left, const cref_point& right) NOEXCEPT
 
 // Deserialization.
 // ----------------------------------------------------------------------------
+
+// static/private
+input input::from_data(reader& source) NOEXCEPT
+{
+    // Witness is deserialized by transaction.
+    return
+    {
+        to_shared<chain::point>(source),
+        to_shared<chain::script>(source, true),
+        to_shared<chain::witness>(),
+        source.read_4_bytes_little_endian(),
+        source
+    };
+}
 
 // Serialization.
 // ----------------------------------------------------------------------------
@@ -313,25 +322,14 @@ size_t input::witnessed_size() const NOEXCEPT
     return size_.witnessed;
 }
 
-////bool input::set_witness(reader& source) NOEXCEPT
-////{
-////    witness_ = to_shared<chain::witness>(source, true);
-////    size_.witnessed = ceilinged_add(size_.nominal,
-////        witness_->serialized_size(true));
-////
-////    // Valid implies non-empty.
-////    return witness_->is_valid();
-////}
-
+// true implies non-empty (for superfluous check), source returns error state.
 bool input::set_witness(reader& source) NOEXCEPT
 {
-    auto& allocator = source.get_allocator();
-    witness_.reset(CREATE(chain::witness, allocator, source, true));
+    witness_ = to_shared<chain::witness>(source, true);
     size_.witnessed = ceilinged_add(size_.nominal,
         witness_->serialized_size(true));
 
-    // Valid implies non-empty.
-    return witness_->is_valid();
+    return !witness_->stack().empty();
 }
 
 // Properties.

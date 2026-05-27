@@ -251,13 +251,13 @@ private:
         hash_digest scripts;
     } only_cache;
 
+    static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const input_cptrs& inputs) NOEXCEPT;
     static sizes serialized_size(const input_cptrs& inputs,
         const output_cptrs& outputs, bool segregated) NOEXCEPT;
 
     input_iterator input_at(uint32_t index) const NOEXCEPT;
-    void assign_data(reader& source, bool witness) NOEXCEPT;
     chain::points points() const NOEXCEPT;
 
     // delegated

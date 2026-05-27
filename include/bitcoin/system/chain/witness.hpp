@@ -72,8 +72,8 @@ public:
     /// Serialization.
     /// -----------------------------------------------------------------------
 
-    /// Skip a witness (as if deserialized).
-    static void skip(reader& source, bool prefix) NOEXCEPT;
+    /// Skip a witness (as if deserialized) true if not superfluous.
+    static bool skip(reader& source, bool prefix) NOEXCEPT;
 
     data_chunk to_data(bool prefix) const NOEXCEPT;
     void to_data(std::ostream& stream, bool prefix) const NOEXCEPT;
@@ -127,7 +127,7 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string_view& mnemonic) NOEXCEPT;
-    void assign_data(reader& source, bool prefix) NOEXCEPT;
+    static witness from_data(reader& source, bool prefix) NOEXCEPT;
 
     // Witness should be stored as shared.
     chunk_cptrs stack_;
