@@ -394,9 +394,6 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\paths.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utreexo\utreexo.cpp">
-      <ObjectFileName>$(IntDir)test_utreexo_utreexo.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
@@ -464,7 +461,6 @@
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\mocks\blocks.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
-    <ClInclude Include="..\..\..\..\test\utreexo\utreexo.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\mnemonic.hpp" />
