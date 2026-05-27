@@ -377,7 +377,9 @@ main()
         "-Wno-enum-constexpr-conversion")
 
     boost_OPTIONS=(
+        "--with-container"
         "--with-iostreams"
+        "--with-json"
         "--with-locale"
         "--with-program_options"
         "--with-regex"
