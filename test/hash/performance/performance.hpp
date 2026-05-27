@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
 #define LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
 
+#if defined(HAVE_PERFORMANCE_TESTS)
+
 #include "../../test.hpp"
 #include "baseline/rmd160.h"
 #include "baseline/sha256.h"
@@ -769,5 +771,7 @@ bool test_merkle(std::ostream& out, bool csv = use_csv,
 
 } // namespace base
 } // namespace performance
+
+#endif
 
 #endif

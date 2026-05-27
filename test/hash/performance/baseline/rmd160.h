@@ -2,6 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_PERFORMANCE_TESTS)
+
 #ifndef BITCOIN_CRYPTO_RIPEMD160_H
 #define BITCOIN_CRYPTO_RIPEMD160_H
 
@@ -30,3 +32,5 @@ public:
 } // namespace baseline
 
 #endif // BITCOIN_CRYPTO_RIPEMD160_H
+
+#endif

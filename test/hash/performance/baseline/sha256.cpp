@@ -2,6 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_PERFORMANCE_TESTS)
+
 #include "sha256.h"
 #include "common.h"
 #include <string.h>
@@ -521,3 +523,5 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
+
+#endif
