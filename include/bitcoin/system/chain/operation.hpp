@@ -156,6 +156,7 @@ private:
     friend class script;
     static bool count_op(reader& source) NOEXCEPT;
 
+    static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
         bool minimal) NOEXCEPT;
 
@@ -177,7 +178,6 @@ private:
     size_t data_size() const NOEXCEPT;
     const data_chunk& get_data() const NOEXCEPT;
     const chunk_cptr& get_data_cptr() const NOEXCEPT;
-    void assign_data(reader& source) NOEXCEPT;
 
     // Operation should not be stored as shared (adds 16 bytes).
     // copy: 8 + 2 * 64 + 1 = 18 bytes (vs. 16 when shared).

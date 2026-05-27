@@ -90,10 +90,8 @@ witness::witness(reader&& source, bool prefix) NOEXCEPT
 
 // protected
 witness::witness(reader& source, bool prefix) NOEXCEPT
-  : stack_(source.get_arena()), annex_()
+  : witness(from_data(source, prefix))
 {
-    // annex_ may be reconstructed, since it requires the populated stack.
-    assign_data(source, prefix);
 }
 
 witness::witness(const std::string_view& mnemonic) NOEXCEPT
@@ -103,9 +101,10 @@ witness::witness(const std::string_view& mnemonic) NOEXCEPT
 
 // protected
 witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
-  : stack_(std::move(stack)), valid_(valid),
+  : stack_(std::move(stack)),
+    valid_(valid),
     size_(serialized_size(stack_, false)),
-    annex_(stack_)
+    annex_(annex::is_annex_pattern(stack_) ? stack.back() : nullptr)
 {
 }
 
@@ -114,7 +113,7 @@ witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
   : stack_(stack),
     valid_(valid),
     size_(serialized_size(stack_, false)),
-    annex_(stack_)
+    annex_(annex::is_annex_pattern(stack_) ? stack.back() : nullptr)
 {
 }
 
@@ -123,7 +122,7 @@ witness::witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT
   : stack_(stack),
     valid_(valid),
     size_(size),
-    annex_(stack_)
+    annex_(annex::is_annex_pattern(stack_) ? stack.back() : nullptr)
 {
 }
 
@@ -150,63 +149,70 @@ static inline size_t element_size(const chunk_cptr& element) NOEXCEPT
     return ceilinged_add(variable_size(size), size);
 };
 
-// static
-void witness::skip(reader& source, bool prefix) NOEXCEPT
+static inline data_chunk read_element(reader& source) NOEXCEPT
 {
+    // Each witness encoded as variable integer prefixed byte array (bip144).
+    return source.read_bytes(source.read_size(max_bytes));
+}
+
+// static/private
+witness witness::from_data(reader& source, bool prefix) NOEXCEPT
+{
+    size_t size{};
+    chunk_cptrs stack{};
+
+    if (prefix)
+    {
+        // Witness stack size cannot use the count limiter.
+        const auto count = source.read_size(max_bytes);
+        stack.reserve(count);
+
+        for (size_t element{}; element < count; ++element)
+        {
+            stack.push_back(to_shared<data_chunk>(read_element(source)));
+            size += element_size(stack.back());
+        }
+    }
+    else
+    {
+        while (!source.is_exhausted())
+        {
+            stack.push_back(to_shared<data_chunk>(read_element(source)));
+            size += element_size(stack.back());
+        }
+    }
+
+    return { stack, source, size };
+}
+
+// static
+bool witness::skip(reader& source, bool prefix) NOEXCEPT
+{
+    bool superfluous{ true };
     if (prefix)
     {
         const auto count = source.read_size(max_bytes);
 
         for (size_t element{}; element < count; ++element)
-            source.read_bytes(source.read_size(max_bytes));
+        {
+            const auto size = source.read_size(max_bytes);
+            source.read_bytes(size);
+            if (!is_zero(size))
+                superfluous = false;
+        }
     }
     else
     {
         while (!source.is_exhausted())
-            source.read_bytes(source.read_size(max_bytes));
-    }
-}
-
-// private
-void witness::assign_data(reader& source, bool prefix) NOEXCEPT
-{
-    size_ = zero;
-    auto& allocator = source.get_allocator();
-
-    const auto push_witness = [&allocator, &source, this]() NOEXCEPT
-    {
-        // If read_bytes_raw returns nullptr invalid source is implied.
-        const auto size = source.read_size(max_bytes);
-        const auto bytes = source.read_bytes_raw(size);
-        if (is_null(bytes))
-            return false;
-
-        stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
-        size_ = ceilinged_add(size_, element_size(stack_.back()));
-        return true;
-    };
-
-    if (prefix)
-    {
-        // Witness stack size cannot use the count limiter.
-        const auto stack = source.read_size(max_bytes);
-        stack_.reserve(stack);
-
-        for (size_t element{}; element < stack; ++element)
-            if (!push_witness())
-                break;
-    }
-    else
-    {
-        while (!source.is_exhausted())
-            if (!push_witness())
-                break;
+        {
+            const auto size = source.read_size(max_bytes);
+            source.read_bytes(size);
+            if (!is_zero(size))
+                superfluous = false;
+        }
     }
 
-    if (annex::is_annex_pattern(stack_))
-        annex_ = { stack_.back() };
-
-    valid_ = source && !stack_.empty();
+    return !superfluous;
 }
 
 // Serialization.

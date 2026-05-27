@@ -127,6 +127,7 @@ protected:
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 
+    static input from_data(reader& source) NOEXCEPT;
     static sizes serialized_size(const chain::script& script) NOEXCEPT;
     static sizes serialized_size(const chain::script& script,
         const chain::witness& witness) NOEXCEPT;

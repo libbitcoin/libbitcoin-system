@@ -157,8 +157,8 @@ operation::operation(reader&& source) NOEXCEPT
 }
 
 operation::operation(reader& source) NOEXCEPT
+  : operation(from_data(source))
 {
-    assign_data(source);
 }
 
 operation::operation(const std::string_view& mnemonic) NOEXCEPT
@@ -192,16 +192,11 @@ bool operation::operator!=(const operation& other) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // private
-void operation::assign_data(reader& source) NOEXCEPT
+operation operation::from_data(reader& source) NOEXCEPT
 {
-    auto& allocator = source.get_allocator();
-
     // Guard against resetting a previously-invalid stream.
     if (!source)
-    {
-        INPLACE(&data_, data_chunk, allocator, nullptr);
-        return;
-    }
+        return {};
 
     // If stream is not empty then a non-data opcode will always deserialize.
     // A push-data opcode may indicate more bytes than are available. In this
@@ -214,21 +209,16 @@ void operation::assign_data(reader& source) NOEXCEPT
     const auto start = source.get_read_position();
 
     // Size of a push-data opcode is not retained, as this is inherent in data.
-    code_ = static_cast<opcode>(source.read_byte());
-    const auto size = read_data_size(code_, source);
+    auto code = static_cast<opcode>(source.read_byte());
+    const auto size = read_data_size(code, source);
 
     // read_bytes is only guarded from excessive allocation by stream limit.
     if (size > max_bytes)
         source.invalidate();
 
     // An invalid source.read_bytes_raw returns nullptr.
-    const auto ptr = source.read_bytes_raw(size);
-    underflow_ = !source;
-    if (!underflow_)
-    {
-        INPLACE(&data_, data_chunk, allocator, ptr);
-        return;
-    }
+    auto push = to_shared(source ? source.read_bytes(size) : data_chunk{});
+    const auto underflow = !source;
 
     // This requires that provided stream terminates at the end of the script.
     // When passing ops as part of a stream longer than the script, such as for
@@ -236,9 +226,15 @@ void operation::assign_data(reader& source) NOEXCEPT
     // clear the stream limit upon return. Stream invalidation and set_position
     // do not alter a stream limit, it just behaves as a smaller stream buffer.
     // Without a limit, source.read_bytes() below consumes the remaining stream.
-    code_ = any_invalid;
-    source.set_position(start);
-    INPLACE(&data_, data_chunk, allocator, source.read_bytes_raw());
+    if (underflow)
+    {
+        code = any_invalid;
+        source.set_position(start);
+        push = to_shared(source.read_bytes());
+    }
+
+    // All byte vectors are deserializable, stream indicates own failure.
+    return { code, push, underflow };
 }
 
 // static/private

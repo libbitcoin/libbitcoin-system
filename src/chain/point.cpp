@@ -77,8 +77,8 @@ point::point(reader&& source) NOEXCEPT
 }
 
 point::point(reader& source) NOEXCEPT
+  : point(from_data(source))
 {
-    assign_data(source);
 }
 
 // protected
@@ -136,12 +136,15 @@ bool operator!=(const point_cref& left, const point_cref& right) NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-// private
-void point::assign_data(reader& source) NOEXCEPT
+// static/private
+point point::from_data(reader& source) NOEXCEPT
 {
-    source.read_bytes(hash_.data(), hash_size);
-    index_ = source.read_4_bytes_little_endian();
-    valid_ = source;
+    return
+    {
+        source.read_hash(),
+        source.read_4_bytes_little_endian(),
+        source
+    };
 }
 
 // Serialization.

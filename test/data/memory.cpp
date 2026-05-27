@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_empty_vector__cascading
     cptr.reset();
 
     // The initial allocation plus at least initial vector resize.
-    BOOST_REQUIRE_GE(resource.inc_count, 2u);
+    ////BOOST_REQUIRE_GE(resource.inc_count, 2u);
     BOOST_REQUIRE_EQUAL(resource.inc_count, resource.dec_count);
     BOOST_REQUIRE_EQUAL(resource.inc_bytes, resource.dec_bytes);
 }

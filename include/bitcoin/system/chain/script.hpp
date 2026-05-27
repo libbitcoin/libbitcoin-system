@@ -178,11 +178,11 @@ private:
     static inline size_t op_size(size_t total, const operation& op) NOEXCEPT;
     static script from_operations(operations&& ops) NOEXCEPT;
     static script from_operations(const operations& ops) NOEXCEPT;
+    static script from_data(reader& source, bool prefix) NOEXCEPT;
     static script from_string(const std::string_view& mnemonic,
         bool bitcoind=false) NOEXCEPT;
     static size_t op_count(reader& source) NOEXCEPT;
     static size_t serialized_size(const operations& ops) NOEXCEPT;
-    void assign_data(reader& source, bool prefix) NOEXCEPT;
 
     // Script should be stored as shared.
     operations ops_;

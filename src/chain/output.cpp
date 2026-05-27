@@ -95,10 +95,7 @@ output::output(reader&& source) NOEXCEPT
 }
 
 output::output(reader& source) NOEXCEPT
-  : value_(source.read_8_bytes_little_endian()),
-    script_(CREATE(chain::script, source.get_allocator(), source, true)),
-    valid_(source),
-    size_(serialized_size(*script_, value_))
+  : output(from_data(source))
 {
 }
 
@@ -128,6 +125,17 @@ bool output::operator!=(const output& other) const NOEXCEPT
 
 // Deserialization.
 // ----------------------------------------------------------------------------
+
+// static/private
+output output::from_data(reader& source) NOEXCEPT
+{
+    return
+    {
+        source.read_8_bytes_little_endian(),
+        to_shared<chain::script>(source, true),
+        source
+    };
+}
 
 // Serialization.
 // ----------------------------------------------------------------------------
