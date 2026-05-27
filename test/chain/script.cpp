@@ -634,10 +634,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__bip66_invalid_der)
     {
         const auto tx = test_tx(test);
         const auto name = test_name(test);
-        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
-        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) ==
-            error::op_check_multisig_parse_signature, name);
+        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) == error::op_check_multisig_parse_signature, name);
     }
 }
 
@@ -647,10 +646,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__soft_errors__push_false)
     {
         const auto tx = test_tx(test);
         const auto name = test_name(test);
-        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
-        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) ==
-            error::stack_false, name);
+        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::stack_false, name);
     }
 }
 

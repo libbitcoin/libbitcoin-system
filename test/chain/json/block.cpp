@@ -17,62 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include "../../mocks/blocks.hpp"
 
 using namespace boost;
 using namespace bc::system::chain;
 
 BOOST_AUTO_TEST_SUITE(block_tests)
-
-block block_instance()
-{
-    static const block instance
-    {
-        header
-        {
-            42, null_hash, one_hash, 43, 44, 45
-        },
-        transactions
-        {
-            transaction
-            {
-                42,
-                inputs
-                {
-                    input
-                    {
-                        point{ null_hash, 24 },
-                        script{ { { opcode::op_return }, { opcode::pick } } },
-                        witness{ "[242424]" },
-                        42
-                    },
-                    input
-                    {
-                        point{ one_hash, 42 },
-                        script{ { { opcode::op_return }, { opcode::roll } } },
-                        witness{ "[424242]" },
-                        24
-                    }
-                },
-                outputs
-                {
-                    output
-                    {
-                        24,
-                        script{ { { opcode::pick } } }
-                    },
-                    output
-                    {
-                        42,
-                        script{ { { opcode::roll } } }
-                    }
-                },
-                24
-            }
-        }
-    };
-
-    return instance;
-}
 
 BOOST_AUTO_TEST_CASE(block__json__native__expected)
 {
@@ -134,7 +84,7 @@ BOOST_AUTO_TEST_CASE(block__json__native__expected)
         "}"
     };
 
-    const auto& instance = block_instance();
+    const auto& instance = test::mock_block_json;
     const auto value = json::value_from(instance);
 
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
@@ -164,7 +114,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind__expected)
         "}"
     };
 
-    const auto& instance = block_instance();
+    const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind(instance));
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }
@@ -190,7 +140,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_hashed__expected)
         "}"
     };
 
-    const auto& instance = block_instance();
+    const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind_hashed(instance));
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }
@@ -216,7 +166,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_embedded__expected)
         "}"
     };
 
-    const auto& instance = block_instance();
+    const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind_embedded(instance));
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }
@@ -304,7 +254,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
         "}"
     };
 
-    const auto& instance = block_instance();
+    const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind_verbose(instance));
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }

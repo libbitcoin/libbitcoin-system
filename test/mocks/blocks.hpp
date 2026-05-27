@@ -93,7 +93,9 @@ extern const system::chain::transaction tx5;
 extern const system::chain::block block1b;
 extern const system::chain::block block2b;
 extern const system::chain::transaction tx2b;
-extern const system::chain::block mock_block;
+extern const system::chain::block mock_block_b;
+extern const system::chain::block mock_block_c;
+extern const system::chain::block mock_block_json;
 
 } // namespace test
 

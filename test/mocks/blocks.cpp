@@ -758,7 +758,7 @@ const transaction tx2b
     }
 };
 
-struct mock_block_value
+struct mock_block_b_value
 {
     static constexpr hash_digest root = base16_hash("0f3842895590aae2727ca1b35c755d1d9e577a8f2640d972f9989bdcddc9c1e5");
     static constexpr uint32_t block_version{ 0 };
@@ -774,23 +774,23 @@ struct mock_block_value
     static constexpr bool minimal{ true };
 };
 
-const block mock_block
+const block mock_block_b
 {
     header // ptr<header>
     {
-        mock_block_value::block_version,
-        mock_block_value::previous_block_hash,
-        mock_block_value::merkle_root,
-        mock_block_value::timestamp,
-        mock_block_value::bits,
-        mock_block_value::nonce
+        mock_block_b_value::block_version,
+        mock_block_b_value::previous_block_hash,
+        mock_block_b_value::merkle_root,
+        mock_block_b_value::timestamp,
+        mock_block_b_value::bits,
+        mock_block_b_value::nonce
     },
     transactions // ptr<vector<tx>>
     {
         // coinbase
         transaction  // first tx
         {
-            mock_block_value::tx_version,
+            mock_block_b_value::tx_version,
             inputs
             {
                 input // exactly one input
@@ -815,19 +815,19 @@ const block mock_block
                             operation
                             {
                                 data_chunk{ 0x42 , 0x24 }, // ptr<data_chunk>
-                                mock_block_value::minimal
+                                mock_block_b_value::minimal
                             },
                             operation
                             {
                                 data_chunk{ 0xfe , 0xed }, // ptr<data_chunk>
-                                mock_block_value::minimal
+                                mock_block_b_value::minimal
                             }
                         }
                     },
                     witness
                     {
                     },
-                    mock_block_value::sequence
+                    mock_block_b_value::sequence
                 },
                 input
                 {
@@ -847,23 +847,192 @@ const block mock_block
                             data_chunk{}  // ptr<data_chunk>
                         }
                     },
-                    mock_block_value::sequence
+                    mock_block_b_value::sequence
                 }
             },
             outputs
             {
                 output // at least one output
                 {
-                    mock_block_value::value,  // no more than reward
+                    mock_block_b_value::value,  // no more than reward
                     script{}
                 },
                 output // at least one output
                 {
-                    mock_block_value::value,  // no more than reward
+                    mock_block_b_value::value,  // no more than reward
                     script{}
                 }
             },
-            mock_block_value::locktime
+            mock_block_b_value::locktime
+        }
+    }
+};
+
+struct mock_block_c_value
+{
+    static constexpr hash_digest root = base16_hash("1bf6a4281aca254af9dafb696dc1b9ce47d9f0785ebd4622fa0e28104fe3df44");
+    static constexpr uint32_t block_version{ 0 };
+    static constexpr hash_digest previous_block_hash{ 1 };
+    static constexpr hash_digest merkle_root{ root };
+    static constexpr uint32_t timestamp{ 3 };
+    static constexpr uint32_t bits{ 4 };
+    static constexpr uint32_t nonce{ 5 };
+    static constexpr uint32_t tx_version{ 6 };
+    static constexpr uint32_t locktime{ 7 };
+    static constexpr uint32_t sequence{ 8 };
+    static constexpr uint64_t value{ 9 };
+    static constexpr hash_digest point_hash{ 9 };
+    static constexpr uint32_t point_index{ 9 };
+    static constexpr bool minimal{ true };
+};
+
+const block mock_block_c
+{
+    header // ptr<header>
+    {
+        mock_block_c_value::block_version,
+        mock_block_c_value::previous_block_hash,
+        mock_block_c_value::merkle_root,
+        mock_block_c_value::timestamp,
+        mock_block_c_value::bits,
+        mock_block_c_value::nonce
+    },
+    transactions // ptr<vector<tx>>
+    {
+        // coinbase
+        transaction  // first tx
+        {
+            mock_block_c_value::tx_version,
+            inputs
+            {
+                input // exactly one input
+                {
+                    point // null point
+                    {
+                        null_hash,
+                        point::null_index
+                    },
+                    script{ operations{ operation{ opcode::nop1 }, operation{ opcode::nop2 } } }, // minumum 2 bytes
+                    mock_block_c_value::sequence
+                }
+            },
+            outputs
+            {
+                output // at least one output
+                {
+                    mock_block_c_value::value,  // no more than reward
+                    script{}
+                }
+            },
+            mock_block_c_value::locktime
+        },
+        transaction // ptr<tx>
+        {
+            mock_block_c_value::tx_version,
+            inputs // ptr<vector<ptr<input>>>
+            {
+                input // ptr<input>
+                {
+                    point // ptr<point>
+                    {
+                        mock_block_c_value::point_hash,
+                        mock_block_c_value::point_index
+                    },
+                    script // ptr<script>
+                    {
+                        operations // vector<operation>
+                        {
+                            operation
+                            {
+                                opcode::nop3  // ptr<nullptr>
+                            },
+                            operation
+                            {
+                                data_chunk{}, // ptr<data_chunk>
+                                mock_block_c_value::minimal
+                            }
+                        }
+                    },
+                    witness // ptr<witness>
+                    {
+                        data_stack // vector<ptr<data_chunk>>
+                        {
+                            data_chunk{}, // ptr<data_chunk>
+                            data_chunk{}  // ptr<data_chunk>
+                        }
+                    },
+                    mock_block_c_value::sequence
+                }
+            },
+            outputs // vector<ptr<output>>
+            {
+                output // ptr<output>
+                {
+                    mock_block_c_value::value,
+                    script // ptr<script>
+                    {
+                        operations // vector<operation>
+                        {
+                            operation
+                            {
+                                opcode::nop4  // ptr<nullptr>
+                            },
+                            operation
+                            {
+                                data_chunk{}, // ptr<data_chunk>
+                                mock_block_c_value::minimal
+                            }
+                        }
+                    }
+                }
+            },
+            mock_block_c_value::locktime
+        }
+    }
+};
+
+const block mock_block_json
+{
+    header
+    {
+        42, null_hash, one_hash, 43, 44, 45
+    },
+    transactions
+    {
+        transaction
+        {
+            42,
+            inputs
+            {
+                input
+                {
+                    point{ null_hash, 24 },
+                    script{ { { opcode::op_return }, { opcode::pick } } },
+                    witness{ "[242424]" },
+                    42
+                },
+                input
+                {
+                    point{ one_hash, 42 },
+                    script{ { { opcode::op_return }, { opcode::roll } } },
+                    witness{ "[424242]" },
+                    24
+                }
+            },
+            outputs
+            {
+                output
+                {
+                    24,
+                    script{ { { opcode::pick } } }
+                },
+                output
+                {
+                    42,
+                    script{ { { opcode::roll } } }
+                }
+            },
+            24
         }
     }
 };
