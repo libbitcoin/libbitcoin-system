@@ -652,6 +652,22 @@ BOOST_AUTO_TEST_CASE(script__multisig__soft_errors__push_false)
     }
 }
 
+BOOST_AUTO_TEST_CASE(script__checksigverify__empty_key_without_bip342__empty_endorsement)
+{
+    const script_test test
+    {
+        "",
+        "0 0 checksigverify",
+        "empty legacy checksigverify key is not a tapscript empty-key error"
+    };
+    const auto tx = test_tx(test);
+    const auto name = test_name(test);
+    BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
+
+    BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::op_check_sig_verify2, name);
+    BOOST_CHECK_MESSAGE(tx.connect({ all_but_taproot }, 0) == error::op_check_sig_verify2, name);
+}
+
 BOOST_AUTO_TEST_CASE(script__context_free__valid)
 {
     for (const auto& test: valid_context_free_scripts)
