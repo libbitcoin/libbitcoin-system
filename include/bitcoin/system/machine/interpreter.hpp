@@ -30,19 +30,20 @@ namespace system {
 namespace machine {
 
 /// Class to isolate operation iteration, dispatch, and handlers from state.
-template <typename Stack>
+template <typename Stack, typename Program = program<Stack>>
 class interpreter
-  : public program<Stack>
+  : public Program
 {
 public:
     DELETE_COPY_MOVE_DESTRUCT(interpreter);
 
-    using state = program<Stack>;
+    /// Aliases.
+    using state = Program;
     using op_iterator = typename state::op_iterator;
     using input_iterator = chain::input_cptrs::const_iterator;
 
     /// Use program constructors.
-    using program<Stack>::program;
+    using Program::Program;
 
     /// Run the program.
     code run() NOEXCEPT;
@@ -168,8 +169,8 @@ protected:
 } // namespace system
 } // namespace libbitcoin
 
-#define TEMPLATE template <typename Stack>
-#define CLASS interpreter<Stack>
+#define TEMPLATE template <typename Stack, typename Program>
+#define CLASS interpreter<Stack, Program>
 
 #include <bitcoin/system/impl/machine/interpreter.ipp>
 #include <bitcoin/system/impl/machine/interpreter_connect.ipp>
