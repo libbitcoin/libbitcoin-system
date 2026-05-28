@@ -108,9 +108,9 @@ transaction::transaction(reader& source, bool witness) NOEXCEPT
 }
 
 // protected
-transaction::transaction(uint32_t version,
-    const chain::inputs_cptr& inputs, const chain::outputs_cptr& outputs,
-    uint32_t locktime, bool segregated, bool valid) NOEXCEPT
+transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
+    const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,
+    bool valid) NOEXCEPT
   : version_(version),
     inputs_(inputs ? inputs : to_shared<input_cptrs>()),
     outputs_(outputs ? outputs : to_shared<output_cptrs>()),
