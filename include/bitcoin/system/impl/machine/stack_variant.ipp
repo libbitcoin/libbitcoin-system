@@ -37,7 +37,7 @@ TEMPLATE
 template<size_t Bytes, typename Integer,
     if_not_lesser<sizeof(Integer), Bytes>,
     if_signed_integral_integer<Integer>>
-inline bool CLASS::
+bool CLASS::
 peek_signed(Integer& value) const NOEXCEPT
 {
     using namespace number;
@@ -71,7 +71,7 @@ peek_signed(Integer& value) const NOEXCEPT
 /// standardness and are therefore not considered "stadnard" in comments below.
 
 TEMPLATE
-inline bool CLASS::
+bool CLASS::
 peek_bool() const NOEXCEPT
 {
     using namespace number;
@@ -101,7 +101,7 @@ peek_bool() const NOEXCEPT
 
 // Differs from peek_bool in that a chunk false must be empty [].
 TEMPLATE
-inline bool CLASS::
+bool CLASS::
 peek_strict_bool() const NOEXCEPT
 {
     using namespace number;
@@ -132,7 +132,7 @@ peek_strict_bool() const NOEXCEPT
 // This is the only convertor with both a return value and a result.
 // A chunk false must be [] and chunk true must be [0x01], otherwise fails.
 TEMPLATE
-inline bool CLASS::
+bool CLASS::
 peek_minimal_bool(bool& value) const NOEXCEPT
 {
     using namespace number;
@@ -162,7 +162,7 @@ peek_minimal_bool(bool& value) const NOEXCEPT
 
 // Could use peek_chunk but this overload skips allocation and tethering.
 TEMPLATE
-inline size_t CLASS::
+size_t CLASS::
 peek_size() const NOEXCEPT
 {
     using namespace number;
@@ -192,7 +192,7 @@ peek_size() const NOEXCEPT
 
 // This is the only source of peek/pop (read) tethering.
 TEMPLATE
-inline chunk_xptr CLASS::
+chunk_xptr CLASS::
 peek_chunk() const NOEXCEPT
 {
     using namespace number;
@@ -242,7 +242,7 @@ peek_chunk() const NOEXCEPT
 // chunk conversions reduce to conventional bitcoin design.
 // Integers are unconstrained as these are stack chunk equality comparisons.
 TEMPLATE
-inline bool CLASS::
+bool CLASS::
 equal_chunks(const stack_variant& left, const stack_variant& right) NOEXCEPT
 {
     using namespace number;

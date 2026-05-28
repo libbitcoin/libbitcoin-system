@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__data__expected)
 
 BOOST_AUTO_TEST_CASE(block__constructor__fast__success)
 {
-    const auto data = test::mock_block.to_data(true);
+    const auto data = test::mock_block_b.to_data(true);
     test::reporting_arena<false> arena{};
     stream::in::fast stream(data);
     read::bytes::fast source(stream, &arena);
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(block__spends__genesis__zero)
 
 BOOST_AUTO_TEST_CASE(block__spends__coinbase_only__zero)
 {
-    BOOST_REQUIRE(is_zero(test::mock_block.spends()));
+    BOOST_REQUIRE(is_zero(test::mock_block_b.spends()));
 }
 
 BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)

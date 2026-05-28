@@ -429,8 +429,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/unicode/utf8_everywhere/paths.cpp \
     test/unicode/utf8_everywhere/unicode_istream.cpp \
     test/unicode/utf8_everywhere/unicode_ostream.cpp \
-    test/utreexo/utreexo.cpp \
-    test/utreexo/utreexo.hpp \
     test/wallet/context.cpp \
     test/wallet/message.cpp \
     test/wallet/neutrino.cpp \

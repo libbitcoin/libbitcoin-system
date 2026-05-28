@@ -2,6 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_PERFORMANCE_TESTS)
+
 #ifndef BITCOIN_CRYPTO_COMMON_H
 #define BITCOIN_CRYPTO_COMMON_H
 
@@ -102,3 +104,5 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 
 #endif // BITCOIN_CRYPTO_COMMON_H
+
+#endif

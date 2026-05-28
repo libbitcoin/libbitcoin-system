@@ -23,12 +23,8 @@ BOOST_AUTO_TEST_SUITE(point_tests)
 namespace json = boost::json;
 using namespace system::chain;
 
-static const auto point_hash = base16_hash(
-    "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-
-static const auto point_data = base16_chunk(
-    "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f00000015");
-
+static const auto point_hash = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+static const auto point_data = base16_chunk("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f00000015");
 static const point expected_point(point_data);
 
 // constructors

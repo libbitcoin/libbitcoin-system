@@ -2,6 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#if defined(HAVE_PERFORMANCE_TESTS)
+
 #ifndef BITCOIN_CRYPTO_SHA256_H
 #define BITCOIN_CRYPTO_SHA256_H
 
@@ -33,3 +35,5 @@ void SHA256D64(unsigned char* output, const unsigned char* input, size_t blocks)
 } // namespace baseline
 
 #endif // BITCOIN_CRYPTO_SHA256_H
+
+#endif
