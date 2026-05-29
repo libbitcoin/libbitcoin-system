@@ -1022,12 +1022,12 @@ op_check_sig_verify() NOEXCEPT
     const auto key = state::pop_chunk_();
     const auto endorsement = state::pop_chunk_();
 
-    if (key->empty())
-        return error::op_check_sig_empty_key;
-
     // BIP342:
     if (state::is_enabled(flags::bip342_rule))
     {
+        if (key->empty())
+            return error::op_check_sig_empty_key;
+
         if (endorsement->empty())
             return error::op_check_sig_verify1;
 
