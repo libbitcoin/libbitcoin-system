@@ -19,6 +19,7 @@
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
@@ -28,6 +29,20 @@
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "ec_context.hpp"
+
+// Batch signature verification dispatch.
+// WITH_ULTRAFAST: route the packed batch to the UltrafastSecp256k1 ⇄ libbitcoin
+// acceleration bridge (GPU when a backend is linked, else the engine CPU path).
+// Otherwise: a parallel std::for_each over the singular verify_signature — the
+// consensus reference and a benchmark baseline (the bridge must match it
+// bit-for-bit). The parallel policy is used where the toolchain provides it.
+#if defined(WITH_ULTRAFAST)
+#include <ufsecp_libbitcoin.h>
+#else
+// libbitcoin's vendored poolSTL maps std::execution::par to a portable thread
+// pool (no TBB dependency) and provides the parallel std::for_each overload.
+#include <bitcoin/system/execution.hpp>
+#endif
 
 namespace libbitcoin {
 namespace system {
@@ -475,6 +490,55 @@ bool recover_public(ec_uncompressed& out,
     return recover_public(context, out, recoverable, hash);
 }
 
+// ECDSA batch verification (GPU/CPU acceleration bridge)
+// ----------------------------------------------------------------------------
+
+bool batch_verify(const data_slice& rows, size_t count, size_t key_size,
+    std_vector<uint8_t>& results) NOEXCEPT
+{
+    results.assign(count, 0u);
+    if (is_zero(count))
+        return true;
+
+    const auto stride = batch_record_size + key_size;
+    if (rows.size() < count * stride)
+        return false;
+
+#if defined(WITH_ULTRAFAST)
+    // One bridge controller per worker thread: amortizes GPU device init and
+    // honors the bridge's "not internally synchronized" contract (libbitcoin
+    // verifies across validation threads).
+    static thread_local ufsecp::lbtc::Controller control{ UFSECP_LBTC_AUTO };
+    if (!control.ok())
+        return false;
+
+    size_t invalid_count{};
+    return ufsecp_lbtc_verify_ecdsa(control.get(), rows.data(), count, key_size,
+        results.data(), nullptr, 0, &invalid_count) == UFSECP_OK;
+#else
+    std_vector<size_t> index(count);
+    std::iota(index.begin(), index.end(), size_t{0});
+
+    const auto verify_row = [&](size_t row) NOEXCEPT
+    {
+        const auto record = std::next(rows.data(), row * stride);
+        hash_digest hash;
+        ec_compressed point;
+        ec_signature signature;
+        std::copy_n(record, hash_size, hash.begin());
+        std::copy_n(std::next(record, hash_size), ec_compressed_size,
+            point.begin());
+        std::copy_n(std::next(record, hash_size + ec_compressed_size),
+            ec_signature_size, signature.begin());
+        results[row] = verify_signature(point, hash, signature) ?
+            uint8_t{1} : uint8_t{0};
+    };
+
+    std::for_each(std::execution::par, index.begin(), index.end(), verify_row);
+    return true;
+#endif
+}
+
 } // namespace ecdsa
 
 namespace schnorr {
@@ -535,6 +599,52 @@ bool verify_commitment(const ec_xonly& internal_key, const hash_digest& tweak,
             ec_success &&
         secp256k1_xonly_pubkey_tweak_add_check(context, tweaked_key.data(),
             parity, &pubkey, tweak.data()) == ec_success;
+}
+
+// Schnorr (BIP-340) batch verification (GPU/CPU acceleration bridge)
+// ----------------------------------------------------------------------------
+
+bool batch_verify(const data_slice& rows, size_t count, size_t key_size,
+    std_vector<uint8_t>& results) NOEXCEPT
+{
+    results.assign(count, 0u);
+    if (is_zero(count))
+        return true;
+
+    const auto stride = batch_record_size + key_size;
+    if (rows.size() < count * stride)
+        return false;
+
+#if defined(WITH_ULTRAFAST)
+    static thread_local ufsecp::lbtc::Controller control{ UFSECP_LBTC_AUTO };
+    if (!control.ok())
+        return false;
+
+    size_t invalid_count{};
+    return ufsecp_lbtc_verify_schnorr(control.get(), rows.data(), count, key_size,
+        results.data(), nullptr, 0, &invalid_count) == UFSECP_OK;
+#else
+    std_vector<size_t> index(count);
+    std::iota(index.begin(), index.end(), size_t{0});
+
+    const auto verify_row = [&](size_t row) NOEXCEPT
+    {
+        // Schnorr record order: x-only key | hash | signature.
+        const auto record = std::next(rows.data(), row * stride);
+        ec_xonly key;
+        hash_digest hash;
+        ec_signature signature;
+        std::copy_n(record, ec_xonly_size, key.begin());
+        std::copy_n(std::next(record, ec_xonly_size), hash_size, hash.begin());
+        std::copy_n(std::next(record, ec_xonly_size + hash_size),
+            ec_signature_size, signature.begin());
+        results[row] = verify_signature(key, hash, signature) ?
+            uint8_t{1} : uint8_t{0};
+    };
+
+    std::for_each(std::execution::par, index.begin(), index.end(), verify_row);
+    return true;
+#endif
 }
 
 } // namespace schnorr

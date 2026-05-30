@@ -221,6 +221,27 @@ BC_API bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable,
     const hash_digest& hash) NOEXCEPT;
 
+/// ECDSA batch verification (GPU/CPU acceleration bridge)
+/// ---------------------------------------------------------------------------
+/// Targets IBD/historical block validation, where signatures are ~95% of script
+/// cost. NOT a mempool-latency path.
+
+/// Packed batch record: 32 hash | 33 compressed point | 64 signature.
+static constexpr size_t batch_record_size = 129;
+
+/// Verify a packed batch of ECDSA signatures. Each row is one batch_record_size
+/// record optionally followed by key_size opaque bytes (a caller tag, e.g. a
+/// block/tx id; never interpreted here, pass key_size == 0 to disable). results
+/// is resized to count; results[i] is non-zero iff row i verifies. Returns false
+/// only on malformed input (e.g. rows too short); a structurally-invalid row is
+/// reported as results[i] == 0, not an error.
+///
+/// Compiled WITH_ULTRAFAST this dispatches to the UltrafastSecp256k1 batch bridge
+/// (GPU when a backend is linked, else its CPU path); otherwise it is a parallel
+/// std::for_each over the singular verify_signature.
+BC_API bool batch_verify(const data_slice& rows, size_t count, size_t key_size,
+    std_vector<uint8_t>& results) NOEXCEPT;
+
 } // namespace ecdsa
 
 namespace schnorr {
@@ -248,6 +269,20 @@ BC_API bool verify_signature(const ec_xonly& x_point,
 BC_API bool verify_commitment(const ec_xonly& internal_key,
     const hash_digest& tweak, const ec_xonly& tweaked_key,
     bool tweaked_key_parity) NOEXCEPT;
+
+/// Schnorr (BIP-340) batch verification (GPU/CPU acceleration bridge)
+/// ---------------------------------------------------------------------------
+
+/// Packed batch record: 32 x-only key | 32 hash | 64 signature.
+/// Note the deliberate field-order difference from ecdsa::batch_record_size:
+/// the hash is the FIRST field for ECDSA and the SECOND for Schnorr.
+static constexpr size_t batch_record_size = 128;
+
+/// Verify a packed batch of Schnorr/BIP-340 signatures. Row layout and result
+/// semantics mirror ecdsa::batch_verify (one batch_record_size record + optional
+/// key_size opaque tail per row; results[i] non-zero iff row i verifies).
+BC_API bool batch_verify(const data_slice& rows, size_t count, size_t key_size,
+    std_vector<uint8_t>& results) NOEXCEPT;
 
 } // namespace schnorr
 } // namespace system

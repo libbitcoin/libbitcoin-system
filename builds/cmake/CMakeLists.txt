@@ -28,6 +28,7 @@ option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
 option( with-tests "Build tests." ON )
 option( with-examples "Build examples." ON )
+option( with-ultrafast "Use UltrafastSecp256k1 (GPU/CPU batch signature verification) as the secp256k1 backend." OFF )
 
 #------------------------------------------------------------------------------
 # Dependencies.
@@ -53,7 +54,46 @@ find_package( Boost 1.86.0 REQUIRED
     unit_test_framework
 )
 
-find_package( libsecp256k1 0.7.0 REQUIRED )
+if ( with-ultrafast )
+  #----------------------------------------------------------------------------
+  # UltrafastSecp256k1 secondary backend.
+  #
+  # Provides the libsecp256k1 ABI through its drop-in compatibility shim (so the
+  # existing libbitcoin crypto wrappers compile and link unchanged) PLUS the
+  # ufsecp_lbtc_* batch script-signature verify (ECDSA / Schnorr) and BIP-352
+  # scan entry points for GPU/CPU-accelerated block validation.
+  #
+  # Engine source is expected at deps/UltrafastSecp256k1 (git submodule) or at
+  # the path given by -DUltrafastSecp256k1_DIR=<path>.
+  # See doc/ultrafast-secp256k1-backend.md.
+  #----------------------------------------------------------------------------
+  if ( NOT UltrafastSecp256k1_DIR )
+    set( UltrafastSecp256k1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../deps/UltrafastSecp256k1" )
+  endif()
+  if ( NOT EXISTS "${UltrafastSecp256k1_DIR}/CMakeLists.txt" )
+    message( FATAL_ERROR
+      "with-ultrafast=ON but UltrafastSecp256k1 was not found at '${UltrafastSecp256k1_DIR}'.\n"
+      "  git submodule update --init --recursive deps/UltrafastSecp256k1\n"
+      "or configure with -DUltrafastSecp256k1_DIR=/path/to/UltrafastSecp256k1" )
+  endif()
+  # Minimal libbitcoin profile: shim + CT + strict ABI + batch bridge, extras off.
+  set( SECP256K1_BUILD_LIBBITCOIN ON CACHE BOOL "UltrafastSecp256k1 libbitcoin profile" FORCE )
+  add_subdirectory( "${UltrafastSecp256k1_DIR}" ultrafast_secp256k1 EXCLUDE_FROM_ALL )
+  # Route libbitcoin's `libsecp256k1::secp256k1` dependency to the shim target.
+  if ( NOT TARGET libsecp256k1::secp256k1 )
+    add_library( libsecp256k1::secp256k1 ALIAS secp256k1_shim )
+  endif()
+  # Activate the batch bridge in libbitcoin's secp256k1 wrapper: WITH_ULTRAFAST
+  # makes ecdsa::batch_verify / schnorr::batch_verify dispatch to ufsecp_lbtc_*
+  # (without it they fall back to a parallel std::for_each over the singular
+  # calls). Expose the bridge header; its symbols come from the engine target
+  # built above under the libbitcoin profile.
+  add_compile_definitions( WITH_ULTRAFAST )
+  include_directories( "${UltrafastSecp256k1_DIR}/compat/libbitcoin_bridge/include" )
+  message( STATUS "libbitcoin-system: secp256k1 backend = UltrafastSecp256k1 (shim + ufsecp_lbtc batch bridge)" )
+else()
+  find_package( libsecp256k1 0.7.0 REQUIRED )
+endif()
 
 #------------------------------------------------------------------------------
 # Compiler options.

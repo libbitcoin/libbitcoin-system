@@ -147,6 +147,124 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__negative__expected)
     BOOST_REQUIRE(!verify_signature(compressed2, sighash2, signature));
 }
 
+// batch verification
+// These exercise the CPU reference path (no WITH_ULTRAFAST in the test build);
+// the UltrafastSecp256k1 bridge path must match it bit-for-bit.
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_batch_verify__all_valid__expected)
+{
+    const std_vector<ec_secret> secrets{ secret1, secret3, one };
+    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
+
+    // Pack rows: [32 hash | 33 point | 64 signature], no opaque key column.
+    data_chunk rows;
+    for (const auto& secret: secrets)
+    {
+        ec_compressed point;
+        BOOST_REQUIRE(secret_to_public(point, secret));
+        ec_signature signature;
+        BOOST_REQUIRE(sign(signature, secret, hash));
+        rows.insert(rows.end(), hash.begin(), hash.end());
+        rows.insert(rows.end(), point.begin(), point.end());
+        rows.insert(rows.end(), signature.begin(), signature.end());
+    }
+
+    std_vector<uint8_t> results;
+    BOOST_REQUIRE(batch_verify(rows, secrets.size(), 0, results));
+    BOOST_REQUIRE_EQUAL(results.size(), secrets.size());
+    for (const auto valid: results)
+        BOOST_REQUIRE_NE(valid, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_batch_verify__one_invalid_with_key__expected)
+{
+    const std_vector<ec_secret> secrets{ secret1, secret3, one, secret1 };
+    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa-key"));
+    constexpr size_t key_size = 3; // 3-byte opaque block id, carried not verified
+
+    data_chunk rows;
+    for (size_t i = 0; i < secrets.size(); ++i)
+    {
+        ec_compressed point;
+        BOOST_REQUIRE(secret_to_public(point, secrets[i]));
+        ec_signature signature;
+        BOOST_REQUIRE(sign(signature, secrets[i], hash));
+        rows.insert(rows.end(), hash.begin(), hash.end());
+        rows.insert(rows.end(), point.begin(), point.end());
+        rows.insert(rows.end(), signature.begin(), signature.end());
+        rows.insert(rows.end(), { static_cast<uint8_t>(i), 0x00, 0x00 });
+    }
+
+    // Corrupt the signature of one row; its opaque key column is untouched.
+    constexpr size_t bad = 2;
+    const auto stride = ecdsa::batch_record_size + key_size;
+    rows[bad * stride + hash_size + ec_compressed_size + 10] ^= 0xff;
+
+    std_vector<uint8_t> results;
+    BOOST_REQUIRE(batch_verify(rows, secrets.size(), key_size, results));
+    for (size_t i = 0; i < results.size(); ++i)
+        BOOST_REQUIRE_EQUAL((results[i] != 0u), (i != bad));
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__schnorr_batch_verify__all_valid__expected)
+{
+    const std_vector<ec_secret> secrets{ secret1, secret3, one };
+    const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
+    const hash_digest auxiliary{};
+
+    // Pack rows: [32 x-only key | 32 hash | 64 signature].
+    data_chunk rows;
+    for (const auto& secret: secrets)
+    {
+        ec_compressed point;
+        BOOST_REQUIRE(secret_to_public(point, secret));
+        ec_xonly xonly;
+        std::copy_n(std::next(point.begin()), ec_xonly_size, xonly.begin());
+        ec_signature signature;
+        BOOST_REQUIRE(schnorr::sign(signature, secret, hash, auxiliary));
+        rows.insert(rows.end(), xonly.begin(), xonly.end());
+        rows.insert(rows.end(), hash.begin(), hash.end());
+        rows.insert(rows.end(), signature.begin(), signature.end());
+    }
+
+    std_vector<uint8_t> results;
+    BOOST_REQUIRE(schnorr::batch_verify(rows, secrets.size(), 0, results));
+    BOOST_REQUIRE_EQUAL(results.size(), secrets.size());
+    for (const auto valid: results)
+        BOOST_REQUIRE_NE(valid, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__schnorr_batch_verify__one_invalid__expected)
+{
+    const std_vector<ec_secret> secrets{ secret1, secret3, one };
+    const auto hash = bitcoin_hash(to_chunk("batch-schnorr-neg"));
+    const hash_digest auxiliary{};
+
+    data_chunk rows;
+    for (const auto& secret: secrets)
+    {
+        ec_compressed point;
+        BOOST_REQUIRE(secret_to_public(point, secret));
+        ec_xonly xonly;
+        std::copy_n(std::next(point.begin()), ec_xonly_size, xonly.begin());
+        ec_signature signature;
+        BOOST_REQUIRE(schnorr::sign(signature, secret, hash, auxiliary));
+        rows.insert(rows.end(), xonly.begin(), xonly.end());
+        rows.insert(rows.end(), hash.begin(), hash.end());
+        rows.insert(rows.end(), signature.begin(), signature.end());
+    }
+
+    // Corrupt one signature.
+    constexpr size_t bad = 1;
+    const auto stride = schnorr::batch_record_size;
+    rows[bad * stride + ec_xonly_size + hash_size + 10] ^= 0xff;
+
+    std_vector<uint8_t> results;
+    BOOST_REQUIRE(schnorr::batch_verify(rows, secrets.size(), 0, results));
+    for (size_t i = 0; i < results.size(); ++i)
+        BOOST_REQUIRE_EQUAL((results[i] != 0u), (i != bad));
+}
+
 // addition
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__expected)
