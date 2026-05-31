@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_HPP
 
+#include <span>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -186,6 +187,20 @@ namespace ecdsa {
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
 
+#pragma pack(push, 1)
+struct triple
+{
+    using token = system::data_array<3>;
+    using tokens = std::vector<token>;
+
+    system::hash_digest digest;
+    system::ec_compressed point;
+    system::ec_signature signature;
+    token identifier;
+};
+using triples = std::span<const triple>;
+#pragma pack(pop)
+
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
 BC_API bool parse_signature(ec_signature& out, const data_slice& der_signature,
@@ -200,8 +215,14 @@ BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT;
 
 /// Verify an ECDSA signature using a potential point.
+BC_API bool verify_signature(const triple& single) NOEXCEPT;
 BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT;
+
+/// Verify ECDSA signatures of { message, public key, signature } triples.
+/// Failed rows are identified by return of associated token, otherwise empty.
+BC_API triple::tokens verify_signatures(const triples& batch,
+    bool turbo) NOEXCEPT;
 
 /// ECDSA recoverable sign/recover
 /// ---------------------------------------------------------------------------
@@ -225,12 +246,26 @@ BC_API bool recover_public(ec_uncompressed& out,
 
 namespace schnorr {
 
-static constexpr size_t signature_size = 64;
-static constexpr size_t public_key_size = 32;
-
 /// Schnorr parse/sign/verify
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
+
+static constexpr size_t signature_size = 64;
+static constexpr size_t public_key_size = 32;
+
+#pragma pack(push, 1)
+struct triple
+{
+    using token = system::data_array<3>;
+    using tokens = std::vector<token>;
+
+    system::hash_digest digest;
+    system::ec_xonly point;
+    system::ec_signature signature;
+    token identifier;
+};
+using triples = std::span<const triple>;
+#pragma pack(pop)
 
 /// Create Schnorr signature using a private key (simple version, no tweaks).
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
@@ -241,8 +276,14 @@ BC_API bool verify_signature(const data_chunk& x_point,
     const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
 
 /// Verify Schnorr signature of hash by associated secret of the x-only point.
+BC_API bool verify_signature(const triple& single) NOEXCEPT;
 BC_API bool verify_signature(const ec_xonly& x_point,
     const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
+
+/// Verify Schnorr signatures of { message, public key, signature } triples.
+/// Failed rows are identified by return of associated token, otherwise empty.
+BC_API triple::tokens verify_signatures(const triples& batch,
+    bool turbo) NOEXCEPT;
 
 /// Verify Schnorr commitment of key/parity to hash, results in x-only point.
 BC_API bool verify_commitment(const ec_xonly& internal_key,

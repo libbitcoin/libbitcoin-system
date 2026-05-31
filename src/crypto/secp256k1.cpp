@@ -25,6 +25,7 @@
 #include <secp256k1_schnorrsig.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "ec_context.hpp"
@@ -436,6 +437,42 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
         system::verify_signature(context, pubkey, hash, signature);
 }
 
+bool verify_signature(const triple& single) NOEXCEPT
+{
+    return verify_signature(single.point, single.digest, single.signature);
+}
+
+// par_if() doesn't throw, array indexing is required for span<> in c++20.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
+{
+    const auto policy = poolstl::execution::par_if(turbo);
+
+    // Used only to produce order for concurrency.
+    std::vector<size_t> index(batch.size());
+    std::iota(index.begin(), index.end(), zero);
+
+    // Collect signature validation results as corresponding integer booleans.
+    std::vector<size_t> result(batch.size());
+    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
+    {
+        result.at(row) = to_int(verify_signature(batch[row]));
+    });
+
+    // Map success results to failures only.
+    triple::tokens out{};
+    for (size_t row{}; row < result.size(); ++row)
+        if (!to_bool(result.at(row)))
+            out.push_back(batch[row].identifier);
+
+    return out;
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+
 // ECDSA recoverable sign/recover
 // ----------------------------------------------------------------------------
 // It is recommended to verify a signature after signing.
@@ -521,6 +558,42 @@ bool verify_signature(const ec_xonly& x_point, const hash_digest& hash,
         secp256k1_schnorrsig_verify(context, signature.data(), hash.data(),
             hash_size, &pubkey) == ec_success;
 }
+
+bool verify_signature(const triple& single) NOEXCEPT
+{
+    return verify_signature(single.point, single.digest, single.signature);
+}
+
+// par_if() doesn't throw, array indexing is required for span<> in c++20.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
+{
+    const auto policy = poolstl::execution::par_if(turbo);
+
+    // Used only to produce order for concurrency.
+    std::vector<size_t> index(batch.size());
+    std::iota(index.begin(), index.end(), zero);
+
+    // Collect signature validation results as corresponding integer booleans.
+    std::vector<size_t> result(batch.size());
+    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
+    {
+        result.at(row) = to_int(verify_signature(batch[row]));
+    });
+
+    // Map success results to failures only.
+    triple::tokens out{};
+    for (size_t row{}; row < result.size(); ++row)
+        if (!to_bool(result.at(row)))
+            out.push_back(batch[row].identifier);
+
+    return out;
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 // BIP341: If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
 bool verify_commitment(const ec_xonly& internal_key, const hash_digest& tweak,
