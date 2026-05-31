@@ -18,7 +18,11 @@
  */
 #include "ec_context.hpp"
 
-#include <secp256k1.h>
+#if defined(HAVE_ULTRAFAST)
+    #include <ufsecp_libbitcoin.h>
+#else
+    #include <secp256k1.h>
+#endif
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
