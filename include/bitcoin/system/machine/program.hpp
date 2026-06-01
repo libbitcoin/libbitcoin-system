@@ -46,7 +46,7 @@ public:
 
     /// Input script (default/empty stack).
     program(const transaction& transaction, const input_iterator& input,
-        uint32_t active_flags) NOEXCEPT;
+        uint32_t active_flags, const chain::signatures& capture) NOEXCEPT;
 
     /// Legacy p2sh or prevout script (copied input stack).
     program(const program& other, const script::cptr& script) NOEXCEPT;
@@ -57,13 +57,14 @@ public:
     /// Witness v0 (segwit) script.
     program(const transaction& transaction, const input_iterator& input,
         const script::cptr& script, uint32_t active_flags,
-        script_version version, const chunk_cptrs_ptr& stack) NOEXCEPT;
+        script_version version, const chunk_cptrs_ptr& stack,
+        const chain::signatures& capture) NOEXCEPT;
 
     /// Witness v1 (tapscript) script.
     program(const transaction& transaction, const input_iterator& input,
         const script::cptr& script, uint32_t active_flags,
         script_version version, const chunk_cptrs_ptr& stack,
-        const hash_cptr& tapleaf) NOEXCEPT;
+        const hash_cptr& tapleaf, const chain::signatures& capture) NOEXCEPT;
 
     /// Program result.
     virtual bool is_true(bool clean) const NOEXCEPT;
@@ -229,6 +230,7 @@ private:
     const script_version version_;
     const chunk_cptrs_ptr witness_{};
     const hash_cptr tapleaf_{};
+    const chain::signatures& capture_;
 
     // Caches.
     multisig_cache cache_{};

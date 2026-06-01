@@ -30,6 +30,7 @@
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -841,11 +842,12 @@ code block::accept_transactions(const context& ctx) const NOEXCEPT
 }
 
 // Do NOT invoke on coinbase.
-code block::connect_transactions(const context& ctx) const NOEXCEPT
+code block::connect_transactions(const context& ctx,
+    const signatures& capture) const NOEXCEPT
 {
     if (!is_empty())
         for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-            if (const auto ec = (*tx)->connect(ctx))
+            if (const auto ec = (*tx)->connect(ctx, capture))
                 return ec;
 
     return error::block_success;
@@ -971,7 +973,16 @@ code block::confirm(const context& ctx) const NOEXCEPT
 // This assumes that prevout caching is completed on all inputs.
 code block::connect(const context& ctx) const NOEXCEPT
 {
-    return connect_transactions(ctx);
+    return connect_transactions(ctx, {});
+}
+
+// This assumes that prevout caching is completed on all inputs.
+// All captured signatures produced 'true' result in their op_check_sig().
+// If any script fails batch validation the associated block is invalid.
+code block::connect(const context& ctx,
+    const signatures& capture) const NOEXCEPT
+{
+    return connect_transactions(ctx, capture);
 }
 
 BC_POP_WARNING()

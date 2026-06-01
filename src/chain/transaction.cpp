@@ -29,6 +29,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -931,8 +932,8 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
 // Delegated.
 // ----------------------------------------------------------------------------
 
-code transaction::connect_input(const context& ctx,
-    const input_iterator& it) const NOEXCEPT
+code transaction::connect_input(const context& ctx, const input_iterator& it,
+    const signatures& capture) const NOEXCEPT
 {
     using namespace machine;
     const auto& input = **it;
@@ -944,11 +945,11 @@ code transaction::connect_input(const context& ctx,
     if (input.is_roller() || input.prevout->script().is_roller())
     {
         // Evaluate rolling scripts with linear search but constant erase.
-        return interpreter<linked_stack>::connect(ctx, *this, it);
+        return interpreter<linked_stack>::connect(ctx, *this, it, capture);
     }
 
     // Evaluate non-rolling scripts with constant search but linear erase.
-    return interpreter<contiguous_stack>::connect(ctx, *this, it);
+    return interpreter<contiguous_stack>::connect(ctx, *this, it, capture);
 }
 
 // Connect (contextual).

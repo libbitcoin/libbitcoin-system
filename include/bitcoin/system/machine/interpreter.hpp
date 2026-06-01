@@ -54,7 +54,8 @@ public:
 
     /// Connect tx.input[*].script to tx.input[*].prevout.script.
     static code connect(const chain::context& state,
-        const chain::transaction& tx, const input_iterator& it) NOEXCEPT;
+        const chain::transaction& tx, const input_iterator& it,
+        const chain::signatures& capture) NOEXCEPT;
 
 protected:
     using flags = chain::flags;
@@ -65,12 +66,13 @@ protected:
     /// Embedded script handler.
     static code connect_embedded(const chain::context& state,
         const chain::transaction& tx, const input_iterator& it,
-        interpreter& in_program) NOEXCEPT;
+        interpreter& in_program, const chain::signatures& capture) NOEXCEPT;
 
     /// Witnessed script handler.
     static code connect_witness(const chain::context& state,
         const chain::transaction& tx, const input_iterator& it,
-        const chain::script& prevout, bool embedded) NOEXCEPT;
+        const chain::script& prevout, bool embedded,
+        const chain::signatures& capture) NOEXCEPT;
 
     /// Operation disatch.
     virtual op_error_t run_op(const op_iterator& op) NOEXCEPT;

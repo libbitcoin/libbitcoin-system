@@ -26,6 +26,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -169,6 +170,7 @@ public:
     code check() const NOEXCEPT;
     code check(const context& ctx) const NOEXCEPT;
     code accept(const context& ctx) const NOEXCEPT;
+    code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
@@ -261,8 +263,8 @@ private:
     chain::points points() const NOEXCEPT;
 
     // delegated
-    code connect_input(const context& ctx,
-        const input_iterator& it) const NOEXCEPT;
+    code connect_input(const context& ctx, const input_iterator& it,
+        const signatures& capture) const NOEXCEPT;
 
     // Patterns.
     // ------------------------------------------------------------------------
