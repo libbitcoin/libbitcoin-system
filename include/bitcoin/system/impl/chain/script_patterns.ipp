@@ -181,7 +181,7 @@ constexpr bool script::is_pay_witness_taproot_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
-        && ops[0].code() == opcode::push_size_1
+        && ops[0].code() == opcode::push_positive_1
         && ops[1].code() == opcode::push_size_32;
 }
 
@@ -364,7 +364,7 @@ inline operations script::to_pay_witness_taproot_pattern(
 {
     return
     {
-        { opcode::push_size_1 },
+        { opcode::push_positive_1 },
         { to_chunk(hash), false }
     };
 }
