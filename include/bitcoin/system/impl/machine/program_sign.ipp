@@ -251,26 +251,42 @@ cached_hash() const NOEXCEPT
     return cache_.hash;
 }
 
-// Signature validation (batchable).
+// Signature validation.
 // ----------------------------------------------------------------------------
-// These are only caled for op_check_sig_verify() as others are not batchable.
 
 TEMPLATE
 INLINE bool CLASS::
-is_batchable() const NOEXCEPT
+is_ecdsa_batchable() const NOEXCEPT
 {
-    return false;
+    if (!capture_.enabled)
+        return false;
+
+    const auto& ops = script_->ops();
+    return chain::script::is_pay_public_key_pattern(ops)
+        || chain::script::is_pay_key_hash_pattern(ops)
+        || chain::script::is_pay_witness_key_hash_pattern(ops);
+}
+
+TEMPLATE
+INLINE bool CLASS::
+is_schnorr_batchable() const NOEXCEPT
+{
+    if (!capture_.enabled)
+        return false;
+
+    const auto& ops = script_->ops();
+    return chain::script::is_pay_witness_taproot_key_path_pattern(ops);
 }
 
 TEMPLATE
 INLINE bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature) const NOEXCEPT
+    const ec_signature& signature, bool batchable) const NOEXCEPT
 {
-    if (!capture_.enabled || !is_batchable())
+    if (!batchable || !is_ecdsa_batchable())
         return ecdsa::verify_signature(point, hash, signature);
 
-    // Compression is avoided on the disabled path since it is less efficient.
+    // Compression is avoided on unbatched path since less efficient.
     // However compression is required as a batching normalization.
     switch (point.size())
     {
@@ -300,9 +316,9 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
 TEMPLATE
 INLINE bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature) const NOEXCEPT
+    const ec_signature& signature, bool batchable) const NOEXCEPT
 {
-    if (!capture_.enabled || !is_batchable())
+    if (!batchable || !is_schnorr_batchable())
         return schnorr::verify_signature(point, hash, signature);
 
     constexpr auto size = schnorr::public_key_size;
