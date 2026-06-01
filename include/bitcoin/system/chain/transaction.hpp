@@ -147,7 +147,7 @@ public:
 
     /// Not used internally.
     bool check_signature(const ec_signature& signature,
-        const data_slice& public_key, const script& subscript, uint32_t index,
+        const data_chunk& public_key, const script& subscript, uint32_t index,
         uint64_t value, uint8_t sighash_flags, script_version version,
         uint32_t flags) const NOEXCEPT;
 

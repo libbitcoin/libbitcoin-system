@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_negative__expected)
     // Invalidate the positive test.
     hash[0] = 0;
 
-    BOOST_REQUIRE(!verify_signature(point, hash, signature));
+    BOOST_REQUIRE(!verify_signature(to_chunk(point), hash, signature));
 }
 
 BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__positive__expected)

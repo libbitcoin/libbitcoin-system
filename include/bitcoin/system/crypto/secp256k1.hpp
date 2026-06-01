@@ -214,10 +214,12 @@ BC_API bool encode_signature(der_signature& out,
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT;
 
-/// Verify an ECDSA signature using a potential point.
+/// Verify ECDSA signature of hash by associated secret of the point.
 BC_API bool verify_signature(const triple& single) NOEXCEPT;
-BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
-    const ec_signature& signature) NOEXCEPT;
+BC_API bool verify_signature(const data_chunk& point,
+    const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
+BC_API bool verify_signature(const ec_compressed& compressed,
+    const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
 
 /// Verify ECDSA signatures of { message, public key, signature } triples.
 /// Failed rows are identified by return of associated token, otherwise empty.
@@ -272,11 +274,9 @@ BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT;
 
 /// Verify Schnorr signature of hash by associated secret of the x-only point.
+BC_API bool verify_signature(const triple& single) NOEXCEPT;
 BC_API bool verify_signature(const data_chunk& x_point,
     const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
-
-/// Verify Schnorr signature of hash by associated secret of the x-only point.
-BC_API bool verify_signature(const triple& single) NOEXCEPT;
 BC_API bool verify_signature(const ec_xonly& x_point,
     const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
 
