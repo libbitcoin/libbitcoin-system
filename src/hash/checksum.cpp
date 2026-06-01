@@ -69,6 +69,10 @@ bool verify_checksum(const data_chunk& data) NOEXCEPT
 
 static const size_t bech32_version_size = 1;
 static const size_t bech32_checksum_size = 6;
+// BIP173: All versions use 0x00000001 (bech32).
+// BIP350: Nonzero versions use 0x2bc830a3 (bech32m).
+static constexpr uint32_t bech32_checksum_constant = 0x00000001;
+static constexpr uint32_t bech32m_checksum_constant = 0x2bc830a3;
 
 static base32b_chunk bech32_expand_prefix(const std::string& prefix) NOEXCEPT
 {
@@ -118,11 +122,21 @@ static uint32_t bech32_checksum(const base32b_chunk& data) NOEXCEPT
     return checksum;
 }
 
-// BIP173: All versions use 0x00000001 (bech32).
-// BIP350: Nonzero versions use 0x2bc830a3 (bech32m).
-constexpr uint32_t bech32_constant(uint8_t version) NOEXCEPT
+constexpr uint32_t to_bech32_constant(checksum_constant constant) NOEXCEPT
 {
-    return is_zero(version) ? 0x00000001 : 0x2bc830a3;
+    return constant == checksum_constant::bech32m ?
+        bech32m_checksum_constant : bech32_checksum_constant;
+}
+
+constexpr checksum_constant bech32_witness_constant(uint8_t version) NOEXCEPT
+{
+    return is_zero(version) ? checksum_constant::bech32 :
+        checksum_constant::bech32m;
+}
+
+constexpr uint32_t to_bech32_constant(uint8_t version) NOEXCEPT
+{
+    return to_bech32_constant(bech32_witness_constant(version));
 }
 
 static void bech32_prepend_prefix(base32b_chunk& data,
@@ -133,26 +147,34 @@ static void bech32_prepend_prefix(base32b_chunk& data,
 }
 
 static void bech32_append_checksum(base32b_chunk& data,
-    const std::string& prefix, uint8_t version) NOEXCEPT
+    const std::string& prefix, uint32_t constant) NOEXCEPT
 {
     base32b_chunk prefixed{ data };
     bech32_prepend_prefix(prefixed, prefix);
     prefixed.resize(prefixed.size() + bech32_checksum_size, 0x00);
-    const auto checksum = bech32_checksum(prefixed) ^ bech32_constant(version);
+    const auto checksum = bech32_checksum(prefixed) ^ constant;
     const auto checked = bech32_expand_checksum(checksum);
     data.insert(data.end(), checked.begin(), checked.end());
 }
 
 static bool bech32_verify_checksum(const base32b_chunk& checked,
-    const std::string& prefix, uint8_t version) NOEXCEPT
+    const std::string& prefix, uint32_t constant) NOEXCEPT
 {
     base32b_chunk prefixed{ checked };
     bech32_prepend_prefix(prefixed, prefix);
-    return bech32_checksum(prefixed) == bech32_constant(version);
+    return bech32_checksum(prefixed) == constant;
 }
 
-base32b_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
-    const std::string& prefix) NOEXCEPT
+static bool bech32_verify_checksum(const base32b_chunk& checked,
+    const std::string& prefix, uint8_t version) NOEXCEPT
+{
+    return bech32_verify_checksum(checked, prefix,
+        to_bech32_constant(version));
+}
+
+static base32b_chunk bech32_build_checked(uint8_t version,
+    const data_chunk& program, const std::string& prefix,
+    uint32_t constant) NOEXCEPT
 {
     // Version expansion would truncate a value above 5 bits.
     if (version >= (1 << 5))
@@ -160,14 +182,14 @@ base32b_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
 
     auto checked = base32b_unpack(program);
     checked.insert(checked.begin(), static_cast<uint5_t>(version));
-    bech32_append_checksum(checked, prefix, version);
-    BC_ASSERT(bech32_verify_checksum(checked, prefix, version));
+    bech32_append_checksum(checked, prefix, constant);
+    BC_ASSERT(bech32_verify_checksum(checked, prefix, constant));
 
     return checked;
 }
 
-bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
-    const std::string& prefix, const base32b_chunk& checked) NOEXCEPT
+static bool bech32_extract_checked(uint8_t& out_version,
+    data_chunk& out_program, const base32b_chunk& checked) NOEXCEPT
 {
     if (checked.size() < bech32_version_size + bech32_checksum_size)
         return false;
@@ -179,7 +201,36 @@ bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
         std::prev(checked.end(), bech32_checksum_size)
     });
 
-    return bech32_verify_checksum(checked, prefix, out_version);
+    return true;
+}
+
+base32b_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
+    const std::string& prefix) NOEXCEPT
+{
+    return bech32_build_checked(version, program, prefix,
+        bech32_witness_constant(version));
+}
+
+base32b_chunk bech32_build_checked(uint8_t version, const data_chunk& program,
+    const std::string& prefix, checksum_constant constant) NOEXCEPT
+{
+    return bech32_build_checked(version, program, prefix,
+        to_bech32_constant(constant));
+}
+
+bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
+    const std::string& prefix, const base32b_chunk& checked) NOEXCEPT
+{
+    return bech32_extract_checked(out_version, out_program, checked) &&
+        bech32_verify_checksum(checked, prefix, out_version);
+}
+
+bool bech32_verify_checked(uint8_t& out_version, data_chunk& out_program,
+    const std::string& prefix, const base32b_chunk& checked,
+    checksum_constant constant) NOEXCEPT
+{
+    return bech32_extract_checked(out_version, out_program, checked) &&
+        bech32_verify_checksum(checked, prefix, to_bech32_constant(constant));
 }
 
 } // namespace system
