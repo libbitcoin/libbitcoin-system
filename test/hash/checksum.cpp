@@ -247,6 +247,30 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__five_program_bytes__expecte
     BOOST_REQUIRE_EQUAL(encode_base32(checked), "qqypqxpq939vyak");
 }
 
+BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_zero_bech32m__expected)
+{
+    constexpr auto checksum = checksum_constant::bech32m;
+    const auto checked = bech32_build_checked(0, {}, "abcdef", checksum);
+    BOOST_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
+    BOOST_REQUIRE_EQUAL(encode_base32(checked), "qa40fc4");
+}
+
+BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__version_zero_bech32m__true)
+{
+    constexpr auto checksum = checksum_constant::bech32m;
+    base32_chunk checked{};
+    BOOST_REQUIRE(decode_base32(checked, "qa40fc4"));
+
+    uint8_t version{};
+    data_chunk program{};
+    const auto hrp = "abcdef";
+    const auto valid = bech32_verify_checked(version, program, hrp, checked, checksum);
+    BOOST_REQUIRE(valid);
+    BOOST_REQUIRE_EQUAL(version, 0u);
+    BOOST_REQUIRE(program.empty());
+    BOOST_REQUIRE(!bech32_verify_checked(version, program, hrp, checked));
+}
+
 // bech32_build_checked - BIP173
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wkh__expected)
