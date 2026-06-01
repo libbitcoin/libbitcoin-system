@@ -462,16 +462,11 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
 
     // The results vector is the only allocation.
     const auto count = batch.size();
-    std::vector<size_t> results(count);
+    std::vector<uint8_t> results(count);
     const auto in = pointer_cast<uint8_t>(batch.data());
     const auto out = results.data();
-    size_t fails{};
-
-    BC_DEBUG_ONLY(const auto result =)
-    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, out, nullptr, 0, &fails);
-
-    // Presumed not possible conditions under above constraints.
-    BC_ASSERT((result == UFSECP_OK) && is_zero(fails));
+    constexpr auto id_size = array_count<decltype(triple::identifier)>;
+    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, id_size, out);
 #else
     const auto policy = poolstl::execution::par_if(turbo);
 
@@ -480,10 +475,10 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
     std::iota(index.begin(), index.end(), zero);
 
     // Collect signature validation results as corresponding integer booleans.
-    std::vector<size_t> results(batch.size());
+    std::vector<uint8_t> results(batch.size());
     std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
     {
-        results.at(row) = to_int(verify_signature(batch[row]));
+        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
     });
 #endif
 
@@ -605,16 +600,11 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
 
     // The results vector is the only allocation.
     const auto count = batch.size();
-    std::vector<size_t> results(count);
+    std::vector<uint8_t> results(count);
     const auto in = pointer_cast<uint8_t>(batch.data());
     const auto out = results.data();
-    size_t fails{};
-
-    BC_DEBUG_ONLY(const auto result = )
-    ufsecp_lbtc_verify_schnorr(context.get(), in, count, out, nullptr, 0, &fails);
-
-    // Presumed not possible conditions under above constraints.
-    BC_ASSERT((result == UFSECP_OK) && is_zero(fails));
+    constexpr auto id_size = array_count<decltype(triple::identifier)>;
+    ufsecp_lbtc_verify_schnorr(context.get(), in, count, id_size, out);
 #else
     const auto policy = poolstl::execution::par_if(turbo);
 
@@ -623,10 +613,10 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
     std::iota(index.begin(), index.end(), zero);
 
     // Collect signature validation results as corresponding integer booleans.
-    std::vector<size_t> results(batch.size());
+    std::vector<uint8_t> results(batch.size());
     std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
     {
-        results.at(row) = to_int(verify_signature(batch[row]));
+        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
     });
 #endif
 
