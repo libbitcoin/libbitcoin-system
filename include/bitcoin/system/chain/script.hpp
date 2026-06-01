@@ -58,6 +58,7 @@ public:
     static constexpr bool is_pay_witness_key_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_witness_script_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_witness_taproot_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_witness_taproot_key_path_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_public_key_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_key_hash_pattern(const operations& ops) NOEXCEPT;

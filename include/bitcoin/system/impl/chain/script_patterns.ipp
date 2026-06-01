@@ -185,6 +185,14 @@ constexpr bool script::is_pay_witness_taproot_pattern(
         && ops[1].code() == opcode::push_size_32;
 }
 
+// This script type is fabricated in witness::extract_taproot.
+constexpr bool script::is_pay_witness_taproot_key_path_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 1
+        && ops[0].code() == opcode::checksig;
+}
+
 // The first push is based on wacky satoshi op_check_multisig behavior that
 // we must perpetuate, though this is not used in consensus validation.
 constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
