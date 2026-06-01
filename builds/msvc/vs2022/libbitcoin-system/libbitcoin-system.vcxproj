@@ -315,6 +315,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\split.c">
       <ObjectFileName>$(IntDir)src_wallet_addresses_qrencode_split.c.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\silent_payment.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_receiver.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_sender.cpp" />
@@ -626,6 +627,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\checked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\payment_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_code.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\silent_payment.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\stealth_receiver.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\stealth_sender.hpp" />

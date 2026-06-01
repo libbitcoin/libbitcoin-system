@@ -398,6 +398,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\silent_payment.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_receiver.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_sender.cpp" />
@@ -461,6 +462,7 @@
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\mocks\blocks.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\addresses\silent_payment_vectors.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\mnemonic.hpp" />
