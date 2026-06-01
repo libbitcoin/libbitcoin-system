@@ -197,6 +197,14 @@ protected:
     virtual INLINE bool set_hash(const chain::script& subscript,
         uint8_t sighash_flags) NOEXCEPT;
 
+    /// Signature validation (batchable).
+    /// -----------------------------------------------------------------------
+    bool is_batchable() const NOEXCEPT;
+    bool verify_ecdsa_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+    bool verify_schnorr_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+
 private:
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
     using primary_stack = stack<Stack>;

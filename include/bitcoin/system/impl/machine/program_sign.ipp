@@ -251,6 +251,66 @@ cached_hash() const NOEXCEPT
     return cache_.hash;
 }
 
+// Signature validation (batchable).
+// ----------------------------------------------------------------------------
+// These are only caled for op_check_sig_verify() as others are not batchable.
+
+TEMPLATE
+INLINE bool CLASS::
+is_batchable() const NOEXCEPT
+{
+    return false;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature) const NOEXCEPT
+{
+    if (!capture_.enabled || !is_batchable())
+        return ecdsa::verify_signature(point, hash, signature);
+
+    // Compression is avoided on the disabled path since it is less efficient.
+    // However compression is required as a batching normalization.
+    switch (point.size())
+    {
+        case ec_compressed_size:
+        {
+            constexpr auto size = ec_compressed_size;
+            const auto& thin = unsafe_array_cast<uint8_t, size>(point.data());
+            capture_.ecdsa(hash, thin, signature);
+            return true;
+        }
+        case ec_uncompressed_size:
+        {
+            constexpr auto size = ec_uncompressed_size;
+            const auto& fat = unsafe_array_cast<uint8_t, size>(point.data());
+            ec_compressed thin;
+            if (!compress(thin, fat)) return false;
+            capture_.ecdsa(hash, thin, signature);
+            return true;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+}
+
+TEMPLATE
+INLINE bool CLASS::
+verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature) const NOEXCEPT
+{
+    if (!capture_.enabled || !is_batchable())
+        return schnorr::verify_signature(point, hash, signature);
+
+    constexpr auto size = schnorr::public_key_size;
+    const auto& x_point = unsafe_array_cast<uint8_t, size>(point.data());
+    capture_.schnorr(hash, x_point, signature);
+    return true;
+}
+
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin

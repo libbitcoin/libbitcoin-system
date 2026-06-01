@@ -1047,7 +1047,7 @@ op_check_sig_verify() NOEXCEPT
                 return error::op_check_sig_schnorr2;
 
             // Verify schnorr signature against public key and signature hash.
-            if (!schnorr::verify_signature(*key, hash, sig))
+            if (!state::verify_schnorr_signature(*key, hash, sig))
                 return error::op_check_sig_schnorr3;
         }
 
@@ -1080,7 +1080,7 @@ op_check_sig_verify() NOEXCEPT
         return error::op_check_sig_verify3;
 
     // Verify ECDSA signature against public key and signature hash.
-    if (!ecdsa::verify_signature(*key, hash, sig))
+    if (!state::verify_ecdsa_signature(*key, hash, sig))
         return error::op_check_sig_verify4;
 
     // TODO: use sighash and key to generate signature in sign mode.
