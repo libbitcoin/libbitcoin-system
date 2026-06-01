@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
 
+#include <atomic>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -42,9 +43,18 @@ struct BC_API signatures
     using schnorr_handler = std::function<void(const hash_digest& signature_hash,
         const ec_xonly& public_key, const ec_signature& signature)>;
 
-    const bool enabled{};
+    /// Invoked with signature verification triples in script interpreter.
     const ecdsa_handler ecdsa{};
     const schnorr_handler schnorr{};
+
+    /// Default construction disables batching.
+    const bool enabled{};
+
+    /// Diagnostic counters.
+    mutable std::atomic<size_t> batched_ecdsa{};
+    mutable std::atomic<size_t> unbatched_ecdsa{};
+    mutable std::atomic<size_t> batched_schnorr{};
+    mutable std::atomic<size_t> unbatched_schnorr{};
 };
 
 } // namespace chain

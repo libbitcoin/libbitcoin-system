@@ -284,10 +284,12 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature, bool batchable) const NOEXCEPT
 {
     if (!batchable || !is_ecdsa_batchable())
+    {
+        capture_.unbatched_ecdsa.fetch_add(one, std::memory_order_relaxed);
         return ecdsa::verify_signature(point, hash, signature);
+    }
 
-    // Compression is avoided on unbatched path since less efficient.
-    // However compression is required as a batching normalization.
+    capture_.batched_ecdsa.fetch_add(one, std::memory_order_relaxed);
     switch (point.size())
     {
         case ec_compressed_size:
@@ -319,8 +321,12 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature, bool batchable) const NOEXCEPT
 {
     if (!batchable || !is_schnorr_batchable())
+    {
+        capture_.unbatched_schnorr.fetch_add(one, std::memory_order_relaxed);
         return schnorr::verify_signature(point, hash, signature);
+    }
 
+    capture_.batched_schnorr.fetch_add(one, std::memory_order_relaxed);
     constexpr auto size = schnorr::public_key_size;
     const auto& x_point = unsafe_array_cast<uint8_t, size>(point.data());
     capture_.schnorr(hash, x_point, signature);
