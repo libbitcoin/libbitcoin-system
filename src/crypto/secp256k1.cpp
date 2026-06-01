@@ -211,6 +211,26 @@ bool ec_add(ec_compressed& left, const ec_uncompressed& right) NOEXCEPT
     return compress(out, right) && ec_add(left, out);
 }
 
+bool ec_add(ec_uncompressed& left, const ec_uncompressed& right) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+
+    secp256k1_pubkey left_key;
+    secp256k1_pubkey right_key;
+    if (!parse(context, left_key, left) || !parse(context, right_key, right))
+        return false;
+
+    const secp256k1_pubkey* keys[]
+    {
+        &left_key,
+        &right_key
+    };
+
+    secp256k1_pubkey out;
+    return secp256k1_ec_pubkey_combine(context, &out, keys, 2) ==
+        ec_success && serialize(context, left, out);
+}
+
 // parse, combine, serialize
 bool ec_sum(ec_compressed& out, const compressed_list& points) NOEXCEPT
 {
