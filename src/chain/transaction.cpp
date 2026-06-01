@@ -935,9 +935,13 @@ code transaction::connect_input(const context& ctx,
     const input_iterator& it) const NOEXCEPT
 {
     using namespace machine;
+    const auto& input = **it;
+
+    if (!input.prevout)
+        return error::missing_previous_output;
 
     // TODO: evaluate performance tradeoff.
-    if ((*it)->is_roller())
+    if (input.is_roller() || input.prevout->script().is_roller())
     {
         // Evaluate rolling scripts with linear search but constant erase.
         return interpreter<linked_stack>::connect(ctx, *this, it);
@@ -956,13 +960,19 @@ code transaction::connect_input(const context& ctx,
 
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
+    return connect(ctx, {});
+}
+
+code transaction::connect(const context& ctx,
+    const signatures& capture) const NOEXCEPT
+{
     ////BC_ASSERT(!is_coinbase());
 
     if (is_coinbase())
         return error::transaction_success;
 
     for (auto in = inputs_->begin(); in != inputs_->end(); ++in)
-        if (const auto ec = connect_input(ctx, in))
+        if (const auto ec = connect_input(ctx, in, capture))
             return ec;
 
     return error::transaction_success;
