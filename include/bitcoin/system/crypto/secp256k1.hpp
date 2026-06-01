@@ -183,6 +183,24 @@ BC_API bool is_endorsement(const endorsement& endorsement) NOEXCEPT;
 
 namespace ecdsa {
 
+/// ECDSA recoverable sign/recover
+/// ---------------------------------------------------------------------------
+/// It is recommended to verify a signature after signing.
+
+/// Create a recoverable signature for use in message signing.
+BC_API bool sign_recoverable(recoverable_signature& out,
+    const ec_secret& secret, const hash_digest& hash) NOEXCEPT;
+
+/// Recover the compressed point from a recoverable message signature.
+BC_API bool recover_public(ec_compressed& out,
+    const recoverable_signature& recoverable,
+    const hash_digest& hash) NOEXCEPT;
+
+/// Recover the uncompressed point from a recoverable message signature.
+BC_API bool recover_public(ec_uncompressed& out,
+    const recoverable_signature& recoverable,
+    const hash_digest& hash) NOEXCEPT;
+
 /// ECDSA parse/encode/sign/verify signature
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
@@ -225,24 +243,6 @@ BC_API bool verify_signature(const ec_compressed& compressed,
 /// Failed rows are identified by return of associated token, otherwise empty.
 BC_API triple::tokens verify_signatures(const triples& batch,
     bool turbo) NOEXCEPT;
-
-/// ECDSA recoverable sign/recover
-/// ---------------------------------------------------------------------------
-/// It is recommended to verify a signature after signing.
-
-/// Create a recoverable signature for use in message signing.
-BC_API bool sign_recoverable(recoverable_signature& out,
-    const ec_secret& secret, const hash_digest& hash) NOEXCEPT;
-
-/// Recover the compressed point from a recoverable message signature.
-BC_API bool recover_public(ec_compressed& out,
-    const recoverable_signature& recoverable,
-    const hash_digest& hash) NOEXCEPT;
-
-/// Recover the uncompressed point from a recoverable message signature.
-BC_API bool recover_public(ec_uncompressed& out,
-    const recoverable_signature& recoverable,
-    const hash_digest& hash) NOEXCEPT;
 
 } // namespace ecdsa
 

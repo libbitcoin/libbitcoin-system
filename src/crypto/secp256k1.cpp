@@ -376,6 +376,45 @@ bool is_endorsement(const endorsement& endorsement) NOEXCEPT
 
 namespace ecdsa {
 
+// ECDSA recoverable sign/recover
+// ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
+
+bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
+    const hash_digest& hash) NOEXCEPT
+{
+    int recovery_id{};
+    const auto context = ec_context_sign::context();
+    secp256k1_ecdsa_recoverable_signature signature;
+
+    const auto result =
+        secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
+            secret.data(), secp256k1_nonce_function_rfc6979, nullptr) ==
+            ec_success &&
+        secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
+            out.signature.data(), &recovery_id, &signature) == ec_success;
+
+    if (is_negative(recovery_id) || recovery_id > maximum_recovery_id)
+        return false;
+
+    out.recovery_id = narrow_sign_cast<uint8_t>(recovery_id);
+    return result;
+}
+
+bool recover_public(ec_compressed& out,
+    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+    return recover_public(context, out, recoverable, hash);
+}
+
+bool recover_public(ec_uncompressed& out,
+    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+    return recover_public(context, out, recoverable, hash);
+}
+
 // ECDSA parse/encode/sign/verify signature
 // ----------------------------------------------------------------------------
 // It is recommended to verify a signature after signing.
@@ -503,45 +542,6 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
 
 BC_POP_WARNING()
 BC_POP_WARNING()
-
-// ECDSA recoverable sign/recover
-// ----------------------------------------------------------------------------
-// It is recommended to verify a signature after signing.
-
-bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
-    const hash_digest& hash) NOEXCEPT
-{
-    int recovery_id{};
-    const auto context = ec_context_sign::context();
-    secp256k1_ecdsa_recoverable_signature signature;
-
-    const auto result =
-        secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
-            secret.data(), secp256k1_nonce_function_rfc6979, nullptr) ==
-            ec_success &&
-        secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
-            out.signature.data(), &recovery_id, &signature) == ec_success;
-
-    if (is_negative(recovery_id) || recovery_id > maximum_recovery_id)
-        return false;
-
-    out.recovery_id = narrow_sign_cast<uint8_t>(recovery_id);
-    return result;
-}
-
-bool recover_public(ec_compressed& out,
-    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
-{
-    const auto context = ec_context_verify::context();
-    return recover_public(context, out, recoverable, hash);
-}
-
-bool recover_public(ec_uncompressed& out,
-    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
-{
-    const auto context = ec_context_verify::context();
-    return recover_public(context, out, recoverable, hash);
-}
 
 } // namespace ecdsa
 
