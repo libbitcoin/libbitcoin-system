@@ -51,6 +51,7 @@
 //is_sign_multisig_pattern
 //is_sign_public_key_pattern
 //is_sign_key_hash_pattern
+//is_sign_witness_key_hash_pattern
 //is_sign_script_hash_pattern
 //
 //to_pay_null_data_pattern
@@ -454,6 +455,21 @@ BOOST_AUTO_TEST_CASE(script__to_pay_witness_taproot_pattern__valid_key__expected
 
     const script instance(script::to_pay_witness_taproot_pattern(key));
     BOOST_REQUIRE_EQUAL(encode_base16(instance.to_data(false)), "512053a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343");
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_witness_key_hash_pattern__p2sh_p2wpkh_redeem__true)
+{
+    const auto data = base16_chunk("001419c2f3ae0ca3b642bd3e49598b8da89f50c14161");
+    const operations ops{ { data, false } };
+    BOOST_REQUIRE(script::is_sign_witness_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_witness_key_hash_pattern__pay_witness_key_hash__false)
+{
+    constexpr auto hash = base16_array("19c2f3ae0ca3b642bd3e49598b8da89f50c14161");
+
+    const auto ops = script::to_pay_witness_key_hash_pattern(hash);
+    BOOST_REQUIRE(!script::is_sign_witness_key_hash_pattern(ops));
 }
 
 // pay_multisig
