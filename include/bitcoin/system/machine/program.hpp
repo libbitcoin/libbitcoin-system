@@ -46,7 +46,7 @@ public:
 
     /// Input script (default/empty stack).
     program(const transaction& transaction, const input_iterator& input,
-        uint32_t active_flags) NOEXCEPT;
+        uint32_t active_flags, const chain::signatures& capture) NOEXCEPT;
 
     /// Legacy p2sh or prevout script (copied input stack).
     program(const program& other, const script::cptr& script) NOEXCEPT;
@@ -57,13 +57,14 @@ public:
     /// Witness v0 (segwit) script.
     program(const transaction& transaction, const input_iterator& input,
         const script::cptr& script, uint32_t active_flags,
-        script_version version, const chunk_cptrs_ptr& stack) NOEXCEPT;
+        script_version version, const chunk_cptrs_ptr& stack,
+        const chain::signatures& capture) NOEXCEPT;
 
     /// Witness v1 (tapscript) script.
     program(const transaction& transaction, const input_iterator& input,
         const script::cptr& script, uint32_t active_flags,
         script_version version, const chunk_cptrs_ptr& stack,
-        const hash_cptr& tapleaf) NOEXCEPT;
+        const hash_cptr& tapleaf, const chain::signatures& capture) NOEXCEPT;
 
     /// Program result.
     virtual bool is_true(bool clean) const NOEXCEPT;
@@ -196,6 +197,23 @@ protected:
     virtual INLINE bool set_hash(const chain::script& subscript,
         uint8_t sighash_flags) NOEXCEPT;
 
+    /// Signature validation.
+    /// -----------------------------------------------------------------------
+    bool is_input_script() const NOEXCEPT;
+    bool is_ecdsa_batchable() const NOEXCEPT;
+    bool is_schnorr_batchable() const NOEXCEPT;
+    bool is_multisig_batchable() const NOEXCEPT;
+    bool verify_ecdsa_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature,
+        bool batchable=false) const NOEXCEPT;
+    bool verify_schnorr_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature,
+        bool batchable=false) const NOEXCEPT;
+    bool verify_multisig_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+    bool try_batch_multisig_verification(const chunk_xptrs& keys,
+        const chunk_xptrs& endorsements) const NOEXCEPT;
+
 private:
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
     using primary_stack = stack<Stack>;
@@ -229,6 +247,8 @@ private:
     const script_version version_;
     const chunk_cptrs_ptr witness_{};
     const hash_cptr tapleaf_{};
+    const bool spender_{};
+    const chain::signatures& capture_;
 
     // Caches.
     multisig_cache cache_{};

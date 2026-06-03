@@ -185,6 +185,40 @@ constexpr bool script::is_pay_witness_taproot_pattern(
         && ops[1].code() == opcode::push_size_32;
 }
 
+// This script type is fabricated in witness::extract_taproot.
+constexpr bool script::is_pay_witness_taproot_key_path_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 1
+        && ops[0].code() == opcode::checksig;
+}
+
+constexpr bool script::is_pay_multisig_standard_pattern(
+    const operations& ops) NOEXCEPT
+{
+    if (ops.size() < 4u ||
+        ops.back().code() != opcode::checkmultisig)
+        return false;
+
+    const auto& m_op = ops.front();
+    const auto& n_op = ops[ops.size() - 2u];
+
+    if (!m_op.is_positive() || !n_op.is_positive())
+        return false;
+
+    const auto m = operation::opcode_to_positive(m_op.code());
+    const auto n = operation::opcode_to_positive(n_op.code());
+
+    if (is_zero(m) || is_zero(n) || m > n || n > 16u || n != ops.size() - 3u)
+        return false;
+
+    for (auto op = std::next(ops.begin()); op != std::prev(ops.end(), 2); ++op)
+        if (!is_public_key(op->data()))
+            return false;
+
+    return true;
+}
+
 // The first push is based on wacky satoshi op_check_multisig behavior that
 // we must perpetuate, though this is not used in consensus validation.
 constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT

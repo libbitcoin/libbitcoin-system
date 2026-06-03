@@ -24,6 +24,7 @@
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
+#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -138,6 +139,7 @@ public:
     code check(const context& ctx, bool identity=true) const NOEXCEPT;
     code accept(const context& ctx, size_t subsidy_interval,
         uint64_t initial_subsidy) const NOEXCEPT;
+    code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
@@ -202,7 +204,8 @@ private:
     code check_transactions() const NOEXCEPT;
     code check_transactions(const context& ctx) const NOEXCEPT;
     code accept_transactions(const context& ctx) const NOEXCEPT;
-    code connect_transactions(const context& ctx) const NOEXCEPT;
+    code connect_transactions(const context& ctx,
+        const signatures& capture) const NOEXCEPT;
     code confirm_transactions(const context& ctx) const NOEXCEPT;
 
     // Block should be stored as shared (adds 16 bytes).

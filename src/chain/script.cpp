@@ -268,7 +268,7 @@ script script::from_operations(const operations& ops) NOEXCEPT
     bool failer{};
     bool roller{};
 
-    for (const auto& op : ops)
+    for (const auto& op: ops)
     {
         easier |= op.is_success();
         failer |= op.is_invalid();

@@ -19,12 +19,18 @@
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <utility>
-#include <secp256k1.h>
-#include <secp256k1_recovery.h>
-#include <secp256k1_schnorrsig.h>
+#if defined(HAVE_ULTRAFAST)
+    #include <ufsecp_libbitcoin.h>
+#else
+    #include <secp256k1.h>
+    #include <secp256k1_recovery.h>
+    #include <secp256k1_schnorrsig.h>
+#endif
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "ec_context.hpp"
@@ -370,6 +376,45 @@ bool is_endorsement(const endorsement& endorsement) NOEXCEPT
 
 namespace ecdsa {
 
+// ECDSA recoverable sign/recover
+// ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
+
+bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
+    const hash_digest& hash) NOEXCEPT
+{
+    int recovery_id{};
+    const auto context = ec_context_sign::context();
+    secp256k1_ecdsa_recoverable_signature signature;
+
+    const auto result =
+        secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
+            secret.data(), secp256k1_nonce_function_rfc6979, nullptr) ==
+            ec_success &&
+        secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
+            out.signature.data(), &recovery_id, &signature) == ec_success;
+
+    if (is_negative(recovery_id) || recovery_id > maximum_recovery_id)
+        return false;
+
+    out.recovery_id = narrow_sign_cast<uint8_t>(recovery_id);
+    return result;
+}
+
+bool recover_public(ec_compressed& out,
+    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+    return recover_public(context, out, recoverable, hash);
+}
+
+bool recover_public(ec_uncompressed& out,
+    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+    return recover_public(context, out, recoverable, hash);
+}
+
 // ECDSA parse/encode/sign/verify signature
 // ----------------------------------------------------------------------------
 // It is recommended to verify a signature after signing.
@@ -426,7 +471,12 @@ bool sign(ec_signature& out, const ec_secret& secret,
         secp256k1_nonce_function_rfc6979, nullptr) == ec_success;
 }
 
-bool verify_signature(const data_slice& point, const hash_digest& hash,
+bool verify_signature(const triple& single) NOEXCEPT
+{
+    return verify_signature(single.point, single.digest, single.signature);
+}
+
+bool verify_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
@@ -436,44 +486,62 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
         system::verify_signature(context, pubkey, hash, signature);
 }
 
-// ECDSA recoverable sign/recover
-// ----------------------------------------------------------------------------
-// It is recommended to verify a signature after signing.
-
-bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
-    const hash_digest& hash) NOEXCEPT
+bool verify_signature(const ec_compressed& compressed,
+    const hash_digest& hash, const ec_signature& signature) NOEXCEPT
 {
-    int recovery_id{};
-    const auto context = ec_context_sign::context();
-    secp256k1_ecdsa_recoverable_signature signature;
-
-    const auto result =
-        secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
-            secret.data(), secp256k1_nonce_function_rfc6979, nullptr) ==
-            ec_success &&
-        secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
-            out.signature.data(), &recovery_id, &signature) == ec_success;
-
-    if (is_negative(recovery_id) || recovery_id > maximum_recovery_id)
-        return false;
-
-    out.recovery_id = narrow_sign_cast<uint8_t>(recovery_id);
-    return result;
-}
-
-bool recover_public(ec_compressed& out,
-    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
-{
+    secp256k1_pubkey pubkey;
     const auto context = ec_context_verify::context();
-    return recover_public(context, out, recoverable, hash);
+
+    return system::parse(context, pubkey, compressed) &&
+        system::verify_signature(context, pubkey, hash, signature);
 }
 
-bool recover_public(ec_uncompressed& out,
-    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+// par_if() doesn't throw, array indexing is required for span<> in c++20.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
 {
-    const auto context = ec_context_verify::context();
-    return recover_public(context, out, recoverable, hash);
+#if defined(HAVE_ULTRAFAST)
+    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
+
+    // Unrecoverable (OOM).
+    if (!context.ok())
+        return std::abort();
+
+    // The results vector is the only allocation.
+    const auto count = batch.size();
+    std::vector<uint8_t> results(count);
+    const auto in = pointer_cast<uint8_t>(batch.data());
+    const auto out = results.data();
+    constexpr auto id_size = array_count<decltype(triple::identifier)>;
+    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, id_size, out);
+#else
+    const auto policy = poolstl::execution::par_if(turbo);
+
+    // Used only to produce order for concurrency.
+    std::vector<size_t> index(batch.size());
+    std::iota(index.begin(), index.end(), zero);
+
+    // Collect signature validation results as corresponding integer booleans.
+    std::vector<uint8_t> results(batch.size());
+    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
+    {
+        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
+    });
+#endif
+
+    // Map success results to failures only.
+    triple::tokens out{};
+    for (size_t row{}; row < results.size(); ++row)
+        if (!to_bool(results.at(row)))
+            out.push_back(batch[row].identifier);
+
+    return out;
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace ecdsa
 
@@ -504,8 +572,8 @@ bool verify_signature(const data_chunk& x_point, const hash_digest& hash,
     if (x_point.size() != size)
         return false;
 
-    const auto& pubkey = unsafe_array_cast<uint8_t, size>(x_point.data());
-    return verify_signature(pubkey, hash, signature);
+    const auto& public_key = unsafe_array_cast<uint8_t, size>(x_point.data());
+    return verify_signature(public_key, hash, signature);
 }
 
 // BIP341: A Taproot signature is a 64-byte Schnorr sig, as defined in BIP340.
@@ -521,6 +589,58 @@ bool verify_signature(const ec_xonly& x_point, const hash_digest& hash,
         secp256k1_schnorrsig_verify(context, signature.data(), hash.data(),
             hash_size, &pubkey) == ec_success;
 }
+
+bool verify_signature(const triple& single) NOEXCEPT
+{
+    return verify_signature(single.point, single.digest, single.signature);
+}
+
+// par_if() doesn't throw, array indexing is required for span<> in c++20.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
+{
+#if defined(HAVE_ULTRAFAST)
+    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
+
+    // Unrecoverable (OOM).
+    if (!context.ok())
+        return std::abort();
+
+    // The results vector is the only allocation.
+    const auto count = batch.size();
+    std::vector<uint8_t> results(count);
+    const auto in = pointer_cast<uint8_t>(batch.data());
+    const auto out = results.data();
+    constexpr auto id_size = array_count<decltype(triple::identifier)>;
+    ufsecp_lbtc_verify_schnorr(context.get(), in, count, id_size, out);
+#else
+    const auto policy = poolstl::execution::par_if(turbo);
+
+    // Used only to produce order for concurrency.
+    std::vector<size_t> index(batch.size());
+    std::iota(index.begin(), index.end(), zero);
+
+    // Collect signature validation results as corresponding integer booleans.
+    std::vector<uint8_t> results(batch.size());
+    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
+    {
+        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
+    });
+#endif
+
+    // Map success results to failures only.
+    triple::tokens out{};
+    for (size_t row{}; row < results.size(); ++row)
+        if (!to_bool(results.at(row)))
+            out.push_back(batch[row].identifier);
+
+    return out;
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 // BIP341: If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
 bool verify_commitment(const ec_xonly& internal_key, const hash_digest& tweak,

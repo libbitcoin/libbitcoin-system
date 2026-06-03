@@ -103,6 +103,11 @@
     #endif
 #endif
 
+// shrec/UltrafastSecp256k1 (otherwise secp256k1)
+#if defined(WITH_ULTRAFAST)
+    #define HAVE_ULTRAFAST
+#endif
+
 /// Platform features derived.
 /// ---------------------------------------------------------------------------
 

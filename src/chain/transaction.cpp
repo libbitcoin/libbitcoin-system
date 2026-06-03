@@ -29,6 +29,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -423,7 +424,7 @@ transaction::input_iterator transaction::input_at(
 
 // This is not used internal to the library.
 bool transaction::check_signature(const ec_signature& signature,
-    const data_slice& public_key, const script& subscript, uint32_t index,
+    const data_chunk& public_key, const script& subscript, uint32_t index,
     uint64_t value, uint8_t sighash_flags, script_version version,
     uint32_t flags) const NOEXCEPT
 {
@@ -931,20 +932,24 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
 // Delegated.
 // ----------------------------------------------------------------------------
 
-code transaction::connect_input(const context& ctx,
-    const input_iterator& it) const NOEXCEPT
+code transaction::connect_input(const context& ctx, const input_iterator& it,
+    const signatures& capture) const NOEXCEPT
 {
     using namespace machine;
+    const auto& input = **it;
+
+    if (!input.prevout)
+        return error::missing_previous_output;
 
     // TODO: evaluate performance tradeoff.
-    if ((*it)->is_roller())
+    if (input.is_roller() || input.prevout->script().is_roller())
     {
         // Evaluate rolling scripts with linear search but constant erase.
-        return interpreter<linked_stack>::connect(ctx, *this, it);
+        return interpreter<linked_stack>::connect(ctx, *this, it, capture);
     }
 
     // Evaluate non-rolling scripts with constant search but linear erase.
-    return interpreter<contiguous_stack>::connect(ctx, *this, it);
+    return interpreter<contiguous_stack>::connect(ctx, *this, it, capture);
 }
 
 // Connect (contextual).
@@ -956,13 +961,19 @@ code transaction::connect_input(const context& ctx,
 
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
+    return connect(ctx, {});
+}
+
+code transaction::connect(const context& ctx,
+    const signatures& capture) const NOEXCEPT
+{
     ////BC_ASSERT(!is_coinbase());
 
     if (is_coinbase())
         return error::transaction_success;
 
     for (auto in = inputs_->begin(); in != inputs_->end(); ++in)
-        if (const auto ec = connect_input(ctx, in))
+        if (const auto ec = connect_input(ctx, in, capture))
             return ec;
 
     return error::transaction_success;

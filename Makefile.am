@@ -519,6 +519,7 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/point.hpp \
     include/bitcoin/system/chain/prevout.hpp \
     include/bitcoin/system/chain/script.hpp \
+    include/bitcoin/system/chain/signatures.hpp \
     include/bitcoin/system/chain/stripper.hpp \
     include/bitcoin/system/chain/taproot.hpp \
     include/bitcoin/system/chain/tapscript.hpp \

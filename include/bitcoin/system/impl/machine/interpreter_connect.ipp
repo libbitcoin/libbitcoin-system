@@ -41,13 +41,13 @@ connect(const chain::context& state, const chain::transaction& tx,
     if (index >= tx.inputs())
         return error::inputs_overflow;
 
-    return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index));
+    return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index), {});
 }
 
 TEMPLATE
 code CLASS::
 connect(const chain::context& state, const chain::transaction& tx,
-    const input_iterator& it) NOEXCEPT
+    const input_iterator& it, const chain::signatures& capture) NOEXCEPT
 {
     using namespace chain;
     const auto& input = **it;
@@ -55,7 +55,7 @@ connect(const chain::context& state, const chain::transaction& tx,
         return error::missing_previous_output;
 
     // Evaluate input script.
-    interpreter in_program(tx, it, state.flags);
+    interpreter in_program(tx, it, state.flags, capture);
     if (const auto ec = in_program.run())
         return ec;
 
@@ -74,7 +74,7 @@ connect(const chain::context& state, const chain::transaction& tx,
     else if (prevout->is_pay_to_script_hash(state.flags))
     {
         // Because output script pushed script hash program [bip16].
-        if ((ec = connect_embedded(state, tx, it, in_program)))
+        if ((ec = connect_embedded(state, tx, it, in_program, capture)))
             return ec;
     }
     else if (prevout->is_pay_to_witness(state.flags))
@@ -84,7 +84,7 @@ connect(const chain::context& state, const chain::transaction& tx,
             return error::dirty_witness;
 
         // Because output script pushed version and witness program [bip141].
-        if ((ec = connect_witness(state, tx, it, *prevout, false)))
+        if ((ec = connect_witness(state, tx, it, *prevout, false, capture)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -100,7 +100,7 @@ connect(const chain::context& state, const chain::transaction& tx,
 TEMPLATE
 code CLASS::connect_embedded(const chain::context& state,
     const chain::transaction& tx, const input_iterator& it,
-    interpreter& in_program) NOEXCEPT
+    interpreter& in_program, const chain::signatures& capture) NOEXCEPT
 {
     using namespace chain;
     const auto& input = **it;
@@ -129,7 +129,7 @@ code CLASS::connect_embedded(const chain::context& state,
             return error::dirty_witness;
 
         // Because output script pushed version/witness program [bip141].
-        if ((ec = connect_witness(state, tx, it, *embedded, true)))
+        if ((ec = connect_witness(state, tx, it, *embedded, true, capture)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -145,7 +145,8 @@ code CLASS::connect_embedded(const chain::context& state,
 TEMPLATE
 code CLASS::connect_witness(const chain::context& state,
     const chain::transaction& tx, const input_iterator& it,
-    const chain::script& prevout, bool embedded) NOEXCEPT
+    const chain::script& prevout, bool embedded,
+    const chain::signatures& capture) NOEXCEPT
 {
     using namespace chain;
     const auto& input = **it;
@@ -162,7 +163,7 @@ code CLASS::connect_witness(const chain::context& state,
             if ((ec = input.witness().extract_segwit(script, stack, prevout)))
                 return ec;
 
-            interpreter program(tx, it, script, flags, version, stack);
+            interpreter program(tx, it, script, flags, version, stack, capture);
 
             if ((ec = program.run()))
             {
@@ -195,7 +196,8 @@ code CLASS::connect_witness(const chain::context& state,
                 prevout)))
                 return ec;
 
-            interpreter program(tx, it, script, flags, version, stack, tapleaf);
+            interpreter program(tx, it, script, flags, version, stack, tapleaf,
+                capture);
 
             if ((ec = program.run()))
             {

@@ -1047,7 +1047,7 @@ op_check_sig_verify() NOEXCEPT
                 return error::op_check_sig_schnorr2;
 
             // Verify schnorr signature against public key and signature hash.
-            if (!schnorr::verify_signature(*key, hash, sig))
+            if (!state::verify_schnorr_signature(*key, hash, sig, true))
                 return error::op_check_sig_schnorr3;
         }
 
@@ -1080,7 +1080,7 @@ op_check_sig_verify() NOEXCEPT
         return error::op_check_sig_verify3;
 
     // Verify ECDSA signature against public key and signature hash.
-    if (!ecdsa::verify_signature(*key, hash, sig))
+    if (!state::verify_ecdsa_signature(*key, hash, sig, true))
         return error::op_check_sig_verify4;
 
     // TODO: use sighash and key to generate signature in sign mode.
@@ -1154,6 +1154,11 @@ op_check_multisig_verify() NOEXCEPT
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
+    // TODO: enable and remove state::verify_multisig_signature().
+    ////// False if signature cannot be batched for any reason.
+    ////if (state::try_batch_multisig_verification(keys, endorsements))
+    ////    return error::success;
+
     state::initialize_cache();
     auto it = endorsements.begin();
     const auto subscript = state::subscript(endorsements);
@@ -1186,7 +1191,7 @@ op_check_multisig_verify() NOEXCEPT
                 continue;
 
         // Verify ECDSA signature against public key and cache signature hash.
-        if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
+        if (state::verify_multisig_signature(*key, state::cached_hash(), sig))
             ++it;
     }
 
@@ -1326,7 +1331,7 @@ op_check_sig_add() NOEXCEPT
         return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
-    if (!schnorr::verify_signature(*key, hash, sig))
+    if (!state::verify_schnorr_signature(*key, hash, sig))
         return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.

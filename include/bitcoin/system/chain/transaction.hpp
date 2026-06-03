@@ -26,6 +26,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -146,7 +147,7 @@ public:
 
     /// Not used internally.
     bool check_signature(const ec_signature& signature,
-        const data_slice& public_key, const script& subscript, uint32_t index,
+        const data_chunk& public_key, const script& subscript, uint32_t index,
         uint64_t value, uint8_t sighash_flags, script_version version,
         uint32_t flags) const NOEXCEPT;
 
@@ -169,6 +170,7 @@ public:
     code check() const NOEXCEPT;
     code check(const context& ctx) const NOEXCEPT;
     code accept(const context& ctx) const NOEXCEPT;
+    code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
@@ -261,8 +263,8 @@ private:
     chain::points points() const NOEXCEPT;
 
     // delegated
-    code connect_input(const context& ctx,
-        const input_iterator& it) const NOEXCEPT;
+    code connect_input(const context& ctx, const input_iterator& it,
+        const signatures& capture) const NOEXCEPT;
 
     // Patterns.
     // ------------------------------------------------------------------------
