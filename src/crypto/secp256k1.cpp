@@ -21,13 +21,9 @@
 #include <algorithm>
 #include <numeric>
 #include <utility>
-#if defined(HAVE_ULTRAFAST)
-    #include <ufsecp_libbitcoin.h>
-#else
-    #include <secp256k1.h>
-    #include <secp256k1_recovery.h>
-    #include <secp256k1_schnorrsig.h>
-#endif
+#include <secp256k1.h>
+#include <secp256k1_recovery.h>
+#include <secp256k1_schnorrsig.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/execution.hpp>
@@ -500,19 +496,20 @@ bool verify_signature(const ec_compressed& compressed,
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
+triple::tokens verify_signatures(const triples& batch,
+    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
 {
 #if defined(HAVE_ULTRAFAST)
     static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
 
     // Unrecoverable (OOM).
     if (!context.ok())
-        return std::abort();
+        std::abort();
 
     // The results vector is the only allocation.
     const auto count = batch.size();
     std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<uint8_t>(batch.data());
+    const auto in = pointer_cast<const uint8_t>(batch.data());
     const auto out = results.data();
     constexpr auto id_size = array_count<decltype(triple::identifier)>;
     ufsecp_lbtc_verify_ecdsa(context.get(), in, count, id_size, out);
@@ -532,12 +529,12 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
 #endif
 
     // Map success results to failures only.
-    triple::tokens out{};
+    triple::tokens tokens{};
     for (size_t row{}; row < results.size(); ++row)
         if (!to_bool(results.at(row)))
-            out.push_back(batch[row].identifier);
+            tokens.push_back(batch[row].identifier);
 
-    return out;
+    return tokens;
 }
 
 BC_POP_WARNING()
@@ -599,19 +596,20 @@ bool verify_signature(const triple& single) NOEXCEPT
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
+triple::tokens verify_signatures(const triples& batch,
+    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
 {
 #if defined(HAVE_ULTRAFAST)
     static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
 
     // Unrecoverable (OOM).
     if (!context.ok())
-        return std::abort();
+        std::abort();
 
     // The results vector is the only allocation.
     const auto count = batch.size();
     std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<uint8_t>(batch.data());
+    const auto in = pointer_cast<const uint8_t>(batch.data());
     const auto out = results.data();
     constexpr auto id_size = array_count<decltype(triple::identifier)>;
     ufsecp_lbtc_verify_schnorr(context.get(), in, count, id_size, out);
@@ -631,12 +629,12 @@ triple::tokens verify_signatures(const triples& batch, bool turbo) NOEXCEPT
 #endif
 
     // Map success results to failures only.
-    triple::tokens out{};
+    triple::tokens tokens{};
     for (size_t row{}; row < results.size(); ++row)
         if (!to_bool(results.at(row)))
-            out.push_back(batch[row].identifier);
+            tokens.push_back(batch[row].identifier);
 
-    return out;
+    return tokens;
 }
 
 BC_POP_WARNING()
