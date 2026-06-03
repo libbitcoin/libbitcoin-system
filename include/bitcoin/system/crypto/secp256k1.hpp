@@ -105,6 +105,10 @@ BC_API bool ec_add(ec_compressed& left, const ec_compressed& right) NOEXCEPT;
 /// Compute the sum a += b.
 BC_API bool ec_add(ec_compressed& left, const ec_uncompressed& right) NOEXCEPT;
 
+/// Compute the sum a += b.
+BC_API bool ec_add(ec_uncompressed& left,
+    const ec_uncompressed& right) NOEXCEPT;
+
 /// Compute the sum of compressed point values.
 BC_API bool ec_sum(ec_compressed& out, const compressed_list& values) NOEXCEPT;
 

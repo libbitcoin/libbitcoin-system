@@ -74,7 +74,7 @@ void sha256t_writer<Tag, OStream>::do_flush() NOEXCEPT
 
 // static
 template <data_t Tag, typename OStream>
-constexpr sha256::state_t sha256t_writer<Tag, OStream>::midstate() NOEXCEPT
+consteval sha256::state_t sha256t_writer<Tag, OStream>::midstate() NOEXCEPT
 {
     // Cache midstate of tagged hash part that does not change for a given tag.
     // sha256(sha256(tag) || sha256(tag) || message) [bip340].

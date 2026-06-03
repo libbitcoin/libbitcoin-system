@@ -167,6 +167,25 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__expected)
     BOOST_REQUIRE_EQUAL(public1, public2);
 }
 
+BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add_uncompressed__positive__expected)
+{
+    const ec_secret secret_one{ { 1, 2, 3 } };
+    const ec_secret secret_two{ { 3, 2, 1 } };
+
+    ec_secret secret_sum{ secret_one };
+    BOOST_REQUIRE(ec_add(secret_sum, secret_two));
+
+    ec_uncompressed expected_uncompressed{};
+    BOOST_REQUIRE(secret_to_public(expected_uncompressed, secret_sum));
+
+    ec_uncompressed uncompressed_left{};
+    ec_uncompressed uncompressed_right{};
+    BOOST_REQUIRE(secret_to_public(uncompressed_left, secret_one));
+    BOOST_REQUIRE(secret_to_public(uncompressed_right, secret_two));
+    BOOST_REQUIRE(ec_add(uncompressed_left, uncompressed_right));
+    BOOST_REQUIRE_EQUAL(uncompressed_left, expected_uncompressed);
+}
+
 BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__expected)
 {
     // = n - 1

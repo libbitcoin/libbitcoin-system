@@ -60,7 +60,7 @@ BC_API data_chunk append_checksum(const data_loaf& slices) NOEXCEPT;
 /// Append a four byte bitcoin checksum of data to itself.
 BC_API void append_checksum(data_chunk& data) NOEXCEPT;
 
-// bech32 checksum, used by witness_address.
+// bech32 checksum, used by versioned bech32 encodings.
 // ----------------------------------------------------------------------------
 
 /// These utilities are used for witness payment addresses and other standards
@@ -72,13 +72,27 @@ BC_API void append_checksum(data_chunk& data) NOEXCEPT;
 /// The implementation does not support unversioned bech32 payloads as there
 /// is no use case and support requires exposure of bech32 internals.
 
+enum class checksum_constant
+{
+    bech32,
+    bech32m
+};
+
 /// Combine witness version, program and checksum.
 /// The result may be passed to encode_base32 when creating a witness address.
 /// For implementation details see wallet::witness_address. Version is limited
 /// to 5 bits (less than 32) by bech32 design and is otherwise truncated. Non-
-/// zero versions select bech32m (vs. bech32), resulting in distinct checksum.
+/// zero versions select bech32m (vs. bech32), resulting in distinct checksum
+/// constants.
 BC_API base32_chunk bech32_build_checked(uint8_t version,
     const data_chunk& program, const std::string& prefix) NOEXCEPT;
+
+/// Combine version, program and checksum with explicit checksum constant.
+/// This supports encodings whose checksum constant is not selected by the
+/// witness address version rule.
+BC_API base32_chunk bech32_build_checked(uint8_t version,
+    const data_chunk& program, const std::string& prefix,
+    checksum_constant constant) NOEXCEPT;
 
 /// Verify the bech32 checksum and extract witness version and program.
 /// The data parameter may obtained from a witness address using decode_base32.
@@ -86,6 +100,11 @@ BC_API base32_chunk bech32_build_checked(uint8_t version,
 BC_API bool bech32_verify_checked(uint8_t& out_version,
     data_chunk& out_program, const std::string& prefix,
     const base32_chunk& checked) NOEXCEPT;
+
+/// Verify the bech32 checksum constant and extract version and program.
+BC_API bool bech32_verify_checked(uint8_t& out_version,
+    data_chunk& out_program, const std::string& prefix,
+    const base32_chunk& checked, checksum_constant constant) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

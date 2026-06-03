@@ -181,7 +181,7 @@ constexpr bool script::is_pay_witness_taproot_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
-        && ops[0].code() == opcode::push_size_1
+        && ops[0].code() == opcode::push_positive_1
         && ops[1].code() == opcode::push_size_32;
 }
 
@@ -216,6 +216,15 @@ constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
         && is_public_key(ops[1].data());
 }
 
+constexpr bool script::is_sign_witness_key_hash_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 1
+        && ops[0].code() == opcode::push_size_22
+        && ops[0].data().size() == short_hash_size + 2u
+        && ops[0].data()[0] == 0x00
+        && ops[0].data()[1] == short_hash_size;
+}
 
 // Ambiguous with is_sign_key_hash when second/last op is a public key.
 // Ambiguous with is_sign_public_key_pattern when only op is endorsement.
@@ -364,7 +373,7 @@ inline operations script::to_pay_witness_taproot_pattern(
 {
     return
     {
-        { opcode::push_size_1 },
+        { opcode::push_positive_1 },
         { to_chunk(hash), false }
     };
 }

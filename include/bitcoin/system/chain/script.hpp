@@ -61,6 +61,7 @@ public:
     static constexpr bool is_sign_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_public_key_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_key_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_sign_witness_key_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_script_hash_pattern(const operations& ops) NOEXCEPT;
     static bool is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT;
     static bool is_pay_multisig_pattern(const operations& ops) NOEXCEPT;
