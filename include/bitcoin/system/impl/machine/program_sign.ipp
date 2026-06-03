@@ -374,7 +374,7 @@ verify_multisig_signature(const data_chunk& point, const hash_digest& hash,
 
 TEMPLATE
 INLINE bool CLASS::
-try_batch_multisig_verification(const chunk_xptrs& keys,
+try_batch_multisig_verification(const chunk_xptrs& ,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
     const auto m = endorsements.size();
@@ -388,9 +388,8 @@ try_batch_multisig_verification(const chunk_xptrs& keys,
     // TODO: capture one sighash all keys (as ec_compressed) and ec_signatures.
     // TODO: return false if parse_signature(..., bip66) fails.
 
-    const auto n = keys.size();
-    const auto counts = bit_or(shift_left(m, 4), n);
-
+    ////const auto n = keys.size();
+    ////const auto counts = bit_or(shift_left(m, 4), n);
     // m is a best case assumption of how many verifications are skipped.
     capture_.batched_multisig.fetch_add(m, std::memory_order_relaxed);
     ////capture_.multisig(hash, signatures, compresseds, counts);
