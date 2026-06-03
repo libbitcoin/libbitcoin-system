@@ -256,6 +256,13 @@ cached_hash() const NOEXCEPT
 
 TEMPLATE
 INLINE bool CLASS::
+is_input_script() const NOEXCEPT
+{
+    return spender_;
+}
+
+TEMPLATE
+INLINE bool CLASS::
 is_ecdsa_batchable() const NOEXCEPT
 {
     if (!capture_.enabled)
@@ -276,6 +283,17 @@ is_schnorr_batchable() const NOEXCEPT
 
     const auto& ops = script_->ops();
     return chain::script::is_pay_witness_taproot_key_path_pattern(ops);
+}
+
+TEMPLATE
+INLINE bool CLASS::
+is_multisig_batchable() const NOEXCEPT
+{
+    if (!capture_.enabled || is_input_script())
+        return false;
+
+    const auto& ops = script_->ops();
+    return chain::script::is_pay_multisig_standard_pattern(ops);
 }
 
 TEMPLATE
@@ -330,6 +348,52 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     constexpr auto size = schnorr::public_key_size;
     const auto& x_point = unsafe_array_cast<uint8_t, size>(point.data());
     capture_.schnorr(hash, x_point, signature);
+    return true;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+verify_multisig_signature(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature) const NOEXCEPT
+{
+    if (!is_multisig_batchable())
+    {
+        capture_.unbatched_multisig.fetch_add(one, std::memory_order_relaxed);
+        return ecdsa::verify_signature(point, hash, signature);
+    }
+
+    // Presently this will capture the actual number of signatures evaluated in
+    // order to validate the script. We will validate the full cross product of
+    // signatures, which will be more, but this number will tell us about how
+    // many will be avoided in the otherwise unoptimized path. This doesn't
+    // account for mismatched sighash bytes (ok).
+    capture_.batched_multisig.fetch_add(one, std::memory_order_relaxed);
+    ////capture_.multisig(hash, point, signature, counts);
+    return true;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+try_batch_multisig_verification(const chunk_xptrs& keys,
+    const chunk_xptrs& endorsements) const NOEXCEPT
+{
+    const auto m = endorsements.size();
+    if (!is_multisig_batchable())
+    {
+        capture_.unbatched_multisig.fetch_add(m, std::memory_order_relaxed);
+        return false;
+    }
+
+    // TODO: return false if empty endorsement or non-uniform sighash bytes.
+    // TODO: capture one sighash all keys (as ec_compressed) and ec_signatures.
+    // TODO: return false if parse_signature(..., bip66) fails.
+
+    const auto n = keys.size();
+    const auto counts = bit_or(shift_left(m, 4), n);
+
+    // m is a best case assumption of how many verifications are skipped.
+    capture_.batched_multisig.fetch_add(m, std::memory_order_relaxed);
+    ////capture_.multisig(hash, signatures, compresseds, counts);
     return true;
 }
 

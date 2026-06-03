@@ -1154,6 +1154,11 @@ op_check_multisig_verify() NOEXCEPT
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
+    // TODO: enable and remove state::verify_multisig_signature().
+    ////// False if signature cannot be batched for any reason.
+    ////if (state::try_batch_multisig_verification(keys, endorsements))
+    ////    return error::success;
+
     state::initialize_cache();
     auto it = endorsements.begin();
     const auto subscript = state::subscript(endorsements);
@@ -1186,7 +1191,7 @@ op_check_multisig_verify() NOEXCEPT
                 continue;
 
         // Verify ECDSA signature against public key and cache signature hash.
-        if (state::verify_ecdsa_signature(*key, state::cached_hash(), sig))
+        if (state::verify_multisig_signature(*key, state::cached_hash(), sig))
             ++it;
     }
 

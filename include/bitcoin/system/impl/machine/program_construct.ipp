@@ -46,6 +46,7 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     value_(max_uint64),
     version_(script_version::unversioned),
     capture_(capture),
+    spender_(true),
     primary_()
 {
     script_->clear_offset();

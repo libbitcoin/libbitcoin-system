@@ -199,14 +199,20 @@ protected:
 
     /// Signature validation.
     /// -----------------------------------------------------------------------
+    bool is_input_script() const NOEXCEPT;
     bool is_ecdsa_batchable() const NOEXCEPT;
     bool is_schnorr_batchable() const NOEXCEPT;
+    bool is_multisig_batchable() const NOEXCEPT;
     bool verify_ecdsa_signature(const data_chunk& point,
         const hash_digest& hash, const ec_signature& signature,
         bool batchable=false) const NOEXCEPT;
     bool verify_schnorr_signature(const data_chunk& point,
         const hash_digest& hash, const ec_signature& signature,
         bool batchable=false) const NOEXCEPT;
+    bool verify_multisig_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+    bool try_batch_multisig_verification(const chunk_xptrs& keys,
+        const chunk_xptrs& endorsements) const NOEXCEPT;
 
 private:
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
@@ -241,6 +247,7 @@ private:
     const script_version version_;
     const chunk_cptrs_ptr witness_{};
     const hash_cptr tapleaf_{};
+    const bool spender_{};
     const chain::signatures& capture_;
 
     // Caches.

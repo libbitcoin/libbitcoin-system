@@ -43,9 +43,15 @@ struct BC_API signatures
     using schnorr_handler = std::function<void(const hash_digest& signature_hash,
         const ec_xonly& public_key, const ec_signature& signature)>;
 
+    // TODO: implement. in addition to block link the handler should capture
+    // TODO: a per-block atomic counter, and increment it on each write. This
+    // TODO: provides input correlation for batch multisig post-processing.
+    ////using multisig_handler = std::function<void(...)>;
+
     /// Invoked with signature verification triples in script interpreter.
     const ecdsa_handler ecdsa{};
     const schnorr_handler schnorr{};
+    ////const multisig_handler multisig{};
 
     /// Default construction disables batching.
     const bool enabled{};
@@ -55,6 +61,8 @@ struct BC_API signatures
     mutable std::atomic<size_t> unbatched_ecdsa{};
     mutable std::atomic<size_t> batched_schnorr{};
     mutable std::atomic<size_t> unbatched_schnorr{};
+    mutable std::atomic<size_t> batched_multisig{};
+    mutable std::atomic<size_t> unbatched_multisig{};
 };
 
 } // namespace chain
