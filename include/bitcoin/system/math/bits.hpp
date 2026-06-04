@@ -238,6 +238,15 @@ template <typename To, typename From,
     if_not_uintx<From> = true>
 constexpr To lo_word(From value) NOEXCEPT;
 
+/// High/Low word pack.
+/// ---------------------------------------------------------------------------
+
+/// Pack two values equally into one, excess bits discarded.
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    if_not_uintx<From> = true>
+constexpr To pack_word(From high, From low) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 

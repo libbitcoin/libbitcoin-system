@@ -255,13 +255,13 @@ constexpr Value unmask_left(size_t bits) NOEXCEPT
 template <typename Value, if_integral_integer<Value>>
 constexpr Value unmask_left(Value value, size_t bits) NOEXCEPT
 {
-    return bit_or(unmask_left<Value>(bits), value);
+    return bit_and(unmask_left<Value>(bits), value);
 }
 
 template <typename Value, if_integral_integer<Value>>
 constexpr void unmask_left_into(Value& value, size_t bits) NOEXCEPT
 {
-    value |= unmask_left<Value>(bits);
+    value &= unmask_left<Value>(bits);
 }
 
 template <typename Value, if_integral_integer<Value>>
@@ -273,13 +273,13 @@ constexpr Value unmask_right(size_t bits) NOEXCEPT
 template <typename Value, if_integral_integer<Value>>
 constexpr Value unmask_right(Value value, size_t bits) NOEXCEPT
 {
-    return bit_or(unmask_right<Value>(bits), value);
+    return bit_and(unmask_right<Value>(bits), value);
 }
 
 template <typename Value, if_integral_integer<Value>>
 constexpr void unmask_right_into(Value& value, size_t bits) NOEXCEPT
 {
-    value |= unmask_right<Value>(bits);
+    value &= unmask_right<Value>(bits);
 }
 
 // Shift (left/right).
@@ -459,6 +459,21 @@ template <typename To, typename From,
 constexpr To lo_word(From value) NOEXCEPT
 {
     return narrow_cast<To>(value);
+}
+
+// High/Low word pack.
+// ----------------------------------------------------------------------------
+
+template <typename To, typename From,
+    if_integral_integer<To>,
+    if_not_uintx<From>>
+constexpr To pack_word(From high, From low) NOEXCEPT
+{
+    constexpr auto span = bits<To>;
+    constexpr auto half = to_half(span);
+    const auto hi = possible_narrow_and_sign_cast<To>(high);
+    const auto lo = possible_narrow_and_sign_cast<To>(low);
+    return bit_or(shift_left(hi, half), unmask_right(lo, half));
 }
 
 } // namespace system
