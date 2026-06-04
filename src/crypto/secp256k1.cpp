@@ -19,14 +19,12 @@
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
 #include <algorithm>
-#include <numeric>
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 #include <secp256k1_schnorrsig.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "ec_context.hpp"
@@ -467,11 +465,6 @@ bool sign(ec_signature& out, const ec_secret& secret,
         secp256k1_nonce_function_rfc6979, nullptr) == ec_success;
 }
 
-bool verify_signature(const triple& single) NOEXCEPT
-{
-    return verify_signature(single.point, single.digest, single.signature);
-}
-
 bool verify_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
@@ -491,97 +484,6 @@ bool verify_signature(const ec_compressed& compressed,
     return system::parse(context, pubkey, compressed) &&
         system::verify_signature(context, pubkey, hash, signature);
 }
-
-// par_if() doesn't throw, array indexing is required for span<> in c++20.
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-
-triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
-{
-#if defined(HAVE_ULTRAFAST)
-    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
-
-    // Unrecoverable (OOM).
-    if (!context.ok())
-        std::abort();
-
-    // The results vector is the only allocation.
-    const auto count = batch.size();
-    std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<const uint8_t>(batch.data());
-    const auto out = results.data();
-    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, triple::id_size, out);
-#else
-    const auto policy = poolstl::execution::par_if(turbo);
-
-    // Used only to produce order for concurrency.
-    std::vector<size_t> index(batch.size());
-    std::iota(index.begin(), index.end(), zero);
-
-    // Collect signature validation results as corresponding integer booleans.
-    std::vector<uint8_t> results(batch.size());
-    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
-    {
-        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
-    });
-#endif
-
-    // Map success results to failures only.
-    triple::tokens tokens{};
-    for (size_t row{}; row < results.size(); ++row)
-        if (!to_bool(results.at(row)))
-            tokens.push_back(batch[row].identifier);
-
-    return tokens;
-}
-
-namespace multisig {
-
-triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
-{
-#if defined(HAVE_ULTRAFAST)
-    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
-
-    // Unrecoverable (OOM).
-    if (!context.ok())
-        std::abort();
-
-    // The results vector is the only allocation.
-    const auto count = batch.size();
-    std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<const uint8_t>(batch.data());
-    const auto out = results.data();
-    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, triple::id_size, out);
-#else
-    const auto policy = poolstl::execution::par_if(turbo);
-
-    // Used only to produce order for concurrency.
-    std::vector<size_t> index(batch.size());
-    std::iota(index.begin(), index.end(), zero);
-
-    // Collect signature validation results as corresponding integer booleans.
-    std::vector<uint8_t> results(batch.size());
-    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
-    {
-        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
-    });
-#endif
-
-    // Map success results to failures only.
-    triple::tokens tokens{};
-    for (size_t row{}; row < results.size(); ++row)
-        if (!to_bool(results.at(row)))
-            tokens.push_back(batch[row].identifier);
-
-    return tokens;
-}
-
-} // namespace multisig
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 } // namespace ecdsa
 
@@ -629,58 +531,6 @@ bool verify_signature(const ec_xonly& x_point, const hash_digest& hash,
         secp256k1_schnorrsig_verify(context, signature.data(), hash.data(),
             hash_size, &pubkey) == ec_success;
 }
-
-bool verify_signature(const triple& single) NOEXCEPT
-{
-    return verify_signature(single.point, single.digest, single.signature);
-}
-
-// par_if() doesn't throw, array indexing is required for span<> in c++20.
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-
-triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
-{
-#if defined(HAVE_ULTRAFAST)
-    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
-
-    // Unrecoverable (OOM).
-    if (!context.ok())
-        std::abort();
-
-    // The results vector is the only allocation.
-    const auto count = batch.size();
-    std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<const uint8_t>(batch.data());
-    const auto out = results.data();
-    ufsecp_lbtc_verify_schnorr(context.get(), in, count, triple::id_size, out);
-#else
-    const auto policy = poolstl::execution::par_if(turbo);
-
-    // Used only to produce order for concurrency.
-    std::vector<size_t> index(batch.size());
-    std::iota(index.begin(), index.end(), zero);
-
-    // Collect signature validation results as corresponding integer booleans.
-    std::vector<uint8_t> results(batch.size());
-    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
-    {
-        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
-    });
-#endif
-
-    // Map success results to failures only.
-    triple::tokens tokens{};
-    for (size_t row{}; row < results.size(); ++row)
-        if (!to_bool(results.at(row)))
-            tokens.push_back(batch[row].identifier);
-
-    return tokens;
-}
-
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 // BIP341: If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
 bool verify_commitment(const ec_xonly& internal_key, const hash_digest& tweak,

@@ -276,13 +276,16 @@
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1_batch.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp">

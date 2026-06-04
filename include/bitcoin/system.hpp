@@ -110,6 +110,7 @@
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/crypto/secp256k1_batch.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>

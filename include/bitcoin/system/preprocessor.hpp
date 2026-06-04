@@ -201,7 +201,7 @@
 /// Delint.
 /// ---------------------------------------------------------------------------
 
-/// HAVE_ULTRAFAST (conditional exclusion).
+/// UltrafastSecp256k1 (conditional exclusion).
 #if defined(HAVE_ULTRAFAST)
     #include <ufsecp_libbitcoin.h>
     #define NOT_ULTRAFAST(expression)

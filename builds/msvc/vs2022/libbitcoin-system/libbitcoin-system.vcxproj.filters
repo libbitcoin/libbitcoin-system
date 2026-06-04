@@ -453,6 +453,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1_batch.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
@@ -954,6 +957,9 @@
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp">

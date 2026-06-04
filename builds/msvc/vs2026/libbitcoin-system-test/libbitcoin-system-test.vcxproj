@@ -220,9 +220,10 @@
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1_batch.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\collection.cpp" />

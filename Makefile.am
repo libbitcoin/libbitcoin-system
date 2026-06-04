@@ -103,6 +103,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
     src/crypto/secp256k1.cpp \
+    src/crypto/secp256k1_batch.cpp \
     src/data/data_chunk.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \
@@ -291,9 +292,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/utilities.cpp \
     test/config/version.cpp \
     test/crypto/aes256.cpp \
-    test/crypto/elliptic_curve.cpp \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
+    test/crypto/secp256k1.cpp \
+    test/crypto/secp256k1_batch.cpp \
     test/data/array_cast.cpp \
     test/data/byte_cast.cpp \
     test/data/collection.cpp \
@@ -596,7 +598,8 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/der_parser.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
-    include/bitcoin/system/crypto/secp256k1.hpp
+    include/bitcoin/system/crypto/secp256k1.hpp \
+    include/bitcoin/system/crypto/secp256k1_batch.hpp
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \
