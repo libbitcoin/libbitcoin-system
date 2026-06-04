@@ -205,9 +205,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_multisig_batch_verify__all_valid__expected
 
     const std::array<triple, 3> batch
     {
-        triple{ hash, point1, sig1, { 0, 0, 0 }, 3_u16, 6_u8 },
-        triple{ hash, point2, sig2, { 1, 0, 0 }, 4_u16, 7_u8 },
-        triple{ hash, point3, sig3, { 2, 0, 0 }, 5_u16, 8_u8 }
+        triple{ hash, point1, sig1, 3_u8, 6_u16, { 0, 0, 0 } },
+        triple{ hash, point2, sig2, 4_u8, 7_u16, { 1, 0, 0 } },
+        triple{ hash, point3, sig3, 5_u8, 8_u16, { 2, 0, 0 } }
     };
 
     const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
@@ -243,10 +243,10 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_multisig_batch_verify__one_invalid_with_ke
 
     const std::array<triple, 4> batch
     {
-        triple{ hash, point1, sig1, { 0, 0, 0 }, 4_u16,  8_u8 },
-        triple{ hash, point2, sig2, { 1, 0, 0 }, 5_u16,  9_u8 },
-        triple{ hash, point3, sig3, { 2, 0, 0 }, 6_u16, 10_u8 },
-        triple{ hash, point4, sig4, { 3, 0, 0 }, 7_u16, 11_u8 }
+        triple{ hash, point1, sig1, 4_u8,  8_u16, { 0, 0, 0 } },
+        triple{ hash, point2, sig2, 5_u8,  9_u16, { 1, 0, 0 } },
+        triple{ hash, point3, sig3, 6_u8, 10_u16, { 2, 0, 0 } },
+        triple{ hash, point4, sig4, 7_u8, 11_u16, { 3, 0, 0 } }
     };
 
     // TODO: update for multisig correlation when implemented.

@@ -98,9 +98,9 @@ struct BC_API triple
     hash_digest digest;
     ec_compressed point;
     ec_signature signature;
-    token identifier;
-    uint16_t set;
     uint8_t pair;
+    uint16_t set;
+    token identifier;
 
     static constexpr size_t id_size = sizeof(token) + sizeof(set) +
         sizeof(pair);
