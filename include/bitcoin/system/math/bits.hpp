@@ -131,17 +131,17 @@ constexpr void set_right_into(Value& target, size_t offset=zero,
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value mask_left(size_t bits=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value mask_left(Value target, size_t bits=one) NOEXCEPT;
+constexpr Value mask_left(Value target, size_t bits) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr void mask_left_into(Value& target, size_t bits=one) NOEXCEPT;
+constexpr void mask_left_into(Value& target, size_t bits) NOEXCEPT;
 
 /// A set of bitmasks with low order count of bits unset.
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value mask_right(size_t bits=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value mask_right(Value target, size_t bits=one) NOEXCEPT;
+constexpr Value mask_right(Value target, size_t bits) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr void mask_right_into(Value& target, size_t bits=one) NOEXCEPT;
+constexpr void mask_right_into(Value& target, size_t bits) NOEXCEPT;
 
 /// Unmask (~mask).
 /// ---------------------------------------------------------------------------
@@ -150,17 +150,17 @@ constexpr void mask_right_into(Value& target, size_t bits=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value unmask_left(size_t bits=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value unmask_left(Value target, size_t bits=one) NOEXCEPT;
+constexpr Value unmask_left(Value target, size_t bits) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value unmask_left_into(Value& target, size_t bits=one) NOEXCEPT;
+constexpr Value unmask_left_into(Value& target, size_t bits) NOEXCEPT;
 
 /// A set of bitflags with low order count of bits set.
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value unmask_right(size_t bits=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value unmask_right(Value target, size_t bits=one) NOEXCEPT;
+constexpr Value unmask_right(Value target, size_t bits) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr void unmask_right_into(Value& target, size_t bits=one) NOEXCEPT;
+constexpr void unmask_right_into(Value& target, size_t bits) NOEXCEPT;
 
 /// Shift (left/right).
 /// ---------------------------------------------------------------------------
