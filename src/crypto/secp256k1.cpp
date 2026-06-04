@@ -511,8 +511,7 @@ triple::tokens verify_signatures(const triples& batch,
     std::vector<uint8_t> results(count);
     const auto in = pointer_cast<const uint8_t>(batch.data());
     const auto out = results.data();
-    constexpr auto id_size = array_count<decltype(triple::identifier)>;
-    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, id_size, out);
+    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, triple::id_size, out);
 #else
     const auto policy = poolstl::execution::par_if(turbo);
 
@@ -536,6 +535,50 @@ triple::tokens verify_signatures(const triples& batch,
 
     return tokens;
 }
+
+namespace multisig {
+
+triple::tokens verify_signatures(const triples& batch,
+    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
+{
+#if defined(HAVE_ULTRAFAST)
+    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
+
+    // Unrecoverable (OOM).
+    if (!context.ok())
+        std::abort();
+
+    // The results vector is the only allocation.
+    const auto count = batch.size();
+    std::vector<uint8_t> results(count);
+    const auto in = pointer_cast<const uint8_t>(batch.data());
+    const auto out = results.data();
+    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, triple::id_size, out);
+#else
+    const auto policy = poolstl::execution::par_if(turbo);
+
+    // Used only to produce order for concurrency.
+    std::vector<size_t> index(batch.size());
+    std::iota(index.begin(), index.end(), zero);
+
+    // Collect signature validation results as corresponding integer booleans.
+    std::vector<uint8_t> results(batch.size());
+    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
+    {
+        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
+    });
+#endif
+
+    // Map success results to failures only.
+    triple::tokens tokens{};
+    for (size_t row{}; row < results.size(); ++row)
+        if (!to_bool(results.at(row)))
+            tokens.push_back(batch[row].identifier);
+
+    return tokens;
+}
+
+} // namespace multisig
 
 BC_POP_WARNING()
 BC_POP_WARNING()
@@ -611,8 +654,7 @@ triple::tokens verify_signatures(const triples& batch,
     std::vector<uint8_t> results(count);
     const auto in = pointer_cast<const uint8_t>(batch.data());
     const auto out = results.data();
-    constexpr auto id_size = array_count<decltype(triple::identifier)>;
-    ufsecp_lbtc_verify_schnorr(context.get(), in, count, id_size, out);
+    ufsecp_lbtc_verify_schnorr(context.get(), in, count, triple::id_size, out);
 #else
     const auto policy = poolstl::execution::par_if(turbo);
 

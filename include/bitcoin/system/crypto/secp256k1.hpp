@@ -206,18 +206,45 @@ BC_API bool recover_public(ec_uncompressed& out,
 /// It is recommended to verify a signature after signing.
 
 #pragma pack(push, 1)
-struct triple
+struct BC_API triple
 {
-    using token = system::data_array<3>;
+    using token = data_array<3>;
     using tokens = std::vector<token>;
+    static constexpr size_t id_size = sizeof(token);
 
-    system::hash_digest digest;
-    system::ec_compressed point;
-    system::ec_signature signature;
+    hash_digest digest;
+    ec_compressed point;
+    ec_signature signature;
     token identifier;
 };
 using triples = std::span<const triple>;
 #pragma pack(pop)
+
+namespace multisig {
+
+#pragma pack(push, 1)
+struct BC_API triple
+{
+    using token = data_array<3>;
+    using tokens = std::vector<token>;
+
+    hash_digest digest;
+    ec_compressed point;
+    ec_signature signature;
+    token identifier;
+    uint16_t set;
+    uint8_t pair;
+
+    static constexpr size_t id_size = sizeof(token) + sizeof(set) +
+        sizeof(pair);
+};
+using triples = std::span<const triple>;
+#pragma pack(pop)
+
+BC_API triple::tokens verify_signatures(const triples& batch,
+    bool NOT_ULTRAFAST(turbo)) NOEXCEPT;
+
+} // namespace multisig
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
@@ -256,14 +283,15 @@ static constexpr size_t signature_size = 64;
 static constexpr size_t public_key_size = 32;
 
 #pragma pack(push, 1)
-struct triple
+struct BC_API triple
 {
-    using token = system::data_array<3>;
+    using token = data_array<3>;
     using tokens = std::vector<token>;
+    static constexpr size_t id_size = sizeof(token);
 
-    system::hash_digest digest;
-    system::ec_xonly point;
-    system::ec_signature signature;
+    hash_digest digest;
+    ec_xonly point;
+    ec_signature signature;
     token identifier;
 };
 using triples = std::span<const triple>;

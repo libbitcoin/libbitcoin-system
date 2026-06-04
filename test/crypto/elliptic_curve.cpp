@@ -287,7 +287,81 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_batch_verify__one_invalid_with_key__e
 
     const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[2].identifier);
+    BOOST_REQUIRE_EQUAL(tokens[0], batch[2].id);
+}
+
+// batch ecdsa multisig verification
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_multisig_batch_verify__all_valid__expected)
+{
+    using namespace system;
+    using namespace system::ecdsa::multisig;
+    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
+
+    ec_compressed point1{};
+    ec_compressed point2{};
+    ec_compressed point3{};
+    BOOST_REQUIRE(secret_to_public(point1, secret1));
+    BOOST_REQUIRE(secret_to_public(point2, secret3));
+    BOOST_REQUIRE(secret_to_public(point3, one));
+
+    ec_signature sig1{};
+    ec_signature sig2{};
+    ec_signature sig3{};
+    BOOST_REQUIRE(sign(sig1, secret1, hash));
+    BOOST_REQUIRE(sign(sig2, secret3, hash));
+    BOOST_REQUIRE(sign(sig3, one, hash));
+
+    const std::array<triple, 3> batch
+    {
+        triple{ hash, point1, sig1, { 0, 0, 0 }, 3_u16, 6_u8 },
+        triple{ hash, point2, sig2, { 1, 0, 0 }, 4_u16, 7_u8 },
+        triple{ hash, point3, sig3, { 2, 0, 0 }, 5_u16, 8_u8 }
+    };
+
+    const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
+    BOOST_REQUIRE(tokens.empty());
+}
+
+BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_multisig_batch_verify__one_invalid_with_key__expected)
+{
+    using namespace system;
+    using namespace system::ecdsa::multisig;
+    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa-key"));
+
+    ec_compressed point1{};
+    ec_compressed point2{};
+    ec_compressed point3{};
+    ec_compressed point4{};
+    BOOST_REQUIRE(secret_to_public(point1, secret1));
+    BOOST_REQUIRE(secret_to_public(point2, secret3));
+    BOOST_REQUIRE(secret_to_public(point3, one));
+    BOOST_REQUIRE(secret_to_public(point4, secret1));
+
+    ec_signature sig1{};
+    ec_signature sig2{};
+    ec_signature sig3{};
+    ec_signature sig4{};
+    BOOST_REQUIRE(sign(sig1, secret1, hash));
+    BOOST_REQUIRE(sign(sig2, secret3, hash));
+    BOOST_REQUIRE(sign(sig3, one, hash));
+    BOOST_REQUIRE(sign(sig4, secret1, hash));
+
+    // corrupt signature of third row
+    sig3[10] ^= 0xff;
+
+    const std::array<triple, 4> batch
+    {
+        triple{ hash, point1, sig1, { 0, 0, 0 }, 4_u16,  8_u8 },
+        triple{ hash, point2, sig2, { 1, 0, 0 }, 5_u16,  9_u8 },
+        triple{ hash, point3, sig3, { 2, 0, 0 }, 6_u16, 10_u8 },
+        triple{ hash, point4, sig4, { 3, 0, 0 }, 7_u16, 11_u8 }
+    };
+
+    // TODO: update for multisig correlation when implemented.
+    const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
+    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
+    BOOST_REQUIRE_EQUAL(tokens[0], batch[2].id);
 }
 
 // batch schnorr signature verification
@@ -371,7 +445,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__schnorr_batch_verify__one_invalid__expected
 
     const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[1].identifier);
+    BOOST_REQUIRE_EQUAL(tokens[0], batch[1].id);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
