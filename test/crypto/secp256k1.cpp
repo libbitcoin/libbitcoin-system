@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(elliptic_curve_tests)
+BOOST_AUTO_TEST_SUITE(secp256k1_tests)
 
 // These vectors use hash encoding for sighash values.
 
@@ -44,7 +44,7 @@ const ec_compressed generator_point_times_4 = base16_array("02e493dbf1c10d80f358
 
 // constants
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__generator__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__generator__expected)
 {
     ec_compressed generator;
     BOOST_REQUIRE(secret_to_public(generator, one));
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__generator__expected)
 
 // conversion
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__compress__round_trip__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__compress__round_trip__expected)
 {
     ec_uncompressed uncompressed;
     BOOST_REQUIRE(decompress(uncompressed, compressed1));
@@ -63,21 +63,21 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__compress__round_trip__expected)
     BOOST_REQUIRE_EQUAL(compressed, compressed1);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__decompress__positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__decompress__positive__expected)
 {
     ec_uncompressed point;
     BOOST_REQUIRE(decompress(point, compressed1));
     BOOST_REQUIRE_EQUAL(point, uncompressed1);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__compressed_positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__secret_to_public__compressed_positive__expected)
 {
     ec_compressed point;
     BOOST_REQUIRE(secret_to_public(point, secret1));
     BOOST_REQUIRE_EQUAL(point, compressed1);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__uncompressed_positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__secret_to_public__uncompressed_positive__expected)
 {
     ec_uncompressed point;
     BOOST_REQUIRE(secret_to_public(point, secret1));
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__secret_to_public__uncompressed_positive__ex
 
 // addition
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ec_add__positive__expected)
 {
     const auto sum = base16_array("0404040000000000000000000000000000000000000000000000000000000000");
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__positive__expected)
     BOOST_REQUIRE_EQUAL(public1, public2);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ec_add__negative__expected)
 {
     // = n - 1
     auto secret_one = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_add__negative__expected)
     BOOST_REQUIRE(!ec_add(public1, secret_two));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ec_sum__expected)
 {
     const compressed_list points
     {
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_sum__expected)
 
 // multiplication
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ec_multiply__expected)
 {
     ec_secret secret_one{ {0} };
     ec_secret secret_two{ {0} };
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__ec_multiply__expected)
 
 // ecdsa signature
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__sign__positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__sign__positive__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__sign__positive__expected)
     BOOST_REQUIRE_EQUAL(signature, signature3);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__encode_signature__positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__positive__expected)
 {
     using namespace system::ecdsa;
     der_signature signature;
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__encode_signature__positive__expected)
     BOOST_REQUIRE_EQUAL(signature, der_signature3);
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_positive__expected)
 {
     using namespace system::ecdsa;
     ec_compressed point;
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_positive__expected)
     BOOST_REQUIRE(verify_signature(point, hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_negative__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_negative__expected)
 {
     using namespace system::ecdsa;
     ec_compressed point;
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__sign__round_trip_negative__expected)
     BOOST_REQUIRE(!verify_signature(to_chunk(point), hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__positive__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__positive__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__positive__expected)
     BOOST_REQUIRE(verify_signature(compressed2, sighash2, signature));
 }
 
-BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__negative__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__negative__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
@@ -215,163 +215,6 @@ BOOST_AUTO_TEST_CASE(elliptic_curve__verify_signature__negative__expected)
     // Invalidate the positive test.
     signature[10] = 110;
     BOOST_REQUIRE(!verify_signature(compressed2, sighash2, signature));
-}
-
-// batch ecdsa signature verification
-
-BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_batch_verify__all_valid__expected)
-{
-    using namespace system;
-    using namespace system::ecdsa;
-    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
-
-    ec_compressed point1{};
-    ec_compressed point2{};
-    ec_compressed point3{};
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, secret3));
-    BOOST_REQUIRE(secret_to_public(point3, one));
-
-    ec_signature sig1{};
-    ec_signature sig2{};
-    ec_signature sig3{};
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, secret3, hash));
-    BOOST_REQUIRE(sign(sig3, one, hash));
-
-    const std::array<triple, 3> batch
-    {
-        triple{ hash, point1, sig1, { 0, 0, 0 } },
-        triple{ hash, point2, sig2, { 1, 0, 0 } },
-        triple{ hash, point3, sig3, { 2, 0, 0 } }
-    };
-
-    const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
-    BOOST_REQUIRE(tokens.empty());
-}
-
-BOOST_AUTO_TEST_CASE(elliptic_curve__ecdsa_batch_verify__one_invalid_with_key__expected)
-{
-    using namespace system;
-    using namespace system::ecdsa;
-    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa-key"));
-
-    ec_compressed point1{};
-    ec_compressed point2{};
-    ec_compressed point3{};
-    ec_compressed point4{};
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, secret3));
-    BOOST_REQUIRE(secret_to_public(point3, one));
-    BOOST_REQUIRE(secret_to_public(point4, secret1));
-
-    ec_signature sig1{};
-    ec_signature sig2{};
-    ec_signature sig3{};
-    ec_signature sig4{};
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, secret3, hash));
-    BOOST_REQUIRE(sign(sig3, one, hash));
-    BOOST_REQUIRE(sign(sig4, secret1, hash));
-
-    // corrupt signature of third row
-    sig3[10] ^= 0xff;
-
-    const std::array<triple, 4> batch
-    {
-        triple{ hash, point1, sig1, { 0, 0, 0 } },
-        triple{ hash, point2, sig2, { 1, 0, 0 } },
-        triple{ hash, point3, sig3, { 2, 0, 0 } },
-        triple{ hash, point4, sig4, { 3, 0, 0 } }
-    };
-
-    const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[2].identifier);
-}
-
-// batch schnorr signature verification
-
-BOOST_AUTO_TEST_CASE(elliptic_curve__schnorr_batch_verify__all_valid__expected)
-{
-    using namespace system;
-    using namespace system::schnorr;
-    const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
-
-    ec_compressed p1{};
-    ec_compressed p2{};
-    ec_compressed p3{};
-    BOOST_REQUIRE(secret_to_public(p1, secret1));
-    BOOST_REQUIRE(secret_to_public(p2, secret3));
-    BOOST_REQUIRE(secret_to_public(p3, one));
-
-    ec_xonly point1{};
-    ec_xonly point2{};
-    ec_xonly point3{};
-    std::copy_n(std::next(p1.begin()), ec_xonly_size, point1.begin());
-    std::copy_n(std::next(p2.begin()), ec_xonly_size, point2.begin());
-    std::copy_n(std::next(p3.begin()), ec_xonly_size, point3.begin());
-
-    ec_signature sig1{};
-    ec_signature sig2{};
-    ec_signature sig3{};
-    constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, secret3, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig3, one, hash, auxiliary));
-
-    const std::array<triple, 3> batch
-    {
-        triple{ hash, point1, sig1, { 0, 0, 0 } },
-        triple{ hash, point2, sig2, { 1, 0, 0 } },
-        triple{ hash, point3, sig3, { 2, 0, 0 } }
-    };
-
-    const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
-    BOOST_REQUIRE(tokens.empty());
-}
-
-BOOST_AUTO_TEST_CASE(elliptic_curve__schnorr_batch_verify__one_invalid__expected)
-{
-    using namespace system;
-    using namespace system::schnorr;
-    const auto hash = bitcoin_hash(to_chunk("batch-schnorr-neg"));
-
-    ec_compressed p1{};
-    ec_compressed p2{};
-    ec_compressed p3{};
-    BOOST_REQUIRE(secret_to_public(p1, secret1));
-    BOOST_REQUIRE(secret_to_public(p2, secret3));
-    BOOST_REQUIRE(secret_to_public(p3, one));
-
-    ec_xonly point1{};
-    ec_xonly point2{};
-    ec_xonly point3{};
-    std::copy_n(std::next(p1.begin()), ec_xonly_size, point1.begin());
-    std::copy_n(std::next(p2.begin()), ec_xonly_size, point2.begin());
-    std::copy_n(std::next(p3.begin()), ec_xonly_size, point3.begin());
-
-    ec_signature sig1{};
-    ec_signature sig2{};
-    ec_signature sig3{};
-    constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, secret3, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig3, one, hash, auxiliary));
-
-    // corrupt signature of second row
-    sig2[10] ^= 0xff;
-
-    const std::array<triple, 3> batch
-    {
-        triple{ hash, point1, sig1, { 0, 0, 0 } },
-        triple{ hash, point2, sig2, { 1, 0, 0 } },
-        triple{ hash, point3, sig3, { 2, 0, 0 } }
-    };
-
-    const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[1].identifier);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

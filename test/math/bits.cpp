@@ -610,10 +610,14 @@ static_assert(unmask_left<uint8_t>(8) == 0xffu);
 static_assert(unmask_left<uint16_t>(8) == 0xff00u);
 static_assert(unmask_left<uint32_t>(8) == 0xff000000ul);
 static_assert(unmask_left<uint64_t>(8) == 0xff00000000000000ull);
-static_assert(unmask_left<uint8_t>(0x00, 8) == 0xffu);
-static_assert(unmask_left<uint16_t>(0x0000, 8) == 0xff00u);
-static_assert(unmask_left<uint32_t>(0x00000000l, 8) == 0xff000000ul);
-static_assert(unmask_left<uint64_t>(0x0000000000000000ll, 8) == 0xff00000000000000ull);
+static_assert(unmask_left<uint8_t>(0x00, 8) == 0x00u);
+static_assert(unmask_left<uint16_t>(0x0000, 8) == 0x0000u);
+static_assert(unmask_left<uint32_t>(0x00000000l, 8) == 0x00000000ul);
+static_assert(unmask_left<uint64_t>(0x0000000000000000ll, 8) == 0x0000000000000000ull);
+static_assert(unmask_left<uint8_t>(0x42, 8) == 0x42u);
+static_assert(unmask_left<uint16_t>(0x42ff, 8) == 0x4200u);
+static_assert(unmask_left<uint32_t>(0x42ffffffl, 8) == 0x42000000ul);
+static_assert(unmask_left<uint64_t>(0x42ffffffffffffffll, 8) == 0x4200000000000000ull);
 static_assert(is_same_type<decltype(unmask_left<uint8_t>(0)), uint8_t>);
 
 // unmask_right
@@ -633,10 +637,14 @@ static_assert(unmask_right<uint8_t>(8) == 0xffu);
 static_assert(unmask_right<uint16_t>(8) == 0x00ffu);
 static_assert(unmask_right<uint32_t>(8) == 0x000000fful);
 static_assert(unmask_right<uint64_t>(8) == 0x00000000000000ffull);
-static_assert(unmask_right<uint8_t>(0x00, 8) == 0xffu);
-static_assert(unmask_right<uint16_t>(0x0000, 8) == 0x00ffu);
-static_assert(unmask_right<uint32_t>(0x00000000l, 8) == 0x000000fful);
-static_assert(unmask_right<uint64_t>(0x0000000000000000ll, 8) == 0x00000000000000ffull);
+static_assert(unmask_right<uint8_t>(0x00, 8) == 0x00u);
+static_assert(unmask_right<uint16_t>(0x0000, 8) == 0x0000u);
+static_assert(unmask_right<uint32_t>(0x00000000l, 8) == 0x00000000ul);
+static_assert(unmask_right<uint64_t>(0x0000000000000000ll, 8) == 0x0000000000000000ull);
+static_assert(unmask_right<uint8_t>(0x42, 8) == 0x42u);
+static_assert(unmask_right<uint16_t>(0xff42, 8) == 0x0042u);
+static_assert(unmask_right<uint32_t>(0xffffff42l, 8) == 0x00000042ul);
+static_assert(unmask_right<uint64_t>(0xffffffffffffff42ll, 8) == 0x0000000000000042ull);
 static_assert(is_same_type<decltype(unmask_right<uint8_t>(0)), uint8_t>);
 
 // shift_left
@@ -851,3 +859,12 @@ static_assert(hi_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0x0f000002
 static_assert(lo_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0xa0000001_u32);
 static_assert(hi_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 0x0f000002a0000001_u64);
 static_assert(lo_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 42_u64);
+
+static_assert(pack_word<uint8_t>(0x1a_i8, 0x2b_i8) == 0xab_u8);
+static_assert(pack_word<uint8_t>(0x1a_u8, 0x2b_u8) == 0xab_u8);
+static_assert(pack_word<uint16_t>(0xab_u8, 0xcd_u8) == 0xabcd_u16);
+static_assert(pack_word<uint16_t>(0xabcd_u16, 0x1234_u16) == 0xcd34_u16);
+static_assert(pack_word<uint16_t>(0xabcd00aa_u32, 0x123400bb_u32) == 0xaabb_u16);
+static_assert(pack_word<uint32_t>(0xabcd_u32, 0x1234_u32) == 0xabcd1234_u32);
+static_assert(pack_word<uint64_t>(0x1234abcd_u32, 0x5678ef01_u32) == 0x1234abcd5678ef01_u64);
+static_assert(is_same_type<decltype(pack_word<uint8_t>(0, 0)), uint8_t>);

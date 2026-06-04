@@ -20,8 +20,6 @@
 
 #include <algorithm>
 #include <map>
-#include <numeric>
-#include <secp256k1.h>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>

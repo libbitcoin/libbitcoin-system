@@ -19,11 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_EC_CONTEXT_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_EC_CONTEXT_HPP
 
-#if defined(HAVE_ULTRAFAST)
-    #include <ufsecp_libbitcoin.h>
-#else
-    #include <secp256k1.h>
-#endif
+#include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
