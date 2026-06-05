@@ -29,6 +29,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+/// TODO: use methods to hide fields and metadata.
 /// A container for passing signature triples into a caller's buffer.
 /// When enabled and passed to machine::interpreter this causes
 /// signature_verify() calls to return true in scripts for which this one call
@@ -44,15 +45,18 @@ struct BC_API signatures
         const ec_xonly, const ec_signature&)>;
 
     using multisig_handler = std::function<void(const hash_digest&,
-        const ec_compresseds&, const ec_signatures&)>;
+        const ec_compresseds&, const ec_signatures&, uint16_t)>;
+
+    /// Default construction disables batching.
+    const bool enabled{};
 
     /// Invoked with signature verification triples in script interpreter.
     const ecdsa_handler ecdsa{};
     const schnorr_handler schnorr{};
     const multisig_handler multisig{};
 
-    /// Default construction disables batching.
-    const bool enabled{};
+    /// Unique identifier of a (contiguous) multisig group within a block.
+    mutable std::atomic<uint16_t> group{};
 
     /// Diagnostic counters.
     mutable std::atomic<size_t> batched_ecdsa{};

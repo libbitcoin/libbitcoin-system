@@ -97,8 +97,10 @@ try_batch_multisig_verification(const chunk_xptrs& points,
     if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
         return false;
 
+    // TODO: assert against group rollover (more than 2^16 inputs).
+    const auto group = capture_.group.fetch_add(one, relaxed);
     capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
-    capture_.multisig(hash, keys, sigs);
+    capture_.multisig(hash, keys, sigs, group);
     return true;
 }
 
