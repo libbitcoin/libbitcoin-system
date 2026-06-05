@@ -912,27 +912,58 @@ BOOST_AUTO_TEST_CASE(bit_reader__read_string__one_byte__expected)
 
 BOOST_AUTO_TEST_CASE(bit_reader__read_string__two_bytes__expected)
 {
-    const std::string value{ (char)varint_two_bytes, 0x03, 0x00, 'a', 'b', 'c' };
+    const std::string payload(253, 'a');
+    std::string value{
+        static_cast<char>(varint_two_bytes),
+        static_cast<char>(0xfd), 0x00
+    };
+
+    value += payload;
+
     std::istringstream stream{ value };
     read::bits::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
+    BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+    BOOST_REQUIRE(reader);
 }
 
 BOOST_AUTO_TEST_CASE(bit_reader__read_string__four_bytes__expected)
 {
-    const std::string value{ (char)varint_four_bytes, 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
+    const std::string payload(65536, 'a');
+    std::string value{
+        static_cast<char>(varint_four_bytes),
+        static_cast<char>(0xfe), 0x00, 0x01, 0x00
+    };
+    value += payload;
+
     std::istringstream stream{ value };
     read::bits::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
+    BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+    BOOST_REQUIRE(reader);
 }
 
-BOOST_AUTO_TEST_CASE(bit_reader__read_string__eight_bytes__expected)
-{
-    const std::string value{ (char)varint_eight_bytes, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
-    std::istringstream stream{ value };
-    read::bits::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
-}
+// To test read_string with 8 bytes in canonical compact size represesntation would require 
+// a string of 4,294,967,296 'chars' ~= 4GB, should we remove tha test?
+// BOOST_AUTO_TEST_CASE(bit_reader__read_string__eight_bytes__expected)
+// {
+//     const std::string payload(4294967296, 'a');
+//     std::string value;
+//     value.push_back(static_cast<char>(varint_eight_bytes));
+//     value.push_back(static_cast<char>(0xff));
+//     value.push_back(0x00);
+//     value.push_back(0x00);
+//     value.push_back(0x00);
+//     value.push_back(0x00);
+//     value.push_back(0x01);
+//     value.push_back(0x00);
+//     value.push_back(0x00);
+//     value.push_back(0x00);
+//     value += payload;
+
+//     std::istringstream stream{ value };
+//     read::bits::istream reader(stream);
+//     BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+//     BOOST_REQUIRE(reader);
+// }
 
 // read_string_buffer
 
