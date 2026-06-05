@@ -199,8 +199,8 @@ multisig::batch::links to_links<multisig::batch>(
     {
         // Find the start of the next group (or end).
         if ((index != in.size()) &&
-            (in[index].id  == in[group].id) &&
-            (in[index].set == in[group].set))
+            (in[index].id == in[group].id) &&
+            (in[index].group == in[group].group))
             continue;
 
         // Process the previous group.

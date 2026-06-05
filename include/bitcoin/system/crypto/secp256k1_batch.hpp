@@ -90,7 +90,7 @@ struct BC_API batch
     ec_compressed point;
     ec_signature signature;
     uint8_t pair;
-    uint16_t set;
+    uint16_t group;
     link id;
 
 protected:
