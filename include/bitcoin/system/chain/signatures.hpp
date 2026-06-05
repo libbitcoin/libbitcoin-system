@@ -56,7 +56,9 @@ struct BC_API signatures
     const multisig_handler multisig{};
 
     /// Unique identifier of a (contiguous) multisig group within a block.
-    mutable std::atomic<uint16_t> group{};
+    /// So an overflow can be safely detected, resulting in capture bypass.
+    /// Caller can detect occurances of lost capture by checking .group.
+    mutable std::atomic<uint64_t> group{};
 
     /// Diagnostic counters.
     mutable std::atomic<size_t> batched_ecdsa{};
