@@ -868,3 +868,10 @@ static_assert(pack_word<uint16_t>(0xabcd00aa_u32, 0x123400bb_u32) == 0xaabb_u16)
 static_assert(pack_word<uint32_t>(0xabcd_u32, 0x1234_u32) == 0xabcd1234_u32);
 static_assert(pack_word<uint64_t>(0x1234abcd_u32, 0x5678ef01_u32) == 0x1234abcd5678ef01_u64);
 static_assert(is_same_type<decltype(pack_word<uint8_t>(0, 0)), uint8_t>);
+
+static_assert(unpack_word<uint8_t>(0xab_u8) == std::pair<uint8_t, uint8_t>{ 0x0a_u8, 0x0b_u8 });
+static_assert(unpack_word<uint8_t>(0xabcd_u16) == std::pair<uint8_t, uint8_t>{ 0xab_u8, 0xcd_u8 });
+static_assert(unpack_word<uint8_t>(0xcd34_u16) == std::pair<uint8_t, uint8_t>{ 0xcd_u8, 0x34_u8 });
+static_assert(unpack_word<uint8_t>(0xaabb_u16) == std::pair<uint8_t, uint8_t>{ 0xaa_u8, 0xbb_u8 });
+static_assert(unpack_word<uint32_t>(0x1234abcd5678ef01_u64) == std::pair<uint32_t, uint32_t>{ 0x1234abcd_u32, 0x5678ef01_u32 });
+static_assert(is_same_type<decltype(unpack_word<uint8_t>(0)), std::pair<uint8_t, uint8_t>>);

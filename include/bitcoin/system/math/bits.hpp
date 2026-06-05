@@ -238,7 +238,7 @@ template <typename To, typename From,
     if_not_uintx<From> = true>
 constexpr To lo_word(From value) NOEXCEPT;
 
-/// High/Low word pack.
+/// Word pack/unpack.
 /// ---------------------------------------------------------------------------
 
 /// Pack two values equally into one, excess bits discarded.
@@ -246,6 +246,12 @@ template <typename To, typename From,
     if_integral_integer<To> = true,
     if_not_uintx<From> = true>
 constexpr To pack_word(From high, From low) NOEXCEPT;
+
+/// Unpack bits of a value into two equal parts, excess bits discarded.
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    if_not_uintx<From> = true>
+constexpr std::pair<To, To> unpack_word(From value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
