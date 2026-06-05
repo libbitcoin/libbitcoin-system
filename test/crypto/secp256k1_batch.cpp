@@ -48,14 +48,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__all_valid__expected)
     BOOST_REQUIRE(sign(sig2, secret3, hash, auxiliary));
     BOOST_REQUIRE(sign(sig3, one, hash, auxiliary));
 
-    const std::array<signatures, 3> batch
+    const std::array<batch, 3> triples
     {
-        signatures{ hash, point1, sig1, { 0, 0, 0 } },
-        signatures{ hash, point2, sig2, { 1, 0, 0 } },
-        signatures{ hash, point3, sig3, { 2, 0, 0 } }
+        batch{ hash, point1, sig1, { 0, 0, 0 } },
+        batch{ hash, point2, sig2, { 1, 0, 0 } },
+        batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = signatures::verify({ batch.data(), batch.size() }, false);
+    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE(tokens.empty());
 }
 
@@ -83,16 +83,16 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__one_invalid__expected)
 
     // corrupt second signature
     sig2[10] ^= 0xff;
-    const std::array<signatures, 3> batch
+    const std::array<batch, 3> triples
     {
-        signatures{ hash, point1, sig1, { 0, 0, 0 } },
-        signatures{ hash, point2, sig2, { 1, 0, 0 } },
-        signatures{ hash, point3, sig3, { 2, 0, 0 } }
+        batch{ hash, point1, sig1, { 0, 0, 0 } },
+        batch{ hash, point2, sig2, { 1, 0, 0 } },
+        batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = signatures::verify({ batch.data(), batch.size() }, false);
+    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<signatures::link_t>(batch.at(1).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batch::link_t>(triples.at(1).id));
 }
 
 // batch ecdsa signature verification
@@ -113,14 +113,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__all_valid__expected)
     BOOST_REQUIRE(sign(sig2, secret3, hash));
     BOOST_REQUIRE(sign(sig3, one, hash));
 
-    const std::array<signatures, 3> batch
+    const std::array<batch, 3> triples
     {
-        signatures{ hash, point1, sig1, { 0, 0, 0 } },
-        signatures{ hash, point2, sig2, { 1, 0, 0 } },
-        signatures{ hash, point3, sig3, { 2, 0, 0 } }
+        batch{ hash, point1, sig1, { 0, 0, 0 } },
+        batch{ hash, point2, sig2, { 1, 0, 0 } },
+        batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = signatures::verify({ batch.data(), batch.size() }, false);
+    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE(tokens.empty());
 }
 
@@ -142,16 +142,16 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__one_invalid__expected)
 
     // corrupt third signature
     sig3[10] ^= 0xff;
-    const std::array<signatures, 3> batch
+    const std::array<batch, 3> triples
     {
-        signatures{ hash, point1, sig1, { 0, 0, 0 } },
-        signatures{ hash, point2, sig2, { 1, 0, 0 } },
-        signatures{ hash, point3, sig3, { 2, 0, 0 } }
+        batch{ hash, point1, sig1, { 0, 0, 0 } },
+        batch{ hash, point2, sig2, { 1, 0, 0 } },
+        batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = signatures::verify({ batch.data(), batch.size() }, false);
+    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<signatures::link_t>(batch.at(2).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batch::link_t>(triples.at(2).id));
 }
 
 // batch multisig (ecdsa) verification
@@ -174,14 +174,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__all_valid__expected)
     BOOST_REQUIRE(ecdsa::sign(sig3, one, hash));
 
     // One 2-of-3 multisig group (same id + set)
-    const std::array<signatures, 3> batch
+    const std::array<batch, 3> triples
     {
-        signatures{ hash, point1, sig1, 0x12, 5, { 0, 0, 0 } }, // (sig 1, key 2)
-        signatures{ hash, point2, sig2, 0x01, 5, { 0, 0, 0 } }, // (sig 0, key 1)
-        signatures{ hash, point3, sig3, 0x20, 5, { 0, 0, 0 } }  // (sig 2, key 0)
+        batch{ hash, point1, sig1, 0x12, 5, { 0, 0, 0 } }, // (sig 1, key 2)
+        batch{ hash, point2, sig2, 0x01, 5, { 0, 0, 0 } }, // (sig 0, key 1)
+        batch{ hash, point3, sig3, 0x20, 5, { 0, 0, 0 } }  // (sig 2, key 0)
     };
 
-    const auto tokens = signatures::verify({ batch.data(), batch.size() }, false);
+    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE(tokens.empty());
 }
 
@@ -205,16 +205,16 @@ BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__one_invalid__expected)
     sig2[10] ^= 0xff;
 
     // Same group (id + set)
-    const std::array<signatures, 3> batch
+    const std::array<batch, 3> triples
     {
-        signatures{ hash, point1, sig1, 0x12, 7, { 0, 0, 0 } },
-        signatures{ hash, point2, sig2, 0x01, 7, { 0, 0, 0 } },
-        signatures{ hash, point3, sig3, 0x20, 7, { 0, 0, 0 } }
+        batch{ hash, point1, sig1, 0x12, 7, { 0, 0, 0 } },
+        batch{ hash, point2, sig2, 0x01, 7, { 0, 0, 0 } },
+        batch{ hash, point3, sig3, 0x20, 7, { 0, 0, 0 } }
     };
 
-    const auto tokens = signatures::verify({ batch.data(), batch.size() }, false);
+    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<signatures::link_t>(batch.at(0).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batch::link_t>(triples.at(0).id));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

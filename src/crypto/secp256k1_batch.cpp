@@ -39,19 +39,19 @@ namespace system {
 // ----------------------------------------------------------------------------
 // local
 
-inline bool verify_signature(const schnorr::signatures& single) NOEXCEPT
+inline bool verify_signature(const schnorr::batch& single) NOEXCEPT
 {
     return schnorr::verify_signature(single.point, single.digest,
         single.signature);
 }
 
-inline bool verify_signature(const ecdsa::signatures& single) NOEXCEPT
+inline bool verify_signature(const ecdsa::batch& single) NOEXCEPT
 {
     return ecdsa::verify_signature(single.point, single.digest,
         single.signature);
 }
 
-inline bool verify_signature(const multisig::signatures& single) NOEXCEPT
+inline bool verify_signature(const multisig::batch& single) NOEXCEPT
 {
     return ecdsa::verify_signature(single.point, single.digest,
         single.signature);
@@ -65,8 +65,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 #if defined(HAVE_ULTRAFAST)
     
-template <typename Signatures>
-data_chunk batch_verify(const std::span<Signatures>& batch, bool) NOEXCEPT
+template <typename Batch>
+data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 {
     // OOM is unrecoverable.
     static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
@@ -77,15 +77,15 @@ data_chunk batch_verify(const std::span<Signatures>& batch, bool) NOEXCEPT
     const auto out = results.data();
     const auto in = pointer_cast<const uint8_t>(batch.data());
 
-    if constexpr (is_same_type<Signatures, schnorr::signatures>)
+    if constexpr (is_same_type<Batch, schnorr::batch>)
     {
-        constexpr auto extra_size = sizeof(Signatures) - (sizeof(hash_digest) +
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
             sizeof(ec_xonly) + sizeof(ec_signature));
         ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out);
     }
     else
     {
-        constexpr auto extra_size = sizeof(Signatures) - (sizeof(hash_digest) +
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
             sizeof(ec_compressed) + sizeof(ec_signature));
         ufsecp_lbtc_verify_ecdsa(context.get(), in, count, extra_size, out);
     }
@@ -95,8 +95,8 @@ data_chunk batch_verify(const std::span<Signatures>& batch, bool) NOEXCEPT
 
 #else
 
-template <typename Signatures>
-data_chunk batch_verify(const std::span<Signatures>& batch, bool turbo) NOEXCEPT
+template <typename Batch>
+data_chunk batch_verify(const std::span<Batch>& batch, bool turbo) NOEXCEPT
 {
     // par_if doesn't throw.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -150,9 +150,9 @@ inline bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
 // ----------------------------------------------------------------------------
 
 // Trivial single signature correlation.
-template <typename Signatures>
-Signatures::links to_links(const data_chunk& out,
-    const std::span<const Signatures>& in) NOEXCEPT
+template <typename Batch>
+Batch::links to_links(const data_chunk& out,
+    const std::span<const Batch>& in) NOEXCEPT
 {
     BC_ASSERT(out.size() == in.size());
 
@@ -160,8 +160,8 @@ Signatures::links to_links(const data_chunk& out,
     std::vector<size_t> it(in.size());
     std::iota(it.begin(), it.end(), zero);
 
-    using link_t = typename Signatures::link_t;
-    typename Signatures::links fails(zero);
+    using link_t = typename Batch::link_t;
+    typename Batch::links fails(zero);
     std::shared_mutex mutex{};
 
     std::for_each(poolstl::execution::par, it.cbegin(), it.cend(),
@@ -182,8 +182,8 @@ Signatures::links to_links(const data_chunk& out,
 // Specialized multisig correlation.
 // O(n) over the sig set, ~100 bytes of stack, no heap.
 template <>
-multisig::signatures::links to_links<multisig::signatures>(
-    const data_chunk& out, const multisig::signatures::span& in) NOEXCEPT
+multisig::batch::links to_links<multisig::batch>(
+    const data_chunk& out, const multisig::batch::span& in) NOEXCEPT
 {
     BC_ASSERT(out.size() == in.size());
 
@@ -191,8 +191,8 @@ multisig::signatures::links to_links<multisig::signatures>(
         return {};
 
     using namespace multisig;
-    using link_t = signatures::link_t;
-    signatures::links fails{};
+    using link_t = batch::link_t;
+    batch::links fails{};
     size_t group{};
 
     for (auto index = one; index <= in.size(); ++index)
@@ -226,23 +226,23 @@ multisig::signatures::links to_links<multisig::signatures>(
 
 BC_POP_WARNING()
 
-// batch
+// evaluate
 // ----------------------------------------------------------------------------
 // static/protected
 
-data_chunk schnorr::signatures::batch(const schnorr::signatures::span& batch,
+data_chunk schnorr::batch::evaluate(const schnorr::batch::span& batch,
     bool turbo) NOEXCEPT
 {
     return batch_verify(batch, turbo);
 }
 
-data_chunk ecdsa::signatures::batch(const ecdsa::signatures::span& batch,
+data_chunk ecdsa::batch::evaluate(const ecdsa::batch::span& batch,
     bool turbo) NOEXCEPT
 {
     return batch_verify(batch, turbo);
 }
 
-data_chunk multisig::signatures::batch(const multisig::signatures::span& batch,
+data_chunk multisig::batch::evaluate(const multisig::batch::span& batch,
     bool turbo) NOEXCEPT
 {
     return batch_verify(batch, turbo);
@@ -252,20 +252,20 @@ data_chunk multisig::signatures::batch(const multisig::signatures::span& batch,
 // ----------------------------------------------------------------------------
 // static/protected
 
-schnorr::signatures::links schnorr::signatures::correlate(const data_chunk& out,
-    const schnorr::signatures::span& in) NOEXCEPT
+schnorr::batch::links schnorr::batch::correlate(const data_chunk& out,
+    const schnorr::batch::span& in) NOEXCEPT
 {
     return to_links(out, in);
 }
 
-ecdsa::signatures::links ecdsa::signatures::correlate(const data_chunk& out,
-    const ecdsa::signatures::span& in) NOEXCEPT
+ecdsa::batch::links ecdsa::batch::correlate(const data_chunk& out,
+    const ecdsa::batch::span& in) NOEXCEPT
 {
     return to_links(out, in);
 }
 
-multisig::signatures::links multisig::signatures::correlate(
-    const data_chunk& out, const multisig::signatures::span& in) NOEXCEPT
+multisig::batch::links multisig::batch::correlate(const data_chunk& out,
+    const multisig::batch::span& in) NOEXCEPT
 {
     return to_links(out, in);
 }
@@ -274,22 +274,22 @@ multisig::signatures::links multisig::signatures::correlate(
 // ----------------------------------------------------------------------------
 // static/public
 
-schnorr::signatures::links schnorr::signatures::verify(
-    const schnorr::signatures::span& batch, bool turbo) NOEXCEPT
+schnorr::batch::links schnorr::batch::verify(
+    const schnorr::batch::span& batch, bool turbo) NOEXCEPT
 {
-    return to_links(batch_verify(batch, turbo), batch);
+    return correlate(evaluate(batch, turbo), batch);
 }
 
-ecdsa::signatures::links ecdsa::signatures::verify(
-    const ecdsa::signatures::span& batch, bool turbo) NOEXCEPT
+ecdsa::batch::links ecdsa::batch::verify(
+    const ecdsa::batch::span& batch, bool turbo) NOEXCEPT
 {
-    return to_links(batch_verify(batch, turbo), batch);
+    return correlate(evaluate(batch, turbo), batch);
 }
 
-multisig::signatures::links multisig::signatures::verify(
-    const multisig::signatures::span& batch, bool turbo) NOEXCEPT
+multisig::batch::links multisig::batch::verify(
+    const multisig::batch::span& batch, bool turbo) NOEXCEPT
 {
-    return to_links(batch_verify(batch, turbo), batch);
+    return correlate(evaluate(batch, turbo), batch);
 }
 
 } // namespace system

@@ -32,12 +32,12 @@ namespace system {
 namespace schnorr {
     
 /// Span matches serialized buffer.
-struct BC_API signatures
+struct BC_API batch
 {
     using link = data_array<3>;
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
-    using span = std::span<const signatures>;
+    using span = std::span<const batch>;
     static links verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
@@ -46,7 +46,7 @@ struct BC_API signatures
     link id;
 
 protected:
-    static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
+    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
     static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
@@ -55,12 +55,12 @@ protected:
 namespace ecdsa {
 
 /// Span matches serialized buffer.
-struct BC_API signatures
+struct BC_API batch
 {
     using link = data_array<3>;
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
-    using span = std::span<const signatures>;
+    using span = std::span<const batch>;
     static links verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
@@ -69,7 +69,7 @@ struct BC_API signatures
     link id;
 
 protected:
-    static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
+    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
     static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
@@ -78,12 +78,12 @@ protected:
 namespace multisig {
     
 /// Span matches serialized buffer.
-struct BC_API signatures
+struct BC_API batch
 {
     using link = data_array<3>;
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
-    using span = std::span<const signatures>;
+    using span = std::span<const batch>;
     static links verify(const span& batch, bool turbo)  NOEXCEPT;
 
     hash_digest digest;
@@ -94,7 +94,7 @@ struct BC_API signatures
     link id;
 
 protected:
-    static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
+    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
     static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
