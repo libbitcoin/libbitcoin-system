@@ -35,6 +35,28 @@
 namespace libbitcoin {
 namespace system {
 
+// polymorphic namespace selectors (template support)
+// ----------------------------------------------------------------------------
+// local
+
+inline bool verify_signature(const schnorr::batch& single) NOEXCEPT
+{
+    return schnorr::verify_signature(single.point, single.digest,
+        single.signature);
+}
+
+inline bool verify_signature(const ecdsa::batch& single) NOEXCEPT
+{
+    return ecdsa::verify_signature(single.point, single.digest,
+        single.signature);
+}
+
+inline bool verify_signature(const multisig::batch& single) NOEXCEPT
+{
+    return ecdsa::verify_signature(single.point, single.digest,
+        single.signature);
+}
+
 // Array indexing required for c++20 span<T>.
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
@@ -43,8 +65,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 #if defined(HAVE_ULTRAFAST)
     
-template <typename Triple>
-data_chunk batch_verify(const std::span<Triple>& batch, bool) NOEXCEPT
+template <typename Batch>
+data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 {
     // OOM is unrecoverable.
     static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
@@ -55,37 +77,26 @@ data_chunk batch_verify(const std::span<Triple>& batch, bool) NOEXCEPT
     const auto out = results.data();
     const auto in = pointer_cast<const uint8_t>(batch.data());
 
-    constexpr auto extra_size = Triple::metadata_size;
-    if constexpr (is_same_type<Triple, schnorr::triple>)
+    if constexpr (is_same_type<Batch, schnorr::batch>)
+    {
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
+            sizeof(ec_xonly) + sizeof(ec_signature));
         ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out);
+    }
     else
+    {
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
+            sizeof(ec_compressed) + sizeof(ec_signature));
         ufsecp_lbtc_verify_ecdsa(context.get(), in, count, extra_size, out);
+    }
 
     return results;
 }
 
 #else
 
-inline bool verify_signature(const schnorr::triple& single) NOEXCEPT
-{
-    return schnorr::verify_signature(single.point, single.digest,
-        single.signature);
-}
-
-inline bool verify_signature(const ecdsa::triple& single) NOEXCEPT
-{
-    return ecdsa::verify_signature(single.point, single.digest,
-        single.signature);
-}
-
-inline bool verify_signature(const multisig::triple& single) NOEXCEPT
-{
-    return ecdsa::verify_signature(single.point, single.digest,
-        single.signature);
-}
-
-template <typename Triple>
-data_chunk batch_verify(const std::span<Triple>& batch, bool turbo) NOEXCEPT
+template <typename Batch>
+data_chunk batch_verify(const std::span<Batch>& batch, bool turbo) NOEXCEPT
 {
     // par_if doesn't throw.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -107,14 +118,41 @@ data_chunk batch_verify(const std::span<Triple>& batch, bool turbo) NOEXCEPT
 }
 
 #endif
+
+// utility
+// ----------------------------------------------------------------------------
+// local
+
+using multisig_matrix = std::array<uint16_t, bits<uint16_t>>;
+
+// O(1) as m and n are bounded at 16.
+inline bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
+    const multisig_matrix& success) NOEXCEPT
+{
+    multisig_matrix matrix{};
+
+    for (size_t key{}; key < n_keys; ++key)
+        for (size_t sig{}; sig < m_sigs; ++sig)
+            if (get_right(success.at(sig), key))
+            {
+                uint16_t length{};
+                for (size_t subkey{}; subkey < key; ++subkey)
+                    length = greater(matrix.at(subkey), length);
+
+                if (++length >= m_sigs) return true;
+                matrix.at(key) = greater(length, matrix.at(key));
+            }
+
+    return false;
+}
     
 // to_links
 // ----------------------------------------------------------------------------
 
 // Trivial single signature correlation.
-template <typename Triple>
-Triple::links to_links(const data_chunk& out,
-    const std::span<const Triple>& in) NOEXCEPT
+template <typename Batch>
+Batch::links to_links(const data_chunk& out,
+    const std::span<const Batch>& in) NOEXCEPT
 {
     BC_ASSERT(out.size() == in.size());
 
@@ -122,8 +160,8 @@ Triple::links to_links(const data_chunk& out,
     std::vector<size_t> it(in.size());
     std::iota(it.begin(), it.end(), zero);
 
-    using link_t = typename Triple::link_t;
-    typename Triple::links links(zero);
+    using link_t = typename Batch::link_t;
+    typename Batch::links fails(zero);
     std::shared_mutex mutex{};
 
     std::for_each(poolstl::execution::par, it.cbegin(), it.cend(),
@@ -134,42 +172,18 @@ Triple::links to_links(const data_chunk& out,
             {
                 std::unique_lock lock{ mutex };
                 const auto& link = in[row].id;
-                links.push_back(from_little_array<link_t>(link));
+                fails.push_back(from_little_array<link_t>(link));
             }
         });
 
-    return links;
-}
-
-using matrix_t = std::array<uint16_t, bits<uint16_t>>;
-
-// O(1) as m and n are bounded at 16.
-constexpr bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
-    const matrix_t& success) NOEXCEPT
-{
-    uint16_t longest{};
-    matrix_t matrix{};
-
-    for (size_t key{}; key < n_keys; ++key)
-        for (size_t sig{}; sig < m_sigs; ++sig)
-            if (get_right(success.at(sig), key))
-            {
-                uint16_t length{};
-                for (size_t subkey{}; subkey < key; ++subkey)
-                    length = greater(matrix.at(subkey), length);
-
-                longest = greater(++length, longest);
-                matrix.at(key) = greater(length, matrix.at(key));
-            }
-
-    return longest >= m_sigs;
+    return fails;
 }
 
 // Specialized multisig correlation.
 // O(n) over the sig set, ~100 bytes of stack, no heap.
 template <>
-multisig::triple::links to_links<const multisig::triple>(const data_chunk& out,
-    const std::span<const multisig::triple>& in) NOEXCEPT
+multisig::batch::links to_links<multisig::batch>(
+    const data_chunk& out, const multisig::batch::span& in) NOEXCEPT
 {
     BC_ASSERT(out.size() == in.size());
 
@@ -177,8 +191,8 @@ multisig::triple::links to_links<const multisig::triple>(const data_chunk& out,
         return {};
 
     using namespace multisig;
-    using link_t = triple::link_t;
-    triple::links fails{};
+    using link_t = batch::link_t;
+    batch::links fails{};
     size_t group{};
 
     for (auto index = one; index <= in.size(); ++index)
@@ -190,7 +204,7 @@ multisig::triple::links to_links<const multisig::triple>(const data_chunk& out,
             continue;
 
         // Process the previous group.
-        matrix_t matrix{};
+        multisig_matrix matrix{};
         uint8_t max_sig{}, max_key{};
         for (auto row = group; row < index; ++row)
         {
@@ -210,28 +224,73 @@ multisig::triple::links to_links<const multisig::triple>(const data_chunk& out,
     return fails;
 }
 
-// published
-// ----------------------------------------------------------------------------
-
-schnorr::triple::links verify_signatures(const schnorr::triples& batch,
-    bool turbo) NOEXCEPT
-{
-    return to_links(batch_verify(batch, turbo), batch);
-}
-
-ecdsa::triple::links verify_signatures(const ecdsa::triples& batch,
-    bool turbo) NOEXCEPT
-{
-    return to_links(batch_verify(batch, turbo), batch);
-}
-
-multisig::triple::links verify_signatures(const multisig::triples& batch,
-    bool turbo) NOEXCEPT
-{
-    return to_links(batch_verify(batch, turbo), batch);
-}
-
 BC_POP_WARNING()
+
+// evaluate
+// ----------------------------------------------------------------------------
+// static/protected
+
+data_chunk schnorr::batch::evaluate(const schnorr::batch::span& batch,
+    bool turbo) NOEXCEPT
+{
+    return batch_verify(batch, turbo);
+}
+
+data_chunk ecdsa::batch::evaluate(const ecdsa::batch::span& batch,
+    bool turbo) NOEXCEPT
+{
+    return batch_verify(batch, turbo);
+}
+
+data_chunk multisig::batch::evaluate(const multisig::batch::span& batch,
+    bool turbo) NOEXCEPT
+{
+    return batch_verify(batch, turbo);
+}
+
+// correlate
+// ----------------------------------------------------------------------------
+// static/protected
+
+schnorr::batch::links schnorr::batch::correlate(const data_chunk& out,
+    const schnorr::batch::span& in) NOEXCEPT
+{
+    return to_links(out, in);
+}
+
+ecdsa::batch::links ecdsa::batch::correlate(const data_chunk& out,
+    const ecdsa::batch::span& in) NOEXCEPT
+{
+    return to_links(out, in);
+}
+
+multisig::batch::links multisig::batch::correlate(const data_chunk& out,
+    const multisig::batch::span& in) NOEXCEPT
+{
+    return to_links(out, in);
+}
+
+// verify
+// ----------------------------------------------------------------------------
+// static/public
+
+schnorr::batch::links schnorr::batch::verify(
+    const schnorr::batch::span& batch, bool turbo) NOEXCEPT
+{
+    return correlate(evaluate(batch, turbo), batch);
+}
+
+ecdsa::batch::links ecdsa::batch::verify(
+    const ecdsa::batch::span& batch, bool turbo) NOEXCEPT
+{
+    return correlate(evaluate(batch, turbo), batch);
+}
+
+multisig::batch::links multisig::batch::verify(
+    const multisig::batch::span& batch, bool turbo) NOEXCEPT
+{
+    return correlate(evaluate(batch, turbo), batch);
+}
 
 } // namespace system
 } // namespace libbitcoin

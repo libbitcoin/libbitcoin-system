@@ -89,7 +89,7 @@ try_batch_multisig_verification(const chunk_xptrs& points,
 
     uint8_t sighash_flags;
     ec_signatures sigs(endorsements.size());
-    if (!parse_signatures(sighash_flags, sigs, endorsements,
+    if (!parse_ecdsa_signatures(sighash_flags, sigs, endorsements,
         is_enabled(flags::bip66_rule)))
         return false;
 
@@ -97,8 +97,10 @@ try_batch_multisig_verification(const chunk_xptrs& points,
     if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
         return false;
 
+    // TODO: assert against group rollover (more than 2^16 inputs).
+    const auto group = capture_.group.fetch_add(one, relaxed);
     capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
-    capture_.multisig(hash, keys, sigs);
+    capture_.multisig(hash, keys, sigs, group);
     return true;
 }
 
@@ -124,7 +126,7 @@ compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
 // static
 TEMPLATE
 inline bool CLASS::
-parse_signatures(uint8_t& sighash, ec_signatures& out,
+parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
     const chunk_xptrs& endorsements, bool strict) NOEXCEPT
 {
     std::optional<uint8_t> byte{};
