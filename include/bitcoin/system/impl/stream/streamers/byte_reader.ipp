@@ -202,28 +202,26 @@ uint64_t byte_reader<IStream>::read_8_bytes_little_endian() NOEXCEPT
 template <typename IStream>
 uint64_t byte_reader<IStream>::read_variable() NOEXCEPT
 {
-    uint64_t value;
-    switch (const auto length_byte = read_byte())
+    switch (const auto size = read_byte())
     {
         case varint_eight_bytes:
-            value = read_8_bytes_little_endian();
-            if (value <= max_uint32)
-                invalid();
+            if (const auto value = read_8_bytes_little_endian();
+                value > max_uint32) return value;
             break;
         case varint_four_bytes:
-            value = read_4_bytes_little_endian();
-            if (value <= max_uint16)
-                invalid();
+            if (const auto value = read_4_bytes_little_endian();
+                value > max_uint16) return value;
             break;
         case varint_two_bytes:
-            value = read_2_bytes_little_endian();
-            if (value < varint_two_bytes)
-                invalid();
+            if (const auto value = read_2_bytes_little_endian();
+                value >= varint_two_bytes) return value;
             break;
         default:
-            value = length_byte;
+            return size;
     }
-    return value;
+
+    invalid();
+    return {};
 }
 
 template <typename IStream>
@@ -236,7 +234,7 @@ size_t byte_reader<IStream>::read_size(size_t limit) NOEXCEPT
     if (size > limit)
     {
         invalid();
-        return zero;
+        return {};
     }
  
     return possible_narrow_cast<size_t>(size);

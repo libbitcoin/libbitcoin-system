@@ -98,7 +98,7 @@ data_chunk batch_verify(const std::span<Triple>& batch, bool turbo) NOEXCEPT
 
     // Collect signature validation results as corresponding integer booleans.
     data_chunk results(batch.size());
-    std::for_each(policy, it.begin(), it.end(), [&](size_t row) NOEXCEPT
+    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
     {
         results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
     });
@@ -126,7 +126,7 @@ Triple::links to_links(const data_chunk& out,
     typename Triple::links links(zero);
     std::shared_mutex mutex{};
 
-    std::for_each(poolstl::execution::par, it.begin(), it.end(),
+    std::for_each(poolstl::execution::par, it.cbegin(), it.cend(),
         [&](size_t row) NOEXCEPT
         {
             // Failure is *extremely* rare, so this is very efficient.

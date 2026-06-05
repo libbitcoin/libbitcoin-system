@@ -804,6 +804,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__one_byte__expected)
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x08u);
+
     reader.rewind_bytes(1);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x08u);
     BOOST_REQUIRE(reader);
@@ -815,6 +816,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__two_bytes__expected)
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0708u);
+
     reader.rewind_bytes(3);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0708u);
     BOOST_REQUIRE(reader);
@@ -826,6 +828,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__four_bytes__expected)
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x05060708u);
+
     reader.rewind_bytes(5);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x05060708u);
     BOOST_REQUIRE(reader);
@@ -851,38 +854,61 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__eight_bytes__expected)
     }
 }
 
-// non-canonical variable size
+// non-canonical read_size
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__non_canonical_two_bytes_expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_size__non_canonical_two_bytes__zero_invalid)
 {
-    const std::string value{static_cast<char>(varint_two_bytes), 0x08, 0x00};
-    std::istringstream stream {value};
+    const std::string value{ static_cast<char>(varint_two_bytes), 0x08, 0x00 };
+    std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0008u);
-    reader.rewind_bytes(3);
-    reader.read_variable();
+    BOOST_REQUIRE(is_zero(reader.read_size()));
     BOOST_REQUIRE(!reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__non_canonical_four_bytes_expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_size__non_canonical_four_bytes__zero_invalid)
 {
-    const std::string value{static_cast<char>(varint_four_bytes), 0x08, 0x00, 0x00, 0x00};
-    std::istringstream stream {value};
+    const std::string value{ static_cast<char>(varint_four_bytes), 0x08, 0x00, 0x00, 0x00 };
+    std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x00000008u);
-    reader.rewind_bytes(5);
-    reader.read_variable();
+    BOOST_REQUIRE(is_zero(reader.read_size()));
     BOOST_REQUIRE(!reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__non_canonical_eight_bytes_expected)
+BOOST_AUTO_TEST_CASE(byte_reader__read_size__non_canonical_eight_bytes__zero_invalid)
 {
-    const std::string value{static_cast<char>(varint_eight_bytes), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    std::istringstream stream {value};
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0000000000000000u);
-    reader.rewind_bytes(9);
-    reader.read_variable();
+    BOOST_REQUIRE(is_zero(reader.read_size()));
+    BOOST_REQUIRE(!reader);
+}
+
+// non-canonical read_variable
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_variable__non_canonical_two_bytes__zero_invalid)
+{
+    const std::string value{ static_cast<char>(varint_two_bytes), 0x08, 0x00 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(is_zero(reader.read_variable()));
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_variable__non_canonical_four_bytes__zero_invalid)
+{
+    const std::string value{ static_cast<char>(varint_four_bytes), 0x08, 0x00, 0x00, 0x00 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(is_zero(reader.read_variable()));
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_variable__non_canonical_eight_bytes__zero_invalid)
+{
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(is_zero(reader.read_variable()));
     BOOST_REQUIRE(!reader);
 }
 
