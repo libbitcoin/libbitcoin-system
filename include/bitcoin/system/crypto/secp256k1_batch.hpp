@@ -29,61 +29,64 @@
 
 namespace libbitcoin {
 namespace system {
-
-/// schnorr
-/// ---------------------------------------------------------------------------
 namespace schnorr {
-struct BC_API triple
+    
+/// Span matches serialized buffer.
+struct BC_API signatures
 {
     using link = data_array<3>;
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
+    using span = std::span<const signatures>;
     static constexpr size_t metadata_size = sizeof(link);
+    static links verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
     ec_xonly point;
     ec_signature signature;
     link id;
+
+protected:
+    static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
+    static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
 };
-using triples = std::span<const triple>;
+
 } // namespace schnorr
 
-/// Verify Schnorr signatures of { message, public key, signature } triples.
-/// Failed rows are identified by return of associated index, otherwise empty.
-BC_API schnorr::triple::links verify_signatures(const schnorr::triples& batch,
-    bool turbo) NOEXCEPT;
-
-/// ecdsa
-/// ---------------------------------------------------------------------------
 namespace ecdsa {
-struct BC_API triple
+
+/// Span matches serialized buffer.
+struct BC_API signatures
 {
     using link = data_array<3>;
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
+    using span = std::span<const signatures>;
     static constexpr size_t metadata_size = sizeof(link);
+    static links verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
     ec_compressed point;
     ec_signature signature;
     link id;
+
+protected:
+    static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
+    static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
 };
-using triples = std::span<const triple>;
+
 } // namespace ecdsa
 
-/// Verify ECDSA signatures of { message, public key, signature } triples.
-/// Failed rows are identified by return of associated index, otherwise empty.
-BC_API ecdsa::triple::links verify_signatures(const ecdsa::triples& batch,
-    bool turbo) NOEXCEPT;
-
-/// multisig (ecdsa)
-/// ---------------------------------------------------------------------------
 namespace multisig {
-struct BC_API triple
+    
+/// Span matches serialized buffer.
+struct BC_API signatures
 {
     using link = data_array<3>;
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
+    using span = std::span<const signatures>;
+    static links verify(const span& batch, bool turbo)  NOEXCEPT;
 
     hash_digest digest;
     ec_compressed point;
@@ -94,15 +97,13 @@ struct BC_API triple
 
     static constexpr size_t metadata_size = sizeof(link) + sizeof(set) +
         sizeof(pair);
+
+protected:
+    static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
+    static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
 };
-using triples = std::span<const triple>;
+
 } // namespace multisig
-
-/// Verify ECDSA signatures of { message, public key, signature } triples.
-/// Failed rows are identified by return of associated index, otherwise empty.
-BC_API multisig::triple::links verify_signatures(
-    const multisig::triples& batch, bool turbo) NOEXCEPT;
-
 } // namespace system
 } // namespace libbitcoin
 
