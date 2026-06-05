@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include <cstring>
+#include <memory>
 #include <sstream>
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
@@ -1606,24 +1608,43 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string__four_bytes__expected)
     BOOST_REQUIRE(reader);
 }
 
-// To test read_string with 8 bytes in canonical compact size representation
-// would require a string of 4,294,967,296 chars ~= 4GB.
-// BOOST_AUTO_TEST_CASE(byte_reader__read_string__eight_bytes__expected)
-// {
-//     const std::string payload(4294967296ull, 'a');
-//     std::string value
-//     {
-//         static_cast<char>(varint_eight_bytes),
-//         0x00, 0x00, 0x00, 0x00,
-//         0x01, 0x00, 0x00, 0x00
-//     };
-//     value += payload;
-//
-//     std::istringstream stream{ value };
-//     read::bytes::istream reader(stream);
-//     BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
-//     BOOST_REQUIRE(reader);
-// }
+BOOST_AUTO_TEST_CASE(byte_reader__read_string__eight_bytes__expected)
+{
+    constexpr char header[]
+    {
+        static_cast<char>(varint_eight_bytes),
+        0x00, 0x00, 0x00, 0x00,
+        0x01, 0x00, 0x00, 0x00
+    };
+    constexpr auto payload_size = 4294967296ull;
+    const auto total_size = sizeof(header) + static_cast<size_t>(payload_size);
+
+    const auto buffer = std::make_unique<char[]>(total_size);
+    BOOST_REQUIRE(buffer);
+
+    auto* data = buffer.get();
+    std::memcpy(data, header, sizeof(header));
+    std::memset(data + sizeof(header), 'a', static_cast<size_t>(payload_size));
+
+    struct memory_streambuf
+      : public std::streambuf
+    {
+        memory_streambuf(char* begin, size_t size) NOEXCEPT
+        {
+            setg(begin, begin, begin + size);
+        }
+    };
+
+    memory_streambuf source(data, total_size);
+    std::istream stream{ &source };
+    read::bytes::istream reader(stream);
+
+    const auto payload = reader.read_string();
+    BOOST_REQUIRE_EQUAL(payload.size(), payload_size);
+    BOOST_REQUIRE_EQUAL(payload.front(), 'a');
+    BOOST_REQUIRE_EQUAL(payload.back(), 'a');
+    BOOST_REQUIRE(reader);
+}
 
 // read_string_buffer
 
