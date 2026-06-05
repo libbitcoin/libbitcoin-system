@@ -37,21 +37,19 @@ namespace chain {
 /// which if any block (or transaction depending on correlation) has failed.
 struct BC_API signatures
 {
-    using ecdsa_handler = std::function<void(const hash_digest& signature_hash,
-        const ec_compressed& public_key, const ec_signature& signature)>;
+    using ecdsa_handler = std::function<void(const hash_digest&,
+        const ec_compressed&, const ec_signature&)>;
 
-    using schnorr_handler = std::function<void(const hash_digest& signature_hash,
-        const ec_xonly& public_key, const ec_signature& signature)>;
+    using schnorr_handler = std::function<void(const hash_digest&,
+        const ec_xonly, const ec_signature&)>;
 
-    // TODO: implement. in addition to block link the handler should capture
-    // TODO: a per-block atomic counter, and increment it on each write. This
-    // TODO: provides input correlation for batch multisig post-processing.
-    ////using multisig_handler = std::function<void(...)>;
+    using multisig_handler = std::function<void(const hash_digest&,
+        const ec_compresseds&, const ec_signatures&)>;
 
     /// Invoked with signature verification triples in script interpreter.
     const ecdsa_handler ecdsa{};
     const schnorr_handler schnorr{};
-    ////const multisig_handler multisig{};
+    const multisig_handler multisig{};
 
     /// Default construction disables batching.
     const bool enabled{};

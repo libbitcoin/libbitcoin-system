@@ -20,30 +20,30 @@
 
 // power
 
-static_assert(power(0,  0u) == 0u);
-static_assert(power(0u, 0u) == 0u);
-static_assert(power(0,  1u) == 0u);
-static_assert(power(0u, 1u) == 0u);
+static_assert(power(0,  0u) == to_signed(0_size));
+static_assert(power(0u, 0u) == 0_size);
+static_assert(power(0,  1u) == to_signed(0_size));
+static_assert(power(0u, 1u) == 0_size);
 
-static_assert(power(1,  0u) == 1u);
-static_assert(power(1u, 0u) == 1u);
-static_assert(power(1,  1u) == 1u);
-static_assert(power(1u, 1u) == 1u);
+static_assert(power(1,  0u) == to_signed(1_size));
+static_assert(power(1u, 0u) == 1_size);
+static_assert(power(1,  1u) == to_signed(1_size));
+static_assert(power(1u, 1u) == 1_size);
 
 static_assert(power(2,  16u) == to_signed(power2(16u)));
 static_assert(power(2u, 16u) == 0b1'0000'0000'0000'0000_size);
 
-static_assert(power(3,   0u) == 1u);
-static_assert(power(3u,  0u) == 1u);
-static_assert(power(3,  10u) == 0xe6a9_size);
+static_assert(power(3,   0u) == to_signed(1_size));
+static_assert(power(3u,  0u) == 1_size);
+static_assert(power(3,  10u) == to_signed(0xe6a9_size));
 static_assert(power(3u, 10u) == 0xe6a9_size);
 
-static_assert(power(-1, 0u) == 1u);
+static_assert(power(-1, 0u) == to_signed(1_size));
 static_assert(power(-1, 1u) == 1_nsize);
 
-static_assert(power(-3,  0u) == 1u);
+static_assert(power(-3,  0u) == to_signed(1_size));
 static_assert(power(-3,  1u) == 3_nsize);
-static_assert(power(-3, 10u) == 0xe6a9_size);
+static_assert(power(-3, 10u) == to_signed(0xe6a9_size));
 
 // power2
 static_assert(power2(0u) == 1u);

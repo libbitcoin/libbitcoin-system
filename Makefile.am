@@ -756,8 +756,9 @@ include_bitcoin_system_impl_machine_HEADERS = \
     include/bitcoin/system/impl/machine/number_chunk.ipp \
     include/bitcoin/system/impl/machine/number_integer.ipp \
     include/bitcoin/system/impl/machine/program.ipp \
+    include/bitcoin/system/impl/machine/program_batch.ipp \
     include/bitcoin/system/impl/machine/program_construct.ipp \
-    include/bitcoin/system/impl/machine/program_sign.ipp \
+    include/bitcoin/system/impl/machine/program_verify.ipp \
     include/bitcoin/system/impl/machine/stack.ipp \
     include/bitcoin/system/impl/machine/stack_variant.ipp
 

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
 #include <bit>
+#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/logarithm.hpp>
@@ -461,7 +462,7 @@ constexpr To lo_word(From value) NOEXCEPT
     return narrow_cast<To>(value);
 }
 
-// High/Low word pack.
+// Word pack/unpack.
 // ----------------------------------------------------------------------------
 
 template <typename To, typename From,
@@ -474,6 +475,20 @@ constexpr To pack_word(From high, From low) NOEXCEPT
     const auto hi = possible_narrow_and_sign_cast<To>(high);
     const auto lo = possible_narrow_and_sign_cast<To>(low);
     return bit_or(shift_left(hi, half), unmask_right(lo, half));
+}
+
+template <typename To, typename From,
+    if_integral_integer<To>,
+    if_not_uintx<From>>
+constexpr std::pair<To, To> unpack_word(From value) NOEXCEPT
+{
+    constexpr auto span = bits<From>;
+    constexpr auto half = to_half(span);
+    return
+    {
+        possible_narrow_and_sign_cast<To>(shift_right(value, half)),
+        possible_narrow_and_sign_cast<To>(unmask_right(value, half))
+    };
 }
 
 } // namespace system

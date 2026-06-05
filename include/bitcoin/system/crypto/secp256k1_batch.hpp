@@ -33,90 +33,75 @@ namespace system {
 /// schnorr
 /// ---------------------------------------------------------------------------
 namespace schnorr {
-
 struct BC_API triple
 {
-    using token = data_array<3>;
-    using tokens = std::vector<token>;
-    static constexpr size_t id_size = sizeof(token);
+    using link = data_array<3>;
+    using link_t = unsigned_type<sizeof(link)>;
+    using links = std::vector<link_t>;
+    static constexpr size_t metadata_size = sizeof(link);
 
     hash_digest digest;
     ec_xonly point;
     ec_signature signature;
-    token identifier;
+    link id;
 };
-
 using triples = std::span<const triple>;
-
-/// Verify Schnorr signature of hash by associated secret of the x-only point.
-BC_API bool verify_signature(const triple& single) NOEXCEPT;
+} // namespace schnorr
 
 /// Verify Schnorr signatures of { message, public key, signature } triples.
-/// Failed rows are identified by return of associated token, otherwise empty.
-BC_API triple::tokens verify_signatures(const triples& batch,
+/// Failed rows are identified by return of associated index, otherwise empty.
+BC_API schnorr::triple::links verify_signatures(const schnorr::triples& batch,
     bool turbo) NOEXCEPT;
-
-} // namespace schnorr
 
 /// ecdsa
 /// ---------------------------------------------------------------------------
 namespace ecdsa {
-
 struct BC_API triple
 {
-    using token = data_array<3>;
-    using tokens = std::vector<token>;
-    static constexpr size_t id_size = sizeof(token);
+    using link = data_array<3>;
+    using link_t = unsigned_type<sizeof(link)>;
+    using links = std::vector<link_t>;
+    static constexpr size_t metadata_size = sizeof(link);
 
     hash_digest digest;
     ec_compressed point;
     ec_signature signature;
-    token identifier;
+    link id;
 };
-
 using triples = std::span<const triple>;
-
-/// Verify ECDSA signature of hash by associated secret of the point.
-BC_API bool verify_signature(const triple& single) NOEXCEPT;
+} // namespace ecdsa
 
 /// Verify ECDSA signatures of { message, public key, signature } triples.
-/// Failed rows are identified by return of associated token, otherwise empty.
-BC_API triple::tokens verify_signatures(const triples& batch,
+/// Failed rows are identified by return of associated index, otherwise empty.
+BC_API ecdsa::triple::links verify_signatures(const ecdsa::triples& batch,
     bool turbo) NOEXCEPT;
-
-} // namespace ecdsa
 
 /// multisig (ecdsa)
 /// ---------------------------------------------------------------------------
 namespace multisig {
-
 struct BC_API triple
 {
-    using token = data_array<3>;
-    using tokens = std::vector<token>;
+    using link = data_array<3>;
+    using link_t = unsigned_type<sizeof(link)>;
+    using links = std::vector<link_t>;
 
     hash_digest digest;
     ec_compressed point;
     ec_signature signature;
     uint8_t pair;
     uint16_t set;
-    token identifier;
+    link id;
 
-    static constexpr size_t id_size = sizeof(token) + sizeof(set) +
+    static constexpr size_t metadata_size = sizeof(link) + sizeof(set) +
         sizeof(pair);
 };
-
 using triples = std::span<const triple>;
-
-/// Verify ECDSA signature of hash by associated secret of the point.
-BC_API bool verify_signature(const triple& single) NOEXCEPT;
+} // namespace multisig
 
 /// Verify ECDSA signatures of { message, public key, signature } triples.
-/// Failed rows are identified by return of associated token, otherwise empty.
-BC_API triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT;
-
-} // namespace multisig
+/// Failed rows are identified by return of associated index, otherwise empty.
+BC_API multisig::triple::links verify_signatures(
+    const multisig::triples& batch, bool turbo) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

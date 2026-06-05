@@ -34,26 +34,30 @@ static constexpr uint8_t ec_even_sign = 2;
 /// Private key:
 static constexpr size_t ec_secret_size = 32;
 typedef data_array<ec_secret_size> ec_secret;
-
-typedef std_vector<ec_secret> secret_list;
+typedef std_vector<ec_secret> secret_list;              // deprecated
+typedef std_vector<ec_secret> secrets;
 
 /// Compressed ECDSA public key:
 static constexpr size_t ec_compressed_size = 33;
 typedef data_array<ec_compressed_size> ec_compressed;
-typedef std_vector<ec_compressed> compressed_list;
+typedef std_vector<ec_compressed> compressed_list;      // deprecated
+typedef std_vector<ec_compressed> ec_compresseds;
 
 /// Uncompressed ECDSA public key:
 static constexpr size_t ec_uncompressed_size = 65;
 typedef data_array<ec_uncompressed_size> ec_uncompressed;
-typedef std_vector<ec_uncompressed> uncompressed_list;
+typedef std_vector<ec_uncompressed> uncompressed_list;  // deprecated
+typedef std_vector<ec_uncompressed> ec_uncompresseds;
 
 /// X-only Schnorr public key:
 static constexpr size_t ec_xonly_size = 32;
 typedef data_array<ec_xonly_size> ec_xonly;
+typedef std_vector<ec_xonly> ec_xonlys;
 
 // Parsed ECDSA or Schnorr signature:
 static constexpr size_t ec_signature_size = 64;
 typedef data_array<ec_signature_size> ec_signature;
+typedef std_vector<ec_signature> ec_signatures;
 
 // DER encoded signature:
 static constexpr size_t max_der_signature_size = 72;

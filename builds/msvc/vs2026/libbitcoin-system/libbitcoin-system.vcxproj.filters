@@ -1810,10 +1810,13 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_batch.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_construct.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_sign.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_verify.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack.ipp">

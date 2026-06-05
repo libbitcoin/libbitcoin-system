@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__one_invalid__expected)
 
     const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[1].identifier);
+    BOOST_REQUIRE_EQUAL(tokens[0], from_little_array<triple::link_t>(batch[1].id));
 }
 
 // batch ecdsa signature verification
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__one_invalid_with_key__expect
 
     const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[2].identifier);
+    BOOST_REQUIRE_EQUAL(tokens[0], from_little_array<triple::link_t>(batch[2].id));
 }
 
 // batch multisig (ecdsa) verification
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_multisig_batch_verify__one_invalid_with_ke
     // TODO: update for multisig correlation when implemented.
     const auto tokens = verify_signatures({ batch.data(), batch.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens[0], batch[2].identifier);
+    BOOST_REQUIRE_EQUAL(tokens[0], from_little_array<triple::link_t>(batch[2].id));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
