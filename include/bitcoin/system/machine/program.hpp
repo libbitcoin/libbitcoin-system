@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
+#include <atomic>
 #include <unordered_map>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -197,24 +198,20 @@ protected:
     virtual INLINE bool set_hash(const chain::script& subscript,
         uint8_t sighash_flags) NOEXCEPT;
 
-    /// Signature validation.
+    /// Signature verify (with batching).
     /// -----------------------------------------------------------------------
-    bool is_input_script() const NOEXCEPT;
-    bool is_ecdsa_batchable() const NOEXCEPT;
-    bool is_schnorr_batchable() const NOEXCEPT;
-    bool is_multisig_batchable() const NOEXCEPT;
-    bool verify_ecdsa_signature(const data_chunk& point,
+    virtual inline bool verify_ecdsa_signature(const data_chunk& point,
+        const hash_digest& hash,
+        const ec_signature& signature) const NOEXCEPT;
+    virtual inline bool verify_schnorr_signature(const data_chunk& point,
         const hash_digest& hash, const ec_signature& signature,
-        bool batchable=false) const NOEXCEPT;
-    bool verify_schnorr_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature,
-        bool batchable=false) const NOEXCEPT;
-    bool verify_multisig_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
-    bool try_batch_multisig_verification(const chunk_xptrs& keys,
+        bool batchable) const NOEXCEPT;
+    virtual inline bool try_batch_multisig_verification(
+        const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
 
 private:
+    static constexpr auto relaxed = std::memory_order_relaxed;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
     using primary_stack = stack<Stack>;
     struct multisig_cache
@@ -224,12 +221,25 @@ private:
         hash_digest hash;
     };
 
-    // Signing helpers.
+    // Verify helpers.
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
     static inline chain::strippers create_strip_ops(
         const chunk_xptrs& endorsements) NOEXCEPT;
     static INLINE chain::strippers create_strip_ops(
         const chunk_xptr& endorsement) NOEXCEPT;
+
+    // Batching helpers.
+    static inline bool compress_public_keys(ec_compresseds& out,
+        const chunk_xptrs& keys) NOEXCEPT;
+    static inline bool parse_signatures(uint8_t& sighash,
+        ec_signatures& out, const chunk_xptrs& endorsements,
+        bool strict) NOEXCEPT;
+    static inline bool to_compressed(ec_compressed& out,
+        const data_chunk& point) NOEXCEPT;
+    INLINE bool is_multisig_batchable() const NOEXCEPT;
+    INLINE bool is_schnorr_batchable() const NOEXCEPT;
+    INLINE bool is_ecdsa_batchable() const NOEXCEPT;
+    INLINE bool is_input_script() const NOEXCEPT;
 
     // Stack helpers.
     INLINE void push_chunk(const chunk_xptr& datum) NOEXCEPT;
@@ -272,8 +282,9 @@ private:
 #define CLASS program<Stack>
 
 #include <bitcoin/system/impl/machine/program.ipp>
+#include <bitcoin/system/impl/machine/program_batch.ipp>
 #include <bitcoin/system/impl/machine/program_construct.ipp>
-#include <bitcoin/system/impl/machine/program_sign.ipp>
+#include <bitcoin/system/impl/machine/program_verify.ipp>
 
 #undef CLASS
 #undef TEMPLATE

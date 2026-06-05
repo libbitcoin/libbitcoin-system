@@ -1065,7 +1065,7 @@ op_check_sig_verify() NOEXCEPT
 
     // Split endorsement into DER signature and signature hash flags.
     uint8_t sighash_flags;
-    const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
+    const auto der = state::ecdsa_split(sighash_flags, *endorsement);
     const auto bip66 = state::is_enabled(flags::bip66_rule);
 
     // BIP66: if DER encoding invalid script MUST fail and end.
@@ -1080,7 +1080,7 @@ op_check_sig_verify() NOEXCEPT
         return error::op_check_sig_verify3;
 
     // Verify ECDSA signature against public key and signature hash.
-    if (!state::verify_ecdsa_signature(*key, hash, sig, true))
+    if (!state::verify_ecdsa_signature(*key, hash, sig))
         return error::op_check_sig_verify4;
 
     // TODO: use sighash and key to generate signature in sign mode.
@@ -1154,10 +1154,9 @@ op_check_multisig_verify() NOEXCEPT
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
-    // TODO: enable and remove state::verify_multisig_signature().
-    ////// False if signature cannot be batched for any reason.
-    ////if (state::try_batch_multisig_verification(keys, endorsements))
-    ////    return error::success;
+    // False if signature cannot be batched for any reason.
+    if (state::try_batch_multisig_verification(keys, endorsements))
+        return error::op_success;
 
     state::initialize_cache();
     auto it = endorsements.begin();
@@ -1178,7 +1177,7 @@ op_check_multisig_verify() NOEXCEPT
 
         // Split endorsement into DER signature and signature hash flags.
         uint8_t sighash_flags;
-        const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
+        const auto der = state::ecdsa_split(sighash_flags, *endorsement);
 
         // BIP66: if DER encoding invalid script MUST fail and end.
         ec_signature sig;
@@ -1191,7 +1190,7 @@ op_check_multisig_verify() NOEXCEPT
                 continue;
 
         // Verify ECDSA signature against public key and cache signature hash.
-        if (state::verify_multisig_signature(*key, state::cached_hash(), sig))
+        if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
             ++it;
     }
 
@@ -1331,7 +1330,7 @@ op_check_sig_add() NOEXCEPT
         return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
-    if (!state::verify_schnorr_signature(*key, hash, sig))
+    if (!state::verify_schnorr_signature(*key, hash, sig, false))
         return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.

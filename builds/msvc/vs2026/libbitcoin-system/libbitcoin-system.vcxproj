@@ -740,8 +740,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_chunk.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_integer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_batch.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_construct.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_sign.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_verify.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack_variant.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp" />

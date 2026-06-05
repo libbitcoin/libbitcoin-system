@@ -198,17 +198,6 @@
     #define HAVE_MEMORY_PRIORITY
 #endif
 
-/// Delint.
-/// ---------------------------------------------------------------------------
-
-/// UltrafastSecp256k1 (conditional exclusion).
-#if defined(HAVE_ULTRAFAST)
-    #include <ufsecp_libbitcoin.h>
-    #define NOT_ULTRAFAST(expression)
-#else
-    #define NOT_ULTRAFAST(expression) expression
-#endif
-
 /// Workarounds for C++ noncompliance.
 /// ---------------------------------------------------------------------------
 

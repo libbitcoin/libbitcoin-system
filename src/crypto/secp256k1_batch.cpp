@@ -20,176 +20,218 @@
 
 #include <algorithm>
 #include <numeric>
+#include <shared_mutex>
+#include <span>
+#if defined(HAVE_ULTRAFAST)
+    #include <ufsecp_libbitcoin.h>
+#endif
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-
-// par_if() doesn't throw, array indexing is required for span<> in c++20.
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// schnorr
+// Array indexing required for c++20 span<T>.
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+// batch_verify
 // ----------------------------------------------------------------------------
 
-namespace schnorr {
-
-bool verify_signature(const triple& single) NOEXCEPT
-{
-    return verify_signature(single.point, single.digest, single.signature);
-}
-
-triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
-{
 #if defined(HAVE_ULTRAFAST)
-    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
-
-    // Unrecoverable (OOM).
-    if (!context.ok())
-        std::abort();
-
-    // The results vector is the only allocation.
-    const auto count = batch.size();
-    std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<const uint8_t>(batch.data());
-    const auto out = results.data();
-    ufsecp_lbtc_verify_schnorr(context.get(), in, count, triple::id_size, out);
-#else
-    const auto policy = poolstl::execution::par_if(turbo);
-
-    // Used only to produce order for concurrency.
-    std::vector<size_t> index(batch.size());
-    std::iota(index.begin(), index.end(), zero);
-
-    // Collect signature validation results as corresponding integer booleans.
-    std::vector<uint8_t> results(batch.size());
-    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
-    {
-        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
-    });
-#endif
-
-    // Map success results to failures only.
-    triple::tokens tokens{};
-    for (size_t row{}; row < results.size(); ++row)
-        if (!to_bool(results.at(row)))
-            tokens.push_back(batch[row].identifier);
-
-    return tokens;
-}
-
-} // namespace schnorr
-
-// ecdsa
-// ----------------------------------------------------------------------------
-
-namespace ecdsa {
-
-bool verify_signature(const triple& single) NOEXCEPT
+    
+template <typename Triple>
+data_chunk batch_verify(const std::span<Triple>& batch, bool) NOEXCEPT
 {
-    return verify_signature(single.point, single.digest, single.signature);
-}
-
-triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
-{
-#if defined(HAVE_ULTRAFAST)
+    // OOM is unrecoverable.
     static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
+    if (!context.ok()) std::abort();
 
-    // Unrecoverable (OOM).
-    if (!context.ok())
-        std::abort();
-
-    // The results vector is the only allocation.
     const auto count = batch.size();
-    std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<const uint8_t>(batch.data());
+    data_chunk results(count);
     const auto out = results.data();
-    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, triple::id_size, out);
-#else
-    const auto policy = poolstl::execution::par_if(turbo);
+    const auto in = pointer_cast<const uint8_t>(batch.data());
 
-    // Used only to produce order for concurrency.
-    std::vector<size_t> index(batch.size());
-    std::iota(index.begin(), index.end(), zero);
+    constexpr auto extra_size = Triple::metadata_size;
+    if constexpr (is_same_type<Triple, schnorr::triple>)
+        ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out);
+    else
+        ufsecp_lbtc_verify_ecdsa(context.get(), in, count, extra_size, out);
 
-    // Collect signature validation results as corresponding integer booleans.
-    std::vector<uint8_t> results(batch.size());
-    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
-    {
-        results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
-    });
-#endif
-
-    // Map success results to failures only.
-    triple::tokens tokens{};
-    for (size_t row{}; row < results.size(); ++row)
-        if (!to_bool(results.at(row)))
-            tokens.push_back(batch[row].identifier);
-
-    return tokens;
+    return results;
 }
 
-} // namespace ecdsa
+#else
 
-// multisig
-// ----------------------------------------------------------------------------
+inline bool verify_signature(const schnorr::triple& single) NOEXCEPT
+{
+    return schnorr::verify_signature(single.point, single.digest,
+        single.signature);
+}
 
-namespace multisig {
-
-bool verify_signature(const triple& single) NOEXCEPT
+inline bool verify_signature(const ecdsa::triple& single) NOEXCEPT
 {
     return ecdsa::verify_signature(single.point, single.digest,
         single.signature);
 }
 
-triple::tokens verify_signatures(const triples& batch,
-    bool NOT_ULTRAFAST(turbo)) NOEXCEPT
+inline bool verify_signature(const multisig::triple& single) NOEXCEPT
 {
-#if defined(HAVE_ULTRAFAST)
-    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
+    return ecdsa::verify_signature(single.point, single.digest,
+        single.signature);
+}
 
-    // Unrecoverable (OOM).
-    if (!context.ok())
-        std::abort();
-
-    // The results vector is the only allocation.
-    const auto count = batch.size();
-    std::vector<uint8_t> results(count);
-    const auto in = pointer_cast<const uint8_t>(batch.data());
-    const auto out = results.data();
-    ufsecp_lbtc_verify_ecdsa(context.get(), in, count, triple::id_size, out);
-#else
+template <typename Triple>
+data_chunk batch_verify(const std::span<Triple>& batch, bool turbo) NOEXCEPT
+{
+    // par_if doesn't throw.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     const auto policy = poolstl::execution::par_if(turbo);
+    BC_POP_WARNING()
 
     // Used only to produce order for concurrency.
-    std::vector<size_t> index(batch.size());
-    std::iota(index.begin(), index.end(), zero);
+    std::vector<size_t> it(batch.size());
+    std::iota(it.begin(), it.end(), zero);
 
     // Collect signature validation results as corresponding integer booleans.
-    std::vector<uint8_t> results(batch.size());
-    std::for_each(policy, index.begin(), index.end(), [&](size_t row) NOEXCEPT
+    data_chunk results(batch.size());
+    std::for_each(policy, it.begin(), it.end(), [&](size_t row) NOEXCEPT
     {
         results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
     });
-#endif
 
-    // Map success results to failures only.
-    triple::tokens tokens{};
-    for (size_t row{}; row < results.size(); ++row)
-        if (!to_bool(results.at(row)))
-            tokens.push_back(batch[row].identifier);
-
-    return tokens;
+    return results;
 }
 
-} // namespace multisig
+#endif
+    
+// to_links
+// ----------------------------------------------------------------------------
+
+// Trivial single signature correlation.
+template <typename Triple>
+Triple::links to_links(const data_chunk& out,
+    const std::span<const Triple>& in) NOEXCEPT
+{
+    BC_ASSERT(out.size() == in.size());
+
+    // Used only to produce order for concurrency.
+    std::vector<size_t> it(in.size());
+    std::iota(it.begin(), it.end(), zero);
+
+    using link_t = typename Triple::link_t;
+    typename Triple::links links(zero);
+    std::shared_mutex mutex{};
+
+    std::for_each(poolstl::execution::par, it.begin(), it.end(),
+        [&](size_t row) NOEXCEPT
+        {
+            // Failure is *extremely* rare, so this is very efficient.
+            if (!to_bool(out.at(row)))
+            {
+                std::unique_lock lock{ mutex };
+                const auto& link = in[row].id;
+                links.push_back(from_little_array<link_t>(link));
+            }
+        });
+
+    return links;
+}
+
+using matrix_t = std::array<uint16_t, bits<uint16_t>>;
+
+// O(1) as m and n are bounded at 16.
+constexpr bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
+    const matrix_t& success) NOEXCEPT
+{
+    uint16_t longest{};
+    matrix_t matrix{};
+
+    for (size_t key{}; key < n_keys; ++key)
+        for (size_t sig{}; sig < m_sigs; ++sig)
+            if (get_right(success.at(sig), key))
+            {
+                uint16_t length{};
+                for (size_t subkey{}; subkey < key; ++subkey)
+                    length = greater(matrix.at(subkey), length);
+
+                longest = greater(++length, longest);
+                matrix.at(key) = greater(length, matrix.at(key));
+            }
+
+    return longest >= m_sigs;
+}
+
+// Specialized multisig correlation.
+// O(n) over the sig set, ~100 bytes of stack, no heap.
+template <>
+multisig::triple::links to_links<const multisig::triple>(const data_chunk& out,
+    const std::span<const multisig::triple>& in) NOEXCEPT
+{
+    BC_ASSERT(out.size() == in.size());
+
+    if (in.empty())
+        return {};
+
+    using namespace multisig;
+    using link_t = triple::link_t;
+    triple::links fails{};
+    size_t group{};
+
+    for (auto index = one; index <= in.size(); ++index)
+    {
+        // Find the start of the next group (or end).
+        if ((index != in.size()) &&
+            (in[index].id  == in[group].id) &&
+            (in[index].set == in[group].set))
+            continue;
+
+        // Process the previous group.
+        matrix_t matrix{};
+        uint8_t max_sig{}, max_key{};
+        for (auto row = group; row < index; ++row)
+        {
+            const auto [sig, key] = unpack_word<uint8_t>(in[row].pair);
+            if (to_bool(out.at(row))) set_right_into(matrix.at(sig), key);
+            max_sig = greater(sig, max_sig);
+            max_key = greater(key, max_key);
+        }
+
+        // Evaluate matrix for valid solution.
+        if (!has_valid_path(++max_sig, ++max_key, matrix))
+            fails.push_back(from_little_array<link_t>(in[group].id));
+
+        group = index;
+    }
+
+    return fails;
+}
+
+// published
+// ----------------------------------------------------------------------------
+
+schnorr::triple::links verify_signatures(const schnorr::triples& batch,
+    bool turbo) NOEXCEPT
+{
+    return to_links(batch_verify(batch, turbo), batch);
+}
+
+ecdsa::triple::links verify_signatures(const ecdsa::triples& batch,
+    bool turbo) NOEXCEPT
+{
+    return to_links(batch_verify(batch, turbo), batch);
+}
+
+multisig::triple::links verify_signatures(const multisig::triples& batch,
+    bool turbo) NOEXCEPT
+{
+    return to_links(batch_verify(batch, turbo), batch);
+}
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
-BC_POP_WARNING()
