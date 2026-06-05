@@ -77,11 +77,18 @@ data_chunk batch_verify(const std::span<Signatures>& batch, bool) NOEXCEPT
     const auto out = results.data();
     const auto in = pointer_cast<const uint8_t>(batch.data());
 
-    constexpr auto extra_size = Signatures::metadata_size;
     if constexpr (is_same_type<Signatures, schnorr::signatures>)
+    {
+        constexpr auto extra_size = sizeof(Signatures) - (sizeof(hash_digest) +
+            sizeof(ec_xonly) + sizeof(ec_signature));
         ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out);
+    }
     else
+    {
+        constexpr auto extra_size = sizeof(Signatures) - (sizeof(hash_digest) +
+            sizeof(ec_compressed) + sizeof(ec_signature));
         ufsecp_lbtc_verify_ecdsa(context.get(), in, count, extra_size, out);
+    }
 
     return results;
 }
@@ -114,11 +121,12 @@ data_chunk batch_verify(const std::span<Signatures>& batch, bool turbo) NOEXCEPT
 
 // utility
 // ----------------------------------------------------------------------------
+// local
 
 using multisig_matrix = std::array<uint16_t, bits<uint16_t>>;
 
 // O(1) as m and n are bounded at 16.
-bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
+inline bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
     const multisig_matrix& success) NOEXCEPT
 {
     multisig_matrix matrix{};

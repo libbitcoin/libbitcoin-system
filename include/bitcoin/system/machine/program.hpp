@@ -231,7 +231,7 @@ private:
     // Batching helpers.
     static inline bool compress_public_keys(ec_compresseds& out,
         const chunk_xptrs& keys) NOEXCEPT;
-    static inline bool parse_signatures(uint8_t& sighash,
+    static inline bool parse_ecdsa_signatures(uint8_t& sighash,
         ec_signatures& out, const chunk_xptrs& endorsements,
         bool strict) NOEXCEPT;
     static inline bool to_compressed(ec_compressed& out,

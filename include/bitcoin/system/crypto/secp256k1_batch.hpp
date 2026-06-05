@@ -38,7 +38,6 @@ struct BC_API signatures
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
     using span = std::span<const signatures>;
-    static constexpr size_t metadata_size = sizeof(link);
     static links verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
@@ -62,7 +61,6 @@ struct BC_API signatures
     using link_t = unsigned_type<sizeof(link)>;
     using links = std::vector<link_t>;
     using span = std::span<const signatures>;
-    static constexpr size_t metadata_size = sizeof(link);
     static links verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
@@ -94,9 +92,6 @@ struct BC_API signatures
     uint8_t pair;
     uint16_t set;
     link id;
-
-    static constexpr size_t metadata_size = sizeof(link) + sizeof(set) +
-        sizeof(pair);
 
 protected:
     static data_chunk batch(const span& batch, bool turbo) NOEXCEPT;
