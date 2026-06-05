@@ -851,6 +851,40 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__eight_bytes__expected)
     }
 }
 
+// non-canonical variable size
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__non_canonical_two_bytes_expected)
+{
+    const std::string value{static_cast<char>(varint_two_bytes), 0x08, 0x00};
+    std::istringstream stream {value};
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0008u);
+    reader.rewind_bytes(3);
+    reader.read_variable();
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__non_canonical_four_bytes_expected)
+{
+    const std::string value{static_cast<char>(varint_four_bytes), 0x08, 0x00, 0x00, 0x00};
+    std::istringstream stream {value};
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x00000008u);
+    reader.rewind_bytes(5);
+    reader.read_variable();
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__non_canonical_eight_bytes_expected)
+{
+    const std::string value{static_cast<char>(varint_eight_bytes), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    std::istringstream stream {value};
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0000000000000000u);
+    reader.rewind_bytes(9);
+    reader.read_variable();
+    BOOST_REQUIRE(!reader);
+}
 
 // read_error_code
 
@@ -1550,26 +1584,26 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string__one_byte__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_string__two_bytes__expected)
 {
-    const std::string value{ static_cast<char>(varint_two_bytes), 0x03, 0x00, 'a', 'b', 'c' };
+    const std::string payload(253, 'a');
+    std::string value{ static_cast<char>(varint_two_bytes), static_cast<char>(0xfd), 0x00 };
+    value += payload;
+
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
+    BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+    BOOST_REQUIRE(reader);
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_string__four_bytes__expected)
 {
-    const std::string value{ static_cast<char>(varint_four_bytes), 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
-    std::istringstream stream{ value };
-    read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
-}
+    const std::string payload(65536, 'a');
+    std::string value{ static_cast<char>(varint_four_bytes), 0x00, 0x00, 0x01, 0x00 };
+    value += payload;
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_string__eight_bytes__expected)
-{
-    const std::string value{ static_cast<char>(varint_eight_bytes), 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
+    BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+    BOOST_REQUIRE(reader);
 }
 
 // read_string_buffer

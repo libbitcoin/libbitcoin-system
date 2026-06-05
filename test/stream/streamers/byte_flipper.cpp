@@ -937,26 +937,26 @@ BOOST_AUTO_TEST_CASE(byte_flipper__read_string__one_byte__expected)
 
 BOOST_AUTO_TEST_CASE(byte_flipper__read_string__two_bytes__expected)
 {
-    const std::string value{ (char)varint_two_bytes, 0x03, 0x00, 'a', 'b', 'c' };
+    const std::string payload(253, 'a');
+    std::string value{ (char)varint_two_bytes, static_cast<char>(0xfd), 0x00 };
+    value += payload;
+
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
+    BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+    BOOST_REQUIRE(reader);
 }
 
 BOOST_AUTO_TEST_CASE(byte_flipper__read_string__four_bytes__expected)
 {
-    const std::string value{ (char)varint_four_bytes, 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
-    std::stringstream stream{ value };
-    flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
-}
+    const std::string payload(65536, 'a');
+    std::string value{ (char)varint_four_bytes, 0x00, 0x00, 0x01, 0x00 };
+    value += payload;
 
-BOOST_AUTO_TEST_CASE(byte_flipper__read_string__eight_bytes__expected)
-{
-    const std::string value{ (char)varint_eight_bytes, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::stringstream stream{ value };
     flip::bytes::iostream reader(stream);
-    BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
+    BOOST_REQUIRE_EQUAL(reader.read_string(), payload);
+    BOOST_REQUIRE(reader);
 }
 
 // read_string_buffer
