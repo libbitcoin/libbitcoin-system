@@ -97,10 +97,20 @@ try_batch_multisig_verification(const chunk_xptrs& points,
     if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
         return false;
 
-    // TODO: assert against group rollover (more than 2^16 inputs).
+    // The group is logically limited to uint16 but capture group is uint64.
+    using logical_group_t = decltype(multisig::batch::group);
+    using capture_group_t = decltype(capture_.group)::value_type;
+    static_assert(is_same_type<capture_group_t, uint64_t>);
+    static_assert(is_same_type<logical_group_t, uint16_t>);
+
+    // So an overflow can be safely detected here, resulting in capture bypass.
+    // Caller can detect occurances of lost capture by checking capture_.group.
     const auto group = capture_.group.fetch_add(one, relaxed);
+    if (is_limited<logical_group_t>(group))
+        return false;
+
     capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
-    capture_.multisig(hash, keys, sigs, group);
+    capture_.multisig(hash, keys, sigs, narrow_cast<logical_group_t>(group));
     return true;
 }
 
