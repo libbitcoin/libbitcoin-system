@@ -8,7 +8,7 @@
   <PropertyGroup>
     <_PropertySheetDisplayName>Release Settings</_PropertySheetDisplayName>
     <DebugOrRelease>Release</DebugOrRelease>
-    <LinkIncremental>false</LinkIncremental>
+    <!--<LinkIncremental>false</LinkIncremental>-->
   </PropertyGroup>
   
   <!-- DebugInformationFormat and GenerateDebugInformation were formerly disabled. -->
