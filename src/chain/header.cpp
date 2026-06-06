@@ -355,14 +355,32 @@ bool header::is_futuristic_timestamp(
     return time > future;
 }
 
+// BIP94 specific (the block's timestamp is too early on difficulty
+// adjustment block).
+bool header::is_timestamp_early(size_t height, uint32_t timestamp,
+    uint32_t previous_block_timestamp,
+    uint32_t retarget_interval) const NOEXCEPT
+{
+    static const auto max_timewarp = 600;
+
+    return (height % retarget_interval == 0) &&
+        (timestamp < previous_block_timestamp - max_timewarp);
+}
+
+
 // Validation.
 // ----------------------------------------------------------------------------
 
 code header::check(uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit, bool scrypt) const NOEXCEPT
+    uint32_t proof_of_work_limit, size_t height,
+    uint32_t current_timestamp, uint32_t previous_block_timestamp,
+    uint32_t retarget_interval, bool bip94, bool scrypt) const NOEXCEPT
 {
     if (is_invalid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
+    if (bip94 && is_timestamp_early(height, current_timestamp,
+        previous_block_timestamp, retarget_interval))
+        return error::early_timewarp_attack;
     if (is_futuristic_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 

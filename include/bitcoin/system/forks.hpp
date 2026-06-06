@@ -34,6 +34,9 @@ typedef struct
     /// github.com/bitcoin/bitcoin/pull/8391
     bool bip90;
 
+    // https://github.com/bitcoin/bitcoin/pull/29775
+    bool bip94;
+
     /// github.com/bitcoin/bitcoin/commit/a206b0ea12eb4606b93323268fc81a4f1f952531
     /// github.com/bitcoin/bitcoin/pull/6931
     /// github.com/bitcoin/bitcoin/pull/12204

@@ -154,6 +154,55 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
+BOOST_AUTO_TEST_CASE(settings__construct__testnet4_context__expected)
+{
+    const chain::checkpoint::list checkpoints
+    {
+        { "00000000da84f2bafbbc53dee25a72ae507ff4914b867c565be350b0da8bf043", 0 }
+    };
+
+    settings configuration(chain::selection::testnet4);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    const chain::block genesis_block = configuration.genesis_block;
+    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000004e7b2b9128fe0291db0693af2ae418b767e657cd407e80cb1434221eaea7a07a046f3566ffff001dbb0c78170101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff5504ffff001d01044c4c30332f4d61792f323032342030303030303030303030303030303030303030303165626435386332343439373062336161396437383362623030313031316662653865613865393865303065ffffffff0100f2052a010000002321000000000000000000000000000000000000000000000000000000000000000000ac00000000");
+    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
+    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
+    const chain::checkpoint bit0_active("0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
+    const chain::checkpoint bit1_active("0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
+    ////const chain::checkpoint bit2_active("0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632);
+    ////BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
+    const chain::checkpoint milestone("0000000002368b1e4ee27e2e85676ae6f9f9e69579b29093e9a82c170bf7cf8a", 123613u);
+    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
+}
+
 BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
 {
     settings configuration(chain::selection::regtest);

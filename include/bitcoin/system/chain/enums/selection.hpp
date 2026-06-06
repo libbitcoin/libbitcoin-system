@@ -31,6 +31,7 @@ enum class selection
     none,
     mainnet,
     testnet3,
+    testnet4,
     regtest
 };
 

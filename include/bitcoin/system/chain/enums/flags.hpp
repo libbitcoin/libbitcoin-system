@@ -137,7 +137,10 @@ enum flags : uint32_t
     /// Reduces threshold segregated witness signaling (soft fork, feature).
     bip91_rule = bit_right<uint32_t>(27),
 
-    /// Agregates
+    /// Testnet4 only
+    bip94_rule = bit_right<uint32_t>(28),
+
+    /// Aggregates
     /// -----------------------------------------------------------------------
 
     /// Rules that use bip34-based activation.
