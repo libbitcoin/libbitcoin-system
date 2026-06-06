@@ -132,7 +132,9 @@ inline bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
     multisig_matrix matrix{};
 
     for (size_t key{}; key < n_keys; ++key)
+    {
         for (size_t sig{}; sig < m_sigs; ++sig)
+        {
             if (get_right(success.at(sig), key))
             {
                 uint16_t length{};
@@ -142,6 +144,8 @@ inline bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
                 if (++length >= m_sigs) return true;
                 matrix.at(key) = greater(length, matrix.at(key));
             }
+        }
+    }
 
     return false;
 }
