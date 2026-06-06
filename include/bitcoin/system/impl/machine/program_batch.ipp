@@ -39,7 +39,7 @@ INLINE bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) const NOEXCEPT
 {
-    if (!is_ecdsa_batchable())
+    if (!capture_.enabled || !is_ecdsa_batchable())
     {
         capture_.unbatched_ecdsa.fetch_add(one, relaxed);
         return ecdsa::verify_signature(point, hash, signature);
@@ -59,7 +59,7 @@ INLINE bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature, bool batchable) const NOEXCEPT
 {
-    if (!batchable || !is_schnorr_batchable())
+    if (!batchable || !capture_.enabled || !is_schnorr_batchable())
     {
         capture_.unbatched_schnorr.fetch_add(one, relaxed);
         return schnorr::verify_signature(point, hash, signature);
@@ -77,7 +77,7 @@ INLINE bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    if (!is_multisig_batchable())
+    if (!capture_.enabled || !is_multisig_batchable())
     {
         capture_.unbatched_multisig.fetch_add(endorsements.size(), relaxed);
         return false;
@@ -97,20 +97,20 @@ try_batch_multisig_verification(const chunk_xptrs& points,
     if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
         return false;
 
-    // The group is logically limited to uint16 but capture group is uint64.
-    using logical_group_t = decltype(multisig::batch::group);
+    // The group is storage limited to uint16 but capture group is uint64.
+    using storage_group_t = decltype(multisig::batch::group);
     using capture_group_t = decltype(capture_.group)::value_type;
     static_assert(is_same_type<capture_group_t, uint64_t>);
-    static_assert(is_same_type<logical_group_t, uint16_t>);
+    static_assert(is_same_type<storage_group_t, uint16_t>);
 
     // So an overflow can be safely detected here, resulting in capture bypass.
     // Caller can detect occurances of lost capture by checking capture_.group.
     const auto group = capture_.group.fetch_add(one, relaxed);
-    if (is_limited<logical_group_t>(group))
+    if (is_limited<storage_group_t>(group))
         return false;
 
     capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
-    capture_.multisig(hash, keys, sigs, narrow_cast<logical_group_t>(group));
+    capture_.multisig(hash, keys, sigs, narrow_cast<storage_group_t>(group));
     return true;
 }
 
@@ -191,7 +191,7 @@ TEMPLATE
 INLINE bool CLASS::
 is_multisig_batchable() const NOEXCEPT
 {
-    if (!capture_.enabled || is_input_script())
+    if (is_input_script())
         return false;
 
     const auto& ops = script_->ops();
@@ -202,7 +202,7 @@ TEMPLATE
 INLINE bool CLASS::
 is_schnorr_batchable() const NOEXCEPT
 {
-    if (!capture_.enabled || is_input_script())
+    if (is_input_script())
         return false;
 
     const auto& ops = script_->ops();
@@ -213,7 +213,7 @@ TEMPLATE
 INLINE bool CLASS::
 is_ecdsa_batchable() const NOEXCEPT
 {
-    if (!capture_.enabled || is_input_script())
+    if (is_input_script())
         return false;
 
     const auto& ops = script_->ops();
