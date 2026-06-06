@@ -1330,8 +1330,12 @@ op_check_sig_add() NOEXCEPT
         return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
-    if (!state::verify_schnorr_signature(*key, hash, sig, false))
-        return error::op_check_sig_add6;
+    // If public key size is neither 0 nor 32 bytes, it is an unknown type.
+    // During script execution of signature opcodes these behave exactly as
+    // known types except that signature validation considered successful.
+    if (key->size() == ec_xonly_size &&
+        !state::verify_schnorr_signature(*key, hash, sig, false))
+            return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.
     if (!state::sigops_increment())
