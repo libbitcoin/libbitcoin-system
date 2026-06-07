@@ -56,24 +56,6 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
 
 TEMPLATE
 INLINE bool CLASS::
-verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature, bool batchable) const NOEXCEPT
-{
-    if (!batchable || !capture_.enabled || !is_schnorr_batchable())
-    {
-        capture_.unbatched_schnorr.fetch_add(one, relaxed);
-        return schnorr::verify_signature(point, hash, signature);
-    }
-
-    capture_.batched_schnorr.fetch_add(one, relaxed);
-    constexpr auto size = schnorr::public_key_size;
-    const auto& x_point = unsafe_array_cast<uint8_t, size>(point.data());
-    capture_.schnorr(hash, x_point, signature);
-    return true;
-}
-
-TEMPLATE
-INLINE bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
@@ -111,6 +93,65 @@ try_batch_multisig_verification(const chunk_xptrs& points,
 
     capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
     capture_.multisig(hash, keys, sigs, narrow_cast<storage_group_t>(group));
+    return true;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature, bool threshold) const NOEXCEPT
+{
+    if (threshold)
+        return add_threshold_verification(point, hash, signature);
+
+    if (!capture_.enabled || !is_schnorr_batchable())
+    {
+        capture_.unbatched_schnorr.fetch_add(one, relaxed);
+        return schnorr::verify_signature(point, hash, signature);
+    }
+
+    // Guarded by consensus rule.
+    BC_ASSERT(point.size() == ec_xonly_size);
+    const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(point.data());
+    capture_.batched_schnorr.fetch_add(one, relaxed);
+    capture_.schnorr(hash, key, signature);
+    return true;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+add_threshold_verification(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature) const NOEXCEPT
+{
+    // is_threshold_batchable() returns true when threshold cache is non-empty.
+    if (!capture_.enabled || !is_threshold_batchable())
+    {
+        capture_.unbatched_threshold.fetch_add(one, relaxed);
+        return schnorr::verify_signature(point, hash, signature);
+    }
+
+    if (threshold_.entries.empty())
+    {
+        // TODO: function to extract required/expected from script opcodes.
+        threshold_.required = 42_u8;
+        threshold_.expected = 42_u8;
+        threshold_.entries.reserve(threshold_.expected);
+    }
+
+    // Guarded by consensus rule.
+    BC_ASSERT(point.size() == ec_xonly_size);
+    const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(point.data());
+    threshold_.entries.emplace_back(hash, key, signature);
+    capture_.batched_threshold.fetch_add(one, relaxed);
+
+    if (threshold_.entries.size() == threshold_.expected)
+    {
+        // TODO: Can't return false here in case of overflow.
+        const auto group = capture_.group.fetch_add(one, relaxed);
+        capture_.threshold(threshold_, narrow_cast<uint16_t>(group));
+    }
+
+    BC_ASSERT(threshold_.entries.size() <= threshold_.expected);
     return true;
 }
 
@@ -189,6 +230,19 @@ to_compressed(ec_compressed& out, const data_chunk& point) NOEXCEPT
 
 TEMPLATE
 INLINE bool CLASS::
+is_ecdsa_batchable() const NOEXCEPT
+{
+    if (is_input_script())
+        return false;
+
+    const auto& ops = script_->ops();
+    return chain::script::is_pay_public_key_pattern(ops)
+        || chain::script::is_pay_key_hash_pattern(ops)
+        || chain::script::is_pay_witness_key_hash_pattern(ops);
+}
+
+TEMPLATE
+INLINE bool CLASS::
 is_multisig_batchable() const NOEXCEPT
 {
     if (is_input_script())
@@ -206,20 +260,28 @@ is_schnorr_batchable() const NOEXCEPT
         return false;
 
     const auto& ops = script_->ops();
-    return chain::script::is_pay_witness_taproot_key_path_pattern(ops);
+    return chain::script::is_pay_taproot_key_path_pattern(ops)
+        || chain::script::is_pay_tapscript_single_pattern(ops)
+        || chain::script::is_pay_tapscript_timelock_pattern(ops);
 }
 
-TEMPLATE
 INLINE bool CLASS::
-is_ecdsa_batchable() const NOEXCEPT
+is_threshold_batchable() const NOEXCEPT
 {
+    if (is_threshold_cached())
+        return true;
+
     if (is_input_script())
         return false;
 
     const auto& ops = script_->ops();
-    return chain::script::is_pay_public_key_pattern(ops)
-        || chain::script::is_pay_key_hash_pattern(ops)
-        || chain::script::is_pay_witness_key_hash_pattern(ops);
+    return chain::script::is_pay_tapscript_threshold_pattern(ops);
+}
+
+INLINE bool CLASS::
+is_threshold_cached() const NOEXCEPT
+{
+    return !threshold_.entries.empty();
 }
 
 TEMPLATE

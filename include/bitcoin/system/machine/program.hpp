@@ -201,18 +201,20 @@ protected:
     /// Signature verify (with batching).
     /// -----------------------------------------------------------------------
     virtual inline bool verify_ecdsa_signature(const data_chunk& point,
-        const hash_digest& hash,
-        const ec_signature& signature) const NOEXCEPT;
-    virtual inline bool verify_schnorr_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature,
-        bool batchable) const NOEXCEPT;
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
     virtual inline bool try_batch_multisig_verification(
         const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
+    virtual inline bool verify_schnorr_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature,
+        bool threshold=true) const NOEXCEPT;
+    virtual inline bool add_threshold_verification(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
 
 private:
     static constexpr auto relaxed = std::memory_order_relaxed;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
+    using threshold_cache = chain::signatures::threshold_group;
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {
@@ -236,9 +238,13 @@ private:
         bool strict) NOEXCEPT;
     static inline bool to_compressed(ec_compressed& out,
         const data_chunk& point) NOEXCEPT;
+
+    // Batching conditions.
+    INLINE bool is_threshold_batchable() const NOEXCEPT;
     INLINE bool is_multisig_batchable() const NOEXCEPT;
     INLINE bool is_schnorr_batchable() const NOEXCEPT;
     INLINE bool is_ecdsa_batchable() const NOEXCEPT;
+    INLINE bool is_threshold_cached() const NOEXCEPT;
     INLINE bool is_input_script() const NOEXCEPT;
 
     // Stack helpers.
@@ -262,6 +268,7 @@ private:
 
     // Caches.
     multisig_cache multisig_{};
+    threshold_cache threshold_{};
 
     // Stacks.
     primary_stack primary_;
