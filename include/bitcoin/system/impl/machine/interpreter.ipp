@@ -1033,7 +1033,7 @@ op_check_sig_verify() NOEXCEPT
 
         // If public key is 32 bytes it is a bip340 schnorr key.
         // If signature is not empty, it is validated against public key.
-        if (key->size() == schnorr::public_key_size)
+        if (key->size() == ec_xonly_size)
         {
             // Split endorsement into schnorr sig and signature hash flags.
             uint8_t sighash_flags;

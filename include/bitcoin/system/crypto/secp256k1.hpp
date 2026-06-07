@@ -236,9 +236,6 @@ namespace schnorr {
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
 
-static constexpr size_t signature_size = 64;
-static constexpr size_t public_key_size = 32;
-
 /// Create Schnorr signature using a private key (simple version, no tweaks).
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT;

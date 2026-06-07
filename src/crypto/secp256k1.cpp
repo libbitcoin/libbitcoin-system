@@ -510,7 +510,7 @@ bool sign(ec_signature& out, const ec_secret& secret,
 bool verify_signature(const data_chunk& x_point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
-    constexpr auto size = public_key_size;
+    constexpr auto size = ec_xonly_size;
     if (x_point.size() != size)
         return false;
 
