@@ -423,15 +423,10 @@ constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
         is_retarget_height(height, retargeting_interval);
 }
 
-uint32_t chain_state::work_required_retarget(const data& values,
+uint32_t chain_state::work_required_retarget_bits(const data& values,
     const forks& forks, uint32_t proof_of_work_limit,
-    uint32_t minimum_timespan, uint32_t maximum_timespan,
-    size_t retargeting_interval,
-    uint32_t retargeting_interval_seconds) NOEXCEPT
+    uint32_t retargeting_interval) NOEXCEPT
 {
-    static const auto limit = compact::expand(proof_of_work_limit);
-    auto target = compact::expand(bits_high(values));
-
     if (forks.bip94)
     {
         auto height = values.height;
@@ -442,12 +437,22 @@ uint32_t chain_state::work_required_retarget(const data& values,
         {
             if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
                 proof_of_work_limit))
-            {
-                target = compact::expand(bit);
-                break;
-            }
+                return bit;
         }
     }
+
+    return bits_high(values);
+}
+
+uint32_t chain_state::work_required_retarget(const data& values,
+    const forks& forks, uint32_t proof_of_work_limit,
+    uint32_t minimum_timespan, uint32_t maximum_timespan,
+    uint32_t retargeting_interval,
+    uint32_t retargeting_interval_seconds) NOEXCEPT
+{
+    static const auto limit = compact::expand(proof_of_work_limit);
+    auto target = compact::expand(work_required_retarget_bits(values,
+        forks, proof_of_work_limit, retargeting_interval));
 
     // Conditionally implement retarget overflow patch (e.g. Litecoin).
     const auto timewarp = to_int(patch_timewarp(forks, limit, target));
@@ -697,6 +702,7 @@ chain_state::chain_state(const chain_state& top,
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
     activations_(activation(data_, forks_, settings)),
+    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -743,6 +749,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
   : data_(to_block(pool, block, settings)),
     forks_(pool.forks_),
     activations_(activation(data_, forks_, settings)),
+    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -790,6 +797,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
   : data_(to_header(parent, header, settings)),
     forks_(parent.forks_),
     activations_(activation(data_, forks_, settings)),
+    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -801,6 +809,7 @@ chain_state::chain_state(data&& values,
   : data_(std::move(values)),
     forks_(settings.forks),
     activations_(activation(data_, forks_, settings)),
+    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -815,6 +824,8 @@ chain::context chain_state::context() const NOEXCEPT
     {
         flags(),
         timestamp(),
+        previous_block_timestamp(),
+        retargeting_interval(),
         median_time_past(),
         possible_narrow_cast<uint32_t>(height()),
         minimum_block_version(),
@@ -852,6 +863,11 @@ uint32_t chain_state::timestamp() const NOEXCEPT
 uint32_t chain_state::previous_block_timestamp() const NOEXCEPT
 {
     return timestamp_high(data_);
+}
+
+uint32_t chain_state::retargeting_interval() const NOEXCEPT
+{
+    return retargeting_interval_;
 }
 
 uint32_t chain_state::median_time_past() const NOEXCEPT

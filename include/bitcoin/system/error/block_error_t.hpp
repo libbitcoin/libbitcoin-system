@@ -42,7 +42,7 @@ enum block_error_t : uint8_t
     insufficient_block_version,
     anachronistic_timestamp,
     incorrect_proof_of_work,
-    early_timewarp_attack,
+    early_timestamp,
 
     // confirm header
     orphan_block,

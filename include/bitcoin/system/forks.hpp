@@ -34,7 +34,7 @@ typedef struct
     /// github.com/bitcoin/bitcoin/pull/8391
     bool bip90;
 
-    // https://github.com/bitcoin/bitcoin/pull/29775
+    // github.com/bitcoin/bitcoin/pull/29775 ("testnet4")
     bool bip94;
 
     /// github.com/bitcoin/bitcoin/commit/a206b0ea12eb4606b93323268fc81a4f1f952531

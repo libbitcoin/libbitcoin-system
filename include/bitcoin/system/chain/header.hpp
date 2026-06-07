@@ -115,10 +115,8 @@ public:
     /// -----------------------------------------------------------------------
     /// Checkpoints and previous_block_hash are chain validation (not here).
 
-    code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
-        size_t height, uint32_t current_timestamp,
-        uint32_t previous_block_timestamp, uint32_t retarget_interval,
-        bool bip94, bool scrypt=false) const NOEXCEPT;
+    code check(uint32_t timestamp_limit_seconds,
+        uint32_t proof_of_work_limit, bool scrypt=false) const NOEXCEPT;
     code accept(const context& ctx) const NOEXCEPT;
 
 protected:
@@ -137,9 +135,7 @@ protected:
     bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
         bool scrypt=false) const NOEXCEPT;
     bool is_futuristic_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
-    bool is_timestamp_early(size_t height, uint32_t timestamp,
-        uint32_t previous_block_timestamp,
-        uint32_t retarget_interval) const NOEXCEPT;
+    bool is_early_timestamp() const NOEXCEPT;
 
     /// Accept (relative to chain_state).
     /// -----------------------------------------------------------------------

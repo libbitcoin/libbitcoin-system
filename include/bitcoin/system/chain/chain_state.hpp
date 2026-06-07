@@ -183,6 +183,7 @@ public:
     const hash_digest& hash() const NOEXCEPT;
     const uint256_t& cumulative_work() const NOEXCEPT;
     uint32_t minimum_block_version() const NOEXCEPT;
+    uint32_t retargeting_interval() const NOEXCEPT;
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
     uint32_t previous_block_timestamp() const NOEXCEPT;
@@ -237,10 +238,13 @@ private:
     static data to_header(const chain_state& parent, const header& header,
         const system::settings& settings) NOEXCEPT;
 
+    static uint32_t work_required_retarget_bits(const data& values,
+        const forks& forks, uint32_t proof_of_work_limit,
+        uint32_t retargeting_interval) NOEXCEPT;
     static uint32_t work_required_retarget(const data& values,
         const forks& forks, uint32_t proof_of_work_limit,
         uint32_t minimum_timespan, uint32_t maximum_timespan,
-        size_t retargeting_interval,
+        uint32_t retargeting_interval,
         uint32_t retargeting_interval_seconds) NOEXCEPT;
     static uint32_t retarget_timespan(const data& values,
         uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT;
@@ -252,6 +256,7 @@ private:
     const data data_;
     const forks& forks_;
     const activations activations_;
+    const uint32_t retargeting_interval_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
     const uint256_t cumulative_work_;
