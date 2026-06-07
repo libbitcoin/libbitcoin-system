@@ -193,6 +193,59 @@ constexpr bool script::is_pay_witness_taproot_key_path_pattern(
         && ops[0].code() == opcode::checksig;
 }
 
+constexpr bool script::is_pay_tapscript_single_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 2
+        && ops[0].data().size() == ec_xonly_size
+        && ops[1].code() == opcode::checksig;
+}
+
+constexpr bool script::is_pay_tapscript_timelock_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 5u
+        && ops[0].is_nonnegative()
+        && ops[1].is_timelock()
+        && ops[2].code() == opcode::drop
+        && ops[3].data().size() == ec_xonly_size
+        && ops[4].code() == opcode::checksig;
+}
+
+constexpr bool script::is_pay_tapscript_threshold_pattern(
+    const operations& ops) NOEXCEPT
+{
+    if (ops.size() < 4u || !is_even(ops.size()))
+        return false;
+
+    auto op = ops.begin();
+    if (op->data().size() != ec_xonly_size)
+        return false;
+
+    ++op;
+    if (op->code() != opcode::checksig &&
+        op->code() != opcode::checksigadd)
+        return false;
+
+    ++op;
+    while (op != std::prev(ops.end(), two))
+    {
+        if ((op++.data().size() != ec_xonly_size) ||
+            (op++.code() != opcode::checksigadd))
+            return false;
+    }
+
+    if (!op->is_positive())
+        return false;
+
+    ++op;
+    if (op->code() != opcode::numequal &&
+        op->code() != opcode::numequalverify)
+        return false;
+
+    return true;
+}
+
 constexpr bool script::is_pay_multisig_standard_pattern(
     const operations& ops) NOEXCEPT
 {
