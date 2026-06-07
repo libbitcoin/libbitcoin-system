@@ -186,7 +186,7 @@ constexpr bool script::is_pay_witness_taproot_pattern(
 }
 
 // This script type is fabricated in witness::extract_taproot.
-constexpr bool script::is_pay_witness_taproot_key_path_pattern(
+constexpr bool script::is_pay_taproot_key_path_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 1
