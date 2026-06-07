@@ -315,9 +315,9 @@ private:
     void signature_hash_all(writer& sink, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
 
-    bool unversioned_sighash(hash_digest& out, const input_iterator& input,
+    void unversioned_sighash(hash_digest& out, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
-    bool version0_sighash(hash_digest& out, const input_iterator& input,
+    void version0_sighash(hash_digest& out, const input_iterator& input,
         const script& subscript, uint64_t value,
         uint8_t sighash_flags) const NOEXCEPT;
     bool version1_sighash(hash_digest& out, const input_iterator& input,

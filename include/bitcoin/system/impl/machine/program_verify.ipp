@@ -222,33 +222,36 @@ signature_hash(hash_digest& out, const script& subscript,
 // ----------------------------------------------------------------------------
 
 TEMPLATE
+INLINE bool CLASS::
+cached(uint8_t sighash_flags) const NOEXCEPT
+{
+    return multisig_.set && (multisig_.flags == sighash_flags);
+}
+
+TEMPLATE
+INLINE bool CLASS::
+set_hash(uint8_t sighash_flags) NOEXCEPT
+{
+    // This v1 (unsubscripted) sighash can fail, in which case don't set cache.
+    return ((multisig_.set = signature_hash(multisig_.hash, *script_,
+        multisig_.flags = sighash_flags)));
+}
+
+TEMPLATE
 INLINE void CLASS::
-initialize_cache() NOEXCEPT
-{
-    cache_.first = true;
-}
-
-TEMPLATE
-INLINE bool CLASS::
-uncached(uint8_t sighash_flags) const NOEXCEPT
-{
-    return cache_.first || cache_.flags != sighash_flags;
-}
-
-TEMPLATE
-INLINE bool CLASS::
 set_hash(const chain::script& subscript, uint8_t sighash_flags) NOEXCEPT
 {
-    cache_.first = false;
-    cache_.flags = sighash_flags;
-    return signature_hash(cache_.hash, subscript, sighash_flags);
+    // Only v1 (unsubscripted) sighash can fail, so void return here.
+    signature_hash(multisig_.hash, subscript, multisig_.flags = sighash_flags);
+    multisig_.set = true;
 }
 
 TEMPLATE
 INLINE const hash_digest& CLASS::
 cached_hash() const NOEXCEPT
 {
-    return cache_.hash;
+    BC_ASSERT(multisig_.set);
+    return multisig_.hash;
 }
 
 } // namespace machine

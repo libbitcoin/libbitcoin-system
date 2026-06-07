@@ -1158,7 +1158,6 @@ op_check_multisig_verify() NOEXCEPT
     if (state::try_batch_multisig_verification(keys, endorsements))
         return error::op_success;
 
-    state::initialize_cache();
     auto it = endorsements.begin();
     const auto subscript = state::subscript(endorsements);
     const auto bip66 = state::is_enabled(flags::bip66_rule);
@@ -1185,9 +1184,8 @@ op_check_multisig_verify() NOEXCEPT
             return error::op_check_multisig_parse_signature;
 
         // Signature hash caching (bypass signature hash if same as previous).
-        if (state::uncached(sighash_flags))
-            if (!state::set_hash(*subscript, sighash_flags))
-                continue;
+        if (!state::cached(sighash_flags))
+            state::set_hash(*subscript, sighash_flags);
 
         // Verify ECDSA signature against public key and cache signature hash.
         if (ecdsa::verify_signature(*key, state::cached_hash(), sig))

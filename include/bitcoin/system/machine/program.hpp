@@ -192,10 +192,10 @@ protected:
 
     /// Multisig signature hash caching.
     /// -----------------------------------------------------------------------
-    virtual INLINE void initialize_cache() NOEXCEPT;
-    virtual INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
+    virtual INLINE bool cached(uint8_t sighash_flags) const NOEXCEPT;
     virtual INLINE const hash_digest& cached_hash() const NOEXCEPT;
-    virtual INLINE bool set_hash(const chain::script& subscript,
+    virtual INLINE bool set_hash(uint8_t sighash_flags) NOEXCEPT;
+    virtual INLINE void set_hash(const chain::script& subscript,
         uint8_t sighash_flags) NOEXCEPT;
 
     /// Signature verify (with batching).
@@ -216,9 +216,9 @@ private:
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {
-        bool first;
-        uint8_t flags;
-        hash_digest hash;
+        bool set{};
+        uint8_t flags{};
+        hash_digest hash{};
     };
 
     // Verify helpers.
@@ -261,7 +261,7 @@ private:
     const chain::signatures& capture_;
 
     // Caches.
-    multisig_cache cache_{};
+    multisig_cache multisig_{};
 
     // Stacks.
     primary_stack primary_;

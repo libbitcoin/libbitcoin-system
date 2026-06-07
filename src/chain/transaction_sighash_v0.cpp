@@ -58,7 +58,7 @@ hash_digest transaction::output_hash_v0(
 
 // NOT THREAD SAFE
 // Concurrent input validation for a tx unsafe due to on-demand hash caching.
-bool transaction::version0_sighash(hash_digest& out,
+void transaction::version0_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript, uint64_t value,
     uint8_t sighash_flags) const NOEXCEPT
 {
@@ -90,7 +90,6 @@ bool transaction::version0_sighash(hash_digest& out,
     sink.write_4_bytes_little_endian(sighash_flags);
 
     sink.flush();
-    return true;
 }
 
 } // namespace chain
