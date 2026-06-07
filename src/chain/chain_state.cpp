@@ -824,7 +824,7 @@ chain::context chain_state::context() const NOEXCEPT
     {
         flags(),
         timestamp(),
-        previous_block_timestamp(),
+        previous_timestamp(),
         retargeting_interval(),
         median_time_past(),
         possible_narrow_cast<uint32_t>(height()),
@@ -860,7 +860,7 @@ uint32_t chain_state::timestamp() const NOEXCEPT
     return data_.timestamp.self;
 }
 
-uint32_t chain_state::previous_block_timestamp() const NOEXCEPT
+uint32_t chain_state::previous_timestamp() const NOEXCEPT
 {
     return timestamp_high(data_);
 }

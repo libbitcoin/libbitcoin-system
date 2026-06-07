@@ -186,7 +186,7 @@ public:
     uint32_t retargeting_interval() const NOEXCEPT;
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
-    uint32_t previous_block_timestamp() const NOEXCEPT;
+    uint32_t previous_timestamp() const NOEXCEPT;
     uint32_t median_time_past() const NOEXCEPT;
     uint32_t flags() const NOEXCEPT;
     size_t height() const NOEXCEPT;
