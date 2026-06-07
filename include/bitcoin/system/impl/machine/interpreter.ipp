@@ -1322,17 +1322,17 @@ op_check_sig_add() NOEXCEPT
     if (sighash_flags == chain::coverage::invalid)
         return error::op_check_sig_add4;
 
-    // Generate signature hash.
-    hash_digest hash{};
-    if (!state::signature_hash(hash, sighash_flags))
-        return error::op_check_sig_add5;
+    // Signature hash caching (bypass signature hash if same as previous).
+    if (!state::cached(sighash_flags))
+        if (!state::set_hash(sighash_flags))
+            return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
     // If public key size is neither 0 nor 32 bytes, it is an unknown type.
     // During script execution of signature opcodes these behave exactly as
     // known types except that signature validation considered successful.
     if (key->size() == ec_xonly_size &&
-        !state::verify_schnorr_signature(*key, hash, sig, false))
+        !state::verify_schnorr_signature(*key, state::cached_hash(), sig))
             return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.
