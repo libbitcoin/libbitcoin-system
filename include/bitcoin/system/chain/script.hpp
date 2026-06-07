@@ -169,9 +169,11 @@ public:
     script_pattern output_pattern() const NOEXCEPT;
 
     /// Consensus computations.
+    size_t signature_operations(bool accurate) const NOEXCEPT;
     bool extract_sigop_script(script& embedded,
         const script& prevout_script) const NOEXCEPT;
-    size_t signature_operations(bool accurate) const NOEXCEPT;
+    bool script::extract_tapscript_threshold(uint8_t& required,
+        uint8_t& sigops, const operations& ops) NOEXCEPT
 
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;

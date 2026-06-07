@@ -114,24 +114,6 @@ script_pattern script::input_pattern() const NOEXCEPT
     return script_pattern::non_standard;
 }
 
-// prevout_script is only used to determine is_pay_script_hash_pattern.
-bool script::extract_sigop_script(script& embedded,
-    const chain::script& prevout_script) const NOEXCEPT
-{
-    // There are no embedded sigops when the prevout script is not p2sh.
-    if (!is_pay_script_hash_pattern(prevout_script.ops()))
-        return false;
-
-    // There are no embedded sigops when the input script is not push only.
-    if (ops().empty() || !is_relaxed_push_pattern(ops()))
-        return false;
-
-    // Parse the embedded script from the last input script item (data).
-    // This cannot fail because there is no prefix to invalidate the length.
-    embedded = { ops().back().data(), false };
-    return true;
-}
-
 // Count 1..16 multisig accurately for embedded [bip16] and witness [bip141].
 constexpr size_t multisig_sigops(bool accurate, opcode code) NOEXCEPT
 {
@@ -173,6 +155,36 @@ size_t script::signature_operations(bool accurate) const NOEXCEPT
     }
 
     return total;
+}
+
+// prevout_script is only used to determine is_pay_script_hash_pattern.
+bool script::extract_sigop_script(script& embedded,
+    const chain::script& prevout_script) const NOEXCEPT
+{
+    // There are no embedded sigops when the prevout script is not p2sh.
+    if (!is_pay_script_hash_pattern(prevout_script.ops()))
+        return false;
+
+    // There are no embedded sigops when the input script is not push only.
+    if (ops().empty() || !is_relaxed_push_pattern(ops()))
+        return false;
+
+    // Parse the embedded script from the last input script item (data).
+    // This cannot fail because there is no prefix to invalidate the length.
+    embedded = { ops().back().data(), false };
+    return true;
+}
+
+bool script::extract_tapscript_threshold(uint8_t& required,
+    uint8_t& sigops, const operations& ops) NOEXCEPT
+{
+    if (!is_pay_tapscript_threshold_pattern(ops))
+        return false;
+
+    const auto pairs = ops.size() - two;
+    required = operation::opcode_to_positive(ops[pairs].code());
+    sigops = to_half(pairs);
+    return true;
 }
 
 } // namespace chain
