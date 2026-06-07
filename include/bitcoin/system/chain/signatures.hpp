@@ -57,8 +57,9 @@ struct BC_API signatures
     using schnorr_handler = std::function<void(const hash_digest&,
         const ec_xonly, const ec_signature&)>;
     using multisig_handler = std::function<void(const hash_digest&,
-        const ec_compresseds&, const ec_signatures&, uint16_t)>;
-    using threshold_handler = std::function<void(const threshold_group&)>;
+        const ec_compresseds&, const ec_signatures&, batchy::group_t)>;
+    using threshold_handler = std::function<void(const threshold_group&,
+        batchy::group_t)>;
 
     /// Default construction disables batching.
     const bool enabled{};

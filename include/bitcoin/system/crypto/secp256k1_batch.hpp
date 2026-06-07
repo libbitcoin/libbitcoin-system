@@ -29,48 +29,75 @@
 
 namespace libbitcoin {
 namespace system {
+namespace batchy {
+using link = data_array<3>;
+using link_t = unsigned_type<sizeof(link)>;
+using links_t = std::vector<link_t>;
+using pairing_t = uint8_t;
+using group_t = uint16_t;
+} // namespace batchy
+
 namespace schnorr {
     
 /// Span matches serialized buffer.
 struct BC_API batch
 {
-    using link = data_array<3>;
-    using link_t = unsigned_type<sizeof(link)>;
-    using links = std::vector<link_t>;
     using span = std::span<const batch>;
-    static links verify(const span& batch, bool turbo) NOEXCEPT;
+    static batchy::links_t verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
     ec_xonly point;
     ec_signature signature;
-    link id;
+    batchy::link id;
 
 protected:
     static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const data_chunk& out,
+        const span& batch) NOEXCEPT;
 };
 
 } // namespace schnorr
+
+namespace threshold {
+
+/// Span matches serialized buffer.
+struct BC_API batch
+{
+    using span = std::span<const batch>;
+    static batchy::links_t verify(const span& batch, bool turbo)  NOEXCEPT;
+
+    hash_digest digest;
+    ec_xonly point;
+    ec_signature signature;
+    batchy::pairing_t required;
+    batchy::group_t group;
+    batchy::link id;
+
+protected:
+    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
+    static batchy::links_t correlate(const data_chunk& out,
+        const span& batch) NOEXCEPT;
+};
+
+} // namespace threshold
 
 namespace ecdsa {
 
 /// Span matches serialized buffer.
 struct BC_API batch
 {
-    using link = data_array<3>;
-    using link_t = unsigned_type<sizeof(link)>;
-    using links = std::vector<link_t>;
     using span = std::span<const batch>;
-    static links verify(const span& batch, bool turbo) NOEXCEPT;
+    static batchy::links_t verify(const span& batch, bool turbo) NOEXCEPT;
 
     hash_digest digest;
     ec_compressed point;
     ec_signature signature;
-    link id;
+    batchy::link id;
 
 protected:
     static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const data_chunk& out,
+        const span& batch) NOEXCEPT;
 };
 
 } // namespace ecdsa
@@ -80,22 +107,20 @@ namespace multisig {
 /// Span matches serialized buffer.
 struct BC_API batch
 {
-    using link = data_array<3>;
-    using link_t = unsigned_type<sizeof(link)>;
-    using links = std::vector<link_t>;
     using span = std::span<const batch>;
-    static links verify(const span& batch, bool turbo)  NOEXCEPT;
+    static batchy::links_t verify(const span& batch, bool turbo)  NOEXCEPT;
 
     hash_digest digest;
     ec_compressed point;
     ec_signature signature;
-    uint8_t pair;
-    uint16_t group;
-    link id;
+    batchy::pairing_t pair;
+    batchy::group_t group;
+    batchy::link id;
 
 protected:
     static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static links correlate(const data_chunk& out, const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const data_chunk& out,
+        const span& batch) NOEXCEPT;
 };
 
 } // namespace multisig

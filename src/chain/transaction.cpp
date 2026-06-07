@@ -508,7 +508,7 @@ bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     if (bip143 && version == script_version::segwit)
     {
         version0_sighash(out, input, subscript, value, sighash_flags);
-        return;
+        return true;
     }
 
     // This is where the connection between bip341 and bip342 is made. If a

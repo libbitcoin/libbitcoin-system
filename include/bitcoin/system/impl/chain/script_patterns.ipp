@@ -230,8 +230,8 @@ constexpr bool script::is_pay_tapscript_threshold_pattern(
     ++op;
     while (op != std::prev(ops.end(), two))
     {
-        if ((op++.data().size() != ec_xonly_size) ||
-            (op++.code() != opcode::checksigadd))
+        if ((op++->data().size() != ec_xonly_size) ||
+            (op++->code() != opcode::checksigadd))
             return false;
     }
 

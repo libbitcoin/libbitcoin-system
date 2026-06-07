@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__one_invalid__expected)
 
     const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batch::link_t>(triples.at(1).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(1).id));
 }
 
 // batch ecdsa signature verification
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__one_invalid__expected)
 
     const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batch::link_t>(triples.at(2).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(2).id));
 }
 
 // batch multisig (ecdsa) verification
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__one_invalid__expected)
 
     const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batch::link_t>(triples.at(0).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(0).id));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

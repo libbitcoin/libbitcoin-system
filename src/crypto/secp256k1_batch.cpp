@@ -35,11 +35,19 @@
 namespace libbitcoin {
 namespace system {
 
+using namespace batchy;
+
 // polymorphic namespace selectors (template support)
 // ----------------------------------------------------------------------------
 // local
 
 inline bool verify_signature(const schnorr::batch& single) NOEXCEPT
+{
+    return schnorr::verify_signature(single.point, single.digest,
+        single.signature);
+}
+
+inline bool verify_signature(const threshold::batch& single) NOEXCEPT
 {
     return schnorr::verify_signature(single.point, single.digest,
         single.signature);
@@ -155,7 +163,7 @@ inline bool has_valid_path(uint8_t m_sigs, uint8_t n_keys,
 
 // Trivial single signature correlation.
 template <typename Batch>
-Batch::links to_links(const data_chunk& out,
+links_t to_links(const data_chunk& out,
     const std::span<const Batch>& in) NOEXCEPT
 {
     BC_ASSERT(out.size() == in.size());
@@ -164,8 +172,7 @@ Batch::links to_links(const data_chunk& out,
     std::vector<size_t> it(in.size());
     std::iota(it.begin(), it.end(), zero);
 
-    using link_t = typename Batch::link_t;
-    typename Batch::links fails(zero);
+    links_t fails(zero);
     std::shared_mutex mutex{};
 
     std::for_each(poolstl::execution::par, it.cbegin(), it.cend(),
@@ -175,10 +182,46 @@ Batch::links to_links(const data_chunk& out,
             if (!to_bool(out.at(row)))
             {
                 std::unique_lock lock{ mutex };
-                const auto& link = in[row].id;
-                fails.push_back(from_little_array<link_t>(link));
+                fails.push_back(from_little_array<link_t>(in[row].id));
             }
         });
+
+    return fails;
+}
+
+// Specialized threshold correlation.
+// O(n) over the sig set, ~100 bytes of stack, no heap.
+template <>
+links_t to_links<threshold::batch>(const data_chunk& out,
+    const threshold::batch::span& in) NOEXCEPT
+{
+    BC_ASSERT(out.size() == in.size());
+
+    if (in.empty())
+        return {};
+
+    size_t group{};
+    links_t fails{};
+    for (auto index = one; index <= in.size(); ++index)
+    {
+        // Find the start of the next group (or end).
+        if ((index != in.size()) &&
+            (in[index].id == in[group].id) &&
+            (in[index].group == in[group].group))
+            continue;
+
+        // Count successes in this group.
+        size_t successes{};
+        for (auto row = group; row < index; ++row)
+            if (to_bool(out.at(row)))
+                ++successes;
+
+        // Fail if group successes < required.
+        if (successes < in[group].required)
+            fails.push_back(from_little_array<link_t>(in[group].id));
+
+        group = index;
+    }
 
     return fails;
 }
@@ -186,19 +229,16 @@ Batch::links to_links(const data_chunk& out,
 // Specialized multisig correlation.
 // O(n) over the sig set, ~100 bytes of stack, no heap.
 template <>
-multisig::batch::links to_links<multisig::batch>(
-    const data_chunk& out, const multisig::batch::span& in) NOEXCEPT
+links_t to_links<multisig::batch>(const data_chunk& out, 
+    const multisig::batch::span& in) NOEXCEPT
 {
     BC_ASSERT(out.size() == in.size());
 
     if (in.empty())
         return {};
 
-    using namespace multisig;
-    using link_t = batch::link_t;
-    batch::links fails{};
     size_t group{};
-
+    links_t fails{};
     for (auto index = one; index <= in.size(); ++index)
     {
         // Find the start of the next group (or end).
@@ -212,6 +252,7 @@ multisig::batch::links to_links<multisig::batch>(
         uint8_t max_sig{}, max_key{};
         for (auto row = group; row < index; ++row)
         {
+            static_assert(is_same_type<pairing_t, uint8_t>);
             const auto [sig, key] = unpack_word<uint8_t>(in[row].pair);
             if (to_bool(out.at(row))) set_right_into(matrix.at(sig), key);
             max_sig = greater(sig, max_sig);
@@ -240,6 +281,12 @@ data_chunk schnorr::batch::evaluate(const schnorr::batch::span& batch,
     return batch_verify(batch, turbo);
 }
 
+data_chunk threshold::batch::evaluate(const threshold::batch::span& batch,
+    bool turbo) NOEXCEPT
+{
+    return batch_verify(batch, turbo);
+}
+
 data_chunk ecdsa::batch::evaluate(const ecdsa::batch::span& batch,
     bool turbo) NOEXCEPT
 {
@@ -256,19 +303,25 @@ data_chunk multisig::batch::evaluate(const multisig::batch::span& batch,
 // ----------------------------------------------------------------------------
 // static/protected
 
-schnorr::batch::links schnorr::batch::correlate(const data_chunk& out,
+links_t schnorr::batch::correlate(const data_chunk& out,
     const schnorr::batch::span& in) NOEXCEPT
 {
     return to_links(out, in);
 }
 
-ecdsa::batch::links ecdsa::batch::correlate(const data_chunk& out,
+links_t threshold::batch::correlate(const data_chunk& out,
+    const threshold::batch::span& in) NOEXCEPT
+{
+    return to_links(out, in);
+}
+
+links_t ecdsa::batch::correlate(const data_chunk& out,
     const ecdsa::batch::span& in) NOEXCEPT
 {
     return to_links(out, in);
 }
 
-multisig::batch::links multisig::batch::correlate(const data_chunk& out,
+links_t multisig::batch::correlate(const data_chunk& out,
     const multisig::batch::span& in) NOEXCEPT
 {
     return to_links(out, in);
@@ -278,20 +331,26 @@ multisig::batch::links multisig::batch::correlate(const data_chunk& out,
 // ----------------------------------------------------------------------------
 // static/public
 
-schnorr::batch::links schnorr::batch::verify(
-    const schnorr::batch::span& batch, bool turbo) NOEXCEPT
+links_t schnorr::batch::verify(const schnorr::batch::span& batch,
+    bool turbo) NOEXCEPT
 {
     return correlate(evaluate(batch, turbo), batch);
 }
 
-ecdsa::batch::links ecdsa::batch::verify(
-    const ecdsa::batch::span& batch, bool turbo) NOEXCEPT
+links_t threshold::batch::verify(const threshold::batch::span& batch,
+    bool turbo) NOEXCEPT
 {
     return correlate(evaluate(batch, turbo), batch);
 }
 
-multisig::batch::links multisig::batch::verify(
-    const multisig::batch::span& batch, bool turbo) NOEXCEPT
+links_t ecdsa::batch::verify(const ecdsa::batch::span& batch,
+    bool turbo) NOEXCEPT
+{
+    return correlate(evaluate(batch, turbo), batch);
+}
+
+links_t multisig::batch::verify(const multisig::batch::span& batch,
+    bool turbo) NOEXCEPT
 {
     return correlate(evaluate(batch, turbo), batch);
 }

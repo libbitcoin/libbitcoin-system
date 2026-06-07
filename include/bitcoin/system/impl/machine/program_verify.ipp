@@ -70,13 +70,13 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
     sighash_flags = coverage::invalid;
     const auto size = endorsement.size();
 
-    if (size == signature_size)
+    if (size == ec_signature_size)
     {
         // BIP341: if [sighash byte] is omitted the resulting signatures are 64
         // bytes, and [default == 0] mode is implied (implies SIGHASH_ALL).
         sighash_flags = coverage::hash_default;
     }
-    else if (size == add1(signature_size))
+    else if (size == add1(ec_signature_size))
     {
         // BIP341: signature has sighash byte appended in the usual fashion.
         const auto byte = endorsement.back();
@@ -93,7 +93,7 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
         return empty;
     }
 
-    return unsafe_array_cast<uint8_t, signature_size>(endorsement.data());
+    return unsafe_array_cast<uint8_t, ec_signature_size>(endorsement.data());
 }
 
 // static
@@ -230,7 +230,7 @@ cached(uint8_t sighash_flags) const NOEXCEPT
 
 TEMPLATE
 INLINE bool CLASS::
-set_hash(uint8_t sighash_flags) NOEXCEPT
+set_hash(uint8_t sighash_flags) const NOEXCEPT
 {
     // This v1 (unsubscripted) sighash can fail, in which case don't set cache.
     return ((multisig_.set = signature_hash(multisig_.hash, *script_,
@@ -239,7 +239,7 @@ set_hash(uint8_t sighash_flags) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-set_hash(const chain::script& subscript, uint8_t sighash_flags) NOEXCEPT
+set_hash(const chain::script& subscript, uint8_t sighash_flags) const NOEXCEPT
 {
     // Only v1 (unsubscripted) sighash can fail, so void return here.
     signature_hash(multisig_.hash, subscript, multisig_.flags = sighash_flags);

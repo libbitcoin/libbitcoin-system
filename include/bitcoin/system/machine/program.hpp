@@ -194,22 +194,19 @@ protected:
     /// -----------------------------------------------------------------------
     virtual INLINE bool cached(uint8_t sighash_flags) const NOEXCEPT;
     virtual INLINE const hash_digest& cached_hash() const NOEXCEPT;
-    virtual INLINE bool set_hash(uint8_t sighash_flags) NOEXCEPT;
+    virtual INLINE bool set_hash(uint8_t sighash_flags) const NOEXCEPT;
     virtual INLINE void set_hash(const chain::script& subscript,
-        uint8_t sighash_flags) NOEXCEPT;
+        uint8_t sighash_flags) const NOEXCEPT;
 
     /// Signature verify (with batching).
     /// -----------------------------------------------------------------------
     virtual inline bool verify_ecdsa_signature(const data_chunk& point,
         const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+    virtual inline bool verify_schnorr_signature(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
     virtual inline bool try_batch_multisig_verification(
         const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
-    virtual inline bool verify_schnorr_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature,
-        bool threshold=true) const NOEXCEPT;
-    virtual inline bool add_threshold_verification(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
 
 private:
     static constexpr auto relaxed = std::memory_order_relaxed;
@@ -238,8 +235,11 @@ private:
         bool strict) NOEXCEPT;
     static inline bool to_compressed(ec_compressed& out,
         const data_chunk& point) NOEXCEPT;
+    static inline const ec_xonly& as_xonly(
+        const data_chunk& point) NOEXCEPT;
 
-    // Batching conditions.
+    // Batching properties.
+    INLINE uint16_t next_batch_group() const NOEXCEPT;
     INLINE bool is_threshold_batchable() const NOEXCEPT;
     INLINE bool is_multisig_batchable() const NOEXCEPT;
     INLINE bool is_schnorr_batchable() const NOEXCEPT;
@@ -267,8 +267,8 @@ private:
     const chain::signatures& capture_;
 
     // Caches.
-    multisig_cache multisig_{};
-    threshold_cache threshold_{};
+    mutable multisig_cache multisig_{};
+    mutable threshold_cache threshold_{};
 
     // Stacks.
     primary_stack primary_;

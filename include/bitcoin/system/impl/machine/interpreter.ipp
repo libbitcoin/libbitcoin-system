@@ -1047,7 +1047,7 @@ op_check_sig_verify() NOEXCEPT
                 return error::op_check_sig_schnorr2;
 
             // Verify schnorr signature against public key and signature hash.
-            if (!state::verify_schnorr_signature(*key, hash, sig, false))
+            if (!state::verify_schnorr_signature(*key, hash, sig))
                 return error::op_check_sig_schnorr3;
         }
 

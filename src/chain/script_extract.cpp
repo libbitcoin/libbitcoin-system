@@ -175,14 +175,14 @@ bool script::extract_sigop_script(script& embedded,
     return true;
 }
 
-bool script::extract_tapscript_threshold(uint8_t& required,
-    uint8_t& sigops, const operations& ops) NOEXCEPT
+bool script::extract_tapscript_threshold(size_t& required,
+    size_t& sigops) const NOEXCEPT
 {
-    if (!is_pay_tapscript_threshold_pattern(ops))
+    if (!is_pay_tapscript_threshold_pattern(ops()))
         return false;
 
-    const auto pairs = ops.size() - two;
-    required = operation::opcode_to_positive(ops[pairs].code());
+    const auto pairs = ops().size() - two;
+    required = operation::opcode_to_positive(ops()[pairs].code());
     sigops = to_half(pairs);
     return true;
 }
