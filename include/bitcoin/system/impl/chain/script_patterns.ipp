@@ -212,40 +212,6 @@ constexpr bool script::is_pay_tapscript_timelock_pattern(
         && ops[4].code() == opcode::checksig;
 }
 
-constexpr bool script::is_pay_tapscript_threshold_pattern(
-    const operations& ops) NOEXCEPT
-{
-    if (ops.size() < 4u || !is_even(ops.size()))
-        return false;
-
-    auto op = ops.begin();
-    if (op->data().size() != ec_xonly_size)
-        return false;
-
-    ++op;
-    if (op->code() != opcode::checksig &&
-        op->code() != opcode::checksigadd)
-        return false;
-
-    ++op;
-    while (op != std::prev(ops.end(), two))
-    {
-        if ((op++->data().size() != ec_xonly_size) ||
-            (op++->code() != opcode::checksigadd))
-            return false;
-    }
-
-    if (!op->is_positive())
-        return false;
-
-    ++op;
-    if (op->code() != opcode::numequal &&
-        op->code() != opcode::numequalverify)
-        return false;
-
-    return true;
-}
-
 constexpr bool script::is_pay_multisig_standard_pattern(
     const operations& ops) NOEXCEPT
 {
@@ -256,6 +222,7 @@ constexpr bool script::is_pay_multisig_standard_pattern(
     const auto& m_op = ops.front();
     const auto& n_op = ops[ops.size() - 2u];
 
+    // Standard form is restricted to minimal encoding.
     if (!m_op.is_positive() || !n_op.is_positive())
         return false;
 
@@ -265,6 +232,7 @@ constexpr bool script::is_pay_multisig_standard_pattern(
     if (is_zero(m) || is_zero(n) || m > n || n > 16u || n != ops.size() - 3u)
         return false;
 
+    // Standard multisig requires valid public key forms.
     for (auto op = std::next(ops.begin()); op != std::prev(ops.end(), 2); ++op)
         if (!is_public_key(op->data()))
             return false;

@@ -25,6 +25,7 @@
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/machine/machine.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -181,8 +182,31 @@ bool script::extract_tapscript_threshold(size_t& required,
     if (!is_pay_tapscript_threshold_pattern(ops()))
         return false;
 
+    int32_t count{};
     const auto pairs = ops().size() - two;
-    required = operation::opcode_to_positive(ops()[pairs].code());
+    const auto& op = ops().at(pairs);
+
+    if (op.is_nonnegative())
+    {
+        // TODO: add opcode_to_nonnegative(opcode).
+        required = (op.code() == opcode::push_size_0) ? zero :
+            operation::opcode_to_positive(op.code());
+    }
+    else if
+        (
+            // TODO: generalize script number extraction from operation.
+            op.is_payload() &&
+            machine::number::integer<4>::from_chunk(count, op.data()) &&
+            !is_limited<size_t>(count)
+        )
+    {
+        required = sign_cast<size_t>(count);
+    }
+    else
+    {
+        return false;
+    }
+
     sigops = to_half(pairs);
     return true;
 }
