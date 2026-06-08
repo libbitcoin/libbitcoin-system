@@ -869,6 +869,7 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 ////static constexpr bool is_positive(opcode code) NOEXCEPT;
 ////static constexpr bool is_nonnegative(opcode code) NOEXCEPT;
 ////static constexpr bool is_number(opcode code) NOEXCEPT;
+////static constexpr bool is_timelock(opcode code) NOEXCEPT;
 ////static constexpr bool is_roller(opcode code) NOEXCEPT;
 ////static constexpr bool is_counted(opcode code) NOEXCEPT;
 ////static constexpr bool is_success(opcode code) NOEXCEPT;

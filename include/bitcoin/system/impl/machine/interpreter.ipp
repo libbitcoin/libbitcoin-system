@@ -1033,7 +1033,7 @@ op_check_sig_verify() NOEXCEPT
 
         // If public key is 32 bytes it is a bip340 schnorr key.
         // If signature is not empty, it is validated against public key.
-        if (key->size() == schnorr::public_key_size)
+        if (key->size() == ec_xonly_size)
         {
             // Split endorsement into schnorr sig and signature hash flags.
             uint8_t sighash_flags;
@@ -1047,7 +1047,7 @@ op_check_sig_verify() NOEXCEPT
                 return error::op_check_sig_schnorr2;
 
             // Verify schnorr signature against public key and signature hash.
-            if (!state::verify_schnorr_signature(*key, hash, sig, true))
+            if (!state::verify_schnorr_signature(*key, hash, sig))
                 return error::op_check_sig_schnorr3;
         }
 
@@ -1158,7 +1158,6 @@ op_check_multisig_verify() NOEXCEPT
     if (state::try_batch_multisig_verification(keys, endorsements))
         return error::op_success;
 
-    state::initialize_cache();
     auto it = endorsements.begin();
     const auto subscript = state::subscript(endorsements);
     const auto bip66 = state::is_enabled(flags::bip66_rule);
@@ -1185,9 +1184,8 @@ op_check_multisig_verify() NOEXCEPT
             return error::op_check_multisig_parse_signature;
 
         // Signature hash caching (bypass signature hash if same as previous).
-        if (state::uncached(sighash_flags))
-            if (!state::set_hash(*subscript, sighash_flags))
-                continue;
+        if (!state::cached(sighash_flags))
+            state::set_hash(*subscript, sighash_flags);
 
         // Verify ECDSA signature against public key and cache signature hash.
         if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
@@ -1324,17 +1322,17 @@ op_check_sig_add() NOEXCEPT
     if (sighash_flags == chain::coverage::invalid)
         return error::op_check_sig_add4;
 
-    // Generate signature hash.
-    hash_digest hash{};
-    if (!state::signature_hash(hash, sighash_flags))
-        return error::op_check_sig_add5;
+    // Signature hash caching (bypass signature hash if same as previous).
+    if (!state::cached(sighash_flags))
+        if (!state::set_hash(sighash_flags))
+            return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
     // If public key size is neither 0 nor 32 bytes, it is an unknown type.
     // During script execution of signature opcodes these behave exactly as
     // known types except that signature validation considered successful.
     if (key->size() == ec_xonly_size &&
-        !state::verify_schnorr_signature(*key, hash, sig, false))
+        !state::verify_schnorr_signature(*key, state::cached_hash(), sig))
             return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.

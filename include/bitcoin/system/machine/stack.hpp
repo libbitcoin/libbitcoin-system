@@ -82,6 +82,7 @@ public:
     virtual bool peek_strict_bool() const NOEXCEPT;
     virtual bool peek_minimal_bool(bool& value) const NOEXCEPT;
     virtual size_t peek_size() const NOEXCEPT;
+    virtual size_t peek_nonempty() const NOEXCEPT;
     virtual chunk_xptr peek_chunk() const NOEXCEPT;
     static bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;

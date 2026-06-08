@@ -136,6 +136,7 @@ protected:
 
     /// Primary stack state (untyped).
     virtual INLINE size_t stack_size() const NOEXCEPT;
+    virtual INLINE size_t stack_nonempty() const NOEXCEPT;
     virtual INLINE bool is_stack_empty() const NOEXCEPT;
     virtual INLINE bool is_stack_overflow() const NOEXCEPT;
 
@@ -192,20 +193,18 @@ protected:
 
     /// Multisig signature hash caching.
     /// -----------------------------------------------------------------------
-    virtual INLINE void initialize_cache() NOEXCEPT;
-    virtual INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
+    virtual INLINE bool cached(uint8_t sighash_flags) const NOEXCEPT;
     virtual INLINE const hash_digest& cached_hash() const NOEXCEPT;
-    virtual INLINE bool set_hash(const chain::script& subscript,
-        uint8_t sighash_flags) NOEXCEPT;
+    virtual INLINE bool set_hash(uint8_t sighash_flags) const NOEXCEPT;
+    virtual INLINE void set_hash(const chain::script& subscript,
+        uint8_t sighash_flags) const NOEXCEPT;
 
     /// Signature verify (with batching).
     /// -----------------------------------------------------------------------
     virtual inline bool verify_ecdsa_signature(const data_chunk& point,
-        const hash_digest& hash,
-        const ec_signature& signature) const NOEXCEPT;
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
     virtual inline bool verify_schnorr_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature,
-        bool batchable) const NOEXCEPT;
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
     virtual inline bool try_batch_multisig_verification(
         const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
@@ -213,12 +212,13 @@ protected:
 private:
     static constexpr auto relaxed = std::memory_order_relaxed;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
+    using threshold_cache = chain::signatures::threshold_group;
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {
-        bool first;
-        uint8_t flags;
-        hash_digest hash;
+        bool set{};
+        uint8_t flags{};
+        hash_digest hash{};
     };
 
     // Verify helpers.
@@ -236,9 +236,16 @@ private:
         bool strict) NOEXCEPT;
     static inline bool to_compressed(ec_compressed& out,
         const data_chunk& point) NOEXCEPT;
+    static inline const ec_xonly& as_xonly(
+        const data_chunk& point) NOEXCEPT;
+
+    // Batching properties.
+    INLINE uint16_t next_batch_group() const NOEXCEPT;
+    INLINE bool is_threshold_batchable() const NOEXCEPT;
     INLINE bool is_multisig_batchable() const NOEXCEPT;
     INLINE bool is_schnorr_batchable() const NOEXCEPT;
     INLINE bool is_ecdsa_batchable() const NOEXCEPT;
+    INLINE bool is_threshold_cached() const NOEXCEPT;
     INLINE bool is_input_script() const NOEXCEPT;
 
     // Stack helpers.
@@ -261,7 +268,8 @@ private:
     const chain::signatures& capture_;
 
     // Caches.
-    multisig_cache cache_{};
+    mutable multisig_cache multisig_{};
+    mutable threshold_cache threshold_{};
 
     // Stacks.
     primary_stack primary_;

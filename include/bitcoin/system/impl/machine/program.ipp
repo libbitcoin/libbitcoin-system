@@ -461,6 +461,13 @@ stack_size() const NOEXCEPT
 }
 
 TEMPLATE
+INLINE size_t CLASS::
+stack_nonempty() const NOEXCEPT
+{
+    return primary_.peek_nonempty();
+}
+
+TEMPLATE
 INLINE bool CLASS::
 is_stack_empty() const NOEXCEPT
 {

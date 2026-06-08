@@ -39,37 +39,46 @@ INLINE bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) const NOEXCEPT
 {
-    if (!capture_.enabled || !is_ecdsa_batchable())
+    ec_compressed key;
+    if (capture_.enabled && is_ecdsa_batchable() &&
+        to_compressed(key, point))
     {
-        capture_.unbatched_ecdsa.fetch_add(one, relaxed);
-        return ecdsa::verify_signature(point, hash, signature);
+        capture_.batched_ecdsa.fetch_add(one, relaxed);
+        capture_.ecdsa(hash, key, signature);
+        return true;
     }
 
-    ec_compressed key;
-    if (!to_compressed(key, point))
-        return false;
-
-    capture_.batched_ecdsa.fetch_add(one, relaxed);
-    capture_.ecdsa(hash, key, signature);
-    return true;
+    capture_.unbatched_ecdsa.fetch_add(one, relaxed);
+    return ecdsa::verify_signature(point, hash, signature);
 }
 
 TEMPLATE
 INLINE bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature, bool batchable) const NOEXCEPT
+    const ec_signature& signature) const NOEXCEPT
 {
-    if (!batchable || !capture_.enabled || !is_schnorr_batchable())
+    if (capture_.enabled && is_threshold_batchable())
     {
-        capture_.unbatched_schnorr.fetch_add(one, relaxed);
-        return schnorr::verify_signature(point, hash, signature);
+        threshold_.entries.emplace_back(hash, as_xonly(point), signature);
+        if (const auto count = threshold_.entries.size();
+            count == threshold_.expected)
+        {
+            capture_.batched_threshold.fetch_add(count, relaxed);
+            capture_.threshold(threshold_, next_batch_group());
+        }
+
+        return true;
     }
 
-    capture_.batched_schnorr.fetch_add(one, relaxed);
-    constexpr auto size = schnorr::public_key_size;
-    const auto& x_point = unsafe_array_cast<uint8_t, size>(point.data());
-    capture_.schnorr(hash, x_point, signature);
-    return true;
+    if (capture_.enabled && is_schnorr_batchable())
+    {
+        capture_.batched_schnorr.fetch_add(one, relaxed);
+        capture_.schnorr(hash, as_xonly(point), signature);
+        return true;
+    }
+
+    capture_.unbatched_schnorr.fetch_add(one, relaxed);
+    return schnorr::verify_signature(point, hash, signature);
 }
 
 TEMPLATE
@@ -77,48 +86,35 @@ INLINE bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    if (!capture_.enabled || !is_multisig_batchable())
+    if (capture_.enabled && is_multisig_batchable())
     {
-        capture_.unbatched_multisig.fetch_add(endorsements.size(), relaxed);
-        return false;
+        ec_compresseds keys(points.size());
+        if (!compress_public_keys(keys, points))
+            return false;
+
+        uint8_t sighash_flags;
+        ec_signatures sigs(endorsements.size());
+        if (!parse_ecdsa_signatures(sighash_flags, sigs, endorsements,
+            is_enabled(flags::bip66_rule)))
+            return false;
+
+        hash_digest hash;
+        if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
+            return false;
+
+        capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
+        capture_.multisig(hash, keys, sigs, next_batch_group());
+        return true;
     }
 
-    ec_compresseds keys(points.size());
-    if (!compress_public_keys(keys, points))
-        return false;
-
-    uint8_t sighash_flags;
-    ec_signatures sigs(endorsements.size());
-    if (!parse_ecdsa_signatures(sighash_flags, sigs, endorsements,
-        is_enabled(flags::bip66_rule)))
-        return false;
-
-    hash_digest hash;
-    if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
-        return false;
-
-    // The group is storage limited to uint16 but capture group is uint64.
-    using storage_group_t = decltype(multisig::batch::group);
-    using capture_group_t = decltype(capture_.group)::value_type;
-    static_assert(is_same_type<capture_group_t, uint64_t>);
-    static_assert(is_same_type<storage_group_t, uint16_t>);
-
-    // So an overflow can be safely detected here, resulting in capture bypass.
-    // Caller can detect occurances of lost capture by checking capture_.group.
-    const auto group = capture_.group.fetch_add(one, relaxed);
-    if (is_limited<storage_group_t>(group))
-        return false;
-
-    capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
-    capture_.multisig(hash, keys, sigs, narrow_cast<storage_group_t>(group));
-    return true;
+    capture_.unbatched_multisig.fetch_add(endorsements.size(), relaxed);
+    return false;
 }
 
 // Batching helpers.
 // ----------------------------------------------------------------------------
-// private
+// static/private
 
-// static
 TEMPLATE
 inline bool CLASS::
 compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
@@ -133,7 +129,6 @@ compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
     return true;
 }
 
-// static
 TEMPLATE
 inline bool CLASS::
 parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
@@ -167,7 +162,6 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
     return true;
 }
 
-// static
 TEMPLATE
 bool CLASS::
 to_compressed(ec_compressed& out, const data_chunk& point) NOEXCEPT
@@ -185,6 +179,45 @@ to_compressed(ec_compressed& out, const data_chunk& point) NOEXCEPT
         default:
             return false;
     }
+}
+
+TEMPLATE
+const ec_xonly& CLASS::
+as_xonly(const data_chunk& point) NOEXCEPT
+{
+    // Guarded by consensus rule.
+    BC_ASSERT(point.size() == ec_xonly_size);
+    return unsafe_array_cast<uint8_t, ec_xonly_size>(point.data());
+}
+
+// Batching properties.
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+INLINE uint16_t CLASS::
+next_batch_group() const NOEXCEPT
+{
+    static_assert(is_same_type<batchy::group_t, uint16_t>);
+    const auto group = capture_.group.fetch_add(one, relaxed);
+
+    // Must return true when batching, so overflow is a hard stop.
+    if (is_limited<uint32_t>(group))
+        std::abort();
+
+    return narrow_cast<uint16_t>(group);
+}
+
+TEMPLATE
+INLINE bool CLASS::
+is_ecdsa_batchable() const NOEXCEPT
+{
+    if (is_input_script())
+        return false;
+
+    const auto& ops = script_->ops();
+    return chain::script::is_pay_public_key_pattern(ops)
+        || chain::script::is_pay_key_hash_pattern(ops)
+        || chain::script::is_pay_witness_key_hash_pattern(ops);
 }
 
 TEMPLATE
@@ -206,20 +239,43 @@ is_schnorr_batchable() const NOEXCEPT
         return false;
 
     const auto& ops = script_->ops();
-    return chain::script::is_pay_witness_taproot_key_path_pattern(ops);
+    return chain::script::is_pay_taproot_key_path_pattern(ops)
+        || chain::script::is_pay_tapscript_single_pattern(ops)
+        || chain::script::is_pay_tapscript_timelock_pattern(ops);
 }
 
 TEMPLATE
 INLINE bool CLASS::
-is_ecdsa_batchable() const NOEXCEPT
+is_threshold_batchable() const NOEXCEPT
 {
+    if (is_threshold_cached())
+        return true;
+
     if (is_input_script())
         return false;
 
-    const auto& ops = script_->ops();
-    return chain::script::is_pay_public_key_pattern(ops)
-        || chain::script::is_pay_key_hash_pattern(ops)
-        || chain::script::is_pay_witness_key_hash_pattern(ops);
+    size_t required{};
+    if (!script_->extract_tapscript_threshold(required))
+        return false;
+
+    // Limit batching to 255 verified (one byte correlation field).
+    // All non-empty elements (sigs) on the stack (plus self) must be evaluated
+    // in a captured signature op. Underflow/overflow imply script failure.
+    const auto expected = add1(stack_nonempty());
+    if (is_limited<uint8_t>(expected))
+        return false;
+
+    threshold_.entries.reserve(expected);
+    threshold_.required = narrow_cast<uint8_t>(required);
+    threshold_.expected = narrow_cast<uint8_t>(expected);
+    return true;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+is_threshold_cached() const NOEXCEPT
+{
+    return !threshold_.entries.empty();
 }
 
 TEMPLATE

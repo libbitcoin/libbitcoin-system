@@ -186,11 +186,30 @@ constexpr bool script::is_pay_witness_taproot_pattern(
 }
 
 // This script type is fabricated in witness::extract_taproot.
-constexpr bool script::is_pay_witness_taproot_key_path_pattern(
+constexpr bool script::is_pay_taproot_key_path_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 1
         && ops[0].code() == opcode::checksig;
+}
+
+constexpr bool script::is_pay_tapscript_single_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 2
+        && ops[0].data().size() == ec_xonly_size
+        && ops[1].code() == opcode::checksig;
+}
+
+constexpr bool script::is_pay_tapscript_timelock_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() == 5u
+        && ops[0].is_nonnegative()
+        && ops[1].is_timelock()
+        && ops[2].code() == opcode::drop
+        && ops[3].data().size() == ec_xonly_size
+        && ops[4].code() == opcode::checksig;
 }
 
 constexpr bool script::is_pay_multisig_standard_pattern(
@@ -203,6 +222,7 @@ constexpr bool script::is_pay_multisig_standard_pattern(
     const auto& m_op = ops.front();
     const auto& n_op = ops[ops.size() - 2u];
 
+    // Standard form is restricted to minimal encoding.
     if (!m_op.is_positive() || !n_op.is_positive())
         return false;
 
@@ -212,6 +232,7 @@ constexpr bool script::is_pay_multisig_standard_pattern(
     if (is_zero(m) || is_zero(n) || m > n || n > 16u || n != ops.size() - 3u)
         return false;
 
+    // Standard multisig requires valid public key forms.
     for (auto op = std::next(ops.begin()); op != std::prev(ops.end(), 2); ++op)
         if (!is_public_key(op->data()))
             return false;

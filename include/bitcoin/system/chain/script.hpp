@@ -58,13 +58,16 @@ public:
     static constexpr bool is_pay_witness_key_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_witness_script_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_witness_taproot_pattern(const operations& ops) NOEXCEPT;
-    static constexpr bool is_pay_witness_taproot_key_path_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_taproot_key_path_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_tapscript_single_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_tapscript_timelock_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_multisig_standard_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_public_key_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_key_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_script_hash_pattern(const operations& ops) NOEXCEPT;
     static bool is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT;
+    static bool is_pay_tapscript_threshold_pattern(const operations& ops) NOEXCEPT;
     static bool is_pay_multisig_pattern(const operations& ops) NOEXCEPT;
 
     static inline operations to_pay_null_data_pattern(
@@ -166,9 +169,10 @@ public:
     script_pattern output_pattern() const NOEXCEPT;
 
     /// Consensus computations.
+    size_t signature_operations(bool accurate) const NOEXCEPT;
     bool extract_sigop_script(script& embedded,
         const script& prevout_script) const NOEXCEPT;
-    size_t signature_operations(bool accurate) const NOEXCEPT;
+    bool extract_tapscript_threshold(size_t& required) const NOEXCEPT;
 
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;

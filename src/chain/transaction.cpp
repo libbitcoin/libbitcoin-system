@@ -506,19 +506,25 @@ bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
     // hashing) is not active, then drop down to unversioned signature hashing.
     if (bip143 && version == script_version::segwit)
-        return version0_sighash(out, input, subscript, value, sighash_flags);
+    {
+        version0_sighash(out, input, subscript, value, sighash_flags);
+        return true;
+    }
 
     // This is where the connection between bip341 and bip342 is made. If a
     // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
     // is not active then drop down to unversioned signature hashing. 
     if (bip342 && version == script_version::taproot)
+    {
         return version1_sighash(out, input, subscript, value, tapleaf,
             sighash_flags);
+    }
 
     // Given above forks are documented to activate together, this distinction
     // is moot, however these are distinct BIPs and therefore must be either be
     // differentiated as such in code, or the BIP distiction would be ignored.
-    return unversioned_sighash(out, input, subscript, sighash_flags);
+    unversioned_sighash(out, input, subscript, sighash_flags);
+    return true;
 }
 
 // Guard (context free).

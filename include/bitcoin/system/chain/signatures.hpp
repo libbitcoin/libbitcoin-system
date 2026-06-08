@@ -38,14 +38,28 @@ namespace chain {
 /// which if any block (or transaction depending on correlation) has failed.
 struct BC_API signatures
 {
+    struct threshold_group
+    {
+        struct entry
+        {
+            cref<hash_digest> digest;
+            cref<ec_xonly> point;
+            cref<ec_signature> sig;
+        };
+
+        std::vector<entry> entries{};
+        uint8_t required{};
+        uint8_t expected{};
+    };
+
     using ecdsa_handler = std::function<void(const hash_digest&,
         const ec_compressed&, const ec_signature&)>;
-
     using schnorr_handler = std::function<void(const hash_digest&,
         const ec_xonly, const ec_signature&)>;
-
     using multisig_handler = std::function<void(const hash_digest&,
-        const ec_compresseds&, const ec_signatures&, uint16_t)>;
+        const ec_compresseds&, const ec_signatures&, batchy::group_t)>;
+    using threshold_handler = std::function<void(const threshold_group&,
+        batchy::group_t)>;
 
     /// Default construction disables batching.
     const bool enabled{};
@@ -54,19 +68,24 @@ struct BC_API signatures
     const ecdsa_handler ecdsa{};
     const schnorr_handler schnorr{};
     const multisig_handler multisig{};
+    const threshold_handler threshold{};
 
-    /// Unique identifier of a (contiguous) multisig group within a block.
-    /// So an overflow can be safely detected, resulting in capture bypass.
-    /// Caller can detect occurances of lost capture by checking .group.
+    /// Unique identifier of a multisig/threshold group within a block.
+    /// Oversized so an overflow can be detected, resulting in capture bypass.
+    /// Caller can detect occurances of lost capture by checking .group value.
     mutable std::atomic<uint64_t> group{};
 
-    /// Diagnostic counters.
+    /// Diagnostic counters (single-sig).
     mutable std::atomic<size_t> batched_ecdsa{};
     mutable std::atomic<size_t> unbatched_ecdsa{};
-    mutable std::atomic<size_t> batched_schnorr{};
-    mutable std::atomic<size_t> unbatched_schnorr{};
     mutable std::atomic<size_t> batched_multisig{};
     mutable std::atomic<size_t> unbatched_multisig{};
+
+    /// Diagnostic counters (multi-sig).
+    mutable std::atomic<size_t> batched_schnorr{};
+    mutable std::atomic<size_t> unbatched_schnorr{};
+    mutable std::atomic<size_t> batched_threshold{};
+    mutable std::atomic<size_t> unbatched_threshold{};
 };
 
 } // namespace chain

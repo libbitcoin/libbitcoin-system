@@ -183,6 +183,14 @@ constexpr bool operation::is_number(opcode code) NOEXCEPT
     return code == op_79 || is_nonnegative(code);
 }
 
+// opcode: [177, 178].
+constexpr bool operation::is_timelock(opcode code) NOEXCEPT
+{
+    constexpr auto op_177 = opcode::checklocktimeverify;
+    constexpr auto op_178 = opcode::checksequenceverify;
+    return code == op_177 || code == op_178;
+}
+
 // opcode: [122].
 constexpr bool operation::is_roller(opcode code) NOEXCEPT
 {
@@ -419,6 +427,11 @@ bool operation::is_nonnegative() const NOEXCEPT
 bool operation::is_number() const NOEXCEPT
 {
     return is_number(code_);
+}
+
+bool operation::is_timelock() const NOEXCEPT
+{
+    return is_timelock(code_);
 }
 
 bool operation::is_roller() const NOEXCEPT

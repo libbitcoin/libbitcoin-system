@@ -189,7 +189,7 @@ void transaction::signature_hash_all(writer& sink,
     sink.write_4_bytes_little_endian(sighash_flags);
 }
 
-bool transaction::unversioned_sighash(hash_digest& out,
+void transaction::unversioned_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
@@ -199,7 +199,7 @@ bool transaction::unversioned_sighash(hash_digest& out,
     if (flag == coverage::hash_single && output_overflow(input_index(input)))
     {
         out = one_hash;
-        return true;
+        return;
     }
 
     // Create hash writer.
@@ -220,7 +220,6 @@ bool transaction::unversioned_sighash(hash_digest& out,
     }
 
     sink.flush();
-    return true;
 }
 
 } // namespace chain
