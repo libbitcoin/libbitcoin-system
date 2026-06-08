@@ -136,6 +136,7 @@ protected:
 
     /// Primary stack state (untyped).
     virtual INLINE size_t stack_size() const NOEXCEPT;
+    virtual INLINE size_t stack_nonempty() const NOEXCEPT;
     virtual INLINE bool is_stack_empty() const NOEXCEPT;
     virtual INLINE bool is_stack_overflow() const NOEXCEPT;
 

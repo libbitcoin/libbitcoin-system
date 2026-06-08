@@ -235,6 +235,37 @@ peek_chunk() const NOEXCEPT
     return value;
 }
 
+TEMPLATE
+INLINE size_t CLASS::
+peek_nonempty() const NOEXCEPT
+{
+    size_t count{};
+
+    for (const auto& element: container_)
+    {
+        std::visit(overload
+        {
+            [&](bool vary) NOEXCEPT
+            {
+                if (vary)
+                    ++count;
+            },
+            [&](int64_t vary) NOEXCEPT
+            {
+                if (!is_zero(vary))
+                    ++count;
+            },
+            [&](const chunk_xptr& vary) NOEXCEPT
+            {
+                if (vary && !vary->empty())
+                    ++count;
+            }
+        }, element);
+    }
+
+    return count;
+}
+
 // Static variant compare with conversion.
 // Methods bound at compile time (free).
 // One runtime switch on variant index (cheap).
