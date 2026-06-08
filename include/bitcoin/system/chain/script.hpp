@@ -172,8 +172,7 @@ public:
     size_t signature_operations(bool accurate) const NOEXCEPT;
     bool extract_sigop_script(script& embedded,
         const script& prevout_script) const NOEXCEPT;
-    bool extract_tapscript_threshold(size_t& required,
-        size_t& sigops) const NOEXCEPT;
+    bool extract_tapscript_threshold(size_t& required) const NOEXCEPT;
 
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;

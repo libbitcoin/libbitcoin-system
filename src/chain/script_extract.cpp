@@ -176,8 +176,7 @@ bool script::extract_sigop_script(script& embedded,
     return true;
 }
 
-bool script::extract_tapscript_threshold(size_t& required,
-    size_t& sigops) const NOEXCEPT
+bool script::extract_tapscript_threshold(size_t& required) const NOEXCEPT
 {
     if (!is_pay_tapscript_threshold_pattern(ops()))
         return false;
@@ -191,6 +190,7 @@ bool script::extract_tapscript_threshold(size_t& required,
         // TODO: add opcode_to_nonnegative(opcode).
         required = (op.code() == opcode::push_size_0) ? zero :
             operation::opcode_to_positive(op.code());
+        return true;
     }
     else if
         (
@@ -201,14 +201,10 @@ bool script::extract_tapscript_threshold(size_t& required,
         )
     {
         required = sign_cast<size_t>(count);
-    }
-    else
-    {
-        return false;
+        return true;
     }
 
-    sigops = to_half(pairs);
-    return true;
+    return false;
 }
 
 } // namespace chain

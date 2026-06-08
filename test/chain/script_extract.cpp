@@ -50,10 +50,9 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_2_of_3__true_exp
 {
     const chain::script script{ make_threshold_ops(2, 3) };
 
-    size_t required{}, sigops{};
-    BOOST_CHECK(script.extract_tapscript_threshold(required, sigops));
+    size_t required{};
+    BOOST_CHECK(script.extract_tapscript_threshold(required));
     BOOST_CHECK_EQUAL(required, 2u);
-    BOOST_CHECK_EQUAL(sigops, 3u);
 }
 
 BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequal__true_expected)
@@ -68,10 +67,9 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequal__true_e
     const chain::script script{ ops };
 
     // Requries more than are present (still valid and executed sigops).
-    size_t required{}, sigops{};
-    BOOST_CHECK(script.extract_tapscript_threshold(required, sigops));
+    size_t required{};
+    BOOST_CHECK(script.extract_tapscript_threshold(required));
     BOOST_CHECK_EQUAL(required, 3u);
-    BOOST_CHECK_EQUAL(sigops, 1u);
 }
 
 BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequalverify__true_expected)
@@ -85,10 +83,9 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequalverify__
     ops.emplace_back(opcode::numequalverify);
     const chain::script script{ ops };
 
-    size_t required{}, sigops{};
-    BOOST_CHECK(script.extract_tapscript_threshold(required, sigops));
+    size_t required{};
+    BOOST_CHECK(script.extract_tapscript_threshold(required));
     BOOST_CHECK_EQUAL(required, 9u);
-    BOOST_CHECK_EQUAL(sigops, 1u);
 }
 
 BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__mismatch_final__false)
@@ -102,8 +99,8 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__mismatch_final__false)
     ops.emplace_back(opcode::equal);
     const chain::script script{ ops };
 
-    size_t required{}, sigops{};
-    BOOST_CHECK(!script.extract_tapscript_threshold(required, sigops));
+    size_t required{};
+    BOOST_CHECK(!script.extract_tapscript_threshold(required));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
