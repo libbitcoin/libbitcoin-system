@@ -110,18 +110,9 @@ bool script::is_pay_tapscript_threshold_pattern(
             (op++->code() != opcode::checksigadd))
             return false;
     }
-    
-    int32_t count{};
-    if (!op->is_nonnegative() &&
-        !(
-            // TODO: generalize script number extraction from operation.
-            op->is_payload() &&
-            machine::number::integer<4>::from_chunk(count, op->data()) &&
-            !is_limited<size_t>(count))
-        )
-    {
+
+    if (!op->is_unsigned32())
         return false;
-    }
 
     ++op;
     if (op->code() != opcode::numequal &&

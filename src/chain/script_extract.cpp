@@ -181,30 +181,15 @@ bool script::extract_tapscript_threshold(size_t& required) const NOEXCEPT
     if (!is_pay_tapscript_threshold_pattern(ops()))
         return false;
 
-    int32_t count{};
-    const auto pairs = ops().size() - two;
-    const auto& op = ops().at(pairs);
+    // This threshold op holds the numeric value for required signatures.
+    const auto required_op = ops().at(ops().size() - two);
 
-    if (op.is_nonnegative())
-    {
-        // TODO: add opcode_to_nonnegative(opcode).
-        required = (op.code() == opcode::push_size_0) ? zero :
-            operation::opcode_to_positive(op.code());
-        return true;
-    }
-    else if
-        (
-            // TODO: generalize script number extraction from operation.
-            op.is_payload() &&
-            machine::number::integer<4>::from_chunk(count, op.data()) &&
-            !is_limited<size_t>(count)
-        )
-    {
-        required = sign_cast<size_t>(count);
-        return true;
-    }
+    uint32_t value{};
+    if (!required_op.as_unsigned32(value))
+        return false;
 
-    return false;
+    required = value;
+    return true;
 }
 
 } // namespace chain

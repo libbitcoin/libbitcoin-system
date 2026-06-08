@@ -389,7 +389,7 @@ inline operations script::to_pay_witness_pattern(uint8_t version,
 {
     return
     {
-        { operation::opcode_from_version(version) },
+        { operation::opcode_from_nonnegative(version) },
         { to_chunk(data), false },
     };
 }

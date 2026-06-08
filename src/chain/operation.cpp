@@ -486,6 +486,54 @@ bool operation::is_valid() const NOEXCEPT
     return !(code_ == any_invalid && !underflow_ && !data_empty());
 }
 
+bool operation::is_unsigned32() const NOEXCEPT
+{
+    uint32_t unused{};
+    return as_unsigned32(unused);
+}
+
+bool operation::is_unsigned40() const NOEXCEPT
+{
+    uint64_t unused{};
+    return as_unsigned40(unused);
+}
+
+bool operation::as_unsigned32(uint32_t& value) const NOEXCEPT
+{
+    if (is_nonnegative(code_))
+    {
+        value = opcode_to_nonnegative(code_);
+        return true;
+    }
+
+    using namespace machine::number;
+    int32_t signed_value{};
+    if (!is_payload() || !integer<4>::from_chunk(signed_value, data()) ||
+        is_limited<uint32_t>(signed_value))
+        return false;
+
+    value = sign_cast<uint32_t>(signed_value);
+    return true;
+}
+
+bool operation::as_unsigned40(uint64_t& value) const NOEXCEPT
+{
+    if (is_nonnegative(code_))
+    {
+        value = opcode_to_nonnegative(code_);
+        return true;
+    }
+
+    using namespace machine::number;
+    int64_t signed_value{};
+    if (!is_payload() || !integer<5>::from_chunk(signed_value, data()) ||
+        is_limited<uint64_t>(signed_value))
+        return false;
+
+    value = sign_cast<uint64_t>(signed_value);
+    return true;
+}
+
 opcode operation::code() const NOEXCEPT
 {
     return code_;

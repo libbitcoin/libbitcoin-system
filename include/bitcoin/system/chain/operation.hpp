@@ -41,10 +41,11 @@ public:
     /// -----------------------------------------------------------------------
 
     static constexpr uint8_t opcode_to_positive(opcode code) NOEXCEPT;
+    static constexpr uint8_t opcode_to_nonnegative(opcode code) NOEXCEPT;
     static constexpr size_t opcode_to_maximum_size(opcode code) NOEXCEPT;
     static constexpr opcode opcode_from_size(size_t size) NOEXCEPT;
-    static constexpr opcode opcode_from_version(uint8_t value) NOEXCEPT;
     static constexpr opcode opcode_from_positive(uint8_t value) NOEXCEPT;
+    static constexpr opcode opcode_from_nonnegative(uint8_t value) NOEXCEPT;
     static constexpr opcode minimal_opcode_from_data(const data_chunk& data) NOEXCEPT;
     static constexpr opcode nominal_opcode_from_data(const data_chunk& data) NOEXCEPT;
 
@@ -143,6 +144,10 @@ public:
     opcode code() const NOEXCEPT;
     const data_chunk& data() const NOEXCEPT;
     const chunk_cptr& data_ptr() const NOEXCEPT;
+    bool as_unsigned32(uint32_t& value) const NOEXCEPT;
+    bool as_unsigned40(uint64_t& value) const NOEXCEPT;
+    bool is_unsigned32() const NOEXCEPT;
+    bool is_unsigned40() const NOEXCEPT;
 
     /// Computed properties.
     size_t serialized_size() const NOEXCEPT;

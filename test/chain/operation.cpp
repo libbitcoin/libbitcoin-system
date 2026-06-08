@@ -823,9 +823,77 @@ BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify
 
 ////size_t serialized_size() const
 ////opcode opcode_from_size(size_t size)
-////opcode minimal_opcode_from_data(const data_chunk& data);
+////opcode minimal_opcode_from_data(const data_chunk& data)
 ////opcode nominal_opcode_from_data(const data_chunk& data)
-////opcode opcode_from_version(uint8_t value)
+
+// operation__is_positive__always__expected
+static_assert(!operation::is_positive(opcode::push_size_1));
+static_assert(!operation::is_positive(opcode::push_size_75));
+static_assert(!operation::is_positive(opcode::push_one_size));
+static_assert(!operation::is_positive(opcode::push_two_size));
+static_assert(!operation::is_positive(opcode::push_four_size));
+static_assert(!operation::is_positive(opcode::push_negative_1));
+static_assert(!operation::is_positive(opcode::push_size_0));
+static_assert(operation::is_positive(opcode::push_positive_1));
+static_assert(operation::is_positive(opcode::push_positive_2));
+static_assert(operation::is_positive(opcode::push_positive_3));
+static_assert(operation::is_positive(opcode::push_positive_4));
+static_assert(operation::is_positive(opcode::push_positive_5));
+static_assert(operation::is_positive(opcode::push_positive_6));
+static_assert(operation::is_positive(opcode::push_positive_7));
+static_assert(operation::is_positive(opcode::push_positive_8));
+static_assert(operation::is_positive(opcode::push_positive_9));
+static_assert(operation::is_positive(opcode::push_positive_10));
+static_assert(operation::is_positive(opcode::push_positive_11));
+static_assert(operation::is_positive(opcode::push_positive_12));
+static_assert(operation::is_positive(opcode::push_positive_13));
+static_assert(operation::is_positive(opcode::push_positive_14));
+static_assert(operation::is_positive(opcode::push_positive_15));
+static_assert(operation::is_positive(opcode::push_positive_16));
+
+// operation__is_positive__always__expected
+static_assert(!operation::is_nonnegative(opcode::push_size_1));
+static_assert(!operation::is_nonnegative(opcode::push_size_75));
+static_assert(!operation::is_nonnegative(opcode::push_one_size));
+static_assert(!operation::is_nonnegative(opcode::push_two_size));
+static_assert(!operation::is_nonnegative(opcode::push_four_size));
+static_assert(!operation::is_nonnegative(opcode::push_negative_1));
+static_assert(operation::is_nonnegative(opcode::push_size_0));
+static_assert(operation::is_nonnegative(opcode::push_positive_1));
+static_assert(operation::is_nonnegative(opcode::push_positive_2));
+static_assert(operation::is_nonnegative(opcode::push_positive_3));
+static_assert(operation::is_nonnegative(opcode::push_positive_4));
+static_assert(operation::is_nonnegative(opcode::push_positive_5));
+static_assert(operation::is_nonnegative(opcode::push_positive_6));
+static_assert(operation::is_nonnegative(opcode::push_positive_7));
+static_assert(operation::is_nonnegative(opcode::push_positive_8));
+static_assert(operation::is_nonnegative(opcode::push_positive_9));
+static_assert(operation::is_nonnegative(opcode::push_positive_10));
+static_assert(operation::is_nonnegative(opcode::push_positive_11));
+static_assert(operation::is_nonnegative(opcode::push_positive_12));
+static_assert(operation::is_nonnegative(opcode::push_positive_13));
+static_assert(operation::is_nonnegative(opcode::push_positive_14));
+static_assert(operation::is_nonnegative(opcode::push_positive_15));
+static_assert(operation::is_nonnegative(opcode::push_positive_16));
+
+// operation__opcode_to_nonnegative__all_nonnegatives__expected
+static_assert(operation::opcode_to_nonnegative(opcode::push_size_0) == 0u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_1) == 1u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_2) == 2u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_3) == 3u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_4) == 4u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_5) == 5u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_6) == 6u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_7) == 7u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_8) == 8u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_9) == 9u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_10) == 10u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_11) == 11u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_12) == 12u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_13) == 13u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_14) == 14u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_15) == 15u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_16) == 16u);
 
 // operation__opcode_from_positive__all_positives__expected
 static_assert(operation::opcode_from_positive(1u) == opcode::push_positive_1);
@@ -845,6 +913,25 @@ static_assert(operation::opcode_from_positive(14u) == opcode::push_positive_14);
 static_assert(operation::opcode_from_positive(15u) == opcode::push_positive_15);
 static_assert(operation::opcode_from_positive(16u) == opcode::push_positive_16);
 
+// operation__opcode_from_nonnegative__all_nonnegatives__expected
+static_assert(operation::opcode_from_nonnegative(0u) == opcode::push_size_0);
+static_assert(operation::opcode_from_nonnegative(1u) == opcode::push_positive_1);
+static_assert(operation::opcode_from_nonnegative(2u) == opcode::push_positive_2);
+static_assert(operation::opcode_from_nonnegative(3u) == opcode::push_positive_3);
+static_assert(operation::opcode_from_nonnegative(4u) == opcode::push_positive_4);
+static_assert(operation::opcode_from_nonnegative(5u) == opcode::push_positive_5);
+static_assert(operation::opcode_from_nonnegative(6u) == opcode::push_positive_6);
+static_assert(operation::opcode_from_nonnegative(7u) == opcode::push_positive_7);
+static_assert(operation::opcode_from_nonnegative(8u) == opcode::push_positive_8);
+static_assert(operation::opcode_from_nonnegative(9u) == opcode::push_positive_9);
+static_assert(operation::opcode_from_nonnegative(10u) == opcode::push_positive_10);
+static_assert(operation::opcode_from_nonnegative(11u) == opcode::push_positive_11);
+static_assert(operation::opcode_from_nonnegative(12u) == opcode::push_positive_12);
+static_assert(operation::opcode_from_nonnegative(13u) == opcode::push_positive_13);
+static_assert(operation::opcode_from_nonnegative(14u) == opcode::push_positive_14);
+static_assert(operation::opcode_from_nonnegative(15u) == opcode::push_positive_15);
+static_assert(operation::opcode_from_nonnegative(16u) == opcode::push_positive_16);
+
 // operation__opcode_to_positive__all_positives__expected
 static_assert(operation::opcode_to_positive(opcode::push_positive_1) == 1u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_2) == 2u);
@@ -863,11 +950,28 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_14) == 14u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_15) == 15u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 
+// operation__opcode_to_nonnegative__all_nonnegatives__expected
+static_assert(operation::opcode_to_nonnegative(opcode::push_size_0) == 0u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_1) == 1u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_2) == 2u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_3) == 3u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_4) == 4u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_5) == 5u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_6) == 6u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_7) == 7u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_8) == 8u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_9) == 9u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_10) == 10u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_11) == 11u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_12) == 12u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_13) == 13u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_14) == 14u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_15) == 15u);
+static_assert(operation::opcode_to_nonnegative(opcode::push_positive_16) == 16u);
+
 ////static constexpr bool is_relaxed_push(opcode code) NOEXCEPT;
 ////static constexpr bool is_push(opcode code) NOEXCEPT;
 ////static constexpr bool is_payload(opcode code) NOEXCEPT;
-////static constexpr bool is_positive(opcode code) NOEXCEPT;
-////static constexpr bool is_nonnegative(opcode code) NOEXCEPT;
 ////static constexpr bool is_number(opcode code) NOEXCEPT;
 ////static constexpr bool is_timelock(opcode code) NOEXCEPT;
 ////static constexpr bool is_roller(opcode code) NOEXCEPT;
@@ -880,57 +984,57 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
 {
     // 80
-    BOOST_REQUIRE(!operation::is_success(opcode::push_negative_1));
-    BOOST_REQUIRE( operation::is_success(opcode::reserved_80));
-    BOOST_REQUIRE(!operation::is_success(opcode::push_positive_1));
+    BOOST_CHECK(!operation::is_success(opcode::push_negative_1));
+    BOOST_CHECK( operation::is_success(opcode::reserved_80));
+    BOOST_CHECK(!operation::is_success(opcode::push_positive_1));
 
     // 98
-    BOOST_REQUIRE(!operation::is_success(opcode::nop));
-    BOOST_REQUIRE( operation::is_success(opcode::op_ver));
-    BOOST_REQUIRE(!operation::is_success(opcode::if_));
+    BOOST_CHECK(!operation::is_success(opcode::nop));
+    BOOST_CHECK( operation::is_success(opcode::op_ver));
+    BOOST_CHECK(!operation::is_success(opcode::if_));
 
     // 126-129
-    BOOST_REQUIRE(!operation::is_success(opcode::tuck));
-    BOOST_REQUIRE( operation::is_success(opcode::op_cat));
-    BOOST_REQUIRE( operation::is_success(opcode::op_substr));
-    BOOST_REQUIRE( operation::is_success(opcode::op_left));
-    BOOST_REQUIRE( operation::is_success(opcode::op_right));
-    BOOST_REQUIRE(!operation::is_success(opcode::size));
+    BOOST_CHECK(!operation::is_success(opcode::tuck));
+    BOOST_CHECK( operation::is_success(opcode::op_cat));
+    BOOST_CHECK( operation::is_success(opcode::op_substr));
+    BOOST_CHECK( operation::is_success(opcode::op_left));
+    BOOST_CHECK( operation::is_success(opcode::op_right));
+    BOOST_CHECK(!operation::is_success(opcode::size));
 
     // 131-134
-    BOOST_REQUIRE(!operation::is_success(opcode::size));
-    BOOST_REQUIRE( operation::is_success(opcode::op_invert));
-    BOOST_REQUIRE( operation::is_success(opcode::op_and));
-    BOOST_REQUIRE( operation::is_success(opcode::op_or));
-    BOOST_REQUIRE( operation::is_success(opcode::op_xor));
-    BOOST_REQUIRE(!operation::is_success(opcode::equal));
+    BOOST_CHECK(!operation::is_success(opcode::size));
+    BOOST_CHECK( operation::is_success(opcode::op_invert));
+    BOOST_CHECK( operation::is_success(opcode::op_and));
+    BOOST_CHECK( operation::is_success(opcode::op_or));
+    BOOST_CHECK( operation::is_success(opcode::op_xor));
+    BOOST_CHECK(!operation::is_success(opcode::equal));
 
     // 137-138
-    BOOST_REQUIRE(!operation::is_success(opcode::equalverify));
-    BOOST_REQUIRE( operation::is_success(opcode::reserved_137));
-    BOOST_REQUIRE( operation::is_success(opcode::reserved_138));
-    BOOST_REQUIRE(!operation::is_success(opcode::add1));
+    BOOST_CHECK(!operation::is_success(opcode::equalverify));
+    BOOST_CHECK( operation::is_success(opcode::reserved_137));
+    BOOST_CHECK( operation::is_success(opcode::reserved_138));
+    BOOST_CHECK(!operation::is_success(opcode::add1));
 
     // 141-142
-    BOOST_REQUIRE(!operation::is_success(opcode::sub1));
-    BOOST_REQUIRE( operation::is_success(opcode::op_mul2));
-    BOOST_REQUIRE( operation::is_success(opcode::op_div2));
-    BOOST_REQUIRE(!operation::is_success(opcode::negate));
+    BOOST_CHECK(!operation::is_success(opcode::sub1));
+    BOOST_CHECK( operation::is_success(opcode::op_mul2));
+    BOOST_CHECK( operation::is_success(opcode::op_div2));
+    BOOST_CHECK(!operation::is_success(opcode::negate));
 
     // 149-153
-    BOOST_REQUIRE(!operation::is_success(opcode::sub));
-    BOOST_REQUIRE( operation::is_success(opcode::op_mul));
-    BOOST_REQUIRE( operation::is_success(opcode::op_div));
-    BOOST_REQUIRE( operation::is_success(opcode::op_mod));
-    BOOST_REQUIRE( operation::is_success(opcode::op_lshift));
-    BOOST_REQUIRE( operation::is_success(opcode::op_rshift));
-    BOOST_REQUIRE(!operation::is_success(opcode::booland));
+    BOOST_CHECK(!operation::is_success(opcode::sub));
+    BOOST_CHECK( operation::is_success(opcode::op_mul));
+    BOOST_CHECK( operation::is_success(opcode::op_div));
+    BOOST_CHECK( operation::is_success(opcode::op_mod));
+    BOOST_CHECK( operation::is_success(opcode::op_lshift));
+    BOOST_CHECK( operation::is_success(opcode::op_rshift));
+    BOOST_CHECK(!operation::is_success(opcode::booland));
 
     // 187-254
-    BOOST_REQUIRE(!operation::is_success(opcode::reserved_186));
-    BOOST_REQUIRE( operation::is_success(opcode::reserved_187));
-    BOOST_REQUIRE( operation::is_success(opcode::reserved_254));
-    BOOST_REQUIRE(!operation::is_success(opcode::reserved_255));
+    BOOST_CHECK(!operation::is_success(opcode::reserved_186));
+    BOOST_CHECK( operation::is_success(opcode::reserved_187));
+    BOOST_CHECK( operation::is_success(opcode::reserved_254));
+    BOOST_CHECK(!operation::is_success(opcode::reserved_255));
 }
 
 // utilities (member)
@@ -953,5 +1057,71 @@ BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
 //bool is_underclaimed() const NOEXCEPT;
 //bool is_oversized() const NOEXCEPT;
 //bool is_underflow() const NOEXCEPT;
+
+BOOST_AUTO_TEST_CASE(operation__is_unsigned32__always__expected)
+{
+    BOOST_CHECK(operation(opcode::push_size_0).is_unsigned32());
+    BOOST_CHECK(operation(opcode::push_positive_1).is_unsigned32());
+    BOOST_CHECK(operation(opcode::push_positive_16).is_unsigned32());
+
+    BOOST_CHECK(operation(data_chunk{ 0x00 }, true).is_unsigned32());
+    BOOST_CHECK(operation({ 0xff, 0xff, 0xff, 0x7f }, true).is_unsigned32());
+
+    BOOST_CHECK(!operation(data_chunk{ 0x81 }, true).is_unsigned32());
+    BOOST_CHECK(!operation(data_chunk{ 0x82 }, true).is_unsigned32());
+    BOOST_CHECK(!operation({ 0x80, 0x00, 0x00, 0x80 }, true).is_unsigned32());
+
+    BOOST_CHECK(!operation({ 0x00, 0x00, 0x00, 0x00, 0x00 }, true).is_unsigned32());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_unsigned40__always__expected)
+{
+    BOOST_CHECK(operation(opcode::push_size_0).is_unsigned40());
+    BOOST_CHECK(operation(opcode::push_positive_1).is_unsigned40());
+    BOOST_CHECK(operation(opcode::push_positive_16).is_unsigned40());
+
+    BOOST_CHECK(operation({ 0xff, 0xff, 0xff, 0xff, 0x7f }, true).is_unsigned40());
+
+    BOOST_CHECK(!operation(data_chunk{ 0x81 }, true).is_unsigned40());
+    BOOST_CHECK(!operation({ 0x42, 0x00, 0x00, 0x00, 0x80 }, true).is_unsigned40());
+
+    BOOST_CHECK(!operation({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, true).is_unsigned40());
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unsigned32__always__expected)
+{
+    uint32_t value{};
+    BOOST_CHECK(operation(opcode::push_size_0).as_unsigned32(value));
+    BOOST_CHECK_EQUAL(value, 0u);
+
+    BOOST_CHECK(operation(opcode::push_positive_1).as_unsigned32(value));
+    BOOST_CHECK_EQUAL(value, 1u);
+
+    BOOST_CHECK(operation({ 0xff, 0xff, 0xff, 0x7f }, true).as_unsigned32(value));
+    BOOST_CHECK_EQUAL(value, 0x7fffffff_u32);
+
+    BOOST_CHECK(!operation(data_chunk{ 0x81 }, true).as_unsigned32(value));
+    BOOST_CHECK(!operation({ 0x80, 0x00, 0x00, 0x80 }, true).as_unsigned32(value));
+
+    BOOST_CHECK(!operation({ 0x00, 0x00, 0x00, 0x00, 0x00 }, true).as_unsigned32(value));
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unsigned40__always__expected)
+{
+    uint64_t value{};
+    BOOST_CHECK(operation(opcode::push_size_0).as_unsigned40(value));
+    BOOST_CHECK_EQUAL(value, 0u);
+
+    BOOST_CHECK(operation(opcode::push_positive_1).as_unsigned40(value));
+    BOOST_CHECK_EQUAL(value, 1u);
+
+    BOOST_CHECK(operation({ 0xff, 0xff, 0xff, 0xff, 0x7f }, true).as_unsigned40(value));
+    BOOST_CHECK_EQUAL(value, 0x0000007fffffffff_u64);
+
+    BOOST_CHECK(!operation(data_chunk{ 0x81 }, true).as_unsigned40(value));
+    BOOST_CHECK(!operation({ 0x42, 0x00, 0x00, 0x00, 0x80 }, true).as_unsigned40(value));
+
+    BOOST_CHECK(!operation({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, true).as_unsigned40(value));
+}
 
 BOOST_AUTO_TEST_SUITE_END()
