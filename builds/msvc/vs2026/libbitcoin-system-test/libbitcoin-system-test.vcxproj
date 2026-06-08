@@ -189,6 +189,10 @@
     <ClCompile Include="..\..\..\..\test\chain\script.cpp">
       <ObjectFileName>$(IntDir)test_chain_script.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\script_connect.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script_extract.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script_patterns.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script_serialize.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\stripper.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\taproot.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\tapscript.cpp" />

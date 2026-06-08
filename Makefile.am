@@ -257,6 +257,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
+    test/chain/script_connect.cpp \
+    test/chain/script_extract.cpp \
+    test/chain/script_patterns.cpp \
+    test/chain/script_serialize.cpp \
     test/chain/stripper.cpp \
     test/chain/taproot.cpp \
     test/chain/tapscript.cpp \
