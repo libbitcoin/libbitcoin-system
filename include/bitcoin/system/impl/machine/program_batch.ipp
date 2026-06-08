@@ -254,17 +254,17 @@ is_threshold_batchable() const NOEXCEPT
     if (is_input_script())
         return false;
 
-    size_t required{}, expected{};
-    if (!script_->extract_tapscript_threshold(required, expected))
+    size_t required{};
+    if (!script_->extract_tapscript_threshold(required))
         return false;
 
-    // Limit batching to 255 expected (one byte correlation field).
+    // Limit batching to 255 verified (one byte correlation field).
+    // All non-empty elements (sigs) on the stack (plus self) must be evaluated
+    // in a captured signature op. Underflow/overflow imply script failure.
+    const auto expected = add1(stack_nonempty());
     if (is_limited<uint8_t>(expected))
         return false;
 
-    // Zero required mut still evaluate, and requires that none verify.
-    // TODO: The script will execute all scripts when required > expected even
-    // TODO: though it cannot pass validation. Could be short-circuited here.
     threshold_.entries.reserve(expected);
     threshold_.required = narrow_cast<uint8_t>(required);
     threshold_.expected = narrow_cast<uint8_t>(expected);
