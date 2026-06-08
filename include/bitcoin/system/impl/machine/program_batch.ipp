@@ -258,10 +258,13 @@ is_threshold_batchable() const NOEXCEPT
     if (!script_->extract_tapscript_threshold(required, expected))
         return false;
 
-    BC_ASSERT(required <= expected);
+    // Limit batching to 255 expected (one byte correlation field).
     if (is_limited<uint8_t>(expected))
         return false;
 
+    // Zero required mut still evaluate, and requires that none verify.
+    // TODO: The script will execute all scripts when required > expected even
+    // TODO: though it cannot pass validation. Could be short-circuited here.
     threshold_.entries.reserve(expected);
     threshold_.required = narrow_cast<uint8_t>(required);
     threshold_.expected = narrow_cast<uint8_t>(expected);
