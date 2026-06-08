@@ -42,6 +42,13 @@ constexpr uint8_t operation::opcode_to_positive(opcode code) NOEXCEPT
     return static_cast<uint8_t>(code) - sub1(op_81);
 }
 
+// Convert the opcode to the corresponding [0, 1..16] value (or undefined).
+constexpr uint8_t operation::opcode_to_nonnegative(opcode code) NOEXCEPT
+{
+    ////BC_ASSERT(is_nonnegative(code));
+    return (code == opcode::push_size_0) ? 0_u8 : opcode_to_positive(code);
+}
+
 // Compute maximum push data size for the opcode (without script limit).
 constexpr size_t operation::opcode_to_maximum_size(opcode code) NOEXCEPT
 {
@@ -80,14 +87,6 @@ constexpr opcode operation::opcode_from_size(size_t size) NOEXCEPT
         return opcode::push_four_size;
 }
 
-// Convert the [0..16] value to the corresponding opcode (or undefined).
-constexpr opcode operation::opcode_from_version(uint8_t value) NOEXCEPT
-{
-    ////BC_ASSERT(value <= numbers::positive_16);
-    return (value == numbers::number_0) ? opcode::push_size_0 :
-        operation::opcode_from_positive(value);
-}
-
 // Convert the [1..16] value to the corresponding opcode (or undefined).
 constexpr opcode operation::opcode_from_positive(uint8_t value) NOEXCEPT
 {
@@ -95,6 +94,14 @@ constexpr opcode operation::opcode_from_positive(uint8_t value) NOEXCEPT
     ////BC_ASSERT(value <= numbers::positive_16);
     constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
     return static_cast<opcode>(value + sub1(op_81));
+}
+
+// Convert the [0..16] value to the corresponding opcode (or undefined).
+constexpr opcode operation::opcode_from_nonnegative(uint8_t value) NOEXCEPT
+{
+    ////BC_ASSERT(value <= numbers::positive_16);
+    return (value == numbers::number_0) ? opcode::push_size_0 :
+        operation::opcode_from_positive(value);
 }
 
 // Compute the minimal data opcode for a given chunk of data.
