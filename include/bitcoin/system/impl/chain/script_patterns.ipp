@@ -278,7 +278,8 @@ constexpr bool script::is_pay_multisig_standard_pattern(
     const auto m = operation::opcode_to_positive(m_op.code());
     const auto n = operation::opcode_to_positive(n_op.code());
 
-    if (is_zero(m) || is_zero(n) || m > n || n > 16u || n != ops.size() - 3u)
+    if (is_zero(m) || is_zero(n) || (m > n) || (n > 16u) ||
+        (n != ops.size() - 3u))
         return false;
 
     // Standard multisig requires valid public key forms.
