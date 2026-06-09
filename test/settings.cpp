@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
         { "000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70", 546 }
     };
 
-    settings configuration(chain::selection::testnet);
+    settings configuration(chain::selection::testnet3);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(settings__block_spacing_seconds__set_double_value__retarget
 
 BOOST_AUTO_TEST_CASE(settings__sorted_checkpoints__testnet_empty__empty)
 {
-    settings configuration(chain::selection::testnet);
+    settings configuration(chain::selection::testnet3);
     configuration.checkpoints.clear();
     BOOST_REQUIRE(configuration.sorted_checkpoints().empty());
 }
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(settings__sorted_checkpoints__mainnet_default_expected)
 
 BOOST_AUTO_TEST_CASE(settings__top_checkpoint__testnet_empty__genesis)
 {
-    settings configuration(chain::selection::testnet);
+    settings configuration(chain::selection::testnet3);
     configuration.checkpoints.clear();
     const chain::checkpoint genesis{ configuration.genesis_block.hash(), zero };
     BOOST_REQUIRE_EQUAL(configuration.top_checkpoint(), genesis);

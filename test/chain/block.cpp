@@ -463,7 +463,7 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__mainnet_genesis__false)
 
 BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__testnet_genesis__false)
 {
-    const auto data = settings(selection::testnet).genesis_block.to_data(true);
+    const auto data = settings(selection::testnet3).genesis_block.to_data(true);
     const accessor genesis(data, true);
     BOOST_REQUIRE(genesis.is_valid());
     BOOST_REQUIRE(!genesis.is_invalid_merkle_root());

@@ -175,7 +175,7 @@ settings::settings(chain::selection context) NOEXCEPT
             break;
         }
 
-        case chain::selection::testnet:
+        case chain::selection::testnet3:
         {
             genesis_block = chain::block
             {
