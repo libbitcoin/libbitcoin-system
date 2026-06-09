@@ -30,7 +30,7 @@ enum class selection
 {
     none,
     mainnet,
-    testnet,
+    testnet3,
     regtest
 };
 
