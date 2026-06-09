@@ -54,35 +54,6 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
 
 TEMPLATE
 INLINE bool CLASS::
-verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature) const NOEXCEPT
-{
-    if (capture_.enabled && is_threshold_batchable())
-    {
-        threshold_.entries.emplace_back(hash, as_xonly(point), signature);
-        if (const auto count = threshold_.entries.size();
-            count == threshold_.expected)
-        {
-            capture_.batched_threshold.fetch_add(count, relaxed);
-            capture_.threshold(threshold_, next_batch_group());
-        }
-
-        return true;
-    }
-
-    if (capture_.enabled && is_schnorr_batchable())
-    {
-        capture_.batched_schnorr.fetch_add(one, relaxed);
-        capture_.schnorr(hash, as_xonly(point), signature);
-        return true;
-    }
-
-    capture_.unbatched_schnorr.fetch_add(one, relaxed);
-    return schnorr::verify_signature(point, hash, signature);
-}
-
-TEMPLATE
-INLINE bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
@@ -109,6 +80,78 @@ try_batch_multisig_verification(const chunk_xptrs& points,
 
     capture_.unbatched_multisig.fetch_add(endorsements.size(), relaxed);
     return false;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature) const NOEXCEPT
+{
+    if (capture_.enabled && is_threshold_batchable())
+    {
+        const auto script = script_->to_string(chain::flags::all_rules);
+        capture_.log((boost::format("THRSH [%1%] { %2% }") % threshold_.group % script).str());
+
+        capture_.log((boost::format("NXPCT [%1%] %2%") % threshold_.group % threshold_.expected).str());
+        threshold_.entries.emplace_back(hash, as_xonly(point), signature);
+
+        if (const auto count = threshold_.entries.size();
+            count == threshold_.expected)
+        {
+            capture_.log((boost::format("MSIGS [%1%] %2%") % threshold_.group % count).str());
+            capture_.batched_threshold.fetch_add(count, relaxed);
+            capture_.threshold(threshold_, threshold_.group);
+        }
+
+        return true;
+    }
+
+    if (capture_.enabled && is_schnorr_batchable())
+    {
+        const auto script = script_->to_string(chain::flags::all_rules);
+        capture_.log((boost::format("BATCH [%1%] { %2% }") % threshold_.group % script).str());
+        capture_.batched_schnorr.fetch_add(one, relaxed);
+        capture_.schnorr(hash, as_xonly(point), signature);
+        return true;
+    }
+
+    const auto script = script_->to_string(chain::flags::all_rules);
+    capture_.log((boost::format("UBACH [%1%] { %2% }") % threshold_.group % script).str());
+    capture_.unbatched_schnorr.fetch_add(one, relaxed);
+    return schnorr::verify_signature(point, hash, signature);
+}
+
+TEMPLATE
+INLINE bool CLASS::
+is_threshold_batchable() const NOEXCEPT
+{
+    if (is_threshold_cached())
+        return true;
+
+    if (is_input_script())
+        return false;
+
+    size_t required{};
+    const auto condition = script_->extract_tapscript_threshold(required);
+    if (operation::is_invalid(condition))
+        return false;
+
+    // Limit batching to 255 verified (one byte correlation field).
+    // All non-empty elements (sigs) on the stack (plus self) must be evaluated
+    // in a captured signature op. Underflow/overflow imply script failure.
+    const auto expected = add1(stack_nonempty());
+    if (is_limited<uint8_t>(expected))
+    {
+        capture_.log((boost::format("LIMITED CAPTURE (%1%).") % expected).str());
+        return false;
+    }
+
+    next_batch_group();
+    threshold_.entries.reserve(expected);
+    threshold_.required = narrow_cast<uint8_t>(required);
+    threshold_.expected = narrow_cast<uint8_t>(expected);
+    threshold_.condition = condition;
+    return true;
 }
 
 // Batching helpers.
@@ -241,34 +284,8 @@ is_schnorr_batchable() const NOEXCEPT
     const auto& ops = script_->ops();
     return chain::script::is_pay_taproot_key_path_pattern(ops)
         || chain::script::is_pay_tapscript_single_pattern(ops)
-        || chain::script::is_pay_tapscript_timelock_pattern(ops);
-}
-
-TEMPLATE
-INLINE bool CLASS::
-is_threshold_batchable() const NOEXCEPT
-{
-    if (is_threshold_cached())
-        return true;
-
-    if (is_input_script())
-        return false;
-
-    size_t required{};
-    if (!script_->extract_tapscript_threshold(required))
-        return false;
-
-    // Limit batching to 255 verified (one byte correlation field).
-    // All non-empty elements (sigs) on the stack (plus self) must be evaluated
-    // in a captured signature op. Underflow/overflow imply script failure.
-    const auto expected = add1(stack_nonempty());
-    if (is_limited<uint8_t>(expected))
-        return false;
-
-    threshold_.entries.reserve(expected);
-    threshold_.required = narrow_cast<uint8_t>(required);
-    threshold_.expected = narrow_cast<uint8_t>(expected);
-    return true;
+        || chain::script::is_pay_tapscript_timelock_pattern(ops)
+        || chain::script::is_pay_tapscript_inscription_pattern(ops);
 }
 
 TEMPLATE
