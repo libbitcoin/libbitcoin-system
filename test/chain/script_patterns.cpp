@@ -384,4 +384,123 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__empty__false)
     BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
 }
 
+// is_pay_tapscript_inscription_pattern
+
+// <pubkey> OP_CHECKSIG
+// OP_0
+// OP_IF
+//   OP_PUSHBYTES_3 "ord"   ; 0x6f7264
+//   OP_PUSHBYTES_1 0x01
+//   OP_PUSHBYTES_... "<MIME type>"
+//   OP_0
+//   [data chunk(s) ≤ 520 bytes each]
+// OP_ENDIF
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__match_minimal__true)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::if_);
+    ops.emplace_back(opcode::endif);
+
+    BOOST_CHECK(script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__match_normal__true)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::if_);
+    ops.emplace_back(to_chunk(std::string("ord")), true);
+    ops.emplace_back(opcode::push_positive_1);
+    ops.emplace_back(to_chunk(std::string("text/plain")), true);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(to_chunk(std::string("hello")), true);
+    ops.emplace_back(opcode::endif);
+
+    BOOST_CHECK(script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__too_small__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::if_);
+
+    BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__wrong_start__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::if_);
+    ops.emplace_back(opcode::endif);
+
+    BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__no_if_envelope__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::endif);
+
+    BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__wrong_final_opcode__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::if_);
+    ops.emplace_back(opcode::push_size_0); // not endif
+
+    BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__empty__false)
+{
+    operations ops{};
+    BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__wrong_key_size__false)
+{
+    const auto short_key = to_chunk(short_hash{});
+
+    operations ops{};
+    ops.emplace_back(short_key, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::if_);
+    ops.emplace_back(opcode::endif);
+
+    BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

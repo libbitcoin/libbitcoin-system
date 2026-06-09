@@ -212,6 +212,17 @@ constexpr bool script::is_pay_tapscript_timelock_pattern(
         && ops[4].code() == opcode::checksig;
 }
 
+constexpr bool script::is_pay_tapscript_inscription_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return ops.size() > 4u
+        && ops[0].data().size() == ec_xonly_size
+        && ops[1].code() == opcode::checksig
+        && ops[2].code() == opcode::push_size_0
+        && ops[3].code() == opcode::if_
+        && ops.back().code() == opcode::endif;
+}
+
 constexpr bool script::is_pay_tapscript_threshold_pattern(
     const operations& ops) NOEXCEPT
 {

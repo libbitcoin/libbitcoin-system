@@ -62,6 +62,7 @@ public:
     static constexpr bool is_pay_taproot_key_path_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_single_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_timelock_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_tapscript_inscription_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_threshold_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_multisig_standard_pattern(const operations& ops) NOEXCEPT;
