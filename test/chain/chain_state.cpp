@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled
     settings.proof_of_work_limit = 0x1e0fffff;
     const auto values = get_values(settings.retargeting_interval());
     settings.forks.retarget = true;
-    settings.forks.retarget_overflow_patch = true;
+    settings.forks.ltc_retarget_overflow_patch = true;
     const auto work = test_chain_state::work_required(values, settings.forks, settings);
     BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
 }
