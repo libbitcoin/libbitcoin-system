@@ -145,11 +145,15 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
     const auto parent = source.read_4_bytes_big_endian();
     const auto child = source.read_4_bytes_big_endian();
     const auto chain = source.read_hash();
-    source.skip_byte();
+    const auto padding = source.read_byte();
     const auto secret = source.read_hash();
 
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))
+        return {};
+
+    // Validate the key padding.
+    if (padding != 0x00)
         return {};
 
     const hd_lineage lineage
