@@ -356,7 +356,6 @@ constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
         && is_public_key(ops[1].data());
 }
 
-
 // Ambiguous with is_sign_key_hash when second/last op is a public key.
 // Ambiguous with is_sign_public_key_pattern when only op is endorsement.
 constexpr bool script::is_sign_script_hash_pattern(
