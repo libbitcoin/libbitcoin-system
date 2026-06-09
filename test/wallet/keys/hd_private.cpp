@@ -137,6 +137,14 @@ BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key__decodes_to_invalid)
     BOOST_REQUIRE(!xprv_null);
 }
 
+BOOST_AUTO_TEST_CASE(hd_private__constructor__nonzero_private_key_padding__invalid)
+{
+    static const auto encoded = "tprvAk8SVSmAT8FFvWjCNUB546H9tsmRk5bii5WZvSY2zSnxSg4uuLFspzTZffwYUoYXqsP7WDdHTRS92WJzeXTki31ftCwzYCEnLAPt9a7aJyV";
+
+    const hd_private xprv_invalid(encoded);
+    BOOST_REQUIRE(!xprv_invalid);
+}
+
 BOOST_AUTO_TEST_CASE(hd_private__to_public__from_invalid_private__invalid)
 {
     // the 11...14rcJhr is a serialization of a null key;
