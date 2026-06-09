@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <bitcoin/system/chain/enums/flags.hpp>
+#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -173,7 +174,7 @@ public:
     size_t signature_operations(bool accurate) const NOEXCEPT;
     bool extract_sigop_script(script& embedded,
         const script& prevout_script) const NOEXCEPT;
-    bool extract_tapscript_threshold(size_t& required) const NOEXCEPT;
+    opcode extract_tapscript_threshold(size_t& required) const NOEXCEPT;
 
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;

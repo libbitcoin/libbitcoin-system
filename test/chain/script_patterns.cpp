@@ -243,25 +243,6 @@ BOOST_AUTO_TEST_CASE(script__pattern__20_of_21_multisig__non_standard)
 
 // is_pay_tapscript_threshold_pattern
 
-static operations make_tapscript_threshold_ops(uint8_t threshold, size_t keys)
-{
-    const auto xkey = to_chunk(ec_xonly{});
-
-    operations ops{};
-    ops.reserve(add1(add1(keys)));
-
-    for (size_t key{}; key < keys; ++key)
-    {
-        ops.emplace_back(xkey, true);
-        ops.emplace_back(is_zero(key) ? opcode::checksig : opcode::checksigadd);
-    }
-
-    // Uniform but non-minimal encoding.
-    ops.emplace_back(to_chunk(threshold), true);
-    ops.emplace_back(opcode::numequal);
-    return ops;
-}
-
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__match_1_of_1__true)
 {
     const auto ops = make_tapscript_threshold_ops(1, 1);
@@ -328,23 +309,6 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_order__fa
 }
 
 // is_pay_tapscript_multisig_pattern
-
-static operations make_tapscript_multisig_ops(size_t keys)
-{
-    const auto xkey = to_chunk(ec_xonly{});
-
-    operations ops{};
-    ops.reserve(keys + keys);
-
-    for (size_t key{}; key < keys; ++key)
-    {
-        ops.emplace_back(xkey, true);
-        ops.emplace_back(add1(key) < keys ? opcode::checksigverify :
-            opcode::checksig);
-    }
-
-    return ops;
-}
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_1_of_1__true)
 {
