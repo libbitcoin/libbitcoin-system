@@ -122,21 +122,21 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // time_warp_patch is activated based on configuration alone.
-    if (forks.time_warp_patch)
+    if (forks.ltc_time_warp_patch)
     {
-        result.flags |= flags::time_warp_patch;
+        result.flags |= flags::ltc_time_warp_patch;
     }
 
     // retarget_overflow_patch is activated based on configuration alone.
-    if (forks.retarget_overflow_patch)
+    if (forks.ltc_retarget_overflow_patch)
     {
-        result.flags |= flags::retarget_overflow_patch;
+        result.flags |= flags::ltc_retarget_overflow_patch;
     }
 
     // scrypt_proof_of_work is activated based on configuration alone.
-    if (forks.scrypt_proof_of_work)
+    if (forks.ltc_scrypt_proof_of_work)
     {
-        result.flags |= flags::scrypt_proof_of_work;
+        result.flags |= flags::ltc_scrypt_proof_of_work;
     }
 
     // bip42 is activated based on configuration alone (soft fork).
@@ -402,7 +402,7 @@ uint32_t chain_state::retarget_timespan(const data& values,
 constexpr bool patch_timewarp(const forks& forks, const uint256_t& limit,
     const uint256_t& target) NOEXCEPT
 {
-    return forks.retarget_overflow_patch &&
+    return forks.ltc_retarget_overflow_patch &&
         floored_log2(target) >= floored_log2(limit);
 }
 
@@ -648,7 +648,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
         settings.retargeting_interval()))
     {
         // Conditionally patch time warp bug (e.g. Litecoin).
-        data.timestamp.retarget = (forks.time_warp_patch && !is_one(height)) ?
+        data.timestamp.retarget = (forks.ltc_time_warp_patch && !is_one(height)) ?
             *std::next(data.timestamp.ordered.crbegin()) : data.timestamp.self;
     }
 

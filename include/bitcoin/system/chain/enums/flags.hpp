@@ -88,13 +88,13 @@ enum flags : uint32_t
     /// -----------------------------------------------------------------------
 
     /// Fix Satoshi's time warp bug (hard fork, security).
-    time_warp_patch = bit_right<uint32_t>(17),
+    ltc_time_warp_patch = bit_right<uint32_t>(17),
 
     /// Fix target overflow for very low difficulty (hard fork, security).
-    retarget_overflow_patch = bit_right<uint32_t>(18),
+    ltc_retarget_overflow_patch = bit_right<uint32_t>(18),
 
     /// Use scrypt hashing for proof of work (hard fork, feature).
-    scrypt_proof_of_work = bit_right<uint32_t>(19),
+    ltc_scrypt_proof_of_work = bit_right<uint32_t>(19),
 
     /// TODO: hardwired or obsoleted (historical).
     /// -----------------------------------------------------------------------

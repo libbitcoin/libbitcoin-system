@@ -73,9 +73,9 @@ typedef struct
     bool difficult;
 
     /// Litecoin deviations from Bitcoin.
-    bool time_warp_patch;         // litecoin
-    bool retarget_overflow_patch; // litecoin
-    bool scrypt_proof_of_work;    // litecoin
+    bool ltc_time_warp_patch;         // litecoin
+    bool ltc_retarget_overflow_patch; // litecoin
+    bool ltc_scrypt_proof_of_work;    // litecoin
 } forks;
 
 } // namespace system
