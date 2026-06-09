@@ -1037,6 +1037,44 @@ BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
     BOOST_CHECK(!operation::is_success(opcode::reserved_255));
 }
 
+// is_threshold
+
+BOOST_AUTO_TEST_CASE(operation__is_threshold__expected)
+{
+    // 156-158 (numeric in/equality family)
+    BOOST_CHECK( operation::is_threshold(opcode::numequal));
+    BOOST_CHECK( operation::is_threshold(opcode::numequalverify));
+    BOOST_CHECK( operation::is_threshold(opcode::numnotequal));
+
+    // 159-162 (numeric comparison family)
+    BOOST_CHECK( operation::is_threshold(opcode::lessthan));
+    BOOST_CHECK( operation::is_threshold(opcode::greaterthan));
+    BOOST_CHECK( operation::is_threshold(opcode::lessthanorequal));
+    BOOST_CHECK( operation::is_threshold(opcode::greaterthanorequal));
+    BOOST_CHECK(!operation::is_threshold(opcode::equal));
+
+    // 165 (range check)
+    BOOST_CHECK( operation::is_threshold(opcode::within));
+    BOOST_CHECK(!operation::is_threshold(opcode::add));
+    BOOST_CHECK(!operation::is_threshold(opcode::reserved_255));
+}
+
+// is_timelock
+
+BOOST_AUTO_TEST_CASE(operation__is_timelock__expected)
+{
+    // 177
+    BOOST_CHECK(!operation::is_timelock(opcode::checksig));
+    BOOST_CHECK( operation::is_timelock(opcode::checklocktimeverify));
+    BOOST_CHECK(!operation::is_timelock(opcode::checksigverify));
+
+    // 178
+    BOOST_CHECK(!operation::is_timelock(opcode::checksigadd));
+    BOOST_CHECK( operation::is_timelock(opcode::checksequenceverify));
+    BOOST_CHECK(!operation::is_timelock(opcode::checkmultisig));
+    BOOST_CHECK(!operation::is_timelock(opcode::reserved_255));
+}
+
 // utilities (member)
 // ----------------------------------------------------------------------------
 
