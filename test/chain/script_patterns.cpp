@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__wrong_intermedia
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__wrong_key_size__false)
 {
-    const auto short_key = to_chunk(hash_digest{});
+    const auto short_key = to_chunk(short_hash{});
 
     operations ops{};
     ops.emplace_back(short_key, true);
