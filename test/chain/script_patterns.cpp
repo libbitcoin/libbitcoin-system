@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(script__pattern__20_of_21_multisig__non_standard)
 
 // is_pay_tapscript_threshold_pattern
 
-static operations make_threshold_ops(uint8_t threshold, size_t keys)
+static operations make_tapscript_threshold_ops(uint8_t threshold, size_t keys)
 {
     const auto xkey = to_chunk(ec_xonly{});
 
@@ -264,19 +264,19 @@ static operations make_threshold_ops(uint8_t threshold, size_t keys)
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__match_1_of_1__true)
 {
-    const auto ops = make_threshold_ops(1, 1);
+    const auto ops = make_tapscript_threshold_ops(1, 1);
     BOOST_CHECK(script::is_pay_tapscript_threshold_pattern(ops));
 }
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__match_2_of_2__true)
 {
-    const auto ops = make_threshold_ops(2, 2);
+    const auto ops = make_tapscript_threshold_ops(2, 2);
     BOOST_CHECK(script::is_pay_tapscript_threshold_pattern(ops));
 }
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__match_2_of_3__true)
 {
-    const auto ops = make_threshold_ops(2, 3);
+    const auto ops = make_tapscript_threshold_ops(2, 3);
     BOOST_CHECK(script::is_pay_tapscript_threshold_pattern(ops));
 }
 
@@ -294,21 +294,21 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__match_0_of_1__t
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__odd_length__false)
 {
-    auto ops = make_threshold_ops(2, 2);
+    auto ops = make_tapscript_threshold_ops(2, 2);
     ops.pop_back();
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
 }
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_final_opcode__false)
 {
-    auto ops = make_threshold_ops(2, 2);
+    auto ops = make_tapscript_threshold_ops(2, 2);
     ops.back() = operation(opcode::equal);
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
 }
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__negative_threshold__false)
 {
-    auto ops = make_threshold_ops(2, 2);
+    auto ops = make_tapscript_threshold_ops(2, 2);
     ops[ops.size() - 2] = operation(opcode::push_negative_1);
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
 }
@@ -325,6 +325,99 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_order__fa
     ops.emplace_back(opcode::push_size_2);
     ops.emplace_back(opcode::numequal);
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
+}
+
+// is_pay_tapscript_multisig_pattern
+
+static operations make_tapscript_multisig_ops(size_t keys)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.reserve(keys + keys);
+
+    for (size_t key{}; key < keys; ++key)
+    {
+        ops.emplace_back(xkey, true);
+        ops.emplace_back(add1(key) < keys ? opcode::checksigverify :
+            opcode::checksig);
+    }
+
+    return ops;
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_1_of_1__true)
+{
+    const auto ops = make_tapscript_multisig_ops(1);
+    BOOST_CHECK(script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_2_of_2__true)
+{
+    const auto ops = make_tapscript_multisig_ops(2);
+    BOOST_CHECK(script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_3_of_3__true)
+{
+    const auto ops = make_tapscript_multisig_ops(3);
+    BOOST_CHECK(script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__odd_length__false)
+{
+    auto ops = make_tapscript_multisig_ops(2);
+    ops.pop_back();
+    BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__wrong_final_opcode__false)
+{
+    auto ops = make_tapscript_multisig_ops(2);
+    ops.back() = operation(opcode::checksigverify);
+    BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__wrong_intermediate_opcode__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__wrong_key_size__false)
+{
+    const auto short_key = to_chunk(hash_digest{});
+
+    operations ops{};
+    ops.emplace_back(short_key, true);
+    ops.emplace_back(opcode::checksigverify);
+    ops.emplace_back(short_key, true);
+    ops.emplace_back(opcode::checksig);
+    BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__wrong_order__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksigverify);
+    BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__empty__false)
+{
+    operations ops{};
+    BOOST_CHECK(!script::is_pay_tapscript_multisig_pattern(ops));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

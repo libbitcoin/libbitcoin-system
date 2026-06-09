@@ -212,6 +212,55 @@ constexpr bool script::is_pay_tapscript_timelock_pattern(
         && ops[4].code() == opcode::checksig;
 }
 
+constexpr bool script::is_pay_tapscript_threshold_pattern(
+    const operations& ops) NOEXCEPT
+{
+    if (ops.size() < 4u || !is_even(ops.size()))
+        return false;
+
+    auto op = ops.begin();
+    if (op->data().size() != ec_xonly_size)
+        return false;
+
+    ++op;
+    if (op->code() != opcode::checksig)
+        return false;
+
+    ++op;
+    while (op != std::prev(ops.end(), 2))
+    {
+        if (((op++)->data().size() != ec_xonly_size) ||
+            ((op++)->code() != opcode::checksigadd))
+            return false;
+    }
+
+    if (!op->is_unsigned32())
+        return false;
+
+    return (++op)->is_threshold();
+}
+
+constexpr bool script::is_pay_tapscript_multisig_pattern(
+    const operations& ops) NOEXCEPT
+{
+    if (ops.size() < 2u || !is_even(ops.size()))
+        return false;
+
+    auto op = ops.begin();
+    while (op != std::prev(ops.end(), 2))
+    {
+        if (((op++)->data().size() != ec_xonly_size) ||
+            ((op++)->code() != opcode::checksigverify))
+            return false;
+    }
+
+    if (((op++)->data().size() != ec_xonly_size) ||
+        ((op++)->code() != opcode::checksig))
+        return false;
+
+    return true;
+}
+
 constexpr bool script::is_pay_multisig_standard_pattern(
     const operations& ops) NOEXCEPT
 {
@@ -238,6 +287,30 @@ constexpr bool script::is_pay_multisig_standard_pattern(
             return false;
 
     return true;
+}
+
+// Allows non-minimal number encoding, and invalid size public keys.
+// op_check_multisig is limited to 20 signatures (max_script_public_keys).
+constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
+{
+    if (ops.size() < 4u ||
+        ops.back().code() != opcode::checkmultisig)
+        return false;
+
+    const auto signatures = [](const operation& op) NOEXCEPT
+    {
+        uint32_t count{};
+        if (!op.as_unsigned32(count) ||
+            is_limited(count, one, max_script_public_keys))
+            return 0_u8;
+
+        return narrow_cast<uint8_t>(count);
+    };
+
+    const auto size = ops.size();
+    const auto m = signatures(ops.front());
+    const auto n = signatures(ops[size - 2u]);
+    return !is_zero(m) && !is_zero(n) && !(m > n) && (n == size - 3u);
 }
 
 // The first push is based on wacky satoshi op_check_multisig behavior that
