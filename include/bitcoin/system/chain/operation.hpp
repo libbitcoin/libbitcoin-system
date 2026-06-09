@@ -59,6 +59,7 @@ public:
     static constexpr bool is_nonnegative(opcode code) NOEXCEPT;
     static constexpr bool is_number(opcode code) NOEXCEPT;
     static constexpr bool is_timelock(opcode code) NOEXCEPT;
+    static constexpr bool is_threshold(opcode code) NOEXCEPT;
     static constexpr bool is_roller(opcode code) NOEXCEPT;
     static constexpr bool is_counted(opcode code) NOEXCEPT;
     static constexpr bool is_success(opcode code) NOEXCEPT;
@@ -80,6 +81,7 @@ public:
     inline bool is_nonnegative() const NOEXCEPT;
     inline bool is_number() const NOEXCEPT;
     inline bool is_timelock() const NOEXCEPT;
+    inline bool is_threshold() const NOEXCEPT;
     inline bool is_roller() const NOEXCEPT;
     inline bool is_counted() const NOEXCEPT;
     inline bool is_success() const NOEXCEPT;

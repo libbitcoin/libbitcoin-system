@@ -27,31 +27,13 @@ using namespace system::machine;
 
 // extract_tapscript_threshold
 
-static operations make_threshold_ops(uint8_t threshold, size_t keys)
-{
-    const auto xkey = to_chunk(ec_xonly{});
-
-    operations ops{};
-    ops.reserve(add1(add1(keys)));
-
-    for (size_t key{}; key < keys; ++key)
-    {
-        ops.emplace_back(xkey, true);
-        ops.emplace_back(is_zero(key) ? opcode::checksig : opcode::checksigadd);
-    }
-
-    // Uniform but non-minimal encoding.
-    ops.emplace_back(to_chunk(threshold), true);
-    ops.emplace_back(opcode::numequal);
-    return ops;
-}
-
 BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_2_of_3__true_expected)
 {
-    const chain::script script{ make_threshold_ops(2, 3) };
+    const chain::script script{ make_tapscript_threshold_ops(2, 3) };
 
     size_t required{};
-    BOOST_CHECK(script.extract_tapscript_threshold(required));
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(!operation::is_invalid(condition));
     BOOST_CHECK_EQUAL(required, 2u);
 }
 
@@ -66,9 +48,9 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequal__true_e
     ops.emplace_back(opcode::numequal);
     const chain::script script{ ops };
 
-    // Requries more than are present (still valid and executed sigops).
     size_t required{};
-    BOOST_CHECK(script.extract_tapscript_threshold(required));
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(condition == opcode::numequal);
     BOOST_CHECK_EQUAL(required, 3u);
 }
 
@@ -84,7 +66,8 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequalverify__
     const chain::script script{ ops };
 
     size_t required{};
-    BOOST_CHECK(script.extract_tapscript_threshold(required));
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(condition == opcode::numequalverify);
     BOOST_CHECK_EQUAL(required, 9u);
 }
 
@@ -100,7 +83,40 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__mismatch_final__false)
     const chain::script script{ ops };
 
     size_t required{};
-    BOOST_CHECK(!script.extract_tapscript_threshold(required));
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(operation::is_invalid(condition));
+}
+
+// Multisig (pure k-of-k) pattern tests
+
+BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_1_of_1__true_expected)
+{
+    const chain::script script{ make_tapscript_multisig_ops(1) };
+
+    size_t required{};
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(condition == opcode::checksig);
+    BOOST_CHECK_EQUAL(required, 1u);
+}
+
+BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_2_of_2__true_expected)
+{
+    const chain::script script{ make_tapscript_multisig_ops(2) };
+
+    size_t required{};
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(condition == opcode::checksig);
+    BOOST_CHECK_EQUAL(required, 2u);
+}
+
+BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_3_of_3__true_expected)
+{
+    const chain::script script{ make_tapscript_multisig_ops(3) };
+
+    size_t required{};
+    const auto condition = script.extract_tapscript_threshold(required);
+    BOOST_CHECK(condition == opcode::checksig);
+    BOOST_CHECK_EQUAL(required, 3u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

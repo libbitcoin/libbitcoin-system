@@ -198,6 +198,25 @@ constexpr bool operation::is_timelock(opcode code) NOEXCEPT
     return code == op_177 || code == op_178;
 }
 
+// opcode: [156..162, 165].
+constexpr bool operation::is_threshold(opcode code) NOEXCEPT
+{
+    switch (code)
+    {
+        case opcode::numequal:
+        case opcode::numequalverify:
+        case opcode::numnotequal:
+        case opcode::lessthan:
+        case opcode::greaterthan:
+        case opcode::lessthanorequal:
+        case opcode::greaterthanorequal:
+        case opcode::within:
+            return true;
+        default:
+            return false;
+    }
+}
+
 // opcode: [122].
 constexpr bool operation::is_roller(opcode code) NOEXCEPT
 {
@@ -439,6 +458,11 @@ bool operation::is_number() const NOEXCEPT
 bool operation::is_timelock() const NOEXCEPT
 {
     return is_timelock(code_);
+}
+
+bool operation::is_threshold() const NOEXCEPT
+{
+    return is_threshold(code_);
 }
 
 bool operation::is_roller() const NOEXCEPT

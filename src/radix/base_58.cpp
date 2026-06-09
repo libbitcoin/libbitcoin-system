@@ -80,7 +80,7 @@ void pack_value(data_chunk& indexes, size_t carry) NOEXCEPT
     for (auto it = indexes.rbegin(); it != indexes.rend(); ++it)
     {
         carry += 256_size * (*it);
-        *it = carry % 58_size;
+        *it = narrow_cast<uint8_t>(carry % 58_size);
         carry /= 58_size;
     }
 
@@ -148,7 +148,7 @@ void unpack_char(data_chunk& data, size_t carry) NOEXCEPT
     for (auto it = data.rbegin(); it != data.rend(); it++)
     {
         carry += 58_size * (*it);
-        *it = carry % 256_size;
+        *it = narrow_cast<uint8_t>(carry % 256_size);
         carry /= 256_size;
     }
 

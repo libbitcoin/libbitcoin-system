@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <bitcoin/system/chain/enums/flags.hpp>
+#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -61,14 +62,16 @@ public:
     static constexpr bool is_pay_taproot_key_path_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_single_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_timelock_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_tapscript_inscription_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_tapscript_threshold_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_tapscript_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_multisig_standard_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_multisig_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_public_key_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_key_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_sign_script_hash_pattern(const operations& ops) NOEXCEPT;
     static bool is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT;
-    static bool is_pay_tapscript_threshold_pattern(const operations& ops) NOEXCEPT;
-    static bool is_pay_multisig_pattern(const operations& ops) NOEXCEPT;
 
     static inline operations to_pay_null_data_pattern(
         const data_slice& data) NOEXCEPT;
@@ -172,7 +175,7 @@ public:
     size_t signature_operations(bool accurate) const NOEXCEPT;
     bool extract_sigop_script(script& embedded,
         const script& prevout_script) const NOEXCEPT;
-    bool extract_tapscript_threshold(size_t& required) const NOEXCEPT;
+    opcode extract_tapscript_threshold(size_t& required) const NOEXCEPT;
 
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;

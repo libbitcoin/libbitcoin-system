@@ -19,7 +19,47 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_TEST_SCRIPT_HPP
 
-#include <bitcoin/system.hpp>
+// TODO: move to own test util.
+inline chain::operations make_tapscript_threshold_ops(uint8_t threshold,
+    size_t keys)
+{
+    using namespace chain;
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.reserve(add1(add1(keys)));
+
+    for (size_t key{}; key < keys; ++key)
+    {
+        ops.emplace_back(xkey, true);
+        ops.emplace_back(is_zero(key) ? opcode::checksig :
+            opcode::checksigadd);
+    }
+
+    // Uniform but non-minimal encoding.
+    ops.emplace_back(to_chunk(threshold), true);
+    ops.emplace_back(opcode::numequal);
+    return ops;
+}
+
+// TODO: move to own test util.
+inline chain::operations make_tapscript_multisig_ops(size_t keys)
+{
+    using namespace chain;
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.reserve(keys + keys);
+
+    for (size_t key{}; key < keys; ++key)
+    {
+        ops.emplace_back(xkey, true);
+        ops.emplace_back(add1(key) < keys ? opcode::checksigverify :
+            opcode::checksig);
+    }
+
+    return ops;
+}
 
 struct script_test
 {

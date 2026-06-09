@@ -176,20 +176,27 @@ bool script::extract_sigop_script(script& embedded,
     return true;
 }
 
-bool script::extract_tapscript_threshold(size_t& required) const NOEXCEPT
+opcode script::extract_tapscript_threshold(size_t& required) const NOEXCEPT
 {
-    if (!is_pay_tapscript_threshold_pattern(ops()))
-        return false;
+    constexpr auto any_invalid = opcode::op_xor;
 
-    // This threshold op holds the numeric value for required signatures.
-    const auto required_op = ops().at(ops().size() - two);
+    if (is_pay_tapscript_multisig_pattern(ops()))
+    {
+        required = to_half(ops().size());
+        return opcode::checksig;
+    }
 
-    uint32_t value{};
-    if (!required_op.as_unsigned32(value))
-        return false;
+    if (is_pay_tapscript_threshold_pattern(ops()))
+    {
+        uint32_t value{};
+        if (!ops().at(ops().size() - two).as_unsigned32(value))
+            return any_invalid;
 
-    required = value;
-    return true;
+        required = value;
+        return ops().back().code();
+    }
+
+    return any_invalid;
 }
 
 } // namespace chain

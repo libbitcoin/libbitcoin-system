@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
 
 #include <atomic>
+#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -48,23 +49,29 @@ struct BC_API signatures
         };
 
         std::vector<entry> entries{};
+        opcode condition{};
         uint8_t required{};
         uint8_t expected{};
+        uint16_t group{};
     };
 
+    using event_handler = std::function<void(uint64_t)>;
+    using log_handler = std::function<void(const std::string_view&)>;
     using ecdsa_handler = std::function<void(const hash_digest&,
         const ec_compressed&, const ec_signature&)>;
     using schnorr_handler = std::function<void(const hash_digest&,
         const ec_xonly, const ec_signature&)>;
     using multisig_handler = std::function<void(const hash_digest&,
-        const ec_compresseds&, const ec_signatures&, batchy::group_t)>;
+        const ec_compresseds&, const ec_signatures&, uint16_t)>;
     using threshold_handler = std::function<void(const threshold_group&,
-        batchy::group_t)>;
+        uint16_t)>;
 
     /// Default construction disables batching.
     const bool enabled{};
 
     /// Invoked with signature verification triples in script interpreter.
+    const log_handler log{};
+    const event_handler event{};
     const ecdsa_handler ecdsa{};
     const schnorr_handler schnorr{};
     const multisig_handler multisig{};
