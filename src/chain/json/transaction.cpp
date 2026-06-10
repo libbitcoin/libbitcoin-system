@@ -23,11 +23,30 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
+namespace {
+
+// Witnessed serialization hash for the bitcoind verbose "hash" field. The
+// wtxid of a coinbase is null_hash (BIP141), but bitcoind displays this value.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+inline hash_digest witnessed_hash(const transaction& tx) NOEXCEPT
+{
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
+    tx.to_data(sink, true);
+    sink.flush();
+    return digest;
+}
+BC_POP_WARNING()
+
+} // namespace
 
 DEFINE_JSON_TO_TAG(transaction)
 {
@@ -74,8 +93,10 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, transaction)
     {
         { "hex", value_from(bitcoind_embedded(tx)) },
         { "txid", encode_hash(tx.hash(false)) },
-        { "hash", encode_hash(tx.hash(true)) },
-        { "size", tx.serialized_size(false) },
+        // bitcoind displays the witnessed serialization hash, even for a coinbase.
+        { "hash", encode_hash(witnessed_hash(tx)) },
+        // bitcoind "size" is the witness-included total; (false) is base only.
+        { "size", tx.serialized_size(true) },
         { "vsize", tx.virtual_size() },
         { "weight", tx.weight() },
         { "version", tx.version() },
