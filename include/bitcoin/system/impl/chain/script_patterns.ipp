@@ -226,29 +226,34 @@ constexpr bool script::is_pay_tapscript_inscription_pattern(
 constexpr bool script::is_pay_tapscript_threshold_pattern(
     const operations& ops) NOEXCEPT
 {
-    if (ops.size() < 4u || !is_even(ops.size()))
+    const auto size = ops.size();
+    if (is_zero(size))
+        return false;
+
+    // opcode::within requires an additional number in the script.
+    const auto within = (ops.back().code() == opcode::within);
+    if ((is_even(size) == within) || (size < (4 + to_int(within))))
         return false;
 
     auto op = ops.begin();
-    if (op->data().size() != ec_xonly_size)
+    if ((op++)->data().size() != ec_xonly_size)
         return false;
 
-    ++op;
-    if (op->code() != opcode::checksig)
+    if ((op++)->code() != opcode::checksig)
         return false;
 
-    ++op;
-    while (op != std::prev(ops.end(), 2))
+    while (op != std::prev(ops.end(), 2 + to_int(within)))
     {
         if (((op++)->data().size() != ec_xonly_size) ||
             ((op++)->code() != opcode::checksigadd))
             return false;
     }
 
-    if (!op->is_unsigned32())
+    if (!(op++)->is_unsigned32() || (within &&
+        !(op++)->is_unsigned32()))
         return false;
 
-    return (++op)->is_threshold();
+    return op->is_threshold();
 }
 
 constexpr bool script::is_pay_tapscript_multisig_pattern(

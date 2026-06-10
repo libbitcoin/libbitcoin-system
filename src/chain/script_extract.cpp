@@ -176,27 +176,35 @@ bool script::extract_sigop_script(script& embedded,
     return true;
 }
 
-opcode script::extract_tapscript_threshold(size_t& required) const NOEXCEPT
+// TODO: add all deterministic multiple signature tapscript patterns.
+opcode script::extract_tapscript_threshold(size_t& min,
+    size_t& max) const NOEXCEPT
 {
-    constexpr auto any_invalid = opcode::op_xor;
-
     if (is_pay_tapscript_multisig_pattern(ops()))
     {
-        required = to_half(ops().size());
+        min = max = to_half(ops().size());
         return opcode::checksig;
     }
 
     if (is_pay_tapscript_threshold_pattern(ops()))
     {
         uint32_t value{};
-        if (!ops().at(ops().size() - two).as_unsigned32(value))
-            return any_invalid;
+        if (ops().at(ops().size() - 2).as_unsigned32(value))
+        {
+            min = max = value;
+            const auto condition = ops().back().code();
+            if (condition != opcode::within)
+                return condition;
 
-        required = value;
-        return ops().back().code();
+            if (ops().at(ops().size() - 3).as_unsigned32(value))
+            {
+                min = value;
+                return condition;
+            }
+        }
     }
 
-    return any_invalid;
+    return opcode::op_xor;
 }
 
 } // namespace chain
