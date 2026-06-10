@@ -330,11 +330,11 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
-            forks.retarget = true;                 // !regtest
-            forks.difficult = false;               // !testnet
-            forks.time_warp_patch = false;         // litecoin
-            forks.retarget_overflow_patch = false; // litecoin
-            forks.scrypt_proof_of_work = false;    // litecoin
+            forks.retarget = true;                     // !regtest
+            forks.difficult = false;                   // !testnet
+            forks.ltc_time_warp_patch = false;         // litecoin
+            forks.ltc_retarget_overflow_patch = false; // litecoin
+            forks.ltc_scrypt_proof_of_work = false;    // litecoin
 
             bip16_activation_time = 1329264000;
             bip34_activation_threshold = 51;

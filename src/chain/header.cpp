@@ -377,7 +377,8 @@ code header::check(uint32_t timestamp_limit_seconds,
 // Checkpoints and previous_block_hash are chain validation (not here).
 // bits_ below is the consensus direct comparison of the header.bits value.
 // All other work comparisons performed on expanded/normalized bits values.
-code header::accept(const context& ctx) const NOEXCEPT
+code header::accept(const context& ctx,
+    uint32_t retargeting_interval) const NOEXCEPT
 {
     if (ctx.is_insufficient_version(version_))
         return error::insufficient_block_version;
@@ -385,7 +386,7 @@ code header::accept(const context& ctx) const NOEXCEPT
         return error::anachronistic_timestamp;
     if (ctx.is_invalid_work(bits_))
         return error::incorrect_proof_of_work;
-    if (ctx.is_early_timestamp())
+    if (ctx.is_early_timestamp(retargeting_interval))
         return error::early_timestamp;
 
     return error::block_success;

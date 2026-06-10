@@ -702,7 +702,6 @@ chain_state::chain_state(const chain_state& top,
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
     activations_(activation(data_, forks_, settings)),
-    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -749,7 +748,6 @@ chain_state::chain_state(const chain_state& pool, const block& block,
   : data_(to_block(pool, block, settings)),
     forks_(pool.forks_),
     activations_(activation(data_, forks_, settings)),
-    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -797,7 +795,6 @@ chain_state::chain_state(const chain_state& parent, const header& header,
   : data_(to_header(parent, header, settings)),
     forks_(parent.forks_),
     activations_(activation(data_, forks_, settings)),
-    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -809,7 +806,6 @@ chain_state::chain_state(data&& values,
   : data_(std::move(values)),
     forks_(settings.forks),
     activations_(activation(data_, forks_, settings)),
-    retargeting_interval_(settings.retargeting_interval()),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
 {
@@ -824,12 +820,11 @@ chain::context chain_state::context() const NOEXCEPT
     {
         flags(),
         timestamp(),
-        previous_timestamp(),
-        retargeting_interval(),
         median_time_past(),
         possible_narrow_cast<uint32_t>(height()),
         minimum_block_version(),
-        work_required()
+        work_required(),
+        previous_timestamp()
     };
 }
 
@@ -862,12 +857,7 @@ uint32_t chain_state::timestamp() const NOEXCEPT
 
 uint32_t chain_state::previous_timestamp() const NOEXCEPT
 {
-    return timestamp_high(data_);
-}
-
-uint32_t chain_state::retargeting_interval() const NOEXCEPT
-{
-    return retargeting_interval_;
+    return data_.timestamp.ordered.empty() ? 0 : timestamp_high(data_);
 }
 
 uint32_t chain_state::median_time_past() const NOEXCEPT

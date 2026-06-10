@@ -183,7 +183,6 @@ public:
     const hash_digest& hash() const NOEXCEPT;
     const uint256_t& cumulative_work() const NOEXCEPT;
     uint32_t minimum_block_version() const NOEXCEPT;
-    uint32_t retargeting_interval() const NOEXCEPT;
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
     uint32_t previous_timestamp() const NOEXCEPT;
@@ -239,24 +238,27 @@ private:
         const system::settings& settings) NOEXCEPT;
 
     static uint32_t work_required_retarget_bits(const data& values,
-        const forks& forks, uint32_t proof_of_work_limit,
+        const forks& forks,
+        uint32_t proof_of_work_limit,
         uint32_t retargeting_interval) NOEXCEPT;
     static uint32_t work_required_retarget(const data& values,
         const forks& forks, uint32_t proof_of_work_limit,
-        uint32_t minimum_timespan, uint32_t maximum_timespan,
+        uint32_t minimum_timespan,
+        uint32_t maximum_timespan,
         uint32_t retargeting_interval,
         uint32_t retargeting_interval_seconds) NOEXCEPT;
     static uint32_t retarget_timespan(const data& values,
-        uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT;
+        uint32_t minimum_timespan,
+        uint32_t maximum_timespan) NOEXCEPT;
     static uint32_t easy_work_required(const data& values,
-        size_t retargeting_interval, uint32_t proof_of_work_limit,
+        size_t retargeting_interval,
+        uint32_t proof_of_work_limit,
         uint32_t block_spacing_seconds) NOEXCEPT;
 
     // These are thread safe.
     const data data_;
     const forks& forks_;
     const activations activations_;
-    const uint32_t retargeting_interval_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
     const uint256_t cumulative_work_;

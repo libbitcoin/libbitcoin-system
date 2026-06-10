@@ -115,9 +115,10 @@ public:
     /// -----------------------------------------------------------------------
     /// Checkpoints and previous_block_hash are chain validation (not here).
 
-    code check(uint32_t timestamp_limit_seconds,
-        uint32_t proof_of_work_limit, bool scrypt=false) const NOEXCEPT;
-    code accept(const context& ctx) const NOEXCEPT;
+    code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
+        bool scrypt=false) const NOEXCEPT;
+    code accept(const context& ctx,
+        uint32_t retargeting_interval) const NOEXCEPT;
 
 protected:
     header(stream::in::fast&& stream) NOEXCEPT;

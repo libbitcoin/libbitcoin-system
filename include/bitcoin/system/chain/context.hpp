@@ -59,23 +59,22 @@ public:
 
     // BIP94 specific (the block's timestamp is too early on difficulty
     // adjustment block).
-    inline bool is_early_timestamp() const NOEXCEPT
+    inline bool is_early_timestamp(uint32_t retargeting_interval) const NOEXCEPT
     {
         return is_enabled(chain::flags::bip94_rule) &&
             is_zero(height % retargeting_interval) &&
             (timestamp <
-             floored_subtract(previous_block_timestamp, max_timewarp));
+             floored_subtract(previous_timestamp, max_timewarp));
     }
 
     /// Header context within chain.
     uint32_t flags;
     uint32_t timestamp;
-    uint32_t previous_block_timestamp;
-    uint32_t retargeting_interval;
     uint32_t median_time_past;
     size_t height;
     uint32_t minimum_block_version;
     uint32_t work_required;
+    uint32_t previous_timestamp;
 };
 
 bool operator==(const context& left, const context& right) NOEXCEPT;
