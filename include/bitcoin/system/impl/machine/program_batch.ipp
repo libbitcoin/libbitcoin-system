@@ -33,123 +33,90 @@ namespace machine {
 
 // Signature verify (with batching).
 // ----------------------------------------------------------------------------
+// If compress or parse fails it's not technically a miss (invalid script).
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) const NOEXCEPT
 {
     ec_compressed key;
     if (capture_.enabled && is_ecdsa_batchable() &&
         to_compressed(key, point))
-    {
-        capture_.batched_ecdsa.fetch_add(one, relaxed);
-        capture_.ecdsa(hash, key, signature);
-        return true;
-    }
+        return capture_.ecdsa(hash, key, signature);
 
-    capture_.unbatched_ecdsa.fetch_add(one, relaxed);
+    capture_.fire(chain::signatures::miss::ecdsa);
+    capture_.log(*script_);
     return ecdsa::verify_signature(point, hash, signature);
 }
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    if (capture_.enabled && is_multisig_batchable())
-    {
-        ec_compresseds keys(points.size());
-        if (!compress_public_keys(keys, points))
-            return false;
+    hash_digest hash;
+    ec_compresseds keys;
+    ec_signatures sigs;
+    if (capture_.enabled && is_multisig_batchable() &&
+        parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
+        return capture_.multisig(hash, keys, sigs);
 
-        uint8_t sighash_flags;
-        ec_signatures sigs(endorsements.size());
-        if (!parse_ecdsa_signatures(sighash_flags, sigs, endorsements,
-            is_enabled(flags::bip66_rule)))
-            return false;
-
-        hash_digest hash;
-        if (!signature_hash(hash, *subscript(endorsements), sighash_flags))
-            return false;
-
-        capture_.batched_multisig.fetch_add(sigs.size(), relaxed);
-        capture_.multisig(hash, keys, sigs, next_batch_group());
-        return true;
-    }
-
-    capture_.unbatched_multisig.fetch_add(endorsements.size(), relaxed);
+    capture_.fire(chain::signatures::miss::multisig);
+    capture_.log(*script_);
     return false;
 }
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) const NOEXCEPT
 {
+    // TODO: !capture_.threshold() implies store failure.
     if (capture_.enabled && is_threshold_batchable())
-    {
-        const auto script = script_->to_string(chain::flags::all_rules);
-        capture_.log((boost::format("THRSH [%1%] { %2% }") % threshold_.group % script).str());
-
-        capture_.log((boost::format("NXPCT [%1%] %2%") % threshold_.group % threshold_.expected).str());
-        threshold_.entries.emplace_back(hash, as_xonly(point), signature);
-
-        if (const auto count = threshold_.entries.size();
-            count == threshold_.expected)
-        {
-            capture_.log((boost::format("MSIGS [%1%] %2%") % threshold_.group % count).str());
-            capture_.batched_threshold.fetch_add(count, relaxed);
-            capture_.threshold(threshold_, threshold_.group);
-        }
-
-        return true;
-    }
+        return !threshold_.push_entry(hash, std::cref(as_xonly(point)),
+            std::cref(signature)) || capture_.threshold(threshold_);
 
     if (capture_.enabled && is_schnorr_batchable())
-    {
-        const auto script = script_->to_string(chain::flags::all_rules);
-        capture_.log((boost::format("BATCH [%1%] { %2% }") % threshold_.group % script).str());
-        capture_.batched_schnorr.fetch_add(one, relaxed);
-        capture_.schnorr(hash, as_xonly(point), signature);
-        return true;
-    }
+        return capture_.schnorr(hash, as_xonly(point), signature);
 
-    const auto script = script_->to_string(chain::flags::all_rules);
-    capture_.log((boost::format("UBACH [%1%] { %2% }") % threshold_.group % script).str());
-    capture_.unbatched_schnorr.fetch_add(one, relaxed);
+    capture_.fire(chain::signatures::miss::schnorr);
+    capture_.log(*script_);
     return schnorr::verify_signature(point, hash, signature);
 }
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 is_threshold_batchable() const NOEXCEPT
 {
-    if (is_threshold_cached())
-        return true;
-
     if (is_input_script())
         return false;
 
-    size_t required{};
-    const auto condition = script_->extract_tapscript_threshold(required);
+    // Already batching.
+    if (!threshold_.entries.empty())
+        return true;
+
+    size_t min{}, max{};
+    const auto condition = script_->extract_tapscript_threshold(min, max);
     if (operation::is_invalid(condition))
         return false;
 
-    // Limit batching to 255 verified (one byte correlation field).
     // All non-empty elements (sigs) on the stack (plus self) must be evaluated
     // in a captured signature op. Underflow/overflow imply script failure.
     const auto expected = add1(stack_nonempty());
-    if (is_limited<uint8_t>(expected))
+
+    // Limit batching to 65,535 verified; 58,883 is widely observed.
+    if (is_limited<uint16_t>(min) || is_limited<uint16_t>(max) ||
+        is_limited<uint16_t>(expected))
     {
-        capture_.log((boost::format("LIMITED CAPTURE (%1%).") % expected).str());
+        capture_.fire(chain::signatures::miss::overflow);
         return false;
     }
 
-    next_batch_group();
     threshold_.entries.reserve(expected);
-    threshold_.required = narrow_cast<uint8_t>(required);
-    threshold_.expected = narrow_cast<uint8_t>(expected);
+    threshold_.minimum = narrow_cast<uint16_t>(min);
+    threshold_.maximum = narrow_cast<uint16_t>(max);
+    threshold_.expected = narrow_cast<uint16_t>(expected);
     threshold_.condition = condition;
     return true;
 }
@@ -160,16 +127,21 @@ is_threshold_batchable() const NOEXCEPT
 
 TEMPLATE
 inline bool CLASS::
-compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
+parse_ecdsa_multisig(hash_digest& hash, ec_compresseds& keys,
+    ec_signatures& sigs, const chunk_xptrs& points,
+    const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    out.resize(keys.size());
-    auto it = out.begin();
+    uint8_t sighash_flags;
+    sigs.reserve(endorsements.size());
+    if (!parse_ecdsa_signatures(sighash_flags, sigs, endorsements,
+        is_enabled(flags::bip66_rule)))
+        return false;
 
-    for (const auto& key: keys)
-        if (!to_compressed(*it++, *key))
-            return false;
+    keys.reserve(points.size());
+    if (!compress_public_keys(keys, points))
+        return false;
 
-    return true;
+    return signature_hash(hash, *subscript(endorsements), sighash_flags);
 }
 
 TEMPLATE
@@ -183,6 +155,7 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
 
     for (const auto& sig: endorsements)
     {
+        // don't capture ecdsa multisig with empty sigs.
         if (sig->empty())
             return false;
 
@@ -206,7 +179,21 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
 }
 
 TEMPLATE
-bool CLASS::
+inline bool CLASS::
+compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
+{
+    out.resize(keys.size());
+    auto it = out.begin();
+
+    for (const auto& key: keys)
+        if (!to_compressed(*it++, *key))
+            return false;
+
+    return true;
+}
+
+TEMPLATE
+inline bool CLASS::
 to_compressed(ec_compressed& out, const data_chunk& point) NOEXCEPT
 {
     constexpr auto lo = ec_compressed_size;
@@ -237,21 +224,7 @@ as_xonly(const data_chunk& point) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-INLINE uint16_t CLASS::
-next_batch_group() const NOEXCEPT
-{
-    static_assert(is_same_type<batchy::group_t, uint16_t>);
-    const auto group = capture_.group.fetch_add(one, relaxed);
-
-    // Must return true when batching, so overflow is a hard stop.
-    if (is_limited<uint32_t>(group))
-        std::abort();
-
-    return narrow_cast<uint16_t>(group);
-}
-
-TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 is_ecdsa_batchable() const NOEXCEPT
 {
     if (is_input_script())
@@ -264,7 +237,7 @@ is_ecdsa_batchable() const NOEXCEPT
 }
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 is_multisig_batchable() const NOEXCEPT
 {
     if (is_input_script())
@@ -275,7 +248,7 @@ is_multisig_batchable() const NOEXCEPT
 }
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 is_schnorr_batchable() const NOEXCEPT
 {
     if (is_input_script())
@@ -289,14 +262,7 @@ is_schnorr_batchable() const NOEXCEPT
 }
 
 TEMPLATE
-INLINE bool CLASS::
-is_threshold_cached() const NOEXCEPT
-{
-    return !threshold_.entries.empty();
-}
-
-TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 is_input_script() const NOEXCEPT
 {
     return spender_;

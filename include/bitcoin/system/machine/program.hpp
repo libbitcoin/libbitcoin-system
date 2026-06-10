@@ -165,7 +165,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Parse schnorr endorsement into signature and signature hash flags.
-    static inline const ec_signature& schnorr_split(uint8_t& sighash_flags,
+    static INLINE const ec_signature& schnorr_split(uint8_t& sighash_flags,
         const data_chunk& endorsement) NOEXCEPT;
 
     /// Parse ecdsa endorsement into signature and signature hash flags.
@@ -179,7 +179,7 @@ protected:
     virtual INLINE void set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and op_codeseparator from returned subscript.
-    virtual inline script::cptr subscript(
+    virtual INLINE script::cptr subscript(
         const chunk_xptrs& endorsements) const NOEXCEPT;
     virtual INLINE script::cptr subscript(
         const chunk_xptr& endorsement) const NOEXCEPT;
@@ -203,16 +203,15 @@ protected:
     /// -----------------------------------------------------------------------
     virtual inline bool verify_ecdsa_signature(const data_chunk& point,
         const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+    virtual inline bool try_batch_multisig_verification(const chunk_xptrs& points,
+        const chunk_xptrs& endorsements) const NOEXCEPT;
     virtual inline bool verify_schnorr_signature(const data_chunk& point,
         const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
-    virtual inline bool try_batch_multisig_verification(
-        const chunk_xptrs& points,
-        const chunk_xptrs& endorsements) const NOEXCEPT;
 
 private:
     static constexpr auto relaxed = std::memory_order_relaxed;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
-    using threshold_cache = chain::signatures::threshold_group;
+    using threshold_cache = chain::signatures::threshold_entries;
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {
@@ -225,28 +224,29 @@ private:
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
     static inline chain::strippers create_strip_ops(
         const chunk_xptrs& endorsements) NOEXCEPT;
-    static INLINE chain::strippers create_strip_ops(
+    static inline chain::strippers create_strip_ops(
         const chunk_xptr& endorsement) NOEXCEPT;
 
     // Batching helpers.
-    static inline bool compress_public_keys(ec_compresseds& out,
-        const chunk_xptrs& keys) NOEXCEPT;
+    inline bool parse_ecdsa_multisig(hash_digest& hash, ec_compresseds& keys,
+        ec_signatures& sigs, const chunk_xptrs& points,
+        const chunk_xptrs& endorsements) const NOEXCEPT;
     static inline bool parse_ecdsa_signatures(uint8_t& sighash,
         ec_signatures& out, const chunk_xptrs& endorsements,
         bool strict) NOEXCEPT;
+    static inline bool compress_public_keys(ec_compresseds& out,
+        const chunk_xptrs& keys) NOEXCEPT;
     static inline bool to_compressed(ec_compressed& out,
         const data_chunk& point) NOEXCEPT;
     static inline const ec_xonly& as_xonly(
         const data_chunk& point) NOEXCEPT;
 
     // Batching properties.
-    INLINE uint16_t next_batch_group() const NOEXCEPT;
-    INLINE bool is_threshold_batchable() const NOEXCEPT;
-    INLINE bool is_multisig_batchable() const NOEXCEPT;
-    INLINE bool is_schnorr_batchable() const NOEXCEPT;
-    INLINE bool is_ecdsa_batchable() const NOEXCEPT;
-    INLINE bool is_threshold_cached() const NOEXCEPT;
-    INLINE bool is_input_script() const NOEXCEPT;
+    inline bool is_threshold_batchable() const NOEXCEPT;
+    inline bool is_multisig_batchable() const NOEXCEPT;
+    inline bool is_schnorr_batchable() const NOEXCEPT;
+    inline bool is_ecdsa_batchable() const NOEXCEPT;
+    inline bool is_input_script() const NOEXCEPT;
 
     // Stack helpers.
     INLINE void push_chunk(const chunk_xptr& datum) NOEXCEPT;

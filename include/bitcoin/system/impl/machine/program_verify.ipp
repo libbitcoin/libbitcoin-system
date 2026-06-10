@@ -61,7 +61,7 @@ is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT
 
 // static
 TEMPLATE
-inline const ec_signature& CLASS::
+INLINE const ec_signature& CLASS::
 schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
 {
     using namespace chain;
@@ -142,7 +142,7 @@ create_strip_ops(const chunk_xptrs& endorsements) NOEXCEPT
 
 // static/private
 TEMPLATE
-INLINE chain::strippers CLASS::
+inline chain::strippers CLASS::
 create_strip_ops(const chunk_xptr& endorsement) NOEXCEPT
 {
     using namespace chain;
