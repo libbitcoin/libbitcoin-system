@@ -118,6 +118,7 @@ struct BC_API signatures
     /// Default construction disables batching.
     const bool enabled{};
 
+    /// Replace with operative handlers.
     /// Allows script interpreter to emit log info via caller.
     const log_handler log
     {
@@ -128,6 +129,7 @@ struct BC_API signatures
         [] (miss) NOEXCEPT {}
     };
 
+    /// Replace with operative handlers.
     /// Invoked with signature triples for capture in script interpreter.
     const ecdsa_handler ecdsa
     {
