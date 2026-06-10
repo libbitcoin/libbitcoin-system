@@ -232,7 +232,8 @@ constexpr bool script::is_pay_tapscript_threshold_pattern(
 
     // opcode::within requires an additional number in the script.
     const auto within = (ops.back().code() == opcode::within);
-    if ((is_even(size) == within) || (size < (4 + to_int(within))))
+    if ((is_even(size) == within) ||
+        (size < (4u + to_int<uint8_t>(within))))
         return false;
 
     auto op = ops.begin();
