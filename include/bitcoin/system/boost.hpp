@@ -60,6 +60,12 @@
 
 namespace libbitcoin
 {
+    // `boost::format` is and unusable name with locale or urls included.
+    // boost::        typedef basic_format<char> format;
+    // boost::locale  typedef basic_format<char> format;
+    // boost::urls    void format(...)
+    using boost_format = boost::basic_format<char>;
+
     namespace system
     {
         namespace asio

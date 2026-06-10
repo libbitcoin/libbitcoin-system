@@ -18,8 +18,8 @@
  */
 #include <bitcoin/system/define.hpp>
 
-// Required in source (cpp) for boost header only.
-#include <boost/json/src.hpp>
+////// Required in source (cpp) for boost header only.
+////#include <boost/json/src.hpp>
 
 // This is a maintainer file to force rebuild of /system only.
 
