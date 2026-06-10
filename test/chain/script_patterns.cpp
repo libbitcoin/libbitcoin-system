@@ -273,6 +273,21 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__match_0_of_1__t
     BOOST_CHECK(script::is_pay_tapscript_threshold_pattern(ops));
 }
 
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__within_0_to_1__true)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+
+    operations ops{};
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksig);
+    ops.emplace_back(xkey, true);
+    ops.emplace_back(opcode::checksigadd);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(opcode::push_size_1);
+    ops.emplace_back(opcode::within);
+    BOOST_CHECK(script::is_pay_tapscript_threshold_pattern(ops));
+}
+
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__odd_length__false)
 {
     auto ops = make_tapscript_threshold_ops(2, 2);

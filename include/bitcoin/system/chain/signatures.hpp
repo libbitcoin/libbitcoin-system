@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <bitcoin/system/chain/enums/opcode.hpp>
+#include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -30,7 +31,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// TODO: use methods to hide fields and metadata.
 /// A container for passing signature triples into a caller's buffer.
 /// When enabled and passed to machine::interpreter this causes
 /// signature_verify() calls to return true in scripts for which this one call
@@ -39,60 +39,129 @@ namespace chain {
 /// which if any block (or transaction depending on correlation) has failed.
 struct BC_API signatures
 {
-    struct threshold_group
+    /// Reporting enumeration for capture misses.
+    enum class miss
+    {
+        /// Failed to capture an ecdsa signature.
+        ecdsa,
+
+        /// Failed to capture ecdsa signatures.
+        multisig,
+
+        /// Failed to capture a schnorr signature (single|multiple).
+        schnorr,
+
+        /// Failed to capture schnorr signatures (multiple >= 2^16).
+        overflow
+    };
+
+    /// Threshold category.
+    enum class category
+    {
+        single,
+        equal,
+        inequal,
+        lesser,
+        greater,
+        not_lesser,
+        not_greater,
+        between
+    };
+
+    struct threshold_entries
     {
         struct entry
         {
-            cref<hash_digest> digest;
+            /// Digest is created in the sigop (sigop scope - must copy).
+            hash_digest digest;
+
+            /// Point is a stack element (script scope - use reference).
             cref<ec_xonly> point;
+
+            /// Signature is a stack element (script scope - use reference).
             cref<ec_signature> sig;
         };
 
+        /// Scoping requires that capture_.threshold(threshold_entries) does not
+        /// retain a reference to point or sig (must copy or dispose the refs).
+        inline bool push_entry(const hash_digest& digest,
+            const cref<ec_xonly>& point,
+            const cref<ec_signature>& sig) NOEXCEPT
+        {
+            BC_ASSERT(entries.size() == expected);
+            entries.emplace_back(digest, point, sig);
+            return entries.size() == expected;
+        }
+
         std::vector<entry> entries{};
         opcode condition{};
-        uint8_t required{};
-        uint8_t expected{};
-        uint16_t group{};
+        uint16_t minimum{};
+        uint16_t maximum{};
+        uint16_t expected{};
     };
 
-    using event_handler = std::function<void(uint64_t)>;
-    using log_handler = std::function<void(const std::string_view&)>;
-    using ecdsa_handler = std::function<void(const hash_digest&,
+    /// Reporting handlers.
+    using fire_handler = std::function<void(miss)>;
+    using log_handler = std::function<void(const script&)>;
+
+    /// False implies script should execute because store cannot accept.
+    using ecdsa_handler = std::function<bool(const hash_digest&,
         const ec_compressed&, const ec_signature&)>;
-    using schnorr_handler = std::function<void(const hash_digest&,
+    using schnorr_handler = std::function<bool(const hash_digest&,
         const ec_xonly, const ec_signature&)>;
-    using multisig_handler = std::function<void(const hash_digest&,
-        const ec_compresseds&, const ec_signatures&, uint16_t)>;
-    using threshold_handler = std::function<void(const threshold_group&,
-        uint16_t)>;
+    using multisig_handler = std::function<bool(const hash_digest&,
+        const ec_compresseds&, const ec_signatures&)>;
+
+    /// False implies script must validate signatures or abort.
+    using threshold_handler = std::function<bool(const threshold_entries&)>;
 
     /// Default construction disables batching.
     const bool enabled{};
 
-    /// Invoked with signature verification triples in script interpreter.
-    const log_handler log{};
-    const event_handler event{};
-    const ecdsa_handler ecdsa{};
-    const schnorr_handler schnorr{};
-    const multisig_handler multisig{};
-    const threshold_handler threshold{};
+    /// Replace with operative handlers.
+    /// Allows script interpreter to emit log info via caller.
+    const log_handler log
+    {
+        [] (const script&) NOEXCEPT {}
+    };
+    const fire_handler fire
+    {
+        [] (miss) NOEXCEPT {}
+    };
 
-    /// Unique identifier of a multisig/threshold group within a block.
-    /// Oversized so an overflow can be detected, resulting in capture bypass.
-    /// Caller can detect occurances of lost capture by checking .group value.
-    mutable std::atomic<uint64_t> group{};
-
-    /// Diagnostic counters (single-sig).
-    mutable std::atomic<size_t> batched_ecdsa{};
-    mutable std::atomic<size_t> unbatched_ecdsa{};
-    mutable std::atomic<size_t> batched_multisig{};
-    mutable std::atomic<size_t> unbatched_multisig{};
-
-    /// Diagnostic counters (multi-sig).
-    mutable std::atomic<size_t> batched_schnorr{};
-    mutable std::atomic<size_t> unbatched_schnorr{};
-    mutable std::atomic<size_t> batched_threshold{};
-    mutable std::atomic<size_t> unbatched_threshold{};
+    /// Replace with operative handlers.
+    /// Invoked with signature triples for capture in script interpreter.
+    const ecdsa_handler ecdsa
+    {
+        [] (const hash_digest&, const ec_compressed&,
+            const ec_signature&) NOEXCEPT
+        {
+            return false;
+        }
+    };
+    const schnorr_handler schnorr
+    {
+        [] (const hash_digest&, const ec_xonly,
+            const ec_signature&) NOEXCEPT
+        {
+            return false;
+        }
+    };
+    const multisig_handler multisig
+    {
+        [] (const hash_digest&, const ec_compresseds&,
+            const ec_signatures&) NOEXCEPT
+        {
+            return false;
+        }
+    };
+    const threshold_handler threshold
+    {
+        [] (const threshold_entries&) NOEXCEPT
+        {
+            return false;
+        }
+    };
 };
 
 } // namespace chain

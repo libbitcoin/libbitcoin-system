@@ -65,7 +65,7 @@ namespace config {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-using boost::format;
+using format = boost_format;
 const int printer::max_arguments = 256;
 
 printer::printer(const options_metadata& options,
