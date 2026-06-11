@@ -56,7 +56,7 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
         else
         {
             // Not batchable.
-            capture_.fire(chain::signatures::miss::ecdsa);
+            capture_.fire(chain::signatures::miss::ecdsa, one);
             capture_.log(*script_);
         }
     }
@@ -86,7 +86,7 @@ try_batch_multisig_verification(const chunk_xptrs& points,
         else
         {
             // Not batchable.
-            capture_.fire(chain::signatures::miss::multisig);
+            capture_.fire(chain::signatures::miss::multisig, points.size());
             capture_.log(*script_);
         }
     }
@@ -157,7 +157,7 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
         else
         {
             // Not batchable.
-            capture_.fire(chain::signatures::miss::schnorr);
+            capture_.fire(chain::signatures::miss::schnorr, one);
             capture_.log(*script_);
         }
     }
@@ -189,7 +189,7 @@ is_threshold_batchable() const NOEXCEPT
     if (is_limited<uint16_t>(min) || is_limited<uint16_t>(max) ||
         is_limited<uint16_t>(expected))
     {
-        capture_.fire(chain::signatures::miss::overflow);
+        capture_.fire(chain::signatures::miss::overflow, one);
         return false;
     }
 
