@@ -101,8 +101,8 @@ struct BC_API signatures
     };
 
     /// Reporting handlers.
-    using fire_handler = std::function<void(miss)>;
     using log_handler = std::function<void(const script&)>;
+    using fire_handler = std::function<void(miss, size_t)>;
 
     /// False implies script should execute because store cannot accept.
     using ecdsa_handler = std::function<bool(const hash_digest&,
@@ -126,7 +126,7 @@ struct BC_API signatures
     };
     const fire_handler fire
     {
-        [] (miss) NOEXCEPT {}
+        [] (miss, size_t) NOEXCEPT {}
     };
 
     /// Replace with operative handlers.
