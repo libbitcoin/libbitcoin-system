@@ -40,13 +40,27 @@ inline bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) const NOEXCEPT
 {
-    ec_compressed key;
-    if (capture_.enabled && is_ecdsa_batchable() &&
-        to_compressed(key, point))
-        return capture_.ecdsa(hash, key, signature);
+    if (capture_.enabled)
+    {
+        if (is_ecdsa_batchable())
+        {
+            // Compress failure is a verify failure.
+            ec_compressed key;
+            if (!to_compressed(key, point))
+                return false;
 
-    capture_.fire(chain::signatures::miss::ecdsa);
-    capture_.log(*script_);
+            // Capture is bypass (single sigop).
+            if (capture_.ecdsa(hash, key, signature))
+                return true;
+        }
+        else
+        {
+            // Not batchable.
+            capture_.fire(chain::signatures::miss::ecdsa);
+            capture_.log(*script_);
+        }
+    }
+
     return ecdsa::verify_signature(point, hash, signature);
 }
 
@@ -55,33 +69,99 @@ inline bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    hash_digest hash;
-    ec_compresseds keys;
-    ec_signatures sigs;
-    if (capture_.enabled && is_multisig_batchable() &&
-        parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
-        return capture_.multisig(hash, keys, sigs);
+    if (capture_.enabled)
+    {
+        if (is_multisig_batchable())
+        {
+            // Parse failure is a full op execution.
+            // TODO: this could be further short-circuited.
+            hash_digest hash; ec_compresseds keys; ec_signatures sigs;
+            if (!parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
+                return false;
 
-    capture_.fire(chain::signatures::miss::multisig);
-    capture_.log(*script_);
+            // Capture is bypass (single sigop).
+            if (capture_.multisig(hash, keys, sigs))
+                return true;
+        }
+        else
+        {
+            // Not batchable.
+            capture_.fire(chain::signatures::miss::multisig);
+            capture_.log(*script_);
+        }
+    }
+
+    // Full op execution.
     return false;
 }
+
+// The store has failed to commit the group. The store may
+// be faulted (unrecoverable), or the disk may be full
+// (recoverable). It is too late to return false here as
+// false on the last threshold op will fail the script.
+// The script failure propagates to a block invalidity and
+// a consesus error, problematic in the case of disk full.
+// So this must be managed by the node. When a false is
+// propagated from this write via the node, the store
+// failure must be atomic (all or no subtables written
+// fully) so as to not corrupt stored batches. This just
+// requires preallocation across all tables before write,
+// first allocation at the primary table, with sentinel
+// write to indicate first phase commit. Then upon all
+// allocations complete, the write is assured, and the
+// sentinel is eventually overwritten as the second phase
+// commit. If a secondary table fails to allocate, the
+// operation terminates and the sentinel allows the batch
+// result to be ignored in post-processing. In this case of
+// false return from the store write, the node may honor
+// a failure result from the block validation, as this
+// store ault will not produce a failure, as true is
+// returned here. However validation success remains
+// unknown and would be presumed to be contained within the
+// batch table. However that is not so in this case, as the
+// commit failed due to an allocation failure on one of the
+// tables. So the node must treat the block as state
+// unknown. Given that the state of the block is unchanged
+// until the batch results complete, this will stall the
+// node during continuous operation (not if there is a
+// restart) unless the block is re-entered into the
+// validator's asio work queue. So in the case of a store
+// fault on threshold commit, the validator must re-
+// introduce the block to it queue. Upon a restart the
+// batches are processed at start, block states updated to
+// valid or unconfirmable, and then the validation queue is
+// repopulated as always.
 
 TEMPLATE
 inline bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) const NOEXCEPT
 {
-    // TODO: !capture_.threshold() implies store failure.
-    if (capture_.enabled && is_threshold_batchable())
-        return !threshold_.push_entry(hash, std::cref(as_xonly(point)),
-            std::cref(signature)) || capture_.threshold(threshold_);
+    if (capture_.enabled)
+    {
+        if (is_threshold_batchable())
+        {
+            if (threshold_.push_entry(hash, std::cref(as_xonly(point)),
+                std::cref(signature)))
+                capture_.threshold(threshold_);
 
-    if (capture_.enabled && is_schnorr_batchable())
-        return capture_.schnorr(hash, as_xonly(point), signature);
+            // Push or push/flush (capture) is bypass.
+            return true;
+        }
+        else if (is_schnorr_batchable())
+        {
+            // Capture is bypass (single sigop).
+            if (capture_.schnorr(hash, as_xonly(point), signature))
+                return true;
+        }
+        else
+        {
+            // Not batchable.
+            capture_.fire(chain::signatures::miss::schnorr);
+            capture_.log(*script_);
+        }
+    }
 
-    capture_.fire(chain::signatures::miss::schnorr);
-    capture_.log(*script_);
     return schnorr::verify_signature(point, hash, signature);
 }
 

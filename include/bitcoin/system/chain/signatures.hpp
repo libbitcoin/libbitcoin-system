@@ -113,7 +113,7 @@ struct BC_API signatures
         const ec_compresseds&, const ec_signatures&)>;
 
     /// False implies script must validate signatures or abort.
-    using threshold_handler = std::function<bool(const threshold_entries&)>;
+    using threshold_handler = std::function<void(const threshold_entries&)>;
 
     /// Default construction disables batching.
     const bool enabled{};
