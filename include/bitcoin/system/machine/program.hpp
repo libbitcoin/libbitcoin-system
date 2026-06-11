@@ -164,13 +164,17 @@ protected:
     /// Endorsement parsing.
     /// -----------------------------------------------------------------------
 
-    /// Parse schnorr endorsement into signature and signature hash flags.
-    static INLINE const ec_signature& schnorr_split(uint8_t& sighash_flags,
-        const data_chunk& endorsement) NOEXCEPT;
+    /// Parse schnorr endorsement into ec signature and signature hash flags.
+    virtual INLINE const ec_signature& schnorr_split(uint8_t& sighash_flags,
+        const data_chunk& endorsement) const NOEXCEPT;
 
-    /// Parse ecdsa endorsement into signature and signature hash flags.
-    static INLINE data_slice ecdsa_split(uint8_t& sighash_flags,
-        const data_chunk& endorsement) NOEXCEPT;
+    /// Parse ecdsa endorsement into der signature and signature hash flags.
+    virtual INLINE data_slice ecdsa_split(uint8_t& sighash_flags,
+        const data_chunk& endorsement) const NOEXCEPT;
+
+    /// Parse der signature into ec signature and signature hash flags.
+    virtual INLINE bool parse_signature(ec_signature& out,
+        const data_slice& der_signature, bool strict) const NOEXCEPT;
 
     /// Signature subscripting.
     /// -----------------------------------------------------------------------
@@ -202,7 +206,8 @@ protected:
     /// Signature verify (with batching).
     /// -----------------------------------------------------------------------
     virtual inline bool verify_ecdsa_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+        const hash_digest& hash, const ec_signature& signature,
+        bool capture=true) const NOEXCEPT;
     virtual inline bool try_batch_multisig_verification(const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
     virtual inline bool verify_schnorr_signature(const data_chunk& point,
@@ -231,15 +236,13 @@ private:
     inline bool parse_ecdsa_multisig(hash_digest& hash, ec_compresseds& keys,
         ec_signatures& sigs, const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
-    static inline bool parse_ecdsa_signatures(uint8_t& sighash,
-        ec_signatures& out, const chunk_xptrs& endorsements,
-        bool strict) NOEXCEPT;
-    static inline bool compress_public_keys(ec_compresseds& out,
+    inline bool parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
+        const chunk_xptrs& endorsements, bool strict) NOEXCEPT;
+    inline bool compress_public_keys(ec_compresseds& out,
         const chunk_xptrs& keys) NOEXCEPT;
-    static inline bool to_compressed(ec_compressed& out,
+    inline bool to_compressed(ec_compressed& out,
         const data_chunk& point) NOEXCEPT;
-    static inline const ec_xonly& as_xonly(
-        const data_chunk& point) NOEXCEPT;
+    inline const ec_xonly& as_xonly(const data_chunk& point) NOEXCEPT;
 
     // Batching properties.
     inline bool is_threshold_batchable() const NOEXCEPT;

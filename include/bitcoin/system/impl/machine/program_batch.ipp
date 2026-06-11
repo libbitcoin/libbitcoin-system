@@ -38,9 +38,9 @@ namespace machine {
 TEMPLATE
 inline bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature) const NOEXCEPT
+    const ec_signature& signature, bool capture) const NOEXCEPT
 {
-    if (capture_.enabled)
+    if (capture_.enabled && capture)
     {
         if (is_ecdsa_batchable())
         {
@@ -203,7 +203,7 @@ is_threshold_batchable() const NOEXCEPT
 
 // Batching helpers.
 // ----------------------------------------------------------------------------
-// static/private
+// private
 
 TEMPLATE
 inline bool CLASS::
@@ -246,7 +246,7 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
             return false;
 
         const auto end = std::prev(sig->end());
-        if (!ecdsa::parse_signature(*it++, { sig->begin(), end }, strict))
+        if (!parse_signature(*it++, { sig->begin(), end }, strict))
             return false;
     }
 
