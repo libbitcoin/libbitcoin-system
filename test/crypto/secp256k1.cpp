@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__positive__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(parse_signature(signature, der_signature2, false));
+    BOOST_REQUIRE(decode_signature(signature, der_signature2, false));
     BOOST_REQUIRE(verify_signature(compressed2, sighash2, signature));
 }
 
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__negative__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(parse_signature(signature, der_signature2, false));
+    BOOST_REQUIRE(decode_signature(signature, der_signature2, false));
 
     // Invalidate the positive test.
     signature[10] = 110;

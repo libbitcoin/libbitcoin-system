@@ -59,10 +59,10 @@ is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT
     }
 }
 
-// static
 TEMPLATE
 INLINE const ec_signature& CLASS::
-schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
+schnorr_split(uint8_t& sighash_flags,
+    const data_chunk& endorsement) const NOEXCEPT
 {
     using namespace chain;
     using namespace schnorr;
@@ -96,16 +96,24 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
     return unsafe_array_cast<uint8_t, ec_signature_size>(endorsement.data());
 }
 
-// static
 TEMPLATE
 INLINE data_slice CLASS::
-ecdsa_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
+ecdsa_split(uint8_t& sighash_flags,
+    const data_chunk& endorsement) const NOEXCEPT
 {
     BC_ASSERT(!endorsement.empty());
     sighash_flags = endorsement.back();
 
     // data_slice is returned since the size of the DER encoding is not fixed.
     return { endorsement.begin(), std::prev(endorsement.end()) };
+}
+
+TEMPLATE
+INLINE bool CLASS::
+decode_signature(ec_signature& out, const data_slice& der_signature,
+    bool strict) const NOEXCEPT
+{
+    return ecdsa::decode_signature(out, der_signature, strict);
 }
 
 // Signature subscripting.

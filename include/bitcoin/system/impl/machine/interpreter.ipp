@@ -50,7 +50,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_nop(opcode) const NOEXCEPT
 {
-    if (state::is_enabled(flags::nops_rule))
+    if (this->is_enabled(flags::nops_rule))
         return error::op_success;
 
     ////return op_unevaluated(code);
@@ -61,7 +61,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_push_number(int8_t value) NOEXCEPT
 {
-    state::push_signed64(value);
+    this->push_signed64(value);
     return error::op_success;
 }
 
@@ -72,7 +72,7 @@ op_push_size(const operation& op) NOEXCEPT
     if (op.is_underclaimed())
         return error::op_push_size;
 
-    state::push_chunk(op.data_ptr());
+    this->push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -83,7 +83,7 @@ op_push_one_size(const operation& op) NOEXCEPT
     if (op.is_underclaimed())
         return error::op_push_one_size;
 
-    state::push_chunk(op.data_ptr());
+    this->push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -94,7 +94,7 @@ op_push_two_size(const operation& op) NOEXCEPT
     if (op.is_underclaimed())
         return error::op_push_two_size;
 
-    state::push_chunk(op.data_ptr());
+    this->push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -105,7 +105,7 @@ op_push_four_size(const operation& op) NOEXCEPT
     if (op.is_underclaimed())
         return error::op_push_four_size;
 
-    state::push_chunk(op.data_ptr());
+    this->push_chunk(op.data_ptr());
     return error::op_success;
 }
 
@@ -121,7 +121,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_ver() const NOEXCEPT
 {
-    if (state::is_enabled(flags::nops_rule))
+    if (this->is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_ver);
 
     return error::op_not_implemented;
@@ -133,16 +133,16 @@ op_if() NOEXCEPT
 {
     auto value = false;
 
-    if (state::is_success())
+    if (this->is_success())
     {
-        if (state::is_stack_empty())
+        if (this->is_stack_empty())
             return error::op_if1;
 
-        if (!state::pop_bool_(value, state::is_enabled(flags::bip342_rule)))
+        if (!this->pop_bool_(value, this->is_enabled(flags::bip342_rule)))
             return error::op_if2;
     }
 
-    state::begin_if(value);
+    this->begin_if(value);
     return error::op_success;
 }
 
@@ -152,16 +152,16 @@ op_notif() NOEXCEPT
 {
     auto value = false;
 
-    if (state::is_success())
+    if (this->is_success())
     {
-        if (state::is_stack_empty())
+        if (this->is_stack_empty())
             return error::op_notif1;
 
-        if (!state::pop_bool_(value, state::is_enabled(flags::bip342_rule)))
+        if (!this->pop_bool_(value, this->is_enabled(flags::bip342_rule)))
             return error::op_notif2;
     }
 
-    state::begin_if(!value);
+    this->begin_if(!value);
     return error::op_success;
 }
 
@@ -169,7 +169,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_verif() const NOEXCEPT
 {
-    if (state::is_enabled(flags::nops_rule))
+    if (this->is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_verif);
 
     return error::op_not_implemented;
@@ -179,7 +179,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_vernotif() const NOEXCEPT
 {
-    if (state::is_enabled(flags::nops_rule))
+    if (this->is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
 
     return error::op_not_implemented;
@@ -189,10 +189,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_else() NOEXCEPT
 {
-    if (state::is_balanced())
+    if (this->is_balanced())
         return error::op_else;
 
-    state::else_if_();
+    this->else_if_();
     return error::op_success;
 }
 
@@ -200,10 +200,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_endif() NOEXCEPT
 {
-    if (state::is_balanced())
+    if (this->is_balanced())
         return error::op_endif;
 
-    state::end_if_();
+    this->end_if_();
     return error::op_success;
 }
 
@@ -211,13 +211,13 @@ TEMPLATE
 error::op_error_t CLASS::
 op_verify() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_verify1;
 
-    if (!state::peek_bool_())
+    if (!this->peek_bool_())
         return error::op_verify2;
 
-    state::drop_();
+    this->drop_();
     return error::op_success;
 }
 
@@ -225,7 +225,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_return() const NOEXCEPT
 {
-    if (state::is_enabled(flags::nops_rule))
+    if (this->is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_return);
         
     return error::op_not_implemented;
@@ -235,10 +235,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_to_alt_stack() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_to_alt_stack;
 
-    state::push_alternate(state::pop_());
+    this->push_alternate(this->pop_());
     return error::op_success;
 }
 
@@ -246,10 +246,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_from_alt_stack() NOEXCEPT
 {
-    if (state::is_alternate_empty())
+    if (this->is_alternate_empty())
         return error::op_from_alt_stack;
 
-    state::push_variant(state::pop_alternate_());
+    this->push_variant(this->pop_alternate_());
     return error::op_success;
 }
 
@@ -257,12 +257,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_drop2() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
-    state::drop_();
-    state::drop_();
+    this->drop_();
+    this->drop_();
     return error::op_success;
 }
 
@@ -270,12 +270,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_dup2() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_dup2;
 
     // [0,1,2,3] => 1,[0,1,2,3] =>  0,1,[0,1,2,3]
-    state::push_variant(state::peek_(1));
-    state::push_variant(state::peek_(1));
+    this->push_variant(this->peek_(1));
+    this->push_variant(this->peek_(1));
     return error::op_success;
 }
 
@@ -283,13 +283,13 @@ TEMPLATE
 error::op_error_t CLASS::
 op_dup3() NOEXCEPT
 {
-    if (state::stack_size() < 3u)
+    if (this->stack_size() < 3u)
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
-    state::push_variant(state::peek_(2));
-    state::push_variant(state::peek_(2));
-    state::push_variant(state::peek_(2));
+    this->push_variant(this->peek_(2));
+    this->push_variant(this->peek_(2));
+    this->push_variant(this->peek_(2));
     return error::op_success;
 }
 
@@ -297,12 +297,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_over2() NOEXCEPT
 {
-    if (state::stack_size() < 4u)
+    if (this->stack_size() < 4u)
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
-    state::push_variant(state::peek_(3));
-    state::push_variant(state::peek_(3));
+    this->push_variant(this->peek_(3));
+    this->push_variant(this->peek_(3));
     return error::op_success;
 }
 
@@ -310,15 +310,15 @@ TEMPLATE
 error::op_error_t CLASS::
 op_rot2() NOEXCEPT
 {
-    if (state::stack_size() < 6u)
+    if (this->stack_size() < 6u)
         return error::op_rot2;
 
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
     // [4,5,0,3,2,1] => [4,5,0,1,2,3]
-    state::swap_(0, 4);
-    state::swap_(1, 5);
-    state::swap_(2, 4);
-    state::swap_(3, 5);
+    this->swap_(0, 4);
+    this->swap_(1, 5);
+    this->swap_(2, 4);
+    this->swap_(3, 5);
     return error::op_success;
 }
 
@@ -326,12 +326,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_swap2() NOEXCEPT
 {
-    if (state::stack_size() < 4u)
+    if (this->stack_size() < 4u)
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    state::swap_(1, 3);
-    state::swap_(0, 2);
+    this->swap_(1, 3);
+    this->swap_(0, 2);
     return error::op_success;
 }
 
@@ -339,12 +339,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_if_dup() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_if_dup;
 
     // [0,1,2] => 0,[0,1,2]
-    if (state::peek_bool_())
-        state::push_variant(state::peek_());
+    if (this->peek_bool_())
+        this->push_variant(this->peek_());
 
     return error::op_success;
 }
@@ -354,7 +354,7 @@ error::op_error_t CLASS::
 op_depth() NOEXCEPT
 {
     // [0,1,2] => 3,[0,1,2]
-    state::push_length(state::stack_size());
+    this->push_length(this->stack_size());
     return error::op_success;
 }
 
@@ -362,11 +362,11 @@ TEMPLATE
 error::op_error_t CLASS::
 op_drop() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_drop;
 
     // 0,[1,2] => [1,2]
-    state::drop_();
+    this->drop_();
     return error::op_success;
 }
 
@@ -374,11 +374,11 @@ TEMPLATE
 error::op_error_t CLASS::
 op_dup() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_dup;
 
     // [0,1,2] => 0,[0,1 2]
-    state::push_variant(state::peek_());
+    this->push_variant(this->peek_());
     return error::op_success;
 }
 
@@ -386,12 +386,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_nip() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
-    state::swap_(0, 1);
-    state::drop_();
+    this->swap_(0, 1);
+    this->drop_();
     return error::op_success;
 }
 
@@ -399,11 +399,11 @@ TEMPLATE
 error::op_error_t CLASS::
 op_over() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_over;
 
     // [0,1] => 1,[0,1]
-    state::push_variant(state::peek_(1));
+    this->push_variant(this->peek_(1));
     return error::op_success;
 }
 
@@ -414,11 +414,11 @@ op_pick() NOEXCEPT
     size_t index;
 
     // 2,[0,1,2,3] => {2} [0,1,2,3]
-    if (!state::pop_index32(index))
+    if (!this->pop_index32(index))
         return error::op_pick;
 
     // [0,1,2,3] => 2,[0,1,2,3]
-    state::push_variant(state::peek_(index));
+    this->push_variant(this->peek_(index));
     return error::op_success;
 }
 
@@ -440,18 +440,18 @@ op_roll() NOEXCEPT
     size_t index;
 
     // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
-    if (!state::pop_index32(index))
+    if (!this->pop_index32(index))
         return error::op_roll;
 
     // Copy variant because should be deleted before push (no stack alloc).
-    stack_variant temporary{ state::peek_(index) };
+    stack_variant temporary{ this->peek_(index) };
 
     // Shifts maximum of n-1 references within vector of n.
     // [0,1,2,...,997,xxxx,999] => [0,1,2,...,997,999]
-    state::erase_(index);
+    this->erase_(index);
 
     // [0,1,2,...,997,999] => 998,[0,1,2,...,997,999]
-    state::push_variant(std::move(temporary));
+    this->push_variant(std::move(temporary));
     return error::op_success;
 }
 
@@ -459,12 +459,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_rot() NOEXCEPT
 {
-    if (state::stack_size() < 3u)
+    if (this->stack_size() < 3u)
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    state::swap_(1, 2);
-    state::swap_(0, 1);
+    this->swap_(1, 2);
+    this->swap_(0, 1);
     return error::op_success;
 }
 
@@ -472,11 +472,11 @@ TEMPLATE
 error::op_error_t CLASS::
 op_swap() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    state::swap_(0, 1);
+    this->swap_(0, 1);
     return error::op_success;
 }
 
@@ -484,12 +484,12 @@ TEMPLATE
 error::op_error_t CLASS::
 op_tuck() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
-    state::swap_(0, 1);
-    state::push_variant(state::peek_(1));
+    this->swap_(0, 1);
+    this->push_variant(this->peek_(1));
     return error::op_success;
 }
 
@@ -497,7 +497,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_cat() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_cat);
 
     return error::op_not_implemented;
@@ -507,7 +507,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_substr() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_substr);
 
     return error::op_not_implemented;
@@ -517,7 +517,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_left() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_left);
 
     return error::op_not_implemented;
@@ -527,7 +527,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_right() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_right);
 
     return error::op_not_implemented;
@@ -537,10 +537,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_size() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_size;
 
-    state::push_length(state::peek_size());
+    this->push_length(this->peek_size());
     return error::op_success;
 }
 
@@ -548,7 +548,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_invert() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_invert);
 
     return error::op_not_implemented;
@@ -558,7 +558,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_and() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_and);
 
     return error::op_not_implemented;
@@ -568,7 +568,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_or() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_or);
 
     return error::op_not_implemented;
@@ -578,7 +578,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_xor() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_xor);
 
     return error::op_not_implemented;
@@ -588,10 +588,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_equal() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_equal;
 
-    state::push_bool(state::equal_chunks(state::pop_(), state::pop_()));
+    this->push_bool(this->equal_chunks(this->pop_(), this->pop_()));
     return error::op_success;
 }
 
@@ -599,10 +599,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_equal_verify() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_equal_verify1;
 
-    return state::equal_chunks(state::pop_(), state::pop_()) ?
+    return this->equal_chunks(this->pop_(), this->pop_()) ?
         error::op_success : error::op_equal_verify2;
 }
 
@@ -611,10 +611,10 @@ error::op_error_t CLASS::
 op_add1() NOEXCEPT
 {
     int32_t number;
-    if (!state::pop_signed32(number))
+    if (!this->pop_signed32(number))
         return error::op_add1;
 
-    state::push_signed64(add1<int64_t>(number));
+    this->push_signed64(add1<int64_t>(number));
     return error::op_success;
 }
 
@@ -623,10 +623,10 @@ error::op_error_t CLASS::
 op_sub1() NOEXCEPT
 {
     int32_t number;
-    if (!state::pop_signed32(number))
+    if (!this->pop_signed32(number))
         return error::op_sub1;
 
-    state::push_signed64(sub1<int64_t>(number));
+    this->push_signed64(sub1<int64_t>(number));
     return error::op_success;
 }
 
@@ -634,7 +634,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_mul2() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_mul2);
 
     return error::op_not_implemented;
@@ -644,7 +644,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_div2() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_div2);
 
     return error::op_not_implemented;
@@ -655,11 +655,11 @@ error::op_error_t CLASS::
 op_negate() NOEXCEPT
 {
     int32_t number;
-    if (!state::pop_signed32(number))
+    if (!this->pop_signed32(number))
         return error::op_negate;
 
     // negate(minimum) overflow precluded by domain increase.
-    state::push_signed64(negate<int64_t>(number));
+    this->push_signed64(negate<int64_t>(number));
     return error::op_success;
 }
 
@@ -668,11 +668,11 @@ error::op_error_t CLASS::
 op_abs() NOEXCEPT
 {
     int32_t number;
-    if (!state::pop_signed32(number))
+    if (!this->pop_signed32(number))
         return error::op_abs;
 
     // absolute(minimum) overflow precluded by domain increase.
-    state::push_signed64(absolute<int64_t>(number));
+    this->push_signed64(absolute<int64_t>(number));
     return error::op_success;
 }
 
@@ -681,11 +681,11 @@ error::op_error_t CLASS::
 op_not() NOEXCEPT
 {
     int32_t number;
-    if (!state::pop_signed32(number))
+    if (!this->pop_signed32(number))
         return error::op_not;
 
     // Do not pop_bool() above, as number must be validated.
-    state::push_bool(!to_bool(number));
+    this->push_bool(!to_bool(number));
     return error::op_success;
 }
 
@@ -694,10 +694,10 @@ error::op_error_t CLASS::
 op_nonzero() NOEXCEPT
 {
     int32_t number;
-    if (!state::pop_signed32(number))
+    if (!this->pop_signed32(number))
         return error::op_nonzero;
 
-    state::push_bool(is_nonzero(number));
+    this->push_bool(is_nonzero(number));
     return error::op_success;
 }
 
@@ -706,11 +706,11 @@ error::op_error_t CLASS::
 op_add() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_add;
 
     // addition overflow precluded by domain increase.
-    state::push_signed64(add<int64_t>(left, right));
+    this->push_signed64(add<int64_t>(left, right));
     return error::op_success;
 }
 
@@ -719,11 +719,11 @@ error::op_error_t CLASS::
 op_sub() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_sub;
 
     // subtraction overflow precluded by domain increase.
-    state::push_signed64(subtract<int64_t>(left, right));
+    this->push_signed64(subtract<int64_t>(left, right));
     return error::op_success;
 }
 
@@ -731,7 +731,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_mul() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_mul);
 
     return error::op_not_implemented;
@@ -741,7 +741,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_div() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_div);
 
     return error::op_not_implemented;
@@ -751,7 +751,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_mod() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_mod);
 
     return error::op_not_implemented;
@@ -761,7 +761,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_lshift() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_lshift);
 
     return error::op_not_implemented;
@@ -771,7 +771,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_rshift() const NOEXCEPT
 {
-    if (state::is_enabled(flags::cats_rule))
+    if (this->is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_rshift);
 
     return error::op_not_implemented;
@@ -782,10 +782,10 @@ error::op_error_t CLASS::
 op_bool_and() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_bool_and;
 
-    state::push_bool(to_bool(left) && to_bool(right));
+    this->push_bool(to_bool(left) && to_bool(right));
     return error::op_success;
 }
 
@@ -794,10 +794,10 @@ error::op_error_t CLASS::
 op_bool_or() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_bool_or;
 
-    state::push_bool(to_bool(left) || to_bool(right));
+    this->push_bool(to_bool(left) || to_bool(right));
     return error::op_success;
 }
 
@@ -806,10 +806,10 @@ error::op_error_t CLASS::
 op_num_equal() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_num_equal;
 
-    state::push_bool(left == right);
+    this->push_bool(left == right);
     return error::op_success;
 }
 
@@ -818,7 +818,7 @@ error::op_error_t CLASS::
 op_num_equal_verify() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_num_equal_verify1;
 
     return (left == right) ? error::op_success : 
@@ -830,10 +830,10 @@ error::op_error_t CLASS::
 op_num_not_equal() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_num_not_equal;
 
-    state::push_bool(left != right);
+    this->push_bool(left != right);
     return error::op_success;
 }
 
@@ -842,10 +842,10 @@ error::op_error_t CLASS::
 op_less_than() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_less_than;
 
-    state::push_bool(is_lesser(left, right));
+    this->push_bool(is_lesser(left, right));
     return error::op_success;
 }
 
@@ -854,10 +854,10 @@ error::op_error_t CLASS::
 op_greater_than() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_greater_than;
 
-    state::push_bool(is_greater(left, right));
+    this->push_bool(is_greater(left, right));
     return error::op_success;
 }
 
@@ -866,10 +866,10 @@ error::op_error_t CLASS::
 op_less_than_or_equal() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_less_than_or_equal;
 
-    state::push_bool(!is_greater(left, right));
+    this->push_bool(!is_greater(left, right));
     return error::op_success;
 }
 
@@ -878,10 +878,10 @@ error::op_error_t CLASS::
 op_greater_than_or_equal() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_greater_than_or_equal;
 
-    state::push_bool(!is_lesser(left, right));
+    this->push_bool(!is_lesser(left, right));
     return error::op_success;
 }
 
@@ -890,10 +890,10 @@ error::op_error_t CLASS::
 op_min() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_min;
 
-    state::push_signed64(lesser(left, right));
+    this->push_signed64(lesser(left, right));
     return error::op_success;
 }
 
@@ -902,10 +902,10 @@ error::op_error_t CLASS::
 op_max() NOEXCEPT
 {
     int32_t right, left;
-    if (!state::pop_binary32(left, right))
+    if (!this->pop_binary32(left, right))
         return error::op_max;
 
-    state::push_signed64(greater(left, right));
+    this->push_signed64(greater(left, right));
     return error::op_success;
 }
 
@@ -914,10 +914,10 @@ error::op_error_t CLASS::
 op_within() NOEXCEPT
 {
     int32_t upper, lower, value;
-    if (!state::pop_ternary32(upper, lower, value))
+    if (!this->pop_ternary32(upper, lower, value))
         return error::op_within;
 
-    state::push_bool(!is_lesser(value, lower) && is_lesser(value, upper));
+    this->push_bool(!is_lesser(value, lower) && is_lesser(value, upper));
     return error::op_success;
 }
 
@@ -925,10 +925,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_ripemd160() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_ripemd160;
 
-    state::push_chunk(rmd160_chunk(*state::pop_chunk_()));
+    this->push_chunk(rmd160_chunk(*this->pop_chunk_()));
     return error::op_success;
 }
 
@@ -936,10 +936,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_sha1() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_sha1;
 
-    state::push_chunk(sha1_chunk(*state::pop_chunk_()));
+    this->push_chunk(sha1_chunk(*this->pop_chunk_()));
     return error::op_success;
 }
 
@@ -947,10 +947,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_sha256() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_sha256;
 
-    state::push_chunk(sha256_chunk(*state::pop_chunk_()));
+    this->push_chunk(sha256_chunk(*this->pop_chunk_()));
     return error::op_success;
 }
 
@@ -958,10 +958,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_hash160() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_hash160;
 
-    state::push_chunk(bitcoin_short_chunk(*state::pop_chunk_()));
+    this->push_chunk(bitcoin_short_chunk(*this->pop_chunk_()));
     return error::op_success;
 }
 
@@ -969,10 +969,10 @@ TEMPLATE
 error::op_error_t CLASS::
 op_hash256() NOEXCEPT
 {
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_hash256;
 
-    state::push_chunk(bitcoin_chunk(*state::pop_chunk_()));
+    this->push_chunk(bitcoin_chunk(*this->pop_chunk_()));
     return error::op_success;
 }
 
@@ -981,7 +981,7 @@ error::op_error_t CLASS::
 op_codeseparator(const op_iterator& op) NOEXCEPT
 {
     // Not thread safe for the script (changes script object metadata).
-    state::set_subscript(op);
+    this->set_subscript(op);
     return error::op_success;
 }
 
@@ -994,12 +994,12 @@ op_check_sig() NOEXCEPT
         return ec;
 
     // BIP66: if DER encoding invalid script MUST fail and end.
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
-    if (bip66 && ec == error::op_check_sig_parse_signature)
+    const auto bip66 = this->is_enabled(flags::bip66_rule);
+    if (bip66 && ec == error::op_check_sig_decode_signature)
         return ec;
 
     // BIP342: MUST fail and end conditions.
-    const auto bip342 = state::is_enabled(flags::bip342_rule);
+    const auto bip342 = this->is_enabled(flags::bip342_rule);
     if (bip342 && (
         ec == error::op_check_sig_empty_key ||
         ec == error::op_check_sig_schnorr1 ||
@@ -1008,7 +1008,7 @@ op_check_sig() NOEXCEPT
         ec == error::op_check_sig_budget))
         return ec;
 
-    state::push_bool(ec == error::op_success);
+    this->push_bool(ec == error::op_success);
     return error::op_success;
 }
 
@@ -1016,14 +1016,14 @@ TEMPLATE
 error::op_error_t CLASS::
 op_check_sig_verify() NOEXCEPT
 {
-    if (state::stack_size() < 2u)
+    if (this->stack_size() < 2u)
         return error::op_check_sig_low_stack;
 
-    const auto key = state::pop_chunk_();
-    const auto endorsement = state::pop_chunk_();
+    const auto key = this->pop_chunk_();
+    const auto endorsement = this->pop_chunk_();
 
     // BIP342:
-    if (state::is_enabled(flags::bip342_rule))
+    if (this->is_enabled(flags::bip342_rule))
     {
         if (key->empty())
             return error::op_check_sig_empty_key;
@@ -1037,21 +1037,21 @@ op_check_sig_verify() NOEXCEPT
         {
             // Split endorsement into schnorr sig and signature hash flags.
             uint8_t sighash_flags;
-            const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
+            const auto& sig = this->schnorr_split(sighash_flags, *endorsement);
             if (sighash_flags == chain::coverage::invalid)
                 return error::op_check_sig_schnorr1;
 
             // Generate signature hash.
             hash_digest hash{};
-            if (!state::signature_hash(hash, sighash_flags))
+            if (!this->signature_hash(hash, sighash_flags))
                 return error::op_check_sig_schnorr2;
 
             // Verify schnorr signature against public key and signature hash.
-            if (!state::verify_schnorr_signature(*key, hash, sig))
+            if (!this->verify_schnorr_signature(*key, hash, sig))
                 return error::op_check_sig_schnorr3;
         }
 
-        if (!state::sigops_increment())
+        if (!this->sigops_increment())
             return error::op_check_sig_budget;
 
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
@@ -1065,22 +1065,22 @@ op_check_sig_verify() NOEXCEPT
 
     // Split endorsement into DER signature and signature hash flags.
     uint8_t sighash_flags;
-    const auto der = state::ecdsa_split(sighash_flags, *endorsement);
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
+    const auto der = this->ecdsa_split(sighash_flags, *endorsement);
+    const auto bip66 = this->is_enabled(flags::bip66_rule);
 
     // BIP66: if DER encoding invalid script MUST fail and end.
     ec_signature sig;
-    if (!ecdsa::parse_signature(sig, der, bip66))
-        return error::op_check_sig_parse_signature;
+    if (!this->decode_signature(sig, der, bip66))
+        return error::op_check_sig_decode_signature;
 
     // Generate signature hash.
     hash_digest hash{};
-    const auto subscript = state::subscript(endorsement);
-    if (!state::signature_hash(hash, *subscript, sighash_flags))
+    const auto subscript = this->subscript(endorsement);
+    if (!this->signature_hash(hash, *subscript, sighash_flags))
         return error::op_check_sig_verify3;
 
     // Verify ECDSA signature against public key and signature hash.
-    if (!state::verify_ecdsa_signature(*key, hash, sig))
+    if (!this->verify_ecdsa_signature(*key, hash, sig))
         return error::op_check_sig_verify4;
 
     // TODO: use sighash and key to generate signature in sign mode.
@@ -1091,7 +1091,7 @@ TEMPLATE
 error::op_error_t CLASS::
 op_check_multisig() NOEXCEPT
 {
-    if (state::is_enabled(flags::bip342_rule))
+    if (this->is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::checkmultisig);
 
     const auto ec = op_check_multisig_verify();
@@ -1107,11 +1107,11 @@ op_check_multisig() NOEXCEPT
         return ec;
 
     // BIP66: if DER encoding invalid, script MUST fail and end.
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
-    if (bip66 && ec == error::op_check_multisig_parse_signature)
+    const auto bip66 = this->is_enabled(flags::bip66_rule);
+    if (bip66 && ec == error::op_check_multisig_decode_signature)
         return ec;
 
-    state::push_bool(ec == error::op_success);
+    this->push_bool(ec == error::op_success);
     return error::op_success;
 }
 
@@ -1119,48 +1119,48 @@ TEMPLATE
 error::op_error_t CLASS::
 op_check_multisig_verify() NOEXCEPT
 {
-    if (state::is_enabled(flags::bip342_rule))
+    if (this->is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::checkmultisigverify);
 
     size_t count{};
-    if (!state::pop_index32(count))
+    if (!this->pop_index32(count))
         return error::op_check_multisig_verify1;
 
     if (count > chain::max_script_public_keys)
         return error::op_check_multisig_verify2;
 
-    if (!state::ops_increment(count))
+    if (!this->ops_increment(count))
         return error::op_check_multisig_verify3;
 
     chunk_xptrs keys;
-    if (!state::pop_chunks(keys, count))
+    if (!this->pop_chunks(keys, count))
         return error::op_check_multisig_verify4;
 
-    if (!state::pop_index32(count))
+    if (!this->pop_index32(count))
         return error::op_check_multisig_verify5;
 
     if (count > keys.size())
         return error::op_check_multisig_verify6;
 
     chunk_xptrs endorsements;
-    if (!state::pop_chunks(endorsements, count))
+    if (!this->pop_chunks(endorsements, count))
         return error::op_check_multisig_verify7;
 
-    if (state::is_stack_empty())
+    if (this->is_stack_empty())
         return error::op_check_multisig_verify8;
 
     // BIP147: Satoshi bug, discard stack element, malleable until active.
-    const auto bip147 = state::is_enabled(flags::bip147_rule);
-    if (state::pop_strict_bool_() && bip147)
+    const auto bip147 = this->is_enabled(flags::bip147_rule);
+    if (this->pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
     // False if signature cannot be batched for any reason.
-    if (state::try_batch_multisig_verification(keys, endorsements))
+    if (this->try_batch_multisig_verification(keys, endorsements))
         return error::op_success;
 
     auto it = endorsements.begin();
-    const auto subscript = state::subscript(endorsements);
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
+    const auto subscript = this->subscript(endorsements);
+    const auto bip66 = this->is_enabled(flags::bip66_rule);
 
     // Keys may be empty.
     for (const auto& key: keys)
@@ -1176,19 +1176,19 @@ op_check_multisig_verify() NOEXCEPT
 
         // Split endorsement into DER signature and signature hash flags.
         uint8_t sighash_flags;
-        const auto der = state::ecdsa_split(sighash_flags, *endorsement);
+        const auto der = this->ecdsa_split(sighash_flags, *endorsement);
 
         // BIP66: if DER encoding invalid script MUST fail and end.
         ec_signature sig;
-        if (!ecdsa::parse_signature(sig, der, bip66))
-            return error::op_check_multisig_parse_signature;
+        if (!this->decode_signature(sig, der, bip66))
+            return error::op_check_multisig_decode_signature;
 
         // Signature hash caching (bypass signature hash if same as previous).
-        if (!state::cached(sighash_flags))
-            state::set_hash(*subscript, sighash_flags);
+        if (!this->cached(sighash_flags))
+            this->set_hash(*subscript, sighash_flags);
 
         // Verify ECDSA signature against public key and cache signature hash.
-        if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
+        if (this->verify_ecdsa_signature(*key, this->cached_hash(), sig, false))
             ++it;
     }
 
@@ -1205,11 +1205,11 @@ error::op_error_t CLASS::
 op_check_locktime_verify() const NOEXCEPT
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
-    if (!state::is_enabled(flags::bip65_rule))
+    if (!this->is_enabled(flags::bip65_rule))
         return op_nop(opcode::nop2);
 
     // The tx sequence is 0xffffffff.
-    if (state::input().is_final())
+    if (this->input().is_final())
         return error::op_check_locktime_verify1;
 
     // The stack is empty.
@@ -1217,10 +1217,10 @@ op_check_locktime_verify() const NOEXCEPT
     // Extend the (signed) script number range to 5 bytes.
     // The stack top is positive and 40 bits are usable.
     uint64_t stack_locktime40;
-    if (!state::peek_unsigned40(stack_locktime40))
+    if (!this->peek_unsigned40(stack_locktime40))
         return error::op_check_locktime_verify2;
 
-    const auto trans_locktime32 = state::tx().locktime();
+    const auto trans_locktime32 = this->tx().locktime();
     using namespace chain;
 
     // The stack locktime type differs from that of tx.
@@ -1241,7 +1241,7 @@ error::op_error_t CLASS::
 op_check_sequence_verify() const NOEXCEPT
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
-    if (!state::is_enabled(flags::bip112_rule))
+    if (!this->is_enabled(flags::bip112_rule))
         return op_nop(opcode::nop3);
 
     // The stack is empty.
@@ -1249,11 +1249,11 @@ op_check_sequence_verify() const NOEXCEPT
     // Extend the (signed) script number range to 5 bytes.
     // The stack top is positive and 32 bits are used (33rd-40th discarded).
     uint32_t stack_sequence32;
-    if (!state::peek_unsigned32(stack_sequence32))
+    if (!this->peek_unsigned32(stack_sequence32))
         return error::op_check_sequence_verify1;
 
     // Only 32 bits are tested.
-    const auto input_sequence32 = state::input().sequence();
+    const auto input_sequence32 = this->input().sequence();
     using namespace chain;
 
     // The stack sequence is disabled, treat as nop3.
@@ -1261,7 +1261,7 @@ op_check_sequence_verify() const NOEXCEPT
         return op_nop(opcode::nop3);
 
     // The stack sequence is enabled and tx version less than 2.
-    if (state::tx().version() < relative_locktime_min_version)
+    if (this->tx().version() < relative_locktime_min_version)
         return error::op_check_sequence_verify2;
 
     // The transaction sequence is disabled.
@@ -1286,15 +1286,15 @@ error::op_error_t CLASS::
 op_check_sig_add() NOEXCEPT
 {
     // BIP342: reserved_186 subsumed by op_checksigadd when tapscript active.
-    if (!state::is_enabled(flags::bip342_rule))
+    if (!this->is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::reserved_186);
 
     // If fewer than 3 elements on stack, script MUST fail and end.
-    if (state::stack_size() < 3u)
+    if (this->stack_size() < 3u)
         return error::op_check_sig_add1;
 
     // Public key (top) is popped.
-    const auto key = state::pop_chunk_();
+    const auto key = this->pop_chunk_();
 
     // If public key is empty, script MUST fail and end.
     if (key->empty())
@@ -1303,28 +1303,28 @@ op_check_sig_add() NOEXCEPT
     // Number (second to top) is popped.
     // If number is larger than 4 bytes, script MUST fail and end.
     int32_t number;
-    if (!state::pop_signed32_(number))
+    if (!this->pop_signed32_(number))
         return error::op_check_sig_add3;
 
     // Signature (third to top) is popped.
-    const auto endorsement = state::pop_chunk_();
+    const auto endorsement = this->pop_chunk_();
 
     // If signature is empty, [number] pushed, execution continues.
     if (endorsement->empty())
     {
-        state::push_signed64(number);
+        this->push_signed64(number);
         return error::op_success;
     }
 
     // Split endorsement into schnorr signature and signature hash flags.
     uint8_t sighash_flags;
-    const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
+    const auto& sig = this->schnorr_split(sighash_flags, *endorsement);
     if (sighash_flags == chain::coverage::invalid)
         return error::op_check_sig_add4;
 
     // Signature hash caching (bypass signature hash if same as previous).
-    if (!state::cached(sighash_flags))
-        if (!state::set_hash(sighash_flags))
+    if (!this->cached(sighash_flags))
+        if (!this->set_hash(sighash_flags))
             return error::op_check_sig_add5;
 
     // Verify schnorr signature against public key and signature hash.
@@ -1332,15 +1332,15 @@ op_check_sig_add() NOEXCEPT
     // During script execution of signature opcodes these behave exactly as
     // known types except that signature validation considered successful.
     if (key->size() == ec_xonly_size &&
-        !state::verify_schnorr_signature(*key, state::cached_hash(), sig))
+        !this->verify_schnorr_signature(*key, this->cached_hash(), sig))
             return error::op_check_sig_add6;
 
     // If signature not empty, opcode counted toward sigops budget.
-    if (!state::sigops_increment())
+    if (!this->sigops_increment())
         return error::op_check_sig_add7;
 
     // If signature not empty (and successful), [number+1] pushed.
-    state::push_signed64(add1<int64_t>(number));
+    this->push_signed64(add1<int64_t>(number));
     return error::op_success;
 }
 

@@ -697,13 +697,13 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_budget__true_expected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_budget");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_parse_signature__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_decode_signature__true_expected_message)
 {
-    constexpr auto value = error::op_check_sig_parse_signature;
+    constexpr auto value = error::op_check_sig_decode_signature;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_parse_signature");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_decode_signature");
 }
 
 // op_check_multisig/verify
@@ -798,13 +798,13 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_mismatch__true_expected
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_mismatch");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_parse_signature__true_expected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_decode_signature__true_expected_message)
 {
-    constexpr auto value = error::op_check_multisig_parse_signature;
+    constexpr auto value = error::op_check_multisig_decode_signature;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_parse_signature");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_decode_signature");
 }
 
 // op_check_locktime_verify

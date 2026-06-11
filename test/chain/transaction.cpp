@@ -1326,7 +1326,7 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__single__uses_one_hash)
     constexpr auto bip66 = true;
     constexpr auto flags = flags::bip66_rule;
     ec_signature signature;
-    BOOST_REQUIRE(ecdsa::parse_signature(signature, distinguished, bip66));
+    BOOST_REQUIRE(ecdsa::decode_signature(signature, distinguished, bip66));
     BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, flags));
 }
 
@@ -1348,7 +1348,7 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__normal__success)
     constexpr auto bip66 = true;
     constexpr auto flags = flags::bip66_rule;
     ec_signature signature;
-    BOOST_REQUIRE(ecdsa::parse_signature(signature, distinguished, bip66));
+    BOOST_REQUIRE(ecdsa::decode_signature(signature, distinguished, bip66));
     BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, flags));
 }
 
