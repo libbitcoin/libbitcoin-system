@@ -103,7 +103,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_check_sig_schnorr2, "op_check_sig_schnorr2" },
     { op_check_sig_schnorr3, "op_check_sig_schnorr3" },
     { op_check_sig_budget, "op_check_sig_budget" },
-    { op_check_sig_parse_signature, "op_check_sig_parse_signature" },
+    { op_check_sig_decode_signature, "op_check_sig_decode_signature" },
 
     { op_check_multisig_verify1, "op_check_multisig_verify1" },
     { op_check_multisig_verify2, "op_check_multisig_verify2" },
@@ -115,7 +115,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_check_multisig_verify8, "op_check_multisig_verify8" },
     { op_check_multisig_verify9, "op_check_multisig_verify9" },
     { op_check_multisig_mismatch, "op_check_multisig_mismatch" },
-    { op_check_multisig_parse_signature, "op_check_multisig_parse_signature" },
+    { op_check_multisig_decode_signature, "op_check_multisig_decode_signature" },
 
     { op_check_locktime_verify1, "op_check_locktime_verify1" },
     { op_check_locktime_verify2, "op_check_locktime_verify2" },

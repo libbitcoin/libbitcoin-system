@@ -211,8 +211,8 @@ BC_API bool recover_public(ec_uncompressed& out,
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
-BC_API bool parse_signature(ec_signature& out, const data_slice& der_signature,
-    bool strict) NOEXCEPT;
+BC_API bool decode_signature(ec_signature& out,
+    const data_slice& der_signature, bool strict) NOEXCEPT;
 
 /// Encode an ECDSA signature as DER (strict).
 BC_API bool encode_signature(der_signature& out,

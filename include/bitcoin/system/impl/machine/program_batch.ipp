@@ -246,7 +246,7 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
             return false;
 
         const auto end = std::prev(sig->end());
-        if (!parse_signature(*it++, { sig->begin(), end }, strict))
+        if (!decode_signature(*it++, { sig->begin(), end }, strict))
             return false;
     }
 

@@ -110,10 +110,10 @@ ecdsa_split(uint8_t& sighash_flags,
 
 TEMPLATE
 INLINE bool CLASS::
-parse_signature(ec_signature& out, const data_slice& der_signature,
+decode_signature(ec_signature& out, const data_slice& der_signature,
     bool strict) const NOEXCEPT
 {
-    return ecdsa::parse_signature(out, der_signature, strict);
+    return ecdsa::decode_signature(out, der_signature, strict);
 }
 
 // Signature subscripting.

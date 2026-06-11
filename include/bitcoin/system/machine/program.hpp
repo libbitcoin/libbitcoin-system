@@ -173,7 +173,7 @@ protected:
         const data_chunk& endorsement) const NOEXCEPT;
 
     /// Parse der signature into ec signature and signature hash flags.
-    virtual INLINE bool parse_signature(ec_signature& out,
+    virtual INLINE bool decode_signature(ec_signature& out,
         const data_slice& der_signature, bool strict) const NOEXCEPT;
 
     /// Signature subscripting.

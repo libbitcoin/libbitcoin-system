@@ -413,7 +413,7 @@ bool recover_public(ec_uncompressed& out,
 // ----------------------------------------------------------------------------
 // It is recommended to verify a signature after signing.
 
-bool parse_signature(ec_signature& out, const data_slice& der_signature,
+bool decode_signature(ec_signature& out, const data_slice& der_signature,
     bool strict) NOEXCEPT
 {
     // BIP66: strict parse is not called for when signature is empty.

@@ -995,7 +995,7 @@ op_check_sig() NOEXCEPT
 
     // BIP66: if DER encoding invalid script MUST fail and end.
     const auto bip66 = this->is_enabled(flags::bip66_rule);
-    if (bip66 && ec == error::op_check_sig_parse_signature)
+    if (bip66 && ec == error::op_check_sig_decode_signature)
         return ec;
 
     // BIP342: MUST fail and end conditions.
@@ -1070,8 +1070,8 @@ op_check_sig_verify() NOEXCEPT
 
     // BIP66: if DER encoding invalid script MUST fail and end.
     ec_signature sig;
-    if (!this->parse_signature(sig, der, bip66))
-        return error::op_check_sig_parse_signature;
+    if (!this->decode_signature(sig, der, bip66))
+        return error::op_check_sig_decode_signature;
 
     // Generate signature hash.
     hash_digest hash{};
@@ -1108,7 +1108,7 @@ op_check_multisig() NOEXCEPT
 
     // BIP66: if DER encoding invalid, script MUST fail and end.
     const auto bip66 = this->is_enabled(flags::bip66_rule);
-    if (bip66 && ec == error::op_check_multisig_parse_signature)
+    if (bip66 && ec == error::op_check_multisig_decode_signature)
         return ec;
 
     this->push_bool(ec == error::op_success);
@@ -1180,8 +1180,8 @@ op_check_multisig_verify() NOEXCEPT
 
         // BIP66: if DER encoding invalid script MUST fail and end.
         ec_signature sig;
-        if (!this->parse_signature(sig, der, bip66))
-            return error::op_check_multisig_parse_signature;
+        if (!this->decode_signature(sig, der, bip66))
+            return error::op_check_multisig_decode_signature;
 
         // Signature hash caching (bypass signature hash if same as previous).
         if (!this->cached(sighash_flags))
