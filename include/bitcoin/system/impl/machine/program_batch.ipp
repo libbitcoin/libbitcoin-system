@@ -227,7 +227,7 @@ parse_ecdsa_multisig(hash_digest& hash, ec_compresseds& keys,
 TEMPLATE
 inline bool CLASS::
 parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
-    const chunk_xptrs& endorsements, bool strict) NOEXCEPT
+    const chunk_xptrs& endorsements, bool strict) const NOEXCEPT
 {
     std::optional<uint8_t> byte{};
     out.resize(endorsements.size());
@@ -260,7 +260,8 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
 
 TEMPLATE
 inline bool CLASS::
-compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
+compress_public_keys(ec_compresseds& out,
+    const chunk_xptrs& keys) const NOEXCEPT
 {
     out.resize(keys.size());
     auto it = out.begin();
@@ -274,7 +275,7 @@ compress_public_keys(ec_compresseds& out, const chunk_xptrs& keys) NOEXCEPT
 
 TEMPLATE
 inline bool CLASS::
-to_compressed(ec_compressed& out, const data_chunk& point) NOEXCEPT
+to_compressed(ec_compressed& out, const data_chunk& point) const NOEXCEPT
 {
     constexpr auto lo = ec_compressed_size;
     constexpr auto hi = ec_uncompressed_size;
@@ -293,7 +294,7 @@ to_compressed(ec_compressed& out, const data_chunk& point) NOEXCEPT
 
 TEMPLATE
 const ec_xonly& CLASS::
-as_xonly(const data_chunk& point) NOEXCEPT
+as_xonly(const data_chunk& point) const NOEXCEPT
 {
     // Guarded by consensus rule.
     BC_ASSERT(point.size() == ec_xonly_size);

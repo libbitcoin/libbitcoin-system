@@ -237,12 +237,12 @@ private:
         ec_signatures& sigs, const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
     inline bool parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
-        const chunk_xptrs& endorsements, bool strict) NOEXCEPT;
+        const chunk_xptrs& endorsements, bool strict) const NOEXCEPT;
     inline bool compress_public_keys(ec_compresseds& out,
-        const chunk_xptrs& keys) NOEXCEPT;
+        const chunk_xptrs& keys) const NOEXCEPT;
     inline bool to_compressed(ec_compressed& out,
-        const data_chunk& point) NOEXCEPT;
-    inline const ec_xonly& as_xonly(const data_chunk& point) NOEXCEPT;
+        const data_chunk& point) const NOEXCEPT;
+    inline const ec_xonly& as_xonly(const data_chunk& point) const NOEXCEPT;
 
     // Batching properties.
     inline bool is_threshold_batchable() const NOEXCEPT;
