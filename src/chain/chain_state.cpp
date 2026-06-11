@@ -151,10 +151,18 @@ chain_state::activations chain_state::activation(const data& values,
         result.flags |= flags::bip90_rule;
     }
 
-    // bip94 is activated based on configuration alone (hard fork).
-    if (forks.bip94)
+    // time_warp_patch (testnet4) is activated based on configuration
+    // alone (hard fork).
+    if (forks.time_warp_patch)
     {
-        result.flags |= flags::bip94_rule;
+        result.flags |= flags::time_warp_patch;
+    }
+
+    // block_storm_patch (testnet4) is activated based on configuration
+    // alone (hard fork).
+    if (forks.block_storm_patch)
+    {
+        result.flags |= flags::block_storm_patch;
     }
 
     // bip16 was activated by manual inspection of signal history (soft fork).
@@ -427,7 +435,7 @@ uint32_t chain_state::work_required_retarget_bits(const data& values,
     const forks& forks, uint32_t proof_of_work_limit,
     uint32_t retargeting_interval) NOEXCEPT
 {
-    if (forks.bip94)
+    if (forks.block_storm_patch)
     {
         auto height = values.height;
 

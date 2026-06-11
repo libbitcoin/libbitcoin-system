@@ -55,7 +55,6 @@ settings::settings() NOEXCEPT
     forks.bip66 = true;
     forks.bip68 = true;
     forks.bip90 = true;
-    forks.bip94 = false;
     forks.bip112 = true;
     forks.bip113 = true;
     forks.bip141 = true;
@@ -65,6 +64,8 @@ settings::settings() NOEXCEPT
     forks.bip342 = true;
     forks.retarget = true;                     // !regtest
     forks.difficult = true;                    // !testnet
+    forks.time_warp_patch = false;             // testnet4
+    forks.block_storm_patch = false;           // testnet4
     forks.ltc_time_warp_patch = false;         // litecoin
     forks.ltc_retarget_overflow_patch = false; // litecoin
     forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -130,7 +131,6 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip66 = true;
             forks.bip68 = true;
             forks.bip90 = true;
-            forks.bip94 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -138,8 +138,10 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
-            forks.retarget = true;                 // !regtest
-            forks.difficult = true;                // !testnet
+            forks.retarget = true;                     // !regtest
+            forks.difficult = true;                    // !testnet
+            forks.time_warp_patch = false;             // testnet4
+            forks.block_storm_patch = false;           // testnet4
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -232,7 +234,6 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip66 = true;
             forks.bip68 = true;
             forks.bip90 = true;
-            forks.bip94 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -242,6 +243,8 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip342 = true;
             forks.retarget = true;                     // !regtest
             forks.difficult = false;                   // !testnet
+            forks.time_warp_patch = false;             // testnet4
+            forks.block_storm_patch = false;           // testnet4
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -322,7 +325,6 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip66 = true;
             forks.bip68 = true;
             forks.bip90 = true;
-            forks.bip94 = true;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -332,6 +334,8 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip342 = true;
             forks.retarget = true;                     // !regtest
             forks.difficult = false;                   // !testnet
+            forks.time_warp_patch = true;              // testnet4
+            forks.block_storm_patch = true;            // testnet4
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -426,6 +430,8 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip342 = true;
             forks.retarget = false;                    // !regtest
             forks.difficult = true;                    // !testnet
+            forks.time_warp_patch = false;             // testnet4
+            forks.block_storm_patch = false;           // testnet4
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
