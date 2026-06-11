@@ -126,22 +126,22 @@ enum flags : uint32_t
     bip91_rule = bit_right<uint32_t>(25),
 
     /// Testnet4 only
-    time_warp_patch = bit_right<uint32_t>(26),
+    time_warp_patch = bit_right<uint32_t>(27),
 
     /// Testnet4 only
-    block_storm_patch = bit_right<uint32_t>(27),
+    block_storm_patch = bit_right<uint32_t>(28),
 
     /// Litecoin rules.
     /// -----------------------------------------------------------------------
 
     /// Fix Satoshi's time warp bug (hard fork, security).
-    ltc_time_warp_patch = bit_right<uint32_t>(28),
+    ltc_time_warp_patch = bit_right<uint32_t>(29),
 
     /// Fix target overflow for very low difficulty (hard fork, security).
-    ltc_retarget_overflow_patch = bit_right<uint32_t>(29),
+    ltc_retarget_overflow_patch = bit_right<uint32_t>(30),
 
     /// Use scrypt hashing for proof of work (hard fork, feature).
-    ltc_scrypt_proof_of_work = bit_right<uint32_t>(30),
+    ltc_scrypt_proof_of_work = bit_right<uint32_t>(31),
 
     /// Aggregates
     /// -----------------------------------------------------------------------
