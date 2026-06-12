@@ -32,6 +32,7 @@ namespace error {
 enum block_error_t : uint8_t
 {
     block_success = 0,
+    block_capture,
 
     // check header
     invalid_proof_of_work,

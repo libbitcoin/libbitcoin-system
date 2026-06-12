@@ -31,6 +31,17 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_success__false_expected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "block success");
 }
 
+// signature capture
+
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_capture__false_expected_message)
+{
+    constexpr auto value = error::block_capture;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "block capture");
+}
+
 // check header
 
 BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_proof_of_work__true_expected_message)

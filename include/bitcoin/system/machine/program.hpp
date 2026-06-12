@@ -216,7 +216,7 @@ protected:
 private:
     static constexpr auto relaxed = std::memory_order_relaxed;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
-    using threshold_cache = chain::signatures::threshold_entries;
+    using threshold_cache = chain::signatures::threshold_group;
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {

@@ -49,10 +49,7 @@ struct BC_API signatures
         multisig,
 
         /// Failed to capture a schnorr signature (single|multiple).
-        schnorr,
-
-        /// Failed to capture schnorr signatures (multiple >= 2^16).
-        overflow
+        schnorr
     };
 
     /// Threshold category.
@@ -68,7 +65,7 @@ struct BC_API signatures
         between
     };
 
-    struct threshold_entries
+    struct threshold_group
     {
         struct entry
         {
@@ -82,7 +79,7 @@ struct BC_API signatures
             cref<ec_signature> sig;
         };
 
-        /// Scoping requires that capture_.threshold(threshold_entries) does not
+        /// Scoping requires that capture_.threshold(threshold_group) does not
         /// retain a reference to point or sig (must copy or dispose the refs).
         inline bool push_entry(const hash_digest& digest,
             const cref<ec_xonly>& point,
@@ -104,16 +101,14 @@ struct BC_API signatures
     using log_handler = std::function<void(const script&)>;
     using fire_handler = std::function<void(miss, size_t)>;
 
-    /// False implies script should execute because store cannot accept.
+    /// False implies write was not committed.
     using ecdsa_handler = std::function<bool(const hash_digest&,
         const ec_compressed&, const ec_signature&)>;
     using schnorr_handler = std::function<bool(const hash_digest&,
         const ec_xonly, const ec_signature&)>;
     using multisig_handler = std::function<bool(const hash_digest&,
         const ec_compresseds&, const ec_signatures&)>;
-
-    /// False implies script must validate signatures or abort.
-    using threshold_handler = std::function<void(const threshold_entries&)>;
+    using threshold_handler = std::function<bool(const threshold_group&)>;
 
     /// Default construction disables batching.
     const bool enabled{};
@@ -141,8 +136,7 @@ struct BC_API signatures
     };
     const schnorr_handler schnorr
     {
-        [] (const hash_digest&, const ec_xonly,
-            const ec_signature&) NOEXCEPT
+        [] (const hash_digest&, const ec_xonly, const ec_signature&) NOEXCEPT
         {
             return false;
         }
@@ -157,11 +151,14 @@ struct BC_API signatures
     };
     const threshold_handler threshold
     {
-        [] (const threshold_entries&) NOEXCEPT
+        [] (const threshold_group&) NOEXCEPT
         {
             return false;
         }
     };
+
+    /// Store failed to accept at least one threshold commit (set in script).
+    mutable std::atomic_bool fault{};
 };
 
 } // namespace chain

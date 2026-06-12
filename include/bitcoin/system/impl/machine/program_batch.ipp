@@ -143,7 +143,12 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
         {
             if (threshold_.push_entry(hash, std::cref(as_xonly(point)),
                 std::cref(signature)))
-                capture_.threshold(threshold_);
+            {
+                // With a fault block.connect() returns error::block_capture.
+                // Scripts continue but a block::success result is disregarded.
+                if (!capture_.threshold(threshold_))
+                    capture_.fault = true;
+            }
 
             // Push or push/flush (capture) is bypass.
             return true;
@@ -186,12 +191,10 @@ is_threshold_batchable() const NOEXCEPT
     const auto expected = add1(stack_nonempty());
 
     // Limit batching to 65,535 verified; 58,883 is widely observed.
-    if (is_limited<uint16_t>(min) || is_limited<uint16_t>(max) ||
+    if (is_limited<uint16_t>(min) ||
+        is_limited<uint16_t>(max) ||
         is_limited<uint16_t>(expected))
-    {
-        capture_.fire(chain::signatures::miss::overflow, one);
         return false;
-    }
 
     threshold_.entries.reserve(expected);
     threshold_.minimum = narrow_cast<uint16_t>(min);

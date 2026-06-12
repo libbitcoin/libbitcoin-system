@@ -28,6 +28,7 @@ namespace error {
 DEFINE_ERROR_T_MESSAGE_MAP(block_error)
 {
     { block_success, "block success" },
+    { block_capture, "block capture" },
 
     // check header
     { invalid_proof_of_work, "proof of work invalid" },
