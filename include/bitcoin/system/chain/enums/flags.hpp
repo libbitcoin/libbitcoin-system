@@ -84,18 +84,6 @@ enum flags : uint32_t
     /// Taproot: validation of tapscripts.
     bip342_rule = bit_right<uint32_t>(16),
 
-    /// Litecoin rules.
-    /// -----------------------------------------------------------------------
-
-    /// Fix Satoshi's time warp bug (hard fork, security).
-    ltc_time_warp_patch = bit_right<uint32_t>(17),
-
-    /// Fix target overflow for very low difficulty (hard fork, security).
-    ltc_retarget_overflow_patch = bit_right<uint32_t>(18),
-
-    /// Use scrypt hashing for proof of work (hard fork, feature).
-    ltc_scrypt_proof_of_work = bit_right<uint32_t>(19),
-
     /// TODO: hardwired or obsoleted (historical).
     /// -----------------------------------------------------------------------
 
@@ -103,41 +91,59 @@ enum flags : uint32_t
     /// Combined script max 20,000 bytes, push_data 520 (soft fork, arbitrary).
     /// Initial script and push_data size limits (soft fork, arbitrary).
     /// Demote return, op_ver, verif, vernotif (soft fork, security).
-    nops_rule = bit_right<uint32_t>(20),
+    nops_rule = bit_right<uint32_t>(17),
 
     /// Splits script evaluation, activated by [0.3.7] (hard fork, security).
     /// Per script max 10,000 bytes, one more total byte than prior, as the
     /// previous limit was imposed after concatenating with op_codeseparator.
-    split_rule = bit_right<uint32_t>(21),
+    split_rule = bit_right<uint32_t>(18),
 
     /// Invalidate op_cat, etc. [0.3.9] (soft fork, security).
-    cats_rule = bit_right<uint32_t>(22),
+    cats_rule = bit_right<uint32_t>(19),
 
     /// The original rule leaked output value, was plugged here (soft fork).
     /// This was activated at block 74,638 [0.3.10], later to all blocks.
-    plug_rule = bit_right<uint32_t>(23),
+    plug_rule = bit_right<uint32_t>(20),
 
     /// Limit block size to 1,000,000 bytes (soft fork, system DoS).
     /// Limit signature operations per block (soft fork, system DoS).
     /// This was activated at block 79,400 [0.3.12], and later to all blocks.
-    size_rule = bit_right<uint32_t>(24),
+    size_rule = bit_right<uint32_t>(21),
 
     /// Release [0.8.0] removal of hash limit, chain split at block 225,430.
     /// Original rule was from Berkely DB [unknown] (hard fork, determinism).
-    unlock_rule = bit_right<uint32_t>(23),
+    unlock_rule = bit_right<uint32_t>(22),
 
     /// This allowed double spends, applied and removed (hard fork, inflation).
     /// Activated (hard fork) in [0.15.0] deactivated (soft fork) in [0.16.3].
-    inflation_rule = bit_right<uint32_t>(25),
+    inflation_rule = bit_right<uint32_t>(23),
 
     /// Tx and input hashes max 4,500 per block (soft/hard fork, determinism).
     /// This (initially) soft fork rule expires, which makes it a hard fork.
-    bip50_rule = bit_right<uint32_t>(26),
+    bip50_rule = bit_right<uint32_t>(24),
 
     /// Reduces threshold segregated witness signaling (soft fork, feature).
-    bip91_rule = bit_right<uint32_t>(27),
+    bip91_rule = bit_right<uint32_t>(25),
 
-    /// Agregates
+    /// Testnet4 only
+    time_warp_patch = bit_right<uint32_t>(27),
+
+    /// Testnet4 only
+    block_storm_patch = bit_right<uint32_t>(28),
+
+    /// Litecoin rules.
+    /// -----------------------------------------------------------------------
+
+    /// Fix Satoshi's time warp bug (hard fork, security).
+    ltc_time_warp_patch = bit_right<uint32_t>(29),
+
+    /// Fix target overflow for very low difficulty (hard fork, security).
+    ltc_retarget_overflow_patch = bit_right<uint32_t>(30),
+
+    /// Use scrypt hashing for proof of work (hard fork, feature).
+    ltc_scrypt_proof_of_work = bit_right<uint32_t>(31),
+
+    /// Aggregates
     /// -----------------------------------------------------------------------
 
     /// Rules that use bip34-based activation.

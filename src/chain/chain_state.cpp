@@ -151,6 +151,20 @@ chain_state::activations chain_state::activation(const data& values,
         result.flags |= flags::bip90_rule;
     }
 
+    // time_warp_patch (testnet4) is activated based on configuration
+    // alone (hard fork).
+    if (forks.time_warp_patch)
+    {
+        result.flags |= flags::time_warp_patch;
+    }
+
+    // block_storm_patch (testnet4) is activated based on configuration
+    // alone (hard fork).
+    if (forks.block_storm_patch)
+    {
+        result.flags |= flags::block_storm_patch;
+    }
+
     // bip16 was activated by manual inspection of signal history (soft fork).
     if (forks.bip16 &&
         (values.timestamp.self >= settings.bip16_activation_time))
@@ -368,6 +382,7 @@ uint32_t chain_state::work_required(const data& values, const forks& forks,
             settings.proof_of_work_limit,
             settings.minimum_timespan(),
             settings.maximum_timespan(),
+            settings.retargeting_interval(),
             settings.retargeting_interval_seconds);
 
     // Testnet retargets easy on inter-interval.
@@ -406,13 +421,46 @@ constexpr bool patch_timewarp(const forks& forks, const uint256_t& limit,
         floored_log2(target) >= floored_log2(limit);
 }
 
+// A retarget height, or a block that does not have proof_of_work_limit bits.
+constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
+    size_t retargeting_interval, uint32_t proof_of_work_limit) NOEXCEPT
+{
+    // Zero is a retarget height, termination required before height underflow.
+    // This is guaranteed, just a comment here because it may not be obvious.
+    return bits != proof_of_work_limit ||
+        is_retarget_height(height, retargeting_interval);
+}
+
+uint32_t chain_state::work_required_retarget_bits(const data& values,
+    const forks& forks, uint32_t proof_of_work_limit,
+    uint32_t retargeting_interval) NOEXCEPT
+{
+    if (forks.block_storm_patch)
+    {
+        auto height = values.height;
+
+        // Reverse iterate the ordered-by-height list of header bits.
+        const auto& bits = values.bits.ordered;
+        for (auto bit: std::views::reverse(bits))
+        {
+            if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
+                proof_of_work_limit))
+                return bit;
+        }
+    }
+
+    return bits_high(values);
+}
+
 uint32_t chain_state::work_required_retarget(const data& values,
     const forks& forks, uint32_t proof_of_work_limit,
     uint32_t minimum_timespan, uint32_t maximum_timespan,
+    uint32_t retargeting_interval,
     uint32_t retargeting_interval_seconds) NOEXCEPT
 {
     static const auto limit = compact::expand(proof_of_work_limit);
-    auto target = compact::expand(bits_high(values));
+    auto target = compact::expand(work_required_retarget_bits(values,
+        forks, proof_of_work_limit, retargeting_interval));
 
     // Conditionally implement retarget overflow patch (e.g. Litecoin).
     const auto timewarp = to_int(patch_timewarp(forks, limit, target));
@@ -425,16 +473,6 @@ uint32_t chain_state::work_required_retarget(const data& values,
     // Disallow target from falling below minimum configured.
     // All targets are a bits value normalized by compress here.
     return target > limit ? proof_of_work_limit : compact::compress(target);
-}
-
-// A retarget height, or a block that does not have proof_of_work_limit bits.
-constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
-    size_t retargeting_interval, uint32_t proof_of_work_limit) NOEXCEPT
-{
-    // Zero is a retarget height, termination required before height underflow.
-    // This is guaranteed, just a comment here because it may not be obvious.
-    return bits != proof_of_work_limit ||
-        is_retarget_height(height, retargeting_interval);
 }
 
 uint32_t chain_state::easy_work_required(const data& values,
@@ -620,7 +658,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // If this overflows height is zero and result is handled as invalid.
     const auto height = add1(data.height);
-    
+
     // Enqueue previous block values to collections.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     data.bits.ordered.push_back(data.bits.self);
@@ -793,7 +831,8 @@ chain::context chain_state::context() const NOEXCEPT
         median_time_past(),
         possible_narrow_cast<uint32_t>(height()),
         minimum_block_version(),
-        work_required()
+        work_required(),
+        previous_timestamp()
     };
 }
 
@@ -822,6 +861,11 @@ uint32_t chain_state::work_required() const NOEXCEPT
 uint32_t chain_state::timestamp() const NOEXCEPT
 {
     return data_.timestamp.self;
+}
+
+uint32_t chain_state::previous_timestamp() const NOEXCEPT
+{
+    return data_.timestamp.ordered.empty() ? 0 : timestamp_high(data_);
 }
 
 uint32_t chain_state::median_time_past() const NOEXCEPT

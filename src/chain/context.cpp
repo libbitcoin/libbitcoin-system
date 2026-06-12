@@ -32,7 +32,8 @@ bool operator==(const context& left, const context& right) NOEXCEPT
         && left.median_time_past == right.median_time_past
         && left.height == right.height
         && left.minimum_block_version == right.minimum_block_version
-        && left.work_required == right.work_required;
+        && left.work_required == right.work_required
+        && left.previous_timestamp == right.previous_timestamp;
 }
 
 bool operator!=(const context& left, const context& right) NOEXCEPT

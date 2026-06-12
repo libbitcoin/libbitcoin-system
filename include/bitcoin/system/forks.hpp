@@ -72,6 +72,10 @@ typedef struct
     /// Testnet is not difficult.
     bool difficult;
 
+    // github.com/bitcoin/bitcoin/pull/29775 ("testnet4")
+    bool time_warp_patch;
+    bool block_storm_patch;
+
     /// Litecoin deviations from Bitcoin.
     bool ltc_time_warp_patch;         // litecoin
     bool ltc_retarget_overflow_patch; // litecoin

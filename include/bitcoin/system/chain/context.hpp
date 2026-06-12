@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 
 namespace libbitcoin {
@@ -56,6 +57,15 @@ public:
         return bits != work_required;
     }
 
+    // Testnet4 / BIP94 specific (the block's timestamp is too early on
+    // difficulty adjustment block).
+    inline bool is_early_timestamp(uint32_t retargeting_interval) const NOEXCEPT
+    {
+        return is_enabled(chain::flags::time_warp_patch)
+            && is_zero(height % retargeting_interval)
+            && (timestamp < floored_subtract(previous_timestamp, max_timewarp));
+    }
+
     /// Header context within chain.
     uint32_t flags;
     uint32_t timestamp;
@@ -63,6 +73,7 @@ public:
     size_t height;
     uint32_t minimum_block_version;
     uint32_t work_required;
+    uint32_t previous_timestamp;
 };
 
 bool operator==(const context& left, const context& right) NOEXCEPT;
