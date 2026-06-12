@@ -423,7 +423,8 @@ constexpr bool patch_timewarp(const forks& forks, const uint256_t& limit,
 
 // A retarget height, or a block that does not have proof_of_work_limit bits.
 constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
-    size_t retargeting_interval, uint32_t proof_of_work_limit) NOEXCEPT
+    uint32_t retargeting_interval,
+    uint32_t proof_of_work_limit) NOEXCEPT
 {
     // Zero is a retarget height, termination required before height underflow.
     // This is guaranteed, just a comment here because it may not be obvious.
@@ -453,8 +454,10 @@ uint32_t chain_state::work_required_retarget_bits(const data& values,
 }
 
 uint32_t chain_state::work_required_retarget(const data& values,
-    const forks& forks, uint32_t proof_of_work_limit,
-    uint32_t minimum_timespan, uint32_t maximum_timespan,
+    const forks& forks,
+    uint32_t proof_of_work_limit,
+    uint32_t minimum_timespan,
+    uint32_t maximum_timespan,
     uint32_t retargeting_interval,
     uint32_t retargeting_interval_seconds) NOEXCEPT
 {
@@ -476,7 +479,8 @@ uint32_t chain_state::work_required_retarget(const data& values,
 }
 
 uint32_t chain_state::easy_work_required(const data& values,
-    size_t retargeting_interval, uint32_t proof_of_work_limit,
+    uint32_t retargeting_interval,
+    uint32_t proof_of_work_limit,
     uint32_t block_spacing_seconds) NOEXCEPT
 {
     BC_ASSERT(!is_zero(values.height));
