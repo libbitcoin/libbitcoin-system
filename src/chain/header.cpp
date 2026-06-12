@@ -386,7 +386,7 @@ code header::accept(const context& ctx,
         return error::anachronistic_timestamp;
     if (ctx.is_invalid_work(bits_))
         return error::incorrect_proof_of_work;
-    if (ctx.is_early_timestamp(retargeting_interval))
+    if (ctx.is_early_timestamp(ctx.previous_timestamp, retargeting_interval))
         return error::early_timestamp;
 
     return error::block_success;

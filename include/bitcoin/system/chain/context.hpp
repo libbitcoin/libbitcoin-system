@@ -59,7 +59,8 @@ public:
 
     // Testnet4 / BIP94 specific (the block's timestamp is too early on
     // difficulty adjustment block).
-    inline bool is_early_timestamp(uint32_t retargeting_interval) const NOEXCEPT
+    inline bool is_early_timestamp(uint32_t previous_timestamp,
+        uint32_t retargeting_interval) const NOEXCEPT
     {
         return is_enabled(chain::flags::time_warp_patch)
             && is_zero(height % retargeting_interval)
