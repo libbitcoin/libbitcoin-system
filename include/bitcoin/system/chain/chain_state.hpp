@@ -251,7 +251,7 @@ private:
         uint32_t minimum_timespan,
         uint32_t maximum_timespan) NOEXCEPT;
     static uint32_t easy_work_required(const data& values,
-        size_t retargeting_interval,
+        uint32_t retargeting_interval,
         uint32_t proof_of_work_limit,
         uint32_t block_spacing_seconds) NOEXCEPT;
 

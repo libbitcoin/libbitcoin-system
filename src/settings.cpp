@@ -551,7 +551,7 @@ uint32_t settings::maximum_timespan() const NOEXCEPT
 }
 
 // The target number of blocks for 2 weeks of work (2016 blocks).
-size_t settings::retargeting_interval() const NOEXCEPT
+uint32_t settings::retargeting_interval() const NOEXCEPT
 {
     // TODO: optimize to prevent recomputation.
     return chain::chain_state::retargeting_interval(

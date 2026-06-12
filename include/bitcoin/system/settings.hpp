@@ -52,7 +52,7 @@ public:
     /// These are used by chain_state (only).
     virtual uint32_t minimum_timespan() const NOEXCEPT;
     virtual uint32_t maximum_timespan() const NOEXCEPT;
-    virtual size_t retargeting_interval() const NOEXCEPT;
+    virtual uint32_t retargeting_interval() const NOEXCEPT;
 
     /// Configured forks.
     /// -----------------------------------------------------------------------
