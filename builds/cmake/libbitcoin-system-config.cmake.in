@@ -21,6 +21,16 @@ find_dependency( Boost 1.86.0 REQUIRED
     url
 )
 
-find_dependency( libsecp256k1 0.7.0 REQUIRED )
+set( with-secp256k1 @with-secp256k1@ )
+
+if ( with-secp256k1 )
+  find_dependency( libsecp256k1 0.7.0 REQUIRED )
+endif()
+
+set( with-ultrafast @with-ultrafast@ )
+
+if ( with-ultrafast )
+  find_dependency( secp256k1-fast 4.1.1.4 REQUIRED )
+endif()
 
 check_required_components(@PROJECT_NAME@)

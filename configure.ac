@@ -164,6 +164,26 @@ AS_CASE([${enable_ndebug}], [yes], AC_DEFINE([NDEBUG]))
 #------------------------------------------------------------------------------
 AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_ALL_DYN_LINK]))
 
+# Implement --with-ultrafast.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([--with-ultrafast option])
+AC_ARG_WITH([ultrafast],
+    AS_HELP_STRING([--with-ultrafast],
+        [Use shrec/UltrafastSecp256k1 library. @<:@default=no@:>@]),
+    [with_ultrafast=$withval],
+    [with_ultrafast=no])
+AC_MSG_RESULT([$with_ultrafast])
+
+# Implement --with-secp256k1.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([--with-secp256k1 option])
+AC_ARG_WITH([secp256k1],
+    AS_HELP_STRING([--with-secp256k1],
+        [Use bitcoin-core/secp256k1 library. @<:@default=yes@:>@]),
+    [with_secp256k1=$withval],
+    [with_secp256k1=yes])
+AC_MSG_RESULT([$with_secp256k1])
+
 # Implement --enable-isystem.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-isystem option])
@@ -410,24 +430,49 @@ AS_CASE([${with_tests}], [yes],
 
 # Require secp256k1 of at least version 0.5.1.0 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
-PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.5.1.0], [],
-    [
-      AC_MSG_ERROR([libsecp256k1 >= 0.5.1.0 is required but was not found.])
-    ])
-AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.5.1.0'])
-AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
-AC_SUBST([secp256k1_ISYS_CPPFLAGS], [`echo ${secp256k1_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
-AC_MSG_NOTICE([secp256k1_CPPFLAGS : ${secp256k1_CPPFLAGS}])
-AC_MSG_NOTICE([secp256k1_ISYS_CPPFLAGS : ${secp256k1_ISYS_CPPFLAGS}])
-AC_MSG_NOTICE([secp256k1_OTHER_CFLAGS : ${secp256k1_OTHER_CFLAGS}])
-AC_MSG_NOTICE([secp256k1_INCLUDEDIR : ${secp256k1_INCLUDEDIR}])
-AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
+AS_CASE([${with_secp256k1}], [yes],
+    [PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.5.1.0], [],
+        [
+          AC_MSG_ERROR([--with-secp256k1 specified but libsecp256k1 >= 0.5.1.0 was not found.])
+        ])
+     AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.5.1.0'])
+     AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
+     AC_SUBST([secp256k1_ISYS_CPPFLAGS], [`echo ${secp256k1_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
+     AC_MSG_NOTICE([secp256k1_CPPFLAGS : ${secp256k1_CPPFLAGS}])
+     AC_MSG_NOTICE([secp256k1_ISYS_CPPFLAGS : ${secp256k1_ISYS_CPPFLAGS}])
+     AC_MSG_NOTICE([secp256k1_OTHER_CFLAGS : ${secp256k1_OTHER_CFLAGS}])
+     AC_MSG_NOTICE([secp256k1_INCLUDEDIR : ${secp256k1_INCLUDEDIR}])
+     AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])],
+    [AC_SUBST([secp256k1_PKG], [])])
 
 AS_CASE([${enable_isystem}],[yes],
     [AC_SUBST([secp256k1_BUILD_CPPFLAGS], [${secp256k1_ISYS_CPPFLAGS}])],
     [AC_SUBST([secp256k1_BUILD_CPPFLAGS], [${secp256k1_CPPFLAGS}])])
 
 AC_MSG_NOTICE([secp256k1_BUILD_CPPFLAGS : ${secp256k1_BUILD_CPPFLAGS}])
+
+# Require ultrafast of at least version 4.1.1.4 and output ${ultrafast_CPPFLAGS/LIBS/PKG}.
+#------------------------------------------------------------------------------
+AS_CASE([${with_ultrafast}], [yes],
+    [PKG_CHECK_MODULES([ultrafast], [libultrafast >= 4.1.1.4], [],
+        [
+          AC_MSG_ERROR([--with-ultrafast specified but libultrafast >= 4.1.1.4 was not found.])
+        ])
+     AC_SUBST([ultrafast_PKG], ['libultrafast >= 4.1.1.4'])
+     AC_SUBST([ultrafast_CPPFLAGS], [${ultrafast_CFLAGS}])
+     AC_SUBST([ultrafast_ISYS_CPPFLAGS], [`echo ${ultrafast_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
+     AC_MSG_NOTICE([ultrafast_CPPFLAGS : ${ultrafast_CPPFLAGS}])
+     AC_MSG_NOTICE([ultrafast_ISYS_CPPFLAGS : ${ultrafast_ISYS_CPPFLAGS}])
+     AC_MSG_NOTICE([ultrafast_OTHER_CFLAGS : ${ultrafast_OTHER_CFLAGS}])
+     AC_MSG_NOTICE([ultrafast_INCLUDEDIR : ${ultrafast_INCLUDEDIR}])
+     AC_MSG_NOTICE([ultrafast_LIBS : ${ultrafast_LIBS}])],
+    [AC_SUBST([ultrafast_PKG], [])])
+
+AS_CASE([${enable_isystem}],[yes],
+    [AC_SUBST([ultrafast_BUILD_CPPFLAGS], [${ultrafast_ISYS_CPPFLAGS}])],
+    [AC_SUBST([ultrafast_BUILD_CPPFLAGS], [${ultrafast_CPPFLAGS}])])
+
+AC_MSG_NOTICE([ultrafast_BUILD_CPPFLAGS : ${ultrafast_BUILD_CPPFLAGS}])
 
 
 # Process outputs into templates.

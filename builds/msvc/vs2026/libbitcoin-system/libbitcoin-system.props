@@ -83,6 +83,7 @@
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
+    <Message Text="Linkage-ultrafast : $(Linkage-ultrafast)" Importance="high"/>
   </Target>
 
 </Project>
