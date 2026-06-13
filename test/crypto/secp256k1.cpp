@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ec_add__negative__expected)
 
 BOOST_AUTO_TEST_CASE(secp256k1__ec_sum__expected)
 {
-    const compressed_list points
+    const ec_compresseds points
     {
         ec_compressed_generator,
         ec_compressed_generator,

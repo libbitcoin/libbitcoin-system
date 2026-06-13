@@ -98,12 +98,17 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/version.cpp \
     src/crypto/aes256.cpp \
     src/crypto/der_parser.cpp \
-    src/crypto/ec_context.cpp \
-    src/crypto/ec_context.hpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
-    src/crypto/secp256k1.cpp \
-    src/crypto/secp256k1_batch.cpp \
+    src/crypto/secp256k1/batch.cpp \
+    src/crypto/secp256k1/ec_context.cpp \
+    src/crypto/secp256k1/ec_context.hpp \
+    src/crypto/secp256k1/ecdsa.cpp \
+    src/crypto/secp256k1/keys.cpp \
+    src/crypto/secp256k1/math.cpp \
+    src/crypto/secp256k1/recover.cpp \
+    src/crypto/secp256k1/schnorr.cpp \
+    src/crypto/secp256k1/serialize.hpp \
     src/data/data_chunk.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \

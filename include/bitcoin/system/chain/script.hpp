@@ -84,7 +84,7 @@ public:
     static inline operations to_pay_script_hash_pattern(
         const short_hash& hash) NOEXCEPT;
     static inline operations to_pay_multisig_pattern(uint8_t signatures,
-        const compressed_list& points) NOEXCEPT;
+        const ec_compresseds& points) NOEXCEPT;
     static inline operations to_pay_multisig_pattern(uint8_t signatures,
         const data_stack& points) NOEXCEPT;
     static inline operations to_pay_witness_pattern(uint8_t version,

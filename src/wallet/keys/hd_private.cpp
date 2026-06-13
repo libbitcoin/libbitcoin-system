@@ -105,7 +105,7 @@ hd_private hd_private::from_private(const ec_secret& secret,
     const hd_chain_code& chain_code, uint64_t prefixes) NOEXCEPT
 {
     // The key is invalid if parse256(IL) >= n or 0:
-    if (!verify(secret))
+    if (!verify_secret(secret))
         return {};
 
     const hd_lineage master

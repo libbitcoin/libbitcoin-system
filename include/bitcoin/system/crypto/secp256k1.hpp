@@ -28,25 +28,19 @@
 namespace libbitcoin {
 namespace system {
 
-/// The sign byte value for an even (y-valued) key.
-static constexpr uint8_t ec_even_sign = 2;
-
 /// Private key:
 static constexpr size_t ec_secret_size = 32;
 typedef data_array<ec_secret_size> ec_secret;
-typedef std_vector<ec_secret> secret_list;              // deprecated
-typedef std_vector<ec_secret> secrets;
+typedef std_vector<ec_secret> ec_secrets;
 
 /// Compressed ECDSA public key:
 static constexpr size_t ec_compressed_size = 33;
 typedef data_array<ec_compressed_size> ec_compressed;
-typedef std_vector<ec_compressed> compressed_list;      // deprecated
 typedef std_vector<ec_compressed> ec_compresseds;
 
 /// Uncompressed ECDSA public key:
 static constexpr size_t ec_uncompressed_size = 65;
 typedef data_array<ec_uncompressed_size> ec_uncompressed;
-typedef std_vector<ec_uncompressed> uncompressed_list;  // deprecated
 typedef std_vector<ec_uncompressed> ec_uncompresseds;
 
 /// X-only Schnorr public key:
@@ -68,6 +62,13 @@ static constexpr size_t min_endorsement_size = 9;
 static constexpr size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 typedef std_vector<endorsement> endorsements;
+
+/// Sign byte values for ec public keys:
+static constexpr uint8_t ec_even_sign = 2;
+static constexpr uint8_t ec_odd_sign = 3;
+static constexpr uint8_t ec_uncompressed_sign = 4;
+static constexpr uint8_t ec_hybrid_even_sign = 6;
+static constexpr uint8_t ec_hybrid_odd_sign = 7;
 
 // secg.org/sec2-v2.pdf
 constexpr ec_compressed ec_compressed_generator = base16_array("02"
@@ -111,7 +112,7 @@ BC_API bool ec_add(ec_compressed& left, const ec_compressed& right) NOEXCEPT;
 BC_API bool ec_add(ec_compressed& left, const ec_uncompressed& right) NOEXCEPT;
 
 /// Compute the sum of compressed point values.
-BC_API bool ec_sum(ec_compressed& out, const compressed_list& values) NOEXCEPT;
+BC_API bool ec_sum(ec_compressed& out, const ec_compresseds& values) NOEXCEPT;
 
 /// Multiply EC values
 /// ---------------------------------------------------------------------------
@@ -158,14 +159,14 @@ BC_API bool secret_to_public(ec_compressed& out,
 BC_API bool secret_to_public(ec_uncompressed& out,
     const ec_secret& secret) NOEXCEPT;
 
-/// Verify keys
-/// ---------------------------------------------------------------------------
+// Verify keys
+// ---------------------------------------------------------------------------
 
 /// Verify secret.
-BC_API bool verify(const ec_secret& secret) NOEXCEPT;
+BC_API bool verify_secret(const ec_secret& secret) NOEXCEPT;
 
 /// Verify point.
-BC_API bool verify(const data_slice& point) NOEXCEPT;
+BC_API bool verify_point(const data_slice& point) NOEXCEPT;
 
 /// Detect public keys
 /// ---------------------------------------------------------------------------
