@@ -6,8 +6,57 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
+find_package(Git QUIET)
+
+set( GIT_COMMIT_HASH "unknown" )
+set( GIT_COMMIT_HEIGHT 0 )
+set( GIT_DIRTY 0 )
+set( GIT_ORIGIN_URL "https://github.com/libbitcoin/libbitcoin-system" )
+
+if ( GIT_EXECUTABLE )
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HEIGHT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    if ( NOT GIT_COMMIT_HEIGHT )
+        set( GIT_COMMIT_HEIGHT 0 )
+    endif()
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} remote get-url origin
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_ORIGIN_URL
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} status --porcelain
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_STATUS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    if ( GIT_STATUS )
+        set( GIT_DIRTY 1 )
+    endif()
+endif()
+
+set( LIBBITCOIN_VERSION_MAJOR 4 )
+set( LIBBITCOIN_VERSION_MINOR 0 )
+set( LIBBITCOIN_VERSION_PATCH ${GIT_COMMIT_HEIGHT} )
+
 project( libbitcoin-system
-  VERSION 4.0.0
+  VERSION ${LIBBITCOIN_VERSION_MAJOR}.${LIBBITCOIN_VERSION_MINOR}.${LIBBITCOIN_VERSION_PATCH}
   DESCRIPTION "Bitcoin Cross-Platform C++ Development Toolkit"
   LANGUAGES C CXX )
 
@@ -26,6 +75,8 @@ option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
+option( with-ultrafast "Use shrec/UltraFastSecp256k1." OFF )
+option( with-secp256k1 "Use bitcoin-core/secp256k1." ON )
 option( with-tests "Build tests." ON )
 option( with-examples "Build examples." ON )
 
@@ -36,9 +87,11 @@ option( with-examples "Build examples." ON )
 if ( BUILD_SHARED_LIBS )
   set( Boost_USE_STATIC_LIBS "OFF" )
   set( libsecp256k1_USE_STATIC_LIBS "OFF" )
+  set( secp256k1-fast_USE_STATIC_LIBS "OFF" )
 else()
   set( Boost_USE_STATIC_LIBS "ON" )
   set( libsecp256k1_USE_STATIC_LIBS "ON" )
+  set( secp256k1-fast_USE_STATIC_LIBS "ON" )
 endif()
 
 find_package( Boost 1.86.0 REQUIRED
@@ -53,7 +106,13 @@ find_package( Boost 1.86.0 REQUIRED
     unit_test_framework
 )
 
-find_package( libsecp256k1 0.7.0 REQUIRED )
+if ( with-secp256k1 )
+  find_package( libsecp256k1 0.7.0 REQUIRED )
+endif()
+
+if ( with-ultrafast )
+  find_package( secp256k1-fast 4.1.1.4 REQUIRED )
+endif()
 
 #------------------------------------------------------------------------------
 # Compiler options.
@@ -201,6 +260,10 @@ endif()
 include(CheckLinkerFlag)
 
 #------------------------------------------------------------------------------
+# Configurable file(s).
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 # libbitcoin-system library
 #------------------------------------------------------------------------------
 add_library( libbitcoin-system )
@@ -268,7 +331,8 @@ target_link_libraries( libbitcoin-system
     Boost::program_options
     Boost::thread
     Boost::url
-    libsecp256k1::secp256k1
+    $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
+    $<$<BOOL:${with-ultrafast}>:secp256k1-fast>
 )
 
 set_target_properties( libbitcoin-system
