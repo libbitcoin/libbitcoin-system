@@ -217,4 +217,25 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__negative__expected)
     BOOST_REQUIRE(!verify_signature(compressed2, sighash2, signature));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789_ultrafast_release__expected)
+{
+    using namespace system::ecdsa;
+    constexpr bool bip66 = true;
+
+    const hash_digest sighash = base16_array("504d68beac187dd0b259ddd6ed6d5d6348150b9b23ee6dfdb43e87f74dd3c547");
+    const ec_compressed compressed = base16_array("039cfcfe4a5d0efad27382e5d2b478eb398a8b691a66e01c878b600b5042b33166");
+    const der_signature der_signature = base16_chunk("3044022043f141440d4cd28cae8903cb59ce706763fff70d746d13e1713dd620c7c734b4022008dac3365610ad1a3f78fd989ea60d81c6b2e4c8ecae3f68b4326fc3dbe1f401");
+    const ec_signature expected_signature = base16_array("b434c7c720d63d71e1136d740df7ff636770ce59cb0389ae8cd24c0d4441f14301f4e1dbc36f32b4683faeecc8e4b2c6810da69e98fd783f1aad105636c3da08");
+
+    ec_signature signature1{};
+    BOOST_CHECK(decode_signature(signature1, der_signature, bip66));
+    BOOST_CHECK_EQUAL(signature1, expected_signature);
+
+    ec_signature signature2{};
+    BOOST_CHECK(decode_signature(signature2, der_signature, !bip66));
+    BOOST_CHECK_EQUAL(signature2, expected_signature);
+
+    BOOST_CHECK(verify_signature(compressed, sighash, expected_signature));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
