@@ -16,13 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
+#include "../../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(secp256k1_tests)
 
-const ec_secret one = base16_array("0000000000000000000000000000000000000000000000000000000000000001");
-const ec_secret secret1 = base16_array("8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
-const ec_secret secret3 = base16_array("33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce");
+// These tests use sign() to produce ECDSA signature vectors, however sign()
+// produces the private format `secp256k1_ecdsa_signature` type, not canonical.
+
+const ec_secret one = base16_array(
+    "0000000000000000000000000000000000000000000000000000000000000001");
+const ec_secret secret1 = base16_array(
+    "8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
+const ec_secret secret3 = base16_array(
+    "33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce");
 
 // batch schnorr signature verification
 
