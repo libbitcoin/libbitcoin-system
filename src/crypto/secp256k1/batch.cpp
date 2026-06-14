@@ -25,6 +25,7 @@
 #if defined(HAVE_ULTRAFAST)
     #include <ufsecp_libbitcoin.h>
 #endif
+#include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>

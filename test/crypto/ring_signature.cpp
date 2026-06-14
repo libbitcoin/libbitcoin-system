@@ -29,7 +29,7 @@ const hash_digest valid_digest
 ////const ec_secret valid_challenge = 
 ////    base16_array("1f28ee25be3489eb7ae28a294f2b9d99b68be18f184c03ecfea6e7f257b524b3");
 
-const secret_list valid_secrets
+const ec_secrets valid_secrets
 {
     base16_array("0000000000000000000000000000000000000000000000000000000000000001"),
     base16_array("0000000000000000000000000000000000000000000000000000000000000001"),
@@ -57,7 +57,7 @@ const key_rings valid_public_rings
     }
 };
 
-const secret_list valid_salts
+const ec_secrets valid_salts
 {
     base16_array("4e7fee78574b38fc965938741ce9619cc640c2d45c47982479680910fdebabc6"),
     base16_array("8a96b2847f42449e15784c5caa2edd32a18e3980e6641b83bc669194ac09e5ea"),

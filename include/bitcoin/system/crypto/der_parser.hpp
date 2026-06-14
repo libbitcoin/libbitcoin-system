@@ -24,7 +24,8 @@
 #include <bitcoin/system/define.hpp>
 
 /// Based on example code in bip66, but without signature hash byte.
-bool is_valid_signature_encoding(const bc::system::data_slice& sig) NOEXCEPT;
+bool is_valid_bip66_signature_encoding(
+    const bc::system::data_slice& sig) NOEXCEPT;
 
 /***********************************************************************
  * Copyright (c) 2015 Pieter Wuille                                    *

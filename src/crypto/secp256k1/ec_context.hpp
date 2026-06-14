@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EC_CONTEXT_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EC_CONTEXT_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_EC_CONTEXT_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_EC_CONTEXT_HPP
 
 #include <secp256k1.h>
 #include <bitcoin/system/define.hpp>

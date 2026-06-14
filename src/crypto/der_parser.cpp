@@ -33,7 +33,8 @@ BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 // * R: arbitrary-length big-endian encoded R value. Must use shortest.
 // * S-length: 1-byte length descriptor of the S value that follows.
 // * S: arbitrary-length big-endian encoded S value. Must use shortest.
-bool is_valid_signature_encoding(const bc::system::data_slice& sig) NOEXCEPT
+bool is_valid_bip66_signature_encoding(
+    const bc::system::data_slice& sig) NOEXCEPT
 {
     // Minimum and maximum size constraints (strict DER, no sighash byte).
     if (sig.size() < 8u) return false; // Minimum DER size.

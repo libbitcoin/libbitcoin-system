@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <map>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
@@ -49,11 +50,11 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
 
 // Take a list of secret keys and generate a mapping from public key -> secret.
 static bool generate_keys_map(secret_keys_map& out,
-    const secret_list& secrets) NOEXCEPT
+    const ec_secrets& secrets) NOEXCEPT
 {
     for (const auto& secret: secrets)
     {
-        ec_compressed public_key;
+        ec_compressed public_key{};
         if (!secret_to_public(public_key, secret))
             return false;
 
@@ -65,10 +66,10 @@ static bool generate_keys_map(secret_keys_map& out,
 
 // Make a list of public keys for which we have the corresponding secret key
 // in a single ring of public keys.
-static const compressed_list known_keys_in_ring(
-    const secret_keys_map& secret_keys, const compressed_list& ring) NOEXCEPT
+static const ec_compresseds known_keys_in_ring(
+    const secret_keys_map& secret_keys, const ec_compresseds& ring) NOEXCEPT
 {
-    compressed_list known_ring;
+    ec_compresseds known_ring{};
     known_ring.reserve(ring.size());
 
     for (const auto& key: ring)
@@ -83,7 +84,7 @@ static const compressed_list known_keys_in_ring(
 static key_rings partition_keys_into_rings(const secret_keys_map& secret_keys,
     const key_rings& rings) NOEXCEPT
 {
-    key_rings known_keys;
+    key_rings known_keys{};
     known_keys.reserve(rings.size());
 
     for (const auto& ring: rings)
@@ -101,7 +102,7 @@ static bool create_key_indexes(index_list& out, const key_rings& rings,
 {
     BC_ASSERT(known_keys_by_ring.size() == rings.size());
 
-    for (uint32_t i = 0; i < rings.size(); ++i)
+    for (uint32_t i{}; i < rings.size(); ++i)
     {
         const auto& ring = rings[i];
         const auto& known = known_keys_by_ring[i];
@@ -123,7 +124,7 @@ static bool generate_known_indexes(index_list& out, const key_rings& rings,
     auto known_keys_by_ring = partition_keys_into_rings(secret_keys, rings);
     BC_ASSERT(known_keys_by_ring.size() == rings.size());
 
-    const auto empty = [](const compressed_list& ring) NOEXCEPT
+    const auto empty = [](const ec_compresseds& ring) NOEXCEPT
     {
         return ring.empty();
     };
@@ -142,9 +143,9 @@ static ec_point calculate_R(const ec_scalar& s, const ec_scalar& e,
     return s * ec_point::generator + e * P;
 }
 
-static ec_point calculate_last_R_signing(const compressed_list& ring,
+static ec_point calculate_last_R_signing(const ec_compresseds& ring,
     uint32_t i, const hash_digest& digest, const ring_signature& signature,
-    const uint32_t known_key_index, const secret_list& salts) NOEXCEPT
+    const uint32_t known_key_index, const ec_secrets& salts) NOEXCEPT
 {
     auto R_i_j = salts[i] * ec_point::generator;
     if (!R_i_j)
@@ -172,8 +173,8 @@ static ec_point calculate_last_R_signing(const compressed_list& ring,
 }
 
 static bool calculate_e0(ring_signature& out, const key_rings& rings,
-    const hash_digest& digest, const secret_list& salts,
-    const index_list& known_key_indexes) NOEXCEPT
+    const hash_digest& digest, const ec_secrets& salts, const index_list&
+    known_key_indexes) NOEXCEPT
 {
     hash_digest hash{};
     stream::out::fast stream{ hash };
@@ -183,7 +184,7 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
     BC_ASSERT(out.proofs.size() == rings.size());
     BC_ASSERT(salts.size() == rings.size());
 
-    for (uint32_t i = 0; i < rings.size(); ++i)
+    for (uint32_t i{}; i < rings.size(); ++i)
     {
         const auto& ring = rings[i];
         const auto known_key_index = known_key_indexes[i];
@@ -207,7 +208,7 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
 }
 
 static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
-    const ring_signature& signature, const compressed_list& ring,
+    const ring_signature& signature, const ec_compresseds& ring,
     const hash_digest& digest, const uint32_t i,
     const uint32_t known_key_index) NOEXCEPT
 {
@@ -215,7 +216,7 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
     BC_ASSERT(ring.size() > known_key_index);
 
     // Loop until index of known key.
-    for (uint32_t j = 0; j < known_key_index; ++j)
+    for (uint32_t j{}; j < known_key_index; ++j)
     {
         const ec_scalar s{ signature.proofs[i][j] };
         if (!s)
@@ -235,10 +236,10 @@ static bool calculate_e_at_known_key_index(ec_scalar& e_i_j,
 }
 
 static bool join_rings(ring_signature& out, const key_rings& rings,
-    const hash_digest& digest, const secret_list& salts,
+    const hash_digest& digest, const ec_secrets& salts,
     const index_list& known_key_indexes, secret_keys_map& secret_keys) NOEXCEPT
 {
-    for (uint32_t i = 0; i < rings.size(); ++i)
+    for (uint32_t i{}; i < rings.size(); ++i)
     {
         const auto& ring = rings[i];
         const auto known_key_index = known_key_indexes[i];
@@ -274,17 +275,17 @@ static bool join_rings(ring_signature& out, const key_rings& rings,
     return true;
 }
 
-static ec_point calculate_last_R_verify(const compressed_list& ring,
+static ec_point calculate_last_R_verify(const ec_compresseds& ring,
     ec_scalar e_i_j, uint32_t i, const hash_digest& digest,
     const ring_signature& signature) NOEXCEPT
 {
-    ec_point R_i_j;
+    ec_point R_i_j{};
     BC_ASSERT(signature.proofs[i].size() == ring.size());
 
-    for (uint32_t j = 0; j < ring.size(); ++j)
+    for (uint32_t j{}; j < ring.size(); ++j)
     {
         // s_i_j
-        const ec_scalar s(signature.proofs[i][j]);
+        const ec_scalar s{ signature.proofs[i][j] };
 
         if (!s || !e_i_j)
             return {};
@@ -295,7 +296,7 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
             return {};
 
         // Calculate the next e value.
-        e_i_j = borromean_hash(digest, R_i_j.point(), i, j + 1u);
+        e_i_j = borromean_hash(digest, R_i_j.point(), i, add1(j));
         if (!e_i_j)
             return {};
     }
@@ -322,15 +323,15 @@ hash_digest digest(const data_slice& message, const key_rings& rings) NOEXCEPT
     return hash;
 }
 
-bool sign(ring_signature& out, const secret_list& secrets,
+bool sign(ring_signature& out, const ec_secrets& secrets,
     const key_rings& rings, const hash_digest& digest,
-    const secret_list& salts) NOEXCEPT
+    const ec_secrets& salts) NOEXCEPT
 {
     // Guard against overflow.
     if (rings.size() >= max_uint32)
         return false;
 
-    secret_keys_map secret_keys;
+    secret_keys_map secret_keys{};
     if (!generate_keys_map(secret_keys, secrets))
         return false;
 
@@ -363,7 +364,7 @@ bool verify(const key_rings& rings, const hash_digest& digest,
     stream::out::fast stream{ hash };
     hash::sha256::fast sink(stream);
 
-    for (uint32_t i = 0; i < rings.size(); ++i)
+    for (uint32_t i{}; i < rings.size(); ++i)
     {
         // Calculate first e value for this ring.
         const auto e_i_0 = borromean_hash(digest, signature.challenge, i, zero);

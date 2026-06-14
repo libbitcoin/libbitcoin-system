@@ -431,7 +431,7 @@ inline operations script::to_pay_script_hash_pattern(
 }
 
 inline operations script::to_pay_multisig_pattern(uint8_t signatures,
-    const compressed_list& points) NOEXCEPT
+    const ec_compresseds& points) NOEXCEPT
 {
     return to_pay_multisig_pattern(signatures,
         to_stack<ec_compressed_size>(points));

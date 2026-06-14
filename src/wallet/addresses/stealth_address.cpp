@@ -72,7 +72,7 @@ stealth_address::stealth_address(const data_chunk& decoded) NOEXCEPT
 }
 
 stealth_address::stealth_address(const binary& filter,
-    const ec_compressed& scan_key, const compressed_list& spend_keys,
+    const ec_compressed& scan_key, const ec_compresseds& spend_keys,
     uint8_t signatures, uint8_t version) NOEXCEPT
   : stealth_address(from_stealth(filter, scan_key, spend_keys, signatures,
         version))
@@ -80,7 +80,7 @@ stealth_address::stealth_address(const binary& filter,
 }
 
 stealth_address::stealth_address(uint8_t version, const binary& filter,
-    const ec_compressed& scan_key, const compressed_list& spend_keys,
+    const ec_compressed& scan_key, const ec_compresseds& spend_keys,
     uint8_t signatures) NOEXCEPT
   : valid_(true), filter_(filter), scan_key_(scan_key),
     spend_keys_(spend_keys), signatures_(signatures), version_(version)
@@ -134,7 +134,7 @@ stealth_address stealth_address::from_stealth(
         return {};
 
     // We don't explicitly save 'reuse', instead we add to spend_keys_.
-    compressed_list spend_keys;
+    ec_compresseds spend_keys;
     if (options == reuse_key_flag)
         spend_keys.push_back(scan_key);
 
@@ -174,7 +174,7 @@ stealth_address stealth_address::from_stealth(
 
 // This corrects signature and spend_keys.
 stealth_address stealth_address::from_stealth(const binary& filter,
-    const ec_compressed& scan_key, const compressed_list& spend_keys,
+    const ec_compressed& scan_key, const ec_compresseds& spend_keys,
     uint8_t signatures, uint8_t version) NOEXCEPT
 {
     // Ensure there is at least one spend key.
@@ -245,7 +245,7 @@ uint8_t stealth_address::signatures() const NOEXCEPT
     return signatures_;
 }
 
-const compressed_list& stealth_address::spend_keys() const NOEXCEPT
+const ec_compresseds& stealth_address::spend_keys() const NOEXCEPT
 {
     return spend_keys_;
 }

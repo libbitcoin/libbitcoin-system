@@ -51,7 +51,7 @@ public:
     stealth_address(const data_chunk& decoded) NOEXCEPT;
     stealth_address(const std::string& encoded) NOEXCEPT;
     stealth_address(const binary& filter, const ec_compressed& scan_key,
-        const compressed_list& spend_keys, uint8_t signatures=0,
+        const ec_compresseds& spend_keys, uint8_t signatures=0,
         uint8_t version=mainnet_p2kh) NOEXCEPT;
 
     /// Operators.
@@ -72,7 +72,7 @@ public:
     /// Accessors.
     uint8_t version() const NOEXCEPT;
     const ec_compressed& scan_key() const NOEXCEPT;
-    const compressed_list& spend_keys() const NOEXCEPT;
+    const ec_compresseds& spend_keys() const NOEXCEPT;
     uint8_t signatures() const NOEXCEPT;
     const binary& filter() const NOEXCEPT;
 
@@ -84,12 +84,12 @@ private:
     static stealth_address from_string(const std::string& encoded) NOEXCEPT;
     static stealth_address from_stealth(const data_chunk& decoded) NOEXCEPT;
     static stealth_address from_stealth(const binary& filter,
-        const ec_compressed& scan_key, const compressed_list& spend_keys,
+        const ec_compressed& scan_key, const ec_compresseds& spend_keys,
         uint8_t signatures, uint8_t version) NOEXCEPT;
 
     /// Parameter order is used to change the constructor signature.
     stealth_address(uint8_t version, const binary& filter,
-        const ec_compressed& scan_key, const compressed_list& spend_keys,
+        const ec_compressed& scan_key, const ec_compresseds& spend_keys,
         uint8_t signatures) NOEXCEPT;
 
     /// Helpers.
@@ -102,7 +102,7 @@ private:
     bool valid_;
     uint8_t version_;
     ec_compressed scan_key_;
-    compressed_list spend_keys_;
+    ec_compresseds spend_keys_;
     uint8_t signatures_;
     binary filter_;
 };

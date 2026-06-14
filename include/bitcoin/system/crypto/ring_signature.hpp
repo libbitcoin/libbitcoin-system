@@ -34,13 +34,13 @@ namespace system {
 /// valid signature, we must use a private key from each of those sets.
 /// For example A and E and X. We can summarize this operation as:
 /// (A or B or C) and (D or E or F) and (X or Y)
-typedef std::vector<compressed_list> key_rings;
+typedef std::vector<ec_compresseds> key_rings;
 
 /// A borromean ring signature.
 /// theta = {e_0, s_{i_j} : 0 <= i <= n, 0 <= j <= m_i}
 struct BC_API ring_signature
 {
-    typedef std::vector<secret_list> proof_list;
+    typedef std::vector<ec_secrets> proof_list;
 
     ec_secret challenge;
     proof_list proofs;
@@ -62,9 +62,9 @@ BC_API hash_digest digest(const data_slice& message,
 /// digest   The message digest to sign.
 /// salts    Randomizing seed values.
 /// return false if the signing operation fails.
-BC_API bool sign(ring_signature& out, const secret_list& secrets,
+BC_API bool sign(ring_signature& out, const ec_secrets& secrets,
     const key_rings& rings, const hash_digest& digest,
-    const secret_list& salts) NOEXCEPT;
+    const ec_secrets& salts) NOEXCEPT;
 
 /// Verify a borromean ring signature.
 /// rings        The rings each with N_i public keys.
