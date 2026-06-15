@@ -159,6 +159,9 @@ struct BC_API signatures
 
     /// Store failed to accept at least one threshold commit (set in script).
     mutable std::atomic_bool fault{};
+
+    /// True if any signatures were batched for the block (includes faulted).
+    mutable std::atomic_bool batched{};
 };
 
 } // namespace chain

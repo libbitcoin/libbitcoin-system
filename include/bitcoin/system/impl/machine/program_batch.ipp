@@ -50,6 +50,7 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
                 return false;
 
             // Capture is bypass (single sigop).
+            capture_.batched.store(true, relaxed);
             if (capture_.ecdsa(hash, key, signature))
                 return true;
         }
@@ -80,6 +81,7 @@ try_batch_multisig_verification(const chunk_xptrs& points,
                 return false;
 
             // Capture is bypass (single sigop).
+            capture_.batched.store(true, relaxed);
             if (capture_.multisig(hash, keys, sigs))
                 return true;
         }
@@ -146,6 +148,7 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
             {
                 // With a fault block.connect() returns error::block_capture.
                 // Scripts continue but a block::success result is disregarded.
+                capture_.batched.store(true, relaxed);
                 if (!capture_.threshold(threshold_))
                     capture_.fault = true;
             }
