@@ -206,18 +206,31 @@ BC_API bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable,
     const hash_digest& hash) NOEXCEPT;
 
-/// ECDSA parse/encode/sign/verify signature
+/// ECDSA parse/encode/canonicalize
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
 
+/// Encode an ECDSA signature as DER (strict).
+/// ec_signature is an alias for secp256k1_ecdsa_signature (private format).
+BC_API bool encode_signature(der_signature& out,
+    const ec_signature& signature) NOEXCEPT;
+
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
+/// ec_signature is an alias for secp256k1_ecdsa_signature (private format).
 BC_API bool decode_signature(ec_signature& out,
     const data_slice& der_signature, bool strict) NOEXCEPT;
 
-/// Encode an ECDSA signature as DER (strict).
-BC_API bool encode_signature(der_signature& out,
-    const ec_signature& signature) NOEXCEPT;
+/// Convert a private form ECDSA signature to low-s private form ec_signature.
+BC_API bool normalize_signature(ec_signature& out,
+    const ec_signature& in) NOEXCEPT;
+
+/// Convert a private form ECDSA signature to low-s big-endian canonical form.
+BC_API bool canonicalize_signature(ec_signature& out,
+    const ec_signature& in) NOEXCEPT;
+
+/// ECDSA sign/verify signature
+/// ---------------------------------------------------------------------------
 
 /// Create a deterministic ECDSA signature using a private key.
 BC_API bool sign(ec_signature& out, const ec_secret& secret,

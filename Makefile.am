@@ -303,8 +303,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/aes256.cpp \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
-    test/crypto/secp256k1.cpp \
-    test/crypto/secp256k1_batch.cpp \
+    test/crypto/secp256k1/batch.cpp \
+    test/crypto/secp256k1/ecdsa.cpp \
+    test/crypto/secp256k1/keys.cpp \
+    test/crypto/secp256k1/math.cpp \
+    test/crypto/secp256k1/schnorr.cpp \
     test/data/array_cast.cpp \
     test/data/byte_cast.cpp \
     test/data/collection.cpp \
