@@ -340,10 +340,9 @@ size_t chain_state::retarget_height(size_t height, const forks& forks,
 
 //*****************************************************************************
 // CONSENSUS: satoshi associates the median time past for block N with block
-// N-1, as opposed to block N. Given that the value is actually obtained from
-// yet another preceding block in all cases except block 1 and 2, this is a
-// curious and confusing convention. We associate the median time past for
-// block N with block N. This is simple but requires care when comparing code.
+// N-1, as opposed to block N. This is unnecessarily confusing. We associate
+// the median time past for block N with block N. This is intuitive but
+// requires care when comparing code.
 //*****************************************************************************
 uint32_t chain_state::median_time_past(const data& values,
     const forks&) NOEXCEPT

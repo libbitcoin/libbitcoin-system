@@ -850,8 +850,7 @@ code block::connect_transactions(const context& ctx,
             if (const auto ec = (*tx)->connect(ctx, capture))
                 return ec;
 
-    // Translate capture fault. Does not imply invalid, just not validated.
-    return capture.fault ? error::block_capture : error::block_success;
+    return error::block_success;
 }
 
 // Do NOT invoke on coinbase.
