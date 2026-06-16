@@ -32,7 +32,6 @@ namespace error {
 enum block_error_t : uint8_t
 {
     block_success = 0,
-    block_capture,
 
     // check header
     invalid_proof_of_work,
@@ -67,6 +66,9 @@ enum block_error_t : uint8_t
     invalid_witness_commitment,
     block_weight_limit,
     temporary_hash_limit,
+
+    // connect block
+    invalid_signature,
 
     // confirm block
     unspent_coinbase_collision,

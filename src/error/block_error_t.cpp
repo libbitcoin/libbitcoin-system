@@ -28,7 +28,6 @@ namespace error {
 DEFINE_ERROR_T_MESSAGE_MAP(block_error)
 {
     { block_success, "block success" },
-    { block_capture, "block capture" },
 
     // check header
     { invalid_proof_of_work, "proof of work invalid" },
@@ -62,6 +61,11 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { invalid_witness_commitment, "invalid witness commitment" },
     { block_weight_limit, "block weight limit exceeded" },
     { temporary_hash_limit, "block contains too many hashes" },
+
+    // connect block
+    { invalid_signature, "invalid batched signature" },
+        
+    // confirm block
     { unspent_coinbase_collision, "unspent coinbase collision" }
 };
 
