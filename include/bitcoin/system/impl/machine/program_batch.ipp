@@ -146,11 +146,10 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
             if (threshold_.push_entry(hash, std::cref(as_xonly(point)),
                 std::cref(signature)))
             {
-                // With a fault block.connect() returns error::block_capture.
-                // Scripts continue but a block::success result is disregarded.
+                // With a capture fault block success is disregarded.
                 capture_.batched.store(true, relaxed);
                 if (!capture_.threshold(threshold_))
-                    capture_.fault = true;
+                    capture_.faulted = true;
             }
 
             // Push or push/flush (capture) is bypass.
