@@ -16,8 +16,13 @@
 #                               Default: --disable-sse41
 # --<enable/disable>-shani    Use Intel/ARM SHA Extensions.
 #                               Default: --disable-shani
+# --<with/without>-ultrafast  Use shrec/UltrafastSecp256k1.
+#                               Default: --without-ultrafast
+# --<with/without>-secp256k1  Use bitcoin-core/secp256k1.
+#                               Default: --with-secp256k1
 # --build-boost               Build Boost libraries
 # --build-secp256k1           Build libsecp256k1 libraries
+# --build-ultrafast           Build UltrafastSecp256k1 libraries
 # --build-src-dir=<path>      Location for sources.
 #                               Default: $(pwd)
 # --build-obj-dir=<path>      Location for intermediate objects.
@@ -67,6 +72,13 @@ if [[ -z ${secp256k1_TAG} ]]; then
     secp256k1_TAG="v0.7.0"
 fi
 
+if [[ -z ${UltrafastSecp256k1_OWNER} ]]; then
+    UltrafastSecp256k1_OWNER="pmienk"
+fi
+if [[ -z ${UltrafastSecp256k1_TAG} ]]; then
+    UltrafastSecp256k1_TAG="main"
+fi
+
 if [[ -z ${libbitcoin_system_OWNER} ]]; then
     libbitcoin_system_OWNER="libbitcoin"
 fi
@@ -80,22 +92,23 @@ main()
 
     for OPTION in "$@"; do
         case ${OPTION} in
-            (--build-boost)             BUILD_boost="yes";;
-            (--build-secp256k1)         BUILD_secp256k1="yes";;
-            (--build-src-dir=*)         BUILD_SRC_DIR="${OPTION#*=}";;
-            (--build-obj-dir=*)         BUILD_OBJ_DIR="${OPTION#*=}";;
-            (--build-obj-dir-relative)  BUILD_OBJ_DIR_RELATIVE="yes";;
-            (--build-config=*)          BUILD_CONFIG="${OPTION#*=}";;
-            (--build-link=*)            BUILD_LINK="${OPTION#*=}";;
-            (--build-full-repositories) BUILD_FULL_REPOSITORIES="yes";;
-            (--build-post-install-clean)BUILD_POST_INSTALL_CLEAN="yes";;
-            (--build-skip-tests)        BUILD_SKIP_TESTS="yes";;
-            (--build-parallel=*)        PARALLEL="${OPTION#*=}";;
-            (--build-use-local-src)     BUILD_USE_LOCAL_SRC="yes";;
-            (--prefix=*)                PREFIX="${OPTION#*=}";;
-            (--noninteractive)          NONINTERACTIVE="yes";;
-            (--verbose)                 DISPLAY_VERBOSE="yes";;
-            (--help|-h)                 DISPLAY_HELP="yes";;
+            (--build-boost)                 BUILD_boost="yes";;
+            (--build-secp256k1)             BUILD_secp256k1="yes";;
+            (--build-ultrafast)             BUILD_ultrafast="yes";;
+            (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
+            (--build-obj-dir=*)             BUILD_OBJ_DIR="${OPTION#*=}";;
+            (--build-obj-dir-relative)      BUILD_OBJ_DIR_RELATIVE="yes";;
+            (--build-config=*)              BUILD_CONFIG="${OPTION#*=}";;
+            (--build-link=*)                BUILD_LINK="${OPTION#*=}";;
+            (--build-full-repositories)     BUILD_FULL_REPOSITORIES="yes";;
+            (--build-post-install-clean)    BUILD_POST_INSTALL_CLEAN="yes";;
+            (--build-skip-tests)            BUILD_SKIP_TESTS="yes";;
+            (--build-parallel=*)            PARALLEL="${OPTION#*=}";;
+            (--build-use-local-src)         BUILD_USE_LOCAL_SRC="yes";;
+            (--prefix=*)                    PREFIX="${OPTION#*=}";;
+            (--noninteractive)              NONINTERACTIVE="yes";;
+            (--verbose)                     DISPLAY_VERBOSE="yes";;
+            (--help|-h)                     DISPLAY_HELP="yes";;
         esac
     done
 
@@ -103,6 +116,7 @@ main()
     CONFIGURE_OPTIONS=("$@")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-boost/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-secp256k1/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-ultrafast/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir-relative/}")
@@ -118,6 +132,8 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--help/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-h/}")
+    CONFIGURE_OPTIONS_CMAKE=()
+    CONFIGURE_OPTIONS_GNU=("${CONFIGURE_OPTIONS[@]}")
     msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
     msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
@@ -197,6 +213,11 @@ main()
         exit 1
     fi
 
+    if [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Dwith-tests=OFF" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--without-tests" )
+    fi
+
     # --prefix
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
@@ -217,8 +238,31 @@ main()
         fi
     fi
 
+    if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_INSTALL_PREFIX}" ]]; then
+        msg_error "Both PREFIX and CMAKE_INSTALL_PREFIX have been defined differently."
+        help
+        exit 1
+    fi
+
     if [[ -n "${PREFIX}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=${PREFIX}" )
+        CMAKE_INSTALL_PREFIX="${PREFIX}"
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_INSTALL_PREFIX=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
+    fi
+
+    if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_PREFIX_PATH}" ]] &&
+       [[ "${PREFIX}" != "${CMAKE_PREFIX_PATH}" ]]; then
+        CMAKE_PREFIX_PATH="${PREFIX}:${CMAKE_PREFIX_PATH}"
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
+    elif [[ -n "${PREFIX}" ]]; then
+        CMAKE_INSTALL_PREFIX="${PREFIX}"
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
+    fi
+
+    if [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--prefix=${PREFIX}" )
     fi
 
     if [[ -n "${PREFIX}" ]]; then
@@ -320,22 +364,36 @@ main()
 
     # Specify or remove --enable-ndebug for gnu toolchain on release
     if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-ndebug/}")
+        CONFIGURE_OPTIONS_GNU=("${CONFIGURE_OPTIONS_GNU[@]/--enable-ndebug/}")
     elif [[ "${BUILD_CONFIG}" == "release" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-ndebug" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-ndebug" )
+    fi
+
+    # Specify cmake build
+    if [[ "${BUILD_CONFIG}" == "debug" ]]; then
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
+    elif [[ "${BUILD_CONFIG}" == "release" ]]; then
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_BUILD_TYPE=Release" )
     fi
 
     # translate BUILD_LINK to appropriate arguments
     if [[ -n "${BUILD_LINK}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-shared=*}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-shared=*}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-static=*}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-static=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--disable-shared=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--enable-shared=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--disable-static=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--enable-static=*}" )
 
         if [[ "${BUILD_LINK}" == "dynamic" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-shared" "--disable-static" )
+            CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-shared" "--disable-static" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--disable-shared" "--enable-static" )
+            CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--disable-shared" "--enable-static" )
+        fi
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DBUILD_SHARED_LIBS=*}" )
+
+        if [[ "${BUILD_LINK}" == "dynamic" ]]; then
+            CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DBUILD_SHARED_LIBS=ON" )
+        else
+            CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DBUILD_SHARED_LIBS=OFF" )
         fi
     fi
 
@@ -351,13 +409,23 @@ main()
         with_boost="--with-boost=${PREFIX}"
     fi
 
+
     REMAP=()
-    for argument in "${CONFIGURE_OPTIONS[@]}"; do
+    for argument in "${CONFIGURE_OPTIONS_CMAKE[@]}"; do
         if [[ -n "${argument}" ]]; then
             REMAP+=( "${argument}" )
         fi
     done
-    CONFIGURE_OPTIONS=( "${REMAP[@]}" )
+    CONFIGURE_OPTIONS_CMAKE=( "${REMAP[@]}" )
+    unset REMAP
+
+    REMAP=()
+    for argument in "${CONFIGURE_OPTIONS_GNU[@]}"; do
+        if [[ -n "${argument}" ]]; then
+            REMAP+=( "${argument}" )
+        fi
+    done
+    CONFIGURE_OPTIONS_GNU=( "${REMAP[@]}" )
     unset REMAP
 
     msg_heading "Configuration"
@@ -396,6 +464,25 @@ main()
         "--enable-module-recovery"
         "--enable-module-schnorrsig")
 
+    UltrafastSecp256k1_FLAGS=()
+
+    UltrafastSecp256k1_OPTIONS=(
+        "-DSECP256K1_BUILD_TESTS=OFF"
+        "-DSECP256K1_BUILD_BENCH=OFF"
+        "-DSECP256K1_BUILD_EXAMPLES=OFF"
+        "-DSECP256K1_BUILD_JAVA=OFF"
+        "-DUFSECP_BUILD_SHARED=OFF"
+        "-DSECP256K1_BUILD_CABI=ON"
+        "-DSECP256K1_BUILD_CPU=ON"
+        "-DSECP256K1_BUILD_SHIM=ON"
+        "-DSECP256K1_BUILD_CUDA=OFF"
+        "-DSECP256K1_BUILD_ROCM=OFF"
+        "-DSECP256K1_BUILD_OPENCL=OFF"
+        "-DSECP256K1_BUILD_METAL=OFF"
+        "-DSECP256K1_INSTALL=ON"
+        "-DSECP256K1_INSTALL_PKGCONFIG=ON"
+        "-DSECP256K1_USE_ULTRAFAST=ON")
+
     libbitcoin_system_FLAGS=()
 
     libbitcoin_system_OPTIONS=(
@@ -414,10 +501,22 @@ main()
         source_github "${secp256k1_OWNER}" "secp256k1" "${secp256k1_TAG}"
         local SAVE_CPPFLAGS="${CPPFLAGS}"
         export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
-        build_gnu "secp256k1" "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
-        install_make "secp256k1"
+        build_gnu "secp256k1" "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
+        install_gnu "secp256k1"
         if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-            clean_make "secp256k1"
+            clean_gnu "secp256k1"
+        fi
+        export CPPFLAGS="${SAVE_CPPFLAGS}"
+    fi
+
+    if [[ ${BUILD_ultrafast} == "yes" ]]; then
+        source_github "${UltrafastSecp256k1_OWNER}" "UltrafastSecp256k1" "${UltrafastSecp256k1_TAG}"
+        local SAVE_CPPFLAGS="${CPPFLAGS}"
+        export CPPFLAGS="${CPPFLAGS} ${UltrafastSecp256k1_FLAGS[@]}"
+        build_cmake "UltrafastSecp256k1" "." "${PARALLEL}" "${UltrafastSecp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
+        install_cmake "UltrafastSecp256k1"
+        if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+            clean_cmake "UltrafastSecp256k1"
         fi
         export CPPFLAGS="${SAVE_CPPFLAGS}"
     fi
@@ -425,13 +524,13 @@ main()
     source_github "${libbitcoin_system_OWNER}" "libbitcoin-system" "${libbitcoin_system_TAG}"
     local SAVE_CPPFLAGS="${CPPFLAGS}"
     export CPPFLAGS="${CPPFLAGS} ${libbitcoin_system_FLAGS[@]}"
-    build_gnu "libbitcoin-system" "." "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+    build_gnu "libbitcoin-system" "." "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
     if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-        test_make "libbitcoin-system" "check" "${PARALLEL}"
+        test_gnu "libbitcoin-system" "${PARALLEL}"
     fi
-    install_make "libbitcoin-system"
+    install_gnu "libbitcoin-system"
     if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-        clean_make "libbitcoin-system"
+        clean_gnu "libbitcoin-system"
     fi
     export CPPFLAGS="${SAVE_CPPFLAGS}"
 
@@ -557,117 +656,6 @@ source_github()
 
     github_repository_status "${REPOSITORY}"
     pop_directory # pop BUILD_SRC_DIR
-}
-
-install_make()
-{
-    local PROJECT="$1"
-    shift
-
-    msg "Preparing to install ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    make install
-
-    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
-        ldconfig
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-
-    msg_success "'${PROJECT}' installation complete."
-}
-
-test_make()
-{
-    local PROJECT="$1"
-    local TARGET="$2"
-    local JOBS="$3"
-    shift 3
-
-    msg "Preparing to test ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    disable_exit_on_error
-
-    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} ${TARGET} VERBOSE=1
-    else
-        make ${TARGET} VERBOSE=1
-    fi
-
-    local RESULT=$?
-
-    if [[ -e "test-suite.log" ]]; then
-        msg_warn "begin error log: test-suite.log"
-        cat "test-suite.log"
-        msg_warn "  end error log: test-suite.log"
-    fi
-
-    if [[ -e "test.log" ]]; then
-        msg_warn "begin error log: test.log"
-        cat "test.log"
-        msg_warn "  end error log: test.log"
-    fi
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        msg_error "Encountered error, please see test.log contents above."
-        exit ${RESULT}
-    fi
-
-    enable_exit_on_error
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-
-    msg_success "'${PROJECT}' test complete."
-}
-
-clean_make()
-{
-    local PROJECT="$1"
-    shift 1
-
-    msg "Preparing to clean ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    disable_exit_on_error
-
-    make clean
-
-    local RESULT=$?
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        msg_error "Encountered error, please see test.log contents above."
-        exit ${RESULT}
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-
-    msg_success "'${PROJECT}' clean complete."
 }
 
 build_boost()
@@ -812,10 +800,279 @@ build_gnu()
     msg_success "'${PROJECT}' built successfully."
 }
 
+
+build_cmake()
+{
+    local PROJECT="$1"
+    local RELATIVE_PATH="$2"
+    local JOBS="$3"
+    shift 3
+
+    local VERBOSITY_CMAKE=""
+    local VERBOSITY_MAKE=""
+
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
+        VERBOSITY_MAKE="--verbose"
+    fi
+
+    msg_heading "Preparing to build ${PROJECT}"
+
+
+    # directory rationalization
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+    push_directory "${RELATIVE_PATH}"
+    local BUILD_PATH="$(pwd)"
+    pop_directory
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        create_directory_force "${BUILD_OBJ_DIR}"
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}"
+        create_directory_force "${PROJECT}"
+        pop_directory
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    display_configure_options "$@"
+
+    cmake ${VERBOSITY_CMAKE} -LA "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_PATH}"
+
+    # make
+    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
+        cmake --build . -j${JOBS} ${VERBOSITY_MAKE}
+    else
+        cmake --build . ${VERBOSITY_MAKE}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+    msg_success "'${PROJECT}' built successfully."
+}
+
+
+clean_cmake()
+{
+    local PROJECT="$1"
+    shift 1
+
+    msg "Preparing to clean ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    cmake --build . --target clean
+
+    local RESULT=$?
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' clean complete."
+}
+
+install_cmake()
+{
+    local PROJECT="$1"
+    shift
+
+    msg "Preparing to install ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    cmake --install .
+
+    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
+        ldconfig
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' installation complete."
+}
+
+test_cmake()
+{
+    local PROJECT="$1"
+    local JOBS="$2"
+    shift 2
+
+    msg "Preparing to test ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    ctest --test-dir .
+
+    local RESULT=$?
+
+    if [[ -e "test-suite.log" ]]; then
+        msg_warn "begin error log: test-suite.log"
+        cat "test-suite.log"
+        msg_warn "  end error log: test-suite.log"
+    fi
+
+    if [[ -e "test.log" ]]; then
+        msg_warn "begin error log: test.log"
+        cat "test.log"
+        msg_warn "  end error log: test.log"
+    fi
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    enable_exit_on_error
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' test complete."
+}
+
+clean_gnu()
+{
+    local PROJECT="$1"
+    shift 1
+
+    msg "Preparing to clean ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    make clean
+
+    local RESULT=$?
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' clean complete."
+}
+
+install_gnu()
+{
+    local PROJECT="$1"
+    shift
+
+    msg "Preparing to install ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    make install
+
+    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
+        ldconfig
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' installation complete."
+}
+
+test_gnu()
+{
+    local PROJECT="$1"
+    local JOBS="$2"
+    shift 2
+
+    msg "Preparing to test ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
+        make -j${JOBS} check VERBOSE=1
+    else
+        make check VERBOSE=1
+    fi
+
+    local RESULT=$?
+
+    if [[ -e "test-suite.log" ]]; then
+        msg_warn "begin error log: test-suite.log"
+        cat "test-suite.log"
+        msg_warn "  end error log: test-suite.log"
+    fi
+
+    if [[ -e "test.log" ]]; then
+        msg_warn "begin error log: test.log"
+        cat "test.log"
+        msg_warn "  end error log: test.log"
+    fi
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    enable_exit_on_error
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' test complete."
+}
+
 display_build_variables()
 {
     msg "BUILD_boost                     : ${BUILD_boost}"
     msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
+    msg "BUILD_ultrafast                 : ${BUILD_ultrafast}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
     msg "BUILD_OBJ_DIR                   : ${BUILD_OBJ_DIR}"
     msg "BUILD_OBJ_DIR_RELATIVE          : ${BUILD_OBJ_DIR_RELATIVE}"
@@ -846,6 +1103,10 @@ display_toolchain_variables()
     msg "PKG_CONFIG_PATH                 : ${PKG_CONFIG_PATH}"
     msg "LDLIBS                          : ${LDLIBS}"
     msg "BOOST_ROOT                      : ${BOOST_ROOT}"
+    msg "CMAKE_PREFIX_PATH               : ${CMAKE_PREFIX_PATH}"
+    msg "CMAKE_INSTALL_PREFIX            : ${CMAKE_INSTALL_PREFIX}"
+    msg "CMAKE_INCLUDE_PATH              : ${CMAKE_INCLUDE_PATH}"
+    msg "CMAKE_LIBRARY_PATH              : ${CMAKE_LIBRARY_PATH}"
 }
 
 display_constants()
@@ -855,6 +1116,9 @@ display_constants()
 
     msg "secp256k1_OWNER                 : ${secp256k1_OWNER}"
     msg "secp256k1_TAG                   : ${secp256k1_TAG}"
+
+    msg "UltrafastSecp256k1_OWNER        : ${UltrafastSecp256k1_OWNER}"
+    msg "UltrafastSecp256k1_TAG          : ${UltrafastSecp256k1_TAG}"
 
     msg "libbitcoin_system_OWNER         : ${libbitcoin_system_OWNER}"
     msg "libbitcoin_system_TAG           : ${libbitcoin_system_TAG}"
@@ -873,8 +1137,13 @@ help()
     msg "                              Default: --disable-sse41"
     msg "--<enable/disable>-shani    Use Intel/ARM SHA Extensions."
     msg "                              Default: --disable-shani"
+    msg "--<with/without>-ultrafast  Use shrec/UltrafastSecp256k1."
+    msg "                              Default: --without-ultrafast"
+    msg "--<with/without>-secp256k1  Use bitcoin-core/secp256k1."
+    msg "                              Default: --with-secp256k1"
     msg "--build-boost               Build Boost libraries"
     msg "--build-secp256k1           Build libsecp256k1 libraries"
+    msg "--build-ultrafast           Build UltrafastSecp256k1 libraries"
     msg "--build-src-dir=<path>      Location for sources."
     msg "                              Default: $(pwd)"
     msg "--build-obj-dir=<path>      Location for intermediate objects."
