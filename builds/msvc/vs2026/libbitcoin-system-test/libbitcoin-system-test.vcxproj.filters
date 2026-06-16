@@ -8,67 +8,67 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000000}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\chain">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\chain\enums">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\chain\json">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\chain\views">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\config">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\crypto">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\crypto\secp256k1">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\data">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\endian">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\error">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\filter">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash\performance">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash\performance\baseline">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash\rmd">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\hash\sha">
+    <Filter Include="src\chain\enums">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\intrinsics">
+    <Filter Include="src\chain\json">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\intrinsics\platforms">
+    <Filter Include="src\chain\views">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\machine">
+    <Filter Include="src\config">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\math">
+    <Filter Include="src\crypto">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\crypto\secp256k1">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\data">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\endian">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\error">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\filter">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\performance">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\performance\baseline">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\rmd">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\sha">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\intrinsics">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\intrinsics\platforms">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\machine">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\mocks">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
