@@ -16,8 +16,13 @@
 #                               Default: OFF
 # -Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions.
 #                               Default: OFF
+# -Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1.
+#                               Default: OFF
+# -Dwith-secp256k1=<ON/OFF>   Use bitcoin-core/secp256k1.
+#                               Default: ON
 # --build-boost               Build Boost libraries
 # --build-secp256k1           Build libsecp256k1 libraries
+# --build-ultrafast           Build UltrafastSecp256k1 libraries
 # --build-preset=<preset>     Specifies preset configuration to build.
 # --build-src-dir=<path>      Location for sources.
 #                               Default: $(pwd)
@@ -57,6 +62,13 @@ if [[ -z ${secp256k1_TAG} ]]; then
     secp256k1_TAG="v0.7.0"
 fi
 
+if [[ -z ${UltrafastSecp256k1_OWNER} ]]; then
+    UltrafastSecp256k1_OWNER="pmienk"
+fi
+if [[ -z ${UltrafastSecp256k1_TAG} ]]; then
+    UltrafastSecp256k1_TAG="main"
+fi
+
 if [[ -z ${libbitcoin_system_OWNER} ]]; then
     libbitcoin_system_OWNER="libbitcoin"
 fi
@@ -70,22 +82,23 @@ main()
 
     for OPTION in "$@"; do
         case ${OPTION} in
-            (--build-boost)             BUILD_boost="yes";;
-            (--build-secp256k1)         BUILD_secp256k1="yes";;
-            (--build-preset=*)          BUILD_PRESET="${OPTION#*=}";;
-            (--build-src-dir=*)         BUILD_SRC_DIR="${OPTION#*=}";;
-            (--build-full-repositories) BUILD_FULL_REPOSITORIES="yes";;
-            (--build-post-install-clean)BUILD_POST_INSTALL_CLEAN="yes";;
-            (--build-skip-tests)        BUILD_SKIP_TESTS="yes";;
-            (--build-parallel=*)        PARALLEL="${OPTION#*=}";;
-            (--build-use-local-src)     BUILD_USE_LOCAL_SRC="yes";;
-            (--noninteractive)          NONINTERACTIVE="yes";;
-            (--verbose)                 DISPLAY_VERBOSE="yes";;
-            (--help|-h)                 DISPLAY_HELP="yes";;
-            (-DCMAKE_PREFIX_PATH=*)     CMAKE_PREFIX_PATH="${OPTION#*=}";;
-            (-DCMAKE_INSTALL_PREFIX=*)  CMAKE_INSTALL_PREFIX="${OPTION#*=}";;
-            (-DCMAKE_INCLUDE_PATH=*)    CMAKE_INCLUDE_PATH="${OPTION#*=}";;
-            (-DCMAKE_LIBRARY_PATH=*)    CMAKE_LIBRARY_PATH="${OPTION#*=}";;
+            (--build-boost)                 BUILD_boost="yes";;
+            (--build-secp256k1)             BUILD_secp256k1="yes";;
+            (--build-ultrafast)             BUILD_ultrafast="yes";;
+            (--build-preset=*)              BUILD_PRESET="${OPTION#*=}";;
+            (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
+            (--build-full-repositories)     BUILD_FULL_REPOSITORIES="yes";;
+            (--build-post-install-clean)    BUILD_POST_INSTALL_CLEAN="yes";;
+            (--build-skip-tests)            BUILD_SKIP_TESTS="yes";;
+            (--build-parallel=*)            PARALLEL="${OPTION#*=}";;
+            (--build-use-local-src)         BUILD_USE_LOCAL_SRC="yes";;
+            (--noninteractive)              NONINTERACTIVE="yes";;
+            (--verbose)                     DISPLAY_VERBOSE="yes";;
+            (--help|-h)                     DISPLAY_HELP="yes";;
+            (-DCMAKE_PREFIX_PATH=*)         CMAKE_PREFIX_PATH="${OPTION#*=}";;
+            (-DCMAKE_INSTALL_PREFIX=*)      CMAKE_INSTALL_PREFIX="${OPTION#*=}";;
+            (-DCMAKE_INCLUDE_PATH=*)        CMAKE_INCLUDE_PATH="${OPTION#*=}";;
+            (-DCMAKE_LIBRARY_PATH=*)        CMAKE_LIBRARY_PATH="${OPTION#*=}";;
         esac
     done
 
@@ -93,6 +106,7 @@ main()
     CONFIGURE_OPTIONS=("$@")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-boost/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-secp256k1/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-ultrafast/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-preset=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-full-repositories/}")
@@ -104,6 +118,7 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--help/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-h/}")
+    CONFIGURE_OPTIONS_CMAKE=("${CONFIGURE_OPTIONS[@]}")
     msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
     msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
@@ -217,6 +232,10 @@ main()
         exit 1
     fi
 
+    if [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Dwith-tests=OFF" )
+    fi
+
     # --prefix
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
@@ -241,21 +260,23 @@ main()
         msg_error "Both PREFIX and CMAKE_INSTALL_PREFIX have been defined differently."
         help
         exit 1
-    elif [[ -n "${PREFIX}" ]]; then
+    fi
+
+    if [[ -n "${PREFIX}" ]]; then
         CMAKE_INSTALL_PREFIX="${PREFIX}"
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX=*/}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_INSTALL_PREFIX=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
     fi
 
     if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_PREFIX_PATH}" ]] &&
        [[ "${PREFIX}" != "${CMAKE_PREFIX_PATH}" ]]; then
         CMAKE_PREFIX_PATH="${PREFIX}:${CMAKE_PREFIX_PATH}"
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
     elif [[ -n "${PREFIX}" ]]; then
         CMAKE_INSTALL_PREFIX="${PREFIX}"
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
     fi
 
     if [[ -n "${PREFIX}" ]]; then
@@ -357,19 +378,19 @@ main()
 
     # Specify cmake build
     if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
     elif [[ "${BUILD_CONFIG}" == "release" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_BUILD_TYPE=Release" )
     fi
 
     # translate BUILD_LINK to appropriate arguments
     if [[ -n "${BUILD_LINK}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DBUILD_SHARED_LIBS=*}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DBUILD_SHARED_LIBS=*}" )
 
         if [[ "${BUILD_LINK}" == "dynamic" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DBUILD_SHARED_LIBS=ON" )
+            CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DBUILD_SHARED_LIBS=ON" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DBUILD_SHARED_LIBS=OFF" )
+            CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DBUILD_SHARED_LIBS=OFF" )
         fi
     fi
 
@@ -385,13 +406,14 @@ main()
         with_boost="--with-boost=${PREFIX}"
     fi
 
+
     REMAP=()
-    for argument in "${CONFIGURE_OPTIONS[@]}"; do
+    for argument in "${CONFIGURE_OPTIONS_CMAKE[@]}"; do
         if [[ -n "${argument}" ]]; then
             REMAP+=( "${argument}" )
         fi
     done
-    CONFIGURE_OPTIONS=( "${REMAP[@]}" )
+    CONFIGURE_OPTIONS_CMAKE=( "${REMAP[@]}" )
     unset REMAP
 
     msg_heading "Configuration"
@@ -430,6 +452,25 @@ main()
         "-DSECP256K1_ENABLE_MODULE_RECOVERY=ON"
         "-DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON")
 
+    UltrafastSecp256k1_FLAGS=()
+
+    UltrafastSecp256k1_OPTIONS=(
+        "-DSECP256K1_BUILD_TESTS=OFF"
+        "-DSECP256K1_BUILD_BENCH=OFF"
+        "-DSECP256K1_BUILD_EXAMPLES=OFF"
+        "-DSECP256K1_BUILD_JAVA=OFF"
+        "-DUFSECP_BUILD_SHARED=OFF"
+        "-DSECP256K1_BUILD_CABI=ON"
+        "-DSECP256K1_BUILD_CPU=ON"
+        "-DSECP256K1_BUILD_SHIM=ON"
+        "-DSECP256K1_BUILD_CUDA=OFF"
+        "-DSECP256K1_BUILD_ROCM=OFF"
+        "-DSECP256K1_BUILD_OPENCL=OFF"
+        "-DSECP256K1_BUILD_METAL=OFF"
+        "-DSECP256K1_INSTALL=ON"
+        "-DSECP256K1_INSTALL_PKGCONFIG=ON"
+        "-DSECP256K1_USE_ULTRAFAST=ON")
+
     libbitcoin_system_FLAGS=()
 
     libbitcoin_system_OPTIONS=()
@@ -446,10 +487,22 @@ main()
         source_github "${secp256k1_OWNER}" "secp256k1" "${secp256k1_TAG}"
         local SAVE_CPPFLAGS="${CPPFLAGS}"
         export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
-        build_cmake "secp256k1" "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
-        install_make "secp256k1"
+        build_cmake "secp256k1" "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
+        install_cmake "secp256k1"
         if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-            clean_make "secp256k1"
+            clean_cmake "secp256k1"
+        fi
+        export CPPFLAGS="${SAVE_CPPFLAGS}"
+    fi
+
+    if [[ ${BUILD_ultrafast} == "yes" ]]; then
+        source_github "${UltrafastSecp256k1_OWNER}" "UltrafastSecp256k1" "${UltrafastSecp256k1_TAG}"
+        local SAVE_CPPFLAGS="${CPPFLAGS}"
+        export CPPFLAGS="${CPPFLAGS} ${UltrafastSecp256k1_FLAGS[@]}"
+        build_cmake "UltrafastSecp256k1" "." "${PARALLEL}" "${UltrafastSecp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
+        install_cmake "UltrafastSecp256k1"
+        if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+            clean_cmake "UltrafastSecp256k1"
         fi
         export CPPFLAGS="${SAVE_CPPFLAGS}"
     fi
@@ -457,13 +510,13 @@ main()
     source_github "${libbitcoin_system_OWNER}" "libbitcoin-system" "${libbitcoin_system_TAG}"
     local SAVE_CPPFLAGS="${CPPFLAGS}"
     export CPPFLAGS="${CPPFLAGS} ${libbitcoin_system_FLAGS[@]}"
-    build_preset "libbitcoin-system" "builds/cmake" "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+    build_preset "libbitcoin-system" "builds/cmake" "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
     if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-        test_make "libbitcoin-system" "test" "${PARALLEL}"
+        test_cmake "libbitcoin-system" "test" "${PARALLEL}"
     fi
-    install_make "libbitcoin-system"
+    install_cmake "libbitcoin-system"
     if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-        clean_make "libbitcoin-system"
+        clean_cmake "libbitcoin-system"
     fi
     export CPPFLAGS="${SAVE_CPPFLAGS}"
 
@@ -591,117 +644,6 @@ source_github()
     pop_directory # pop BUILD_SRC_DIR
 }
 
-install_make()
-{
-    local PROJECT="$1"
-    shift
-
-    msg "Preparing to install ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    make install
-
-    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
-        ldconfig
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-
-    msg_success "'${PROJECT}' installation complete."
-}
-
-test_make()
-{
-    local PROJECT="$1"
-    local TARGET="$2"
-    local JOBS="$3"
-    shift 3
-
-    msg "Preparing to test ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    disable_exit_on_error
-
-    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} ${TARGET} VERBOSE=1
-    else
-        make ${TARGET} VERBOSE=1
-    fi
-
-    local RESULT=$?
-
-    if [[ -e "Testing/Temporary/LastTest.log" ]]; then
-        msg_warn "begin error log: Testing/Temporary/LastTest.log"
-        cat "Testing/Temporary/LastTest.log"
-        msg_warn "  end error log: Testing/Temporary/LastTest.log"
-    fi
-
-    if [[ -e "test.log" ]]; then
-        msg_warn "begin error log: test.log"
-        cat "test.log"
-        msg_warn "  end error log: test.log"
-    fi
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        msg_error "Encountered error, please see test.log contents above."
-        exit ${RESULT}
-    fi
-
-    enable_exit_on_error
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-
-    msg_success "'${PROJECT}' test complete."
-}
-
-clean_make()
-{
-    local PROJECT="$1"
-    shift 1
-
-    msg "Preparing to clean ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    disable_exit_on_error
-
-    make clean
-
-    local RESULT=$?
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        msg_error "Encountered error, please see test.log contents above."
-        exit ${RESULT}
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-
-    msg_success "'${PROJECT}' clean complete."
-}
-
 build_boost()
 {
     local PROJECT="$1"
@@ -801,7 +743,7 @@ build_cmake()
 
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
-        VERBOSITY_MAKE="VERBOSE=1"
+        VERBOSITY_MAKE="--verbose"
     fi
 
     msg_heading "Preparing to build ${PROJECT}"
@@ -829,15 +771,16 @@ build_cmake()
 
     # make
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} ${VERBOSITY_MAKE}
+        cmake --build . -j${JOBS} ${VERBOSITY_MAKE}
     else
-        make
+        cmake --build . ${VERBOSITY_MAKE}
     fi
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
     msg_success "'${PROJECT}' built successfully."
 }
+
 
 build_preset()
 {
@@ -889,10 +832,118 @@ build_preset()
     msg_success "'${PROJECT}' built successfully."
 }
 
+
+clean_cmake()
+{
+    local PROJECT="$1"
+    shift 1
+
+    msg "Preparing to clean ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    cmake --build . --target clean
+
+    local RESULT=$?
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' clean complete."
+}
+
+install_cmake()
+{
+    local PROJECT="$1"
+    shift
+
+    msg "Preparing to install ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    cmake --install .
+
+    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
+        ldconfig
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' installation complete."
+}
+
+test_cmake()
+{
+    local PROJECT="$1"
+    local JOBS="$2"
+    shift 2
+
+    msg "Preparing to test ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    ctest --test-dir .
+
+    local RESULT=$?
+
+    if [[ -e "Testing/Temporary/LastTest.log" ]]; then
+        msg_warn "begin error log: Testing/Temporary/LastTest.log"
+        cat "Testing/Temporary/LastTest.log"
+        msg_warn "  end error log: Testing/Temporary/LastTest.log"
+    fi
+
+    if [[ -e "test.log" ]]; then
+        msg_warn "begin error log: test.log"
+        cat "test.log"
+        msg_warn "  end error log: test.log"
+    fi
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    enable_exit_on_error
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' test complete."
+}
+
 display_build_variables()
 {
     msg "BUILD_boost                     : ${BUILD_boost}"
     msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
+    msg "BUILD_ultrafast                 : ${BUILD_ultrafast}"
     msg "BUILD_PRESET                    : ${BUILD_PRESET}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
     msg "BUILD_OBJ_DIR                   : ${BUILD_OBJ_DIR}"
@@ -938,6 +989,9 @@ display_constants()
     msg "secp256k1_OWNER                 : ${secp256k1_OWNER}"
     msg "secp256k1_TAG                   : ${secp256k1_TAG}"
 
+    msg "UltrafastSecp256k1_OWNER        : ${UltrafastSecp256k1_OWNER}"
+    msg "UltrafastSecp256k1_TAG          : ${UltrafastSecp256k1_TAG}"
+
     msg "libbitcoin_system_OWNER         : ${libbitcoin_system_OWNER}"
     msg "libbitcoin_system_TAG           : ${libbitcoin_system_TAG}"
 }
@@ -955,8 +1009,13 @@ help()
     msg "                              Default: OFF"
     msg "-Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions."
     msg "                              Default: OFF"
+    msg "-Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1."
+    msg "                              Default: OFF"
+    msg "-Dwith-secp256k1=<ON/OFF>   Use bitcoin-core/secp256k1."
+    msg "                              Default: ON"
     msg "--build-boost               Build Boost libraries"
     msg "--build-secp256k1           Build libsecp256k1 libraries"
+    msg "--build-ultrafast           Build UltrafastSecp256k1 libraries"
     msg "--build-preset=<preset>     Specifies preset configuration to build."
     msg "--build-src-dir=<path>      Location for sources."
     msg "                              Default: $(pwd)"
