@@ -88,15 +88,13 @@ data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 
     if constexpr (is_same_type<Batch, schnorr::batch>)
     {
-        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
-            sizeof(ec_xonly) + sizeof(ec_signature));
-        ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out);
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) + sizeof(ec_xonly) + sizeof(ec_signature));
+        ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out, nullptr, 0, nullptr);
     }
     else
     {
-        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
-            sizeof(ec_compressed) + sizeof(ec_signature));
-        ufsecp_lbtc_verify_ecdsa(context.get(), in, count, extra_size, out);
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) + sizeof(ec_compressed) + sizeof(ec_signature));
+        ufsecp_lbtc_verify_ecdsa_opaque(context.get(), in, count, extra_size, out, nullptr, 0, nullptr);
     }
 
     return results;
@@ -105,12 +103,9 @@ data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 #else
 
 template <typename Batch>
-data_chunk batch_verify(const std::span<Batch>& batch, bool turbo) NOEXCEPT
+data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 {
-    // par_if doesn't throw.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    const auto policy = poolstl::execution::par_if(turbo);
-    BC_POP_WARNING()
+    constexpr auto policy = poolstl::execution::par;
 
     // Used only to produce order for concurrency.
     std::vector<size_t> it(batch.size());

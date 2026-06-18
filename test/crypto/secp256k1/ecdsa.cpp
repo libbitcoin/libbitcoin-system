@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__negative__expected)
     BOOST_REQUIRE(!verify_signature(compressed2, sighash2, signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789_ultrafast_release__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
 {
     using namespace system::ecdsa;
     constexpr bool bip66 = true;
