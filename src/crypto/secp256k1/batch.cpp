@@ -103,12 +103,9 @@ data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 #else
 
 template <typename Batch>
-data_chunk batch_verify(const std::span<Batch>& batch, bool turbo) NOEXCEPT
+data_chunk batch_verify(const std::span<Batch>& batch, bool) NOEXCEPT
 {
-    // par_if doesn't throw.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    const auto policy = poolstl::execution::par_if(turbo);
-    BC_POP_WARNING()
+    constexpr auto policy = poolstl::execution::par;
 
     // Used only to produce order for concurrency.
     std::vector<size_t> it(batch.size());
