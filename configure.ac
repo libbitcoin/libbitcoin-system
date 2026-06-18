@@ -451,14 +451,14 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([secp256k1_BUILD_CPPFLAGS : ${secp256k1_BUILD_CPPFLAGS}])
 
-# Require ultrafast of at least version 4.1.1.4 and output ${ultrafast_CPPFLAGS/LIBS/PKG}.
+# Require ultrafast of at least version 4.0.0.0 and output ${ultrafast_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 AS_CASE([${with_ultrafast}], [yes],
-    [PKG_CHECK_MODULES([ultrafast], [libultrafast >= 4.1.1.4], [],
+    [PKG_CHECK_MODULES([ultrafast], [libultrafast >= 4.0.0.0], [],
         [
-          AC_MSG_ERROR([--with-ultrafast specified but libultrafast >= 4.1.1.4 was not found.])
+          AC_MSG_ERROR([--with-ultrafast specified but libultrafast >= 4.0.0.0 was not found.])
         ])
-     AC_SUBST([ultrafast_PKG], ['libultrafast >= 4.1.1.4'])
+     AC_SUBST([ultrafast_PKG], ['libultrafast >= 4.0.0.0'])
      AC_SUBST([ultrafast_CPPFLAGS], [${ultrafast_CFLAGS}])
      AC_SUBST([ultrafast_ISYS_CPPFLAGS], [`echo ${ultrafast_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`]])
      AC_MSG_NOTICE([ultrafast_CPPFLAGS : ${ultrafast_CPPFLAGS}])

@@ -111,7 +111,7 @@ if ( with-secp256k1 )
 endif()
 
 if ( with-ultrafast )
-  find_package( secp256k1-fast 4.1.1.7 REQUIRED )
+  find_package( secp256k1-fast 4.0.0.0 REQUIRED )
 endif()
 
 #------------------------------------------------------------------------------
