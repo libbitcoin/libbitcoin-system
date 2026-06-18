@@ -332,7 +332,7 @@ target_link_libraries( libbitcoin-system
     Boost::thread
     Boost::url
     $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
-    $<$<BOOL:${with-ultrafast}>:secp256k1-fast>
+    $<$<BOOL:${with-ultrafast}>:secp256k1::fastsecp256k1>
 )
 
 set_target_properties( libbitcoin-system

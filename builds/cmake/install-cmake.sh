@@ -73,7 +73,7 @@ if [[ -z ${secp256k1_TAG} ]]; then
 fi
 
 if [[ -z ${UltrafastSecp256k1_OWNER} ]]; then
-    UltrafastSecp256k1_OWNER="pmienk"
+    UltrafastSecp256k1_OWNER="shrec"
 fi
 if [[ -z ${UltrafastSecp256k1_TAG} ]]; then
     UltrafastSecp256k1_TAG="main"
@@ -447,10 +447,10 @@ main()
         "-DSECP256K1_BUILD_CABI=ON"
         "-DSECP256K1_BUILD_CPU=ON"
         "-DSECP256K1_BUILD_SHIM=ON"
-        "-DSECP256K1_BUILD_CUDA=OFF"
-        "-DSECP256K1_BUILD_ROCM=OFF"
-        "-DSECP256K1_BUILD_OPENCL=OFF"
-        "-DSECP256K1_BUILD_METAL=OFF"
+        "-DSECP256K1_BUILD_CUDA=ON"
+        "-DSECP256K1_BUILD_ROCM=ON"
+        "-DSECP256K1_BUILD_OPENCL=ON"
+        "-DSECP256K1_BUILD_METAL=ON"
         "-DSECP256K1_INSTALL=ON"
         "-DSECP256K1_INSTALL_PKGCONFIG=ON"
         "-DSECP256K1_USE_ULTRAFAST=ON")
