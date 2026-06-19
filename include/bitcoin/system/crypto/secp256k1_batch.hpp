@@ -43,7 +43,8 @@ namespace schnorr {
 struct BC_API batch
 {
     using span = std::span<const batch>;
-    static batchy::links_t verify(const span& batch, bool turbo) NOEXCEPT;
+    static batchy::links_t verify(const stopper& cancel,
+        const span& batch) NOEXCEPT;
 
     hash_digest digest;
     ec_xonly point;
@@ -51,9 +52,10 @@ struct BC_API batch
     batchy::link id;
 
 protected:
-    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static batchy::links_t correlate(const data_chunk& out,
+    static data_chunk evaluate(const stopper& cancel,
         const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const stopper& cancel,
+        const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
 } // namespace schnorr
@@ -64,7 +66,8 @@ namespace threshold {
 struct BC_API batch
 {
     using span = std::span<const batch>;
-    static batchy::links_t verify(const span& batch, bool turbo)  NOEXCEPT;
+    static batchy::links_t verify(const stopper& cancel,
+        const span& batch) NOEXCEPT;
 
     hash_digest digest;
     ec_xonly point;
@@ -74,9 +77,10 @@ struct BC_API batch
     batchy::link id;
 
 protected:
-    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static batchy::links_t correlate(const data_chunk& out,
+    static data_chunk evaluate(const stopper& cancel,
         const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const stopper& cancel,
+        const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
 } // namespace threshold
@@ -87,7 +91,8 @@ namespace ecdsa {
 struct BC_API batch
 {
     using span = std::span<const batch>;
-    static batchy::links_t verify(const span& batch, bool turbo) NOEXCEPT;
+    static batchy::links_t verify(const stopper& cancel,
+        const span& batch) NOEXCEPT;
 
     hash_digest digest;
     ec_compressed point;
@@ -95,9 +100,10 @@ struct BC_API batch
     batchy::link id;
 
 protected:
-    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static batchy::links_t correlate(const data_chunk& out,
+    static data_chunk evaluate(const stopper& cancel,
         const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const stopper& cancel,
+        const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
 } // namespace ecdsa
@@ -108,7 +114,8 @@ namespace multisig {
 struct BC_API batch
 {
     using span = std::span<const batch>;
-    static batchy::links_t verify(const span& batch, bool turbo)  NOEXCEPT;
+    static batchy::links_t verify(const stopper& cancel,
+        const span& batch) NOEXCEPT;
 
     hash_digest digest;
     ec_compressed point;
@@ -118,9 +125,10 @@ struct BC_API batch
     batchy::link id;
 
 protected:
-    static data_chunk evaluate(const span& batch, bool turbo) NOEXCEPT;
-    static batchy::links_t correlate(const data_chunk& out,
+    static data_chunk evaluate(const stopper& cancel,
         const span& batch) NOEXCEPT;
+    static batchy::links_t correlate(const stopper& cancel,
+        const data_chunk& out, const span& batch) NOEXCEPT;
 };
 
 } // namespace multisig
