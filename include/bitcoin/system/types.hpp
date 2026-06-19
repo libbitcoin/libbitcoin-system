@@ -57,6 +57,9 @@ using iif = std::conditional_t<Condition, IfTrue, IfFalse>;
 template <size_t Position, typename ...Args>
 using argument = std::tuple_element_t<Position, std::tuple<Args...>>;
 
+/// Used for cancellation, see also std::std::stop_token.
+using stopper = std::atomic_bool;
+
 /// Define signed_size_t
 /// ---------------------------------------------------------------------------
 

@@ -61,7 +61,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__all_valid__expected)
         batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE(tokens.empty());
 }
 
@@ -96,7 +97,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__one_invalid__expected)
         batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(1).id));
 }
@@ -126,7 +128,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__all_valid__expected)
         batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE(tokens.empty());
 }
 
@@ -155,7 +158,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__one_invalid__expected)
         batch{ hash, point3, sig3, { 2, 0, 0 } }
     };
 
-    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(2).id));
 }
@@ -187,7 +191,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__all_valid__expected)
         batch{ hash, point3, sig3, 0x20, 5, { 0, 0, 0 } }  // (sig 2, key 0)
     };
 
-    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE(tokens.empty());
 }
 
@@ -218,7 +223,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__one_invalid__expected)
         batch{ hash, point3, sig3, 0x20, 7, { 0, 0, 0 } }
     };
 
-    const auto tokens = batch::verify({ triples.data(), triples.size() }, false);
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(0).id));
 }
