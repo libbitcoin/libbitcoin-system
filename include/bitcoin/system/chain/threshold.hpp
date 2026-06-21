@@ -91,7 +91,6 @@ struct threshold
     inline bool push_tuple(const hash_digest& digest,
         const cref<ec_xonly>& point, const cref<ec_signature>& sig) NOEXCEPT
     {
-        BC_ASSERT(tuples.size() == expected);
         tuples.emplace_back(digest, point, sig);
         return tuples.size() == expected;
     }
