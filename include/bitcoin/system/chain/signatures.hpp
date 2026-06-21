@@ -20,10 +20,9 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
 
 #include <atomic>
-#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/threshold.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 
@@ -52,51 +51,6 @@ struct BC_API signatures
         schnorr
     };
 
-    /// Threshold category.
-    enum class category
-    {
-        single,
-        equal,
-        inequal,
-        lesser,
-        greater,
-        not_lesser,
-        not_greater,
-        between
-    };
-
-    struct threshold_group
-    {
-        struct entry
-        {
-            /// Digest is created in the sigop (sigop scope - must copy).
-            hash_digest digest;
-
-            /// Point is a stack element (script scope - use reference).
-            cref<ec_xonly> point;
-
-            /// Signature is a stack element (script scope - use reference).
-            cref<ec_signature> sig;
-        };
-
-        /// Scoping requires that capture_.threshold(threshold_group) does not
-        /// retain a reference to point or sig (must copy or dispose the refs).
-        inline bool push_entry(const hash_digest& digest,
-            const cref<ec_xonly>& point,
-            const cref<ec_signature>& sig) NOEXCEPT
-        {
-            BC_ASSERT(entries.size() == expected);
-            entries.emplace_back(digest, point, sig);
-            return entries.size() == expected;
-        }
-
-        std::vector<entry> entries{};
-        opcode condition{};
-        uint16_t minimum{};
-        uint16_t maximum{};
-        uint16_t expected{};
-    };
-
     /// Reporting handlers.
     using log_handler = std::function<void(const script&)>;
     using fire_handler = std::function<void(miss, size_t)>;
@@ -108,7 +62,7 @@ struct BC_API signatures
         const ec_xonly, const ec_signature&)>;
     using multisig_handler = std::function<bool(const hash_digest&,
         const ec_compresseds&, const ec_signatures&)>;
-    using threshold_handler = std::function<bool(const threshold_group&)>;
+    using threshold_handler = std::function<bool(const threshold&)>;
 
     /// Default construction disables batching.
     const bool enabled{};
@@ -151,7 +105,7 @@ struct BC_API signatures
     };
     const threshold_handler threshold
     {
-        [] (const threshold_group&) NOEXCEPT
+        [] (const chain::threshold&) NOEXCEPT
         {
             return false;
         }

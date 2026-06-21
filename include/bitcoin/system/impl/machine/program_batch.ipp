@@ -143,7 +143,7 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     {
         if (is_threshold_batchable())
         {
-            if (threshold_.push_entry(hash, std::cref(as_xonly(point)),
+            if (threshold_.push_tuple(hash, std::cref(as_xonly(point)),
                 std::cref(signature)))
             {
                 // With a capture fault block success is disregarded.
@@ -180,12 +180,13 @@ is_threshold_batchable() const NOEXCEPT
         return false;
 
     // Already batching.
-    if (!threshold_.entries.empty())
+    if (!threshold_.tuples.empty())
         return true;
 
     size_t min{}, max{};
-    const auto condition = script_->extract_tapscript_threshold(min, max);
-    if (operation::is_invalid(condition))
+    const auto op = script_->extract_tapscript_threshold(min, max);
+    const auto category = chain::threshold::to_category(op);
+    if (category == chain::threshold::category_t::unknown)
         return false;
 
     // All non-empty elements (sigs) on the stack (plus self) must be evaluated
@@ -198,11 +199,11 @@ is_threshold_batchable() const NOEXCEPT
         is_limited<uint16_t>(expected))
         return false;
 
-    threshold_.entries.reserve(expected);
+    threshold_.tuples.reserve(expected);
     threshold_.minimum = narrow_cast<uint16_t>(min);
     threshold_.maximum = narrow_cast<uint16_t>(max);
     threshold_.expected = narrow_cast<uint16_t>(expected);
-    threshold_.condition = condition;
+    threshold_.category = category;
     return true;
 }
 

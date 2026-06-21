@@ -307,8 +307,9 @@ constexpr bool script::is_pay_multisig_standard_pattern(
     return true;
 }
 
+// This does not match 0 of n (no signatures to verify).
 // Allows non-minimal number encoding, and invalid size public keys.
-// op_check_multisig is limited to 20 signatures (max_script_public_keys).
+// op_check_multisig is limited to 20 signatures (max_multisig_public_keys).
 constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
 {
     if (ops.size() < 4u ||
@@ -319,7 +320,7 @@ constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
     {
         uint32_t count{};
         if (!op.as_unsigned32(count) ||
-            is_limited(count, one, max_script_public_keys))
+            is_limited(count, one, max_multisig_public_keys))
             return 0_u8;
 
         return narrow_cast<uint8_t>(count);
