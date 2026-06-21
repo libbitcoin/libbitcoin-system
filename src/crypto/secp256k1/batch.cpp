@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/crypto/secp256k1_batch.hpp>
 
+#include <atomic>
 #include <algorithm>
 #include <numeric>
 #include <shared_mutex>
@@ -64,14 +65,27 @@ inline bool verify_signature(const schnorr::batch& single) NOEXCEPT
 
 #if defined(HAVE_ULTRAFAST)
 
-// TODO: pass cancel.
 template <typename Batch>
-data_chunk batch_verify(const stopper& /* cancel */,
+data_chunk batch_verify(const stopper& cancel,
     const std::span<Batch>& batch) NOEXCEPT
 {
     // OOM is unrecoverable.
     static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
     if (!context.ok()) std::abort();
+
+    // set up cancellation callback.
+    const ufsecp_cancel_fn callback = [](void* atomic) NOEXCEPT
+    {
+        constexpr auto relaxed = std::memory_order_relaxed;
+        return to_int(pointer_cast<stopper>(atomic)->load(relaxed));
+    };
+
+    // TODO: should be modified to accept `const void*`.
+    BC_PUSH_WARNING(NO_CONST_CAST)
+    constexpr auto interval = 0;
+    const auto user = const_cast<stopper*>(&cancel);
+    const ufsecp_cancel_token token{ callback, user, interval };
+    BC_POP_WARNING()
 
     const auto count = batch.size();
     data_chunk results(count);
@@ -80,13 +94,17 @@ data_chunk batch_verify(const stopper& /* cancel */,
 
     if constexpr (is_same_type<Batch, schnorr::batch>)
     {
-        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) + sizeof(ec_xonly) + sizeof(ec_signature));
-        ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size, out, nullptr, 0, nullptr);
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
+            sizeof(ec_xonly) + sizeof(ec_signature));
+        ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size,
+            out, nullptr, 0, nullptr, &token);
     }
     else
     {
-        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) + sizeof(ec_compressed) + sizeof(ec_signature));
-        ufsecp_lbtc_verify_ecdsa_opaque(context.get(), in, count, extra_size, out, nullptr, 0, nullptr);
+        constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
+            sizeof(ec_compressed) + sizeof(ec_signature));
+        ufsecp_lbtc_verify_ecdsa_opaque(context.get(), in, count, extra_size,
+            out, nullptr, 0, nullptr, &token);
     }
 
     return results;
