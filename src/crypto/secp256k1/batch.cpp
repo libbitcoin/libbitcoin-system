@@ -70,7 +70,7 @@ data_chunk batch_verify(const stopper& cancel,
     const std::span<Batch>& batch) NOEXCEPT
 {
     // OOM is unrecoverable.
-    static thread_local ufsecp::lbtc::Controller context{ UFSECP_LBTC_AUTO };
+    static thread_local ufsecp::lbtc::Controller context{};
     if (!context.ok()) std::abort();
 
     // set up cancellation callback.
