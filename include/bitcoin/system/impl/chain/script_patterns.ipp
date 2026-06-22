@@ -78,7 +78,7 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 
     // Bytes after commitment optional with no consensus meaning [bip141].
     // Commitment not executable so invalid trailing operations are allowed.
-    return ops.size() > 1
+    return ops.size() > 1u
         && ops[0].code() == opcode::op_return
         && ops[1].code() == opcode::push_size_36
         && ops[1].data().size() >= header.size()
@@ -91,7 +91,7 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 constexpr bool script::is_witness_program_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].is_nonnegative()
         && ops[1].is_minimal_push()
         && ops[1].data().size() >= min_witness_program
@@ -102,15 +102,15 @@ constexpr bool script::is_witness_program_pattern(
 constexpr bool script::is_anchor_program_pattern(const operations& ops) NOEXCEPT
 {
     return is_witness_program_pattern(ops)
-        && ops[1].data().size() == 2
-        && ops[1].data()[0] == 0x4e
-        && ops[1].data()[1] == 0x73;
+        && ops[1].data().size() == 2u
+        && ops[1].data()[0] == 0x4e_u8
+        && ops[1].data()[1] == 0x73_u8;
 }
 
 // The satoshi client now enables configurable data size for policy.
 constexpr bool script::is_pay_null_data_pattern(const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].code() == opcode::op_return
         && ops[1].is_minimal_push()
         && ops[1].data().size() <= max_null_data_size;
@@ -127,14 +127,14 @@ constexpr bool script::is_pay_op_return_pattern(const operations& ops) NOEXCEPT
 constexpr bool script::is_pay_public_key_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && is_public_key(ops[0].data())
         && ops[1].code() == opcode::checksig;
 }
 
 constexpr bool script::is_pay_key_hash_pattern(const operations& ops) NOEXCEPT
 {
-    return ops.size() == 5
+    return ops.size() == 5u
         && ops[0].code() == opcode::dup
         && ops[1].code() == opcode::hash160
         && ops[2].data().size() == short_hash_size
@@ -148,7 +148,7 @@ constexpr bool script::is_pay_key_hash_pattern(const operations& ops) NOEXCEPT
 constexpr bool script::is_pay_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 3
+    return ops.size() == 3u
         && ops[0].code() == opcode::hash160
         && ops[1].code() == opcode::push_size_20
         && ops[2].code() == opcode::equal;
@@ -156,7 +156,7 @@ constexpr bool script::is_pay_script_hash_pattern(
 
 constexpr bool script::is_pay_witness_pattern(const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].is_nonnegative()
         && ops[1].is_push();
 }
@@ -164,7 +164,7 @@ constexpr bool script::is_pay_witness_pattern(const operations& ops) NOEXCEPT
 constexpr bool script::is_pay_witness_key_hash_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].code() == opcode::push_size_0
         && ops[1].code() == opcode::push_size_20;
 }
@@ -172,7 +172,7 @@ constexpr bool script::is_pay_witness_key_hash_pattern(
 constexpr bool script::is_pay_witness_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].code() == opcode::push_size_0
         && ops[1].code() == opcode::push_size_32;
 }
@@ -180,7 +180,7 @@ constexpr bool script::is_pay_witness_script_hash_pattern(
 constexpr bool script::is_pay_witness_taproot_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].code() == opcode::push_size_1
         && ops[1].code() == opcode::push_size_32;
 }
@@ -189,14 +189,14 @@ constexpr bool script::is_pay_witness_taproot_pattern(
 constexpr bool script::is_pay_taproot_key_path_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 1
+    return ops.size() == 1u
         && ops[0].code() == opcode::checksig;
 }
 
 constexpr bool script::is_pay_tapscript_single_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && ops[0].data().size() == ec_xonly_size
         && ops[1].code() == opcode::checksig;
 }
@@ -341,7 +341,7 @@ constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
         return is_endorsement(op.data());
     };
 
-    return ops.size() >= 2
+    return ops.size() >= 2u
         && ops[0].code() == opcode::push_size_0
         && std::all_of(std::next(ops.begin()), ops.end(), endorsement);
 }
@@ -349,7 +349,7 @@ constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
 constexpr bool script::is_sign_public_key_pattern(
     const operations& ops) NOEXCEPT
 {
-    return ops.size() == 1
+    return ops.size() == 1u
         && is_endorsement(ops[0].data());
 }
 
@@ -358,7 +358,7 @@ constexpr bool script::is_sign_public_key_pattern(
 // ****************************************************************************
 constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
 {
-    return ops.size() == 2
+    return ops.size() == 2u
         && is_endorsement(ops[0].data())
         && is_public_key(ops[1].data());
 }
@@ -452,14 +452,14 @@ inline operations script::to_pay_multisig_pattern(uint8_t signatures,
     const auto m = signatures;
     const auto n = points.size();
 
-    if (m < 1 || m > n || n < 1 || n > max)
+    if (m < 1u || m > n || n < 1u || n > max)
         return {};
 
     const auto op_m = static_cast<opcode>(m + base);
     const auto op_n = static_cast<opcode>(points.size() + base);
 
     operations ops{};
-    ops.reserve(points.size() + 3);
+    ops.reserve(points.size() + 3u);
     ops.emplace_back(op_m);
 
     for (const auto& point: points)
