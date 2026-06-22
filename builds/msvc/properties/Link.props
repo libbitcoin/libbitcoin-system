@@ -9,6 +9,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </ClCompile>
     <Link>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
