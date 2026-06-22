@@ -25,11 +25,11 @@ BOOST_AUTO_TEST_SUITE(secp256k1_tests)
 // scenario 1
 const ec_secret secret1 = base16_array(
     "8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
-const ec_compressed compressed1 = base16_array(
-    "0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731");
-const ec_uncompressed uncompressed1 = base16_array(
-    "0409ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc73273"
-    "18c3a6ec6acd33c36328b8fb4349b31671bcd3a192316ea4f6236ee1ae4a7d8c9");
+////const ec_compressed compressed1 = base16_array(
+////    "0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731");
+////const ec_uncompressed uncompressed1 = base16_array(
+////    "0409ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc73273"
+////    "18c3a6ec6acd33c36328b8fb4349b31671bcd3a192316ea4f6236ee1ae4a7d8c9");
 
 // scenario 2
 const ec_compressed compressed2 = base16_array(
