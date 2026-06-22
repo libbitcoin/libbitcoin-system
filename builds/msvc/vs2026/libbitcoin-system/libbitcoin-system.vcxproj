@@ -402,6 +402,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stripper.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\taproot.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\tapscript.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\threshold.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\block_view.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\transaction_view.hpp" />
@@ -773,7 +774,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.3.0.3\build\native\UltrafastSecp256k1-vc145.targets" Condition="Exists('$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.3.0.3\build\native\UltrafastSecp256k1-vc145.targets')" />
+    <Import Project="$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.4.0.1\build\native\UltrafastSecp256k1-vc145.targets" Condition="Exists('$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.4.0.1\build\native\UltrafastSecp256k1-vc145.targets')" />
     <Import Project="$(NuGetPackageRoot)libbitcoin-boost.1.91.0\build\libbitcoin-boost.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0\build\libbitcoin-boost.targets')" />
     <Import Project="$(NuGetPackageRoot)libbitcoin-boost_container-vc145.1.91.0\build\libbitcoin-boost_container-vc145.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost_container-vc145.1.91.0\build\libbitcoin-boost_container-vc145.targets')" />
     <Import Project="$(NuGetPackageRoot)libbitcoin-boost_iostreams-vc145.1.91.0\build\libbitcoin-boost_iostreams-vc145.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost_iostreams-vc145.1.91.0\build\libbitcoin-boost_iostreams-vc145.targets')" />
@@ -797,7 +798,7 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost_thread-vc145.1.91.0\build\libbitcoin-boost_thread-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost_thread-vc145.1.91.0\build\libbitcoin-boost_thread-vc145.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost_url-vc145.1.91.0\build\libbitcoin-boost_url-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost_url-vc145.1.91.0\build\libbitcoin-boost_url-vc145.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc145.0.6.1.2\build\native\secp256k1_vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc145.0.6.1.2\build\native\secp256k1_vc145.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.3.0.3\build\native\UltrafastSecp256k1-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.3.0.3\build\native\UltrafastSecp256k1-vc145.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.4.0.1\build\native\UltrafastSecp256k1-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)UltrafastSecp256k1-vc145.4.4.0.1\build\native\UltrafastSecp256k1-vc145.targets'))" />
   </Target>
   <ItemGroup>
     <Natvis Include="..\..\debug.natvis" />

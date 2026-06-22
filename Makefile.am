@@ -269,6 +269,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/stripper.cpp \
     test/chain/taproot.cpp \
     test/chain/tapscript.cpp \
+    test/chain/threshold.cpp \
     test/chain/transaction.cpp \
     test/chain/witness.cpp \
     test/chain/enums/opcode.cpp \
@@ -537,6 +538,7 @@ include_bitcoin_system_chain_HEADERS = \
     include/bitcoin/system/chain/stripper.hpp \
     include/bitcoin/system/chain/taproot.hpp \
     include/bitcoin/system/chain/tapscript.hpp \
+    include/bitcoin/system/chain/threshold.hpp \
     include/bitcoin/system/chain/transaction.hpp \
     include/bitcoin/system/chain/witness.hpp
 

@@ -1126,7 +1126,7 @@ op_check_multisig_verify() NOEXCEPT
     if (!this->pop_index32(count))
         return error::op_check_multisig_verify1;
 
-    if (count > chain::max_script_public_keys)
+    if (count > chain::max_multisig_public_keys)
         return error::op_check_multisig_verify2;
 
     if (!this->ops_increment(count))

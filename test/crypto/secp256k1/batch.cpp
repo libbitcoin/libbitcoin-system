@@ -20,112 +20,37 @@
 
 BOOST_AUTO_TEST_SUITE(secp256k1_tests)
 
-// These tests use sign() to produce ECDSA signature vectors, however sign()
-// produces the private format `secp256k1_ecdsa_signature` type, not canonical.
-
 const ec_secret one = base16_array(
     "0000000000000000000000000000000000000000000000000000000000000001");
-const ec_secret secret1 = base16_array(
+const ec_secret secret0 = base16_array(
     "8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
-const ec_secret secret3 = base16_array(
+const ec_secret secret1 = base16_array(
     "33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce");
 
-// batch schnorr signature verification
+// batch ecdsa
+// ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__all_valid__expected)
-{
-    using namespace system;
-    using namespace system::schnorr;
-    const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
-
-    ec_compressed pub1{}, pub2{}, pub3{};
-    BOOST_REQUIRE(secret_to_public(pub1, secret1));
-    BOOST_REQUIRE(secret_to_public(pub2, secret3));
-    BOOST_REQUIRE(secret_to_public(pub3, one));
-
-    // TODO: add system utils: ec_secret -> ec_compressed -> ec_xonly.
-    const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
-    const auto& point2 = array_cast<uint8_t, ec_xonly_size, 1>(pub2);
-    const auto& point3 = array_cast<uint8_t, ec_xonly_size, 1>(pub3);
-
-    ec_signature sig1{}, sig2{}, sig3{};
-    constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, secret3, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig3, one, hash, auxiliary));
-
-    const std::array<batch, 3> triples
-    {
-        batch{ hash, point1, sig1, { 0, 0, 0 } },
-        batch{ hash, point2, sig2, { 1, 0, 0 } },
-        batch{ hash, point3, sig3, { 2, 0, 0 } }
-    };
-
-    stopper cancel{};
-    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
-    BOOST_REQUIRE(tokens.empty());
-}
-
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__one_invalid__expected)
-{
-    using namespace system;
-    using namespace system::schnorr;
-    const auto hash = bitcoin_hash(to_chunk("batch-schnorr-neg"));
-
-    ec_compressed pub1{}, pub2{}, pub3{};
-    BOOST_REQUIRE(secret_to_public(pub1, secret1));
-    BOOST_REQUIRE(secret_to_public(pub2, secret3));
-    BOOST_REQUIRE(secret_to_public(pub3, one));
-
-    // TODO: add system utils: ec_secret -> ec_compressed -> ec_xonly.
-    const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
-    const auto& point2 = array_cast<uint8_t, ec_xonly_size, 1>(pub2);
-    const auto& point3 = array_cast<uint8_t, ec_xonly_size, 1>(pub3);
-
-    ec_signature sig1{}, sig2{}, sig3{};
-    constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, secret3, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig3, one, hash, auxiliary));
-
-    // corrupt second signature
-    sig2[10] ^= 0xff;
-    const std::array<batch, 3> triples
-    {
-        batch{ hash, point1, sig1, { 0, 0, 0 } },
-        batch{ hash, point2, sig2, { 1, 0, 0 } },
-        batch{ hash, point3, sig3, { 2, 0, 0 } }
-    };
-
-    stopper cancel{};
-    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
-    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(1).id));
-}
-
-// batch ecdsa signature verification
-
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__all_valid__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
 {
     using namespace system;
     using namespace system::ecdsa;
     const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
 
-    ec_compressed point1{}, point2{}, point3{};
+    ec_compressed point0{}, point1{}, point2{};
+    BOOST_REQUIRE(secret_to_public(point0, secret0));
     BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, secret3));
-    BOOST_REQUIRE(secret_to_public(point3, one));
+    BOOST_REQUIRE(secret_to_public(point2, one));
 
-    ec_signature sig1{}, sig2{}, sig3{};
+    ec_signature sig0{}, sig1{}, sig2{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash));
     BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, secret3, hash));
-    BOOST_REQUIRE(sign(sig3, one, hash));
+    BOOST_REQUIRE(sign(sig2, one, hash));
 
     const std::array<batch, 3> triples
     {
-        batch{ hash, point1, sig1, { 0, 0, 0 } },
-        batch{ hash, point2, sig2, { 1, 0, 0 } },
-        batch{ hash, point3, sig3, { 2, 0, 0 } }
+        batch{ hash, point0, sig0, 0, 0, { 0, 0, 0 } },
+        batch{ hash, point1, sig1, 0, 0, { 1, 0, 0 } },
+        batch{ hash, point2, sig2, 0, 0, { 2, 0, 0 } }
     };
 
     stopper cancel{};
@@ -133,62 +58,60 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__all_valid__expected)
     BOOST_REQUIRE(tokens.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__one_invalid__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expected)
 {
     using namespace system;
     using namespace system::ecdsa;
     const auto hash = bitcoin_hash(to_chunk("batch-ecdsa-invalid"));
 
-    ec_compressed point1{}, point2{}, point3{};
+    ec_compressed point0{}, point1{}, point2{};
+    BOOST_REQUIRE(secret_to_public(point0, secret0));
     BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, secret3));
-    BOOST_REQUIRE(secret_to_public(point3, one));
+    BOOST_REQUIRE(secret_to_public(point2, one));
 
-    ec_signature sig1{}, sig2{}, sig3{};
+    ec_signature sig0{}, sig1{}, sig2{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash));
     BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, secret3, hash));
-    BOOST_REQUIRE(sign(sig3, one, hash));
+    BOOST_REQUIRE(sign(sig2, one, hash));
 
     // corrupt third signature
-    sig3[10] ^= 0xff;
+    sig2[10] ^= 0xff;
     const std::array<batch, 3> triples
     {
-        batch{ hash, point1, sig1, { 0, 0, 0 } },
-        batch{ hash, point2, sig2, { 1, 0, 0 } },
-        batch{ hash, point3, sig3, { 2, 0, 0 } }
+        batch{ hash, point0, sig0, 0, 0, { 0, 0, 0 } },
+        batch{ hash, point1, sig1, 0, 0, { 1, 0, 0 } },
+        batch{ hash, point2, sig2, 0, 0, { 2, 0, 0 } }
     };
 
     stopper cancel{};
     const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(2).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(triples.at(2).id));
 }
 
-// batch multisig (ecdsa) verification
-
-BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__all_valid__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected)
 {
     using namespace system;
-    using namespace system::multisig;
+    using namespace system::ecdsa;
 
     const auto hash = bitcoin_hash(to_chunk("batch-multisig"));
 
-    ec_compressed point1{}, point2{}, point3{};
+    ec_compressed point0{}, point1{}, point2{};
+    BOOST_REQUIRE(secret_to_public(point0, secret0));
     BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, secret3));
-    BOOST_REQUIRE(secret_to_public(point3, one));
+    BOOST_REQUIRE(secret_to_public(point2, one));
 
-    ec_signature sig1{}, sig2{}, sig3{};
-    BOOST_REQUIRE(ecdsa::sign(sig1, secret1, hash));
-    BOOST_REQUIRE(ecdsa::sign(sig2, secret3, hash));
-    BOOST_REQUIRE(ecdsa::sign(sig3, one, hash));
+    ec_signature sig0{}, sig1{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash));
+    BOOST_REQUIRE(sign(sig1, secret1, hash));
 
-    // One 2-of-3 multisig group (same id + set)
-    const std::array<batch, 3> triples
+    // 2-of-3 group.
+    const std::array<batch, 4> triples
     {
-        batch{ hash, point1, sig1, 0x12, 5, { 0, 0, 0 } }, // (sig 1, key 2)
-        batch{ hash, point2, sig2, 0x01, 5, { 0, 0, 0 } }, // (sig 0, key 1)
-        batch{ hash, point3, sig3, 0x20, 5, { 0, 0, 0 } }  // (sig 2, key 0)
+        batch{ hash, point0, sig0, 0b0000'0000, 5, { 0, 0, 0 } }, // invalid
+        batch{ hash, point1, sig0, 0b0000'0001, 5, { 0, 0, 0 } }, // valid
+        batch{ hash, point1, sig1, 0b0001'0001, 5, { 0, 0, 0 } }, // invalid
+        batch{ hash, point2, sig1, 0b0001'0010, 5, { 0, 0, 0 } }  // valid
     };
 
     stopper cancel{};
@@ -196,37 +119,275 @@ BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__all_valid__expected)
     BOOST_REQUIRE(tokens.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__multisig_batch_verify__one_invalid__expected)
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expected)
 {
     using namespace system;
-    using namespace system::multisig;
+    using namespace system::ecdsa;
     const auto hash = bitcoin_hash(to_chunk("batch-multisig-invalid"));
 
-    ec_compressed point1{}, point2{}, point3{};
+    ec_compressed point0{}, point1{}, point2{};
+    BOOST_REQUIRE(secret_to_public(point0, secret0));
     BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, secret3));
-    BOOST_REQUIRE(secret_to_public(point3, one));
+    BOOST_REQUIRE(secret_to_public(point2, one));
 
-    ec_signature sig1{}, sig2{}, sig3{};
-    BOOST_REQUIRE(ecdsa::sign(sig1, secret1, hash));
-    BOOST_REQUIRE(ecdsa::sign(sig2, secret3, hash));
-    BOOST_REQUIRE(ecdsa::sign(sig3, one, hash));
+    ec_signature sig0{}, sig1{}, sig2{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash));
+    BOOST_REQUIRE(sign(sig1, secret1, hash));
+    BOOST_REQUIRE(sign(sig2, one, hash));
 
     // corrupt second signature
-    sig2[10] ^= 0xff;
+    sig1[10] ^= 0xff;
 
-    // Same group (id + set)
+    // 2-of-3 group (same id + group)
     const std::array<batch, 3> triples
     {
-        batch{ hash, point1, sig1, 0x12, 7, { 0, 0, 0 } },
-        batch{ hash, point2, sig2, 0x01, 7, { 0, 0, 0 } },
-        batch{ hash, point3, sig3, 0x20, 7, { 0, 0, 0 } }
+        batch{ hash, point0, sig0, 0b0000'0000, 7, { 0, 0, 0 } }, // valid
+        batch{ hash, point1, sig1, 0b0000'0001, 7, { 0, 0, 0 } }, // invalid
+        batch{ hash, point2, sig2, 0b0001'0000, 7, { 0, 0, 0 } }  // valid
     };
 
     stopper cancel{};
     const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batchy::link_t>(triples.at(0).id));
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(triples.at(0).id));
+}
+
+// meets_threshold
+
+struct ecdsa_accessor
+    : public ecdsa::batch
+{
+    using multisig_matrix = multisig_matrix;
+    using ecdsa::batch::meets_threshold;
+};
+
+using multisig_matrix = ecdsa_accessor::multisig_matrix;
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__1_of_1__success)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(1, 1, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__1_of_1__failure)
+{
+    multisig_matrix matrix{};
+    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(1, 1, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_3__success)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    set_right_into(matrix.at(1), 1);
+    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(2, 3, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_3__failure)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    set_right_into(matrix.at(0), 1); // both successes on same key
+    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(2, 3, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__3_of_3__success)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    set_right_into(matrix.at(1), 1);
+    set_right_into(matrix.at(2), 2);
+    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(3, 3, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__3_of_3__failure)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    set_right_into(matrix.at(1), 0);
+    set_right_into(matrix.at(2), 0);
+    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(3, 3, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__success)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    set_right_into(matrix.at(1), 1);
+    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(2, 2, matrix));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__failure)
+{
+    multisig_matrix matrix{};
+    set_right_into(matrix.at(0), 0);
+    set_right_into(matrix.at(0), 1);
+    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(2, 2, matrix));
+}
+
+// batch schnorr
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected)
+{
+    using namespace system;
+    using namespace system::schnorr;
+    const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
+
+    ec_compressed pub0{}, pub1{}, pub2{};
+    BOOST_REQUIRE(secret_to_public(pub0, secret0));
+    BOOST_REQUIRE(secret_to_public(pub1, secret1));
+    BOOST_REQUIRE(secret_to_public(pub2, one));
+
+    const auto& point0 = array_cast<uint8_t, ec_xonly_size, 1>(pub0);
+    const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
+    const auto& point2 = array_cast<uint8_t, ec_xonly_size, 1>(pub2);
+
+    ec_signature sig0{}, sig1{}, sig2{};
+    constexpr hash_digest auxiliary{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash, auxiliary));
+    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
+    BOOST_REQUIRE(sign(sig2, one, hash, auxiliary));
+
+    const std::array<batch, 3> triples
+    {
+        batch{ hash, point0, sig0, 0, 0, 0, { 0, 0, 0 } },
+        batch{ hash, point1, sig1, 0, 0, 0, { 1, 0, 0 } },
+        batch{ hash, point2, sig2, 0, 0, 0, { 2, 0, 0 } }
+    };
+
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
+    BOOST_REQUIRE(tokens.empty());
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)
+{
+    using namespace system;
+    using namespace system::schnorr;
+    const auto hash = bitcoin_hash(to_chunk("batch-schnorr-neg"));
+
+    ec_compressed pub0{}, pub1{}, pub2{};
+    BOOST_REQUIRE(secret_to_public(pub0, secret0));
+    BOOST_REQUIRE(secret_to_public(pub1, secret1));
+    BOOST_REQUIRE(secret_to_public(pub2, one));
+
+    const auto& point0 = array_cast<uint8_t, ec_xonly_size, 1>(pub0);
+    const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
+    const auto& point2 = array_cast<uint8_t, ec_xonly_size, 1>(pub2);
+
+    ec_signature sig0{}, sig1{}, sig2{};
+    constexpr hash_digest auxiliary{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash, auxiliary));
+    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
+    BOOST_REQUIRE(sign(sig2, one, hash, auxiliary));
+
+    // corrupt second signature
+    sig1[10] ^= 0xff;
+    const std::array<batch, 3> triples
+    {
+        batch{ hash, point0, sig0, 0, 0, 0, { 0, 0, 0 } },
+        batch{ hash, point1, sig1, 0, 0, 0, { 1, 0, 0 } },
+        batch{ hash, point2, sig2, 0, 0, 0, { 2, 0, 0 } }
+    };
+
+    stopper cancel{};
+    const auto tokens = batch::verify(cancel, { triples.data(), triples.size() });
+    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
+    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(triples.at(1).id));
+}
+
+// meets_threshold
+
+struct schnorr_accessor
+    : public schnorr::batch
+{
+    using schnorr::batch::meets_threshold;
+};
+
+using category_t = system::chain::threshold::category_t;
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::equal), 5, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::equal), 4, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::inequal), 4, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::inequal), 5, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::lesser), 3, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::lesser), 5, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::greater), 7, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::greater), 5, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 5, 5, 0));
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 7, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 3, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 5, 5, 0));
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 3, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 7, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 3, 7));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__failure_below)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 2, 3, 7));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__failure_above)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 8, 3, 7));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__unknown_category__failure)
+{
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::unknown), 5, 5, 5));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

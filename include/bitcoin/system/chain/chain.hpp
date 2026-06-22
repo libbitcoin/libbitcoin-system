@@ -40,6 +40,7 @@
 #include <bitcoin/system/chain/stripper.hpp>
 #include <bitcoin/system/chain/taproot.hpp>
 #include <bitcoin/system/chain/tapscript.hpp>
+#include <bitcoin/system/chain/threshold.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/views/block_view.hpp>
 #include <bitcoin/system/chain/views/transaction_view.hpp>

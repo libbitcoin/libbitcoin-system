@@ -196,6 +196,7 @@
     <ClCompile Include="..\..\..\..\test\chain\stripper.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\taproot.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\tapscript.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\threshold.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>
