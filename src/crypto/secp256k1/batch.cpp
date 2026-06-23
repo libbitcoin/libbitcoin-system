@@ -74,37 +74,31 @@ data_chunk batch_verify(const stopper& cancel,
     if (!context.ok()) std::abort();
 
     // set up cancellation callback.
-    const ufsecp_cancel_fn callback = [](void* atomic) NOEXCEPT
+    const ufsecp_cancel_fn callback = [](const void* atomic) NOEXCEPT
     {
         constexpr auto relaxed = std::memory_order_relaxed;
-        return to_int(pointer_cast<stopper>(atomic)->load(relaxed));
+        return to_int(pointer_cast<const stopper>(atomic)->load(relaxed));
     };
-
-    // TODO: should be modified to accept `const void*`.
-    BC_PUSH_WARNING(NO_CONST_CAST)
-    constexpr auto interval = 0;
-    const auto user = const_cast<stopper*>(&cancel);
-    const ufsecp_cancel_token token{ callback, user, interval };
-    BC_POP_WARNING()
 
     const auto count = batch.size();
     data_chunk results(count);
     const auto out = results.data();
     const auto in = pointer_cast<const uint8_t>(batch.data());
+    const ufsecp_cancel_token token{ callback, &cancel, 0 };
 
     if constexpr (is_same_type<Batch, schnorr::batch>)
     {
         constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
             sizeof(ec_xonly) + sizeof(ec_signature));
-        ufsecp_lbtc_verify_schnorr(context.get(), in, count, extra_size,
-            out, nullptr, 0, nullptr, &token);
+        ufsecp_lbtc_verify_schnorr_mt(context.get(), in, count, extra_size,
+            out, nullptr, 0, nullptr, 0, &token);
     }
     else
     {
         constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
             sizeof(ec_compressed) + sizeof(ec_signature));
-        ufsecp_lbtc_verify_ecdsa_opaque(context.get(), in, count, extra_size,
-            out, nullptr, 0, nullptr, &token);
+        ufsecp_lbtc_verify_ecdsa_opaque_mt(context.get(), in, count, extra_size,
+            out, nullptr, 0, nullptr, 0, &token);
     }
 
     return results;
