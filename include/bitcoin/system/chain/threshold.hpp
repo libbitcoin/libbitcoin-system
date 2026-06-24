@@ -45,7 +45,7 @@ struct threshold
         between
     };
 
-    struct tuple
+    struct tuple_t
     {
         /// Digest is created in the sigop (sigop scope - must copy).
         hash_digest digest;
@@ -56,6 +56,7 @@ struct threshold
         /// Signature is a stack element (script scope - use reference).
         cref<ec_signature> sig;
     };
+    using tuples_t = std::vector<tuple_t>;
 
     /// Convert opcode to category.
     static constexpr category_t to_category(opcode code) NOEXCEPT
@@ -95,7 +96,7 @@ struct threshold
         return tuples.size() == expected;
     }
 
-    std::vector<tuple> tuples{};
+    tuples_t tuples{};
     category_t category{};
     uint16_t minimum{};
     uint16_t maximum{};
