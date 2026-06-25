@@ -115,7 +115,7 @@ struct BC_API batch
     batched::tx_link link;
 
     static void scan(const stopper& cancel, const span& batch,
-        const ec_compressed& scan_key, const handler& callback) NOEXCEPT;
+        const ec_secret& scan_key, const handler& callback) NOEXCEPT;
 };
 
 } // namespace silent
