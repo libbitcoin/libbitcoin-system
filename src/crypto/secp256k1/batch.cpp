@@ -348,7 +348,7 @@ links_t schnorr::batch::verify(const stopper& cancel,
 #if defined(HAVE_ULTRAFAST)
 
 void silent::batch::scan(const stopper& , const span& ,
-    const ec_compressed& , const handler& ) NOEXCEPT
+    const ec_secret& , const handler& ) NOEXCEPT
 {
     // TODO: iterate over chunked subsets or entire set.
     // TODO: correlate matches to tx link column and invoke callback.
@@ -357,7 +357,7 @@ void silent::batch::scan(const stopper& , const span& ,
 #else
 
 void silent::batch::scan(const stopper& , const span& ,
-    const ec_compressed& , const handler& ) NOEXCEPT
+    const ec_secret& , const handler& ) NOEXCEPT
 {
     // TODO: iterate results set in cancellable parallel loop over full space.
     // TODO: correlate matches to tx link and invoke callback.
