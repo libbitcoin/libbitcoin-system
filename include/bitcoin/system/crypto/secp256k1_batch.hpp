@@ -23,6 +23,7 @@
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 
 #pragma pack(push, 1)
@@ -34,6 +35,9 @@ namespace batched {
 using link = data_array<3>;
 using link_t = unsigned_type<sizeof(link)>;
 using links_t = std::vector<link_t>;
+using tx_link = data_array<4>;
+using tx_link_t = unsigned_type<sizeof(tx_link)>;
+using tx_links_t = std::vector<tx_link_t>;
 } // namespace batched
 
 namespace ecdsa {
@@ -95,6 +99,26 @@ protected:
 };
 
 } // namespace schnorr
+
+namespace silent
+{
+
+/// Span matches serialized buffer.
+struct BC_API batch
+{
+    using span = std::span<const batch>;
+    using prefix_bytes = data_array<sizeof(uint64_t)>;
+    using handler = std::function<void(const code&, batched::tx_link_t)>;
+
+    prefix_bytes prefix;
+    ec_compressed compressed;
+    batched::tx_link link;
+
+    static void scan(const stopper& cancel, const span& batch,
+        const ec_compressed& scan_key, const handler& callback) NOEXCEPT;
+};
+
+} // namespace silent
 } // namespace system
 } // namespace libbitcoin
 

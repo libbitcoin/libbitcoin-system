@@ -340,6 +340,31 @@ links_t schnorr::batch::verify(const stopper& cancel,
     return correlate(cancel, evaluate(cancel, batch), batch);
 }
 
+// scan
+// ----------------------------------------------------------------------------
+// The callback provides granular response when the query is very long-running,
+// which is consistent with the push notification public interface.
+
+#if defined(HAVE_ULTRAFAST)
+
+void silent::batch::scan(const stopper& , const span& ,
+    const ec_compressed& , const handler& ) NOEXCEPT
+{
+    // TODO: iterate over chunked subsets or entire set.
+    // TODO: correlate matches to tx link column and invoke callback.
+}
+
+#else
+
+void silent::batch::scan(const stopper& , const span& ,
+    const ec_compressed& , const handler& ) NOEXCEPT
+{
+    // TODO: iterate results set in cancellable parallel loop over full space.
+    // TODO: correlate matches to tx link and invoke callback.
+}
+
+#endif
+
 BC_POP_WARNING()
 
 } // namespace system
