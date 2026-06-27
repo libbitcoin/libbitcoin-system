@@ -292,6 +292,16 @@ links_t schnorr::batch::get_failures(const stopper& cancel,
     return fails;
 }
 
+// get_match (silent)
+// ----------------------------------------------------------------------------
+
+bool silent::batch::get_match(tx_link_t& , const batch& , size_t ,
+    const ec_secret& ) NOEXCEPT
+{
+    // TODO: implement.
+    return false;
+}
+
 // evaluate
 // ----------------------------------------------------------------------------
 // static/protected
@@ -347,7 +357,7 @@ links_t schnorr::batch::verify(const stopper& cancel,
 
 #if defined(HAVE_ULTRAFAST)
 
-void silent::batch::scan(const stopper& , const span& ,
+void silent::batch::scan(const stopper& , const batch& ,
     const ec_secret& , const handler& ) NOEXCEPT
 {
     // TODO: iterate over chunked subsets or entire set.
@@ -356,11 +366,29 @@ void silent::batch::scan(const stopper& , const span& ,
 
 #else
 
-void silent::batch::scan(const stopper& , const span& ,
-    const ec_secret& , const handler& ) NOEXCEPT
+void silent::batch::scan(const stopper& cancel, const batch& batch,
+    const ec_secret& scan_key, const handler& callback, bool turbo) NOEXCEPT
 {
-    // TODO: iterate results set in cancellable parallel loop over full space.
-    // TODO: correlate matches to tx link and invoke callback.
+    const auto policy = poolstl::execution::par_if(turbo);
+
+    // Three spans are corresponding arrays of equal length.
+    const auto count = batch.correlates.size();
+    BC_ASSERT(batch.prefixes.size() == count);
+    BC_ASSERT(batch.compresseds.size() == count);
+
+    std::vector<size_t> it(count);
+    std::iota(it.begin(), it.end(), zero);
+
+    // Return from scan with !cancel implies complete.
+    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
+    {
+        if (cancel)
+            return;
+
+        tx_link_t tx{};
+        if (get_match(tx, batch, row, scan_key))
+            callback({}, tx);
+    });
 }
 
 #endif
