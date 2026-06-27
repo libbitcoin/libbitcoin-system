@@ -35,9 +35,6 @@ namespace batched {
 using link = data_array<3>;
 using link_t = unsigned_type<sizeof(link)>;
 using links_t = std::vector<link_t>;
-using tx_link = data_array<4>;
-using tx_link_t = unsigned_type<sizeof(tx_link)>;
-using tx_links_t = std::vector<tx_link_t>;
 } // namespace batched
 
 namespace ecdsa {
@@ -106,16 +103,23 @@ namespace silent
 /// Span matches serialized buffer.
 struct BC_API batch
 {
-    using span = std::span<const batch>;
-    using prefix_bytes = data_array<sizeof(uint64_t)>;
-    using handler = std::function<void(const code&, batched::tx_link_t)>;
+    using prefix = data_array<8>;
+    using tx_link = data_array<4>;
+    using tx_link_t = unsigned_type<sizeof(tx_link)>;
+    ////using tx_links_t = std::vector<tx_link_t>;
+    using handler = std::function<void(const code&, tx_link_t)>;
 
-    prefix_bytes prefix;
-    ec_compressed compressed;
-    batched::tx_link link;
+    std::span<const prefix> prefixes;
+    std::span<const ec_compressed> compresseds;
+    std::span<const tx_link> correlates;
 
-    static void scan(const stopper& cancel, const span& batch,
-        const ec_secret& scan_key, const handler& callback) NOEXCEPT;
+    static void scan(const stopper& cancel, const batch& batch,
+        const ec_secret& scan_key, const handler& callback,
+        bool turbo) NOEXCEPT;
+
+protected:
+    static bool get_match(tx_link_t& out, const batch& batch,
+        size_t row, const ec_secret& scan_key) NOEXCEPT;
 };
 
 } // namespace silent
