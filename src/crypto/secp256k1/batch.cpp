@@ -224,6 +224,7 @@ bool schnorr::batch::meets_threshold(uint8_t category, size_t successes,
 {
     switch (static_cast<threshold::category_t>(category))
     {
+        case threshold::category_t::single:
         case threshold::category_t::equal:
             return (successes == minimum);
         case threshold::category_t::inequal:

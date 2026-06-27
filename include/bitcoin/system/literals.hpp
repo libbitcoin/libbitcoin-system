@@ -114,13 +114,13 @@ BC_POP_WARNING()
 /// ---------------------------------------------------------------------------
 
 template <data_t Data>
-consteval auto operator "" _a() noexcept
+consteval auto operator ""_a() noexcept
 {
     return Data.data;
 }
 
 template <text_t Text>
-consteval auto operator "" _t() noexcept
+consteval auto operator ""_t() noexcept
 {
     return Text.text;
 }
