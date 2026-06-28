@@ -26,8 +26,6 @@
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 
-#pragma pack(push, 1)
-
 namespace libbitcoin {
 namespace system {
 
@@ -43,27 +41,33 @@ namespace ecdsa {
 /// Span matches serialized buffer.
 struct BC_API batch
 {
-    using span = std::span<const batch>;
-    static batched::links_t verify(const stopper& cancel,
-        const span& batch) NOEXCEPT;
+#pragma pack(push, 1)
+    struct correlate_t
+    {
+        uint8_t pair;
+        uint16_t group;
+        batched::link id;
+    };
+#pragma pack(pop)
 
-    hash_digest digest;
-    ec_compressed point;
-    ec_signature signature;
-    uint8_t pair;
-    uint16_t group;
-    batched::link id;
+    static batched::links_t verify(const stopper& cancel,
+        const batch& batch) NOEXCEPT;
+
+    std::span<const correlate_t> correlates;
+    std::span<const hash_digest> digests;
+    std::span<const ec_compressed> points;
+    std::span<const ec_signature> signatures;
 
 protected:
     using multisig_matrix = std::array<uint16_t, bits<uint16_t>>;
     static bool meets_threshold(uint8_t signatures, uint8_t keys,
         const multisig_matrix& successes) NOEXCEPT;
     static batched::links_t get_failures(const stopper& cancel,
-        const data_chunk& out, const span& in) NOEXCEPT;
+        const data_chunk& out, const batch& in) NOEXCEPT;
     static data_chunk evaluate(const stopper& cancel,
-        const span& batch) NOEXCEPT;
+        const batch& batch) NOEXCEPT;
     static batched::links_t correlate(const stopper& cancel,
-        const data_chunk& out, const span& batch) NOEXCEPT;
+        const data_chunk& out, const batch& batch) NOEXCEPT;
 };
 
 } // namespace ecdsa
@@ -73,27 +77,33 @@ namespace schnorr {
 /// Span matches serialized buffer.
 struct BC_API batch
 {
-    using span = std::span<const batch>;
-    static batched::links_t verify(const stopper& cancel,
-        const span& batch) NOEXCEPT;
+#pragma pack(push, 1)
+    struct correlate_t
+    {
+        uint8_t category;
+        uint16_t pair;
+        uint16_t group;
+        batched::link id;
+    };
+#pragma pack(pop)
 
-    hash_digest digest;
-    ec_xonly point;
-    ec_signature signature;
-    uint8_t category;
-    uint16_t pair;
-    uint16_t group;
-    batched::link id;
+    static batched::links_t verify(const stopper& cancel,
+        const batch& batch) NOEXCEPT;
+
+    std::span<const correlate_t> correlates;
+    std::span<const hash_digest> digests;
+    std::span<const ec_xonly> points;
+    std::span<const ec_signature> signatures;
 
 protected:
     static bool meets_threshold(uint8_t category, size_t successes,
         size_t minimum, size_t maximum) NOEXCEPT;
     static batched::links_t get_failures(const stopper& cancel,
-        const data_chunk& out, const span& in) NOEXCEPT;
+        const data_chunk& out, const batch& in) NOEXCEPT;
     static data_chunk evaluate(const stopper& cancel,
-        const span& batch) NOEXCEPT;
+        const batch& batch) NOEXCEPT;
     static batched::links_t correlate(const stopper& cancel,
-        const data_chunk& out, const span& batch) NOEXCEPT;
+        const data_chunk& out, const batch& batch) NOEXCEPT;
 };
 
 } // namespace schnorr
@@ -110,9 +120,9 @@ struct BC_API batch
     ////using tx_links_t = std::vector<tx_link_t>;
     using handler = std::function<void(const code&, tx_link_t)>;
 
-    std::span<const prefix> prefixes;
-    std::span<const ec_compressed> compresseds;
     std::span<const tx_link> correlates;
+    std::span<const prefix> prefixes;
+    std::span<const ec_compressed> points;
 
     static void scan(const stopper& cancel, const batch& batch,
         const ec_secret& scan_key, const handler& callback,
@@ -126,7 +136,5 @@ protected:
 } // namespace silent
 } // namespace system
 } // namespace libbitcoin
-
-#pragma pack(pop)
 
 #endif
