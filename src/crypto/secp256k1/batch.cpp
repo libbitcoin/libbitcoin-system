@@ -25,6 +25,7 @@
 #include <span>
 #if defined(HAVE_ULTRAFAST)
     #include <ufsecp_libbitcoin.h>
+    #include <ufsecp/ufsecp_gpu.h>
 #endif
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -367,10 +368,28 @@ links_t schnorr::batch::verify(const stopper& cancel,
 #if defined(HAVE_ULTRAFAST)
 
 void silent::batch::scan(const stopper& , const batch& ,
-    const ec_secret& , const handler& ) NOEXCEPT
+    const ec_secret& , const handler& , bool) NOEXCEPT
 {
-    // TODO: iterate over chunked subsets or entire set.
-    // TODO: correlate matches to tx link column and invoke callback.
+    ////static thread_local ufsecp_gpu_ctx* ctx = /* create */;
+    ////const auto count = batch.correlates.size();
+    ////std::vector<uint64_t> prefixes(count);
+    ////const auto tweaks = pointer_cast<const uint8_t>(batch.points.data());
+    ////
+    ////if (ufsecp_gpu_bip352_scan_batch
+    ////    (
+    ////        ctx,
+    ////        scan_key.data(),
+    ////        spend_pubkey.data(),
+    ////        tweaks,
+    ////        count, 
+    ////        prefixes.data()
+    ////    ) != UFSECP_OK) return;
+    ////
+    ////// Compare each computed prefix against known outputs (get_match), fire
+    ////// callback with tx_link on a candidate match.
+    ////for (size_t row{}; row < count && !cancel; ++row)
+    ////    if (get_match(/* prefixes[row] vs known outputs */))
+    ////        callback({}, from_little_array<tx_link_t>(batch.correlates[row]));
 }
 
 #else
