@@ -131,9 +131,12 @@ data_chunk batch_verify(const stopper& cancel,
 
 // local
 // ----------------------------------------------------------------------------
+
 inline void push_fail(links_t& fails, const batched::link& id) NOEXCEPT
 {
-    fails.push_back(from_little_array<link_t>(id));
+    // Terminal indicates a partially-written signature table row (no-count).
+    if (id != batched::terminal)
+        fails.push_back(from_little_array<link_t>(id));
 }
 
 // get_failures (ecdsa)

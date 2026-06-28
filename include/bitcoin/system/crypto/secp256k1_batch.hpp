@@ -35,6 +35,7 @@ namespace batched {
 using link = data_array<3>;
 using link_t = unsigned_type<sizeof(link)>;
 using links_t = std::vector<link_t>;
+constexpr link terminal{ 0xff, 0xff, 0xff };
 } // namespace batched
 
 namespace ecdsa {
