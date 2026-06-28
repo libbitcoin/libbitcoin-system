@@ -65,15 +65,20 @@ inline bool verify_signature(const schnorr::batch& batch, size_t row) NOEXCEPT
 // batch_verify
 // ----------------------------------------------------------------------------
 
-
 #if defined(HAVE_ULTRAFAST)
 
 template <typename Batch>
 data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 {
-    // OOM is unrecoverable.
-    static thread_local ufsecp::lbtc::Controller context{};
-    if (!context.ok()) std::abort();
+    // TODO: create uf_context static class wrapper (see ec_context).
+    static thread_local ufsecp_lbtc_ctrl* context = []() NOEXCEPT
+    {
+        ufsecp_lbtc_ctrl* out{};
+        if (ufsecp_lbtc_ctrl_create(&out, UFSECP_LBTC_AUTO) != UFSECP_OK)
+            std::abort();
+
+        return out;
+    }();
 
     // Set up cancellation callback.
     const ufsecp_cancel_fn callback = [](const void* atomic) NOEXCEPT
@@ -84,22 +89,19 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 
     const auto count = batch.correlates.size();
     data_chunk results(count);
+    const auto digests = pointer_cast<const uint8_t>(batch.digests.data());
+    const auto points = pointer_cast<const uint8_t>(batch.points.data());
+    const auto sigs = pointer_cast<const uint8_t>(batch.signatures.data());
     const ufsecp_cancel_token token{ callback, &cancel, 0 };
 
     if constexpr (is_same_type<Batch, schnorr::batch>)
     {
-        ufsecp_lbtc_verify_schnorr_soa_mt(context.get(),
-            pointer_cast<const uint8_t>(batch.digests.data()),
-            pointer_cast<const uint8_t>(batch.points.data()),
-            pointer_cast<const uint8_t>(batch.signatures.data()),
+        ufsecp_lbtc_verify_schnorr_columns(context, digests, points, sigs,
             count, results.data(), &token);
     }
     else
     {
-        ufsecp_lbtc_verify_ecdsa_soa_mt(context.get(),
-            pointer_cast<const uint8_t>(batch.digests.data()),
-            pointer_cast<const uint8_t>(batch.points.data()),
-            pointer_cast<const uint8_t>(batch.signatures.data()),
+        ufsecp_lbtc_verify_ecdsa_columns(context, digests, points, sigs,
             count, results.data(), &token);
     }
 
