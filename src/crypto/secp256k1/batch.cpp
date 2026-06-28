@@ -42,91 +42,90 @@ using namespace chain;
 using namespace batched;
 
 // Array indexing required for c++20 span<T>.
+BC_PUSH_WARNING(NO_USE_OF_SPAN)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // polymorphic namespace selectors (template support)
 // ----------------------------------------------------------------------------
 // local
 
-inline bool verify_signature(const ecdsa::batch& ) NOEXCEPT
+inline bool verify_signature(const ecdsa::batch& batch, size_t row) NOEXCEPT
 {
-    ////return ecdsa::verify_signature(single.point, single.digest,
-    ////    single.signature);
-    return {};
+    return ecdsa::verify_signature(batch.points[row], batch.digests[row],
+        batch.signatures[row]);
 }
 
-inline bool verify_signature(const schnorr::batch& ) NOEXCEPT
+inline bool verify_signature(const schnorr::batch& batch, size_t row) NOEXCEPT
 {
-    ////return schnorr::verify_signature(single.point, single.digest,
-    ////    single.signature);
-    return {};
+    return schnorr::verify_signature(batch.points[row], batch.digests[row],
+        batch.signatures[row]);
 }
 
 // batch_verify
 // ----------------------------------------------------------------------------
+
 
 #if defined(HAVE_ULTRAFAST)
 
 template <typename Batch>
 data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 {
-    ////// OOM is unrecoverable.
-    ////static thread_local ufsecp::lbtc::Controller context{};
-    ////if (!context.ok()) std::abort();
-    ////
-    ////// set up cancellation callback.
-    ////const ufsecp_cancel_fn callback = [](const void* atomic) NOEXCEPT
-    ////{
-    ////    constexpr auto relaxed = std::memory_order_relaxed;
-    ////    return to_int(pointer_cast<const stopper>(atomic)->load(relaxed));
-    ////};
-    ////
-    ////const auto count = batch.size();
-    ////data_chunk results(count);
-    ////const auto out = results.data();
-    ////const auto in = pointer_cast<const uint8_t>(batch.data());
-    ////const ufsecp_cancel_token token{ callback, &cancel, 0 };
-    ////
-    ////if constexpr (is_same_type<Batch, schnorr::batch>)
-    ////{
-    ////    constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
-    ////        sizeof(ec_xonly) + sizeof(ec_signature));
-    ////    ufsecp_lbtc_verify_schnorr_mt(context.get(), in, count, extra_size,
-    ////        out, nullptr, 0, nullptr, 0, &token);
-    ////}
-    ////else
-    ////{
-    ////    constexpr auto extra_size = sizeof(Batch) - (sizeof(hash_digest) +
-    ////        sizeof(ec_compressed) + sizeof(ec_signature));
-    ////    ufsecp_lbtc_verify_ecdsa_opaque_mt(context.get(), in, count, extra_size,
-    ////        out, nullptr, 0, nullptr, 0, &token);
-    ////}
-    ////
-    ////return results;
-    return {};
+    // OOM is unrecoverable.
+    static thread_local ufsecp::lbtc::Controller context{};
+    if (!context.ok()) std::abort();
+
+    // Set up cancellation callback.
+    const ufsecp_cancel_fn callback = [](const void* atomic) NOEXCEPT
+    {
+        constexpr auto relaxed = std::memory_order_relaxed;
+        return to_int(pointer_cast<const stopper>(atomic)->load(relaxed));
+    };
+
+    const auto count = batch.correlates.size();
+    data_chunk results(count);
+    const ufsecp_cancel_token token{ callback, &cancel, 0 };
+
+    if constexpr (is_same_type<Batch, schnorr::batch>)
+    {
+        ufsecp_lbtc_verify_schnorr_soa_mt(context.get(),
+            pointer_cast<const uint8_t>(batch.digests.data()),
+            pointer_cast<const uint8_t>(batch.points.data()),
+            pointer_cast<const uint8_t>(batch.signatures.data()),
+            count, results.data(), &token);
+    }
+    else
+    {
+        ufsecp_lbtc_verify_ecdsa_soa_mt(context.get(),
+            pointer_cast<const uint8_t>(batch.digests.data()),
+            pointer_cast<const uint8_t>(batch.points.data()),
+            pointer_cast<const uint8_t>(batch.signatures.data()),
+            count, results.data(), &token);
+    }
+
+    return results;
 }
 
 #else
 
 template <typename Batch>
-data_chunk batch_verify(const stopper& , const Batch& ) NOEXCEPT
+data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 {
-    ////constexpr auto policy = poolstl::execution::par;
-    ////
-    ////// Used only to produce order for concurrency.
-    ////std::vector<size_t> it(batch.size());
-    ////std::iota(it.begin(), it.end(), zero);
-    ////
-    ////// Collect signature validation results as corresponding integer booleans.
-    ////data_chunk results(batch.size());
-    ////std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
-    ////{
-    ////    if (cancel) return;
-    ////    results.at(row) = to_int<uint8_t>(verify_signature(batch[row]));
-    ////});
-    ////
-    ////return results;
-    return {};
+    constexpr auto policy = poolstl::execution::par;
+
+    const auto count = batch.correlates.size();
+    std::vector<size_t> it(count);
+    std::iota(it.begin(), it.end(), zero);
+
+    // Collect signature validation results as corresponding integer booleans.
+    data_chunk results(count);
+    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
+    {
+        if (cancel) return;
+        results.at(row) = to_int<uint8_t>(verify_signature(batch, row));
+    });
+
+    return results;
 }
 
 #endif
@@ -170,56 +169,56 @@ bool ecdsa::batch::meets_threshold(uint8_t signatures, uint8_t keys,
 
 // Ecdsa (single sig and standard multisig) correlation.
 // O(n) over the sig set, ~100 bytes of stack, no heap.
-links_t ecdsa::batch::get_failures(const stopper& ,
-    const data_chunk& , const batch& ) NOEXCEPT
+links_t ecdsa::batch::get_failures(const stopper& cancel,
+    const data_chunk& out, const batch& in) NOEXCEPT
 {
-    ////BC_ASSERT(out.size() == in.size());
-    ////
-    ////size_t group{};
-    ////links_t fails{};
-    ////for (auto index = one; index <= in.size() && !cancel; ++index)
-    ////{
-    ////    // Find the start of the next group (or end).
-    ////    if ((index != in.size()) &&
-    ////        (in[index].id == in[group].id) &&
-    ////        (in[index].group == in[group].group))
-    ////        continue;
-    ////
-    ////    // Short-circuit single signature.
-    ////    const auto second = add1(group);
-    ////    const auto single = (index == second);
-    ////    if (single)
-    ////    {
-    ////        if (!to_bool(out.at(group)))
-    ////            push_fail(fails, in[group].id);
-    ////
-    ////        group = index;
-    ////        continue;
-    ////    }
-    ////
-    ////    // Build matrix and determine effective m/n from (sig, key) pairs.
-    ////    multisig_matrix successes{};
-    ////    uint8_t max_sig{}, max_key{};
-    ////
-    ////    for (auto row = group; row < index; ++row)
-    ////    {
-    ////        const auto [sig, key] = unpack_word<uint8_t>(in[row].pair);
-    ////        if (to_bool(out.at(row)))
-    ////            set_right_into(successes.at(sig), key);
-    ////
-    ////        max_sig = greater(sig, max_sig);
-    ////        max_key = greater(key, max_key);
-    ////    }
-    ////
-    ////    // Evaluate op_checkmultisig success.
-    ////    if (!meets_threshold(add1(max_sig), add1(max_key), successes))
-    ////        push_fail(fails, in[group].id);
-    ////
-    ////    group = index;
-    ////}
-    ////
-    ////return fails;
-    return {};
+    const auto& correlates = in.correlates;
+    BC_ASSERT(out.size() == correlates.size());
+
+    size_t group{};
+    links_t fails{};
+    for (auto index = one; index <= correlates.size() && !cancel; ++index)
+    {
+        // Find the start of the next group (or end).
+        if ((index != correlates.size()) &&
+            (correlates[index].id == correlates[group].id) &&
+            (correlates[index].group == correlates[group].group))
+            continue;
+
+        // Short-circuit single signature.
+        const auto second = add1(group);
+        const auto single = (index == second);
+        if (single)
+        {
+            if (!to_bool(out.at(group)))
+                push_fail(fails, correlates[group].id);
+
+            group = index;
+            continue;
+        }
+
+        // Build matrix and determine effective m/n from (sig, key) pairs.
+        multisig_matrix successes{};
+        uint8_t max_sig{}, max_key{};
+
+        for (auto row = group; row < index; ++row)
+        {
+            const auto [sig, key] = unpack_word<uint8_t>(correlates[row].pair);
+            if (to_bool(out.at(row)))
+                set_right_into(successes.at(sig), key);
+
+            max_sig = greater(sig, max_sig);
+            max_key = greater(key, max_key);
+        }
+
+        // Evaluate op_checkmultisig success.
+        if (!meets_threshold(add1(max_sig), add1(max_key), successes))
+            push_fail(fails, correlates[group].id);
+
+        group = index;
+    }
+
+    return fails;
 }
 
 // get_failures (schnorr)
@@ -252,52 +251,52 @@ bool schnorr::batch::meets_threshold(uint8_t category, size_t successes,
 
 // Schnorr (single sig and threshold sigs) correlation.
 // O(n) over the sig set, ~100 bytes of stack, no heap.
-links_t schnorr::batch::get_failures(const stopper& ,
-    const data_chunk& , const batch& ) NOEXCEPT
+links_t schnorr::batch::get_failures(const stopper& cancel,
+    const data_chunk& out, const batch& in) NOEXCEPT
 {
-    ////BC_ASSERT(out.size() == in.size());
-    ////
-    ////size_t group{};
-    ////links_t fails{};
-    ////for (auto index = one; index <= in.size() && !cancel; ++index)
-    ////{
-    ////    // Find the start of the next group (or end).
-    ////    if ((index != in.size()) &&
-    ////        (in[index].id == in[group].id) &&
-    ////        (in[index].group == in[group].group))
-    ////        continue;
-    ////
-    ////    // Short-circuit single signature.
-    ////    const auto first = group;
-    ////    const auto second = add1(group);
-    ////    const auto single = (index == second);
-    ////    if (single)
-    ////    {
-    ////        if (!to_bool(out.at(group)))
-    ////            push_fail(fails, in[group].id);
-    ////
-    ////        group = index;
-    ////        continue;
-    ////    }
-    ////
-    ////    // Count successes in the group.
-    ////    size_t successes{};
-    ////    for (auto row = group; row < index; ++row)
-    ////        if (to_bool(out.at(row)))
-    ////            ++successes;
-    ////
-    ////    // Get min and max from first two rows (max only for op_within).
-    ////    const auto minimum = in[first].pair;
-    ////    const auto maximum = in[second].pair;
-    ////    const auto category = in[first].category;
-    ////    if (!meets_threshold(category, successes, minimum, maximum))
-    ////        push_fail(fails, in[group].id);
-    ////
-    ////    group = index;
-    ////}
-    ////
-    ////return fails;
-    return {};
+    const auto& correlates = in.correlates;
+    BC_ASSERT(out.size() == correlates.size());
+
+    size_t group{};
+    links_t fails{};
+    for (auto index = one; index <= correlates.size() && !cancel; ++index)
+    {
+        // Find the start of the next group (or end).
+        if ((index != correlates.size()) &&
+            (correlates[index].id == correlates[group].id) &&
+            (correlates[index].group == correlates[group].group))
+            continue;
+
+        // Short-circuit single signature.
+        const auto first = group;
+        const auto second = add1(group);
+        const auto single = (index == second);
+        if (single)
+        {
+            if (!to_bool(out.at(group)))
+                push_fail(fails, correlates[group].id);
+
+            group = index;
+            continue;
+        }
+
+        // Count successes in the group.
+        size_t successes{};
+        for (auto row = group; row < index; ++row)
+            if (to_bool(out.at(row)))
+                ++successes;
+
+        // Get min and max from first two rows (max only for op_within).
+        const auto minimum = correlates[first].pair;
+        const auto maximum = correlates[second].pair;
+        const auto category = correlates[first].category;
+        if (!meets_threshold(category, successes, minimum, maximum))
+            push_fail(fails, correlates[group].id);
+
+        group = index;
+    }
+
+    return fails;
 }
 
 // get_match (silent)
@@ -401,6 +400,8 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
 
 #endif
 
+BC_POP_WARNING()
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace system
