@@ -44,9 +44,9 @@ struct BC_API batch
 #pragma pack(push, 1)
     struct correlate_t
     {
+        batched::link id;
         uint8_t pair;
         uint16_t group;
-        batched::link id;
     };
 #pragma pack(pop)
 
@@ -80,10 +80,10 @@ struct BC_API batch
 #pragma pack(push, 1)
     struct correlate_t
     {
+        batched::link id;
         uint8_t category;
         uint16_t pair;
         uint16_t group;
-        batched::link id;
     };
 #pragma pack(pop)
 
