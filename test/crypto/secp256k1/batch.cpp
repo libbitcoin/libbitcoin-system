@@ -18,6 +18,8 @@
  */
 #include "../../test.hpp"
 
+BC_PUSH_WARNING(NO_USE_OF_SPAN)
+
 BOOST_AUTO_TEST_SUITE(secp256k1_tests)
 
 const ec_secret one = base16_array
@@ -73,7 +75,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
         { signatures.data(), signatures.size() }
     };
 
-    stopper cancel{};
+    const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE(tokens.empty());
 }
@@ -116,7 +118,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expecte
         { signatures.data(), signatures.size() }
     };
 
-    stopper cancel{};
+    const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
 
@@ -160,7 +162,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected
         { signatures.data(), signatures.size() }
     };
 
-    stopper cancel{};
+    const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE(tokens.empty());
 }
@@ -204,7 +206,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expect
         { signatures.data(), signatures.size() }
     };
 
-    stopper cancel{};
+    const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
 
@@ -330,7 +332,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
         { signatures.data(), signatures.size() }
     };
 
-    stopper cancel{};
+    const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE(tokens.empty());
 }
@@ -378,7 +380,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
         { signatures.data(), signatures.size() }
     };
 
-    stopper cancel{};
+    const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
@@ -477,3 +479,5 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__unknown_category__failure)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BC_POP_WARNING()

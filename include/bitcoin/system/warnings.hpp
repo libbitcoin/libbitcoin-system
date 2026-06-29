@@ -76,6 +76,7 @@
         #define NO_METHOD_HIDING 26434
         #define NO_GOTO 26438
         #define USE_NOEXCEPT_FOR_FUNCTION 26440
+        #define NO_VIEW_REFERENCING 26445
         #define NO_ARRAY_INDEXING 26446
         #define NO_THROW_IN_NOEXCEPT 26447
         #define NO_UNSAFE_COPY_N 26459
@@ -95,7 +96,7 @@
         #define USE_CONST 26496
         #define USE_CONSTEXPR_FOR_FUNCTION 26497
         #define NO_USE_OF_MOVED_OBJECT 26800
-        #define NO_USE_OF_SPAN 26812
+        #define NO_USE_OF_SPAN 26821
         #define NO_INCOMPLETE_SWITCH 26818
         #define UNSATISFIED_EXPECTATION 28020
     #endif
