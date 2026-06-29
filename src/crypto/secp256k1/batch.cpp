@@ -45,6 +45,7 @@ using namespace batched;
 // Array indexing required for c++20 span<T>.
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // polymorphic namespace selectors (template support)
@@ -421,6 +422,7 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
 
 #endif
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
