@@ -91,14 +91,14 @@ BOOST_AUTO_TEST_CASE(threshold__to_category__greaterthan__greater)
     BOOST_CHECK(threshold::to_category(opcode::greaterthan) == threshold::category_t::greater);
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__lessthanorequal__not_lesser)
+BOOST_AUTO_TEST_CASE(threshold__to_category__lessthanorequal__not_greater)
 {
-    BOOST_CHECK(threshold::to_category(opcode::lessthanorequal) == threshold::category_t::not_lesser);
+    BOOST_CHECK(threshold::to_category(opcode::lessthanorequal) == threshold::category_t::not_greater);
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__greaterthanorequal__not_greater)
+BOOST_AUTO_TEST_CASE(threshold__to_category__greaterthanorequal__not_lesser)
 {
-    BOOST_CHECK(threshold::to_category(opcode::greaterthanorequal) == threshold::category_t::not_greater);
+    BOOST_CHECK(threshold::to_category(opcode::greaterthanorequal) == threshold::category_t::not_lesser);
 }
 
 BOOST_AUTO_TEST_CASE(threshold__to_category__within__between)
