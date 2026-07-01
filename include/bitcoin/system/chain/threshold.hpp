@@ -77,9 +77,9 @@ struct threshold
             case opcode::greaterthan:
                 return category_t::greater;
             case opcode::lessthanorequal:
-                return category_t::not_lesser;
-            case opcode::greaterthanorequal:
                 return category_t::not_greater;
+            case opcode::greaterthanorequal:
+                return category_t::not_lesser;
             case opcode::within:
                 return category_t::between;
             default:
