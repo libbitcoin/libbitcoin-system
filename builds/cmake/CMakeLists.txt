@@ -75,15 +75,14 @@ option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
-option( with-ultrafast "Use shrec/UltrafastSecp256k1." OFF )
-option( with-secp256k1 "Use bitcoin-core/secp256k1." ON )
-option( with-tests "Build tests." ON )
-option( with-examples "Build examples." ON )
+option( with-ultrafast "Use shrec/UltrafastSecp256k1 library." OFF )
+option( with-secp256k1 "Use bitcoin-core/secp256k1 library." ON )
+option( with-tests "Compile with unit tests." ON )
+option( with-examples "Compile with examples." ON )
 
 #------------------------------------------------------------------------------
 # Dependencies.
 #------------------------------------------------------------------------------
-
 if ( BUILD_SHARED_LIBS )
   set( Boost_USE_STATIC_LIBS "OFF" )
   set( libsecp256k1_USE_STATIC_LIBS "OFF" )
@@ -117,7 +116,6 @@ endif()
 #------------------------------------------------------------------------------
 # Compiler options.
 #------------------------------------------------------------------------------
-
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
@@ -256,12 +254,7 @@ endif()
 #------------------------------------------------------------------------------
 # Linker options.
 #------------------------------------------------------------------------------
-
 include(CheckLinkerFlag)
-
-#------------------------------------------------------------------------------
-# Configurable file(s).
-#------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # libbitcoin-system library
@@ -292,7 +285,7 @@ target_compile_options( libbitcoin-system
     $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
     $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-    -fstack-protector-all
+    $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
 )
 
 file( GLOB_RECURSE libbitcoin_system_HEADERS CONFIGURE_DEPENDS
@@ -379,7 +372,7 @@ if ( with-tests )
       $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
       $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-      -fstack-protector-all
+      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
   )
 
   file( GLOB_RECURSE libbitcoin_system_test_SOURCES CONFIGURE_DEPENDS
@@ -429,7 +422,7 @@ if ( with-examples )
       $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
       $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-      -fstack-protector-all
+      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
   )
 
   file( GLOB_RECURSE libbitcoin_system_examples_SOURCES CONFIGURE_DEPENDS
@@ -453,6 +446,7 @@ if ( with-examples )
       SOVERSION ${PROJECT_VERSION_MAJOR}
   )
 endif()
+
 #------------------------------------------------------------------------------
 # Installation routine.
 #------------------------------------------------------------------------------

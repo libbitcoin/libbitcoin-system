@@ -6,15 +6,10 @@
  |
  -->
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-
-    <!-- boost::multiprecision::number<boost::multiprecision::cpp_int_backend<*, *, 0, 0, void>> -->
     <Type Name="boost::multiprecision::number&lt;*&gt;">
         <DisplayString>{ m_backend }</DisplayString>
     </Type>
-
-    <!-- boost::multiprecision::backends::cpp_int_backend<*,*,0,0,void> -->
     <Type Name="boost::multiprecision::backends::cpp_int_backend&lt;*,*,0,0,void&gt;">
         <DisplayString>{ m_data }</DisplayString>
     </Type>
-
 </AutoVisualizer>
