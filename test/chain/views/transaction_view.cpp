@@ -273,4 +273,58 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__tx4_witness__expected)
     BOOST_CHECK_EQUAL(witness, expected);
 }
 
+// to_data
+
+BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_witness__matches_transaction)
+{
+    // Serialized to buffer WITH witness data, parsed for a witness node.
+    const auto transaction = test::tx4.to_data(true);
+    const auto& tx = test::tx4;
+    stream::in::fast istream{ transaction };
+    read::bytes::fast reader{ istream };
+
+    const chain::transaction_view view{ reader, transaction, false, true };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_REQUIRE(view.is_segregated());
+
+    // Witnessed form is a copy; stripped drops marker, flag and witness.
+    data_chunk witnessed(view.serialized_size(true));
+    stream::out::fast witnessed_stream(witnessed);
+    write::bytes::fast witnessed_sink(witnessed_stream);
+    view.to_data(witnessed_sink, true);
+    BOOST_CHECK_EQUAL(witnessed, tx.to_data(true));
+
+    data_chunk stripped(view.serialized_size(false));
+    stream::out::fast stripped_stream(stripped);
+    write::bytes::fast stripped_sink(stripped_stream);
+    view.to_data(stripped_sink, false);
+    BOOST_CHECK_EQUAL(stripped, tx.to_data(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_stripped_source__stripped)
+{
+    // Serialized to buffer WITHOUT witness data (nothing to strip).
+    const auto transaction = test::tx4.to_data(false);
+    const auto& tx = test::tx4;
+    stream::in::fast istream{ transaction };
+    read::bytes::fast reader{ istream };
+
+    const chain::transaction_view view{ reader, transaction, false, false };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_REQUIRE(!view.is_segregated());
+
+    // Both forms are the stripped bytes; witness is never added.
+    data_chunk witnessed(view.serialized_size(true));
+    stream::out::fast witnessed_stream(witnessed);
+    write::bytes::fast witnessed_sink(witnessed_stream);
+    view.to_data(witnessed_sink, true);
+    BOOST_CHECK_EQUAL(witnessed, tx.to_data(false));
+
+    data_chunk stripped(view.serialized_size(false));
+    stream::out::fast stripped_stream(stripped);
+    write::bytes::fast stripped_sink(stripped_stream);
+    view.to_data(stripped_sink, false);
+    BOOST_CHECK_EQUAL(stripped, tx.to_data(false));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

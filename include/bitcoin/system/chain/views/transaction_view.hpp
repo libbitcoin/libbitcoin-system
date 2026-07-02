@@ -49,6 +49,7 @@ public:
     uint32_t version() const NOEXCEPT;
     uint32_t locktime() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
+    void to_data(writer& sink, bool witness) const NOEXCEPT;
     const hash_digest& hash(bool witness) const NOEXCEPT;
 
     /// Store helpers.
