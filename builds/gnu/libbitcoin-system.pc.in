@@ -5,12 +5,14 @@
 #
 ###############################################################################
 
+
 # Substitutions
 #==============================================================================
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
+
 
 # Metadata
 #==============================================================================
@@ -22,15 +24,26 @@ Version: @PACKAGE_VERSION@
 
 # Variables
 #==============================================================================
-# Dependencies that publish package configuration.
-#------------------------------------------------------------------------------
-Requires: @secp256k1_PKG@
+Requires: \
+    @secp256k1_PKG@ \
+    @UltrafastSecp256k1_PKG@
 
-# Include directory and any other required compiler flags.
-#------------------------------------------------------------------------------
-Cflags: -I${includedir} @avx2@ @avx512@ @shani@ @sse41@ @boost_CPPFLAGS@
+Cflags: \
+    -I${includedir} \
+    @avx2@ \
+    @avx512@ \
+    @shani@ \
+    @sse41@ \
+    @boost_CPPFLAGS@
 
-# Lib directory, lib and any required that do not publish pkg-config.
-#------------------------------------------------------------------------------
-Libs: -L${libdir} -lbitcoin-system @boost_LDFLAGS@ @boost_container_LIBS@ @boost_iostreams_LIBS@ @boost_json_LIBS@ @boost_locale_LIBS@ @boost_program_options_LIBS@ @boost_thread_LIBS@ @boost_url_LIBS@
-
+Libs: \
+    -L${libdir} \
+    -lbitcoin-system \
+    @boost_LDFLAGS@ \
+    @boost_container_LIBS@ \
+    @boost_iostreams_LIBS@ \
+    @boost_json_LIBS@ \
+    @boost_locale_LIBS@ \
+    @boost_program_options_LIBS@ \
+    @boost_thread_LIBS@ \
+    @boost_url_LIBS@

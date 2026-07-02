@@ -18,16 +18,16 @@ Makefile.in
 .libs
 *.la
 *.lo
-/aclocal.m4
-/autom4te.cache
-/build-aux
-/config.*
-/configure
-/libtool
-.dirstamp
+builds/gnu/aclocal.m4
+builds/gnu/autom4te.cache
+builds/gnu/build-aux
+builds/gnu/config.*
+builds/gnu/configure
+builds/gnu/libtool
+builds/gnu/.dirstamp
 
 # pkg-config pc file from .pc.in
-*.pc
+builds/gnu/*.pc
 
 # msbuild/msvc
 /.vs
