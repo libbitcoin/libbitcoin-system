@@ -327,4 +327,32 @@ BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_stripped_source__stripped)
     BOOST_CHECK_EQUAL(stripped, tx.to_data(false));
 }
 
+BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_overloads__match_transaction)
+{
+    // Serialized to buffer WITH witness data, parsed for a witness node.
+    const auto transaction = test::tx4.to_data(true);
+    const auto& tx = test::tx4;
+    stream::in::fast istream{ transaction };
+    read::bytes::fast reader{ istream };
+
+    const chain::transaction_view view{ reader, transaction, false, true };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_REQUIRE(view.is_segregated());
+
+    // Chunk overload.
+    BOOST_CHECK_EQUAL(view.to_data(true), tx.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), tx.to_data(false));
+
+    // Stream overload.
+    std::stringstream witnessed_stream{};
+    view.to_data(witnessed_stream, true);
+    BOOST_REQUIRE(witnessed_stream);
+    BOOST_CHECK_EQUAL(to_chunk(witnessed_stream.str()), tx.to_data(true));
+
+    std::stringstream stripped_stream{};
+    view.to_data(stripped_stream, false);
+    BOOST_REQUIRE(stripped_stream);
+    BOOST_CHECK_EQUAL(to_chunk(stripped_stream.str()), tx.to_data(false));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -107,64 +107,15 @@ BOOST_AUTO_TEST_CASE(block_view__to_data__block2a_witness__matches_block)
 
 BOOST_AUTO_TEST_CASE(block_view__to_data__mixed_witness_and_legacy__matches_block)
 {
-    using namespace system::chain;
-
-    // One segregated (witness) transaction and one legacy (non-witness)
-    // transaction in a single block, so the per-transaction witness strip is
-    // exercised both ways within one to_data(false) call.
-    const block mixed
-    {
-        header
-        {
-            0x31323334,         // version
-            test::block1a.hash(),
-            system::hash_digest{ 0x2b },// merkle_root
-            0x41424344,         // timestamp
-            0x51525354,         // bits
-            0x61626364          // nonce
-        },
-        transactions
-        {
-            transaction         // segregated (has witness)
-            {
-                0xb2,           // version
-                inputs
-                {
-                    input
-                    {
-                        point{ test::block1a.transactions_ptr()->front()->hash(false), 0x00 },
-                        script{ { { opcode::checkmultisig }, { opcode::pick } } },
-                        witness{ "[242424]" },
-                        0xb2    // sequence
-                    }
-                },
-                outputs{ output{ 0x81, script{ { { opcode::pick } } } } },
-                0x81            // locktime
-            },
-            transaction         // legacy (no witness)
-            {
-                0xb3,           // version
-                inputs
-                {
-                    input
-                    {
-                        point{ test::block1a.transactions_ptr()->front()->hash(false), 0x01 },
-                        script{ { { opcode::checkmultisig }, { opcode::roll } } },
-                        witness{},
-                        0x83    // sequence
-                    }
-                },
-                outputs{ output{ 0x81, script{ { { opcode::pick } } } } },
-                0x81            // locktime
-            }
-        }
-    };
-
-    const chain::block_view view{ mixed.to_data(true), true };
+    // block2c has one segregated (witness) and one legacy (non-witness)
+    // transaction, so the per-transaction witness strip is exercised both
+    // ways within one to_data(false) call.
+    const auto& block = test::block2c;
+    const chain::block_view view{ block.to_data(true), true };
     BOOST_REQUIRE(view.is_segregated());
     BOOST_REQUIRE_EQUAL(view.transactions(), 2u);
-    BOOST_CHECK_EQUAL(view.to_data(true), mixed.to_data(true));
-    BOOST_CHECK_EQUAL(view.to_data(false), mixed.to_data(false));
+    BOOST_CHECK_EQUAL(view.to_data(true), block.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
 }
 
 // identify1 and identify2

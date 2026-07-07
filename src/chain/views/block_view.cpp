@@ -86,8 +86,7 @@ void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
     }
 
     // Strip witness: the header and transaction count are unaffected.
-    sink.write_bytes({ buffer_->data(), std::next(buffer_->data(),
-        header::serialized_size()) });
+    sink.write_bytes(buffer_->data(), header::serialized_size());
     sink.write_variable(txs_.size());
     for (const auto& tx: txs_)
         tx.to_data(sink, false);

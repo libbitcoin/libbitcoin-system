@@ -39,6 +39,11 @@ public:
     transaction_view(reader& source, const data_chunk& block_buffer,
         bool coinbase, bool witness) NOEXCEPT;
 
+    /// Serialization.
+    data_chunk to_data(bool witness) const NOEXCEPT;
+    void to_data(std::ostream& stream, bool witness) const NOEXCEPT;
+    void to_data(writer& sink, bool witness) const NOEXCEPT;
+
     /// Properties.
     bool is_valid() const NOEXCEPT;
     bool is_coinbase() const NOEXCEPT;
@@ -49,7 +54,6 @@ public:
     uint32_t version() const NOEXCEPT;
     uint32_t locktime() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
-    void to_data(writer& sink, bool witness) const NOEXCEPT;
     const hash_digest& hash(bool witness) const NOEXCEPT;
 
     /// Store helpers.
