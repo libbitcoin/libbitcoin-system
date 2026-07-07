@@ -139,8 +139,8 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/pseudo_random.cpp \
     ${srcdir}/../../src/crypto/ring_signature.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
     ${srcdir}/../../src/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
     ${srcdir}/../../src/crypto/secp256k1/recover.cpp \
@@ -1070,6 +1070,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/math/power.cpp \
     ${srcdir}/../../test/math/rotate.cpp \
     ${srcdir}/../../test/math/sign.cpp \
+    ${srcdir}/../../test/mocks/blocks.cpp \
     ${srcdir}/../../test/radix/base_10.cpp \
     ${srcdir}/../../test/radix/base_16.cpp \
     ${srcdir}/../../test/radix/base_2048.cpp \
@@ -1146,8 +1147,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/words/languages.cpp \
     ${srcdir}/../../test/words/catalogs/electrum.cpp \
     ${srcdir}/../../test/words/catalogs/electrum_v1.cpp \
-    ${srcdir}/../../test/words/catalogs/mnemonic.cpp \
-    ${srcdir}/../../test/mocks/blocks.cpp
+    ${srcdir}/../../test/words/catalogs/mnemonic.cpp
 
 TESTS = test_runner.sh
 
