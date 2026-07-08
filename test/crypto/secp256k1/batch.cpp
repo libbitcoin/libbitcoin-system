@@ -396,6 +396,30 @@ struct schnorr_accessor
 
 using category_t = system::chain::threshold::category_t;
 
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__single__success)
+{
+    // Single is recorded with minimum 1, one verified signature.
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::single), 1, 1, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__single__failure)
+{
+    // Zero verified signatures does not satisfy single.
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::single), 0, 1, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__single__excess__failure)
+{
+    // Guards the equal-aliasing: more successes than expected fails.
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::single), 2, 1, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__zero__success)
+{
+    // Zero successes satisfies a zero threshold (e.g. <0> numequal).
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::equal), 0, 0, 0));
+}
+
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__success)
 {
     BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::equal), 5, 5, 0));
@@ -416,6 +440,18 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__failure)
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::inequal), 5, 5, 0));
 }
 
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__zero_successes__success)
+{
+    // Zero is less than any positive minimum.
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::lesser), 0, 1, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__zero_minimum__failure)
+{
+    // Nothing is less than zero (unsigned floor).
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::lesser), 0, 0, 0));
+}
+
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__success)
 {
     BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::lesser), 3, 5, 0));
@@ -424,6 +460,11 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__success)
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__failure)
 {
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::lesser), 5, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__zero_minimum__success)
+{
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::greater), 1, 0, 0));
 }
 
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__success)
@@ -436,6 +477,12 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__failure)
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::greater), 5, 5, 0));
 }
 
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__zero__success)
+{
+    // Zero is not lesser than zero.
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 0, 0, 0));
+}
+
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__success)
 {
     BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 5, 5, 0));
@@ -445,6 +492,12 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__success)
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__failure)
 {
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 3, 5, 0));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__zero__success)
+{
+    // Zero is not greater than zero.
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 0, 0, 0));
 }
 
 BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__success)
@@ -501,6 +554,18 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__inverted_range__fa
 {
     // max < min is unsatisfiable [op_within].
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 7, 3));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__zero_minimum__success)
+{
+    // Half-open [0, 1): only zero successes passes.
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 0, 0, 1));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__zero_minimum_at_maximum__failure)
+{
+    // Half-open [0, 1): one success is at the exclusive maximum.
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 1, 0, 1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
