@@ -458,24 +458,49 @@ BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__failure)
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 7, 5, 0));
 }
 
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__success)
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__interior__success)
 {
     BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 3, 7));
 }
 
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__failure_below)
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__at_minimum__success)
+{
+    // Lower bound is inclusive [op_within].
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 3, 3, 7));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__below_maximum__success)
+{
+    // Last passing value of the half-open range.
+    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 6, 3, 7));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__at_maximum__failure)
+{
+    // Upper bound is exclusive [op_within]: min <= x < max.
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 7, 3, 7));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__below_minimum__failure)
 {
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 2, 3, 7));
 }
 
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__failure_above)
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__above_maximum__failure)
 {
     BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 8, 3, 7));
 }
 
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__unknown_category__failure)
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__empty_range__failure)
 {
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::unknown), 5, 5, 5));
+    // min == max is an empty half-open range, unsatisfiable [op_within].
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 5, 5));
+}
+
+BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__inverted_range__failure)
+{
+    // max < min is unsatisfiable [op_within].
+    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 7, 3));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

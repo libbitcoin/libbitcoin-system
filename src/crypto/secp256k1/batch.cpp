@@ -247,7 +247,8 @@ bool schnorr::batch::meets_threshold(uint8_t category, size_t successes,
         case threshold::category_t::not_lesser:
             return !is_lesser(successes, minimum);
         case threshold::category_t::between:
-            return !is_limited(successes, minimum, maximum);
+            return !is_lesser(successes, minimum)
+                && is_lesser(successes, maximum);
         default:
             return false;
     }
