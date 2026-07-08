@@ -319,8 +319,7 @@ is_ecdsa_batchable() const NOEXCEPT
 
     const auto& ops = script_->ops();
     return chain::script::is_pay_public_key_pattern(ops)
-        || chain::script::is_pay_key_hash_pattern(ops)
-        || chain::script::is_pay_witness_key_hash_pattern(ops);
+        || chain::script::is_pay_key_hash_pattern(ops);
 }
 
 TEMPLATE
