@@ -33,7 +33,6 @@ namespace machine {
 
 // Signature verify (with batching).
 // ----------------------------------------------------------------------------
-// If compress or parse fails it's not technically a miss (invalid script).
 
 TEMPLATE
 inline bool CLASS::
@@ -47,7 +46,12 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
             // Compress failure is a verify failure.
             ec_compressed key;
             if (!to_compressed(key, point))
-                return false;
+            {
+                // Count as missed, consistent with not batchable telemetry.
+                capture_.fire(chain::signatures::miss::ecdsa, one);
+                capture_.log(*script_);
+                return ecdsa::verify_signature(point, hash, signature);
+            }
 
             // Capture is bypass (single sigop).
             capture_.batched.store(true, relaxed);
@@ -78,7 +82,12 @@ try_batch_multisig_verification(const chunk_xptrs& points,
             // TODO: this could be further short-circuited.
             hash_digest hash; ec_compresseds keys; ec_signatures sigs;
             if (!parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
+            {
+                // Count as missed, consistent with not batchable telemetry.
+                capture_.fire(chain::signatures::miss::multisig, points.size());
+                capture_.log(*script_);
                 return false;
+            }
 
             // Capture is bypass (single sigop).
             capture_.batched.store(true, relaxed);
@@ -90,6 +99,7 @@ try_batch_multisig_verification(const chunk_xptrs& points,
             // Not batchable.
             capture_.fire(chain::signatures::miss::multisig, points.size());
             capture_.log(*script_);
+            return false;
         }
     }
 
