@@ -271,6 +271,7 @@ links_t schnorr::batch::get_failures(const stopper& cancel,
             (correlates[index].group == correlates[group].group))
             continue;
 
+        // BUGBUG: no all single rows require success of the row.
         // Short-circuit single signature.
         const auto first = group;
         const auto second = add1(group);

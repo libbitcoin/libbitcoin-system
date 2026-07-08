@@ -97,43 +97,9 @@ try_batch_multisig_verification(const chunk_xptrs& points,
     return false;
 }
 
-// The store has failed to commit the group. The store may
-// be faulted (unrecoverable), or the disk may be full
-// (recoverable). It is too late to return false here as
-// false on the last threshold op will fail the script.
-// The script failure propagates to a block invalidity and
-// a consesus error, problematic in the case of disk full.
-// So this must be managed by the node. When a false is
-// propagated from this write via the node, the store
-// failure must be atomic (all or no subtables written
-// fully) so as to not corrupt stored batches. This just
-// requires preallocation across all tables before write,
-// first allocation at the primary table, with sentinel
-// write to indicate first phase commit. Then upon all
-// allocations complete, the write is assured, and the
-// sentinel is eventually overwritten as the second phase
-// commit. If a secondary table fails to allocate, the
-// operation terminates and the sentinel allows the batch
-// result to be ignored in post-processing. In this case of
-// false return from the store write, the node may honor
-// a failure result from the block validation, as this
-// store ault will not produce a failure, as true is
-// returned here. However validation success remains
-// unknown and would be presumed to be contained within the
-// batch table. However that is not so in this case, as the
-// commit failed due to an allocation failure on one of the
-// tables. So the node must treat the block as state
-// unknown. Given that the state of the block is unchanged
-// until the batch results complete, this will stall the
-// node during continuous operation (not if there is a
-// restart) unless the block is re-entered into the
-// validator's asio work queue. So in the case of a store
-// fault on threshold commit, the validator must re-
-// introduce the block to it queue. Upon a restart the
-// batches are processed at start, block states updated to
-// valid or unconfirmable, and then the validation queue is
-// repopulated as always.
-
+// If the store fails to commit the group, the validator must re-introduce the
+// block to the queue, as collection otherwise implies the script is valid. And
+// threshold collection here cannot be reset once started.
 TEMPLATE
 inline bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
