@@ -90,7 +90,7 @@ struct BC_API signatures
     };
     const schnorr_handler schnorr
     {
-        [] (const hash_digest&, const ec_xonly, const ec_signature&) NOEXCEPT
+        [] (const hash_digest&, const ec_xonly&, const ec_signature&) NOEXCEPT
         {
             return false;
         }
