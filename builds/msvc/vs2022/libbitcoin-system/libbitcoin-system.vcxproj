@@ -359,6 +359,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\arena.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\annex.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\batch.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\cursor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\multisig.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\signatures.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\threshold.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
@@ -398,11 +403,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\prevout.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\signatures.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stripper.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\taproot.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\tapscript.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\threshold.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\block_view.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\transaction_view.hpp" />

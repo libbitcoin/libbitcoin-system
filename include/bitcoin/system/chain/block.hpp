@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
 #include <memory>
+#include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
-#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

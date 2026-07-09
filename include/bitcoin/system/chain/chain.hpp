@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_HPP
 
 #include <bitcoin/system/chain/annex.hpp>
+#include <bitcoin/system/chain/batch/batch.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
@@ -35,12 +36,10 @@
 #include <bitcoin/system/chain/outpoint.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
-#include <bitcoin/system/chain/signatures.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/stripper.hpp>
 #include <bitcoin/system/chain/taproot.hpp>
 #include <bitcoin/system/chain/tapscript.hpp>
-#include <bitcoin/system/chain/threshold.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/views/block_view.hpp>
 #include <bitcoin/system/chain/views/transaction_view.hpp>

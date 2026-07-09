@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
 
 #include <atomic>
+#include <bitcoin/system/chain/batch/threshold.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/threshold.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

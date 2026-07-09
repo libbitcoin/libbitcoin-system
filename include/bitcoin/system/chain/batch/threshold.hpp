@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_THRESHOLD_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_THRESHOLD_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_THRESHOLD_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_BATCH_THRESHOLD_HPP
 
 #include <atomic>
 #include <bitcoin/system/chain/enums/opcode.hpp>
