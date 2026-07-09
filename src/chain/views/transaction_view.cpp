@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/chain/views/transaction_view.hpp>
 
+#include <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
@@ -187,6 +188,43 @@ uint32_t transaction_view::locktime() const NOEXCEPT
 size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
 {
     return witness && is_segregated() ? size_ : stripped_size();
+}
+
+data_chunk transaction_view::to_data(bool witness) const NOEXCEPT
+{
+    data_chunk data(serialized_size(witness));
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out, witness);
+    return data;
+}
+
+void transaction_view::to_data(std::ostream& stream,
+    bool witness) const NOEXCEPT
+{
+    write::bytes::ostream out(stream);
+    to_data(out, witness);
+}
+
+void transaction_view::to_data(writer& sink, bool witness) const NOEXCEPT
+{
+    // Witness can be stripped but never added (mirrors chain::transaction).
+    if (witness && is_segregated())
+    {
+        sink.write_bytes(tx_ptr_, size_);
+        return;
+    }
+
+    // Stripped form drops the witness marker/flag sentinels (after version)
+    // and the witness data (before locktime); inputs/outputs are unchanged.
+    const auto sentinels = is_zero(witnesses_size_) ? zero : sentinels_size;
+    const auto body = std::next(tx_ptr_, version_size + sentinels);
+    const auto body_size = size_ - witnesses_size_ - locktime_size -
+        version_size - sentinels;
+
+    sink.write_bytes(tx_ptr_, version_size);
+    sink.write_bytes(body, body_size);
+    sink.write_bytes(std::next(tx_ptr_, size_ - locktime_size), locktime_size);
 }
 
 const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT

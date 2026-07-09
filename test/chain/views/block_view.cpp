@@ -68,6 +68,56 @@ BOOST_AUTO_TEST_CASE(block_view__construct__block1a_non_witness__valid)
     BOOST_CHECK_EQUAL(view.serialized_size(false), block.serialized_size(false));
 }
 
+// to_data
+
+BOOST_AUTO_TEST_CASE(block_view__to_data__genesis__matches_block)
+{
+    const auto& block = test::genesis;
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_CHECK_EQUAL(view.to_data(true), block.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__to_data__block1a_witness__matches_block)
+{
+    const auto& block = test::block1a;
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_CHECK_EQUAL(view.to_data(true), block.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__to_data__block1a_stripped_source__stripped)
+{
+    const auto& block = test::block1a;
+    const chain::block_view view{ block.to_data(false), false };
+    BOOST_CHECK_EQUAL(view.to_data(true), block.to_data(false));
+    BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__to_data__block2a_witness__matches_block)
+{
+    // block2a is a multi-transaction block bearing witness data.
+    const auto& block = test::block2a;
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_REQUIRE(view.is_segregated());
+    BOOST_CHECK_EQUAL(view.transactions(), block.transactions_ptr()->size());
+    BOOST_CHECK_EQUAL(view.to_data(true), block.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__to_data__mixed_witness_and_legacy__matches_block)
+{
+    // block2c has one segregated (witness) and one legacy (non-witness)
+    // transaction, so the per-transaction witness strip is exercised both
+    // ways within one to_data(false) call.
+    const auto& block = test::block2c;
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_REQUIRE(view.is_segregated());
+    BOOST_REQUIRE_EQUAL(view.transactions(), 2u);
+    BOOST_CHECK_EQUAL(view.to_data(true), block.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
+}
+
 // identify1 and identify2
 
 BOOST_AUTO_TEST_CASE(block_view__identify__genesis__expected)

@@ -76,22 +76,20 @@ void block_view::to_data(std::ostream& stream, bool witness) const NOEXCEPT
     to_data(out, witness);
 }
 
-void block_view::to_data(writer& , bool ) const NOEXCEPT
+void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
 {
-    ////if (witness)
-    ////{
-    ////    sink.write_bytes(*buffer_);
-    ////    return;
-    ////}
-    ////
-    // TODO: write header from first bytes in buffer.
-    ////header_->to_data(sink);
-    ////sink.write_variable(txs_->size());
-    ////
-    // TODO: add writers to tx, skip witness as applicable.
-    ////for (const auto& tx: *txs_)
-    ////    tx->to_data(sink, witness);
-    BC_ASSERT_MSG(false, "not implemented");
+    // The witnessed form is the original buffer.
+    if (witness)
+    {
+        sink.write_bytes(*buffer_);
+        return;
+    }
+
+    // Strip witness: the header and transaction count are unaffected.
+    sink.write_bytes(buffer_->data(), header::serialized_size());
+    sink.write_variable(txs_.size());
+    for (const auto& tx: txs_)
+        tx.to_data(sink, false);
 }
 
 // public

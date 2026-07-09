@@ -730,6 +730,53 @@ const block block2b
         }
     }
 };
+const block block2c
+{
+    header
+    {
+        0x31323334,         // version
+        block1a.hash(),     // previous_block_hash
+        hash_digest{ 0x2c },// merkle_root
+        0x41424344,         // timestamp
+        0x51525354,         // bits
+        0x61626364          // nonce
+    },
+    transactions
+    {
+        transaction         // segregated (has witness)
+        {
+            0xb2,           // version
+            inputs
+            {
+                input
+                {
+                    point{ block1a.transactions_ptr()->front()->hash(false), 0x00 },
+                    script{ { { opcode::checkmultisig }, { opcode::pick } } },
+                    witness{ "[242424]" },
+                    0xb2    // sequence
+                }
+            },
+            outputs{ output{ 0x81, script{ { { opcode::pick } } } } },
+            0x81            // locktime
+        },
+        transaction         // legacy (no witness)
+        {
+            0xb3,           // version
+            inputs
+            {
+                input
+                {
+                    point{ block1a.transactions_ptr()->front()->hash(false), 0x01 },
+                    script{ { { opcode::checkmultisig }, { opcode::roll } } },
+                    witness{},
+                    0x83    // sequence
+                }
+            },
+            outputs{ output{ 0x81, script{ { { opcode::pick } } } } },
+            0x81            // locktime
+        }
+    }
+};
 const transaction tx2b
 {
     transaction
