@@ -228,10 +228,10 @@ private:
 
     // Verify helpers.
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static inline chain::strippers create_strip_ops(
-        const chunk_xptrs& endorsements) NOEXCEPT;
-    static inline chain::strippers create_strip_ops(
-        const chunk_xptr& endorsement) NOEXCEPT;
+    static inline chain::stripper::span create_strip_ops(
+        chain::stripper::buffer& out, const chunk_xptrs& endorsements) NOEXCEPT;
+    static inline chain::stripper::span create_strip_ops(
+        chain::stripper::buffer& out, const chunk_xptr& endorsement) NOEXCEPT;
 
     // Batching helpers.
     inline bool parse_ecdsa_multisig(hash_digest& hash, keys_array& keys,
