@@ -316,9 +316,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
 
     const std::array<correlate, 3> correlates
     {
-        correlate{ { 0, 0, 0 }, 0, 0, 0 },
-        correlate{ { 1, 0, 0 }, 0, 0, 0 },
-        correlate{ { 2, 0, 0 }, 0, 0, 0 }
+        correlate{ { 0, 0, 0 } },
+        correlate{ { 1, 0, 0 } },
+        correlate{ { 2, 0, 0 } }
     };
     const std::array<hash_digest, 3> digests{ hash, hash, hash };
     const std::array<ec_xonly, 3> points{ point0, point1, point2 };
@@ -364,9 +364,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
 
     const std::array<correlate, 3> correlates
     {
-        correlate{ { 0, 0, 0 }, 0, 0, 0 },
-        correlate{ { 1, 0, 0 }, 0, 0, 0 },
-        correlate{ { 2, 0, 0 }, 0, 0, 0 }
+        correlate{ { 0, 0, 0 } },
+        correlate{ { 1, 0, 0 } },
+        correlate{ { 2, 0, 0 } }
     };
     const std::array<hash_digest, 3> digests{ hash, hash, hash };
     const std::array<ec_xonly, 3> points{ point0, point1, point2 };
@@ -384,98 +384,6 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
-}
-
-// meets_threshold
-
-struct schnorr_accessor
-    : public schnorr::batch
-{
-    using schnorr::batch::meets_threshold;
-};
-
-using category_t = system::chain::threshold::category_t;
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::equal), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::equal), 4, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::inequal), 4, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::inequal), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::lesser), 3, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::lesser), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::greater), 7, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::greater), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 5, 5, 0));
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 7, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 3, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 5, 5, 0));
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 3, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 7, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__failure_below)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 2, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__failure_above)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 8, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__unknown_category__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::unknown), 5, 5, 5));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

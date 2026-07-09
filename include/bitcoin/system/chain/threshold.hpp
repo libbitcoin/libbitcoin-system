@@ -32,19 +32,6 @@ namespace chain {
 /// Script helper for threshold signature accumulation.
 struct threshold
 {
-    enum category_t : uint8_t
-    {
-        unknown,
-        single,
-        equal,
-        inequal,
-        lesser,
-        greater,
-        not_lesser,
-        not_greater,
-        between
-    };
-
     struct tuple_t
     {
         /// Digest is created in the sigop (sigop scope - must copy).
@@ -58,32 +45,44 @@ struct threshold
     };
     using tuples_t = std::vector<tuple_t>;
 
-    /// Convert opcode to category.
-    static constexpr category_t to_category(opcode code) NOEXCEPT
+    /// Capture fabricates success for every tuple, and bip342 terminates the
+    /// script on any failing non-empty signature, so a committed group always
+    /// implies the terminal comparison evaluates at exactly `expected`. This
+    /// decides script satisfaction at capture time, before any commit.
+    static constexpr bool is_satisfied(opcode code, size_t expected,
+        size_t minimum, size_t maximum) NOEXCEPT
     {
         switch (code)
         {
-            // checksig is not a threshold script code but is recorded with
-            // single signatures archived in the multisig table.
+            // checksig denotes the tapscript multisig (checksigverify chain)
+            // pattern, min == max == pair count (all must verify).
             case opcode::checksig:
-                return category_t::single;
             case opcode::numequal:
+                return expected == minimum;
+
+            // Verify variant pops both operands and pushes nothing, leaving
+            // an empty stack, which can never satisfy clean-true [bip342].
             case opcode::numequalverify:
-                return category_t::equal;
+                return false;
+
             case opcode::numnotequal:
-                return category_t::inequal;
+                return expected != minimum;
             case opcode::lessthan:
-                return category_t::lesser;
+                return expected < minimum;
             case opcode::greaterthan:
-                return category_t::greater;
+                return expected > minimum;
             case opcode::lessthanorequal:
-                return category_t::not_greater;
+                return expected <= minimum;
             case opcode::greaterthanorequal:
-                return category_t::not_lesser;
+                return expected >= minimum;
+
+            // op_within is half-open: minimum <= x < maximum.
             case opcode::within:
-                return category_t::between;
+                return (expected >= minimum) && (expected < maximum);
+
+            // Includes the op_xor (not a threshold script) sentinel.
             default:
-                return category_t::unknown;
+                return false;
         }
     }
 
@@ -97,9 +96,6 @@ struct threshold
     }
 
     tuples_t tuples{};
-    category_t category{};
-    uint16_t minimum{};
-    uint16_t maximum{};
     uint16_t expected{};
 };
 

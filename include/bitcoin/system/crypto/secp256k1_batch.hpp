@@ -81,9 +81,6 @@ struct BC_API batch
     struct correlate_t
     {
         batched::link id;
-        uint8_t category;
-        uint16_t pair;
-        uint16_t group;
     };
 #pragma pack(pop)
 
@@ -96,8 +93,6 @@ struct BC_API batch
     std::span<const ec_signature> signatures;
 
 protected:
-    static bool meets_threshold(uint8_t category, size_t successes,
-        size_t minimum, size_t maximum) NOEXCEPT;
     static batched::links_t get_failures(const stopper& cancel,
         const data_chunk& out, const batch& in) NOEXCEPT;
     static data_chunk evaluate(const stopper& cancel,

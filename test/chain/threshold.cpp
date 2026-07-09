@@ -20,97 +20,88 @@
 
 BOOST_AUTO_TEST_SUITE(threshold_tests)
 
-using namespace system;
 using namespace system::chain;
 
-BOOST_AUTO_TEST_CASE(threshold__construction__default__unknown_empty)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__checksig__expected_only)
 {
-    threshold group{};
-    BOOST_CHECK(group.tuples.empty());
-    BOOST_CHECK_EQUAL(group.category, threshold::category_t::unknown);
-    BOOST_CHECK_EQUAL(group.minimum, 0u);
-    BOOST_CHECK_EQUAL(group.maximum, 0u);
-    BOOST_CHECK_EQUAL(group.expected, 0u);
+    // Tapscript multisig: all pairs must verify.
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::checksig, 5, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::checksig, 4, 5, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__push_tuple__under_expected__false)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__numequal__boundaries)
 {
-    threshold group{};
-    group.expected = 2;
-    hash_digest digest{};
-    ec_signature sig{};
-    ec_xonly point{};
-
-    BOOST_CHECK(!group.push_tuple(digest, cref<ec_xonly>(point), cref<ec_signature>(sig)));
-    BOOST_CHECK_EQUAL(group.tuples.size(), 1u);
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::numequal, 5, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::numequal, 4, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::numequal, 6, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::numequal, 0, 0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__push_tuple__exactly_expected__true)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__numequalverify__always_false)
 {
-    threshold group{};
-    group.expected = 1;
-    hash_digest digest{};
-    ec_signature sig{};
-    ec_xonly point{};
-
-    BOOST_CHECK(group.push_tuple(digest, cref<ec_xonly>(point), cref<ec_signature>(sig)));
-    BOOST_CHECK_EQUAL(group.tuples.size(), 1u);
+    // Verify variant leaves an empty stack; never clean-true [bip342].
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::numequalverify, 5, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::numequalverify, 0, 0, 0));
 }
 
-// to_category
-
-BOOST_AUTO_TEST_CASE(threshold__to_category__checksig__single)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__numnotequal__boundaries)
 {
-    // checksig is not a threshold script code but is recorded with
-    // single signatures archived in the multisig table.
-    BOOST_CHECK(threshold::to_category(opcode::checksig) == threshold::category_t::single);
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::numnotequal, 4, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::numnotequal, 6, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::numnotequal, 5, 5, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__numequal__equal)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__lessthan__boundaries)
 {
-    BOOST_CHECK(threshold::to_category(opcode::numequal) == threshold::category_t::equal);
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::lessthan, 3, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::lessthan, 5, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::lessthan, 0, 1, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::lessthan, 0, 0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__numequalverify__equal)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__greaterthan__boundaries)
 {
-    BOOST_CHECK(threshold::to_category(opcode::numequalverify) == threshold::category_t::equal);
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::greaterthan, 7, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::greaterthan, 5, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::greaterthan, 1, 0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__numnotequal__inequal)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__lessthanorequal__boundaries)
 {
-    BOOST_CHECK(threshold::to_category(opcode::numnotequal) == threshold::category_t::inequal);
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::lessthanorequal, 5, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::lessthanorequal, 3, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::lessthanorequal, 7, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::lessthanorequal, 0, 0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__lessthan__lesser)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__greaterthanorequal__boundaries)
 {
-    BOOST_CHECK(threshold::to_category(opcode::lessthan) == threshold::category_t::lesser);
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::greaterthanorequal, 5, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::greaterthanorequal, 7, 5, 0));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::greaterthanorequal, 3, 5, 0));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::greaterthanorequal, 0, 0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__greaterthan__greater)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__within__half_open)
 {
-    BOOST_CHECK(threshold::to_category(opcode::greaterthan) == threshold::category_t::greater);
+    // min <= x < max [op_within].
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::within, 5, 3, 7));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::within, 3, 3, 7));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::within, 6, 3, 7));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::within, 7, 3, 7));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::within, 2, 3, 7));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::within, 8, 3, 7));
+    BOOST_REQUIRE(threshold::is_satisfied(opcode::within, 0, 0, 1));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::within, 1, 0, 1));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::within, 5, 5, 5));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::within, 5, 7, 3));
 }
 
-BOOST_AUTO_TEST_CASE(threshold__to_category__lessthanorequal__not_greater)
+BOOST_AUTO_TEST_CASE(threshold__is_satisfied__non_threshold__always_false)
 {
-    BOOST_CHECK(threshold::to_category(opcode::lessthanorequal) == threshold::category_t::not_greater);
-}
-
-BOOST_AUTO_TEST_CASE(threshold__to_category__greaterthanorequal__not_lesser)
-{
-    BOOST_CHECK(threshold::to_category(opcode::greaterthanorequal) == threshold::category_t::not_lesser);
-}
-
-BOOST_AUTO_TEST_CASE(threshold__to_category__within__between)
-{
-    BOOST_CHECK(threshold::to_category(opcode::within) == threshold::category_t::between);
-}
-
-BOOST_AUTO_TEST_CASE(threshold__to_category__non_threashold__unknown)
-{
-    BOOST_CHECK(threshold::to_category(opcode::add) == threshold::category_t::unknown);
-    BOOST_CHECK(threshold::to_category(opcode::boolor) == threshold::category_t::unknown);
-    BOOST_CHECK(threshold::to_category(opcode::op_xor) == threshold::category_t::unknown);
+    // op_xor is the extract_tapscript_threshold sentinel.
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::op_xor, 5, 5, 5));
+    BOOST_REQUIRE(!threshold::is_satisfied(opcode::checksigadd, 5, 5, 5));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
