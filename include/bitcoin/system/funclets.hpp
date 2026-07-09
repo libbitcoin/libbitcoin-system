@@ -172,10 +172,10 @@ constexpr auto to_value(Enum value) noexcept
 }
 
 /// Determine the bitcoin variable-serialized size of a given value.
-template <typename Unsigned,
-    std::enable_if_t<std::is_unsigned_v<Unsigned>, bool> = true>
+template <typename Unsigned>
 constexpr size_t variable_size(Unsigned value) noexcept
 {
+    static_assert(std::is_unsigned_v<Unsigned>);
     if (value < varint_two_bytes)
         return sizeof(uint8_t);
 
