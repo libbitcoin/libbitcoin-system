@@ -33,6 +33,8 @@ namespace machine {
 
 // Signature verify (with batching).
 // ----------------------------------------------------------------------------
+// Store declines (allocation/commit) set faulted and verify inline. All other
+// capture fallbacks under a batchable pattern are counted as missed.
 
 TEMPLATE
 inline bool CLASS::
@@ -43,7 +45,6 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
     {
         if (is_ecdsa_batchable())
         {
-            // Compress failure is a verify failure.
             ec_compressed key;
             if (!to_compressed(key, point))
             {
@@ -54,9 +55,14 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
             }
 
             // Capture is bypass (single sigop).
-            capture_.batched.store(true, relaxed);
             if (capture_.ecdsa(hash, key, signature))
+            {
+                capture_.batched.store(true, relaxed);
                 return true;
+            }
+
+            // Store fault, verify inline, recoverable if disk full.
+            capture_.faulted.store(true, relaxed);
         }
         else
         {
@@ -74,42 +80,54 @@ inline bool CLASS::
 try_batch_multisig_verification(const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    if (capture_.enabled)
-    {
-        if (is_multisig_batchable())
-        {
-            // Parse failure is a full op execution.
-            // TODO: this could be further short-circuited.
-            hash_digest hash; ec_compresseds keys; ec_signatures sigs;
-            if (!parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
-            {
-                // Count as missed, consistent with not batchable telemetry.
-                capture_.fire(chain::signatures::miss::multisig, points.size());
-                capture_.log(*script_);
-                return false;
-            }
+    using namespace chain;
+    if (!capture_.enabled)
+        return false;
 
-            // Capture is bypass (single sigop).
-            capture_.batched.store(true, relaxed);
-            if (capture_.multisig(hash, keys, sigs))
-                return true;
-        }
-        else
-        {
-            // Not batchable.
-            capture_.fire(chain::signatures::miss::multisig, points.size());
-            capture_.log(*script_);
-            return false;
-        }
+    if (!is_multisig_batchable())
+    {
+        // Not batchable.
+        capture_.fire(signatures::miss::multisig, points.size());
+        capture_.log(*script_);
+        return false;
     }
 
-    // Full op execution.
-    return false;
+    // Stack-only normalization (sigs, keys <= 16 by standard pattern).
+    const auto m = endorsements.size();
+    const auto n = points.size();
+    BC_ASSERT(multisig::check(m, n));
+
+    // Parse failure is a full op execution (mixed sighash or invalid).
+    sigs_array sigs; keys_array keys; hash_digest hash;
+    if (!parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
+    {
+        // Count as missed, consistent with not batchable telemetry.
+        capture_.fire(signatures::miss::multisig, n);
+        capture_.log(*script_);
+        return false;
+    }
+
+    // Allocate all banded rows, terminal implies store decline.
+    auto sink = capture_.multisig(multisig::rows(m, n));
+    if (!sink.is_open())
+    {
+        // Store fault, verify inline, recoverable if disk full.
+        capture_.faulted.store(true, relaxed);
+        return false;
+    }
+
+    // Stream the band: sig i pairs keys [i, i + (n - m)], closes on last.
+    const auto gap = n - m;
+    for (size_t sig{}; sig < m; ++sig)
+        for (auto key = sig; key <= gap + sig; ++key)
+            sink.write(hash, keys[key], sigs[sig],
+                pack_word<uint8_t>(sig, key));
+
+    // Capture is bypass (single sigop).
+    capture_.batched.store(true, relaxed);
+    return true;
 }
 
-// If the store fails to commit the group, the validator must re-introduce the
-// block to the queue, as collection otherwise implies the script is valid. And
-// threshold collection here cannot be reset once started.
 TEMPLATE
 inline bool CLASS::
 verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
@@ -119,23 +137,21 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
     {
         if (is_threshold_batchable())
         {
-            if (threshold_.push_tuple(hash, std::cref(as_xonly(point)),
-                std::cref(signature)))
-            {
-                // With a capture fault block success is disregarded.
-                capture_.batched.store(true, relaxed);
-                if (!capture_.threshold(threshold_))
-                    capture_.faulted = true;
-            }
-
-            // Push or push/flush (capture) is bypass.
+            // Capture is bypass (rows preallocated at gate).
+            threshold_.sink.write(hash, as_xonly(point), signature);
             return true;
         }
         else if (is_schnorr_batchable())
         {
             // Capture is bypass (single sigop).
             if (capture_.schnorr(hash, as_xonly(point), signature))
+            {
+                capture_.batched.store(true, relaxed);
                 return true;
+            }
+
+            // Store fault, verify inline, recoverable if disk full.
+            capture_.faulted.store(true, relaxed);
         }
         else
         {
@@ -156,30 +172,28 @@ is_threshold_batchable() const NOEXCEPT
         return false;
 
     // Already batching.
-    if (!threshold_.tuples.empty())
+    if (threshold_.sink.is_open())
         return true;
 
     size_t min{}, max{};
     const auto op = script_->extract_tapscript_threshold(min, max);
 
-    // All non-empty elements (sigs) on the stack (plus self) must be evaluated
-    // in a captured signature op. Underflow/overflow imply script failure.
+    // All non-empty elements (sigs) on the stack (plus self) must be
+    // evaluated in a captured sigop. Underflow/overflow imply failure.
     const auto expected = add1(stack_nonempty());
-
-    // Limit batching to 65,535 verified; 58,883 is widely observed.
-    if (is_limited<uint16_t>(min) ||
-        is_limited<uint16_t>(max) ||
-        is_limited<uint16_t>(expected))
-        return false;
-
-    // Decline capture unless fabricated execution (comparison at exactly
-    // `expected`) satisfies the script; declined spends evaluate inline.
-    // Also declines non-threshold scripts (op_xor) and verify variants.
     if (!chain::threshold::is_satisfied(op, expected, min, max))
         return false;
 
-    threshold_.tuples.reserve(expected);
-    threshold_.expected = narrow_cast<uint16_t>(expected);
+    // Allocate all rows.
+    threshold_.sink = capture_.threshold(expected);
+    if (!threshold_.sink.is_open())
+    {
+        // Store fault, verify inline, recoverable if disk full.
+        capture_.faulted.store(true, relaxed);
+        return false;
+    }
+
+    capture_.batched.store(true, relaxed);
     return true;
 }
 
@@ -189,39 +203,34 @@ is_threshold_batchable() const NOEXCEPT
 
 TEMPLATE
 inline bool CLASS::
-parse_ecdsa_multisig(hash_digest& hash, ec_compresseds& keys,
-    ec_signatures& sigs, const chunk_xptrs& points,
+parse_ecdsa_multisig(hash_digest& hash, keys_array& keys,
+    sigs_array& sigs, const chunk_xptrs& points,
     const chunk_xptrs& endorsements) const NOEXCEPT
 {
-    uint8_t sighash_flags;
-    sigs.reserve(endorsements.size());
-    if (!parse_ecdsa_signatures(sighash_flags, sigs, endorsements,
-        is_enabled(flags::bip66_rule)))
-        return false;
-
-    keys.reserve(points.size());
-    if (!compress_public_keys(keys, points))
-        return false;
-
-    return signature_hash(hash, *subscript(endorsements), sighash_flags);
+    uint8_t sighash;
+    const auto bip66 = is_enabled(flags::bip66_rule);
+    return 
+        parse_ecdsa_signatures(sighash, sigs, endorsements, bip66) &&
+        compress_public_keys(keys, points) &&
+        signature_hash(hash, *subscript(endorsements), sighash);
 }
 
 TEMPLATE
 inline bool CLASS::
-parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
+parse_ecdsa_signatures(uint8_t& sighash, sigs_array& out,
     const chunk_xptrs& endorsements, bool strict) const NOEXCEPT
 {
+    BC_ASSERT(endorsements.size() <= out.size());
     std::optional<uint8_t> byte{};
-    out.resize(endorsements.size());
     auto it = out.begin();
 
     for (const auto& sig: endorsements)
     {
-        // don't capture ecdsa multisig with empty sigs.
+        // Don't capture ecdsa multisig with empty sigs.
         if (sig->empty())
             return false;
 
-        // enforce uniform byte.
+        // Enforce uniform sighash byte (single digest per group).
         if (!byte.has_value())
             byte = sig->back();
         else if (byte != sig->back())
@@ -232,7 +241,7 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
             return false;
     }
 
-    // endorsements was empty.
+    // Endorsements was empty.
     if (!byte.has_value())
         return false;
 
@@ -242,10 +251,10 @@ parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
 
 TEMPLATE
 inline bool CLASS::
-compress_public_keys(ec_compresseds& out,
+compress_public_keys(keys_array& out,
     const chunk_xptrs& keys) const NOEXCEPT
 {
-    out.resize(keys.size());
+    BC_ASSERT(keys.size() <= out.size());
     auto it = out.begin();
 
     for (const auto& key: keys)

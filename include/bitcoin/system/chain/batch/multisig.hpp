@@ -19,11 +19,46 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_MULTISIG_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_MULTISIG_HPP
 
+#include <bitcoin/system/chain/batch/cursor.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
+/// Script helper for ecdsa multisig capture.
+struct multisig
+{
+    /// Maximum keys/sigs for standard multisig capture.
+    static constexpr auto maximum = power2(to_half(byte_bits));
+
+    static constexpr bool check(size_t sigs, size_t keys) NOEXCEPT
+    {
+        return !is_zero(sigs) && !is_zero(keys) && !(keys > maximum) &&
+            !(sigs > keys);
+    }
+
+    /// Banded expansion count: sig i pairs keys [i, i + (keys - sigs)].
+    static constexpr size_t rows(size_t sigs, size_t keys) NOEXCEPT
+    {
+        const auto gap = keys - sigs;
+        if (is_subtract_overflow(keys, sigs) || is_add_overflow(gap, one))
+            return {};
+
+        const auto sum = add1(gap);
+        if (is_multiply_overflow(sigs, sum))
+            return {};
+
+        return sigs * sum;
+    }
+
+    /// pair is pack_word<uint8_t>(sig, key) per the banded expansion.
+    using cursor = chain::cursor<void(size_t row, const hash_digest&,
+        const ec_compressed&, const ec_signature&, uint8_t pair)>;
+};
 
 } // namespace chain
 } // namespace system

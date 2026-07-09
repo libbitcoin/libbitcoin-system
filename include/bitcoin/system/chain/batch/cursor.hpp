@@ -19,11 +19,85 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_CURSOR_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_CURSOR_HPP
 
+#include <utility>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
+/// A move-only row cursor for streaming captured signature rows into caller
+/// storage. Opened per capture (script scope) with all rows preallocated by
+/// the caller. Writes exactly `rows`, releasing caller state (e.g. store
+/// transactor) automatically upon the final write. A default-constructed
+/// (terminal) cursor signals allocation decline. An open cursor implies
+/// pending rows; the matched script pattern guarantees the final sigop is
+/// positionally last, so an opened cursor always completes.
+template <typename Writer>
+struct cursor
+{
+    using writer = std::function<Writer>;
+    using closer = std::function<void()>;
+
+    DELETE_COPY(cursor);
+    cursor() NOEXCEPT = default;
+
+    cursor(cursor&& other) NOEXCEPT
+      : put(std::move(other.put)),
+        done(std::move(other.done)),
+        rows(other.rows),
+        row_(other.row_)
+    {
+    }
+
+    cursor& operator=(cursor&& other) NOEXCEPT
+    {
+        close();
+        put = std::move(other.put);
+        done = std::move(other.done);
+        rows = other.rows;
+        row_ = other.row_;
+        return *this;
+    }
+
+    ~cursor() NOEXCEPT
+    {
+        close();
+    }
+
+    /// False after non-zero open (and no close) implies allocation fault.
+    bool is_open() const NOEXCEPT
+    {
+        return !!done;
+    }
+
+    template <typename... Args>
+    void write(Args&&... args) NOEXCEPT
+    {
+        BC_ASSERT(is_open() && (row_ < rows));
+        put(row_++, std::forward<Args>(args)...);
+        if (row_ == rows)
+            close();
+    }
+
+    /// Release caller state (idempotent).
+    void close() NOEXCEPT
+    {
+        if (is_open())
+        {
+            done();
+            done = {};
+            put = {};
+        }
+    }
+
+    writer put{};
+    closer done{};
+    size_t rows{};
+
+private:
+    size_t row_{};
+};
 
 } // namespace chain
 } // namespace system
