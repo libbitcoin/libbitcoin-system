@@ -222,87 +222,30 @@ links_t ecdsa::batch::get_failures(const stopper& cancel,
         group = index;
     }
 
-    return fails;
+    return distinct(std::move(fails));
 }
 
 // get_failures (schnorr)
 // ----------------------------------------------------------------------------
 
-bool schnorr::batch::meets_threshold(uint8_t category, size_t successes,
-    size_t minimum, size_t maximum) NOEXCEPT
-{
-    switch (static_cast<threshold::category_t>(category))
-    {
-        case threshold::category_t::single:
-        case threshold::category_t::equal:
-            return (successes == minimum);
-        case threshold::category_t::inequal:
-            return (successes != minimum);
-        case threshold::category_t::lesser:
-            return is_lesser(successes, minimum);
-        case threshold::category_t::greater:
-            return is_greater(successes, minimum);
-        case threshold::category_t::not_greater:
-            return !is_greater(successes, minimum);
-        case threshold::category_t::not_lesser:
-            return !is_lesser(successes, minimum);
-        case threshold::category_t::between:
-            return !is_lesser(successes, minimum)
-                && is_lesser(successes, maximum);
-        default:
-            return false;
-    }
-}
-
 // Schnorr (single sig and threshold sigs) correlation.
-// O(n) over the sig set, ~100 bytes of stack, no heap.
+// Capture is gated on the comparison outcome at full success (see
+// is_threshold_batchable), and bip342 terminates the script on any failing
+// non-empty signature, so any failed row fails its block. No group or category
+// correlation required (contrast ecdsa::get_failures, where op_checkmultisig
+// has combinatorial semantics).
 links_t schnorr::batch::get_failures(const stopper& cancel,
     const data_chunk& out, const batch& in) NOEXCEPT
 {
     const auto& correlates = in.correlates;
     BC_ASSERT(out.size() == correlates.size());
 
-    size_t group{};
     links_t fails{};
-    for (auto index = one; index <= correlates.size() && !cancel; ++index)
-    {
-        // Find the start of the next group (or end).
-        if ((index != correlates.size()) &&
-            (correlates[index].id == correlates[group].id) &&
-            (correlates[index].group == correlates[group].group))
-            continue;
+    for (size_t row{}; row < correlates.size() && !cancel; ++row)
+        if (!to_bool(out.at(row)))
+            push_fail(fails, correlates[row].id);
 
-        // BUGBUG: no all single rows require success of the row.
-        // Short-circuit single signature.
-        const auto first = group;
-        const auto second = add1(group);
-        const auto single = (index == second);
-        if (single)
-        {
-            if (!to_bool(out.at(group)))
-                push_fail(fails, correlates[group].id);
-
-            group = index;
-            continue;
-        }
-
-        // Count successes in the group.
-        size_t successes{};
-        for (auto row = group; row < index; ++row)
-            if (to_bool(out.at(row)))
-                ++successes;
-
-        // Get min and max from first two rows (max only for op_within).
-        const auto minimum = correlates[first].pair;
-        const auto maximum = correlates[second].pair;
-        const auto category = correlates[first].category;
-        if (!meets_threshold(category, successes, minimum, maximum))
-            push_fail(fails, correlates[group].id);
-
-        group = index;
-    }
-
-    return fails;
+    return distinct(std::move(fails));
 }
 
 // get_match (silent)

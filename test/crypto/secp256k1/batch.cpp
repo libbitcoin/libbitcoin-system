@@ -316,9 +316,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
 
     const std::array<correlate, 3> correlates
     {
-        correlate{ { 0, 0, 0 }, 0, 0, 0 },
-        correlate{ { 1, 0, 0 }, 0, 0, 0 },
-        correlate{ { 2, 0, 0 }, 0, 0, 0 }
+        correlate{ { 0, 0, 0 } },
+        correlate{ { 1, 0, 0 } },
+        correlate{ { 2, 0, 0 } }
     };
     const std::array<hash_digest, 3> digests{ hash, hash, hash };
     const std::array<ec_xonly, 3> points{ point0, point1, point2 };
@@ -364,9 +364,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
 
     const std::array<correlate, 3> correlates
     {
-        correlate{ { 0, 0, 0 }, 0, 0, 0 },
-        correlate{ { 1, 0, 0 }, 0, 0, 0 },
-        correlate{ { 2, 0, 0 }, 0, 0, 0 }
+        correlate{ { 0, 0, 0 } },
+        correlate{ { 1, 0, 0 } },
+        correlate{ { 2, 0, 0 } }
     };
     const std::array<hash_digest, 3> digests{ hash, hash, hash };
     const std::array<ec_xonly, 3> points{ point0, point1, point2 };
@@ -384,188 +384,6 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
     const auto tokens = batch::verify(cancel, in);
     BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
-}
-
-// meets_threshold
-
-struct schnorr_accessor
-    : public schnorr::batch
-{
-    using schnorr::batch::meets_threshold;
-};
-
-using category_t = system::chain::threshold::category_t;
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__single__success)
-{
-    // Single is recorded with minimum 1, one verified signature.
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::single), 1, 1, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__single__failure)
-{
-    // Zero verified signatures does not satisfy single.
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::single), 0, 1, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__single__excess__failure)
-{
-    // Guards the equal-aliasing: more successes than expected fails.
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::single), 2, 1, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__zero__success)
-{
-    // Zero successes satisfies a zero threshold (e.g. <0> numequal).
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::equal), 0, 0, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::equal), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__equal__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::equal), 4, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::inequal), 4, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__inequal__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::inequal), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__zero_successes__success)
-{
-    // Zero is less than any positive minimum.
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::lesser), 0, 1, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__zero_minimum__failure)
-{
-    // Nothing is less than zero (unsigned floor).
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::lesser), 0, 0, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::lesser), 3, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__lesser__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::lesser), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__zero_minimum__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::greater), 1, 0, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::greater), 7, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__greater__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::greater), 5, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__zero__success)
-{
-    // Zero is not lesser than zero.
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 0, 0, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 5, 5, 0));
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 7, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_lesser__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_lesser), 3, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__zero__success)
-{
-    // Zero is not greater than zero.
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 0, 0, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 5, 5, 0));
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 3, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__not_greater__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::not_greater), 7, 5, 0));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__interior__success)
-{
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__at_minimum__success)
-{
-    // Lower bound is inclusive [op_within].
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 3, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__below_maximum__success)
-{
-    // Last passing value of the half-open range.
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 6, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__at_maximum__failure)
-{
-    // Upper bound is exclusive [op_within]: min <= x < max.
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 7, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__below_minimum__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 2, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__above_maximum__failure)
-{
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 8, 3, 7));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__empty_range__failure)
-{
-    // min == max is an empty half-open range, unsatisfiable [op_within].
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 5, 5));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__inverted_range__failure)
-{
-    // max < min is unsatisfiable [op_within].
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 5, 7, 3));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__zero_minimum__success)
-{
-    // Half-open [0, 1): only zero successes passes.
-    BOOST_REQUIRE(schnorr_accessor::meets_threshold(to_value(category_t::between), 0, 0, 1));
-}
-
-BOOST_AUTO_TEST_CASE(schnorr_batch__meets_threshold__between__zero_minimum_at_maximum__failure)
-{
-    // Half-open [0, 1): one success is at the exclusive maximum.
-    BOOST_REQUIRE(!schnorr_accessor::meets_threshold(to_value(category_t::between), 1, 0, 1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -161,9 +161,6 @@ is_threshold_batchable() const NOEXCEPT
 
     size_t min{}, max{};
     const auto op = script_->extract_tapscript_threshold(min, max);
-    const auto category = chain::threshold::to_category(op);
-    if (category == chain::threshold::category_t::unknown)
-        return false;
 
     // All non-empty elements (sigs) on the stack (plus self) must be evaluated
     // in a captured signature op. Underflow/overflow imply script failure.
@@ -175,11 +172,14 @@ is_threshold_batchable() const NOEXCEPT
         is_limited<uint16_t>(expected))
         return false;
 
+    // Decline capture unless fabricated execution (comparison at exactly
+    // `expected`) satisfies the script; declined spends evaluate inline.
+    // Also declines non-threshold scripts (op_xor) and verify variants.
+    if (!chain::threshold::is_satisfied(op, expected, min, max))
+        return false;
+
     threshold_.tuples.reserve(expected);
-    threshold_.minimum = narrow_cast<uint16_t>(min);
-    threshold_.maximum = narrow_cast<uint16_t>(max);
     threshold_.expected = narrow_cast<uint16_t>(expected);
-    threshold_.category = category;
     return true;
 }
 
