@@ -28,20 +28,24 @@ namespace chain {
 
 /// A move-only row cursor for streaming captured signature rows into caller
 /// storage. Opened per capture (script scope) with all rows preallocated by
-/// the caller. Writes exactly `rows`, releasing caller state (e.g. store
-/// transactor) automatically upon the final write. A default-constructed
-/// (terminal) cursor signals allocation decline. An open cursor implies
-/// pending rows; the matched script pattern guarantees the final sigop is
-/// positionally last, so an opened cursor always completes.
+/// the caller. Writes exactly `rows`, releasing caller state automatically
+/// upon the final write. A default-constructed (!is_open()) cursor implies
+/// allocation failure. An open cursor implies pending rows. The matched script
+/// pattern guarantees the final sigop is positionally last, so an opened cursor
+/// always completes.
 template <typename Writer>
 struct cursor
 {
     using writer = std::function<Writer>;
-    using closer = std::function<void()>;
 
     bool is_open() const NOEXCEPT
     {
-        return !!done;
+        return !!put;
+    }
+
+    void close() NOEXCEPT
+    {
+        put = {};
     }
 
     template <typename... Args>
@@ -56,19 +60,7 @@ struct cursor
             close();
     }
 
-    /// Release caller state (idempotent).
-    void close() NOEXCEPT
-    {
-        if (is_open())
-        {
-            done();
-            done = {};
-            put = {};
-        }
-    }
-
     writer put{};
-    closer done{};
     size_t rows{};
     size_t row{};
 };
