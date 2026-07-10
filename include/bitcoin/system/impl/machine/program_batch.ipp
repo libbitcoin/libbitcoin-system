@@ -92,38 +92,28 @@ try_batch_multisig_verification(const chunk_xptrs& points,
         return false;
     }
 
-    // Stack-only normalization (sigs, keys <= 16 by standard pattern).
-    const auto m = endorsements.size();
-    const auto n = points.size();
-    BC_ASSERT(multisig::check(m, n));
-
-    // Parse failure is a full op execution (mixed sighash or invalid).
-    sigs_array sigs; keys_array keys; hash_digest hash;
+    keys_array keys;
+    sigs_array sigs;
+    hash_digest hash;
     if (!parse_ecdsa_multisig(hash, keys, sigs, points, endorsements))
     {
         // Count as missed, consistent with not batchable telemetry.
-        capture_.fire(signatures::miss::multisig, n);
+        capture_.fire(signatures::miss::multisig, points.size());
         capture_.log(*script_);
         return false;
     }
 
-    // Allocate all banded rows, terminal implies store decline.
-    auto sink = capture_.multisig(multisig::rows(m, n));
-    if (!sink.is_open())
+    // One bulk write per group, store expands the band.
+    if (!capture_.multisig(hash,
+        { keys.data(), points.size() },
+        { sigs.data(), endorsements.size() }))
     {
         // Store fault, verify inline, recoverable if disk full.
         capture_.faulted.store(true, relaxed);
         return false;
     }
 
-    // Stream the band: sig i pairs keys [i, i + (n - m)], closes on last.
-    const auto gap = n - m;
-    for (size_t sig{}; sig < m; ++sig)
-        for (auto key = sig; key <= gap + sig; ++key)
-            sink.write(hash, keys[key], sigs[sig],
-                pack_word<uint8_t>(sig, key));
-
-    // Capture is bypass (single sigop).
+    // Capture is bypass.
     capture_.batched.store(true, relaxed);
     return true;
 }

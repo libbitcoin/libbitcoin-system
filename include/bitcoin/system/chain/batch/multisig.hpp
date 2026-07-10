@@ -19,10 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_MULTISIG_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_MULTISIG_HPP
 
-#include <bitcoin/system/chain/batch/cursor.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -54,10 +52,6 @@ struct multisig
 
         return sigs * sum;
     }
-
-    /// pair is pack_word<uint8_t>(sig, key) per the banded expansion.
-    using cursor = chain::cursor<void(size_t row, const hash_digest&,
-        const ec_compressed&, const ec_signature&, uint8_t pair)>;
 };
 
 } // namespace chain

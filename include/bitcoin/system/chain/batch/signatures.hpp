@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
 
 #include <atomic>
+#include <span>
 #include <bitcoin/system/chain/batch/multisig.hpp>
 #include <bitcoin/system/chain/batch/threshold.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -52,9 +53,14 @@ struct BC_API signatures
     using schnorr_handler = std::function<bool(const hash_digest&,
         const ec_xonly&, const ec_signature&)>;
 
-    /// Multiple-sig captures, allocate rows, stream through returned cursor.
-    using multisig_handler = std::function<multisig::cursor(size_t rows)>;
-    using threshold_handler = std::function<threshold::cursor(size_t rows)>;
+    /// Multisig capture: one bulk write per group, keys.size() = n,
+    /// sigs.size() = m; store expands the band.
+    using multisig_handler = std::function<bool(const hash_digest&,
+        std::span<const ec_compressed>, std::span<const ec_signature>)>;
+
+    /// Threshold capture: allocate all rows, stream through the cursor.
+    using threshold_handler = std::function<
+        chain::threshold::cursor(size_t rows)>;
 
     /// Default construction disables batching.
     const bool enabled{};
@@ -85,13 +91,19 @@ struct BC_API signatures
     };
     const multisig_handler multisig
     {
-        // max_size_t cursor implies possibly recoverable fault.
-        [](size_t) NOEXCEPT { return chain::multisig::cursor{}; }
+        [](const hash_digest&, std::span<const ec_compressed>,
+            std::span<const ec_signature>) NOEXCEPT
+        {
+            return false;
+        }
     };
     const threshold_handler threshold
     {
         // max_size_t cursor implies possibly recoverable fault.
-        [](size_t) NOEXCEPT { return chain::threshold::cursor{}; }
+        [](size_t) NOEXCEPT
+        {
+            return chain::threshold::cursor{};
+        }
     };
 
     /// A store decline occurred during capture (block validity intact).
