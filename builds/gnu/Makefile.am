@@ -275,13 +275,21 @@ include_bitcoin_system_chain_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/chain/point.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/prevout.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/script.hpp \
-    ${srcdir}/../../include/bitcoin/system/chain/signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/stripper.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/taproot.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/tapscript.hpp \
-    ${srcdir}/../../include/bitcoin/system/chain/threshold.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/witness.hpp
+
+include_bitcoin_system_chain_batchdir = \
+    ${includedir}/bitcoin/system/chain/batch
+
+include_bitcoin_system_chain_batch_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/batch.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/cursor.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/multisig.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/signatures.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/threshold.hpp
 
 include_bitcoin_system_chain_enumsdir = \
     ${includedir}/bitcoin/system/chain/enums
@@ -948,9 +956,9 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/stripper.cpp \
     ${srcdir}/../../test/chain/taproot.cpp \
     ${srcdir}/../../test/chain/tapscript.cpp \
-    ${srcdir}/../../test/chain/threshold.cpp \
     ${srcdir}/../../test/chain/transaction.cpp \
     ${srcdir}/../../test/chain/witness.cpp \
+    ${srcdir}/../../test/chain/batch/threshold.cpp \
     ${srcdir}/../../test/chain/enums/opcode.cpp \
     ${srcdir}/../../test/chain/json/block.cpp \
     ${srcdir}/../../test/chain/json/checkpoint.cpp \

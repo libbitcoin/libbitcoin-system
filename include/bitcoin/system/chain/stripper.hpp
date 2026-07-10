@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_STRIPPER_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_STRIPPER_HPP
 
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -34,6 +35,15 @@ namespace chain {
 class BC_API stripper final
 {
 public:
+    using span = std::span<const stripper>;
+    using buffer = std::array<stripper, add1(max_multisig_public_keys)>;
+
+    /// Fills a stack allocation with opcode::codeseparator.
+    inline stripper() NOEXCEPT
+      : code_(opcode::codeseparator), data_()
+    {
+    }
+
     // ************************************************************************
     // CONSENSUS: nominal endorsement operation encoding is required.
     // ************************************************************************
@@ -73,8 +83,6 @@ inline bool operator==(const operation& op, const stripper& strip) NOEXCEPT
     // Endorsements should match by value but not pointer.
     return op.code() == strip.code() && op.data() == strip.data();
 }
-
-typedef std::vector<stripper> strippers;
 
 } // namespace chain
 } // namespace system

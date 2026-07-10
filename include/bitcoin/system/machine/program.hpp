@@ -216,6 +216,8 @@ protected:
 private:
     static constexpr auto relaxed = std::memory_order_relaxed;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
+    using keys_array = std::array<ec_compressed, chain::multisig::maximum>;
+    using sigs_array = std::array<ec_signature, chain::multisig::maximum>;
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {
@@ -226,18 +228,18 @@ private:
 
     // Verify helpers.
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static inline chain::strippers create_strip_ops(
-        const chunk_xptrs& endorsements) NOEXCEPT;
-    static inline chain::strippers create_strip_ops(
-        const chunk_xptr& endorsement) NOEXCEPT;
+    static inline chain::stripper::span create_strip_ops(
+        chain::stripper::buffer& out, const chunk_xptrs& endorsements) NOEXCEPT;
+    static inline chain::stripper::span create_strip_ops(
+        chain::stripper::buffer& out, const chunk_xptr& endorsement) NOEXCEPT;
 
     // Batching helpers.
-    inline bool parse_ecdsa_multisig(hash_digest& hash, ec_compresseds& keys,
-        ec_signatures& sigs, const chunk_xptrs& points,
+    inline bool parse_ecdsa_multisig(hash_digest& hash, keys_array& keys,
+        sigs_array& sigs, const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
-    inline bool parse_ecdsa_signatures(uint8_t& sighash, ec_signatures& out,
+    inline bool parse_ecdsa_signatures(uint8_t& sighash, sigs_array& out,
         const chunk_xptrs& endorsements, bool strict) const NOEXCEPT;
-    inline bool compress_public_keys(ec_compresseds& out,
+    inline bool compress_public_keys(keys_array& out,
         const chunk_xptrs& keys) const NOEXCEPT;
     inline bool to_compressed(ec_compressed& out,
         const data_chunk& point) const NOEXCEPT;
@@ -273,7 +275,7 @@ private:
     mutable multisig_cache multisig_{};
     mutable chain::threshold threshold_{};
 
-    // Stacks.
+    // Stacks (primary_ is propagated).
     primary_stack primary_;
     alternate_stack alternate_{};
     condition_stack condition_{};

@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_THRESHOLD_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_THRESHOLD_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_THRESHOLD_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_BATCH_THRESHOLD_HPP
 
-#include <atomic>
+#include <bitcoin/system/chain/batch/cursor.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
@@ -29,33 +29,21 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// Script helper for threshold signature accumulation.
+/// Script helper for schnorr threshold capture.
 struct threshold
 {
-    struct tuple_t
-    {
-        /// Digest is created in the sigop (sigop scope - must copy).
-        hash_digest digest;
-
-        /// Point is a stack element (script scope - use reference).
-        cref<ec_xonly> point;
-
-        /// Signature is a stack element (script scope - use reference).
-        cref<ec_signature> sig;
-    };
-    using tuples_t = std::vector<tuple_t>;
-
-    /// Capture fabricates success for every tuple, and bip342 terminates the
-    /// script on any failing non-empty signature, so a committed group always
-    /// implies the terminal comparison evaluates at exactly `expected`. This
-    /// decides script satisfaction at capture time, before any commit.
+    /// Capture fabricates success for every sigop, and bip342 terminates the
+    /// script on any failing non-empty signature, so a committed capture
+    /// always implies the terminal comparison evaluates at exactly
+    /// `expected`. This decides script satisfaction at capture time, before
+    /// allocation, unsatisfiable spends decline capture and evaluate inline.
     static constexpr bool is_satisfied(opcode code, size_t expected,
         size_t minimum, size_t maximum) NOEXCEPT
     {
         switch (code)
         {
-            // checksig denotes the tapscript multisig (checksigverify chain)
-            // pattern, min == max == pair count (all must verify).
+            // checksig denotes the tapscript multisig (checksigverify
+            // chain) pattern, minimum == pair count (all must verify).
             case opcode::checksig:
             case opcode::numequal:
                 return expected == minimum;
@@ -86,17 +74,11 @@ struct threshold
         }
     }
 
-    /// Scoping requires that capture_.threshold(threshold) does not
-    /// retain a reference to point or sig (must copy or dispose the refs).
-    inline bool push_tuple(const hash_digest& digest,
-        const cref<ec_xonly>& point, const cref<ec_signature>& sig) NOEXCEPT
-    {
-        tuples.emplace_back(digest, point, sig);
-        return tuples.size() == expected;
-    }
+    using cursor = chain::cursor<bool(const hash_digest&, const ec_xonly&,
+        const ec_signature&)>;
 
-    tuples_t tuples{};
-    uint16_t expected{};
+    /// Open implies batching latched for this script (pending rows).
+    cursor sink{};
 };
 
 } // namespace chain

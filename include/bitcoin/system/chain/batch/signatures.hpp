@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_SIGNATURES_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
 
 #include <atomic>
+#include <span>
+#include <bitcoin/system/chain/batch/multisig.hpp>
+#include <bitcoin/system/chain/batch/threshold.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/threshold.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -30,59 +32,51 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// A container for passing signature triples into a caller's buffer.
-/// When enabled and passed to machine::interpreter this causes
-/// signature_verify() calls to return true in scripts for which this one call
-/// fully determines success/failure of the script. This allows the caller to
-/// batch validate the signatures and through its own correlation determine
-/// which if any block (or transaction depending on correlation) has failed.
+/// A capture context passed into machine::interpreter. When enabled, sigops
+/// in fully-determining scripts stream signature rows into caller storage
+/// and fabricate success, the caller batch-validates and correlates block
+/// failure. Any store decline (allocation or commit) sets `faulted` and the
+/// affected sigop falls through to inline verification, so block validity
+/// is always fully determined, `faulted` is store-health telemetry only.
 struct BC_API signatures
 {
     /// Reporting enumeration for capture misses.
-    enum class miss
-    {
-        /// Failed to capture an ecdsa signature.
-        ecdsa,
-
-        /// Failed to capture ecdsa signatures.
-        multisig,
-
-        /// Failed to capture a schnorr signature (single|multiple).
-        schnorr
-    };
+    enum class miss { ecdsa, multisig, schnorr };
 
     /// Reporting handlers.
     using log_handler = std::function<void(const script&)>;
     using fire_handler = std::function<void(miss, size_t)>;
 
-    /// False implies write was not committed.
+    /// Single-sig captures, false implies write was not committed (fault).
     using ecdsa_handler = std::function<bool(const hash_digest&,
         const ec_compressed&, const ec_signature&)>;
     using schnorr_handler = std::function<bool(const hash_digest&,
-        const ec_xonly, const ec_signature&)>;
+        const ec_xonly&, const ec_signature&)>;
+
+    /// Multisig capture: one bulk write per group, keys.size() = n,
+    /// sigs.size() = m; store expands the band.
     using multisig_handler = std::function<bool(const hash_digest&,
-        const ec_compresseds&, const ec_signatures&)>;
-    using threshold_handler = std::function<bool(const threshold&)>;
+        std::span<const ec_compressed>, std::span<const ec_signature>)>;
+
+    /// Threshold capture: allocate all rows, stream through the cursor.
+    using threshold_handler = std::function<
+        chain::threshold::cursor(size_t rows)>;
 
     /// Default construction disables batching.
     const bool enabled{};
 
     /// Replace with operative handlers.
-    /// Allows script interpreter to emit log info via caller.
     const log_handler log
     {
-        [] (const script&) NOEXCEPT {}
+        [](const script&) NOEXCEPT {}
     };
     const fire_handler fire
     {
-        [] (miss, size_t) NOEXCEPT {}
+        [](miss, size_t) NOEXCEPT {}
     };
-
-    /// Replace with operative handlers.
-    /// Invoked with signature triples for capture in script interpreter.
     const ecdsa_handler ecdsa
     {
-        [] (const hash_digest&, const ec_compressed&,
+        [](const hash_digest&, const ec_compressed&,
             const ec_signature&) NOEXCEPT
         {
             return false;
@@ -90,31 +84,32 @@ struct BC_API signatures
     };
     const schnorr_handler schnorr
     {
-        [] (const hash_digest&, const ec_xonly&, const ec_signature&) NOEXCEPT
+        [](const hash_digest&, const ec_xonly&, const ec_signature&) NOEXCEPT
         {
             return false;
         }
     };
     const multisig_handler multisig
     {
-        [] (const hash_digest&, const ec_compresseds&,
-            const ec_signatures&) NOEXCEPT
+        [](const hash_digest&, std::span<const ec_compressed>,
+            std::span<const ec_signature>) NOEXCEPT
         {
             return false;
         }
     };
     const threshold_handler threshold
     {
-        [] (const chain::threshold&) NOEXCEPT
+        // max_size_t cursor implies possibly recoverable fault.
+        [](size_t) NOEXCEPT
         {
-            return false;
+            return chain::threshold::cursor{};
         }
     };
 
-    /// Store failed to accept at least one threshold commit (set in script).
+    /// A store decline occurred during capture (block validity intact).
     mutable std::atomic_bool faulted{};
 
-    /// True if any signatures were batched for the block (includes faulted).
+    /// Signatures were batched for the block.
     mutable std::atomic_bool batched{};
 };
 
