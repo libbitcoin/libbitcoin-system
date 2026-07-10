@@ -74,8 +74,8 @@ struct threshold
         }
     }
 
-    using cursor = chain::cursor<void(size_t row, const hash_digest&,
-        const ec_xonly&, const ec_signature&)>;
+    using cursor = chain::cursor<bool(const hash_digest&, const ec_xonly&,
+        const ec_signature&)>;
 
     /// Open implies batching latched for this script (pending rows).
     cursor sink{};

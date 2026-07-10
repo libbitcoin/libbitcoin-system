@@ -39,33 +39,6 @@ struct cursor
     using writer = std::function<Writer>;
     using closer = std::function<void()>;
 
-    DELETE_COPY(cursor);
-    cursor() NOEXCEPT = default;
-
-    cursor(cursor&& other) NOEXCEPT
-      : put(std::move(other.put)),
-        done(std::move(other.done)),
-        rows(other.rows),
-        row_(other.row_)
-    {
-    }
-
-    cursor& operator=(cursor&& other) NOEXCEPT
-    {
-        close();
-        put = std::move(other.put);
-        done = std::move(other.done);
-        rows = other.rows;
-        row_ = other.row_;
-        return *this;
-    }
-
-    ~cursor() NOEXCEPT
-    {
-        close();
-    }
-
-    /// False after non-zero open (and no close) implies allocation fault.
     bool is_open() const NOEXCEPT
     {
         return !!done;
@@ -74,9 +47,12 @@ struct cursor
     template <typename... Args>
     void write(Args&&... args) NOEXCEPT
     {
-        BC_ASSERT(is_open() && (row_ < rows));
-        put(row_++, std::forward<Args>(args)...);
-        if (row_ == rows)
+        BC_ASSERT(is_open() && (row < rows));
+
+        // Since all rows allocation precedes this, the only possible failure
+        // is non-recoverable in any case, propagated internal to put().
+        /* bool */ put(std::forward<Args>(args)...);
+        if (++row == rows)
             close();
     }
 
@@ -94,9 +70,7 @@ struct cursor
     writer put{};
     closer done{};
     size_t rows{};
-
-private:
-    size_t row_{};
+    size_t row{};
 };
 
 } // namespace chain
