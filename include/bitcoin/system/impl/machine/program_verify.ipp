@@ -136,28 +136,25 @@ set_subscript(const op_iterator& op) NOEXCEPT
 
 // static/private
 TEMPLATE
-inline chain::stripper::span CLASS::
-create_strip_ops(chain::stripper::buffer& out,
-    const chunk_xptrs& endorsements) NOEXCEPT
+inline chain::strippers CLASS::
+create_strip_ops(const chunk_xptrs& endorsements) NOEXCEPT
 {
-    BC_ASSERT(endorsements.size() < out.size());
-    auto it = out.begin();
+    chain::strippers strip{};
+    strip.reserve(add1(endorsements.size()));
     for (const auto& endorsement: endorsements)
-        *it++ = chain::stripper{ endorsement };
+        strip.emplace_back(endorsement);
 
-    *it++ = chain::stripper{ chain::opcode::codeseparator };
-    return { out.begin(), it };
+    strip.emplace_back(chain::opcode::codeseparator);
+    return strip;
 }
 
 // static/private
 TEMPLATE
-inline chain::stripper::span CLASS::
-create_strip_ops(chain::stripper::buffer& out,
-    const chunk_xptr& endorsement) NOEXCEPT
+inline chain::strippers CLASS::
+create_strip_ops(const chunk_xptr& endorsement) NOEXCEPT
 {
-    out.front() = chain::stripper{ endorsement };
-    out.at(one) = chain::stripper{ chain::opcode::codeseparator };
-    return { out.begin(), two };
+    using namespace chain;
+    return { stripper{ endorsement }, stripper{ opcode::codeseparator } };
 }
 
 // ****************************************************************************
@@ -176,8 +173,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
         return script_;
 
     // Transform into a set of endorsement push ops and one op_codeseparator.
-    chain::stripper::buffer buffer{};
-    const auto strip = create_strip_ops(buffer, endorsements);
+    const auto strip = create_strip_ops(endorsements);
     const auto stop = script_->ops().end();
     const op_iterator start{ script_->offset };
 
@@ -199,8 +195,7 @@ subscript(const chunk_xptr& endorsement) const NOEXCEPT
         return script_;
 
     // Transform into a set with one endorsement push op and op_codeseparator.
-    chain::stripper::buffer buffer{};
-    const auto strip = create_strip_ops(buffer, endorsement);
+    const auto strip = create_strip_ops(endorsement);
     const auto stop = script_->ops().end();
     const op_iterator start{ script_->offset };
 
