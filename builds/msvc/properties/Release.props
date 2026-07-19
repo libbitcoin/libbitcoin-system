@@ -10,6 +10,11 @@
     <DebugOrRelease>Release</DebugOrRelease>
     <!--<LinkIncremental>false</LinkIncremental>-->
   </PropertyGroup>
+
+  <!-- Overridable per machine (e.g. Directory.Build.props above repos, or environment). -->
+  <PropertyGroup>
+    <Option-arch Condition="'$(Option-arch)' == ''">AdvancedVectorExtensions2</Option-arch>
+  </PropertyGroup>
   
   <!-- DebugInformationFormat and GenerateDebugInformation were formerly disabled. -->
   <!-- This is why we were not getting symbols in release builds (update nuget). -->
@@ -29,10 +34,14 @@
       <OmitFramePointers>true</OmitFramePointers>
       <Optimization>MaxSpeed</Optimization>
 
-      <!-- SSE4/AVX2 (also AVX512) -->
-      <!--TODO: these should be integrated with the HAVE build options.-->
-      <!--<EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>-->
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <!-- Literal (not macro) values retain property page presentation text. -->
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'NotSet'">NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'NoExtensions'">NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'StreamingSIMDExtensions'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'StreamingSIMDExtensions2'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'AdvancedVectorExtensions'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'AdvancedVectorExtensions2'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'AdvancedVectorExtensions512'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
   
       <!-- Other. -->
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
