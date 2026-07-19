@@ -10,6 +10,11 @@
     <DebugOrRelease>Release</DebugOrRelease>
     <!--<LinkIncremental>false</LinkIncremental>-->
   </PropertyGroup>
+
+  <!-- Overridable per machine (e.g. Directory.Build.props above repos, or environment). -->
+  <PropertyGroup>
+    <Option-arch Condition="'$(Option-arch)' == ''">AdvancedVectorExtensions2</Option-arch>
+  </PropertyGroup>
   
   <!-- DebugInformationFormat and GenerateDebugInformation were formerly disabled. -->
   <!-- This is why we were not getting symbols in release builds (update nuget). -->
@@ -29,10 +34,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <Optimization>MaxSpeed</Optimization>
 
-      <!-- SSE4/AVX2 (also AVX512) -->
-      <!--TODO: these should be integrated with the HAVE build options.-->
-      <!--<EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>-->
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>$(Option-arch)</EnableEnhancedInstructionSet>
   
       <!-- Other. -->
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>

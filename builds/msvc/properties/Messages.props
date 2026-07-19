@@ -11,6 +11,7 @@
     <Message Text="ConfigurationType : $(ConfigurationType)" Importance="high"/>
     <Message Text="Configuration     : $(Configuration)" Importance="high"/>
     <Message Text="Processor         : $(ProcessorArchitecture)" Importance="high"/>
+    <Message Text="Architecture      : $(Option-arch)" Importance="high"/>
     <Message Text="TargetPath        : $(TargetPath)" Importance="high"/>
   </Target>
 
