@@ -21,6 +21,9 @@
     <!--<Option-256>true</Option-256>-->
     <!--<Option-128>true</Option-128>-->
     <Option-sha Condition="'$(Option-sha)' == ''">false</Option-sha>
+    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
+    <Option-ultrafast Condition="'$(Option-ultrafast)' == ''">false</Option-ultrafast>
+    <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -36,6 +39,9 @@
 
   <Target Name="SystemOptionInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Option-sha        : $(Option-sha)" Importance="high"/>
+    <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
+    <Message Text="Option-ultrafast  : $(Option-ultrafast)" Importance="high"/>
+    <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
     <!--<Message Text="Option-512        : $(Option-512)" Importance="high"/>-->
     <!--<Message Text="Option-256        : $(Option-256)" Importance="high"/>-->
     <!--<Message Text="Option-128        : $(Option-128)" Importance="high"/>-->
