@@ -134,8 +134,7 @@ BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__default__empty)
 BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__append_single__expected_counts)
 {
     ecdsa_signatures accumulator{};
-    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, ecdsa_key, ecdsa_sig));
     BOOST_REQUIRE(!accumulator.empty());
     BOOST_REQUIRE_EQUAL(accumulator.groups(), 1u);
     BOOST_REQUIRE_EQUAL(accumulator.rows(), 1u);
@@ -157,14 +156,27 @@ BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__append_multisig__expected_cou
     BOOST_REQUIRE_EQUAL(accumulator.multisig_keys(), 3u);
 }
 
+BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__append_multisig_1of1__counted_as_multisig)
+{
+    // Classification follows the capture path, not the group shape.
+    const std::array<ec_compressed, 1> keys{ ecdsa_key };
+    const std::array<ec_signature, 1> sigs{ ecdsa_sig };
+
+    ecdsa_signatures accumulator{};
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, keys, sigs));
+    BOOST_REQUIRE_EQUAL(accumulator.groups(), 1u);
+    BOOST_REQUIRE_EQUAL(accumulator.rows(), 1u);
+    BOOST_REQUIRE_EQUAL(accumulator.singles(), zero);
+    BOOST_REQUIRE_EQUAL(accumulator.multisig_keys(), 1u);
+}
+
 BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__for_each__expected_records)
 {
     const std::array<ec_compressed, 2> keys{ ecdsa_key, ecdsa_key };
     const std::array<ec_signature, 2> sigs{ ecdsa_sig, ecdsa_sig };
 
     ecdsa_signatures accumulator{};
-    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, ecdsa_key, ecdsa_sig));
     BOOST_REQUIRE(accumulator.append(sighash_bad, keys, sigs));
 
     size_t group{};
@@ -186,26 +198,22 @@ BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__for_each__expected_records)
 BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__verify_valid__true)
 {
     ecdsa_signatures accumulator{};
-    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, ecdsa_key, ecdsa_sig));
     BOOST_REQUIRE(accumulator.verify());
 }
 
 BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__verify_invalid__false)
 {
     ecdsa_signatures accumulator{};
-    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
-    BOOST_REQUIRE(accumulator.append(sighash_bad, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, ecdsa_key, ecdsa_sig));
+    BOOST_REQUIRE(accumulator.append(sighash_bad, ecdsa_key, ecdsa_sig));
     BOOST_REQUIRE(!accumulator.verify());
 }
 
 BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__clear__empty)
 {
     ecdsa_signatures accumulator{};
-    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, ecdsa_key, ecdsa_sig));
     accumulator.clear();
     BOOST_REQUIRE(accumulator.empty());
     BOOST_REQUIRE_EQUAL(accumulator.rows(), zero);
@@ -215,8 +223,7 @@ BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__clear__empty)
 BOOST_AUTO_TEST_CASE(signatures__ecdsa_signatures__purge__empty)
 {
     ecdsa_signatures accumulator{};
-    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, { &ecdsa_key, one },
-        { &ecdsa_sig, one }));
+    BOOST_REQUIRE(accumulator.append(ecdsa_sighash, ecdsa_key, ecdsa_sig));
     accumulator.purge();
     BOOST_REQUIRE(accumulator.empty());
 }
