@@ -8,13 +8,7 @@
 
 # Define tests and options.
 #==============================================================================
-BOOST_UNIT_TEST_OPTIONS=\
-    "--log_level=warning "\
-    "--show_progress=no "\
-    "--detect_memory_leak=0 "\
-    "--report_level=no "\
-    "--build-info=yes "\
-    "--run_tests=*"
+BOOST_UNIT_TEST_OPTIONS="--log_level=warning --show_progress=no --detect_memory_leak=0 --report_level=no --build_info=yes --run_test=*"
 
 # Run tests.
 #==============================================================================

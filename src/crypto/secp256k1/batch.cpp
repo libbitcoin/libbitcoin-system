@@ -24,8 +24,7 @@
 #include <shared_mutex>
 #include <span>
 #if defined(HAVE_ULTRAFAST)
-    #include <ufsecp_libbitcoin.h>
-    #include <ufsecp/ufsecp_gpu.h>
+    #include <ufsecp/libbitcoin.hpp>
 #endif
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -72,39 +71,25 @@ inline bool verify_signature(const schnorr::batch& batch, size_t row) NOEXCEPT
 template <typename Batch>
 data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 {
-    // TODO: create uf_context static class wrapper (see ec_context).
-    static thread_local ufsecp_lbtc_ctrl* context = []() NOEXCEPT
-    {
-        ufsecp_lbtc_ctrl* out{};
-        if (ufsecp_lbtc_ctrl_create(&out, UFSECP_LBTC_AUTO) != UFSECP_OK)
-            std::abort();
-
-        return out;
-    }();
-
-    // Set up cancellation callback.
-    const ufsecp_cancel_fn callback = [](const void* atomic) NOEXCEPT
-    {
-        constexpr auto relaxed = std::memory_order_relaxed;
-        return to_int(pointer_cast<const stopper>(atomic)->load(relaxed));
-    };
-
+    // Cancellation is batch-granular (batches are block-bounded).
     const auto count = batch.correlates.size();
     data_chunk results(count);
+    if (cancel)
+        return results;
+
     const auto digests = pointer_cast<const uint8_t>(batch.digests.data());
     const auto points = pointer_cast<const uint8_t>(batch.points.data());
     const auto sigs = pointer_cast<const uint8_t>(batch.signatures.data());
-    const ufsecp_cancel_token token{ callback, &cancel, 0 };
 
     if constexpr (is_same_type<Batch, schnorr::batch>)
     {
-        ufsecp_lbtc_verify_schnorr_columns(context, digests, points, sigs,
-            count, results.data(), &token);
+        (void)ufsecp::lbtc::schnorr_verify_columns(digests, points, sigs,
+            count, results.data(), zero);
     }
     else
     {
-        ufsecp_lbtc_verify_ecdsa_columns(context, digests, points, sigs,
-            count, results.data(), &token);
+        (void)ufsecp::lbtc::ecdsa_verify_columns(digests, points, sigs,
+            count, results.data(), zero);
     }
 
     return results;

@@ -51,9 +51,6 @@
     <Linkage-secp256k1 Condition="'$(Option-secp256k1)' != 'false'">static</Linkage-secp256k1>
     <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">static</Linkage-ultrafast>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Option-ultrafast)' == 'true' And '$(Option-cuda)' == 'true'">
-    <Linkage-ultrafast>cuda</Linkage-ultrafast>
-  </PropertyGroup>
   
   <!-- Options -->
 
