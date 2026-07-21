@@ -129,6 +129,9 @@
     <ClCompile Include="..\..\..\..\test\chain\annex.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\batch\signatures.cpp">
+      <Filter>src\chain\batch</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\batch\threshold.cpp">
       <Filter>src\chain\batch</Filter>
     </ClCompile>

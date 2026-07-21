@@ -174,15 +174,8 @@ is_threshold_batchable() const NOEXCEPT
     if (!chain::threshold::is_satisfied(op, expected, min, max))
         return false;
 
-    // Allocate all rows.
+    // Open the row cursor (slab append cannot decline).
     threshold_.sink = capture_.threshold(expected);
-    if (!threshold_.sink.is_open())
-    {
-        // Store fault, verify inline, recoverable if disk full.
-        capture_.faulted.store(true, relaxed);
-        return false;
-    }
-
     capture_.batched.store(true, relaxed);
     return true;
 }

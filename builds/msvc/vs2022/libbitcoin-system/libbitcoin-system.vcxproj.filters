@@ -342,6 +342,9 @@
     <ClCompile Include="..\..\..\..\src\chain\script_extract.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\signatures.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\taproot.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
