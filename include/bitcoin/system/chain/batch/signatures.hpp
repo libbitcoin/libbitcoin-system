@@ -37,6 +37,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_USE_OF_SPAN)
+
 /// Thread-static per-block signature capture accumulators. An accumulator is
 /// populated by one block's sequential connect (single-threaded, lock-free)
 /// and bulk-committed to the corresponding store table upon its completion,
@@ -110,8 +112,8 @@ public:
     /// Reset, releasing capacity (see signatures::purge).
     inline void purge() NOEXCEPT
     {
-        rows_ = {};
-        thresholds_ = zero;
+        clear();
+        rows_.shrink_to_fit();
     }
 
 private:
@@ -157,12 +159,18 @@ public:
     template <typename Handler>
     inline void for_each(Handler&& handler) const NOEXCEPT
     {
+        BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
         auto it = log_.data();
+        BC_POP_WARNING()
+
         const auto end = std::next(it, to_signed(log_.size()));
         while (it != end)
         {
+            BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
             const size_t sigs_count = *it++;
             const size_t keys_count = *it++;
+            BC_POP_WARNING()
+
             const auto& digest = unsafe_array_cast<uint8_t, hash_size>(it);
             std::advance(it, to_signed(hash_size));
             const std::span<const ec_compressed> keys
@@ -238,11 +246,8 @@ public:
     /// Reset, releasing capacity (see signatures::purge).
     inline void purge() NOEXCEPT
     {
-        log_ = {};
-        groups_ = zero;
-        rows_ = zero;
-        singles_ = zero;
-        keys_ = zero;
+        clear();
+        log_.shrink_to_fit();
     }
 
 protected:
@@ -360,6 +365,8 @@ struct BC_API signatures
     /// Signatures were batched for the block.
     mutable std::atomic_bool batched{};
 };
+
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system
