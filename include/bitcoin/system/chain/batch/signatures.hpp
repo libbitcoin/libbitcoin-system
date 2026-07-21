@@ -126,28 +126,28 @@ private:
 class ecdsa_signatures
 {
 public:
-    /// Append one group record, false implies group capacity (decline).
+    /// Append one single sigop (1 of 1) group record, false implies group
+    /// capacity (decline).
+    inline bool append(const hash_digest& digest, const ec_compressed& key,
+        const ec_signature& signature) NOEXCEPT
+    {
+        if (!put(digest, { &key, one }, { &signature, one }))
+            return false;
+
+        ++singles_;
+        return true;
+    }
+
+    /// Append one multisig group record (m of n band, including 1 of 1),
+    /// false implies group capacity (decline).
     inline bool append(const hash_digest& digest,
         std::span<const ec_compressed> keys,
         std::span<const ec_signature> sigs) NOEXCEPT
     {
-        const auto sigs_count = sigs.size();
-        const auto keys_count = keys.size();
-        BC_ASSERT(multisig::check(sigs_count, keys_count));
-
-        if (groups_ > max_uint16)
+        if (!put(digest, keys, sigs))
             return false;
 
-        log_.push_back(possible_narrow_cast<uint8_t>(sigs_count));
-        log_.push_back(possible_narrow_cast<uint8_t>(keys_count));
-        append(digest);
-        for (const auto& key: keys) append(key);
-        for (const auto& sig: sigs) append(sig);
-
-        ++groups_;
-        rows_ += multisig::rows(sigs_count, keys_count);
-        if (is_one(sigs_count) && is_one(keys_count)) ++singles_;
-        else keys_ += keys_count;
+        keys_ += keys.size();
         return true;
     }
 
@@ -191,13 +191,13 @@ public:
         return rows_;
     }
 
-    /// Single sigop (1 of 1) group count (reporting only).
+    /// Single sigop capture count (reporting only).
     inline size_t singles() const NOEXCEPT
     {
         return singles_;
     }
 
-    /// Total keys across multisig groups (reporting only).
+    /// Total keys across multisig captures (reporting only).
     inline size_t multisig_keys() const NOEXCEPT
     {
         return keys_;
@@ -246,6 +246,28 @@ public:
     }
 
 protected:
+    inline bool put(const hash_digest& digest,
+        std::span<const ec_compressed> keys,
+        std::span<const ec_signature> sigs) NOEXCEPT
+    {
+        const auto sigs_count = sigs.size();
+        const auto keys_count = keys.size();
+        BC_ASSERT(multisig::check(sigs_count, keys_count));
+
+        if (groups_ > max_uint16)
+            return false;
+
+        log_.push_back(possible_narrow_cast<uint8_t>(sigs_count));
+        log_.push_back(possible_narrow_cast<uint8_t>(keys_count));
+        append(digest);
+        for (const auto& key: keys) append(key);
+        for (const auto& sig: sigs) append(sig);
+
+        ++groups_;
+        rows_ += multisig::rows(sigs_count, keys_count);
+        return true;
+    }
+
     template <size_t Size>
     inline void append(const data_array<Size>& bytes) NOEXCEPT
     {

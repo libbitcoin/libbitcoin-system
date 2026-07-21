@@ -96,7 +96,7 @@ bool signatures::ecdsa(const hash_digest& digest, const ec_compressed& key,
     const ec_signature& signature) const NOEXCEPT
 {
     BC_ASSERT(enabled);
-    return ecdsa_rows().append(digest, { &key, one }, { &signature, one });
+    return ecdsa_rows().append(digest, key, signature);
 }
 
 bool signatures::schnorr(const hash_digest& digest, const ec_xonly& point,
