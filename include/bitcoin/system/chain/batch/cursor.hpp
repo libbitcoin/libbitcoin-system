@@ -27,12 +27,10 @@ namespace system {
 namespace chain {
 
 /// A move-only row cursor for streaming captured signature rows into caller
-/// storage. Opened per capture (script scope) with all rows preallocated by
-/// the caller. Writes exactly `rows`, releasing caller state automatically
-/// upon the final write. A default-constructed (!is_open()) cursor implies
-/// allocation failure. An open cursor implies pending rows. The matched script
-/// pattern guarantees the final sigop is positionally last, so an opened cursor
-/// always completes.
+/// storage. Opened per capture (script scope). Writes exactly `rows`,
+/// releasing caller state automatically upon the final write. An open cursor
+/// implies pending rows. The matched script pattern guarantees the final
+/// sigop is positionally last, so an opened cursor always completes.
 template <typename Writer>
 struct cursor
 {

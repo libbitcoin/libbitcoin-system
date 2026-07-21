@@ -188,6 +188,7 @@
       <ObjectFileName>$(IntDir)src_chain_script.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\script_extract.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\signatures.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\taproot.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)src_chain_transaction.obj</ObjectFileName>

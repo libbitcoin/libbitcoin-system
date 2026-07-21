@@ -89,6 +89,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/chain/point.cpp \
     ${srcdir}/../../src/chain/script.cpp \
     ${srcdir}/../../src/chain/script_extract.cpp \
+    ${srcdir}/../../src/chain/signatures.cpp \
     ${srcdir}/../../src/chain/taproot.cpp \
     ${srcdir}/../../src/chain/transaction.cpp \
     ${srcdir}/../../src/chain/transaction_cache.cpp \
@@ -958,6 +959,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/tapscript.cpp \
     ${srcdir}/../../test/chain/transaction.cpp \
     ${srcdir}/../../test/chain/witness.cpp \
+    ${srcdir}/../../test/chain/batch/signatures.cpp \
     ${srcdir}/../../test/chain/batch/threshold.cpp \
     ${srcdir}/../../test/chain/enums/opcode.cpp \
     ${srcdir}/../../test/chain/json/block.cpp \
