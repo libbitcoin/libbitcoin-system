@@ -73,7 +73,7 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 {
     // Cancellation is batch-granular (batches are block-bounded).
     const auto count = batch.correlates.size();
-    data_chunk results(count);
+    data_chunk results{};
     if (cancel)
         return results;
 
@@ -83,13 +83,30 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 
     if constexpr (is_same_type<Batch, schnorr::batch>)
     {
-        (void)ufsecp::lbtc::schnorr_verify_columns(digests, points, sigs,
-            count, results.data(), zero);
+        // Avoid results allocation in the almost-always case.
+        if (!ufsecp::lbtc::schnorr_verify_columns(digests, points, sigs, count,
+            nullptr, zero))
+        {
+            results.resize(count);
+
+            BC_PUSH_WARNING(NO_IGNORE_RETURN_VALUE)
+            BC_PUSH_WARNING(DISCARDING_NON_DISCARDABLE)
+            ufsecp::lbtc::schnorr_verify_columns(digests, points, sigs, count,
+                results.data(), zero);
+            BC_POP_WARNING()
+            BC_POP_WARNING()
+        }
     }
     else
     {
-        (void)ufsecp::lbtc::ecdsa_verify_columns(digests, points, sigs,
-            count, results.data(), zero);
+        // Ecdsa row results are always required, as multisig bands expect
+        // row misses (a failed row does not imply a failed batch), so the
+        // optimistic no-allocation call cannot apply. The converse holds:
+        // all rows valid implies a fully-verified batch.
+        results.resize(count);
+        if (ufsecp::lbtc::ecdsa_verify_columns(digests, points, sigs, count,
+            results.data(), zero))
+            results.clear();
     }
 
     return results;
@@ -105,14 +122,23 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
     const auto count = batch.correlates.size();
     std::vector<size_t> it(count);
     std::iota(it.begin(), it.end(), zero);
+    stopper failed{};
 
     // Collect signature validation results as corresponding integer booleans.
+    // A failure cannot short-circuit, as remaining rows would then read as
+    // failures in correlation (failed batches consume the per-row results).
     data_chunk results(count);
     std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
     {
         if (cancel) return;
-        results.at(row) = to_int<uint8_t>(verify_signature(batch, row));
+        const auto good = verify_signature(batch, row);
+        if (!good) failed.store(true);
+        results.at(row) = to_int<uint8_t>(good);
     });
+
+    // Empty implies fully-verified batch (or canceled, which caller gates).
+    if (cancel || !failed)
+        results.clear();
 
     return results;
 }
@@ -162,10 +188,15 @@ links_t ecdsa::batch::get_failures(const stopper& cancel,
     const data_chunk& out, const batch& in) NOEXCEPT
 {
     const auto& correlates = in.correlates;
-    BC_ASSERT(out.size() == correlates.size());
+    BC_ASSERT(out.empty() || out.size() == correlates.size());
+
+    // Empty implies fully-verified batch (or canceled, which the caller
+    // gates on the stopper, discarding the links).
+    links_t fails{};
+    if (out.empty())
+        return fails;
 
     size_t group{};
-    links_t fails{};
     for (auto index = one; index <= correlates.size() && !cancel; ++index)
     {
         // Find the start of the next group (or end).
@@ -223,9 +254,14 @@ links_t schnorr::batch::get_failures(const stopper& cancel,
     const data_chunk& out, const batch& in) NOEXCEPT
 {
     const auto& correlates = in.correlates;
-    BC_ASSERT(out.size() == correlates.size());
+    BC_ASSERT(out.empty() || out.size() == correlates.size());
 
+    // Empty implies fully-verified batch (or canceled, which the caller
+    // gates on the stopper, discarding the links).
     links_t fails{};
+    if (out.empty())
+        return fails;
+
     for (size_t row{}; row < correlates.size() && !cancel; ++row)
         if (!to_bool(out.at(row)))
             push_fail(fails, correlates[row].id);
