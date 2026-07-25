@@ -22,7 +22,7 @@ pkgconfig_DATA = \
 #------------------------------------------------------------------------------
 doc_DATA = \
     AUTHORS \
-    COPYING \
+    ../../COPYING \
     ChangeLog \
     INSTALL \
     NEWS \
@@ -1040,8 +1040,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/scrypt.cpp \
     ${srcdir}/../../test/hash/siphash.cpp \
     ${srcdir}/../../test/hash/performance/performance.cpp \
-    ${srcdir}/../../test/hash/performance/baseline/rmd160.cpp \
-    ${srcdir}/../../test/hash/performance/baseline/sha256.cpp \
     ${srcdir}/../../test/hash/rmd/algorithm.cpp \
     ${srcdir}/../../test/hash/rmd/analysis.cpp \
     ${srcdir}/../../test/hash/sha/algorithm.cpp \

@@ -281,10 +281,6 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\rmd160.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\sha256.cpp">
-      <ObjectFileName>$(IntDir)test_hash_performance_baseline_sha256.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
@@ -300,9 +296,7 @@
       <ObjectFileName>$(IntDir)test_hash_sha_analysis.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\sha160.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\sha\sha256.cpp">
-      <ObjectFileName>$(IntDir)test_hash_sha_sha256.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\vector.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
@@ -448,11 +442,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\byteswap.h" />
-    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\common.h" />
-    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\endian.h" />
-    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\rmd160.h" />
-    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\sha256.h" />
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\mocks\blocks.hpp" />

@@ -657,6 +657,7 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.h" />
+    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\license.h" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mask.h" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mmask.h" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mqrspec.h" />

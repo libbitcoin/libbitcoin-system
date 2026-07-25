@@ -1637,6 +1637,9 @@
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.h">
       <Filter>src\wallet\addresses\qrencode</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\license.h">
+      <Filter>src\wallet\addresses\qrencode</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mask.h">
       <Filter>src\wallet\addresses\qrencode</Filter>
     </ClInclude>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2026 libbitcoin-system developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
  *

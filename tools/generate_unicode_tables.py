@@ -24,7 +24,7 @@ SHIFT = 7  # Same as existing unicode_data1/data2 tables
 
 LICENSE_HEADER = """\
 /**
- * Copyright (c) 2011-2026 libbitcoin-system developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
  *
