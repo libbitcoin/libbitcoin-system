@@ -27,6 +27,13 @@ namespace system {
 
 #ifdef HAVE_MSC
 
+// A process with no attached console (such as a service, or one started with
+// CREATE_NO_WINDOW) has no console code page or mode, and none to set.
+static bool consoled() NOEXCEPT
+{
+    return !is_null(GetConsoleWindow());
+}
+
 // Get Windows input handle.
 static LPVOID get_input_handle() THROWS
 {
@@ -39,6 +46,9 @@ static LPVOID get_input_handle() THROWS
 
 void console_streambuf::set_input(size_t stream_buffer_size) THROWS
 {
+    if (!consoled())
+        return;
+
     // Set console input to operate in UTF-8 for this process.
     // learn.microsoft.com/en-us/windows/console/setconsolecp
     if (SetConsoleCP(CP_UTF8) == FALSE)
@@ -55,6 +65,9 @@ void console_streambuf::set_input(size_t stream_buffer_size) THROWS
 
 void console_streambuf::set_output() THROWS
 {
+    if (!consoled())
+        return;
+
     // Set console output to operate in UTF-8 for this process.
     // learn.microsoft.com/en-us/windows/console/setconsoleoutputcp
     if (SetConsoleOutputCP(CP_UTF8) == FALSE)

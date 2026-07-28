@@ -27,6 +27,7 @@
 #endif
 #include <mutex>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
@@ -68,15 +69,25 @@ std::ostream& cerr_stream() THROWS
     return error;
 }
 
+// A stream that is not associated with a console (such as in a service) has
+// no mode to set, indicated by a negative descriptor (-2, or -1 when in error).
 inline void set_utf8_stdio(FILE* file) THROWS
 {
-    if (_setmode(_fileno(file), _O_U8TEXT) == -1)
+    const auto descriptor = _fileno(file);
+    if (is_negative(descriptor))
+        return;
+
+    if (_setmode(descriptor, _O_U8TEXT) == -1)
         throw runtime_exception{ "Could not set STDIO to utf8 mode." };
 }
 
 inline void set_binary_stdio(FILE* file) THROWS
 {
-    if (_setmode(_fileno(file), _O_BINARY) == -1)
+    const auto descriptor = _fileno(file);
+    if (is_negative(descriptor))
+        return;
+
+    if (_setmode(descriptor, _O_BINARY) == -1)
         throw runtime_exception{ "Could not set STDIO to binary mode." };
 }
 
