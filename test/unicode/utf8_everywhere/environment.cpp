@@ -356,8 +356,6 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__null_terminati
     free_environment(narrow_args);
 }
 
-// extended_path
-
 #endif // HAVE_MSC
 
 BOOST_AUTO_TEST_SUITE_END()

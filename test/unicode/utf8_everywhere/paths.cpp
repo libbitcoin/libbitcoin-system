@@ -122,6 +122,63 @@ BOOST_AUTO_TEST_CASE(paths__to_path__always__expected)
     BOOST_REQUIRE(result.u8string() == u8"\\\\?\\C:\\very\\long\\path\\exceeding\\MAX_PATH\\Unicode 文件名.txt");
 }
 
+// The functions are not platform-specific, though the vectors are. Only win32
+// qualifies a path with a drive and extends one that exceeds the maximum.
+constexpr size_t long_path_size = 260;
+
+#if defined(HAVE_MSC)
+static const auto test_absolute = std::filesystem::path{ L"C:\\path\\file.ext" };
+static const auto test_long = L"C:\\" + std::wstring(long_path_size, L'x');
+static const auto test_extended = std::filesystem::path{ L"\\\\?\\" + test_long };
+#else
+static const auto test_absolute = std::filesystem::path{ "/path/file.ext" };
+static const auto test_long = "/" + std::string(long_path_size, 'x');
+static const auto test_extended = std::filesystem::path{ test_long };
+#endif
+
+// module_path
+
+BOOST_AUTO_TEST_CASE(paths__module_path__always__expected)
+{
+    const auto module = module_path();
+
+#if defined(HAVE_MSC)
+    // The module is the test executable, already qualified and existing.
+    BOOST_REQUIRE(!module.empty());
+    BOOST_REQUIRE(module.is_absolute());
+    BOOST_REQUIRE(module.has_filename());
+    BOOST_REQUIRE(std::filesystem::exists(module));
+    BOOST_REQUIRE_EQUAL(qualified_path(module), module);
+#else
+    // Not implemented for non-Windows.
+    BOOST_REQUIRE(module.empty());
+#endif
+}
+
+// qualified_path
+
+BOOST_AUTO_TEST_CASE(paths__qualified_path__absolute__unchanged)
+{
+    BOOST_REQUIRE_EQUAL(qualified_path(test_absolute), test_absolute);
+}
+
+BOOST_AUTO_TEST_CASE(paths__qualified_path__long_absolute__unextended)
+{
+    BOOST_REQUIRE_EQUAL(qualified_path({ test_long }), std::filesystem::path{ test_long });
+}
+
+// extended_path
+
+BOOST_AUTO_TEST_CASE(paths__extended_path__absolute__unchanged)
+{
+    BOOST_REQUIRE_EQUAL(extended_path(test_absolute), test_absolute);
+}
+
+BOOST_AUTO_TEST_CASE(paths__extended_path__long_absolute__expected)
+{
+    BOOST_REQUIRE_EQUAL(extended_path({ test_long }), test_extended);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

@@ -37,6 +37,15 @@ BC_API std::filesystem::path to_path(const std::string& value) NOEXCEPT;
 BC_API std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT;
 
+/// Get the module path (not implemented for non-Windows).
+BC_API std::filesystem::path module_path() NOEXCEPT;
+
+/// Fully qualify the path and return it as another.
+/// Not thread safe. If another thread calls SetCurrentDirectory during this
+/// call, the result may be corrupted as static storage is used for directory.
+BC_API std::filesystem::path qualified_path(
+    const std::filesystem::path& path) NOEXCEPT;
+
 /// Extend the path and return it as another.
 /// std::filesystem::path does not extend long paths, so we provide this.
 /// Not thread safe. If another thread calls SetCurrentDirectory during this

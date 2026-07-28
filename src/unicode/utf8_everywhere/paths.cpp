@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/paths.hpp>
 
 #ifdef HAVE_MSC
     #include <shlobj.h>
     #include <windows.h>
 #endif
 #include <filesystem>
+#include <system_error>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 
@@ -82,7 +83,7 @@ std::filesystem::path default_config_path(
 
 #if defined(HAVE_MSC)
 
-// Helper for to_fully_qualified_path.
+// Helper for qualified_path.
 inline auto replace_all(std::wstring text, wchar_t from, wchar_t to) NOEXCEPT
 {
     for (auto position = text.find(from); position != std::string::npos;
@@ -95,8 +96,7 @@ inline auto replace_all(std::wstring text, wchar_t from, wchar_t to) NOEXCEPT
 };
 
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
-static std::wstring to_fully_qualified_path(
-    const std::filesystem::path& path) NOEXCEPT
+std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
 {
     // Separator normalization required by use of length extender.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -121,7 +121,9 @@ static std::wstring to_fully_qualified_path(
 
     // The returned size does not include the null terminator, and cannot
     // exceed the original, but does become smaller, so resize accordingly.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return { directory.begin(), std::next(directory.begin(), size) };
+    BC_POP_WARNING()
 }
 
 std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
@@ -129,15 +131,57 @@ std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
     // The length extension prefix works only with a fully-qualified path.
     // However this includes "considered relative" paths (with ".." segments).
     // That is of no consequence here because those will also be converted.
-    const auto full = to_fully_qualified_path(path);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    const auto full = qualified_path(path).wstring();
     return { (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full };
+    BC_POP_WARNING()
+}
+
+std::filesystem::path module_path() NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    constexpr auto max_path = static_cast<DWORD>(MAX_PATH);
+    BC_POP_WARNING()
+
+    for (auto size = max_path; !is_zero(size); size *= 2u)
+    {
+        std::vector<wchar_t> buffer(size);
+        const auto length = ::GetModuleFileNameW(NULL, buffer.data(), size);
+        if (is_zero(length))
+            break;
+
+        if (length < size)
+        {
+            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+            return { buffer.begin(), std::next(buffer.begin(), length) };
+            BC_POP_WARNING()
+        }
+    }
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return {};
+    BC_POP_WARNING()
 }
 
 #else
 
+std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
+{
+    std::error_code ec{};
+    const auto full = std::filesystem::absolute(path, ec);
+    return ec ? path : full;
+}
+
 std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
 {
     return path;
+}
+
+std::filesystem::path module_path() NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return {};
+    BC_POP_WARNING()
 }
 
 #endif // HAVE_MSC
