@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/paths.hpp>
 
 #ifdef HAVE_MSC
     #include <shlobj.h>
@@ -137,6 +137,32 @@ std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
     BC_POP_WARNING()
 }
 
+std::filesystem::path module_path() NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    constexpr auto max_path = static_cast<DWORD>(MAX_PATH);
+    BC_POP_WARNING()
+
+    for (auto size = max_path; !is_zero(size); size *= 2u)
+    {
+        std::vector<wchar_t> buffer(size);
+        const auto length = ::GetModuleFileNameW(NULL, buffer.data(), size);
+        if (is_zero(length))
+            break;
+
+        if (length < size)
+        {
+            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+            return { buffer.begin(), std::next(buffer.begin(), length) };
+            BC_POP_WARNING()
+        }
+    }
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return {};
+    BC_POP_WARNING()
+}
+
 #else
 
 std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
@@ -149,6 +175,13 @@ std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
 std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
 {
     return path;
+}
+
+std::filesystem::path module_path() NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return {};
+    BC_POP_WARNING()
 }
 
 #endif // HAVE_MSC
