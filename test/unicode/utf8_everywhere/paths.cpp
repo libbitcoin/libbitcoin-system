@@ -140,19 +140,13 @@ static const auto test_extended = std::filesystem::path{ test_long };
 
 BOOST_AUTO_TEST_CASE(paths__module_path__always__expected)
 {
-    const auto module = module_path();
-
-#if defined(HAVE_MSC)
     // The module is the test executable, already qualified and existing.
+    const auto module = module_path();
     BOOST_REQUIRE(!module.empty());
     BOOST_REQUIRE(module.is_absolute());
     BOOST_REQUIRE(module.has_filename());
     BOOST_REQUIRE(std::filesystem::exists(module));
     BOOST_REQUIRE_EQUAL(qualified_path(module), module);
-#else
-    // Not implemented for non-Windows.
-    BOOST_REQUIRE(module.empty());
-#endif
 }
 
 // qualified_path
