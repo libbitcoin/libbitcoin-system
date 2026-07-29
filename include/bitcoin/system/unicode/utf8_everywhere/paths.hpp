@@ -37,7 +37,7 @@ BC_API std::filesystem::path to_path(const std::string& value) NOEXCEPT;
 BC_API std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT;
 
-/// Get the module path (not implemented for non-Windows).
+/// Get the fully-qualified path of the executable (empty if unobtainable).
 BC_API std::filesystem::path module_path() NOEXCEPT;
 
 /// Fully qualify the path and return it as another.

@@ -70,4 +70,47 @@ BOOST_AUTO_TEST_CASE(witness__block__without_witness__checks)
     BOOST_REQUIRE(!instance.check());
 }
 
+// annex
+
+// The moved-from stack is empty, so the annex must be taken from the member.
+BOOST_AUTO_TEST_CASE(witness__annex__moved_annex_pattern__expected)
+{
+    const data_chunk expected{ taproot_annex_prefix, 0x42_u8 };
+    chunk_cptrs stack
+    {
+        to_shared<data_chunk>({ 0x24_u8 }),
+        to_shared<data_chunk>(expected)
+    };
+
+    const chain::witness instance{ std::move(stack) };
+    BOOST_REQUIRE(instance.annex());
+    BOOST_REQUIRE_EQUAL(instance.annex().data(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(witness__annex__copied_annex_pattern__expected)
+{
+    const data_chunk expected{ taproot_annex_prefix, 0x42_u8 };
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>({ 0x24_u8 }),
+        to_shared<data_chunk>(expected)
+    };
+
+    const chain::witness instance{ stack };
+    BOOST_REQUIRE(instance.annex());
+    BOOST_REQUIRE_EQUAL(instance.annex().data(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(witness__annex__moved_not_annex_pattern__empty)
+{
+    chunk_cptrs stack
+    {
+        to_shared<data_chunk>({ 0x24_u8 }),
+        to_shared<data_chunk>({ 0x24_u8 })
+    };
+
+    const chain::witness instance{ std::move(stack) };
+    BOOST_REQUIRE(!instance.annex());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

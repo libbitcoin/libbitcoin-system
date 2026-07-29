@@ -22,9 +22,17 @@
     #include <shlobj.h>
     #include <windows.h>
 #endif
+#ifdef HAVE_LINUX
+    #include <climits>
+    #include <unistd.h>
+#endif
+#ifdef HAVE_APPLE
+    #include <mach-o/dyld.h>
+#endif
 #include <filesystem>
 #include <system_error>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 
 namespace libbitcoin {
@@ -180,7 +188,38 @@ std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
 std::filesystem::path module_path() NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+#if defined(HAVE_LINUX)
+    // The link is not known to fit, so grow the buffer until it does.
+    for (auto size = static_cast<size_t>(PATH_MAX); !is_zero(size); size *= 2u)
+    {
+        std::vector<char> buffer(size);
+        const auto length = ::readlink("/proc/self/exe", buffer.data(), size);
+        if (is_negative(length))
+            break;
+
+        // The link is not null terminated, and is truncated when it fills.
+        const auto chars = possible_narrow_sign_cast<size_t>(length);
+        if (chars < size)
+            return { std::string{ buffer.begin(),
+                std::next(buffer.begin(), length) } };
+    }
+
     return {};
+#elif defined(HAVE_APPLE)
+    // The call populates the size when the buffer is insufficient.
+    uint32_t size{};
+    if (is_zero(_NSGetExecutablePath(nullptr, &size)))
+        return {};
+
+    std::vector<char> buffer(size);
+    if (!is_zero(_NSGetExecutablePath(buffer.data(), &size)))
+        return {};
+
+    // The path may be a symlink or contain relative segments, so qualify it.
+    return qualified_path({ std::string{ buffer.data() } });
+#else
+    return {};
+#endif
     BC_POP_WARNING()
 }
 

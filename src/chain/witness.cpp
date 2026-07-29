@@ -104,7 +104,7 @@ witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
   : stack_(std::move(stack)),
     valid_(valid),
     size_(serialized_size(stack_, false)),
-    annex_(annex::is_annex_pattern(stack_) ? stack.back() : nullptr)
+    annex_(annex::is_annex_pattern(stack_) ? stack_.back() : nullptr)
 {
 }
 
@@ -113,7 +113,7 @@ witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
   : stack_(stack),
     valid_(valid),
     size_(serialized_size(stack_, false)),
-    annex_(annex::is_annex_pattern(stack_) ? stack.back() : nullptr)
+    annex_(annex::is_annex_pattern(stack_) ? stack_.back() : nullptr)
 {
 }
 
@@ -122,7 +122,7 @@ witness::witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT
   : stack_(stack),
     valid_(valid),
     size_(size),
-    annex_(annex::is_annex_pattern(stack_) ? stack.back() : nullptr)
+    annex_(annex::is_annex_pattern(stack_) ? stack_.back() : nullptr)
 {
 }
 
