@@ -42,6 +42,11 @@
     #define HAVE_CYGWIN
 #endif
 
+// Others excluded presently due to lack of verified support.
+#if defined(HAVE_LINUX) || defined(HAVE_APPLE)
+    #define HAVE_POSIX
+#endif
+
 /// stackoverflow.com/questions/38499462/how-to-tell-clang-to-stop-pretending-
 /// to-be-other-compilers
 #if defined(__clang__)
