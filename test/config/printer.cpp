@@ -275,6 +275,65 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_
 BOOST_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
+BOOST_AUTO_TEST_SUITE(printer__format_settings_table)
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__empty__empty)
+{
+    CONFIG_PRINTER_SETUP();
+    CONFIG_PRINTER_INITIALIZE(0u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(), "");
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__one_section__expected)
+{
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("network.threads", po::value<std::string>(), "Thread count."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Thread count.\n"
+        "threads = <value>\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
+{
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("table.header.rate", po::value<std::string>(), "Growth rate."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[table.header]\n"
+        "# Growth rate.\n"
+        "rate = <value>\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_sections__grouped_by_section)
+{
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("table.txs.rate", po::value<std::string>(), "Txs growth rate.")
+        ("table.header.buckets", po::value<std::string>(), "Header buckets.")
+        ("table.header.rate", po::value<std::string>(), "Header growth rate."));
+    CONFIG_PRINTER_INITIALIZE(3u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[table.header]\n"
+        "# Header buckets.\n"
+        "buckets = <value>\n"
+        "# Header growth rate.\n"
+        "rate = <value>\n"
+        "\n"
+        "[table.txs]\n"
+        "# Txs growth rate.\n"
+        "rate = <value>\n"
+    );
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(printer__format_usage_parameters)
 
 BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_arg__sorted)

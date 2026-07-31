@@ -213,20 +213,18 @@ static std::string format_setting(const parameter& value,
     return (format(formatter) % name % BC_PRINTER_VALUE_TEXT).str();
 }
 
-// Requires a single period in each setting (i.e. no unnamed sections).
+// Requires at least one period in each setting (i.e. no unnamed sections).
+// The name is the text following the last period, allowing nested sections
+// (e.g. "table.header.rate" is "rate" within section "table.header").
 static void split_setting_name(const parameter& value, std::string& name,
     std::string& section) NOEXCEPT
 {
-    const auto tokens = split(value.long_name(), ".", false);
-    if (tokens.size() != 2)
-    {
-        section.clear();
-        name.clear();
-        return;
-    }
+    const auto& long_name = value.long_name();
+    const auto position = long_name.find_last_of('.');
+    const auto found = position != std::string::npos;
 
-    section = tokens[0];
-    name = tokens[1];
+    section = found ? long_name.substr(zero, position) : "";
+    name = found ? long_name.substr(add1(position)) : "";
 }
 
 std::string printer::format_settings_table() NOEXCEPT
