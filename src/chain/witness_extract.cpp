@@ -194,21 +194,24 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
             if (!control.is_valid())
                 return error::invalid_witness;
 
+            const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(
+                program->data());
+
+            // The second-to-last stack element is the script.
+            const auto tapleaf = to_shared<script>(*pop(*out_stack), false);
+            const auto leaf = taproot::leaf_hash(control.version(), *tapleaf);
+
+            // Execute tapleaf script.
+            // out stack  : [stack-elements]
+            // out script : (popped-from-stack)
+            if (!taproot::verify_commit(control, key, leaf))
+                return error::invalid_commitment;
+
             if (control.is_tapscript())
             {
-                const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(
-                    program->data());
-                
-                // The second-to-last stack element is the script.
-                out_script = to_shared<script>(*pop(*out_stack), false);
-                out_leaf = to_shared(taproot::leaf_hash(control.version(),
-                    *out_script));
-
-                // Execute tapleaf script.
-                // out stack  : [stack-elements]
-                // out script : (popped-from-stack)
-                return taproot::verify_commit(control, key, *out_leaf) ?
-                    error::script_success : error::invalid_commitment;
+                out_script = tapleaf;
+                out_leaf = to_shared(leaf);
+                return error::script_success;
             }
 
             // Others remain unencumbered (success).
