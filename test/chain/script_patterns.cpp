@@ -518,4 +518,71 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__wrong_key_siz
     BOOST_CHECK(!script::is_pay_tapscript_inscription_pattern(ops));
 }
 
+// pay_witness
+
+// The version byte is the opcode that pushes the version value, so version 1
+// serializes as 0x51 (op_1), not 0x01 (a one byte data push) [bip141].
+static const auto witness_v0_key_hash = base16_chunk("0014a85b2107f791b26a84e7586c28cec7cb61202ed3");
+static const auto witness_v0_script_hash = base16_chunk("0020a85b2107f791b26a84e7586c28cec7cb61202ed3d01944d832500f363782d675");
+static const auto witness_v1_taproot = base16_chunk("5120a85b2107f791b26a84e7586c28cec7cb61202ed3d01944d832500f363782d675");
+static const auto push_size_1_version = base16_chunk("010020a85b2107f791b26a84e7586c28cec7cb61202ed3d01944d832500f363782d675");
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v1_taproot__pay_witness_v1_taproot)
+{
+    const script instance(witness_v1_taproot, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.version() == script_version::taproot);
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_v1_taproot);
+}
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v0_key_hash__pay_witness_key_hash)
+{
+    const script instance(witness_v0_key_hash, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_key_hash);
+}
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v0_script_hash__pay_witness_script_hash)
+{
+    const script instance(witness_v0_script_hash, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_script_hash);
+}
+
+// A one byte data push consumes the following byte, so this is not a program.
+BOOST_AUTO_TEST_CASE(script__output_pattern__push_size_1_version__non_standard)
+{
+    const script instance(push_size_1_version, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.version() == script_version::unversioned);
+    BOOST_REQUIRE(!script::is_pay_witness_taproot_pattern(instance.ops()));
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::non_standard);
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_witness_taproot_pattern__round_trip__taproot)
+{
+    const script instance(script::to_pay_witness_taproot_pattern(hash_digest{}));
+    BOOST_REQUIRE(script::is_pay_witness_taproot_pattern(instance.ops()));
+    BOOST_REQUIRE(instance.version() == script_version::taproot);
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_v1_taproot);
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_witness_key_hash_pattern__round_trip__segwit)
+{
+    const script instance(script::to_pay_witness_key_hash_pattern(short_hash{}));
+    BOOST_REQUIRE(script::is_pay_witness_key_hash_pattern(instance.ops()));
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_key_hash);
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_witness_script_hash_pattern__round_trip__segwit)
+{
+    const script instance(script::to_pay_witness_script_hash_pattern(hash_digest{}));
+    BOOST_REQUIRE(script::is_pay_witness_script_hash_pattern(instance.ops()));
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_script_hash);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
