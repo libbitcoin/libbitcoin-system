@@ -106,7 +106,7 @@ find_package( Boost 1.86.0 REQUIRED
 )
 
 if ( with-secp256k1 )
-  find_package( libsecp256k1 0.7.0 REQUIRED )
+  find_package( libsecp256k1 0.8.0 REQUIRED )
 endif()
 
 if ( with-ultrafast )
