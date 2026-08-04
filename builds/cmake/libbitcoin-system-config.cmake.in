@@ -24,7 +24,7 @@ find_dependency( Boost 1.86.0 REQUIRED
 set( with-secp256k1 @with-secp256k1@ )
 
 if ( with-secp256k1 )
-  find_dependency( libsecp256k1 0.7.0 REQUIRED )
+  find_dependency( libsecp256k1 0.8.0 REQUIRED )
 endif()
 
 set( with-ultrafast @with-ultrafast@ )

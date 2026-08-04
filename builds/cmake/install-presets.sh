@@ -59,7 +59,7 @@ if [[ -z ${secp256k1_OWNER} ]]; then
     secp256k1_OWNER="bitcoin-core"
 fi
 if [[ -z ${secp256k1_TAG} ]]; then
-    secp256k1_TAG="v0.7.0"
+    secp256k1_TAG="v0.8.0"
 fi
 
 if [[ -z ${UltrafastSecp256k1_OWNER} ]]; then

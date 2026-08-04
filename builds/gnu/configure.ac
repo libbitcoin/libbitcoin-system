@@ -97,7 +97,7 @@ AC_SUBST([pkgconfigdir],[${with_pkgconfigdir}])
 AC_MSG_CHECKING([--enable-ndebug option])
 AC_ARG_ENABLE([ndebug],
     AS_HELP_STRING([--enable-ndebug],
-        [Compile with NDEBUG assertion. @<:@default=yes@:>@]),
+        [Compile with NDEBUG (no debug assertions). @<:@default=yes@:>@]),
     [enable_ndebug=$enableval],
     [enable_ndebug=yes])
 AC_MSG_RESULT([$enable_ndebug])
@@ -407,12 +407,12 @@ AS_IF([test "x${with_secp256k1}" != "xno"],
   [
     PKG_CHECK_MODULES(
       [secp256k1],
-      [libsecp256k1 >= 0.7.0],
+      [libsecp256k1 >= 0.8.0],
       [],
       [
-        AC_MSG_ERROR([libsecp256k1 >= 0.7.0 is required but was not found.])
+        AC_MSG_ERROR([libsecp256k1 >= 0.8.0 is required but was not found.])
       ])
-    AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.7.0'])
+    AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.8.0'])
     AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
     AC_SUBST([secp256k1_ISYS_CPPFLAGS], [`echo ${secp256k1_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
     AC_MSG_NOTICE([secp256k1_CPPFLAGS : ${secp256k1_CPPFLAGS}])
