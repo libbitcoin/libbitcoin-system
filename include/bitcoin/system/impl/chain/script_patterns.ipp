@@ -165,7 +165,7 @@ constexpr bool script::is_pay_witness_key_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2u
-        && ops[0].code() == opcode::push_size_0
+        && ops[0].code() == operation::opcode_from_nonnegative(0)
         && ops[1].code() == opcode::push_size_20;
 }
 
@@ -173,7 +173,7 @@ constexpr bool script::is_pay_witness_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2u
-        && ops[0].code() == opcode::push_size_0
+        && ops[0].code() == operation::opcode_from_nonnegative(0)
         && ops[1].code() == opcode::push_size_32;
 }
 
@@ -181,7 +181,7 @@ constexpr bool script::is_pay_witness_taproot_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2u
-        && ops[0].code() == opcode::push_size_1
+        && ops[0].code() == operation::opcode_from_nonnegative(1)
         && ops[1].code() == opcode::push_size_32;
 }
 
@@ -488,31 +488,19 @@ inline operations script::to_pay_witness_pattern(uint8_t version,
 inline operations script::to_pay_witness_key_hash_pattern(
     const short_hash& hash) NOEXCEPT
 {
-    return
-    {
-        { opcode::push_size_0 },
-        { to_chunk(hash), false },
-    };
+    return to_pay_witness_pattern(0, hash);
 }
 
 inline operations script::to_pay_witness_script_hash_pattern(
     const hash_digest& hash) NOEXCEPT
 {
-    return
-    {
-        { opcode::push_size_0 },
-        { to_chunk(hash), false }
-    };
+    return to_pay_witness_pattern(0, hash);
 }
 
 inline operations script::to_pay_witness_taproot_pattern(
     const hash_digest& hash) NOEXCEPT
 {
-    return
-    {
-        { opcode::push_size_1 },
-        { to_chunk(hash), false }
-    };
+    return to_pay_witness_pattern(1, hash);
 }
 
 // private
