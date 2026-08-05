@@ -986,6 +986,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/endpoint.cpp \
     ${srcdir}/../../test/config/hash256.cpp \
     ${srcdir}/../../test/config/parameter.cpp \
+    ${srcdir}/../../test/config/parser.cpp \
     ${srcdir}/../../test/config/printer.cpp \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \

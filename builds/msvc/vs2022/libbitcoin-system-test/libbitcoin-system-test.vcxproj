@@ -219,6 +219,7 @@
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\parser.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\config\url.cpp" />
     <ClCompile Include="..\..\..\..\test\config\utilities.cpp" />
