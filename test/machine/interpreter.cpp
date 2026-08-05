@@ -126,4 +126,83 @@ BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_budget_exceeded__op_check_sig_b
     BOOST_REQUIRE_EQUAL(run_budget_script(7), error::op_check_sig_budget);
 }
 
+namespace {
+
+// <sig> <0> <key> OP_CHECKSIGADD <1> OP_NUMEQUAL.
+// Success pushes number+1, so the script is true only when the sigop passed.
+script to_checksigadd_script(const data_chunk& key, const data_chunk& endorsement) NOEXCEPT
+{
+    operations ops{};
+    ops.emplace_back(endorsement, false);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(key, false);
+    ops.emplace_back(opcode::checksigadd);
+    ops.emplace_back(opcode::push_positive_1);
+    ops.emplace_back(opcode::numequal);
+    return script{ std::move(ops) };
+}
+
+// 64 bytes plus an undefined sighash byte (zero must be implicit) [bip341].
+data_chunk to_undefined_sighash_endorsement() NOEXCEPT
+{
+    data_chunk endorsement(add1(ec_signature_size), 0x11);
+    endorsement.back() = 0x04;
+    return endorsement;
+}
+
+} // namespace
+
+// An endorsement of neither 64 nor 65 bytes is not a schnorr signature, but
+// with an unknown key type it is never parsed, so the sigop passes.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_unknown_key_unparsable_endorsement__success)
+{
+    const data_chunk endorsement(10, 0x11);
+    const auto leaf = to_checksigadd_script(unknown_key, endorsement);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::script_success);
+}
+
+// Likewise an undefined sighash byte does not encumber an unknown key type.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_unknown_key_undefined_sighash__success)
+{
+    const auto endorsement = to_undefined_sighash_endorsement();
+    const auto leaf = to_checksigadd_script(unknown_key, endorsement);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::script_success);
+}
+
+// An empty key is invalid for any endorsement [bip342].
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_empty_key__op_check_sig_add2)
+{
+    const data_chunk key{};
+    const data_chunk endorsement(10, 0x11);
+    const auto leaf = to_checksigadd_script(key, endorsement);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add2);
+}
+
+// A 32 byte key remains subject to endorsement parsing.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_xonly_key_unparsable_endorsement__op_check_sig_add4)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const data_chunk endorsement(10, 0x11);
+    const auto leaf = to_checksigadd_script(key, endorsement);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add4);
+}
+
+// A 32 byte key remains subject to the defined sighash type rule.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_xonly_key_undefined_sighash__op_check_sig_add4)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const auto endorsement = to_undefined_sighash_endorsement();
+    const auto leaf = to_checksigadd_script(key, endorsement);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add4);
+}
+
+// A 32 byte key remains subject to signature verification.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_xonly_key_invalid_signature__op_check_sig_add6)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const data_chunk endorsement(ec_signature_size, 0x11);
+    const auto leaf = to_checksigadd_script(key, endorsement);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add6);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
