@@ -198,6 +198,7 @@ protected:
     /// Multisig signature hash caching.
     /// -----------------------------------------------------------------------
     virtual INLINE bool cached(uint8_t sighash_flags) const NOEXCEPT;
+    virtual INLINE void uncache() const NOEXCEPT;
     virtual INLINE const hash_digest& cached_hash() const NOEXCEPT;
     virtual INLINE bool set_hash(uint8_t sighash_flags) const NOEXCEPT;
     virtual INLINE void set_hash(const chain::script& subscript,

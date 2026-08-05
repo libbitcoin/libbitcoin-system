@@ -1162,6 +1162,10 @@ op_check_multisig_verify() NOEXCEPT
     const auto subscript = this->subscript(endorsements);
     const auto bip66 = this->is_enabled(flags::bip66_rule);
 
+    // This subscript is stripped of these endorsements, so a hash cached by a
+    // previous signature op (with a different subscript) cannot be reused.
+    this->uncache();
+
     // Keys may be empty.
     for (const auto& key: keys)
     {

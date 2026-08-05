@@ -23,11 +23,6 @@ BOOST_AUTO_TEST_SUITE(interpreter_tests)
 using namespace system::chain;
 using namespace system::machine;
 
-BOOST_AUTO_TEST_CASE(interpreter_test)
-{
-    BOOST_REQUIRE(true);
-}
-
 namespace {
 
 constexpr auto taproot_rules = flags::bip141_rule | flags::bip143_rule | flags::bip341_rule | flags::bip342_rule;
@@ -203,6 +198,82 @@ BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_xonly_key_invalid_signature__
     const data_chunk endorsement(ec_signature_size, 0x11);
     const auto leaf = to_checksigadd_script(key, endorsement);
     BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add6);
+}
+
+namespace {
+
+// OP_0 <key> OP_CHECKSIGADD OP_DROP OP_CODESEPARATOR OP_0 <key> OP_CHECKSIGADD
+// Both sigops take their signature from the witness. The second signs over the
+// codeseparator position of 4, the first over none (0xffffffff). The offset is
+// the op following the codeseparator, from which that position is derived.
+constexpr size_t after_codeseparator = 5;
+
+script to_codeseparator_script(const ec_xonly& key) NOEXCEPT
+{
+    const data_chunk point{ key.begin(), key.end() };
+
+    operations ops{};
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(point, false);
+    ops.emplace_back(opcode::checksigadd);
+    ops.emplace_back(opcode::drop);
+    ops.emplace_back(opcode::codeseparator);
+    ops.emplace_back(opcode::push_size_0);
+    ops.emplace_back(point, false);
+    ops.emplace_back(opcode::checksigadd);
+    return script{ std::move(ops) };
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__success)
+{
+    // Any valid secret, with its bip340 x-only point.
+    const auto secret = base16_hash("b7e151628aed2a6abf7158809cf4f3c762e7160f38b4da56a784d9045190cfef");
+    ec_compressed compressed{};
+    BOOST_REQUIRE(secret_to_public(compressed, secret));
+
+    const auto x_only = std::next(compressed.data());
+    const auto key = unsafe_array_cast<uint8_t, ec_xonly_size>(x_only);
+    const auto leaf = to_codeseparator_script(key);
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    constexpr auto version = script_version::taproot;
+    constexpr auto sighash = coverage::hash_default;
+
+    // The signature hash is taken over a tx without the signatures, which it
+    // does not cover, and is identical to that of the tx that carries them.
+    const auto tx = to_spending_transaction({});
+    const auto in = tx.inputs_ptr()->begin();
+
+    // The first sigop executes before any codeseparator.
+    hash_digest first{};
+    leaf.clear_offset();
+    BOOST_REQUIRE(tx.signature_hash(first, in, leaf, prevout_value, tapleaf, version, sighash, taproot_rules));
+
+    // The second executes after the codeseparator, which the interpreter
+    // records by advancing the offset to the op following it.
+    hash_digest second{};
+    leaf.offset = std::next(leaf.ops().begin(), after_codeseparator);
+    BOOST_REQUIRE(tx.signature_hash(second, in, leaf, prevout_value, tapleaf, version, sighash, taproot_rules));
+    leaf.clear_offset();
+
+    // The codeseparator position is the only difference between them.
+    BOOST_REQUIRE_NE(first, second);
+
+    // Sign each with the implied SIGHASH_DEFAULT (64 byte, no sighash byte).
+    ec_signature first_signature{};
+    ec_signature second_signature{};
+    BOOST_REQUIRE(schnorr::sign(first_signature, secret, first, one_hash));
+    BOOST_REQUIRE(schnorr::sign(second_signature, secret, second, one_hash));
+
+    // Witness elements, the last of which is the top of the execution stack.
+    const data_chunk second_chunk{ second_signature.begin(), second_signature.end() };
+    const data_chunk first_chunk{ first_signature.begin(), first_signature.end() };
+    const chunk_cptrs elements{ to_shared<data_chunk>(second_chunk), to_shared<data_chunk>(first_chunk) };
+
+    // Both signatures verify only if the second sigop takes its own hash. A
+    // cache retained across the codeseparator hands it the first instead.
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf, elements), error::script_success);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
