@@ -27,6 +27,7 @@
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/base85.hpp>
 #include <bitcoin/system/config/block.hpp>
+#include <bitcoin/system/config/byte.hpp>
 #include <bitcoin/system/config/endpoint.hpp>
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
