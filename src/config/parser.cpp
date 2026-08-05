@@ -96,8 +96,11 @@ bool parser::load_configuration_variables(variables_map& variables,
     const auto extended = extended_path(path);
 
     std::error_code code{};
-    if (!path.empty() /*&& std::filesystem::exists(extended, code)*/)
+    if (!path.empty())
     {
+        if (!std::filesystem::is_regular_file(extended, code))
+            throw ifstream_exception{ from_path(extended).c_str() };
+
         ifstream file{ path };
         if (!file.good())
             throw ifstream_exception{ from_path(extended).c_str() };
