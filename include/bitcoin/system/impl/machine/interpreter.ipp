@@ -227,7 +227,7 @@ op_return() const NOEXCEPT
 {
     if (this->is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_return);
-        
+
     return error::op_not_implemented;
 }
 
@@ -439,7 +439,7 @@ op_roll() NOEXCEPT
 {
     size_t index;
 
-    // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999] 
+    // 998,[0,1,2,...,997,998,999] => {998} [0,1,2,...,997,998,999]
     if (!this->pop_index32(index))
         return error::op_roll;
 
@@ -821,7 +821,7 @@ op_num_equal_verify() NOEXCEPT
     if (!this->pop_binary32(left, right))
         return error::op_num_equal_verify1;
 
-    return (left == right) ? error::op_success : 
+    return (left == right) ? error::op_success :
         error::op_num_equal_verify2;
 }
 
@@ -1162,6 +1162,10 @@ op_check_multisig_verify() NOEXCEPT
     const auto subscript = this->subscript(endorsements);
     const auto bip66 = this->is_enabled(flags::bip66_rule);
 
+    // This subscript is stripped of these endorsements, so a hash cached by a
+    // previous signature op (with a different subscript) cannot be reused.
+    this->uncache();
+
     // Keys may be empty.
     for (const auto& key: keys)
     {
@@ -1316,24 +1320,23 @@ op_check_sig_add() NOEXCEPT
         return error::op_success;
     }
 
-    // Split endorsement into schnorr signature and signature hash flags.
-    uint8_t sighash_flags;
-    const auto& sig = this->schnorr_split(sighash_flags, *endorsement);
-    if (sighash_flags == chain::coverage::invalid)
-        return error::op_check_sig_add4;
+    if (key->size() == ec_xonly_size)
+    {
+        // Split endorsement into schnorr signature and signature hash flags.
+        uint8_t sighash_flags;
+        const auto& sig = this->schnorr_split(sighash_flags, *endorsement);
+        if (sighash_flags == chain::coverage::invalid)
+            return error::op_check_sig_add4;
 
-    // Signature hash caching (bypass signature hash if same as previous).
-    if (!this->cached(sighash_flags))
-        if (!this->set_hash(sighash_flags))
-            return error::op_check_sig_add5;
+        // Signature hash caching (bypass signature hash if same as previous).
+        if (!this->cached(sighash_flags))
+            if (!this->set_hash(sighash_flags))
+                return error::op_check_sig_add5;
 
-    // Verify schnorr signature against public key and signature hash.
-    // If public key size is neither 0 nor 32 bytes, it is an unknown type.
-    // During script execution of signature opcodes these behave exactly as
-    // known types except that signature validation considered successful.
-    if (key->size() == ec_xonly_size &&
-        !this->verify_schnorr_signature(*key, this->cached_hash(), sig))
+        // Verify schnorr signature against public key and signature hash.
+        if (!this->verify_schnorr_signature(*key, this->cached_hash(), sig))
             return error::op_check_sig_add6;
+    }
 
     // If signature not empty, opcode counted toward sigops budget.
     if (!this->sigops_increment())

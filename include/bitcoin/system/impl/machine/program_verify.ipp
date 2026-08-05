@@ -132,6 +132,9 @@ set_subscript(const op_iterator& op) NOEXCEPT
     // Advance the offset to the op following the found code separator.
     // This is non-const because changes script state (despite being mutable).
     script_->offset = std::next(op);
+
+    // The subscript is changed, so any cached signature hash is stale.
+    uncache();
 }
 
 // static/private
@@ -229,11 +232,24 @@ signature_hash(hash_digest& out, const script& subscript,
 // Multisig signature hash caching.
 // ----------------------------------------------------------------------------
 
+// ****************************************************************************
+// CONSENSUS: The cache is keyed only on sighash flags, so it is valid only
+// while the subscript is unchanged. A v1 signature hash commits to the
+// op_codeseparator position and a v0 subscript is stripped of the endorsements
+// of the op that created it, so both invalidate the cache.
+// ****************************************************************************
 TEMPLATE
 INLINE bool CLASS::
 cached(uint8_t sighash_flags) const NOEXCEPT
 {
     return multisig_.set && (multisig_.flags == sighash_flags);
+}
+
+TEMPLATE
+INLINE void CLASS::
+uncache() const NOEXCEPT
+{
+    multisig_.set = false;
 }
 
 TEMPLATE

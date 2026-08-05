@@ -129,7 +129,7 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     primary_(projection<Stack>(*witness)),
     budget_(ceilinged_add(
         add1(chain::signature_cost),
-        chain::witness::serialized_size(*witness_, true)))
+        (*input)->witness().serialized_size(true)))
 {
     script_->clear_offset();
 }
