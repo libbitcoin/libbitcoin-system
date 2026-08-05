@@ -216,6 +216,7 @@
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\byte.cpp" />
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />

@@ -213,6 +213,7 @@
     <ClCompile Include="..\..\..\..\src\config\block.cpp">
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\byte.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp" />
@@ -419,6 +420,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\block.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\byte.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\config.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\hash160.hpp" />

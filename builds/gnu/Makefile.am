@@ -120,6 +120,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/base64.cpp \
     ${srcdir}/../../src/config/base85.cpp \
     ${srcdir}/../../src/config/block.cpp \
+    ${srcdir}/../../src/config/byte.cpp \
     ${srcdir}/../../src/config/endpoint.cpp \
     ${srcdir}/../../src/config/hash160.cpp \
     ${srcdir}/../../src/config/hash256.cpp \
@@ -346,6 +347,7 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/base64.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base85.hpp \
     ${srcdir}/../../include/bitcoin/system/config/block.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/byte.hpp \
     ${srcdir}/../../include/bitcoin/system/config/config.hpp \
     ${srcdir}/../../include/bitcoin/system/config/endpoint.hpp \
     ${srcdir}/../../include/bitcoin/system/config/hash160.hpp \
@@ -983,6 +985,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/base64.cpp \
     ${srcdir}/../../test/config/base85.cpp \
     ${srcdir}/../../test/config/block.cpp \
+    ${srcdir}/../../test/config/byte.cpp \
     ${srcdir}/../../test/config/endpoint.cpp \
     ${srcdir}/../../test/config/hash256.cpp \
     ${srcdir}/../../test/config/parameter.cpp \
