@@ -73,25 +73,20 @@ variables_map configured_variables(mock_parser& instance,
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(parser__load_configuration_variables,
-    test::directory_setup_fixture)
+BOOST_FIXTURE_TEST_SUITE(parser__load_configuration_variables, test::directory_setup_fixture)
 
 BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__directory__throws)
 {
     mock_parser instance;
     auto variables = configured_variables(instance, TEST_DIRECTORY);
-    BOOST_REQUIRE_THROW(
-        instance.load_configuration_variables(variables, "config"),
-        ifstream_exception);
+    BOOST_REQUIRE_THROW(instance.load_configuration_variables(variables, "config"), ifstream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__nonexistent_file__throws)
 {
     mock_parser instance;
     auto variables = configured_variables(instance, TEST_PATH);
-    BOOST_REQUIRE_THROW(
-        instance.load_configuration_variables(variables, "config"),
-        ifstream_exception);
+    BOOST_REQUIRE_THROW(instance.load_configuration_variables(variables, "config"), ifstream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__regular_file__returns_true)
