@@ -78,7 +78,11 @@ from_chunk(bool& value, const data_chunk& vary) NOEXCEPT
         return true;
     }
 
-    return from_integer(value, vary.front());
+    // A non-minimal chunk retains its (non-minimal) boolean interpretation.
+    value = from_chunk(vary);
+
+    // Minimal boolean chunk must be [] (above) or [0x01], all bytes matter.
+    return is_one(vary.size()) && is_one(vary.front());
 }
 
 constexpr bool boolean::

@@ -256,4 +256,149 @@ BOOST_AUTO_TEST_CASE(number__from_chunk__negative_zero__true)
     BOOST_CHECK_EQUAL(value, 0);
 }
 
+// boolean::from_chunk - non-minimal (any chunk is a valid boolean)
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__boolean_from_chunk__empty__false)
+{
+    BOOST_CHECK(!number::boolean::from_chunk({}));
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_from_chunk__zeros__false)
+{
+    BOOST_CHECK(!number::boolean::from_chunk({ 0x00 }));
+    BOOST_CHECK(!number::boolean::from_chunk({ 0x80 }));
+    BOOST_CHECK(!number::boolean::from_chunk({ 0x00, 0x00 }));
+    BOOST_CHECK(!number::boolean::from_chunk({ 0x00, 0x80 }));
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_from_chunk__nonzeros__true)
+{
+    BOOST_CHECK(number::boolean::from_chunk({ 0x01 }));
+    BOOST_CHECK(number::boolean::from_chunk({ 0x02 }));
+    BOOST_CHECK(number::boolean::from_chunk({ 0x00, 0x01 }));
+    BOOST_CHECK(number::boolean::from_chunk({ 0x01, 0x00 }));
+    BOOST_CHECK(number::boolean::from_chunk({ 0x01, 0x80 }));
+}
+
+// boolean::from_chunk - minimal [bip342], chunk must be [] or [0x01]
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__empty__true_false)
+{
+    bool value{ true };
+    BOOST_CHECK(number::boolean::from_chunk(value, {}));
+    BOOST_CHECK(!value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__one__true_true)
+{
+    bool value{};
+    BOOST_CHECK(number::boolean::from_chunk(value, { 0x01 }));
+    BOOST_CHECK(value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__positive_zero__false)
+{
+    // [0x00] is a non-minimal false, must be [].
+    bool value{ true };
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x00 }));
+    BOOST_CHECK(!value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__negative_zero__false)
+{
+    // [0x80] is a non-minimal false, must be [].
+    bool value{ true };
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x80 }));
+    BOOST_CHECK(!value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__negative_one__false)
+{
+    // [0x81] is a non-minimal true, must be [0x01].
+    bool value{};
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x81 }));
+    BOOST_CHECK(value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__two__false)
+{
+    // [0x02] is a non-minimal true, must be [0x01].
+    bool value{};
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x02 }));
+    BOOST_CHECK(value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__one_with_trailing_bytes__false)
+{
+    // All bytes are material, the leading 0x01 is insufficient.
+    bool value{};
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x01, 0x00 }));
+    BOOST_CHECK(value);
+
+    value = false;
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x01, 0x80 }));
+    BOOST_CHECK(value);
+
+    value = false;
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x01, 0x00, 0x00, 0x00 }));
+    BOOST_CHECK(value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_chunk__zero_with_trailing_bytes__false)
+{
+    bool value{ true };
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x00, 0x00 }));
+    BOOST_CHECK(!value);
+
+    value = false;
+    BOOST_CHECK(!number::boolean::from_chunk(value, { 0x00, 0x01 }));
+    BOOST_CHECK(value);
+}
+
+// boolean::from_integer - minimal [bip342], integer must be 0 or 1
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_integer__zero_one__true)
+{
+    bool value{ true };
+    BOOST_CHECK(number::boolean::from_integer(value, 0));
+    BOOST_CHECK(!value);
+
+    value = false;
+    BOOST_CHECK(number::boolean::from_integer(value, 1));
+    BOOST_CHECK(value);
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_minimal_from_integer__not_zero_one__false)
+{
+    bool value{};
+    BOOST_CHECK(!number::boolean::from_integer(value, 2));
+    BOOST_CHECK(value);
+
+    value = false;
+    BOOST_CHECK(!number::boolean::from_integer(value, -1));
+    BOOST_CHECK(value);
+
+    value = true;
+    BOOST_CHECK(!number::boolean::from_integer(value, max_int64));
+    BOOST_CHECK(value);
+}
+
+// boolean::from_chunk_strict - strict [bip147], false must be []
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__boolean_from_chunk_strict__empty__false)
+{
+    BOOST_CHECK(!number::boolean::from_chunk_strict({}));
+}
+
+BOOST_AUTO_TEST_CASE(number__boolean_from_chunk_strict__not_empty__true)
+{
+    BOOST_CHECK(number::boolean::from_chunk_strict({ 0x00 }));
+    BOOST_CHECK(number::boolean::from_chunk_strict({ 0x80 }));
+    BOOST_CHECK(number::boolean::from_chunk_strict({ 0x01 }));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
