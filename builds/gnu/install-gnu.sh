@@ -338,7 +338,7 @@ main()
         msg_verbose "*** Build config specified, calculating flags..."
 
         if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-            BUILD_FLAGS="-Og -g"
+            BUILD_FLAGS="-Og -g1"
         elif [[ "${BUILD_CONFIG}" == "release" ]]; then
             BUILD_FLAGS="-O3"
         fi
