@@ -190,6 +190,10 @@ public:
     uint32_t flags() const NOEXCEPT;
     size_t height() const NOEXCEPT;
 
+    /// The two mainnet blocks with duplicated (unspent) coinbases.
+    static bool is_bip30_exception(const hash_digest& hash,
+        size_t height) NOEXCEPT;
+
 protected:
     struct activations
     {

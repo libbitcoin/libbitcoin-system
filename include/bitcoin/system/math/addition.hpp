@@ -110,6 +110,27 @@ template <typename Explicit, typename Left, typename Right,
     if_integral_integer<Right> = true>
 constexpr Explicit floored_subtract(Left left, Right right) NOEXCEPT;
 
+/// Integer maximum if would overflow, integer minimum if would underflow.
+template <place1 = place1{}, typename Left, typename Right,
+    if_signed_integral_integer<Left> = true,
+    if_signed_integral_integer<Right> = true >
+constexpr to_greater_type<Left, Right> delta(Left left, Right right) NOEXCEPT;
+template <place1 = place1{}, typename Left, typename Right,
+    if_unsigned_integral_integer<Left> = true,
+    if_unsigned_integral_integer<Right> = true >
+constexpr to_signed_type<to_greater_type<Left, Right>> delta(Left left,
+    Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_signed_integral_integer<Explicit> = true,
+    if_unsigned_integral_integer<Left> = true,
+    if_unsigned_integral_integer<Right> = true>
+constexpr Explicit delta(Left left, Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_signed_integral_integer<Explicit> = true,
+    if_signed_integral_integer<Left> = true,
+    if_signed_integral_integer<Right> = true>
+constexpr Explicit delta(Left left, Right right) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 

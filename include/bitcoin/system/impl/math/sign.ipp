@@ -71,6 +71,16 @@ constexpr Unsigned negate(Unsigned value) NOEXCEPT
     return twos_complement(value);
 }
 
+template <typename Signed, typename Unsigned,
+    if_signed_integral_integer<Signed>,
+    if_unsigned_integral_integer<Unsigned>>
+constexpr Signed floored_negate(Unsigned value) NOEXCEPT
+{
+    constexpr auto min = std::numeric_limits<Signed>::min();
+    constexpr auto max = to_unsigned(std::numeric_limits<Signed>::max());
+    return value > max ? min : negate(possible_narrow_sign_cast<Signed>(value));
+}
+
 template <typename Integer, if_integer<Integer>>
 constexpr Integer twos_complement(Integer value) NOEXCEPT
 {
