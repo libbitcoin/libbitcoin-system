@@ -447,4 +447,75 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify4);
 }
 
+// bip141 p2sh-wrapped witness scriptSig malleation.
+// ----------------------------------------------------------------------------
+// The scriptSig of a p2sh-wrapped witness spend must be *exactly* a canonical
+// push of the embedded script. These are the bip143 p2sh_p2wpkh/p2sh_p2wsh
+// transactions above with the scriptSig push re-encoded using a non-nominal
+// (yet still valid) push opcode. The embedded script, and therefore the p2sh
+// hash, is unchanged, and bip143 signature hashing does not commit to the
+// scriptSig, so these would otherwise verify - third party malleation.
+
+BOOST_AUTO_TEST_CASE(script__verify__bip141_p2sh_p2wpkh_pushdata1_scriptsig__dirty_witness)
+{
+    // scriptSig is [push_one_size(0x4c) 0x16 0014<20 bytes>] vs. [0x16 0014<20 bytes>].
+    const auto decoded_tx = base16_chunk("01000000000101db6b1b20aa0fd7b23880be2ecbd4a98130974cf4748fb66092ac4d3ceb1a547701000000184c16001479091972186c449eb1ded22b78e40d009bdf0089feffffff02b8b4eb0b000000001976a914a457b684d7f0d539a46a45bbc043f35b59d0d96388ac0008af2f000000001976a914fd270b1ee6abcaea97fea7ad0402e8bd8ad6d77c88ac02473044022047ac8e878352d3ebbde1c94ce3a10d057c24175747116f8288e5d794d12d482f0220217f36a485cae903c713331d877c1f64677e3622ad4010726870540656fe9dcb012103ad1d8e89212f0b92c74d23bb710c00662ad1470198ac48c43f7d6f93a2a2687392040000");
+    const transaction_accessor tx(decoded_tx, true);
+    BOOST_REQUIRE(tx.is_valid());
+    BOOST_REQUIRE_EQUAL(tx.inputs_ptr()->size(), 1u);
+
+    // The scriptSig is a single (relaxed) push of the same embedded script.
+    const auto& ops = (*tx.inputs_ptr())[0]->script().ops();
+    BOOST_REQUIRE_EQUAL(ops.size(), 1u);
+    BOOST_REQUIRE(ops.front().code() == opcode::push_one_size);
+    BOOST_REQUIRE_EQUAL(encode_base16(ops.front().data()), "001479091972186c449eb1ded22b78e40d009bdf0089");
+
+    constexpr auto value = 1000000000u;
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value, { base16_chunk("a9144733f37cf4db86fbc2efed2500b4f4e49f31202387"), false } });
+
+    // The p2sh hash still matches, and bip143 does not sign the scriptSig.
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::dirty_witness);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__bip141_p2sh_p2wpkh_pushdata2_scriptsig__dirty_witness)
+{
+    // scriptSig is [push_two_size(0x4d) 0x1600 0014<20 bytes>].
+    const auto decoded_tx = base16_chunk("01000000000101db6b1b20aa0fd7b23880be2ecbd4a98130974cf4748fb66092ac4d3ceb1a547701000000194d1600001479091972186c449eb1ded22b78e40d009bdf0089feffffff02b8b4eb0b000000001976a914a457b684d7f0d539a46a45bbc043f35b59d0d96388ac0008af2f000000001976a914fd270b1ee6abcaea97fea7ad0402e8bd8ad6d77c88ac02473044022047ac8e878352d3ebbde1c94ce3a10d057c24175747116f8288e5d794d12d482f0220217f36a485cae903c713331d877c1f64677e3622ad4010726870540656fe9dcb012103ad1d8e89212f0b92c74d23bb710c00662ad1470198ac48c43f7d6f93a2a2687392040000");
+    const transaction_accessor tx(decoded_tx, true);
+    BOOST_REQUIRE(tx.is_valid());
+    BOOST_REQUIRE_EQUAL(tx.inputs_ptr()->size(), 1u);
+
+    const auto& ops = (*tx.inputs_ptr())[0]->script().ops();
+    BOOST_REQUIRE_EQUAL(ops.size(), 1u);
+    BOOST_REQUIRE(ops.front().code() == opcode::push_two_size);
+
+    constexpr auto value = 1000000000u;
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value, { base16_chunk("a9144733f37cf4db86fbc2efed2500b4f4e49f31202387"), false } });
+
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::dirty_witness);
+
+    // Without bip141 the embedded script is not a witness program, so the
+    // (unconsumed) witness is what invalidates the input.
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip143_rule }, 0), error::unexpected_witness);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__bip141_p2sh_p2wsh_pushdata1_scriptsig__dirty_witness)
+{
+    // scriptSig is [push_one_size(0x4c) 0x22 0020<32 bytes>] vs. [0x22 0020<32 bytes>].
+    const auto decoded_tx = base16_chunk("0100000000010136641869ca081e70f394c6948e8af409e18b619df2ed74aa106c1ca29787b96e01000000244c220020a16b5755f7f6f96dbd65f5f0d6ab9418b89af4b1f14a1bb8a09062c35f0dcb54ffffffff0200e9a435000000001976a914389ffce9cd9ae88dcc0631e88a821ffdbe9bfe2688acc0832f05000000001976a9147480a33f950689af511e6e84c138dbbd3c3ee41588ac080047304402206ac44d672dac41f9b00e28f4df20c52eeb087207e8d758d76d92c6fab3b73e2b0220367750dbbe19290069cba53d096f44530e4f98acaa594810388cf7409a1870ce01473044022068c7946a43232757cbdf9176f009a928e1cd9a1a8c212f15c1e11ac9f2925d9002205b75f937ff2f9f3c1246e547e54f62e027f64eefa2695578cc6432cdabce271502473044022059ebf56d98010a932cf8ecfec54c48e6139ed6adb0728c09cbe1e4fa0915302e022007cd986c8fa870ff5d2b3a89139c9fe7e499259875357e20fcbb15571c76795403483045022100fbefd94bd0a488d50b79102b5dad4ab6ced30c4069f1eaa69a4b5a763414067e02203156c6a5c9cf88f91265f5a942e96213afae16d83321c8b31bb342142a14d16381483045022100a5263ea0553ba89221984bd7f0b13613db16e7a70c549a86de0cc0444141a407022005c360ef0ae5a5d4f9f2f87a56c1546cc8268cab08c73501d6b3be2e1e1a8a08824730440220525406a1482936d5a21888260dc165497a90a15669636d8edca6b9fe490d309c022032af0c646a34a44d1f4576bf6a4a74b67940f8faa84c7df9abe12a01a11e2b4783cf56210307b8ae49ac90a048e9b53357a2354b3334e9c8bee813ecb98e99a7e07e8c3ba32103b28f0c28bfab54554ae8c658ac5c3e0ce6e79ad336331f78c428dd43eea8449b21034b8113d703413d57761b8b9781957b8c0ac1dfe69f492580ca4195f50376ba4a21033400f6afecb833092a9a21cfdf1ed1376e58c5d1f47de74683123987e967a8f42103a6d48b1131e94ba04d9737d61acdaa1322008af9602b3b14862c07a1789aac162102d8b661b0b3302ee2f162b09e07a55ad5dfbe673a9f01d9f0c19617681024306b56ae00000000");
+    const transaction_accessor tx(decoded_tx, true);
+    BOOST_REQUIRE(tx.is_valid());
+    BOOST_REQUIRE_EQUAL(tx.inputs_ptr()->size(), 1u);
+
+    const auto& ops = (*tx.inputs_ptr())[0]->script().ops();
+    BOOST_REQUIRE_EQUAL(ops.size(), 1u);
+    BOOST_REQUIRE(ops.front().code() == opcode::push_one_size);
+    BOOST_REQUIRE_EQUAL(encode_base16(ops.front().data()), "0020a16b5755f7f6f96dbd65f5f0d6ab9418b89af4b1f14a1bb8a09062c35f0dcb54");
+
+    constexpr auto value = 987654321u;
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value, { base16_chunk("a9149993a429037b5d912407a71c252019287b8d27a587"), false } });
+
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::dirty_witness);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

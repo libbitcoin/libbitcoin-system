@@ -124,8 +124,14 @@ code CLASS::connect_embedded(const chain::context& state,
     }
     else if (embedded->is_pay_to_witness(state.flags))
     {
-        // The input script must be a push of the embedded_script [bip141].
-        if (!is_one(input.script().ops().size()))
+        // ********************************************************************
+        // CONSENSUS: The input script must be *exactly* a canonical push of
+        // the embedded script, otherwise the witness is malleable [bip141].
+        // A single relaxed push (e.g. push_one_size) encodes the same data
+        // yet is a distinct script, so the nominal encoding is required.
+        // ********************************************************************
+        const auto& ops = input.script().ops();
+        if (!is_one(ops.size()) || !ops.front().is_nominal_push())
             return error::dirty_witness;
 
         // Because output script pushed version/witness program [bip141].
