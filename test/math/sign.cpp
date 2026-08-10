@@ -39,6 +39,18 @@ static_assert(to_unsigned(negate(min_int16)) == add1(to_unsigned(max_int16)));
 static_assert(to_unsigned(negate(min_int32)) == add1(to_unsigned(max_int32)));
 ////static_assert(to_unsigned(negate(min_int64)) == add1(to_unsigned(max_int64)));
 
+// floored_negate (signed negation of an unsigned magnitude)
+static_assert(floored_negate<int8_t>(uint8_t{ 0 }) == 0);
+static_assert(floored_negate<int8_t>(uint8_t{ 5 }) == -5);
+static_assert(floored_negate<int8_t>(uint8_t{ 127 }) == -127);
+
+// The signed minimum is exact (not saturated) at its magnitude.
+static_assert(floored_negate<int8_t>(uint8_t{ 128 }) == min_int8);
+static_assert(floored_negate<int8_t>(uint8_t{ 129 }) == min_int8);
+static_assert(floored_negate<int64_t>(max_uint64) == min_int64);
+static_assert(floored_negate<int64_t>(max_uint32) == 4294967295_ni64);
+static_assert(is_same_type<decltype(floored_negate<int16_t>(uint32_t{})), int16_t>);
+
 // absolute ([absolue] value does not change, signedness to unsigned, sign to positive)
 static_assert(absolute(0_i32)   == 0_u32);
 static_assert(absolute(0_u32)   == 0_u32);

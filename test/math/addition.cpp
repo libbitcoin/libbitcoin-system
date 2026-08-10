@@ -265,4 +265,43 @@ static_assert(floored_subtract(unsigned_half, unsigned_max) == unsigned_min);
 static_assert(floored_subtract(unsigned_half, unsigned_half) == unsigned_min);
 static_assert(is_same_type<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>);
 
+// delta
+// ----------------------------------------------------------------------------
+
+static_assert(delta(min_uint32, min_uint32) == zer_int32);
+static_assert(delta(pos_uint32, min_uint32) == pos_int32);
+static_assert(delta(min_uint32, pos_uint32) == neg_int32);
+static_assert(delta(pos_uint32, pos_uint32) == zer_int32);
+
+// Saturated at the signed bounds.
+static_assert(delta(max_uint32, min_uint32) == max_int32);
+static_assert(delta(min_uint32, max_uint32) == min_int32);
+
+// Exact in a wider signed type.
+static_assert(delta<int64_t>(max_uint32, min_uint32) == 4294967295_i64);
+static_assert(delta<int64_t>(min_uint32, max_uint32) == 4294967295_ni64);
+
+// The signed minimum is exact (not saturated) at its magnitude.
+static_assert(delta<int8_t>(uint8_t{ 0 }, uint8_t{ 128 }) == minimum<int8_t>);
+static_assert(delta<int8_t>(uint8_t{ 0 }, uint8_t{ 129 }) == minimum<int8_t>);
+static_assert(delta<int8_t>(uint8_t{ 200 }, uint8_t{ 0 }) == maximum<int8_t>);
+
+// Mixed operand widths yield the signed type of the greater.
+static_assert(delta(uint16_t{ 1 }, uint32_t{ 2 }) == -1);
+static_assert(is_same_type<decltype(delta(uint16_t{}, uint32_t{})), int32_t>);
+static_assert(is_same_type<decltype(delta<int16_t>(uint32_t{}, uint32_t{})), int16_t>);
+
+// Signed operands.
+static_assert(delta(zer_int32, zer_int32) == zer_int32);
+static_assert(delta(pos_int32, neg_int32) == pos_int32 - neg_int32);
+static_assert(delta(neg_int32, pos_int32) == neg_int32 - pos_int32);
+static_assert(delta(min_int32, max_int32) == min_int32);
+static_assert(delta(max_int32, min_int32) == max_int32);
+static_assert(delta<int64_t>(max_int32, min_int32) == 4294967295_i64);
+static_assert(delta<int64_t>(min_int32, max_int32) == 4294967295_ni64);
+static_assert(delta<int8_t>(max_int32, min_int32) == maximum<int8_t>);
+static_assert(delta<int8_t>(min_int32, max_int32) == minimum<int8_t>);
+static_assert(is_same_type<decltype(delta(int16_t{}, int32_t{})), int32_t>);
+static_assert(is_same_type<decltype(delta<int16_t>(int32_t{}, int32_t{})), int16_t>);
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -217,6 +217,49 @@ constexpr Explicit floored_subtract(Left left, Right right) NOEXCEPT
         possible_narrow_and_sign_cast<Explicit>(right));
 }
 
+// delta
+// ----------------------------------------------------------------------------
+
+template <place1, typename Left, typename Right,
+    if_signed_integral_integer<Left>,
+    if_signed_integral_integer<Right>>
+constexpr to_greater_type<Left, Right> delta(Left left,
+    Right right) NOEXCEPT
+{
+    return delta<to_greater_type<Left, Right>>(left, right);
+}
+
+template <place1, typename Left, typename Right,
+    if_unsigned_integral_integer<Left>,
+    if_unsigned_integral_integer<Right>>
+constexpr to_signed_type<to_greater_type<Left, Right>> delta(Left left,
+    Right right) NOEXCEPT
+{
+    return delta<to_signed_type<to_greater_type<Left, Right>>>(left, right);
+}
+
+template <typename Explicit, typename Left, typename Right,
+    if_signed_integral_integer<Explicit>,
+    if_unsigned_integral_integer<Left>,
+    if_unsigned_integral_integer<Right>>
+constexpr Explicit delta(Left left, Right right) NOEXCEPT
+{
+    return left < right ?
+        floored_negate<Explicit>(subtract(right, left)) :
+        limit<Explicit>(subtract(left, right));
+}
+
+template <typename Explicit, typename Left, typename Right,
+    if_signed_integral_integer<Explicit>,
+    if_signed_integral_integer<Left>,
+    if_signed_integral_integer<Right>>
+constexpr Explicit delta(Left left, Right right) NOEXCEPT
+{
+    using wider = to_greater_type<to_greater_type<Left, Right>, Explicit>;
+    return limit<Explicit>(floored_subtract(possible_wide_cast<wider>(left),
+        possible_wide_cast<wider>(right)));
+}
+
 } // namespace system
 } // namespace libbitcoin
 

@@ -46,6 +46,12 @@ constexpr Signed negate(Signed value) NOEXCEPT;
 template <typename Unsigned, if_unsigned_integer<Unsigned> = true>
 constexpr Unsigned negate(Unsigned value) NOEXCEPT;
 
+/// Signed integer minimum if the negation would underflow.
+template <typename Signed, typename Unsigned,
+    if_signed_integral_integer<Signed> = true,
+    if_unsigned_integral_integer<Unsigned> = true>
+constexpr Signed floored_negate(Unsigned value) NOEXCEPT;
+
 /// Ones complement, alias for bit_not (safe).
 template <typename Integer, if_integer<Integer> = true>
 constexpr Integer ones_complement(Integer value) NOEXCEPT;
