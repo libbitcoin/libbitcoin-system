@@ -137,12 +137,16 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
     ${srcdir}/../../src/crypto/aes256.cpp \
+    ${srcdir}/../../src/crypto/chacha20.cpp \
+    ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../src/crypto/der_parser.cpp \
+    ${srcdir}/../../src/crypto/poly1305.cpp \
     ${srcdir}/../../src/crypto/pseudo_random.cpp \
     ${srcdir}/../../src/crypto/ring_signature.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/ellswift.cpp \
     ${srcdir}/../../src/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
     ${srcdir}/../../src/crypto/secp256k1/recover.cpp \
@@ -370,8 +374,11 @@ include_bitcoin_system_cryptodir = \
 
 include_bitcoin_system_crypto_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/aes256.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/chacha20.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/chacha20_poly1305.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/crypto.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/der_parser.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/poly1305.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/pseudo_random.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/ring_signature.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1.hpp \
@@ -444,6 +451,7 @@ include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/checksum.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/functions.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hash.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/hkdf.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hmac.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/pbkd.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/scrypt.hpp \
@@ -522,6 +530,7 @@ include_bitcoin_system_impl_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/hash/accumulator.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/checksum.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/functions.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/hkdf.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/hmac.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/pbkd.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/scrypt.ipp
@@ -995,10 +1004,14 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/utilities.cpp \
     ${srcdir}/../../test/config/version.cpp \
     ${srcdir}/../../test/crypto/aes256.cpp \
+    ${srcdir}/../../test/crypto/chacha20.cpp \
+    ${srcdir}/../../test/crypto/chacha20_poly1305.cpp \
+    ${srcdir}/../../test/crypto/poly1305.cpp \
     ${srcdir}/../../test/crypto/pseudo_random.cpp \
     ${srcdir}/../../test/crypto/ring_signature.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ecdsa.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/ellswift.cpp \
     ${srcdir}/../../test/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../test/crypto/secp256k1/math.cpp \
     ${srcdir}/../../test/crypto/secp256k1/schnorr.cpp \
@@ -1039,6 +1052,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/accumulator.cpp \
     ${srcdir}/../../test/hash/checksum.cpp \
     ${srcdir}/../../test/hash/functions.cpp \
+    ${srcdir}/../../test/hash/hkdf.cpp \
     ${srcdir}/../../test/hash/hmac.cpp \
     ${srcdir}/../../test/hash/pbkd.cpp \
     ${srcdir}/../../test/hash/scrypt.cpp \

@@ -110,8 +110,11 @@
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/config/version.hpp>
 #include <bitcoin/system/crypto/aes256.hpp>
+#include <bitcoin/system/crypto/chacha20.hpp>
+#include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
+#include <bitcoin/system/crypto/poly1305.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -159,6 +162,7 @@
 #include <bitcoin/system/hash/checksum.hpp>
 #include <bitcoin/system/hash/functions.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/hash/hkdf.hpp>
 #include <bitcoin/system/hash/hmac.hpp>
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
