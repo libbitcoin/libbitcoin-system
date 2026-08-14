@@ -104,9 +104,10 @@ code CLASS::connect_embedded(const chain::context& state,
 {
     using namespace chain;
     const auto& input = **it;
+    const auto& ops = input.script().ops();
 
     // Input script is limited to relaxed push data operations [bip16].
-    if (!script::is_relaxed_push_pattern(input.script().ops()))
+    if (!script::is_relaxed_push_pattern(ops))
         return error::invalid_script_embed;
 
     // Embedded script must be at the top of the stack [bip16].
@@ -124,15 +125,9 @@ code CLASS::connect_embedded(const chain::context& state,
     }
     else if (embedded->is_pay_to_witness(state.flags))
     {
-        // ********************************************************************
-        // CONSENSUS: The input script must be *exactly* a canonical push of
-        // the embedded script, otherwise the witness is malleable [bip141].
-        // A single relaxed push (e.g. push_one_size) encodes the same data
-        // yet is a distinct script, so the nominal encoding is required.
-        // ********************************************************************
-        const auto& ops = input.script().ops();
-        if (!is_one(ops.size()) || !ops.front().is_nominal_push())
-            return error::dirty_witness;
+        // The input script must be a nominal push of the embedded [bip141].
+        if (!script::is_nominal_push_pattern(ops))
+            return error::dirty_embed;
 
         // Because output script pushed version/witness program [bip141].
         if ((ec = connect_witness(state, tx, it, *embedded, true, capture)))

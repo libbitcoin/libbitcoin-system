@@ -69,6 +69,13 @@ constexpr bool script::is_relaxed_push_pattern(const operations& ops) NOEXCEPT
     return std::all_of(ops.begin(), ops.end(), push);
 }
 
+// A single push has exactly one nominal encoding [bip141].
+constexpr bool script::is_nominal_push_pattern(const operations& ops) NOEXCEPT
+{
+    return is_one(ops.size())
+        && ops[0].is_nominal_push();
+}
+
 // ****************************************************************************
 // CONSENSUS: this pattern is used to commit to bip141 witness data.
 // ****************************************************************************

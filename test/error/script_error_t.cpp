@@ -175,6 +175,15 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_witness__true_expected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "dirty witness");
 }
 
+BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_embed__true_expected_message)
+{
+    constexpr auto value = error::dirty_embed;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "dirty embed");
+}
+
 BOOST_AUTO_TEST_CASE(script_error_t__code__stack_false__true_expected_message)
 {
     constexpr auto value = error::stack_false;
