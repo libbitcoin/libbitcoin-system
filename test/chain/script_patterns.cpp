@@ -585,4 +585,61 @@ BOOST_AUTO_TEST_CASE(script__to_pay_witness_script_hash_pattern__round_trip__seg
     BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_script_hash);
 }
 
+// is_nominal_push_pattern
+
+// A 22 byte push is nominally encoded by push_size_22 (0x16).
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__push_size_22__true)
+{
+    const script instance(base16_chunk("16001479091972186c449eb1ded22b78e40d009bdf0089"), false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_CHECK(script::is_nominal_push_pattern(instance.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__push_one_size_22__false)
+{
+    const script instance(base16_chunk("4c16001479091972186c449eb1ded22b78e40d009bdf0089"), false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_CHECK(!script::is_nominal_push_pattern(instance.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__push_two_size_22__false)
+{
+    const script instance(base16_chunk("4d1600001479091972186c449eb1ded22b78e40d009bdf0089"), false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_CHECK(!script::is_nominal_push_pattern(instance.ops()));
+}
+
+// A 76 byte push is nominally encoded by push_one_size (0x4c).
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__push_one_size_76__true)
+{
+    const script instance(base16_chunk("4c4c01020304050607080102030405060708010203040506070801020304050607080102030405060708010203040506070801020304050607080102030405060708010203040506070801020304"), false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_CHECK(script::is_nominal_push_pattern(instance.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__push_two_size_76__false)
+{
+    const script instance(base16_chunk("4d4c0001020304050607080102030405060708010203040506070801020304050607080102030405060708010203040506070801020304050607080102030405060708010203040506070801020304"), false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_CHECK(!script::is_nominal_push_pattern(instance.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__two_pushes__false)
+{
+    const script instance(base16_chunk("0016001479091972186c449eb1ded22b78e40d009bdf0089"), false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_CHECK(!script::is_nominal_push_pattern(instance.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__empty__false)
+{
+    BOOST_CHECK(!script::is_nominal_push_pattern(operations{}));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__non_push__false)
+{
+    const operations ops{ operation{ opcode::checksig } };
+    BOOST_CHECK(!script::is_nominal_push_pattern(ops));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

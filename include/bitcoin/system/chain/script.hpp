@@ -47,6 +47,7 @@ public:
     static constexpr bool is_enabled(uint32_t active_flags, flags flag) NOEXCEPT;
     static constexpr bool is_push_only_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_relaxed_push_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_nominal_push_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_commitment_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_witness_program_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_anchor_program_pattern(const operations& ops) NOEXCEPT;

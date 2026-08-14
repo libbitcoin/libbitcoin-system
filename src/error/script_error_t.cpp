@@ -44,6 +44,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(script_error)
     { invalid_witness_stack, "invalid witness stack" },
     { invalid_commitment, "invalid tapscript commitment" },
     { dirty_witness, "dirty witness" },
+    { dirty_embed, "dirty embed" },
     { stack_false, "stack false" }
 };
 

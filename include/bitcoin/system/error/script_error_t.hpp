@@ -49,6 +49,7 @@ enum script_error_t : uint8_t
     invalid_witness_stack,
     invalid_commitment,
     dirty_witness,
+    dirty_embed,
     stack_false,
 
     // chained to op_error_t
