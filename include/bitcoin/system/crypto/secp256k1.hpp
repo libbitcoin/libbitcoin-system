@@ -48,6 +48,11 @@ static constexpr size_t ec_xonly_size = 32;
 typedef data_array<ec_xonly_size> ec_xonly;
 typedef std_vector<ec_xonly> ec_xonlys;
 
+/// ElligatorSwift encoded public key:
+static constexpr size_t ec_ellswift_size = 64;
+typedef data_array<ec_ellswift_size> ec_ellswift;
+typedef std_vector<ec_ellswift> ec_ellswifts;
+
 // Parsed ECDSA or Schnorr signature:
 static constexpr size_t ec_signature_size = 64;
 typedef data_array<ec_signature_size> ec_signature;
@@ -266,6 +271,30 @@ BC_API bool verify_commitment(const ec_xonly& internal_key,
     bool tweaked_key_parity) NOEXCEPT;
 
 } // namespace schnorr
+
+namespace ellswift {
+
+/// ElligatorSwift create/decode/exchange (bip324)
+/// ---------------------------------------------------------------------------
+
+/// Compute the ElligatorSwift encoding of the public key for the secret.
+/// Auxiliary randomness supplements the secret as encoding entropy (the same
+/// key has many encodings), and may be null-valued.
+BC_API bool create(ec_ellswift& out, const ec_secret& secret,
+    const hash_digest& auxiliary) NOEXCEPT;
+
+/// Decode an ElligatorSwift encoded public key to a compressed point.
+/// Every 64 byte array is a valid encoding of some point.
+BC_API bool decode(ec_compressed& out, const ec_ellswift& key) NOEXCEPT;
+
+/// Compute the bip324 x-only Diffie-Hellman shared secret from own secret and
+/// the ElligatorSwift encoded public keys of the initiating (a) and responding
+/// (b) parties. Set responding if own secret corresponds to key_b.
+BC_API bool exchange(hash_digest& out, const ec_secret& secret,
+    const ec_ellswift& key_a, const ec_ellswift& key_b,
+    bool responding) NOEXCEPT;
+
+} // namespace ellswift
 } // namespace system
 } // namespace libbitcoin
 

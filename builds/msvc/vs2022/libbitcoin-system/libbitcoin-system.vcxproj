@@ -242,12 +242,16 @@
     <ClCompile Include="..\..\..\..\src\config\utilities.cpp" />
     <ClCompile Include="..\..\..\..\src\config\version.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\chacha20.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\math.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_math.obj</ObjectFileName>
@@ -440,8 +444,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
@@ -494,6 +501,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\functions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hash.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hkdf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hmac.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\pbkd.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\algorithm.hpp" />
@@ -706,6 +714,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\accumulator.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\functions.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hkdf.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hmac.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\pbkd.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd\algorithm.ipp" />

@@ -303,6 +303,15 @@
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\chacha20.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -313,6 +322,9 @@
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ecdsa.cpp">
+      <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ellswift.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\keys.cpp">
@@ -442,6 +454,9 @@
       <Filter>src\hash</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\hkdf.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp">

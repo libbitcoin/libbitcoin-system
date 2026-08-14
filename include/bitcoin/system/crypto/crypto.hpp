@@ -20,7 +20,10 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 
 #include <bitcoin/system/crypto/aes256.hpp>
+#include <bitcoin/system/crypto/chacha20.hpp>
+#include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
+#include <bitcoin/system/crypto/poly1305.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
