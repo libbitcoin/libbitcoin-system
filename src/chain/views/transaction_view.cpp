@@ -236,9 +236,10 @@ const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // store helpers
 
-size_t transaction_view::input_table_size() const NOEXCEPT
+size_t transaction_view::input_table_size(bool pruned) const NOEXCEPT
 {
-    return input_table_size_;
+    // pruned: (zero ins, zero wits) * inputs.
+    return pruned ? two * inputs() : input_table_size_;
 }
 
 size_t transaction_view::output_table_size() const NOEXCEPT
