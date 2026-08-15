@@ -57,7 +57,7 @@ public:
     const hash_digest& hash(bool witness) const NOEXCEPT;
 
     /// Store helpers.
-    size_t input_table_size() const NOEXCEPT;
+    size_t input_table_size(bool pruned) const NOEXCEPT;
     size_t output_table_size() const NOEXCEPT;
 
     /// Methods.
