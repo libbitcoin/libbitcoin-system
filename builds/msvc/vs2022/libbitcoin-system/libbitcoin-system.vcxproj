@@ -245,6 +245,8 @@
     <ClCompile Include="..\..\..\..\src\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\fschacha20.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
@@ -448,6 +450,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
