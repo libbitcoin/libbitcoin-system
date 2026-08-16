@@ -37,6 +37,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
+constexpr auto prime = 0x03ffffff_u32;
 static constexpr uint64_t wide(uint32_t left, uint32_t right) NOEXCEPT
 {
     return wide_cast<uint64_t>(left) * right;
@@ -46,7 +47,7 @@ poly1305::poly1305(const secret& key) NOEXCEPT
 {
     // r is clamped: r &= 0x0ffffffc0ffffffc0ffffffc0fffffff.
     // [r in five 26-bit limbs, s (pad) in four 32-bit words.]
-    r_[0] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 0]), 0), 0x03ffffff_u32);
+    r_[0] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 0]), 0), prime);
     r_[1] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 3]), 2), 0x03ffff03_u32);
     r_[2] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 6]), 4), 0x03ffc0ff_u32);
     r_[3] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 9]), 6), 0x03f03fff_u32);
@@ -82,10 +83,10 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
     for (size_t block{}; block < blocks; ++block)
     {
         // Add the message block (with high bit) to the accumulator.
-        h0 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 0]), 0), 0x03ffffff_u32);
-        h1 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 3]), 2), 0x03ffffff_u32);
-        h2 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 6]), 4), 0x03ffffff_u32);
-        h3 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 9]), 6), 0x03ffffff_u32);
+        h0 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 0]), 0), prime);
+        h1 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 3]), 2), prime);
+        h2 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 6]), 4), prime);
+        h3 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 9]), 6), prime);
         h4 +=  bit_or(shift_right(unsafe_from_little_endian<uint32_t>(&data[12]), 8), hibit);
 
         // Multiply by r modulo 2^130 - 5, with partial carry propagation.
@@ -111,22 +112,22 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
             wide(h4, r0);
 
         auto carry = narrow_cast<uint32_t>(shift_right(d0, 26));
-        h0 = bit_and(narrow_cast<uint32_t>(d0), 0x03ffffff_u32);
+        h0 = bit_and(narrow_cast<uint32_t>(d0), prime);
         d1 += carry;
         carry = narrow_cast<uint32_t>(shift_right(d1, 26));
-        h1 = bit_and(narrow_cast<uint32_t>(d1), 0x03ffffff_u32);
+        h1 = bit_and(narrow_cast<uint32_t>(d1), prime);
         d2 += carry;
         carry = narrow_cast<uint32_t>(shift_right(d2, 26));
-        h2 = bit_and(narrow_cast<uint32_t>(d2), 0x03ffffff_u32);
+        h2 = bit_and(narrow_cast<uint32_t>(d2), prime);
         d3 += carry;
         carry = narrow_cast<uint32_t>(shift_right(d3, 26));
-        h3 = bit_and(narrow_cast<uint32_t>(d3), 0x03ffffff_u32);
+        h3 = bit_and(narrow_cast<uint32_t>(d3), prime);
         d4 += carry;
         carry = narrow_cast<uint32_t>(shift_right(d4, 26));
-        h4 = bit_and(narrow_cast<uint32_t>(d4), 0x03ffffff_u32);
+        h4 = bit_and(narrow_cast<uint32_t>(d4), prime);
         h0 += carry * 5_u32;
         carry = shift_right(h0, 26);
-        h0 &= 0x03ffffff_u32;
+        h0 &= prime;
         h1 += carry;
 
         std::advance(data, block_size);
@@ -191,34 +192,34 @@ void poly1305::flush(tag& out) NOEXCEPT
 
     // Full carry propagation.
     auto carry = shift_right(h1, 26);
-    h1 &= 0x03ffffff_u32;
+    h1 &= prime;
     h2 += carry;
     carry = shift_right(h2, 26);
-    h2 &= 0x03ffffff_u32;
+    h2 &= prime;
     h3 += carry;
     carry = shift_right(h3, 26);
-    h3 &= 0x03ffffff_u32;
+    h3 &= prime;
     h4 += carry;
     carry = shift_right(h4, 26);
-    h4 &= 0x03ffffff_u32;
+    h4 &= prime;
     h0 += carry * 5_u32;
     carry = shift_right(h0, 26);
-    h0 &= 0x03ffffff_u32;
+    h0 &= prime;
     h1 += carry;
 
     // Compute h + -p.
     auto g0 = h0 + 5_u32;
     carry = shift_right(g0, 26);
-    g0 &= 0x03ffffff_u32;
+    g0 &= prime;
     auto g1 = h1 + carry;
     carry = shift_right(g1, 26);
-    g1 &= 0x03ffffff_u32;
+    g1 &= prime;
     auto g2 = h2 + carry;
     carry = shift_right(g2, 26);
-    g2 &= 0x03ffffff_u32;
+    g2 &= prime;
     auto g3 = h3 + carry;
     carry = shift_right(g3, 26);
-    g3 &= 0x03ffffff_u32;
+    g3 &= prime;
     auto g4 = h4 + carry - 0x04000000_u32;
 
     // Select h if h < p, or h + -p if h >= p (constant time).
@@ -228,7 +229,7 @@ void poly1305::flush(tag& out) NOEXCEPT
     g2 &= mask;
     g3 &= mask;
     g4 &= mask;
-    mask ~= mask;
+    mask = bit_not(mask);
     h0 = bit_or(bit_and(h0, mask), g0);
     h1 = bit_or(bit_and(h1, mask), g1);
     h2 = bit_or(bit_and(h2, mask), g2);
@@ -244,8 +245,7 @@ void poly1305::flush(tag& out) NOEXCEPT
     // Finally, the value of the secret key s is added to the accumulator,
     // and the 128 least significant bits are serialized in little-endian
     // order to form the tag.
-    auto
-    f = wide_cast<uint64_t>(h0) + pad_[0];
+    auto f = wide_cast<uint64_t>(h0) + pad_[0];
     h0 = narrow_cast<uint32_t>(f);
     f = wide_cast<uint64_t>(h1) + pad_[1] + shift_right(f, 32);
     h1 = narrow_cast<uint32_t>(f);

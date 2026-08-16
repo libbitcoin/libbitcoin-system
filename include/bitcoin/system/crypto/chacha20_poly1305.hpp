@@ -34,7 +34,6 @@ namespace system {
 class BC_API chacha20_poly1305 final
 {
 public:
-
     /// Ciphertext expansion (the appended tag).
     static constexpr size_t expansion = poly1305::tag_size;
 

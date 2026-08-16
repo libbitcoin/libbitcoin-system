@@ -37,12 +37,9 @@ BC_PUSH_WARNING(NO_USE_OF_SPAN)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-constexpr data_array<16> zero_pad{};
-
-// Bytes required to pad size to a multiple of the poly1305 block (16).
 static constexpr size_t padding(size_t size) NOEXCEPT
 {
-    return (zero_pad.size() - (size % zero_pad.size())) % zero_pad.size();
+    return absolute(ceilinged_modulo(size, poly1305::block_size));
 }
 
 // chacha20_poly1305
@@ -62,6 +59,8 @@ void chacha20_poly1305::set_key(const chacha20::secret& key) NOEXCEPT
 void chacha20_poly1305::authenticate(poly1305::tag& out,
     const_byte_span aad, const_byte_span cipher) NOEXCEPT
 {
+    constexpr data_array<poly1305::block_size> zero_pad{};
+
     // First, a Poly1305 one-time key is generated from the 256-bit key and
     // nonce: the ChaCha20 block function with block counter zero, taking the
     // first 256 bits of the 512-bit state [cipher_ must be at block zero].
@@ -123,7 +122,7 @@ bool chacha20_poly1305::decrypt(byte_span plain,
     uint8_t difference{};
     const auto actual = cipher.last(expansion);
     for (size_t byte{}; byte < expansion; ++byte)
-        difference |= expected[byte] ^ actual[byte];
+        difference |= bit_xor(expected[byte], actual[byte]);
 
     // Decryption uses the ChaCha20 block counter starting at one.
     const auto authenticated = is_zero(difference);
@@ -162,7 +161,7 @@ void fschacha20_poly1305::next() NOEXCEPT
 {
     // bip324
     // The key is rotated after every rekey_interval messages, to the
-    // keystream of nonce {0xffffffff, rekey counter}.
+    // keystream of nonce { 0xffffffff, rekey counter }.
     if (++packets_ == interval_)
     {
         chacha20::secret key{};
@@ -174,24 +173,23 @@ void fschacha20_poly1305::next() NOEXCEPT
     }
 }
 
-void fschacha20_poly1305::encrypt(const_byte_span plain,
-    const_byte_span aad, byte_span cipher) NOEXCEPT
+void fschacha20_poly1305::encrypt(const_byte_span plain, const_byte_span aad,
+    byte_span cipher) NOEXCEPT
 {
     encrypt(plain, {}, aad, cipher);
 }
 
 void fschacha20_poly1305::encrypt(const_byte_span plain1,
-    const_byte_span plain2, const_byte_span aad,
-    byte_span cipher) NOEXCEPT
+    const_byte_span plain2, const_byte_span aad, byte_span cipher) NOEXCEPT
 {
     // bip324
-    // The nonce is {message counter, rekey counter}.
+    // The nonce is { message counter, rekey counter }.
     aead_.encrypt(plain1, plain2, aad, packets_, rekeys_, cipher);
     next();
 }
 
-bool fschacha20_poly1305::decrypt(byte_span plain,
-    const_byte_span aad, const_byte_span cipher) NOEXCEPT
+bool fschacha20_poly1305::decrypt(byte_span plain, const_byte_span aad,
+    const_byte_span cipher) NOEXCEPT
 {
     const auto valid = aead_.decrypt(plain, aad, packets_, rekeys_, cipher);
     next();

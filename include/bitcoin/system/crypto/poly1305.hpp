@@ -31,6 +31,9 @@ namespace system {
 class BC_API poly1305 final
 {
 public:
+    /// Poly1305 block is always 128 bits.
+    static constexpr size_t block_size = 16;
+
     /// Poly1305 secret is always 256 bits.
     static constexpr size_t secret_size = 32;
     typedef data_array<secret_size> secret;
@@ -46,8 +49,6 @@ public:
     void flush(tag& out) NOEXCEPT;
 
 private:
-    static constexpr size_t block_size = 16;
-
     void blocks(const uint8_t* data, size_t blocks, uint32_t hibit) NOEXCEPT;
 
     std_array<uint32_t, 5> r_{};

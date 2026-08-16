@@ -146,18 +146,17 @@ INLINE xword_t counters(uint32_t counter) NOEXCEPT
 {
 #if defined(HAVE_AVX2)
     return f::add<word_bits>(f::broadcast<xword_t>(counter),
-        f::set<xword_t>(0_u32, 1_u32, 2_u32, 3_u32, 4_u32, 5_u32, 6_u32, 7_u32));
+        f::set<xword_t>(0, 1, 2, 3, 4, 5, 6, 7));
 #else
     return f::add<word_bits>(f::broadcast<xword_t>(counter),
-        f::set<xword_t>(0_u32, 1_u32, 2_u32, 3_u32));
+        f::set<xword_t>(0, 1, 2, 3));
 #endif
 }
 
 // Generates lanes sequential keystream blocks, transposed such that the
 // keystream of block lane is the concatenation of x[parts * lane + part].
-INLINE void xnext(std_array<xword_t, 16>& x,
-    const std_array<uint32_t, 8>& key, const std_array<uint32_t, 3>& nonce,
-    uint32_t counter) NOEXCEPT
+INLINE void xnext(std_array<xword_t, 16>& x, const std_array<uint32_t, 8>& key,
+    const std_array<uint32_t, 3>& nonce, uint32_t counter) NOEXCEPT
 {
     x =
     {
@@ -182,7 +181,6 @@ INLINE void xnext(std_array<xword_t, 16>& x,
     const auto start = x;
     rounds(x);
 
-    // rfc8439
     // At the end of 20 rounds, we add the original input words to the output
     // words [serialization is the little-endian store of transposed lanes].
     for (size_t word{}; word < x.size(); ++word)
@@ -235,10 +233,10 @@ void chacha20::next(block& out) NOEXCEPT
 {
     const std_array<uint32_t, 16> state
     {
-        sigma[0], sigma[1], sigma[2], sigma[3],
-        key_[0], key_[1], key_[2], key_[3],
-        key_[4], key_[5], key_[6], key_[7],
-        counter_, nonce_[0], nonce_[1], nonce_[2]
+        sigma[0],  sigma[1],   sigma[2],  sigma[3],
+        key_[0],    key_[1],    key_[2],   key_[3],
+        key_[4],    key_[5],    key_[6],   key_[7],
+        counter_,  nonce_[0], nonce_[1], nonce_[2]
     };
 
     auto x = state;
