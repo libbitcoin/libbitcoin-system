@@ -90,13 +90,30 @@ INLINE xint128_t shl(xint128_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint128_t ror(xint128_t a) NOEXCEPT
 {
-    return or_(shr<B, S>(a), shl<S - B, S>(a));
+    // SSE3 (a single shuffle) for byte-aligned rotation of 32/64 bit words.
+    if constexpr (((S == bits<uint32_t>) || (S == bits<uint64_t>)) &&
+        is_zero(B % byte_bits))
+    {
+        return _mm_shuffle_epi8(a, _mm_setr_epi8(
+            mm_ror_selector<B, S>(0), mm_ror_selector<B, S>(1),
+            mm_ror_selector<B, S>(2), mm_ror_selector<B, S>(3),
+            mm_ror_selector<B, S>(4), mm_ror_selector<B, S>(5),
+            mm_ror_selector<B, S>(6), mm_ror_selector<B, S>(7),
+            mm_ror_selector<B, S>(8), mm_ror_selector<B, S>(9),
+            mm_ror_selector<B, S>(10), mm_ror_selector<B, S>(11),
+            mm_ror_selector<B, S>(12), mm_ror_selector<B, S>(13),
+            mm_ror_selector<B, S>(14), mm_ror_selector<B, S>(15)));
+    }
+    else
+    {
+        return or_(shr<B, S>(a), shl<S - B, S>(a));
+    }
 }
 
 template <auto B, auto S>
 INLINE xint128_t rol(xint128_t a) NOEXCEPT
 {
-    return or_(shl<B, S>(a), shr<S - B, S>(a));
+    return ror<S - B, S>(a);
 }
 
 // SSE2
@@ -213,6 +230,39 @@ INLINE xint128_t set(
     return _mm_set_epi8(
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
+}
+
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+// SSE2
+// Interleaves low order words of a and b.
+template <auto S>
+INLINE xint128_t unpack_lo(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_unpacklo_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_unpacklo_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_unpacklo_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm_unpacklo_epi64(a, b);
+}
+
+// SSE2
+// Interleaves high order words of a and b.
+template <auto S>
+INLINE xint128_t unpack_hi(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_unpackhi_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_unpackhi_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_unpackhi_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm_unpackhi_epi64(a, b);
 }
 
 /// endianness

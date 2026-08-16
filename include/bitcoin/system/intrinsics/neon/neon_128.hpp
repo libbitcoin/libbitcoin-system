@@ -85,13 +85,33 @@ INLINE xint128_t shl(xint128_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint128_t ror(xint128_t a) NOEXCEPT
 {
-    return or_(shr<B, S>(a), shl<S - B, S>(a));
+    // Half-word rotation is a single element reversal.
+    if constexpr ((S == bits<uint16_t>) && (B == bits<uint8_t>))
+        return (xint128_t)vrev16q_u8((uint8x16_t)a);
+    else if constexpr ((S == bits<uint32_t>) && (B == bits<uint16_t>))
+        return (xint128_t)vrev32q_u16((uint16x8_t)a);
+    else if constexpr ((S == bits<uint64_t>) && (B == bits<uint32_t>))
+        return (xint128_t)vrev64q_u32((uint32x4_t)a);
+
+    // Otherwise shift-right-insert halves the synthesized rotation cost.
+    else if constexpr (S == bits<uint8_t>)
+        return (xint128_t)vsriq_n_u8(vshlq_n_u8((uint8x16_t)a, S - B),
+            (uint8x16_t)a, B);
+    else if constexpr (S == bits<uint16_t>)
+        return (xint128_t)vsriq_n_u16(vshlq_n_u16((uint16x8_t)a, S - B),
+            (uint16x8_t)a, B);
+    else if constexpr (S == bits<uint32_t>)
+        return (xint128_t)vsriq_n_u32(vshlq_n_u32((uint32x4_t)a, S - B),
+            (uint32x4_t)a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vsriq_n_u64(vshlq_n_u64((uint64x2_t)a, S - B),
+            (uint64x2_t)a, B);
 }
 
 template <auto B, auto S>
 INLINE xint128_t rol(xint128_t a) NOEXCEPT
 {
-    return or_(shl<B, S>(a), shr<S - B, S>(a));
+    return ror<S - B, S>(a);
 }
 
 template <auto S>

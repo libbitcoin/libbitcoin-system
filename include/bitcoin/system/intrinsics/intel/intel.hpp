@@ -28,6 +28,22 @@
 namespace libbitcoin {
 namespace system {
 
+/// Byte shuffle selector for rotation (see f::ror/f::rol).
+/// ---------------------------------------------------------------------------
+/// The selector for byte at index for rotate right by B bits of S-bit words,
+/// where B is byte-aligned (B % 8 == 0). A single byte shuffle then performs
+/// the rotation of all words in the vector.
+
+template <auto B, auto S>
+constexpr uint8_t mm_ror_selector(uint8_t index) NOEXCEPT
+{
+    constexpr auto size = S / byte_bits;
+    constexpr auto skip = (B / byte_bits) % size;
+    return possible_narrow_cast<uint8_t>(
+        ((index / size) * size) +
+        ((index + skip) % size));
+}
+
 /// Provide 8 bit shifts to complete matrix.
 /// ---------------------------------------------------------------------------
 /// These are no epi8 versions of these.

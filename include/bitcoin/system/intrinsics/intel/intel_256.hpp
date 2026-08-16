@@ -90,13 +90,38 @@ INLINE xint256_t shl(xint256_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint256_t ror(xint256_t a) NOEXCEPT
 {
-    return or_(shr<B, S>(a), shl<S - B, S>(a));
+    // AVX2 (a single shuffle) for byte-aligned rotation of 32/64 bit words.
+    if constexpr (((S == bits<uint32_t>) || (S == bits<uint64_t>)) &&
+        is_zero(B % byte_bits))
+    {
+        return _mm256_shuffle_epi8(a, _mm256_setr_epi8(
+            mm_ror_selector<B, S>(0), mm_ror_selector<B, S>(1),
+            mm_ror_selector<B, S>(2), mm_ror_selector<B, S>(3),
+            mm_ror_selector<B, S>(4), mm_ror_selector<B, S>(5),
+            mm_ror_selector<B, S>(6), mm_ror_selector<B, S>(7),
+            mm_ror_selector<B, S>(8), mm_ror_selector<B, S>(9),
+            mm_ror_selector<B, S>(10), mm_ror_selector<B, S>(11),
+            mm_ror_selector<B, S>(12), mm_ror_selector<B, S>(13),
+            mm_ror_selector<B, S>(14), mm_ror_selector<B, S>(15),
+            mm_ror_selector<B, S>(16), mm_ror_selector<B, S>(17),
+            mm_ror_selector<B, S>(18), mm_ror_selector<B, S>(19),
+            mm_ror_selector<B, S>(20), mm_ror_selector<B, S>(21),
+            mm_ror_selector<B, S>(22), mm_ror_selector<B, S>(23),
+            mm_ror_selector<B, S>(24), mm_ror_selector<B, S>(25),
+            mm_ror_selector<B, S>(26), mm_ror_selector<B, S>(27),
+            mm_ror_selector<B, S>(28), mm_ror_selector<B, S>(29),
+            mm_ror_selector<B, S>(30), mm_ror_selector<B, S>(31)));
+    }
+    else
+    {
+        return or_(shr<B, S>(a), shl<S - B, S>(a));
+    }
 }
 
 template <auto B, auto S>
 INLINE xint256_t rol(xint256_t a) NOEXCEPT
 {
-    return or_(shl<B, S>(a), shr<S - B, S>(a));
+    return ror<S - B, S>(a);
 }
 
 // AVX2
@@ -226,6 +251,53 @@ INLINE xint256_t set(
         x24, x23, x22, x21, x20, x19, x18, x17,
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
+}
+
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+// AVX2
+// Interleaves low order words of each 128 bit lane of a and b.
+template <auto S>
+INLINE xint256_t unpack_lo(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_unpacklo_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_unpacklo_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_unpacklo_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_unpacklo_epi64(a, b);
+}
+
+// AVX2
+// Interleaves high order words of each 128 bit lane of a and b.
+template <auto S>
+INLINE xint256_t unpack_hi(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_unpackhi_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_unpackhi_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_unpackhi_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_unpackhi_epi64(a, b);
+}
+
+// AVX2
+// Joins the low order 128 bit lanes of a and b.
+INLINE xint256_t merge_lo(xint256_t a, xint256_t b) NOEXCEPT
+{
+    return _mm256_permute2x128_si256(a, b, 0x20);
+}
+
+// AVX2
+// Joins the high order 128 bit lanes of a and b.
+INLINE xint256_t merge_hi(xint256_t a, xint256_t b) NOEXCEPT
+{
+    return _mm256_permute2x128_si256(a, b, 0x31);
 }
 
 /// endianness
