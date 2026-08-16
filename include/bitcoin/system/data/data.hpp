@@ -34,4 +34,8 @@
 #include <bitcoin/system/data/no_fill_allocator.hpp>
 #include <bitcoin/system/data/string.hpp>
 
+#include <span>
+using byte_span = std::span<uint8_t>;
+using const_byte_span = std::span<const uint8_t>;
+
 #endif

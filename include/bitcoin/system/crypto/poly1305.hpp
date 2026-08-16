@@ -42,7 +42,7 @@ public:
     /// Poly1305 accumulator, not resettable.
     poly1305(const secret& key) NOEXCEPT;
 
-    void write(std::span<const uint8_t> data) NOEXCEPT;
+    void write(const_byte_span data) NOEXCEPT;
     void flush(tag& out) NOEXCEPT;
 
 private:

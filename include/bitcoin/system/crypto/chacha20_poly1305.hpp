@@ -34,6 +34,7 @@ namespace system {
 class BC_API chacha20_poly1305 final
 {
 public:
+
     /// Ciphertext expansion (the appended tag).
     static constexpr size_t expansion = poly1305::tag_size;
 
@@ -43,22 +44,26 @@ public:
     void set_key(const chacha20::secret& key) NOEXCEPT;
 
     /// Encrypt plain with aad into cipher (cipher = plain size + expansion).
-    void encrypt(std::span<const uint8_t> plain, std::span<const uint8_t> aad,
-        uint32_t nonce32, uint64_t nonce64, std::span<uint8_t> cipher) NOEXCEPT;
+    void encrypt(const_byte_span plain, const_byte_span aad, uint32_t nonce32,
+        uint64_t nonce64, byte_span cipher) NOEXCEPT;
+
+    /// Encrypt plain1 || plain2 with aad into cipher, avoiding the caller
+    /// concatenation copy (cipher = sum of plain sizes + expansion).
+    void encrypt(const_byte_span plain1, const_byte_span plain2,
+        const_byte_span aad, uint32_t nonce32, uint64_t nonce64,
+        byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher with aad into plain (cipher = plain size + expansion).
     /// False if the tag does not authenticate, in which case plain is cleared.
-    bool decrypt(std::span<uint8_t> plain, std::span<const uint8_t> aad,
-        uint32_t nonce32, uint64_t nonce64,
-        std::span<const uint8_t> cipher) NOEXCEPT;
+    bool decrypt(byte_span plain, const_byte_span aad, uint32_t nonce32,
+        uint64_t nonce64, const_byte_span cipher) NOEXCEPT;
 
     /// Write keystream into out (as encrypt of zeros, without the tag).
-    void stream(uint32_t nonce32, uint64_t nonce64,
-        std::span<uint8_t> out) NOEXCEPT;
+    void stream(uint32_t nonce32, uint64_t nonce64, byte_span out) NOEXCEPT;
 
 private:
-    void authenticate(poly1305::tag& out, std::span<const uint8_t> aad,
-        std::span<const uint8_t> cipher) NOEXCEPT;
+    void authenticate(poly1305::tag& out, const_byte_span aad,
+        const_byte_span cipher) NOEXCEPT;
 
     chacha20 cipher_;
 };
@@ -78,19 +83,25 @@ public:
         uint32_t interval) NOEXCEPT;
 
     /// Encrypt plain with aad into cipher (cipher = plain size + expansion).
-    void encrypt(std::span<const uint8_t> plain, std::span<const uint8_t> aad,
-        std::span<uint8_t> cipher) NOEXCEPT;
+    void encrypt(const_byte_span plain, const_byte_span aad,
+        byte_span cipher) NOEXCEPT;
+
+    /// Encrypt plain1 || plain2 with aad into cipher, avoiding the caller
+    /// concatenation copy (cipher = sum of plain sizes + expansion).
+    void encrypt(const_byte_span plain1,
+        const_byte_span plain2, const_byte_span aad,
+        byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher with aad into plain (cipher = plain size + expansion).
     /// False if the tag does not authenticate, in which case plain is cleared.
-    bool decrypt(std::span<uint8_t> plain, std::span<const uint8_t> aad,
-        std::span<const uint8_t> cipher) NOEXCEPT;
+    bool decrypt(byte_span plain, const_byte_span aad,
+        const_byte_span cipher) NOEXCEPT;
 
 private:
     void next() NOEXCEPT;
 
-    chacha20_poly1305 aead_;
     const uint32_t interval_;
+    chacha20_poly1305 aead_;
     uint32_t packets_{};
     uint64_t rekeys_{};
 };

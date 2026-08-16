@@ -110,6 +110,35 @@ BOOST_AUTO_TEST_CASE(chacha20_poly1305__decrypt__tampered__false_and_cleared)
     BOOST_REQUIRE_EQUAL(decrypted, plain);
 }
 
+BOOST_AUTO_TEST_CASE(chacha20_poly1305__encrypt__two_span__matches_single)
+{
+    const auto plain = base16_chunk(
+        "4c616469657320616e642047656e746c656d656e206f662074686520636c6173"
+        "73206f66202739393a204966204920636f756c64206f6666657220796f75206f"
+        "6e6c79206f6e652074697020666f7220746865206675747572652c2073756e73"
+        "637265656e20776f756c642062652069742e");
+    const auto aad = base16_chunk("50515253c0c1c2c3c4c5c6c7");
+    const auto key = base16_array(
+        "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f");
+    constexpr uint32_t nonce32 = 7;
+    constexpr uint64_t nonce64 = 0x4746454443424140;
+
+    // The single span encryption.
+    chacha20_poly1305 single{ key };
+    data_chunk expected(plain.size() + chacha20_poly1305::expansion);
+    single.encrypt(plain, aad, nonce32, nonce64, expected);
+
+    // The same plaintext split as one byte followed by the remainder.
+    const auto span = const_byte_span{ plain };
+    const auto plain1 = span.first(one);
+    const auto plain2 = span.subspan(one);
+
+    chacha20_poly1305 split{ key };
+    data_chunk cipher(plain.size() + chacha20_poly1305::expansion);
+    split.encrypt(plain1, plain2, aad, nonce32, nonce64, cipher);
+    BOOST_REQUIRE_EQUAL(cipher, expected);
+}
+
 // bip324 fschacha20_poly1305 test vectors (bitcoin core test framework).
 
 BOOST_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_500__expected)
