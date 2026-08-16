@@ -132,6 +132,57 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__split_stream__continuous)
     BOOST_REQUIRE_EQUAL(encrypted, vector.keystream);
 }
 
+BOOST_AUTO_TEST_CASE(chacha20__stream__long__matches_short_reference)
+{
+    const auto& vector = chacha20_vectors.front();
+    constexpr size_t size = 1027;
+
+    // Long request (exercises the concurrent block path where compiled).
+    chacha20 cipher{ vector.key };
+    cipher.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk keystream(size);
+    cipher.stream(keystream);
+
+    // Byte at a time request (scalar buffered reference).
+    chacha20 reference{ vector.key };
+    reference.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk expected(size);
+
+    for (size_t byte{}; byte < size; ++byte)
+        reference.stream({ std::next(expected.data(), byte), 1 });
+
+    BOOST_REQUIRE_EQUAL(keystream, expected);
+}
+
+BOOST_AUTO_TEST_CASE(chacha20__crypt__long__matches_short_reference)
+{
+    const auto& vector = chacha20_vectors.front();
+    constexpr size_t size = 1600;
+
+    data_chunk plain(size);
+    for (size_t byte{}; byte < size; ++byte)
+        plain[byte] = narrow_cast<uint8_t>(byte);
+
+    // Drained partial buffer followed by a long request.
+    chacha20 cipher{ vector.key };
+    cipher.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk encrypted(size);
+    cipher.crypt({ plain.data(), 5 }, { encrypted.data(), 5 });
+    cipher.crypt({ std::next(plain.data(), 5), size - 5 },
+        { std::next(encrypted.data(), 5), size - 5 });
+
+    // Byte at a time request (scalar buffered reference).
+    chacha20 reference{ vector.key };
+    reference.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk expected(size);
+
+    for (size_t byte{}; byte < size; ++byte)
+        reference.crypt({ std::next(plain.data(), byte), 1 },
+            { std::next(expected.data(), byte), 1 });
+
+    BOOST_REQUIRE_EQUAL(encrypted, expected);
+}
+
 // bip324 fschacha20 test vectors (bitcoin core test framework).
 
 BOOST_AUTO_TEST_CASE(fschacha20__crypt__rekey_rotation__expected)

@@ -71,6 +71,135 @@ INLINE constexpr void rounds(std_array<Word, 16>& x) NOEXCEPT
     }
 }
 
+// Vectorized concurrent blocks (one block per 32 bit lane).
+// ----------------------------------------------------------------------------
+// The keystream of lanes blocks is generated concurrently, with the block
+// counter incremented across lanes, and transposed to sequential blocks.
+
+#if defined(HAVE_SSE4)
+
+#if defined(HAVE_AVX2)
+using xword_t = xint256_t;
+#else
+using xword_t = xint128_t;
+#endif
+
+constexpr auto xlanes = capacity<xword_t, uint32_t>;
+constexpr auto xparts = 16_size / xlanes;
+constexpr auto xblock_size = chacha20::block_size * xlanes;
+
+// Transposes a matrix of four rows of four 32 bit words.
+#if !defined(HAVE_AVX2)
+INLINE void transpose(std_array<xint128_t, 4>& row) NOEXCEPT
+{
+    constexpr auto x64 = bits<uint64_t>;
+
+    const auto t0 = f::unpack_lo<word_bits>(row[0], row[1]);
+    const auto t1 = f::unpack_lo<word_bits>(row[2], row[3]);
+    const auto t2 = f::unpack_hi<word_bits>(row[0], row[1]);
+    const auto t3 = f::unpack_hi<word_bits>(row[2], row[3]);
+
+    row[0] = f::unpack_lo<x64>(t0, t1);
+    row[1] = f::unpack_hi<x64>(t0, t1);
+    row[2] = f::unpack_lo<x64>(t2, t3);
+    row[3] = f::unpack_hi<x64>(t2, t3);
+}
+#endif
+
+// Transposes a matrix of eight rows of eight 32 bit words.
+#if defined(HAVE_AVX2)
+INLINE void transpose(std_array<xint256_t, 8>& row) NOEXCEPT
+{
+    constexpr auto x64 = bits<uint64_t>;
+
+    const auto t0 = f::unpack_lo<word_bits>(row[0], row[1]);
+    const auto t1 = f::unpack_hi<word_bits>(row[0], row[1]);
+    const auto t2 = f::unpack_lo<word_bits>(row[2], row[3]);
+    const auto t3 = f::unpack_hi<word_bits>(row[2], row[3]);
+    const auto t4 = f::unpack_lo<word_bits>(row[4], row[5]);
+    const auto t5 = f::unpack_hi<word_bits>(row[4], row[5]);
+    const auto t6 = f::unpack_lo<word_bits>(row[6], row[7]);
+    const auto t7 = f::unpack_hi<word_bits>(row[6], row[7]);
+
+    const auto u0 = f::unpack_lo<x64>(t0, t2);
+    const auto u1 = f::unpack_hi<x64>(t0, t2);
+    const auto u2 = f::unpack_lo<x64>(t1, t3);
+    const auto u3 = f::unpack_hi<x64>(t1, t3);
+    const auto u4 = f::unpack_lo<x64>(t4, t6);
+    const auto u5 = f::unpack_hi<x64>(t4, t6);
+    const auto u6 = f::unpack_lo<x64>(t5, t7);
+    const auto u7 = f::unpack_hi<x64>(t5, t7);
+
+    row[0] = f::merge_lo(u0, u4);
+    row[1] = f::merge_lo(u1, u5);
+    row[2] = f::merge_lo(u2, u6);
+    row[3] = f::merge_lo(u3, u7);
+    row[4] = f::merge_hi(u0, u4);
+    row[5] = f::merge_hi(u1, u5);
+    row[6] = f::merge_hi(u2, u6);
+    row[7] = f::merge_hi(u3, u7);
+}
+#endif
+
+// The counter word of each lane is offset by the lane number.
+INLINE xword_t counters(uint32_t counter) NOEXCEPT
+{
+#if defined(HAVE_AVX2)
+    return f::add<word_bits>(f::broadcast<xword_t>(counter),
+        f::set<xword_t>(0_u32, 1_u32, 2_u32, 3_u32, 4_u32, 5_u32, 6_u32, 7_u32));
+#else
+    return f::add<word_bits>(f::broadcast<xword_t>(counter),
+        f::set<xword_t>(0_u32, 1_u32, 2_u32, 3_u32));
+#endif
+}
+
+// Generates lanes sequential keystream blocks, transposed such that the
+// keystream of block lane is the concatenation of x[parts * lane + part].
+INLINE void xnext(std_array<xword_t, 16>& x,
+    const std_array<uint32_t, 8>& key, const std_array<uint32_t, 3>& nonce,
+    uint32_t counter) NOEXCEPT
+{
+    x =
+    {
+        f::broadcast<xword_t>(sigma[0]),
+        f::broadcast<xword_t>(sigma[1]),
+        f::broadcast<xword_t>(sigma[2]),
+        f::broadcast<xword_t>(sigma[3]),
+        f::broadcast<xword_t>(key[0]),
+        f::broadcast<xword_t>(key[1]),
+        f::broadcast<xword_t>(key[2]),
+        f::broadcast<xword_t>(key[3]),
+        f::broadcast<xword_t>(key[4]),
+        f::broadcast<xword_t>(key[5]),
+        f::broadcast<xword_t>(key[6]),
+        f::broadcast<xword_t>(key[7]),
+        counters(counter),
+        f::broadcast<xword_t>(nonce[0]),
+        f::broadcast<xword_t>(nonce[1]),
+        f::broadcast<xword_t>(nonce[2])
+    };
+
+    const auto start = x;
+    rounds(x);
+
+    // rfc8439
+    // At the end of 20 rounds, we add the original input words to the output
+    // words [serialization is the little-endian store of transposed lanes].
+    for (size_t word{}; word < x.size(); ++word)
+        x[word] = f::add<word_bits>(x[word], start[word]);
+
+#if defined(HAVE_AVX2)
+    transpose(array_cast<xword_t, 8, 0>(x));
+    transpose(array_cast<xword_t, 8, 8>(x));
+#else
+    transpose(array_cast<xword_t, 4, 0>(x));
+    transpose(array_cast<xword_t, 4, 4>(x));
+    transpose(array_cast<xword_t, 4, 8>(x));
+    transpose(array_cast<xword_t, 4, 12>(x));
+#endif
+}
+
+#endif // HAVE_SSE4
 
 // chacha20
 // ----------------------------------------------------------------------------
@@ -136,6 +265,26 @@ void chacha20::crypt(const_byte_span in,
     for (; (offset_ < block_size) && (byte < size); ++offset_, ++byte)
         out[byte] = in[byte] ^ buffer_[offset_];
 
+#if defined(HAVE_SSE4)
+    // Concurrent whole blocks (one block per 32 bit lane).
+    for (; (size - byte) >= xblock_size; byte += xblock_size)
+    {
+        std_array<xword_t, 16> x{};
+        xnext(x, key_, nonce_, counter_);
+        counter_ += xlanes;
+
+        // Sequence lanes into the aligned keystream (caller buffers are not
+        // vector aligned, so cannot be cast to the extended word type).
+        std_array<xword_t, 16> keystream{};
+        for (size_t lane{}; lane < xlanes; ++lane)
+            for (size_t part{}; part < xparts; ++part)
+                keystream[xparts * lane + part] = x[xlanes * part + lane];
+
+        const auto& stream = array_cast<uint8_t>(keystream);
+        for (size_t index{}; index < xblock_size; ++index)
+            out[byte + index] = in[byte + index] ^ stream[index];
+    }
+#endif
 
     // Sequential whole blocks fully consume buffered keystream.
     for (; (size - byte) >= block_size; byte += block_size)
@@ -165,6 +314,26 @@ void chacha20::stream(byte_span out) NOEXCEPT
     for (; (offset_ < block_size) && (byte < size); ++offset_, ++byte)
         out[byte] = buffer_[offset_];
 
+#if defined(HAVE_SSE4)
+    // Concurrent whole blocks (one block per 32 bit lane).
+    for (; (size - byte) >= xblock_size; byte += xblock_size)
+    {
+        std_array<xword_t, 16> x{};
+        xnext(x, key_, nonce_, counter_);
+        counter_ += xlanes;
+
+        // Sequence lanes into the aligned keystream (caller buffers are not
+        // vector aligned, so cannot be cast to the extended word type).
+        std_array<xword_t, 16> keystream{};
+        for (size_t lane{}; lane < xlanes; ++lane)
+            for (size_t part{}; part < xparts; ++part)
+                keystream[xparts * lane + part] = x[xlanes * part + lane];
+
+        const auto& stream = array_cast<uint8_t>(keystream);
+        for (size_t index{}; index < xblock_size; ++index)
+            out[byte + index] = stream[index];
+    }
+#endif
 
     // Sequential whole blocks fully consume buffered keystream.
     for (; (size - byte) >= block_size; byte += block_size)
