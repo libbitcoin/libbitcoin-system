@@ -37,7 +37,30 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-constexpr auto prime = 0x03ffffff_u32;
+// The prime modulus is 2^130 - delta, with the accumulator (and r) held as
+// five 26 bit limbs, so limbs mask to 26 bits and carry out of the top limb
+// is folded back into the bottom, scaled by delta.
+constexpr auto limb_bits = 26_size;
+constexpr auto limb_mask = 0x03ffffff_u32;
+constexpr auto limb_bit = 0x04000000_u32;
+constexpr auto delta = 5_u32;
+
+// The block high bit (2^128) as positioned within the fifth limb.
+constexpr auto high_bit = 0x01000000_u32;
+
+// The shift that isolates the sign of a 32 bit limb difference.
+constexpr auto sign_shift = sub1(bits<uint32_t>);
+
+// The one byte that pads a final partial block.
+constexpr auto pad_byte = 0x01_u8;
+
+// r is clamped: r &= 0x0ffffffc0ffffffc0ffffffc0fffffff (per limb).
+constexpr std_array<uint32_t, 5> clamp
+{
+    0x03ffffff_u32, 0x03ffff03_u32, 0x03ffc0ff_u32, 0x03f03fff_u32,
+    0x000fffff_u32
+};
+
 static constexpr uint64_t wide(uint32_t left, uint32_t right) NOEXCEPT
 {
     return wide_cast<uint64_t>(left) * right;
@@ -47,11 +70,11 @@ poly1305::poly1305(const secret& key) NOEXCEPT
 {
     // r is clamped: r &= 0x0ffffffc0ffffffc0ffffffc0fffffff.
     // [r in five 26-bit limbs, s (pad) in four 32-bit words.]
-    r_[0] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 0]), 0), prime);
-    r_[1] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 3]), 2), 0x03ffff03_u32);
-    r_[2] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 6]), 4), 0x03ffc0ff_u32);
-    r_[3] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 9]), 6), 0x03f03fff_u32);
-    r_[4] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[12]), 8), 0x000fffff_u32);
+    r_[0] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 0]), 0), clamp[0]);
+    r_[1] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 3]), 2), clamp[1]);
+    r_[2] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 6]), 4), clamp[2]);
+    r_[3] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[ 9]), 6), clamp[3]);
+    r_[4] = bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&key[12]), 8), clamp[4]);
 
     pad_[0] = unsafe_from_little_endian<uint32_t>(&key[16]);
     pad_[1] = unsafe_from_little_endian<uint32_t>(&key[20]);
@@ -69,10 +92,10 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
     const auto r3 = r_[3];
     const auto r4 = r_[4];
 
-    const auto s1 = r1 * 5_u32;
-    const auto s2 = r2 * 5_u32;
-    const auto s3 = r3 * 5_u32;
-    const auto s4 = r4 * 5_u32;
+    const auto s1 = r1 * delta;
+    const auto s2 = r2 * delta;
+    const auto s3 = r3 * delta;
+    const auto s4 = r4 * delta;
 
     auto h0 = h_[0];
     auto h1 = h_[1];
@@ -83,13 +106,13 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
     for (size_t block{}; block < blocks; ++block)
     {
         // Add the message block (with high bit) to the accumulator.
-        h0 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 0]), 0), prime);
-        h1 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 3]), 2), prime);
-        h2 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 6]), 4), prime);
-        h3 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 9]), 6), prime);
+        h0 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 0]), 0), limb_mask);
+        h1 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 3]), 2), limb_mask);
+        h2 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 6]), 4), limb_mask);
+        h3 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 9]), 6), limb_mask);
         h4 +=  bit_or(shift_right(unsafe_from_little_endian<uint32_t>(&data[12]), 8), hibit);
 
-        // Multiply by r modulo 2^130 - 5, with partial carry propagation.
+        // Multiply by r modulo 2^130 - delta, with partial carry propagation.
         const auto d0 =
             wide(h0, r0) + wide(h1, s4) +
             wide(h2, s3) + wide(h3, s2) +
@@ -111,23 +134,23 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
             wide(h2, r2) + wide(h3, r1) +
             wide(h4, r0);
 
-        auto carry = narrow_cast<uint32_t>(shift_right(d0, 26));
-        h0 = bit_and(narrow_cast<uint32_t>(d0), prime);
+        auto carry = narrow_cast<uint32_t>(shift_right(d0, limb_bits));
+        h0 = bit_and(narrow_cast<uint32_t>(d0), limb_mask);
         d1 += carry;
-        carry = narrow_cast<uint32_t>(shift_right(d1, 26));
-        h1 = bit_and(narrow_cast<uint32_t>(d1), prime);
+        carry = narrow_cast<uint32_t>(shift_right(d1, limb_bits));
+        h1 = bit_and(narrow_cast<uint32_t>(d1), limb_mask);
         d2 += carry;
-        carry = narrow_cast<uint32_t>(shift_right(d2, 26));
-        h2 = bit_and(narrow_cast<uint32_t>(d2), prime);
+        carry = narrow_cast<uint32_t>(shift_right(d2, limb_bits));
+        h2 = bit_and(narrow_cast<uint32_t>(d2), limb_mask);
         d3 += carry;
-        carry = narrow_cast<uint32_t>(shift_right(d3, 26));
-        h3 = bit_and(narrow_cast<uint32_t>(d3), prime);
+        carry = narrow_cast<uint32_t>(shift_right(d3, limb_bits));
+        h3 = bit_and(narrow_cast<uint32_t>(d3), limb_mask);
         d4 += carry;
-        carry = narrow_cast<uint32_t>(shift_right(d4, 26));
-        h4 = bit_and(narrow_cast<uint32_t>(d4), prime);
-        h0 += carry * 5_u32;
-        carry = shift_right(h0, 26);
-        h0 &= prime;
+        carry = narrow_cast<uint32_t>(shift_right(d4, limb_bits));
+        h4 = bit_and(narrow_cast<uint32_t>(d4), limb_mask);
+        h0 += carry * delta;
+        carry = shift_right(h0, limb_bits);
+        h0 &= limb_mask;
         h1 += carry;
 
         std::advance(data, block_size);
@@ -156,7 +179,7 @@ void poly1305::write(const_byte_span data) NOEXCEPT
 
         if (offset_ == block_size)
         {
-            blocks(buffer_.data(), one, 0x01000000_u32);
+            blocks(buffer_.data(), one, high_bit);
             offset_ = zero;
         }
     }
@@ -166,7 +189,7 @@ void poly1305::write(const_byte_span data) NOEXCEPT
     if (!is_zero(size))
     {
         const auto whole = size / block_size;
-        blocks(bytes, whole, 0x01000000_u32);
+        blocks(bytes, whole, high_bit);
         std::advance(bytes, whole * block_size);
         size -= whole * block_size;
         std::copy_n(bytes, size, buffer_.begin());
@@ -179,7 +202,7 @@ void poly1305::flush(tag& out) NOEXCEPT
     // Final partial block padded with a 1 byte then zeros, no high bit added.
     if (!is_zero(offset_))
     {
-        buffer_[offset_++] = 0x01_u8;
+        buffer_[offset_++] = pad_byte;
         std::fill(std::next(buffer_.begin(), offset_), buffer_.end(), 0x00_u8);
         blocks(buffer_.data(), one, 0_u32);
     }
@@ -191,39 +214,39 @@ void poly1305::flush(tag& out) NOEXCEPT
     auto h4 = h_[4];
 
     // Full carry propagation.
-    auto carry = shift_right(h1, 26);
-    h1 &= prime;
+    auto carry = shift_right(h1, limb_bits);
+    h1 &= limb_mask;
     h2 += carry;
-    carry = shift_right(h2, 26);
-    h2 &= prime;
+    carry = shift_right(h2, limb_bits);
+    h2 &= limb_mask;
     h3 += carry;
-    carry = shift_right(h3, 26);
-    h3 &= prime;
+    carry = shift_right(h3, limb_bits);
+    h3 &= limb_mask;
     h4 += carry;
-    carry = shift_right(h4, 26);
-    h4 &= prime;
-    h0 += carry * 5_u32;
-    carry = shift_right(h0, 26);
-    h0 &= prime;
+    carry = shift_right(h4, limb_bits);
+    h4 &= limb_mask;
+    h0 += carry * delta;
+    carry = shift_right(h0, limb_bits);
+    h0 &= limb_mask;
     h1 += carry;
 
     // Compute h + -p.
-    auto g0 = h0 + 5_u32;
-    carry = shift_right(g0, 26);
-    g0 &= prime;
+    auto g0 = h0 + delta;
+    carry = shift_right(g0, limb_bits);
+    g0 &= limb_mask;
     auto g1 = h1 + carry;
-    carry = shift_right(g1, 26);
-    g1 &= prime;
+    carry = shift_right(g1, limb_bits);
+    g1 &= limb_mask;
     auto g2 = h2 + carry;
-    carry = shift_right(g2, 26);
-    g2 &= prime;
+    carry = shift_right(g2, limb_bits);
+    g2 &= limb_mask;
     auto g3 = h3 + carry;
-    carry = shift_right(g3, 26);
-    g3 &= prime;
-    auto g4 = h4 + carry - 0x04000000_u32;
+    carry = shift_right(g3, limb_bits);
+    g3 &= limb_mask;
+    auto g4 = h4 + carry - limb_bit;
 
     // Select h if h < p, or h + -p if h >= p (constant time).
-    auto mask = sub1(shift_right(g4, 31));
+    auto mask = sub1(shift_right(g4, sign_shift));
     g0 &= mask;
     g1 &= mask;
     g2 &= mask;
