@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_CHACHA20_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_CHACHA20_HPP
 
-#include <span>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -50,14 +49,12 @@ public:
     void seek(uint32_t nonce32, uint64_t nonce64, uint32_t counter) NOEXCEPT;
 
     /// XOR in with keystream into out (in/out may be the same).
-    void crypt(std::span<const uint8_t> in, std::span<uint8_t> out) NOEXCEPT;
+    void crypt(const_byte_span in, byte_span out) NOEXCEPT;
 
     /// Write keystream into out.
-    void stream(std::span<uint8_t> out) NOEXCEPT;
+    void stream(byte_span out) NOEXCEPT;
 
 private:
-    template <size_t A, size_t B, size_t C, size_t D>
-    static constexpr void quarter(std_array<uint32_t, 16>& x) NOEXCEPT;
     void next(block& out) NOEXCEPT;
 
     std_array<uint32_t, 8> key_{};
@@ -77,7 +74,7 @@ public:
     fschacha20(const chacha20::secret& key, uint32_t interval) NOEXCEPT;
 
     /// XOR in with keystream into out (in/out may be the same).
-    void crypt(std::span<const uint8_t> in, std::span<uint8_t> out) NOEXCEPT;
+    void crypt(const_byte_span in, byte_span out) NOEXCEPT;
 
 private:
     chacha20 cipher_;
