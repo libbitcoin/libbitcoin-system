@@ -132,55 +132,61 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__split_stream__continuous)
     BOOST_REQUIRE_EQUAL(encrypted, vector.keystream);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__stream__long__matches_short_reference)
+BOOST_AUTO_TEST_CASE(chacha20__stream__whole__matches_split)
 {
     const auto& vector = chacha20_vectors.front();
     constexpr size_t size = 1027;
 
-    // Long request (exercises the concurrent block path where compiled).
+    // Whole request (exercises the concurrent block path where compiled).
     chacha20 cipher{ vector.key };
     cipher.seek(vector.nonce32, vector.nonce64, vector.counter);
-    data_chunk keystream(size);
-    cipher.stream(keystream);
+    data_chunk whole(size);
+    cipher.stream(whole);
 
-    // Byte at a time request (scalar buffered reference).
-    chacha20 reference{ vector.key };
-    reference.seek(vector.nonce32, vector.nonce64, vector.counter);
-    data_chunk expected(size);
+    // Split requests (exercises the buffered and sequential block paths).
+    chacha20 splitter{ vector.key };
+    splitter.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk split(size);
+    const auto out = split.data();
+    const auto out1 = byte_span{ out, 5 };
+    const auto out2 = byte_span{ std::next(out, 5), 600 };
+    const auto out3 = byte_span{ std::next(out, 605), 422 };
+    splitter.stream(out1);
+    splitter.stream(out2);
+    splitter.stream(out3);
 
-    for (size_t byte{}; byte < size; ++byte)
-        reference.stream({ std::next(expected.data(), byte), 1 });
-
-    BOOST_REQUIRE_EQUAL(keystream, expected);
+    BOOST_REQUIRE_EQUAL(split, whole);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__crypt__long__matches_short_reference)
+BOOST_AUTO_TEST_CASE(chacha20__crypt__whole__matches_split)
 {
     const auto& vector = chacha20_vectors.front();
     constexpr size_t size = 1600;
+    const data_chunk plain(size, 0xab_u8);
 
-    data_chunk plain(size);
-    for (size_t byte{}; byte < size; ++byte)
-        plain[byte] = narrow_cast<uint8_t>(byte);
-
-    // Drained partial buffer followed by a long request.
+    // Whole request (exercises the concurrent block path where compiled).
     chacha20 cipher{ vector.key };
     cipher.seek(vector.nonce32, vector.nonce64, vector.counter);
-    data_chunk encrypted(size);
-    cipher.crypt({ plain.data(), 5 }, { encrypted.data(), 5 });
-    cipher.crypt({ std::next(plain.data(), 5), size - 5 },
-        { std::next(encrypted.data(), 5), size - 5 });
+    data_chunk whole(size);
+    cipher.crypt(plain, whole);
 
-    // Byte at a time request (scalar buffered reference).
-    chacha20 reference{ vector.key };
-    reference.seek(vector.nonce32, vector.nonce64, vector.counter);
-    data_chunk expected(size);
+    // Split requests (exercises the buffered and sequential block paths).
+    chacha20 splitter{ vector.key };
+    splitter.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk split(size);
+    const auto in = plain.data();
+    const auto out = split.data();
+    const auto in1 = const_byte_span{ in, 5 };
+    const auto in2 = const_byte_span{ std::next(in, 5), 1000 };
+    const auto in3 = const_byte_span{ std::next(in, 1005), 595 };
+    const auto out1 = byte_span{ out, 5 };
+    const auto out2 = byte_span{ std::next(out, 5), 1000 };
+    const auto out3 = byte_span{ std::next(out, 1005), 595 };
+    splitter.crypt(in1, out1);
+    splitter.crypt(in2, out2);
+    splitter.crypt(in3, out3);
 
-    for (size_t byte{}; byte < size; ++byte)
-        reference.crypt({ std::next(plain.data(), byte), 1 },
-            { std::next(expected.data(), byte), 1 });
-
-    BOOST_REQUIRE_EQUAL(encrypted, expected);
+    BOOST_REQUIRE_EQUAL(split, whole);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
