@@ -64,25 +64,6 @@ private:
     size_t offset_{ block_size };
 };
 
-/// Forward-secure ChaCha20 (bip324), rekeys every interval of crypt calls.
-/// Each call encrypts or decrypts one chunk of a fixed-length chunk stream.
-class BC_API fschacha20 final
-{
-public:
-    DELETE_COPY_MOVE(fschacha20);
-
-    fschacha20(const chacha20::secret& key, uint32_t interval) NOEXCEPT;
-
-    /// XOR in with keystream into out (in/out may be the same).
-    void crypt(const_byte_span in, byte_span out) NOEXCEPT;
-
-private:
-    chacha20 cipher_;
-    const uint32_t interval_;
-    uint32_t chunks_{};
-    uint64_t rekeys_{};
-};
-
 } // namespace system
 } // namespace libbitcoin
 

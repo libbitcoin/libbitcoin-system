@@ -147,55 +147,6 @@ void chacha20_poly1305::stream(uint32_t nonce32, uint64_t nonce64,
     cipher_.stream(out);
 }
 
-// fschacha20_poly1305
-// ----------------------------------------------------------------------------
-
-fschacha20_poly1305::fschacha20_poly1305(const chacha20::secret& key,
-    uint32_t interval) NOEXCEPT
-  : interval_(interval), aead_(key)
-{
-}
-
-// private
-void fschacha20_poly1305::next() NOEXCEPT
-{
-    // bip324
-    // The key is rotated after every rekey_interval messages, to the
-    // keystream of nonce { 0xffffffff, rekey counter }.
-    if (++packets_ == interval_)
-    {
-        chacha20::secret key{};
-        aead_.stream(0xffffffff_u32, rekeys_, key);
-        aead_.set_key(key);
-        key = {};
-        packets_ = 0;
-        ++rekeys_;
-    }
-}
-
-void fschacha20_poly1305::encrypt(const_byte_span plain, const_byte_span aad,
-    byte_span cipher) NOEXCEPT
-{
-    encrypt(plain, {}, aad, cipher);
-}
-
-void fschacha20_poly1305::encrypt(const_byte_span plain1,
-    const_byte_span plain2, const_byte_span aad, byte_span cipher) NOEXCEPT
-{
-    // bip324
-    // The nonce is { message counter, rekey counter }.
-    aead_.encrypt(plain1, plain2, aad, packets_, rekeys_, cipher);
-    next();
-}
-
-bool fschacha20_poly1305::decrypt(byte_span plain, const_byte_span aad,
-    const_byte_span cipher) NOEXCEPT
-{
-    const auto valid = aead_.decrypt(plain, aad, packets_, rekeys_, cipher);
-    next();
-    return valid;
-}
-
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

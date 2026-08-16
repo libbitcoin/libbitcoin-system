@@ -352,33 +352,6 @@ void chacha20::stream(byte_span out) NOEXCEPT
     }
 }
 
-// fschacha20
-// ----------------------------------------------------------------------------
-
-fschacha20::fschacha20(const chacha20::secret& key, uint32_t interval) NOEXCEPT
-  : cipher_(key), interval_(interval)
-{
-}
-
-void fschacha20::crypt(const_byte_span in,
-    byte_span out) NOEXCEPT
-{
-    cipher_.crypt(in, out);
-
-    // bip324
-    // The key is rotated after every rekey_interval chunks, to the next 32
-    // keystream bytes, and the nonce set to { 0, rekey counter }.
-    if (++chunks_ == interval_)
-    {
-        chacha20::secret key{};
-        cipher_.stream(key);
-        cipher_.set_key(key);
-        cipher_.seek(0, ++rekeys_, 0);
-        key = {};
-        chunks_ = 0;
-    }
-}
-
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
