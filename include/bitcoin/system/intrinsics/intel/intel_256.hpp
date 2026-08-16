@@ -166,6 +166,14 @@ INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_add_epi64(a, b);
 }
 
+// AVX2
+template <auto S>
+INLINE xint256_t mul(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_mul_epu32(a, b);
+}
+
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------
 

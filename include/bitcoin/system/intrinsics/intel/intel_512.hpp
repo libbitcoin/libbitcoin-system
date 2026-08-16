@@ -153,6 +153,14 @@ INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
         return _mm512_add_epi64(a, b);
 }
 
+// AVX512F
+template <auto S>
+INLINE xint512_t mul(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_mul_epu32(a, b);
+}
+
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------
 

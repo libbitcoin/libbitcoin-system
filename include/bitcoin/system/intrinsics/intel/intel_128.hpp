@@ -158,6 +158,14 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
         return _mm_add_epi64(a, b);
 }
 
+// SSE2
+template <auto S>
+INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return _mm_mul_epu32(a, b);
+}
+
 /// broadcast/get/get/set
 /// ---------------------------------------------------------------------------
 

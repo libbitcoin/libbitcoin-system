@@ -153,6 +153,14 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
         return (xint128_t)vaddq_u64((uint64x2_t)a, (uint64x2_t)b);
 }
 
+template <auto S>
+INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vmull_u32(vmovn_u64((uint64x2_t)a),
+            vmovn_u64((uint64x2_t)b));
+}
+
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------
 
