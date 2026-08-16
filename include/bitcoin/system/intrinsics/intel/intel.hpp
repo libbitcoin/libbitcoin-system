@@ -155,6 +155,32 @@ inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
 #if defined(HAVE_512)
 
 // AVX512F
+template <typename ...Args>
+inline auto mm512_setr_epi8(Args ...args) NOEXCEPT
+{
+    static_assert(sizeof...(Args) == 64);
+    const std_array<uint8_t, sizeof...(Args)> bytes
+    {
+        args...
+    };
+
+    return _mm512_loadu_si512(bytes.data());
+}
+
+// AVX512F
+template <typename ...Args>
+inline auto mm512_setr_epi16(Args ...args) NOEXCEPT
+{
+    static_assert(sizeof...(Args) == 32);
+    const std_array<uint16_t, sizeof...(Args)> words
+    {
+        args...
+    };
+
+    return _mm512_loadu_si512(words.data());
+}
+
+// AVX512F
 template <auto Lane>
 inline uint8_t mm512_extract_epi8(auto a) NOEXCEPT
 {

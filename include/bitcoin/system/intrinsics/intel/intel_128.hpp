@@ -232,39 +232,6 @@ INLINE xint128_t set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-/// interleave (for matrix transposition)
-/// ---------------------------------------------------------------------------
-
-// SSE2
-// Interleaves low order words of a and b.
-template <auto S>
-INLINE xint128_t unpack_lo(xint128_t a, xint128_t b) NOEXCEPT
-{
-    if constexpr (S == bits<uint8_t>)
-        return _mm_unpacklo_epi8(a, b);
-    if constexpr (S == bits<uint16_t>)
-        return _mm_unpacklo_epi16(a, b);
-    if constexpr (S == bits<uint32_t>)
-        return _mm_unpacklo_epi32(a, b);
-    if constexpr (S == bits<uint64_t>)
-        return _mm_unpacklo_epi64(a, b);
-}
-
-// SSE2
-// Interleaves high order words of a and b.
-template <auto S>
-INLINE xint128_t unpack_hi(xint128_t a, xint128_t b) NOEXCEPT
-{
-    if constexpr (S == bits<uint8_t>)
-        return _mm_unpackhi_epi8(a, b);
-    if constexpr (S == bits<uint16_t>)
-        return _mm_unpackhi_epi16(a, b);
-    if constexpr (S == bits<uint32_t>)
-        return _mm_unpackhi_epi32(a, b);
-    if constexpr (S == bits<uint64_t>)
-        return _mm_unpackhi_epi64(a, b);
-}
-
 /// endianness
 /// ---------------------------------------------------------------------------
 
@@ -321,7 +288,49 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
     _mm_store_si128(&bytes, a);
 }
 
+
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+// SSE2
+template <auto S>
+INLINE xint128_t unpack_lo(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_unpacklo_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_unpacklo_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_unpacklo_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm_unpacklo_epi64(a, b);
+}
+
+// SSE2
+template <auto S>
+INLINE xint128_t unpack_hi(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_unpackhi_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_unpackhi_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_unpackhi_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm_unpackhi_epi64(a, b);
+}
+
+INLINE xint128_t tile_lo(xint128_t a, xint128_t) NOEXCEPT
+{
+    return a;
+}
+
+INLINE xint128_t tile_hi(xint128_t, xint128_t b) NOEXCEPT
+{
+    return b;
+}
 } // namespace f
+
 } // namespace system
 } // namespace libbitcoin
 

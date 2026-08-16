@@ -253,53 +253,6 @@ INLINE xint256_t set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-/// interleave (for matrix transposition)
-/// ---------------------------------------------------------------------------
-
-// AVX2
-// Interleaves low order words of each 128 bit lane of a and b.
-template <auto S>
-INLINE xint256_t unpack_lo(xint256_t a, xint256_t b) NOEXCEPT
-{
-    if constexpr (S == bits<uint8_t>)
-        return _mm256_unpacklo_epi8(a, b);
-    if constexpr (S == bits<uint16_t>)
-        return _mm256_unpacklo_epi16(a, b);
-    if constexpr (S == bits<uint32_t>)
-        return _mm256_unpacklo_epi32(a, b);
-    if constexpr (S == bits<uint64_t>)
-        return _mm256_unpacklo_epi64(a, b);
-}
-
-// AVX2
-// Interleaves high order words of each 128 bit lane of a and b.
-template <auto S>
-INLINE xint256_t unpack_hi(xint256_t a, xint256_t b) NOEXCEPT
-{
-    if constexpr (S == bits<uint8_t>)
-        return _mm256_unpackhi_epi8(a, b);
-    if constexpr (S == bits<uint16_t>)
-        return _mm256_unpackhi_epi16(a, b);
-    if constexpr (S == bits<uint32_t>)
-        return _mm256_unpackhi_epi32(a, b);
-    if constexpr (S == bits<uint64_t>)
-        return _mm256_unpackhi_epi64(a, b);
-}
-
-// AVX2
-// Joins the low order 128 bit lanes of a and b.
-INLINE xint256_t merge_lo(xint256_t a, xint256_t b) NOEXCEPT
-{
-    return _mm256_permute2x128_si256(a, b, 0x20);
-}
-
-// AVX2
-// Joins the high order 128 bit lanes of a and b.
-INLINE xint256_t merge_hi(xint256_t a, xint256_t b) NOEXCEPT
-{
-    return _mm256_permute2x128_si256(a, b, 0x31);
-}
-
 /// endianness
 /// ---------------------------------------------------------------------------
 
@@ -359,7 +312,51 @@ INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
     _mm256_store_si256(&bytes, a);
 }
 
+
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+// AVX2
+template <auto S>
+INLINE xint256_t unpack_lo(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_unpacklo_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_unpacklo_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_unpacklo_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_unpacklo_epi64(a, b);
+}
+
+// AVX2
+template <auto S>
+INLINE xint256_t unpack_hi(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_unpackhi_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_unpackhi_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_unpackhi_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_unpackhi_epi64(a, b);
+}
+
+// AVX2
+INLINE xint256_t tile_lo(xint256_t a, xint256_t b) NOEXCEPT
+{
+    return _mm256_permute2x128_si256(a, b, 0x20);
+}
+
+// AVX2
+INLINE xint256_t tile_hi(xint256_t a, xint256_t b) NOEXCEPT
+{
+    return _mm256_permute2x128_si256(a, b, 0x31);
+}
 } // namespace f
+
 } // namespace system
 } // namespace libbitcoin
 

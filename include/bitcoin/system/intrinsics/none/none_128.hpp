@@ -119,6 +119,31 @@ INLINE void store_aligned(xint128_t&, xint128_t) NOEXCEPT
 {
 }
 
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+template <auto S>
+INLINE xint128_t unpack_lo(xint128_t, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
+template <auto S>
+INLINE xint128_t unpack_hi(xint128_t, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
+INLINE xint128_t tile_lo(xint128_t a, xint128_t) NOEXCEPT
+{
+    return a;
+}
+
+INLINE xint128_t tile_hi(xint128_t, xint128_t b) NOEXCEPT
+{
+    return b;
+}
+
 } // namespace f
 } // namespace system
 } // namespace libbitcoin
