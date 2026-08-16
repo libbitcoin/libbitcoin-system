@@ -37,13 +37,13 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-// The prime modulus is 2^130 - delta, with the accumulator (and r) held as
+// The prime modulus is 2^130 - prime_delta, with the accumulator (and r) in
 // five 26 bit limbs, so limbs mask to 26 bits and carry out of the top limb
-// is folded back into the bottom, scaled by delta.
+// is folded back into the bottom, scaled by prime_delta.
 constexpr auto limb_bits = 26_size;
 constexpr auto limb_mask = 0x03ffffff_u32;
 constexpr auto limb_bit = 0x04000000_u32;
-constexpr auto delta = 5_u32;
+constexpr auto prime_delta = 5_u32;
 
 // The block high bit (2^128) as positioned within the fifth limb.
 constexpr auto high_bit = 0x01000000_u32;
@@ -92,10 +92,10 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
     const auto r3 = r_[3];
     const auto r4 = r_[4];
 
-    const auto s1 = r1 * delta;
-    const auto s2 = r2 * delta;
-    const auto s3 = r3 * delta;
-    const auto s4 = r4 * delta;
+    const auto s1 = r1 * prime_delta;
+    const auto s2 = r2 * prime_delta;
+    const auto s3 = r3 * prime_delta;
+    const auto s4 = r4 * prime_delta;
 
     auto h0 = h_[0];
     auto h1 = h_[1];
@@ -112,7 +112,7 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
         h3 += bit_and(shift_right(unsafe_from_little_endian<uint32_t>(&data[ 9]), 6), limb_mask);
         h4 +=  bit_or(shift_right(unsafe_from_little_endian<uint32_t>(&data[12]), 8), hibit);
 
-        // Multiply by r modulo 2^130 - delta, with partial carry propagation.
+        // Multiply by r modulo the prime, with partial carry propagation.
         const auto d0 =
             wide(h0, r0) + wide(h1, s4) +
             wide(h2, s3) + wide(h3, s2) +
@@ -148,7 +148,7 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
         d4 += carry;
         carry = narrow_cast<uint32_t>(shift_right(d4, limb_bits));
         h4 = bit_and(narrow_cast<uint32_t>(d4), limb_mask);
-        h0 += carry * delta;
+        h0 += carry * prime_delta;
         carry = shift_right(h0, limb_bits);
         h0 &= limb_mask;
         h1 += carry;
@@ -225,13 +225,13 @@ void poly1305::flush(tag& out) NOEXCEPT
     h4 += carry;
     carry = shift_right(h4, limb_bits);
     h4 &= limb_mask;
-    h0 += carry * delta;
+    h0 += carry * prime_delta;
     carry = shift_right(h0, limb_bits);
     h0 &= limb_mask;
     h1 += carry;
 
     // Compute h + -p.
-    auto g0 = h0 + delta;
+    auto g0 = h0 + prime_delta;
     carry = shift_right(g0, limb_bits);
     g0 &= limb_mask;
     auto g1 = h1 + carry;
