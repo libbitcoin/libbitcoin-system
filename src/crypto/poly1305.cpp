@@ -166,9 +166,9 @@ INLINE constexpr void poly1305::reduce(limbs_t<Word>& a,
     const auto c3 = f::shr<limb_bits, word_bits>(d3);
     const auto d4 = f::add<word_bits>(d[4], c3);
     const auto c4 = f::shr<limb_bits, word_bits>(d4);
-    const auto low = f::and_(d[0], mask);
-    const auto fold = f::mul<word_bits>(c4, delta);
-    const auto d0 = f::add<word_bits>(low, fold);
+    const auto lo = f::and_(d[0], mask);
+    const auto fo = f::mul<word_bits>(c4, delta);
+    const auto d0 = f::add<word_bits>(lo, fo);
     const auto c5 = f::shr<limb_bits, word_bits>(d0);
 
     a[0] = f::and_(d0, mask);
