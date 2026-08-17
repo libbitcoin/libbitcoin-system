@@ -102,8 +102,7 @@ INLINE uint64_t poly1305::limb(const uint8_t* data, uint32_t hibit) NOEXCEPT
         constexpr auto offset = block_size - sizeof(uint32_t);
         const auto word = unsafe_from_little_endian<uint32_t>(
             std::next(data, offset));
-        const auto high = bit_or(shift_right(word, byte_bits), hibit);
-        return wide_cast<uint64_t>(high);
+        return bit_or(shift_right(word, byte_bits), hibit);
     }
     else
     {
@@ -111,8 +110,7 @@ INLINE uint64_t poly1305::limb(const uint8_t* data, uint32_t hibit) NOEXCEPT
         constexpr auto shift = (Limb * limb_bits) % byte_bits;
         const auto word = unsafe_from_little_endian<uint32_t>(
             std::next(data, offset));
-        const auto low = bit_and(shift_right(word, shift), limb_mask);
-        return wide_cast<uint64_t>(low);
+        return bit_and(shift_right(word, shift), limb_mask);
     }
 }
 
