@@ -37,6 +37,11 @@ template <typename Integral, typename Byte,
     if_integral_integer<Integral> = true>
 inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT;
 
+/// Read variable integer and advance pointer past it.
+template <typename Byte,
+    if_one_byte<Byte> = true>
+inline uint64_t unsafe_from_variable(const Byte*& data) NOEXCEPT;
+
 template <typename Integral, typename Byte,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>

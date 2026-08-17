@@ -46,6 +46,43 @@ inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT
     return native_from_little_end(unsafe_byte_cast<Integral>(data));
 }
 
+// Unguarded variable integer read from byte pointer (advancing).
+// ----------------------------------------------------------------------------
+
+template <typename Byte,
+    if_one_byte<Byte>>
+inline uint64_t unsafe_from_variable(const Byte*& data) NOEXCEPT
+{
+    const auto prefix = possible_sign_cast<uint8_t>(*data);
+    data = std::next(data);
+
+    switch (prefix)
+    {
+        case varint_eight_bytes:
+        {
+            const auto value = unsafe_from_little_endian<uint64_t>(data);
+            data = std::next(data, sizeof(uint64_t));
+            return value;
+        }
+        case varint_four_bytes:
+        {
+            const auto value = unsafe_from_little_endian<uint32_t>(data);
+            data = std::next(data, sizeof(uint32_t));
+            return value;
+        }
+        case varint_two_bytes:
+        {
+            const auto value = unsafe_from_little_endian<uint16_t>(data);
+            data = std::next(data, sizeof(uint16_t));
+            return value;
+        }
+        default:
+        {
+            return prefix;
+        }
+    }
+}
+
 // Unguarded endian write from byte pointer.
 // ----------------------------------------------------------------------------
 
