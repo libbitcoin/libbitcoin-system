@@ -309,6 +309,12 @@
     <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\fschacha20.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\fschacha20_poly1305.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>

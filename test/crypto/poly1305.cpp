@@ -74,6 +74,84 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__vector_2__expected)
 }
 
 // Split writes accumulate identically to a single write.
+// Long messages engage the lane-parallel paths (scalar tail remains covered).
+BOOST_AUTO_TEST_CASE(poly1305__flush__112_bytes__expected)
+{
+    const auto key = base16_array(
+        "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
+    const data_chunk message(112, 0x11_u8);
+    const auto expected = base16_array("59d0c2e7f8c2612f1150c97f377c6fa4");
+
+    poly1305 mac{ key };
+    mac.write(message);
+
+    poly1305::tag tag{};
+    mac.flush(tag);
+    BOOST_REQUIRE_EQUAL(tag, expected);
+}
+
+BOOST_AUTO_TEST_CASE(poly1305__flush__240_bytes__expected)
+{
+    const auto key = base16_array(
+        "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
+    const data_chunk message(240, 0x22_u8);
+    const auto expected = base16_array("e385ca0356e5cc9c2bc41019beb27825");
+
+    poly1305 mac{ key };
+    mac.write(message);
+
+    poly1305::tag tag{};
+    mac.flush(tag);
+    BOOST_REQUIRE_EQUAL(tag, expected);
+}
+
+BOOST_AUTO_TEST_CASE(poly1305__flush__1024_bytes__expected)
+{
+    const auto key = base16_array(
+        "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
+    const data_chunk message(1024, 0x33_u8);
+    const auto expected = base16_array("fa458c5c5c56a343bb4fd061094963e2");
+
+    poly1305 mac{ key };
+    mac.write(message);
+
+    poly1305::tag tag{};
+    mac.flush(tag);
+    BOOST_REQUIRE_EQUAL(tag, expected);
+}
+
+BOOST_AUTO_TEST_CASE(poly1305__flush__4104_bytes__expected)
+{
+    const auto key = base16_array(
+        "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
+    const data_chunk message(4104, 0x44_u8);
+    const auto expected = base16_array("05df1c4e1b7d598ec7c350f95996b776");
+
+    poly1305 mac{ key };
+    mac.write(message);
+
+    poly1305::tag tag{};
+    mac.flush(tag);
+    BOOST_REQUIRE_EQUAL(tag, expected);
+}
+
+BOOST_AUTO_TEST_CASE(poly1305__write__long_split__expected)
+{
+    const auto key = base16_array(
+        "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
+    const data_chunk message(1024, 0x33_u8);
+    const auto expected = base16_array("fa458c5c5c56a343bb4fd061094963e2");
+
+    poly1305 split{ key };
+    split.write({ message.data(), 7 });
+    split.write({ std::next(message.data(), 7), 41 });
+    split.write({ std::next(message.data(), 48), message.size() - 48 });
+
+    poly1305::tag tag{};
+    split.flush(tag);
+    BOOST_REQUIRE_EQUAL(tag, expected);
+}
+
 BOOST_AUTO_TEST_CASE(poly1305__write__split__same_tag)
 {
     const auto key = base16_array(

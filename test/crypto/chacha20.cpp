@@ -132,52 +132,61 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__split_stream__continuous)
     BOOST_REQUIRE_EQUAL(encrypted, vector.keystream);
 }
 
-// bip324 fschacha20 test vectors (bitcoin core test framework).
-
-BOOST_AUTO_TEST_CASE(fschacha20__crypt__rekey_rotation__expected)
+BOOST_AUTO_TEST_CASE(chacha20__stream__whole__matches_split)
 {
-    struct fschacha20_vector
-    {
-        data_chunk plain;
-        chacha20::secret key;
-        uint32_t interval;
-        data_chunk cipher;
-    };
+    const auto& vector = chacha20_vectors.front();
+    constexpr size_t size = 1027;
 
-    const std_vector<fschacha20_vector> vectors
-    {
-        {
-            base16_chunk("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
-            base16_array("0000000000000000000000000000000000000000000000000000000000000000"),
-            256,
-            base16_chunk("a93df4ef03011f3db95f60d996e1785df5de38fc39bfcb663a47bb5561928349")
-        },
-        {
-            base16_chunk("01"),
-            base16_array("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
-            5,
-            base16_chunk("ea")
-        },
-        {
-            base16_chunk("e93fdb5c762804b9a706816aca31e35b11d2aa3080108ef46a5b1f1508819c0a"),
-            base16_array("8ec4c3ccdaea336bdeb245636970be01266509b33f3d2642504eaf412206207a"),
-            4096,
-            base16_chunk("8bfaa4eacff308fdb4a94a5ff25bd9d0c1f84b77f81239f67ff39d6e1ac280c9")
-        }
-    };
+    // Whole request (exercises the concurrent block path where compiled).
+    chacha20 cipher{ vector.key };
+    cipher.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk whole(size);
+    cipher.stream(whole);
 
-    for (const auto& vector: vectors)
-    {
-        fschacha20 cipher{ vector.key, vector.interval };
-        data_chunk out(vector.plain.size());
+    // Split requests (exercises the buffered and sequential block paths).
+    chacha20 splitter{ vector.key };
+    splitter.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk split(size);
+    const auto out = split.data();
+    const auto out1 = byte_span{ out, 5 };
+    const auto out2 = byte_span{ std::next(out, 5), 600 };
+    const auto out3 = byte_span{ std::next(out, 605), 422 };
+    splitter.stream(out1);
+    splitter.stream(out2);
+    splitter.stream(out3);
 
-        // Crypt through one full rekey interval, then compare the next.
-        for (uint32_t chunk{}; chunk < vector.interval; ++chunk)
-            cipher.crypt(vector.plain, out);
+    BOOST_REQUIRE_EQUAL(split, whole);
+}
 
-        cipher.crypt(vector.plain, out);
-        BOOST_REQUIRE_EQUAL(out, vector.cipher);
-    }
+BOOST_AUTO_TEST_CASE(chacha20__crypt__whole__matches_split)
+{
+    const auto& vector = chacha20_vectors.front();
+    constexpr size_t size = 1600;
+    const data_chunk plain(size, 0xab_u8);
+
+    // Whole request (exercises the concurrent block path where compiled).
+    chacha20 cipher{ vector.key };
+    cipher.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk whole(size);
+    cipher.crypt(plain, whole);
+
+    // Split requests (exercises the buffered and sequential block paths).
+    chacha20 splitter{ vector.key };
+    splitter.seek(vector.nonce32, vector.nonce64, vector.counter);
+    data_chunk split(size);
+    const auto in = plain.data();
+    const auto out = split.data();
+    const auto in1 = const_byte_span{ in, 5 };
+    const auto in2 = const_byte_span{ std::next(in, 5), 1000 };
+    const auto in3 = const_byte_span{ std::next(in, 1005), 595 };
+    const auto out1 = byte_span{ out, 5 };
+    const auto out2 = byte_span{ std::next(out, 5), 1000 };
+    const auto out3 = byte_span{ std::next(out, 1005), 595 };
+    splitter.crypt(in1, out1);
+    splitter.crypt(in2, out2);
+    splitter.crypt(in3, out3);
+
+    BOOST_REQUIRE_EQUAL(split, whole);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

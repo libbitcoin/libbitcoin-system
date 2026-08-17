@@ -32,16 +32,14 @@
 
 namespace libbitcoin {
 namespace system {
-
+    
+BC_PUSH_WARNING(NO_USE_OF_SPAN)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-constexpr data_array<16> zero_pad{};
-
-// Bytes required to pad size to a multiple of the poly1305 block (16).
 static constexpr size_t padding(size_t size) NOEXCEPT
 {
-    return (zero_pad.size() - (size % zero_pad.size())) % zero_pad.size();
+    return absolute(ceilinged_modulo(size, poly1305::block_size));
 }
 
 // chacha20_poly1305
@@ -59,16 +57,16 @@ void chacha20_poly1305::set_key(const chacha20::secret& key) NOEXCEPT
 
 // private
 void chacha20_poly1305::authenticate(poly1305::tag& out,
-    std::span<const uint8_t> aad, std::span<const uint8_t> cipher) NOEXCEPT
+    const_byte_span aad, const_byte_span cipher) NOEXCEPT
 {
-    // rfc8439
+    constexpr data_array<poly1305::block_size> zero_pad{};
+
     // First, a Poly1305 one-time key is generated from the 256-bit key and
     // nonce: the ChaCha20 block function with block counter zero, taking the
     // first 256 bits of the 512-bit state [cipher_ must be at block zero].
     poly1305::secret key{};
     cipher_.stream(key);
 
-    // rfc8439
     // The Poly1305 message is the aad zero-padded to a multiple of sixteen,
     // the ciphertext likewise padded, the aad length, and then the ciphertext
     // length, both in octets as 64-bit little-endian words.
@@ -83,17 +81,25 @@ void chacha20_poly1305::authenticate(poly1305::tag& out,
     key = {};
 }
 
-void chacha20_poly1305::encrypt(std::span<const uint8_t> plain,
-    std::span<const uint8_t> aad, uint32_t nonce32, uint64_t nonce64,
-    std::span<uint8_t> cipher) NOEXCEPT
+void chacha20_poly1305::encrypt(const_byte_span plain,
+    const_byte_span aad, uint32_t nonce32, uint64_t nonce64,
+    byte_span cipher) NOEXCEPT
 {
-    BC_ASSERT(cipher.size() == plain.size() + expansion);
-    const auto text = cipher.first(plain.size());
+    encrypt(plain, {}, aad, nonce32, nonce64, cipher);
+}
 
-    // rfc8439
+void chacha20_poly1305::encrypt(const_byte_span plain1,
+    const_byte_span plain2, const_byte_span aad,
+    uint32_t nonce32, uint64_t nonce64, byte_span cipher) NOEXCEPT
+{
+    BC_ASSERT(cipher.size() == plain1.size() + plain2.size() + expansion);
+    const auto text = cipher.first(plain1.size() + plain2.size());
+
     // Encryption uses the ChaCha20 block counter starting at one.
+    // Keystream continuity concatenates the plaintext segments.
     cipher_.seek(nonce32, nonce64, one);
-    cipher_.crypt(plain, text);
+    cipher_.crypt(plain1, text.first(plain1.size()));
+    cipher_.crypt(plain2, text.subspan(plain1.size()));
 
     // Tag key is drawn from block counter zero.
     cipher_.seek(nonce32, nonce64, zero);
@@ -101,9 +107,9 @@ void chacha20_poly1305::encrypt(std::span<const uint8_t> plain,
         cipher.last(expansion).data()), aad, text);
 }
 
-bool chacha20_poly1305::decrypt(std::span<uint8_t> plain,
-    std::span<const uint8_t> aad, uint32_t nonce32, uint64_t nonce64,
-    std::span<const uint8_t> cipher) NOEXCEPT
+bool chacha20_poly1305::decrypt(byte_span plain,
+    const_byte_span aad, uint32_t nonce32, uint64_t nonce64,
+    const_byte_span cipher) NOEXCEPT
 {
     BC_ASSERT(cipher.size() == plain.size() + expansion);
     const auto text = cipher.first(plain.size());
@@ -116,9 +122,8 @@ bool chacha20_poly1305::decrypt(std::span<uint8_t> plain,
     uint8_t difference{};
     const auto actual = cipher.last(expansion);
     for (size_t byte{}; byte < expansion; ++byte)
-        difference |= expected[byte] ^ actual[byte];
+        difference |= bit_xor(expected[byte], actual[byte]);
 
-    // rfc8439
     // Decryption uses the ChaCha20 block counter starting at one.
     const auto authenticated = is_zero(difference);
     if (authenticated)
@@ -135,57 +140,14 @@ bool chacha20_poly1305::decrypt(std::span<uint8_t> plain,
 }
 
 void chacha20_poly1305::stream(uint32_t nonce32, uint64_t nonce64,
-    std::span<uint8_t> out) NOEXCEPT
+    byte_span out) NOEXCEPT
 {
-    // rfc8439
     // The first output block is consumed by the poly1305 key generation.
     cipher_.seek(nonce32, nonce64, one);
     cipher_.stream(out);
 }
 
-// fschacha20_poly1305
-// ----------------------------------------------------------------------------
-
-fschacha20_poly1305::fschacha20_poly1305(const chacha20::secret& key,
-    uint32_t interval) NOEXCEPT
-  : aead_(key), interval_(interval)
-{
-}
-
-// private
-void fschacha20_poly1305::next() NOEXCEPT
-{
-    // bip324
-    // The key is rotated after every rekey_interval messages, to the
-    // keystream of nonce {0xffffffff, rekey counter}.
-    if (++packets_ == interval_)
-    {
-        chacha20::secret key{};
-        aead_.stream(0xffffffff_u32, rekeys_, key);
-        aead_.set_key(key);
-        key = {};
-        packets_ = 0;
-        ++rekeys_;
-    }
-}
-
-void fschacha20_poly1305::encrypt(std::span<const uint8_t> plain,
-    std::span<const uint8_t> aad, std::span<uint8_t> cipher) NOEXCEPT
-{
-    // bip324
-    // The nonce is {message counter, rekey counter}.
-    aead_.encrypt(plain, aad, packets_, rekeys_, cipher);
-    next();
-}
-
-bool fschacha20_poly1305::decrypt(std::span<uint8_t> plain,
-    std::span<const uint8_t> aad, std::span<const uint8_t> cipher) NOEXCEPT
-{
-    const auto valid = aead_.decrypt(plain, aad, packets_, rekeys_, cipher);
-    next();
-    return valid;
-}
-
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 

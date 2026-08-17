@@ -85,13 +85,33 @@ INLINE xint128_t shl(xint128_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint128_t ror(xint128_t a) NOEXCEPT
 {
-    return or_(shr<B, S>(a), shl<S - B, S>(a));
+    // Half-word rotation is a single element reversal.
+    if constexpr ((S == bits<uint16_t>) && (B == bits<uint8_t>))
+        return (xint128_t)vrev16q_u8((uint8x16_t)a);
+    else if constexpr ((S == bits<uint32_t>) && (B == bits<uint16_t>))
+        return (xint128_t)vrev32q_u16((uint16x8_t)a);
+    else if constexpr ((S == bits<uint64_t>) && (B == bits<uint32_t>))
+        return (xint128_t)vrev64q_u32((uint32x4_t)a);
+
+    // Otherwise shift-right-insert halves the synthesized rotation cost.
+    else if constexpr (S == bits<uint8_t>)
+        return (xint128_t)vsriq_n_u8(vshlq_n_u8((uint8x16_t)a, S - B),
+            (uint8x16_t)a, B);
+    else if constexpr (S == bits<uint16_t>)
+        return (xint128_t)vsriq_n_u16(vshlq_n_u16((uint16x8_t)a, S - B),
+            (uint16x8_t)a, B);
+    else if constexpr (S == bits<uint32_t>)
+        return (xint128_t)vsriq_n_u32(vshlq_n_u32((uint32x4_t)a, S - B),
+            (uint32x4_t)a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vsriq_n_u64(vshlq_n_u64((uint64x2_t)a, S - B),
+            (uint64x2_t)a, B);
 }
 
 template <auto B, auto S>
 INLINE xint128_t rol(xint128_t a) NOEXCEPT
 {
-    return or_(shl<B, S>(a), shr<S - B, S>(a));
+    return ror<S - B, S>(a);
 }
 
 template <auto S>
@@ -131,6 +151,14 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
         return (xint128_t)vaddq_u32((uint32x4_t)a, (uint32x4_t)b);
     if constexpr (is_same_type<Word, uint64_t>)
         return (xint128_t)vaddq_u64((uint64x2_t)a, (uint64x2_t)b);
+}
+
+template <auto S>
+INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vmull_u32(vmovn_u64((uint64x2_t)a),
+            vmovn_u64((uint64x2_t)b));
 }
 
 /// broadcast/get/set
@@ -270,7 +298,47 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
     vst1q_u32((uint32_t*)&bytes, a);
 }
 
+
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+template <auto S>
+INLINE xint128_t unpack_lo(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return (xint128_t)vzip1q_u8((uint8x16_t)a, (uint8x16_t)b);
+    if constexpr (S == bits<uint16_t>)
+        return (xint128_t)vzip1q_u16((uint16x8_t)a, (uint16x8_t)b);
+    if constexpr (S == bits<uint32_t>)
+        return (xint128_t)vzip1q_u32((uint32x4_t)a, (uint32x4_t)b);
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vzip1q_u64((uint64x2_t)a, (uint64x2_t)b);
+}
+
+template <auto S>
+INLINE xint128_t unpack_hi(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return (xint128_t)vzip2q_u8((uint8x16_t)a, (uint8x16_t)b);
+    if constexpr (S == bits<uint16_t>)
+        return (xint128_t)vzip2q_u16((uint16x8_t)a, (uint16x8_t)b);
+    if constexpr (S == bits<uint32_t>)
+        return (xint128_t)vzip2q_u32((uint32x4_t)a, (uint32x4_t)b);
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vzip2q_u64((uint64x2_t)a, (uint64x2_t)b);
+}
+
+INLINE xint128_t tile_lo(xint128_t a, xint128_t) NOEXCEPT
+{
+    return a;
+}
+
+INLINE xint128_t tile_hi(xint128_t, xint128_t b) NOEXCEPT
+{
+    return b;
+}
 } // namespace f
+
 } // namespace system
 } // namespace libbitcoin
 

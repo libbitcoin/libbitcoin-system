@@ -16,55 +16,52 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_CHACHA20_POLY1305_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_CHACHA20_POLY1305_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_FSCHACHA20_POLY1305_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_FSCHACHA20_POLY1305_HPP
 
-#include <span>
 #include <bitcoin/system/crypto/chacha20.hpp>
-#include <bitcoin/system/crypto/poly1305.hpp>
+#include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// ChaCha20-Poly1305 authenticated encryption with associated data (rfc8439).
-/// The nonce is expressed as a 32-bit and a 64-bit little-endian segment
-/// (bip324 convention), and MUST not be repeated for the same key.
-class BC_API chacha20_poly1305 final
+/// Forward-secure ChaCha20-Poly1305 (bip324).
+/// The nonce is automatically incremented for each message, and the key is
+/// rotated after every interval of messages.
+class BC_API fschacha20_poly1305 final
 {
 public:
+    DELETE_COPY_MOVE(fschacha20_poly1305);
+
     /// Ciphertext expansion (the appended tag).
-    static constexpr size_t expansion = poly1305::tag_size;
+    static constexpr size_t expansion = chacha20_poly1305::expansion;
 
-    chacha20_poly1305(const chacha20::secret& key) NOEXCEPT;
-
-    /// Rekey.
-    void set_key(const chacha20::secret& key) NOEXCEPT;
+    fschacha20_poly1305(const chacha20::secret& key,
+        uint32_t interval) NOEXCEPT;
 
     /// Encrypt plain with aad into cipher (cipher = plain size + expansion).
-    void encrypt(const_byte_span plain, const_byte_span aad, uint32_t nonce32,
-        uint64_t nonce64, byte_span cipher) NOEXCEPT;
+    void encrypt(const_byte_span plain, const_byte_span aad,
+        byte_span cipher) NOEXCEPT;
 
     /// Encrypt plain1 || plain2 with aad into cipher, avoiding the caller
     /// concatenation copy (cipher = sum of plain sizes + expansion).
     void encrypt(const_byte_span plain1, const_byte_span plain2,
-        const_byte_span aad, uint32_t nonce32, uint64_t nonce64,
-        byte_span cipher) NOEXCEPT;
+        const_byte_span aad, byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher with aad into plain (cipher = plain size + expansion).
     /// False if the tag does not authenticate, in which case plain is cleared.
-    bool decrypt(byte_span plain, const_byte_span aad, uint32_t nonce32,
-        uint64_t nonce64, const_byte_span cipher) NOEXCEPT;
-
-    /// Write keystream into out (as encrypt of zeros, without the tag).
-    void stream(uint32_t nonce32, uint64_t nonce64, byte_span out) NOEXCEPT;
-
-private:
-    void authenticate(poly1305::tag& out, const_byte_span aad,
+    bool decrypt(byte_span plain, const_byte_span aad,
         const_byte_span cipher) NOEXCEPT;
 
-    chacha20 cipher_;
+private:
+    void next() NOEXCEPT;
+
+    const uint32_t interval_;
+    chacha20_poly1305 aead_;
+    uint32_t packets_{};
+    uint64_t rekeys_{};
 };
 
 } // namespace system

@@ -90,13 +90,25 @@ INLINE xint512_t shl(xint512_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint512_t ror(xint512_t a) NOEXCEPT
 {
-    return or_(shr<B, S>(a), shl<S - B, S>(a));
+    // AVX512F (native rotation) of 32/64 bit words.
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_ror_epi32(a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm512_ror_epi64(a, B);
+    else
+        return or_(shr<B, S>(a), shl<S - B, S>(a));
 }
 
 template <auto B, auto S>
 INLINE xint512_t rol(xint512_t a) NOEXCEPT
 {
-    return or_(shl<B, S>(a), shr<S - B, S>(a));
+    // AVX512F (native rotation) of 32/64 bit words.
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_rol_epi32(a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm512_rol_epi64(a, B);
+    else
+        return or_(shl<B, S>(a), shr<S - B, S>(a));
 }
 
 // AVX512BW
@@ -139,6 +151,14 @@ INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
         return _mm512_add_epi32(a, b);
     if constexpr (is_same_type<Word, uint64_t>)
         return _mm512_add_epi64(a, b);
+}
+
+// AVX512F
+template <auto S>
+INLINE xint512_t mul(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_mul_epu32(a, b);
 }
 
 /// broadcast/get/set
@@ -316,7 +336,51 @@ INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
     _mm512_store_si512(&bytes, a);
 }
 
+
+/// interleave (for matrix transposition)
+/// ---------------------------------------------------------------------------
+
+// AVX512BW
+template <auto S>
+INLINE xint512_t unpack_lo(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm512_unpacklo_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm512_unpacklo_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_unpacklo_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_unpacklo_epi64(a, b);
+}
+
+// AVX512BW
+template <auto S>
+INLINE xint512_t unpack_hi(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm512_unpackhi_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm512_unpackhi_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_unpackhi_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_unpackhi_epi64(a, b);
+}
+
+// AVX512F
+INLINE xint512_t tile_lo(xint512_t a, xint512_t b) NOEXCEPT
+{
+    return _mm512_shuffle_i32x4(a, b, 0x88);
+}
+
+// AVX512F
+INLINE xint512_t tile_hi(xint512_t a, xint512_t b) NOEXCEPT
+{
+    return _mm512_shuffle_i32x4(a, b, 0xdd);
+}
 } // namespace f
+
 } // namespace system
 } // namespace libbitcoin
 

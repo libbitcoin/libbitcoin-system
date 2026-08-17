@@ -230,6 +230,8 @@
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\fschacha20.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />

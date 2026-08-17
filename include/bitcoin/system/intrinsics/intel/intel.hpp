@@ -28,6 +28,22 @@
 namespace libbitcoin {
 namespace system {
 
+/// Byte shuffle selector for rotation (see f::ror/f::rol).
+/// ---------------------------------------------------------------------------
+/// The selector for byte at index for rotate right by B bits of S-bit words,
+/// where B is byte-aligned (B % 8 == 0). A single byte shuffle then performs
+/// the rotation of all words in the vector.
+
+template <auto B, auto S>
+constexpr uint8_t mm_ror_selector(uint8_t index) NOEXCEPT
+{
+    constexpr auto size = S / byte_bits;
+    constexpr auto skip = (B / byte_bits) % size;
+    return possible_narrow_cast<uint8_t>(
+        ((index / size) * size) +
+        ((index + skip) % size));
+}
+
 /// Provide 8 bit shifts to complete matrix.
 /// ---------------------------------------------------------------------------
 /// These are no epi8 versions of these.
@@ -137,6 +153,32 @@ inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
 /// There are no intrisic versions of these.
 
 #if defined(HAVE_512)
+
+// AVX512F
+template <typename ...Args>
+inline auto mm512_setr_epi8(Args ...args) NOEXCEPT
+{
+    static_assert(sizeof...(Args) == 64);
+    const std_array<uint8_t, sizeof...(Args)> bytes
+    {
+        args...
+    };
+
+    return _mm512_loadu_si512(bytes.data());
+}
+
+// AVX512F
+template <typename ...Args>
+inline auto mm512_setr_epi16(Args ...args) NOEXCEPT
+{
+    static_assert(sizeof...(Args) == 32);
+    const std_array<uint16_t, sizeof...(Args)> words
+    {
+        args...
+    };
+
+    return _mm512_loadu_si512(words.data());
+}
 
 // AVX512F
 template <auto Lane>
