@@ -95,6 +95,12 @@ INLINE constexpr auto addc(Word a) NOEXCEPT
     return depromote<Word>(a + K);
 }
 
+template <auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto mul(Word a, Word b) NOEXCEPT
+{
+    return depromote<Word>(a * b);
+}
+
 } // namespace f
 } // namespace system
 } // namespace libbitcoin
