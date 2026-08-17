@@ -377,7 +377,7 @@ void poly1305::blocks(const uint8_t* data, size_t blocks,
     xblocks<xint128_t>(data, blocks, hibit, r, s, h);
 
     limbs_t<uint64_t> d{};
-    for (; !is_zero(blocks); --blocks)
+    while (!is_zero(blocks--))
     {
         // Add the message block (with high bit) to the accumulator.
         h[0] += limb<0>(data, hibit);
