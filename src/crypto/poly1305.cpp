@@ -100,16 +100,16 @@ INLINE uint64_t poly1305::limb(const uint8_t* data, uint32_t hibit) NOEXCEPT
     {
         // The top limb is short, read (aligned) from the end of the block.
         constexpr auto offset = block_size - sizeof(uint32_t);
-        const auto word = unsafe_from_little_endian<uint32_t>(
-            std::next(data, offset));
+        const auto at = std::next(data, offset);
+        const auto word = unsafe_from_little_endian<uint32_t>(at);
         return bit_or(shift_right(word, byte_bits), hibit);
     }
     else
     {
         constexpr auto offset = (Limb * limb_bits) / byte_bits;
         constexpr auto shift = (Limb * limb_bits) % byte_bits;
-        const auto word = unsafe_from_little_endian<uint32_t>(
-            std::next(data, offset));
+        const auto at = std::next(data, offset);
+        const auto word = unsafe_from_little_endian<uint32_t>(at);
         return bit_and(shift_right(word, shift), limb_mask);
     }
 }
