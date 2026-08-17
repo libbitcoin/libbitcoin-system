@@ -52,6 +52,10 @@ constexpr auto prime_delta = 5_u32;
 // The block high bit (2^128) as positioned within the fifth limb.
 constexpr auto high_bit = 0x01000000_u32;
 
+// The limb mask and prime delta as broadcast into 64 bit lanes.
+constexpr auto lane_mask = wide_cast<uint64_t>(limb_mask);
+constexpr auto lane_delta = wide_cast<uint64_t>(prime_delta);
+
 // The shift that isolates the sign of a 32 bit limb difference.
 constexpr auto sign_shift = sub1(bits<uint32_t>);
 
@@ -84,15 +88,6 @@ poly1305::poly1305(const secret& key) NOEXCEPT
 // multiplication
 // ----------------------------------------------------------------------------
 
-template <typename Word>
-INLINE constexpr Word poly1305::fill(uint64_t value) NOEXCEPT
-{
-    if constexpr (is_integral_integer<Word>)
-        return value;
-    else
-        return f::broadcast<Word>(value);
-}
-
 template <size_t Limb>
 INLINE uint64_t poly1305::limb(const uint8_t* data, uint32_t hibit) NOEXCEPT
 {
@@ -118,7 +113,7 @@ template <typename Word>
 INLINE constexpr void poly1305::scale(limbs_t<Word>& s,
     const limbs_t<Word>& r) NOEXCEPT
 {
-    const auto delta = fill<Word>(prime_delta);
+    const auto delta = f::broadcast<Word>(lane_delta);
     s[0] = f::mul<word_bits>(r[0], delta);
     s[1] = f::mul<word_bits>(r[1], delta);
     s[2] = f::mul<word_bits>(r[2], delta);
@@ -159,8 +154,8 @@ template <typename Word>
 INLINE constexpr void poly1305::reduce(limbs_t<Word>& a,
     const limbs_t<Word>& d) NOEXCEPT
 {
-    const auto mask = fill<Word>(limb_mask);
-    const auto delta = fill<Word>(prime_delta);
+    const auto mask = f::broadcast<Word>(lane_mask);
+    const auto delta = f::broadcast<Word>(lane_delta);
 
     const auto c0 = f::shr<limb_bits, word_bits>(d[0]);
     const auto d1 = f::add<word_bits>(d[1], c0);
@@ -302,11 +297,11 @@ INLINE void poly1305::xblocks(const uint8_t*& data, size_t& blocks,
             // The high power advances all lanes with each group.
             limbs_t<xWord> rn{};
             limbs_t<xWord> sn{};
-            rn[0] = fill<xWord>(ladder[sub1(count)][0]);
-            rn[1] = fill<xWord>(ladder[sub1(count)][1]);
-            rn[2] = fill<xWord>(ladder[sub1(count)][2]);
-            rn[3] = fill<xWord>(ladder[sub1(count)][3]);
-            rn[4] = fill<xWord>(ladder[sub1(count)][4]);
+            rn[0] = f::broadcast<xWord>(ladder[sub1(count)][0]);
+            rn[1] = f::broadcast<xWord>(ladder[sub1(count)][1]);
+            rn[2] = f::broadcast<xWord>(ladder[sub1(count)][2]);
+            rn[3] = f::broadcast<xWord>(ladder[sub1(count)][3]);
+            rn[4] = f::broadcast<xWord>(ladder[sub1(count)][4]);
             scale(sn, rn);
 
             // The first group of blocks, accumulator folded into lane zero.

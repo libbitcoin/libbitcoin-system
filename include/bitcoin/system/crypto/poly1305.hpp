@@ -69,9 +69,6 @@ protected:
     /// multiplication
     /// -----------------------------------------------------------------------
 
-    template <typename Word>
-    static constexpr Word fill(uint64_t value) NOEXCEPT;
-
     template <size_t Limb>
     static uint64_t limb(const uint8_t* data, uint32_t hibit) NOEXCEPT;
 
