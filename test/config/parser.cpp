@@ -34,7 +34,9 @@ public:
     {
         options_metadata description;
         description.add_options()
-            ("config,c", po::value<std::filesystem::path>(&configured_), "");
+            ("config,c", po::value<std::filesystem::path>(&configured_), "")
+            ("with_default", po::value<bool>()->default_value(false), "")
+            ("without_default", po::value<bool>(), "");
         return description;
     }
 
@@ -60,15 +62,12 @@ private:
     std::filesystem::path configured_;
 };
 
-// Populate a variables_map with --config <path>, as the command line would.
-variables_map configured_variables(mock_parser& instance,
-    const std::filesystem::path& path)
+// Load --config <path> into the instance, as the command line would.
+void configure(mock_parser& instance, const std::filesystem::path& path)
 {
-    variables_map variables;
     const auto value = path.string();
     const char* argv[]{ "test", "--config", value.c_str() };
-    instance.load_command_variables(variables, 3, argv);
-    return variables;
+    instance.load_command_variables(3, argv);
 }
 
 } // namespace
@@ -78,23 +77,81 @@ BOOST_FIXTURE_TEST_SUITE(parser__load_configuration_variables, test::directory_s
 BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__directory__throws)
 {
     mock_parser instance;
-    auto variables = configured_variables(instance, TEST_DIRECTORY);
-    BOOST_REQUIRE_THROW(instance.load_configuration_variables(variables, "config"), ifstream_exception);
+    configure(instance, TEST_DIRECTORY);
+    BOOST_REQUIRE_THROW(instance.load_configuration_variables("config"), ifstream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__nonexistent_file__throws)
 {
     mock_parser instance;
-    auto variables = configured_variables(instance, TEST_PATH);
-    BOOST_REQUIRE_THROW(instance.load_configuration_variables(variables, "config"), ifstream_exception);
+    configure(instance, TEST_PATH);
+    BOOST_REQUIRE_THROW(instance.load_configuration_variables("config"), ifstream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__regular_file__returns_true)
 {
     mock_parser instance;
     BOOST_REQUIRE(test::create(TEST_PATH));
-    auto variables = configured_variables(instance, TEST_PATH);
-    BOOST_REQUIRE(instance.load_configuration_variables(variables, "config"));
+    configure(instance, TEST_PATH);
+    BOOST_REQUIRE(instance.load_configuration_variables("config"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(parser__is_configured)
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__unparsed__false)
+{
+    const mock_parser instance;
+    BOOST_REQUIRE(!instance.is_configured("config"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__unregistered__false)
+{
+    mock_parser instance;
+    const char* argv[]{ "test" };
+    instance.load_command_variables(1, argv);
+    BOOST_REQUIRE(!instance.is_configured("nonexistent"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__unspecified_without_default__false)
+{
+    mock_parser instance;
+    const char* argv[]{ "test" };
+    instance.load_command_variables(1, argv);
+    BOOST_REQUIRE(!instance.is_configured("without_default"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__unspecified_with_default__false)
+{
+    mock_parser instance;
+    const char* argv[]{ "test" };
+    instance.load_command_variables(1, argv);
+    BOOST_REQUIRE(!instance.is_configured("with_default"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__specified_without_default__true)
+{
+    mock_parser instance;
+    const char* argv[]{ "test", "--without_default", "true" };
+    instance.load_command_variables(3, argv);
+    BOOST_REQUIRE(instance.is_configured("without_default"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__specified_with_default__true)
+{
+    mock_parser instance;
+    const char* argv[]{ "test", "--with_default", "true" };
+    instance.load_command_variables(3, argv);
+    BOOST_REQUIRE(instance.is_configured("with_default"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__is_configured__specified_as_default_value__true)
+{
+    mock_parser instance;
+    const char* argv[]{ "test", "--with_default", "false" };
+    instance.load_command_variables(3, argv);
+    BOOST_REQUIRE(instance.is_configured("with_default"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

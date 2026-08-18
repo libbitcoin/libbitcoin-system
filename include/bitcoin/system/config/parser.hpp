@@ -37,12 +37,16 @@ class BC_API parser
 public:
     static std::string format_invalid_parameter(
         const std::string& message) NOEXCEPT;
-    static bool get_option(variables_map& variables,
-        const std::string& name) NOEXCEPT;
+
+    /// True if set by command line, environment, or configuration file.
+    /// False if unset or obtained from a declared option default value.
+    bool is_configured(const std::string& name) const NOEXCEPT;
+
+    bool get_option(const std::string& name) const NOEXCEPT;
 
     /// Path is read as u8string (c++20) and held internally as wide on win32.
-    static std::filesystem::path get_config_option(variables_map& variables,
-        const std::string& name) NOEXCEPT;
+    std::filesystem::path get_config_option(
+        const std::string& name) const NOEXCEPT;
 
     /// Load command line options (named).
     virtual options_metadata load_options() THROWS = 0;
@@ -57,14 +61,17 @@ public:
     virtual options_metadata load_settings() THROWS = 0;
 
 protected:
-    virtual void load_command_variables(variables_map& variables,
-        int argc, const char* argv[]) THROWS;
+    virtual void load_command_variables(int argc,
+        const char* argv[]) THROWS;
 
-    virtual bool load_configuration_variables(variables_map& variables,
+    virtual bool load_configuration_variables(
         const std::string& option_name) THROWS;
 
-    virtual void load_environment_variables(variables_map& variables,
+    virtual void load_environment_variables(
         const std::string& prefix) THROWS;
+
+    /// Populated by the loaders, retained for provenance queries.
+    variables_map variables_{};
 };
 
 } // namespace config
