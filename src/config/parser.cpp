@@ -42,11 +42,17 @@ std::string parser::format_invalid_parameter(
     return "Error: " + clean_message;
 }
 
-std::filesystem::path parser::get_config_option(variables_map& variables,
-    const std::string& name) NOEXCEPT
+// Defaulted implies the value was declared by an option, not specified.
+bool parser::is_configured(const std::string& name) const NOEXCEPT
+{
+    return !variables_[name].empty() && !variables_[name].defaulted();
+}
+
+std::filesystem::path parser::get_config_option(
+    const std::string& name) const NOEXCEPT
 {
     // read config from the map so we don't require an early notify
-    const auto& config = variables[name];
+    const auto& config = variables_[name];
 
     // prevent exception in the case where the config variable is not set
     if (config.empty())
@@ -57,11 +63,10 @@ std::filesystem::path parser::get_config_option(variables_map& variables,
     return { config.as<std::filesystem::path>() };
 }
 
-bool parser::get_option(variables_map& variables,
-    const std::string& name) NOEXCEPT
+bool parser::get_option(const std::string& name) const NOEXCEPT
 {
     // Read settings from the map so we don't require an early notify call.
-    const auto& variable = variables[name];
+    const auto& variable = variables_[name];
 
     // prevent exception in the case where the settings variable is not set.
     if (variable.empty())
@@ -70,29 +75,27 @@ bool parser::get_option(variables_map& variables,
     return variable.as<bool>();
 }
 
-void parser::load_command_variables(variables_map& variables, int argc,
-    const char* argv[]) THROWS
+void parser::load_command_variables(int argc, const char* argv[]) THROWS
 {
     const auto options = load_options();
     const auto arguments = load_arguments();
     auto command_parser = command_line_parser(argc, argv).options(options)
         /*.allow_unregistered()*/.positional(arguments);
-    store(command_parser.run(), variables);
+    store(command_parser.run(), variables_);
 }
 
-void parser::load_environment_variables(variables_map& variables,
-    const std::string& prefix) THROWS
+void parser::load_environment_variables(const std::string& prefix) THROWS
 {
     const auto& environment_variables = load_environment();
     const auto environment = parse_environment(environment_variables, prefix);
-    store(environment, variables);
+    store(environment, variables_);
 }
 
-bool parser::load_configuration_variables(variables_map& variables,
+bool parser::load_configuration_variables(
     const std::string& option_name) THROWS
 {
     const auto settings = load_settings();
-    const auto path = get_config_option(variables, option_name);
+    const auto path = get_config_option(option_name);
     const auto extended = extended_path(path);
 
     std::error_code code{};
@@ -106,14 +109,14 @@ bool parser::load_configuration_variables(variables_map& variables,
             throw ifstream_exception{ from_path(extended).c_str() };
 
         const auto config = parse_config_file(file, settings);
-        store(config, variables);
+        store(config, variables_);
         return true;
     }
 
     // Loading from an empty stream causes the defaults to populate.
     std::istringstream stream{};
     const auto config = parse_config_file(stream, settings);
-    store(config, variables);
+    store(config, variables_);
     return false;
 }
 
