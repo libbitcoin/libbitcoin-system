@@ -66,6 +66,18 @@ inline bool verify_signature(const schnorr::batch& batch, size_t row) NOEXCEPT
 // accelerated
 // ----------------------------------------------------------------------------
 
+bool batched::compiled() NOEXCEPT
+{
+    auto uf = false;
+
+    // Feature-gated, false until linked ufsecp exposes gpu_available().
+#if defined(HAVE_ULTRAFAST) && defined(UFSECP_LBTC_HAS_GPU_AVAILABLE)
+    uf = true;
+#endif
+
+    return uf;
+}
+
 bool batched::accelerated() NOEXCEPT
 {
     auto gpu = false;
