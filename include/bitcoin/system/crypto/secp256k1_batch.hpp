@@ -34,6 +34,13 @@ using link = data_array<3>;
 using link_t = unsigned_type<sizeof(link)>;
 using links_t = std::vector<link_t>;
 constexpr link terminal{ 0xff, 0xff, 0xff };
+
+/// True iff hardware (GPU) batch acceleration is compiled in.
+BC_API bool compiled() NOEXCEPT;
+
+/// True iff batch verification is hardware (GPU) accelerated.
+BC_API bool accelerated() NOEXCEPT;
+
 } // namespace batched
 
 namespace ecdsa {
