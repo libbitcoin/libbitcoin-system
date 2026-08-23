@@ -321,6 +321,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\context.cpp">
       <ObjectFileName>$(IntDir)src_wallet_context.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\descriptor.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_public.cpp" />
@@ -649,6 +650,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\witness_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\context.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\descriptor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_public.hpp" />

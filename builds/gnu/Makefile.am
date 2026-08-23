@@ -190,6 +190,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/unicode/utf8_everywhere/unicode_ostream.cpp \
     ${srcdir}/../../src/unicode/utf8_everywhere/unicode_streambuf.cpp \
     ${srcdir}/../../src/wallet/context.cpp \
+    ${srcdir}/../../src/wallet/descriptor.cpp \
     ${srcdir}/../../src/wallet/message.cpp \
     ${srcdir}/../../src/wallet/neutrino.cpp \
     ${srcdir}/../../src/wallet/point_value.cpp \
@@ -851,6 +852,7 @@ include_bitcoin_system_walletdir = \
 
 include_bitcoin_system_wallet_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/context.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/descriptor.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/message.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/neutrino.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/point_value.hpp \
@@ -1160,6 +1162,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_istream.cpp \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_ostream.cpp \
     ${srcdir}/../../test/wallet/context.cpp \
+    ${srcdir}/../../test/wallet/descriptor.cpp \
     ${srcdir}/../../test/wallet/message.cpp \
     ${srcdir}/../../test/wallet/neutrino.cpp \
     ${srcdir}/../../test/wallet/point_value.cpp \

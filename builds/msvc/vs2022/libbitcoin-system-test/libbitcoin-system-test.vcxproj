@@ -413,6 +413,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\context.cpp">
       <ObjectFileName>$(IntDir)test_wallet_context.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\descriptor.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_public.cpp" />

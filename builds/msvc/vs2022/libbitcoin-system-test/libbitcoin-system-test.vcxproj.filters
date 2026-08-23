@@ -783,6 +783,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\context.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\descriptor.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>

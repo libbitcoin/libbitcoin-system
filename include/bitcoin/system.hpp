@@ -280,6 +280,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
 #include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/descriptor.hpp>
 #include <bitcoin/system/wallet/message.hpp>
 #include <bitcoin/system/wallet/neutrino.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>

@@ -675,6 +675,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\context.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\descriptor.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\keys\ec_point.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>
@@ -1599,6 +1602,9 @@
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\context.hpp">
+      <Filter>include\bitcoin\system\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\descriptor.hpp">
       <Filter>include\bitcoin\system\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\ec_point.hpp">

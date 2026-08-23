@@ -31,6 +31,7 @@
 #include <bitcoin/system/wallet/addresses/uri_reader.hpp>
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/descriptor.hpp>
 #include <bitcoin/system/wallet/keys/ec_point.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
