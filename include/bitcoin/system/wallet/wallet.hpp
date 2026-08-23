@@ -50,5 +50,9 @@
 #include <bitcoin/system/wallet/neutrino.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
 #include <bitcoin/system/wallet/points_value.hpp>
+#include <bitcoin/system/wallet/psbt/entry.hpp>
+#include <bitcoin/system/wallet/psbt/input.hpp>
+#include <bitcoin/system/wallet/psbt/output.hpp>
+#include <bitcoin/system/wallet/psbt/transaction.hpp>
 
 #endif

@@ -349,6 +349,16 @@
     <ClCompile Include="..\..\..\..\src\wallet\neutrino.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\point_value.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\points_value.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\psbt\entry.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\psbt\input.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_psbt_input.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\psbt\output.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_psbt_output.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\psbt\transaction.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_psbt_transaction.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\catalogs\electrum.cpp">
       <ObjectFileName>$(IntDir)src_words_catalogs_electrum.obj</ObjectFileName>
     </ClCompile>
@@ -658,6 +668,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\neutrino.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\point_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\points_value.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\psbt\entry.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\psbt\input.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\psbt\output.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\psbt\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\wallet.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\warnings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum.hpp" />

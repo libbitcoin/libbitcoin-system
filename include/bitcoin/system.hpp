@@ -311,6 +311,10 @@
 #include <bitcoin/system/wallet/mnemonics/electrum.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
+#include <bitcoin/system/wallet/psbt/entry.hpp>
+#include <bitcoin/system/wallet/psbt/input.hpp>
+#include <bitcoin/system/wallet/psbt/output.hpp>
+#include <bitcoin/system/wallet/psbt/transaction.hpp>
 #include <bitcoin/system/words/dictionaries.hpp>
 #include <bitcoin/system/words/dictionary.hpp>
 #include <bitcoin/system/words/language.hpp>
