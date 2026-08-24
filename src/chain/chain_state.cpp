@@ -82,8 +82,7 @@ constexpr bool is_retarget_height(size_t height,
 // These two blocks each have a coinbase transaction that exactly duplicates
 // another that is not spent by the arrival of the corresponding duplicate.
 // Exceptions: block 91842 (duplicates 91812), 91880 (duplicates 91722).
-// static
-bool chain_state::is_bip30_exception(const hash_digest& hash,
+inline bool is_bip30_exception(const hash_digest& hash,
     size_t height) NOEXCEPT
 {
     return (hash   == mainnet_bip30_exception_checkpoint1.hash() &&
