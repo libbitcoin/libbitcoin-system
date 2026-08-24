@@ -720,26 +720,26 @@ bool transaction::join(const transaction& other) NOEXCEPT
 // Finalize.
 // ----------------------------------------------------------------------------
 
-// The signature for the public key whose hash160 is the given short hash.
-static data_chunk find_signature_by_hash(const entry::list& signatures,
-    const short_hash& hash) NOEXCEPT
+// The entry for the public key whose hash160 is the given short hash.
+static entry::list::const_iterator find_entry_by_hash(
+    const entry::list& signatures, const short_hash& hash) NOEXCEPT
 {
-    for (const auto& entry: signatures)
-        if (bitcoin_short_hash(entry.keydata()) == hash)
-            return entry.value;
-
-    return {};
+    return std::find_if(signatures.begin(), signatures.end(),
+        [&](const auto& item) NOEXCEPT
+        {
+            return bitcoin_short_hash(item.keydata()) == hash;
+        });
 }
 
-// The signature for the given public key.
-static data_chunk find_signature(const entry::list& signatures,
-    const data_chunk& key) NOEXCEPT
+// The entry for the given public key.
+static entry::list::const_iterator find_entry_by_key(
+    const entry::list& signatures, const data_chunk& key) NOEXCEPT
 {
-    for (const auto& entry: signatures)
-        if (entry.keydata() == key)
-            return entry.value;
-
-    return {};
+    return std::find_if(signatures.begin(), signatures.end(),
+        [&](const auto& item) NOEXCEPT
+        {
+            return item.keydata() == key;
+        });
 }
 
 // The satisfaction push data stack for supported script patterns.
@@ -749,12 +749,11 @@ static bool satisfy(data_stack& stack, const script& spend,
     const auto& ops = spend.ops();
     if (script::is_pay_public_key_pattern(ops))
     {
-        const auto signature = find_signature(signatures,
-            ops.front().data());
-        if (signature.empty())
+        const auto found = find_entry_by_key(signatures, ops.front().data());
+        if (found == signatures.end())
             return false;
 
-        stack.push_back(signature);
+        stack.push_back(found->value);
         return true;
     }
 
@@ -762,17 +761,13 @@ static bool satisfy(data_stack& stack, const script& spend,
     {
         const short_hash hash = unsafe_array_cast<uint8_t, short_hash_size>(
             ops.at(2).data().data());
-        for (const auto& entry: signatures)
-        {
-            if (bitcoin_short_hash(entry.keydata()) == hash)
-            {
-                stack.push_back(entry.value);
-                stack.push_back(entry.keydata());
-                return true;
-            }
-        }
+        const auto found = find_entry_by_hash(signatures, hash);
+        if (found == signatures.end())
+            return false;
 
-        return false;
+        stack.push_back(found->value);
+        stack.push_back(found->keydata());
+        return true;
     }
 
     if (script::is_pay_multisig_pattern(ops))
@@ -787,9 +782,9 @@ static bool satisfy(data_stack& stack, const script& spend,
         for (auto op = std::next(ops.begin());
             op != std::prev(ops.end(), 2); ++op)
         {
-            const auto signature = find_signature(signatures, op->data());
-            if (!signature.empty())
-                stack.push_back(signature);
+            const auto found = find_entry_by_key(signatures, op->data());
+            if (found != signatures.end())
+                stack.push_back(found->value);
         }
 
         return stack.size() == add1<size_t>(required);
@@ -853,19 +848,13 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
     {
         const short_hash hash = unsafe_array_cast<uint8_t, short_hash_size>(
             spend.ops().at(1).data().data());
-        for (const auto& entry: in.partial_signatures)
-        {
-            if (bitcoin_short_hash(entry.keydata()) == hash)
-            {
-                witnessed = true;
-                in.final_script_witness = to_shared<chain::witness>(
-                    data_stack{ entry.value, entry.keydata() });
-                break;
-            }
-        }
-
-        if (!witnessed)
+        const auto found = find_entry_by_hash(in.partial_signatures, hash);
+        if (found == in.partial_signatures.end())
             return false;
+
+        witnessed = true;
+        in.final_script_witness = to_shared<chain::witness>(
+            data_stack{ found->value, found->keydata() });
     }
     else
     {
