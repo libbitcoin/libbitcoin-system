@@ -56,7 +56,7 @@ struct BC_API input
     chain::output::cptr witness_utxo{};
     entry::list partial_signatures{};
     std::optional<uint32_t> sighash_type{};
-    chain::script::cptr redeem_script{};
+    chain::script::cptr embedded_script{};
     chain::script::cptr witness_script{};
     derivation::list derivations{};
     chain::script::cptr final_script_sig{};

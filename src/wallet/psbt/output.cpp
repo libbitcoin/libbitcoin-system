@@ -91,10 +91,10 @@ bool output::from_data(reader& source, uint32_t version) NOEXCEPT
         const auto typed = data.empty();
         switch (static_cast<output_key>(entry.type()))
         {
-            case output_key::redeem_script:
+            case output_key::embedded_script:
             {
-                redeem_script = to_shared<chain::script>(entry.value, false);
-                if (!typed || !redeem_script->is_valid())
+                embedded_script = to_shared<chain::script>(entry.value, false);
+                if (!typed || !embedded_script->is_valid())
                     return false;
                 break;
             }
@@ -157,9 +157,9 @@ void output::to_data(writer& sink, uint32_t) const NOEXCEPT
         sink.write_bytes(value);
     };
 
-    if (redeem_script)
-        write(output_key::redeem_script, {},
-            redeem_script->to_data(false));
+    if (embedded_script)
+        write(output_key::embedded_script, {},
+            embedded_script->to_data(false));
 
     if (witness_script)
         write(output_key::witness_script, {},
@@ -185,8 +185,8 @@ void output::to_data(writer& sink, uint32_t) const NOEXCEPT
 
 void output::combine(const output& other) NOEXCEPT
 {
-    if (!redeem_script)
-        redeem_script = other.redeem_script;
+    if (!embedded_script)
+        embedded_script = other.embedded_script;
 
     if (!witness_script)
         witness_script = other.witness_script;

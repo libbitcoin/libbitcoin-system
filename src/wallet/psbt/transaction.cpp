@@ -816,18 +816,18 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
     auto spend = out->script();
     auto witnessed = false;
 
-    // The spend conditions of a p2sh input are its redeem script.
+    // The spend conditions of a p2sh input are its embedded script.
     if (script::is_pay_script_hash_pattern(spend.ops()))
     {
-        if (!in.redeem_script)
+        if (!in.embedded_script)
             return false;
 
         const short_hash hash = unsafe_array_cast<uint8_t, short_hash_size>(
             spend.ops().at(1).data().data());
-        if (bitcoin_short_hash(in.redeem_script->to_data(false)) != hash)
+        if (bitcoin_short_hash(in.embedded_script->to_data(false)) != hash)
             return false;
 
-        spend = *in.redeem_script;
+        spend = *in.embedded_script;
     }
 
     // The spend conditions of a witness program are its witness script.
@@ -876,16 +876,16 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
         in.final_script_sig = to_shared<chain::script>(to_push_script(stack));
     }
 
-    // A p2sh wrapper places the redeem script push in the signature script.
-    if (in.redeem_script && witnessed)
+    // A p2sh wrapper places the embedded script push in the signature script.
+    if (in.embedded_script && witnessed)
     {
         in.final_script_sig = to_shared<chain::script>(to_push_script(
-            data_stack{ in.redeem_script->to_data(false) }));
+            data_stack{ in.embedded_script->to_data(false) }));
     }
-    else if (in.redeem_script && !witnessed)
+    else if (in.embedded_script && !witnessed)
     {
         auto ops = in.final_script_sig->ops();
-        ops.emplace_back(in.redeem_script->to_data(false), false);
+        ops.emplace_back(in.embedded_script->to_data(false), false);
         in.final_script_sig = to_shared<chain::script>(std::move(ops));
     }
 
@@ -893,7 +893,7 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
     in.partial_signatures.clear();
     in.derivations.clear();
     in.sighash_type.reset();
-    in.redeem_script.reset();
+    in.embedded_script.reset();
     in.witness_script.reset();
     return true;
 }

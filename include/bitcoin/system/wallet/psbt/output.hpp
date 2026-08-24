@@ -45,7 +45,7 @@ struct BC_API output
     void combine(const output& other) NOEXCEPT;
 
     // BIP174.
-    chain::script::cptr redeem_script{};
+    chain::script::cptr embedded_script{};
     chain::script::cptr witness_script{};
     derivation::list derivations{};
 

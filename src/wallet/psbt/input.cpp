@@ -135,10 +135,10 @@ bool input::from_data(reader& source, uint32_t version) NOEXCEPT
                 sighash_type = sighash;
                 break;
             }
-            case input_key::redeem_script:
+            case input_key::embedded_script:
             {
-                redeem_script = to_shared<chain::script>(entry.value, false);
-                if (!typed || !redeem_script->is_valid())
+                embedded_script = to_shared<chain::script>(entry.value, false);
+                if (!typed || !embedded_script->is_valid())
                     return false;
                 break;
             }
@@ -258,9 +258,9 @@ void input::to_data(writer& sink, uint32_t) const NOEXCEPT
         write(input_key::sighash_type, {},
             to_chunk(to_little_endian(sighash_type.value())));
 
-    if (redeem_script)
-        write(input_key::redeem_script, {},
-            redeem_script->to_data(false));
+    if (embedded_script)
+        write(input_key::embedded_script, {},
+            embedded_script->to_data(false));
 
     if (witness_script)
         write(input_key::witness_script, {},
@@ -333,8 +333,8 @@ void input::combine(const input& other) NOEXCEPT
     if (!sighash_type.has_value())
         sighash_type = other.sighash_type;
 
-    if (!redeem_script)
-        redeem_script = other.redeem_script;
+    if (!embedded_script)
+        embedded_script = other.embedded_script;
 
     if (!witness_script)
         witness_script = other.witness_script;

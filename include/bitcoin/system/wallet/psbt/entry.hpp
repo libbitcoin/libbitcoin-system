@@ -49,7 +49,7 @@ enum class input_key : uint8_t
     witness_utxo = 0x01,
     partial_sig = 0x02,
     sighash_type = 0x03,
-    redeem_script = 0x04,
+    embedded_script = 0x04,
     witness_script = 0x05,
     bip32_derivation = 0x06,
     final_script_sig = 0x07,
@@ -76,7 +76,7 @@ enum class input_key : uint8_t
 /// Output map key types, as defined by BIP174/BIP370/BIP371.
 enum class output_key : uint8_t
 {
-    redeem_script = 0x00,
+    embedded_script = 0x00,
     witness_script = 0x01,
     bip32_derivation = 0x02,
     amount = 0x03,
