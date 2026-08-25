@@ -34,6 +34,17 @@
 // xint types are always defined, though must be mocked when not aliased.
 #define MOCK_TYPE(bits) std_array<uint8_t, bytes<bits>>
 
+// Intrinsic headers declare at global scope, so cannot be namespace-included.
+#if defined(HAVE_SVE)
+    #include <arm_sve.h>
+#endif
+#if defined(HAVE_NEON)
+    #include <arm_neon.h>
+#endif
+#if defined(HAVE_XCPU)
+    #include <immintrin.h>
+#endif
+
 // Specialiations are facilitated by direct use of bc namespace.
 namespace libbitcoin {
 
@@ -41,19 +52,16 @@ namespace libbitcoin {
 /// ---------------------------------------------------------------------------
 
 #if defined(HAVE_SVE)
-    #include <arm_sve.h>
     using xint128_t = SVE_TYPE(128);
     using xint256_t = SVE_TYPE(256);
     using xint512_t = SVE_TYPE(512);
 #endif
 #if defined(HAVE_NEON)
-    #include <arm_neon.h>
     using xint128_t = uint32x4_t;
     using xint256_t = MOCK_TYPE(256);
     using xint512_t = MOCK_TYPE(512);
 #endif
 #if defined(HAVE_XCPU)
-    #include <immintrin.h>
     #if defined(HAVE_SSE4)
         using xint128_t = __m128i;
     #else
