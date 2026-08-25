@@ -21,44 +21,6 @@
 
 #include <bitcoin/system/define.hpp>
 
-namespace libbitcoin {
-namespace system {
-
-// For completeness.
-INLINE constexpr uint8_t byte_swap8_nominal(uint8_t value) NOEXCEPT
-{
-    return value;
-}
-
-INLINE constexpr uint16_t byte_swap16_nominal(uint16_t value) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<uint16_t>((value << 8u) | (value >> 8u));
-    BC_POP_WARNING()
-}
-
-INLINE constexpr uint32_t byte_swap32_nominal(uint32_t value) NOEXCEPT
-{
-    return
-        ((value << 24) |
-        ((value <<  8) & 0x00ff0000ul) |
-        ((value >>  8) & 0x0000ff00ul) |
-         (value >> 24));
-}
-
-INLINE constexpr uint64_t byte_swap64_nominal(uint64_t value) NOEXCEPT
-{
-    return
-        ((value << 56) |
-        ((value << 40) & 0xff000000000000ull) |
-        ((value << 24) & 0x00ff0000000000ull) |
-        ((value <<  8) & 0x0000ff00000000ull) |
-        ((value >>  8) & 0x000000ff000000ull) |
-        ((value >> 24) & 0x00000000ff0000ull) |
-        ((value >> 40) & 0x0000000000ff00ull) |
-         (value >> 56));
-}
-
 // Use intrinsics if available (portable).
 #if defined(HAVE_LINUX)
     // man7.org/linux/man-pages/man3/bswap.3.html
@@ -105,6 +67,44 @@ INLINE constexpr uint64_t byte_swap64_nominal(uint64_t value) NOEXCEPT
     #define byte_swap32(value) byte_swap32_nominal(value)
     #define byte_swap64(value) byte_swap64_nominal(value)
 #endif
+
+namespace libbitcoin {
+namespace system {
+
+// For completeness.
+INLINE constexpr uint8_t byte_swap8_nominal(uint8_t value) NOEXCEPT
+{
+    return value;
+}
+
+INLINE constexpr uint16_t byte_swap16_nominal(uint16_t value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<uint16_t>((value << 8u) | (value >> 8u));
+    BC_POP_WARNING()
+}
+
+INLINE constexpr uint32_t byte_swap32_nominal(uint32_t value) NOEXCEPT
+{
+    return
+        ((value << 24) |
+        ((value <<  8) & 0x00ff0000ul) |
+        ((value >>  8) & 0x0000ff00ul) |
+         (value >> 24));
+}
+
+INLINE constexpr uint64_t byte_swap64_nominal(uint64_t value) NOEXCEPT
+{
+    return
+        ((value << 56) |
+        ((value << 40) & 0xff000000000000ull) |
+        ((value << 24) & 0x00ff0000000000ull) |
+        ((value <<  8) & 0x0000ff00000000ull) |
+        ((value >>  8) & 0x000000ff000000ull) |
+        ((value >> 24) & 0x00000000ff0000ull) |
+        ((value >> 40) & 0x0000000000ff00ull) |
+         (value >> 56));
+}
 
 } // namespace system
 } // namespace libbitcoin
