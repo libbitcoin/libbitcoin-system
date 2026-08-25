@@ -471,6 +471,9 @@
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\muhash.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
