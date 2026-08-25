@@ -25,7 +25,7 @@ namespace system {
 /// Chain state accepts configured forks and maps them onto active flags
 /// for the a given validaton context (i.e. block). These are exposed as
 /// chain::chain_state.flags() and chain::context.flags.
-typedef struct
+struct forks
 {
     /// ~55% activation by "/P2SH/" in coinbase.
     /// github.com/bitcoin/bitcoin/pull/11739
@@ -80,7 +80,9 @@ typedef struct
     bool ltc_time_warp_patch;         // litecoin
     bool ltc_retarget_overflow_patch; // litecoin
     bool ltc_scrypt_proof_of_work;    // litecoin
-} forks;
+
+    bool operator==(const forks& other) const NOEXCEPT = default;
+};
 
 } // namespace system
 } // namespace libbitcoin
