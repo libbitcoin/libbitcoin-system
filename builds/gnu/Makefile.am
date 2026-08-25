@@ -165,6 +165,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/filter/golomb.cpp \
     ${srcdir}/../../src/hash/accumulator.cpp \
     ${srcdir}/../../src/hash/checksum.cpp \
+    ${srcdir}/../../src/hash/muhash.cpp \
     ${srcdir}/../../src/hash/siphash.cpp \
     ${srcdir}/../../src/math/math.cpp \
     ${srcdir}/../../src/radix/base_10.cpp \
@@ -462,6 +463,7 @@ include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/hash.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hkdf.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hmac.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/muhash.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/pbkd.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/scrypt.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/siphash.hpp
@@ -1075,6 +1077,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/functions.cpp \
     ${srcdir}/../../test/hash/hkdf.cpp \
     ${srcdir}/../../test/hash/hmac.cpp \
+    ${srcdir}/../../test/hash/muhash.cpp \
     ${srcdir}/../../test/hash/pbkd.cpp \
     ${srcdir}/../../test/hash/scrypt.cpp \
     ${srcdir}/../../test/hash/siphash.cpp \

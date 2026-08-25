@@ -27,6 +27,7 @@
 #include <bitcoin/system/hash/functions.hpp>
 #include <bitcoin/system/hash/hkdf.hpp>
 #include <bitcoin/system/hash/hmac.hpp>
+#include <bitcoin/system/hash/muhash.hpp>
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/siphash.hpp>

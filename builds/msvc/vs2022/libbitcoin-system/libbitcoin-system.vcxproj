@@ -273,6 +273,7 @@
     <ClCompile Include="..\..\..\..\src\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\muhash.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\math.cpp">
       <ObjectFileName>$(IntDir)src_math_math.obj</ObjectFileName>
@@ -518,6 +519,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hkdf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hmac.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\muhash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\pbkd.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\rmd.hpp" />

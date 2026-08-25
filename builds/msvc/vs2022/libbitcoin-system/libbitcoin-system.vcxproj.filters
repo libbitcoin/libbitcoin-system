@@ -543,6 +543,9 @@
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\hash\muhash.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
@@ -1206,6 +1209,9 @@
       <Filter>include\bitcoin\system\hash</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hmac.hpp">
+      <Filter>include\bitcoin\system\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\muhash.hpp">
       <Filter>include\bitcoin\system\hash</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\pbkd.hpp">
