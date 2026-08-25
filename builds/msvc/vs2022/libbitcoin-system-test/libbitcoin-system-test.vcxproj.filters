@@ -109,11 +109,14 @@
     <Filter Include="src\wallet\mnemonics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words">
+    <Filter Include="src\wallet\psbt">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words\catalogs">
+    <Filter Include="src\words">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\words\catalogs">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -780,6 +783,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\context.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\descriptor.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>
@@ -827,6 +833,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\points_value.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\psbt\psbt.cpp">
+      <Filter>src\wallet\psbt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\words\catalogs\electrum.cpp">
       <Filter>src\words\catalogs</Filter>

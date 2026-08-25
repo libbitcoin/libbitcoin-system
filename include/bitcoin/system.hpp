@@ -280,6 +280,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
 #include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/descriptor.hpp>
 #include <bitcoin/system/wallet/message.hpp>
 #include <bitcoin/system/wallet/neutrino.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
@@ -311,6 +312,10 @@
 #include <bitcoin/system/wallet/mnemonics/electrum.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
+#include <bitcoin/system/wallet/psbt/entry.hpp>
+#include <bitcoin/system/wallet/psbt/input.hpp>
+#include <bitcoin/system/wallet/psbt/output.hpp>
+#include <bitcoin/system/wallet/psbt/transaction.hpp>
 #include <bitcoin/system/words/dictionaries.hpp>
 #include <bitcoin/system/words/dictionary.hpp>
 #include <bitcoin/system/words/language.hpp>

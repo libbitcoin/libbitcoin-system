@@ -413,6 +413,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\context.cpp">
       <ObjectFileName>$(IntDir)test_wallet_context.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\descriptor.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\ec_public.cpp" />
@@ -435,6 +436,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\neutrino.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\points_value.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\psbt\psbt.cpp" />
     <ClCompile Include="..\..\..\..\test\words\catalogs\electrum.cpp">
       <ObjectFileName>$(IntDir)test_words_catalogs_electrum.obj</ObjectFileName>
     </ClCompile>

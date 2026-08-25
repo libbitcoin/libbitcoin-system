@@ -190,6 +190,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/unicode/utf8_everywhere/unicode_ostream.cpp \
     ${srcdir}/../../src/unicode/utf8_everywhere/unicode_streambuf.cpp \
     ${srcdir}/../../src/wallet/context.cpp \
+    ${srcdir}/../../src/wallet/descriptor.cpp \
     ${srcdir}/../../src/wallet/message.cpp \
     ${srcdir}/../../src/wallet/neutrino.cpp \
     ${srcdir}/../../src/wallet/point_value.cpp \
@@ -230,6 +231,10 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/wallet/mnemonics/electrum.cpp \
     ${srcdir}/../../src/wallet/mnemonics/electrum_v1.cpp \
     ${srcdir}/../../src/wallet/mnemonics/mnemonic.cpp \
+    ${srcdir}/../../src/wallet/psbt/entry.cpp \
+    ${srcdir}/../../src/wallet/psbt/input.cpp \
+    ${srcdir}/../../src/wallet/psbt/output.cpp \
+    ${srcdir}/../../src/wallet/psbt/transaction.cpp \
     ${srcdir}/../../src/words/languages.cpp \
     ${srcdir}/../../src/words/catalogs/electrum.cpp \
     ${srcdir}/../../src/words/catalogs/electrum_v1.cpp \
@@ -847,6 +852,7 @@ include_bitcoin_system_walletdir = \
 
 include_bitcoin_system_wallet_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/context.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/descriptor.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/message.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/neutrino.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/point_value.hpp \
@@ -893,6 +899,15 @@ include_bitcoin_system_wallet_mnemonics_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/electrum.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/electrum_v1.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/mnemonic.hpp
+
+include_bitcoin_system_wallet_psbtdir = \
+    ${includedir}/bitcoin/system/wallet/psbt
+
+include_bitcoin_system_wallet_psbt_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/wallet/psbt/entry.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/psbt/input.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/psbt/output.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/psbt/transaction.hpp
 
 include_bitcoin_system_wordsdir = \
     ${includedir}/bitcoin/system/words
@@ -1147,6 +1162,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_istream.cpp \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_ostream.cpp \
     ${srcdir}/../../test/wallet/context.cpp \
+    ${srcdir}/../../test/wallet/descriptor.cpp \
     ${srcdir}/../../test/wallet/message.cpp \
     ${srcdir}/../../test/wallet/neutrino.cpp \
     ${srcdir}/../../test/wallet/point_value.cpp \
@@ -1174,6 +1190,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/wallet/mnemonics/electrum.cpp \
     ${srcdir}/../../test/wallet/mnemonics/electrum_v1.cpp \
     ${srcdir}/../../test/wallet/mnemonics/mnemonic.cpp \
+    ${srcdir}/../../test/wallet/psbt/psbt.cpp \
     ${srcdir}/../../test/words/dictionaries.cpp \
     ${srcdir}/../../test/words/dictionary.cpp \
     ${srcdir}/../../test/words/languages.cpp \

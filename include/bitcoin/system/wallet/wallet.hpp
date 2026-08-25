@@ -31,6 +31,7 @@
 #include <bitcoin/system/wallet/addresses/uri_reader.hpp>
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 #include <bitcoin/system/wallet/context.hpp>
+#include <bitcoin/system/wallet/descriptor.hpp>
 #include <bitcoin/system/wallet/keys/ec_point.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
@@ -50,5 +51,9 @@
 #include <bitcoin/system/wallet/neutrino.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
 #include <bitcoin/system/wallet/points_value.hpp>
+#include <bitcoin/system/wallet/psbt/entry.hpp>
+#include <bitcoin/system/wallet/psbt/input.hpp>
+#include <bitcoin/system/wallet/psbt/output.hpp>
+#include <bitcoin/system/wallet/psbt/transaction.hpp>
 
 #endif
