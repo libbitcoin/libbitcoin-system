@@ -67,25 +67,24 @@ public:
     /// Accessors.
     uint32_t version() const NOEXCEPT;
     uint32_t tx_version() const NOEXCEPT;
-    const std::optional<uint32_t>& fallback_locktime() const NOEXCEPT;
-    const std::optional<uint8_t>& tx_modifiable() const NOEXCEPT;
-    const chain::transaction& unsigned_tx() const NOEXCEPT;
     const xpub::list& xpubs() const NOEXCEPT;
     const input::list& inputs() const NOEXCEPT;
     const output::list& outputs() const NOEXCEPT;
     const entry::list& others() const NOEXCEPT;
     input::list& inputs() NOEXCEPT;
     output::list& outputs() NOEXCEPT;
-
-    /// The spent output of the input (nullptr if unavailable).
-    chain::output::cptr prevout(size_t input) const NOEXCEPT;
-
-    /// The fee implied by input prevouts and outputs (nullopt if any
-    /// prevout is unavailable).
-    std::optional<uint64_t> fee() const NOEXCEPT;
+    const chain::transaction& unsigned_tx() const NOEXCEPT;
+    const std::optional<uint8_t>& tx_modifiable() const NOEXCEPT;
+    const std::optional<uint32_t>& fallback_locktime() const NOEXCEPT;
 
     /// All inputs are finalized.
     bool is_final() const NOEXCEPT;
+
+    /// The spent output of the input (null if unavailable).
+    chain::output::cptr prevout(size_t input) const NOEXCEPT;
+
+    /// The fee implied by input prevouts and outputs (null if unavailable).
+    std::optional<uint64_t> fee() const NOEXCEPT;
 
     /// The computed lock time (BIP370), or the unsigned tx lock time.
     /// Unsatisfiable input lock time requirements return nullopt.
@@ -122,13 +121,13 @@ private:
     bool valid_{};
     uint32_t version_{};
     uint32_t tx_version_{};
-    std::optional<uint32_t> fallback_locktime_{};
-    std::optional<uint8_t> tx_modifiable_{};
     chain::transaction tx_{};
     xpub::list xpubs_{};
     input::list inputs_{};
     output::list outputs_{};
     entry::list others_{};
+    std::optional<uint8_t> tx_modifiable_{};
+    std::optional<uint32_t> fallback_locktime_{};
 };
 
 } // namespace psbt

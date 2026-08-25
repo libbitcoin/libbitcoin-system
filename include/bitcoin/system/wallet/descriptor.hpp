@@ -122,7 +122,6 @@ private:
 
     descriptor(bool valid, std::string&& body, node&& tree) NOEXCEPT;
 
-    /// Members.
     bool valid_{};
     std::string body_{};
     node tree_{};

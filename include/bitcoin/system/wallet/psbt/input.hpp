@@ -45,7 +45,7 @@ struct BC_API input
     /// The input carries final signature script and/or witness.
     bool is_final() const NOEXCEPT;
 
-    /// The spent output from either utxo form (nullptr if unavailable).
+    /// The spent output from either utxo form (null if unavailable).
     chain::output::cptr prevout(uint32_t index) const NOEXCEPT;
 
     /// Merge the fields of the other input (BIP174 combiner).

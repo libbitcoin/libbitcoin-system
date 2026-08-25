@@ -42,8 +42,8 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
-constexpr auto hardened_bit = 0x80000000_u32;
 constexpr size_t checksum_length = 8;
+constexpr auto hardened_bit = 0x80000000_u32;
 
 // Checksum (bip380).
 // ----------------------------------------------------------------------------
@@ -100,13 +100,13 @@ std::string descriptor::to_checksum(const std::string& body) NOEXCEPT
     if (is_nonzero(grouped))
         check = poly_mod(check, group);
 
-    for (size_t pad = 0; pad < checksum_length; ++pad)
+    for (size_t pad{}; pad < checksum_length; ++pad)
         check = poly_mod(check, 0);
 
     check = bit_xor<uint64_t>(check, 1);
 
     std::string out{};
-    for (size_t index = 0; index < checksum_length; ++index)
+    for (size_t index{}; index < checksum_length; ++index)
         out += checksum_charset.at(bit_and<uint64_t>(
             shift_right(check, 5 * (7 - index)), 31));
 
@@ -190,7 +190,7 @@ bool descriptor::parse_key(key_expression& out,
     }
 
     // A hexadecimal public key, x-only under tr (no path).
-    constexpr size_t xonly_length = 64;
+    constexpr auto xonly_length = ec_xonly_size * two;
     if (!rest.empty() && (rest.front() == '0' || rest.front() == '4' ||
         rest.size() == xonly_length))
     {
@@ -342,7 +342,7 @@ bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
         case function::sortedmulti:
         {
             const auto parts = split(inner, ",");
-            if (parts.size() < 2u)
+            if (parts.size() < two)
                 return false;
 
             uint64_t required{};
@@ -501,7 +501,7 @@ bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
 
             // The internal key is x-only (a compressed key drops its sign).
             ec_compressed lifted{};
-            lifted.front() = 0x02;
+            lifted.front() = ec_even_sign;
             if (point.size() == ec_xonly_size)
                 std::copy(point.begin(), point.end(),
                     std::next(lifted.begin()));

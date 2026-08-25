@@ -104,9 +104,6 @@ struct BC_API entry
     /// The key excluding its type prefix.
     data_chunk keydata() const NOEXCEPT;
 
-    data_chunk key;
-    data_chunk value;
-
     bool operator==(const entry& other) const NOEXCEPT
     {
         return key == other.key && value == other.value;
@@ -116,6 +113,9 @@ struct BC_API entry
     {
         return !(*this == other);
     }
+
+    data_chunk key;
+    data_chunk value;
 };
 
 /// A BIP32 key origin (master fingerprint and derivation path).
@@ -146,9 +146,6 @@ struct BC_API derivation
 {
     typedef std_vector<derivation> list;
 
-    data_chunk point;
-    key_origin origin;
-
     bool operator==(const derivation& other) const NOEXCEPT
     {
         return point == other.point && origin == other.origin;
@@ -158,15 +155,15 @@ struct BC_API derivation
     {
         return !(*this == other);
     }
+
+    data_chunk point;
+    key_origin origin;
 };
 
 /// An extended public key origin (global xpub).
 struct BC_API xpub
 {
     typedef std_vector<xpub> list;
-
-    data_chunk key;
-    key_origin origin;
 
     bool operator==(const xpub& other) const NOEXCEPT
     {
@@ -177,6 +174,9 @@ struct BC_API xpub
     {
         return !(*this == other);
     }
+
+    data_chunk key;
+    key_origin origin;
 };
 
 } // namespace psbt

@@ -44,6 +44,9 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 constexpr uint32_t psbt_magic = 0x70736274;
 constexpr uint8_t psbt_separator = 0xff;
 
+// The global map terminator.
+constexpr uint8_t psbt_terminator = 0x00;
+
 // The xpub keydata is the BIP32 serialization (without checksum).
 constexpr size_t xpub_size = 78;
 
@@ -387,7 +390,7 @@ data_chunk transaction::to_chunk() const NOEXCEPT
         const data_chunk& data, const data_chunk& value) NOEXCEPT
     {
         sink.write_variable(add1(data.size()));
-        sink.write_byte(static_cast<uint8_t>(type));
+        sink.write_byte(to_value(type));
         sink.write_bytes(data);
         sink.write_variable(value.size());
         sink.write_bytes(value);
@@ -441,9 +444,7 @@ data_chunk transaction::to_chunk() const NOEXCEPT
     for (const auto& field: sorted(others_))
         field.to_data(sink);
 
-    // The global map terminator.
-    sink.write_byte(0);
-
+    sink.write_byte(psbt_terminator);
     for (const auto& input: inputs_)
         input.to_data(sink, version_);
 
@@ -465,21 +466,6 @@ uint32_t transaction::version() const NOEXCEPT
 uint32_t transaction::tx_version() const NOEXCEPT
 {
     return version_ == version_0 ? tx_.version() : tx_version_;
-}
-
-const std::optional<uint32_t>& transaction::fallback_locktime() const NOEXCEPT
-{
-    return fallback_locktime_;
-}
-
-const std::optional<uint8_t>& transaction::tx_modifiable() const NOEXCEPT
-{
-    return tx_modifiable_;
-}
-
-const chain::transaction& transaction::unsigned_tx() const NOEXCEPT
-{
-    return tx_;
 }
 
 const xpub::list& transaction::xpubs() const NOEXCEPT
@@ -510,6 +496,32 @@ input::list& transaction::inputs() NOEXCEPT
 output::list& transaction::outputs() NOEXCEPT
 {
     return outputs_;
+}
+
+const chain::transaction& transaction::unsigned_tx() const NOEXCEPT
+{
+    return tx_;
+}
+
+const std::optional<uint32_t>& transaction::fallback_locktime() const NOEXCEPT
+{
+    return fallback_locktime_;
+}
+
+const std::optional<uint8_t>& transaction::tx_modifiable() const NOEXCEPT
+{
+    return tx_modifiable_;
+}
+
+bool transaction::is_final() const NOEXCEPT
+{
+    const auto finalized = [](const auto& in) NOEXCEPT
+    {
+        return in.is_final();
+    };
+
+    return valid_ && !inputs_.empty() &&
+        std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
 chain::output::cptr transaction::prevout(size_t input) const NOEXCEPT
@@ -543,7 +555,7 @@ chain::output::cptr transaction::prevout(size_t input) const NOEXCEPT
 std::optional<uint64_t> transaction::fee() const NOEXCEPT
 {
     uint64_t in{};
-    for (size_t index = 0; index < inputs_.size(); ++index)
+    for (size_t index{}; index < inputs_.size(); ++index)
     {
         const auto out = prevout(index);
         if (!out)
@@ -568,17 +580,6 @@ std::optional<uint64_t> transaction::fee() const NOEXCEPT
         return {};
 
     return in - out;
-}
-
-bool transaction::is_final() const NOEXCEPT
-{
-    const auto finalized = [](const auto& in) NOEXCEPT
-    {
-        return in.is_final();
-    };
-
-    return valid_ && !inputs_.empty() &&
-        std::all_of(inputs_.begin(), inputs_.end(), finalized);
 }
 
 std::optional<uint32_t> transaction::locktime() const NOEXCEPT
@@ -638,7 +639,7 @@ bool transaction::combine(const transaction& other) NOEXCEPT
         if (tx_version_ != other.tx_version_)
             return false;
 
-        for (size_t index = 0; index < inputs_.size(); ++index)
+        for (size_t index{}; index < inputs_.size(); ++index)
             if (inputs_.at(index).previous_txid !=
                 other.inputs_.at(index).previous_txid ||
                 inputs_.at(index).output_index !=
@@ -646,10 +647,10 @@ bool transaction::combine(const transaction& other) NOEXCEPT
                 return false;
     }
 
-    for (size_t index = 0; index < inputs_.size(); ++index)
+    for (size_t index{}; index < inputs_.size(); ++index)
         inputs_.at(index).combine(other.inputs_.at(index));
 
-    for (size_t index = 0; index < outputs_.size(); ++index)
+    for (size_t index{}; index < outputs_.size(); ++index)
         outputs_.at(index).combine(other.outputs_.at(index));
 
     for (const auto& xpub: other.xpubs_)
@@ -688,13 +689,12 @@ bool transaction::join(const transaction& other) NOEXCEPT
         return (other.version_ == transaction::version_0) ?
             other.tx_.inputs_ptr()->at(index)->point() :
             chain::point{ other.inputs_.at(index).previous_txid.value_or(
-                null_hash), other.inputs_.at(index).output_index.value_or(
-                    0) };
+                null_hash), other.inputs_.at(index).output_index.value_or(0) };
     };
 
     // Duplicated input points cannot be joined.
-    for (size_t left = 0; left < inputs_.size(); ++left)
-        for (size_t right = 0; right < other.inputs_.size(); ++right)
+    for (size_t left{}; left < inputs_.size(); ++left)
+        for (size_t right{}; right < other.inputs_.size(); ++right)
             if (point(left) == other_point(right))
                 return false;
 
@@ -706,8 +706,8 @@ bool transaction::join(const transaction& other) NOEXCEPT
         const auto& more_outs = *other.tx_.outputs_ptr();
         inputs.insert(inputs.end(), more_ins.begin(), more_ins.end());
         outputs.insert(outputs.end(), more_outs.begin(), more_outs.end());
-        tx_ = { tx_.version(), to_shared<input_cptrs>(std::move(inputs)),
-            to_shared<output_cptrs>(std::move(outputs)), tx_.locktime() };
+        tx_ = { tx_.version(), to_shared(std::move(inputs)),
+            to_shared(std::move(outputs)), tx_.locktime() };
     }
 
     inputs_.insert(inputs_.end(), other.inputs_.begin(),
@@ -759,7 +759,7 @@ static bool satisfy(data_stack& stack, const script& spend,
 
     if (script::is_pay_key_hash_pattern(ops))
     {
-        const short_hash hash = unsafe_array_cast<uint8_t, short_hash_size>(
+        const auto hash = unsafe_array_cast<uint8_t, short_hash_size>(
             ops.at(2).data().data());
         const auto found = find_entry_by_hash(signatures, hash);
         if (found == signatures.end())
@@ -799,7 +799,7 @@ static chain::script to_push_script(const data_stack& stack) NOEXCEPT
     for (const auto& data: stack)
         ops.emplace_back(data, false);
 
-    return chain::script{ std::move(ops) };
+    return { std::move(ops) };
 }
 
 bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
@@ -817,9 +817,9 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
         if (!in.embedded_script)
             return false;
 
-        const short_hash hash = unsafe_array_cast<uint8_t, short_hash_size>(
+        const auto hash = unsafe_array_cast<uint8_t, short_hash_size>(
             spend.ops().at(1).data().data());
-        if (bitcoin_short_hash(in.embedded_script->to_data(false)) != hash)
+        if (rmd160_hash(in.embedded_script->hash()) != hash)
             return false;
 
         spend = *in.embedded_script;
@@ -831,9 +831,9 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
         if (!in.witness_script)
             return false;
 
-        const hash_digest hash = unsafe_array_cast<uint8_t, hash_size>(
+        const auto hash = unsafe_array_cast<uint8_t, hash_size>(
             spend.ops().at(1).data().data());
-        if (sha256_hash(in.witness_script->to_data(false)) != hash)
+        if (in.witness_script->hash() != hash)
             return false;
 
         witnessed = true;
@@ -846,7 +846,7 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
     }
     else if (script::is_pay_witness_key_hash_pattern(spend.ops()))
     {
-        const short_hash hash = unsafe_array_cast<uint8_t, short_hash_size>(
+        const auto hash = unsafe_array_cast<uint8_t, short_hash_size>(
             spend.ops().at(1).data().data());
         const auto found = find_entry_by_hash(in.partial_signatures, hash);
         if (found == in.partial_signatures.end())
@@ -862,13 +862,13 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
         if (!satisfy(stack, spend, in.partial_signatures))
             return false;
 
-        in.final_script_sig = to_shared<chain::script>(to_push_script(stack));
+        in.final_script_sig = to_shared(to_push_script(stack));
     }
 
     // A p2sh wrapper places the embedded script push in the signature script.
     if (in.embedded_script && witnessed)
     {
-        in.final_script_sig = to_shared<chain::script>(to_push_script(
+        in.final_script_sig = to_shared(to_push_script(
             data_stack{ in.embedded_script->to_data(false) }));
     }
     else if (in.embedded_script && !witnessed)
@@ -893,7 +893,7 @@ bool transaction::finalize() NOEXCEPT
         return false;
 
     auto complete = true;
-    for (uint32_t index = 0; index < inputs_.size(); ++index)
+    for (uint32_t index{}; index < inputs_.size(); ++index)
     {
         auto& in = inputs_.at(index);
         if (!in.is_final())
@@ -937,7 +937,7 @@ chain::transaction transaction::extract() const NOEXCEPT
         return {};
 
     input_cptrs inputs{};
-    for (size_t index = 0; index < inputs_.size(); ++index)
+    for (size_t index{}; index < inputs_.size(); ++index)
         inputs.push_back(extract_input(index));
 
     output_cptrs outputs{};
@@ -953,8 +953,8 @@ chain::transaction transaction::extract() const NOEXCEPT
                 put.script ? *put.script : script{}));
     }
 
-    return { tx_version(), to_shared<input_cptrs>(std::move(inputs)),
-        to_shared<output_cptrs>(std::move(outputs)), time.value() };
+    return { tx_version(), to_shared(std::move(inputs)),
+        to_shared(std::move(outputs)), time.value() };
 }
 
 BC_POP_WARNING()
