@@ -142,9 +142,9 @@ constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT;
 /// Floating point casts.
 /// ---------------------------------------------------------------------------
 
-/// Cast floating point to integral integer (truncated).
-/// True for any finite value that falls within Integer domain.
-/// False if fractional part is non-zero when whole is set true.
+/// Cast floating point to integral integer (rounded if whole, truncated
+/// otherwise). True for any finite value that falls within Integer domain.
+/// False if fractional part exceeds representation error when whole.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>

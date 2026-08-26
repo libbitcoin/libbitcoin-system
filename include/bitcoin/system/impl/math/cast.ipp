@@ -219,9 +219,12 @@ inline bool to_integer(Integer& out, Float value, bool whole) NOEXCEPT
     if (!std::isfinite(value))
         return false;
 
-    // TODO: Could use tolerance for fp epsilon to handle representation error.
-    Float integer{};
-    if ((std::modf(value, &integer) != 0.0) && whole)
+    // Relative tolerance absorbs fp representation error in a whole value.
+    const auto integer = whole ? std::round(value) : std::trunc(value);
+    const auto tolerance = std::fabs(value) *
+        std::numeric_limits<Float>::epsilon();
+
+    if (whole && (std::fabs(value - integer) > tolerance))
         return false;
 
     if (integer > static_cast<Float>(std::numeric_limits<Integer>::max()) ||

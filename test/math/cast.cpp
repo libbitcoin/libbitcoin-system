@@ -109,6 +109,22 @@ BOOST_AUTO_TEST_CASE(cast__to_integer__finites__expected)
     BOOST_REQUIRE(!to_integer(value, 3.1, true));
 }
 
+BOOST_AUTO_TEST_CASE(cast__to_integer__representation_error__rounded)
+{
+    uint64_t value{};
+    BOOST_REQUIRE(to_integer(value, 83052.07783498 * 1.0e8, true));
+    BOOST_REQUIRE_EQUAL(value, 8305207783498u);
+    BOOST_REQUIRE(to_integer(value, 0.07783498 * 1.0e8, true));
+    BOOST_REQUIRE_EQUAL(value, 7783498u);
+}
+
+BOOST_AUTO_TEST_CASE(cast__to_integer__fractional_whole__false)
+{
+    uint64_t value{};
+    BOOST_REQUIRE(!to_integer(value, 0.5, true));
+    BOOST_REQUIRE(!to_integer(value, 42.0001, true));
+}
+
 // to_ceilinged_integer
 
 BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__non_finites__max)
