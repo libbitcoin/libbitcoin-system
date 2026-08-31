@@ -69,6 +69,51 @@ constexpr CLASS::type CLASS::screen(type value, uint64_t entropy) NOEXCEPT
     }
 }
 
+TEMPLATE
+constexpr bool CLASS::is_screened(type value, uint64_t entropy,
+    size_t k) NOEXCEPT
+{
+    if constexpr (disabled)
+    {
+        return true;
+    }
+    else
+    {
+        BC_ASSERT(!is_zero(k) && k <= K);
+        if (is_empty(value))
+            return false;
+
+        for (size_t index{}; index < k; ++index)
+            if (get_right(value, get_bit(index, entropy)))
+                return false;
+
+        // All selected bits are set (to zero, default is one).
+        return true;
+    }
+}
+
+TEMPLATE
+constexpr CLASS::type CLASS::screen(type value, uint64_t entropy,
+    size_t k) NOEXCEPT
+{
+    if constexpr (disabled)
+    {
+        return value;
+    }
+    else
+    {
+        BC_ASSERT(!is_zero(k) && k <= K);
+        if (is_saturated(value))
+            return value;
+
+        for (size_t index{}; index < k; ++index)
+            set_right_into(value, get_bit(index, entropy), false);
+
+        // All selected bits have been set (to zero, default is one).
+        return value;
+    }
+}
+
 // protected
 // ----------------------------------------------------------------------------
 

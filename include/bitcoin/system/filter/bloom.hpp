@@ -47,6 +47,14 @@ public:
     /// Add fingerprint to bloom.
     static constexpr type screen(type value, uint64_t entropy) NOEXCEPT;
 
+    /// Is potential collision (runtime k selections, 0 < k <= K).
+    static constexpr bool is_screened(type value, uint64_t entropy,
+        size_t k) NOEXCEPT;
+
+    /// Add fingerprint to bloom (runtime k selections, 0 < k <= K).
+    static constexpr type screen(type value, uint64_t entropy,
+        size_t k) NOEXCEPT;
+
 protected:
     /// Effectively sentinel values.
     static constexpr type saturated = 0;
