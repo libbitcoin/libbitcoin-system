@@ -1118,4 +1118,78 @@ BOOST_AUTO_TEST_CASE(bloom__screen__4_bits_reverse__16_screens)
 
 #endif // HAVE_SLOW_TESTS
 
+// Runtime k selects the same bits as the equivalent compile time K.
+constexpr auto mixed_fixed_last = bloom<32, 8>::screen(bloom<32, 8>::screen(0b1111u, 42), 24, 8);
+constexpr auto mixed_dynamic_last = bloom<32, 8>::screen(bloom<32, 8>::screen(0b1111u, 42, 8), 24);
+static_assert(mixed_fixed_last == mixed_dynamic_last);
+static_assert(bloom<0, 0>::is_screened(0, 42, 0));
+static_assert(bloom<1, 0>::is_screened(0, 42, 0));
+
+BOOST_AUTO_TEST_CASE(bloom__screen__runtime_k__matches_compile_time)
+{
+    constexpr size_t m = 32;
+    constexpr size_t k = 4;
+    using bloom_t = accessor<m, k>;
+    using wide_t = accessor<m, 12>;
+
+    auto fixed = bloom_t::screen(bloom_t::empty, 42);
+    auto dynamic = wide_t::screen(wide_t::empty, 42, k);
+    BOOST_REQUIRE_EQUAL(fixed, dynamic);
+    BOOST_REQUIRE(bloom_t::is_screened(fixed, 42));
+    BOOST_REQUIRE(wide_t::is_screened(dynamic, 42, k));
+
+    fixed = bloom_t::screen(fixed, 24);
+    dynamic = wide_t::screen(dynamic, 24, k);
+    BOOST_REQUIRE_EQUAL(fixed, dynamic);
+    BOOST_REQUIRE(bloom_t::is_screened(fixed, 24));
+    BOOST_REQUIRE(wide_t::is_screened(dynamic, 24, k));
+
+    fixed = bloom_t::screen(fixed, 0xdeadbeef);
+    dynamic = wide_t::screen(dynamic, 0xdeadbeef, k);
+    BOOST_REQUIRE_EQUAL(fixed, dynamic);
+    BOOST_REQUIRE(bloom_t::is_screened(fixed, 0xdeadbeef));
+    BOOST_REQUIRE(wide_t::is_screened(dynamic, 0xdeadbeef, k));
+
+    fixed = bloom_t::screen(fixed, max_uint64);
+    dynamic = wide_t::screen(dynamic, max_uint64, k);
+    BOOST_REQUIRE_EQUAL(fixed, dynamic);
+    BOOST_REQUIRE(bloom_t::is_screened(fixed, max_uint64));
+    BOOST_REQUIRE(wide_t::is_screened(dynamic, max_uint64, k));
+}
+
+BOOST_AUTO_TEST_CASE(bloom__is_screened__runtime_k_empty__false)
+{
+    using bloom_t = accessor<32, 12>;
+    BOOST_REQUIRE(!bloom_t::is_screened(bloom_t::empty, 42, 5));
+}
+
+BOOST_AUTO_TEST_CASE(bloom__is_screened__runtime_k_screened__true)
+{
+    using bloom_t = accessor<32, 12>;
+    const auto value1 = bloom_t::screen(bloom_t::empty, 42, 1);
+    const auto value2 = bloom_t::screen(bloom_t::empty, 42, 2);
+    const auto value3 = bloom_t::screen(bloom_t::empty, 42, 3);
+    const auto value4 = bloom_t::screen(bloom_t::empty, 42, 4);
+    const auto value5 = bloom_t::screen(bloom_t::empty, 42, 5);
+    const auto value6 = bloom_t::screen(bloom_t::empty, 42, 6);
+    const auto value7 = bloom_t::screen(bloom_t::empty, 42, 7);
+    const auto value8 = bloom_t::screen(bloom_t::empty, 42, 8);
+    const auto value9 = bloom_t::screen(bloom_t::empty, 42, 9);
+    const auto value10 = bloom_t::screen(bloom_t::empty, 42, 10);
+    const auto value11 = bloom_t::screen(bloom_t::empty, 42, 11);
+    const auto value12 = bloom_t::screen(bloom_t::empty, 42, 12);
+    BOOST_REQUIRE(bloom_t::is_screened(value1, 42, 1));
+    BOOST_REQUIRE(bloom_t::is_screened(value2, 42, 2));
+    BOOST_REQUIRE(bloom_t::is_screened(value3, 42, 3));
+    BOOST_REQUIRE(bloom_t::is_screened(value4, 42, 4));
+    BOOST_REQUIRE(bloom_t::is_screened(value5, 42, 5));
+    BOOST_REQUIRE(bloom_t::is_screened(value6, 42, 6));
+    BOOST_REQUIRE(bloom_t::is_screened(value7, 42, 7));
+    BOOST_REQUIRE(bloom_t::is_screened(value8, 42, 8));
+    BOOST_REQUIRE(bloom_t::is_screened(value9, 42, 9));
+    BOOST_REQUIRE(bloom_t::is_screened(value10, 42, 10));
+    BOOST_REQUIRE(bloom_t::is_screened(value11, 42, 11));
+    BOOST_REQUIRE(bloom_t::is_screened(value12, 42, 12));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
