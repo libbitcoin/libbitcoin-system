@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__same__false)
     BOOST_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
+BOOST_AUTO_TEST_CASE(transaction__inequality__different__true)
 {
     const transaction alpha;
     const transaction beta(tx2_data, true);
@@ -1406,8 +1406,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     BOOST_REQUIRE(prevout_script.is_valid());
 
     constexpr auto value = 0u;
-    ////constexpr auto bip143 = false;
-    ////constexpr auto bip342 = false;
     constexpr auto flags = flags::no_rules;
     const auto& input = test_tx.inputs_ptr()->begin();
 

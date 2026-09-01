@@ -21,7 +21,6 @@
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
-namespace json = boost::json;
 using namespace system::chain;
 
 constexpr auto hash1 = base16_hash("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");

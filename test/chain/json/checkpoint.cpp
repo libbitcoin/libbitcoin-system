@@ -21,7 +21,7 @@
 using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(checkpoint_tests)
+BOOST_AUTO_TEST_SUITE(checkpoint_json_tests)
 
 BOOST_AUTO_TEST_CASE(checkpoint__json__conversions__expected)
 {

@@ -178,13 +178,13 @@ BOOST_AUTO_TEST_CASE(header__equality__different__false)
     BOOST_REQUIRE(!(instance == expected_header));
 }
 
-BOOST_AUTO_TEST_CASE(header__inequality__same__true)
+BOOST_AUTO_TEST_CASE(header__inequality__same__false)
 {
     const header instance(expected_header);
     BOOST_REQUIRE(!(instance != expected_header));
 }
 
-BOOST_AUTO_TEST_CASE(header__inequality__different__false)
+BOOST_AUTO_TEST_CASE(header__inequality__different__true)
 {
     const header instance;
     BOOST_REQUIRE(instance != expected_header);

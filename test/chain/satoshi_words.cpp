@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(satoshi_words)
+BOOST_AUTO_TEST_SUITE(satoshi_words_tests)
 
 BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
 {
