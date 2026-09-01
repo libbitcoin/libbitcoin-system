@@ -1465,7 +1465,7 @@ BOOST_AUTO_TEST_CASE(interpreter__op_within__two__op_within)
     BOOST_REQUIRE_EQUAL(code{ machine->op_within() }, error::op_within);
 }
 
-// Crypto operations.
+// Hashing operations.
 // ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(interpreter__op_ripemd160__empty_chunk__expected)
@@ -1833,8 +1833,9 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__input_program__op_reserved)
 // Tapscript execution.
 // ----------------------------------------------------------------------------
 
-constexpr auto taproot_rules = flags::bip141_rule | flags::bip143_rule | flags::bip341_rule | flags::bip342_rule;
 constexpr uint64_t prevout_value = 42u;
+constexpr auto taproot_rules = flags::bip141_rule | flags::bip143_rule |
+    flags::bip341_rule | flags::bip342_rule;
 
 // A non-empty signature charges the budget. A key that is neither empty nor
 // 32 bytes is an unknown (upgradable) type, for which signature validation is
@@ -1890,13 +1891,24 @@ static code run_tapscript(const script& leaf, const chunk_cptrs& elements={}) NO
     const auto in = tx.inputs_ptr()->begin();
 
     // Execution stack is the witness less the control block and leaf script.
-    const auto execution = std::make_shared<chunk_cptrs>(elements);
     const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto execution = emplace_shared<chunk_cptrs>(elements);
     const auto leaf_ptr = to_shared<script>(leaf);
-    const signatures capture{};
     constexpr auto version = script_version::taproot;
+    const signatures capture{};
 
-    interpreter<contiguous_stack> program{ tx, in, leaf_ptr, taproot_rules, version, execution, tapleaf, capture };
+    interpreter<contiguous_stack> program
+    {
+        tx,
+        in,
+        leaf_ptr,
+        taproot_rules,
+        version,
+        execution,
+        tapleaf,
+        capture
+    };
+
     return program.run();
 }
 
@@ -2011,17 +2023,20 @@ constexpr size_t after_codeseparator = 5;
 static script to_codeseparator_script(const ec_xonly& key) NOEXCEPT
 {
     const data_chunk point{ key.begin(), key.end() };
-
-    operations ops{};
-    ops.emplace_back(opcode::push_size_0);
-    ops.emplace_back(point, false);
-    ops.emplace_back(opcode::checksigadd);
-    ops.emplace_back(opcode::drop);
-    ops.emplace_back(opcode::codeseparator);
-    ops.emplace_back(opcode::push_size_0);
-    ops.emplace_back(point, false);
-    ops.emplace_back(opcode::checksigadd);
-    return script{ std::move(ops) };
+    return script
+    {
+        operations
+        {
+            { opcode::push_size_0 },
+            { point, false },
+            { opcode::checksigadd },
+            { opcode::drop },
+            { opcode::codeseparator },
+            { opcode::push_size_0 },
+            { point, false },
+            { opcode::checksigadd }
+        }
+    };
 }
 
 BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__success)

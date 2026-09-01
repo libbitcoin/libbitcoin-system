@@ -314,7 +314,8 @@ public:
         uint32_t sequence=chain::max_input_sequence, uint32_t locktime=0,
         uint32_t version=1) NOEXCEPT
       : transaction_(accessor_transaction(script, sequence, locktime, version)),
-        accessor_(transaction_, transaction_.inputs_ptr()->begin(), active_flags, capture_)
+        accessor_(transaction_, transaction_.inputs_ptr()->begin(),
+            active_flags, capture_)
     {
     }
 
