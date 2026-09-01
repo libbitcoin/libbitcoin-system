@@ -24,74 +24,1810 @@ BOOST_AUTO_TEST_SUITE(interpreter_tests)
 using namespace system::chain;
 using namespace system::machine;
 
-// Isolated operation handlers (via accessor).
+// Push operations.
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(interpreter__op_add__two_and_three__five)
+BOOST_AUTO_TEST_CASE(interpreter__op_push_number__positive__pushed)
 {
-    const signatures capture{};
-    const auto tx = accessor_transaction({});
-    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
-    accessor.push_signed64(2);
-    accessor.push_signed64(3);
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_add() }, error::op_success);
-    BOOST_REQUIRE_EQUAL(accessor.stack_size(), 1u);
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_number(5) }, error::op_success);
 
     int32_t value{};
-    BOOST_REQUIRE(accessor.pop_signed32(value));
+    BOOST_REQUIRE(machine->pop_signed32(value));
     BOOST_REQUIRE_EQUAL(value, 5);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__op_add__insufficient_stack__op_add)
+BOOST_AUTO_TEST_CASE(interpreter__op_push_number__negative__pushed)
 {
-    const signatures capture{};
-    const auto tx = accessor_transaction({});
-    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
-    accessor.push_signed64(2);
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_add() }, error::op_add);
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_number(-1) }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -1);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__op_dup__chunk__duplicated)
+BOOST_AUTO_TEST_CASE(interpreter__op_push_size__claimed__pushed)
 {
-    const signatures capture{};
-    const auto tx = accessor_transaction({});
-    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
-    accessor.push_chunk(data_chunk{ 0x2a });
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_dup() }, error::op_success);
-    BOOST_REQUIRE_EQUAL(accessor.stack_size(), 2u);
-
-    const auto top = accessor.pop_chunk_();
-    const auto next = accessor.pop_chunk_();
-    BOOST_REQUIRE_EQUAL(*top, *next);
-    BOOST_REQUIRE_EQUAL(*top, data_chunk{ 0x2a });
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ data_chunk{ 0x01, 0x02, 0x03 }, false };
+    BOOST_REQUIRE(!op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_size(op) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("010203"));
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__op_drop__empty_stack__op_drop)
+BOOST_AUTO_TEST_CASE(interpreter__op_push_size__underclaimed__op_push_size)
 {
-    const signatures capture{};
-    const auto tx = accessor_transaction({});
-    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_drop() }, error::op_drop);
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("03ffff") };
+    BOOST_REQUIRE(op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_size(op) }, error::op_push_size);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_push_one_size__claimed__pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("4c03010203") };
+    BOOST_REQUIRE(!op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_one_size(op) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("010203"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_push_one_size__underclaimed__op_push_one_size)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("4c04ffff") };
+    BOOST_REQUIRE(op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_one_size(op) }, error::op_push_one_size);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_push_two_size__claimed__pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("4d0300010203") };
+    BOOST_REQUIRE(!op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_two_size(op) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("010203"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_push_two_size__underclaimed__op_push_two_size)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("4d0400ffff") };
+    BOOST_REQUIRE(op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_two_size(op) }, error::op_push_two_size);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_push_four_size__claimed__pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("4e03000000010203") };
+    BOOST_REQUIRE(!op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_four_size(op) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("010203"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_push_four_size__underclaimed__op_push_four_size)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    const operation op{ base16_chunk("4e04000000ffff") };
+    BOOST_REQUIRE(op.is_underclaimed());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_push_four_size(op) }, error::op_push_four_size);
+}
+
+// Reserved and disabled operations.
+// ----------------------------------------------------------------------------
+// op_nop retains both fork-history branches (currently both succeed).
+
+BOOST_AUTO_TEST_CASE(interpreter__op_unevaluated__invalid_code__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_unevaluated(opcode::op_cat) }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_unevaluated__reserved_code__op_reserved)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_unevaluated(opcode::op_ver) }, error::op_reserved);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nop_code__nops_rule__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nop(opcode::nop4) }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nop_code__no_rules__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nop(opcode::nop4) }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nop__always__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nop() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_ver__nops_rule__op_reserved)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_ver() }, error::op_reserved);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_ver__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_ver() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_verif__nops_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_verif() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_verif__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_verif() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_vernotif__nops_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_vernotif() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_vernotif__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_vernotif() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_return__nops_rule__op_reserved)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_return() }, error::op_reserved);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_return__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_return() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_cat__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_cat() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_cat__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_cat() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_substr__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_substr() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_substr__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_substr() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_left__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_left() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_left__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_left() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_right__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_right() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_right__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_right() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_invert__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_invert() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_invert__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_invert() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_and__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_and() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_and__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_and() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_or__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_or() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_or__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_or() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_xor__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_xor() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_xor__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_xor() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_mul2__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_mul2() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_mul2__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_mul2() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_div2__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_div2() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_div2__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_div2() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_mul__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_mul() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_mul__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_mul() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_div__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_div() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_div__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_div() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_mod__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_mod() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_mod__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_mod() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_lshift__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_lshift() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_lshift__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_lshift() }, error::op_not_implemented);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_rshift__cats_rule__op_invalid)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_rshift() }, error::op_invalid);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_rshift__no_rules__op_not_implemented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_rshift() }, error::op_not_implemented);
+}
+
+// Conditional operations.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if__true__positive_scope_popped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if() }, error::op_success);
+    BOOST_REQUIRE(machine->is_success());
+    BOOST_REQUIRE(!machine->is_balanced());
+    BOOST_REQUIRE(machine->is_stack_empty());
 }
 
 BOOST_AUTO_TEST_CASE(interpreter__op_if__false__negative_scope)
 {
-    const signatures capture{};
-    const auto tx = accessor_transaction({});
-    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
-    accessor.push_bool(false);
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_if() }, error::op_success);
-    BOOST_REQUIRE(!accessor.is_success());
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_endif() }, error::op_success);
-    BOOST_REQUIRE(accessor.is_balanced());
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(false);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if() }, error::op_success);
+    BOOST_REQUIRE(!machine->is_success());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_endif() }, error::op_success);
+    BOOST_REQUIRE(machine->is_balanced());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if__empty_stack__op_if1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if() }, error::op_if1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if__negative_scope__not_popped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->begin_if(false);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_endif() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_endif() }, error::op_success);
+    BOOST_REQUIRE(machine->is_balanced());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_notif__true__negative_scope)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_notif() }, error::op_success);
+    BOOST_REQUIRE(!machine->is_success());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_notif__false__positive_scope)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(false);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_notif() }, error::op_success);
+    BOOST_REQUIRE(machine->is_success());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_notif__empty_stack__op_notif1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_notif() }, error::op_notif1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_else__no_scope__op_else)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_else() }, error::op_else);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_else__negative_scope__toggled)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->begin_if(false);
+    BOOST_REQUIRE(!machine->is_success());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_else() }, error::op_success);
+    BOOST_REQUIRE(machine->is_success());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_else() }, error::op_success);
+    BOOST_REQUIRE(!machine->is_success());
 }
 
 BOOST_AUTO_TEST_CASE(interpreter__op_endif__balanced__op_endif)
 {
-    const signatures capture{};
-    const auto tx = accessor_transaction({});
-    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
-    BOOST_REQUIRE_EQUAL(code{ accessor.op_endif() }, error::op_endif);
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_endif() }, error::op_endif);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_verify__empty_stack__op_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_verify() }, error::op_verify1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_verify__false__op_verify2_not_dropped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(false);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_verify() }, error::op_verify2);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_verify__true__dropped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_verify() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+// Stack operations.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_to_alt_stack__value__moved)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_to_alt_stack() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+    BOOST_REQUIRE(!machine->is_alternate_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_to_alt_stack__empty_stack__op_to_alt_stack)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_to_alt_stack() }, error::op_to_alt_stack);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_from_alt_stack__value__returned)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_to_alt_stack() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_from_alt_stack() }, error::op_success);
+    BOOST_REQUIRE(machine->is_alternate_empty());
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 7);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_from_alt_stack__empty_alternate__op_from_alt_stack)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_from_alt_stack() }, error::op_from_alt_stack);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_drop2__two__both_dropped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_drop2() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_drop2__one__op_drop2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_drop2() }, error::op_drop2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup2__two__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_dup2() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 4u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    int32_t value4{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE(machine->pop_signed32(value4));
+    BOOST_REQUIRE_EQUAL(value1, 2);
+    BOOST_REQUIRE_EQUAL(value2, 1);
+    BOOST_REQUIRE_EQUAL(value3, 2);
+    BOOST_REQUIRE_EQUAL(value4, 1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup2__one__op_dup2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_dup2() }, error::op_dup2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup3__three__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_dup3() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 6u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    int32_t value4{};
+    int32_t value5{};
+    int32_t value6{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE(machine->pop_signed32(value4));
+    BOOST_REQUIRE(machine->pop_signed32(value5));
+    BOOST_REQUIRE(machine->pop_signed32(value6));
+    BOOST_REQUIRE_EQUAL(value1, 3);
+    BOOST_REQUIRE_EQUAL(value2, 2);
+    BOOST_REQUIRE_EQUAL(value3, 1);
+    BOOST_REQUIRE_EQUAL(value4, 3);
+    BOOST_REQUIRE_EQUAL(value5, 2);
+    BOOST_REQUIRE_EQUAL(value6, 1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup3__two__op_dup3)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_dup3() }, error::op_dup3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_over2__four__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    machine->push_signed64(4);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_over2() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 6u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    int32_t value4{};
+    int32_t value5{};
+    int32_t value6{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE(machine->pop_signed32(value4));
+    BOOST_REQUIRE(machine->pop_signed32(value5));
+    BOOST_REQUIRE(machine->pop_signed32(value6));
+    BOOST_REQUIRE_EQUAL(value1, 2);
+    BOOST_REQUIRE_EQUAL(value2, 1);
+    BOOST_REQUIRE_EQUAL(value3, 4);
+    BOOST_REQUIRE_EQUAL(value4, 3);
+    BOOST_REQUIRE_EQUAL(value5, 2);
+    BOOST_REQUIRE_EQUAL(value6, 1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_over2__three__op_over2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_over2() }, error::op_over2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_rot2__six__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    machine->push_signed64(4);
+    machine->push_signed64(5);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_rot2() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 6u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    int32_t value4{};
+    int32_t value5{};
+    int32_t value6{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE(machine->pop_signed32(value4));
+    BOOST_REQUIRE(machine->pop_signed32(value5));
+    BOOST_REQUIRE(machine->pop_signed32(value6));
+    BOOST_REQUIRE_EQUAL(value1, 1);
+    BOOST_REQUIRE_EQUAL(value2, 0);
+    BOOST_REQUIRE_EQUAL(value3, 5);
+    BOOST_REQUIRE_EQUAL(value4, 4);
+    BOOST_REQUIRE_EQUAL(value5, 3);
+    BOOST_REQUIRE_EQUAL(value6, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_rot2__five__op_rot2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    machine->push_signed64(4);
+    machine->push_signed64(5);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_rot2() }, error::op_rot2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_swap2__four__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    machine->push_signed64(4);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_swap2() }, error::op_success);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    int32_t value4{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE(machine->pop_signed32(value4));
+    BOOST_REQUIRE_EQUAL(value1, 2);
+    BOOST_REQUIRE_EQUAL(value2, 1);
+    BOOST_REQUIRE_EQUAL(value3, 4);
+    BOOST_REQUIRE_EQUAL(value4, 3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_swap2__three__op_swap2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_swap2() }, error::op_swap2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if_dup__true__duplicated)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if_dup() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if_dup__false__not_duplicated)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if_dup() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if_dup__empty_stack__op_if_dup)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_if_dup() }, error::op_if_dup);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_depth__empty__zero)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_depth() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 0);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_depth__two__two)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(8);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_depth() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_drop__value__dropped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_drop() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_drop__empty_stack__op_drop)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_drop() }, error::op_drop);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup__chunk__duplicated)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x2a });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_dup() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 2u);
+
+    const auto top = machine->pop_chunk_();
+    const auto next = machine->pop_chunk_();
+    BOOST_REQUIRE_EQUAL(*top, *next);
+    BOOST_REQUIRE_EQUAL(*top, data_chunk{ 0x2a });
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup__empty_stack__op_dup)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_dup() }, error::op_dup);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nip__two__second_removed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(8);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nip() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 8);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nip__one__op_nip)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nip() }, error::op_nip);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_over__two__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(8);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_over() }, error::op_success);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE_EQUAL(value1, 7);
+    BOOST_REQUIRE_EQUAL(value2, 8);
+    BOOST_REQUIRE_EQUAL(value3, 7);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_over__one__op_over)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_over() }, error::op_over);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_pick__index_two__copied)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(10);
+    machine->push_signed64(20);
+    machine->push_signed64(30);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_pick() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 4u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    int32_t value4{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE(machine->pop_signed32(value4));
+    BOOST_REQUIRE_EQUAL(value1, 10);
+    BOOST_REQUIRE_EQUAL(value2, 30);
+    BOOST_REQUIRE_EQUAL(value3, 20);
+    BOOST_REQUIRE_EQUAL(value4, 10);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_pick__index_out_of_range__op_pick)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(10);
+    machine->push_signed64(5);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_pick() }, error::op_pick);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_pick__negative_index__op_pick)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(10);
+    machine->push_signed64(-1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_pick() }, error::op_pick);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_roll__index_two__moved)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(10);
+    machine->push_signed64(20);
+    machine->push_signed64(30);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_roll() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 3u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE_EQUAL(value1, 10);
+    BOOST_REQUIRE_EQUAL(value2, 30);
+    BOOST_REQUIRE_EQUAL(value3, 20);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_roll__index_out_of_range__op_roll)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(10);
+    machine->push_signed64(5);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_roll() }, error::op_roll);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_rot__three__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_rot() }, error::op_success);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE_EQUAL(value1, 1);
+    BOOST_REQUIRE_EQUAL(value2, 3);
+    BOOST_REQUIRE_EQUAL(value3, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_rot__two__op_rot)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_rot() }, error::op_rot);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_swap__two__swapped)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_swap() }, error::op_success);
+
+    int32_t value1{};
+    int32_t value2{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE_EQUAL(value1, 1);
+    BOOST_REQUIRE_EQUAL(value2, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_swap__one__op_swap)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_swap() }, error::op_swap);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_tuck__two__expected_order)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_tuck() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 3u);
+
+    int32_t value1{};
+    int32_t value2{};
+    int32_t value3{};
+    BOOST_REQUIRE(machine->pop_signed32(value1));
+    BOOST_REQUIRE(machine->pop_signed32(value2));
+    BOOST_REQUIRE(machine->pop_signed32(value3));
+    BOOST_REQUIRE_EQUAL(value1, 2);
+    BOOST_REQUIRE_EQUAL(value2, 1);
+    BOOST_REQUIRE_EQUAL(value3, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_tuck__one__op_tuck)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_tuck() }, error::op_tuck);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_size__chunk__length_pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01, 0x02, 0x03 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_size() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 2u);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 3);
+    BOOST_REQUIRE_EQUAL(machine->peek_size(), 3u);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_size__empty_stack__op_size)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_size() }, error::op_size);
+}
+
+// Equality operations.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal__same_chunks__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x2a });
+    machine->push_chunk(data_chunk{ 0x2a });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal__cross_type__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_chunk(data_chunk{ 0x01 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal__different_chunks__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal__one__op_equal)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal() }, error::op_equal);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal_verify__same__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x2a });
+    machine->push_chunk(data_chunk{ 0x2a });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal_verify() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal_verify__different__op_equal_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal_verify() }, error::op_equal_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_equal_verify__one__op_equal_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_equal_verify() }, error::op_equal_verify1);
+}
+
+// Arithmetic operations.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add1__value__incremented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(41);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add1() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add1__max_int32__five_byte_result)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(max_int32);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add1() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->peek_size(), 5u);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add1__five_byte_operand__op_add1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(add1<int64_t>(max_int32));
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add1() }, error::op_add1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add1__empty_stack__op_add1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add1() }, error::op_add1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sub1__value__decremented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(43);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sub1() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sub1__empty_stack__op_sub1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sub1() }, error::op_sub1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_negate__positive__negative)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(42);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_negate() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -42);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_negate__empty_stack__op_negate)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_negate() }, error::op_negate);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_abs__negative__positive)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-42);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_abs() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_abs__empty_stack__op_abs)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_abs() }, error::op_abs);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_not__zero__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_not() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_not__nonzero__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_not() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_not__empty_stack__op_not)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_not() }, error::op_not);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nonzero__nonzero__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nonzero() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nonzero__zero__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nonzero() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add__two_and_three__five)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 5);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add__five_byte_operand__op_add)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(add1<int64_t>(max_int32));
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add() }, error::op_add);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add__one__op_add)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add() }, error::op_add);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sub__five_less_three__two)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(5);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sub() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sub__one__op_sub)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sub() }, error::op_sub);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_bool_and__both_nonzero__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(-1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_bool_and() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_bool_and__one_zero__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_bool_and() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_bool_or__one_zero__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_bool_or() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_bool_or__both_zero__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_bool_or() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_equal__equal__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(7);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_equal() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_equal__unequal__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(8);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_equal() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_equal_verify__equal__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(7);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_equal_verify() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_equal_verify__unequal__op_num_equal_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(8);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_equal_verify() }, error::op_num_equal_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_equal_verify__one__op_num_equal_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_equal_verify() }, error::op_num_equal_verify1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_not_equal__unequal__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(8);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_not_equal() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_not_equal__equal__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(7);
+    machine->push_signed64(7);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_not_equal() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_less_than__lesser__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_less_than() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_less_than__equal__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_less_than() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_greater_than__greater__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_greater_than() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_greater_than__equal__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_greater_than() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_less_than_or_equal__equal__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_less_than_or_equal() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_less_than_or_equal__greater__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(3);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_less_than_or_equal() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_greater_than_or_equal__equal__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(2);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_greater_than_or_equal() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_greater_than_or_equal__lesser__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_greater_than_or_equal() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_min__two_values__lesser)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_min() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_max__two_values__greater)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_max() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_within__inside__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(1);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_within() }, error::op_success);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_within__at_upper__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(3);
+    machine->push_signed64(1);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_within() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_within__below_lower__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(0);
+    machine->push_signed64(1);
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_within() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_within__two__op_within)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_within() }, error::op_within);
+}
+
+// Crypto operations.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_ripemd160__empty_chunk__expected)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    BOOST_REQUIRE_EQUAL(code{ machine->op_ripemd160() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("9c1185a5c5e9fc54612808977ee8f548b2258d31"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_ripemd160__empty_stack__op_ripemd160)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_ripemd160() }, error::op_ripemd160);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sha1__empty_chunk__expected)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sha1() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("da39a3ee5e6b4b0d3255bfef95601890afd80709"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sha1__empty_stack__op_sha1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sha1() }, error::op_sha1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sha256__empty_chunk__expected)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sha256() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sha256__empty_stack__op_sha256)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sha256() }, error::op_sha256);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_hash160__empty_chunk__expected)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    BOOST_REQUIRE_EQUAL(code{ machine->op_hash160() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("b472a266d0bd89c13706a4132ccfb16f7c3b9fcb"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_hash160__empty_stack__op_hash160)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_hash160() }, error::op_hash160);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_hash256__empty_chunk__expected)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    BOOST_REQUIRE_EQUAL(code{ machine->op_hash256() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_hash256__empty_stack__op_hash256)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_hash256() }, error::op_hash256);
+}
+
+// Signature operations.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_codeseparator__second_op__offset_advanced)
+{
+    const script ops_script{ operations{ operation{ opcode::nop }, operation{ opcode::codeseparator }, operation{ opcode::nop } } };
+    machine_accessor<contiguous_stack> machine{ ops_script, flags::all_rules };
+    const auto separator = std::next(machine->begin());
+    BOOST_REQUIRE_EQUAL(code{ machine->op_codeseparator(separator) }, error::op_success);
+
+    const auto& input_script = *machine.transaction().inputs_ptr()->front()->script_ptr();
+    const auto expected = std::next(input_script.ops().begin(), 2);
+    BOOST_REQUIRE(input_script.offset == expected);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__one__op_check_sig_low_stack)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig() }, error::op_check_sig_low_stack);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_verify__empty_endorsement__op_check_sig_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig_verify() }, error::op_check_sig_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__empty_endorsement__false_pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__invalid_der_bip66__op_check_sig_decode_signature)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig() }, error::op_check_sig_decode_signature);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__invalid_der_no_rules__false_pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    machine->push_chunk(data_chunk{ 0x01, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__zero_of_zero_null_dummy__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_signed64(0);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__zero_of_zero_null_dummy__true_pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_signed64(0);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__nonnull_dummy_bip147__op_check_multisig_verify9)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_signed64(0);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify9);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__nonnull_dummy_no_rules__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_signed64(0);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__empty_stack__op_check_multisig_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__twenty_one_keys__op_check_multisig_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_signed64(0);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(21);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__operation_count_exceeded__op_check_multisig_verify3)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(machine->ops_increment(199));
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__invalid_signature_count__op_check_multisig_verify5)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01, 0x02, 0x03, 0x04, 0x05 });
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify5);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__more_signatures_than_keys__op_check_multisig_verify6)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_signed64(1);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify6);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__invalid_der_no_rules__false_pushed)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x01, 0x01 });
+    machine->push_signed64(1);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__invalid_der_bip66__op_check_multisig_decode_signature)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x01, 0x01 });
+    machine->push_signed64(1);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_decode_signature);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__no_rules__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__final_input__op_check_locktime_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__empty_stack__op_check_locktime_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 42 };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__negative_stack__op_check_locktime_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 42 };
+    machine->push_signed64(-1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__type_mismatch__op_check_locktime_verify3)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 42 };
+    machine->push_signed64(500000000);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__exceeded__op_check_locktime_verify4)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 42 };
+    machine->push_signed64(43);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify4);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__equal__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 42 };
+    machine->push_signed64(42);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__no_rules__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__empty_stack__op_check_sequence_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 5, 0, 2 };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_check_sequence_verify1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__disabled_stack_sequence__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 5, 0, 2 };
+    machine->push_signed64(0x80000000);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__version_one__op_check_sequence_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 5, 0, 1 };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_check_sequence_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__disabled_input_sequence__op_check_sequence_verify3)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0x80000000, 0, 2 };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_check_sequence_verify3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__type_mismatch__op_check_sequence_verify4)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 5, 0, 2 };
+    machine->push_signed64(0x00400001);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_check_sequence_verify4);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__exceeded__op_check_sequence_verify5)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 5, 0, 2 };
+    machine->push_signed64(6);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_check_sequence_verify5);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sequence_verify__equal__op_success)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 5, 0, 2 };
+    machine->push_signed64(5);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sequence_verify() }, error::op_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__input_program__op_reserved)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig_add() }, error::op_reserved);
 }
 
 // Tapscript execution.

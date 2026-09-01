@@ -220,12 +220,44 @@ public:
 
 // Single-input transaction for input-script program construction.
 // The transaction must outlive any program constructed over it.
-inline chain::transaction accessor_transaction(const chain::script& script) NOEXCEPT
+inline chain::transaction accessor_transaction(const chain::script& script,
+    uint32_t sequence=chain::max_input_sequence, uint32_t locktime=0,
+    uint32_t version=1) NOEXCEPT
 {
     const chain::point outpoint{ one_hash, 0u };
-    const chain::inputs inputs{ chain::input{ outpoint, script, chain::max_input_sequence } };
+    const chain::inputs inputs{ chain::input{ outpoint, script, sequence } };
     const chain::outputs outputs{ chain::output{ 0u, chain::script{} } };
-    return chain::transaction{ 1u, inputs, outputs, 0u };
+    return chain::transaction{ version, inputs, outputs, locktime };
 }
+
+// Composes an interpreter_accessor with the transaction and capture that the
+// contained program references, so a test can construct state in one line.
+template <typename Stack>
+class machine_accessor
+{
+public:
+    machine_accessor(const chain::script& script, uint32_t active_flags,
+        uint32_t sequence=chain::max_input_sequence, uint32_t locktime=0,
+        uint32_t version=1) NOEXCEPT
+      : transaction_(accessor_transaction(script, sequence, locktime, version)),
+        accessor_(transaction_, transaction_.inputs_ptr()->begin(), active_flags, capture_)
+    {
+    }
+
+    interpreter_accessor<Stack>* operator->() NOEXCEPT
+    {
+        return &accessor_;
+    }
+
+    const chain::transaction& transaction() const NOEXCEPT
+    {
+        return transaction_;
+    }
+
+private:
+    const chain::signatures capture_{};
+    const chain::transaction transaction_;
+    interpreter_accessor<Stack> accessor_;
+};
 
 #endif
