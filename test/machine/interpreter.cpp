@@ -2086,4 +2086,120 @@ BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__s
     BOOST_REQUIRE_EQUAL(run_tapscript(leaf, elements), error::script_success);
 }
 
+// Tapscript program state (via accessor).
+// ----------------------------------------------------------------------------
+
+namespace {
+
+// A tapscript accessor requires the transaction, stack and capture to outlive
+// it, so tests construct these locally from a leaf script.
+script to_op_success_script() NOEXCEPT
+{
+    return script{ operations{ operation{ opcode::reserved_80 } } };
+}
+
+script to_minimal_leaf_script() NOEXCEPT
+{
+    return script{ operations{ operation{ opcode::push_positive_1 } } };
+}
+
+chunk_cptrs to_tapscript_witness(const script& leaf) NOEXCEPT
+{
+    const data_chunk control(add1(ec_xonly_size), tapscript_version);
+    chunk_cptrs stack{};
+    stack.push_back(to_shared<data_chunk>(leaf.to_data(false)));
+    stack.push_back(to_shared<data_chunk>(control));
+    return stack;
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(interpreter__initialize__tapscript_op_success__prevalid_script)
+{
+    const auto leaf = to_op_success_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    BOOST_REQUIRE(accessor.initialize() == error::prevalid_script);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if__tapscript_nonminimal__op_if2)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_if() }, error::op_if2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_notif__tapscript_nonminimal__op_notif2)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_notif() }, error::op_notif2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if__tapscript_minimal_true__op_success)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.push_chunk(data_chunk{ 0x01 });
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_if() }, error::op_success);
+    BOOST_REQUIRE(accessor.is_success());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__tapscript__op_reserved)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_multisig() }, error::op_reserved);
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_multisig_verify() }, error::op_reserved);
+}
+
+// The bip342 budget is the serialized witness size plus fifty. This witness
+// serializes to 37 bytes (count, one byte leaf, 33 byte control), affording
+// exactly one fifty-unit sigop.
+BOOST_AUTO_TEST_CASE(interpreter__sigops_increment__budget_boundary__expected)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    BOOST_REQUIRE_EQUAL((*tx.inputs_ptr()->front()).witness().serialized_size(true), 37u);
+    BOOST_REQUIRE(accessor.sigops_increment());
+    BOOST_REQUIRE(!accessor.sigops_increment());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

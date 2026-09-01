@@ -20,9 +20,52 @@
 
 BOOST_AUTO_TEST_SUITE(context_tests)
 
-BOOST_AUTO_TEST_CASE(context_test)
+using namespace system::chain;
+
+BOOST_AUTO_TEST_CASE(context__is_enabled__set_flag__true)
 {
-    BOOST_REQUIRE(true);
+    const context instance{ flags::bip16_rule | flags::bip65_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE(instance.is_enabled(flags::bip16_rule));
+    BOOST_REQUIRE(instance.is_enabled(flags::bip65_rule));
+    BOOST_REQUIRE(!instance.is_enabled(flags::bip66_rule));
+}
+
+BOOST_AUTO_TEST_CASE(context__is_insufficient_version__below_minimum__true)
+{
+    const context instance{ 0, 0, 0, 0, 4, 0, 0 };
+    BOOST_REQUIRE(instance.is_insufficient_version(3));
+    BOOST_REQUIRE(!instance.is_insufficient_version(4));
+    BOOST_REQUIRE(!instance.is_insufficient_version(5));
+}
+
+// CONSENSUS: the version comparison is signed, a negative version is below
+// any positive minimum.
+BOOST_AUTO_TEST_CASE(context__is_insufficient_version__negative_version__true)
+{
+    const context instance{ 0, 0, 0, 0, 4, 0, 0 };
+    BOOST_REQUIRE(instance.is_insufficient_version(0x80000000));
+}
+
+BOOST_AUTO_TEST_CASE(context__is_insufficient_version__zero_minimum__false)
+{
+    const context instance{ 0, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE(!instance.is_insufficient_version(0));
+    BOOST_REQUIRE(!instance.is_insufficient_version(0x80000000));
+}
+
+BOOST_AUTO_TEST_CASE(context__is_anachronistic_timestamp__at_median__true)
+{
+    const context instance{ 0, 0, 100, 0, 0, 0, 0 };
+    BOOST_REQUIRE(instance.is_anachronistic_timestamp(100));
+    BOOST_REQUIRE(instance.is_anachronistic_timestamp(99));
+    BOOST_REQUIRE(!instance.is_anachronistic_timestamp(101));
+}
+
+BOOST_AUTO_TEST_CASE(context__is_invalid_work__mismatch__true)
+{
+    const context instance{ 0, 0, 0, 0, 0, 0x1d00ffff, 0 };
+    BOOST_REQUIRE(instance.is_invalid_work(0x1d00fffe));
+    BOOST_REQUIRE(!instance.is_invalid_work(0x1d00ffff));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
