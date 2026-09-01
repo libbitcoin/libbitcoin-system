@@ -113,6 +113,43 @@ const script_test_list invalidated_bip65_scripts
     { "nop", "nop2 1", "", 42, 99 }
 }};
 
+// These are valid prior to and after BIP112 activation.
+const script_test_list valid_bip112_scripts
+{{
+    { "1", "checksequenceverify", "equal sequence and stack", 1, 0, 2 },
+    { "1 2147483648", "checksequenceverify drop", "disabled stack sequence is a nop", 0, 0, 2 }
+}};
+
+// These are valid prior to BIP112 activation and invalid after.
+const script_test_list invalidated_bip112_scripts
+{{
+    { "1 2", "checksequenceverify drop", "exceeded csv", 1, 0, 2 },
+    { "1 1", "checksequenceverify drop", "insufficient tx version", 1, 0, 1 },
+    { "1 4194305", "checksequenceverify drop", "mismatched csv type", 1, 0, 2 },
+    { "1 1", "checksequenceverify drop", "disabled tx sequence", 2147483648, 0, 2 },
+    { "1 -1", "checksequenceverify drop", "negative csv", 1, 0, 2 },
+    { "", "checksequenceverify 1", "empty csv", 1, 0, 2 }
+}};
+
+// These are always valid (the four byte operand domain is not fork gated).
+const script_test_list valid_number_scripts
+{{
+    { "", "2147483647 dup add 4294967294 equal", "four byte operands produce a five byte sum" },
+    { "", "-2147483647 dup add -4294967294 equal", "" },
+    { "", "2147483647 1add 2147483648 equal", "" },
+    { "", "-2147483647 1sub -2147483648 equal", "" },
+    { "", "2147483647 negate -2147483647 equal", "" }
+}};
+
+// These are always invalid (arithmetic operands are limited to four bytes).
+const script_test_list invalid_number_scripts
+{{
+    { "", "2147483648 0 add drop 1", "five byte operand" },
+    { "", "2147483648 1add drop 1", "" },
+    { "", "-2147483648 negate drop 1", "" },
+    { "", "2147483648 dup numequal", "numeric compare of five byte values" }
+}};
+
 // These are always valid.
 const script_test_list valid_multisig_scripts
 {{
