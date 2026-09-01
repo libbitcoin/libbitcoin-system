@@ -653,12 +653,161 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
     }
 }
 
-// is_overweight
-// is_invalid_coinbase_script
-// is_hash_limit_exceeded
-// is_invalid_witness_commitment
+// validation predicates
+// ----------------------------------------------------------------------------
+
+static transaction coinbase_transaction(uint64_t value, const script& coinbase_script)
+{
+    const inputs ins{ input{ point{}, coinbase_script, 0xffffffff } };
+    const outputs outs{ output{ value, script{} } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+static transaction spending_transaction()
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, 0xffffffff } };
+    const outputs outs{ output{ 0, script{} } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(block__is_first_non_coinbase__coinbase_first__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
+    BOOST_REQUIRE(!instance.is_first_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_first_non_coinbase__spend_first__true)
+{
+    const accessor instance{ header{}, transactions{ spending_transaction() } };
+    BOOST_REQUIRE(instance.is_first_non_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_extra_coinbases__two_coinbases__true)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), coinbase_transaction(1, script{}) } };
+    BOOST_REQUIRE(instance.is_extra_coinbases());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_extra_coinbases__coinbase_and_spend__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
+    BOOST_REQUIRE(!instance.is_extra_coinbases());
+}
+
+// bip34 requires the coinbase script begin with a minimal height push.
+BOOST_AUTO_TEST_CASE(block__is_invalid_coinbase_script__matching_height__false)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    BOOST_REQUIRE(!instance.is_invalid_coinbase_script(100));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_coinbase_script__mismatched_height__true)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    BOOST_REQUIRE(instance.is_invalid_coinbase_script(101));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_hash_limit_exceeded__small_block__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
+    BOOST_REQUIRE(!instance.is_hash_limit_exceeded());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_oversized__megabyte_script__true)
+{
+    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, big) } };
+    BOOST_REQUIRE(instance.is_oversized());
+    BOOST_REQUIRE(instance.is_overweight());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_oversized__small_block__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
+    BOOST_REQUIRE(!instance.is_oversized());
+    BOOST_REQUIRE(!instance.is_overweight());
+}
+
+// Witness data with no coinbase commitment output invalidates the block.
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__segregated_no_commitment__true)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spend } };
+    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__unsegregated_no_commitment__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
+    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+}
+
+// subsidy
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__subsidy__genesis__initial)
+{
+    BOOST_REQUIRE_EQUAL(block::subsidy(0, 210000, 5000000000, false), 5000000000u);
+}
+
+BOOST_AUTO_TEST_CASE(block__subsidy__first_halving__half)
+{
+    BOOST_REQUIRE_EQUAL(block::subsidy(210000, 210000, 5000000000, false), 2500000000u);
+}
+
+BOOST_AUTO_TEST_CASE(block__subsidy__second_halving__quarter)
+{
+    BOOST_REQUIRE_EQUAL(block::subsidy(420000, 210000, 5000000000, false), 1250000000u);
+}
+
+BOOST_AUTO_TEST_CASE(block__subsidy__below_first_halving__initial)
+{
+    BOOST_REQUIRE_EQUAL(block::subsidy(209999, 210000, 5000000000, false), 5000000000u);
+}
+
+// CONSENSUS: pre-bip42 a sixty-four halving shift is modulo, restoring the
+// initial subsidy; bip42 shifts to zero.
+BOOST_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_pre_bip42__initial)
+{
+    BOOST_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, false), 5000000000u);
+}
+
+BOOST_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_bip42__zero)
+{
+    BOOST_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, true), 0u);
+}
+
 // is_overspent
-// is_signature_operations_limited
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(5000000000, script{}) } };
+    BOOST_REQUIRE(!instance.is_overspent(0, 210000, 5000000000, false));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy__true)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(5000000001, script{}) } };
+    BOOST_REQUIRE(instance.is_overspent(0, 210000, 5000000000, false));
+}
+
+// signature_operations
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__signature_operations__coinbase_checksigs__expected)
+{
+    const script coinbase_script(base16_chunk("02acad"), true);
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 2u);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), 8u);
+    BOOST_REQUIRE(!instance.is_signature_operations_limited(false, false));
+}
+
 // is_unspent_coinbase_collision
 
 BOOST_AUTO_TEST_SUITE_END()
