@@ -128,9 +128,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to and after BIP65 activation.
-        ////BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
         BOOST_CHECK_MESSAGE(tx.connect({ flags::bip65_rule }, 0) == error::script_success, name);
-        ////BOOST_CHECK_MESSAGE(tx.connect({ all_but_taproot & ~flags::bip112_rule }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ all_but_taproot & ~flags::bip112_rule }, 0) == error::script_success, name);
     }
 }
 
@@ -178,9 +178,22 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
         // These are scripts potentially affected by bip66 (but should not be).
         BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
         BOOST_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ all_but_taproot }, 0) == error::script_success, name);
+    }
+}
 
-        // One test fails under bip147 due to alternating results on the stack.
-        BOOST_CHECK_MESSAGE(tx.connect({ all_but_taproot & ~flags::bip147_rule }, 0) == error::script_success, name);
+BOOST_AUTO_TEST_CASE(script__multisig__bip147_invalidated)
+{
+    for (const auto& test: invalidated_bip147_scripts)
+    {
+        const auto tx = test_tx(test);
+        const auto name = test_name(test);
+        BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
+
+        // These are valid prior to BIP147 activation and invalid after.
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip147_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ all_but_taproot }, 0) != error::script_success, name);
     }
 }
 
