@@ -456,6 +456,7 @@
     <ClInclude Include="..\..\..\..\test\hash\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
+    <ClInclude Include="..\..\..\..\test\machine\accessor.hpp" />
     <ClInclude Include="..\..\..\..\test\mocks\blocks.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />

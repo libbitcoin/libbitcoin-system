@@ -17,11 +17,85 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include "accessor.hpp"
 
 BOOST_AUTO_TEST_SUITE(interpreter_tests)
 
 using namespace system::chain;
 using namespace system::machine;
+
+// Isolated operation handlers (via accessor).
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add__two_and_three__five)
+{
+    const signatures capture{};
+    const auto tx = accessor_transaction({});
+    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
+    accessor.push_signed64(2);
+    accessor.push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_add() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(accessor.stack_size(), 1u);
+
+    int32_t value{};
+    BOOST_REQUIRE(accessor.pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 5);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_add__insufficient_stack__op_add)
+{
+    const signatures capture{};
+    const auto tx = accessor_transaction({});
+    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
+    accessor.push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_add() }, error::op_add);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_dup__chunk__duplicated)
+{
+    const signatures capture{};
+    const auto tx = accessor_transaction({});
+    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
+    accessor.push_chunk(data_chunk{ 0x2a });
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_dup() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(accessor.stack_size(), 2u);
+
+    const auto top = accessor.pop_chunk_();
+    const auto next = accessor.pop_chunk_();
+    BOOST_REQUIRE_EQUAL(*top, *next);
+    BOOST_REQUIRE_EQUAL(*top, data_chunk{ 0x2a });
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_drop__empty_stack__op_drop)
+{
+    const signatures capture{};
+    const auto tx = accessor_transaction({});
+    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_drop() }, error::op_drop);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_if__false__negative_scope)
+{
+    const signatures capture{};
+    const auto tx = accessor_transaction({});
+    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
+    accessor.push_bool(false);
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_if() }, error::op_success);
+    BOOST_REQUIRE(!accessor.is_success());
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_endif() }, error::op_success);
+    BOOST_REQUIRE(accessor.is_balanced());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_endif__balanced__op_endif)
+{
+    const signatures capture{};
+    const auto tx = accessor_transaction({});
+    interpreter_accessor<contiguous_stack> accessor{ tx, tx.inputs_ptr()->begin(), flags::all_rules, capture };
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_endif() }, error::op_endif);
+}
+
+// Tapscript execution.
+// ----------------------------------------------------------------------------
 
 namespace {
 
