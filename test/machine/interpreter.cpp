@@ -1833,19 +1833,17 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__input_program__op_reserved)
 // Tapscript execution.
 // ----------------------------------------------------------------------------
 
-namespace {
-
 constexpr auto taproot_rules = flags::bip141_rule | flags::bip143_rule | flags::bip341_rule | flags::bip342_rule;
 constexpr uint64_t prevout_value = 42u;
 
 // A non-empty signature charges the budget. A key that is neither empty nor
 // 32 bytes is an unknown (upgradable) type, for which signature validation is
 // considered successful, so no valid signature is required here [bip342].
-const data_chunk dummy_signature{ 0x01 };
-const data_chunk unknown_key(add1(ec_xonly_size), 0x02);
+static const data_chunk dummy_signature{ 0x01 };
+static const data_chunk unknown_key(add1(ec_xonly_size), 0x02);
 
 // <sig> <key> OP_CHECKSIGVERIFY per sigop (37 bytes each), then OP_1.
-script to_budget_script(size_t sigops) NOEXCEPT
+static script to_budget_script(size_t sigops) NOEXCEPT
 {
     operations ops{};
     for (size_t sigop{}; sigop < sigops; ++sigop)
@@ -1862,7 +1860,7 @@ script to_budget_script(size_t sigops) NOEXCEPT
 // The tx spending the tapscript. The signature hash does not cover the witness
 // (apart from an annex), so a tx built with an empty witness produces the same
 // hashes as one carrying the signatures over which those hashes are taken.
-transaction to_spending_transaction(const chunk_cptrs& stack) NOEXCEPT
+static transaction to_spending_transaction(const chunk_cptrs& stack) NOEXCEPT
 {
     // A non-null point, so the tx is not taken for a coinbase.
     const point outpoint{ one_hash, 0u };
@@ -1880,7 +1878,7 @@ transaction to_spending_transaction(const chunk_cptrs& stack) NOEXCEPT
 // witness, while the program is handed the stack with the control block and
 // leaf script already popped. Elements are the witness stack-elements, in
 // witness order (the last is the top of the execution stack).
-code run_tapscript(const script& leaf, const chunk_cptrs& elements={}) NOEXCEPT
+static code run_tapscript(const script& leaf, const chunk_cptrs& elements={}) NOEXCEPT
 {
     // Witness of the input: [elements] <script> <control>.
     const data_chunk control(add1(ec_xonly_size), tapscript_version);
@@ -1902,12 +1900,10 @@ code run_tapscript(const script& leaf, const chunk_cptrs& elements={}) NOEXCEPT
     return program.run();
 }
 
-code run_budget_script(size_t sigops) NOEXCEPT
+static code run_budget_script(size_t sigops) NOEXCEPT
 {
     return run_tapscript(to_budget_script(sigops));
 }
-
-} // namespace
 
 // Two sigops against a 75 byte leaf script. The full witness serializes to 111
 // bytes, so the budget is 162 and two sigops (100) fit. Deriving the budget
@@ -1931,11 +1927,9 @@ BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_budget_exceeded__op_check_sig_b
     BOOST_REQUIRE_EQUAL(run_budget_script(7), error::op_check_sig_budget);
 }
 
-namespace {
-
 // <sig> <0> <key> OP_CHECKSIGADD <1> OP_NUMEQUAL.
 // Success pushes number+1, so the script is true only when the sigop passed.
-script to_checksigadd_script(const data_chunk& key, const data_chunk& endorsement) NOEXCEPT
+static script to_checksigadd_script(const data_chunk& key, const data_chunk& endorsement) NOEXCEPT
 {
     operations ops{};
     ops.emplace_back(endorsement, false);
@@ -1948,14 +1942,12 @@ script to_checksigadd_script(const data_chunk& key, const data_chunk& endorsemen
 }
 
 // 64 bytes plus an undefined sighash byte (zero must be implicit) [bip341].
-data_chunk to_undefined_sighash_endorsement() NOEXCEPT
+static data_chunk to_undefined_sighash_endorsement() NOEXCEPT
 {
     data_chunk endorsement(add1(ec_signature_size), 0x11);
     endorsement.back() = 0x04;
     return endorsement;
 }
-
-} // namespace
 
 // An endorsement of neither 64 nor 65 bytes is not a schnorr signature, but
 // with an unknown key type it is never parsed, so the sigop passes.
@@ -2010,15 +2002,13 @@ BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_xonly_key_invalid_signature__
     BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add6);
 }
 
-namespace {
-
 // OP_0 <key> OP_CHECKSIGADD OP_DROP OP_CODESEPARATOR OP_0 <key> OP_CHECKSIGADD
 // Both sigops take their signature from the witness. The second signs over the
 // codeseparator position of 4, the first over none (0xffffffff). The offset is
 // the op following the codeseparator, from which that position is derived.
 constexpr size_t after_codeseparator = 5;
 
-script to_codeseparator_script(const ec_xonly& key) NOEXCEPT
+static script to_codeseparator_script(const ec_xonly& key) NOEXCEPT
 {
     const data_chunk point{ key.begin(), key.end() };
 
@@ -2033,8 +2023,6 @@ script to_codeseparator_script(const ec_xonly& key) NOEXCEPT
     ops.emplace_back(opcode::checksigadd);
     return script{ std::move(ops) };
 }
-
-} // namespace
 
 BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__success)
 {
