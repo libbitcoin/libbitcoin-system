@@ -97,8 +97,7 @@ BOOST_AUTO_TEST_CASE(annex__constructor__stack__expected)
 }
 
 // hash
-// Expected values computed by an independent implementation, the annex is
-// hashed inclusive of its 0x50 prefix byte [bip341].
+// The annex is hashed inclusive of its 0x50 prefix byte [bip341].
 
 BOOST_AUTO_TEST_CASE(annex__hash__prefixed__expected)
 {

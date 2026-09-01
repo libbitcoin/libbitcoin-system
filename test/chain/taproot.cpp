@@ -32,8 +32,6 @@ public:
     using taproot::tweak_hash;
 };
 
-// Vectors from the bip341 wallet test vectors (scriptPubKey cases).
-
 // leaf_hash
 
 BOOST_AUTO_TEST_CASE(taproot__leaf_hash__single_leaf_tree__expected)
@@ -97,7 +95,6 @@ BOOST_AUTO_TEST_CASE(taproot__merkle_root__single_element_path__expected)
 }
 
 // tweak_hash
-// Expected value computed by an independent tagged-hash implementation.
 
 BOOST_AUTO_TEST_CASE(taproot__tweak_hash__single_leaf_tree__expected)
 {
@@ -108,7 +105,6 @@ BOOST_AUTO_TEST_CASE(taproot__tweak_hash__single_leaf_tree__expected)
 }
 
 // verify_commit
-// Control parity computed by an independent secp256k1 implementation.
 
 BOOST_AUTO_TEST_CASE(taproot__verify_commit__single_leaf_tree__true)
 {

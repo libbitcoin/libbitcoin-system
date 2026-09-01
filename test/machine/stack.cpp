@@ -28,8 +28,7 @@ static_assert(is_same_type<std::variant_alternative_t<stack_type::pchunk_, stack
 BOOST_AUTO_TEST_SUITE(stack_tests)
 
 // stack_variant is not serializable, so cannot boost compare it.
-// The stack class is the container divergence point, so the full stack API is
-// tested over both containers; higher layers are tested over one.
+// The stack is the container divergence point, tested over both containers.
 
 // pop/push
 

@@ -81,9 +81,8 @@ BOOST_AUTO_TEST_CASE(chain_state__activation__bip34_signalled_but_low_self_versi
     BOOST_REQUIRE(!to_bool(state.flags & flags::bip34_rule));
 }
 
-// The history count applies the satoshi signed comparison (see below), while
-// the self version gate is unsigned, so a negative self version activates.
-// The divergence is unobservable in mainnet history and is subsumed by bip90.
+// The history count is signed (satoshi) but the self version gate is
+// unsigned, so a negative self version activates (subsumed by bip90).
 BOOST_AUTO_TEST_CASE(chain_state__activation__negative_self_version__bip34_rule)
 {
     settings settings(selection::mainnet);

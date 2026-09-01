@@ -769,8 +769,7 @@ BOOST_AUTO_TEST_CASE(block__subsidy__below_first_halving__initial)
     BOOST_REQUIRE_EQUAL(block::subsidy(209999, 210000, 5000000000, false), 5000000000u);
 }
 
-// CONSENSUS: pre-bip42 a sixty-four halving shift is modulo, restoring the
-// initial subsidy; bip42 shifts to zero.
+// Pre-bip42 a sixty four halving shift is modulo, bip42 shifts to zero.
 BOOST_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_pre_bip42__initial)
 {
     BOOST_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, false), 5000000000u);

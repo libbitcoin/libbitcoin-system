@@ -1419,8 +1419,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
 
 // signature_hash (unversioned coverage matrix)
 // ----------------------------------------------------------------------------
-// Expected digests computed by an independent implementation of the Satoshi
-// signature hash algorithm (not derived from this library).
 
 constexpr char sighash_subscript[] = "76a91488350574280395ad2c3e2ee20e322073d94e5e4088ac";
 
@@ -1539,7 +1537,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single_output_over
 
 // signature_hash (version 0, bip143 vectors)
 // ----------------------------------------------------------------------------
-// Transactions, scripts, values and digests from the bip143 specification.
 
 constexpr auto bip143_flags = flags::bip141_rule | flags::bip143_rule;
 
@@ -1568,8 +1565,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2sh_p2wpkh__expected)
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 1000000000, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
     BOOST_REQUIRE_EQUAL(sighash, base16_array("64f3b0f4dd2bb3aa1ce8566d220cc74dda9df97d8490cc81d89d735c92e59fb6"));
 }
-
-// The bip143 p2sh-p2wsh example, signed with each of the six sighash types.
 
 constexpr char bip143_p2wsh_tx[] = "010000000136641869ca081e70f394c6948e8af409e18b619df2ed74aa106c1ca29787b96e0100000000ffffffff0200e9a435000000001976a914389ffce9cd9ae88dcc0631e88a821ffdbe9bfe2688acc0832f05000000001976a9147480a33f950689af511e6e84c138dbbd3c3ee41588ac00000000";
 constexpr char bip143_p2wsh_script[] = "56210307b8ae49ac90a048e9b53357a2354b3334e9c8bee813ecb98e99a7e07e8c3ba32103b28f0c28bfab54554ae8c658ac5c3e0ce6e79ad336331f78c428dd43eea8449b21034b8113d703413d57761b8b9781957b8c0ac1dfe69f492580ca4195f50376ba4a21033400f6afecb833092a9a21cfdf1ed1376e58c5d1f47de74683123987e967a8f42103a6d48b1131e94ba04d9737d61acdaa1322008af9602b3b14862c07a1789aac162102d8b661b0b3302ee2f162b09e07a55ad5dfbe673a9f01d9f0c19617681024306b56ae";
@@ -1643,7 +1638,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_single_anyone_can
 
 // signature_hash (version 1, bip341 key path vectors)
 // ----------------------------------------------------------------------------
-// Transaction, prevouts and digests from the bip341 wallet test vectors.
 
 constexpr auto bip341_flags = flags::bip141_rule | flags::bip143_rule | flags::bip341_rule | flags::bip342_rule;
 
@@ -1735,8 +1729,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all_anyone_can
 
 // signature_hash (midstate cache invariance)
 // ----------------------------------------------------------------------------
-// Interleaved coverage modes on one instance must each match the digest of a
-// fresh instance, or a stale midstate cache is leaking across modes.
 
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_interleaved_modes__cache_invariant)
 {
