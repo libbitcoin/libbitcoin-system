@@ -26,7 +26,8 @@ namespace system {
 namespace chain {
 
 /// Script versions [bip141].
-enum class script_version
+/// Values above 16 do not collide with witness version values [0..16].
+enum class script_version : uint8_t
 {
     /// If the version byte is 0 (either P2WPKH or P2WSH or invalid) [bip141].
     segwit = 0,
@@ -35,10 +36,10 @@ enum class script_version
     taproot = 1,
 
     /// All reserved script versions [2..16].
-    reserved,
+    reserved = 17,
 
     /// All unversioned scripts.
-    unversioned
+    unversioned = 18
 };
 
 } // namespace chain

@@ -631,6 +631,45 @@ BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__two_pushes__false)
     BOOST_CHECK(!script::is_nominal_push_pattern(instance.ops()));
 }
 
+// version_value
+
+BOOST_AUTO_TEST_CASE(script__version_value__not_witness_program__unversioned)
+{
+    const script instance(script_return);
+    BOOST_REQUIRE_EQUAL(instance.version_value(),
+        to_value(script_version::unversioned));
+    BOOST_REQUIRE(instance.version() == script_version::unversioned);
+}
+
+BOOST_AUTO_TEST_CASE(script__version_value__segwit_program__zero)
+{
+    const script instance{ script::to_pay_witness_pattern(0, null_hash) };
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 0u);
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+}
+
+BOOST_AUTO_TEST_CASE(script__version_value__taproot_program__one)
+{
+    const script instance{ script::to_pay_witness_pattern(1, null_hash) };
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 1u);
+    BOOST_REQUIRE(instance.version() == script_version::taproot);
+}
+
+// The reserved versions are distinguished by value but not by version.
+BOOST_AUTO_TEST_CASE(script__version_value__reserved_program__two)
+{
+    const script instance{ script::to_pay_witness_pattern(2, null_hash) };
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 2u);
+    BOOST_REQUIRE(instance.version() == script_version::reserved);
+}
+
+BOOST_AUTO_TEST_CASE(script__version_value__maximum_program__sixteen)
+{
+    const script instance{ script::to_pay_witness_pattern(16, null_hash) };
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 16u);
+    BOOST_REQUIRE(instance.version() == script_version::reserved);
+}
+
 BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__empty__false)
 {
     BOOST_CHECK(!script::is_nominal_push_pattern(operations{}));

@@ -95,7 +95,7 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 // ****************************************************************************
 // CONSENSUS: this pattern is used in bip141 validation rules.
 // ****************************************************************************
-constexpr bool script::is_witness_program_pattern(
+constexpr bool script::is_pay_witness_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2u
@@ -106,9 +106,9 @@ constexpr bool script::is_witness_program_pattern(
 }
 
 // A witness program used only for policy (not implemented).
-constexpr bool script::is_anchor_program_pattern(const operations& ops) NOEXCEPT
+constexpr bool script::is_pay_anchor_pattern(const operations& ops) NOEXCEPT
 {
-    return is_witness_program_pattern(ops)
+    return is_pay_witness_pattern(ops)
         && ops[1].data().size() == 2u
         && ops[1].data()[0] == 0x4e_u8
         && ops[1].data()[1] == 0x73_u8;
@@ -159,13 +159,6 @@ constexpr bool script::is_pay_script_hash_pattern(
         && ops[0].code() == opcode::hash160
         && ops[1].code() == opcode::push_size_20
         && ops[2].code() == opcode::equal;
-}
-
-constexpr bool script::is_pay_witness_pattern(const operations& ops) NOEXCEPT
-{
-    return ops.size() == 2u
-        && ops[0].is_nonnegative()
-        && ops[1].is_push();
 }
 
 constexpr bool script::is_pay_witness_key_hash_pattern(
@@ -520,7 +513,7 @@ inline size_t script::op_size(size_t total, const operation& op) NOEXCEPT
 inline bool script::is_pay_to_witness(uint32_t active_flags) const NOEXCEPT
 {
     return is_enabled(active_flags, flags::bip141_rule) &&
-        is_witness_program_pattern(ops());
+        is_pay_witness_pattern(ops());
 }
 
 // This is an optimization over using script::pattern.
