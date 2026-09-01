@@ -245,7 +245,7 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
     }
 
     // pay-to-anchor (p2a) programs pass by here (standardness).
-    ////script::is_anchor_program_pattern(program_script.ops())
+    ////script::is_pay_anchor_pattern(program_script.ops())
 
     // Version 1 other than 32 bytes...
     // witness stack : [stack-elements]

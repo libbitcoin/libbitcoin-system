@@ -37,20 +37,26 @@ namespace chain {
 const chunk_cptr& script::witness_program() const NOEXCEPT
 {
     static const auto empty = to_shared<const data_chunk>();
-    return is_witness_program_pattern(ops()) ? ops().at(1).data_ptr() : empty;
+    return is_pay_witness_pattern(ops()) ? ops().at(1).data_ptr() : empty;
+}
+
+uint8_t script::version_value() const NOEXCEPT
+{
+    return is_pay_witness_pattern(ops()) ?
+        operation::opcode_to_nonnegative(ops_.front().code()) :
+        to_value(script_version::unversioned);
 }
 
 script_version script::version() const NOEXCEPT
 {
-    if (!is_witness_program_pattern(ops()))
-        return script_version::unversioned;
-
-    switch (ops_.front().code())
+    switch (version_value())
     {
-        case opcode::push_size_0:
+        case 0:
             return script_version::segwit;
-        case opcode::push_positive_1:
+        case 1:
             return script_version::taproot;
+        case to_value(script_version::unversioned):
+            return script_version::unversioned;
         default:
             return script_version::reserved;
     }
