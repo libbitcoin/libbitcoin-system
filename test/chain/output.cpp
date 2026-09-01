@@ -166,13 +166,14 @@ BOOST_AUTO_TEST_CASE(output__to_data__writer__expected)
 
 // committed_hash
 
-BOOST_AUTO_TEST_CASE(output__signature_operations__bip141_inactive__script_sigops)
+BOOST_AUTO_TEST_CASE(output__signature_operations__checksig_checksigverify__expected)
 {
     const script script(base16_chunk("02acad"), true);
     BOOST_REQUIRE(script.is_valid());
 
     const output instance{ 42, script };
-    BOOST_REQUIRE_EQUAL(instance.script().signature_operations(false), instance.signature_operations(false));
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false), 2u);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true), 8u);
 }
 
 // is_dust

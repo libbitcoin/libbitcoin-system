@@ -135,6 +135,16 @@ protected:
 
     bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
         bool scrypt=false) const NOEXCEPT;
+
+    // ************************************************************************
+    // CONSENSUS: 32 bit unsigned unix time overflows in 2106.
+    // ************************************************************************
+    static constexpr bool is_futuristic_timestamp(uint32_t timestamp,
+        uint32_t timestamp_limit_seconds, uint64_t now) NOEXCEPT
+    {
+        return timestamp > add<uint64_t>(now, timestamp_limit_seconds);
+    }
+
     bool is_futuristic_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
     bool is_early_timestamp() const NOEXCEPT;
 

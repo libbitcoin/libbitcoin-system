@@ -872,6 +872,9 @@
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp">
       <Filter>src\hash</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\machine\accessor.hpp">
+      <Filter>src\machine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\mocks\blocks.hpp">
       <Filter>src\mocks</Filter>
     </ClInclude>

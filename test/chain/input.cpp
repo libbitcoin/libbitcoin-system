@@ -323,26 +323,7 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_time_type_sequence_age_
     BOOST_REQUIRE(!instance.is_relative_locked(0, instance.metadata.median_time_past + age_seconds));
 }
 
-BOOST_AUTO_TEST_CASE(input__signature_operations__bips_inactive__script_sigops)
-{
-    const script script(base16_chunk("02acad"), true);
-    BOOST_REQUIRE(script.is_valid());
-
-    const input instance{ {}, script, chain::max_input_sequence };
-    BOOST_REQUIRE_EQUAL(script.signature_operations(false), instance.signature_operations(false, false));
-}
-
-BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_inactive__script_sigops)
-{
-    const script script(base16_chunk("02acad"), true);
-    BOOST_REQUIRE(script.is_valid());
-
-    const input instance{ {}, script, chain::max_input_sequence };
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, false), script.signature_operations(false));
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), script.signature_operations(false));
-}
-
-BOOST_AUTO_TEST_CASE(input__signature_operations__null_input__script_sigops)
+BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__expected)
 {
     const script script(base16_chunk("02acad"), true);
     BOOST_REQUIRE(script.is_valid());

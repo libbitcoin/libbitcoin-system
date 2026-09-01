@@ -31,13 +31,13 @@ static const point expected_point(point_data);
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(output__constructor__default__invalid)
+BOOST_AUTO_TEST_CASE(point__constructor__default__invalid)
 {
     const point instance;
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__move__valid)
+BOOST_AUTO_TEST_CASE(point__constructor__move__valid)
 {
     auto copy = expected_point;
     const point instance(std::move(copy));
@@ -45,14 +45,14 @@ BOOST_AUTO_TEST_CASE(output__constructor__move__valid)
     BOOST_REQUIRE(instance == expected_point);
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__copy__valid)
+BOOST_AUTO_TEST_CASE(point__constructor__copy__valid)
 {
     const point instance(expected_point);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected_point);
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__move_parameters__valid)
+BOOST_AUTO_TEST_CASE(point__constructor__move_parameters__valid)
 {
     const uint32_t index = 1234;
     auto copy = point_hash;
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(output__constructor__move_parameters__valid)
     BOOST_REQUIRE_EQUAL(instance.index(), index);
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__copy_parameters__valid)
+BOOST_AUTO_TEST_CASE(point__constructor__copy_parameters__valid)
 {
     const uint32_t index = 1234;
     point instance(point_hash, index);

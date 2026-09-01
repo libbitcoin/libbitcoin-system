@@ -401,4 +401,113 @@ BOOST_AUTO_TEST_CASE(number__boolean_from_chunk_strict__not_empty__true)
     BOOST_CHECK(number::boolean::from_chunk_strict({ 0x01 }));
 }
 
+// integer from_integer - the domain check applied on every arithmetic pop
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__4_from_integer__max_int32__true)
+{
+    int32_t value32{};
+    BOOST_CHECK(number::integer<4>::from_integer(value32, max_int32));
+    BOOST_CHECK_EQUAL(value32, max_int32);
+}
+
+BOOST_AUTO_TEST_CASE(number__4_from_integer__negated_max_int32__true)
+{
+    int32_t value32{};
+    BOOST_CHECK(number::integer<4>::from_integer(value32, -max_int32));
+    BOOST_CHECK_EQUAL(value32, -max_int32);
+}
+
+BOOST_AUTO_TEST_CASE(number__4_from_integer__five_byte_value__false)
+{
+    constexpr auto five_byte = add1<int64_t>(max_int32);
+    int32_t value32{};
+    BOOST_CHECK(!number::integer<4>::from_integer(value32, five_byte));
+}
+
+BOOST_AUTO_TEST_CASE(number__4_from_integer__min_int32__false)
+{
+    int32_t value32{};
+    BOOST_CHECK(!number::integer<4>::from_integer(value32, min_int32));
+}
+
+BOOST_AUTO_TEST_CASE(number__5_from_integer__five_byte_maximum__true)
+{
+    constexpr auto maximum40 = sub1(power2<int64_t>(39u));
+    int64_t value64{};
+    BOOST_CHECK(number::integer<5>::from_integer(value64, maximum40));
+    BOOST_CHECK_EQUAL(value64, maximum40);
+}
+
+BOOST_AUTO_TEST_CASE(number__5_from_integer__four_byte_overflow__true)
+{
+    constexpr auto five_byte = add1<int64_t>(max_int32);
+    int64_t value64{};
+    BOOST_CHECK(number::integer<5>::from_integer(value64, five_byte));
+    BOOST_CHECK_EQUAL(value64, five_byte);
+}
+
+BOOST_AUTO_TEST_CASE(number__5_from_integer__six_byte_value__false)
+{
+    constexpr auto six_byte = power2<int64_t>(39u);
+    int64_t value64{};
+    BOOST_CHECK(!number::integer<5>::from_integer(value64, six_byte));
+}
+
+// chunk from_integer - encoded bytes (not round-tripped)
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__zero__empty)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(0), data_chunk{});
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__one__expected)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(1), base16_chunk("01"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__negative_one__expected)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(-1), base16_chunk("81"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__high_bit_clear__expected)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(127), base16_chunk("7f"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__negated_positive__positive_sign_byte)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(128), base16_chunk("8000"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__negated_negative__negative_sign_byte)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(-128), base16_chunk("8080"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__negative_sign_folded__expected)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(-127), base16_chunk("ff"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_integer__two_bytes__little_endian)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_integer(256), base16_chunk("0001"));
+}
+
+// chunk from_bool
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_bool__true__expected)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_bool(true), base16_chunk("01"));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_from_bool__false__empty)
+{
+    BOOST_CHECK_EQUAL(number::chunk::from_bool(false), data_chunk{});
+}
+
 BOOST_AUTO_TEST_SUITE_END()

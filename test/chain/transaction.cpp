@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(transaction__inequality__same__false)
     BOOST_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__inequality__different__false)
+BOOST_AUTO_TEST_CASE(transaction__inequality__different__true)
 {
     const transaction alpha;
     const transaction beta(tx2_data, true);
@@ -1406,8 +1406,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     BOOST_REQUIRE(prevout_script.is_valid());
 
     constexpr auto value = 0u;
-    ////constexpr auto bip143 = false;
-    ////constexpr auto bip342 = false;
     constexpr auto flags = flags::no_rules;
     const auto& input = test_tx.inputs_ptr()->begin();
 
@@ -1417,6 +1415,371 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
 
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
+}
+
+// signature_hash (unversioned coverage matrix)
+// ----------------------------------------------------------------------------
+
+constexpr char sighash_subscript[] = "76a91488350574280395ad2c3e2ee20e322073d94e5e4088ac";
+
+static transaction unversioned_sighash_transaction() NOEXCEPT
+{
+    const inputs ins
+    {
+        input{ point{ base16_hash("1111111111111111111111111111111111111111111111111111111111111111"), 0 }, script{}, 0xffffffff },
+        input{ point{ base16_hash("2222222222222222222222222222222222222222222222222222222222222222"), 1 }, script{}, 0xfffffffe }
+    };
+
+    const outputs outs
+    {
+        output{ 1000, script(base16_chunk("51"), false) },
+        output{ 2000, script(base16_chunk("52"), false) }
+    };
+
+    return transaction{ 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_all__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_all, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("6e8be8581d56213cea29b15b05763e925246c09e35ae9942fbf1bae8730f849a"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_none__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_none, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("07af6b16850616dbc378c34ef2b8cdfcc7d63e2a7dd85c84bab41e8dedca8d19"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_single, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("d2bcdf411cae692cff594654c7069d6bdc48378ddaa8e5e01d5a6f92a1843fb1"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_all_anyone_can_pay__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::all_anyone_can_pay, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("ebda8aa0db2288a47d097108211e555aa7319ad53e573a604ad7c04f99143b66"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_none_anyone_can_pay__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::none_anyone_can_pay, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("8cba56695f43d3185bbd74742a6ae82d0415bb0bb5a566d6d9ada1441ee9cb4f"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single_anyone_can_pay__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::single_anyone_can_pay, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("ae19e548c5bab135dafb27cf22a0117caf8ba3df728198527c469dd3fbac98b1"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_all_first_input__expected)
+{
+    const auto tx = unversioned_sighash_transaction();
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_all, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("f44ea6f29147d263dcff34dc0d1440d869039e1d159079e22c2b031dfda19521"));
+}
+
+// CONSENSUS: the Satoshi hash_single bug, input beyond outputs signs one_hash.
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single_output_overflow__one_hash)
+{
+    const inputs ins
+    {
+        input{ point{ base16_hash("1111111111111111111111111111111111111111111111111111111111111111"), 0 }, script{}, 0xffffffff },
+        input{ point{ base16_hash("2222222222222222222222222222222222222222222222222222222222222222"), 1 }, script{}, 0xffffffff }
+    };
+
+    const outputs outs{ output{ 1000, script(base16_chunk("51"), false) } };
+    const transaction tx{ 1, ins, outs, 0 };
+    const script subscript(base16_chunk(sighash_subscript), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_single, flags::no_rules));
+    BOOST_REQUIRE_EQUAL(sighash, one_hash);
+}
+
+// signature_hash (version 0, bip143 vectors)
+// ----------------------------------------------------------------------------
+
+constexpr auto bip143_flags = flags::bip141_rule | flags::bip143_rule;
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wpkh__expected)
+{
+    const transaction tx(base16_chunk("0100000002fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f0000000000eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac11000000"), true);
+    BOOST_REQUIRE(tx.is_valid());
+
+    const script subscript(base16_chunk("76a9141d0f172a0ecb48aee1be1f2687d2963ae33f71a188ac"), false);
+    const auto input = std::next(tx.inputs_ptr()->begin());
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 600000000, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("c37af31116d1b27caf68aae9e3ac82f1477929014d5b917657d0eb49478cb670"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2sh_p2wpkh__expected)
+{
+    const transaction tx(base16_chunk("0100000001db6b1b20aa0fd7b23880be2ecbd4a98130974cf4748fb66092ac4d3ceb1a54770100000000feffffff02b8b4eb0b000000001976a914a457b684d7f0d539a46a45bbc043f35b59d0d96388ac0008af2f000000001976a914fd270b1ee6abcaea97fea7ad0402e8bd8ad6d77c88ac92040000"), true);
+    BOOST_REQUIRE(tx.is_valid());
+
+    const script subscript(base16_chunk("76a91479091972186c449eb1ded22b78e40d009bdf008988ac"), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 1000000000, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("64f3b0f4dd2bb3aa1ce8566d220cc74dda9df97d8490cc81d89d735c92e59fb6"));
+}
+
+constexpr char bip143_p2wsh_tx[] = "010000000136641869ca081e70f394c6948e8af409e18b619df2ed74aa106c1ca29787b96e0100000000ffffffff0200e9a435000000001976a914389ffce9cd9ae88dcc0631e88a821ffdbe9bfe2688acc0832f05000000001976a9147480a33f950689af511e6e84c138dbbd3c3ee41588ac00000000";
+constexpr char bip143_p2wsh_script[] = "56210307b8ae49ac90a048e9b53357a2354b3334e9c8bee813ecb98e99a7e07e8c3ba32103b28f0c28bfab54554ae8c658ac5c3e0ce6e79ad336331f78c428dd43eea8449b21034b8113d703413d57761b8b9781957b8c0ac1dfe69f492580ca4195f50376ba4a21033400f6afecb833092a9a21cfdf1ed1376e58c5d1f47de74683123987e967a8f42103a6d48b1131e94ba04d9737d61acdaa1322008af9602b3b14862c07a1789aac162102d8b661b0b3302ee2f162b09e07a55ad5dfbe673a9f01d9f0c19617681024306b56ae";
+constexpr uint64_t bip143_p2wsh_value = 987654321;
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_all__expected)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("185c0be5263dce5b4bb50a047973c1b6272bfbd0103a89444597dc40b248ee7c"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_none__expected)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_none, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("e9733bc60ea13c95c6527066bb975a2ff29a925e80aa14c213f686cbae5d2f36"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_single__expected)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_single, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("1e1f1c303dc025bd664acb72e583e933fae4cff9148bf78c157d1e8f78530aea"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_all_anyone_can_pay__expected)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::all_anyone_can_pay, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("2a67f03e63a6a422125878b40b82da593be8d4efaafe88ee528af6e5a9955c6e"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_none_anyone_can_pay__expected)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::none_anyone_can_pay, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("781ba15f3779d5542ce8ecb5c18716733a5ee42a6f51488ec96154934e2c890a"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_single_anyone_can_pay__expected)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::single_anyone_can_pay, bip143_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("511e8e52ed574121fc1b654970395502128263f62662e076dc6baf05c2e6a99b"));
+}
+
+// signature_hash (version 1, bip341 key path vectors)
+// ----------------------------------------------------------------------------
+
+constexpr auto bip341_flags = flags::bip141_rule | flags::bip143_rule | flags::bip341_rule | flags::bip342_rule;
+
+static transaction bip341_spending_transaction() NOEXCEPT
+{
+    transaction tx(base16_chunk("02000000097de20cbff686da83a54981d2b9bab3586f4ca7e48f57f5b55963115f3b334e9c010000000000000000d7b7cab57b1393ace2d064f4d4a2cb8af6def61273e127517d44759b6dafdd990000000000fffffffff8e1f583384333689228c5d28eac13366be082dc57441760d957275419a418420000000000fffffffff0689180aa63b30cb162a73c6d2a38b7eeda2a83ece74310fda0843ad604853b0100000000feffffffaa5202bdf6d8ccd2ee0f0202afbbb7461d9264a25e5bfd3c5a52ee1239e0ba6c0000000000feffffff956149bdc66faa968eb2be2d2faa29718acbfe3941215893a2a3446d32acd050000000000000000000e664b9773b88c09c32cb70a2a3e4da0ced63b7ba3b22f848531bbb1d5d5f4c94010000000000000000e9aa6b8e6c9de67619e6a3924ae25696bb7b694bb677a632a74ef7eadfd4eabf0000000000ffffffffa778eb6a263dc090464cd125c466b5a99667720b1c110468831d058aa1b82af10100000000ffffffff0200ca9a3b000000001976a91406afd46bcdfd22ef94ac122aa11f241244a37ecc88ac807840cb0000000020ac9a87f5594be208f8532db38cff670c450ed2fea8fcdefcc9a663f78bab962b0065cd1d"), true);
+    const auto& ins = *tx.inputs_ptr();
+    ins[0]->prevout = to_shared(output{ 420000000, { base16_chunk("512053a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343"), false } });
+    ins[1]->prevout = to_shared(output{ 462000000, { base16_chunk("5120147c9c57132f6e7ecddba9800bb0c4449251c92a1e60371ee77557b6620f3ea3"), false } });
+    ins[2]->prevout = to_shared(output{ 294000000, { base16_chunk("76a914751e76e8199196d454941c45d1b3a323f1433bd688ac"), false } });
+    ins[3]->prevout = to_shared(output{ 504000000, { base16_chunk("5120e4d810fd50586274face62b8a807eb9719cef49c04177cc6b76a9a4251d5450e"), false } });
+    ins[4]->prevout = to_shared(output{ 630000000, { base16_chunk("512091b64d5324723a985170e4dc5a0f84c041804f2cd12660fa5dec09fc21783605"), false } });
+    ins[5]->prevout = to_shared(output{ 378000000, { base16_chunk("00147dd65592d0ab2fe0d0257d571abf032cd9db93dc"), false } });
+    ins[6]->prevout = to_shared(output{ 672000000, { base16_chunk("512075169f4001aa68f15bbed28b218df1d0a62cbbcf1188c6665110c293c907b831"), false } });
+    ins[7]->prevout = to_shared(output{ 546000000, { base16_chunk("5120712447206d7a5238acc7ff53fbe94a3b64539ad291c7cdbc490b7577e4b17df5"), false } });
+    ins[8]->prevout = to_shared(output{ 588000000, { base16_chunk("512077e30a5522dd9f894c3f8b8bd4c4b2cf82ca7da8a3ea6a239655c39c050ab220"), false } });
+    return tx;
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_single__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 0);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 420000000, tapleaf, script_version::taproot, coverage::hash_single, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("2514a6272f85cfa0f45eb907fcb0d121b808ed37c6ea160a5a9046ed5526d555"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_single_anyone_can_pay__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 1);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 462000000, tapleaf, script_version::taproot, coverage::single_anyone_can_pay, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("325a644af47e8a5a2591cda0ab0723978537318f10e6a63d4eed783b96a71a4d"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 3);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 504000000, tapleaf, script_version::taproot, coverage::hash_all, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("bf013ea93474aa67815b1b6cc441d23b64fa310911d991e713cd34c7f5d46669"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_default__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 4);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 630000000, tapleaf, script_version::taproot, coverage::hash_default, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("4f900a0bae3f1446fd48490c2958b5a023228f01661cda3496a11da502a7f7ef"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_none__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 6);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 672000000, tapleaf, script_version::taproot, coverage::hash_none, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("15f25c298eb5cdc7eb1d638dd2d45c97c4c59dcaec6679cfc16ad84f30876b85"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_none_anyone_can_pay__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 7);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 546000000, tapleaf, script_version::taproot, coverage::none_anyone_can_pay, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("cd292de50313804dabe4685e83f923d2969577191a3e1d2882220dca88cbeb10"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all_anyone_can_pay__expected)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 8);
+    const hash_cptr tapleaf{};
+    hash_digest sighash{};
+    BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 588000000, tapleaf, script_version::taproot, coverage::all_anyone_can_pay, bip341_flags));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("cccb739eca6c13a8a89e6e5cd317ffe55669bbda23f2fd37b0f18755e008edd2"));
+}
+
+// signature_hash (midstate cache invariance)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_interleaved_modes__cache_invariant)
+{
+    const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
+    const script subscript(base16_chunk(bip143_p2wsh_script), false);
+    const auto input = tx.inputs_ptr()->begin();
+    const hash_cptr tapleaf{};
+
+    hash_digest all1{};
+    BOOST_REQUIRE(tx.signature_hash(all1, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
+    BOOST_REQUIRE_EQUAL(all1, base16_array("185c0be5263dce5b4bb50a047973c1b6272bfbd0103a89444597dc40b248ee7c"));
+
+    hash_digest single1{};
+    BOOST_REQUIRE(tx.signature_hash(single1, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_single, bip143_flags));
+    BOOST_REQUIRE_EQUAL(single1, base16_array("1e1f1c303dc025bd664acb72e583e933fae4cff9148bf78c157d1e8f78530aea"));
+
+    hash_digest all2{};
+    BOOST_REQUIRE(tx.signature_hash(all2, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
+    BOOST_REQUIRE_EQUAL(all2, all1);
+
+    hash_digest none1{};
+    BOOST_REQUIRE(tx.signature_hash(none1, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_none, bip143_flags));
+    BOOST_REQUIRE_EQUAL(none1, base16_array("e9733bc60ea13c95c6527066bb975a2ff29a925e80aa14c213f686cbae5d2f36"));
+
+    hash_digest anyone1{};
+    BOOST_REQUIRE(tx.signature_hash(anyone1, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::all_anyone_can_pay, bip143_flags));
+    BOOST_REQUIRE_EQUAL(anyone1, base16_array("2a67f03e63a6a422125878b40b82da593be8d4efaafe88ee528af6e5a9955c6e"));
+
+    hash_digest all3{};
+    BOOST_REQUIRE(tx.signature_hash(all3, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
+    BOOST_REQUIRE_EQUAL(all3, all1);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_interleaved_modes__cache_invariant)
+{
+    const auto tx = bip341_spending_transaction();
+    const auto input = std::next(tx.inputs_ptr()->begin(), 4);
+    const hash_cptr tapleaf{};
+
+    hash_digest default1{};
+    BOOST_REQUIRE(tx.signature_hash(default1, input, {}, 630000000, tapleaf, script_version::taproot, coverage::hash_default, bip341_flags));
+    BOOST_REQUIRE_EQUAL(default1, base16_array("4f900a0bae3f1446fd48490c2958b5a023228f01661cda3496a11da502a7f7ef"));
+
+    const auto single_input = std::next(tx.inputs_ptr()->begin(), 0);
+    hash_digest single1{};
+    BOOST_REQUIRE(tx.signature_hash(single1, single_input, {}, 420000000, tapleaf, script_version::taproot, coverage::hash_single, bip341_flags));
+    BOOST_REQUIRE_EQUAL(single1, base16_array("2514a6272f85cfa0f45eb907fcb0d121b808ed37c6ea160a5a9046ed5526d555"));
+
+    hash_digest default2{};
+    BOOST_REQUIRE(tx.signature_hash(default2, input, {}, 630000000, tapleaf, script_version::taproot, coverage::hash_default, bip341_flags));
+    BOOST_REQUIRE_EQUAL(default2, default1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

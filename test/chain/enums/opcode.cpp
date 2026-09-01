@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__dup3_any_forks__3dup)
 }
 
 // Use the traditional serializations for all codes (in this case '2over' vs. 'over2').
-BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__over2_any_forks__vernotif)
+BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__over2_any_forks__2over)
 {
     BOOST_REQUIRE_EQUAL(opcode_to_mnemonic(opcode::over2, flags::no_rules), "2over");
     BOOST_REQUIRE_EQUAL(opcode_to_mnemonic(opcode::over2, flags::all_rules), "2over");
@@ -138,14 +138,14 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__swap2_any_forks__2swap)
 }
 
 // Use the traditional serializations for all codes (in this case '1add' vs. 'add1').
-BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__add1_any_forks__2rot)
+BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__add1_any_forks__1add)
 {
     BOOST_REQUIRE_EQUAL(opcode_to_mnemonic(opcode::add1, flags::no_rules), "1add");
     BOOST_REQUIRE_EQUAL(opcode_to_mnemonic(opcode::add1, flags::all_rules), "1add");
 }
 
 // Use the traditional serializations for all codes (in this case '1sub' vs. 'sub1').
-BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__sub1_any_forks__2swap)
+BOOST_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__sub1_any_forks__1sub)
 {
     BOOST_REQUIRE_EQUAL(opcode_to_mnemonic(opcode::sub1, flags::no_rules), "1sub");
     BOOST_REQUIRE_EQUAL(opcode_to_mnemonic(opcode::sub1, flags::all_rules), "1sub");
@@ -517,14 +517,14 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_from_mnemonic__reserved2__reserved_138)
     BOOST_REQUIRE(out_code == opcode::reserved_138);
 }
 
-BOOST_AUTO_TEST_CASE(opcode__opcode_from_mnemonic__op_vernotif__reserved_137)
+BOOST_AUTO_TEST_CASE(opcode__opcode_from_mnemonic__reserved_137__reserved_137)
 {
     opcode out_code;
     BOOST_REQUIRE(opcode_from_mnemonic(out_code, "reserved_137"));
     BOOST_REQUIRE(out_code == opcode::reserved_137);
 }
 
-BOOST_AUTO_TEST_CASE(opcode__opcode_from_mnemonic__op_vernotif__reserved_138)
+BOOST_AUTO_TEST_CASE(opcode__opcode_from_mnemonic__reserved_138__reserved_138)
 {
     opcode out_code;
     BOOST_REQUIRE(opcode_from_mnemonic(out_code, "reserved_138"));

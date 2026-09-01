@@ -658,15 +658,15 @@ BOOST_AUTO_TEST_CASE(operation__to_data__empty__underflow)
     BOOST_REQUIRE(instance.to_data().empty());
 }
 
-BOOST_AUTO_TEST_CASE(input__to_data__data__expected)
+BOOST_AUTO_TEST_CASE(operation__to_data__data__expected)
 {
     const auto size = expected_op.to_data().size();
     BOOST_REQUIRE_EQUAL(size, expected_op.serialized_size());
 }
 
-BOOST_AUTO_TEST_CASE(input__to_data__stream__expected)
+BOOST_AUTO_TEST_CASE(operation__to_data__stream__expected)
 {
-    // Write input to stream.
+    // Write operation to stream.
     std::stringstream iostream;
     expected_op.to_data(iostream);
     BOOST_REQUIRE(iostream);
@@ -679,9 +679,9 @@ BOOST_AUTO_TEST_CASE(input__to_data__stream__expected)
     BOOST_REQUIRE(copy == expected_op);
 }
 
-BOOST_AUTO_TEST_CASE(input__to_data__writer__expected)
+BOOST_AUTO_TEST_CASE(operation__to_data__writer__expected)
 {
-    // Write input to stream.
+    // Write operation to stream.
     std::stringstream iostream;
     write::bytes::ostream out(iostream);
     expected_op.to_data(out);
@@ -851,7 +851,7 @@ static_assert(operation::is_positive(opcode::push_positive_14));
 static_assert(operation::is_positive(opcode::push_positive_15));
 static_assert(operation::is_positive(opcode::push_positive_16));
 
-// operation__is_positive__always__expected
+// operation__is_nonnegative__always__expected
 static_assert(!operation::is_nonnegative(opcode::push_size_1));
 static_assert(!operation::is_nonnegative(opcode::push_size_75));
 static_assert(!operation::is_nonnegative(opcode::push_one_size));
@@ -949,25 +949,6 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_13) == 13u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_14) == 14u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_15) == 15u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
-
-// operation__opcode_to_nonnegative__all_nonnegatives__expected
-static_assert(operation::opcode_to_nonnegative(opcode::push_size_0) == 0u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_1) == 1u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_2) == 2u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_3) == 3u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_4) == 4u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_5) == 5u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_6) == 6u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_7) == 7u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_8) == 8u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_9) == 9u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_10) == 10u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_11) == 11u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_12) == 12u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_13) == 13u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_14) == 14u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_15) == 15u);
-static_assert(operation::opcode_to_nonnegative(opcode::push_positive_16) == 16u);
 
 ////static constexpr bool is_relaxed_push(opcode code) NOEXCEPT;
 ////static constexpr bool is_push(opcode code) NOEXCEPT;

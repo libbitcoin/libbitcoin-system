@@ -325,7 +325,7 @@ void header::set_state(const chain_state::cptr& state) const NOEXCEPT
 bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     bool scrypt) const NOEXCEPT
 {
-    static const auto limit = compact::expand(proof_of_work_limit);
+    const auto limit = compact::expand(proof_of_work_limit);
     const auto target = compact::expand(bits_);
 
     //*************************************************************************
@@ -343,17 +343,12 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     return to_uintx(scrypt ? scrypt_hash(to_data()) : hash()) > target;
 }
 
-// ****************************************************************************
-// CONSENSUS: 32 bit unsigned unix time overflows in 2106.
-// ****************************************************************************
 bool header::is_futuristic_timestamp(
     uint32_t timestamp_limit_seconds) const NOEXCEPT
 {
-    using namespace std::chrono;
-    static const auto two_hours = seconds(timestamp_limit_seconds);
-    const auto time = wall_clock::from_time_t(timestamp_);
-    const auto future = wall_clock::now() + two_hours;
-    return time > future;
+    const auto now = wall_clock::to_time_t(wall_clock::now());
+    return is_futuristic_timestamp(timestamp_, timestamp_limit_seconds,
+        sign_cast<uint64_t>(now));
 }
 
 // Validation.

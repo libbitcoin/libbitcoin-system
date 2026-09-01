@@ -21,7 +21,7 @@
 using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(point_tests)
+BOOST_AUTO_TEST_SUITE(point_json_tests)
 
 BOOST_AUTO_TEST_CASE(point__json__conversions__expected)
 {

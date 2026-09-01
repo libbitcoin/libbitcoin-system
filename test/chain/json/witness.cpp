@@ -21,9 +21,9 @@
 using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(witness_tests)
+BOOST_AUTO_TEST_SUITE(witness_json_tests)
 
-BOOST_AUTO_TEST_CASE(witness___json__conversions__expected)
+BOOST_AUTO_TEST_CASE(witness__json__conversions__expected)
 {
     const std::string_view text
     {

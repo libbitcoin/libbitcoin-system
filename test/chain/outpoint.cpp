@@ -35,13 +35,13 @@ static const outpoint expected_outpoint{ outpoint_data };
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(output__constructor__default__invalid)
+BOOST_AUTO_TEST_CASE(outpoint__constructor__default__invalid)
 {
     const outpoint instance;
     BOOST_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__move__valid)
+BOOST_AUTO_TEST_CASE(outpoint__constructor__move__valid)
 {
     auto copy = expected_outpoint;
     const outpoint instance{ std::move(copy) };
@@ -49,14 +49,14 @@ BOOST_AUTO_TEST_CASE(output__constructor__move__valid)
     BOOST_REQUIRE(instance == expected_outpoint);
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__copy__valid)
+BOOST_AUTO_TEST_CASE(outpoint__constructor__copy__valid)
 {
     const outpoint instance{ expected_outpoint };
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance == expected_outpoint);
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__move_parameters__valid)
+BOOST_AUTO_TEST_CASE(outpoint__constructor__move_parameters__valid)
 {
     constexpr uint32_t value{ 42 };
     constexpr uint32_t index{ 1234 };
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(output__constructor__move_parameters__valid)
     BOOST_REQUIRE_EQUAL(instance.value(), value);
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__copy_parameters__valid)
+BOOST_AUTO_TEST_CASE(outpoint__constructor__copy_parameters__valid)
 {
     constexpr uint32_t value{ 42 };
     constexpr uint32_t index{ 1234 };

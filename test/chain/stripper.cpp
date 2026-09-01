@@ -20,9 +20,40 @@
 
 BOOST_AUTO_TEST_SUITE(stripper_tests)
 
-BOOST_AUTO_TEST_CASE(stripper__always__success)
+using namespace system::chain;
+
+BOOST_AUTO_TEST_CASE(stripper__constructor__opcode__expected)
 {
-    BOOST_REQUIRE(true);
+    const stripper instance{ opcode::codeseparator };
+    BOOST_REQUIRE(instance.code() == opcode::codeseparator);
+}
+
+BOOST_AUTO_TEST_CASE(stripper__constructor__push_data__nominal_opcode)
+{
+    const auto data = base16_chunk("0102");
+    const chunk_xptr ptr{ data };
+    const stripper instance{ ptr };
+    BOOST_REQUIRE(instance.code() == opcode::push_size_2);
+    BOOST_REQUIRE_EQUAL(instance.data(), data);
+    BOOST_REQUIRE(instance.data_ptr() == ptr);
+}
+
+BOOST_AUTO_TEST_CASE(stripper__operation_equality__same_value_distinct_data__true)
+{
+    const auto data = base16_chunk("0102");
+    const chunk_xptr ptr{ data };
+    const stripper instance{ ptr };
+    const operation op{ base16_chunk("0102"), false };
+    BOOST_REQUIRE(op == instance);
+}
+
+BOOST_AUTO_TEST_CASE(stripper__operation_equality__different_data__false)
+{
+    const auto data = base16_chunk("0102");
+    const chunk_xptr ptr{ data };
+    const stripper instance{ ptr };
+    const operation op{ base16_chunk("0103"), false };
+    BOOST_REQUIRE(!(op == instance));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
