@@ -342,4 +342,43 @@ BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_greater_than_2_h
     BOOST_REQUIRE(instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
 }
 
+// header__is_futuristic_timestamp__static__expected
+static_assert(!accessor::is_futuristic_timestamp(1007200, 7200, 1000000));
+static_assert(accessor::is_futuristic_timestamp(1007201, 7200, 1000000));
+static_assert(!accessor::is_futuristic_timestamp(max_uint32, 7200, max_uint32));
+
+BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__at_limit__false)
+{
+    BOOST_REQUIRE(!accessor::is_futuristic_timestamp(1007200, 7200, 1000000));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__above_limit__true)
+{
+    BOOST_REQUIRE(accessor::is_futuristic_timestamp(1007201, 7200, 1000000));
+}
+
+BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__maximum_timestamp_at_2106__false)
+{
+    BOOST_REQUIRE(!accessor::is_futuristic_timestamp(max_uint32, 7200, max_uint32));
+}
+
+// check
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__check__genesis_header__block_success)
+{
+    const settings settings(selection::mainnet);
+    const auto& genesis = settings.genesis_block.header();
+    const code ec = genesis.check(settings.timestamp_limit_seconds, settings.proof_of_work_limit, false);
+    BOOST_REQUIRE_EQUAL(ec, error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(header__check__zero_bits__invalid_proof_of_work)
+{
+    const settings settings(selection::mainnet);
+    const header instance{ 1, hash_digest{}, hash_digest{}, 1, 0, 0 };
+    const code ec = instance.check(settings.timestamp_limit_seconds, settings.proof_of_work_limit, false);
+    BOOST_REQUIRE_EQUAL(ec, error::invalid_proof_of_work);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
