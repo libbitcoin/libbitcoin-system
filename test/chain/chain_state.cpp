@@ -381,6 +381,15 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_time_exceeded__pro
     BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
 }
 
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__mainnet_limit__proof_of_work_limit)
+{
+    settings settings(selection::mainnet);
+    const auto values = get_values(settings.retargeting_interval());
+    settings.forks.retarget = true;
+    const auto work = test_chain_state::work_required(values, settings.forks, settings);
+    BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
+}
+
 BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_disabled__lower_value)
 {
     settings settings(chain::selection::mainnet);

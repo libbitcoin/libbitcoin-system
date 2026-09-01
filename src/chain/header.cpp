@@ -325,7 +325,7 @@ void header::set_state(const chain_state::cptr& state) const NOEXCEPT
 bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
     bool scrypt) const NOEXCEPT
 {
-    static const auto limit = compact::expand(proof_of_work_limit);
+    const auto limit = compact::expand(proof_of_work_limit);
     const auto target = compact::expand(bits_);
 
     //*************************************************************************

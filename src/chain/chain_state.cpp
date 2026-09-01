@@ -461,7 +461,7 @@ uint32_t chain_state::work_required_retarget(const data& values,
     uint32_t retargeting_interval,
     uint32_t retargeting_interval_seconds) NOEXCEPT
 {
-    static const auto limit = compact::expand(proof_of_work_limit);
+    const auto limit = compact::expand(proof_of_work_limit);
     auto target = compact::expand(work_required_retarget_bits(values,
         forks, proof_of_work_limit, retargeting_interval));
 
