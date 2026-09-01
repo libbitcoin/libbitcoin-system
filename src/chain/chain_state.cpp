@@ -209,7 +209,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip34 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip34 ||
         (is_active(count_2, settings.bip34_activation_threshold) &&
-        version >= settings.bip34_version))
+        ge(version, settings.bip34_version)))
     {
         result.flags |= flags::bip34_rule;
     }
@@ -217,7 +217,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip66 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip66 ||
         (is_active(count_3, settings.bip34_activation_threshold) &&
-        version >= settings.bip66_version))
+        ge(version, settings.bip66_version)))
     {
         result.flags |= flags::bip66_rule;
     }
@@ -225,7 +225,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip65 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip65 ||
         (is_active(count_4, settings.bip34_activation_threshold) &&
-        version >= settings.bip65_version))
+        ge(version, settings.bip65_version)))
     {
         result.flags |= flags::bip65_rule;
     }

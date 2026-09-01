@@ -81,9 +81,7 @@ BOOST_AUTO_TEST_CASE(chain_state__activation__bip34_signalled_but_low_self_versi
     BOOST_REQUIRE(!to_bool(state.flags & flags::bip34_rule));
 }
 
-// The history count is signed (satoshi) but the self version gate is
-// unsigned, so a negative self version activates (subsumed by bip90).
-BOOST_AUTO_TEST_CASE(chain_state__activation__negative_self_version__bip34_rule)
+BOOST_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip34_rule)
 {
     settings settings(selection::mainnet);
     settings.forks.bip90 = false;
@@ -91,7 +89,29 @@ BOOST_AUTO_TEST_CASE(chain_state__activation__negative_self_version__bip34_rule)
     values.version.self = 0x80000000;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip34_version);
     const auto state = test_chain_state::activation(values, settings.forks, settings);
-    BOOST_REQUIRE(to_bool(state.flags & flags::bip34_rule));
+    BOOST_REQUIRE(!to_bool(state.flags & flags::bip34_rule));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip66_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    chain_state::data values{};
+    values.version.self = 0x80000000;
+    values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip66_version);
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(!to_bool(state.flags & flags::bip66_rule));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip65_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    chain_state::data values{};
+    values.version.self = 0x80000000;
+    values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip65_version);
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(!to_bool(state.flags & flags::bip65_rule));
 }
 
 BOOST_AUTO_TEST_CASE(chain_state__activation__negative_history_versions__not_counted)
