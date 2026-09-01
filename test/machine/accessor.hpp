@@ -20,12 +20,12 @@
 #define LIBBITCOIN_SYSTEM_TEST_MACHINE_ACCESSOR_HPP
 
 // Exposes the protected machine surface for isolated unit testing.
-template <typename Stack>
+template <typename Stack, typename Program = machine::program<Stack>>
 class interpreter_accessor
-  : public machine::interpreter<Stack>
+  : public machine::interpreter<Stack, Program>
 {
 public:
-    using base = machine::interpreter<Stack>;
+    using base = machine::interpreter<Stack, Program>;
     using base::base;
 
     // Operation dispatch.
@@ -218,8 +218,83 @@ public:
     using base::verify_schnorr_signature;
 };
 
+// Substitutes signature decoding, hashing and verification for isolation.
+template <typename Stack>
+class mock_program
+  : public machine::program<Stack>
+{
+public:
+    using machine::program<Stack>::program;
+
+    // Results returned by the mocked methods.
+    bool decode_result{ true };
+    bool hash_result{ true };
+    bool ecdsa_result{ true };
+    bool schnorr_result{ true };
+
+    // Number of leading ecdsa verifications to fail before ecdsa_result.
+    mutable size_t ecdsa_failures{ 0 };
+
+protected:
+    bool decode_signature(ec_signature&, const data_slice&,
+        bool) const NOEXCEPT override
+    {
+        return decode_result;
+    }
+
+    bool signature_hash(hash_digest& out, uint8_t) const NOEXCEPT override
+    {
+        out = one_hash;
+        return hash_result;
+    }
+
+    bool signature_hash(hash_digest& out, const chain::script&,
+        uint8_t) const NOEXCEPT override
+    {
+        out = one_hash;
+        return hash_result;
+    }
+
+    bool set_hash(uint8_t) const NOEXCEPT override
+    {
+        return hash_result;
+    }
+
+    void set_hash(const chain::script&, uint8_t) const NOEXCEPT override
+    {
+    }
+
+    const hash_digest& cached_hash() const NOEXCEPT override
+    {
+        return one_hash;
+    }
+
+    bool verify_ecdsa_signature(const data_chunk&, const hash_digest&,
+        const ec_signature&, bool=true) const NOEXCEPT override
+    {
+        if (is_nonzero(ecdsa_failures))
+        {
+            --ecdsa_failures;
+            return false;
+        }
+
+        return ecdsa_result;
+    }
+
+    bool try_batch_multisig_verification(const chunk_xptrs&,
+        const chunk_xptrs&) const NOEXCEPT override
+    {
+        return false;
+    }
+
+    bool verify_schnorr_signature(const data_chunk&, const hash_digest&,
+        const ec_signature&) const NOEXCEPT override
+    {
+        return schnorr_result;
+    }
+};
+
 // Single-input transaction for input-script program construction.
-// The transaction must outlive any program constructed over it.
 inline chain::transaction accessor_transaction(const chain::script& script,
     uint32_t sequence=chain::max_input_sequence, uint32_t locktime=0,
     uint32_t version=1) NOEXCEPT
@@ -230,9 +305,8 @@ inline chain::transaction accessor_transaction(const chain::script& script,
     return chain::transaction{ version, inputs, outputs, locktime };
 }
 
-// Composes an interpreter_accessor with the transaction and capture that the
-// contained program references, so a test can construct state in one line.
-template <typename Stack>
+// Composes an interpreter_accessor with the transaction it references.
+template <typename Stack, typename Program = machine::program<Stack>>
 class machine_accessor
 {
 public:
@@ -244,7 +318,7 @@ public:
     {
     }
 
-    interpreter_accessor<Stack>* operator->() NOEXCEPT
+    interpreter_accessor<Stack, Program>* operator->() NOEXCEPT
     {
         return &accessor_;
     }
@@ -257,7 +331,7 @@ public:
 private:
     const chain::signatures capture_{};
     const chain::transaction transaction_;
-    interpreter_accessor<Stack> accessor_;
+    interpreter_accessor<Stack, Program> accessor_;
 };
 
 #endif

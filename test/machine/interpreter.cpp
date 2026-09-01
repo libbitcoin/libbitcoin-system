@@ -2089,21 +2089,17 @@ BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__s
 // Tapscript program state (via accessor).
 // ----------------------------------------------------------------------------
 
-namespace {
-
-// A tapscript accessor requires the transaction, stack and capture to outlive
-// it, so tests construct these locally from a leaf script.
-script to_op_success_script() NOEXCEPT
+static script to_op_success_script() NOEXCEPT
 {
     return script{ operations{ operation{ opcode::reserved_80 } } };
 }
 
-script to_minimal_leaf_script() NOEXCEPT
+static script to_minimal_leaf_script() NOEXCEPT
 {
     return script{ operations{ operation{ opcode::push_positive_1 } } };
 }
 
-chunk_cptrs to_tapscript_witness(const script& leaf) NOEXCEPT
+static chunk_cptrs to_tapscript_witness(const script& leaf) NOEXCEPT
 {
     const data_chunk control(add1(ec_xonly_size), tapscript_version);
     chunk_cptrs stack{};
@@ -2111,8 +2107,6 @@ chunk_cptrs to_tapscript_witness(const script& leaf) NOEXCEPT
     stack.push_back(to_shared<data_chunk>(control));
     return stack;
 }
-
-} // namespace
 
 BOOST_AUTO_TEST_CASE(interpreter__initialize__tapscript_op_success__prevalid_script)
 {
@@ -2184,9 +2178,151 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__tapscript__op_reserved)
     BOOST_REQUIRE_EQUAL(code{ accessor.op_check_multisig_verify() }, error::op_reserved);
 }
 
-// The bip342 budget is the serialized witness size plus fifty. This witness
-// serializes to 37 bytes (count, one byte leaf, 33 byte control), affording
-// exactly one fifty-unit sigop.
+// Signature operation control flow (mocked verification).
+// ----------------------------------------------------------------------------
+
+using mocked = mock_program<contiguous_stack>;
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__mocked_valid_signature__true_pushed)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__mocked_invalid_signature__false_pushed)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->ecdsa_result = false;
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_verify__mocked_valid_signature__op_success)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig_verify() }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_verify__mocked_invalid_signature__op_check_sig_verify4)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->ecdsa_result = false;
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig_verify() }, error::op_check_sig_verify4);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_verify__mocked_hash_failure__op_check_sig_verify3)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->hash_result = false;
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_sig_verify() }, error::op_check_sig_verify3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__mocked_one_of_one__true_pushed)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_signed64(1);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(machine->peek_bool_());
+}
+
+// A failed verification advances to the next key, not the next endorsement.
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__mocked_one_of_two_first_key_unmatched__op_success)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->ecdsa_failures = 1;
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_signed64(1);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x03 });
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_success);
+}
+
+// CONSENSUS: endorsements must be ordered as their keys.
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__mocked_out_of_order__op_check_multisig_mismatch)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->ecdsa_failures = 1;
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_chunk(data_chunk{ 0x30, 0x02 });
+    machine->push_signed64(2);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x03 });
+    machine->push_signed64(2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_mismatch);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__mocked_mismatch__false_pushed)
+{
+    machine_accessor<contiguous_stack, mocked> machine{ {}, flags::all_rules };
+    machine->ecdsa_result = false;
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x30, 0x01 });
+    machine->push_signed64(1);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_success);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__mocked_valid_signature__incremented)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack, mocked> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.push_chunk(data_chunk(ec_signature_size, 0x11));
+    accessor.push_signed64(0);
+    accessor.push_chunk(data_chunk(ec_xonly_size, 0x02));
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig_add() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(accessor.pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__mocked_hash_failure__op_check_sig_add5)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack, mocked> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.hash_result = false;
+    accessor.push_chunk(data_chunk(ec_signature_size, 0x11));
+    accessor.push_signed64(0);
+    accessor.push_chunk(data_chunk(ec_xonly_size, 0x02));
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig_add() }, error::op_check_sig_add5);
+}
+
+// This witness serializes to 37 bytes, affording exactly one sigop [bip342].
 BOOST_AUTO_TEST_CASE(interpreter__sigops_increment__budget_boundary__expected)
 {
     const auto leaf = to_minimal_leaf_script();
