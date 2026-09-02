@@ -231,6 +231,10 @@
     #define HAVE_ARM_ASSEMBLY
 #endif
 
+#if defined(__FAST_MATH__) || defined(_M_FP_FAST)
+    #define HAVE_FAST_MATH
+#endif
+
 /// MSC predefined constant for Visual Studio version (exclusive).
 /// ---------------------------------------------------------------------------
 
