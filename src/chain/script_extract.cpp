@@ -62,6 +62,46 @@ script_version script::version() const NOEXCEPT
     }
 }
 
+const chunk_cptr& script::public_key() const NOEXCEPT
+{
+    static const auto empty = to_shared<const data_chunk>();
+    return is_pay_public_key_pattern(ops()) ? ops().front().data_ptr() : empty;
+}
+
+uint8_t script::multisig_required() const NOEXCEPT
+{
+    uint32_t count{};
+    return is_pay_multisig_pattern(ops()) && ops_.front().as_unsigned32(count) ?
+        narrow_cast<uint8_t>(count) : 0_u8;
+}
+
+chunk_cptrs script::multisig_keys() const NOEXCEPT
+{
+    chunk_cptrs keys{};
+    if (!is_pay_multisig_pattern(ops()))
+        return keys;
+
+    keys.reserve(ops().size() - 3u);
+    for (auto op = std::next(ops().begin());
+        op != std::prev(ops().end(), 2); ++op)
+        keys.push_back(op->data_ptr());
+
+    return keys;
+}
+
+chunk_cptrs script::endorsements() const NOEXCEPT
+{
+    chunk_cptrs sigs{};
+    if (!is_sign_multisig_pattern(ops()))
+        return sigs;
+
+    sigs.reserve(sub1(ops().size()));
+    for (auto op = std::next(ops().begin()); op != ops().end(); ++op)
+        sigs.push_back(op->data_ptr());
+
+    return sigs;
+}
+
 // Caller should test for is_sign_script_hash_pattern when sign_key_hash result
 // as it is possible for an input script to match both patterns.
 script_pattern script::pattern() const NOEXCEPT

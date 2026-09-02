@@ -168,6 +168,10 @@ public:
     const chunk_cptr& witness_program() const NOEXCEPT;
     uint8_t version_value() const NOEXCEPT;
     script_version version() const NOEXCEPT;
+    const chunk_cptr& public_key() const NOEXCEPT;
+    uint8_t multisig_required() const NOEXCEPT;
+    chunk_cptrs multisig_keys() const NOEXCEPT;
+    chunk_cptrs endorsements() const NOEXCEPT;
     script_pattern pattern() const NOEXCEPT;
     script_pattern input_pattern() const NOEXCEPT;
     script_pattern output_pattern() const NOEXCEPT;
