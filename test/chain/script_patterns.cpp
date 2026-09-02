@@ -636,8 +636,8 @@ BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__two_pushes__false)
 BOOST_AUTO_TEST_CASE(script__version_value__not_witness_program__unversioned)
 {
     const script instance(script_return);
-    BOOST_REQUIRE_EQUAL(instance.version_value(),
-        to_value(script_version::unversioned));
+    constexpr auto unversioned = to_value(script_version::unversioned);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), unversioned);
     BOOST_REQUIRE(instance.version() == script_version::unversioned);
 }
 
@@ -668,6 +668,73 @@ BOOST_AUTO_TEST_CASE(script__version_value__maximum_program__sixteen)
     const script instance{ script::to_pay_witness_pattern(16, null_hash) };
     BOOST_REQUIRE_EQUAL(instance.version_value(), 16u);
     BOOST_REQUIRE(instance.version() == script_version::reserved);
+}
+
+// public_key
+
+BOOST_AUTO_TEST_CASE(script__public_key__not_pay_public_key__empty)
+{
+    const script instance(script_return);
+    BOOST_REQUIRE(instance.public_key()->empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__public_key__pay_public_key__key)
+{
+    const data_chunk key(33, 0x02);
+    const script instance{ script::to_pay_public_key_pattern(key) };
+    BOOST_REQUIRE(*instance.public_key() == key);
+}
+
+// multisig_required/multisig_keys
+
+BOOST_AUTO_TEST_CASE(script__multisig_required__not_multisig__zero_and_empty)
+{
+    const script instance(script_return);
+    BOOST_REQUIRE_EQUAL(instance.multisig_required(), 0u);
+    BOOST_REQUIRE(instance.multisig_keys().empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__multisig_required__two_of_three__two_and_keys)
+{
+    // The pattern builder requires valid public keys (compressed prefixes).
+    const data_chunk key1(33, 0x02);
+    const data_chunk key2(33, 0x03);
+    auto key3 = key1;
+    key3.back() = 0x04;
+    const data_stack points{ key1, key2, key3 };
+    const script instance{ script::to_pay_multisig_pattern(2, points) };
+    BOOST_REQUIRE_EQUAL(instance.multisig_required(), 2u);
+
+    const auto keys = instance.multisig_keys();
+    BOOST_REQUIRE_EQUAL(keys.size(), 3u);
+    BOOST_REQUIRE(*keys.front() == key1);
+    BOOST_REQUIRE(*keys.back() == key3);
+}
+
+// endorsements
+
+BOOST_AUTO_TEST_CASE(script__endorsements__not_sign_multisig__empty)
+{
+    const script instance(script_return);
+    BOOST_REQUIRE(instance.endorsements().empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__endorsements__two_endorsements__both)
+{
+    const data_chunk sig1(71, 0x30);
+    const data_chunk sig2(72, 0x30);
+    const operations ops
+    {
+        { opcode::push_size_0 },
+        { data_chunk{ sig1 }, false },
+        { data_chunk{ sig2 }, false }
+    };
+
+    const script instance{ ops };
+    const auto sigs = instance.endorsements();
+    BOOST_REQUIRE_EQUAL(sigs.size(), 2u);
+    BOOST_REQUIRE(*sigs.front() == sig1);
+    BOOST_REQUIRE(*sigs.back() == sig2);
 }
 
 BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__empty__false)
