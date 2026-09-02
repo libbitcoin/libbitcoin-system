@@ -43,60 +43,6 @@
     #include <windows.h>
 #endif
 
-namespace libbitcoin
-{
-#if defined(NDEBUG)
-    constexpr auto build_checked = false;
-#else
-    constexpr auto build_checked = true;
-#endif
-
-#if defined(HAVE_X32) || defined(HAVE_ARM32)
-    constexpr auto have_32b = true;
-    constexpr auto have_64b = false;
-#else
-    constexpr auto have_32b = false;
-    constexpr auto have_64b = true;
-#endif
-
-#ifdef HAVE_XCPU
-    constexpr auto have_xcpu = true;
-#else
-    constexpr auto have_xcpu = false;
-#endif
-
-#ifdef HAVE_ARM
-    constexpr auto have_arm = true;
-#else
-    constexpr auto have_arm = false;
-#endif
-
-#if defined(HAVE_128)
-    constexpr auto have_128 = true;
-#else
-    constexpr auto have_128 = false;
-#endif
-    
-#if defined(HAVE_256)
-    constexpr auto have_256 = true;
-#else
-    constexpr auto have_256 = false;
-#endif
-
-#if defined(HAVE_512)
-    constexpr auto have_512 = true;
-#else
-    constexpr auto have_512 = false;
-#endif
-
-#if defined(HAVE_SHA)
-    constexpr auto have_sha = true;
-#else
-    constexpr auto have_sha = false;
-#endif
-
-} // namespace libbitcoin
-
 /// Create bc namespace alias.
 namespace bc = libbitcoin;
 
