@@ -297,6 +297,41 @@ bool descriptor::key_expression::derive(data_chunk& out,
     }
 }
 
+bool descriptor::key_expression::derive(psbt::derivation& out,
+    uint32_t index) const NOEXCEPT
+{
+    if (!derive(out.point, index))
+        return false;
+
+    // An origin provides the fingerprint and leading path elements. Without
+    // one an extended key is its own origin and a bare key its fingerprint.
+    auto& to = out.origin;
+    to.path.clear();
+    if (origin.has_value())
+    {
+        to.fingerprint = origin->fingerprint;
+        to.path = origin->path;
+    }
+    else if (form == key_form::point || form == key_form::secret)
+    {
+        to.fingerprint = from_little_endian<uint32_t>(
+            bitcoin_short_hash(out.point));
+    }
+    else
+    {
+        const auto& key = (form == key_form::extended_private) ?
+            extended_private.to_public() : extended_public;
+        to.fingerprint = from_little_endian<uint32_t>(
+            bitcoin_short_hash(key.point()));
+    }
+
+    to.path.insert(to.path.end(), path.begin(), path.end());
+    if (wildcard)
+        to.path.push_back(hardened ? bit_or(index, hardened_bit) : index);
+
+    return true;
+}
+
 // Parse.
 // ----------------------------------------------------------------------------
 
@@ -388,51 +423,64 @@ bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
 // Derive.
 // ----------------------------------------------------------------------------
 
-bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
+bool descriptor::derive_signings(signing::list& out, const node& tree,
     uint32_t index, bool top) NOEXCEPT
 {
     switch (tree.type)
     {
         case function::pk:
         {
-            data_chunk point{};
-            if (!tree.keys.front().derive(point, index) ||
-                !is_public_key(point))
+            psbt::derivation key{};
+            if (!tree.keys.front().derive(key, index) ||
+                !is_public_key(key.point))
                 return false;
 
-            out.emplace_back(script::to_pay_public_key_pattern(point));
+            signing item{};
+            item.script = { script::to_pay_public_key_pattern(key.point) };
+            item.derivations.push_back(std::move(key));
+            out.push_back(std::move(item));
             return true;
         }
         case function::pkh:
         {
-            data_chunk point{};
-            if (!tree.keys.front().derive(point, index) ||
-                !is_public_key(point))
+            psbt::derivation key{};
+            if (!tree.keys.front().derive(key, index) ||
+                !is_public_key(key.point))
                 return false;
 
-            out.emplace_back(script::to_pay_key_hash_pattern(
-                bitcoin_short_hash(point)));
+            signing item{};
+            item.script = { script::to_pay_key_hash_pattern(
+                bitcoin_short_hash(key.point)) };
+            item.derivations.push_back(std::move(key));
+            out.push_back(std::move(item));
             return true;
         }
         case function::wpkh:
         {
-            data_chunk point{};
-            if (!tree.keys.front().derive(point, index) ||
-                !is_compressed_key(point))
+            psbt::derivation key{};
+            if (!tree.keys.front().derive(key, index) ||
+                !is_compressed_key(key.point))
                 return false;
 
-            out.emplace_back(script::to_pay_witness_key_hash_pattern(
-                bitcoin_short_hash(point)));
+            signing item{};
+            item.script = { script::to_pay_witness_key_hash_pattern(
+                bitcoin_short_hash(key.point)) };
+            item.derivations.push_back(std::move(key));
+            out.push_back(std::move(item));
             return true;
         }
         case function::sh:
         {
-            chain::scripts inner{};
-            if (top && derive_scripts(inner, *tree.child, index, false) &&
+            signing::list inner{};
+            if (top && derive_signings(inner, *tree.child, index, false) &&
                 is_one(inner.size()))
             {
-                out.emplace_back(script::to_pay_script_hash_pattern(
-                    bitcoin_short_hash(inner.front().to_data(false))));
+                auto& item = inner.front();
+                item.embedded = to_shared<chain::script>(
+                    std::move(item.script));
+                item.script = { script::to_pay_script_hash_pattern(
+                    bitcoin_short_hash(item.embedded->to_data(false))) };
+                out.push_back(std::move(item));
                 return true;
             }
 
@@ -440,14 +488,18 @@ bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
         }
         case function::wsh:
         {
-            chain::scripts inner{};
+            signing::list inner{};
             if (tree.child->type != function::wpkh &&
                 tree.child->type != function::wsh &&
-                derive_scripts(inner, *tree.child, index, false) &&
+                derive_signings(inner, *tree.child, index, false) &&
                 is_one(inner.size()))
             {
-                out.emplace_back(script::to_pay_witness_script_hash_pattern(
-                    sha256_hash(inner.front().to_data(false))));
+                auto& item = inner.front();
+                item.witness = to_shared<chain::script>(
+                    std::move(item.script));
+                item.script = { script::to_pay_witness_script_hash_pattern(
+                    sha256_hash(item.witness->to_data(false))) };
+                out.push_back(std::move(item));
                 return true;
             }
 
@@ -456,39 +508,47 @@ bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
         case function::multi:
         case function::sortedmulti:
         {
+            signing item{};
             data_stack points{};
             for (const auto& key: tree.keys)
             {
-                data_chunk point{};
-                if (!key.derive(point, index) || !is_public_key(point))
+                psbt::derivation derived{};
+                if (!key.derive(derived, index) ||
+                    !is_public_key(derived.point))
                     return false;
 
-                points.push_back(std::move(point));
+                points.push_back(derived.point);
+                item.derivations.push_back(std::move(derived));
             }
 
             if (tree.type == function::sortedmulti)
                 std::sort(points.begin(), points.end());
 
-            out.emplace_back(script::to_pay_multisig_pattern(tree.required,
-                points));
+            item.script = { script::to_pay_multisig_pattern(tree.required,
+                points) };
+            out.push_back(std::move(item));
             return true;
         }
         case function::combo:
         {
-            data_chunk point{};
-            if (!top || !tree.keys.front().derive(point, index))
+            psbt::derivation key{};
+            if (!top || !tree.keys.front().derive(key, index))
                 return false;
 
-            out.emplace_back(script::to_pay_public_key_pattern(point));
+            const auto& point = key.point;
+            out.push_back({ { script::to_pay_public_key_pattern(point) },
+                {}, {}, { key } });
             const auto hash = bitcoin_short_hash(point);
-            out.emplace_back(script::to_pay_key_hash_pattern(hash));
+            out.push_back({ { script::to_pay_key_hash_pattern(hash) },
+                {}, {}, { key } });
             if (is_compressed_key(point))
             {
-                const script witness{
-                    script::to_pay_witness_key_hash_pattern(hash) };
-                out.push_back(witness);
-                out.emplace_back(script::to_pay_script_hash_pattern(
-                    bitcoin_short_hash(witness.to_data(false))));
+                const auto witness = to_shared<chain::script>(
+                    script::to_pay_witness_key_hash_pattern(hash));
+                out.push_back({ *witness, {}, {}, { key } });
+                out.push_back({ { script::to_pay_script_hash_pattern(
+                    bitcoin_short_hash(witness->to_data(false))) },
+                    witness, {}, { key } });
             }
 
             return true;
@@ -519,7 +579,9 @@ bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
 
             const auto output = unsafe_array_cast<uint8_t, ec_xonly_size>(
                 std::next(lifted.data()));
-            out.emplace_back(script::to_pay_witness_taproot_pattern(output));
+            out.push_back(
+                { { script::to_pay_witness_taproot_pattern(output) },
+                {}, {}, {} });
             return true;
         }
         case function::addr:
@@ -527,14 +589,14 @@ bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
             const payment_address base58{ tree.address };
             if (base58)
             {
-                out.push_back(base58.output_script());
+                out.push_back({ base58.output_script(), {}, {}, {} });
                 return true;
             }
 
             const witness_address witness{ tree.address };
             if (witness)
             {
-                out.push_back(witness.script());
+                out.push_back({ witness.script(), {}, {}, {} });
                 return true;
             }
 
@@ -546,7 +608,7 @@ bool descriptor::derive_scripts(chain::scripts& out, const node& tree,
             if (!script.is_valid())
                 return false;
 
-            out.push_back(script);
+            out.push_back({ script, {}, {}, {} });
             return true;
         }
         default:
@@ -663,7 +725,16 @@ bool descriptor::solvable() const NOEXCEPT
 chain::scripts descriptor::scripts(uint32_t index) const NOEXCEPT
 {
     chain::scripts out{};
-    if (!valid_ || !derive_scripts(out, tree_, index, true))
+    for (auto& item: signings(index))
+        out.push_back(std::move(item.script));
+
+    return out;
+}
+
+descriptor::signing::list descriptor::signings(uint32_t index) const NOEXCEPT
+{
+    signing::list out{};
+    if (!valid_ || !derive_signings(out, tree_, index, true))
         return {};
 
     return out;

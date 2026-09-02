@@ -158,6 +158,89 @@ BOOST_AUTO_TEST_CASE(descriptor__scripts__origin_prefix__parsed)
     BOOST_REQUIRE_EQUAL(instance.scripts(0).size(), 1u);
 }
 
+// signings
+
+BOOST_AUTO_TEST_CASE(descriptor__signings__origin_pkh__origin_derivation)
+{
+    const descriptor instance("pkh([deadbeef/1h/2]" GENESIS_KEY ")");
+    BOOST_REQUIRE(instance);
+
+    const auto signings = instance.signings(0);
+    BOOST_REQUIRE_EQUAL(signings.size(), 1u);
+    BOOST_REQUIRE(signings.front().script == instance.scripts(0).front());
+    BOOST_REQUIRE(!signings.front().embedded);
+    BOOST_REQUIRE(!signings.front().witness);
+
+    // The origin provides the fingerprint (little-endian) and leading path.
+    const auto& derived = signings.front().derivations;
+    BOOST_REQUIRE_EQUAL(derived.size(), 1u);
+    BOOST_REQUIRE_EQUAL(derived.front().origin.fingerprint, 0xefbeadde_u32);
+
+    const std_vector<uint32_t> path{ 0x80000001_u32, 2_u32 };
+    BOOST_REQUIRE(derived.front().origin.path == path);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__signings__bare_key__own_fingerprint)
+{
+    const descriptor instance("pk(" GENESIS_KEY ")");
+    BOOST_REQUIRE(instance);
+
+    const auto signings = instance.signings(0);
+    BOOST_REQUIRE_EQUAL(signings.size(), 1u);
+
+    const auto& derived = signings.front().derivations;
+    BOOST_REQUIRE_EQUAL(derived.size(), 1u);
+    BOOST_REQUIRE(derived.front().origin.path.empty());
+
+    const auto hash = bitcoin_short_hash(derived.front().point);
+    const auto fingerprint = from_little_endian<uint32_t>(hash);
+    BOOST_REQUIRE_EQUAL(derived.front().origin.fingerprint, fingerprint);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__signings__ranged_xpub__own_origin_with_index)
+{
+    const descriptor instance("pkh(" VECTOR1_M0H "/1/*)");
+    BOOST_REQUIRE(instance);
+
+    const auto signings = instance.signings(7);
+    BOOST_REQUIRE_EQUAL(signings.size(), 1u);
+
+    // An extended key without an origin prefix is its own origin.
+    const hd_public parent{ VECTOR1_M0H };
+    const auto& origin = signings.front().derivations.front().origin;
+    const auto hash = bitcoin_short_hash(parent.point());
+    const auto fingerprint = from_little_endian<uint32_t>(hash);
+    BOOST_REQUIRE_EQUAL(origin.fingerprint, fingerprint);
+
+    const std_vector<uint32_t> path{ 1_u32, 7_u32 };
+    BOOST_REQUIRE(origin.path == path);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__signings__sh_wsh_multi__embedded_and_witness)
+{
+    const descriptor instance("sh(wsh(multi(1," GENESIS_KEY ")))");
+    BOOST_REQUIRE(instance);
+
+    const auto signings = instance.signings(0);
+    BOOST_REQUIRE_EQUAL(signings.size(), 1u);
+
+    // The p2sh embedded script is the p2wsh wrapper of the witness script.
+    const auto& item = signings.front();
+    BOOST_REQUIRE(item.embedded);
+    BOOST_REQUIRE(item.witness);
+    BOOST_REQUIRE(chain::script::is_pay_multisig_pattern(item.witness->ops()));
+    BOOST_REQUIRE_EQUAL(item.derivations.size(), 1u);
+
+    const auto witness_hash = sha256_hash(item.witness->to_data(false));
+    const auto wrap = chain::script::to_pay_witness_script_hash_pattern(witness_hash);
+    const chain::script wrapper{ wrap };
+    BOOST_REQUIRE(*item.embedded == wrapper);
+
+    const auto embedded_hash = bitcoin_short_hash(wrapper.to_data(false));
+    const chain::script pay{ chain::script::to_pay_script_hash_pattern(embedded_hash) };
+    BOOST_REQUIRE(item.script == pay);
+}
+
 // multi/sh/wsh
 
 BOOST_AUTO_TEST_CASE(descriptor__scripts__sh_multi__expected_pattern)

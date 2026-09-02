@@ -40,6 +40,16 @@ public:
 
     typedef std_vector<descriptor> list;
 
+    /// Signing metadata for one derived output script.
+    struct signing
+    {
+        typedef std_vector<signing> list;
+        chain::script script{};
+        chain::script::cptr embedded{};
+        chain::script::cptr witness{};
+        psbt::derivation::list derivations{};
+    };
+
     /// The bip380 expression checksum (empty on invalid characters).
     static std::string to_checksum(const std::string& body) NOEXCEPT;
 
@@ -74,6 +84,10 @@ public:
     /// hardened wildcard or derivation failure). Index applies to wildcards.
     chain::scripts scripts(uint32_t index) const NOEXCEPT;
 
+    /// The signing metadata at the index (the scripts(index) set, retaining
+    /// embedded scripts and derived key origins).
+    signing::list signings(uint32_t index) const NOEXCEPT;
+
 protected:
     enum class function : uint8_t
     {
@@ -99,6 +113,7 @@ protected:
         bool hardened{};
 
         bool derive(data_chunk& out, uint32_t index) const NOEXCEPT;
+        bool derive(psbt::derivation& out, uint32_t index) const NOEXCEPT;
     };
 
     struct node
@@ -114,7 +129,7 @@ protected:
     static bool parse(node& out, const std::string& body) NOEXCEPT;
     static bool parse_key(key_expression& out,
         const std::string& text) NOEXCEPT;
-    static bool derive_scripts(chain::scripts& out, const node& tree,
+    static bool derive_signings(signing::list& out, const node& tree,
         uint32_t index, bool top) NOEXCEPT;
 
 private:

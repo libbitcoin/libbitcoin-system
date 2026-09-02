@@ -636,8 +636,8 @@ BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__two_pushes__false)
 BOOST_AUTO_TEST_CASE(script__version_value__not_witness_program__unversioned)
 {
     const script instance(script_return);
-    BOOST_REQUIRE_EQUAL(instance.version_value(),
-        to_value(script_version::unversioned));
+    constexpr auto unversioned = to_value(script_version::unversioned);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), unversioned);
     BOOST_REQUIRE(instance.version() == script_version::unversioned);
 }
 
