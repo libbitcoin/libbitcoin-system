@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/hash/muhash.hpp>
 
+#include <limits>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -28,10 +29,15 @@ namespace system {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// The largest 3072 bit prime, the multiplicative group.
-static const uintx& modulus() NOEXCEPT
+using element = uintx_t<muhash3072::bit_size>;
+using product = uintx_t<muhash3072::bit_size * 2u>;
+
+// The largest 3072 bit prime, the multiplicative group (2^3072 - offset).
+constexpr uint32_t offset = 1103717;
+static const element& modulus() NOEXCEPT
 {
-    static const uintx prime = (uintx{ 1 } << 3072u) - 1103717u;
+    static const element prime = std::numeric_limits<element>::max() -
+        sub1(offset);
     return prime;
 }
 
@@ -41,40 +47,97 @@ muhash3072::muhash3072() NOEXCEPT
 }
 
 muhash3072::muhash3072(const data_slice& element) NOEXCEPT
-  : numerator_(to_element(element)), denominator_(1)
+  : muhash3072()
 {
+    insert(element);
 }
 
-// Elements are the chacha20 expansion of the element hash.
-uintx muhash3072::to_element(const data_slice& element) NOEXCEPT
+// Elements are the chacha20 expansion of the element hash, one conditional
+// subtraction is the full reduction as the expansion is below 2 * modulus.
+muhash3072::element muhash3072::to_element(const hash_digest& hash) NOEXCEPT
 {
     data_array<byte_size> bytes{};
-    chacha20 cipher{ accumulator<sha256>::hash(element.size(),
-        element.data()) };
+    chacha20 cipher{ hash };
     cipher.stream(bytes);
-    return from_little_endian(to_chunk(bytes)) % modulus();
+
+    element value{};
+    boost::multiprecision::import_bits(value, bytes.begin(), bytes.end(),
+        byte_bits, false);
+
+    if (value >= modulus())
+        value -= modulus();
+
+    return value;
+}
+
+// Fixed width (no allocation), the product is twice the element width and
+// reduced by the special form of the modulus (2^3072 - c), as x = hi * 2^3072
+// + lo is congruent to hi * c + lo. Two folds leave less than 2^3072 + 2^43.
+muhash3072::element muhash3072::multiply(const element& left,
+    const element& right) NOEXCEPT
+{
+    static const product mask = (product{ 1 } << bit_size) - 1u;
+    auto value = product{ left } * product{ right };
+    value = (value & mask) + (value >> bit_size) * offset;
+    value = (value & mask) + (value >> bit_size) * offset;
+
+    auto result = element{ value };
+    while (result >= modulus())
+        result -= modulus();
+
+    return result;
+}
+
+// The modular inverse by exponentiation as the modulus is prime (fermat).
+muhash3072::element muhash3072::inverse(const element& value) NOEXCEPT
+{
+    const auto exponent = modulus() - 2u;
+    element result{ 1 };
+    element base{ value };
+
+    for (size_t bit{}; bit < bit_size; ++bit)
+    {
+        if (boost::multiprecision::bit_test(exponent, bit))
+            result = multiply(result, base);
+
+        base = multiply(base, base);
+    }
+
+    return result;
 }
 
 void muhash3072::insert(const data_slice& element) NOEXCEPT
 {
-    numerator_ = (numerator_ * to_element(element)) % modulus();
+    insert_hash(accumulator<sha256>::hash(element.size(), element.data()));
+}
+
+void muhash3072::insert_hash(const hash_digest& hash) NOEXCEPT
+{
+    numerator_ = multiply(numerator_, to_element(hash));
 }
 
 void muhash3072::remove(const data_slice& element) NOEXCEPT
 {
-    denominator_ = (denominator_ * to_element(element)) % modulus();
+    remove_hash(accumulator<sha256>::hash(element.size(), element.data()));
+}
+
+void muhash3072::remove_hash(const hash_digest& hash) NOEXCEPT
+{
+    denominator_ = multiply(denominator_, to_element(hash));
+}
+
+muhash3072& muhash3072::operator*=(const muhash3072& other) NOEXCEPT
+{
+    numerator_ = multiply(numerator_, other.numerator_);
+    denominator_ = multiply(denominator_, other.denominator_);
+    return *this;
 }
 
 hash_digest muhash3072::flush() NOEXCEPT
 {
-    using namespace boost::multiprecision;
-    const auto& prime = modulus();
-
-    // Removals divide out by multiplication with the modular inverse, obtained
-    // by exponentiation as the modulus is prime (fermat's little theorem).
-    numerator_ = (numerator_ * powm(denominator_, prime - 2u, prime)) % prime;
+    numerator_ = multiply(numerator_, inverse(denominator_));
     denominator_ = 1;
-    return sha256_hash(to_little_endian_size<byte_size>(numerator_));
+    return sha256_hash(from_uintx(numerator_));
 }
 
 BC_POP_WARNING()

@@ -70,6 +70,42 @@ BOOST_AUTO_TEST_CASE(muhash__construct__element__inserted)
     BOOST_REQUIRE_EQUAL(constructed.flush(), set.flush());
 }
 
+BOOST_AUTO_TEST_CASE(muhash__insert__element_hash__same_as_element)
+{
+    muhash3072 by_element{};
+    by_element.insert(muhash_element_1);
+    by_element.remove(muhash_element_2);
+    muhash3072 by_hash{};
+    by_hash.insert_hash(sha256_hash(muhash_element_1));
+    by_hash.remove_hash(sha256_hash(muhash_element_2));
+    BOOST_REQUIRE_EQUAL(by_hash.flush(), by_element.flush());
+}
+
+BOOST_AUTO_TEST_CASE(muhash__multiply__partial_sets__same_as_one_set)
+{
+    muhash3072 whole{};
+    whole.insert(muhash_element_0);
+    whole.insert(muhash_element_1);
+    whole.remove(muhash_element_2);
+    muhash3072 left{};
+    left.insert(muhash_element_0);
+    left.remove(muhash_element_2);
+    muhash3072 right{};
+    right.insert(muhash_element_1);
+    left *= right;
+    BOOST_REQUIRE_EQUAL(left.flush(), whole.flush());
+}
+
+BOOST_AUTO_TEST_CASE(muhash__multiply__empty__unchanged)
+{
+    muhash3072 set{};
+    set.insert(muhash_element_1);
+    const auto expected = set.flush();
+    const muhash3072 empty{};
+    set *= empty;
+    BOOST_REQUIRE_EQUAL(set.flush(), expected);
+}
+
 BOOST_AUTO_TEST_CASE(muhash__flush__continued_mutation__valid)
 {
     muhash3072 empty{};
