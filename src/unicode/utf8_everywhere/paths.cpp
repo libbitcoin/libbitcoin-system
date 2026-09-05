@@ -139,9 +139,10 @@ std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
     // The length extension prefix works only with a fully-qualified path.
     // However this includes "considered relative" paths (with ".." segments).
     // That is of no consequence here because those will also be converted.
+    // MAX_PATH includes the terminator, so a path of that length requires it.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     const auto full = qualified_path(path).wstring();
-    return { (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full };
+    return { (full.length() >= MAX_PATH) ? L"\\\\?\\" + full : full };
     BC_POP_WARNING()
 }
 
