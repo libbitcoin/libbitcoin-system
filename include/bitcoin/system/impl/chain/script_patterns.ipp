@@ -109,9 +109,20 @@ constexpr bool script::is_pay_witness_pattern(
 constexpr bool script::is_pay_anchor_pattern(const operations& ops) NOEXCEPT
 {
     return is_pay_witness_pattern(ops)
+        && ops[0].code() == opcode::push_positive_1
         && ops[1].data().size() == 2u
         && ops[1].data()[0] == 0x4e_u8
         && ops[1].data()[1] == 0x73_u8;
+}
+
+// A witness program of undefined version or size (not implemented).
+constexpr bool script::is_pay_witness_unknown_pattern(
+    const operations& ops) NOEXCEPT
+{
+    return is_pay_witness_pattern(ops)
+        && ops[0].code() != opcode::push_size_0
+        && !is_pay_witness_taproot_pattern(ops)
+        && !is_pay_anchor_pattern(ops);
 }
 
 // The satoshi client now enables configurable data size for policy.

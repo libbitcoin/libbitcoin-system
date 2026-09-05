@@ -65,6 +65,14 @@ enum class script_pattern
     /// Pubkey script: OP_1 <32-byte output key>
     pay_witness_v1_taproot,
 
+    /// Pay to Anchor (policy)
+    /// Pubkey script: OP_1 <0x4e73>
+    pay_anchor,
+
+    /// Pay to Witness of undefined version or program size
+    /// Pubkey script: OP_n <2 to 40-byte program>
+    pay_witness_unknown,
+
     /// Sign Multisig script [BIP11]
     sign_multisig,
 

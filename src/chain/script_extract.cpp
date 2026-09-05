@@ -138,6 +138,12 @@ script_pattern script::output_pattern() const NOEXCEPT
     if (is_pay_witness_taproot_pattern(ops()))
         return script_pattern::pay_witness_v1_taproot;
 
+    if (is_pay_anchor_pattern(ops()))
+        return script_pattern::pay_anchor;
+
+    if (is_pay_witness_unknown_pattern(ops()))
+        return script_pattern::pay_witness_unknown;
+
     return script_pattern::non_standard;
 }
 

@@ -59,6 +59,7 @@ public:
     static constexpr bool is_pay_witness_key_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_witness_script_hash_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_witness_taproot_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_witness_unknown_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_taproot_key_path_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_single_pattern(const operations& ops) NOEXCEPT;
     static constexpr bool is_pay_tapscript_timelock_pattern(const operations& ops) NOEXCEPT;
@@ -119,7 +120,7 @@ public:
     script(reader& source, bool prefix) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    script(const std::string_view& mnemonic, bool bitcoind=false) NOEXCEPT;
+    script(const std::string_view& mnemonic) NOEXCEPT;
 
     /// Operators.
     /// -----------------------------------------------------------------------
@@ -139,8 +140,8 @@ public:
     void to_data(writer& sink, bool prefix) const NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    std::string to_string(uint32_t active_flags,
-        bool bitcoind=false) const NOEXCEPT;
+    std::string to_string(uint32_t active_flags, bool bitcoind=false,
+        bool signature=false) const NOEXCEPT;
 
     /// Reset mutable signature hashing op_codeseparator offset. 
     void clear_offset() const NOEXCEPT;
@@ -194,8 +195,7 @@ private:
     static script from_operations(operations&& ops) NOEXCEPT;
     static script from_operations(const operations& ops) NOEXCEPT;
     static script from_data(reader& source, bool prefix) NOEXCEPT;
-    static script from_string(const std::string_view& mnemonic,
-        bool bitcoind=false) NOEXCEPT;
+    static script from_string(const std::string_view& mnemonic) NOEXCEPT;
     static size_t op_count(reader& source) NOEXCEPT;
     static size_t serialized_size(const operations& ops) NOEXCEPT;
 
