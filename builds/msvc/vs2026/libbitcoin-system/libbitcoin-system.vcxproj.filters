@@ -480,6 +480,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
@@ -503,6 +506,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\schnorr.cpp">
       <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\x25519.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp">
+      <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
       <Filter>src\data</Filter>
@@ -1055,10 +1064,19 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\x25519.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\xsalsa20_poly1305.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp">
