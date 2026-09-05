@@ -18,9 +18,12 @@
  */
 #include <bitcoin/system/chain/json/json.hpp>
 
+#include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -62,6 +65,36 @@ DEFINE_JSON_TO_TAG(header::cptr)
 DEFINE_JSON_FROM_TAG(header::cptr)
 {
     tag_invoke(from_tag{}, value, *instance);
+}
+
+// bitcoind
+// ----------------------------------------------------------------------------
+
+DEFINE_JSON_FROM_TAGGED(bitcoind_tag, header)
+{
+    const auto& head = instance.value;
+    value =
+    {
+        { "hash", encode_hash(head.hash()) },
+        { "version", head.version() },
+        { "versionHex", encode_base16(to_big_endian(head.version())) },
+        { "merkleroot", encode_hash(head.merkle_root()) },
+        { "time", head.timestamp() },
+        { "nonce", head.nonce() },
+        { "bits", encode_base16(to_big_endian(head.bits())) },
+        { "target", encode_hash(from_uintx(compact::expand(head.bits()))) },
+        { "difficulty", head.difficulty() }
+
+        // Disabled properties are chain, not header (add with context).
+        // "confirmations" and "nextblockhash" are not fixed for a header.
+        // Each header's "chainwork" is not archived, so query is exhaustive.
+        ////{ "height", 0 },
+        ////{ "confirmations", 0 },
+        ////{ "mediantime", 0 },
+        ////{ "chainwork", "" },
+        ////{ "previousblockhash", "" },
+        ////{ "nextblockhash", "" }
+    };
 }
 
 // electrumx
