@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OPERATION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OPERATION_HPP
 
-#include <memory>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/data/data.hpp>

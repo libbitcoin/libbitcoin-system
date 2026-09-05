@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_CHUNK_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_CHUNK_HPP
 
-#include <memory>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/external_ptr.hpp>
 #include <bitcoin/system/define.hpp>

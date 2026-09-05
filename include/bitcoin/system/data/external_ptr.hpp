@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_EXTERNAL_PTR_HPP
 #define LIBBITCOIN_SYSTEM_DATA_EXTERNAL_PTR_HPP
 
-#include <iterator>
-#include <memory>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

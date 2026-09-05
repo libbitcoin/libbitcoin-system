@@ -22,7 +22,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_NEUTRINO_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_NEUTRINO_HPP
 
-#include <memory>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/chain.hpp>

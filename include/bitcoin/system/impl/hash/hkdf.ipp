@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_HKDF_IPP
 #define LIBBITCOIN_SYSTEM_HASH_HKDF_IPP
 
-#include <algorithm>
 
 // based on:
 // datatracker.ietf.org/doc/html/rfc5869

@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/script.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 

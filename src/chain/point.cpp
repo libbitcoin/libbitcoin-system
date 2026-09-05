@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/point.hpp>
 
-#include <utility>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

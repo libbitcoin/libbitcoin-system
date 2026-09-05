@@ -19,10 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_COLLECTION_IPP
 #define LIBBITCOIN_SYSTEM_DATA_COLLECTION_IPP
 
-#include <algorithm>
-#include <iterator>
-#include <memory>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

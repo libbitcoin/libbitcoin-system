@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/views/transaction_view.hpp>
 
-#include <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/transaction.hpp>

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 
-#include <memory>
 #include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>

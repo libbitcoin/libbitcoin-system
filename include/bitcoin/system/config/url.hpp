@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_URL_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_URL_HPP
 
-#include <memory>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/define.hpp>
 

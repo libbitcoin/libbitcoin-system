@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/crypto/ring_signature.hpp>
 
-#include <algorithm>
 #include <map>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/hash/hash.hpp>

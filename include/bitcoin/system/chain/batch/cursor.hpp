@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_CURSOR_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_CURSOR_HPP
 
-#include <utility>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

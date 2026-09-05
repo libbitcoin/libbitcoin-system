@@ -19,7 +19,6 @@
 #include "../../test.hpp"
 
 #include <optional>
-#include <utility>
 
 BOOST_AUTO_TEST_SUITE(uri_reader_tests)
 

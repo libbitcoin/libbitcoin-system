@@ -19,7 +19,6 @@
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 
 #include <chrono>
-#include <memory>
 #include <random>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

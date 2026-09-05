@@ -19,11 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_SIGNATURES_HPP
 
-#include <algorithm>
 #include <atomic>
-#include <iterator>
 #include <span>
-#include <vector>
 #include <bitcoin/system/chain/batch/multisig.hpp>
 #include <bitcoin/system/chain/batch/threshold.hpp>
 #include <bitcoin/system/chain/script.hpp>

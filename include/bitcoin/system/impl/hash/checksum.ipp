@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_CHECKSUM_IPP
 #define LIBBITCOIN_SYSTEM_HASH_CHECKSUM_IPP
 
-#include <algorithm>
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/functions.hpp>

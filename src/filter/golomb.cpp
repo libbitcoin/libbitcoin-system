@@ -21,8 +21,6 @@
 
 #include <bitcoin/system/filter/golomb.hpp>
 
-#include <algorithm>
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

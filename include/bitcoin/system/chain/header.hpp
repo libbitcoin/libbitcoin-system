@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_HEADER_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_HEADER_HPP
 
-#include <memory>
 #include <optional>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/data/data.hpp>

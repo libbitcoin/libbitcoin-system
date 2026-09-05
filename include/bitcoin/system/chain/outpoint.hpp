@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPOINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OUTPOINT_HPP
 
-#include <memory>
 #include <unordered_set>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/data/data.hpp>

@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/crypto/x25519.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>

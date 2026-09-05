@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/point.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/data/data.hpp>

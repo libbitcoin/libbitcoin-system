@@ -18,9 +18,6 @@
  */
 #include <bitcoin/system/chain/output.hpp>
 
-#include <algorithm>
-#include <iterator>
-#include <memory>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

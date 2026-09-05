@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 
-#include <memory>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
 

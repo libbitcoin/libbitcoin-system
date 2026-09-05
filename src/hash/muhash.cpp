@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/hash/muhash.hpp>
 
-#include <limits>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

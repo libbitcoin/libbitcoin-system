@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/chain/views/block_view.hpp>
 
-#include <algorithm>
-#include <iterator>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_ARRAY_CAST_IPP
 #define LIBBITCOIN_SYSTEM_DATA_ARRAY_CAST_IPP
 
-#include <iterator>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

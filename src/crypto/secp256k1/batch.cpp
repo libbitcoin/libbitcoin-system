@@ -19,7 +19,6 @@
 #include <bitcoin/system/crypto/secp256k1_batch.hpp>
 
 #include <atomic>
-#include <algorithm>
 #include <numeric>
 #include <shared_mutex>
 #include <span>

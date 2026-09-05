@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_PARAMETER_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_PARAMETER_HPP
 
-#include <utility>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

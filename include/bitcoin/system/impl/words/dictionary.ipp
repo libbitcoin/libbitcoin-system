@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WORDS_DICTIONARY_IPP
 #define LIBBITCOIN_SYSTEM_WORDS_DICTIONARY_IPP
 
-#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

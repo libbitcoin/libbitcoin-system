@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/radix/base_10.hpp>
 
-#include <algorithm>
 #include <iomanip>
-#include <iterator>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/addition.hpp>

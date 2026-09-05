@@ -21,7 +21,6 @@
 
 #include <bitcoin/system/wallet/neutrino.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/filter/filter.hpp>

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_BOOLEAN_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_BOOLEAN_IPP
 
-#include <algorithm>
-#include <iterator>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number.hpp>

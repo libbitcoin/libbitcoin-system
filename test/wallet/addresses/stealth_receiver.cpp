@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include <algorithm>
 
 BOOST_AUTO_TEST_SUITE(stealth_receiver_tests)
 

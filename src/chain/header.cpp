@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/header.hpp>
 
 #include <chrono>
-#include <utility>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>

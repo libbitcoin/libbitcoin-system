@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
