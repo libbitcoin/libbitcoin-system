@@ -101,8 +101,8 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, transaction)
         { "weight", tx.weight() },
         { "version", tx.version() },
         { "locktime", tx.locktime() },
-        { "vin", value_from(bitcoind(*tx.inputs_ptr())) },
-        { "vout", value_from(bitcoind(*tx.outputs_ptr())) }
+        { "vin", value_from(bitcoind(*tx.inputs_ptr(), instance.flags)) },
+        { "vout", value_from(bitcoind(*tx.outputs_ptr(), instance.flags)) }
 
         ////{ "in_active_chain", false },
         ////{ "blockhash", "" },
@@ -149,9 +149,9 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, transaction_cptrs)
     const auto& txs = instance.value;
     value = boost::json::array(txs.size());
     std::ranges::transform(txs, value.as_array().begin(),
-        [](const chain::transaction::cptr& tx) NOEXCEPT
+        [flags = instance.flags](const chain::transaction::cptr& tx) NOEXCEPT
         {
-            return value_from(bitcoind(*tx));
+            return value_from(bitcoind(*tx, flags));
         });
 }
 

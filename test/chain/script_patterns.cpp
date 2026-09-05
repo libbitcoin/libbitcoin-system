@@ -535,6 +535,41 @@ BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v1_taproot__pay_witness_v1_
     BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_v1_taproot);
 }
 
+static const auto witness_v1_anchor = base16_chunk("51024e73");
+static const auto witness_v2_anchor = base16_chunk("52024e73");
+static const auto witness_v1_key_hash = base16_chunk("5114a85b2107f791b26a84e7586c28cec7cb61202ed3");
+static const auto witness_v0_program_22 = base16_chunk("0016a85b2107f791b26a84e7586c28cec7cb61202ed3d019");
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v1_anchor__pay_anchor)
+{
+    const script instance(witness_v1_anchor, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(script::is_pay_anchor_pattern(instance.ops()));
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_anchor);
+}
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v2_anchor__pay_witness_unknown)
+{
+    const script instance(witness_v2_anchor, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!script::is_pay_anchor_pattern(instance.ops()));
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_unknown);
+}
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v1_key_hash__pay_witness_unknown)
+{
+    const script instance(witness_v1_key_hash, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_witness_unknown);
+}
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v0_program_22__non_standard)
+{
+    const script instance(witness_v0_program_22, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::non_standard);
+}
+
 BOOST_AUTO_TEST_CASE(script__output_pattern__witness_v0_key_hash__pay_witness_key_hash)
 {
     const script instance(witness_v0_key_hash, false);

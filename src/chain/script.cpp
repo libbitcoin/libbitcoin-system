@@ -130,8 +130,8 @@ script::script(reader& source, bool prefix) NOEXCEPT
 {
 }
 
-script::script(const std::string_view& mnemonic, bool bitcoind) NOEXCEPT
-  : script(from_string(mnemonic, bitcoind))
+script::script(const std::string_view& mnemonic) NOEXCEPT
+  : script(from_string(mnemonic))
 {
 }
 
@@ -286,11 +286,8 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
 }
 
 // static/private
-script script::from_string(const std::string_view& mnemonic,
-    bool /* bitcoind */) NOEXCEPT
+script script::from_string(const std::string_view& mnemonic) NOEXCEPT
 {
-    // TODO: incorporate bitcoind option.
-
     constexpr auto valid = true;
     bool easier{};
     bool failer{};
@@ -352,17 +349,20 @@ void script::to_data(writer& sink, bool prefix) const NOEXCEPT
         op->to_data(sink);
 }
 
-std::string script::to_string(uint32_t active_flags,
-    bool /* bitcoind */) const NOEXCEPT
+std::string script::to_string(uint32_t active_flags, bool bitcoind,
+    bool signature) const NOEXCEPT
 {
-    // TODO: incorporate bitcoind option.
+    // bitcoind does not decode sighash types in an op_return script.
+    const auto decode = bitcoind && signature &&
+        !is_pay_op_return_pattern(ops());
 
     auto first = true;
     std::ostringstream text{};
     for (const auto& op: ops())
     {
         // Throwing stream aborts.
-        text << (first ? "" : " ") << op.to_string(active_flags);
+        const auto token = op.to_string(active_flags, bitcoind, decode);
+        text << (first ? "" : " ") << token;
         first = false;
     }
 

@@ -45,6 +45,9 @@ public:
     virtual uint64_t initial_subsidy() const NOEXCEPT;
     virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
 
+    /// The flags of all configured forks, independent of activation.
+    virtual uint32_t flags() const NOEXCEPT;
+
     /// These are used by node, top checkpoint defaults to genesis.
     virtual chain::checkpoints sorted_checkpoints() const NOEXCEPT;
     virtual chain::checkpoint top_checkpoint() const NOEXCEPT;

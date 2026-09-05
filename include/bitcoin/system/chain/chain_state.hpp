@@ -163,6 +163,9 @@ public:
     static uint32_t signal_version(
         const system::settings& settings) NOEXCEPT;
 
+    /// The flags of all configured forks, independent of activation.
+    static uint32_t configured_flags(const forks& forks) NOEXCEPT;
+
     /// Create pool state from top chain top block state.
     chain_state(const chain_state& top,
         const system::settings& settings) NOEXCEPT;

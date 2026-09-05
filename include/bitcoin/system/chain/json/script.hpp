@@ -31,6 +31,7 @@ DECLARE_JSON_TAG_INVOKE(script);
 DECLARE_JSON_TAG_INVOKE(script::cptr);
 
 DECLARE_JSON_TAGGED_INVOKE(bitcoind_tag, script);
+DECLARE_JSON_TAGGED_INVOKE(bitcoind_signature_tag, script);
 
 } // namespace chain
 } // namespace system

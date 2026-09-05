@@ -85,4 +85,35 @@ BOOST_AUTO_TEST_CASE(block__json__electrumx__expected)
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
+BOOST_AUTO_TEST_CASE(header__json__bitcoind__expected)
+{
+    const header instance
+    {
+        42,
+        null_hash,
+        one_hash,
+        43,
+        44,
+        45
+    };
+
+    const std::string_view text
+    {
+        "{"
+            R"("hash":"d5b1048b2dcb443dd79a15e54de994fa18620d1d99250f2a4123660c68dea664",)"
+            R"("version":42,)"
+            R"("versionHex":"0000002a",)"
+            R"("merkleroot":"0000000000000000000000000000000000000000000000000000000000000001",)"
+            R"("time":43,)"
+            R"("nonce":45,)"
+            R"("bits":"0000002c",)"
+            R"("target":"0000000000000000000000000000000000000000000000000000000000000000",)"
+            R"("difficulty":1.0279680609929991E73)"
+        "}"
+    };
+
+    const auto value = json::value_from(bitcoind(instance));
+    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

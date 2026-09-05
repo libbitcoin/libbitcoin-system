@@ -104,6 +104,57 @@ inline uint32_t bits_high(const chain_state::data& values) NOEXCEPT
 // activation
 // ----------------------------------------------------------------------------
 
+uint32_t chain_state::configured_flags(const forks& forks) NOEXCEPT
+{
+    uint32_t result{ flags::no_rules };
+    if (forks.retarget)
+        result |= flags::retarget;
+    if (forks.difficult)
+        result |= flags::difficult;
+    if (forks.ltc_time_warp_patch)
+        result |= flags::ltc_time_warp_patch;
+    if (forks.ltc_retarget_overflow_patch)
+        result |= flags::ltc_retarget_overflow_patch;
+    if (forks.ltc_scrypt_proof_of_work)
+        result |= flags::ltc_scrypt_proof_of_work;
+    if (forks.time_warp_patch)
+        result |= flags::time_warp_patch;
+    if (forks.block_storm_patch)
+        result |= flags::block_storm_patch;
+    if (forks.bip16)
+        result |= flags::bip16_rule;
+    if (forks.bip30)
+        result |= flags::bip30_rule;
+    if (forks.bip34)
+        result |= flags::bip34_rule;
+    if (forks.bip42)
+        result |= flags::bip42_rule;
+    if (forks.bip65)
+        result |= flags::bip65_rule;
+    if (forks.bip66)
+        result |= flags::bip66_rule;
+    if (forks.bip68)
+        result |= flags::bip68_rule;
+    if (forks.bip90)
+        result |= flags::bip90_rule;
+    if (forks.bip112)
+        result |= flags::bip112_rule;
+    if (forks.bip113)
+        result |= flags::bip113_rule;
+    if (forks.bip141)
+        result |= flags::bip141_rule;
+    if (forks.bip143)
+        result |= flags::bip143_rule;
+    if (forks.bip147)
+        result |= flags::bip147_rule;
+    if (forks.bip341)
+        result |= flags::bip341_rule;
+    if (forks.bip342)
+        result |= flags::bip342_rule;
+
+    return result;
+}
+
 chain_state::activations chain_state::activation(const data& values,
     const forks& forks, const system::settings& settings) NOEXCEPT
 {

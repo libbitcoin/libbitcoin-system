@@ -89,17 +89,19 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input)
     }
     else
     {
+        const auto signature = bitcoind_signature(in.script(), instance.flags);
         value =
         {
             { "txid", encode_hash(in.point().hash()) },
             { "vout", in.point().index() },
-            { "scriptSig", value_from(bitcoind(in.script())) },
+            { "scriptSig", value_from(signature) },
             { "sequence", in.sequence() }
         };
-
-        if (!in.witness().stack().empty())
-            value.as_object()["txinwitness"] = value_from(bitcoind(in.witness()));
     }
+
+    // bitcoind emits the witness of any input, including a coinbase.
+    if (!in.witness().stack().empty())
+        value.as_object()["txinwitness"] = value_from(bitcoind(in.witness()));
 }
 
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input_cptrs)
@@ -107,9 +109,9 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input_cptrs)
     const auto& ins = instance.value;
     value = boost::json::array(ins.size());
     std::ranges::transform(ins, value.as_array().begin(),
-        [](const chain::input::cptr& in) NOEXCEPT
+        [flags = instance.flags](const chain::input::cptr& in) NOEXCEPT
         {
-            return value_from(bitcoind(*in));
+            return value_from(bitcoind(*in, flags));
         });
 }
 

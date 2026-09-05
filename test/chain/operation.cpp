@@ -784,6 +784,144 @@ BOOST_AUTO_TEST_CASE(operation__to_string__empty_underflow__empty)
     BOOST_REQUIRE_EQUAL(value.to_string(0), "()");
 }
 
+// to_string (bitcoind)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__push_size_0__0)
+{
+    const operation value(opcode::push_size_0);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "0");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__push_negative_1__negative_1)
+{
+    const operation value(opcode::push_negative_1);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "-1");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__push_positive_7__7)
+{
+    const operation value(opcode::push_positive_7);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "7");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__push_size_75_empty__0)
+{
+    const operation value(opcode::push_size_75);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "0");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__0x42__66)
+{
+    const operation value(data_chunk{ 0x42 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "66");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__0x81__negative_1)
+{
+    const operation value(data_chunk{ 0x81 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "-1");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__0x112233__3351057)
+{
+    const operation value(data_chunk{ 0x11, 0x22, 0x33 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "3351057");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__0x1122334455__hex)
+{
+    const operation value(data_chunk{ 0x11, 0x22, 0x33, 0x44, 0x55 }, true);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "1122334455");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__push_one_size_0x1122334455__hex)
+{
+    const data_chunk encoded{ { 0x4c, 0x05, 0x11, 0x22, 0x33, 0x44, 0x55 } };
+    const operation value(encoded);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "1122334455");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__dup__op_dup)
+{
+    const operation value(opcode::dup);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "OP_DUP");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__nonzero__op_0notequal)
+{
+    const operation value(opcode::nonzero);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "OP_0NOTEQUAL");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__reserved_80__op_reserved)
+{
+    const operation value(opcode::reserved_80);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "OP_RESERVED");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__reserved_137__op_reserved1)
+{
+    const operation value(opcode::reserved_137);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "OP_RESERVED1");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__reserved_187__op_unknown)
+{
+    const operation value(opcode::reserved_187);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "OP_UNKNOWN");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__reserved_255__op_invalidopcode)
+{
+    const operation value(opcode::reserved_255);
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "OP_INVALIDOPCODE");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__checklocktimeverify_inactive__op_nop2)
+{
+    const operation value(opcode::checklocktimeverify);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::flags::no_rules, true), "OP_NOP2");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__checklocktimeverify_active__op_checklocktimeverify)
+{
+    const operation value(opcode::checklocktimeverify);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::flags::bip65_rule, true), "OP_CHECKLOCKTIMEVERIFY");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__checksequenceverify_inactive__op_nop3)
+{
+    const operation value(opcode::checksequenceverify);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::flags::no_rules, true), "OP_NOP3");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__checksequenceverify_active__op_checksequenceverify)
+{
+    const operation value(opcode::checksequenceverify);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::flags::bip112_rule, true), "OP_CHECKSEQUENCEVERIFY");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__checksigadd_inactive__op_unknown)
+{
+    const operation value(opcode::checksigadd);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::flags::no_rules, true), "OP_UNKNOWN");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__checksigadd_active__op_checksigadd)
+{
+    const operation value(opcode::checksigadd);
+    BOOST_REQUIRE_EQUAL(value.to_string(chain::flags::bip342_rule, true), "OP_CHECKSIGADD");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string_bitcoind__underflow__error)
+{
+    const data_chunk encoded{ { 0x4c, 0x03, 0x11 } };
+    const operation value(encoded);
+    BOOST_REQUIRE(value.is_underflow());
+    BOOST_REQUIRE_EQUAL(value.to_string(0, true), "[error]");
+}
+
 BOOST_AUTO_TEST_CASE(operation__to_string__non_empty_underflow__empty)
 {
     // Should be two bytes of push data.

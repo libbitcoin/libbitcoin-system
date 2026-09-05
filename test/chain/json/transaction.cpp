@@ -115,7 +115,6 @@ BOOST_AUTO_TEST_CASE(transaction__json__conversions__expected)
 
 
 // mainnet block 840000 coinbase.
-// TODO: output script (type/address/asm) parity.
 static const auto block840000_coinbase = base16_chunk(
     "0100000000010100000000000000000000000000000000000000000000000000"
     "00000000000000ffffffff600340d10c192f5669614254432f4d696e65642062"
@@ -154,7 +153,27 @@ BOOST_AUTO_TEST_CASE(transaction__bitcoind__witness_coinbase_840000__size_and_wi
     BOOST_REQUIRE(vin.at(0u).as_object().contains("coinbase"));
     BOOST_REQUIRE(!vin.at(0u).as_object().contains("txid"));
 
-    BOOST_REQUIRE_EQUAL(object.at("vout").as_array().size(), 3u);
+    // The coinbase witness reservation is emitted as any other witness.
+    const auto& witness = vin.at(0u).as_object().at("txinwitness").as_array();
+    BOOST_REQUIRE_EQUAL(witness.size(), 1u);
+    BOOST_REQUIRE_EQUAL(witness.at(0u).as_string(), "0000000000000000000000000000000000000000000000000000000000000000");
+
+    const auto& vout = object.at("vout").as_array();
+    BOOST_REQUIRE_EQUAL(vout.size(), 3u);
+
+    const auto& script0 = vout.at(0u).as_object().at("scriptPubKey").as_object();
+    BOOST_REQUIRE_EQUAL(script0.at("asm").as_string(), "OP_DUP OP_HASH160 536ffa992491508dca0354e52f32a3a7a679a53a OP_EQUALVERIFY OP_CHECKSIG");
+    BOOST_REQUIRE_EQUAL(script0.at("hex").as_string(), "76a914536ffa992491508dca0354e52f32a3a7a679a53a88ac");
+    BOOST_REQUIRE_EQUAL(script0.at("type").as_string(), "pubkeyhash");
+    BOOST_REQUIRE(!script0.contains("addresses"));
+
+    const auto& script1 = vout.at(1u).as_object().at("scriptPubKey").as_object();
+    BOOST_REQUIRE_EQUAL(script1.at("asm").as_string(), "OP_RETURN 52534b424c4f434b3a52e15efafb3e2cf6dc2fc0e6bde5cb1d7d2143f1e089bd874e6b7913005fb2a0");
+    BOOST_REQUIRE_EQUAL(script1.at("type").as_string(), "nulldata");
+
+    const auto& script2 = vout.at(2u).as_object().at("scriptPubKey").as_object();
+    BOOST_REQUIRE_EQUAL(script2.at("asm").as_string(), "OP_RETURN aa21a9ed88601d3d03ccce017fe2131c4c95a7292e4372983148e62996bb5e2de0e4d1d8");
+    BOOST_REQUIRE_EQUAL(script2.at("type").as_string(), "nulldata");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
