@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/wallet/psbt/transaction.hpp>
 
-#include <algorithm>
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

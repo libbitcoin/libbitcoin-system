@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/serial/props.hpp>
 
-#include <algorithm>
 #include <initializer_list>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>

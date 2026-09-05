@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 #define LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 
-#include <utility>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/outpoint.hpp>
 
-#include <utility>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_PBKD_IPP
 #define LIBBITCOIN_SYSTEM_HASH_PBKD_IPP
 
-#include <algorithm>
 
 // based on:
 // datatracker.ietf.org/doc/html/rfc8018

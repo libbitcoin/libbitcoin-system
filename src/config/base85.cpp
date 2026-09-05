@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/base85.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {

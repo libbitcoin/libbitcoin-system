@@ -18,9 +18,6 @@
  */
 #include <bitcoin/system/chain/input.hpp>
 
-#include <algorithm>
-#include <memory>
-#include <utility>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>

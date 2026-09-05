@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/taproot.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/tapscript.hpp>

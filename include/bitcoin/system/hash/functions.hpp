@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 #define LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 
-#include <algorithm>
-#include <memory>
 #include <unordered_set>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

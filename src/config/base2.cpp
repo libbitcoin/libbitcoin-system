@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/base2.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

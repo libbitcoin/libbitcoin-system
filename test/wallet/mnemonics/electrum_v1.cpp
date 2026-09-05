@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include <sstream>
-#include <utility>
 #include "electrum_v1.hpp"
 
 BOOST_AUTO_TEST_SUITE(electrum_v1_tests)

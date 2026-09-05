@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 
-#include <memory>
 #include <optional>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>

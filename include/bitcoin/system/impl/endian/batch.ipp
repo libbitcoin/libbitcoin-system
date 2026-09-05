@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_BATCH_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_BATCH_IPP
 
-#include <algorithm>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
 

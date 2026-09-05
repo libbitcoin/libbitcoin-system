@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_PATTERNS_IPP
 #define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_PATTERNS_IPP
 
-#include <algorithm>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include <utility>
 #include <sstream>
 #include "electrum.hpp"
 

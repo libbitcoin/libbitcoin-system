@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_IPP
 
 #include <initializer_list>
-#include <iterator>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 ////#include <bitcoin/system/radix/radix.hpp>

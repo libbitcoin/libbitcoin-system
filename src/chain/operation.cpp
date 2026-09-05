@@ -19,8 +19,6 @@
  */
 #include <bitcoin/system/chain/operation.hpp>
 
-#include <algorithm>
-#include <memory>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>

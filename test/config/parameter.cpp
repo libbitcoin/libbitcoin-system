@@ -18,7 +18,6 @@
  */
 #include "../test.hpp"
 #include <filesystem>
-#include <utility>
 
 BOOST_AUTO_TEST_SUITE(parameter_tests)
 

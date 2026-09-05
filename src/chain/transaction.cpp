@@ -18,10 +18,7 @@
  */
 #include <bitcoin/system/chain/transaction.hpp>
 
-#include <algorithm>
-#include <iterator>
 #include <numeric>
-#include <utility>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>

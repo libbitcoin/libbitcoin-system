@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/words/languages.hpp>
 
-#include <algorithm>
 #include <unordered_map>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>

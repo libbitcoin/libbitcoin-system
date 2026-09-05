@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 
-#include <algorithm>
-#include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/radix/radix.hpp>

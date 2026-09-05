@@ -142,9 +142,12 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/der_parser.cpp \
     ${srcdir}/../../src/crypto/fschacha20.cpp \
     ${srcdir}/../../src/crypto/fschacha20_poly1305.cpp \
+    ${srcdir}/../../src/crypto/maybe_random.cpp \
     ${srcdir}/../../src/crypto/poly1305.cpp \
-    ${srcdir}/../../src/crypto/pseudo_random.cpp \
     ${srcdir}/../../src/crypto/ring_signature.cpp \
+    ${srcdir}/../../src/crypto/salsa20.cpp \
+    ${srcdir}/../../src/crypto/x25519.cpp \
+    ${srcdir}/../../src/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
@@ -388,11 +391,14 @@ include_bitcoin_system_crypto_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/der_parser.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/fschacha20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/fschacha20_poly1305.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/maybe_random.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/poly1305.hpp \
-    ${srcdir}/../../include/bitcoin/system/crypto/pseudo_random.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/ring_signature.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/salsa20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1.hpp \
-    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1_batch.hpp
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1_batch.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/x25519.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/xsalsa20_poly1305.hpp
 
 include_bitcoin_system_datadir = \
     ${includedir}/bitcoin/system/data
@@ -1029,9 +1035,12 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../test/crypto/fschacha20.cpp \
     ${srcdir}/../../test/crypto/fschacha20_poly1305.cpp \
+    ${srcdir}/../../test/crypto/maybe_random.cpp \
     ${srcdir}/../../test/crypto/poly1305.cpp \
-    ${srcdir}/../../test/crypto/pseudo_random.cpp \
     ${srcdir}/../../test/crypto/ring_signature.cpp \
+    ${srcdir}/../../test/crypto/salsa20.cpp \
+    ${srcdir}/../../test/crypto/x25519.cpp \
+    ${srcdir}/../../test/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ellswift.cpp \

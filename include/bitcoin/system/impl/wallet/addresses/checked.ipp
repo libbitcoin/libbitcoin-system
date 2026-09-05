@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_CHECKED_IPP
 
 #include <tuple>
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

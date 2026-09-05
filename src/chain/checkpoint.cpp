@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/chain/checkpoint.hpp>
 
-#include <algorithm>
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>

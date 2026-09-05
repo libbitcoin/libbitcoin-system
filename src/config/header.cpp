@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/header.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/radix/radix.hpp>

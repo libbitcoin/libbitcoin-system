@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/base32.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 

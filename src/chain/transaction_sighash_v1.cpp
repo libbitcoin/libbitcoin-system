@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/transaction.hpp>
 
-#include <iterator>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/extension.hpp>

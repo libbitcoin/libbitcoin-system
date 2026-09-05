@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/unicode/ascii.hpp>
 
-#include <algorithm>
-#include <iterator>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

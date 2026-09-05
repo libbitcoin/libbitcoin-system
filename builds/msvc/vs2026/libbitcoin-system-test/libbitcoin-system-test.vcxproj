@@ -232,9 +232,10 @@
     <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20_poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
     </ClCompile>
@@ -243,6 +244,8 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\math.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\collection.cpp" />

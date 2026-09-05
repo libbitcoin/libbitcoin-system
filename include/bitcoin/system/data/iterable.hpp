@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_ITERABLE_HPP
 #define LIBBITCOIN_SYSTEM_DATA_ITERABLE_HPP
 
-#include <iterator>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/exclusive_slice.hpp>

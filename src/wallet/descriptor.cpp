@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/wallet/descriptor.hpp>
 
-#include <algorithm>
 #include <unordered_map>
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

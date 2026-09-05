@@ -18,12 +18,9 @@
  */
 #include <bitcoin/system/chain/block.hpp>
 
-#include <algorithm>
-#include <iterator>
 #include <numeric>
 #include <ranges>
 #include <set>
-#include <utility>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>

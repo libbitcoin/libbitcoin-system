@@ -18,10 +18,7 @@
  */
 #include <bitcoin/system/data/string.hpp>
 
-#include <algorithm>
-#include <iterator>
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>

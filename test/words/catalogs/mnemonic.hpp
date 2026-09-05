@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_CATALOGS_MNEMONIC_HPP
 #define LIBBITCOIN_SYSTEM_TEST_CATALOGS_MNEMONIC_HPP
 
-#include <algorithm>
 #include <bitcoin/system.hpp>
 
 // Avoid using namespace in shared headers, but okay here.

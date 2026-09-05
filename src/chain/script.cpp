@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/chain/script.hpp>
 
-#include <algorithm>
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
