@@ -123,17 +123,25 @@ BOOST_AUTO_TEST_CASE(paths__to_path__always__expected)
 }
 
 // The functions are not platform-specific, though the vectors are. Only win32
-// qualifies a path with a drive and extends one that exceeds the maximum.
+// qualifies a path with a drive and extends one that reaches the maximum,
+// which is MAX_PATH (260) as it includes the terminator.
 constexpr size_t long_path_size = 260;
+constexpr size_t maximum_path_size = 260;
 
 #if defined(HAVE_MSC)
 static const auto test_absolute = std::filesystem::path{ L"C:\\path\\file.ext" };
 static const auto test_long = L"C:\\" + std::wstring(long_path_size, L'x');
 static const auto test_extended = std::filesystem::path{ L"\\\\?\\" + test_long };
+static const auto test_below = L"C:\\" + std::wstring(maximum_path_size - 4, L'x');
+static const auto test_maximum = L"C:\\" + std::wstring(maximum_path_size - 3, L'x');
+static const auto test_maximum_extended = std::filesystem::path{ L"\\\\?\\" + test_maximum };
 #else
 static const auto test_absolute = std::filesystem::path{ "/path/file.ext" };
 static const auto test_long = "/" + std::string(long_path_size, 'x');
 static const auto test_extended = std::filesystem::path{ test_long };
+static const auto test_below = "/" + std::string(maximum_path_size - 2, 'x');
+static const auto test_maximum = "/" + std::string(maximum_path_size - 1, 'x');
+static const auto test_maximum_extended = std::filesystem::path{ test_maximum };
 #endif
 
 // module_path
@@ -171,6 +179,18 @@ BOOST_AUTO_TEST_CASE(paths__extended_path__absolute__unchanged)
 BOOST_AUTO_TEST_CASE(paths__extended_path__long_absolute__expected)
 {
     BOOST_REQUIRE_EQUAL(extended_path({ test_long }), test_extended);
+}
+
+BOOST_AUTO_TEST_CASE(paths__extended_path__below_maximum__unchanged)
+{
+    BOOST_REQUIRE_EQUAL(std::filesystem::path{ test_below }.native().length(), sub1(maximum_path_size));
+    BOOST_REQUIRE_EQUAL(extended_path({ test_below }), std::filesystem::path{ test_below });
+}
+
+BOOST_AUTO_TEST_CASE(paths__extended_path__maximum__extended)
+{
+    BOOST_REQUIRE_EQUAL(std::filesystem::path{ test_maximum }.native().length(), maximum_path_size);
+    BOOST_REQUIRE_EQUAL(extended_path({ test_maximum }), test_maximum_extended);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
