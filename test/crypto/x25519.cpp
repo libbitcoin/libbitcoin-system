@@ -94,4 +94,20 @@ BOOST_AUTO_TEST_CASE(x25519__multiply__zero_point__false)
     BOOST_REQUIRE_EQUAL(out, point);
 }
 
+BOOST_AUTO_TEST_CASE(x25519__generate__twice__distinct_consistent_keys)
+{
+    x25519::key secret1{};
+    x25519::key public1{};
+    x25519::key secret2{};
+    x25519::key public2{};
+    x25519::generate(secret1, public1);
+    x25519::generate(secret2, public2);
+    BOOST_REQUIRE_NE(secret1, secret2);
+    BOOST_REQUIRE_NE(public1, public2);
+
+    x25519::key derived{};
+    BOOST_REQUIRE(x25519::multiply(derived, secret1));
+    BOOST_REQUIRE_EQUAL(derived, public1);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

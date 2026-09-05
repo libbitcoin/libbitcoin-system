@@ -41,6 +41,9 @@ public:
     /// Compute scalar * base point (u = 9).
     static bool multiply(key& out, const key& scalar) NOEXCEPT;
 
+    /// Generate a keypair from maybe_random (not for wallet keys).
+    static void generate(key& secret, key& public_key) NOEXCEPT;
+
 protected:
     /// Field elements are sixteen radix 2^16 limbs (unreduced) over int64.
     static constexpr size_t limb_count = 16;

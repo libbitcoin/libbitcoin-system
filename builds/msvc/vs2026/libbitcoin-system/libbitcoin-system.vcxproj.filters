@@ -471,10 +471,10 @@
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20_poly1305.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp">
+    <ClCompile Include="..\..\..\..\src\crypto\maybe_random.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp">
+    <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp">
@@ -1055,10 +1055,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20_poly1305.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\maybe_random.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp">

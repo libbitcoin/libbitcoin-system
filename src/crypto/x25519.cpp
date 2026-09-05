@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/crypto/x25519.hpp>
 
+#include <bitcoin/system/crypto/maybe_random.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -240,6 +241,16 @@ bool x25519::multiply(key& out, const key& scalar) NOEXCEPT
 {
     constexpr key base{ 9 };
     return multiply(out, scalar, base);
+}
+
+void x25519::generate(key& secret, key& public_key) NOEXCEPT
+{
+    // A low order result is astronomically improbable.
+    do
+    {
+        maybe_random::fill(secret);
+    }
+    while (!multiply(public_key, secret));
 }
 
 BC_POP_WARNING()
