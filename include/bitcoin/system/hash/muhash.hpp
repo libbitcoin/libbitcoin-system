@@ -34,6 +34,7 @@ class BC_API muhash3072
 public:
     /// The set representation is 3072 bits.
     static constexpr size_t byte_size = 384;
+    static constexpr size_t bit_size = to_bits(byte_size);
 
     /// The empty set.
     muhash3072() NOEXCEPT;
@@ -44,18 +45,33 @@ public:
     /// Add an element to the set.
     void insert(const data_slice& element) NOEXCEPT;
 
+    /// Add an element to the set, by its hash (accumulator output).
+    void insert_hash(const hash_digest& hash) NOEXCEPT;
+
     /// Remove an element from the set (must have been inserted).
     void remove(const data_slice& element) NOEXCEPT;
+
+    /// Remove an element from the set, by its hash (accumulator output).
+    void remove_hash(const hash_digest& hash) NOEXCEPT;
+
+    /// Combine with another set (union of multisets), as for partial sets.
+    muhash3072& operator*=(const muhash3072& other) NOEXCEPT;
 
     /// The set hash, the set remains valid for continued mutation.
     hash_digest flush() NOEXCEPT;
 
 private:
-    static uintx to_element(const data_slice& element) NOEXCEPT;
+    using element = uintx_t<bit_size>;
+    using product = uintx_t<bit_size * 2u>;
+
+    static element to_element(const hash_digest& hash) NOEXCEPT;
+    static element multiply(const element& left,
+        const element& right) NOEXCEPT;
+    static element inverse(const element& value) NOEXCEPT;
 
     // These are not thread safe.
-    uintx numerator_;
-    uintx denominator_;
+    element numerator_;
+    element denominator_;
 };
 
 } // namespace system
