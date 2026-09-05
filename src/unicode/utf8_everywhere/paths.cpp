@@ -140,9 +140,14 @@ std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
     // However this includes "considered relative" paths (with ".." segments).
     // That is of no consequence here because those will also be converted.
     // MAX_PATH includes the terminator, so a path of that length requires it.
+    // An already extended path (e.g. by a shell) is not extended again.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    constexpr std::wstring_view prefix{ L"\\\\?\\" };
     const auto full = qualified_path(path).wstring();
-    return { (full.length() >= MAX_PATH) ? L"\\\\?\\" + full : full };
+    if (full.starts_with(prefix) || full.length() < MAX_PATH)
+        return { full };
+
+    return { std::wstring{ prefix } + full };
     BC_POP_WARNING()
 }
 

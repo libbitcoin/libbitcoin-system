@@ -193,6 +193,12 @@ BOOST_AUTO_TEST_CASE(paths__extended_path__maximum__extended)
     BOOST_REQUIRE_EQUAL(extended_path({ test_maximum }), test_maximum_extended);
 }
 
+BOOST_AUTO_TEST_CASE(paths__extended_path__extended__unchanged)
+{
+    BOOST_REQUIRE_EQUAL(extended_path(test_extended), test_extended);
+    BOOST_REQUIRE_EQUAL(extended_path(test_maximum_extended), test_maximum_extended);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()
