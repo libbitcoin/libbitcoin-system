@@ -21,8 +21,10 @@
 
 #include <algorithm>
 #include <memory>
+#include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/machine.hpp>
@@ -460,8 +462,101 @@ static std::string opcode_to_prefix(opcode code,
     }
 }
 
-std::string operation::to_string(uint32_t active_flags) const NOEXCEPT
+// bitcoind decorates a signature push with its sighash type.
+static std::string sighash_suffix(uint8_t sighash) NOEXCEPT
 {
+    switch (sighash)
+    {
+        case coverage::hash_all:
+            return "[ALL]";
+        case coverage::hash_none:
+            return "[NONE]";
+        case coverage::hash_single:
+            return "[SINGLE]";
+        case coverage::all_anyone_can_pay:
+            return "[ALL|ANYONECANPAY]";
+        case coverage::none_anyone_can_pay:
+            return "[NONE|ANYONECANPAY]";
+        case coverage::single_anyone_can_pay:
+            return "[SINGLE|ANYONECANPAY]";
+        default:
+            return "";
+    }
+}
+
+// bitcoind renders up to four bytes of push data as a number.
+static std::string bitcoind_data(const data_chunk& data,
+    bool signature) NOEXCEPT
+{
+    constexpr auto size = sizeof(int32_t);
+    if (data.size() <= size)
+    {
+        int32_t value{};
+        machine::number::integer<size>::from_chunk(value, data);
+        return serialize(value);
+    }
+
+    if (signature)
+    {
+        const auto suffix = sighash_suffix(data.back());
+        const data_slice der{ data.begin(), std::prev(data.end()) };
+        if (!suffix.empty() && ::is_valid_bip66_signature_encoding(der))
+            return encode_base16(der) + suffix;
+    }
+
+    return encode_base16(data);
+}
+
+// bitcoind renders number opcodes as numbers, others OP_ prefixed.
+static std::string bitcoind_opcode(opcode code, uint32_t active_flags) NOEXCEPT
+{
+    if (code == opcode::push_negative_1)
+        return "-1";
+
+    if (operation::is_nonnegative(code))
+        return serialize(operation::opcode_to_nonnegative(code));
+
+    switch (code)
+    {
+        case opcode::nonzero:
+            return "OP_0NOTEQUAL";
+        case opcode::reserved_137:
+            return "OP_RESERVED1";
+        case opcode::reserved_138:
+            return "OP_RESERVED2";
+        case opcode::reserved_255:
+            return "OP_INVALIDOPCODE";
+        default:
+            break;
+    }
+
+    // Unnamed (hexadecimal) codes are unknown to bitcoind.
+    const auto mnemonic = opcode_to_mnemonic(code, active_flags);
+    if (mnemonic.starts_with("0x"))
+        return "OP_UNKNOWN";
+
+    return "OP_" + ascii_to_upper(mnemonic);
+}
+
+// bitcoind terminates the text at a truncated push.
+static std::string bitcoind_string(const operation& op, uint32_t active_flags,
+    bool signature) NOEXCEPT
+{
+    if (!op.is_valid() || op.is_underflow())
+        return "[error]";
+
+    if (op.code() <= opcode::push_four_size)
+        return bitcoind_data(op.data(), signature);
+
+    return bitcoind_opcode(op.code(), active_flags);
+}
+
+std::string operation::to_string(uint32_t active_flags, bool bitcoind,
+    bool signature) const NOEXCEPT
+{
+    if (bitcoind)
+        return bitcoind_string(*this, active_flags, signature);
+
     if (!is_valid())
         return "?";
 
