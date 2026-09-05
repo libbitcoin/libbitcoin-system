@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_ISTREAM_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_ISTREAM_IPP
 
-#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

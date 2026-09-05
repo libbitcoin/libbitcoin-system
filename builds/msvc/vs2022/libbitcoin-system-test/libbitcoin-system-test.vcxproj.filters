@@ -327,6 +327,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
@@ -344,6 +347,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp">
       <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp">
+      <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp">
       <Filter>src\data</Filter>

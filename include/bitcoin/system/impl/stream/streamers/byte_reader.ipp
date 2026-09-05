@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_IPP
 
-#include <algorithm>
 #include <ios>
-#include <memory>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>

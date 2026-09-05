@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 
 #include <deque>
-#include <memory>
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>

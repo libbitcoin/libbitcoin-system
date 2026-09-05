@@ -20,9 +20,7 @@
 #define LIBBITCOIN_SYSTEM_HASH_SCRYPT_IPP
 
 #include <atomic>
-#include <algorithm>
 #include <bit>
-#include <memory>
 
 // Based on:
 // tools.ietf.org/html/rfc7914

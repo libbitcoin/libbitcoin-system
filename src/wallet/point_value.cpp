@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/point_value.hpp>
 
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 
 namespace libbitcoin {

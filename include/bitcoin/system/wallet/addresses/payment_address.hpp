@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_PAYMENT_ADDRESS_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_PAYMENT_ADDRESS_HPP
 
-#include <memory>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

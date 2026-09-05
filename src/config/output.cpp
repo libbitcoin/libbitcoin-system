@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/output.hpp>
 
 #include <sstream>
-#include <utility>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>

@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_MEMORY_IPP
 #define LIBBITCOIN_SYSTEM_DATA_MEMORY_IPP
 
-#include <algorithm>
-#include <memory>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

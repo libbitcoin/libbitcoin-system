@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_ARRAY_IPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_ARRAY_IPP
 
-#include <algorithm>
-#include <iterator>
 #include <ranges>
-#include <utility>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>

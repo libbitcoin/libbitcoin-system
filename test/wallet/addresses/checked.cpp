@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include <tuple>
-#include <utility>
 
 BOOST_AUTO_TEST_SUITE(checked_tests)
 

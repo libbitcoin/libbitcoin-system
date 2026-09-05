@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/config/version.hpp>
 
-#include <algorithm>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

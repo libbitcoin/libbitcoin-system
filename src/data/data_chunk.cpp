@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/data/data_chunk.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {

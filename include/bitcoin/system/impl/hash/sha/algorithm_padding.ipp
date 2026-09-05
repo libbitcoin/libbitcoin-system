@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_PADDING_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_PADDING_IPP
 
-#include <algorithm>
-#include <iterator>
 
 // 5.1 Padding the Message
 // ============================================================================

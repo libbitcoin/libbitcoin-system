@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_WRITER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BASE16_WRITER_IPP
 
-#include <algorithm>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>

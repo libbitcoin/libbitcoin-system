@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/json/json.hpp>
 
-#include <algorithm>
 #include <ranges>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 
-#include <memory>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>

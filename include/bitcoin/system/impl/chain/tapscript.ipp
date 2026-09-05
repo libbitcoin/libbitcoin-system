@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_TAPSCRIPT_IPP
 #define LIBBITCOIN_SYSTEM_CHAIN_TAPSCRIPT_IPP
 
-#include <iterator>
-#include <utility>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

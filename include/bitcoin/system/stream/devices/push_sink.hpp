@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICES_PUSH_SINK_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_PUSH_SINK_HPP
 
-#include <iterator>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/device.hpp>

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_CONNECT_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_CONNECT_IPP
 
-#include <iterator>
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

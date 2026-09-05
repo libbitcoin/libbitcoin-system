@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
-#include <algorithm>
 #include <tuple>
-#include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>

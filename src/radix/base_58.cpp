@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/radix/base_58.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/define.hpp>
 
 // base58

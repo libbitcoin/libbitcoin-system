@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_PATTERNS_IPP
 #define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_PATTERNS_IPP
 
-#include <algorithm>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>

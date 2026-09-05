@@ -18,9 +18,7 @@
  */
 #include "../../test.hpp"
 
-#include <iterator>
 #include <sstream>
-#include <utility>
 
 BOOST_AUTO_TEST_SUITE(witness_address_tests)
 

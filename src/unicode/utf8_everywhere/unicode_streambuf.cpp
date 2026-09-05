@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 
-#include <algorithm>
 #include <cstring>
 #include <streambuf>
 #include <bitcoin/system/unicode/conversion.hpp>

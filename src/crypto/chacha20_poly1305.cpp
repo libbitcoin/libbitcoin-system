@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/crypto/chacha20.hpp>
 #include <bitcoin/system/crypto/poly1305.hpp>
 #include <bitcoin/system/data/data.hpp>

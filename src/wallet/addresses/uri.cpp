@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/addresses/uri.hpp>
 
-#include <algorithm>
 #include <ranges>
 #include <bitcoin/system/unicode/unicode.hpp>
 

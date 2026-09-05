@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/batch/signatures.hpp>
 
 #include <mutex>
-#include <vector>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

@@ -18,9 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/ec_scalar.hpp>
 
-#include <algorithm>
-#include <iterator>
-#include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>

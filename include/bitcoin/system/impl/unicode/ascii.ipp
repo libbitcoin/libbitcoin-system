@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_ASCII_IPP
 #define LIBBITCOIN_SYSTEM_UNICODE_ASCII_IPP
 
-#include <algorithm>
-#include <iterator>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

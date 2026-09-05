@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/unicode/normalization.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>

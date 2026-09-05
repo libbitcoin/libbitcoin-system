@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
 #include <bit>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/logarithm.hpp>

@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/chain/chain_state.hpp>
 
-#include <algorithm>
 #include <chrono>
-#include <iterator>
 #include <ranges>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>

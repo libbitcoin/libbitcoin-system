@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_BATCH_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_BATCH_IPP
 
-#include <iterator>
 #include <optional>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>

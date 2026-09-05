@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_COLLECTION_HPP
 #define LIBBITCOIN_SYSTEM_DATA_COLLECTION_HPP
 
-#include <iterator>
-#include <memory>
-#include <utility>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

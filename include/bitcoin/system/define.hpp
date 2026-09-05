@@ -21,6 +21,7 @@
 
 /// Standard includes (do not include directly).
 /// All except 'array' are included here by include ancestory.
+#include <algorithm>        // purged
 #include <array>            // purged
 #include <cstddef>          // purged
 #include <cstdint>          // purged
@@ -28,11 +29,14 @@
 #include <istream>          // purged
 #include <ostream>          // purged
 #include <iostream>         // purged
+#include <iterator>         // purged
 #include <limits>           // purged
+#include <memory>           // purged
 #include <stdexcept>        // purged
 #include <string>           // purged
-#include <string_view>      // not purged
+#include <string_view>      // purged
 #include <type_traits>      // purged
+#include <utility>          // purged
 #include <variant>          // purged
 #include <vector>           // purged
 

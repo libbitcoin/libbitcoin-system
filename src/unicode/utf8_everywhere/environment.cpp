@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
-#include <algorithm>
 #include <cstdlib>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/define.hpp>
