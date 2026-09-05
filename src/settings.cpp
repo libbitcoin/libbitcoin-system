@@ -513,6 +513,11 @@ uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
     BC_POP_WARNING()
 }
 
+uint32_t settings::flags() const NOEXCEPT
+{
+    return chain::chain_state::configured_flags(forks);
+}
+
 // Computed properties.
 // ----------------------------------------------------------------------------
 // These are used by node.
