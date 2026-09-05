@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_JSON_MACROS_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_JSON_MACROS_HPP
 
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -29,49 +30,63 @@ struct bitcoind_tag {};
 struct bitcoind_hashed_tag {};
 struct bitcoind_verbose_tag {};
 struct bitcoind_embedded_tag {};
+struct bitcoind_signature_tag {};
 struct electrumx_tag {};
 
-/// Reference wrapper.
+/// Reference wrapper, flags are the active rules for script text.
 template<class Tag, class Type>
 struct wrapped
 {
     const Type& value;
-    explicit wrapped(const Type& value) NOEXCEPT
-      : value(value)
+    uint32_t flags;
+    explicit wrapped(const Type& value, uint32_t flags) NOEXCEPT
+      : value(value), flags(flags)
     {
     }
 };
 
 /// Convenience aliases.
 template<class Type>
-inline auto native(const Type& value) NOEXCEPT
+inline auto native(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
 {
-    return wrapped<native_tag, Type>{ value };
+    return wrapped<native_tag, Type>{ value, flags };
 }
 template<class Type>
-inline auto bitcoind(const Type& value) NOEXCEPT
+inline auto bitcoind(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
 {
-    return wrapped<bitcoind_tag, Type>{ value };
+    return wrapped<bitcoind_tag, Type>{ value, flags };
 }
 template<class Type>
-inline auto bitcoind_hashed(const Type& value) NOEXCEPT
+inline auto bitcoind_hashed(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
 {
-    return wrapped<bitcoind_hashed_tag, Type>{ value };
+    return wrapped<bitcoind_hashed_tag, Type>{ value, flags };
 }
 template<class Type>
-inline auto bitcoind_verbose(const Type& value) NOEXCEPT
+inline auto bitcoind_verbose(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
 {
-    return wrapped<bitcoind_verbose_tag, Type>{ value };
+    return wrapped<bitcoind_verbose_tag, Type>{ value, flags };
 }
 template<class Type>
-inline auto bitcoind_embedded(const Type& value) NOEXCEPT
+inline auto bitcoind_embedded(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
 {
-    return wrapped<bitcoind_embedded_tag, Type>{ value };
+    return wrapped<bitcoind_embedded_tag, Type>{ value, flags };
 }
 template<class Type>
-inline auto electrumx(const Type& value) NOEXCEPT
+inline auto bitcoind_signature(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
 {
-    return wrapped<electrumx_tag, Type>{ value };
+    return wrapped<bitcoind_signature_tag, Type>{ value, flags };
+}
+template<class Type>
+inline auto electrumx(const Type& value,
+    uint32_t flags=system::chain::flags::all_rules) NOEXCEPT
+{
+    return wrapped<electrumx_tag, Type>{ value, flags };
 }
 
 /// json aliases

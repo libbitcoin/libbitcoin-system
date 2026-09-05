@@ -61,22 +61,15 @@ DEFINE_JSON_FROM_TAG(output::cptr)
 
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output)
 {
-    using namespace boost::json;
     const auto& out = instance.value;
     const auto satoshis = out.value() / to_floating(satoshi_per_bitcoin);
-    auto script = value_from(bitcoind(out.script())).as_object();
+    const auto script = bitcoind(out.script(), instance.flags);
 
-    // Removed in bitcoind v22.0 (because not useful).
-    ////script["reqSigs"] = 1;
-
-    // TODO: use this universal address format when standard not found.
-    script["type"] = "nonstandard";
-    script["addresses"] = array{ encode_hash(out.script().hash()) };
-
+    // "address" and "desc" require network context (added by the server).
     value =
     {
         { "value", satoshis},
-        { "scriptPubKey", std::move(script) }
+        { "scriptPubKey", value_from(script) }
 
         // In what parallel universe does serializing position make sense?
         ////{ "n", injected from loop }
@@ -90,7 +83,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output_cptrs)
     auto& values = value.as_array();
     for (size_t n{}; n < outs.size(); ++n)
     {
-        values.at(n) = value_from(bitcoind(*outs.at(n)));
+        values.at(n) = value_from(bitcoind(*outs.at(n), instance.flags));
         values.at(n).as_object()["n"] = n;
     }
 }
