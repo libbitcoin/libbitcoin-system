@@ -149,7 +149,7 @@ void salsa20::seek(uint64_t nonce, uint64_t counter) NOEXCEPT
 {
     // Words 6-7 are the nonce, which MUST not be repeated for the same key.
     nonce_[0] = narrow_cast<uint32_t>(nonce);
-    nonce_[1] = narrow_cast<uint32_t>(shift_right(nonce, 32u));
+    nonce_[1] = narrow_cast<uint32_t>(shift_right(nonce, 32));
     counter_ = counter;
     offset_ = block_size;
 }
@@ -159,7 +159,7 @@ void salsa20::next(block& out) NOEXCEPT
 {
     // Words 8-9 are the block counter.
     nonce_[2] = narrow_cast<uint32_t>(counter_);
-    nonce_[3] = narrow_cast<uint32_t>(shift_right(counter_, 32u));
+    nonce_[3] = narrow_cast<uint32_t>(shift_right(counter_, 32));
 
     auto x = initial(key_, nonce_);
     const auto start = x;
