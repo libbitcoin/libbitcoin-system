@@ -234,7 +234,6 @@
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
