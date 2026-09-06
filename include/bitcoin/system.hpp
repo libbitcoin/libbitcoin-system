@@ -118,7 +118,6 @@
 #include <bitcoin/system/crypto/fschacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/maybe_random.hpp>
 #include <bitcoin/system/crypto/poly1305.hpp>
-#include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/salsa20.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1_batch.hpp>

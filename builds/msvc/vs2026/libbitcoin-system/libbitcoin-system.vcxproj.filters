@@ -477,9 +477,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -1059,9 +1056,6 @@
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp">
-      <Filter>include\bitcoin\system\crypto</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp">

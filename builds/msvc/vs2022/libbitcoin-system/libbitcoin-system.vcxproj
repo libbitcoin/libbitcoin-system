@@ -249,7 +249,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
@@ -469,7 +468,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\maybe_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp" />
