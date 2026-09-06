@@ -110,4 +110,32 @@ BOOST_AUTO_TEST_CASE(x25519__generate__twice__distinct_consistent_keys)
     BOOST_REQUIRE_EQUAL(derived, public1);
 }
 
+BOOST_AUTO_TEST_CASE(x25519__generate__sanitize__no_pound_in_z85_encodings)
+{
+    for (size_t count{}; count < 20; ++count)
+    {
+        x25519::key secret{};
+        x25519::key public_key{};
+        x25519::generate(secret, public_key);
+
+        std::string encoded_secret{};
+        std::string encoded_public{};
+        BOOST_REQUIRE(encode_base85(encoded_secret, secret));
+        BOOST_REQUIRE(encode_base85(encoded_public, public_key));
+        BOOST_REQUIRE_EQUAL(encoded_secret.find('#'), std::string::npos);
+        BOOST_REQUIRE_EQUAL(encoded_public.find('#'), std::string::npos);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(x25519__generate__unsanitized__consistent_keys)
+{
+    x25519::key secret{};
+    x25519::key public_key{};
+    x25519::generate(secret, public_key, false);
+
+    x25519::key derived{};
+    BOOST_REQUIRE(x25519::multiply(derived, secret));
+    BOOST_REQUIRE_EQUAL(derived, public_key);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
