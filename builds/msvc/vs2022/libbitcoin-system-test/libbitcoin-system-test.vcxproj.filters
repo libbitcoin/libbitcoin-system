@@ -255,7 +255,7 @@
     <ClCompile Include="..\..\..\..\test\config\base2.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\base32.cpp">
+    <ClCompile Include="..\..\..\..\test\config\base32b.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\base58.cpp">
@@ -627,7 +627,7 @@
     <ClCompile Include="..\..\..\..\test\radix\base_2n.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\radix\base_32.cpp">
+    <ClCompile Include="..\..\..\..\test\radix\base_32b.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_58.cpp">

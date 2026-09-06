@@ -206,7 +206,7 @@
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\base32.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\base32b.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base64.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base85.cpp" />
@@ -282,7 +282,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
-    <ClCompile Include="..\..\..\..\src\radix\base_32.cpp" />
+    <ClCompile Include="..\..\..\..\src\radix\base_32b.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_58.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_64.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_85.cpp" />
@@ -435,7 +435,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\authority.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base32.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base32b.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base85.hpp" />
@@ -583,7 +583,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2048.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2n.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_32.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_32b.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_85.hpp" />

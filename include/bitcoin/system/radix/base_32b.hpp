@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_32_HPP
-#define LIBBITCOIN_SYSTEM_RADIX_BASE_32_HPP
+#ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_32B_HPP
+#define LIBBITCOIN_SYSTEM_RADIX_BASE_32B_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -25,7 +25,7 @@
 namespace libbitcoin {
 namespace system {
 
-typedef std_vector<uint5_t> base32_chunk;
+typedef std_vector<uint5_t> base32b_chunk;
 
 // This is NOT an implementation of RFC 4648: tools.ietf.org/html/rfc4648
 // This is a generic data-text encoder fully compliant with the data
@@ -45,7 +45,7 @@ typedef std_vector<uint5_t> base32_chunk;
 
 // For these reasons we provide bech32_build_checked and bech32_verify_checked
 // functions as a bridge for base32 for those working with witness addresses.
-// These are implemented using the base32_unpack and base32_pack functions
+// These are implemented using the base32b_unpack and base32b_pack functions
 // here. These expose the internal expand/contract stages of base32
 // encode/decode, but are not necessary given the bech32 checked functions.
 // The expand/contract functions here are exposed for implementation of the
@@ -62,24 +62,24 @@ typedef std_vector<uint5_t> base32_chunk;
 // but may not round trip (as is the case with BIP173 address encoding).
 
 /// Convert bytes to a base32 string.
-BC_API std::string encode_base32(const data_chunk& data) NOEXCEPT;
+BC_API std::string encode_base32b(const data_chunk& data) NOEXCEPT;
 
 /// Convert a base32 string to bytes.
 /// False if mixed case or any character is not from the base32 character set.
-BC_API bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT;
+BC_API bool decode_base32b(data_chunk& out, const std::string& in) NOEXCEPT;
 
 /// Convert base32 data to a base32 string.
-BC_API std::string encode_base32(const base32_chunk& data) NOEXCEPT;
+BC_API std::string encode_base32b(const base32b_chunk& data) NOEXCEPT;
 
 /// Convert a base32 string to base32 data.
 /// False if mixed case or any character is not from the base32 character set.
-BC_API bool decode_base32(base32_chunk& out, const std::string& in) NOEXCEPT;
+BC_API bool decode_base32b(base32b_chunk& out, const std::string& in) NOEXCEPT;
 
 /// Pack any vector of 5 bit bytes to vector of 8 bit bytes.
-BC_API data_chunk base32_pack(const base32_chunk& unpacked) NOEXCEPT;
+BC_API data_chunk base32b_pack(const base32b_chunk& unpacked) NOEXCEPT;
 
 /// Unpack any vector of 8 bit bytes to a vector of 5 bit bytes.
-BC_API base32_chunk base32_unpack(const data_chunk& packed) NOEXCEPT;
+BC_API base32b_chunk base32b_unpack(const data_chunk& packed) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

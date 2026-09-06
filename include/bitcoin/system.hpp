@@ -87,7 +87,7 @@
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>
-#include <bitcoin/system/config/base32.hpp>
+#include <bitcoin/system/config/base32b.hpp>
 #include <bitcoin/system/config/base58.hpp>
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/base85.hpp>
@@ -225,7 +225,7 @@
 #include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
 #include <bitcoin/system/radix/base_2n.hpp>
-#include <bitcoin/system/radix/base_32.hpp>
+#include <bitcoin/system/radix/base_32b.hpp>
 #include <bitcoin/system/radix/base_58.hpp>
 #include <bitcoin/system/radix/base_64.hpp>
 #include <bitcoin/system/radix/base_85.hpp>

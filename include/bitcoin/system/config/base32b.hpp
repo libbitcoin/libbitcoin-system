@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE32_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_BASE32_HPP
+#ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE32B_HPP
+#define LIBBITCOIN_SYSTEM_CONFIG_BASE32B_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -26,21 +26,21 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper for base32 encoded data.
-class BC_API base32 final
+/// Serialization helper for base32b (bech32 alphabet) encoded data.
+class BC_API base32b final
 {
 public:
-    base32() NOEXCEPT;
-    base32(data_chunk&& value) NOEXCEPT;
-    base32(const data_chunk& value) NOEXCEPT;
-    base32(const std::string& base32) THROWS;
+    base32b() NOEXCEPT;
+    base32b(data_chunk&& value) NOEXCEPT;
+    base32b(const data_chunk& value) NOEXCEPT;
+    base32b(const std::string& base32) THROWS;
 
     operator const data_chunk&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        base32& argument) THROWS;
+        base32b& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const base32& argument) NOEXCEPT;
+        const base32b& argument) NOEXCEPT;
 
 private:
     data_chunk value_;

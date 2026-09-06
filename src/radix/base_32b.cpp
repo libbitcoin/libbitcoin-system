@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/radix/base_32.hpp>
+#include <bitcoin/system/radix/base_32b.hpp>
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -54,7 +54,7 @@ constexpr uint8_t decode[] =
 
 // encode
 
-std::string encode_base32(const base32_chunk& data) NOEXCEPT
+std::string encode_base32b(const base32b_chunk& data) NOEXCEPT
 {
     std::string out;
     out.reserve(data.size());
@@ -66,14 +66,14 @@ std::string encode_base32(const base32_chunk& data) NOEXCEPT
     return out;
 }
 
-std::string encode_base32(const data_chunk& data) NOEXCEPT
+std::string encode_base32b(const data_chunk& data) NOEXCEPT
 {
-    return encode_base32(base32_unpack(data));
+    return encode_base32b(base32b_unpack(data));
 }
 
 // decode
 
-bool decode_base32(base32_chunk& out, const std::string& in) NOEXCEPT
+bool decode_base32b(base32b_chunk& out, const std::string& in) NOEXCEPT
 {
     if (has_mixed_ascii_case(in))
         return false;
@@ -95,19 +95,19 @@ bool decode_base32(base32_chunk& out, const std::string& in) NOEXCEPT
     return true;
 }
 
-bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT
+bool decode_base32b(data_chunk& out, const std::string& in) NOEXCEPT
 {
-    base32_chunk expanded;
-    if (!decode_base32(expanded, in))
+    base32b_chunk expanded;
+    if (!decode_base32b(expanded, in))
         return false;
 
-    out = base32_pack(expanded);
+    out = base32b_pack(expanded);
     return true;
 }
 
 // pack/unpack
 
-data_chunk base32_pack(const base32_chunk& unpacked) NOEXCEPT
+data_chunk base32b_pack(const base32b_chunk& unpacked) NOEXCEPT
 {
     data_chunk packed;
     write::bits::data sink(packed);
@@ -118,7 +118,7 @@ data_chunk base32_pack(const base32_chunk& unpacked) NOEXCEPT
 
     sink.flush();
 
-    // Remove an element that is only padding, assumes base32_unpack encoding.
+    // Remove an element that is only padding, assumes base32b_unpack encoding.
     // The bit writer writes zeros past end as padding.
     // This is a ((n * 5) / 8) operation, so (8 - ((n * 5) % 8)) are pad.
     // This padding is in addition to that added by unpacking. When unpacked
@@ -127,7 +127,7 @@ data_chunk base32_pack(const base32_chunk& unpacked) NOEXCEPT
     // that the number of used bits is unchanged. Remainder indicates padding.
     if (!is_zero((unpacked.size() * 5) % 8))
     {
-        // If pad byte is non-zero the unpacking was not base32_unpack.
+        // If pad byte is non-zero the unpacking was not base32b_unpack.
         // So we return an failure where the condition is detecable.
         packed.resize(packed.back() == 0x00 ? sub1(packed.size()) : 0);
     }
@@ -135,9 +135,9 @@ data_chunk base32_pack(const base32_chunk& unpacked) NOEXCEPT
     return packed;
 }
 
-base32_chunk base32_unpack(const data_chunk& packed) NOEXCEPT
+base32b_chunk base32b_unpack(const data_chunk& packed) NOEXCEPT
 {
-    base32_chunk unpacked;
+    base32b_chunk unpacked;
     read::bits::copy source(packed);
 
     // This is how C++ developers do it. :)

@@ -65,27 +65,27 @@ BC_API void append_checksum(data_chunk& data) NOEXCEPT;
 
 /// These utilities are used for witness payment addresses and other standards
 /// that leverage the same technique. These hide the complexities of data
-/// expansion and contraction inherent to BIP173. base_32 class is a typical
+/// expansion and contraction inherent to BIP173. base_32b class is a typical
 /// byte encoder/decoder, yet fully complaint with BIP173. The output from
-/// decode_base32 can be fed directly to bech32_verify_checked(data) and
-/// the output of bech32_build_checked can be fed directly to encode_base32.
+/// decode_base32b can be fed directly to bech32_verify_checked(data) and
+/// the output of bech32_build_checked can be fed directly to encode_base32b.
 /// The implementation does not support unversioned bech32 payloads as there
 /// is no use case and support requires exposure of bech32 internals.
 
 /// Combine witness version, program and checksum.
-/// The result may be passed to encode_base32 when creating a witness address.
+/// The result may be passed to encode_base32b when creating a witness address.
 /// For implementation details see wallet::witness_address. Version is limited
 /// to 5 bits (less than 32) by bech32 design and is otherwise truncated. Non-
 /// zero versions select bech32m (vs. bech32), resulting in distinct checksum.
-BC_API base32_chunk bech32_build_checked(uint8_t version,
+BC_API base32b_chunk bech32_build_checked(uint8_t version,
     const data_chunk& program, const std::string& prefix) NOEXCEPT;
 
 /// Verify the bech32 checksum and extract witness version and program.
-/// The data parameter may obtained from a witness address using decode_base32.
+/// The data parameter may obtained from a witness address using decode_base32b.
 /// For implementation details see wallet::witness_address.
 BC_API bool bech32_verify_checked(uint8_t& out_version,
     data_chunk& out_program, const std::string& prefix,
-    const base32_chunk& checked) NOEXCEPT;
+    const base32b_chunk& checked) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

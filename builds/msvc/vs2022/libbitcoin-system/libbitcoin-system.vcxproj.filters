@@ -390,7 +390,7 @@
     <ClCompile Include="..\..\..\..\src\config\base2.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\base32.cpp">
+    <ClCompile Include="..\..\..\..\src\config\base32b.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base58.cpp">
@@ -564,7 +564,7 @@
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\radix\base_32.cpp">
+    <ClCompile Include="..\..\..\..\src\radix\base_32b.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_58.cpp">
@@ -959,7 +959,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base32.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base32b.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58.hpp">
@@ -1403,7 +1403,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2n.hpp">
       <Filter>include\bitcoin\system\radix</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_32.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_32b.hpp">
       <Filter>include\bitcoin\system\radix</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_58.hpp">

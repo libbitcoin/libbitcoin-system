@@ -252,8 +252,8 @@ witness_address::parse_result witness_address::parse_address(
     if (payload.length() > (one + program_maximum_length + checksum_length))
         return parse_result::payload_too_long;
 
-    base32_chunk checked;
-    if (!decode_base32(checked, payload))
+    base32b_chunk checked;
+    if (!decode_base32b(checked, payload))
         return parse_result::payload_not_base32;
 
     // Verify the bech32 checksum and extract version and program.
@@ -388,7 +388,7 @@ std::string witness_address::encoded() const NOEXCEPT
         return {};
 
     const auto checked = bech32_build_checked(version_, program_, prefix_);
-    return prefix_ + separator + encode_base32(checked);
+    return prefix_ + separator + encode_base32b(checked);
 }
 
 // Properties.

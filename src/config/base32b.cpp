@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/base32.hpp>
+#include <bitcoin/system/config/base32b.hpp>
 
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
@@ -26,44 +26,44 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base32::base32() NOEXCEPT
+base32b::base32b() NOEXCEPT
 {
 }
 
-base32::base32(data_chunk&& value) NOEXCEPT
+base32b::base32b(data_chunk&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-base32::base32(const data_chunk& value) NOEXCEPT
+base32b::base32b(const data_chunk& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base32::base32(const std::string& base32) THROWS
+base32b::base32b(const std::string& base32) THROWS
 {
     std::istringstream(base32) >> *this;
 }
 
-base32::operator const data_chunk&() const NOEXCEPT
+base32b::operator const data_chunk&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, base32& argument) THROWS
+std::istream& operator>>(std::istream& stream, base32b& argument) THROWS
 {
     std::string base32;
     stream >> base32;
 
-    if (!decode_base32(argument.value_, base32))
+    if (!decode_base32b(argument.value_, base32))
         throw istream_exception(base32);
 
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const base32& argument) NOEXCEPT
+std::ostream& operator<<(std::ostream& stream, const base32b& argument) NOEXCEPT
 {
-    stream << encode_base32(argument.value_);
+    stream << encode_base32b(argument.value_);
     return stream;
 }
 
