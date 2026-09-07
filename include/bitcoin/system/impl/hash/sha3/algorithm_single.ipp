@@ -62,24 +62,12 @@ hash(uint8_t byte) NOEXCEPT
 }
 
 TEMPLATE
-template <typename Iterable, if_same<Iterable, typename CLASSIF::iblocks_t>>
 typename CLASS::digest_t CLASS::
-hash(Iterable&& blocks) NOEXCEPT
+hash(iblocks_t&& blocks) NOEXCEPT
 {
     auto state = H::get;
     iterate(state, blocks);
     return finalize(state);
-}
-
-TEMPLATE
-typename CLASS::digest_t CLASS::
-hash(const data_slice& data) NOEXCEPT
-{
-    const auto size = data.size();
-    const auto tail = size % block_bytes;
-    auto state = H::get;
-    accumulate(state, iblocks_t{ size - tail, data.data() });
-    return finalize(state, tail, std::next(data.data(), size - tail));
 }
 
 TEMPLATE

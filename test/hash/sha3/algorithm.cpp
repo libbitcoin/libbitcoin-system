@@ -46,13 +46,13 @@ static_assert(!sha3_256::vector);
 // The initial state is zero (sponge).
 static_assert(sha3_256::H::get == sha3_256::state_t{});
 
-BOOST_AUTO_TEST_CASE(sha3_algorithm__hash__digest_truncation__prefix)
-{
-    // A truncated digest is the prefix of the full digest (same rate).
-    using sha3_256_224 = sha3::algorithm<sha3::h256<224>>;
-    const auto full = sha3_256::hash(to_chunk("abc"));
-    const auto truncated = sha3_256_224::hash(to_chunk("abc"));
-    BOOST_REQUIRE(std::equal(truncated.begin(), truncated.end(), full.begin()));
-}
+// The rate is derived from the digest, the permutation is shared.
+static_assert(sha3_224::H::rate == 1152);
+static_assert(sha3_256::H::rate == 1088);
+static_assert(sha3_384::H::rate == 832);
+static_assert(sha3_512::H::rate == 576);
+static_assert(sha3_224::H::capacity == 2 * 224);
+static_assert(sha3_256::K::rotation == keccak_256::K::rotation);
+static_assert(sha3_256::K::get == sha3_512::K::get);
 
 BOOST_AUTO_TEST_SUITE_END()

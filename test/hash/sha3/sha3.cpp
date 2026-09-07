@@ -39,11 +39,13 @@ constexpr auto million256 = base16_array("5c8875ae474a3634ba4fd55ec85bffd661f32a
 constexpr auto keccak_empty256 = base16_array("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
 
 constexpr std_array<uint8_t, 3> abc{ 'a', 'b', 'c' };
-const std::string long_message{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq" };
+constexpr auto long_message = to_array(
+    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha3_256::simple_hash(sha3_256::bytes_t<0>{}) == empty256);
 static_assert(sha3_256::simple_hash(abc) == abc256);
+static_assert(sha3_256::simple_hash(long_message) == long256);
 static_assert(keccak_256::simple_hash(sha3_256::bytes_t<0>{}) == keccak_empty256);
 
 // simple_hash (const-evaluated)
@@ -64,81 +66,56 @@ BOOST_AUTO_TEST_CASE(sha3__simple_hash__abc__expected)
     BOOST_REQUIRE_EQUAL(sha3_512::simple_hash(abc), abc512);
 }
 
-// hash (data_slice)
-
-BOOST_AUTO_TEST_CASE(sha3__hash__empty__expected)
+BOOST_AUTO_TEST_CASE(sha3__simple_hash__448_bit_message__expected)
 {
-    BOOST_REQUIRE_EQUAL(sha3_224::hash(data_chunk{}), empty224);
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(data_chunk{}), empty256);
-    BOOST_REQUIRE_EQUAL(sha3_384::hash(data_chunk{}), empty384);
-    BOOST_REQUIRE_EQUAL(sha3_512::hash(data_chunk{}), empty512);
+    BOOST_REQUIRE_EQUAL(sha3_256::simple_hash(long_message), long256);
 }
 
-BOOST_AUTO_TEST_CASE(sha3__hash__abc__expected)
-{
-    const auto data = to_chunk("abc");
-    BOOST_REQUIRE_EQUAL(sha3_224::hash(data), abc224);
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(data), abc256);
-    BOOST_REQUIRE_EQUAL(sha3_384::hash(data), abc384);
-    BOOST_REQUIRE_EQUAL(sha3_512::hash(data), abc512);
-}
+// hash (blocks)
 
-BOOST_AUTO_TEST_CASE(sha3__hash__448_bit_message__expected)
+BOOST_AUTO_TEST_CASE(sha3__hash__full_block__matches_streamed)
 {
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(to_chunk(long_message)), long256);
-}
-
-BOOST_AUTO_TEST_CASE(sha3__hash__one_million_a__expected)
-{
-    // Spans many rate blocks (136 bytes) with a partial trailing block.
-    const data_chunk data(1'000'000, 'a');
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(data), million256);
-}
-
-// hash (block/half/byte)
-
-BOOST_AUTO_TEST_CASE(sha3__hash__block_forms__consistent)
-{
-    // Correlate the typed overloads to the data_slice overload.
+    // A full rate block absorbs, then pad10*1 adds a second (empty tail).
     constexpr sha3_256::block_t block{};
+    auto state = sha3_256::H::get;
+    sha3_256::accumulate(state, block);
+    BOOST_REQUIRE_EQUAL(sha3_256::finalize(state), sha3_256::hash(block));
+}
+
+BOOST_AUTO_TEST_CASE(sha3__hash__half_and_byte__match_simple)
+{
+    // The partial block overloads are simple_hash of the same bytes.
     constexpr sha3_256::half_t half{};
-    const auto block_chunk = to_chunk(block);
-    const auto half_chunk = to_chunk(half);
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(block), sha3_256::hash(block_chunk));
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(half), sha3_256::hash(half_chunk));
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(0x61_u8), sha3_256::hash(to_chunk("a")));
+    constexpr sha3_256::bytes_t<1> byte{ 'a' };
+    BOOST_REQUIRE_EQUAL(sha3_256::hash(half), sha3_256::simple_hash(half));
+    BOOST_REQUIRE_EQUAL(sha3_256::hash(0x61_u8), sha3_256::simple_hash(byte));
 }
 
 // accumulate/finalize
 
-BOOST_AUTO_TEST_CASE(sha3__accumulate_finalize__blocks_and_tail__expected)
+BOOST_AUTO_TEST_CASE(sha3__accumulate_finalize__one_million_a__expected)
 {
-    // Two full blocks then a three byte tail, streamed vs. single hash.
-    constexpr sha3_256::block_t block{ 0x42 };
-    constexpr std_array<uint8_t, 3> tail{ 'a', 'b', 'c' };
-    auto data = to_chunk(block);
-    extend(data, to_chunk(block));
-    extend(data, to_chunk(tail));
+    // 1,000,000 bytes is 7352 rate blocks of 136 plus a 128 byte tail.
+    const data_chunk data(999'872, 'a');
+    sha3_256::bytes_t<128> tail{};
+    tail.fill('a');
 
     auto state = sha3_256::H::get;
-    sha3_256::accumulate(state, block);
-    sha3_256::accumulate(state, block);
-    const auto streamed = sha3_256::finalize(state, tail);
-    BOOST_REQUIRE_EQUAL(streamed, sha3_256::hash(data));
+    sha3_256::accumulate(state, { data.size(), data.data() });
+    BOOST_REQUIRE_EQUAL(sha3_256::finalize(state, tail), million256);
 }
 
 // keccak
 
-BOOST_AUTO_TEST_CASE(keccak__hash__empty__expected)
+BOOST_AUTO_TEST_CASE(keccak__simple_hash__empty__expected)
 {
-    BOOST_REQUIRE_EQUAL(keccak_256::hash(data_chunk{}), keccak_empty256);
+    BOOST_REQUIRE_EQUAL(keccak_256::simple_hash(keccak_256::bytes_t<0>{}), keccak_empty256);
 }
 
-BOOST_AUTO_TEST_CASE(keccak__hash__abc__differs_from_sha3)
+BOOST_AUTO_TEST_CASE(keccak__simple_hash__abc__differs_from_sha3)
 {
     // Domain separation alone distinguishes the two.
-    const auto data = to_chunk("abc");
-    BOOST_REQUIRE_NE(keccak_256::hash(data), sha3_256::hash(data));
+    BOOST_REQUIRE_NE(keccak_256::simple_hash(abc), sha3_256::simple_hash(abc));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

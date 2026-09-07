@@ -29,23 +29,21 @@ namespace sha3 {
 struct sha3k_t{};
 struct sha3h_t{};
 
-/// Padding domain separation byte (FIPS 202 SHA3 vs. original Keccak).
+/// Padding domain separation byte (FIPS202 SHA3 vs. original Keccak).
 constexpr uint8_t sha3_domain = 0x06;
 constexpr uint8_t keccak_domain = 0x01;
 
-/// Keccak-f[1600] parameters, capacity is twice the strength.
-template <size_t Strength,
-    bool_if<Strength == 224 || Strength == 256 ||
-        Strength == 384 || Strength == 512> = true>
+/// The Keccak-f[1600] permutation, invariant across all digest sizes.
 struct k
 {
     using T = sha3k_t;
-    static constexpr auto strength = Strength;
     static constexpr auto rounds = 24_size;
     static constexpr auto width = 1600_size;
-    static constexpr auto capacity = 2 * strength;
-    static constexpr auto rate = width - capacity;
-    using constants_t = std_array<uint64_t, rounds>;
+    static constexpr auto word_bits = 64_size;
+    static constexpr auto lanes = width / word_bits;
+    using word_t = uint64_t;
+    using constants_t = std_array<word_t, rounds>;
+    using offsets_t = std_array<size_t, lanes>;
 
     // round constants (RC)
     static constexpr constants_t get
@@ -63,11 +61,22 @@ struct k
         0x8000000080008081, 0x8000000000008080,
         0x0000000080000001, 0x8000000080008008
     };
+
+    // rotation offsets (rho), indexed by lane (x + 5 * y)
+    static constexpr offsets_t rotation
+    {
+         0,  1, 62, 28, 27,
+        36, 44,  6, 55, 20,
+         3, 10, 43, 25, 39,
+        41, 45, 15, 21,  8,
+        18,  2, 61, 56, 14
+    };
 };
 
-template <typename Constants, size_t Digest = Constants::strength,
-    uint8_t Domain = sha3_domain,
-    if_not_greater<Digest, Constants::strength> = true,
+/// The sponge rate is derived from the digest, capacity is twice the digest.
+template <typename Constants, size_t Digest, uint8_t Domain = sha3_domain,
+    bool_if<Digest == 224 || Digest == 256 ||
+        Digest == 384 || Digest == 512> = true,
     if_same<typename Constants::T, sha3k_t> = true>
 struct h
 {
@@ -76,44 +85,40 @@ struct h
     static constexpr auto digest       = Digest;
     static constexpr auto domain       = Domain;
     static constexpr auto rounds       = K::rounds;
-    static constexpr auto strength     = K::strength;
-    static constexpr auto word_bits    = 64_size;
+    static constexpr auto word_bits    = K::word_bits;
     static constexpr auto word_bytes   = bytes<word_bits>;
-    static constexpr auto block_words  = K::rate / word_bits;
-    static constexpr auto state_words  = K::width / word_bits;
-    using word_t = uint64_t;
+    static constexpr auto capacity     = two * digest;
+    static constexpr auto rate         = K::width - capacity;
+    static constexpr auto block_words  = rate / word_bits;
+    static constexpr auto state_words  = K::lanes;
+    using word_t = typename K::word_t;
     using state_t = std_array<word_t, state_words>;
 
-    // initial value (H), the sponge state is initially zero.
+    // initial value (H), the sponge state is initially zero
     static constexpr state_t get{};
 };
 
-using k224 = k<224>;
-using k256 = k<256>;
-using k384 = k<384>;
-using k512 = k<512>;
-
-template <size_t Digest = 224, uint8_t Domain = sha3_domain>
+template <uint8_t Domain = sha3_domain>
 struct h224
-  : public h<k224, Digest, Domain>
+  : public h<k, 224, Domain>
 {
 };
 
-template <size_t Digest = 256, uint8_t Domain = sha3_domain>
+template <uint8_t Domain = sha3_domain>
 struct h256
-  : public h<k256, Digest, Domain>
+  : public h<k, 256, Domain>
 {
 };
 
-template <size_t Digest = 384, uint8_t Domain = sha3_domain>
+template <uint8_t Domain = sha3_domain>
 struct h384
-  : public h<k384, Digest, Domain>
+  : public h<k, 384, Domain>
 {
 };
 
-template <size_t Digest = 512, uint8_t Domain = sha3_domain>
+template <uint8_t Domain = sha3_domain>
 struct h512
-  : public h<k512, Digest, Domain>
+  : public h<k, 512, Domain>
 {
 };
 

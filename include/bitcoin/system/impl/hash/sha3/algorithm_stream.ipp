@@ -60,17 +60,6 @@ finalize(state_t& state, const bytes_t<Size>& tail) NOEXCEPT
     return output(state);
 }
 
-// protected
-// ----------------------------------------------------------------------------
-
-TEMPLATE
-typename CLASS::digest_t CLASS::
-finalize(state_t& state, size_t size, const byte_t* tail) NOEXCEPT
-{
-    absorb(state, pad(size, tail));
-    return output(state);
-}
-
 } // namespace sha3
 } // namespace system
 } // namespace libbitcoin

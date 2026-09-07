@@ -91,9 +91,7 @@ public:
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t hash(uint8_t byte) NOEXCEPT;
-    template <typename Iterable, if_same<Iterable, typename CLASSIF::iblocks_t> = true>
-    static digest_t hash(Iterable&& blocks) NOEXCEPT;
-    static digest_t hash(const data_slice& data) NOEXCEPT;
+    static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
     /// Finalized hash of a single partial block (any size less than a block).
     template <size_t Size, if_not_greater<Size, CLASSIF::space> = true>
@@ -115,9 +113,6 @@ public:
         const bytes_t<Size>& tail) NOEXCEPT;
 
 protected:
-    using uint = unsigned int;
-    using offsets_t = std_array<uint, SHA3::state_words>;
-
     /// Keccak-f[1600] functions.
     /// -----------------------------------------------------------------------
 
@@ -162,16 +157,6 @@ protected:
     static constexpr void iterate(state_t& state,
         const ablocks_t<Size>& blocks) NOEXCEPT;
     static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
-
-    /// Rotation offsets (rho), indexed by lane (x + 5 * y).
-    static constexpr offsets_t rotation
-    {
-         0,  1, 62, 28, 27,
-        36, 44,  6, 55, 20,
-         3, 10, 43, 25, 39,
-        41, 45, 15, 21,  8,
-        18,  2, 61, 56, 14
-    };
 
 public:
     /// Summary public values.
