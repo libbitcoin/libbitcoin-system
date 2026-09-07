@@ -16,38 +16,57 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE32_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_BASE32_HPP
+#include <bitcoin/system/config/base32b.hpp>
 
+#include <sstream>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper for base32 (RFC 4648) encoded data.
-class BC_API base32 final
+base32b::base32b() NOEXCEPT
 {
-public:
-    base32() NOEXCEPT;
-    base32(data_chunk&& value) NOEXCEPT;
-    base32(const data_chunk& value) NOEXCEPT;
-    base32(const std::string& base32) THROWS;
+}
 
-    operator const data_chunk&() const NOEXCEPT;
+base32b::base32b(data_chunk&& value) NOEXCEPT
+  : value_(std::move(value))
+{
+}
 
-    friend std::istream& operator>>(std::istream& stream,
-        base32& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& stream,
-        const base32& argument) NOEXCEPT;
+base32b::base32b(const data_chunk& value) NOEXCEPT
+  : value_(value)
+{
+}
 
-private:
-    data_chunk value_;
-};
+base32b::base32b(const std::string& base32) THROWS
+{
+    std::istringstream(base32) >> *this;
+}
+
+base32b::operator const data_chunk&() const NOEXCEPT
+{
+    return value_;
+}
+
+std::istream& operator>>(std::istream& stream, base32b& argument) THROWS
+{
+    std::string base32;
+    stream >> base32;
+
+    if (!decode_base32b(argument.value_, base32))
+        throw istream_exception(base32);
+
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, const base32b& argument) NOEXCEPT
+{
+    stream << encode_base32b(argument.value_);
+    return stream;
+}
 
 } // namespace config
 } // namespace system
 } // namespace libbitcoin
-
-#endif

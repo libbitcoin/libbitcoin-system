@@ -20,219 +20,135 @@
 
 BOOST_AUTO_TEST_SUITE(base_32_tests)
 
-// decode_base32
+// RFC 4648 section 10 test vectors.
 
-BOOST_AUTO_TEST_CASE(base_32__decode_base32__vector0__expected)
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__empty__empty)
 {
-    const auto encoded = "";
-    const auto decoded = base16_chunk("");
+    BOOST_REQUIRE_EQUAL(encode_base32(data_chunk{}), "");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__f__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_base32(to_chunk("f")), "MY======");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__fo__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_base32(to_chunk("fo")), "MZXQ====");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__foo__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_base32(to_chunk("foo")), "MZXW6===");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__foob__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_base32(to_chunk("foob")), "MZXW6YQ=");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__fooba__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_base32(to_chunk("fooba")), "MZXW6YTB");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__encode_base32__foobar__expected)
+{
+    BOOST_REQUIRE_EQUAL(encode_base32(to_chunk("foobar")), "MZXW6YTBOI======");
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__empty__empty)
+{
+    data_chunk out;
+    BOOST_REQUIRE(decode_base32(out, ""));
+    BOOST_REQUIRE(out.empty());
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__padded__expected)
+{
+    data_chunk out;
+    BOOST_REQUIRE(decode_base32(out, "MZXW6YTBOI======"));
+    BOOST_REQUIRE(out == to_chunk("foobar"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__unpadded__expected)
+{
+    data_chunk out;
+    BOOST_REQUIRE(decode_base32(out, "MZXW6YTBOI"));
+    BOOST_REQUIRE(out == to_chunk("foobar"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__lower_case__expected)
+{
+    data_chunk out;
+    BOOST_REQUIRE(decode_base32(out, "mzxw6ytboi"));
+    BOOST_REQUIRE(out == to_chunk("foobar"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__unaligned__expected)
+{
+    data_chunk out;
+    BOOST_REQUIRE(decode_base32(out, "MZXW6YQ="));
+    BOOST_REQUIRE(out == to_chunk("foob"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__invalid_character__false)
+{
+    data_chunk out;
+    BOOST_REQUIRE(!decode_base32(out, "MZXW6YTB0I"));
+    BOOST_REQUIRE(!decode_base32(out, "MZXW6YTB1I"));
+    BOOST_REQUIRE(!decode_base32(out, "MZXW6YTB8I"));
+    BOOST_REQUIRE(!decode_base32(out, "MZXW6Y-BOI"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__invalid_length__false)
+{
+    data_chunk out;
+    BOOST_REQUIRE(!decode_base32(out, "M"));
+    BOOST_REQUIRE(!decode_base32(out, "MZX"));
+    BOOST_REQUIRE(!decode_base32(out, "MZXW6Y"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__invalid_padding__false)
+{
+    data_chunk out;
+    BOOST_REQUIRE(!decode_base32(out, "MY====="));
+    BOOST_REQUIRE(!decode_base32(out, "MY======="));
+    BOOST_REQUIRE(!decode_base32(out, "MZXW6YTB========"));
+    BOOST_REQUIRE(!decode_base32(out, "MY==MZXQ"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__decode_base32__nonzero_trailing_bits__false)
+{
+    // Two characters carry ten bits, the trailing two must be zero.
+    data_chunk out;
+    BOOST_REQUIRE(!decode_base32(out, "MZ"));
+}
+
+BOOST_AUTO_TEST_CASE(base_32__round_trip__thirty_two_bytes__expected)
+{
+    // The i2p b32 payload size, 52 characters unpadded.
+    const data_chunk data(32, 0xab);
+    const auto encoded = encode_base32(data);
+    BOOST_REQUIRE_EQUAL(encoded.size(), 56u);
+    BOOST_REQUIRE_EQUAL(encoded.substr(52), "====");
+
+    data_chunk out;
+    BOOST_REQUIRE(decode_base32(out, encoded.substr(0, 52)));
+    BOOST_REQUIRE(out == data);
+}
+
+BOOST_AUTO_TEST_CASE(base_32__round_trip__thirty_five_bytes__expected)
+{
+    // The onion v3 payload size, 56 characters, no padding.
+    const data_chunk data(35, 0xcd);
+    const auto encoded = encode_base32(data);
+    BOOST_REQUIRE_EQUAL(encoded.size(), 56u);
+    BOOST_REQUIRE_EQUAL(encoded.find('='), std::string::npos);
+
     data_chunk out;
     BOOST_REQUIRE(decode_base32(out, encoded));
-    BOOST_REQUIRE_EQUAL(out, decoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__decode_base32__vector1__expected)
-{
-    const auto encoded = "pu";
-    const auto decoded = base16_chunk("0f");
-    data_chunk out;
-    BOOST_REQUIRE(decode_base32(out, encoded));
-    BOOST_REQUIRE_EQUAL(out, decoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__decode_base32__vector2__expected)
-{
-    const auto encoded = "qyhs";
-    const auto decoded = base16_chunk("012f");
-    data_chunk out;
-    BOOST_REQUIRE(decode_base32(out, encoded));
-    BOOST_REQUIRE_EQUAL(out, decoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__decode_base32__vector3__expected)
-{
-    const auto encoded = "qy357";
-    const auto decoded = base16_chunk("01234f");
-    data_chunk out;
-    BOOST_REQUIRE(decode_base32(out, encoded));
-    BOOST_REQUIRE_EQUAL(out, decoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__decode_base32__vector4__expected)
-{
-    const auto encoded = "qy352mc";
-    const auto decoded = base16_chunk("0123456f");
-    data_chunk out;
-    BOOST_REQUIRE(decode_base32(out, encoded));
-    BOOST_REQUIRE_EQUAL(out, decoded);
-}
-
-// Minimum unpadded (non-zero) size.
-BOOST_AUTO_TEST_CASE(base_32__decode_base32__vector5__expected)
-{
-    const auto encoded = "qy352eu0";
-    const auto decoded = base16_chunk("012345678f");
-    data_chunk out;
-    BOOST_REQUIRE(decode_base32(out, encoded));
-    BOOST_REQUIRE_EQUAL(out, decoded);
-}
-
-// encode_base32
-
-BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector0__expected)
-{
-    const auto encoded = "";
-    const auto decoded = base16_chunk("");
-    BOOST_REQUIRE_EQUAL(encode_base32(decoded), encoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector1__expected)
-{
-    const auto encoded = "pu";
-    const auto decoded = base16_chunk("0f");
-    BOOST_REQUIRE_EQUAL(encode_base32(decoded), encoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector2__expected)
-{
-    const auto encoded = "qyhs";
-    const auto decoded = base16_chunk("012f");
-    BOOST_REQUIRE_EQUAL(encode_base32(decoded), encoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector3__expected)
-{
-    const auto encoded = "qy357";
-    const auto decoded = base16_chunk("01234f");
-    BOOST_REQUIRE_EQUAL(encode_base32(decoded), encoded);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector4__expected)
-{
-    const auto encoded = "qy352mc";
-    const auto decoded = base16_chunk("0123456f");
-    BOOST_REQUIRE_EQUAL(encode_base32(decoded), encoded);
-}
-
-// Minimum unpadded (non-zero) size.
-BOOST_AUTO_TEST_CASE(base_32__encode_base32__vector5__expected)
-{
-    const auto encoded = "qy352eu0";
-    const auto decoded = base16_chunk("012345678f");
-    BOOST_REQUIRE_EQUAL(encode_base32(decoded), encoded);
-}
-
-// base32_unpack
-
-BOOST_AUTO_TEST_CASE(base_32__base32_unpack__vector0__expected)
-{
-    // []=>[]
-    const data_chunk packed{};
-    const base32_chunk expected{};
-    BOOST_REQUIRE_EQUAL(base32_unpack(packed), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_unpack__vector1__expected)
-{
-    // [11111111]=>
-    // [11111][111pp]
-    const data_chunk packed(1, 0xff);
-    const base32_chunk expected{ 0x1f, 0x1c };
-    BOOST_REQUIRE_EQUAL(base32_unpack(packed), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_unpack__vector2__expected)
-{
-    // [11111111][11111111]=>
-    // [11111][11111][11111][1pppp]
-    const data_chunk packed(2, 0xff);
-    const base32_chunk expected{ 0x1f, 0x1f, 0x1f, 0x10 };
-    BOOST_REQUIRE_EQUAL(base32_unpack(packed), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_unpack__vector3__expected)
-{
-    // [11111111][11111111][11111111]=>
-    // [11111][11111][11111][11111][1111p]
-    const data_chunk packed(3, 0xff);
-    const base32_chunk expected{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1e };
-    BOOST_REQUIRE_EQUAL(base32_unpack(packed), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_unpack__vector4__expected)
-{
-    // [11111111][11111111][11111111][11111111]=>
-    // [11111][11111][11111][11111][11111][11111][11ppp]
-    const data_chunk packed(4, 0xff);
-    const base32_chunk expected{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x18 };
-    BOOST_REQUIRE_EQUAL(base32_unpack(packed), expected);
-}
-
-// Minimum unpadded (non-zero) size.
-BOOST_AUTO_TEST_CASE(base_32__base32_unpack__vector5__expected)
-{
-    // [11111111][11111111][11111111][11111111][11111111]=>
-    // [11111][11111][11111][11111][11111][11111][11111][11111]
-    const data_chunk packed(5, 0xff);
-    const base32_chunk expected((packed.size() * 8) / 5, 0x1f);
-    BOOST_REQUIRE_EQUAL(base32_unpack(packed), expected);
-}
-
-// base32_pack
-
-BOOST_AUTO_TEST_CASE(base_32__base32_pack__vector0__expected)
-{
-    // []=>[]
-    const base32_chunk unpacked{};
-    const data_chunk expected{};
-    data_chunk out;
-    BOOST_REQUIRE_EQUAL(base32_pack(unpacked), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_pack__vector1__expected)
-{
-    // [11111][111xx]=>
-    // [11111111][xxpppppp]
-    const base32_chunk unpacked{ 0x1f, 0x1c };
-    const data_chunk expected(1, 0xff);
-    BOOST_REQUIRE_EQUAL(base32_pack(unpacked), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_pack__vector2__expected)
-{
-    // [11111][11111][11111][1xxxx]=>
-    // [11111111][11111111][xxxxpppp]
-    const base32_chunk unpacked{ 0x1f, 0x1f, 0x1f, 0x10 };
-    const data_chunk expected(2, 0xff);
-    BOOST_REQUIRE_EQUAL(base32_pack(unpacked), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_pack__vector3__expected)
-{
-    // [11111][11111][11111][11111][1111x]=>
-    // [11111111][11111111][11111111][xppppppp]
-    const base32_chunk unpacked{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1e };
-    const data_chunk expected(3, 0xff);
-    BOOST_REQUIRE_EQUAL(base32_pack(unpacked), expected);
-}
-
-BOOST_AUTO_TEST_CASE(base_32__base32_pack__vector4__expected)
-{
-    // [11111][11111][11111][11111][11111][11111][11xxx]=>
-    // [11111111][11111111][11111111][11111111][xxxppppp]
-    const base32_chunk unpacked{ 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x1f, 0x18 };
-    const data_chunk expected(4, 0xff);
-    BOOST_REQUIRE_EQUAL(base32_pack(unpacked), expected);
-}
-
-// Minimum unpadded (non-zero) size.
-BOOST_AUTO_TEST_CASE(base_32__base32_pack__vector5__expected)
-{
-    // [11111][11111][11111][11111][11111][11111][11111][11111]=>
-    // [11111111][11111111][11111111][11111111][11111111]
-    const base32_chunk unpacked(8, 0x1f);
-    const data_chunk expected((unpacked.size() * 5) / 8, 0xff);
-    BOOST_REQUIRE_EQUAL(base32_pack(unpacked), expected);
+    BOOST_REQUIRE(out == data);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

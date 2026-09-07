@@ -88,6 +88,7 @@
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>
 #include <bitcoin/system/config/base32.hpp>
+#include <bitcoin/system/config/base32b.hpp>
 #include <bitcoin/system/config/base58.hpp>
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/base85.hpp>
@@ -181,6 +182,8 @@
 #include <bitcoin/system/hash/sha/sha160.hpp>
 #include <bitcoin/system/hash/sha/sha256.hpp>
 #include <bitcoin/system/hash/sha/sha512.hpp>
+#include <bitcoin/system/hash/sha3/algorithm.hpp>
+#include <bitcoin/system/hash/sha3/sha3.hpp>
 #include <bitcoin/system/intrinsics/byte_swap.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 #include <bitcoin/system/intrinsics/detection.hpp>
@@ -226,6 +229,7 @@
 #include <bitcoin/system/radix/base_2048.hpp>
 #include <bitcoin/system/radix/base_2n.hpp>
 #include <bitcoin/system/radix/base_32.hpp>
+#include <bitcoin/system/radix/base_32b.hpp>
 #include <bitcoin/system/radix/base_58.hpp>
 #include <bitcoin/system/radix/base_64.hpp>
 #include <bitcoin/system/radix/base_85.hpp>

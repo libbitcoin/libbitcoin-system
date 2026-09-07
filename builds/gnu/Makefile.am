@@ -116,6 +116,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/base16.cpp \
     ${srcdir}/../../src/config/base2.cpp \
     ${srcdir}/../../src/config/base32.cpp \
+    ${srcdir}/../../src/config/base32b.cpp \
     ${srcdir}/../../src/config/base58.cpp \
     ${srcdir}/../../src/config/base64.cpp \
     ${srcdir}/../../src/config/base85.cpp \
@@ -173,6 +174,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/radix/base_10.cpp \
     ${srcdir}/../../src/radix/base_2048.cpp \
     ${srcdir}/../../src/radix/base_32.cpp \
+    ${srcdir}/../../src/radix/base_32b.cpp \
     ${srcdir}/../../src/radix/base_58.cpp \
     ${srcdir}/../../src/radix/base_64.cpp \
     ${srcdir}/../../src/radix/base_85.cpp \
@@ -357,6 +359,7 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/base16.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base2.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base32.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/base32b.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base58.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base64.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base85.hpp \
@@ -491,6 +494,13 @@ include_bitcoin_system_hash_sha_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/sha/sha256.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/sha/sha512.hpp
 
+include_bitcoin_system_hash_sha3dir = \
+    ${includedir}/bitcoin/system/hash/sha3
+
+include_bitcoin_system_hash_sha3_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/hash/sha3/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/sha3/sha3.hpp
+
 include_bitcoin_system_impl_chaindir = \
     ${includedir}/bitcoin/system/impl/chain
 
@@ -574,6 +584,17 @@ include_bitcoin_system_impl_hash_sha_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/hash/sha/algorithm_sigma.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/sha/algorithm_single.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/sha/algorithm_stream.ipp
+
+include_bitcoin_system_impl_hash_sha3dir = \
+    ${includedir}/bitcoin/system/impl/hash/sha3
+
+include_bitcoin_system_impl_hash_sha3_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_functions.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_iterate.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_padding.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_parsing.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_single.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_stream.ipp
 
 include_bitcoin_system_impl_machinedir = \
     ${includedir}/bitcoin/system/impl/machine
@@ -756,6 +777,7 @@ include_bitcoin_system_radix_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/radix/base_2048.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_2n.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_32.hpp \
+    ${srcdir}/../../include/bitcoin/system/radix/base_32b.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_58.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_64.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_85.hpp \
@@ -1015,6 +1037,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/base16.cpp \
     ${srcdir}/../../test/config/base2.cpp \
     ${srcdir}/../../test/config/base32.cpp \
+    ${srcdir}/../../test/config/base32b.cpp \
     ${srcdir}/../../test/config/base58.cpp \
     ${srcdir}/../../test/config/base64.cpp \
     ${srcdir}/../../test/config/base85.cpp \
@@ -1096,6 +1119,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/sha/sha256.cpp \
     ${srcdir}/../../test/hash/sha/sha512.cpp \
     ${srcdir}/../../test/hash/sha/vector.cpp \
+    ${srcdir}/../../test/hash/sha3/algorithm.cpp \
+    ${srcdir}/../../test/hash/sha3/sha3.cpp \
     ${srcdir}/../../test/intrinsics/byte_swap.cpp \
     ${srcdir}/../../test/intrinsics/cpuid.cpp \
     ${srcdir}/../../test/intrinsics/detection.cpp \
@@ -1132,6 +1157,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/radix/base_2048.cpp \
     ${srcdir}/../../test/radix/base_2n.cpp \
     ${srcdir}/../../test/radix/base_32.cpp \
+    ${srcdir}/../../test/radix/base_32b.cpp \
     ${srcdir}/../../test/radix/base_58.cpp \
     ${srcdir}/../../test/radix/base_64.cpp \
     ${srcdir}/../../test/radix/base_85.cpp \

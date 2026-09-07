@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__invalid_payload__payload_no
 BOOST_AUTO_TEST_CASE(witness_address__parse_address__invalid_checksum__checksum_invalid)
 {
     const std::string prefix{ "bc" };
-    auto address = prefix + "1" + encode_base32(bech32_build_checked(0, data_chunk(2, 0x00), prefix));
+    auto address = prefix + "1" + encode_base32b(bech32_build_checked(0, data_chunk(2, 0x00), prefix));
     *std::prev(address.end()) = 'x';
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::checksum_invalid);
 }
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version17__version_invalid)
     const size_t version = 17;
     const data_chunk program(2, 0x00);
     const std::string prefix{ "bc" };
-    const auto address = prefix + "1" + encode_base32(bech32_build_checked(version, program, prefix));
+    const auto address = prefix + "1" + encode_base32b(bech32_build_checked(version, program, prefix));
     BOOST_REQUIRE_EQUAL(address, "bc13qqqqjggfzq");
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::version_invalid);
 }
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version16_minimal_program_s
     const size_t version = 16;
     const data_chunk program(2, 0x00);
     const std::string prefix{ "bc" };
-    const auto address = prefix + "1" + encode_base32(bech32_build_checked(version, program, prefix));
+    const auto address = prefix + "1" + encode_base32b(bech32_build_checked(version, program, prefix));
     BOOST_REQUIRE_EQUAL(address, "bc1sqqqqkfw08p");
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address, true) == result::program_invalid);
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address, false) == result::valid);
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version16_minimal_program_s
 BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_empty_program__payload_too_short)
 {
     const std::string prefix{ "bc" };
-    const auto address = prefix + "1" + encode_base32(bech32_build_checked(0, {}, prefix));
+    const auto address = prefix + "1" + encode_base32b(bech32_build_checked(0, {}, prefix));
     BOOST_REQUIRE_EQUAL(address, "bc1q9zpgru");
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::payload_too_short);
 }
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_empty_program__pay
 BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_minimal_program__program_invalid)
 {
     const std::string prefix{ "bc" };
-    const auto address = prefix + "1" + encode_base32(bech32_build_checked(0, data_chunk(2, 0x00), prefix));
+    const auto address = prefix + "1" + encode_base32b(bech32_build_checked(0, data_chunk(2, 0x00), prefix));
     BOOST_REQUIRE_EQUAL(address, "bc1qqqqq399cqn");
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::program_invalid);
 }
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_null_short_hash_pr
     const size_t version = 0;
     const data_chunk program = to_chunk(null_short_hash);
     const std::string prefix{ "bc" };
-    const auto address = prefix + "1" + encode_base32(bech32_build_checked(version, program, prefix));
+    const auto address = prefix + "1" + encode_base32b(bech32_build_checked(version, program, prefix));
     BOOST_REQUIRE_EQUAL(address, "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9e75rs");
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::valid);
     BOOST_REQUIRE_EQUAL(out1, prefix);
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_null_hash_program_
     const size_t version = 0;
     const data_chunk program = to_chunk(null_hash);
     const std::string prefix{ "bc" };
-    const auto address = prefix + "1" + encode_base32(bech32_build_checked(version, program, prefix));
+    const auto address = prefix + "1" + encode_base32b(bech32_build_checked(version, program, prefix));
     BOOST_REQUIRE_EQUAL(address, "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqthqst8");
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::valid);
     BOOST_REQUIRE_EQUAL(out1, prefix);
@@ -830,7 +830,7 @@ BOOST_AUTO_TEST_CASE(witness_address__ostream__valid__expected)
 }
 
 // BIP173 vectors
-// See checksum and base_32 for related tests.
+// See checksum and base_32b for related tests.
 
 // These examples of valid "bech32" require an unversioned (and empty) payload, which
 // requires exposure of bech32 internals and has no use case, so is not supported.

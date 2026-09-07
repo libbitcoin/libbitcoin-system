@@ -210,6 +210,7 @@
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base2.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base32.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base32b.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base64.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base85.cpp" />
@@ -311,6 +312,10 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\vector.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\sha3\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_hash_sha3_algorithm.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha3\sha3.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />
@@ -356,6 +361,7 @@
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2n.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_32.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_32b.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_58.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_64.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_85.cpp" />
