@@ -37,7 +37,7 @@ constexpr char pad = '=';
 constexpr size_t bits = 5;
 constexpr size_t bytes = 5;
 constexpr size_t characters = 8;
-const static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+constexpr auto table = to_array("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567");
 
 // Characters required to encode the given number of bytes (unpadded).
 constexpr size_t unpadded(size_t size) NOEXCEPT
@@ -86,16 +86,16 @@ std::string encode_base32(const data_slice& unencoded) NOEXCEPT
         while (count >= bits)
         {
             count -= bits;
-            const auto at = unmask_right(shift_right(value, count), bits);
-            encoded.push_back(table[at]);
+            const auto index = unmask_right(shift_right(value, count), bits);
+            encoded.push_back(table.at(index));
         }
     }
 
     // Zero-fill the trailing partial character.
     if (!is_zero(count))
     {
-        const auto at = unmask_right(shift_left(value, bits - count), bits);
-        encoded.push_back(table[at]);
+        const auto index = unmask_right(shift_left(value, bits - count), bits);
+        encoded.push_back(table.at(index));
     }
 
     // Pad to a multiple of eight characters.
@@ -133,7 +133,7 @@ bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT
     for (size_t index{}; index < length; ++index)
     {
         uint8_t symbol{};
-        if (!decode_character(symbol, in[index]))
+        if (!decode_character(symbol, in.at(index)))
             return false;
 
         value = bit_or<uint64_t>(shift_left(value, bits), symbol);
