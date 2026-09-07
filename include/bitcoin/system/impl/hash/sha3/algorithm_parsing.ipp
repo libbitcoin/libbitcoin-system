@@ -32,7 +32,7 @@ namespace sha3 {
 
 TEMPLATE
 template <size_t ...Words>
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 input_(words_t& words, const block_t& block,
     std::index_sequence<Words...>) NOEXCEPT
 {
@@ -40,7 +40,7 @@ input_(words_t& words, const block_t& block,
 }
 
 TEMPLATE
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 input(words_t& words, const block_t& block) NOEXCEPT
 {
     input_(words, block, std::make_index_sequence<SHA3::block_words>{});
@@ -48,7 +48,7 @@ input(words_t& words, const block_t& block) NOEXCEPT
 
 TEMPLATE
 template <size_t ...Words>
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 output_(block_t& bytes, const state_t& state,
     std::index_sequence<Words...>) NOEXCEPT
 {
@@ -56,7 +56,7 @@ output_(block_t& bytes, const state_t& state,
 }
 
 TEMPLATE
-INLINE constexpr typename CLASS::digest_t CLASS::
+constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
     // The digest is the leading bytes of the rate (single squeeze).

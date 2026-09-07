@@ -31,7 +31,7 @@ namespace sha3 {
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 theta(state_t& state) NOEXCEPT
 {
     std_array<word_t, 5> column{};
@@ -48,7 +48,7 @@ theta(state_t& state) NOEXCEPT
 }
 
 TEMPLATE
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 rho_pi(state_t& state) NOEXCEPT
 {
     // A zero rotation (lane 0,0) is excluded (rotl by zero is undefined).
@@ -66,7 +66,7 @@ rho_pi(state_t& state) NOEXCEPT
 }
 
 TEMPLATE
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 chi(state_t& state) NOEXCEPT
 {
     for (size_t y = 0; y < 25; y += 5)
@@ -83,7 +83,7 @@ chi(state_t& state) NOEXCEPT
 
 TEMPLATE
 template <size_t Round>
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 iota(state_t& state) NOEXCEPT
 {
     state[0] ^= K::get[Round];
@@ -91,7 +91,7 @@ iota(state_t& state) NOEXCEPT
 
 TEMPLATE
 template <size_t Round>
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 round(state_t& state) NOEXCEPT
 {
     theta(state);
@@ -102,7 +102,7 @@ round(state_t& state) NOEXCEPT
 
 TEMPLATE
 template <size_t ...Rounds>
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 permute_(state_t& state, std::index_sequence<Rounds...>) NOEXCEPT
 {
     (round<Rounds>(state), ...);

@@ -30,7 +30,7 @@ namespace sha3 {
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 absorb(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t words{};

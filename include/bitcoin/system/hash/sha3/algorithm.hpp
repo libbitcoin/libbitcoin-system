@@ -121,15 +121,18 @@ protected:
     /// Keccak-f[1600] functions.
     /// -----------------------------------------------------------------------
 
-    INLINE static constexpr void theta(state_t& state) NOEXCEPT;
-    INLINE static constexpr void rho_pi(state_t& state) NOEXCEPT;
-    INLINE static constexpr void chi(state_t& state) NOEXCEPT;
+    static constexpr void theta(state_t& state) NOEXCEPT;
+    static constexpr void rho_pi(state_t& state) NOEXCEPT;
+    static constexpr void chi(state_t& state) NOEXCEPT;
+
     template <size_t Round>
-    INLINE static constexpr void iota(state_t& state) NOEXCEPT;
+    static constexpr void iota(state_t& state) NOEXCEPT;
+
     template <size_t Round>
-    INLINE static constexpr void round(state_t& state) NOEXCEPT;
+    static constexpr void round(state_t& state) NOEXCEPT;
+
     template <size_t ...Rounds>
-    INLINE static constexpr void permute_(state_t& state,
+    static constexpr void permute_(state_t& state,
         std::index_sequence<Rounds...>) NOEXCEPT;
     static constexpr void permute(state_t& state) NOEXCEPT;
 
@@ -137,21 +140,20 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <size_t ...Words>
-    INLINE static constexpr void input_(words_t& words, const block_t& block,
+    static constexpr void input_(words_t& words, const block_t& block,
         std::index_sequence<Words...>) NOEXCEPT;
-    INLINE static constexpr void input(words_t& words,
-        const block_t& block) NOEXCEPT;
+    static constexpr void input(words_t& words, const block_t& block) NOEXCEPT;
+
     template <size_t ...Words>
-    INLINE static constexpr void output_(block_t& bytes, const state_t& state,
+    static constexpr void output_(block_t& bytes, const state_t& state,
         std::index_sequence<Words...>) NOEXCEPT;
-    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
-    INLINE static constexpr void absorb(state_t& state,
-        const block_t& block) NOEXCEPT;
-    static constexpr block_t pad(size_t size, const byte_t* tail) NOEXCEPT;
+    static constexpr digest_t output(const state_t& state) NOEXCEPT;
+
     template <size_t Size>
     static constexpr block_t pad(const bytes_t<Size>& tail) NOEXCEPT;
-    static digest_t finalize(state_t& state, size_t size,
-        const byte_t* tail) NOEXCEPT;
+    static constexpr block_t pad(size_t size, const byte_t* tail) NOEXCEPT;
+
+    static constexpr void absorb(state_t& state, const block_t& block) NOEXCEPT;
 
     /// Iteration.
     /// -----------------------------------------------------------------------
