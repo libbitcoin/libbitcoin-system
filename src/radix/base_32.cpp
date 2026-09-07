@@ -33,35 +33,37 @@
 namespace libbitcoin {
 namespace system {
 
-const static char pad = '=';
-const static size_t bits = 5;
-const static size_t bytes = 5;
-const static size_t characters = 8;
-
+constexpr char pad = '=';
+constexpr size_t bits = 5;
+constexpr size_t bytes = 5;
+constexpr size_t characters = 8;
 const static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 // Characters required to encode the given number of bytes (unpadded).
-static size_t unpadded(size_t size) NOEXCEPT
+constexpr size_t unpadded(size_t size) NOEXCEPT
 {
     return ceilinged_divide(size * byte_bits, bits);
 }
 
 // Unpadded lengths are valid only if they can be produced by encoding.
-static bool valid_unpadded(size_t length) NOEXCEPT
+constexpr bool valid_unpadded(size_t length) NOEXCEPT
 {
-    const auto remainder = length % characters;
-    return remainder == 0 || remainder == 2 || remainder == 4
-        || remainder == 5 || remainder == 7;
+    const auto remainder = floored_modulo(length, characters);
+    return remainder == 0
+        || remainder == 2
+        || remainder == 4
+        || remainder == 5
+        || remainder == 7;
 }
 
-static bool decode_character(uint8_t& out, char character) NOEXCEPT
+constexpr bool decode_character(uint8_t& out, char character) NOEXCEPT
 {
     if (character >= 'A' && character <= 'Z')
-        out = static_cast<uint8_t>(character - 'A');
+        out = possible_narrow_and_sign_cast<uint8_t>(character - 'A');
     else if (character >= 'a' && character <= 'z')
-        out = static_cast<uint8_t>(character - 'a');
+        out = possible_narrow_and_sign_cast<uint8_t>(character - 'a');
     else if (character >= '2' && character <= '7')
-        out = static_cast<uint8_t>(character - '2' + 26);
+        out = possible_narrow_and_sign_cast<uint8_t>(character - '2' + 26);
     else
         return false;
 
@@ -74,27 +76,31 @@ std::string encode_base32(const data_slice& unencoded) NOEXCEPT
     const auto size = unencoded.size();
     encoded.reserve(ceilinged_divide(size, bytes) * characters);
 
-    uint64_t value{};
     size_t count{};
+    uint64_t value{};
     for (const auto byte: unencoded)
     {
-        value = (value << byte_bits) | byte;
+        value = bit_or<uint64_t>(shift_left(value, byte_bits), byte);
         count += byte_bits;
 
         while (count >= bits)
         {
             count -= bits;
-            encoded.push_back(table[(value >> count) & 0x1f]);
+            const auto at = unmask_right(shift_right(value, count), bits);
+            encoded.push_back(table[at]);
         }
     }
 
     // Zero-fill the trailing partial character.
     if (!is_zero(count))
-        encoded.push_back(table[(value << (bits - count)) & 0x1f]);
+    {
+        const auto at = unmask_right(shift_left(value, bits - count), bits);
+        encoded.push_back(table[at]);
+    }
 
     // Pad to a multiple of eight characters.
-    const auto remainder = unpadded(size) % characters;
-    encoded.append(is_zero(remainder) ? 0 : characters - remainder, pad);
+    const auto remainder = floored_modulo(unpadded(size), characters);
+    encoded.append(is_zero(remainder) ? zero : characters - remainder, pad);
     return encoded;
 }
 
@@ -107,10 +113,12 @@ bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT
 
     if (padded != std::string::npos)
     {
-        if (!is_zero(in.size() % characters) ||
+        const auto remainder = floored_modulo(length, characters);
+
+        if (!is_zero(floored_modulo(in.size(), characters)) ||
             in.find_first_not_of(pad, padded) != std::string::npos ||
-            is_zero(length % characters) ||
-            (length % characters) + pads != characters)
+            is_zero(remainder) ||
+            remainder + pads != characters)
             return false;
     }
 
@@ -118,28 +126,29 @@ bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT
         return false;
 
     data_chunk decoded{};
-    decoded.reserve((length * bits) / byte_bits);
+    decoded.reserve(floored_divide(length * bits, byte_bits));
 
-    uint64_t value{};
     size_t count{};
-    for (size_t index = 0; index < length; ++index)
+    uint64_t value{};
+    for (size_t index{}; index < length; ++index)
     {
         uint8_t symbol{};
         if (!decode_character(symbol, in[index]))
             return false;
 
-        value = (value << bits) | symbol;
+        value = bit_or<uint64_t>(shift_left(value, bits), symbol);
         count += bits;
 
         if (count >= byte_bits)
         {
             count -= byte_bits;
-            decoded.push_back(static_cast<uint8_t>((value >> count) & 0xff));
+            decoded.push_back(possible_narrow_cast<uint8_t>(
+                unmask_right(shift_right(value, count), byte_bits)));
         }
     }
 
     // Trailing partial byte bits must be zero (canonical encoding).
-    if (!is_zero(value & ((1u << count) - 1u)))
+    if (!is_zero(unmask_right(value, count)))
         return false;
 
     out = std::move(decoded);

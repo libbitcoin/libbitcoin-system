@@ -35,14 +35,14 @@ constexpr void CLASS::
 theta(state_t& state) NOEXCEPT
 {
     std_array<word_t, 5> column{};
-    for (size_t x = 0; x < 5; ++x)
+    for (size_t x{}; x < 5u; ++x)
         column[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^
             state[x + 20];
 
-    for (size_t x = 0; x < 5; ++x)
+    for (size_t x{}; x < 5u; ++x)
     {
-        const auto delta = column[(x + 4) % 5] ^ rotl(column[(x + 1) % 5], 1);
-        for (size_t y = 0; y < 25; y += 5)
+        const auto delta = column[(x + 4) % 5] ^ rotl(column[(x + 1) % 5]);
+        for (size_t y{}; y < 25; y += 5)
             state[x + y] ^= delta;
     }
 }
@@ -53,11 +53,11 @@ rho_pi(state_t& state) NOEXCEPT
 {
     // A zero rotation (lane 0,0) is excluded (rotl by zero is undefined).
     state_t moved{};
-    for (size_t x = 0; x < 5; ++x)
-        for (size_t y = 0; y < 5; ++y)
+    for (size_t x{}; x < 5u; ++x)
+        for (size_t y{}; y < 5u; ++y)
         {
             const auto lane = x + 5 * y;
-            const auto shift = rotation[lane];
+            const auto shift = K::rotation[lane];
             moved[y + 5 * ((2 * x + 3 * y) % 5)] =
                 is_zero(shift) ? state[lane] : rotl(state[lane], shift);
         }
@@ -69,14 +69,14 @@ TEMPLATE
 constexpr void CLASS::
 chi(state_t& state) NOEXCEPT
 {
-    for (size_t y = 0; y < 25; y += 5)
+    for (size_t y{}; y < 25u; y += 5)
     {
         const std_array<word_t, 5> row
         {
             state[y], state[y + 1], state[y + 2], state[y + 3], state[y + 4]
         };
 
-        for (size_t x = 0; x < 5; ++x)
+        for (size_t x{}; x < 5u; ++x)
             state[x + y] = row[x] ^ (~row[(x + 1) % 5] & row[(x + 2) % 5]);
     }
 }

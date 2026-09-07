@@ -36,7 +36,7 @@ absorb(state_t& state, const block_t& block) NOEXCEPT
     words_t words{};
     input(words, block);
 
-    for (size_t word = 0; word < SHA3::block_words; ++word)
+    for (size_t word{}; word < SHA3::block_words; ++word)
         state[word] ^= words[word];
 
     permute(state);

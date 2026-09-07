@@ -31,12 +31,12 @@ namespace system {
 /// shift is unguarded.
 template <typename Integral,
     if_integral_integer<Integral> = true>
-INLINE constexpr Integral rotl(Integral value, size_t shift) NOEXCEPT;
+INLINE constexpr Integral rotl(Integral value, size_t shift=one) NOEXCEPT;
 
 /// shift is unguarded.
 template <typename Integral,
     if_integral_integer<Integral> = true>
-INLINE constexpr Integral rotr(Integral value, size_t shift) NOEXCEPT;
+INLINE constexpr Integral rotr(Integral value, size_t shift=one) NOEXCEPT;
 
 template <size_t Shift, typename Integral,
     if_integral_integer<Integral> = true>
