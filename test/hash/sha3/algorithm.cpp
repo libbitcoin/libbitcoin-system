@@ -41,7 +41,6 @@ static_assert(std::is_same_v<sha3_256::word_t, uint64_t>);
 static_assert(sha3_256::H::domain == sha3::sha3_domain);
 static_assert(keccak_256::H::domain == sha3::keccak_domain);
 static_assert(sha3_256::space == 135);
-static_assert(!sha3_256::vector);
 
 // The initial state is zero (sponge).
 static_assert(sha3_256::H::get == sha3_256::state_t{});

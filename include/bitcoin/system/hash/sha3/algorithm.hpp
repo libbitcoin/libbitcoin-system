@@ -38,12 +38,10 @@ namespace system {
 namespace sha3 {
 
 // Hacking our way around an MSVC compiler bug (see sha::algorithm).
-#define CLASSIF algorithm<SHA3, Vector, true>
+#define CLASSIF algorithm<SHA3, true>
 
 /// SHA3 and Keccak hashing algorithm (sponge over Keccak-f[1600]).
-/// Vectorization (lane-parallel independent messages) is reserved, not
-/// implemented, so the Vector parameter is currently inert.
-template <typename SHA3, bool Vector = true,
+template <typename SHA3,
     if_same<typename SHA3::T, sha3h_t> = true>
 class algorithm
   : algorithm_t
@@ -157,20 +155,15 @@ protected:
     static constexpr void iterate(state_t& state,
         const ablocks_t<Size>& blocks) NOEXCEPT;
     static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
-
-public:
-    /// Summary public values.
-    /// -----------------------------------------------------------------------
-    static constexpr auto vector = false;
 };
 
 } // namespace sha3
 } // namespace system
 } // namespace libbitcoin
 
-#define TEMPLATE template <typename SHA3, bool Vector, \
+#define TEMPLATE template <typename SHA3, \
     if_same<typename SHA3::T, sha3::sha3h_t> If>
-#define CLASS algorithm<SHA3, Vector, If>
+#define CLASS algorithm<SHA3, If>
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
