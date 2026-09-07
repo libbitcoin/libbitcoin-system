@@ -115,6 +115,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/authority.cpp \
     ${srcdir}/../../src/config/base16.cpp \
     ${srcdir}/../../src/config/base2.cpp \
+    ${srcdir}/../../src/config/base32.cpp \
     ${srcdir}/../../src/config/base32b.cpp \
     ${srcdir}/../../src/config/base58.cpp \
     ${srcdir}/../../src/config/base64.cpp \
@@ -172,6 +173,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/math/math.cpp \
     ${srcdir}/../../src/radix/base_10.cpp \
     ${srcdir}/../../src/radix/base_2048.cpp \
+    ${srcdir}/../../src/radix/base_32.cpp \
     ${srcdir}/../../src/radix/base_32b.cpp \
     ${srcdir}/../../src/radix/base_58.cpp \
     ${srcdir}/../../src/radix/base_64.cpp \
@@ -356,6 +358,7 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/authority.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base16.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base2.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/base32.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base32b.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base58.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base64.hpp \
@@ -755,6 +758,7 @@ include_bitcoin_system_radix_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/radix/base_16.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_2048.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_2n.hpp \
+    ${srcdir}/../../include/bitcoin/system/radix/base_32.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_32b.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_58.hpp \
     ${srcdir}/../../include/bitcoin/system/radix/base_64.hpp \
@@ -1014,6 +1018,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/authority.cpp \
     ${srcdir}/../../test/config/base16.cpp \
     ${srcdir}/../../test/config/base2.cpp \
+    ${srcdir}/../../test/config/base32.cpp \
     ${srcdir}/../../test/config/base32b.cpp \
     ${srcdir}/../../test/config/base58.cpp \
     ${srcdir}/../../test/config/base64.cpp \
@@ -1131,6 +1136,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/radix/base_16.cpp \
     ${srcdir}/../../test/radix/base_2048.cpp \
     ${srcdir}/../../test/radix/base_2n.cpp \
+    ${srcdir}/../../test/radix/base_32.cpp \
     ${srcdir}/../../test/radix/base_32b.cpp \
     ${srcdir}/../../test/radix/base_58.cpp \
     ${srcdir}/../../test/radix/base_64.cpp \

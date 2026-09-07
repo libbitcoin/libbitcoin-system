@@ -16,18 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_RADIX_RADIX_HPP
-#define LIBBITCOIN_SYSTEM_RADIX_RADIX_HPP
+#ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_32_HPP
+#define LIBBITCOIN_SYSTEM_RADIX_BASE_32_HPP
 
-////#include <bitcoin/system/radix/base_2.hpp>
-#include <bitcoin/system/radix/base_2n.hpp>
-#include <bitcoin/system/radix/base_10.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
-#include <bitcoin/system/radix/base_32.hpp>
-#include <bitcoin/system/radix/base_32b.hpp>
-#include <bitcoin/system/radix/base_58.hpp>
-#include <bitcoin/system/radix/base_64.hpp>
-#include <bitcoin/system/radix/base_85.hpp>
-#include <bitcoin/system/radix/base_2048.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+/// Encode data as base32 (RFC 4648, upper case, padded).
+BC_API std::string encode_base32(const data_slice& unencoded) NOEXCEPT;
+
+/// Attempt to decode base32 data (RFC 4648, either case, padding optional).
+/// False if the input contains non-base32 characters or invalid padding.
+BC_API bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT;
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif

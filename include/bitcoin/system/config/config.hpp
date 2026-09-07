@@ -22,6 +22,7 @@
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base2.hpp>
 #include <bitcoin/system/config/base16.hpp>
+#include <bitcoin/system/config/base32.hpp>
 #include <bitcoin/system/config/base32b.hpp>
 #include <bitcoin/system/config/base58.hpp>
 #include <bitcoin/system/config/base64.hpp>
