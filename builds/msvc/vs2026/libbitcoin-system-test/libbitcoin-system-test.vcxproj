@@ -312,6 +312,10 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\vector.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\sha3\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_hash_sha3_algorithm.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha3\sha3.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />

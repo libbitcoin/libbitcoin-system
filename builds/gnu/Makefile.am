@@ -494,6 +494,13 @@ include_bitcoin_system_hash_sha_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/sha/sha256.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/sha/sha512.hpp
 
+include_bitcoin_system_hash_sha3dir = \
+    ${includedir}/bitcoin/system/hash/sha3
+
+include_bitcoin_system_hash_sha3_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/hash/sha3/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/sha3/sha3.hpp
+
 include_bitcoin_system_impl_chaindir = \
     ${includedir}/bitcoin/system/impl/chain
 
@@ -577,6 +584,17 @@ include_bitcoin_system_impl_hash_sha_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/hash/sha/algorithm_sigma.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/sha/algorithm_single.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/sha/algorithm_stream.ipp
+
+include_bitcoin_system_impl_hash_sha3dir = \
+    ${includedir}/bitcoin/system/impl/hash/sha3
+
+include_bitcoin_system_impl_hash_sha3_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_functions.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_iterate.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_padding.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_parsing.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_single.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sha3/algorithm_stream.ipp
 
 include_bitcoin_system_impl_machinedir = \
     ${includedir}/bitcoin/system/impl/machine
@@ -1101,6 +1119,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/sha/sha256.cpp \
     ${srcdir}/../../test/hash/sha/sha512.cpp \
     ${srcdir}/../../test/hash/sha/vector.cpp \
+    ${srcdir}/../../test/hash/sha3/algorithm.cpp \
+    ${srcdir}/../../test/hash/sha3/sha3.cpp \
     ${srcdir}/../../test/intrinsics/byte_swap.cpp \
     ${srcdir}/../../test/intrinsics/cpuid.cpp \
     ${srcdir}/../../test/intrinsics/detection.cpp \

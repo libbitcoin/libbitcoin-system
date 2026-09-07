@@ -538,6 +538,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha\sha160.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha\sha256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha\sha512.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha3\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha3\sha3.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byte_swap.hpp" />
@@ -763,6 +765,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_sigma.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_single.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_stream.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha3\algorithm_functions.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha3\algorithm_iterate.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha3\algorithm_padding.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha3\algorithm_parsing.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha3\algorithm_single.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha3\algorithm_stream.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter_connect.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter_run.ipp" />

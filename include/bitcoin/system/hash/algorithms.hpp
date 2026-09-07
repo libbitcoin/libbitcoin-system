@@ -22,6 +22,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/rmd/algorithm.hpp>
 #include <bitcoin/system/hash/sha/algorithm.hpp>
+#include <bitcoin/system/hash/sha3/algorithm.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -39,6 +40,10 @@ using sha512_256 = sha::algorithm<sha::h512<256>>;
 using sha512_224 = sha::algorithm<sha::h512<224>>;
 using sha512_384 = sha::algorithm<sha::h512<384>>;
 using sha512     = sha::algorithm<sha::h512<>>;
+
+/// bc::system sha3 algorithm aliases (sponge, scalar).
+using sha3_256   = sha3::algorithm<sha3::h256<>>;
+using keccak_256 = sha3::algorithm<sha3::h256<256, sha3::keccak_domain>>;
 
 } // namespace system
 } // namespace libbitcoin

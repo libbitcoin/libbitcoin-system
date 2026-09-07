@@ -182,6 +182,8 @@
 #include <bitcoin/system/hash/sha/sha160.hpp>
 #include <bitcoin/system/hash/sha/sha256.hpp>
 #include <bitcoin/system/hash/sha/sha512.hpp>
+#include <bitcoin/system/hash/sha3/algorithm.hpp>
+#include <bitcoin/system/hash/sha3/sha3.hpp>
 #include <bitcoin/system/intrinsics/byte_swap.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 #include <bitcoin/system/intrinsics/detection.hpp>
