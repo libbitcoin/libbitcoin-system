@@ -59,7 +59,7 @@ public:
     struct map
     {
         // This sentinel indicates that the value was not requested.
-        static const size_t unrequested = max_size_t;
+        static constexpr size_t unrequested = max_size_t;
 
         /// [block - 1, floor(block - 2016, 0)] mainnet: 1, testnet: 2016|0
         range bits{};
