@@ -144,14 +144,14 @@ BOOST_AUTO_TEST_CASE(script__from_data__block_163120_tx_0_script_0__success)
     BOOST_REQUIRE(instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(script__from_string__empty__success)
+BOOST_AUTO_TEST_CASE(script__string_constructor__empty__success)
 {
     const script instance(std::string{});
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.ops().empty());
 }
 
-BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
+BOOST_AUTO_TEST_CASE(script__string_constructor__two_of_three_multisig__success)
 {
     constexpr auto script_2_of_3_multisig = "2 [03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864] [02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c] [03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934] 3 checkmultisig";
     const script instance(script_2_of_3_multisig);
@@ -181,6 +181,50 @@ BOOST_AUTO_TEST_CASE(script__empty__non_empty__false)
 {
     const script instance(script::to_pay_null_data_pattern(data_chunk{ 42u }));
     BOOST_REQUIRE(!instance.ops().empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__string_constructor__whitespace__valid_empty)
+{
+    const script instance{ std::string{ "   " } };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.ops().empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__string_constructor__mnemonics__expected)
+{
+    const script instance{ std::string{ "dup hash160 equalverify checksig" } };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.ops().size(), 4u);
+    BOOST_REQUIRE(instance.ops()[0].code() == opcode::dup);
+    BOOST_REQUIRE(instance.ops()[3].code() == opcode::checksig);
+}
+
+BOOST_AUTO_TEST_CASE(script__string_constructor__hex_push__expected)
+{
+    const script instance{ std::string{ "[0102]" } };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.ops().size(), one);
+    BOOST_REQUIRE_EQUAL(instance.ops()[0].data(), base16_chunk("0102"));
+}
+
+BOOST_AUTO_TEST_CASE(script__string_constructor__invalid_opcode__sets_prefail)
+{
+    const script instance{ std::string{ "cat" } };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.is_prefail());
+}
+
+BOOST_AUTO_TEST_CASE(script__string_constructor__unknown_mnemonic__invalid)
+{
+    const script instance{ std::string{ "not_an_opcode" } };
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(script__string_constructor__roll__sets_roller)
+{
+    const script instance{ std::string{ "roll" } };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.is_roller());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
