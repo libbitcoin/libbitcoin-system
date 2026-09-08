@@ -725,6 +725,94 @@ BOOST_AUTO_TEST_CASE(script__verify__p2pk_invalid_signature_batched__success_but
     rows.clear();
 }
 
+static script batch_multisig_script() NOEXCEPT
+{
+    ec_compressed public_key{};
+    secret_to_public(public_key, batch_secret);
+    const auto positive1 = operation::opcode_from_positive(1_u8);
+    const operations ops
+    {
+        operation{ positive1 },
+        operation{ to_chunk(public_key), false },
+        operation{ positive1 },
+        operation{ opcode::checkmultisig }
+    };
+
+    return script{ ops };
+}
+
+static transaction_accessor batch_multisig_tx(bool valid) NOEXCEPT
+{
+    const auto prevout_script = batch_multisig_script();
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ batch_value, script{} } };
+    const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
+
+    hash_digest sighash{};
+    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto version = script_version::unversioned;
+    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {}, version, coverage::hash_all, flags::no_rules);
+
+    auto digest = sighash;
+    if (!valid)
+        digest.front() ^= 0x01_u8;
+
+    ec_signature signature{};
+    ecdsa::sign(signature, batch_secret, digest);
+    der_signature der{};
+    ecdsa::encode_signature(der, signature);
+
+    auto endorsement = to_chunk(der);
+    endorsement.push_back(coverage::hash_all);
+
+    const operations in_ops{ operation{ data_chunk{}, true }, operation{ endorsement, false } };
+    const script input_script{ in_ops };
+    const inputs signed_ins{ input{ point{ one_hash, 0 }, input_script, max_input_sequence } };
+    const transaction_accessor tx{ 1, signed_ins, outs, 0 };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    return tx;
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__multisig_valid_signature_unbatched__success)
+{
+    const auto tx = batch_multisig_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__multisig_invalid_signature_unbatched__stack_false)
+{
+    const auto tx = batch_multisig_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::stack_false);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__multisig_valid_signature_batched__success_and_verifies)
+{
+    auto& rows = signatures::ecdsa_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = batch_multisig_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE(!rows.empty());
+    BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__multisig_invalid_signature_batched__success_but_fails_verify)
+{
+    auto& rows = signatures::ecdsa_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = batch_multisig_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE(!rows.empty());
+    BOOST_REQUIRE(!rows.verify());
+    rows.clear();
+}
+
 // An input script is never batchable, so a disabled capture changes nothing.
 BOOST_AUTO_TEST_CASE(script__verify__p2pk_capture_disabled__no_rows)
 {
