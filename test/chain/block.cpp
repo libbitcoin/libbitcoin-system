@@ -941,25 +941,35 @@ BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_height_seventeen__blo
     BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
-// Heights one through sixteen serialize as a single byte small integer under
-// the satoshi encoding, which is not a nominal push.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height__coinbase_height_mismatch)
+// Heights one through sixteen serialize as a single byte small integer.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01 }, true } } };
     BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("51"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_pushed_height_one__block_success)
+// The sized push of a small integer height is not the minimal encoding.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_pushed_height_one__coinbase_height_mismatch)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01 }, false } } };
     BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0101"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height_sixteen__block_success)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x10 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("60"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 16, 0, 0, 0 };
     BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
@@ -1040,17 +1050,39 @@ BOOST_AUTO_TEST_CASE(block__identify__witnessed_valid_merkle_root__block_success
     BOOST_REQUIRE_EQUAL(instance.identify(), error::block_success);
 }
 
-// The witness commitment check is gated, so it does not apply before bip141.
-BOOST_AUTO_TEST_CASE(block__identify__witnessed_bip141_off__block_success)
+BOOST_AUTO_TEST_CASE(block__identify__witnessed_bip141_off__invalid_witness_commitment)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(witnessed_block().identify(ctx), error::block_success);
+    BOOST_REQUIRE_EQUAL(witnessed_block().identify(ctx), error::invalid_witness_commitment);
 }
 
 BOOST_AUTO_TEST_CASE(block__identify__witnessed_bip141_on__invalid_witness_commitment)
 {
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
     BOOST_REQUIRE_EQUAL(witnessed_block().identify(ctx), error::invalid_witness_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify__unwitnessed_bip141_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.identify(ctx), error::block_success);
+}
+
+// A commitment output without witness data is not a malleation before bip141.
+BOOST_AUTO_TEST_CASE(block__identify__commitment_without_witness_bip141_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const script commitment(base16_chunk("6a24aa21a9ed0000000000000000000000000000000000000000000000000000000000000000"), false);
+    const inputs ins{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, 0xffffffff } };
+    const outputs outs{ output{ 0, commitment } };
+    const transaction coinbase{ 1, ins, outs, 0 };
+    const block instance{ header{}, transactions{ coinbase } };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.identify(ctx), error::block_success);
 }
 
 // accept

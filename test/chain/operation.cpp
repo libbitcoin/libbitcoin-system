@@ -1209,11 +1209,62 @@ BOOST_AUTO_TEST_CASE(operation__is_timelock__expected)
 //bool is_invalid() const NOEXCEPT;
 //bool is_conditional() const NOEXCEPT;
 //bool is_reserved() const NOEXCEPT;
-//bool is_minimal_push() const NOEXCEPT;
-//bool is_nominal_push() const NOEXCEPT;
 //bool is_underclaimed() const NOEXCEPT;
 //bool is_oversized() const NOEXCEPT;
 //bool is_underflow() const NOEXCEPT;
+
+// is_minimal_push/is_nominal_push
+
+BOOST_AUTO_TEST_CASE(operation__is_minimal_push__small_integer_opcode__true)
+{
+    BOOST_REQUIRE(operation(opcode::push_positive_1).is_minimal_push());
+    BOOST_REQUIRE(operation(opcode::push_positive_16).is_minimal_push());
+    BOOST_REQUIRE(operation(opcode::push_negative_1).is_minimal_push());
+    BOOST_REQUIRE(operation(opcode::push_size_0).is_minimal_push());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_nominal_push__small_integer_opcode__true)
+{
+    BOOST_REQUIRE(operation(opcode::push_positive_1).is_nominal_push());
+    BOOST_REQUIRE(operation(opcode::push_positive_16).is_nominal_push());
+    BOOST_REQUIRE(operation(opcode::push_negative_1).is_nominal_push());
+    BOOST_REQUIRE(operation(opcode::push_size_0).is_nominal_push());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_nominal_push__non_push_opcode__false)
+{
+    BOOST_REQUIRE(!operation(opcode::nop).is_nominal_push());
+    BOOST_REQUIRE(!operation(opcode::checksig).is_nominal_push());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_minimal_push__non_push_opcode__false)
+{
+    BOOST_REQUIRE(!operation(opcode::nop).is_minimal_push());
+    BOOST_REQUIRE(!operation(opcode::checksig).is_minimal_push());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_minimal_push__sized_small_integer__false)
+{
+    const operation instance{ data_chunk{ 0x01 }, false };
+    BOOST_REQUIRE(instance.code() == opcode::push_size_1);
+    BOOST_REQUIRE(instance.is_nominal_push());
+    BOOST_REQUIRE(!instance.is_minimal_push());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_minimal_push__sized_non_numeric__true)
+{
+    const operation instance{ data_chunk{ 0x11 }, false };
+    BOOST_REQUIRE(instance.code() == opcode::push_size_1);
+    BOOST_REQUIRE(instance.is_nominal_push());
+    BOOST_REQUIRE(instance.is_minimal_push());
+}
+
+BOOST_AUTO_TEST_CASE(operation__is_minimal_push__multiple_bytes__true)
+{
+    const operation instance{ data_chunk{ 0x01, 0x02 }, false };
+    BOOST_REQUIRE(instance.is_nominal_push());
+    BOOST_REQUIRE(instance.is_minimal_push());
+}
 
 BOOST_AUTO_TEST_CASE(operation__is_unsigned32__always__expected)
 {

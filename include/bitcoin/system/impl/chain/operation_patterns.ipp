@@ -497,12 +497,14 @@ bool operation::is_reserved() const NOEXCEPT
 
 bool operation::is_minimal_push() const NOEXCEPT
 {
-    return code_ == minimal_opcode_from_data(get_data());
+    return is_payload(code_) ?
+        code_ == minimal_opcode_from_data(get_data()) : is_number(code_);
 }
 
 bool operation::is_nominal_push() const NOEXCEPT
 {
-    return code_ == nominal_opcode_from_data(get_data());
+    return is_payload(code_) ?
+        code_ == nominal_opcode_from_data(get_data()) : is_number(code_);
 }
 
 bool operation::is_underclaimed() const NOEXCEPT
