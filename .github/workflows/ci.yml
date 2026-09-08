@@ -159,11 +159,16 @@ jobs:
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
-        uses: coverallsapp/github-action@v2.3.6
-        with:
-          format: lcov
-          files: "libbitcoin-system/coverage.info"
-          github-token: ${{ secrets.github_token }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}
+        run: |
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-linux-x86_64.tar.gz
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-checksums.txt
+          grep -F coveralls-linux-x86_64.tar.gz coveralls-checksums.txt | sha256sum -c
+          tar -xzf coveralls-linux-x86_64.tar.gz
+          ./coveralls report --format lcov coverage.info
 
       - name: Test artifact collection
         if: failure()
@@ -337,11 +342,16 @@ jobs:
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
-        uses: coverallsapp/github-action@v2.3.6
-        with:
-          format: lcov
-          files: "libbitcoin-system/coverage.info"
-          github-token: ${{ secrets.github_token }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}
+        run: |
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-linux-x86_64.tar.gz
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-checksums.txt
+          grep -F coveralls-linux-x86_64.tar.gz coveralls-checksums.txt | sha256sum -c
+          tar -xzf coveralls-linux-x86_64.tar.gz
+          ./coveralls report --format lcov coverage.info
 
       - name: Test artifact collection
         if: failure()
@@ -473,11 +483,16 @@ jobs:
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
-        uses: coverallsapp/github-action@v2.3.6
-        with:
-          format: lcov
-          files: "libbitcoin-system/coverage.info"
-          github-token: ${{ secrets.github_token }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}
+        run: |
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-linux-x86_64.tar.gz
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-checksums.txt
+          grep -F coveralls-linux-x86_64.tar.gz coveralls-checksums.txt | sha256sum -c
+          tar -xzf coveralls-linux-x86_64.tar.gz
+          ./coveralls report --format lcov coverage.info
 
       - name: Test artifact collection
         if: failure()
