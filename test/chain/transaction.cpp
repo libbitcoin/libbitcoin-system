@@ -702,11 +702,37 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true
     BOOST_REQUIRE(instance.is_dusty(258000001));
 }
 
-// TODO: tests with initialized data
 BOOST_AUTO_TEST_CASE(transaction__signature_operations__empty_input_output__zero)
 {
     const transaction instance{ 0, inputs{}, {}, 0 };
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 0u);
+}
+
+// The transaction total is the sum over inputs and outputs.
+BOOST_AUTO_TEST_CASE(transaction__signature_operations__input_and_output__sum)
+{
+    const script sigops(base16_chunk("02acad"), true);
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const outputs outs{ output{ 42, sigops } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 4u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_operations__bip141_scaling__four_times)
+{
+    const script sigops(base16_chunk("02acad"), true);
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const outputs outs{ output{ 42, sigops } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), 16u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_signature_operations_limited__within_limit__false)
+{
+    const script sigops(base16_chunk("02acad"), true);
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const accessor instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(!instance.is_signature_operations_limited(false, false));
 }
 
 // hash/get_hash
