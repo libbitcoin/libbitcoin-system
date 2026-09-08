@@ -431,4 +431,146 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled
     BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
 }
 
+// get_map
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__genesis__default)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(0, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.version.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__mainnet_height__expected_ranges)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(1000, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.high, 999u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.high, 999u);
+    BOOST_REQUIRE_EQUAL(map.version.high, 999u);
+
+    // Mainnet does not use bits in retargeting, and bip90 freezes versions.
+    BOOST_REQUIRE_EQUAL(map.bits.count, 1u);
+    BOOST_REQUIRE_EQUAL(map.version.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, median_time_past_interval);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__below_median_time_past_interval__height_count)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(5, settings);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, 5u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__version_signalling_enabled__sample_count)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    const auto map = chain_state::get_map(10000, settings);
+    BOOST_REQUIRE_EQUAL(map.version.count, settings.bip34_activation_sample);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__retarget_height__expected)
+{
+    const settings settings(selection::mainnet);
+    const auto interval = settings.retargeting_interval();
+    const auto map = chain_state::get_map(interval, settings);
+    BOOST_REQUIRE_EQUAL(map.timestamp_retarget, 0u);
+
+    const auto next = chain_state::get_map(add1<size_t>(interval), settings);
+    BOOST_REQUIRE_EQUAL(next.timestamp_retarget, interval);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__bip9_disabled__unrequested)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    const auto map = chain_state::get_map(1000, settings);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, chain_state::map::unrequested);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit2_height, chain_state::map::unrequested);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__below_bip9_checkpoint__unrequested)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(1000, settings);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, chain_state::map::unrequested);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__at_bip9_bit0_checkpoint__requested)
+{
+    const settings settings(selection::mainnet);
+    const auto height = settings.bip9_bit0_active_checkpoint.height();
+    const auto map = chain_state::get_map(height, settings);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, height);
+}
+
+// signal_version
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__mainnet__bip9_bit2)
+{
+    const settings settings(selection::mainnet);
+    const auto expected = settings.bip9_version_base | settings.bip9_version_bit2;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__taproot_disabled__bip9_bit1)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    const auto expected = settings.bip9_version_base | settings.bip9_version_bit1;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__segwit_disabled__bip9_bit0)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    settings.forks.bip141 = false;
+    settings.forks.bip143 = false;
+    settings.forks.bip147 = false;
+    const auto expected = settings.bip9_version_base | settings.bip9_version_bit0;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip65_only__bip65_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    settings.forks.bip141 = false;
+    settings.forks.bip143 = false;
+    settings.forks.bip147 = false;
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.bip65_version);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__no_forks__first_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    settings.forks.bip141 = false;
+    settings.forks.bip143 = false;
+    settings.forks.bip147 = false;
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    settings.forks.bip65 = false;
+    settings.forks.bip66 = false;
+    settings.forks.bip34 = false;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.first_version);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
