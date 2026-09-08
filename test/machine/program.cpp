@@ -401,4 +401,49 @@ BOOST_AUTO_TEST_CASE(program__ops_increment__keys_beyond_limit__false)
     BOOST_REQUIRE(!machine->ops_increment(1));
 }
 
+// is_true
+
+BOOST_AUTO_TEST_CASE(program__is_true__empty_stack__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(!machine->is_true(false));
+}
+
+BOOST_AUTO_TEST_CASE(program__is_true__single_true__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    BOOST_REQUIRE(machine->is_true(true));
+    BOOST_REQUIRE(machine->is_true(false));
+}
+
+BOOST_AUTO_TEST_CASE(program__is_true__single_false__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(false);
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(!machine->is_true(false));
+}
+
+// BIP62: the clean stack rule requires that exactly one element remains.
+BOOST_AUTO_TEST_CASE(program__is_true__dirty_stack__clean_only_false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    machine->push_bool(true);
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(machine->is_true(false));
+}
+
+// The top element is evaluated, so a dirty stack with a false top is false.
+BOOST_AUTO_TEST_CASE(program__is_true__dirty_stack_false_top__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    machine->push_bool(false);
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(!machine->is_true(false));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

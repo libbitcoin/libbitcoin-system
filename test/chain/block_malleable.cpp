@@ -43,6 +43,7 @@ public:
     using block::malleated32_size;
     using block::is_malleated32;
     using block::is_malleable32;
+    using block::malleated_or;
 };
 
 struct txs
@@ -484,6 +485,26 @@ BOOST_AUTO_TEST_CASE(block__is_malleated__neither_shape__false)
     BOOST_REQUIRE(!instance.is_malleated32());
     BOOST_REQUIRE(!instance.is_malleated64());
     BOOST_REQUIRE(!instance.is_malleated());
+}
+
+// malleated_or
+// ----------------------------------------------------------------------------
+// A malleated block is reported as a commitment failure, so that the node does
+// not mark the honest block hash unconfirmable.
+
+BOOST_AUTO_TEST_CASE(block__malleated_or__unmalleated__given_code)
+{
+    const accessor instance{ header, { txs::tx60(), txs::tx61() } };
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_witness_commitment);
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__malleated_or__malleated__invalid_transaction_commitment)
+{
+    const accessor instance{ header, { tx64_spend(0), tx64_spend(1) } };
+    BOOST_REQUIRE(instance.is_malleated());
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_transaction_commitment);
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::invalid_transaction_commitment);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
