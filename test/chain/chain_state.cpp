@@ -749,4 +749,54 @@ BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__pool_promotion)
     BOOST_REQUIRE_EQUAL(state.median_time_past(), pool.median_time_past());
 }
 
+// block storm patch
+// ----------------------------------------------------------------------------
+// BIP94: the retarget is computed from the first block of the period, so a
+// retarget height requires the full interval of bits.
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__retarget_height_block_storm_patch__full_interval)
+{
+    const settings settings(selection::testnet4);
+    BOOST_REQUIRE(settings.forks.block_storm_patch);
+    const auto interval = settings.retargeting_interval();
+    BOOST_REQUIRE_EQUAL(chain_state::get_map(interval, settings).bits.count, interval);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__retarget_height_unpatched__one)
+{
+    const settings settings(selection::testnet3);
+    BOOST_REQUIRE(!settings.forks.block_storm_patch);
+    const auto interval = settings.retargeting_interval();
+    BOOST_REQUIRE_EQUAL(chain_state::get_map(interval, settings).bits.count, 1u);
+}
+
+// The period is on target, with a minimum difficulty block preceding retarget.
+static chain::chain_state::data storm_values(const settings& settings, uint32_t first)
+{
+    const auto interval = settings.retargeting_interval();
+    chain::chain_state::data values{};
+    values.height = interval;
+    values.timestamp.retarget = 1000000;
+    values.timestamp.ordered.push_back(1000000 + interval * settings.block_spacing_seconds);
+    values.bits.ordered = chain_state::bitss(interval, settings.proof_of_work_limit);
+    values.bits.ordered.front() = first;
+    return values;
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__block_storm_patch__period_first_bits)
+{
+    const settings settings(selection::testnet4);
+    const auto values = storm_values(settings, 0x1c0ffff0);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), 0x1c0ffff0u);
+}
+
+// Unpatched, the minimum difficulty block lowers the retarget to the limit.
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__unpatched__proof_of_work_limit)
+{
+    settings settings(selection::testnet4);
+    settings.forks.block_storm_patch = false;
+    const auto values = storm_values(settings, 0x1c0ffff0);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

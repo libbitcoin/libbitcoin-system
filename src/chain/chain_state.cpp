@@ -351,11 +351,13 @@ size_t chain_state::bits_count(size_t height, const forks& forks,
     if (!forks.retarget)
         return one;
 
-    // Testnet uses mainnet retargeting on interval.
-    if (is_retarget_height(height, retargeting_interval))
+    // Testnet uses mainnet retargeting on interval, unless storm patched.
+    if (!forks.block_storm_patch &&
+        is_retarget_height(height, retargeting_interval))
         return one;
 
     // Testnet requires all bits for inter-interval retargeting.
+    // Block storm patch requires all bits for interval retargeting [bip94].
     return std::min(height, retargeting_interval);
 }
 
