@@ -842,6 +842,33 @@ BOOST_AUTO_TEST_CASE(block__check__malleated64_first_not_coinbase__invalid_trans
     BOOST_REQUIRE_EQUAL(instance.check(false), error::invalid_transaction_commitment);
 }
 
+// Duplicate points within one transaction are caught at block scope.
+BOOST_AUTO_TEST_CASE(block__check__duplicate_points_within_transaction__block_internal_double_spend)
+{
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, 0xffffffff },
+        input{ point{ one_hash, 0 }, script{}, 0xffffffff }
+    };
+
+    const transaction duplicated{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), duplicated } };
+    BOOST_REQUIRE_EQUAL(instance.check(false), error::block_internal_double_spend);
+}
+
+// Duplicate points across transactions are caught at block scope.
+BOOST_AUTO_TEST_CASE(block__check__duplicate_points_across_transactions__block_internal_double_spend)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, 0xffffffff } };
+    const transaction spend1{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const transaction spend2{ 2, ins, outputs{ output{ 0, script{} } }, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const auto txs = transactions{ coinbase_transaction(0, coinbase_script), spend1, spend2 };
+    const block instance{ header{}, txs };
+    BOOST_REQUIRE_EQUAL(instance.check(false), error::block_internal_double_spend);
+}
+
 BOOST_AUTO_TEST_CASE(block__check__extra_coinbases__extra_coinbases)
 {
     const auto txs = transactions{ coinbase_transaction(0, script{}), coinbase_transaction(1, script{}) };
@@ -900,6 +927,39 @@ BOOST_AUTO_TEST_CASE(block__check_context__matching_coinbase_script_bip34_on__bl
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+// Heights above sixteen serialize as a nominal data push in both encodings.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_height_seventeen__block_success)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x11 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0111"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 17, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+// Heights one through sixteen serialize as a single byte small integer under
+// the satoshi encoding, which is not a nominal push.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height__coinbase_height_mismatch)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("51"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_pushed_height_one__block_success)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01 }, false } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0101"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
     BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 

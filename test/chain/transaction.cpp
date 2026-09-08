@@ -1922,6 +1922,17 @@ BOOST_AUTO_TEST_CASE(transaction__accept__overspent__spend_exceeds_value)
     BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::spend_exceeds_value);
 }
 
+// Output value summation saturates, so an overflowed spend exceeds any value.
+BOOST_AUTO_TEST_CASE(transaction__accept__output_value_overflow__spend_exceeds_value)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ max_uint64, script{} }, output{ 1, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::spend_exceeds_value);
+}
+
 BOOST_AUTO_TEST_CASE(transaction__accept__populated__transaction_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
@@ -1965,6 +1976,16 @@ BOOST_AUTO_TEST_CASE(transaction__confirm__immature_coinbase_prevout__coinbase_m
     const auto instance = triad_confirmable();
     instance.inputs_ptr()->front()->metadata.coinbase = true;
     instance.inputs_ptr()->front()->metadata.prevout_height = 50;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+}
+
+// The genesis coinbase is never mature, it is not a member of the unspent set.
+BOOST_AUTO_TEST_CASE(transaction__confirm__genesis_coinbase_prevout__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, max_size_t, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 0;
     BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
 }
 
