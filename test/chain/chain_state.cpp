@@ -573,4 +573,180 @@ BOOST_AUTO_TEST_CASE(chain_state__signal_version__no_forks__first_version)
     BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.first_version);
 }
 
+// configured_flags
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__no_forks__no_rules)
+{
+    const forks forks{};
+    BOOST_REQUIRE_EQUAL(chain_state::configured_flags(forks), flags::no_rules);
+}
+
+// Configured flags are independent of activation.
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__mainnet__all_rules)
+{
+    const settings settings(selection::mainnet);
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::bip16_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::bip34_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::bip141_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::bip341_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::retarget));
+    BOOST_REQUIRE(to_bool(configured & flags::difficult));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__one_fork__one_rule)
+{
+    forks forks{};
+    forks.bip16 = true;
+    BOOST_REQUIRE_EQUAL(chain_state::configured_flags(forks), flags::bip16_rule);
+}
+
+// minimum_timespan/maximum_timespan
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__minimum_timespan__mainnet__interval_over_factor)
+{
+    const settings settings(selection::mainnet);
+    const auto interval = settings.retargeting_interval_seconds;
+    const auto factor = settings.retargeting_factor;
+    const auto expected = interval / factor;
+    BOOST_REQUIRE_EQUAL(chain_state::minimum_timespan(interval, factor), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__maximum_timespan__mainnet__interval_times_factor)
+{
+    const settings settings(selection::mainnet);
+    const auto interval = settings.retargeting_interval_seconds;
+    const auto factor = settings.retargeting_factor;
+    const auto expected = interval * factor;
+    BOOST_REQUIRE_EQUAL(chain_state::maximum_timespan(interval, factor), expected);
+}
+
+// State transitions.
+// ----------------------------------------------------------------------------
+// Retargeting is disabled so that work_required is the preceding bits.
+
+static chain::chain_state::data transition_values()
+{
+    chain::chain_state::data values{};
+    values.height = 42;
+    values.hash = one_hash;
+    values.bits.self = 0x1e0ffff0u;
+    values.version.self = 4u;
+    values.timestamp.self = 1000u;
+    values.bits.ordered.push_back(0x1e0ffff0u);
+    values.version.ordered.push_back(4u);
+    values.timestamp.ordered.push_back(900u);
+    values.cumulative_work = 1u;
+    return values;
+}
+
+static system::chain::header transition_header(uint32_t timestamp)
+{
+    return { 4u, one_hash, system::hash_digest{}, timestamp, 0x1e0ffff0u, 0u };
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__previous_timestamp__no_history__zero)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state state{ chain_state::data{}, settings };
+    BOOST_REQUIRE_EQUAL(state.previous_timestamp(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__next_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.height(), add1(top.height()));
+    BOOST_REQUIRE_EQUAL(pool.hash(), null_hash);
+}
+
+// The pool carries no block, so it accumulates no work.
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__same_work)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.cumulative_work(), top.cumulative_work());
+}
+
+// The top block timestamp is preserved for the computation of staleness.
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__promoted_timestamps)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.timestamp(), top.timestamp());
+    BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), top.timestamp());
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__pool_to_block__same_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    const chain::block block{ transition_header(1100u), transactions{} };
+    const chain_state state{ pool, block, settings };
+    BOOST_REQUIRE_EQUAL(state.height(), pool.height());
+    BOOST_REQUIRE_EQUAL(state.hash(), null_hash);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__pool_to_block__accumulated_work)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    const auto header = transition_header(1100u);
+    const chain::block block{ header, transactions{} };
+    const chain_state state{ pool, block, settings };
+    const auto expected = pool.cumulative_work() + header.proof();
+    BOOST_REQUIRE_EQUAL(state.cumulative_work(), expected);
+    BOOST_REQUIRE_EQUAL(state.timestamp(), 1100u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__next_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state parent{ transition_values(), settings };
+    const auto header = transition_header(1100u);
+    const chain_state state{ parent, header, settings };
+    BOOST_REQUIRE_EQUAL(state.height(), add1(parent.height()));
+    BOOST_REQUIRE_EQUAL(state.hash(), header.hash());
+    BOOST_REQUIRE_EQUAL(state.timestamp(), 1100u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__accumulated_work)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state parent{ transition_values(), settings };
+    const auto header = transition_header(1100u);
+    const chain_state state{ parent, header, settings };
+    const auto expected = parent.cumulative_work() + header.proof();
+    BOOST_REQUIRE_EQUAL(state.cumulative_work(), expected);
+}
+
+// The pool and header transitions promote identically apart from identity.
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__pool_promotion)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state parent{ transition_values(), settings };
+    const chain_state pool{ parent, settings };
+    const auto header = transition_header(1100u);
+    const chain_state state{ parent, header, settings };
+    BOOST_REQUIRE_EQUAL(state.height(), pool.height());
+    BOOST_REQUIRE_EQUAL(state.previous_timestamp(), pool.previous_timestamp());
+    BOOST_REQUIRE_EQUAL(state.median_time_past(), pool.median_time_past());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
