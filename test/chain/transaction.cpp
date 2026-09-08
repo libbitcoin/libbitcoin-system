@@ -709,20 +709,61 @@ BOOST_AUTO_TEST_CASE(transaction__signature_operations__empty_input_output__zero
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 0u);
 }
 
-// points
-// outputs_hash
-// points_hash
-// sequences_hash
+// hash/get_hash
+
+BOOST_AUTO_TEST_CASE(transaction__hash__unwitnessed__witness_hash_identical)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.hash(true), instance.hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__hash__witnessed__witness_hash_differs)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_NE(instance.hash(true), instance.hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__get_hash__repeated__cached_and_equal)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), instance.hash(false));
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), instance.get_hash(false));
+}
+
+// The segregated coinbase witness hash is null by convention [bip141].
+BOOST_AUTO_TEST_CASE(transaction__hash__segregated_coinbase_witness__null_hash)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const witness reservation{ chunk_cptrs{ to_shared(data_chunk(hash_size, 0x00)) } };
+    const inputs ins{ input{ point{}, coinbase_script, reservation, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.hash(true), null_hash);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__hash__unsegregated_coinbase_witness__nominal_hash)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const inputs ins{ input{ point{}, coinbase_script, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.hash(true), instance.hash(false));
+}
 
 // guards
 // ----------------------------------------------------------------------------
 
-// guard 1/2
-
 // validation (public)
 // ----------------------------------------------------------------------------
 
-// check
 // accept
 // connect
 
