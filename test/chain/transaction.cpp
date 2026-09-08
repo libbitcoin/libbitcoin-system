@@ -2249,4 +2249,95 @@ BOOST_AUTO_TEST_CASE(transaction__accept_guard__populated__transaction_success)
     BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_success);
 }
 
+// is_coinbase_immature
+// ----------------------------------------------------------------------------
+
+// A zero coinbase height is genesis or an unpopulated prevout.
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__zero_coinbase_height__true)
+{
+    BOOST_REQUIRE(transaction::is_coinbase_immature(0, 0));
+    BOOST_REQUIRE(transaction::is_coinbase_immature(0, max_size_t));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__below_maturity__true)
+{
+    BOOST_REQUIRE(transaction::is_coinbase_immature(1, sub1(add1(coinbase_maturity))));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__at_maturity__false)
+{
+    BOOST_REQUIRE(!transaction::is_coinbase_immature(1, add1(coinbase_maturity)));
+}
+
+// The addition is ceilinged, so a high coinbase height saturates instead of
+// wrapping to a low maturity height and reporting a spend as mature.
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__ceilinged_height__true)
+{
+    BOOST_REQUIRE(transaction::is_coinbase_immature(max_size_t, coinbase_maturity));
+}
+
+// is_internally_locked
+// ----------------------------------------------------------------------------
+// Internal spends have no relative age, so any applied lock is unsatisfied.
+
+static transaction locked_tx(uint32_t version, uint32_t sequence) NOEXCEPT
+{
+    const inputs ins{ { point{ one_hash, 0 }, script{}, sequence } };
+    const outputs outs{ { 42, script{} } };
+    return { version, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__version_one__false)
+{
+    const auto instance = locked_tx(1, 1);
+    BOOST_REQUIRE(!instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__version_two_locked__true)
+{
+    const auto instance = locked_tx(2, 1);
+    BOOST_REQUIRE(instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__zero_sequence__false)
+{
+    const auto instance = locked_tx(2, 0);
+    BOOST_REQUIRE(!instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+// BIP68: bit 31 set carries no consensus meaning.
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__locktime_disabled__false)
+{
+    const auto instance = locked_tx(2, 0x80000001);
+    BOOST_REQUIRE(!instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+// desegregated_hash
+// ----------------------------------------------------------------------------
+
+static transaction segregated_tx() NOEXCEPT
+{
+    const chain::witness witness{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
+    const inputs ins{ { point{ one_hash, 0 }, script{ { opcode::dup } }, witness, 42 } };
+    const outputs outs{ { 42, script{ { opcode::dup } } } };
+    return { 2, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__desegregated_hash__segregated__nominal_hash)
+{
+    const auto instance = segregated_tx();
+    BOOST_REQUIRE(instance.is_segregated());
+
+    const auto data = instance.to_data(true);
+    const auto witnessed = instance.serialized_size(true);
+    const auto unwitnessed = instance.serialized_size(false);
+    const auto hash = transaction::desegregated_hash(witnessed, unwitnessed, data.data());
+    BOOST_REQUIRE_EQUAL(hash, instance.hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__desegregated_hash__null_data__null_hash)
+{
+    BOOST_REQUIRE_EQUAL(transaction::desegregated_hash(0, 0, nullptr), null_hash);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
