@@ -1445,8 +1445,7 @@ BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty__false)
 
 // is_coinbase_pattern
 // -----------------------------------------------------------------------------
-// BIP34 requires the coinbase input script to begin with a minimally-encoded
-// push of the block height.
+// BIP34 requires a minimally-encoded push of the block height.
 
 BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__empty__false)
 {

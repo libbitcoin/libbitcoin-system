@@ -2269,8 +2269,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__at_maturity__false)
     BOOST_REQUIRE(!transaction::is_coinbase_immature(1, add1(coinbase_maturity)));
 }
 
-// The addition is ceilinged, so a high coinbase height saturates instead of
-// wrapping to a low maturity height and reporting a spend as mature.
+// Ceilinged addition prevents wrapping to a low maturity height.
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__ceilinged_height__true)
 {
     BOOST_REQUIRE(transaction::is_coinbase_immature(max_size_t, coinbase_maturity));
