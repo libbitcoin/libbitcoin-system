@@ -353,6 +353,46 @@ BOOST_AUTO_TEST_CASE(transaction__to_data__writer__expected)
 
 // weight
 
+// An unwitnessed transaction weighs four times its serialized size [bip141].
+BOOST_AUTO_TEST_CASE(transaction__weight__unwitnessed__four_times_size)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(!instance.is_segregated());
+
+    const auto size = instance.serialized_size(false);
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(true), size);
+    BOOST_REQUIRE_EQUAL(instance.weight(), size * 4u);
+    BOOST_REQUIRE_EQUAL(instance.virtual_size(), size);
+}
+
+// Witness bytes are discounted to one quarter weight [bip141].
+BOOST_AUTO_TEST_CASE(transaction__weight__witnessed__discounted)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102030405")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(instance.is_segregated());
+
+    const auto base = instance.serialized_size(false);
+    const auto total = instance.serialized_size(true);
+    BOOST_REQUIRE_GT(total, base);
+    BOOST_REQUIRE_EQUAL(instance.weight(), base * 3u + total);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__virtual_size__weight_rounds_up__expected)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102030405")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+
+    const auto weight = instance.weight();
+    BOOST_REQUIRE_EQUAL(instance.virtual_size(), ceilinged_divide(weight, 4_size));
+}
+
 BOOST_AUTO_TEST_CASE(transaction__fee__empty__zero)
 {
     const transaction instance

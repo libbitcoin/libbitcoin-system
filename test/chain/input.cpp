@@ -323,6 +323,46 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_time_type_sequence_age_
     BOOST_REQUIRE(!instance.is_relative_locked(0, instance.metadata.median_time_past + age_seconds));
 }
 
+// reserved_hash
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__single_thirty_two_byte_element__expected)
+{
+    const auto reservation = base16_chunk("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20");
+    const witness spender{ chunk_cptrs{ to_shared(reservation) } };
+    const input instance{ point{}, script{}, spender, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(instance.reserved_hash(out));
+    BOOST_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
+}
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__wrong_element_size__false)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102")) } };
+    const input instance{ point{}, script{}, spender, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.reserved_hash(out));
+}
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__two_elements__false)
+{
+    const auto reservation = base16_chunk("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20");
+    const witness spender{ chunk_cptrs{ to_shared(reservation), to_shared(reservation) } };
+    const input instance{ point{}, script{}, spender, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.reserved_hash(out));
+}
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__empty_witness__false)
+{
+    const input instance{ point{}, script{}, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.reserved_hash(out));
+}
+
 BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__expected)
 {
     const script script(base16_chunk("02acad"), true);
