@@ -1443,4 +1443,62 @@ BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty__false)
     BOOST_REQUIRE(!script::is_sign_script_hash_pattern(operations{}));
 }
 
+// is_coinbase_pattern
+// -----------------------------------------------------------------------------
+// BIP34 requires the coinbase input script to begin with a minimally-encoded
+// push of the block height.
+
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__empty__false)
+{
+    BOOST_REQUIRE(!script::is_coinbase_pattern(operations{}, 1));
+}
+
+// Heights one through sixteen are minimally encoded as a single opcode.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__positive_opcode__true)
+{
+    const operations one{ { operation::opcode_from_positive(1_u8) } };
+    const operations sixteen{ { operation::opcode_from_positive(16_u8) } };
+    BOOST_REQUIRE(script::is_coinbase_pattern(one, 1));
+    BOOST_REQUIRE(script::is_coinbase_pattern(sixteen, 16));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__wrong_height__false)
+{
+    const operations ops{ { operation::opcode_from_positive(1_u8) } };
+    BOOST_REQUIRE(!script::is_coinbase_pattern(ops, 2));
+}
+
+// A data push of a value in [1..16] is not the minimal encoding.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__non_minimal_push__false)
+{
+    const operations ops{ { data_chunk{ 0x01 }, false } };
+    BOOST_REQUIRE(!script::is_coinbase_pattern(ops, 1));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__one_byte_height__true)
+{
+    const operations ops{ { data_chunk{ 0x11 }, true } };
+    BOOST_REQUIRE(script::is_coinbase_pattern(ops, 17));
+}
+
+// The sign byte is required, so 255 is a two byte push.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__signed_height__true)
+{
+    const operations ops{ { data_chunk{ 0xff, 0x00 }, true } };
+    BOOST_REQUIRE(script::is_coinbase_pattern(ops, 255));
+}
+
+// Only the first operation is the commitment, the remainder is arbitrary.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__trailing_operations__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_hash32, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_coinbase_pattern(ops, 1));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
