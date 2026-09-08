@@ -632,6 +632,77 @@ BOOST_AUTO_TEST_CASE(script__verify__index_above_inputs__inputs_overflow)
     BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 1), error::inputs_overflow);
 }
 
+// BIP341 key path spend.
+// ----------------------------------------------------------------------------
+// Input zero of the published key path vector, signed with hash_single. The
+// witness is the vector's, so this pins the sighash, taproot extraction and
+// schnorr verification against the reference rather than against signing.
+
+static transaction bip341_unsigned_tx() NOEXCEPT
+{
+    return transaction{ base16_chunk("02000000097de20cbff686da83a54981d2b9bab3586f4ca7e48f57f5b55963115f3b334e9c010000000000000000d7b7cab57b1393ace2d064f4d4a2cb8af6def61273e127517d44759b6dafdd990000000000fffffffff8e1f583384333689228c5d28eac13366be082dc57441760d957275419a418420000000000fffffffff0689180aa63b30cb162a73c6d2a38b7eeda2a83ece74310fda0843ad604853b0100000000feffffffaa5202bdf6d8ccd2ee0f0202afbbb7461d9264a25e5bfd3c5a52ee1239e0ba6c0000000000feffffff956149bdc66faa968eb2be2d2faa29718acbfe3941215893a2a3446d32acd050000000000000000000e664b9773b88c09c32cb70a2a3e4da0ced63b7ba3b22f848531bbb1d5d5f4c94010000000000000000e9aa6b8e6c9de67619e6a3924ae25696bb7b694bb677a632a74ef7eadfd4eabf0000000000ffffffffa778eb6a263dc090464cd125c466b5a99667720b1c110468831d058aa1b82af10100000000ffffffff0200ca9a3b000000001976a91406afd46bcdfd22ef94ac122aa11f241244a37ecc88ac807840cb0000000020ac9a87f5594be208f8532db38cff670c450ed2fea8fcdefcc9a663f78bab962b0065cd1d"), true };
+}
+
+static transaction_accessor bip341_signed_tx(const data_chunk& signature) NOEXCEPT
+{
+    const auto unsigned_tx = bip341_unsigned_tx();
+    const auto& in = *unsigned_tx.inputs_ptr();
+    const auto& out = *unsigned_tx.outputs_ptr();
+    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(signature) } };
+    const chain::witness none{};
+
+    const inputs ins
+    {
+        input{ in[0]->point(), script{}, spender, in[0]->sequence() },
+        input{ in[1]->point(), script{}, none, in[1]->sequence() },
+        input{ in[2]->point(), script{}, none, in[2]->sequence() },
+        input{ in[3]->point(), script{}, none, in[3]->sequence() },
+        input{ in[4]->point(), script{}, none, in[4]->sequence() },
+        input{ in[5]->point(), script{}, none, in[5]->sequence() },
+        input{ in[6]->point(), script{}, none, in[6]->sequence() },
+        input{ in[7]->point(), script{}, none, in[7]->sequence() },
+        input{ in[8]->point(), script{}, none, in[8]->sequence() }
+    };
+
+    const outputs outs
+    {
+        output{ out[0]->value(), out[0]->script() },
+        output{ out[1]->value(), out[1]->script() }
+    };
+
+    const transaction_accessor tx{ unsigned_tx.version(), ins, outs, unsigned_tx.locktime() };
+    const auto& set = *tx.inputs_ptr();
+    set[0]->prevout = to_shared(output{ 420000000, { base16_chunk("512053a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343"), false } });
+    set[1]->prevout = to_shared(output{ 462000000, { base16_chunk("5120147c9c57132f6e7ecddba9800bb0c4449251c92a1e60371ee77557b6620f3ea3"), false } });
+    set[2]->prevout = to_shared(output{ 294000000, { base16_chunk("76a914751e76e8199196d454941c45d1b3a323f1433bd688ac"), false } });
+    set[3]->prevout = to_shared(output{ 504000000, { base16_chunk("5120e4d810fd50586274face62b8a807eb9719cef49c04177cc6b76a9a4251d5450e"), false } });
+    set[4]->prevout = to_shared(output{ 630000000, { base16_chunk("512091b64d5324723a985170e4dc5a0f84c041804f2cd12660fa5dec09fc21783605"), false } });
+    set[5]->prevout = to_shared(output{ 378000000, { base16_chunk("00147dd65592d0ab2fe0d0257d571abf032cd9db93dc"), false } });
+    set[6]->prevout = to_shared(output{ 672000000, { base16_chunk("512075169f4001aa68f15bbed28b218df1d0a62cbbcf1188c6665110c293c907b831"), false } });
+    set[7]->prevout = to_shared(output{ 546000000, { base16_chunk("5120712447206d7a5238acc7ff53fbe94a3b64539ad291c7cdbc490b7577e4b17df5"), false } });
+    set[8]->prevout = to_shared(output{ 588000000, { base16_chunk("512077e30a5522dd9f894c3f8b8bd4c4b2cf82ca7da8a3ea6a239655c39c050ab220"), false } });
+    return tx;
+}
+
+static data_chunk bip341_signature() NOEXCEPT
+{
+    return base16_chunk("ed7c1647cb97379e76892be0cacff57ec4a7102aa24296ca39af7541246d8ff14d38958d4cc1e2e478e4d4a764bbfd835b16d4e314b72937b29833060b87276c03");
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__bip341_key_path_vector__success)
+{
+    const auto tx = bip341_signed_tx(bip341_signature());
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__bip341_key_path_vector_altered_signature__op_check_sig_schnorr3)
+{
+    auto signature = bip341_signature();
+    signature.front() ^= 0x01_u8;
+    const auto tx = bip341_signed_tx(signature);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::op_check_sig_schnorr3);
+}
+
 // Signature batching.
 // ----------------------------------------------------------------------------
 // Batching fabricates sigop success and defers adjudication to the
