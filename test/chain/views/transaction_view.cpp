@@ -355,4 +355,76 @@ BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_overloads__match_transaction
     BOOST_CHECK_EQUAL(to_chunk(stripped_stream.str()), tx.to_data(false));
 }
 
+// input_table_size/output_table_size
+// ----------------------------------------------------------------------------
+// Store sizes, computed over the buffer during construction.
+
+// One byte input script and two byte output script, value of 42.
+static system::chain::transaction table_tx()
+{
+    using namespace system::chain;
+    const inputs ins{ { point{ one_hash, 0 }, script{ { opcode::dup } }, 42 } };
+    const outputs outs{ { 42, script{ { opcode::dup, opcode::dup } } } };
+    return { 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__input_table_size__unwitnessed__scripts_and_input_count)
+{
+    const chain::block block{ chain::header{}, chain::transactions{ table_tx() } };
+    const auto data = block.to_data(true);
+    stream::in::fast istream{ data };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    BOOST_REQUIRE_EQUAL(reader.read_variable(), 1u);
+
+    const chain::transaction_view view{ reader, data, false, true };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_REQUIRE(!view.is_segregated());
+
+    // variable_size(1) + 1 script byte, plus one byte for the unwitnessed input.
+    BOOST_CHECK_EQUAL(view.input_table_size(false), 3u);
+
+    // variable_size(42) + variable_size(2) + 2 script bytes.
+    BOOST_CHECK_EQUAL(view.output_table_size(), 4u);
+}
+
+// The pruned form carries an empty script and witness for each input.
+BOOST_AUTO_TEST_CASE(transaction_view__input_table_size__pruned__two_per_input)
+{
+    const chain::block block{ chain::header{}, chain::transactions{ table_tx() } };
+    const auto data = block.to_data(true);
+    stream::in::fast istream{ data };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    BOOST_REQUIRE_EQUAL(reader.read_variable(), 1u);
+
+    const chain::transaction_view view{ reader, data, false, true };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_CHECK_EQUAL(view.input_table_size(true), 2u * view.inputs());
+}
+
+// read_witness_size
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction_view__read_witness_size__populated__serialized_size)
+{
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }), to_shared<data_chunk>(hash_size, 0x00_u8) } };
+    const auto data = instance.to_data(true);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_CHECK_EQUAL(chain::transaction_view::read_witness_size(reader), data.size());
+    BOOST_CHECK(reader);
+    BOOST_CHECK(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__read_witness_size__empty_stack__prefix_only)
+{
+    const chain::witness instance{ chunk_cptrs{} };
+    const auto data = instance.to_data(true);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_CHECK_EQUAL(chain::transaction_view::read_witness_size(reader), data.size());
+    BOOST_CHECK_EQUAL(data.size(), 1u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

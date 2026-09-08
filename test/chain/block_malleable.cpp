@@ -43,6 +43,7 @@ public:
     using block::malleated32_size;
     using block::is_malleated32;
     using block::is_malleable32;
+    using block::malleated_or;
 };
 
 struct txs
@@ -415,6 +416,95 @@ BOOST_AUTO_TEST_CASE(block__is_malleable32__various__expected)
     BOOST_REQUIRE(!accessor::is_malleable32(30, 1));
     BOOST_REQUIRE( accessor::is_malleable32(30, 2)); // 32:2
     BOOST_REQUIRE( accessor::is_malleable32(31, 1)); // 32:1
+}
+
+// is_malleated64
+// ----------------------------------------------------------------------------
+// Malleability is 64 byte serialization, malleation additionally requires a
+// non-null first input point, as the coinbase point cannot be spent.
+
+static transaction tx64_spend(uint32_t index) NOEXCEPT
+{
+    return
+    {
+        42,
+        inputs{ { point{ one_hash, index }, script{ { opcode::dup, opcode::dup } }, 42 } },
+        outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+        42
+    };
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated64__empty__false)
+{
+    const accessor instance{};
+    BOOST_REQUIRE(!instance.is_malleated64());
+    BOOST_REQUIRE(!instance.is_malleated());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated64__spending_first_input__true)
+{
+    const accessor instance{ header, { tx64_spend(0), tx64_spend(1) } };
+    BOOST_REQUIRE_EQUAL(tx64_spend(0).serialized_size(false), 64u);
+    BOOST_REQUIRE(instance.is_malleable64());
+    BOOST_REQUIRE(instance.is_malleated64());
+    BOOST_REQUIRE(instance.is_malleated());
+}
+
+// A null first input point is a coinbase, so this is malleable but not
+// malleated (producing such a block is considered computationally infeasible).
+BOOST_AUTO_TEST_CASE(block__is_malleated64__coinbase_first__false)
+{
+    const accessor instance{ header, { txs::tx64(), tx64_spend(1) } };
+    BOOST_REQUIRE(instance.is_malleable64());
+    BOOST_REQUIRE(!instance.is_malleated64());
+    BOOST_REQUIRE(!instance.is_malleated());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated64__mixed_sizes__false)
+{
+    const accessor instance{ header, { tx64_spend(0), txs::tx65() } };
+    BOOST_REQUIRE(!instance.is_malleable64());
+    BOOST_REQUIRE(!instance.is_malleated64());
+}
+
+// is_malleated
+// ----------------------------------------------------------------------------
+
+// The composite is satisfied by the 32 byte shape alone.
+BOOST_AUTO_TEST_CASE(block__is_malleated__malleated32_only__true)
+{
+    const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx65() } };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE(!instance.is_malleated64());
+    BOOST_REQUIRE(instance.is_malleated());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated__neither_shape__false)
+{
+    const accessor instance{ header, { txs::tx60(), txs::tx61() } };
+    BOOST_REQUIRE(!instance.is_malleated32());
+    BOOST_REQUIRE(!instance.is_malleated64());
+    BOOST_REQUIRE(!instance.is_malleated());
+}
+
+// malleated_or
+// ----------------------------------------------------------------------------
+// A malleated block is reported as a commitment failure, so that the node does
+// not mark the honest block hash unconfirmable.
+
+BOOST_AUTO_TEST_CASE(block__malleated_or__unmalleated__given_code)
+{
+    const accessor instance{ header, { txs::tx60(), txs::tx61() } };
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_witness_commitment);
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__malleated_or__malleated__invalid_transaction_commitment)
+{
+    const accessor instance{ header, { tx64_spend(0), tx64_spend(1) } };
+    BOOST_REQUIRE(instance.is_malleated());
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_transaction_commitment);
+    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::invalid_transaction_commitment);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

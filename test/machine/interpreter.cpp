@@ -2181,6 +2181,59 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__tapscript__op_reserved)
     BOOST_REQUIRE_EQUAL(code{ accessor.op_check_multisig_verify() }, error::op_reserved);
 }
 
+// Operation dispatch (run_op).
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__push_size_0__pushes_number_zero)
+{
+    const script leaf{ operations{ operation{ opcode::push_size_0 } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__push_positive_1__pushes_number_one)
+{
+    const script leaf{ operations{ operation{ opcode::push_positive_1 } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__push_size__pushes_payload)
+{
+    const script leaf{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("0102"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__nop__op_success)
+{
+    const script leaf{ operations{ operation{ opcode::nop } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__dup_on_empty_stack__op_dup)
+{
+    const script leaf{ operations{ operation{ opcode::dup } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_dup);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__invalid_opcode__op_invalid)
+{
+    const script leaf{ operations{ operation{ opcode::op_cat } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_invalid);
+}
+
 // Signature operation control flow (mocked verification).
 // ----------------------------------------------------------------------------
 
@@ -2339,6 +2392,157 @@ BOOST_AUTO_TEST_CASE(interpreter__sigops_increment__budget_boundary__expected)
     BOOST_REQUIRE_EQUAL((*tx.inputs_ptr()->front()).witness().serialized_size(true), 37u);
     BOOST_REQUIRE(accessor.sigops_increment());
     BOOST_REQUIRE(!accessor.sigops_increment());
+}
+
+// Numeric operand underflow codes.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__op_nonzero__empty_stack__op_nonzero)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_nonzero() }, error::op_nonzero);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_bool_and__one_operand__op_bool_and)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_bool_and() }, error::op_bool_and);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_bool_or__one_operand__op_bool_or)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_bool_or() }, error::op_bool_or);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_equal__one_operand__op_num_equal)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_equal() }, error::op_num_equal);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_num_not_equal__one_operand__op_num_not_equal)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_num_not_equal() }, error::op_num_not_equal);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_less_than__one_operand__op_less_than)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_less_than() }, error::op_less_than);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_greater_than__one_operand__op_greater_than)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_greater_than() }, error::op_greater_than);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_less_than_or_equal__one_operand__op_less_than_or_equal)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_less_than_or_equal() }, error::op_less_than_or_equal);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_greater_than_or_equal__one_operand__op_greater_than_or_equal)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_greater_than_or_equal() }, error::op_greater_than_or_equal);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_min__one_operand__op_min)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_min() }, error::op_min);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_max__one_operand__op_max)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_max() }, error::op_max);
+}
+
+// Tapscript checksig failure codes [bip342].
+// ----------------------------------------------------------------------------
+
+static script to_checksig_script(const data_chunk& key, const data_chunk& endorsement, opcode checksig) NOEXCEPT
+{
+    return script{ operations{ operation{ endorsement, false }, operation{ key, false }, operation{ checksig } } };
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_low_stack__op_check_sig_add1)
+{
+    const script leaf{ operations{ operation{ opcode::checksigadd } } };
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add1);
+}
+
+// The number operand is limited to four bytes.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigadd_five_byte_number__op_check_sig_add3)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const data_chunk number{ 0x00, 0x00, 0x00, 0x00, 0x01 };
+    const script leaf{ operations{ operation{ data_chunk{}, false }, operation{ number, false }, operation{ key, false }, operation{ opcode::checksigadd } } };
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_add3);
+}
+
+// An empty key fails the script for any endorsement [bip342].
+BOOST_AUTO_TEST_CASE(interpreter__run__checksig_empty_key__op_check_sig_empty_key)
+{
+    const data_chunk endorsement(ec_signature_size, 0x11);
+    const auto leaf = to_checksig_script({}, endorsement, opcode::checksig);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_empty_key);
+}
+
+// An empty endorsement is false, which fails the verify form.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksigverify_empty_endorsement__op_check_sig_verify1)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const auto leaf = to_checksig_script(key, {}, opcode::checksigverify);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_verify1);
+}
+
+// A 32 byte key is subject to the defined sighash type rule.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksig_xonly_key_undefined_sighash__op_check_sig_schnorr1)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const auto leaf = to_checksig_script(key, to_undefined_sighash_endorsement(), opcode::checksig);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_schnorr1);
+}
+
+// A 32 byte key is subject to signature verification, which fails the script.
+BOOST_AUTO_TEST_CASE(interpreter__run__checksig_xonly_key_invalid_signature__op_check_sig_schnorr3)
+{
+    const data_chunk key(ec_xonly_size, 0x02);
+    const data_chunk endorsement(ec_signature_size, 0x11);
+    const auto leaf = to_checksig_script(key, endorsement, opcode::checksig);
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf), error::op_check_sig_schnorr3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_verify__mocked_hash_failure__op_check_sig_schnorr2)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack, mocked> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.hash_result = false;
+    accessor.push_chunk(data_chunk(ec_signature_size, 0x11));
+    accessor.push_chunk(data_chunk(ec_xonly_size, 0x02));
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig_verify() }, error::op_check_sig_schnorr2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

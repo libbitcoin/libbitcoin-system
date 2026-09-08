@@ -262,4 +262,195 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__key_path__success_with_checksig)
     BOOST_REQUIRE_EQUAL(*stack->back(), c0_program);
 }
 
+// extract_segwit
+
+static script segwit_prevout(const data_chunk& program) NOEXCEPT
+{
+    return script{ script::to_pay_witness_pattern(0_u8, program) };
+}
+
+static const data_chunk key_hash_program = base16_chunk("1d0f172a0ecb48aee1be1f2687d2963ae33f71a1");
+static const data_chunk embedded_script{ 0x51_u8 };
+
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_two_elements__success)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = segwit_prevout(key_hash_program);
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x01_u8 }), to_shared<data_chunk>({ 0x02_u8 }) } };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::script_success);
+    BOOST_REQUIRE(*out == script{ script::to_pay_key_hash_pattern(to_shared(key_hash_program)) });
+    BOOST_REQUIRE_EQUAL(stack->size(), two);
+}
+
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_one_element__invalid_witness)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = segwit_prevout(key_hash_program);
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x01_u8 }) } };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+}
+
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_three_elements__invalid_witness)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = segwit_prevout(key_hash_program);
+    const chunk_cptrs elements{ to_shared<data_chunk>({ 0x01_u8 }), to_shared<data_chunk>({ 0x02_u8 }), to_shared<data_chunk>({ 0x03_u8 }) };
+    const chain::witness instance{ elements };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+}
+
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_committed__success)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto program = to_chunk(sha256_hash(embedded_script));
+    const auto prevout = segwit_prevout(program);
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x02_u8 }), to_shared<data_chunk>(embedded_script) } };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::script_success);
+    BOOST_REQUIRE(*out == script(embedded_script, false));
+    BOOST_REQUIRE_EQUAL(stack->size(), one);
+}
+
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_uncommitted__invalid_witness)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto program = to_chunk(sha256_hash(data_chunk{ 0x52_u8 }));
+    const auto prevout = segwit_prevout(program);
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>(embedded_script) } };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+}
+
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_empty_stack__invalid_witness)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto program = to_chunk(sha256_hash(embedded_script));
+    const auto prevout = segwit_prevout(program);
+    const chain::witness instance{ chunk_cptrs{} };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+}
+
+// A version zero program of neither twenty nor thirty two bytes must fail.
+BOOST_AUTO_TEST_CASE(witness__extract_segwit__undefined_program_size__invalid_witness)
+{
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = segwit_prevout(data_chunk(21, 0x00));
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x01_u8 }), to_shared<data_chunk>({ 0x02_u8 }) } };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+}
+
+// is_push_size
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(witness__is_push_size__empty__true)
+{
+    BOOST_REQUIRE(chain::witness::is_push_size(chunk_cptrs{}));
+}
+
+BOOST_AUTO_TEST_CASE(witness__is_push_size__maximum__true)
+{
+    const auto element = to_shared<data_chunk>(max_push_data_size, 0x42_u8);
+    BOOST_REQUIRE(chain::witness::is_push_size(chunk_cptrs{ element }));
+}
+
+BOOST_AUTO_TEST_CASE(witness__is_push_size__oversized__false)
+{
+    const auto element = to_shared<data_chunk>(add1(max_push_data_size), 0x42_u8);
+    BOOST_REQUIRE(!chain::witness::is_push_size(chunk_cptrs{ element }));
+}
+
+// Any oversized element fails the whole stack.
+BOOST_AUTO_TEST_CASE(witness__is_push_size__trailing_oversized__false)
+{
+    const auto small = to_shared<data_chunk>(1, 0x42_u8);
+    const auto large = to_shared<data_chunk>(add1(max_push_data_size), 0x42_u8);
+    BOOST_REQUIRE(!chain::witness::is_push_size(chunk_cptrs{ small, large }));
+}
+
+// is_reserved_pattern
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__single_hash__true)
+{
+    const auto element = to_shared<data_chunk>(hash_size, 0x42_u8);
+    BOOST_REQUIRE(chain::witness::is_reserved_pattern(chunk_cptrs{ element }));
+}
+
+BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__empty__false)
+{
+    BOOST_REQUIRE(!chain::witness::is_reserved_pattern(chunk_cptrs{}));
+}
+
+BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__wrong_size__false)
+{
+    const auto element = to_shared<data_chunk>(short_hash_size, 0x42_u8);
+    BOOST_REQUIRE(!chain::witness::is_reserved_pattern(chunk_cptrs{ element }));
+}
+
+BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__two_hashes__false)
+{
+    const auto element = to_shared<data_chunk>(hash_size, 0x42_u8);
+    const chunk_cptrs stack{ element, element };
+    BOOST_REQUIRE(!chain::witness::is_reserved_pattern(stack));
+}
+
+// skip
+// ----------------------------------------------------------------------------
+// The return is superfluity, meaning the stack carries no non-empty element.
+
+BOOST_AUTO_TEST_CASE(witness__skip__prefixed_non_empty__true)
+{
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
+    const auto data = instance.to_data(true);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_REQUIRE(chain::witness::skip(reader, true));
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_element__false)
+{
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>() } };
+    const auto data = instance.to_data(true);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_REQUIRE(!chain::witness::skip(reader, true));
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(witness__skip__unprefixed_non_empty__true)
+{
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
+    const auto data = instance.to_data(false);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_REQUIRE(chain::witness::skip(reader, false));
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_stack__false)
+{
+    const chain::witness instance{ chunk_cptrs{} };
+    const auto data = instance.to_data(true);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_REQUIRE(!chain::witness::skip(reader, true));
+    BOOST_REQUIRE(reader);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

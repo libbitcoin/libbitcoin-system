@@ -156,12 +156,164 @@ BOOST_AUTO_TEST_CASE(block_view__identify__block1a_witness__expected)
     ec = view.identify({ bip141, 1, 0 });
     BOOST_CHECK_EQUAL(ec, error::invalid_witness_commitment);
 
+    // Witness is uncommitted before bip141.
     ec = view.identify({ 0, 1, 0 });
-    BOOST_CHECK_EQUAL(ec, error::block_success);
+    BOOST_CHECK_EQUAL(ec, error::invalid_witness_commitment);
 }
 
-// TODO: add positive test for bip141.
-// TODO: add full malleation coverage since it is partially independent of
-// block implemention.
+BOOST_AUTO_TEST_CASE(block_view__identify__unwitnessed_bip141_off__block_success)
+{
+    using namespace system;
+    const auto& block = test::genesis;
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_CHECK(!view.is_segregated());
+    BOOST_CHECK_EQUAL(view.identify({ 0, 1, 0 }), error::block_success);
+}
+
+// malleation
+// ----------------------------------------------------------------------------
+
+// block_view is final, so malleation is asserted through identify, which
+// reports both malleation and merkle root failure as a commitment failure.
+// Each fixture below carries its computed merkle root, so a commitment
+// failure is attributable to malleation alone.
+
+// Sixty four byte transaction, the malleable64 unit.
+static system::chain::transaction view_tx64(uint32_t index) NOEXCEPT
+{
+    using namespace system::chain;
+    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const inputs ins{ input{ point{ one_hash, index }, dups, 42 } };
+    const outputs outs{ output{ 42, dups } };
+    return transaction{ 42, ins, outs, 42 };
+}
+
+static system::chain::transaction view_coinbase64() NOEXCEPT
+{
+    using namespace system::chain;
+    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const inputs ins{ input{ point{}, dups, 42 } };
+    const outputs outs{ output{ 42, dups } };
+    return transaction{ 42, ins, outs, 42 };
+}
+
+static system::chain::transaction view_tx(uint32_t index) NOEXCEPT
+{
+    using namespace system::chain;
+    const inputs ins{ input{ point{ one_hash, index }, script{}, 42 } };
+    const outputs outs{ output{ 42, script{} } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+static system::hash_digest view_root(const system::chain::transactions& txs) NOEXCEPT
+{
+    using namespace system;
+    const auto left = bitcoin_hash(txs[0].hash(false), txs[1].hash(false));
+    if (txs.size() == two) return left;
+    const auto right = bitcoin_hash(txs[2].hash(false), txs[3].hash(false));
+    return bitcoin_hash(left, right);
+}
+
+static system::chain::block view_block(const system::chain::transactions& txs) NOEXCEPT
+{
+    using namespace system;
+    const chain::header head{ 1, hash_digest{}, view_root(txs), 0, 0, 0 };
+    return chain::block{ head, txs };
+}
+
+// A set of all sixty four byte transactions is the malleated64 shape, as each
+// transaction is indistinguishable from a pair of merkle nodes.
+BOOST_AUTO_TEST_CASE(block_view__identify__all_sixty_four_byte__invalid_transaction_commitment)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx64(0), view_tx64(1) };
+    BOOST_REQUIRE_EQUAL(txs.front().serialized_size(false), 64u);
+
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
+
+// A null point in the first transaction precludes the malleated64 shape.
+BOOST_AUTO_TEST_CASE(block_view__identify__sixty_four_byte_coinbase_first__block_success)
+{
+    using namespace system;
+    const chain::transactions txs{ view_coinbase64(), view_tx64(1) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__mixed_transaction_sizes__block_success)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx64(0), view_tx(1) };
+    BOOST_REQUIRE_NE(txs.back().serialized_size(false), 64u);
+
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+// An odd set at width depth clones its last element, so a tail duplicate
+// produces the same merkle root as the honest block.
+BOOST_AUTO_TEST_CASE(block_view__identify__tail_clone_of_four__invalid_transaction_commitment)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx(0), view_tx(1), view_tx(2), view_tx(2) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__four_distinct__block_success)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx(0), view_tx(1), view_tx(2), view_tx(3) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+// A duplicate that is not the merkle clone is not a malleation.
+BOOST_AUTO_TEST_CASE(block_view__identify__leading_duplicate_of_four__block_success)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx(0), view_tx(0), view_tx(2), view_tx(3) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+// An even set at width depth is not cloned by merkle.
+BOOST_AUTO_TEST_CASE(block_view__identify__tail_clone_of_two__block_success)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx(0), view_tx(0) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+// merkle root
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block_view__identify__computed_root__block_success)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx(0), view_tx(1) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__wrong_root__invalid_transaction_commitment)
+{
+    using namespace system;
+    const chain::transactions txs{ view_tx(0), view_tx(1) };
+    const chain::header head{ 1, hash_digest{}, one_hash, 0, 0, 0 };
+    const chain::block block{ head, txs };
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

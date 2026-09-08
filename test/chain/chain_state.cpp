@@ -431,4 +431,372 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled
     BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
 }
 
+// get_map
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__genesis__default)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(0, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.version.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__mainnet_height__expected_ranges)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(1000, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.high, 999u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.high, 999u);
+    BOOST_REQUIRE_EQUAL(map.version.high, 999u);
+
+    // Mainnet does not use bits in retargeting, and bip90 freezes versions.
+    BOOST_REQUIRE_EQUAL(map.bits.count, 1u);
+    BOOST_REQUIRE_EQUAL(map.version.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, median_time_past_interval);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__below_median_time_past_interval__height_count)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(5, settings);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, 5u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__version_signalling_enabled__sample_count)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    const auto map = chain_state::get_map(10000, settings);
+    BOOST_REQUIRE_EQUAL(map.version.count, settings.bip34_activation_sample);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__retarget_height__expected)
+{
+    const settings settings(selection::mainnet);
+    const auto interval = settings.retargeting_interval();
+    const auto map = chain_state::get_map(interval, settings);
+    BOOST_REQUIRE_EQUAL(map.timestamp_retarget, 0u);
+
+    const auto next = chain_state::get_map(add1<size_t>(interval), settings);
+    BOOST_REQUIRE_EQUAL(next.timestamp_retarget, interval);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__bip9_disabled__unrequested)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    const auto map = chain_state::get_map(1000, settings);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, chain_state::map::unrequested);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit2_height, chain_state::map::unrequested);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__below_bip9_checkpoint__unrequested)
+{
+    const settings settings(selection::mainnet);
+    const auto map = chain_state::get_map(1000, settings);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, chain_state::map::unrequested);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__at_bip9_bit0_checkpoint__requested)
+{
+    const settings settings(selection::mainnet);
+    const auto height = settings.bip9_bit0_active_checkpoint.height();
+    const auto map = chain_state::get_map(height, settings);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, height);
+}
+
+// signal_version
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__mainnet__bip9_bit2)
+{
+    const settings settings(selection::mainnet);
+    const auto expected = settings.bip9_version_base | settings.bip9_version_bit2;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__taproot_disabled__bip9_bit1)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    const auto expected = settings.bip9_version_base | settings.bip9_version_bit1;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__segwit_disabled__bip9_bit0)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    settings.forks.bip141 = false;
+    settings.forks.bip143 = false;
+    settings.forks.bip147 = false;
+    const auto expected = settings.bip9_version_base | settings.bip9_version_bit0;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip65_only__bip65_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    settings.forks.bip141 = false;
+    settings.forks.bip143 = false;
+    settings.forks.bip147 = false;
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.bip65_version);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__no_forks__first_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip341 = false;
+    settings.forks.bip342 = false;
+    settings.forks.bip141 = false;
+    settings.forks.bip143 = false;
+    settings.forks.bip147 = false;
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    settings.forks.bip65 = false;
+    settings.forks.bip66 = false;
+    settings.forks.bip34 = false;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.first_version);
+}
+
+// configured_flags
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__no_forks__no_rules)
+{
+    const forks forks{};
+    BOOST_REQUIRE_EQUAL(chain_state::configured_flags(forks), flags::no_rules);
+}
+
+// Configured flags are independent of activation.
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__mainnet__all_rules)
+{
+    const settings settings(selection::mainnet);
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::bip16_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::bip34_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::bip141_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::bip341_rule));
+    BOOST_REQUIRE(to_bool(configured & flags::retarget));
+    BOOST_REQUIRE(to_bool(configured & flags::difficult));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__one_fork__one_rule)
+{
+    forks forks{};
+    forks.bip16 = true;
+    BOOST_REQUIRE_EQUAL(chain_state::configured_flags(forks), flags::bip16_rule);
+}
+
+// minimum_timespan/maximum_timespan
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__minimum_timespan__mainnet__interval_over_factor)
+{
+    const settings settings(selection::mainnet);
+    const auto interval = settings.retargeting_interval_seconds;
+    const auto factor = settings.retargeting_factor;
+    const auto expected = interval / factor;
+    BOOST_REQUIRE_EQUAL(chain_state::minimum_timespan(interval, factor), expected);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__maximum_timespan__mainnet__interval_times_factor)
+{
+    const settings settings(selection::mainnet);
+    const auto interval = settings.retargeting_interval_seconds;
+    const auto factor = settings.retargeting_factor;
+    const auto expected = interval * factor;
+    BOOST_REQUIRE_EQUAL(chain_state::maximum_timespan(interval, factor), expected);
+}
+
+// State transitions.
+// ----------------------------------------------------------------------------
+// Retargeting is disabled so that work_required is the preceding bits.
+
+static chain::chain_state::data transition_values()
+{
+    chain::chain_state::data values{};
+    values.height = 42;
+    values.hash = one_hash;
+    values.bits.self = 0x1e0ffff0u;
+    values.version.self = 4u;
+    values.timestamp.self = 1000u;
+    values.bits.ordered.push_back(0x1e0ffff0u);
+    values.version.ordered.push_back(4u);
+    values.timestamp.ordered.push_back(900u);
+    values.cumulative_work = 1u;
+    return values;
+}
+
+static system::chain::header transition_header(uint32_t timestamp)
+{
+    return { 4u, one_hash, system::hash_digest{}, timestamp, 0x1e0ffff0u, 0u };
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__previous_timestamp__no_history__zero)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state state{ chain_state::data{}, settings };
+    BOOST_REQUIRE_EQUAL(state.previous_timestamp(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__next_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.height(), add1(top.height()));
+    BOOST_REQUIRE_EQUAL(pool.hash(), null_hash);
+}
+
+// The pool carries no block, so it accumulates no work.
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__same_work)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.cumulative_work(), top.cumulative_work());
+}
+
+// The top block timestamp is preserved for the computation of staleness.
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__promoted_timestamps)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.timestamp(), top.timestamp());
+    BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), top.timestamp());
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__pool_to_block__same_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    const chain::block block{ transition_header(1100u), transactions{} };
+    const chain_state state{ pool, block, settings };
+    BOOST_REQUIRE_EQUAL(state.height(), pool.height());
+    BOOST_REQUIRE_EQUAL(state.hash(), null_hash);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__pool_to_block__accumulated_work)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ transition_values(), settings };
+    const chain_state pool{ top, settings };
+    const auto header = transition_header(1100u);
+    const chain::block block{ header, transactions{} };
+    const chain_state state{ pool, block, settings };
+    const auto expected = pool.cumulative_work() + header.proof();
+    BOOST_REQUIRE_EQUAL(state.cumulative_work(), expected);
+    BOOST_REQUIRE_EQUAL(state.timestamp(), 1100u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__next_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state parent{ transition_values(), settings };
+    const auto header = transition_header(1100u);
+    const chain_state state{ parent, header, settings };
+    BOOST_REQUIRE_EQUAL(state.height(), add1(parent.height()));
+    BOOST_REQUIRE_EQUAL(state.hash(), header.hash());
+    BOOST_REQUIRE_EQUAL(state.timestamp(), 1100u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__accumulated_work)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state parent{ transition_values(), settings };
+    const auto header = transition_header(1100u);
+    const chain_state state{ parent, header, settings };
+    const auto expected = parent.cumulative_work() + header.proof();
+    BOOST_REQUIRE_EQUAL(state.cumulative_work(), expected);
+}
+
+// The pool and header transitions promote identically apart from identity.
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__pool_promotion)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state parent{ transition_values(), settings };
+    const chain_state pool{ parent, settings };
+    const auto header = transition_header(1100u);
+    const chain_state state{ parent, header, settings };
+    BOOST_REQUIRE_EQUAL(state.height(), pool.height());
+    BOOST_REQUIRE_EQUAL(state.previous_timestamp(), pool.previous_timestamp());
+    BOOST_REQUIRE_EQUAL(state.median_time_past(), pool.median_time_past());
+}
+
+// block storm patch
+// ----------------------------------------------------------------------------
+// BIP94: the retarget is computed from the first block of the period, so a
+// retarget height requires the full interval of bits.
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__retarget_height_block_storm_patch__full_interval)
+{
+    const settings settings(selection::testnet4);
+    BOOST_REQUIRE(settings.forks.block_storm_patch);
+    const auto interval = settings.retargeting_interval();
+    BOOST_REQUIRE_EQUAL(chain_state::get_map(interval, settings).bits.count, interval);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__retarget_height_unpatched__one)
+{
+    const settings settings(selection::testnet3);
+    BOOST_REQUIRE(!settings.forks.block_storm_patch);
+    const auto interval = settings.retargeting_interval();
+    BOOST_REQUIRE_EQUAL(chain_state::get_map(interval, settings).bits.count, 1u);
+}
+
+// The period is on target, with a minimum difficulty block preceding retarget.
+static chain::chain_state::data storm_values(const settings& settings, uint32_t first)
+{
+    const auto interval = settings.retargeting_interval();
+    chain::chain_state::data values{};
+    values.height = interval;
+    values.timestamp.retarget = 1000000;
+    values.timestamp.ordered.push_back(1000000 + interval * settings.block_spacing_seconds);
+    values.bits.ordered = chain_state::bitss(interval, settings.proof_of_work_limit);
+    values.bits.ordered.front() = first;
+    return values;
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__block_storm_patch__period_first_bits)
+{
+    const settings settings(selection::testnet4);
+    const auto values = storm_values(settings, 0x1c0ffff0);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), 0x1c0ffff0u);
+}
+
+// Unpatched, the minimum difficulty block lowers the retarget to the limit.
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__unpatched__proof_of_work_limit)
+{
+    settings settings(selection::testnet4);
+    settings.forks.block_storm_patch = false;
+    const auto values = storm_values(settings, 0x1c0ffff0);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

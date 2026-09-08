@@ -353,6 +353,46 @@ BOOST_AUTO_TEST_CASE(transaction__to_data__writer__expected)
 
 // weight
 
+// An unwitnessed transaction weighs four times its serialized size [bip141].
+BOOST_AUTO_TEST_CASE(transaction__weight__unwitnessed__four_times_size)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(!instance.is_segregated());
+
+    const auto size = instance.serialized_size(false);
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(true), size);
+    BOOST_REQUIRE_EQUAL(instance.weight(), size * 4u);
+    BOOST_REQUIRE_EQUAL(instance.virtual_size(), size);
+}
+
+// Witness bytes are discounted to one quarter weight [bip141].
+BOOST_AUTO_TEST_CASE(transaction__weight__witnessed__discounted)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102030405")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(instance.is_segregated());
+
+    const auto base = instance.serialized_size(false);
+    const auto total = instance.serialized_size(true);
+    BOOST_REQUIRE_GT(total, base);
+    BOOST_REQUIRE_EQUAL(instance.weight(), base * 3u + total);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__virtual_size__weight_rounds_up__expected)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102030405")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+
+    const auto weight = instance.weight();
+    BOOST_REQUIRE_EQUAL(instance.virtual_size(), ceilinged_divide(weight, 4_size));
+}
+
 BOOST_AUTO_TEST_CASE(transaction__fee__empty__zero)
 {
     const transaction instance
@@ -662,27 +702,94 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true
     BOOST_REQUIRE(instance.is_dusty(258000001));
 }
 
-// TODO: tests with initialized data
 BOOST_AUTO_TEST_CASE(transaction__signature_operations__empty_input_output__zero)
 {
     const transaction instance{ 0, inputs{}, {}, 0 };
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 0u);
 }
 
-// points
-// outputs_hash
-// points_hash
-// sequences_hash
+// The transaction total is the sum over inputs and outputs.
+BOOST_AUTO_TEST_CASE(transaction__signature_operations__input_and_output__sum)
+{
+    const script sigops(base16_chunk("02acad"), true);
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const outputs outs{ output{ 42, sigops } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 4u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_operations__bip141_scaling__four_times)
+{
+    const script sigops(base16_chunk("02acad"), true);
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const outputs outs{ output{ 42, sigops } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), 16u);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_signature_operations_limited__within_limit__false)
+{
+    const script sigops(base16_chunk("02acad"), true);
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const accessor instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(!instance.is_signature_operations_limited(false, false));
+}
+
+// hash/get_hash
+
+BOOST_AUTO_TEST_CASE(transaction__hash__unwitnessed__witness_hash_identical)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.hash(true), instance.hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__hash__witnessed__witness_hash_differs)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_NE(instance.hash(true), instance.hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__get_hash__repeated__cached_and_equal)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), instance.hash(false));
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), instance.get_hash(false));
+}
+
+// The segregated coinbase witness hash is null by convention [bip141].
+BOOST_AUTO_TEST_CASE(transaction__hash__segregated_coinbase_witness__null_hash)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const witness reservation{ chunk_cptrs{ to_shared(data_chunk(hash_size, 0x00)) } };
+    const inputs ins{ input{ point{}, coinbase_script, reservation, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.hash(true), null_hash);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__hash__unsegregated_coinbase_witness__nominal_hash)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const inputs ins{ input{ point{}, coinbase_script, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.hash(true), instance.hash(false));
+}
 
 // guards
 // ----------------------------------------------------------------------------
 
-// guard 1/2
-
 // validation (public)
 // ----------------------------------------------------------------------------
 
-// check
 // accept
 // connect
 
@@ -1780,6 +1887,509 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_interleaved_modes__cach
     hash_digest default2{};
     BOOST_REQUIRE(tx.signature_hash(default2, input, {}, 630000000, tapleaf, script_version::taproot, coverage::hash_default, bip341_flags));
     BOOST_REQUIRE_EQUAL(default2, default1);
+}
+
+// check
+// ----------------------------------------------------------------------------
+
+static transaction triad_coinbase(const script& coinbase_script) NOEXCEPT
+{
+    const inputs ins{ input{ point{}, coinbase_script, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+static script triad_coinbase_script() NOEXCEPT
+{
+    return script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+}
+
+static transaction triad_spend(uint32_t sequence=max_input_sequence,
+    uint32_t locktime=0, uint32_t version=1) NOEXCEPT
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    return transaction{ version, ins, outs, locktime };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__no_inputs__empty_transaction)
+{
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, inputs{}, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(), error::empty_transaction);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__no_outputs__empty_transaction)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{}, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(), error::empty_transaction);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__undersized_coinbase_script__invalid_coinbase_script_size)
+{
+    const auto instance = triad_coinbase(script{});
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE_EQUAL(instance.check(), error::invalid_coinbase_script_size);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__oversized_coinbase_script__invalid_coinbase_script_size)
+{
+    const script oversized{ operations{ operation{ data_chunk(100, 0x00), false } } };
+    const auto instance = triad_coinbase(oversized);
+    BOOST_REQUIRE_EQUAL(instance.check(), error::invalid_coinbase_script_size);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__minimal_coinbase_script__transaction_success)
+{
+    const auto instance = triad_coinbase(triad_coinbase_script());
+    BOOST_REQUIRE_EQUAL(instance.check(), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__null_non_coinbase_input__previous_output_null)
+{
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence },
+        input{ point{}, script{}, max_input_sequence }
+    };
+
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(!instance.is_coinbase());
+    BOOST_REQUIRE_EQUAL(instance.check(), error::previous_output_null);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check__spend__transaction_success)
+{
+    BOOST_REQUIRE_EQUAL(triad_spend().check(), error::transaction_success);
+}
+
+// check(context)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction__check_context__unlocked__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_spend().check(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_context__height_locked__absolute_time_locked)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_spend(sub1(max_input_sequence), 200);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx), error::absolute_time_locked);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_context__final_input_height_locked__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_spend(max_input_sequence, 200);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx), error::transaction_success);
+}
+
+// bip113 compares locktime against median time past, not block timestamp.
+BOOST_AUTO_TEST_CASE(transaction__check_context__time_locked_bip113_off__absolute_time_locked)
+{
+    const context ctx{ flags::no_rules, 500000100, 500000000, 100, 0, 0, 0 };
+    const auto instance = triad_spend(sub1(max_input_sequence), 500000050);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_context__time_locked_bip113_on__absolute_time_locked)
+{
+    const context ctx{ flags::bip113_rule, 500000100, 500000000, 100, 0, 0, 0 };
+    const auto instance = triad_spend(sub1(max_input_sequence), 500000050);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx), error::absolute_time_locked);
+}
+
+// accept
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction__accept__coinbase__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_coinbase(triad_coinbase_script());
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept__missing_prevouts__missing_previous_output)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_spend();
+    BOOST_REQUIRE(!instance.inputs_ptr()->front()->prevout);
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::missing_previous_output);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept__overspent__spend_exceeds_value)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_spend();
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 41, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::spend_exceeds_value);
+}
+
+// Output value summation saturates, so an overflowed spend exceeds any value.
+BOOST_AUTO_TEST_CASE(transaction__accept__output_value_overflow__spend_exceeds_value)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ max_uint64, script{} }, output{ 1, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::spend_exceeds_value);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept__populated__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_spend();
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx), error::transaction_success);
+}
+
+// confirm
+// ----------------------------------------------------------------------------
+
+static transaction triad_confirmable(uint32_t sequence=max_input_sequence,
+    uint32_t version=1) NOEXCEPT
+{
+    const auto instance = triad_spend(sequence, 0, version);
+    const auto& in = instance.inputs_ptr()->front();
+    in->prevout = to_shared(output{ 42, script{} });
+    in->metadata.coinbase = false;
+    in->metadata.prevout_height = 1;
+    in->metadata.median_time_past = 0;
+    in->metadata.spender_height = max_uint32;
+    return instance;
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__coinbase__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_coinbase(triad_coinbase_script());
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__mature_confirmed_spend__transaction_success)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_confirmable().confirm(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__immature_coinbase_prevout__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 50;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+}
+
+// The genesis coinbase is never mature, it is not a member of the unspent set.
+BOOST_AUTO_TEST_CASE(transaction__confirm__genesis_coinbase_prevout__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, max_size_t, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 0;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+}
+
+// A coinbase output matures at one hundred blocks depth.
+BOOST_AUTO_TEST_CASE(transaction__confirm__coinbase_prevout_at_maturity__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 101, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 1;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__coinbase_prevout_below_maturity__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 1;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__confirmed_double_spend__confirmed_double_spend)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.spender_height = 50;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::confirmed_double_spend);
+}
+
+// The unconfirmed spend condition (height < prevout_height) is a subset of
+// the non-coinbase immaturity condition, which is evaluated first.
+BOOST_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.prevout_height = 200;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__relative_locked_bip68_off__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable(1, 2);
+    instance.inputs_ptr()->front()->metadata.prevout_height = 100;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm__relative_locked_bip68_on__relative_time_locked)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable(1, 2);
+    instance.inputs_ptr()->front()->metadata.prevout_height = 100;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::relative_time_locked);
+}
+
+// bip68 relative locktime applies only to version two and above.
+BOOST_AUTO_TEST_CASE(transaction__confirm__relative_locked_version_one__transaction_success)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable(1, 1);
+    instance.inputs_ptr()->front()->metadata.prevout_height = 100;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::transaction_success);
+}
+
+// connect
+// ----------------------------------------------------------------------------
+
+// A witness carrying input does not connect when bip141 is inactive, so a
+// pre-segwit block carrying witness data cannot validate.
+BOOST_AUTO_TEST_CASE(transaction__connect__witness_bip141_off__unexpected_witness)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    const script prevout_script{ operations{ operation{ opcode::push_positive_1 } } };
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, prevout_script });
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::unexpected_witness);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__connect__no_witness_bip141_off__script_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    const script prevout_script{ operations{ operation{ opcode::push_positive_1 } } };
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, prevout_script });
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
+}
+
+// guards
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard__coinbase__coinbase_transaction)
+{
+    const auto instance = triad_coinbase(triad_coinbase_script());
+    BOOST_REQUIRE_EQUAL(instance.check_guard(), error::coinbase_transaction);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard__internal_double_spend__transaction_internal_double_spend)
+{
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence },
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
+
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check_guard(), error::transaction_internal_double_spend);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard__spend__transaction_success)
+{
+    BOOST_REQUIRE_EQUAL(triad_spend().check_guard(), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard_context__segregated_bip141_off__unexpected_witness_transaction)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.check_guard(ctx), error::unexpected_witness_transaction);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard_context__segregated_bip141_on__transaction_success)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 100, 0, 0, 0 };
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept_guard__missing_prevouts__missing_previous_output)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_spend().accept_guard(ctx), error::missing_previous_output);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept_guard__populated__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_spend();
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_success);
+}
+
+// is_coinbase_immature
+// ----------------------------------------------------------------------------
+
+// A zero coinbase height is genesis or an unpopulated prevout.
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__zero_coinbase_height__true)
+{
+    BOOST_REQUIRE(transaction::is_coinbase_immature(0, 0));
+    BOOST_REQUIRE(transaction::is_coinbase_immature(0, max_size_t));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__below_maturity__true)
+{
+    BOOST_REQUIRE(transaction::is_coinbase_immature(1, sub1(add1(coinbase_maturity))));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__at_maturity__false)
+{
+    BOOST_REQUIRE(!transaction::is_coinbase_immature(1, add1(coinbase_maturity)));
+}
+
+// The addition is ceilinged, so a high coinbase height saturates instead of
+// wrapping to a low maturity height and reporting a spend as mature.
+BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__ceilinged_height__true)
+{
+    BOOST_REQUIRE(transaction::is_coinbase_immature(max_size_t, coinbase_maturity));
+}
+
+// is_internally_locked
+// ----------------------------------------------------------------------------
+// Internal spends have no relative age, so any applied lock is unsatisfied.
+
+static transaction locked_tx(uint32_t version, uint32_t sequence) NOEXCEPT
+{
+    const inputs ins{ { point{ one_hash, 0 }, script{}, sequence } };
+    const outputs outs{ { 42, script{} } };
+    return { version, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__version_one__false)
+{
+    const auto instance = locked_tx(1, 1);
+    BOOST_REQUIRE(!instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__version_two_locked__true)
+{
+    const auto instance = locked_tx(2, 1);
+    BOOST_REQUIRE(instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__zero_sequence__false)
+{
+    const auto instance = locked_tx(2, 0);
+    BOOST_REQUIRE(!instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+// BIP68: bit 31 set carries no consensus meaning.
+BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__locktime_disabled__false)
+{
+    const auto instance = locked_tx(2, 0x80000001);
+    BOOST_REQUIRE(!instance.is_internally_locked(*instance.inputs_ptr()->front()));
+}
+
+// desegregated_hash
+// ----------------------------------------------------------------------------
+
+static transaction segregated_tx() NOEXCEPT
+{
+    const chain::witness witness{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
+    const inputs ins{ { point{ one_hash, 0 }, script{ { opcode::dup } }, witness, 42 } };
+    const outputs outs{ { 42, script{ { opcode::dup } } } };
+    return { 2, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__desegregated_hash__segregated__nominal_hash)
+{
+    const auto instance = segregated_tx();
+    BOOST_REQUIRE(instance.is_segregated());
+
+    const auto data = instance.to_data(true);
+    const auto witnessed = instance.serialized_size(true);
+    const auto unwitnessed = instance.serialized_size(false);
+    const auto hash = transaction::desegregated_hash(witnessed, unwitnessed, data.data());
+    BOOST_REQUIRE_EQUAL(hash, instance.hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__desegregated_hash__null_data__null_hash)
+{
+    BOOST_REQUIRE_EQUAL(transaction::desegregated_hash(0, 0, nullptr), null_hash);
+}
+
+// guard limits
+// ----------------------------------------------------------------------------
+
+static transaction oversized_spend() NOEXCEPT
+{
+    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const inputs ins{ input{ point{ one_hash, 0 }, big, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    return { 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard__oversized__transaction_size_limit)
+{
+    BOOST_REQUIRE_EQUAL(oversized_spend().check_guard(), error::transaction_size_limit);
+}
+
+// Weight is four times the unwitnessed size, so oversized is also overweight.
+BOOST_AUTO_TEST_CASE(transaction__check_guard_context__overweight_bip141__transaction_weight_limit)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(oversized_spend().check_guard(ctx), error::transaction_weight_limit);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard_context__overweight_bip141_off__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(oversized_spend().check_guard(ctx), error::transaction_success);
+}
+
+static transaction sigops_spend(size_t checksigs) NOEXCEPT
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{ operations(checksigs, operation{ opcode::checksig }) } } };
+    return { 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept_guard__sigops_at_limit__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = sigops_spend(max_block_sigops);
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept_guard__sigops_above_limit__transaction_sigop_limit)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = sigops_spend(add1(max_block_sigops));
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_sigop_limit);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

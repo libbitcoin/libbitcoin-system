@@ -323,6 +323,70 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_time_type_sequence_age_
     BOOST_REQUIRE(!instance.is_relative_locked(0, instance.metadata.median_time_past + age_seconds));
 }
 
+// metadata (chain::prevout)
+// ----------------------------------------------------------------------------
+// The prevout defaults fail closed, so unpopulated metadata rejects.
+
+BOOST_AUTO_TEST_CASE(input__metadata__default__fails_closed)
+{
+    const input instance{};
+    BOOST_REQUIRE(instance.metadata.coinbase);
+    BOOST_REQUIRE_EQUAL(instance.metadata.median_time_past, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.prevout_height, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.spender_height, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.parent_tx, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.point_link, max_uint32);
+}
+
+BOOST_AUTO_TEST_CASE(input__metadata__mutable_on_const_input__assignable)
+{
+    const input instance{};
+    instance.metadata.coinbase = false;
+    instance.metadata.prevout_height = 42;
+    BOOST_REQUIRE(!instance.metadata.coinbase);
+    BOOST_REQUIRE_EQUAL(instance.metadata.prevout_height, 42u);
+}
+
+// reserved_hash
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__single_thirty_two_byte_element__expected)
+{
+    const auto reservation = base16_chunk("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20");
+    const witness spender{ chunk_cptrs{ to_shared(reservation) } };
+    const input instance{ point{}, script{}, spender, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(instance.reserved_hash(out));
+    BOOST_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
+}
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__wrong_element_size__false)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("0102")) } };
+    const input instance{ point{}, script{}, spender, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.reserved_hash(out));
+}
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__two_elements__false)
+{
+    const auto reservation = base16_chunk("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20");
+    const witness spender{ chunk_cptrs{ to_shared(reservation), to_shared(reservation) } };
+    const input instance{ point{}, script{}, spender, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.reserved_hash(out));
+}
+
+BOOST_AUTO_TEST_CASE(input__reserved_hash__empty_witness__false)
+{
+    const input instance{ point{}, script{}, max_input_sequence };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.reserved_hash(out));
+}
+
 BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__expected)
 {
     const script script(base16_chunk("02acad"), true);
@@ -333,6 +397,44 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__expected)
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 2u);
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), 8u);
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), 8u);
+}
+
+// is_relative_locktime_applied
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__is_relative_locktime_applied__zero_sequence__true)
+{
+    BOOST_REQUIRE(input::is_relative_locktime_applied(0));
+}
+
+// BIP68: bit 31 set carries no consensus meaning.
+BOOST_AUTO_TEST_CASE(input__is_relative_locktime_applied__disable_bit__false)
+{
+    BOOST_REQUIRE(!input::is_relative_locktime_applied(0x80000000));
+    BOOST_REQUIRE(!input::is_relative_locktime_applied(max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(input__is_relative_locktime_applied__maximum_applied__true)
+{
+    BOOST_REQUIRE(input::is_relative_locktime_applied(0x7fffffff));
+}
+
+// point_ptr/witness_ptr
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__point_ptr__default__matches_point)
+{
+    const input instance{};
+    BOOST_REQUIRE(instance.point_ptr());
+    BOOST_REQUIRE(*instance.point_ptr() == instance.point());
+}
+
+BOOST_AUTO_TEST_CASE(input__witness_ptr__witnessed__matches_witness)
+{
+    const chain::witness witness{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
+    const input instance{ point{}, script{}, witness, 42 };
+    BOOST_REQUIRE(instance.witness_ptr());
+    BOOST_REQUIRE(*instance.witness_ptr() == instance.witness());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

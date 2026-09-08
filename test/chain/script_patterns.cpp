@@ -783,4 +783,722 @@ BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__non_push__false)
     BOOST_CHECK(!script::is_nominal_push_pattern(ops));
 }
 
+// is_push_only_pattern/is_relaxed_push_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_push_only_pattern__empty__true)
+{
+    BOOST_CHECK(script::is_push_only_pattern(operations{}));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_push_only_pattern__pushes__true)
+{
+    const operations ops{ operation{ data_chunk{ 0x01 }, false }, operation{ opcode::push_positive_1 } };
+    BOOST_CHECK(script::is_push_only_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_push_only_pattern__non_push__false)
+{
+    const operations ops{ operation{ data_chunk{ 0x01 }, false }, operation{ opcode::checksig } };
+    BOOST_CHECK(!script::is_push_only_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_relaxed_push_pattern__pushes__true)
+{
+    const operations ops{ operation{ data_chunk{ 0x01 }, false }, operation{ opcode::push_positive_16 } };
+    BOOST_CHECK(script::is_relaxed_push_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_relaxed_push_pattern__non_push__false)
+{
+    const operations ops{ operation{ opcode::checksig } };
+    BOOST_CHECK(!script::is_relaxed_push_pattern(ops));
+}
+
+// is_pay_script_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_script_hash_pattern__expected__true)
+{
+    const auto ops = script::to_pay_script_hash_pattern(short_hash{});
+    BOOST_CHECK(script::is_pay_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_script_hash_pattern__wrong_hash_size__false)
+{
+    const operations ops
+    {
+        operation{ opcode::hash160 },
+        operation{ data_chunk(32, 0x00), false },
+        operation{ opcode::equal }
+    };
+
+    BOOST_CHECK(!script::is_pay_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_script_hash_pattern__missing_equal__false)
+{
+    const operations ops
+    {
+        operation{ opcode::hash160 },
+        operation{ data_chunk(20, 0x00), false }
+    };
+
+    BOOST_CHECK(!script::is_pay_script_hash_pattern(ops));
+}
+
+// is_pay_witness_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__minimum_program__true)
+{
+    const auto ops = script::to_pay_witness_pattern(0_u8, data_chunk(2, 0x00));
+    BOOST_CHECK(script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__maximum_program__true)
+{
+    const auto ops = script::to_pay_witness_pattern(16_u8, data_chunk(40, 0x00));
+    BOOST_CHECK(script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__undersized_program__false)
+{
+    const auto ops = script::to_pay_witness_pattern(0_u8, data_chunk(1, 0x00));
+    BOOST_CHECK(!script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__oversized_program__false)
+{
+    const auto ops = script::to_pay_witness_pattern(0_u8, data_chunk(41, 0x00));
+    BOOST_CHECK(!script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__non_numeric_version__false)
+{
+    const operations ops
+    {
+        operation{ opcode::checksig },
+        operation{ data_chunk(20, 0x00), false }
+    };
+
+    BOOST_CHECK(!script::is_pay_witness_pattern(ops));
+}
+
+// is_commitment_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__expected__true)
+{
+    const script commitment(base16_chunk("6a24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    BOOST_CHECK(script::is_commitment_pattern(commitment.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__wrong_head__false)
+{
+    const script commitment(base16_chunk("6a24aa21a9ee0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    BOOST_CHECK(!script::is_commitment_pattern(commitment.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__wrong_push_size__false)
+{
+    const script commitment(base16_chunk("6a23aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), false);
+    BOOST_CHECK(!script::is_commitment_pattern(commitment.ops()));
+}
+
+// is_pay_null_data_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__pushed_data__true)
+{
+    const operations ops{ operation{ opcode::op_return }, operation{ data_chunk{ 0x2a }, false } };
+    BOOST_CHECK(script::is_pay_null_data_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__small_integer_opcode__true)
+{
+    const operations ops{ operation{ opcode::op_return }, operation{ opcode::push_positive_1 } };
+    BOOST_CHECK(script::is_pay_null_data_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__non_minimal_push__false)
+{
+    const script instance(base16_chunk("6a4c0101"), false);
+    BOOST_REQUIRE(instance.ops()[1].code() == opcode::push_one_size);
+    BOOST_CHECK(!script::is_pay_null_data_pattern(instance.ops()));
+}
+
+// version/version_value/witness_program
+
+BOOST_AUTO_TEST_CASE(script__version__non_witness__unversioned)
+{
+    const script instance{ operations{ operation{ opcode::checksig } } };
+    BOOST_REQUIRE(instance.version() == script_version::unversioned);
+    BOOST_REQUIRE(instance.witness_program()->empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_zero_program__segwit)
+{
+    const auto program = data_chunk(20, 0x42);
+    const script instance{ script::to_pay_witness_pattern(0_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 0_u8);
+    BOOST_REQUIRE_EQUAL(*instance.witness_program(), program);
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_one_program__taproot)
+{
+    const auto program = data_chunk(32, 0x42);
+    const script instance{ script::to_pay_witness_pattern(1_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::taproot);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 1_u8);
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_two_program__reserved)
+{
+    const auto program = data_chunk(32, 0x42);
+    const script instance{ script::to_pay_witness_pattern(2_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::reserved);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 2_u8);
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_sixteen_program__reserved)
+{
+    const auto program = data_chunk(32, 0x42);
+    const script instance{ script::to_pay_witness_pattern(16_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::reserved);
+}
+
+// is_pay_to_witness/is_pay_to_script_hash are flag gated.
+
+BOOST_AUTO_TEST_CASE(script__is_pay_to_witness__bip141_gated__expected)
+{
+    const script instance{ script::to_pay_witness_pattern(0_u8, data_chunk(20, 0x42)) };
+    BOOST_REQUIRE(instance.is_pay_to_witness(flags::bip141_rule));
+    BOOST_REQUIRE(!instance.is_pay_to_witness(flags::no_rules));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_to_script_hash__bip16_gated__expected)
+{
+    const script instance{ script::to_pay_script_hash_pattern(short_hash{}) };
+    BOOST_REQUIRE(instance.is_pay_to_script_hash(flags::bip16_rule));
+    BOOST_REQUIRE(!instance.is_pay_to_script_hash(flags::no_rules));
+}
+
+// Predicates not surfaced by pattern/input_pattern/output_pattern.
+// -----------------------------------------------------------------------------
+
+static const auto pattern_signature = data_chunk(70, 0x42);
+static const auto pattern_short = data_chunk(8, 0x42);
+static const auto pattern_xonly = data_chunk(ec_xonly_size, 0x42);
+static const auto pattern_hash20 = data_chunk(short_hash_size, 0x42);
+static const auto pattern_hash32 = data_chunk(hash_size, 0x42);
+static const auto pattern_anchor = base16_chunk("4e73");
+static const auto pattern_compressed = build_chunk(
+{
+    base16_chunk("03"),
+    data_chunk(sub1(ec_compressed_size), 0x42)
+});
+static const auto pattern_uncompressed = build_chunk(
+{
+    base16_chunk("04"),
+    data_chunk(sub1(ec_uncompressed_size), 0x42)
+});
+
+// is_pay_op_return_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__empty__false)
+{
+    BOOST_REQUIRE(!script::is_pay_op_return_pattern(operations{}));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__return_only__true)
+{
+    const operations ops{ { opcode::op_return } };
+    BOOST_REQUIRE(script::is_pay_op_return_pattern(ops));
+}
+
+// Unlike pay_null_data this is unbounded in data size and operation count.
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__return_and_trailing__true)
+{
+    const operations ops
+    {
+        { opcode::op_return },
+        { pattern_hash32, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_op_return_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__trailing_return__false)
+{
+    const operations ops{ { pattern_hash32, true }, { opcode::op_return } };
+    BOOST_REQUIRE(!script::is_pay_op_return_pattern(ops));
+}
+
+// is_pay_witness_unknown_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__version_two__true)
+{
+    const auto version = operation::opcode_from_nonnegative(2_u8);
+    const operations ops{ { version }, { pattern_hash32, true } };
+    BOOST_REQUIRE(script::is_pay_witness_unknown_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__version_zero__false)
+{
+    const auto version = operation::opcode_from_nonnegative(0_u8);
+    const operations ops{ { version }, { pattern_hash20, true } };
+    BOOST_REQUIRE(!script::is_pay_witness_unknown_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__taproot__false)
+{
+    const auto version = operation::opcode_from_nonnegative(1_u8);
+    const operations ops{ { version }, { pattern_hash32, true } };
+    BOOST_REQUIRE(script::is_pay_witness_taproot_pattern(ops));
+    BOOST_REQUIRE(!script::is_pay_witness_unknown_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__anchor__false)
+{
+    const auto version = operation::opcode_from_nonnegative(1_u8);
+    const operations ops{ { version }, { pattern_anchor, true } };
+    BOOST_REQUIRE(script::is_pay_anchor_pattern(ops));
+    BOOST_REQUIRE(!script::is_pay_witness_unknown_pattern(ops));
+}
+
+// is_pay_taproot_key_path_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_taproot_key_path_pattern__checksig__true)
+{
+    const operations ops{ { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_taproot_key_path_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_taproot_key_path_pattern__two_operations__false)
+{
+    const operations ops{ { opcode::checksig }, { opcode::checksig } };
+    BOOST_REQUIRE(!script::is_pay_taproot_key_path_pattern(ops));
+}
+
+// is_pay_tapscript_single_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_single_pattern__xonly_key__true)
+{
+    const operations ops{ { pattern_xonly, true }, { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_tapscript_single_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_single_pattern__compressed_key__false)
+{
+    const operations ops{ { pattern_compressed, true }, { opcode::checksig } };
+    BOOST_REQUIRE(!script::is_pay_tapscript_single_pattern(ops));
+}
+
+// is_pay_tapscript_timelock_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_timelock_pattern__checklocktimeverify__true)
+{
+    const operations ops
+    {
+        { opcode::push_positive_1 },
+        { opcode::checklocktimeverify },
+        { opcode::drop },
+        { pattern_xonly, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_tapscript_timelock_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_timelock_pattern__checksequenceverify__true)
+{
+    const operations ops
+    {
+        { opcode::push_positive_1 },
+        { opcode::checksequenceverify },
+        { opcode::drop },
+        { pattern_xonly, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_tapscript_timelock_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_timelock_pattern__not_timelock__false)
+{
+    const operations ops
+    {
+        { opcode::push_positive_1 },
+        { opcode::nop },
+        { opcode::drop },
+        { pattern_xonly, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_tapscript_timelock_pattern(ops));
+}
+
+// is_pay_key_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_key_hash_pattern__short_hash__true)
+{
+    const operations ops
+    {
+        { opcode::dup },
+        { opcode::hash160 },
+        { pattern_hash20, true },
+        { opcode::equalverify },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_key_hash_pattern__long_hash__false)
+{
+    const operations ops
+    {
+        { opcode::dup },
+        { opcode::hash160 },
+        { pattern_hash32, true },
+        { opcode::equalverify },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_key_hash_pattern(ops));
+}
+
+// is_pay_public_key_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_public_key_pattern__compressed__true)
+{
+    const operations ops{ { pattern_compressed, true }, { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_public_key_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_public_key_pattern__uncompressed__true)
+{
+    const operations ops{ { pattern_uncompressed, true }, { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_public_key_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_public_key_pattern__xonly__false)
+{
+    const operations ops{ { pattern_xonly, true }, { opcode::checksig } };
+    BOOST_REQUIRE(!script::is_pay_public_key_pattern(ops));
+}
+
+// is_pay_multisig_standard_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__one_of_one__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_standard_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__two_of_three__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(2_u8) },
+        { pattern_compressed, true },
+        { pattern_uncompressed, true },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(3_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_standard_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__signatures_exceed_keys__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(2_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__invalid_key__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_xonly, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
+// Standard form requires the counts as op_1..op_16, not as data pushes.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__non_minimal_count__false)
+{
+    const operations ops
+    {
+        { data_chunk{ 0x01 }, false },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
+// is_pay_multisig_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__one_of_one__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(ops));
+}
+
+// Unlike the standard form this admits non-minimal counts.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__non_minimal_count__true)
+{
+    const operations ops
+    {
+        { data_chunk{ 0x01 }, false },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(ops));
+}
+
+// Unlike the standard form this admits invalid public key forms.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__invalid_key__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_xonly, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(ops));
+}
+
+// Zero signatures verifies nothing, so it does not match.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__zero_signatures__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_nonnegative(0_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__count_mismatch__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
+}
+
+// is_sign_public_key_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_public_key_pattern__endorsement__true)
+{
+    const operations ops{ { pattern_signature, true } };
+    BOOST_REQUIRE(script::is_sign_public_key_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_public_key_pattern__undersized__false)
+{
+    const operations ops{ { pattern_short, true } };
+    BOOST_REQUIRE(!script::is_sign_public_key_pattern(ops));
+}
+
+// is_sign_key_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_key_hash_pattern__endorsement_and_key__true)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_compressed, true }
+    };
+
+    BOOST_REQUIRE(script::is_sign_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_key_hash_pattern__endorsement_only__false)
+{
+    const operations ops{ { pattern_signature, true } };
+    BOOST_REQUIRE(!script::is_sign_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_key_hash_pattern__invalid_key__false)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_hash20, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_key_hash_pattern(ops));
+}
+
+// is_sign_multisig_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_multisig_pattern__dummy_and_endorsement__true)
+{
+    const operations ops
+    {
+        { data_chunk{}, true },
+        { pattern_signature, true }
+    };
+
+    BOOST_REQUIRE(script::is_sign_multisig_pattern(ops));
+}
+
+// The leading push must be the satoshi op_check_multisig dummy.
+BOOST_AUTO_TEST_CASE(script__is_sign_multisig_pattern__missing_dummy__false)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_signature, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_multisig_pattern__dummy_only__false)
+{
+    const operations ops{ { data_chunk{}, true } };
+    BOOST_REQUIRE(!script::is_sign_multisig_pattern(ops));
+}
+
+// is_sign_script_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__push_only__true)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_hash20, true }
+    };
+
+    BOOST_REQUIRE(script::is_sign_script_hash_pattern(ops));
+}
+
+// The last push is the serialized script, so it cannot be empty.
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty_last_push__false)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { data_chunk{}, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__not_push_only__false)
+{
+    const operations ops
+    {
+        { opcode::nop },
+        { pattern_hash20, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty__false)
+{
+    BOOST_REQUIRE(!script::is_sign_script_hash_pattern(operations{}));
+}
+
+// is_coinbase_pattern
+// -----------------------------------------------------------------------------
+// BIP34 requires the coinbase input script to begin with a minimally-encoded
+// push of the block height.
+
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__empty__false)
+{
+    BOOST_REQUIRE(!script::is_coinbase_pattern(operations{}, 1));
+}
+
+// Heights one through sixteen are minimally encoded as a single opcode.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__positive_opcode__true)
+{
+    const operations one{ { operation::opcode_from_positive(1_u8) } };
+    const operations sixteen{ { operation::opcode_from_positive(16_u8) } };
+    BOOST_REQUIRE(script::is_coinbase_pattern(one, 1));
+    BOOST_REQUIRE(script::is_coinbase_pattern(sixteen, 16));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__wrong_height__false)
+{
+    const operations ops{ { operation::opcode_from_positive(1_u8) } };
+    BOOST_REQUIRE(!script::is_coinbase_pattern(ops, 2));
+}
+
+// A data push of a value in [1..16] is not the minimal encoding.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__non_minimal_push__false)
+{
+    const operations ops{ { data_chunk{ 0x01 }, false } };
+    BOOST_REQUIRE(!script::is_coinbase_pattern(ops, 1));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__one_byte_height__true)
+{
+    const operations ops{ { data_chunk{ 0x11 }, true } };
+    BOOST_REQUIRE(script::is_coinbase_pattern(ops, 17));
+}
+
+// The sign byte is required, so 255 is a two byte push.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__signed_height__true)
+{
+    const operations ops{ { data_chunk{ 0xff, 0x00 }, true } };
+    BOOST_REQUIRE(script::is_coinbase_pattern(ops, 255));
+}
+
+// Only the first operation is the commitment, the remainder is arbitrary.
+BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__trailing_operations__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_hash32, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_coinbase_pattern(ops, 1));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

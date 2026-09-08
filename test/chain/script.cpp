@@ -367,4 +367,109 @@ BOOST_AUTO_TEST_CASE(script__parse_push_overflow__invalid)
     }
 }
 
+// state predicates
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(script__is_prefail__invalid_opcode__true)
+{
+    const script instance{ operations{ operation{ opcode::op_cat } } };
+    BOOST_REQUIRE(instance.is_prefail());
+    BOOST_REQUIRE(!instance.is_underflow());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_prefail__valid_opcodes__false)
+{
+    const script instance{ operations{ operation{ opcode::checksig } } };
+    BOOST_REQUIRE(!instance.is_prefail());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_underflow__truncated_push__true)
+{
+    const script instance(base16_chunk("4c"), false);
+    BOOST_REQUIRE(instance.is_prefail());
+    BOOST_REQUIRE(instance.is_underflow());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_prevalid__success_opcode__true)
+{
+    const script instance{ operations{ operation{ opcode::reserved_80 } } };
+    BOOST_REQUIRE(instance.is_prevalid());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_prevalid__no_success_opcode__false)
+{
+    const script instance{ operations{ operation{ opcode::checksig } } };
+    BOOST_REQUIRE(!instance.is_prevalid());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_roller__roll__true)
+{
+    const script instance{ operations{ operation{ opcode::roll } } };
+    BOOST_REQUIRE(instance.is_roller());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_roller__pick__false)
+{
+    const script instance{ operations{ operation{ opcode::pick } } };
+    BOOST_REQUIRE(!instance.is_roller());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_oversized__at_limit__false)
+{
+    const script instance{ operations{ operation{ data_chunk(max_script_size - 3u, 0x00), false } } };
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), max_script_size);
+    BOOST_REQUIRE(!instance.is_oversized());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_oversized__above_limit__true)
+{
+    const script instance{ operations{ operation{ data_chunk(max_script_size - 2u, 0x00), false } } };
+    BOOST_REQUIRE(instance.is_oversized());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_unspendable__op_return__true)
+{
+    const script instance{ operations{ operation{ opcode::op_return } } };
+    BOOST_REQUIRE(instance.is_unspendable());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_unspendable__leading_invalid__true)
+{
+    const script instance{ operations{ operation{ opcode::op_cat } } };
+    BOOST_REQUIRE(instance.is_unspendable());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_unspendable__empty__false)
+{
+    const script instance{};
+    BOOST_REQUIRE(!instance.is_unspendable());
+}
+
+BOOST_AUTO_TEST_CASE(script__is_unspendable__spendable__false)
+{
+    const script instance{ operations{ operation{ opcode::checksig } } };
+    BOOST_REQUIRE(!instance.is_unspendable());
+}
+
+// A default initialized or failed parse script hashes to null_hash.
+BOOST_AUTO_TEST_CASE(script__hash__default__null_hash)
+{
+    const script instance{};
+    BOOST_REQUIRE(!instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.hash(), null_hash);
+}
+
+BOOST_AUTO_TEST_CASE(script__hash__valid_empty__sha256_of_empty)
+{
+    const script instance(data_chunk{}, false);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.hash(), sha256_hash(data_chunk{}));
+}
+
+BOOST_AUTO_TEST_CASE(script__hash__checksig__expected)
+{
+    const script instance{ operations{ operation{ opcode::checksig } } };
+    BOOST_REQUIRE_EQUAL(instance.hash(), sha256_hash(base16_chunk("ac")));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

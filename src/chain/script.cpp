@@ -41,15 +41,16 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 //*****************************************************************************
 // CONSENSUS: BIP34 requires coinbase input script to begin with one byte
 // that indicates height size. This is inconsistent with an extreme future
-// where the size byte overflows. However satoshi actually requires nominal
+// where the size byte overflows. However satoshi actually requires minimal
 // encoding.
 //*****************************************************************************
 bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
-    using namespace machine::number;
+    uint32_t value{};
     return !ops.empty()
-        && ops[0].is_nominal_push()
-        && ops[0].data() == chunk::from_integer(to_signed(height));
+        && ops[0].is_minimal_push()
+        && ops[0].as_unsigned32(value)
+        && value == height;
 }
 
 // Constructors.

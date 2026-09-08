@@ -147,12 +147,10 @@ code block_view::identify() const NOEXCEPT
 
 code block_view::identify(const context& ctx) const NOEXCEPT
 {
-    const auto bip141 = ctx.is_enabled(bip141_rule);
+    const auto invalid = ctx.is_enabled(bip141_rule) ?
+        is_invalid_witness_commitment() : is_segregated();
 
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
-
-    return error::block_success;
+    return invalid ? error::invalid_witness_commitment : error::block_success;
 }
 
 // protected

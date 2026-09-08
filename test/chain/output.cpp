@@ -166,6 +166,54 @@ BOOST_AUTO_TEST_CASE(output__to_data__writer__expected)
 
 // committed_hash
 
+BOOST_AUTO_TEST_CASE(output__committed_hash__commitment_pattern__expected)
+{
+    const script commitment(base16_chunk("6a24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    const output instance{ 0, commitment };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(instance.committed_hash(out));
+    BOOST_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
+}
+
+// Trailing bytes after the commitment have no consensus meaning [bip141].
+BOOST_AUTO_TEST_CASE(output__committed_hash__trailing_operations__expected)
+{
+    const script commitment(base16_chunk("6a24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2051"), false);
+    const output instance{ 0, commitment };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(instance.committed_hash(out));
+    BOOST_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
+}
+
+BOOST_AUTO_TEST_CASE(output__committed_hash__wrong_head__false)
+{
+    const script commitment(base16_chunk("6a24aa21a9ee0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    const output instance{ 0, commitment };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.committed_hash(out));
+}
+
+BOOST_AUTO_TEST_CASE(output__committed_hash__short_push__false)
+{
+    const script commitment(base16_chunk("6a23aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), false);
+    const output instance{ 0, commitment };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.committed_hash(out));
+}
+
+BOOST_AUTO_TEST_CASE(output__committed_hash__not_op_return__false)
+{
+    const script commitment(base16_chunk("6b24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    const output instance{ 0, commitment };
+
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(!instance.committed_hash(out));
+}
+
 BOOST_AUTO_TEST_CASE(output__signature_operations__checksig_checksigverify__expected)
 {
     const script script(base16_chunk("02acad"), true);
@@ -177,5 +225,24 @@ BOOST_AUTO_TEST_CASE(output__signature_operations__checksig_checksigverify__expe
 }
 
 // is_dust
+
+BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_spendable__true)
+{
+    const output instance{ 41, script{ operations{ operation{ opcode::checksig } } } };
+    BOOST_REQUIRE(instance.is_dust(42));
+}
+
+BOOST_AUTO_TEST_CASE(output__is_dust__at_minimum_spendable__false)
+{
+    const output instance{ 42, script{ operations{ operation{ opcode::checksig } } } };
+    BOOST_REQUIRE(!instance.is_dust(42));
+}
+
+// Provably unspendable outputs do not expand the unspent set, so are not dust.
+BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_unspendable__false)
+{
+    const output instance{ 41, script{ operations{ operation{ opcode::op_return } } } };
+    BOOST_REQUIRE(!instance.is_dust(42));
+}
 
 BOOST_AUTO_TEST_SUITE_END()

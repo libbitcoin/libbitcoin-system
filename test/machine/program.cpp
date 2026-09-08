@@ -342,6 +342,37 @@ BOOST_AUTO_TEST_CASE(program__if___negative_scope_conditional_op__true)
     BOOST_REQUIRE(machine->if_(conditional));
 }
 
+// stack limits
+
+BOOST_AUTO_TEST_CASE(program__is_stack_overflow__empty__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(!machine->is_stack_overflow());
+}
+
+BOOST_AUTO_TEST_CASE(program__stack_nonempty__mixed_elements__counts_nonempty)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    machine->push_bool(false);
+    machine->push_signed64(0);
+    machine->push_signed64(42);
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x01 });
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 6u);
+    BOOST_REQUIRE_EQUAL(machine->stack_nonempty(), 3u);
+}
+
+// The primary and alternate stacks share one limit [bip342].
+BOOST_AUTO_TEST_CASE(program__is_stack_overflow__alternate_counted__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(machine->ops_increment(0));
+    machine->push_bool(true);
+    machine->push_alternate(stack_variant{ true });
+    BOOST_REQUIRE(!machine->is_stack_overflow());
+}
+
 // accumulators
 
 BOOST_AUTO_TEST_CASE(program__ops_increment__op_at_limit__expected)
@@ -368,6 +399,51 @@ BOOST_AUTO_TEST_CASE(program__ops_increment__keys_beyond_limit__false)
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BOOST_REQUIRE(machine->ops_increment(201));
     BOOST_REQUIRE(!machine->ops_increment(1));
+}
+
+// is_true
+
+BOOST_AUTO_TEST_CASE(program__is_true__empty_stack__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(!machine->is_true(false));
+}
+
+BOOST_AUTO_TEST_CASE(program__is_true__single_true__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    BOOST_REQUIRE(machine->is_true(true));
+    BOOST_REQUIRE(machine->is_true(false));
+}
+
+BOOST_AUTO_TEST_CASE(program__is_true__single_false__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(false);
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(!machine->is_true(false));
+}
+
+// BIP62: the clean stack rule requires that exactly one element remains.
+BOOST_AUTO_TEST_CASE(program__is_true__dirty_stack__clean_only_false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    machine->push_bool(true);
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(machine->is_true(false));
+}
+
+// The top element is evaluated, so a dirty stack with a false top is false.
+BOOST_AUTO_TEST_CASE(program__is_true__dirty_stack_false_top__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    machine->push_bool(false);
+    BOOST_REQUIRE(!machine->is_true(true));
+    BOOST_REQUIRE(!machine->is_true(false));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
