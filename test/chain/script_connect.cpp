@@ -1012,6 +1012,159 @@ BOOST_AUTO_TEST_CASE(script__verify__taproot_invalid_signature_batched__success_
     rows.clear();
 }
 
+// Tapscript threshold batching.
+// ----------------------------------------------------------------------------
+// A script path spend of <key0> checksig <key1> checksigadd 2 numequal, whose
+// terminal comparison is satisfied at exactly the captured sigop count.
+
+class taproot_accessor
+  : public taproot
+{
+public:
+    using taproot::tweak_hash;
+};
+
+constexpr auto threshold_secret = base16_array("0000000000000000000000000000000000000000000000000000000000000002");
+constexpr auto internal_secret = base16_array("0000000000000000000000000000000000000000000000000000000000000003");
+
+static ec_xonly to_xonly(const ec_secret& secret) NOEXCEPT
+{
+    ec_compressed public_key{};
+    secret_to_public(public_key, secret);
+    const auto xonly = std::next(public_key.data());
+    return unsafe_array_cast<uint8_t, ec_xonly_size>(xonly);
+}
+
+static script threshold_leaf() NOEXCEPT
+{
+    const operations ops
+    {
+        operation{ to_chunk(to_xonly(batch_secret)), false },
+        operation{ opcode::checksig },
+        operation{ to_chunk(to_xonly(threshold_secret)), false },
+        operation{ opcode::checksigadd },
+        operation{ opcode::push_positive_2 },
+        operation{ opcode::numequal }
+    };
+
+    return script{ ops };
+}
+
+// Commits the leaf to the output key, returning the spending control block.
+static data_chunk threshold_control(ec_xonly& out_key) NOEXCEPT
+{
+    const auto internal = to_xonly(internal_secret);
+    const auto leaf = taproot::leaf_hash(tapscript_version, threshold_leaf());
+    const auto tweak = taproot_accessor::tweak_hash(internal, leaf);
+
+    // The internal key lifts to even parity [bip341].
+    ec_compressed point{};
+    point.front() = 0x02_u8;
+    std::copy(internal.begin(), internal.end(), std::next(point.begin()));
+    /* bool */ ec_add(point, tweak);
+
+    const auto tweaked = std::next(point.data());
+    out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(tweaked);
+    const auto parity = to_int<uint8_t>(point.front() == 0x03_u8);
+
+    data_chunk control{ bit_or<uint8_t>(tapscript_version, parity) };
+    control.insert(control.end(), internal.begin(), internal.end());
+    return control;
+}
+
+static transaction_accessor threshold_tx(bool valid) NOEXCEPT
+{
+    ec_xonly out_key{};
+    const auto control = threshold_control(out_key);
+    const auto leaf_script = threshold_leaf();
+    const auto program = to_chunk(out_key);
+    const script prevout_script{ script::to_pay_witness_pattern(1, program) };
+    const outputs outs{ output{ batch_value, script{} } };
+    const chain::witness none{};
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, none, max_input_sequence }
+    };
+    const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
+    const output prevout{ batch_value, prevout_script };
+    (*unsigned_tx.inputs_ptr())[0]->prevout = to_shared(prevout);
+
+    hash_digest sighash{};
+    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto leaf = to_shared(taproot::leaf_hash(tapscript_version,
+        leaf_script));
+    unsigned_tx.signature_hash(sighash, it, leaf_script, batch_value, leaf,
+        script_version::taproot, coverage::hash_default, taproot_rules);
+
+    auto digest = sighash;
+    if (!valid)
+        digest.front() ^= 0x01_u8;
+
+    ec_signature signature0{};
+    ec_signature signature1{};
+    schnorr::sign(signature0, batch_secret, sighash, {});
+    schnorr::sign(signature1, threshold_secret, digest, {});
+
+    // Stack top is the checksig endorsement, the checksigadd below it.
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>(to_chunk(signature1)),
+        to_shared<data_chunk>(to_chunk(signature0)),
+        to_shared<data_chunk>(leaf_script.to_data(false)),
+        to_shared<data_chunk>(control)
+    };
+
+    const chain::witness spender{ stack };
+    const inputs signed_ins
+    {
+        input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence }
+    };
+    const transaction_accessor tx{ 1, signed_ins, outs, 0 };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(prevout);
+    return tx;
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__tapscript_threshold_unbatched__success)
+{
+    const auto tx = threshold_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__tapscript_threshold_wrong_signature__op_check_sig_add6)
+{
+    const auto tx = threshold_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::op_check_sig_add6);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__tapscript_threshold_batched__success_and_verifies)
+{
+    auto& rows = signatures::schnorr_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = threshold_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), two);
+    BOOST_REQUIRE_EQUAL(rows.thresholds(), two);
+    BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__tapscript_threshold_batched_wrong_signature__success_but_fails_verify)
+{
+    auto& rows = signatures::schnorr_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = threshold_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), two);
+    BOOST_REQUIRE(!rows.verify());
+    rows.clear();
+}
+
 // An input script is never batchable, so a disabled capture changes nothing.
 BOOST_AUTO_TEST_CASE(script__verify__p2pk_capture_disabled__no_rows)
 {
