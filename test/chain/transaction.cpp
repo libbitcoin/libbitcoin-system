@@ -2051,6 +2051,35 @@ BOOST_AUTO_TEST_CASE(transaction__confirm__relative_locked_version_one__transact
     BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::transaction_success);
 }
 
+// connect
+// ----------------------------------------------------------------------------
+
+// A witness carrying input does not connect when bip141 is inactive, so a
+// pre-segwit block carrying witness data cannot validate.
+BOOST_AUTO_TEST_CASE(transaction__connect__witness_bip141_off__unexpected_witness)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    const script prevout_script{ operations{ operation{ opcode::push_positive_1 } } };
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, prevout_script });
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::unexpected_witness);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__connect__no_witness_bip141_off__script_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    const script prevout_script{ operations{ operation{ opcode::push_positive_1 } } };
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, prevout_script });
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
+}
+
 // guards
 // ----------------------------------------------------------------------------
 
