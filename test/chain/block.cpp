@@ -265,8 +265,70 @@ BOOST_AUTO_TEST_CASE(block__to_data__writer__expected)
 // ----------------------------------------------------------------------------
 
 // weight
-// fees
-// claim
+
+// The coinbase claim is the spend of the first transaction.
+BOOST_AUTO_TEST_CASE(block__claim__coinbase_outputs__sum)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const inputs ins{ input{ point{}, coinbase_script, 0xffffffff } };
+    const outputs outs{ output{ 40, script{} }, output{ 2, script{} } };
+    const transaction coinbase{ 1, ins, outs, 0 };
+    const block instance{ header{}, transactions{ coinbase } };
+    BOOST_REQUIRE_EQUAL(instance.claim(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(block__claim__no_transactions__zero)
+{
+    const block instance{ header{}, transactions{} };
+    BOOST_REQUIRE_EQUAL(instance.claim(), 0u);
+}
+
+// A transaction without prevouts has no fee, so the coinbase contributes none.
+BOOST_AUTO_TEST_CASE(block__fees__unpopulated__zero)
+{
+    const inputs ins{ input{ point{}, script{}, 0xffffffff } };
+    const transaction coinbase{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    const block instance{ header{}, transactions{ coinbase } };
+    BOOST_REQUIRE_EQUAL(instance.fees(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(block__fees__populated_spend__difference)
+{
+    const inputs coins{ input{ point{}, script{}, 0xffffffff } };
+    const transaction coinbase{ 1, coins, outputs{ output{ 0, script{} } }, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 30, script{} } }, 0 };
+    spend.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+
+    const block instance{ header{}, transactions{ coinbase, spend } };
+    BOOST_REQUIRE_EQUAL(instance.fees(), 12u);
+}
+
+// The reward is the subsidy plus fees, bounding the coinbase claim.
+BOOST_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy_plus_fees__false)
+{
+    const inputs coins{ input{ point{}, script{}, 0xffffffff } };
+    const transaction coinbase{ 1, coins, outputs{ output{ 5000000012, script{} } }, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 30, script{} } }, 0 };
+    spend.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+
+    const accessor instance{ header{}, transactions{ coinbase, spend } };
+    BOOST_REQUIRE_EQUAL(instance.fees(), 12u);
+    BOOST_REQUIRE(!instance.is_overspent(0, 210000, 5000000000, false));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy_plus_fees__true)
+{
+    const inputs coins{ input{ point{}, script{}, 0xffffffff } };
+    const transaction coinbase{ 1, coins, outputs{ output{ 5000000013, script{} } }, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 30, script{} } }, 0 };
+    spend.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+
+    const accessor instance{ header{}, transactions{ coinbase, spend } };
+    BOOST_REQUIRE(instance.is_overspent(0, 210000, 5000000000, false));
+}
 
 BOOST_AUTO_TEST_CASE(block__spends__genesis__zero)
 {

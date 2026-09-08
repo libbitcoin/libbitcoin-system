@@ -323,6 +323,30 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_time_type_sequence_age_
     BOOST_REQUIRE(!instance.is_relative_locked(0, instance.metadata.median_time_past + age_seconds));
 }
 
+// metadata (chain::prevout)
+// ----------------------------------------------------------------------------
+// The prevout defaults fail closed, so unpopulated metadata rejects.
+
+BOOST_AUTO_TEST_CASE(input__metadata__default__fails_closed)
+{
+    const input instance{};
+    BOOST_REQUIRE(instance.metadata.coinbase);
+    BOOST_REQUIRE_EQUAL(instance.metadata.median_time_past, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.prevout_height, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.spender_height, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.parent_tx, max_uint32);
+    BOOST_REQUIRE_EQUAL(instance.metadata.point_link, max_uint32);
+}
+
+BOOST_AUTO_TEST_CASE(input__metadata__mutable_on_const_input__assignable)
+{
+    const input instance{};
+    instance.metadata.coinbase = false;
+    instance.metadata.prevout_height = 42;
+    BOOST_REQUIRE(!instance.metadata.coinbase);
+    BOOST_REQUIRE_EQUAL(instance.metadata.prevout_height, 42u);
+}
+
 // reserved_hash
 
 BOOST_AUTO_TEST_CASE(input__reserved_hash__single_thirty_two_byte_element__expected)
