@@ -399,4 +399,42 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__expected)
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), 8u);
 }
 
+// is_relative_locktime_applied
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__is_relative_locktime_applied__zero_sequence__true)
+{
+    BOOST_REQUIRE(input::is_relative_locktime_applied(0));
+}
+
+// BIP68: bit 31 set carries no consensus meaning.
+BOOST_AUTO_TEST_CASE(input__is_relative_locktime_applied__disable_bit__false)
+{
+    BOOST_REQUIRE(!input::is_relative_locktime_applied(0x80000000));
+    BOOST_REQUIRE(!input::is_relative_locktime_applied(max_uint32));
+}
+
+BOOST_AUTO_TEST_CASE(input__is_relative_locktime_applied__maximum_applied__true)
+{
+    BOOST_REQUIRE(input::is_relative_locktime_applied(0x7fffffff));
+}
+
+// point_ptr/witness_ptr
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(input__point_ptr__default__matches_point)
+{
+    const input instance{};
+    BOOST_REQUIRE(instance.point_ptr());
+    BOOST_REQUIRE(*instance.point_ptr() == instance.point());
+}
+
+BOOST_AUTO_TEST_CASE(input__witness_ptr__witnessed__matches_witness)
+{
+    const chain::witness witness{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
+    const input instance{ point{}, script{}, witness, 42 };
+    BOOST_REQUIRE(instance.witness_ptr());
+    BOOST_REQUIRE(*instance.witness_ptr() == instance.witness());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

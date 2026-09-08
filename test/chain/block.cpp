@@ -1255,4 +1255,78 @@ BOOST_AUTO_TEST_CASE(block__confirm__coinbase_only__block_success)
     BOOST_REQUIRE_EQUAL(triad_block().confirm(ctx), error::block_success);
 }
 
+// header_ptr/transaction_hashes
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__header_ptr__genesis__matches_header)
+{
+    const auto& instance = test::genesis;
+    BOOST_REQUIRE(instance.header_ptr());
+    BOOST_REQUIRE(*instance.header_ptr() == instance.header());
+}
+
+BOOST_AUTO_TEST_CASE(block__transaction_hashes__genesis__coinbase_hash)
+{
+    const auto& instance = test::genesis;
+    const auto& txs = *instance.transactions_ptr();
+    const auto out = instance.transaction_hashes(false);
+    BOOST_REQUIRE_EQUAL(out.size(), 1u);
+    BOOST_REQUIRE_EQUAL(out.front(), txs.front()->hash(false));
+}
+
+BOOST_AUTO_TEST_CASE(block__transaction_hashes__block2a__witness_distinguished)
+{
+    const auto& instance = test::block2a;
+    const auto& txs = *instance.transactions_ptr();
+    const auto nominal = instance.transaction_hashes(false);
+    const auto witnessed = instance.transaction_hashes(true);
+    BOOST_REQUIRE_EQUAL(nominal.size(), txs.size());
+    BOOST_REQUIRE_EQUAL(witnessed.size(), txs.size());
+    BOOST_REQUIRE_EQUAL(nominal.back(), txs.back()->hash(false));
+    BOOST_REQUIRE_EQUAL(witnessed.back(), txs.back()->hash(true));
+    BOOST_REQUIRE_NE(nominal.back(), witnessed.back());
+}
+
+// set_hashes
+// ----------------------------------------------------------------------------
+// Caches the header hash and each transaction hash from the serialization.
+
+BOOST_AUTO_TEST_CASE(block__set_hashes__genesis__matches_computed)
+{
+    const auto& expected = test::genesis;
+    const auto data = expected.to_data(true);
+    block instance{ data, true };
+    instance.set_hashes(data);
+    BOOST_REQUIRE_EQUAL(instance.hash(), expected.hash());
+    BOOST_REQUIRE_EQUAL(instance.transaction_hashes(false), expected.transaction_hashes(false));
+}
+
+BOOST_AUTO_TEST_CASE(block__set_hashes__block2a__matches_computed)
+{
+    const auto& expected = test::block2a;
+    const auto data = expected.to_data(true);
+    block instance{ data, true };
+    instance.set_hashes(data);
+    BOOST_REQUIRE_EQUAL(instance.hash(), expected.hash());
+    BOOST_REQUIRE_EQUAL(instance.transaction_hashes(false), expected.transaction_hashes(false));
+}
+
+// set_state/get_state
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__get_state__default__nullptr)
+{
+    const block instance{ header{}, transactions{} };
+    BOOST_REQUIRE(!instance.get_state());
+}
+
+BOOST_AUTO_TEST_CASE(block__set_state__assigned__same_state)
+{
+    const settings settings(selection::mainnet);
+    const auto state = std::make_shared<const chain_state>(chain_state::data{}, settings);
+    const block instance{ header{}, transactions{} };
+    instance.set_state(state);
+    BOOST_REQUIRE(instance.get_state() == state);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

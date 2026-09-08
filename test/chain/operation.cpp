@@ -1476,4 +1476,29 @@ BOOST_AUTO_TEST_CASE(operation__as_unsigned40__always__expected)
     BOOST_CHECK(!operation({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, true).as_unsigned40(value));
 }
 
+// opcode_to_maximum_size
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(operation__opcode_to_maximum_size__size_codes__own_value)
+{
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_size_0), 0u);
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_size_1), 1u);
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_size_75), 75u);
+}
+
+BOOST_AUTO_TEST_CASE(operation__opcode_to_maximum_size__prefixed_codes__operand_domain)
+{
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_one_size), max_uint8);
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_two_size), max_uint16);
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_four_size), max_uint32);
+}
+
+// Codes above push_size_75 that are not prefixed pushes carry no payload.
+BOOST_AUTO_TEST_CASE(operation__opcode_to_maximum_size__non_payload_codes__zero)
+{
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_negative_1), 0u);
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::push_positive_1), 0u);
+    BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::checksig), 0u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

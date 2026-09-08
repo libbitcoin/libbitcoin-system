@@ -446,4 +446,33 @@ BOOST_AUTO_TEST_CASE(header__check__zero_bits__invalid_proof_of_work)
     BOOST_REQUIRE_EQUAL(ec, error::invalid_proof_of_work);
 }
 
+// set_state/get_state
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(header__get_state__default__nullptr)
+{
+    const header instance{};
+    BOOST_REQUIRE(!instance.get_state());
+}
+
+BOOST_AUTO_TEST_CASE(header__set_state__assigned__same_state)
+{
+    const settings settings(selection::mainnet);
+    const auto state = std::make_shared<const chain_state>(chain_state::data{}, settings);
+    const header instance{};
+    instance.set_state(state);
+    BOOST_REQUIRE(instance.get_state() == state);
+}
+
+// The cache is copied on copy construct.
+BOOST_AUTO_TEST_CASE(header__set_state__copied__same_state)
+{
+    const settings settings(selection::mainnet);
+    const auto state = std::make_shared<const chain_state>(chain_state::data{}, settings);
+    const header instance{};
+    instance.set_state(state);
+    const header copy{ instance };
+    BOOST_REQUIRE(copy.get_state() == state);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
