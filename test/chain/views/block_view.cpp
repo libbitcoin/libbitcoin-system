@@ -156,11 +156,20 @@ BOOST_AUTO_TEST_CASE(block_view__identify__block1a_witness__expected)
     ec = view.identify({ bip141, 1, 0 });
     BOOST_CHECK_EQUAL(ec, error::invalid_witness_commitment);
 
+    // Witness is uncommitted before bip141.
     ec = view.identify({ 0, 1, 0 });
-    BOOST_CHECK_EQUAL(ec, error::block_success);
+    BOOST_CHECK_EQUAL(ec, error::invalid_witness_commitment);
 }
 
-// TODO: add positive test for bip141.
+BOOST_AUTO_TEST_CASE(block_view__identify__unwitnessed_bip141_off__block_success)
+{
+    using namespace system;
+    const auto& block = test::genesis;
+    const chain::block_view view{ block.to_data(true), true };
+    BOOST_CHECK(!view.is_segregated());
+    BOOST_CHECK_EQUAL(view.identify({ 0, 1, 0 }), error::block_success);
+}
+
 // TODO: add full malleation coverage since it is partially independent of
 // block implemention.
 
