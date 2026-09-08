@@ -783,4 +783,144 @@ BOOST_AUTO_TEST_CASE(script__is_nominal_push_pattern__non_push__false)
     BOOST_CHECK(!script::is_nominal_push_pattern(ops));
 }
 
+// is_push_only_pattern/is_relaxed_push_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_push_only_pattern__empty__true)
+{
+    BOOST_CHECK(script::is_push_only_pattern(operations{}));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_push_only_pattern__pushes__true)
+{
+    const operations ops{ operation{ data_chunk{ 0x01 }, false }, operation{ opcode::push_positive_1 } };
+    BOOST_CHECK(script::is_push_only_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_push_only_pattern__non_push__false)
+{
+    const operations ops{ operation{ data_chunk{ 0x01 }, false }, operation{ opcode::checksig } };
+    BOOST_CHECK(!script::is_push_only_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_relaxed_push_pattern__pushes__true)
+{
+    const operations ops{ operation{ data_chunk{ 0x01 }, false }, operation{ opcode::push_positive_16 } };
+    BOOST_CHECK(script::is_relaxed_push_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_relaxed_push_pattern__non_push__false)
+{
+    const operations ops{ operation{ opcode::checksig } };
+    BOOST_CHECK(!script::is_relaxed_push_pattern(ops));
+}
+
+// is_pay_script_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_script_hash_pattern__expected__true)
+{
+    const auto ops = script::to_pay_script_hash_pattern(short_hash{});
+    BOOST_CHECK(script::is_pay_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_script_hash_pattern__wrong_hash_size__false)
+{
+    const operations ops
+    {
+        operation{ opcode::hash160 },
+        operation{ data_chunk(32, 0x00), false },
+        operation{ opcode::equal }
+    };
+
+    BOOST_CHECK(!script::is_pay_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_script_hash_pattern__missing_equal__false)
+{
+    const operations ops
+    {
+        operation{ opcode::hash160 },
+        operation{ data_chunk(20, 0x00), false }
+    };
+
+    BOOST_CHECK(!script::is_pay_script_hash_pattern(ops));
+}
+
+// is_pay_witness_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__minimum_program__true)
+{
+    const auto ops = script::to_pay_witness_pattern(0_u8, data_chunk(2, 0x00));
+    BOOST_CHECK(script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__maximum_program__true)
+{
+    const auto ops = script::to_pay_witness_pattern(16_u8, data_chunk(40, 0x00));
+    BOOST_CHECK(script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__undersized_program__false)
+{
+    const auto ops = script::to_pay_witness_pattern(0_u8, data_chunk(1, 0x00));
+    BOOST_CHECK(!script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__oversized_program__false)
+{
+    const auto ops = script::to_pay_witness_pattern(0_u8, data_chunk(41, 0x00));
+    BOOST_CHECK(!script::is_pay_witness_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_pattern__non_numeric_version__false)
+{
+    const operations ops
+    {
+        operation{ opcode::checksig },
+        operation{ data_chunk(20, 0x00), false }
+    };
+
+    BOOST_CHECK(!script::is_pay_witness_pattern(ops));
+}
+
+// is_commitment_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__expected__true)
+{
+    const script commitment(base16_chunk("6a24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    BOOST_CHECK(script::is_commitment_pattern(commitment.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__wrong_head__false)
+{
+    const script commitment(base16_chunk("6a24aa21a9ee0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
+    BOOST_CHECK(!script::is_commitment_pattern(commitment.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__wrong_push_size__false)
+{
+    const script commitment(base16_chunk("6a23aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), false);
+    BOOST_CHECK(!script::is_commitment_pattern(commitment.ops()));
+}
+
+// is_pay_null_data_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__pushed_data__true)
+{
+    const operations ops{ operation{ opcode::op_return }, operation{ data_chunk{ 0x2a }, false } };
+    BOOST_CHECK(script::is_pay_null_data_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__small_integer_opcode__true)
+{
+    const operations ops{ operation{ opcode::op_return }, operation{ opcode::push_positive_1 } };
+    BOOST_CHECK(script::is_pay_null_data_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__non_minimal_push__false)
+{
+    const script instance(base16_chunk("6a4c0101"), false);
+    BOOST_REQUIRE(instance.ops()[1].code() == opcode::push_one_size);
+    BOOST_CHECK(!script::is_pay_null_data_pattern(instance.ops()));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
