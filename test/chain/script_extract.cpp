@@ -148,4 +148,42 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_3_of_3__true_
     BOOST_CHECK_EQUAL(max, 3u);
 }
 
+// extract_sigop_script
+
+static script p2sh_prevout() NOEXCEPT
+{
+    return script{ script::to_pay_script_hash_pattern(short_hash{}) };
+}
+
+BOOST_AUTO_TEST_CASE(script__extract_sigop_script__non_p2sh_prevout__false)
+{
+    const script prevout{ operations{ operation{ opcode::checksig } } };
+    const script input{ operations{ operation{ data_chunk{ 0x51 }, false } } };
+    script embedded{};
+    BOOST_REQUIRE(!input.extract_sigop_script(embedded, prevout));
+}
+
+BOOST_AUTO_TEST_CASE(script__extract_sigop_script__empty_input_script__false)
+{
+    const script input{};
+    script embedded{};
+    BOOST_REQUIRE(!input.extract_sigop_script(embedded, p2sh_prevout()));
+}
+
+BOOST_AUTO_TEST_CASE(script__extract_sigop_script__non_push_input_script__false)
+{
+    const script input{ operations{ operation{ opcode::checksig } } };
+    script embedded{};
+    BOOST_REQUIRE(!input.extract_sigop_script(embedded, p2sh_prevout()));
+}
+
+BOOST_AUTO_TEST_CASE(script__extract_sigop_script__last_push__embedded)
+{
+    const script input{ operations{ operation{ data_chunk{ 0x52 }, false }, operation{ data_chunk{ 0xac }, false } } };
+    script embedded{};
+    BOOST_REQUIRE(input.extract_sigop_script(embedded, p2sh_prevout()));
+    BOOST_REQUIRE(embedded == script{ operations{ operation{ opcode::checksig } } });
+    BOOST_REQUIRE_EQUAL(embedded.signature_operations(false), one);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
