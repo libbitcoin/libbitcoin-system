@@ -2340,4 +2340,56 @@ BOOST_AUTO_TEST_CASE(transaction__desegregated_hash__null_data__null_hash)
     BOOST_REQUIRE_EQUAL(transaction::desegregated_hash(0, 0, nullptr), null_hash);
 }
 
+// guard limits
+// ----------------------------------------------------------------------------
+
+static transaction oversized_spend() NOEXCEPT
+{
+    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const inputs ins{ input{ point{ one_hash, 0 }, big, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    return { 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard__oversized__transaction_size_limit)
+{
+    BOOST_REQUIRE_EQUAL(oversized_spend().check_guard(), error::transaction_size_limit);
+}
+
+// Weight is four times the unwitnessed size, so oversized is also overweight.
+BOOST_AUTO_TEST_CASE(transaction__check_guard_context__overweight_bip141__transaction_weight_limit)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(oversized_spend().check_guard(ctx), error::transaction_weight_limit);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__check_guard_context__overweight_bip141_off__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(oversized_spend().check_guard(ctx), error::transaction_success);
+}
+
+static transaction sigops_spend(size_t checksigs) NOEXCEPT
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{ operations(checksigs, operation{ opcode::checksig }) } } };
+    return { 1, ins, outs, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept_guard__sigops_at_limit__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = sigops_spend(max_block_sigops);
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__accept_guard__sigops_above_limit__transaction_sigop_limit)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = sigops_spend(add1(max_block_sigops));
+    instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
+    BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_sigop_limit);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

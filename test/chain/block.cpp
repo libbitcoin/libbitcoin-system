@@ -1329,4 +1329,50 @@ BOOST_AUTO_TEST_CASE(block__set_state__assigned__same_state)
     BOOST_REQUIRE(instance.get_state() == state);
 }
 
+// check/accept code mappings
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__check__oversized__block_size_limit)
+{
+    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, big) } };
+    BOOST_REQUIRE_EQUAL(instance.check(), error::block_size_limit);
+}
+
+BOOST_AUTO_TEST_CASE(block__check__forward_reference__forward_reference)
+{
+    const transaction to{ 0, inputs{}, {}, 42 };
+    const transaction from{ 0, { { { to.hash(false), 0 }, {}, 0 } }, {}, 0 };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, script{}), from, to } };
+    BOOST_REQUIRE_EQUAL(instance.check(), error::forward_reference);
+}
+
+static block sigops_block(size_t checksigs) NOEXCEPT
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const inputs ins{ input{ point{}, coinbase_script, max_input_sequence } };
+    const outputs outs{ output{ 5000000000, script{ operations(checksigs, operation{ opcode::checksig }) } } };
+    return block{ header{}, transactions{ transaction{ 1, ins, outs, 0 } } };
+}
+
+BOOST_AUTO_TEST_CASE(block__accept__sigops_at_limit__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(sigops_block(max_block_sigops).accept(ctx, 210000, 5000000000), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__accept__sigops_above_limit__block_sigop_limit)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(sigops_block(add1(max_block_sigops)).accept(ctx, 210000, 5000000000), error::block_sigop_limit);
+}
+
+// BIP141: legacy sigops are scaled by four against a four times larger limit.
+BOOST_AUTO_TEST_CASE(block__accept__sigops_bip141__scaled_limit)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(sigops_block(max_block_sigops).accept(ctx, 210000, 5000000000), error::block_success);
+    BOOST_REQUIRE_EQUAL(sigops_block(add1(max_block_sigops)).accept(ctx, 210000, 5000000000), error::block_sigop_limit);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
