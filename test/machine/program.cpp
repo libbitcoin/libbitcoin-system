@@ -587,6 +587,19 @@ BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__empty_endorsement
     BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
 }
 
+// A decodable endorsement, so the uniform sighash check is reached.
+static data_chunk batch_endorsement(uint8_t sighash) NOEXCEPT
+{
+    ec_signature signature{};
+    ecdsa::sign(signature, batch_secret, hash_digest{});
+    der_signature der{};
+    ecdsa::encode_signature(der, signature);
+
+    auto endorsement = to_chunk(der);
+    endorsement.push_back(sighash);
+    return endorsement;
+}
+
 // One digest per group, so the sighash byte must be uniform.
 BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__mixed_sighash__false)
 {
@@ -597,10 +610,25 @@ BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__mixed_sighash__fa
     const batch_accessor out{ in, to_shared<script>(batch_multisig()) };
 
     const auto key = batch_key();
-    const data_chunk all(ec_signature_size, coverage::hash_all);
-    const data_chunk none(ec_signature_size, coverage::hash_none);
+    const auto all = batch_endorsement(coverage::hash_all);
+    const auto none = batch_endorsement(coverage::hash_none);
     const chunk_xptrs points{ chunk_xptr{ key }, chunk_xptr{ key } };
     const chunk_xptrs endorsements{ chunk_xptr{ all }, chunk_xptr{ none } };
+    BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
+}
+
+BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__unbatchable_script__false)
+{
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    const batch_accessor out{ in, to_shared<script>(batch_p2pk()) };
+
+    const auto key = batch_key();
+    const auto endorsement = batch_endorsement(coverage::hash_all);
+    const chunk_xptrs points{ chunk_xptr{ key } };
+    const chunk_xptrs endorsements{ chunk_xptr{ endorsement } };
     BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
 }
 
