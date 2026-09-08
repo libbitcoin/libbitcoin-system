@@ -205,7 +205,8 @@ static data_chunk bip158_element() NOEXCEPT
 
 static siphash_key bip158_key() NOEXCEPT
 {
-    const auto& half = unsafe_array_cast<uint8_t, half_hash_size>(bip158_block_hash.data());
+    const auto data = bip158_block_hash.data();
+    const auto& half = unsafe_array_cast<uint8_t, half_hash_size>(data);
     return to_siphash_key(half);
 }
 

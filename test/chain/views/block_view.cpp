@@ -177,7 +177,8 @@ BOOST_AUTO_TEST_CASE(block_view__identify__unwitnessed_bip141_off__block_success
 static system::chain::transaction view_tx64(uint32_t index) NOEXCEPT
 {
     using namespace system::chain;
-    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const operations ops{ operation{ opcode::dup }, operation{ opcode::dup } };
+    const script dups{ ops };
     const inputs ins{ input{ point{ one_hash, index }, dups, 42 } };
     const outputs outs{ output{ 42, dups } };
     return transaction{ 42, ins, outs, 42 };
@@ -186,7 +187,8 @@ static system::chain::transaction view_tx64(uint32_t index) NOEXCEPT
 static system::chain::transaction view_coinbase64() NOEXCEPT
 {
     using namespace system::chain;
-    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const operations ops{ operation{ opcode::dup }, operation{ opcode::dup } };
+    const script dups{ ops };
     const inputs ins{ input{ point{}, dups, 42 } };
     const outputs outs{ output{ 42, dups } };
     return transaction{ 42, ins, outs, 42 };
@@ -200,7 +202,8 @@ static system::chain::transaction view_tx(uint32_t index) NOEXCEPT
     return transaction{ 1, ins, outs, 0 };
 }
 
-static system::hash_digest view_root(const system::chain::transactions& txs) NOEXCEPT
+static system::hash_digest view_root(
+    const system::chain::transactions& txs) NOEXCEPT
 {
     using namespace system;
     const auto left = bitcoin_hash(txs[0].hash(false), txs[1].hash(false));
@@ -209,7 +212,8 @@ static system::hash_digest view_root(const system::chain::transactions& txs) NOE
     return bitcoin_hash(left, right);
 }
 
-static system::chain::block view_block(const system::chain::transactions& txs) NOEXCEPT
+static system::chain::block view_block(
+    const system::chain::transactions& txs) NOEXCEPT
 {
     using namespace system;
     const chain::header head{ 1, hash_digest{}, view_root(txs), 0, 0, 0 };

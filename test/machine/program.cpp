@@ -464,7 +464,12 @@ static data_chunk batch_key() NOEXCEPT
 
 static script batch_p2pk() NOEXCEPT
 {
-    return script{ operations{ operation{ batch_key(), false }, operation{ opcode::checksig } } };
+    const operations ops
+    {
+        operation{ batch_key(), false },
+        operation{ opcode::checksig }
+    };
+    return script{ ops };
 }
 
 // The key is supplied by the input, so its size is not constrained here.

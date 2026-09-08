@@ -42,7 +42,8 @@ public:
         return interpreter<contiguous_stack>::connect(ctx, *this, index);
     }
 
-    code connect(const context& ctx, uint32_t index, const signatures& capture) const NOEXCEPT
+    code connect(const context& ctx, uint32_t index,
+        const signatures& capture) const NOEXCEPT
     {
         const auto it = std::next(inputs_ptr()->begin(), index);
         return interpreter<contiguous_stack>::connect(ctx, *this, it, capture);
@@ -535,12 +536,18 @@ BOOST_AUTO_TEST_CASE(script__verify__bip141_p2sh_p2wsh_push_one_size_input__dirt
 // ----------------------------------------------------------------------------
 
 constexpr auto segwit_rules = flags::bip141_rule | flags::bip143_rule;
-constexpr auto taproot_rules = segwit_rules | flags::bip341_rule | flags::bip342_rule;
+constexpr auto taproot_rules = segwit_rules | flags::bip341_rule |
+    flags::bip342_rule;
 
-static transaction_accessor witness_tx(uint8_t version, const data_chunk& program, const script& input_script={}) NOEXCEPT
+static transaction_accessor witness_tx(uint8_t version,
+    const data_chunk& program, const script& input_script={}) NOEXCEPT
 {
-    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(data_chunk{ 0x01 }) } };
-    const inputs ins{ input{ point{ one_hash, 0 }, input_script, spender, max_input_sequence } };
+    const chunk_cptrs stack{ to_shared<data_chunk>(data_chunk{ 0x01 }) };
+    const chain::witness spender{ stack };
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, input_script, spender, max_input_sequence }
+    };
     const outputs outs{ output{ 42, script{} } };
     const transaction_accessor tx{ 1, ins, outs, 0 };
     const script prevout{ script::to_pay_witness_pattern(version, program) };
@@ -618,7 +625,10 @@ BOOST_AUTO_TEST_CASE(script__verify__witness_program_dirty_input_script__dirty_w
 
 BOOST_AUTO_TEST_CASE(script__verify__no_prevout__missing_previous_output)
 {
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
     const outputs outs{ output{ 42, script{} } };
     const transaction_accessor tx{ 1, ins, outs, 0 };
     BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 0), error::missing_previous_output);
@@ -626,7 +636,10 @@ BOOST_AUTO_TEST_CASE(script__verify__no_prevout__missing_previous_output)
 
 BOOST_AUTO_TEST_CASE(script__verify__index_above_inputs__inputs_overflow)
 {
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
     const outputs outs{ output{ 42, script{} } };
     const transaction_accessor tx{ 1, ins, outs, 0 };
     BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 1), error::inputs_overflow);
@@ -643,12 +656,14 @@ static transaction bip341_unsigned_tx() NOEXCEPT
     return transaction{ base16_chunk("02000000097de20cbff686da83a54981d2b9bab3586f4ca7e48f57f5b55963115f3b334e9c010000000000000000d7b7cab57b1393ace2d064f4d4a2cb8af6def61273e127517d44759b6dafdd990000000000fffffffff8e1f583384333689228c5d28eac13366be082dc57441760d957275419a418420000000000fffffffff0689180aa63b30cb162a73c6d2a38b7eeda2a83ece74310fda0843ad604853b0100000000feffffffaa5202bdf6d8ccd2ee0f0202afbbb7461d9264a25e5bfd3c5a52ee1239e0ba6c0000000000feffffff956149bdc66faa968eb2be2d2faa29718acbfe3941215893a2a3446d32acd050000000000000000000e664b9773b88c09c32cb70a2a3e4da0ced63b7ba3b22f848531bbb1d5d5f4c94010000000000000000e9aa6b8e6c9de67619e6a3924ae25696bb7b694bb677a632a74ef7eadfd4eabf0000000000ffffffffa778eb6a263dc090464cd125c466b5a99667720b1c110468831d058aa1b82af10100000000ffffffff0200ca9a3b000000001976a91406afd46bcdfd22ef94ac122aa11f241244a37ecc88ac807840cb0000000020ac9a87f5594be208f8532db38cff670c450ed2fea8fcdefcc9a663f78bab962b0065cd1d"), true };
 }
 
-static transaction_accessor bip341_signed_tx(const data_chunk& signature) NOEXCEPT
+static transaction_accessor bip341_signed_tx(
+    const data_chunk& signature) NOEXCEPT
 {
     const auto unsigned_tx = bip341_unsigned_tx();
     const auto& in = *unsigned_tx.inputs_ptr();
     const auto& out = *unsigned_tx.outputs_ptr();
-    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(signature) } };
+    const chunk_cptrs stack{ to_shared<data_chunk>(signature) };
+    const chain::witness spender{ stack };
     const chain::witness none{};
 
     const inputs ins
@@ -670,7 +685,10 @@ static transaction_accessor bip341_signed_tx(const data_chunk& signature) NOEXCE
         output{ out[1]->value(), out[1]->script() }
     };
 
-    const transaction_accessor tx{ unsigned_tx.version(), ins, outs, unsigned_tx.locktime() };
+    const transaction_accessor tx
+    {
+        unsigned_tx.version(), ins, outs, unsigned_tx.locktime()
+    };
     const auto& set = *tx.inputs_ptr();
     set[0]->prevout = to_shared(output{ 420000000, { base16_chunk("512053a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343"), false } });
     set[1]->prevout = to_shared(output{ 462000000, { base16_chunk("5120147c9c57132f6e7ecddba9800bb0c4449251c92a1e60371ee77557b6620f3ea3"), false } });
@@ -716,21 +734,29 @@ static script batch_prevout_script() NOEXCEPT
 {
     ec_compressed public_key{};
     secret_to_public(public_key, batch_secret);
-    const operations ops{ operation{ to_chunk(public_key), false }, operation{ opcode::checksig } };
+    const operations ops
+    {
+        operation{ to_chunk(public_key), false },
+        operation{ opcode::checksig }
+    };
     return script{ ops };
 }
 
 static transaction_accessor batch_tx(bool valid) NOEXCEPT
 {
     const auto prevout_script = batch_prevout_script();
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
     const outputs outs{ output{ batch_value, script{} } };
     const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
 
     hash_digest sighash{};
     const auto it = unsigned_tx.inputs_ptr()->begin();
     const auto version = script_version::unversioned;
-    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {}, version, coverage::hash_all, flags::no_rules);
+    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {},
+        version, coverage::hash_all, flags::no_rules);
 
     // Signing a different digest yields a well-formed signature that fails
     // verification, as opposed to one that fails to decode.
@@ -747,9 +773,13 @@ static transaction_accessor batch_tx(bool valid) NOEXCEPT
     endorsement.push_back(coverage::hash_all);
 
     const script input_script{ operations{ operation{ endorsement, false } } };
-    const inputs signed_ins{ input{ point{ one_hash, 0 }, input_script, max_input_sequence } };
+    const inputs signed_ins
+    {
+        input{ point{ one_hash, 0 }, input_script, max_input_sequence }
+    };
     const transaction_accessor tx{ 1, signed_ins, outs, 0 };
-    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    const output prevout{ batch_value, prevout_script };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(prevout);
     return tx;
 }
 
@@ -815,14 +845,18 @@ static script batch_multisig_script() NOEXCEPT
 static transaction_accessor batch_multisig_tx(bool valid) NOEXCEPT
 {
     const auto prevout_script = batch_multisig_script();
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
     const outputs outs{ output{ batch_value, script{} } };
     const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
 
     hash_digest sighash{};
     const auto it = unsigned_tx.inputs_ptr()->begin();
     const auto version = script_version::unversioned;
-    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {}, version, coverage::hash_all, flags::no_rules);
+    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {},
+        version, coverage::hash_all, flags::no_rules);
 
     auto digest = sighash;
     if (!valid)
@@ -836,11 +870,19 @@ static transaction_accessor batch_multisig_tx(bool valid) NOEXCEPT
     auto endorsement = to_chunk(der);
     endorsement.push_back(coverage::hash_all);
 
-    const operations in_ops{ operation{ data_chunk{}, true }, operation{ endorsement, false } };
+    const operations in_ops
+    {
+        operation{ data_chunk{}, true },
+        operation{ endorsement, false }
+    };
     const script input_script{ in_ops };
-    const inputs signed_ins{ input{ point{ one_hash, 0 }, input_script, max_input_sequence } };
+    const inputs signed_ins
+    {
+        input{ point{ one_hash, 0 }, input_script, max_input_sequence }
+    };
     const transaction_accessor tx{ 1, signed_ins, outs, 0 };
-    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    const output prevout{ batch_value, prevout_script };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(prevout);
     return tx;
 }
 
@@ -888,7 +930,8 @@ static ec_xonly batch_xonly() NOEXCEPT
 {
     ec_compressed public_key{};
     secret_to_public(public_key, batch_secret);
-    return unsafe_array_cast<uint8_t, ec_xonly_size>(std::next(public_key.data()));
+    const auto xonly = std::next(public_key.data());
+    return unsafe_array_cast<uint8_t, ec_xonly_size>(xonly);
 }
 
 static transaction_accessor batch_taproot_tx(bool valid) NOEXCEPT
@@ -896,14 +939,20 @@ static transaction_accessor batch_taproot_tx(bool valid) NOEXCEPT
     const auto program = to_chunk(batch_xonly());
     const script prevout_script{ script::to_pay_witness_pattern(1, program) };
     const outputs outs{ output{ batch_value, script{} } };
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, chain::witness{}, max_input_sequence } };
+    const chain::witness none{};
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, none, max_input_sequence }
+    };
     const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
-    (*unsigned_tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    const output prevout{ batch_value, prevout_script };
+    (*unsigned_tx.inputs_ptr())[0]->prevout = to_shared(prevout);
 
     hash_digest sighash{};
     const auto it = unsigned_tx.inputs_ptr()->begin();
     const auto version = script_version::taproot;
-    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {}, version, coverage::hash_default, taproot_rules);
+    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {},
+        version, coverage::hash_default, taproot_rules);
 
     auto digest = sighash;
     if (!valid)
@@ -912,10 +961,14 @@ static transaction_accessor batch_taproot_tx(bool valid) NOEXCEPT
     ec_signature signature{};
     schnorr::sign(signature, batch_secret, digest, {});
 
-    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(to_chunk(signature)) } };
-    const inputs signed_ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const chunk_cptrs stack{ to_shared<data_chunk>(to_chunk(signature)) };
+    const chain::witness spender{ stack };
+    const inputs signed_ins
+    {
+        input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence }
+    };
     const transaction_accessor tx{ 1, signed_ins, outs, 0 };
-    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(prevout);
     return tx;
 }
 

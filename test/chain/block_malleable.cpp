@@ -105,22 +105,25 @@ struct txs
 
     static transaction tx65() NOEXCEPT
     {
+        const script three{ { opcode::dup, opcode::dup, opcode::dup } };
+        const script two{ { opcode::dup, opcode::dup } };
         return
         {
             42,
-            inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
-            outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+            inputs{ { point{}, three, 42 } },
+            outputs{ { 42, two } },
             42
         };
     }
 
     static transaction tx66() NOEXCEPT
     {
+        const script three{ { opcode::dup, opcode::dup, opcode::dup } };
         return
         {
             42,
-            inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
-            outputs{ { 42, script{ { opcode::dup, opcode::dup, opcode::dup } } } },
+            inputs{ { point{}, three, 42 } },
+            outputs{ { 42, three } },
             42
         };
     }
@@ -424,11 +427,12 @@ BOOST_AUTO_TEST_CASE(block__is_malleable32__various__expected)
 
 static transaction tx64_spend(uint32_t index) NOEXCEPT
 {
+    const script two{ { opcode::dup, opcode::dup } };
     return
     {
         42,
-        inputs{ { point{ one_hash, index }, script{ { opcode::dup, opcode::dup } }, 42 } },
-        outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+        inputs{ { point{ one_hash, index }, two, 42 } },
+        outputs{ { 42, two } },
         42
     };
 }
