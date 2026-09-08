@@ -226,4 +226,23 @@ BOOST_AUTO_TEST_CASE(output__signature_operations__checksig_checksigverify__expe
 
 // is_dust
 
+BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_spendable__true)
+{
+    const output instance{ 41, script{ operations{ operation{ opcode::checksig } } } };
+    BOOST_REQUIRE(instance.is_dust(42));
+}
+
+BOOST_AUTO_TEST_CASE(output__is_dust__at_minimum_spendable__false)
+{
+    const output instance{ 42, script{ operations{ operation{ opcode::checksig } } } };
+    BOOST_REQUIRE(!instance.is_dust(42));
+}
+
+// Provably unspendable outputs do not expand the unspent set, so are not dust.
+BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_unspendable__false)
+{
+    const output instance{ 41, script{ operations{ operation{ opcode::op_return } } } };
+    BOOST_REQUIRE(!instance.is_dust(42));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

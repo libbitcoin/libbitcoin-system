@@ -1166,6 +1166,86 @@ BOOST_AUTO_TEST_CASE(block__accept__claim_above_subsidy__coinbase_value_limit)
     BOOST_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::coinbase_value_limit);
 }
 
+// populate
+// ----------------------------------------------------------------------------
+
+static transaction populate_coinbase() NOEXCEPT
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const inputs ins{ input{ point{}, coinbase_script, 0xffffffff } };
+    return transaction{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+}
+
+BOOST_AUTO_TEST_CASE(block__populate__no_transactions__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{} };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate__internal_spend__prevout_populated)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction tx1{ 1, ins1, outputs{ output{ 42, script{} } }, 0 };
+    const inputs ins2{ input{ point{ tx1.hash(false), 0 }, script{}, max_input_sequence } };
+    const transaction tx2{ 1, ins2, outputs{ output{ 40, script{} } }, 0 };
+
+    const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+
+    const auto& spender = instance.transactions_ptr()->back();
+    BOOST_REQUIRE(spender->inputs_ptr()->front()->prevout);
+    BOOST_REQUIRE_EQUAL(spender->inputs_ptr()->front()->prevout->value(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate__external_spend__prevout_unpopulated)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction spend{ 1, ins, outputs{ output{ 40, script{} } }, 0 };
+
+    const block instance{ header{}, transactions{ populate_coinbase(), spend } };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BOOST_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->prevout);
+}
+
+// The coinbase output of a block cannot be spent within that block.
+BOOST_AUTO_TEST_CASE(block__populate__spend_of_block_coinbase__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto coinbase = populate_coinbase();
+    const inputs ins{ input{ point{ coinbase.hash(false), 0 }, script{}, max_input_sequence } };
+    const transaction spend{ 1, ins, outputs{ output{ 40, script{} } }, 0 };
+
+    const block instance{ header{}, transactions{ coinbase, spend } };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::coinbase_maturity);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_on__relative_time_locked)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction tx1{ 1, ins1, outputs{ output{ 42, script{} } }, 0 };
+    const inputs ins2{ input{ point{ tx1.hash(false), 0 }, script{}, 1 } };
+    const transaction tx2{ 2, ins2, outputs{ output{ 40, script{} } }, 0 };
+
+    const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::relative_time_locked);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction tx1{ 1, ins1, outputs{ output{ 42, script{} } }, 0 };
+    const inputs ins2{ input{ point{ tx1.hash(false), 0 }, script{}, 1 } };
+    const transaction tx2{ 2, ins2, outputs{ output{ 40, script{} } }, 0 };
+
+    const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+}
+
 // confirm
 // ----------------------------------------------------------------------------
 
