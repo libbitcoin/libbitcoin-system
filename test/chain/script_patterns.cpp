@@ -923,4 +923,61 @@ BOOST_AUTO_TEST_CASE(script__is_pay_null_data_pattern__non_minimal_push__false)
     BOOST_CHECK(!script::is_pay_null_data_pattern(instance.ops()));
 }
 
+// version/version_value/witness_program
+
+BOOST_AUTO_TEST_CASE(script__version__non_witness__unversioned)
+{
+    const script instance{ operations{ operation{ opcode::checksig } } };
+    BOOST_REQUIRE(instance.version() == script_version::unversioned);
+    BOOST_REQUIRE(instance.witness_program()->empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_zero_program__segwit)
+{
+    const auto program = data_chunk(20, 0x42);
+    const script instance{ script::to_pay_witness_pattern(0_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::segwit);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 0_u8);
+    BOOST_REQUIRE_EQUAL(*instance.witness_program(), program);
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_one_program__taproot)
+{
+    const auto program = data_chunk(32, 0x42);
+    const script instance{ script::to_pay_witness_pattern(1_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::taproot);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 1_u8);
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_two_program__reserved)
+{
+    const auto program = data_chunk(32, 0x42);
+    const script instance{ script::to_pay_witness_pattern(2_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::reserved);
+    BOOST_REQUIRE_EQUAL(instance.version_value(), 2_u8);
+}
+
+BOOST_AUTO_TEST_CASE(script__version__version_sixteen_program__reserved)
+{
+    const auto program = data_chunk(32, 0x42);
+    const script instance{ script::to_pay_witness_pattern(16_u8, program) };
+    BOOST_REQUIRE(instance.version() == script_version::reserved);
+}
+
+// is_pay_to_witness/is_pay_to_script_hash are flag gated.
+
+BOOST_AUTO_TEST_CASE(script__is_pay_to_witness__bip141_gated__expected)
+{
+    const script instance{ script::to_pay_witness_pattern(0_u8, data_chunk(20, 0x42)) };
+    BOOST_REQUIRE(instance.is_pay_to_witness(flags::bip141_rule));
+    BOOST_REQUIRE(!instance.is_pay_to_witness(flags::no_rules));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_to_script_hash__bip16_gated__expected)
+{
+    const script instance{ script::to_pay_script_hash_pattern(short_hash{}) };
+    BOOST_REQUIRE(instance.is_pay_to_script_hash(flags::bip16_rule));
+    BOOST_REQUIRE(!instance.is_pay_to_script_hash(flags::no_rules));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
