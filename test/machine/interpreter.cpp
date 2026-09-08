@@ -2181,6 +2181,59 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__tapscript__op_reserved)
     BOOST_REQUIRE_EQUAL(code{ accessor.op_check_multisig_verify() }, error::op_reserved);
 }
 
+// Operation dispatch (run_op).
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__push_size_0__pushes_number_zero)
+{
+    const script leaf{ operations{ operation{ opcode::push_size_0 } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 1u);
+    BOOST_REQUIRE(!machine->peek_bool_());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__push_positive_1__pushes_number_one)
+{
+    const script leaf{ operations{ operation{ opcode::push_positive_1 } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__push_size__pushes_payload)
+{
+    const script leaf{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+    BOOST_REQUIRE_EQUAL(*machine->pop_chunk_(), base16_chunk("0102"));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__nop__op_success)
+{
+    const script leaf{ operations{ operation{ opcode::nop } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_success);
+    BOOST_REQUIRE(machine->is_stack_empty());
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__dup_on_empty_stack__op_dup)
+{
+    const script leaf{ operations{ operation{ opcode::dup } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_dup);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__run_op__invalid_opcode__op_invalid)
+{
+    const script leaf{ operations{ operation{ opcode::op_cat } } };
+    machine_accessor<contiguous_stack> machine{ leaf, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->run_op(machine->begin()) }, error::op_invalid);
+}
+
 // Signature operation control flow (mocked verification).
 // ----------------------------------------------------------------------------
 

@@ -342,6 +342,37 @@ BOOST_AUTO_TEST_CASE(program__if___negative_scope_conditional_op__true)
     BOOST_REQUIRE(machine->if_(conditional));
 }
 
+// stack limits
+
+BOOST_AUTO_TEST_CASE(program__is_stack_overflow__empty__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(!machine->is_stack_overflow());
+}
+
+BOOST_AUTO_TEST_CASE(program__stack_nonempty__mixed_elements__counts_nonempty)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_bool(true);
+    machine->push_bool(false);
+    machine->push_signed64(0);
+    machine->push_signed64(42);
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x01 });
+    BOOST_REQUIRE_EQUAL(machine->stack_size(), 6u);
+    BOOST_REQUIRE_EQUAL(machine->stack_nonempty(), 3u);
+}
+
+// The primary and alternate stacks share one limit [bip342].
+BOOST_AUTO_TEST_CASE(program__is_stack_overflow__alternate_counted__true)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(machine->ops_increment(0));
+    machine->push_bool(true);
+    machine->push_alternate(stack_variant{ true });
+    BOOST_REQUIRE(!machine->is_stack_overflow());
+}
+
 // accumulators
 
 BOOST_AUTO_TEST_CASE(program__ops_increment__op_at_limit__expected)
