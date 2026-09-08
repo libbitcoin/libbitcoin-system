@@ -470,7 +470,6 @@ jobs:
         with:
           format: lcov
           files: "libbitcoin-system/coverage.info"
-          base-path: "libbitcoin-system"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
@@ -956,7 +955,6 @@ jobs:
         with:
           format: lcov
           files: "libbitcoin-system/coverage.info"
-          base-path: "libbitcoin-system"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
@@ -1365,7 +1363,6 @@ jobs:
         with:
           format: lcov
           files: "libbitcoin-system/coverage.info"
-          base-path: "libbitcoin-system"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
