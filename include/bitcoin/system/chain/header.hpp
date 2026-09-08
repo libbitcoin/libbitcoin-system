@@ -145,7 +145,6 @@ protected:
     }
 
     bool is_futuristic_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
-    bool is_early_timestamp() const NOEXCEPT;
 
     /// Accept (relative to chain_state).
     /// -----------------------------------------------------------------------
