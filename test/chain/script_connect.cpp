@@ -41,6 +41,12 @@ public:
     {
         return interpreter<contiguous_stack>::connect(ctx, *this, index);
     }
+
+    code connect(const context& ctx, uint32_t index, const signatures& capture) const NOEXCEPT
+    {
+        const auto it = std::next(inputs_ptr()->begin(), index);
+        return interpreter<contiguous_stack>::connect(ctx, *this, it, capture);
+    }
 };
 
 BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
@@ -523,6 +529,213 @@ BOOST_AUTO_TEST_CASE(script__verify__bip141_p2sh_p2wsh_push_one_size_input__dirt
     (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value, { base16_chunk("a9149993a429037b5d912407a71c252019287b8d27a587"), false } });
 
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::dirty_embed);
+}
+
+// Witness version dispatch.
+// ----------------------------------------------------------------------------
+
+constexpr auto segwit_rules = flags::bip141_rule | flags::bip143_rule;
+constexpr auto taproot_rules = segwit_rules | flags::bip341_rule | flags::bip342_rule;
+
+static transaction_accessor witness_tx(uint8_t version, const data_chunk& program, const script& input_script={}) NOEXCEPT
+{
+    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(data_chunk{ 0x01 }) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, input_script, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction_accessor tx{ 1, ins, outs, 0 };
+    const script prevout{ script::to_pay_witness_pattern(version, program) };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ 42, prevout });
+    return tx;
+}
+
+// Undefined witness versions are unencumbered [bip141].
+BOOST_AUTO_TEST_CASE(script__verify__witness_version_two__success)
+{
+    const auto program = data_chunk(hash_size, 0x42);
+    const auto tx = witness_tx(2, program);
+    BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__witness_version_sixteen__success)
+{
+    const auto program = data_chunk(hash_size, 0x42);
+    const auto tx = witness_tx(16, program);
+    BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 0), error::script_success);
+}
+
+// Version one is unencumbered until taproot activates [bip341].
+BOOST_AUTO_TEST_CASE(script__verify__taproot_program_bip341_off__success)
+{
+    const auto program = data_chunk(ec_xonly_size, 0x42);
+    const auto tx = witness_tx(1, program);
+    BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 0), error::script_success);
+}
+
+// An undefined sighash type is not a schnorr signature [bip341].
+BOOST_AUTO_TEST_CASE(script__verify__taproot_key_path_invalid_signature__op_check_sig_schnorr1)
+{
+    const auto program = data_chunk(ec_xonly_size, 0x42);
+    const auto tx = witness_tx(1, program);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::op_check_sig_schnorr1);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__taproot_empty_witness__invalid_witness)
+{
+    const auto program = data_chunk(ec_xonly_size, 0x42);
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, chain::witness{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction_accessor tx{ 1, ins, outs, 0 };
+    const script prevout{ script::to_pay_witness_pattern(1, program) };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ 42, prevout });
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::invalid_witness);
+}
+
+// P2SH-wrapped version one outputs remain unencumbered [bip341].
+BOOST_AUTO_TEST_CASE(script__verify__p2sh_wrapped_taproot__success)
+{
+    const auto program = data_chunk(ec_xonly_size, 0x42);
+    const script redeem{ script::to_pay_witness_pattern(1, program) };
+    const auto redeem_data = redeem.to_data(false);
+    const script input_script{ operations{ operation{ redeem_data, false } } };
+    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(data_chunk{ 0x01 }) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, input_script, spender, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction_accessor tx{ 1, ins, outs, 0 };
+    const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(redeem_data)) };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ 42, prevout });
+    const auto rules = taproot_rules | flags::bip16_rule;
+    BOOST_REQUIRE_EQUAL(tx.connect({ rules }, 0), error::script_success);
+}
+
+// The input script must be empty for a native witness program [bip141].
+BOOST_AUTO_TEST_CASE(script__verify__witness_program_dirty_input_script__dirty_witness)
+{
+    const auto program = data_chunk(hash_size, 0x42);
+    const script input_script{ operations{ operation{ opcode::push_positive_1 } } };
+    const auto tx = witness_tx(0, program, input_script);
+    BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 0), error::dirty_witness);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__no_prevout__missing_previous_output)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction_accessor tx{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 0), error::missing_previous_output);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__index_above_inputs__inputs_overflow)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ 42, script{} } };
+    const transaction_accessor tx{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(tx.connect({ segwit_rules }, 1), error::inputs_overflow);
+}
+
+// Signature batching.
+// ----------------------------------------------------------------------------
+// Batching fabricates sigop success and defers adjudication to the
+// accumulator, so a batched connect must never differ from an inline connect
+// except in when the verdict is reached.
+
+constexpr uint64_t batch_value = 42;
+constexpr auto batch_secret = base16_array("0000000000000000000000000000000000000000000000000000000000000001");
+
+static script batch_prevout_script() NOEXCEPT
+{
+    ec_compressed public_key{};
+    secret_to_public(public_key, batch_secret);
+    const operations ops{ operation{ to_chunk(public_key), false }, operation{ opcode::checksig } };
+    return script{ ops };
+}
+
+static transaction_accessor batch_tx(bool valid) NOEXCEPT
+{
+    const auto prevout_script = batch_prevout_script();
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const outputs outs{ output{ batch_value, script{} } };
+    const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
+
+    hash_digest sighash{};
+    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto version = script_version::unversioned;
+    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {}, version, coverage::hash_all, flags::no_rules);
+
+    // Signing a different digest yields a well-formed signature that fails
+    // verification, as opposed to one that fails to decode.
+    auto digest = sighash;
+    if (!valid)
+        digest.front() ^= 0x01_u8;
+
+    ec_signature signature{};
+    ecdsa::sign(signature, batch_secret, digest);
+    der_signature der{};
+    ecdsa::encode_signature(der, signature);
+
+    auto endorsement = to_chunk(der);
+    endorsement.push_back(coverage::hash_all);
+
+    const script input_script{ operations{ operation{ endorsement, false } } };
+    const inputs signed_ins{ input{ point{ one_hash, 0 }, input_script, max_input_sequence } };
+    const transaction_accessor tx{ 1, signed_ins, outs, 0 };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    return tx;
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__p2pk_valid_signature_unbatched__success)
+{
+    const auto tx = batch_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__p2pk_invalid_signature_unbatched__stack_false)
+{
+    const auto tx = batch_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::stack_false);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__p2pk_valid_signature_batched__success_and_verifies)
+{
+    auto& rows = signatures::ecdsa_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = batch_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE(!capture.faulted.load());
+    BOOST_REQUIRE_EQUAL(rows.rows(), one);
+    BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+// The sigop fabricates success, so the invalid signature is caught only by the
+// accumulator.
+BOOST_AUTO_TEST_CASE(script__verify__p2pk_invalid_signature_batched__success_but_fails_verify)
+{
+    auto& rows = signatures::ecdsa_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = batch_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows(), one);
+    BOOST_REQUIRE(!rows.verify());
+    rows.clear();
+}
+
+// An input script is never batchable, so a disabled capture changes nothing.
+BOOST_AUTO_TEST_CASE(script__verify__p2pk_capture_disabled__no_rows)
+{
+    auto& rows = signatures::ecdsa_rows();
+    rows.clear();
+
+    const signatures capture{};
+    const auto tx = batch_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(!capture.batched.load());
+    BOOST_REQUIRE(rows.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
