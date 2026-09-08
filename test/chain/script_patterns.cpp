@@ -980,4 +980,467 @@ BOOST_AUTO_TEST_CASE(script__is_pay_to_script_hash__bip16_gated__expected)
     BOOST_REQUIRE(!instance.is_pay_to_script_hash(flags::no_rules));
 }
 
+// Predicates not surfaced by pattern/input_pattern/output_pattern.
+// -----------------------------------------------------------------------------
+
+static const auto pattern_signature = data_chunk(70, 0x42);
+static const auto pattern_short = data_chunk(8, 0x42);
+static const auto pattern_xonly = data_chunk(ec_xonly_size, 0x42);
+static const auto pattern_hash20 = data_chunk(short_hash_size, 0x42);
+static const auto pattern_hash32 = data_chunk(hash_size, 0x42);
+static const auto pattern_anchor = base16_chunk("4e73");
+static const auto pattern_compressed = build_chunk(
+{
+    base16_chunk("03"),
+    data_chunk(sub1(ec_compressed_size), 0x42)
+});
+static const auto pattern_uncompressed = build_chunk(
+{
+    base16_chunk("04"),
+    data_chunk(sub1(ec_uncompressed_size), 0x42)
+});
+
+// is_pay_op_return_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__empty__false)
+{
+    BOOST_REQUIRE(!script::is_pay_op_return_pattern(operations{}));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__return_only__true)
+{
+    const operations ops{ { opcode::op_return } };
+    BOOST_REQUIRE(script::is_pay_op_return_pattern(ops));
+}
+
+// Unlike pay_null_data this is unbounded in data size and operation count.
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__return_and_trailing__true)
+{
+    const operations ops
+    {
+        { opcode::op_return },
+        { pattern_hash32, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_op_return_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_op_return_pattern__trailing_return__false)
+{
+    const operations ops{ { pattern_hash32, true }, { opcode::op_return } };
+    BOOST_REQUIRE(!script::is_pay_op_return_pattern(ops));
+}
+
+// is_pay_witness_unknown_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__version_two__true)
+{
+    const auto version = operation::opcode_from_nonnegative(2_u8);
+    const operations ops{ { version }, { pattern_hash32, true } };
+    BOOST_REQUIRE(script::is_pay_witness_unknown_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__version_zero__false)
+{
+    const auto version = operation::opcode_from_nonnegative(0_u8);
+    const operations ops{ { version }, { pattern_hash20, true } };
+    BOOST_REQUIRE(!script::is_pay_witness_unknown_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__taproot__false)
+{
+    const auto version = operation::opcode_from_nonnegative(1_u8);
+    const operations ops{ { version }, { pattern_hash32, true } };
+    BOOST_REQUIRE(script::is_pay_witness_taproot_pattern(ops));
+    BOOST_REQUIRE(!script::is_pay_witness_unknown_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_witness_unknown_pattern__anchor__false)
+{
+    const auto version = operation::opcode_from_nonnegative(1_u8);
+    const operations ops{ { version }, { pattern_anchor, true } };
+    BOOST_REQUIRE(script::is_pay_anchor_pattern(ops));
+    BOOST_REQUIRE(!script::is_pay_witness_unknown_pattern(ops));
+}
+
+// is_pay_taproot_key_path_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_taproot_key_path_pattern__checksig__true)
+{
+    const operations ops{ { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_taproot_key_path_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_taproot_key_path_pattern__two_operations__false)
+{
+    const operations ops{ { opcode::checksig }, { opcode::checksig } };
+    BOOST_REQUIRE(!script::is_pay_taproot_key_path_pattern(ops));
+}
+
+// is_pay_tapscript_single_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_single_pattern__xonly_key__true)
+{
+    const operations ops{ { pattern_xonly, true }, { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_tapscript_single_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_single_pattern__compressed_key__false)
+{
+    const operations ops{ { pattern_compressed, true }, { opcode::checksig } };
+    BOOST_REQUIRE(!script::is_pay_tapscript_single_pattern(ops));
+}
+
+// is_pay_tapscript_timelock_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_timelock_pattern__checklocktimeverify__true)
+{
+    const operations ops
+    {
+        { opcode::push_positive_1 },
+        { opcode::checklocktimeverify },
+        { opcode::drop },
+        { pattern_xonly, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_tapscript_timelock_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_timelock_pattern__checksequenceverify__true)
+{
+    const operations ops
+    {
+        { opcode::push_positive_1 },
+        { opcode::checksequenceverify },
+        { opcode::drop },
+        { pattern_xonly, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_tapscript_timelock_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_timelock_pattern__not_timelock__false)
+{
+    const operations ops
+    {
+        { opcode::push_positive_1 },
+        { opcode::nop },
+        { opcode::drop },
+        { pattern_xonly, true },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_tapscript_timelock_pattern(ops));
+}
+
+// is_pay_key_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_key_hash_pattern__short_hash__true)
+{
+    const operations ops
+    {
+        { opcode::dup },
+        { opcode::hash160 },
+        { pattern_hash20, true },
+        { opcode::equalverify },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_key_hash_pattern__long_hash__false)
+{
+    const operations ops
+    {
+        { opcode::dup },
+        { opcode::hash160 },
+        { pattern_hash32, true },
+        { opcode::equalverify },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_key_hash_pattern(ops));
+}
+
+// is_pay_public_key_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_public_key_pattern__compressed__true)
+{
+    const operations ops{ { pattern_compressed, true }, { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_public_key_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_public_key_pattern__uncompressed__true)
+{
+    const operations ops{ { pattern_uncompressed, true }, { opcode::checksig } };
+    BOOST_REQUIRE(script::is_pay_public_key_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_public_key_pattern__xonly__false)
+{
+    const operations ops{ { pattern_xonly, true }, { opcode::checksig } };
+    BOOST_REQUIRE(!script::is_pay_public_key_pattern(ops));
+}
+
+// is_pay_multisig_standard_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__one_of_one__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_standard_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__two_of_three__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(2_u8) },
+        { pattern_compressed, true },
+        { pattern_uncompressed, true },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(3_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_standard_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__signatures_exceed_keys__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(2_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__invalid_key__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_xonly, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
+// Standard form requires the counts as op_1..op_16, not as data pushes.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__non_minimal_count__false)
+{
+    const operations ops
+    {
+        { data_chunk{ 0x01 }, false },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
+// is_pay_multisig_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__one_of_one__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(ops));
+}
+
+// Unlike the standard form this admits non-minimal counts.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__non_minimal_count__true)
+{
+    const operations ops
+    {
+        { data_chunk{ 0x01 }, false },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(ops));
+}
+
+// Unlike the standard form this admits invalid public key forms.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__invalid_key__true)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_xonly, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(script::is_pay_multisig_pattern(ops));
+}
+
+// Zero signatures verifies nothing, so it does not match.
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__zero_signatures__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_nonnegative(0_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__count_mismatch__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
+}
+
+// is_sign_public_key_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_public_key_pattern__endorsement__true)
+{
+    const operations ops{ { pattern_signature, true } };
+    BOOST_REQUIRE(script::is_sign_public_key_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_public_key_pattern__undersized__false)
+{
+    const operations ops{ { pattern_short, true } };
+    BOOST_REQUIRE(!script::is_sign_public_key_pattern(ops));
+}
+
+// is_sign_key_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_key_hash_pattern__endorsement_and_key__true)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_compressed, true }
+    };
+
+    BOOST_REQUIRE(script::is_sign_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_key_hash_pattern__endorsement_only__false)
+{
+    const operations ops{ { pattern_signature, true } };
+    BOOST_REQUIRE(!script::is_sign_key_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_key_hash_pattern__invalid_key__false)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_hash20, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_key_hash_pattern(ops));
+}
+
+// is_sign_multisig_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_multisig_pattern__dummy_and_endorsement__true)
+{
+    const operations ops
+    {
+        { data_chunk{}, true },
+        { pattern_signature, true }
+    };
+
+    BOOST_REQUIRE(script::is_sign_multisig_pattern(ops));
+}
+
+// The leading push must be the satoshi op_check_multisig dummy.
+BOOST_AUTO_TEST_CASE(script__is_sign_multisig_pattern__missing_dummy__false)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_signature, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_multisig_pattern__dummy_only__false)
+{
+    const operations ops{ { data_chunk{}, true } };
+    BOOST_REQUIRE(!script::is_sign_multisig_pattern(ops));
+}
+
+// is_sign_script_hash_pattern
+
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__push_only__true)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { pattern_hash20, true }
+    };
+
+    BOOST_REQUIRE(script::is_sign_script_hash_pattern(ops));
+}
+
+// The last push is the serialized script, so it cannot be empty.
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty_last_push__false)
+{
+    const operations ops
+    {
+        { pattern_signature, true },
+        { data_chunk{}, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__not_push_only__false)
+{
+    const operations ops
+    {
+        { opcode::nop },
+        { pattern_hash20, true }
+    };
+
+    BOOST_REQUIRE(!script::is_sign_script_hash_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty__false)
+{
+    BOOST_REQUIRE(!script::is_sign_script_hash_pattern(operations{}));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
