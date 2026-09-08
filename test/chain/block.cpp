@@ -809,4 +809,175 @@ BOOST_AUTO_TEST_CASE(block__signature_operations__coinbase_checksigs__expected)
 
 // is_unspent_coinbase_collision
 
+// check
+// ----------------------------------------------------------------------------
+
+// Sixty four byte non-coinbase transaction, the malleable64 unit.
+static transaction triad_tx64() NOEXCEPT
+{
+    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const inputs ins{ input{ point{ one_hash, 0 }, dups, 42 } };
+    const outputs outs{ output{ 42, dups } };
+    return transaction{ 42, ins, outs, 42 };
+}
+
+BOOST_AUTO_TEST_CASE(block__check__no_transactions__empty_block)
+{
+    const block instance{ header{}, transactions{} };
+    BOOST_REQUIRE_EQUAL(instance.check(), error::empty_block);
+}
+
+BOOST_AUTO_TEST_CASE(block__check__first_not_coinbase__first_not_coinbase)
+{
+    const block instance{ header{}, transactions{ spending_transaction() } };
+    BOOST_REQUIRE_EQUAL(instance.check(false), error::first_not_coinbase);
+}
+
+// A malleated block reports the commitment failure, not the structural one.
+BOOST_AUTO_TEST_CASE(block__check__malleated64_first_not_coinbase__invalid_transaction_commitment)
+{
+    const accessor instance{ header{}, transactions{ triad_tx64(), triad_tx64() } };
+    BOOST_REQUIRE_EQUAL(triad_tx64().serialized_size(false), 64u);
+    BOOST_REQUIRE(instance.is_first_non_coinbase());
+    BOOST_REQUIRE_EQUAL(instance.check(false), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__check__extra_coinbases__extra_coinbases)
+{
+    const auto txs = transactions{ coinbase_transaction(0, script{}), coinbase_transaction(1, script{}) };
+    const block instance{ header{}, txs };
+    BOOST_REQUIRE_EQUAL(instance.check(false), error::extra_coinbases);
+}
+
+BOOST_AUTO_TEST_CASE(block__check__identity_false__merkle_root_unchecked)
+{
+    const block instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
+    BOOST_REQUIRE(instance.check(false) != error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__check__identity_true__invalid_transaction_commitment)
+{
+    const block instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
+    BOOST_REQUIRE_EQUAL(instance.check(true), error::invalid_transaction_commitment);
+}
+
+// The context free check delegates to the transaction check.
+BOOST_AUTO_TEST_CASE(block__check__invalid_coinbase_script_size__invalid_coinbase_script_size)
+{
+    const block instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
+    BOOST_REQUIRE_EQUAL(instance.check(false), error::invalid_coinbase_script_size);
+}
+
+// check(context)
+// ----------------------------------------------------------------------------
+
+static block triad_block() NOEXCEPT
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    return block{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__minimal_block__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_bip34_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_bip34_on__coinbase_height_mismatch)
+{
+    const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false), error::coinbase_height_mismatch);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__matching_coinbase_script_bip34_on__block_success)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__overweight_bip141_off__block_success)
+{
+    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, big) } };
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__overweight_bip141_on__block_weight_limit)
+{
+    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, big) } };
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_weight_limit);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_false__block_success)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), spend } };
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_true__invalid_witness_commitment)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), spend } };
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, true), error::invalid_witness_commitment);
+}
+
+// The contextual check delegates to the transaction contextual check.
+BOOST_AUTO_TEST_CASE(block__check_context__locked_transaction__absolute_time_locked)
+{
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, sub1(0xffffffff) } };
+    const transaction locked{ 1, ins, outputs{ output{ 0, script{} } }, 200 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), locked } };
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::absolute_time_locked);
+}
+
+// accept
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__accept__claim_at_subsidy__block_success)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(5000000000, coinbase_script) } };
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__accept__claim_above_subsidy__coinbase_value_limit)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const block instance{ header{}, transactions{ coinbase_transaction(5000000001, coinbase_script) } };
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::coinbase_value_limit);
+}
+
+// confirm
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__confirm__coinbase_only__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_block().confirm(ctx), error::block_success);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

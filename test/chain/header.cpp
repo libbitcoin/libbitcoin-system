@@ -396,6 +396,48 @@ BOOST_AUTO_TEST_CASE(header__check__genesis_header__block_success)
     BOOST_REQUIRE_EQUAL(ec, error::block_success);
 }
 
+BOOST_AUTO_TEST_CASE(header__accept__sufficient__block_success)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::no_rules, 0, 99, 0, 4, 0x207fffff, 0 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(header__accept__insufficient_version__insufficient_block_version)
+{
+    const header instance{ 3, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::no_rules, 0, 99, 0, 4, 0x207fffff, 0 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::insufficient_block_version);
+}
+
+BOOST_AUTO_TEST_CASE(header__accept__timestamp_at_median_time_past__anachronistic_timestamp)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::no_rules, 0, 100, 0, 4, 0x207fffff, 0 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::anachronistic_timestamp);
+}
+
+BOOST_AUTO_TEST_CASE(header__accept__mismatched_work__incorrect_proof_of_work)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::no_rules, 0, 99, 0, 4, 0x207ffffe, 0 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::incorrect_proof_of_work);
+}
+
+BOOST_AUTO_TEST_CASE(header__accept__time_warp_patch_off__block_success)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::no_rules, 100, 99, 2016, 4, 0x207fffff, max_uint32 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(header__accept__time_warp_patch_on__early_timestamp)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::time_warp_patch, 100, 99, 2016, 4, 0x207fffff, max_uint32 };
+    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::early_timestamp);
+}
+
 BOOST_AUTO_TEST_CASE(header__check__zero_bits__invalid_proof_of_work)
 {
     const settings settings(selection::mainnet);
