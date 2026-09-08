@@ -1012,6 +1012,47 @@ BOOST_AUTO_TEST_CASE(block__check_context__locked_transaction__absolute_time_loc
     BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::absolute_time_locked);
 }
 
+// identify
+// ----------------------------------------------------------------------------
+
+// A block carrying witness data with no commitment, merkle root valid.
+static transactions witnessed_transactions() NOEXCEPT
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    return transactions{ coinbase_transaction(0, coinbase_script), spend };
+}
+
+static block witnessed_block() NOEXCEPT
+{
+    const auto txs = witnessed_transactions();
+    const auto root = bitcoin_hash(txs.front().hash(false), txs.back().hash(false));
+    const header head{ 1, hash_digest{}, root, 0, 0, 0 };
+    return block{ head, txs };
+}
+
+BOOST_AUTO_TEST_CASE(block__identify__witnessed_valid_merkle_root__block_success)
+{
+    const auto instance = witnessed_block();
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.identify(), error::block_success);
+}
+
+// The witness commitment check is gated, so it does not apply before bip141.
+BOOST_AUTO_TEST_CASE(block__identify__witnessed_bip141_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(witnessed_block().identify(ctx), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify__witnessed_bip141_on__invalid_witness_commitment)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(witnessed_block().identify(ctx), error::invalid_witness_commitment);
+}
+
 // accept
 // ----------------------------------------------------------------------------
 
