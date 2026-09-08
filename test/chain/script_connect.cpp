@@ -813,6 +813,81 @@ BOOST_AUTO_TEST_CASE(script__verify__multisig_invalid_signature_batched__success
     rows.clear();
 }
 
+static ec_xonly batch_xonly() NOEXCEPT
+{
+    ec_compressed public_key{};
+    secret_to_public(public_key, batch_secret);
+    return unsafe_array_cast<uint8_t, ec_xonly_size>(std::next(public_key.data()));
+}
+
+static transaction_accessor batch_taproot_tx(bool valid) NOEXCEPT
+{
+    const auto program = to_chunk(batch_xonly());
+    const script prevout_script{ script::to_pay_witness_pattern(1, program) };
+    const outputs outs{ output{ batch_value, script{} } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, chain::witness{}, max_input_sequence } };
+    const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
+    (*unsigned_tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+
+    hash_digest sighash{};
+    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto version = script_version::taproot;
+    unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {}, version, coverage::hash_default, taproot_rules);
+
+    auto digest = sighash;
+    if (!valid)
+        digest.front() ^= 0x01_u8;
+
+    ec_signature signature{};
+    schnorr::sign(signature, batch_secret, digest, {});
+
+    const chain::witness spender{ chunk_cptrs{ to_shared<data_chunk>(to_chunk(signature)) } };
+    const inputs signed_ins{ input{ point{ one_hash, 0 }, script{}, spender, max_input_sequence } };
+    const transaction_accessor tx{ 1, signed_ins, outs, 0 };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ batch_value, prevout_script });
+    return tx;
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__taproot_key_path_valid_signature__success)
+{
+    const auto tx = batch_taproot_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__taproot_key_path_wrong_signature__op_check_sig_schnorr3)
+{
+    const auto tx = batch_taproot_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0), error::op_check_sig_schnorr3);
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__taproot_valid_signature_batched__success_and_verifies)
+{
+    auto& rows = signatures::schnorr_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = batch_taproot_tx(true);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE(!rows.empty());
+    BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(script__verify__taproot_invalid_signature_batched__success_but_fails_verify)
+{
+    auto& rows = signatures::schnorr_rows();
+    rows.clear();
+
+    const signatures capture{ true };
+    const auto tx = batch_taproot_tx(false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ taproot_rules }, 0, capture), error::script_success);
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE(!rows.empty());
+    BOOST_REQUIRE(!rows.verify());
+    rows.clear();
+}
+
 // An input script is never batchable, so a disabled capture changes nothing.
 BOOST_AUTO_TEST_CASE(script__verify__p2pk_capture_disabled__no_rows)
 {
