@@ -462,7 +462,7 @@ jobs:
         working-directory: 'libbitcoin-system'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/addresses/qrencode/*" "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -952,7 +952,7 @@ jobs:
         working-directory: 'libbitcoin-system'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/addresses/qrencode/*" "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -1365,7 +1365,7 @@ jobs:
         working-directory: 'libbitcoin-system'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/libbitcoin-system/examples/*" "${{ github.workspace }}/libbitcoin-system/test/*" "${{ github.workspace }}/libbitcoin-system/src/wallet/addresses/qrencode/*" "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}

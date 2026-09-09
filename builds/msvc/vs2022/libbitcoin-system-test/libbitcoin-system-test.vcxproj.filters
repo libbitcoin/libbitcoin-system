@@ -567,10 +567,22 @@
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\interpreter_connect.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\interpreter_run.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\number.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\program.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\program_batch.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\program_verify.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\sizing.cpp">

@@ -334,8 +334,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\interpreter_connect.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\interpreter_run.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\program.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\program_batch.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\program_verify.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\sizing.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\stack.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
