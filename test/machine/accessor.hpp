@@ -294,6 +294,186 @@ protected:
     }
 };
 
+// Isolates run() from dispatch, recording the operations dispatched to it.
+// Conditional scope is modeled, as run() predicates dispatch upon it.
+template <typename Stack>
+class mock_runner
+  : public interpreter_accessor<Stack>
+{
+public:
+    using base = interpreter_accessor<Stack>;
+    using base::base;
+
+    // Result returned by each dispatch.
+    error::op_error_t op_result{ error::op_success };
+
+    // Codes dispatched, in order.
+    std::vector<chain::opcode> dispatched{};
+
+protected:
+    error::op_error_t run_op(
+        const typename base::op_iterator& op) NOEXCEPT override
+    {
+        const auto code = op->code();
+        dispatched.push_back(code);
+
+        if (code == chain::opcode::if_)
+            base::begin_if(false);
+
+        if (code == chain::opcode::endif)
+            base::end_if_();
+
+        return op_result;
+    }
+};
+
+// Isolates run_op() from handler behavior, recording the handler dispatched
+// and the argument passed to those handlers that take one.
+template <typename Stack>
+class mock_handlers
+  : public interpreter_accessor<Stack>
+{
+public:
+    using base = interpreter_accessor<Stack>;
+    using base::base;
+    using op_error_t = error::op_error_t;
+    using op_iterator = typename base::op_iterator;
+
+    mutable std::string_view handler{};
+    mutable chain::opcode code{};
+    mutable int8_t number{};
+
+protected:
+    op_error_t set(std::string_view name) const NOEXCEPT
+    {
+        handler = name;
+        return error::op_success;
+    }
+
+    op_error_t op_unevaluated(chain::opcode value) const NOEXCEPT override
+    {
+        code = value;
+        return set("op_unevaluated");
+    }
+
+    op_error_t op_nop(chain::opcode value) const NOEXCEPT override
+    {
+        code = value;
+        return set("op_nop_code");
+    }
+
+    op_error_t op_push_number(int8_t value) NOEXCEPT override
+    {
+        number = value;
+        return set("op_push_number");
+    }
+
+    op_error_t op_push_size(const chain::operation&) NOEXCEPT override
+    {
+        return set("op_push_size");
+    }
+
+    op_error_t op_push_one_size(const chain::operation&) NOEXCEPT override
+    {
+        return set("op_push_one_size");
+    }
+
+    op_error_t op_push_two_size(const chain::operation&) NOEXCEPT override
+    {
+        return set("op_push_two_size");
+    }
+
+    op_error_t op_push_four_size(const chain::operation&) NOEXCEPT override
+    {
+        return set("op_push_four_size");
+    }
+
+    op_error_t op_codeseparator(const op_iterator&) NOEXCEPT override
+    {
+        return set("op_codeseparator");
+    }
+
+    op_error_t op_nop() const NOEXCEPT override { return set("op_nop"); }
+    op_error_t op_ver() const NOEXCEPT override { return set("op_ver"); }
+    op_error_t op_if() NOEXCEPT override { return set("op_if"); }
+    op_error_t op_notif() NOEXCEPT override { return set("op_notif"); }
+    op_error_t op_verif() const NOEXCEPT override { return set("op_verif"); }
+    op_error_t op_vernotif() const NOEXCEPT override { return set("op_vernotif"); }
+    op_error_t op_else() NOEXCEPT override { return set("op_else"); }
+    op_error_t op_endif() NOEXCEPT override { return set("op_endif"); }
+    op_error_t op_verify() NOEXCEPT override { return set("op_verify"); }
+    op_error_t op_return() const NOEXCEPT override { return set("op_return"); }
+    op_error_t op_to_alt_stack() NOEXCEPT override { return set("op_to_alt_stack"); }
+    op_error_t op_from_alt_stack() NOEXCEPT override { return set("op_from_alt_stack"); }
+    op_error_t op_drop2() NOEXCEPT override { return set("op_drop2"); }
+    op_error_t op_dup2() NOEXCEPT override { return set("op_dup2"); }
+    op_error_t op_dup3() NOEXCEPT override { return set("op_dup3"); }
+    op_error_t op_over2() NOEXCEPT override { return set("op_over2"); }
+    op_error_t op_rot2() NOEXCEPT override { return set("op_rot2"); }
+    op_error_t op_swap2() NOEXCEPT override { return set("op_swap2"); }
+    op_error_t op_if_dup() NOEXCEPT override { return set("op_if_dup"); }
+    op_error_t op_depth() NOEXCEPT override { return set("op_depth"); }
+    op_error_t op_drop() NOEXCEPT override { return set("op_drop"); }
+    op_error_t op_dup() NOEXCEPT override { return set("op_dup"); }
+    op_error_t op_nip() NOEXCEPT override { return set("op_nip"); }
+    op_error_t op_over() NOEXCEPT override { return set("op_over"); }
+    op_error_t op_pick() NOEXCEPT override { return set("op_pick"); }
+    op_error_t op_roll() NOEXCEPT override { return set("op_roll"); }
+    op_error_t op_rot() NOEXCEPT override { return set("op_rot"); }
+    op_error_t op_swap() NOEXCEPT override { return set("op_swap"); }
+    op_error_t op_tuck() NOEXCEPT override { return set("op_tuck"); }
+    op_error_t op_cat() const NOEXCEPT override { return set("op_cat"); }
+    op_error_t op_substr() const NOEXCEPT override { return set("op_substr"); }
+    op_error_t op_left() const NOEXCEPT override { return set("op_left"); }
+    op_error_t op_right() const NOEXCEPT override { return set("op_right"); }
+    op_error_t op_size() NOEXCEPT override { return set("op_size"); }
+    op_error_t op_invert() const NOEXCEPT override { return set("op_invert"); }
+    op_error_t op_and() const NOEXCEPT override { return set("op_and"); }
+    op_error_t op_or() const NOEXCEPT override { return set("op_or"); }
+    op_error_t op_xor() const NOEXCEPT override { return set("op_xor"); }
+    op_error_t op_equal() NOEXCEPT override { return set("op_equal"); }
+    op_error_t op_equal_verify() NOEXCEPT override { return set("op_equal_verify"); }
+    op_error_t op_add1() NOEXCEPT override { return set("op_add1"); }
+    op_error_t op_sub1() NOEXCEPT override { return set("op_sub1"); }
+    op_error_t op_mul2() const NOEXCEPT override { return set("op_mul2"); }
+    op_error_t op_div2() const NOEXCEPT override { return set("op_div2"); }
+    op_error_t op_negate() NOEXCEPT override { return set("op_negate"); }
+    op_error_t op_abs() NOEXCEPT override { return set("op_abs"); }
+    op_error_t op_not() NOEXCEPT override { return set("op_not"); }
+    op_error_t op_nonzero() NOEXCEPT override { return set("op_nonzero"); }
+    op_error_t op_add() NOEXCEPT override { return set("op_add"); }
+    op_error_t op_sub() NOEXCEPT override { return set("op_sub"); }
+    op_error_t op_mul() const NOEXCEPT override { return set("op_mul"); }
+    op_error_t op_div() const NOEXCEPT override { return set("op_div"); }
+    op_error_t op_mod() const NOEXCEPT override { return set("op_mod"); }
+    op_error_t op_lshift() const NOEXCEPT override { return set("op_lshift"); }
+    op_error_t op_rshift() const NOEXCEPT override { return set("op_rshift"); }
+    op_error_t op_bool_and() NOEXCEPT override { return set("op_bool_and"); }
+    op_error_t op_bool_or() NOEXCEPT override { return set("op_bool_or"); }
+    op_error_t op_num_equal() NOEXCEPT override { return set("op_num_equal"); }
+    op_error_t op_num_equal_verify() NOEXCEPT override { return set("op_num_equal_verify"); }
+    op_error_t op_num_not_equal() NOEXCEPT override { return set("op_num_not_equal"); }
+    op_error_t op_less_than() NOEXCEPT override { return set("op_less_than"); }
+    op_error_t op_greater_than() NOEXCEPT override { return set("op_greater_than"); }
+    op_error_t op_less_than_or_equal() NOEXCEPT override { return set("op_less_than_or_equal"); }
+    op_error_t op_greater_than_or_equal() NOEXCEPT override { return set("op_greater_than_or_equal"); }
+    op_error_t op_min() NOEXCEPT override { return set("op_min"); }
+    op_error_t op_max() NOEXCEPT override { return set("op_max"); }
+    op_error_t op_within() NOEXCEPT override { return set("op_within"); }
+    op_error_t op_ripemd160() NOEXCEPT override { return set("op_ripemd160"); }
+    op_error_t op_sha1() NOEXCEPT override { return set("op_sha1"); }
+    op_error_t op_sha256() NOEXCEPT override { return set("op_sha256"); }
+    op_error_t op_hash160() NOEXCEPT override { return set("op_hash160"); }
+    op_error_t op_hash256() NOEXCEPT override { return set("op_hash256"); }
+    op_error_t op_check_sig() NOEXCEPT override { return set("op_check_sig"); }
+    op_error_t op_check_sig_verify() NOEXCEPT override { return set("op_check_sig_verify"); }
+    op_error_t op_check_multisig_verify() NOEXCEPT override { return set("op_check_multisig_verify"); }
+    op_error_t op_check_multisig() NOEXCEPT override { return set("op_check_multisig"); }
+    op_error_t op_check_locktime_verify() const NOEXCEPT override { return set("op_check_locktime_verify"); }
+    op_error_t op_check_sequence_verify() const NOEXCEPT override { return set("op_check_sequence_verify"); }
+    op_error_t op_check_sig_add() NOEXCEPT override { return set("op_check_sig_add"); }
+};
+
 // Single-input transaction for input-script program construction.
 inline chain::transaction accessor_transaction(const chain::script& script,
     uint32_t sequence=chain::max_input_sequence, uint32_t locktime=0,
