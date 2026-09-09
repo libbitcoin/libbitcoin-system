@@ -61,7 +61,9 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
             }
 
             // Store fault, verify inline, recoverable if disk full.
+            LCOV_EXCL_START("Decline requires exhausting the group id domain.")
             capture_.faulted.store(true, relaxed);
+            LCOV_EXCL_STOP()
         }
         else
         {
@@ -108,8 +110,10 @@ try_batch_multisig_verification(const chunk_xptrs& points,
         { sigs.data(), endorsements.size() }))
     {
         // Store fault, verify inline, recoverable if disk full.
+        LCOV_EXCL_START("Decline requires exhausting the group id domain.")
         capture_.faulted.store(true, relaxed);
         return false;
+        LCOV_EXCL_STOP()
     }
 
     // Capture is bypass.
@@ -140,7 +144,9 @@ verify_schnorr_signature(const data_chunk& point, const hash_digest& hash,
             }
 
             // Store fault, verify inline, recoverable if disk full.
+            LCOV_EXCL_START("Schnorr append cannot decline.")
             capture_.faulted.store(true, relaxed);
+            LCOV_EXCL_STOP()
         }
         else
         {
