@@ -46,7 +46,7 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 // ----------------------------------------------------------------------------
 
 block::block() NOEXCEPT
-  : block(to_shared<chain::header>(), to_shared<transaction_cptrs>(), false)
+  : block({}, {}, false)
 {
 }
 
@@ -63,8 +63,7 @@ block::block(const chain::header& header,
 
 block::block(const chain::header::cptr& header,
     const transactions_cptr& txs) NOEXCEPT
-  : block(header ? header : to_shared<chain::header>(),
-      txs ? txs : to_shared<transaction_cptrs>(), true)
+  : block(header, txs, true)
 {
 }
 
@@ -106,7 +105,7 @@ block::block(const chain::header::cptr& header,
   : header_(header),
     txs_(txs),
     valid_(valid),
-    size_(serialized_size(*txs))
+    size_(serialized_size(*txs_))
 {
 }
 

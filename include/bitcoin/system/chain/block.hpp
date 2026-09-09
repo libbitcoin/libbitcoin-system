@@ -208,8 +208,8 @@ private:
 
     // Block should be stored as shared (adds 16 bytes).
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).
-    chain::header::cptr header_;
-    chain::transactions_cptr txs_;
+    default_ptr<chain::header> header_;
+    default_ptr<transaction_cptrs> txs_;
 
     // Cache.
     bool valid_;

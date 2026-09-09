@@ -328,8 +328,8 @@ private:
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
-    chain::inputs_cptr inputs_;
-    chain::outputs_cptr outputs_;
+    default_ptr<input_cptrs> inputs_;
+    default_ptr<output_cptrs> outputs_;
     uint32_t locktime_;
 
     // Cache.

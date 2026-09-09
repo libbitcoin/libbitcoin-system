@@ -46,10 +46,7 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // ----------------------------------------------------------------------------
 
 transaction::transaction() NOEXCEPT
-  : transaction(0,
-      to_shared<input_cptrs>(),
-      to_shared<output_cptrs>(),
-      0, false, false)
+  : transaction(0, {}, {}, 0, false, false)
 {
 }
 
@@ -110,12 +107,12 @@ transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
     const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,
     bool valid) NOEXCEPT
   : version_(version),
-    inputs_(inputs ? inputs : to_shared<input_cptrs>()),
-    outputs_(outputs ? outputs : to_shared<output_cptrs>()),
+    inputs_(inputs),
+    outputs_(outputs),
     locktime_(locktime),
     segregated_(segregated),
     valid_(valid),
-    size_(serialized_size(*inputs, *outputs, segregated))
+    size_(serialized_size(*inputs_, *outputs_, segregated))
 {
 }
 

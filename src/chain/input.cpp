@@ -45,11 +45,7 @@ static_assert(max_script_size <
 // Default point is null_hash and point::null_index. 
 // Default metadata is spent, invalid, max_size_t value. 
 input::input() NOEXCEPT
-  : input(
-      to_shared<chain::point>(),
-      to_shared<chain::script>(),
-      to_shared<chain::witness>(),
-      0, false)
+  : input({}, {}, {}, 0, false)
 {
 }
 
@@ -58,8 +54,7 @@ input::input(chain::point&& point, chain::script&& script,
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
-      to_shared<chain::witness>(),
-      sequence, true)
+      {}, sequence, true)
 {
 }
 
@@ -68,8 +63,7 @@ input::input(const chain::point& point, const chain::script& script,
   : input(
       to_shared(point),
       to_shared(script),
-      to_shared<chain::witness>(),
-      sequence, true)
+      {}, sequence, true)
 {
 }
 
@@ -141,56 +135,14 @@ input::input(reader& source) NOEXCEPT
 // protected
 input::input(const chain::point::cptr& point, const chain::script::cptr& script,
     const chain::witness::cptr& witness, uint32_t sequence, bool valid) NOEXCEPT
-  : point_(to_pointer(point)),
-    script_(to_pointer(script)),
-    witness_(to_pointer(witness)),
+  : point_(point),
+    script_(script),
+    witness_(witness),
     sequence_(sequence),
     valid_(valid),
     size_(serialized_size(*script_, *witness_))
 {
 }
-
-// A moved-from input is equivalent to a default input.
-input::input(input&& other) NOEXCEPT
-  : point_(std::move(other.point_)),
-    script_(std::move(other.script_)),
-    witness_(std::move(other.witness_)),
-    sequence_(other.sequence_),
-    valid_(other.valid_),
-    size_(other.size_)
-{
-    prevout = std::move(other.prevout);
-    metadata = other.metadata;
-    other.reset();
-}
-
-input& input::operator=(input&& other) NOEXCEPT
-{
-    point_ = std::move(other.point_);
-    script_ = std::move(other.script_);
-    witness_ = std::move(other.witness_);
-    sequence_ = other.sequence_;
-    valid_ = other.valid_;
-    size_ = other.size_;
-    prevout = std::move(other.prevout);
-    metadata = other.metadata;
-    other.reset();
-    return *this;
-}
-
-// private
-void input::reset() NOEXCEPT
-{
-    point_ = to_empty<chain::point>();
-    script_ = to_empty<chain::script>();
-    witness_ = to_empty<chain::witness>();
-    sequence_ = zero;
-    valid_ = false;
-    size_ = serialized_size(*script_, *witness_);
-    prevout.reset();
-    metadata = {};
-}
-
 
 // Operators.
 // ----------------------------------------------------------------------------
@@ -240,7 +192,7 @@ input input::from_data(reader& source) NOEXCEPT
     {
         to_shared<chain::point>(source),
         to_shared<chain::script>(source, true),
-        to_shared<chain::witness>(),
+        {},
         source.read_4_bytes_little_endian(),
         source
     };

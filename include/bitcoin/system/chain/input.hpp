@@ -37,10 +37,7 @@ namespace chain {
 class BC_API input
 {
 public:
-    DEFAULT_COPY(input);
-    input(input&& other) NOEXCEPT;
-    input& operator=(input&& other) NOEXCEPT;
-    virtual ~input() = default;
+    DEFAULT_COPY_MOVE_DESTRUCT(input);
 
     typedef std::shared_ptr<const input> cptr;
 
@@ -130,7 +127,6 @@ private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 
     static input from_data(reader& source) NOEXCEPT;
-    void reset() NOEXCEPT;
     static sizes serialized_size(const chain::script& script,
         const chain::witness& witness) NOEXCEPT;
 
@@ -143,9 +139,9 @@ private:
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).
     // mutable chain::prevout::cptr prevout; (public)
-    chain::point::cptr point_;
-    chain::script::cptr script_;
-    chain::witness::cptr witness_;
+    default_ptr<chain::point> point_;
+    default_ptr<chain::script> script_;
+    default_ptr<chain::witness> witness_;
     uint32_t sequence_;
 
     // Cache.
