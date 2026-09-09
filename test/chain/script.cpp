@@ -472,4 +472,32 @@ BOOST_AUTO_TEST_CASE(script__hash__checksig__expected)
     BOOST_REQUIRE_EQUAL(instance.hash(), sha256_hash(base16_chunk("ac")));
 }
 
+BOOST_AUTO_TEST_CASE(script__inequality__different__true)
+{
+    const script instance{ operations{ { opcode::pick } } };
+    const script other{ operations{ { opcode::roll } } };
+    BOOST_REQUIRE(instance != other);
+    BOOST_REQUIRE(!(instance != instance));
+}
+
+// Operation counting traps a previously-invalidated stream.
+BOOST_AUTO_TEST_CASE(script__construct__invalid_source__invalid)
+{
+    const data_chunk empty{};
+    read::bytes::copy source(empty);
+    source.invalidate();
+    const script instance{ source, true };
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_data__ostream__matches_chunk)
+{
+    const script instance{ operations{ { opcode::pick }, { opcode::roll } } };
+    std::ostringstream stream{};
+    instance.to_data(stream, true);
+    const auto text = stream.str();
+    const data_chunk data(text.begin(), text.end());
+    BOOST_REQUIRE_EQUAL(data, instance.to_data(true));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

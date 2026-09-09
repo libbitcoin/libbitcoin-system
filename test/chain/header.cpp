@@ -475,4 +475,18 @@ BOOST_AUTO_TEST_CASE(header__set_state__copied__same_state)
     BOOST_REQUIRE(copy.get_state() == state);
 }
 
+// A target of zero is the overflow sentinel, so contributes no work.
+BOOST_AUTO_TEST_CASE(header__proof__zero_target__zero)
+{
+    BOOST_REQUIRE_EQUAL(chain::header::proof(0), 0u);
+}
+
+// An exponent above 29 scales the difficulty down by 256 per excess byte.
+BOOST_AUTO_TEST_CASE(header__difficulty__high_exponent__scaled_down)
+{
+    const chain::header instance{ 0, {}, {}, 0, 0x1e00ffff, 0 };
+    const chain::header other{ 0, {}, {}, 0, 0x1d00ffff, 0 };
+    BOOST_REQUIRE_EQUAL(instance.difficulty(), other.difficulty() / 256.0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

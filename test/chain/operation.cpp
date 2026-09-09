@@ -1501,4 +1501,47 @@ BOOST_AUTO_TEST_CASE(operation__opcode_to_maximum_size__non_payload_codes__zero)
     BOOST_CHECK_EQUAL(operation::opcode_to_maximum_size(opcode::checksig), 0u);
 }
 
+// A non-push operation carries no data, so the shared default is returned.
+BOOST_AUTO_TEST_CASE(operation__data_ptr__non_push__shared_empty)
+{
+    const operation instance{ opcode::nop };
+    const operation other{ opcode::dup };
+    BOOST_REQUIRE(instance.data_ptr());
+    BOOST_REQUIRE(instance.data_ptr()->empty());
+    BOOST_REQUIRE_EQUAL(instance.data_ptr(), other.data_ptr());
+}
+
+// The default operation is the invalid sentinel.
+BOOST_AUTO_TEST_CASE(operation__to_string__default__question)
+{
+    const operation instance{};
+    BOOST_REQUIRE(!instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "?");
+}
+
+BOOST_AUTO_TEST_CASE(operation__to_string__bitcoind_reserved_138__op_reserved2)
+{
+    const operation instance{ opcode::reserved_138 };
+    BOOST_REQUIRE_EQUAL(instance.to_string(0, true), "OP_RESERVED2");
+}
+
+// The token is numeric but exceeds the int64 domain.
+BOOST_AUTO_TEST_CASE(operation__construct__overflow_decimal__invalid)
+{
+    const operation instance{ std::string_view("9223372036854775808") };
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
+// Deserialization does not resume from a previously-invalidated stream.
+BOOST_AUTO_TEST_CASE(operation__construct__invalid_source__default)
+{
+    const data_chunk empty{};
+    read::bytes::copy source(empty);
+    source.invalidate();
+    BOOST_REQUIRE(!source);
+
+    const operation instance{ source };
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
