@@ -40,6 +40,8 @@ to_shareds(std_vector<Type>&& values) NOEXCEPT
             return to_shared(std::move(value));
         });
 
+    values.clear();
+
     return out;
 }
 
@@ -58,6 +60,21 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
         });
 
     return out;
+}
+
+// Null pointers are permitted, substituted by a shared default instance.
+template <typename Type>
+const std::shared_ptr<const Type>& to_empty() NOEXCEPT
+{
+    static const auto empty = to_shared<const Type>();
+    return empty;
+}
+
+template <typename Type>
+const std::shared_ptr<const Type>& to_pointer(
+    const std::shared_ptr<const Type>& ptr) NOEXCEPT
+{
+    return ptr ? ptr : to_empty<Type>();
 }
 
 // Allocate a shared instance and construct with given arguments.
