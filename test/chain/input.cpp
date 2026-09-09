@@ -437,4 +437,128 @@ BOOST_AUTO_TEST_CASE(input__witness_ptr__witnessed__matches_witness)
     BOOST_REQUIRE(*instance.witness_ptr() == instance.witness());
 }
 
+// A null point or script pointer is replaced by a default instance.
+BOOST_AUTO_TEST_CASE(input__construct__null_pointers__defaults)
+{
+    const input instance{ point::cptr{}, script::cptr{}, 7 };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.point() == point{});
+    BOOST_REQUIRE(instance.script() == script{});
+    BOOST_REQUIRE_EQUAL(instance.sequence(), 7u);
+}
+
+BOOST_AUTO_TEST_CASE(input__construct__pointers__expected)
+{
+    const auto value = to_shared<point>(point{ one_hash, 42 });
+    const auto code = to_shared<script>(script{ operations{ operation{ opcode::dup } } });
+    const input instance{ value, code, to_shared<chain::witness>(), 7 };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.point() == *value);
+    BOOST_REQUIRE(instance.script() == *code);
+}
+
+// Constant reference optimizers.
+
+BOOST_AUTO_TEST_CASE(input__cref_point_lesser__lesser_index__true)
+{
+    const auto hash = one_hash;
+    const cref_point left{ hash, 1 };
+    const cref_point right{ hash, 2 };
+    BOOST_REQUIRE(left < right);
+    BOOST_REQUIRE(!(right < left));
+}
+
+// Equal indexes order by hash, an arbitrary compare for uniqueness sorting.
+BOOST_AUTO_TEST_CASE(input__cref_point_lesser__same_index__orders_by_hash)
+{
+    const auto lesser = null_hash;
+    const auto greater = one_hash;
+    const cref_point left{ lesser, 1 };
+    const cref_point right{ greater, 1 };
+    BOOST_REQUIRE(left < right);
+    BOOST_REQUIRE(!(right < left));
+}
+
+BOOST_AUTO_TEST_CASE(input__cref_point_inequality__different__true)
+{
+    const auto hash = one_hash;
+    const cref_point left{ hash, 1 };
+    const cref_point right{ hash, 2 };
+    BOOST_REQUIRE(left != right);
+    BOOST_REQUIRE(!(left != left));
+}
+
+// signature_operations
+// ----------------------------------------------------------------------------
+// Counts follow satoshi GetTransactionSigOpCost: legacy input script sigops
+// are weighted, witness script sigops are not, and a plain embedded script is
+// weighted [bip16][bip141].
+
+static input sigops_input(const script& input_script,
+    const script& prevout_script, const chain::witness& spender={}) NOEXCEPT
+{
+    input instance{ point{ one_hash, 0 }, input_script, spender, 42 };
+    instance.prevout = to_shared(output{ 0, prevout_script });
+    return instance;
+}
+
+// Each p2wkh input is counted as one sigop [bip141].
+BOOST_AUTO_TEST_CASE(input__signature_operations__native_key_hash__one)
+{
+    const data_chunk program(short_hash_size, 0x01_u8);
+    const script prevout{ script::to_pay_witness_pattern(0, program) };
+    const auto instance = sigops_input(script{}, prevout);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), one);
+}
+
+// p2wsh sigops are counted accurately, from the witness script [bip141].
+BOOST_AUTO_TEST_CASE(input__signature_operations__native_script_hash__witness_script_count)
+{
+    const operations ops{ operation{ opcode::checksig }, operation{ opcode::checksig } };
+    const auto data = script{ ops }.to_data(false);
+    const data_chunk program(hash_size, 0x01_u8);
+    const script prevout{ script::to_pay_witness_pattern(0, program) };
+    const chunk_cptrs stack{ to_shared<data_chunk>(data) };
+    const auto instance = sigops_input(script{}, prevout, chain::witness{ stack });
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), two);
+}
+
+// A p2sh-wrapped witness program counts as the witness program does.
+BOOST_AUTO_TEST_CASE(input__signature_operations__embedded_key_hash__one)
+{
+    const data_chunk program(short_hash_size, 0x01_u8);
+    const auto data = script{ script::to_pay_witness_pattern(0, program) }.to_data(false);
+    const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(data)) };
+    const script input_script{ operations{ operation{ data, false } } };
+    const auto instance = sigops_input(input_script, prevout);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), one);
+}
+
+// Sigops in a plain embedded script are weighted [bip141].
+BOOST_AUTO_TEST_CASE(input__signature_operations__embedded_script__weighted_count)
+{
+    const auto data = script{ operations{ operation{ opcode::checksig } } }.to_data(false);
+    const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(data)) };
+    const script input_script{ operations{ operation{ data, false } } };
+    const auto instance = sigops_input(input_script, prevout);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), heavy_sigops_factor);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, false), one);
+}
+
+// Sigops in tapscripts do not count towards the block limit [bip342].
+BOOST_AUTO_TEST_CASE(input__signature_operations__taproot__zero)
+{
+    const data_chunk program(hash_size, 0x01_u8);
+    const script prevout{ script::to_pay_witness_pattern(1, program) };
+    const auto instance = sigops_input(script{}, prevout);
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), zero);
+}
+
+// A null prevout (coinbase) counts only the input script.
+BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__input_script_only)
+{
+    const input instance{ point{}, script{ operations{ operation{ opcode::checksig } } }, 42 };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), heavy_sigops_factor);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
