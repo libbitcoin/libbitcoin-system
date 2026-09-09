@@ -652,4 +652,255 @@ BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__undecodable_endor
     BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
 }
 
+// Threshold capture.
+// ----------------------------------------------------------------------------
+// A satisfiable terminal comparison opens a row cursor at the first sigop,
+// and each subsequent sigop streams to it.
+
+constexpr auto batch_secret2 = base16_array("0000000000000000000000000000000000000000000000000000000000000002");
+
+static ec_xonly batch_xonly(const ec_secret& secret) NOEXCEPT
+{
+    ec_compressed public_key{};
+    secret_to_public(public_key, secret);
+    const auto xonly = std::next(public_key.data());
+    return unsafe_array_cast<uint8_t, ec_xonly_size>(xonly);
+}
+
+static ec_signature batch_schnorr(const ec_secret& secret,
+    const hash_digest& hash) NOEXCEPT
+{
+    ec_signature signature{};
+    schnorr::sign(signature, secret, hash, {});
+    return signature;
+}
+
+// <key0> CHECKSIG <key1> CHECKSIGADD 2 NUMEQUAL
+static script batch_threshold() NOEXCEPT
+{
+    const operations ops
+    {
+        operation{ to_chunk(batch_xonly(batch_secret)), false },
+        operation{ opcode::checksig },
+        operation{ to_chunk(batch_xonly(batch_secret2)), false },
+        operation{ opcode::checksigadd },
+        operation{ opcode::push_positive_2 },
+        operation{ opcode::numequal }
+    };
+
+    return script{ ops };
+}
+
+// An input script is never batchable.
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__threshold_input_script__verified_inline)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(batch_threshold(), max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+
+    const hash_digest hash{};
+    const auto point = to_chunk(batch_xonly(batch_secret));
+    const auto signature = batch_schnorr(batch_secret, hash);
+    BOOST_REQUIRE(in.verify_schnorr_signature(point, hash, signature));
+    BOOST_REQUIRE(rows.empty());
+    BOOST_REQUIRE(!capture.batched.load());
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__threshold_output_script__batched_and_verifies)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    batch_accessor out{ in, to_shared<script>(batch_threshold()) };
+
+    // The unevaluated signature on the stack implies two expected sigops.
+    out.push_chunk(data_chunk{ 0x42_u8 });
+
+    const hash_digest hash{};
+    const auto point0 = to_chunk(batch_xonly(batch_secret));
+    const auto point1 = to_chunk(batch_xonly(batch_secret2));
+    const auto signature0 = batch_schnorr(batch_secret, hash);
+    const auto signature1 = batch_schnorr(batch_secret2, hash);
+    BOOST_REQUIRE(out.verify_schnorr_signature(point0, hash, signature0));
+    BOOST_REQUIRE(out.verify_schnorr_signature(point1, hash, signature1));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), two);
+    BOOST_REQUIRE_EQUAL(rows.thresholds(), two);
+    BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+// Capture fabricates sigop success, deferring the verdict to the accumulator.
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__threshold_wrong_signature__batched_but_fails_verify)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    batch_accessor out{ in, to_shared<script>(batch_threshold()) };
+    out.push_chunk(data_chunk{ 0x42_u8 });
+
+    const hash_digest hash{};
+    const auto point0 = to_chunk(batch_xonly(batch_secret));
+    const auto point1 = to_chunk(batch_xonly(batch_secret2));
+    const auto signature0 = batch_schnorr(batch_secret, hash);
+    BOOST_REQUIRE(out.verify_schnorr_signature(point0, hash, signature0));
+    BOOST_REQUIRE(out.verify_schnorr_signature(point1, hash, signature0));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), two);
+    BOOST_REQUIRE(!rows.verify());
+    rows.clear();
+}
+
+// Capture.
+// ----------------------------------------------------------------------------
+// A batchable pattern captures and fabricates success, deferring the verdict.
+
+static script batch_key_path() NOEXCEPT
+{
+    const operations ops
+    {
+        operation{ to_chunk(batch_xonly(batch_secret)), false },
+        operation{ opcode::checksig }
+    };
+
+    return script{ ops };
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__batchable_script__captured)
+{
+    auto& rows = chain::signatures::ecdsa_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    const batch_accessor out{ in, to_shared<script>(batch_p2pk()) };
+
+    const auto point = batch_key();
+    const hash_digest hash{};
+    const ec_signature signature{};
+    BOOST_REQUIRE(out.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.groups(), one);
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__batchable_group__captured)
+{
+    auto& rows = chain::signatures::ecdsa_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    const batch_accessor out{ in, to_shared<script>(batch_multisig()) };
+
+    const auto key = batch_key();
+    const auto endorsement = batch_endorsement(coverage::hash_all);
+    const chunk_xptrs points{ chunk_xptr{ key } };
+    const chunk_xptrs endorsements{ chunk_xptr{ endorsement } };
+    BOOST_REQUIRE(out.try_batch_multisig_verification(points, endorsements));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.groups(), one);
+    rows.clear();
+}
+
+// The key path pattern is a one of one threshold, so the stack must exceed the
+// threshold minimum for the single sigop capture to be reached.
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__batchable_script__captured)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    batch_accessor out{ in, to_shared<script>(batch_key_path()) };
+    out.push_chunk(data_chunk{ 0x42_u8 });
+
+    const hash_digest hash{};
+    const auto point = to_chunk(batch_xonly(batch_secret));
+    const auto signature = batch_schnorr(batch_secret, hash);
+    BOOST_REQUIRE(out.verify_schnorr_signature(point, hash, signature));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), one);
+    BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+// subscript
+// ----------------------------------------------------------------------------
+
+static transaction funded_tx() NOEXCEPT
+{
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
+
+    const outputs outs{ output{ 42, script{} } };
+    const transaction tx{ 1, ins, outs, 0 };
+    const output prevout{ 42, script{} };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(prevout);
+    return tx;
+}
+
+// Op stripping is not applied to bip141 v0 scripts [bip143].
+BOOST_AUTO_TEST_CASE(program__subscript__segwit_bip143__unstripped)
+{
+    const operations ops{ operation{ opcode::codeseparator } };
+    const auto separator = to_shared<script>(script{ ops });
+    const auto tx = funded_tx();
+    const auto it = tx.inputs_ptr()->begin();
+    const auto stack = std::make_shared<chunk_cptrs>();
+    const chain::signatures capture{};
+    const batch_accessor out{ tx, it, separator, flags::bip143_rule, script_version::segwit, stack, capture };
+
+    const data_chunk endorsement{ 0x01_u8 };
+    const chunk_xptr single{ endorsement };
+    BOOST_REQUIRE(out.subscript(single) == separator);
+    BOOST_REQUIRE(out.subscript(chunk_xptrs{ single }) == separator);
+}
+
+BOOST_AUTO_TEST_CASE(program__subscript__codeseparator__stripped)
+{
+    const operations ops{ operation{ opcode::codeseparator }, operation{ opcode::dup } };
+    const auto tx = accessor_transaction(script{ ops }, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const chain::signatures capture{};
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+
+    const data_chunk endorsement{ 0x01_u8 };
+    const chunk_xptr single{ endorsement };
+    BOOST_REQUIRE_EQUAL(in.subscript(single)->ops().size(), one);
+    BOOST_REQUIRE_EQUAL(in.subscript(chunk_xptrs{ single })->ops().size(), one);
+}
+
+// The subscripted sighash cannot fail, so the cache is set unconditionally.
+BOOST_AUTO_TEST_CASE(program__set_hash__subscript__cached)
+{
+    const chain::signatures capture{};
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    BOOST_REQUIRE(!in.cached(coverage::hash_all));
+    in.set_hash(batch_p2pk(), coverage::hash_all);
+    BOOST_REQUIRE(in.cached(coverage::hash_all));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
