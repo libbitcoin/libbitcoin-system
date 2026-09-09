@@ -174,4 +174,35 @@ BOOST_AUTO_TEST_CASE(point__serialized_size__always__expected)
     BOOST_REQUIRE_EQUAL(point::serialized_size(), hash_size + sizeof(uint32_t));
 }
 
+BOOST_AUTO_TEST_CASE(point__construct__fast_stream__round_trips)
+{
+    const point expected{ one_hash, 42 };
+    const auto data = expected.to_data();
+    stream::in::fast source{ data };
+    const point instance{ source };
+    BOOST_REQUIRE(instance == expected);
+}
+
+// Constant reference optimizers.
+
+BOOST_AUTO_TEST_CASE(point__cref_lesser__lesser_index__true)
+{
+    const point instance1{ one_hash, 1 };
+    const point instance2{ one_hash, 2 };
+    const point_cref left{ instance1 };
+    const point_cref right{ instance2 };
+    BOOST_REQUIRE(left < right);
+    BOOST_REQUIRE(!(right < left));
+}
+
+BOOST_AUTO_TEST_CASE(point__cref_inequality__different__true)
+{
+    const point instance1{ one_hash, 1 };
+    const point instance2{ one_hash, 2 };
+    const point_cref left{ instance1 };
+    const point_cref right{ instance2 };
+    BOOST_REQUIRE(left != right);
+    BOOST_REQUIRE(!(left != left));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

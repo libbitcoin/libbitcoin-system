@@ -245,4 +245,30 @@ BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_unspendable__false)
     BOOST_REQUIRE(!instance.is_dust(42));
 }
 
+BOOST_AUTO_TEST_CASE(output__construct__script_pointer__expected)
+{
+    const auto value = to_shared<script>(script{ operations{ operation{ opcode::dup } } });
+    const output instance{ 42, value };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.value(), 42u);
+    BOOST_REQUIRE(instance.script() == *value);
+}
+
+// A null script pointer is replaced by a default script.
+BOOST_AUTO_TEST_CASE(output__construct__null_script_pointer__default_script)
+{
+    const output instance{ 42, script::cptr{} };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.script() == script{});
+}
+
+BOOST_AUTO_TEST_CASE(output__construct__fast_stream__round_trips)
+{
+    const output expected{ 42, script{ operations{ operation{ opcode::dup } } } };
+    const auto data = expected.to_data();
+    stream::in::fast source{ data };
+    const output instance{ source };
+    BOOST_REQUIRE(instance == expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
