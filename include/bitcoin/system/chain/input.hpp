@@ -127,20 +127,14 @@ private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 
     static input from_data(reader& source) NOEXCEPT;
-    static sizes serialized_size(const chain::script& script) NOEXCEPT;
     static sizes serialized_size(const chain::script& script,
         const chain::witness& witness) NOEXCEPT;
-    static const chain::witness& no_witness() NOEXCEPT;
-    static const chain::witness::cptr& no_witness_cptr() NOEXCEPT;
 
     // So that witness may be set late in deserialization.
     friend class transaction;
     size_t nominal_size() const NOEXCEPT;
     size_t witnessed_size() const NOEXCEPT;
     bool set_witness(reader& source) NOEXCEPT;
-
-    const chain::witness& get_witness() const NOEXCEPT;
-    const chain::witness::cptr& get_witness_cptr() const NOEXCEPT;
 
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).
