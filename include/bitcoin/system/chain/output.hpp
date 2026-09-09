@@ -107,7 +107,7 @@ private:
     // Output should be stored as shared (adds 16 bytes).
     // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
     uint64_t value_;
-    chain::script::cptr script_;
+    default_ptr<chain::script> script_;
 
     // Cache.
     bool valid_;

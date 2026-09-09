@@ -45,11 +45,7 @@ static_assert(max_script_size <
 // Default point is null_hash and point::null_index. 
 // Default metadata is spent, invalid, max_size_t value. 
 input::input() NOEXCEPT
-  : input(
-      to_shared<chain::point>(),
-      to_shared<chain::script>(),
-      to_shared<chain::witness>(),
-      0, false)
+  : input({}, {}, {}, 0, false)
 {
 }
 
@@ -58,8 +54,7 @@ input::input(chain::point&& point, chain::script&& script,
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
-      to_shared<chain::witness>(),
-      sequence, true)
+      {}, sequence, true)
 {
 }
 
@@ -68,18 +63,13 @@ input::input(const chain::point& point, const chain::script& script,
   : input(
       to_shared(point),
       to_shared(script),
-      to_shared<chain::witness>(),
-      sequence, true)
+      {}, sequence, true)
 {
 }
 
 input::input(const chain::point::cptr& point,
     const chain::script::cptr& script, uint32_t sequence) NOEXCEPT
-  : input(
-      point ? point : to_shared<chain::point>(),
-      script ? script : to_shared<chain::script>(),
-      to_shared<chain::witness>(),
-      sequence, true)
+  : input(point, script, {}, sequence, true)
 {
 }
 
@@ -150,7 +140,7 @@ input::input(const chain::point::cptr& point, const chain::script::cptr& script,
     witness_(witness),
     sequence_(sequence),
     valid_(valid),
-    size_(serialized_size(*script, *witness))
+    size_(serialized_size(*script_, *witness_))
 {
 }
 
@@ -202,7 +192,7 @@ input input::from_data(reader& source) NOEXCEPT
     {
         to_shared<chain::point>(source),
         to_shared<chain::script>(source, true),
-        to_shared<chain::witness>(),
+        {},
         source.read_4_bytes_little_endian(),
         source
     };

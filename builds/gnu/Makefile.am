@@ -414,6 +414,7 @@ include_bitcoin_system_data_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/data/data_reference.hpp \
     ${srcdir}/../../include/bitcoin/system/data/data_slab.hpp \
     ${srcdir}/../../include/bitcoin/system/data/data_slice.hpp \
+    ${srcdir}/../../include/bitcoin/system/data/default_ptr.hpp \
     ${srcdir}/../../include/bitcoin/system/data/exclusive_slice.hpp \
     ${srcdir}/../../include/bitcoin/system/data/external_ptr.hpp \
     ${srcdir}/../../include/bitcoin/system/data/iterable.hpp \
@@ -1075,6 +1076,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/data/data_reference.cpp \
     ${srcdir}/../../test/data/data_slab.cpp \
     ${srcdir}/../../test/data/data_slice.cpp \
+    ${srcdir}/../../test/data/default_ptr.cpp \
     ${srcdir}/../../test/data/exclusive_slice.cpp \
     ${srcdir}/../../test/data/external_ptr.cpp \
     ${srcdir}/../../test/data/integer.cpp \

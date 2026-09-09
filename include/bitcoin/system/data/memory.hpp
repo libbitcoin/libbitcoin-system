@@ -104,6 +104,15 @@ template <typename Type>
 std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
 to_shareds(const std_vector<Type>& values) NOEXCEPT;
 
+/// Shared instance of a default constructed Type.
+template <typename Type>
+const std::shared_ptr<const Type>& to_empty() NOEXCEPT;
+
+/// The pointer, or a pointer to a default instance if the pointer is null.
+template <typename Type>
+const std::shared_ptr<const Type>& to_pointer(
+    const std::shared_ptr<const Type>& ptr) NOEXCEPT;
+
 /// Allocate a shared instance and construct with given arguments.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,

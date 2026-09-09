@@ -139,9 +139,9 @@ private:
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).
     // mutable chain::prevout::cptr prevout; (public)
-    chain::point::cptr point_;
-    chain::script::cptr script_;
-    chain::witness::cptr witness_;
+    default_ptr<chain::point> point_;
+    default_ptr<chain::script> script_;
+    default_ptr<chain::witness> witness_;
     uint32_t sequence_;
 
     // Cache.

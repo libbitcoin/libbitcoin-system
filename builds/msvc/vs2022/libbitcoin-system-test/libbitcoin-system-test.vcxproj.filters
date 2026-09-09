@@ -381,6 +381,9 @@
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\default_ptr.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\exclusive_slice.cpp">
       <Filter>src\data</Filter>
     </ClCompile>

@@ -254,13 +254,6 @@ BOOST_AUTO_TEST_CASE(output__construct__script_pointer__expected)
     BOOST_REQUIRE(instance.script() == *value);
 }
 
-BOOST_AUTO_TEST_CASE(output__construct__null_script_pointer__default_script)
-{
-    const output instance{ 42, script::cptr{} };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.script() == script{});
-}
-
 BOOST_AUTO_TEST_CASE(output__construct__fast_stream__round_trips)
 {
     const output expected{ 42, script{ operations{ operation{ opcode::dup } } } };

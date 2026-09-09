@@ -181,6 +181,14 @@ BOOST_AUTO_TEST_CASE(memory__to_shareds1__non_empty__expected)
     BOOST_REQUIRE_EQUAL(ptr->at(1)->right, 2);
 }
 
+BOOST_AUTO_TEST_CASE(memory__to_shareds1__non_empty__source_emptied)
+{
+    auto instance = std_vector<type>{ {}, { 1, 2 } };
+    const test_shareds_ptr ptr = to_shareds<type>(std::move(instance));
+    BOOST_REQUIRE_EQUAL(ptr->size(), 2u);
+    BOOST_REQUIRE(instance.empty());
+}
+
 BOOST_AUTO_TEST_CASE(memory__to_shareds2__empty__empty)
 {
     const auto instance = std_vector<type>{};
