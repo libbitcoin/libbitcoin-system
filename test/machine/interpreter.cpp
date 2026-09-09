@@ -2999,6 +2999,72 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_empty_witness__invalid
     BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_witness);
 }
 
+// A witness script and the p2wsh program that commits to it.
+static script witness_script() NOEXCEPT
+{
+    return script{ operations{ operation{ opcode::push_positive_1 } } };
+}
+
+static data_chunk witness_program() NOEXCEPT
+{
+    return to_chunk(sha256_hash(witness_script().to_data(false)));
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_true_script__script_success)
+{
+    const script prevout{ script::to_pay_witness_pattern(0, witness_program()) };
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>(witness_script().to_data(false))
+    };
+
+    const chain::witness spender{ stack };
+    const auto tx = connect_tx(script{}, prevout, spender);
+    const auto it = tx.inputs_ptr()->begin();
+    const signatures capture{};
+    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
+}
+
+// Signature verification is faked, so the endorsement is arbitrary.
+BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_key_path__script_success)
+{
+    const data_chunk program(hash_size, 0x02_u8);
+    const script prevout{ script::to_pay_witness_pattern(1, program) };
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>(data_chunk(ec_signature_size, 0x11_u8))
+    };
+
+    const chain::witness spender{ stack };
+    const auto tx = connect_tx(script{}, prevout, spender);
+    const auto it = tx.inputs_ptr()->begin();
+    const signatures capture{};
+    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_script_hash__script_success)
+{
+    const script embedded{ operations{ operation{ opcode::push_positive_1 } } };
+    const auto data = embedded.to_data(false);
+    const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(data)) };
+    const script input_script{ operations{ operation{ data, false } } };
+    const auto tx = connect_tx(input_script, prevout);
+    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_witness__script_success)
+{
+    const script prevout{ script::to_pay_witness_pattern(0, witness_program()) };
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>(witness_script().to_data(false))
+    };
+
+    const chain::witness spender{ stack };
+    const auto tx = connect_tx(script{}, prevout, spender);
+    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
+}
+
 // connect_embedded
 // ----------------------------------------------------------------------------
 // The embedded script is popped from the input script evaluation stack.
@@ -3061,6 +3127,25 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__non_witness_embedded_with_wi
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{ data });
     BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::unexpected_witness);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness__script_success)
+{
+    const script embedded{ script::to_pay_witness_pattern(0, witness_program()) };
+    const auto data = embedded.to_data(false);
+    const script input_script{ operations{ operation{ data, false } } };
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>(witness_script().to_data(false))
+    };
+
+    const chain::witness spender{ stack };
+    const auto tx = connect_tx(input_script, script{}, spender);
+    const auto it = tx.inputs_ptr()->begin();
+    const signatures capture{};
+    connector in{ tx, it, flags::all_rules, capture };
+    in.push_chunk(data_chunk{ data });
+    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::script_success);
 }
 
 // The input script must be a nominal push of the embedded script [bip141].
