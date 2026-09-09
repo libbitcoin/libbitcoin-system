@@ -254,6 +254,7 @@
     <ClCompile Include="..\..\..\..\test\data\data_reference.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slab.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\default_ptr.cpp" />
     <ClCompile Include="..\..\..\..\test\data\exclusive_slice.cpp" />
     <ClCompile Include="..\..\..\..\test\data\external_ptr.cpp" />
     <ClCompile Include="..\..\..\..\test\data\integer.cpp" />
