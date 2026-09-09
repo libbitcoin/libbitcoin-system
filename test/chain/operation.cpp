@@ -1544,4 +1544,23 @@ BOOST_AUTO_TEST_CASE(operation__construct__invalid_source__default)
     BOOST_REQUIRE(!instance.is_valid());
 }
 
+// Access the protected code/data constructor.
+class accessor
+  : public operation
+{
+public:
+    accessor(opcode code, const chunk_cptr& data, bool underflow) NOEXCEPT
+      : operation(code, data, underflow)
+    {
+    }
+};
+
+// A push code that is not minimal for its data size carries a size prefix.
+BOOST_AUTO_TEST_CASE(operation__to_string__non_minimal_push_size__prefixed)
+{
+    const auto data = to_shared<const data_chunk>(data_chunk{ 0x07 });
+    const accessor instance{ opcode::push_size_2, data, false };
+    BOOST_REQUIRE_EQUAL(instance.to_string(0), "[0.07]");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

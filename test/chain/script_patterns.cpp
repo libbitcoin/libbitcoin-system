@@ -1500,4 +1500,68 @@ BOOST_AUTO_TEST_CASE(script__is_coinbase_pattern__trailing_operations__true)
     BOOST_REQUIRE(script::is_coinbase_pattern(ops, 1));
 }
 
+// output_pattern
+// -----------------------------------------------------------------------------
+
+static const std::string script_pay_script_hash =
+    "hash160 [0000000000000000000000000000000000000000] equal";
+static const std::string script_pay_public_key =
+    "[02abababababababababababababababababababababababababababababababab] checksig";
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__pay_script_hash__expected)
+{
+    const script instance(script_pay_script_hash);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_script_hash);
+}
+
+BOOST_AUTO_TEST_CASE(script__output_pattern__pay_public_key__expected)
+{
+    const script instance(script_pay_public_key);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.output_pattern() == chain::script_pattern::pay_public_key);
+}
+
+// input_pattern
+// -----------------------------------------------------------------------------
+
+static const std::string endorsement =
+    "[30440220011111111111111111111111111111111111111111111111111111111111"
+    "1111022002222222222222222222222222222222222222222222222222222222222222"
+    "2201]";
+
+BOOST_AUTO_TEST_CASE(script__input_pattern__sign_key_hash__expected)
+{
+    const std::string text = endorsement +
+        " [02abababababababababababababababababababababababababababababababab]";
+    const script instance(text);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::sign_key_hash);
+}
+
+BOOST_AUTO_TEST_CASE(script__input_pattern__push_only__sign_script_hash)
+{
+    const script instance("[0102] [0304]");
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::sign_script_hash);
+}
+
+// sigop counting
+// -----------------------------------------------------------------------------
+
+// Accurate counting reads the key count from the preceding positive opcode.
+BOOST_AUTO_TEST_CASE(script__signature_operations__multisig_accurate__key_count)
+{
+    const script instance(script_1_of_3_multisig);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true), 3u);
+}
+
+BOOST_AUTO_TEST_CASE(script__signature_operations__multisig_inaccurate__default)
+{
+    const script instance(script_1_of_3_multisig);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false), multisig_default_sigops);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
