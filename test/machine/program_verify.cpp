@@ -43,7 +43,6 @@ static transaction funded_tx() NOEXCEPT
     return tx;
 }
 
-// Op stripping is not applied to bip141 v0 scripts [bip143].
 BOOST_AUTO_TEST_CASE(program__subscript__segwit_bip143__unstripped)
 {
     const operations ops{ operation{ opcode::codeseparator } };
@@ -74,7 +73,6 @@ BOOST_AUTO_TEST_CASE(program__subscript__codeseparator__stripped)
     BOOST_REQUIRE_EQUAL(in.subscript(chunk_xptrs{ single })->ops().size(), one);
 }
 
-// The subscripted sighash cannot fail, so the cache is set unconditionally.
 BOOST_AUTO_TEST_CASE(program__set_hash__subscript__cached)
 {
     const chain::signatures capture{};

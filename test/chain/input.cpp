@@ -437,7 +437,6 @@ BOOST_AUTO_TEST_CASE(input__witness_ptr__witnessed__matches_witness)
     BOOST_REQUIRE(*instance.witness_ptr() == instance.witness());
 }
 
-// A null point or script pointer is replaced by a default instance.
 BOOST_AUTO_TEST_CASE(input__construct__null_pointers__defaults)
 {
     const input instance{ point::cptr{}, script::cptr{}, 7 };
@@ -468,7 +467,6 @@ BOOST_AUTO_TEST_CASE(input__cref_point_lesser__lesser_index__true)
     BOOST_REQUIRE(!(right < left));
 }
 
-// Equal indexes order by hash, an arbitrary compare for uniqueness sorting.
 BOOST_AUTO_TEST_CASE(input__cref_point_lesser__same_index__orders_by_hash)
 {
     const auto lesser = null_hash;
@@ -490,9 +488,6 @@ BOOST_AUTO_TEST_CASE(input__cref_point_inequality__different__true)
 
 // signature_operations
 // ----------------------------------------------------------------------------
-// Counts follow satoshi GetTransactionSigOpCost: legacy input script sigops
-// are weighted, witness script sigops are not, and a plain embedded script is
-// weighted [bip16][bip141].
 
 static input sigops_input(const script& input_script,
     const script& prevout_script, const chain::witness& spender={}) NOEXCEPT
@@ -502,7 +497,6 @@ static input sigops_input(const script& input_script,
     return instance;
 }
 
-// Each p2wkh input is counted as one sigop [bip141].
 BOOST_AUTO_TEST_CASE(input__signature_operations__native_key_hash__one)
 {
     const data_chunk program(short_hash_size, 0x01_u8);
@@ -511,7 +505,6 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__native_key_hash__one)
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), one);
 }
 
-// p2wsh sigops are counted accurately, from the witness script [bip141].
 BOOST_AUTO_TEST_CASE(input__signature_operations__native_script_hash__witness_script_count)
 {
     const operations ops{ operation{ opcode::checksig }, operation{ opcode::checksig } };
@@ -523,7 +516,6 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__native_script_hash__witness_sc
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), two);
 }
 
-// A p2sh-wrapped witness program counts as the witness program does.
 BOOST_AUTO_TEST_CASE(input__signature_operations__embedded_key_hash__one)
 {
     const data_chunk program(short_hash_size, 0x01_u8);
@@ -534,7 +526,6 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__embedded_key_hash__one)
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), one);
 }
 
-// Sigops in a plain embedded script are weighted [bip141].
 BOOST_AUTO_TEST_CASE(input__signature_operations__embedded_script__weighted_count)
 {
     const auto data = script{ operations{ operation{ opcode::checksig } } }.to_data(false);
@@ -545,7 +536,6 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__embedded_script__weighted_coun
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, false), one);
 }
 
-// Sigops in tapscripts do not count towards the block limit [bip342].
 BOOST_AUTO_TEST_CASE(input__signature_operations__taproot__zero)
 {
     const data_chunk program(hash_size, 0x01_u8);
@@ -554,7 +544,6 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__taproot__zero)
     BOOST_REQUIRE_EQUAL(instance.signature_operations(true, true), zero);
 }
 
-// A null prevout (coinbase) counts only the input script.
 BOOST_AUTO_TEST_CASE(input__signature_operations__no_prevout__input_script_only)
 {
     const input instance{ point{}, script{ operations{ operation{ opcode::checksig } } }, 42 };

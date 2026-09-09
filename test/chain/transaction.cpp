@@ -1835,7 +1835,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all_anyone_can
     BOOST_REQUIRE_EQUAL(sighash, base16_array("cccb739eca6c13a8a89e6e5cd317ffe55669bbda23f2fd37b0f18755e008edd2"));
 }
 
-// anyone_can_pay commits to the spent output, which the node always populates.
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_anyone_can_pay_no_prevout__false)
 {
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1847,7 +1846,6 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_anyone_can_pay_no_prevo
     BOOST_REQUIRE(!tx.signature_hash(sighash, input, {}, 42, tapleaf, script_version::taproot, coverage::all_anyone_can_pay, bip341_flags));
 }
 
-// hash_single commits to the output of the same index, which must exist.
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_single_output_overflow__false)
 {
     const inputs ins

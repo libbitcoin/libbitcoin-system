@@ -401,8 +401,6 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_time_exceeded__pro
     BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
 }
 
-// Within the easy time limit satoshi returns the bits of the last block that
-// is either at a retarget height or does not carry the limit [testnet].
 BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_within_limit__last_non_limit_bits)
 {
     settings settings(selection::testnet3);

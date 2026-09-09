@@ -201,7 +201,6 @@ BOOST_AUTO_TEST_CASE(outpoint__construct__fast_stream__round_trips)
     BOOST_REQUIRE_EQUAL(instance.value(), 99u);
 }
 
-// Value does not contribute to identity, so ordering is by point alone.
 BOOST_AUTO_TEST_CASE(outpoint__lesser__lesser_point__true)
 {
     const outpoint instance1{ point{ one_hash, 1 }, 99 };

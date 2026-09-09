@@ -810,9 +810,6 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__unsegregated_no_commi
 
 // Witness commitment [bip141].
 // ----------------------------------------------------------------------------
-// The commitment is the last coinbase output of the commitment pattern, and
-// commits to sha256d(witness merkle root || witness reserved value). The
-// reserved value is a single 32 byte coinbase input witness element.
 
 static script commitment_script(const hash_digest& commitment) NOEXCEPT
 {
@@ -853,13 +850,11 @@ static transaction two_commitment_coinbase(const hash_digest& first,
     return transaction{ 1, ins, outs, 0 };
 }
 
-// The coinbase wtxid is null, so a coinbase only block commits to null_hash.
 static hash_digest expected_commitment(const hash_digest& reservation) NOEXCEPT
 {
     return sha256::double_hash(null_hash, reservation);
 }
 
-// An invalid witness reserved value size invalidates the block [bip141].
 BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__commitment_without_reservation__true)
 {
     const accessor instance{ header{}, transactions{ commitment_coinbase(one_hash, witness{}) } };
@@ -879,7 +874,6 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__valid_commitment__fal
     BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
 }
 
-// Satoshi retains the last matching output, so the last commitment governs.
 BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_valid__false)
 {
     const auto commitment = expected_commitment(one_hash);

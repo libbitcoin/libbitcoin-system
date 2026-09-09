@@ -232,8 +232,6 @@ BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__undecodable_endor
 
 // Threshold capture.
 // ----------------------------------------------------------------------------
-// A satisfiable terminal comparison opens a row cursor at the first sigop,
-// and each subsequent sigop streams to it.
 
 constexpr auto batch_secret2 = base16_array("0000000000000000000000000000000000000000000000000000000000000002");
 
@@ -316,7 +314,6 @@ BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__threshold_output_script_
     rows.clear();
 }
 
-// Capture fabricates sigop success, deferring the verdict to the accumulator.
 BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__threshold_wrong_signature__batched_but_fails_verify)
 {
     auto& rows = chain::signatures::schnorr_rows();
@@ -343,7 +340,6 @@ BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__threshold_wrong_signatur
 
 // Capture.
 // ----------------------------------------------------------------------------
-// A batchable pattern captures and fabricates success, deferring the verdict.
 
 static script batch_key_path() NOEXCEPT
 {

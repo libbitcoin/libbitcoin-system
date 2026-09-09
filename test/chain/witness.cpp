@@ -477,7 +477,6 @@ BOOST_AUTO_TEST_CASE(witness__construct__data_slice_prefixed__round_trips)
     BOOST_REQUIRE(instance == expected);
 }
 
-// Unprefixed deserialization reads elements until the source is exhausted.
 BOOST_AUTO_TEST_CASE(witness__construct__data_slice_unprefixed__round_trips)
 {
     const chain::witness expected{ witness_stack() };

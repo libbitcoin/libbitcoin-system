@@ -31,7 +31,6 @@ using namespace system::machine;
 using mocked = mock_program<contiguous_stack>;
 using connector = interpreter_accessor<contiguous_stack, mocked>;
 
-// A script whose first operation fails the run, before any dispatch.
 static script unrunnable_script() NOEXCEPT
 {
     const data_chunk data(add1(max_push_data_size), 0x00_u8);
@@ -142,7 +141,6 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__reserved_version__script_succ
     BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
 }
 
-// P2SH-wrapped version 1 outputs remain unencumbered [bip341].
 BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_embedded__script_success)
 {
     const data_chunk program(hash_size, 0x00_u8);
@@ -153,7 +151,6 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_embedded__script_succ
     BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, true, capture), error::script_success);
 }
 
-// Behaves as script_version::reserved if taproot is not active.
 BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_bip341_off__script_success)
 {
     const data_chunk program(hash_size, 0x00_u8);
@@ -184,7 +181,6 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_empty_witness__invalid
     BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_witness);
 }
 
-// A witness script and the p2wsh program that commits to it.
 static script witness_script() NOEXCEPT
 {
     return script{ operations{ operation{ opcode::push_positive_1 } } };
@@ -215,7 +211,6 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_true_script__script_su
     BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
 }
 
-// Signature verification is faked, so the endorsement is arbitrary.
 BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_key_path__script_success)
 {
     const data_chunk program(hash_size, 0x02_u8);
@@ -412,7 +407,6 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness_false_scrip
     BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::stack_false);
 }
 
-// The input script must be a nominal push of the embedded script [bip141].
 BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__dirty_embedded_witness__dirty_embed)
 {
     const data_chunk program(short_hash_size, 0x01_u8);

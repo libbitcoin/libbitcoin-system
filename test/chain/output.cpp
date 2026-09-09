@@ -254,7 +254,6 @@ BOOST_AUTO_TEST_CASE(output__construct__script_pointer__expected)
     BOOST_REQUIRE(instance.script() == *value);
 }
 
-// A null script pointer is replaced by a default script.
 BOOST_AUTO_TEST_CASE(output__construct__null_script_pointer__default_script)
 {
     const output instance{ 42, script::cptr{} };
