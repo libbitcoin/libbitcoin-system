@@ -317,9 +317,9 @@ static chain::script commitment_script(const hash_digest& commitment) NOEXCEPT
 {
     constexpr auto head = to_big_endian(chain::witness_head);
     data_chunk data(head.size() + hash_size);
+    const auto start = std::next(data.begin(), head.size());
     std::copy(head.begin(), head.end(), data.begin());
-    std::copy(commitment.begin(), commitment.end(),
-        std::next(data.begin(), head.size()));
+    std::copy(commitment.begin(), commitment.end(), start);
 
     return chain::script
     {

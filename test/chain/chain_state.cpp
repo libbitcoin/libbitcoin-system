@@ -935,4 +935,152 @@ BOOST_AUTO_TEST_CASE(chain_state__get_map__no_retarget__unrequested)
     BOOST_REQUIRE_EQUAL(map.timestamp_retarget, chain_state::map::unrequested);
 }
 
+// properties
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__context__always__matches_properties)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state state{ transition_values(), settings };
+    const auto ctx = state.context();
+    BOOST_REQUIRE_EQUAL(ctx.flags, state.flags());
+    BOOST_REQUIRE_EQUAL(ctx.timestamp, state.timestamp());
+    BOOST_REQUIRE_EQUAL(ctx.median_time_past, state.median_time_past());
+    BOOST_REQUIRE_EQUAL(ctx.height, state.height());
+    BOOST_REQUIRE_EQUAL(ctx.work_required, state.work_required());
+    BOOST_REQUIRE_EQUAL(ctx.previous_timestamp, state.previous_timestamp());
+    const auto version = state.minimum_block_version();
+    BOOST_REQUIRE_EQUAL(ctx.minimum_block_version, version);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required__invalid_previous_bits__zero)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    auto values = transition_values();
+    values.bits.ordered.clear();
+    values.bits.ordered.push_back(0u);
+    const chain_state state{ std::move(values), settings };
+    BOOST_REQUIRE_EQUAL(state.work_required(), 0u);
+}
+
+// promotion collections
+// ----------------------------------------------------------------------------
+
+// The oldest timestamp is dequeued once the median window is exceeded.
+static chain::chain_state::data window_values()
+{
+    auto values = transition_values();
+    values.timestamp.ordered.clear();
+    values.timestamp.ordered.push_back(1000u);
+    values.timestamp.ordered.push_back(2u);
+    values.timestamp.ordered.push_back(3u);
+    values.timestamp.ordered.push_back(4u);
+    values.timestamp.ordered.push_back(5u);
+    values.timestamp.ordered.push_back(6u);
+    values.timestamp.ordered.push_back(7u);
+    values.timestamp.ordered.push_back(8u);
+    values.timestamp.ordered.push_back(9u);
+    values.timestamp.ordered.push_back(10u);
+    values.timestamp.ordered.push_back(11u);
+    values.timestamp.self = 12u;
+    return values;
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__oldest_timestamp_dequeued)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ window_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.median_time_past(), 7u);
+}
+
+// retarget promotion
+// ----------------------------------------------------------------------------
+
+static chain::chain_state::data retarget_values()
+{
+    auto values = transition_values();
+    values.height = 2016;
+    values.timestamp.ordered.push_back(950u);
+    return values;
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__retarget_height__promoted)
+{
+    settings settings(selection::mainnet);
+    const chain_state top{ retarget_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.height(), 2017u);
+    BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), 1000u);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__ltc_time_warp__promoted)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_time_warp_patch = true;
+    const chain_state top{ retarget_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.height(), 2017u);
+    BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), 1000u);
+}
+
+// checkpoint caching
+// ----------------------------------------------------------------------------
+// The bip9 and bip30_deactivate hashes are cached at their checkpoint height,
+// and the cached hash activates the associated rules.
+
+static chain::chain_state::data uncached_values()
+{
+    auto values = transition_values();
+    values.bip30_deactivate_hash = one_hash;
+    values.bip9_bit0_hash = one_hash;
+    values.bip9_bit1_hash = one_hash;
+    values.bip9_bit2_hash = one_hash;
+    return values;
+}
+
+static void set_checkpoints(settings& settings, const hash_digest& hash)
+{
+    settings.bip30_deactivate_checkpoint = { hash, 43 };
+    settings.bip9_bit0_active_checkpoint = { hash, 43 };
+    settings.bip9_bit1_active_checkpoint = { hash, 43 };
+    settings.bip9_bit2_active_checkpoint = { hash, 43 };
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__pool_to_block__checkpoints__activated)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    set_checkpoints(settings, null_hash);
+
+    const chain_state top{ uncached_values(), settings };
+    const chain_state pool{ top, settings };
+    const chain::block block{ transition_header(1100u), transactions{} };
+    const chain_state state{ pool, block, settings };
+
+    BOOST_REQUIRE(!to_bool(pool.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip141_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip341_rule));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__checkpoints__activated)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const auto header = transition_header(1100u);
+    set_checkpoints(settings, header.hash());
+
+    const chain_state parent{ uncached_values(), settings };
+    const chain_state state{ parent, header, settings };
+
+    BOOST_REQUIRE(!to_bool(parent.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip141_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip341_rule));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
