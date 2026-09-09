@@ -1017,14 +1017,61 @@ BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__retarget_height__promo
     BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), 1000u);
 }
 
-BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__ltc_time_warp__promoted)
+// The retargeting interval is configured down so a full period is spannable.
+// bitcoind starts the period (interval - 1) blocks back, litecoin goes back
+// the full interval, so the patched period start is one block earlier.
+
+static chain::chain_state::data warp_values()
+{
+    chain::chain_state::data values{};
+    values.height = 4;
+    values.hash = one_hash;
+    values.bits.self = 0x1d00ffffu;
+    values.version.self = 4u;
+    values.timestamp.self = 980u;
+    values.bits.ordered.push_back(0x1d00ffffu);
+    values.version.ordered.push_back(4u);
+    values.timestamp.ordered.push_back(970u);
+    values.cumulative_work = 1u;
+    return values;
+}
+
+static system::chain::header warp_header(const hash_digest& previous,
+    uint32_t timestamp)
+{
+    return { 4u, previous, system::hash_digest{}, timestamp, 0x1d00ffffu, 0u };
+}
+
+static uint32_t warp_work_required(bool patch)
 {
     settings settings(selection::mainnet);
-    settings.forks.ltc_time_warp_patch = true;
-    const chain_state top{ retarget_values(), settings };
-    const chain_state pool{ top, settings };
-    BOOST_REQUIRE_EQUAL(pool.height(), 2017u);
-    BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), 1000u);
+    settings.retargeting_interval_seconds = 40u;
+    settings.block_spacing_seconds = 10u;
+    settings.forks.ltc_time_warp_patch = patch;
+
+    const chain_state top{ warp_values(), settings };
+    const auto header5 = warp_header(top.hash(), 990u);
+    const chain_state state5{ top, header5, settings };
+    const auto header6 = warp_header(state5.hash(), 995u);
+    const chain_state state6{ state5, header6, settings };
+    const auto header7 = warp_header(state6.hash(), 1000u);
+    const chain_state state7{ state6, header7, settings };
+    const auto header8 = warp_header(state7.hash(), 1005u);
+    const chain_state state8{ state7, header8, settings };
+
+    BOOST_REQUIRE_EQUAL(state8.height(), 8u);
+    return state8.work_required();
+}
+
+// Period start is height 4 (timestamp 980), so the timespan is 1000-980.
+// The patched period start is height 3 (timestamp 970), timespan 1000-970.
+// A longer timespan retargets to a larger (easier) target.
+BOOST_AUTO_TEST_CASE(chain_state__work_required__ltc_time_warp_patch__easier)
+{
+    const auto plain = warp_work_required(false);
+    const auto patched = warp_work_required(true);
+    BOOST_REQUIRE_NE(patched, plain);
+    BOOST_REQUIRE(compact::expand(patched) > compact::expand(plain));
 }
 
 // checkpoint caching
