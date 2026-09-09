@@ -37,7 +37,10 @@ namespace chain {
 class BC_API input
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(input);
+    DEFAULT_COPY(input);
+    input(input&& other) NOEXCEPT;
+    input& operator=(input&& other) NOEXCEPT;
+    virtual ~input() = default;
 
     typedef std::shared_ptr<const input> cptr;
 
@@ -127,6 +130,7 @@ private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 
     static input from_data(reader& source) NOEXCEPT;
+    void reset() NOEXCEPT;
     static sizes serialized_size(const chain::script& script,
         const chain::witness& witness) NOEXCEPT;
 
