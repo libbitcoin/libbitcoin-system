@@ -1746,7 +1746,8 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_single_anyone_can
 // signature_hash (version 1, bip341 key path vectors)
 // ----------------------------------------------------------------------------
 
-constexpr auto bip341_flags = flags::bip141_rule | flags::bip143_rule | flags::bip341_rule | flags::bip342_rule;
+constexpr auto bip341_flags = flags::bip141_rule | flags::bip143_rule |
+    flags::bip341_rule | flags::bip342_rule;
 
 static transaction bip341_spending_transaction() NOEXCEPT
 {
@@ -2269,8 +2270,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__at_maturity__false)
     BOOST_REQUIRE(!transaction::is_coinbase_immature(1, add1(coinbase_maturity)));
 }
 
-// The addition is ceilinged, so a high coinbase height saturates instead of
-// wrapping to a low maturity height and reporting a spend as mature.
+// Ceilinged addition prevents wrapping to a low maturity height.
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase_immature__ceilinged_height__true)
 {
     BOOST_REQUIRE(transaction::is_coinbase_immature(max_size_t, coinbase_maturity));
@@ -2317,8 +2317,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_internally_locked__locktime_disabled__false
 
 static transaction segregated_tx() NOEXCEPT
 {
-    const chain::witness witness{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
-    const inputs ins{ { point{ one_hash, 0 }, script{ { opcode::dup } }, witness, 42 } };
+    const chunk_cptrs stack{ to_shared<data_chunk>({ 0x42_u8 }) };
+    const chain::witness witness{ stack };
+    const inputs ins
+    {
+        { point{ one_hash, 0 }, script{ { opcode::dup } }, witness, 42 }
+    };
     const outputs outs{ { 42, script{ { opcode::dup } } } };
     return { 2, ins, outs, 0 };
 }
@@ -2345,7 +2349,8 @@ BOOST_AUTO_TEST_CASE(transaction__desegregated_hash__null_data__null_hash)
 
 static transaction oversized_spend() NOEXCEPT
 {
-    const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
+    const operations ops{ operation{ data_chunk(1'000'000, 0x00), false } };
+    const script big{ ops };
     const inputs ins{ input{ point{ one_hash, 0 }, big, max_input_sequence } };
     const outputs outs{ output{ 42, script{} } };
     return { 1, ins, outs, 0 };
@@ -2371,8 +2376,12 @@ BOOST_AUTO_TEST_CASE(transaction__check_guard_context__overweight_bip141_off__tr
 
 static transaction sigops_spend(size_t checksigs) NOEXCEPT
 {
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
-    const outputs outs{ output{ 42, script{ operations(checksigs, operation{ opcode::checksig }) } } };
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
+    const operations ops(checksigs, operation{ opcode::checksig });
+    const outputs outs{ output{ 42, script{ ops } } };
     return { 1, ins, outs, 0 };
 }
 

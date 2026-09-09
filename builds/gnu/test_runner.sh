@@ -12,7 +12,7 @@ BOOST_UNIT_TEST_OPTIONS="--log_level=warning --show_progress=no --detect_memory_
 
 # Run tests.
 #==============================================================================
-if [[ ${CI} == true ]]; then
+if [ "${CI}" = true ]; then
     ./test/libbitcoin-system-test ${BOOST_UNIT_TEST_OPTIONS}
 else
     ./test/libbitcoin-system-test ${BOOST_UNIT_TEST_OPTIONS} > test.log

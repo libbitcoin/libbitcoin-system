@@ -105,22 +105,25 @@ struct txs
 
     static transaction tx65() NOEXCEPT
     {
+        const script three{ { opcode::dup, opcode::dup, opcode::dup } };
+        const script two{ { opcode::dup, opcode::dup } };
         return
         {
             42,
-            inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
-            outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+            inputs{ { point{}, three, 42 } },
+            outputs{ { 42, two } },
             42
         };
     }
 
     static transaction tx66() NOEXCEPT
     {
+        const script three{ { opcode::dup, opcode::dup, opcode::dup } };
         return
         {
             42,
-            inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
-            outputs{ { 42, script{ { opcode::dup, opcode::dup, opcode::dup } } } },
+            inputs{ { point{}, three, 42 } },
+            outputs{ { 42, three } },
             42
         };
     }
@@ -420,16 +423,16 @@ BOOST_AUTO_TEST_CASE(block__is_malleable32__various__expected)
 
 // is_malleated64
 // ----------------------------------------------------------------------------
-// Malleability is 64 byte serialization, malleation additionally requires a
-// non-null first input point, as the coinbase point cannot be spent.
+// Malleated64 additionally requires a non-null first input point.
 
 static transaction tx64_spend(uint32_t index) NOEXCEPT
 {
+    const script two{ { opcode::dup, opcode::dup } };
     return
     {
         42,
-        inputs{ { point{ one_hash, index }, script{ { opcode::dup, opcode::dup } }, 42 } },
-        outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+        inputs{ { point{ one_hash, index }, two, 42 } },
+        outputs{ { 42, two } },
         42
     };
 }
@@ -450,8 +453,6 @@ BOOST_AUTO_TEST_CASE(block__is_malleated64__spending_first_input__true)
     BOOST_REQUIRE(instance.is_malleated());
 }
 
-// A null first input point is a coinbase, so this is malleable but not
-// malleated (producing such a block is considered computationally infeasible).
 BOOST_AUTO_TEST_CASE(block__is_malleated64__coinbase_first__false)
 {
     const accessor instance{ header, { txs::tx64(), tx64_spend(1) } };
@@ -489,8 +490,7 @@ BOOST_AUTO_TEST_CASE(block__is_malleated__neither_shape__false)
 
 // malleated_or
 // ----------------------------------------------------------------------------
-// A malleated block is reported as a commitment failure, so that the node does
-// not mark the honest block hash unconfirmable.
+// A malleated block is reported as a commitment failure.
 
 BOOST_AUTO_TEST_CASE(block__malleated_or__unmalleated__given_code)
 {

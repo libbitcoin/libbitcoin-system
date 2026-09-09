@@ -107,9 +107,6 @@ BOOST_AUTO_TEST_CASE(block_view__to_data__block2a_witness__matches_block)
 
 BOOST_AUTO_TEST_CASE(block_view__to_data__mixed_witness_and_legacy__matches_block)
 {
-    // block2c has one segregated (witness) and one legacy (non-witness)
-    // transaction, so the per-transaction witness strip is exercised both
-    // ways within one to_data(false) call.
     const auto& block = test::block2c;
     const chain::block_view view{ block.to_data(true), true };
     BOOST_REQUIRE(view.is_segregated());
@@ -173,16 +170,15 @@ BOOST_AUTO_TEST_CASE(block_view__identify__unwitnessed_bip141_off__block_success
 // malleation
 // ----------------------------------------------------------------------------
 
-// block_view is final, so malleation is asserted through identify, which
-// reports both malleation and merkle root failure as a commitment failure.
-// Each fixture below carries its computed merkle root, so a commitment
-// failure is attributable to malleation alone.
+// block_view is final, so malleation is asserted through identify.
+// Each fixture carries its computed merkle root.
 
 // Sixty four byte transaction, the malleable64 unit.
 static system::chain::transaction view_tx64(uint32_t index) NOEXCEPT
 {
     using namespace system::chain;
-    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const operations ops{ operation{ opcode::dup }, operation{ opcode::dup } };
+    const script dups{ ops };
     const inputs ins{ input{ point{ one_hash, index }, dups, 42 } };
     const outputs outs{ output{ 42, dups } };
     return transaction{ 42, ins, outs, 42 };
@@ -191,7 +187,8 @@ static system::chain::transaction view_tx64(uint32_t index) NOEXCEPT
 static system::chain::transaction view_coinbase64() NOEXCEPT
 {
     using namespace system::chain;
-    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const operations ops{ operation{ opcode::dup }, operation{ opcode::dup } };
+    const script dups{ ops };
     const inputs ins{ input{ point{}, dups, 42 } };
     const outputs outs{ output{ 42, dups } };
     return transaction{ 42, ins, outs, 42 };
@@ -205,7 +202,8 @@ static system::chain::transaction view_tx(uint32_t index) NOEXCEPT
     return transaction{ 1, ins, outs, 0 };
 }
 
-static system::hash_digest view_root(const system::chain::transactions& txs) NOEXCEPT
+static system::hash_digest view_root(
+    const system::chain::transactions& txs) NOEXCEPT
 {
     using namespace system;
     const auto left = bitcoin_hash(txs[0].hash(false), txs[1].hash(false));
@@ -214,15 +212,14 @@ static system::hash_digest view_root(const system::chain::transactions& txs) NOE
     return bitcoin_hash(left, right);
 }
 
-static system::chain::block view_block(const system::chain::transactions& txs) NOEXCEPT
+static system::chain::block view_block(
+    const system::chain::transactions& txs) NOEXCEPT
 {
     using namespace system;
     const chain::header head{ 1, hash_digest{}, view_root(txs), 0, 0, 0 };
     return chain::block{ head, txs };
 }
 
-// A set of all sixty four byte transactions is the malleated64 shape, as each
-// transaction is indistinguishable from a pair of merkle nodes.
 BOOST_AUTO_TEST_CASE(block_view__identify__all_sixty_four_byte__invalid_transaction_commitment)
 {
     using namespace system;
@@ -255,8 +252,6 @@ BOOST_AUTO_TEST_CASE(block_view__identify__mixed_transaction_sizes__block_succes
     BOOST_CHECK_EQUAL(view.identify(), error::block_success);
 }
 
-// An odd set at width depth clones its last element, so a tail duplicate
-// produces the same merkle root as the honest block.
 BOOST_AUTO_TEST_CASE(block_view__identify__tail_clone_of_four__invalid_transaction_commitment)
 {
     using namespace system;
