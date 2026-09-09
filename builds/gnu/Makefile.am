@@ -1133,8 +1133,12 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/intrinsics/platforms/neon.cpp \
     ${srcdir}/../../test/intrinsics/platforms/sve.cpp \
     ${srcdir}/../../test/machine/interpreter.cpp \
+    ${srcdir}/../../test/machine/interpreter_connect.cpp \
+    ${srcdir}/../../test/machine/interpreter_run.cpp \
     ${srcdir}/../../test/machine/number.cpp \
     ${srcdir}/../../test/machine/program.cpp \
+    ${srcdir}/../../test/machine/program_batch.cpp \
+    ${srcdir}/../../test/machine/program_verify.cpp \
     ${srcdir}/../../test/machine/sizing.cpp \
     ${srcdir}/../../test/machine/stack.cpp \
     ${srcdir}/../../test/math/addition.cpp \
