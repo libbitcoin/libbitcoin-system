@@ -116,4 +116,12 @@ BOOST_AUTO_TEST_CASE(header__json__bitcoind__expected)
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
+BOOST_AUTO_TEST_CASE(header__json__pointer_conversions__expected)
+{
+    const header::cptr instance{ to_shared(header{ 42, null_hash, one_hash, 43, 44, 45 }) };
+    const auto value = json::value_from(instance);
+    BOOST_REQUIRE(value == json::value_from(*instance));
+    BOOST_REQUIRE(*json::value_to<header::cptr>(value) == *instance);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -808,5 +808,122 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__unpatched__proof_of_wo
     const auto values = storm_values(settings, 0x1c0ffff0);
     BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
 }
+// configured_flags (activation independent of signalling)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__ltc_time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_time_warp_patch = true;
+    BOOST_REQUIRE(to_bool(chain_state::configured_flags(settings.forks) & flags::ltc_time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__ltc_retarget_overflow_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_retarget_overflow_patch = true;
+    BOOST_REQUIRE(to_bool(chain_state::configured_flags(settings.forks) & flags::ltc_retarget_overflow_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__ltc_scrypt_proof_of_work__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_scrypt_proof_of_work = true;
+    BOOST_REQUIRE(to_bool(chain_state::configured_flags(settings.forks) & flags::ltc_scrypt_proof_of_work));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.time_warp_patch = true;
+    BOOST_REQUIRE(to_bool(chain_state::configured_flags(settings.forks) & flags::time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured_flags__block_storm_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.block_storm_patch = true;
+    BOOST_REQUIRE(to_bool(chain_state::configured_flags(settings.forks) & flags::block_storm_patch));
+}
+
+// activation (configuration-only forks)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__ltc_time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_time_warp_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::ltc_time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__ltc_retarget_overflow_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_retarget_overflow_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::ltc_retarget_overflow_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__ltc_scrypt_proof_of_work__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_scrypt_proof_of_work = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::ltc_scrypt_proof_of_work));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.time_warp_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__block_storm_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.block_storm_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::block_storm_patch));
+}
+
+// signal_version
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip66_only__bip66_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks = {};
+    settings.forks.bip66 = true;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.bip66_version);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip34_only__bip34_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks = {};
+    settings.forks.bip34 = true;
+    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.bip34_version);
+}
+
+// get_map (regtest bypasses retargeting)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__no_retarget__unrequested_retarget_height)
+{
+    settings settings(selection::mainnet);
+    settings.forks.difficult = false;
+    settings.forks.retarget = false;
+    const auto map = chain_state::get_map(42, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.count, one);
+    BOOST_REQUIRE_EQUAL(map.timestamp_retarget, chain_state::map::unrequested);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

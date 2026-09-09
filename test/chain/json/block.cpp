@@ -261,4 +261,26 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
     BOOST_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
+BOOST_AUTO_TEST_CASE(block__json__pointer_conversions__expected)
+{
+    const block::cptr instance{ to_shared(block
+    {
+        header{ 42, null_hash, one_hash, 43, 44, 45 },
+        transactions
+        {
+            transaction
+            {
+                42,
+                inputs{ input{ point{ one_hash, 42 }, script{ operations{ { opcode::pick } } }, witness{ "[424242]" }, 24 } },
+                outputs{ output{ 24, script{ operations{ { opcode::roll } } } } },
+                24
+            }
+        }
+    }) };
+
+    const auto value = json::value_from(instance);
+    BOOST_REQUIRE(value == json::value_from(*instance));
+    BOOST_REQUIRE(*json::value_to<block::cptr>(value) == *instance);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
