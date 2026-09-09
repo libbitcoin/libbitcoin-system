@@ -2428,4 +2428,88 @@ BOOST_AUTO_TEST_CASE(transaction__accept_guard__sigops_above_limit__transaction_
     BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_sigop_limit);
 }
 
+// spends
+
+static transaction spends_transaction() NOEXCEPT
+{
+    const chain::inputs ins
+    {
+        input{ point{ one_hash, 42 }, script{}, 0xffffffff },
+        input{ point{ one_hash, 24 }, script{}, 0xffffffff }
+    };
+
+    const chain::outputs outs{ output{ 0, script{} } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+// The coinbase input is not a spend.
+BOOST_AUTO_TEST_CASE(transaction__spends__coinbase__zero)
+{
+    const chain::inputs ins{ input{ point{}, script{}, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE_EQUAL(instance.spends(), zero);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__spends__non_coinbase__inputs)
+{
+    const auto instance = spends_transaction();
+    BOOST_REQUIRE_EQUAL(instance.spends(), 2u);
+    BOOST_REQUIRE_EQUAL(instance.inputs(), 2u);
+}
+
+// signing guards
+
+BOOST_AUTO_TEST_CASE(transaction__check_signature__index_out_of_range__false)
+{
+    const auto instance = spends_transaction();
+    const ec_signature signature{ 0x01_u8 };
+    const data_chunk key(ec_compressed_size, 0x02_u8);
+    const auto result = instance.check_signature(signature, key, {}, 2, 0,
+        coverage::hash_all, script_version::unversioned, 0);
+    BOOST_REQUIRE(!result);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__create_endorsement__index_out_of_range__false)
+{
+    const auto instance = spends_transaction();
+    endorsement out{};
+    const ec_secret secret{ 0x01_u8 };
+    const auto result = instance.create_endorsement(out, secret, {}, 2, 0,
+        coverage::hash_all, script_version::unversioned, 0);
+    BOOST_REQUIRE(!result);
+}
+
+// bip68 relative locktime application
+
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locktime_applied__coinbase__false)
+{
+    const auto applied = transaction::is_relative_locktime_applied(true, 2, 0);
+    BOOST_REQUIRE(!applied);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locktime_applied__version_one__false)
+{
+    const auto applied = transaction::is_relative_locktime_applied(false, 1, 0);
+    BOOST_REQUIRE(!applied);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locktime_applied__version_two__true)
+{
+    const auto applied = transaction::is_relative_locktime_applied(false, 2, 0);
+    BOOST_REQUIRE(applied);
+}
+
+// connect
+
+BOOST_AUTO_TEST_CASE(transaction__connect__coinbase__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const chain::inputs ins{ input{ point{}, script{}, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
