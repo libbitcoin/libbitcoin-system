@@ -265,4 +265,69 @@ BOOST_AUTO_TEST_CASE(checkpoint__is_conflict__non_empty__expected)
     BOOST_REQUIRE(!checkpoint::is_conflict(points, hash, 1001));
 }
 
+// is_valid
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_valid__default__false)
+{
+    BOOST_REQUIRE(!checkpoint{}.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_valid__string__true)
+{
+    const checkpoint instance{ "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 };
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_valid__invalid_string__false)
+{
+    const checkpoint instance{ "42", 42 };
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
+// serialization
+
+BOOST_AUTO_TEST_CASE(checkpoint__to_string__populated__expected)
+{
+    const auto text = "0102030405060708090a0102030405060708090a0102030405060708090a0b0c:42";
+    const checkpoint instance{ base16_hash("0102030405060708090a0102030405060708090a0102030405060708090a0b0c"), 42 };
+    BOOST_REQUIRE_EQUAL(instance.to_string(), text);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__ostream__populated__expected)
+{
+    const auto text = "0102030405060708090a0102030405060708090a0102030405060708090a0b0c:42";
+    const checkpoint instance{ base16_hash("0102030405060708090a0102030405060708090a0102030405060708090a0b0c"), 42 };
+    std::ostringstream output{};
+    output << instance;
+    BOOST_REQUIRE_EQUAL(output.str(), text);
+}
+
+// deserialization
+
+BOOST_AUTO_TEST_CASE(checkpoint__istream__valid__expected)
+{
+    checkpoint instance{};
+    std::istringstream("0102030405060708090a0102030405060708090a0102030405060708090a0b0c:42") >> instance;
+    BOOST_REQUIRE_EQUAL(instance.hash(), base16_hash("0102030405060708090a0102030405060708090a0102030405060708090a0b0c"));
+    BOOST_REQUIRE_EQUAL(instance.height(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__istream__no_delimiter__throws_istream_exception)
+{
+    checkpoint instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("0102030405060708090a0102030405060708090a0102030405060708090a0b0c") >> instance, istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__istream__invalid_hash__throws_istream_exception)
+{
+    checkpoint instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("42:42") >> instance, istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__istream__invalid_height__throws_istream_exception)
+{
+    checkpoint instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("0102030405060708090a0102030405060708090a0102030405060708090a0b0c:xx") >> instance, istream_exception);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
