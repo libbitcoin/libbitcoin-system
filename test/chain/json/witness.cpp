@@ -51,7 +51,8 @@ BOOST_AUTO_TEST_CASE(witness__json__conversions__expected)
 
 BOOST_AUTO_TEST_CASE(witness__json__pointer_conversions__expected)
 {
-    const chain::witness::cptr instance{ to_shared(chain::witness{ data_stack{ { 0x42, 0x43, 0x44 } } }) };
+    const chain::witness expected{ data_stack{ { 0x42, 0x43, 0x44 } } };
+    const chain::witness::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
     BOOST_REQUIRE(value == json::value_from(*instance));
     BOOST_REQUIRE(*json::value_to<chain::witness::cptr>(value) == *instance);

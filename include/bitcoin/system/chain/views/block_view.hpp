@@ -29,7 +29,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-class BC_API block_view final
+class BC_API block_view
 {
 public:
     DEFAULT_COPY_MOVE(block_view);

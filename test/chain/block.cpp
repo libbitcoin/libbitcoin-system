@@ -1525,14 +1525,16 @@ BOOST_AUTO_TEST_CASE(block__spends__empty__zero)
 
 BOOST_AUTO_TEST_CASE(block__get_hash__always__header_hash)
 {
-    BOOST_REQUIRE_EQUAL(expected_block::get().get_hash(), expected_header.hash());
+    const auto& instance = expected_block::get();
+    BOOST_REQUIRE_EQUAL(instance.get_hash(), expected_header.hash());
 }
 
 // Weight is 3 * base + 1 * total, so vsize is size when there is no witness.
 BOOST_AUTO_TEST_CASE(block__virtual_size__unwitnessed__serialized_size)
 {
     const auto& instance = expected_block::get();
-    BOOST_REQUIRE_EQUAL(instance.virtual_size(), instance.serialized_size(true));
+    const auto size = instance.serialized_size(true);
+    BOOST_REQUIRE_EQUAL(instance.virtual_size(), size);
 }
 
 // empty block predicates
@@ -1567,25 +1569,36 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__empty__false)
 
 static block unpopulated_block() NOEXCEPT
 {
-    return block{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
+    return block
+    {
+        header{},
+        transactions
+        {
+            coinbase_transaction(0, script{}),
+            spending_transaction()
+        }
+    };
 }
 
-BOOST_AUTO_TEST_CASE(block__identify__invalid_merkle_root__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block__identify__bad_merkle__transaction_commitment)
 {
     const block instance{ expected_header, expected_transactions::get() };
-    BOOST_REQUIRE_EQUAL(instance.identify(), error::invalid_transaction_commitment);
+    const auto ec = instance.identify();
+    BOOST_REQUIRE_EQUAL(ec, error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__accept__unpopulated_spend__missing_previous_output)
+BOOST_AUTO_TEST_CASE(block__accept__unpopulated_spend__missing_prevout)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(unpopulated_block().accept(ctx, 210000, 5000000000), error::missing_previous_output);
+    const auto ec = unpopulated_block().accept(ctx, 210000, 5000000000);
+    BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
 BOOST_AUTO_TEST_CASE(block__confirm__unpopulated_spend__coinbase_maturity)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(unpopulated_block().confirm(ctx), error::coinbase_maturity);
+    const auto ec = unpopulated_block().confirm(ctx);
+    BOOST_REQUIRE_EQUAL(ec, error::coinbase_maturity);
 }
 
 BOOST_AUTO_TEST_CASE(block__connect__empty__block_success)
@@ -1595,16 +1608,18 @@ BOOST_AUTO_TEST_CASE(block__connect__empty__block_success)
     BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__connect__unpopulated_spend__missing_previous_output)
+BOOST_AUTO_TEST_CASE(block__connect__unpopulated_spend__missing_prevout)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(unpopulated_block().connect(ctx), error::missing_previous_output);
+    const auto ec = unpopulated_block().connect(ctx);
+    BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
-BOOST_AUTO_TEST_CASE(block__connect__capture_unpopulated_spend__missing_previous_output)
+BOOST_AUTO_TEST_CASE(block__connect__capture_unpopulated__missing_prevout)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(unpopulated_block().connect(ctx, {}), error::missing_previous_output);
+    const auto ec = unpopulated_block().connect(ctx, {});
+    BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

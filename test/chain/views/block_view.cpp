@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(block_view__identify__unwitnessed_bip141_off__block_success
 // malleation
 // ----------------------------------------------------------------------------
 
-// block_view is final, so malleation is asserted through identify.
+// Malleation methods are private, so asserted through identify.
 // Each fixture carries its computed merkle root.
 
 // Sixty four byte transaction, the malleable64 unit.
@@ -321,12 +321,18 @@ static chain::script commitment_script(const hash_digest& commitment) NOEXCEPT
     std::copy(commitment.begin(), commitment.end(),
         std::next(data.begin(), head.size()));
 
-    return chain::script{ chain::operations{
-        chain::operation{ chain::opcode::op_return },
-        chain::operation{ data, false } } };
+    return chain::script
+    {
+        chain::operations
+        {
+            chain::operation{ chain::opcode::op_return },
+            chain::operation{ data, false }
+        }
+    };
 }
 
-static chain::witness reservation_witness(const hash_digest& reservation) NOEXCEPT
+static chain::witness reservation_witness(
+    const hash_digest& reservation) NOEXCEPT
 {
     const chunk_cptrs stack{ to_shared<data_chunk>(to_chunk(reservation)) };
     return chain::witness{ stack };
@@ -335,9 +341,34 @@ static chain::witness reservation_witness(const hash_digest& reservation) NOEXCE
 static chain::block commitment_block(const hash_digest& commitment,
     const chain::witness& spender) NOEXCEPT
 {
-    const chain::inputs ins{ chain::input{ chain::point{}, chain::script{}, spender, 0xffffffff } };
-    const chain::outputs outs{ chain::output{ 0, commitment_script(commitment) } };
-    return chain::block{ chain::header{}, chain::transactions{ chain::transaction{ 1, ins, outs, 0 } } };
+    const chain::inputs ins
+    {
+        chain::input
+        {
+            chain::point{},
+            chain::script{},
+            spender,
+            0xffffffff
+        }
+    };
+
+    const chain::outputs outs
+    {
+        chain::output
+        {
+            0,
+            commitment_script(commitment)
+        }
+    };
+
+    return chain::block
+    {
+        chain::header{},
+        chain::transactions
+        {
+            chain::transaction{ 1, ins, outs, 0 }
+        }
+    };
 }
 
 static hash_digest expected_commitment(const hash_digest& reservation) NOEXCEPT
@@ -360,7 +391,8 @@ BOOST_AUTO_TEST_CASE(block_view__to_data__ostream__round_trips)
     std::ostringstream stream{};
     view.to_data(stream, true);
     const auto text = stream.str();
-    BOOST_CHECK_EQUAL(data_chunk(text.begin(), text.end()), block.to_data(true));
+    const data_chunk data(text.begin(), text.end());
+    BOOST_CHECK_EQUAL(data, block.to_data(true));
 }
 
 BOOST_AUTO_TEST_CASE(block_view__identify__empty__empty_block)
@@ -369,9 +401,10 @@ BOOST_AUTO_TEST_CASE(block_view__identify__empty__empty_block)
     BOOST_CHECK_EQUAL(view.identify(), error::empty_block);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__invalid_merkle_root__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__identify__bad_merkle__transaction_commitment)
 {
-    const chain::block_view view{ commitment_block(one_hash, chain::witness{}).to_data(true), true };
+    const auto block = commitment_block(one_hash, chain::witness{});
+    const chain::block_view view{ block.to_data(true), true };
     BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
 }
 
@@ -384,26 +417,43 @@ BOOST_AUTO_TEST_CASE(block_view__identify__empty_context__block_success)
 
 // Witness commitment [bip141].
 
-BOOST_AUTO_TEST_CASE(block_view__identify__commitment_without_reservation__invalid_witness_commitment)
+// Access protected validation methods.
+class accessor
+  : public chain::block_view
 {
-    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    const chain::block_view view{ commitment_block(one_hash, chain::witness{}).to_data(true), true };
-    BOOST_CHECK_EQUAL(view.identify(ctx), error::invalid_witness_commitment);
+public:
+    using chain::block_view::block_view;
+    using chain::block_view::is_invalid_witness_commitment;
+};
+
+BOOST_AUTO_TEST_CASE(block_view__is_invalid_witness_commitment__empty__false)
+{
+    const accessor view{ {}, true };
+    BOOST_CHECK(!view.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__wrong_commitment__invalid_witness_commitment)
+BOOST_AUTO_TEST_CASE(block_view__is_invalid_witness_commitment__no_reserve__true)
 {
-    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    const chain::block_view view{ commitment_block(one_hash, reservation_witness(null_hash)).to_data(true), true };
-    BOOST_CHECK_EQUAL(view.identify(ctx), error::invalid_witness_commitment);
+    const auto block = commitment_block(one_hash, chain::witness{});
+    const accessor view{ block.to_data(true), true };
+    BOOST_CHECK(view.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__valid_commitment__block_success)
+BOOST_AUTO_TEST_CASE(block_view__is_invalid_witness_commitment__wrong__true)
 {
-    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const auto reserved = reservation_witness(null_hash);
+    const auto block = commitment_block(one_hash, reserved);
+    const accessor view{ block.to_data(true), true };
+    BOOST_CHECK(view.is_invalid_witness_commitment());
+}
+
+BOOST_AUTO_TEST_CASE(block_view__is_invalid_witness_commitment__valid__false)
+{
     const auto commitment = expected_commitment(one_hash);
-    const chain::block_view view{ commitment_block(commitment, reservation_witness(one_hash)).to_data(true), true };
-    BOOST_CHECK_EQUAL(view.identify(ctx), error::block_success);
+    const auto reserved = reservation_witness(one_hash);
+    const auto block = commitment_block(commitment, reserved);
+    const accessor view{ block.to_data(true), true };
+    BOOST_CHECK(!view.is_invalid_witness_commitment());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

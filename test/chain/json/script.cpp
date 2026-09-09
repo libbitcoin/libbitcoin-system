@@ -130,7 +130,8 @@ BOOST_AUTO_TEST_CASE(script__json__bitcoind_output__not_decoded)
 
 BOOST_AUTO_TEST_CASE(script__json__pointer_conversions__expected)
 {
-    const script::cptr instance{ to_shared(script{ operations{ { opcode::pick } } }) };
+    const script expected{ operations{ { opcode::pick } } };
+    const script::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
     BOOST_REQUIRE(value == json::value_from(*instance));
     BOOST_REQUIRE(*json::value_to<script::cptr>(value) == *instance);
