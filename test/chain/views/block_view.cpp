@@ -311,4 +311,99 @@ BOOST_AUTO_TEST_CASE(block_view__identify__wrong_root__invalid_transaction_commi
     BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
 }
 
+// Witness commitment [bip141].
+
+static chain::script commitment_script(const hash_digest& commitment) NOEXCEPT
+{
+    constexpr auto head = to_big_endian(chain::witness_head);
+    data_chunk data(head.size() + hash_size);
+    std::copy(head.begin(), head.end(), data.begin());
+    std::copy(commitment.begin(), commitment.end(),
+        std::next(data.begin(), head.size()));
+
+    return chain::script{ chain::operations{
+        chain::operation{ chain::opcode::op_return },
+        chain::operation{ data, false } } };
+}
+
+static chain::witness reservation_witness(const hash_digest& reservation) NOEXCEPT
+{
+    const chunk_cptrs stack{ to_shared<data_chunk>(to_chunk(reservation)) };
+    return chain::witness{ stack };
+}
+
+static chain::block commitment_block(const hash_digest& commitment,
+    const chain::witness& spender) NOEXCEPT
+{
+    const chain::inputs ins{ chain::input{ chain::point{}, chain::script{}, spender, 0xffffffff } };
+    const chain::outputs outs{ chain::output{ 0, commitment_script(commitment) } };
+    return chain::block{ chain::header{}, chain::transactions{ chain::transaction{ 1, ins, outs, 0 } } };
+}
+
+static hash_digest expected_commitment(const hash_digest& reservation) NOEXCEPT
+{
+    return sha256::double_hash(null_hash, reservation);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__construct__truncated__invalid)
+{
+    auto data = test::block1a.to_data(true);
+    data.resize(sub1(data.size()));
+    const chain::block_view view{ std::move(data), true };
+    BOOST_CHECK(!view.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(block_view__to_data__ostream__round_trips)
+{
+    const auto& block = test::block1a;
+    const chain::block_view view{ block.to_data(true), true };
+    std::ostringstream stream{};
+    view.to_data(stream, true);
+    const auto text = stream.str();
+    BOOST_CHECK_EQUAL(data_chunk(text.begin(), text.end()), block.to_data(true));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__empty__empty_block)
+{
+    const chain::block_view view{ {}, true };
+    BOOST_CHECK_EQUAL(view.identify(), error::empty_block);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__invalid_merkle_root__invalid_transaction_commitment)
+{
+    const chain::block_view view{ commitment_block(one_hash, chain::witness{}).to_data(true), true };
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__empty_context__block_success)
+{
+    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const chain::block_view view{ {}, true };
+    BOOST_CHECK_EQUAL(view.identify(ctx), error::block_success);
+}
+
+// Witness commitment [bip141].
+
+BOOST_AUTO_TEST_CASE(block_view__identify__commitment_without_reservation__invalid_witness_commitment)
+{
+    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const chain::block_view view{ commitment_block(one_hash, chain::witness{}).to_data(true), true };
+    BOOST_CHECK_EQUAL(view.identify(ctx), error::invalid_witness_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__wrong_commitment__invalid_witness_commitment)
+{
+    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const chain::block_view view{ commitment_block(one_hash, reservation_witness(null_hash)).to_data(true), true };
+    BOOST_CHECK_EQUAL(view.identify(ctx), error::invalid_witness_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__valid_commitment__block_success)
+{
+    const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const auto commitment = expected_commitment(one_hash);
+    const chain::block_view view{ commitment_block(commitment, reservation_witness(one_hash)).to_data(true), true };
+    BOOST_CHECK_EQUAL(view.identify(ctx), error::block_success);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -459,4 +459,34 @@ BOOST_AUTO_TEST_CASE(stack__equal_chunks__unequal_integers__false)
     BOOST_REQUIRE(!stack<contiguous_stack>::equal_chunks(left, right));
 }
 
+// push(stack_variant&&)
+
+BOOST_AUTO_TEST_CASE(stack__push__contiguous_variant__expected)
+{
+    stack<contiguous_stack> instance{};
+    instance.push(stack_variant{ 42 });
+    BOOST_REQUIRE(instance.pop() == stack_variant{ 42 });
+}
+
+BOOST_AUTO_TEST_CASE(stack__push__linked_variant__expected)
+{
+    stack<linked_stack> instance{};
+    instance.push(stack_variant{ 42 });
+    BOOST_REQUIRE(instance.pop() == stack_variant{ 42 });
+}
+
+// linked swap/peek
+
+BOOST_AUTO_TEST_CASE(stack__swap__linked__swapped)
+{
+    stack<linked_stack> instance{};
+    instance.push(1);
+    instance.push(2);
+    instance.push(3);
+    instance.swap(zero, two);
+    BOOST_REQUIRE(instance.peek(zero) == stack_variant{ 1 });
+    BOOST_REQUIRE(instance.peek(one) == stack_variant{ 2 });
+    BOOST_REQUIRE(instance.peek(two) == stack_variant{ 3 });
+}
+
 BOOST_AUTO_TEST_SUITE_END()
