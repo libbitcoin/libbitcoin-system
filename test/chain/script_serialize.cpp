@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(script_tests)
+BOOST_AUTO_TEST_SUITE(script_serialize_tests)
 
 using namespace system::chain;
 using namespace system::machine;

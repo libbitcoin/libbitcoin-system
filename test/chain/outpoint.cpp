@@ -182,4 +182,31 @@ BOOST_AUTO_TEST_CASE(outpoint__serialized_size__always__expected)
     BOOST_REQUIRE_EQUAL(outpoint::serialized_size(), point::serialized_size() + sizeof(uint64_t));
 }
 
+BOOST_AUTO_TEST_CASE(outpoint__construct__copy_point__expected)
+{
+    const point value{ one_hash, 42 };
+    const outpoint instance{ value, 99 };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.point() == value);
+    BOOST_REQUIRE_EQUAL(instance.value(), 99u);
+}
+
+BOOST_AUTO_TEST_CASE(outpoint__construct__fast_stream__round_trips)
+{
+    const outpoint expected{ point{ one_hash, 42 }, 99 };
+    const auto data = expected.to_data();
+    stream::in::fast source{ data };
+    const outpoint instance{ source };
+    BOOST_REQUIRE(instance == expected);
+    BOOST_REQUIRE_EQUAL(instance.value(), 99u);
+}
+
+BOOST_AUTO_TEST_CASE(outpoint__lesser__lesser_point__true)
+{
+    const outpoint instance1{ point{ one_hash, 1 }, 99 };
+    const outpoint instance2{ point{ one_hash, 2 }, 0 };
+    BOOST_REQUIRE(instance1 < instance2);
+    BOOST_REQUIRE(!(instance2 < instance1));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

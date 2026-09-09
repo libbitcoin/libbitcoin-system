@@ -39,33 +39,6 @@ static_assert(max_script_size <
     max_size_t / multisig_default_sigops / heavy_sigops_factor,
     "input sigop overflow guard");
 
-// Null witness helpers.
-// ----------------------------------------------------------------------------
-
-// static/private
-const witness& input::no_witness() NOEXCEPT
-{
-    static const chain::witness empty{};
-    return empty;
-}
-
-// static/private
-const witness::cptr& input::no_witness_cptr() NOEXCEPT
-{
-    static const auto empty = to_shared<const chain::witness>();
-    return empty;
-}
-
-const chain::witness& input::get_witness() const NOEXCEPT
-{
-    return witness_ ? *witness_ : no_witness();
-}
-
-const chain::witness::cptr& input::get_witness_cptr() const NOEXCEPT
-{
-    return witness_ ? witness_ : no_witness_cptr();
-}
-
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -189,7 +162,7 @@ bool input::operator==(const input& other) const NOEXCEPT
     return (sequence_ == other.sequence_)
         && (point_ == other.point_ || *point_ == *other.point_)
         && (script_ == other.script_ || *script_ == *other.script_)
-        && (witness_ == other.witness_ || get_witness() == other.get_witness());
+        && (witness_ == other.witness_ || *witness_ == *other.witness_);
 }
 
 bool input::operator!=(const input& other) const NOEXCEPT
@@ -259,21 +232,6 @@ void input::to_data(writer& sink) const NOEXCEPT
     point_->to_data(sink);
     script_->to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
-}
-
-// static/private
-input::sizes input::serialized_size(const chain::script& script) NOEXCEPT
-{
-    constexpr auto const_size = ceilinged_add(point::serialized_size(),
-        sizeof(sequence_));
-
-    const auto nominal_size = ceilinged_add(const_size,
-        script.serialized_size(true));
-
-    // Non-segregated input serialization requires an empty witness stack size.
-    // when serializing with witness included (witnessed_size for non-witness).
-    // This does not affect tx serialiation as does not set witness paramter.
-    return { nominal_size, add1(nominal_size) };
 }
 
 // static/private
@@ -349,7 +307,7 @@ const chain::script& input::script() const NOEXCEPT
 
 const chain::witness& input::witness() const NOEXCEPT
 {
-    return get_witness();
+    return *witness_;
 }
 
 const point::cptr& input::point_ptr() const NOEXCEPT
@@ -364,7 +322,7 @@ const chain::script::cptr& input::script_ptr() const NOEXCEPT
 
 const chain::witness::cptr& input::witness_ptr() const NOEXCEPT
 {
-    return get_witness_cptr();
+    return witness_;
 }
 
 uint32_t input::sequence() const NOEXCEPT

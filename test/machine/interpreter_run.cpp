@@ -151,7 +151,6 @@ static std::string_view dispatch(const operation& op) NOEXCEPT
     return dispatch(op, number, code);
 }
 
-// The pushed value is the handler argument, so each is asserted.
 static int8_t dispatch_number(const operation& op) NOEXCEPT
 {
     int8_t number{};
@@ -296,7 +295,6 @@ BOOST_AUTO_TEST_CASE(interpreter__run_op__crypto_codes__expected_handlers)
     BOOST_REQUIRE_EQUAL(dispatch(operation{ opcode::checksequenceverify }), "op_check_sequence_verify");
 }
 
-// The nop codes carry their own code, as the fork that reserved them differs.
 BOOST_AUTO_TEST_CASE(interpreter__run_op__nop_codes__expected_handlers)
 {
     BOOST_REQUIRE_EQUAL(dispatch(operation{ opcode::nop }), "op_nop");

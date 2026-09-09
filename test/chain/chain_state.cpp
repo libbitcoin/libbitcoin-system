@@ -401,6 +401,16 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_time_exceeded__pro
     BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
 }
 
+BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_within_limit__last_non_limit_bits)
+{
+    settings settings(selection::testnet3);
+    auto values = get_values(settings.retargeting_interval());
+    values.height = settings.retargeting_interval() + 5u;
+    values.bits.ordered.push_back(settings.proof_of_work_limit);
+    values.timestamp.self = 1692625u;
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), 0x1e0ffff0u);
+}
+
 BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__mainnet_limit__proof_of_work_limit)
 {
     settings settings(selection::mainnet);

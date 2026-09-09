@@ -453,4 +453,97 @@ BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_stack__false)
     BOOST_REQUIRE(reader);
 }
 
+// construct
+// ----------------------------------------------------------------------------
+
+static data_stack witness_stack() NOEXCEPT
+{
+    return data_stack{ { 0x01_u8 }, { 0x02_u8, 0x03_u8 } };
+}
+
+BOOST_AUTO_TEST_CASE(witness__construct__copy_data_stack__expected)
+{
+    const auto stack = witness_stack();
+    const chain::witness instance{ stack };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE_EQUAL(instance.stack().size(), two);
+}
+
+BOOST_AUTO_TEST_CASE(witness__construct__data_slice_prefixed__round_trips)
+{
+    const chain::witness expected{ witness_stack() };
+    const auto data = expected.to_data(true);
+    const chain::witness instance{ data, true };
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(witness__construct__data_slice_unprefixed__round_trips)
+{
+    const chain::witness expected{ witness_stack() };
+    const auto data = expected.to_data(false);
+    const chain::witness instance{ data, false };
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(witness__construct__fast_stream__round_trips)
+{
+    const chain::witness expected{ witness_stack() };
+    const auto data = expected.to_data(true);
+    stream::in::fast source{ data };
+    const chain::witness instance{ source, true };
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(witness__construct__istream__round_trips)
+{
+    const chain::witness expected{ witness_stack() };
+    const auto data = expected.to_data(true);
+    const std::string text(data.begin(), data.end());
+    std::istringstream source{ text };
+    const chain::witness instance{ source, true };
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(witness__inequality__different__true)
+{
+    const chain::witness instance1{ witness_stack() };
+    const chain::witness instance2{ chunk_cptrs{} };
+    BOOST_REQUIRE(instance1 != instance2);
+}
+
+// serialization
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(witness__to_data__ostream__expected)
+{
+    const chain::witness instance{ witness_stack() };
+    const auto expected = instance.to_data(true);
+    std::ostringstream output{};
+    instance.to_data(output, true);
+    const std::string text(expected.begin(), expected.end());
+    BOOST_REQUIRE_EQUAL(output.str(), text);
+}
+
+// text
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(witness__construct__whitespace_mnemonic__empty)
+{
+    const chain::witness instance{ "  " };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.stack().empty());
+}
+
+BOOST_AUTO_TEST_CASE(witness__construct__undelimited_mnemonic__invalid)
+{
+    const chain::witness instance{ "42" };
+    BOOST_REQUIRE(!instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(witness__to_string__invalid__expected)
+{
+    const chain::witness instance{ "42" };
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "(?)");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

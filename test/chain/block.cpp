@@ -808,6 +808,105 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__unsegregated_no_commi
     BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
 }
 
+// Witness commitment [bip141].
+// ----------------------------------------------------------------------------
+
+static script commitment_script(const hash_digest& commitment) NOEXCEPT
+{
+    constexpr auto head = to_big_endian(witness_head);
+    data_chunk data(head.size() + hash_size);
+    std::copy(head.begin(), head.end(), data.begin());
+    std::copy(commitment.begin(), commitment.end(),
+        std::next(data.begin(), head.size()));
+
+    return script{ operations{ operation{ opcode::op_return },
+        operation{ data, false } } };
+}
+
+static witness reservation_witness(const hash_digest& reservation) NOEXCEPT
+{
+    const chunk_cptrs stack{ to_shared<data_chunk>(to_chunk(reservation)) };
+    return witness{ stack };
+}
+
+static transaction commitment_coinbase(const hash_digest& commitment,
+    const witness& spender) NOEXCEPT
+{
+    const inputs ins{ input{ point{}, script{}, spender, 0xffffffff } };
+    const outputs outs{ output{ 0, commitment_script(commitment) } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+static transaction two_commitment_coinbase(const hash_digest& first,
+    const hash_digest& second, const witness& spender) NOEXCEPT
+{
+    const inputs ins{ input{ point{}, script{}, spender, 0xffffffff } };
+    const outputs outs
+    {
+        output{ 0, commitment_script(first) },
+        output{ 0, commitment_script(second) }
+    };
+
+    return transaction{ 1, ins, outs, 0 };
+}
+
+static hash_digest expected_commitment(const hash_digest& reservation) NOEXCEPT
+{
+    return sha256::double_hash(null_hash, reservation);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__commitment_without_reservation__true)
+{
+    const accessor instance{ header{}, transactions{ commitment_coinbase(one_hash, witness{}) } };
+    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__wrong_commitment__true)
+{
+    const accessor instance{ header{}, transactions{ commitment_coinbase(one_hash, reservation_witness(null_hash)) } };
+    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__valid_commitment__false)
+{
+    const auto commitment = expected_commitment(one_hash);
+    const accessor instance{ header{}, transactions{ commitment_coinbase(commitment, reservation_witness(one_hash)) } };
+    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_valid__false)
+{
+    const auto commitment = expected_commitment(one_hash);
+    const accessor instance{ header{}, transactions{ two_commitment_coinbase(null_hash, commitment, reservation_witness(one_hash)) } };
+    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_invalid__true)
+{
+    const auto commitment = expected_commitment(one_hash);
+    const accessor instance{ header{}, transactions{ two_commitment_coinbase(commitment, null_hash, reservation_witness(one_hash)) } };
+    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+}
+
+// segregated
+
+BOOST_AUTO_TEST_CASE(block__segregated__no_witness__zero)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
+    BOOST_REQUIRE(!instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.segregated(), zero);
+}
+
+BOOST_AUTO_TEST_CASE(block__segregated__witness__counted)
+{
+    const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
+    const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spend, spend } };
+    BOOST_REQUIRE(instance.is_segregated());
+    BOOST_REQUIRE_EQUAL(instance.segregated(), two);
+}
+
 // subsidy
 // ----------------------------------------------------------------------------
 
