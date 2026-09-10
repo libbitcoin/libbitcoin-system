@@ -45,28 +45,29 @@ ec_private::ec_private() NOEXCEPT
 {
 }
 
-ec_private::ec_private(const ec_scalar& scalar, uint8_t address) NOEXCEPT
-  : ec_scalar(scalar), compress_(true), versions_(address)
+ec_private::ec_private(const ec_scalar& scalar, uint16_t versions) NOEXCEPT
+  : ec_scalar(scalar), compress_(true), versions_(versions)
 {
 }
 
-ec_private::ec_private(const data_chunk& entropy, uint8_t address) NOEXCEPT
-  : ec_private(from_entropy(entropy, address))
+ec_private::ec_private(const data_chunk& entropy, uint16_t versions) NOEXCEPT
+  : ec_private(from_entropy(entropy, versions))
 {
 }
 
-ec_private::ec_private(const std::string& wif, uint8_t address) NOEXCEPT
-  : ec_private(from_string(wif, address))
+ec_private::ec_private(const std::string& wif, uint16_t versions) NOEXCEPT
+  : ec_private(from_string(wif, versions))
 {
 }
 
-ec_private::ec_private(const wif_compressed& wif, uint8_t address) NOEXCEPT
-  : ec_private(from_compressed(wif, address))
+ec_private::ec_private(const wif_compressed& wif, uint16_t versions) NOEXCEPT
+  : ec_private(from_compressed(wif, versions))
 {
 }
 
-ec_private::ec_private(const wif_uncompressed& wif, uint8_t address) NOEXCEPT
-  : ec_private(from_uncompressed(wif, address))
+ec_private::ec_private(const wif_uncompressed& wif,
+    uint16_t versions) NOEXCEPT
+  : ec_private(from_uncompressed(wif, versions))
 {
 }
 
@@ -96,7 +97,7 @@ bool ec_private::is_wif(const data_slice& decoded) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 ec_private ec_private::from_string(const std::string& wif,
-    uint8_t address) NOEXCEPT
+    uint16_t versions) NOEXCEPT
 {
     data_chunk decoded;
     if (!decode_base58(decoded, wif) || !is_wif(decoded))
@@ -106,40 +107,38 @@ ec_private ec_private::from_string(const std::string& wif,
         return
         { 
             unsafe_array_cast<uint8_t, wif_compressed_size>(decoded.data()),
-            address
+            versions
         };
 
     return
     {
         unsafe_array_cast<uint8_t, wif_uncompressed_size>(decoded.data()),
-        address
+        versions
     };
 }
 
 ec_private ec_private::from_compressed(const wif_compressed& wif,
-    uint8_t address) NOEXCEPT
+    uint16_t versions) NOEXCEPT
 {
-    if (!is_wif(wif))
+    if (!is_wif(wif) || wif.front() != to_wif_version(versions))
         return {};
 
-    const auto versions = to_versions(address, wif.front());
     const auto secret = slice<one, add1(ec_secret_size)>(wif);
     return { secret, versions, true };
 }
 
 ec_private ec_private::from_uncompressed(const wif_uncompressed& wif,
-    uint8_t address) NOEXCEPT
+    uint16_t versions) NOEXCEPT
 {
-    if (!is_wif(wif))
+    if (!is_wif(wif) || wif.front() != to_wif_version(versions))
         return {};
 
-    const auto versions = to_versions(address, wif.front());
     const auto secret = slice<one, add1(ec_secret_size)>(wif);
     return { secret, versions, false };
 }
 
 ec_private ec_private::from_entropy(const data_chunk& entropy,
-    uint8_t version) NOEXCEPT
+    uint16_t versions) NOEXCEPT
 {
     // This technique ensures consistent secrets with BIP32 from a given seed.
     const hd_private key(entropy);
@@ -148,7 +147,7 @@ ec_private ec_private::from_entropy(const data_chunk& entropy,
     if (!key)
         return {};
 
-    return { key.secret(), version, true };
+    return { key.secret(), versions, true };
 }
 
 // Serializer.
