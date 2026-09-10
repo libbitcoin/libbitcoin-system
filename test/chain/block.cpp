@@ -1642,4 +1642,39 @@ BOOST_AUTO_TEST_CASE(block__constructor__fast_stream__round_trips)
     BOOST_REQUIRE(instance == expected_block::get());
 }
 
+// Each spend contributes its own hash and its point hash, so 2250 spends
+// plus the coinbase exceed the 4500 unique hash limit [bip50].
+static block hash_limit_block() NOEXCEPT
+{
+    transactions txs{ coinbase_transaction(0, script{}) };
+    txs.reserve(2251u);
+
+    for (uint32_t tx = 0; tx < 2250u; ++tx)
+    {
+        hash_digest hash{};
+        hash[0] = narrow_cast<uint8_t>(tx);
+        hash[1] = narrow_cast<uint8_t>(shift_right(tx, 8u));
+        const inputs ins{ input{ point{ hash, 0 }, script{}, max_input_sequence } };
+        const outputs outs{ output{ 0, script{} } };
+        txs.push_back(transaction{ 1, ins, outs, 0 });
+    }
+
+    return block{ header{}, std::move(txs) };
+}
+
+BOOST_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50__temporary_hash_limit)
+{
+    const context ctx{ flags::bip50_rule, 0, 0, 0, 0, 0, 0 };
+    const auto instance = hash_limit_block();
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::temporary_hash_limit);
+}
+
+// The limit is not applied before bip50.
+BOOST_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50_off__not_applied)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const auto instance = hash_limit_block();
+    BOOST_REQUIRE_NE(instance.check(ctx, false), error::temporary_hash_limit);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
