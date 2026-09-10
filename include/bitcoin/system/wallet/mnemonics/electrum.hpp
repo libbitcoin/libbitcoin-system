@@ -142,7 +142,7 @@ public:
     /// Context affects the hd form but does not affect the contained seed.
     /// Returns invalid result if current prefix is 'none', 'bip39, or 'old'.
     hd_private to_key(const std::string& passphrase="",
-        const context& context=btc_mainnet_p2kh) const NOEXCEPT;
+        const context& context=btc_mainnet) const NOEXCEPT;
 
 protected:
     typedef struct

@@ -761,7 +761,7 @@ BOOST_AUTO_TEST_CASE(electrum_v1__to_public_key__valid_explicit_context__valid)
 {
     const electrum_v1 instance(words12);
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.to_public_key(btc_mainnet_p2kh));
+    BOOST_REQUIRE(instance.to_public_key(btc_mainnet));
 }
 
 BOOST_AUTO_TEST_CASE(electrum_v1__to_public_key__todo__todo)

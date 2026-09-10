@@ -32,8 +32,6 @@ namespace system {
 namespace wallet {
 
 /// An extended private key, as defined by BIP32.
-/// Additional prefix codes are documented in SLIP132.
-/// github.com/satoshilabs/slips/blob/master/slip-0132.md
 class BC_API hd_private
   : public hd_public
 {

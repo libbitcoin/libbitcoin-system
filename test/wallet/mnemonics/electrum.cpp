@@ -1227,7 +1227,7 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__ascii__expected)
     const electrum instance(vector.mnemonic);
     BOOST_REQUIRE(instance);
 
-    const auto seed = instance.to_key(vector.passphrase, btc_mainnet_p2kh);
+    const auto seed = instance.to_key(vector.passphrase, btc_mainnet);
     BOOST_REQUIRE(seed);
     BOOST_REQUIRE_EQUAL(seed, vector.to_hd());
 }
@@ -1238,7 +1238,7 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__ascii_uppercased__expected)
     const electrum instance(vector.mnemonic);
     BOOST_REQUIRE(instance);
 
-    const auto seed = instance.to_key(ascii_to_upper(vector.passphrase), btc_mainnet_p2kh);
+    const auto seed = instance.to_key(ascii_to_upper(vector.passphrase), btc_mainnet);
     BOOST_REQUIRE(seed);
     BOOST_REQUIRE_EQUAL(seed, vector.to_hd());
 }
@@ -1246,14 +1246,14 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__ascii_uppercased__expected)
 BOOST_AUTO_TEST_CASE(electrum__to_key__ascii_passphrase_mainnet__expected_hd_key)
 {
     const electrum instance(split(vectors[7].mnemonic));
-    const auto result = instance.to_key("Did you ever hear the tragedy of Darth Plagueis the Wise?", btc_mainnet_p2kh);
+    const auto result = instance.to_key("Did you ever hear the tragedy of Darth Plagueis the Wise?", btc_mainnet);
     BOOST_REQUIRE_EQUAL(result.encoded(), "xprv9s21ZrQH143K3J7uaJtH3fPYadCubChqdXxqpWVDU9PasYoWhbCXLLQCP1DtCtuixztKC6eYXXqrk1an8sztbZ8L53MDLsvKLHZ3GaxY1d8");
 }
 
 BOOST_AUTO_TEST_CASE(electrum__to_key__ascii_passphrase_testnet__expected_hd_key)
 {
     const electrum instance(split(vectors[7].mnemonic));
-    const auto result = instance.to_key("Did you ever hear the tragedy of Darth Plagueis the Wise?", btc_testnet_p2kh);
+    const auto result = instance.to_key("Did you ever hear the tragedy of Darth Plagueis the Wise?", btc_testnet);
     BOOST_REQUIRE_EQUAL(result.encoded(), "tprv8ZgxMBicQKsPe7MSEsjnDK1Xtkd7pijqy5sxgvufx7t4f9YbgxYGr5meJBPYDGJ3LSR6CCGJgtRfCs8XG6LqQcPvbgZX1EeNFPJTiGTAqkt");
 }
 

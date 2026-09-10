@@ -29,50 +29,44 @@ using namespace bc::system::wallet;
 
 BOOST_AUTO_TEST_CASE(context__encoded__ltc_mainnet__expected_wif)
 {
-    const ec_private secret(base16_array(SECRET), ctx::ltc::main::p2pkh.versions());
+    const ec_private secret(base16_array(SECRET), ctx::ltc::main.versions());
     BOOST_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_COMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(context__encoded__ltc_mainnet_uncompressed__expected_wif)
 {
-    const ec_private secret(base16_array(SECRET), ctx::ltc::main::p2pkh.versions(), false);
+    const ec_private secret(base16_array(SECRET), ctx::ltc::main.versions(), false);
     BOOST_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_UNCOMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(context__construct__ltc_mainnet_wif__round_trips)
 {
-    const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main::p2pkh.versions());
+    const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main.versions());
     BOOST_REQUIRE(secret);
     BOOST_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_COMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(context__to_payment_address__ltc_mainnet__ltc_prefix)
 {
-    const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main::p2pkh.versions());
-    BOOST_REQUIRE_EQUAL(secret.to_payment_address().prefix(), prefix::add::p2pkh::main::ltc);
-}
-
-BOOST_AUTO_TEST_CASE(context__to_payment_address__ltc_mainnet_p2sh__ltc_prefix)
-{
-    const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main::p2sh.versions());
-    BOOST_REQUIRE_EQUAL(secret.to_payment_address().prefix(), prefix::add::p2sh::main::ltc);
+    const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main.versions());
+    BOOST_REQUIRE_EQUAL(secret.to_payment_address().prefix(), prefix::p2kh::main::ltc);
 }
 
 BOOST_AUTO_TEST_CASE(context__construct__ltc_wif_btc_versions__invalid)
 {
-    BOOST_REQUIRE(!ec_private(LTC_WIF_COMPRESSED, ctx::btc::main::p2pkh.versions()));
+    BOOST_REQUIRE(!ec_private(LTC_WIF_COMPRESSED, ctx::btc::main.versions()));
 }
 
 BOOST_AUTO_TEST_CASE(context__construct__btc_wif_ltc_versions__invalid)
 {
-    BOOST_REQUIRE(!ec_private(BTC_WIF_COMPRESSED, ctx::ltc::main::p2pkh.versions()));
+    BOOST_REQUIRE(!ec_private(BTC_WIF_COMPRESSED, ctx::ltc::main.versions()));
 }
 
 BOOST_AUTO_TEST_CASE(context__construct__ltc_testnet_wif__round_trips)
 {
-    const ec_private secret(base16_array(SECRET), ctx::ltc::test::p2pkh.versions());
+    const ec_private secret(base16_array(SECRET), ctx::ltc::test.versions());
     BOOST_REQUIRE_EQUAL(secret.wif_version(), prefix::wif::test::ltc);
-    BOOST_REQUIRE(ec_private(secret.encoded(), ctx::ltc::test::p2pkh.versions()));
+    BOOST_REQUIRE(ec_private(secret.encoded(), ctx::ltc::test.versions()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

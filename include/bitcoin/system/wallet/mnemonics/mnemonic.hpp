@@ -91,7 +91,7 @@ public:
     /// hd_private.to_public() is the "master public key".
     /// The "master binary seed" cannot be obtained from the key.
     hd_private to_key(const std::string& passphrase="",
-        const context& context=btc_mainnet_p2kh) const NOEXCEPT;
+        const context& context=btc_mainnet) const NOEXCEPT;
 
 protected:
     // Constructors.

@@ -115,13 +115,13 @@ public:
     /// ec_private.secret() is the "wallet seed"/"master private key".
     /// ec_private.to_public().point() is the compressed "master public key".
     /// Context sets the version byte for derived payment addresses.
-    ec_private to_seed(const context& context=btc_mainnet_p2kh) const NOEXCEPT;
+    ec_private to_seed(const context& context=btc_mainnet) const NOEXCEPT;
 
     /// Derive the wallet "master public key" from entropy.
     /// ec_public.point() is the compressed "master public key".
     /// Context sets the version byte for derived payment addresses.
     ec_public to_public_key(
-        const context& context=btc_mainnet_p2kh) const NOEXCEPT;
+        const context& context=btc_mainnet) const NOEXCEPT;
 
     /// True if the mnemonic words were incorrectly generated.
     /// An overflow does not affect the validity of the object.

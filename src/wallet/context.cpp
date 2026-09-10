@@ -22,13 +22,10 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-const context btc_mainnet_p2kh = ctx::btc::main::p2pkh;
-const context btc_mainnet_p2sh = ctx::btc::main::p2sh;
-const context btc_testnet_p2kh = ctx::btc::test::p2pkh;
-const context btc_testnet_p2sh = ctx::btc::test::p2sh;
-
-const context btc_mainnet = btc_mainnet_p2kh;
-const context btc_testnet = btc_testnet_p2kh;
+const context btc_mainnet = ctx::btc::main;
+const context btc_testnet = ctx::btc::test;
+const context ltc_mainnet = ctx::ltc::main;
+const context ltc_testnet = ctx::ltc::test;
 
 const context btc = btc_mainnet;
 
