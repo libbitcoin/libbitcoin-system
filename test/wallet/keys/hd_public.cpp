@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__depth_overflow__invalid)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
-    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQFSjf36";
+    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQB12ucr";
     const hd_private xprv_254(xprv_254_encoded);
     hd_public xpub_254 = xprv_254.to_public();
 
@@ -243,7 +243,8 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__off_curve_point__invalid)
 {
     auto key = hd_public(BIP32_M_0H).to_hd_key();
     const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    std::copy(off_curve.begin(), off_curve.end(), std::prev(key.end(), ec_compressed_size));
+    std::copy(off_curve.begin(), off_curve.end(), std::prev(key.end(), checksum_default_size + ec_compressed_size));
+    insert_checksum(key);
 
     const hd_public instance(key);
     BOOST_REQUIRE(instance);
