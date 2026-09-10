@@ -2508,4 +2508,43 @@ BOOST_AUTO_TEST_CASE(transaction__connect__coinbase__transaction_success)
     BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
 }
 
+// Taproot eliminates the one_hash return, so a single sigop without a
+// corresponding output fails the signature hash [bip341].
+BOOST_AUTO_TEST_CASE(transaction__check_signature__taproot_single_overflow__false)
+{
+    const auto instance = spends_transaction();
+    const ec_signature signature{ 0x01_u8 };
+    const data_chunk key(ec_compressed_size, 0x02_u8);
+    BOOST_REQUIRE(!instance.check_signature(signature, key, {}, 1, 0, coverage::hash_single, script_version::taproot, flags::bip342_rule));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__create_endorsement__taproot_single_overflow__false)
+{
+    const auto instance = spends_transaction();
+    endorsement out{};
+    const ec_secret secret{ 0x01_u8 };
+    BOOST_REQUIRE(!instance.create_endorsement(out, secret, {}, 1, 0, coverage::hash_single, script_version::taproot, flags::bip342_rule));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__create_endorsement__invalid_secret__false)
+{
+    const auto instance = spends_transaction();
+    endorsement out{};
+    const ec_secret secret{};
+    BOOST_REQUIRE(!instance.create_endorsement(out, secret, {}, 0, 0, coverage::hash_all, script_version::unversioned, 0));
+}
+
+// Witness data present but not requested is skipped, not read.
+BOOST_AUTO_TEST_CASE(transaction__construct__witness_data_without_witness__not_segregated)
+{
+    const chain::inputs ins{ input{ point{ one_hash, 42 }, script{}, witness{ "[424242]" }, 24 } };
+    const chain::outputs outs{ output{ 24, script{} } };
+    const transaction expected{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(expected.is_segregated());
+
+    const transaction instance{ expected.to_data(true), false };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_segregated());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

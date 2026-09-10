@@ -2603,4 +2603,25 @@ BOOST_AUTO_TEST_CASE(interpreter__ops_increment__tapscript_public_keys__true)
     BOOST_REQUIRE(accessor.ops_increment(add1(chain::max_counted_ops)));
 }
 
+// An empty signature leaves the accumulator unchanged and continues [bip342].
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__empty_endorsement__unchanged)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.push_chunk(data_chunk{});
+    accessor.push_signed64(7);
+    accessor.push_chunk(data_chunk(ec_xonly_size, 0x02));
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig_add() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(accessor.pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, 7);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
