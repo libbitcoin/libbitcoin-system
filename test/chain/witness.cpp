@@ -546,4 +546,75 @@ BOOST_AUTO_TEST_CASE(witness__to_string__invalid__expected)
     BOOST_REQUIRE_EQUAL(instance.to_string(), "(?)");
 }
 
+// extract_sigop_script
+
+// A v0 program of an undefined size will not validate, so counts no sigops.
+BOOST_AUTO_TEST_CASE(witness__extract_sigop_script__undefined_v0_program__empty)
+{
+    const auto program = base16_chunk("000102030405060708090a0b0c0d0e0f10111213141516");
+    const script prevout{ script::to_pay_witness_pattern(0_u8, program) };
+    BOOST_REQUIRE(prevout.version() == script_version::segwit);
+
+    const chain::witness instance{ chunk_cptrs{} };
+    script out{ operations{ { opcode::pick } } };
+    BOOST_REQUIRE(instance.extract_sigop_script(out, prevout));
+    BOOST_REQUIRE(out.ops().empty());
+}
+
+// Versions above taproot are reserved, so count no sigops [bip141].
+BOOST_AUTO_TEST_CASE(witness__extract_sigop_script__reserved_version__empty)
+{
+    const auto program = base16_chunk("0001020304050607080910111213141516171819");
+    const script prevout{ script::to_pay_witness_pattern(2_u8, program) };
+    BOOST_REQUIRE(prevout.version() == script_version::reserved);
+
+    const chain::witness instance{ chunk_cptrs{} };
+    script out{ operations{ { opcode::pick } } };
+    BOOST_REQUIRE(instance.extract_sigop_script(out, prevout));
+    BOOST_REQUIRE(out.ops().empty());
+}
+
+// extract_taproot (annex and undefined program size)
+
+static chain::witness annexed_script_path(const data_chunk& control) NOEXCEPT
+{
+    const auto script_element = to_shared<data_chunk>(tapleaf_script);
+    const auto control_element = to_shared<data_chunk>(control);
+    const auto annex_element = to_shared<data_chunk>(data_chunk{ 0x50_u8, 0x42_u8 });
+    return chain::witness{ chunk_cptrs{ script_element, control_element, annex_element } };
+}
+
+// The annex is discarded before the control block is popped [bip341].
+BOOST_AUTO_TEST_CASE(witness__extract_taproot__annexed_tapscript__annex_dropped)
+{
+    hash_cptr leaf{};
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = taproot_prevout(c0_program);
+    const auto instance = annexed_script_path(c0_control);
+
+    const auto ec = instance.extract_taproot(leaf, out, stack, prevout);
+    BOOST_REQUIRE_EQUAL(ec, error::script_success);
+    BOOST_REQUIRE(leaf);
+    BOOST_REQUIRE_EQUAL(*leaf, c0_tapleaf);
+    BOOST_REQUIRE(stack->empty());
+}
+
+// A v1 program that is not 32 bytes remains unencumbered [bip341].
+BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_program_size__unencumbered)
+{
+    hash_cptr leaf{};
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto program = base16_chunk("0001020304050607080910111213141516171819");
+    const script prevout{ script::to_pay_witness_pattern(1_u8, program) };
+    BOOST_REQUIRE(prevout.version() == script_version::taproot);
+
+    const auto instance = script_path(c0_control);
+    const auto ec = instance.extract_taproot(leaf, out, stack, prevout);
+    BOOST_REQUIRE_EQUAL(ec, error::script_success);
+    BOOST_REQUIRE(out->is_prevalid());
+    BOOST_REQUIRE(stack->empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

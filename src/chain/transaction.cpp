@@ -919,10 +919,11 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
         return error::transaction_success;
     if (bip68 && is_relative_locked(ctx.height, ctx.median_time_past))
         return error::relative_time_locked;
-    if (is_immature(ctx.height))
-        return error::coinbase_maturity;
+    // This must precede is_immature, which it subsumes.
     if (is_unconfirmed_spend(ctx.height))
         return error::unconfirmed_spend;
+    if (is_immature(ctx.height))
+        return error::coinbase_maturity;
     if (is_confirmed_double_spend(ctx.height))
         return error::confirmed_double_spend;
 

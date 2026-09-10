@@ -2151,14 +2151,14 @@ BOOST_AUTO_TEST_CASE(transaction__confirm__confirmed_double_spend__confirmed_dou
     BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::confirmed_double_spend);
 }
 
-// The unconfirmed spend condition (height < prevout_height) is a subset of
-// the non-coinbase immaturity condition, which is evaluated first.
-BOOST_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__coinbase_maturity)
+// The immaturity condition subsumes the unconfirmed spend condition
+// (height < prevout_height), so the more specific error is evaluated first.
+BOOST_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__unconfirmed_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const auto instance = triad_confirmable();
     instance.inputs_ptr()->front()->metadata.prevout_height = 200;
-    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::unconfirmed_spend);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__confirm__relative_locked_bip68_off__transaction_success)
@@ -2426,6 +2426,86 @@ BOOST_AUTO_TEST_CASE(transaction__accept_guard__sigops_above_limit__transaction_
     const auto instance = sigops_spend(add1(max_block_sigops));
     instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
     BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_sigop_limit);
+}
+
+// spends
+
+static transaction spends_transaction() NOEXCEPT
+{
+    const chain::inputs ins
+    {
+        input{ point{ one_hash, 42 }, script{}, 0xffffffff },
+        input{ point{ one_hash, 24 }, script{}, 0xffffffff }
+    };
+
+    const chain::outputs outs{ output{ 0, script{} } };
+    return transaction{ 1, ins, outs, 0 };
+}
+
+// The coinbase input is not a spend.
+BOOST_AUTO_TEST_CASE(transaction__spends__coinbase__zero)
+{
+    const chain::inputs ins{ input{ point{}, script{}, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(instance.is_coinbase());
+    BOOST_REQUIRE_EQUAL(instance.spends(), zero);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__spends__non_coinbase__inputs)
+{
+    const auto instance = spends_transaction();
+    BOOST_REQUIRE_EQUAL(instance.spends(), 2u);
+    BOOST_REQUIRE_EQUAL(instance.inputs(), 2u);
+}
+
+// signing guards
+
+BOOST_AUTO_TEST_CASE(transaction__check_signature__index_out_of_range__false)
+{
+    const auto instance = spends_transaction();
+    const ec_signature signature{ 0x01_u8 };
+    const data_chunk key(ec_compressed_size, 0x02_u8);
+    BOOST_REQUIRE(!instance.check_signature(signature, key, {}, 2, 0, coverage::hash_all, script_version::unversioned, 0));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__create_endorsement__index_out_of_range__false)
+{
+    const auto instance = spends_transaction();
+    endorsement out{};
+    const ec_secret secret{ 0x01_u8 };
+    BOOST_REQUIRE(!instance.create_endorsement(out, secret, {}, 2, 0, coverage::hash_all, script_version::unversioned, 0));
+}
+
+// bip68 relative locktime application
+
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locktime_applied__coinbase__false)
+{
+    const auto applied = transaction::is_relative_locktime_applied(true, 2, 0);
+    BOOST_REQUIRE(!applied);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locktime_applied__version_one__false)
+{
+    const auto applied = transaction::is_relative_locktime_applied(false, 1, 0);
+    BOOST_REQUIRE(!applied);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locktime_applied__version_two__true)
+{
+    const auto applied = transaction::is_relative_locktime_applied(false, 2, 0);
+    BOOST_REQUIRE(applied);
+}
+
+// connect
+
+BOOST_AUTO_TEST_CASE(transaction__connect__coinbase__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const chain::inputs ins{ input{ point{}, script{}, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
