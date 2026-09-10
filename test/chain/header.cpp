@@ -489,4 +489,10 @@ BOOST_AUTO_TEST_CASE(header__difficulty__high_exponent__scaled_down)
     BOOST_REQUIRE_EQUAL(instance.difficulty(), other.difficulty() / 256.0);
 }
 
+// A negated compact mantissa is invalid, expanding to the zero sentinel.
+BOOST_AUTO_TEST_CASE(header__proof__negated_bits__zero)
+{
+    BOOST_REQUIRE_EQUAL(chain::header::proof(0x01800000), 0u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

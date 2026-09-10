@@ -647,8 +647,8 @@ size_t block::segregated() const NOEXCEPT
 // Last output of commitment pattern holds the committed value [bip141].
 bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
 {
-    if (txs_->empty())
-        return false;
+    // Caller guards empty, which the coinbase access would fault on.
+    BC_ASSERT(!txs_->empty());
 
     const auto& outputs = *txs_->front()->outputs_ptr();
     for (const auto& output: std::views::reverse(outputs))
@@ -661,8 +661,8 @@ bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
 // Coinbase input witness must be 32 byte witness reserved value [bip141].
 bool block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
 {
-    if (txs_->empty())
-        return false;
+    // Caller guards empty, which the coinbase access would fault on.
+    BC_ASSERT(!txs_->empty());
 
     const auto& inputs = *txs_->front()->inputs_ptr();
     return !inputs.empty() && inputs.front()->reserved_hash(reservation);

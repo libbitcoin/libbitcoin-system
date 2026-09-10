@@ -1634,4 +1634,12 @@ BOOST_AUTO_TEST_CASE(block__connect__capture_unpopulated__missing_prevout)
     BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
+BOOST_AUTO_TEST_CASE(block__constructor__fast_stream__round_trips)
+{
+    const auto& data = expected_block::data();
+    stream::in::fast source{ data };
+    const block instance{ source, true };
+    BOOST_REQUIRE(instance == expected_block::get());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

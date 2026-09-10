@@ -111,4 +111,12 @@ BOOST_AUTO_TEST_CASE(annex__hash__unprefixed__expected)
     BOOST_REQUIRE_EQUAL(instance.hash(false), base16_array("d978efba3e41ea9d2c9073fc50b3ed18048e85bbd32ad19594f3ef2ea7a5c58b"));
 }
 
+// A stack that does not match the annex pattern yields no data.
+BOOST_AUTO_TEST_CASE(annex__data__default__empty)
+{
+    const chain::annex instance{};
+    BOOST_REQUIRE(!instance);
+    BOOST_REQUIRE(instance.data().empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
