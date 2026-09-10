@@ -287,7 +287,7 @@ bool descriptor::key_expression::derive(data_chunk& out,
             if (!key)
                 return false;
 
-            out = to_chunk(key.to_public().point());
+            out = to_chunk(key.point());
             return true;
         }
         default:
@@ -317,10 +317,10 @@ bool descriptor::key_expression::derive(psbt::derivation& out,
     }
     else
     {
-        const auto& key = (form == key_form::extended_private) ?
-            extended_private.to_public() : extended_public;
+        const auto& point = (form == key_form::extended_private) ?
+            extended_private.point() : extended_public.point();
         to.fingerprint = from_little_endian<uint32_t>(
-            bitcoin_short_hash(key.point()));
+            bitcoin_short_hash(point));
     }
 
     to.path.insert(to.path.end(), path.begin(), path.end());
