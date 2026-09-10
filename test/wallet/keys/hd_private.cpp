@@ -27,6 +27,12 @@ using namespace bc::system::wallet;
 #define SHORT_SEED "000102030405060708090a0b0c0d0e0f"
 #define LONG_SEED "fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542"
 
+// bip32 test vector 1 master key, in each network serialization.
+#define MAINNET_M "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
+#define MAINNET_M_PUBLIC "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"
+#define TESTNET_M "tprv8ZgxMBicQKsPeDgjzdC36fs6bMjGApWDNLR9erAXMs5skhMv36j9MV5ecvfavji5khqjWaWSFhN3YcCUUdiKH6isR4Pwy3U5y5egddBr16m"
+#define TESTNET_M_PUBLIC "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
+
 BOOST_AUTO_TEST_CASE(hd_private__encoded__round_trip__expected)
 {
     static const auto encoded = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi";
@@ -139,10 +145,7 @@ BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key__decodes_to_invalid)
 
 BOOST_AUTO_TEST_CASE(hd_private__constructor__nonzero_private_key_padding__invalid)
 {
-    static const auto encoded = "tprvAk8SVSmAT8FFvWjCNUB546H9tsmRk5bii5WZvSY2zSnxSg4uuLFspzTZffwYUoYXqsP7WDdHTRS92WJzeXTki31ftCwzYCEnLAPt9a7aJyV";
-
-    const hd_private xprv_invalid(encoded);
-    BOOST_REQUIRE(!xprv_invalid);
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGpWnsj83BHtEy5Zt8CcDr1UiRXuWCmTQLxEK9vbz5gPstX92JQ"));
 }
 
 BOOST_AUTO_TEST_CASE(hd_private__to_public__from_invalid_private__invalid)
@@ -244,4 +247,129 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__hardened_must_not_overflow_depth
     BOOST_REQUIRE(!xpub_256);
 }
 
+
+// Network prefixes.
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_private__encoded__testnet_short_seed__expected)
+{
+    data_chunk seed;
+    BOOST_REQUIRE(decode_base16(seed, SHORT_SEED));
+
+    const hd_private m(seed, hd_private::testnet);
+    BOOST_REQUIRE_EQUAL(m.encoded(), TESTNET_M);
+    BOOST_REQUIRE_EQUAL(m.to_public().encoded(), TESTNET_M_PUBLIC);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__to_public__testnet_prefixes__testnet_public)
+{
+    const hd_private key(TESTNET_M, hd_private::testnet);
+    BOOST_REQUIRE(key);
+    BOOST_REQUIRE_EQUAL(key.encoded(), TESTNET_M);
+    BOOST_REQUIRE_EQUAL(key.to_public().encoded(), TESTNET_M_PUBLIC);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__to_public__mainnet_prefixes__mainnet_public)
+{
+    const hd_private key(MAINNET_M, hd_private::mainnet);
+    BOOST_REQUIRE(key);
+    BOOST_REQUIRE_EQUAL(key.encoded(), MAINNET_M);
+    BOOST_REQUIRE_EQUAL(key.to_public().encoded(), MAINNET_M_PUBLIC);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__testnet_key_mainnet_prefixes__invalid)
+{
+    const hd_private key(TESTNET_M, hd_private::mainnet);
+    BOOST_REQUIRE(!key);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__mainnet_key_testnet_prefixes__invalid)
+{
+    const hd_private key(MAINNET_M, hd_private::testnet);
+    BOOST_REQUIRE(!key);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__testnet_key_default_prefixes__invalid)
+{
+    const hd_private key(TESTNET_M);
+    BOOST_REQUIRE(!key);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__derive_private__testnet_prefixes__prefixes_transitive)
+{
+    const hd_private key(TESTNET_M, hd_private::testnet);
+    const auto derived = key.derive_private(hd_first_hardened_key);
+    BOOST_REQUIRE(derived);
+    BOOST_REQUIRE_EQUAL(derived.lineage().prefixes, hd_private::testnet);
+    BOOST_REQUIRE_EQUAL(derived.encoded().substr(0, 4), "tprv");
+    BOOST_REQUIRE_EQUAL(key.derive_public(hd_first_hardened_key).encoded().substr(0, 4), "tpub");
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__stream__mainnet_key__round_trips)
+{
+    std::istringstream in{ MAINNET_M };
+    hd_private instance{};
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), MAINNET_M);
+    BOOST_REQUIRE_EQUAL(instance.to_public().encoded(), MAINNET_M_PUBLIC);
+
+    std::ostringstream out{};
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), MAINNET_M);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__stream__testnet_key__throws)
+{
+    hd_private instance{};
+    BOOST_REQUIRE_THROW(std::istringstream(TESTNET_M) >> instance, istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__stream__invalid__throws)
+{
+    hd_private instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
+
+// bip32 test vector 5 (invalid extended keys).
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__private_version_public_mismatch__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGTQQD3dC4H2D5GBj7vWvSQaaBv5cxi9gafk7NF3pnBju6dwKvH"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__private_key_prefix_01__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD9y5gkZ6Eq3Rjuahrv17fEQ3Qen6J"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__zero_depth_nonzero_parent_fingerprint__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s2SPatNQ9Vc6GTbVMFPFo7jsaZySyzk7L8n2uqKXJen3KUmvQNTuLh3fhZMBoG3G4ZW1N2kZuHEPY53qmbZzCHshoQnNf4GvELZfqTUrcv"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__zero_depth_nonzero_index__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH4r4TsiLvyLXqM9P7k1K3EYhA1kkD6xuquB5i39AU8KF42acDyL3qsDbU9NmZn6MsGSUYZEsuoePmjzsB3eFKSUEh3Gu1N3cqVUN"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__unknown_version__invalid)
+{
+    BOOST_REQUIRE(!hd_private("DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHGMQzT7ayAmfo4z3gY5KfbrZWZ6St24UVf2Qgo6oujFktLHdHY4"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__private_key_zero__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzF93Y5wvzdUayhgkkFoicQZcP3y52uPPxFnfoLZB21Teqt1VvEHx"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__private_key_order__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD5SDKr24z3aiUvKr9bJpdrcLg1y3G"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__invalid_checksum__invalid)
+{
+    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"));
+}
 BOOST_AUTO_TEST_SUITE_END()

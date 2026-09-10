@@ -115,12 +115,20 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
     const auto padding = source.read_byte();
     const auto secret = source.read_hash();
 
+    // Validate the key checksum.
+    if (!verify_checksum(key))
+        return {};
+
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))
         return {};
 
     // Validate the key padding.
     if (padding != 0x00)
+        return {};
+
+    // Validate the master key lineage.
+    if (is_zero(depth) && !(is_zero(parent) && is_zero(child)))
         return {};
 
     const hd_lineage lineage

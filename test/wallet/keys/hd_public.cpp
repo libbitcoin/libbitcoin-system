@@ -251,4 +251,23 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__off_curve_point__invalid)
     BOOST_REQUIRE(!instance.derive_public(1));
 }
 
+
+// bip32 test vector 5 (invalid extended keys).
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__zero_depth_nonzero_parent_fingerprint__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661no6RGEX3uJkY4bNnPcw4URcQTrSibUZ4NqJEw5eBkv7ovTwgiT91XX27VbEXGENhYRCf7hyEbWrR3FewATdCEebj6znwMfQkhRYHRLpJ"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__zero_depth_nonzero_index__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAuDcm6CRQ5N4qiHKrJ39Xe1R1NyfouMKTTWcguwVcfrZJaNvhpebzGerh7gucBvzEQWRugZDuDXjNDRmXzSZe4c7mnTK97pTvGS8"));
+}
+
+// Vector 1 with an altered final character.
+BOOST_AUTO_TEST_CASE(hd_public__constructor__invalid_checksum__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcetL"));
+}
 BOOST_AUTO_TEST_SUITE_END()
