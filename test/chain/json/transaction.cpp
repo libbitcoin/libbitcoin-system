@@ -176,4 +176,49 @@ BOOST_AUTO_TEST_CASE(transaction__bitcoind__witness_coinbase_840000__size_and_wi
     BOOST_REQUIRE_EQUAL(script2.at("type").as_string(), "nulldata");
 }
 
+static transaction witnessed_transaction() NOEXCEPT
+{
+    const inputs ins
+    {
+        input
+        {
+            point{ one_hash, 42 },
+            script{ operations{ { opcode::pick } } },
+            witness{ "[424242]" },
+            24
+        }
+    };
+
+    const outputs outs
+    {
+        output{ 24, script{ operations{ { opcode::roll } } } }
+    };
+
+    return transaction{ 42, ins, outs, 24 };
+}
+
+BOOST_AUTO_TEST_CASE(transaction__json__pointer_conversions__expected)
+{
+    const transaction::cptr instance{ to_shared(witnessed_transaction()) };
+    const auto value = json::value_from(instance);
+    BOOST_REQUIRE(value == json::value_from(*instance));
+    BOOST_REQUIRE(*json::value_to<transaction::cptr>(value) == *instance);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__json__bitcoind_verbose__native_transaction)
+{
+    const auto instance = witnessed_transaction();
+    const auto value = json::value_from(bitcoind_verbose(instance));
+    BOOST_REQUIRE(value == json::value_from(instance));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__json__bitcoind_verbose_pointers__expected)
+{
+    const transaction_cptrs txs{ to_shared(witnessed_transaction()) };
+
+    const auto value = json::value_from(bitcoind_verbose(txs));
+    BOOST_REQUIRE_EQUAL(value.as_array().size(), 1u);
+    BOOST_REQUIRE(value.as_array().front() == json::value_from(*txs.front()));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

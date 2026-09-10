@@ -563,7 +563,8 @@ BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip65_only__bip65_version)
     settings.forks.bip68 = false;
     settings.forks.bip112 = false;
     settings.forks.bip113 = false;
-    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.bip65_version);
+    const auto version = chain_state::signal_version(settings);
+    BOOST_REQUIRE_EQUAL(version, settings.bip65_version);
 }
 
 BOOST_AUTO_TEST_CASE(chain_state__signal_version__no_forks__first_version)
@@ -580,7 +581,8 @@ BOOST_AUTO_TEST_CASE(chain_state__signal_version__no_forks__first_version)
     settings.forks.bip65 = false;
     settings.forks.bip66 = false;
     settings.forks.bip34 = false;
-    BOOST_REQUIRE_EQUAL(chain_state::signal_version(settings), settings.first_version);
+    const auto version = chain_state::signal_version(settings);
+    BOOST_REQUIRE_EQUAL(version, settings.first_version);
 }
 
 // configured_flags
@@ -807,6 +809,325 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__unpatched__proof_of_wo
     settings.forks.block_storm_patch = false;
     const auto values = storm_values(settings, 0x1c0ffff0);
     BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), settings.proof_of_work_limit);
+}
+// configured_flags (activation independent of signalling)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__configured__ltc_time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_time_warp_patch = true;
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::ltc_time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured__ltc_retarget_overflow_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_retarget_overflow_patch = true;
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::ltc_retarget_overflow_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured__ltc_scrypt_proof_of_work__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_scrypt_proof_of_work = true;
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::ltc_scrypt_proof_of_work));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured__time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.time_warp_patch = true;
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__configured__block_storm_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.block_storm_patch = true;
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::block_storm_patch));
+}
+
+// activation (configuration-only forks)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__ltc_time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_time_warp_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::ltc_time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__ltc_retarget_overflow_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_retarget_overflow_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::ltc_retarget_overflow_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__ltc_scrypt_proof_of_work__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.ltc_scrypt_proof_of_work = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::ltc_scrypt_proof_of_work));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__time_warp_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.time_warp_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::time_warp_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__block_storm_patch__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.block_storm_patch = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::block_storm_patch));
+}
+
+// signal_version
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip66_only__bip66_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks = {};
+    settings.forks.bip66 = true;
+    const auto version = chain_state::signal_version(settings);
+    BOOST_REQUIRE_EQUAL(version, settings.bip66_version);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__signal_version__bip34_only__bip34_version)
+{
+    settings settings(selection::mainnet);
+    settings.forks = {};
+    settings.forks.bip34 = true;
+    const auto version = chain_state::signal_version(settings);
+    BOOST_REQUIRE_EQUAL(version, settings.bip34_version);
+}
+
+// get_map (regtest bypasses retargeting)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__no_retarget__unrequested)
+{
+    settings settings(selection::mainnet);
+    settings.forks.difficult = false;
+    settings.forks.retarget = false;
+    const auto map = chain_state::get_map(42, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.count, one);
+    BOOST_REQUIRE_EQUAL(map.timestamp_retarget, chain_state::map::unrequested);
+}
+
+// properties
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(chain_state__context__always__matches_properties)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state state{ transition_values(), settings };
+    const auto ctx = state.context();
+    BOOST_REQUIRE_EQUAL(ctx.flags, state.flags());
+    BOOST_REQUIRE_EQUAL(ctx.timestamp, state.timestamp());
+    BOOST_REQUIRE_EQUAL(ctx.median_time_past, state.median_time_past());
+    BOOST_REQUIRE_EQUAL(ctx.height, state.height());
+    BOOST_REQUIRE_EQUAL(ctx.work_required, state.work_required());
+    BOOST_REQUIRE_EQUAL(ctx.previous_timestamp, state.previous_timestamp());
+    const auto version = state.minimum_block_version();
+    BOOST_REQUIRE_EQUAL(ctx.minimum_block_version, version);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required__invalid_previous_bits__zero)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    auto values = transition_values();
+    values.bits.ordered.clear();
+    values.bits.ordered.push_back(0u);
+    const chain_state state{ std::move(values), settings };
+    BOOST_REQUIRE_EQUAL(state.work_required(), 0u);
+}
+
+// promotion collections
+// ----------------------------------------------------------------------------
+
+// The oldest timestamp is dequeued once the median window is exceeded.
+static chain::chain_state::data window_values()
+{
+    auto values = transition_values();
+    values.timestamp.ordered.clear();
+    values.timestamp.ordered.push_back(1000u);
+    values.timestamp.ordered.push_back(2u);
+    values.timestamp.ordered.push_back(3u);
+    values.timestamp.ordered.push_back(4u);
+    values.timestamp.ordered.push_back(5u);
+    values.timestamp.ordered.push_back(6u);
+    values.timestamp.ordered.push_back(7u);
+    values.timestamp.ordered.push_back(8u);
+    values.timestamp.ordered.push_back(9u);
+    values.timestamp.ordered.push_back(10u);
+    values.timestamp.ordered.push_back(11u);
+    values.timestamp.self = 12u;
+    return values;
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__oldest_timestamp_dequeued)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const chain_state top{ window_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.median_time_past(), 7u);
+}
+
+// retarget promotion
+// ----------------------------------------------------------------------------
+
+static chain::chain_state::data retarget_values()
+{
+    auto values = transition_values();
+    values.height = 2016;
+    values.timestamp.ordered.push_back(950u);
+    return values;
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__top_to_pool__retarget_height__promoted)
+{
+    settings settings(selection::mainnet);
+    const chain_state top{ retarget_values(), settings };
+    const chain_state pool{ top, settings };
+    BOOST_REQUIRE_EQUAL(pool.height(), 2017u);
+    BOOST_REQUIRE_EQUAL(pool.previous_timestamp(), 1000u);
+}
+
+// The retargeting interval is configured down so a full period is spannable.
+// bitcoind starts the period (interval - 1) blocks back, litecoin goes back
+// the full interval, so the patched period start is one block earlier.
+
+static chain::chain_state::data warp_values()
+{
+    chain::chain_state::data values{};
+    values.height = 4;
+    values.hash = one_hash;
+    values.bits.self = 0x1d00ffffu;
+    values.version.self = 4u;
+    values.timestamp.self = 980u;
+    values.bits.ordered.push_back(0x1d00ffffu);
+    values.version.ordered.push_back(4u);
+    values.timestamp.ordered.push_back(970u);
+    values.cumulative_work = 1u;
+    return values;
+}
+
+static system::chain::header warp_header(const hash_digest& previous,
+    uint32_t timestamp)
+{
+    return { 4u, previous, system::hash_digest{}, timestamp, 0x1d00ffffu, 0u };
+}
+
+static uint32_t warp_work_required(bool patch)
+{
+    settings settings(selection::mainnet);
+    settings.retargeting_interval_seconds = 40u;
+    settings.block_spacing_seconds = 10u;
+    settings.forks.ltc_time_warp_patch = patch;
+
+    const chain_state top{ warp_values(), settings };
+    const auto header5 = warp_header(top.hash(), 990u);
+    const chain_state state5{ top, header5, settings };
+    const auto header6 = warp_header(state5.hash(), 995u);
+    const chain_state state6{ state5, header6, settings };
+    const auto header7 = warp_header(state6.hash(), 1000u);
+    const chain_state state7{ state6, header7, settings };
+    const auto header8 = warp_header(state7.hash(), 1005u);
+    const chain_state state8{ state7, header8, settings };
+
+    BOOST_REQUIRE_EQUAL(state8.height(), 8u);
+    return state8.work_required();
+}
+
+// Period start is height 4 (timestamp 980), so the timespan is 1000-980.
+// The patched period start is height 3 (timestamp 970), timespan 1000-970.
+// A longer timespan retargets to a larger (easier) target.
+BOOST_AUTO_TEST_CASE(chain_state__work_required__ltc_time_warp_patch__easier)
+{
+    const auto plain = warp_work_required(false);
+    const auto patched = warp_work_required(true);
+    BOOST_REQUIRE_NE(patched, plain);
+    BOOST_REQUIRE(compact::expand(patched) > compact::expand(plain));
+}
+
+// checkpoint caching
+// ----------------------------------------------------------------------------
+// The bip9 and bip30_deactivate hashes are cached at their checkpoint height,
+// and the cached hash activates the associated rules.
+
+static chain::chain_state::data uncached_values()
+{
+    auto values = transition_values();
+    values.bip30_deactivate_hash = one_hash;
+    values.bip9_bit0_hash = one_hash;
+    values.bip9_bit1_hash = one_hash;
+    values.bip9_bit2_hash = one_hash;
+    return values;
+}
+
+static void set_checkpoints(settings& settings, const hash_digest& hash)
+{
+    settings.bip30_deactivate_checkpoint = { hash, 43 };
+    settings.bip9_bit0_active_checkpoint = { hash, 43 };
+    settings.bip9_bit1_active_checkpoint = { hash, 43 };
+    settings.bip9_bit2_active_checkpoint = { hash, 43 };
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__pool_to_block__checkpoints__activated)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    set_checkpoints(settings, null_hash);
+
+    const chain_state top{ uncached_values(), settings };
+    const chain_state pool{ top, settings };
+    const chain::block block{ transition_header(1100u), transactions{} };
+    const chain_state state{ pool, block, settings };
+
+    BOOST_REQUIRE(!to_bool(pool.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip141_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip341_rule));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__construct__parent_to_header__checkpoints__activated)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const auto header = transition_header(1100u);
+    set_checkpoints(settings, header.hash());
+
+    const chain_state parent{ uncached_values(), settings };
+    const chain_state state{ parent, header, settings };
+
+    BOOST_REQUIRE(!to_bool(parent.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip141_rule));
+    BOOST_REQUIRE(to_bool(state.flags() & flags::bip341_rule));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

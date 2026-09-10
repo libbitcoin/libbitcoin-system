@@ -128,4 +128,13 @@ BOOST_AUTO_TEST_CASE(script__json__bitcoind_output__not_decoded)
     BOOST_REQUIRE_EQUAL(value.at("type").as_string(), "nonstandard");
 }
 
+BOOST_AUTO_TEST_CASE(script__json__pointer_conversions__expected)
+{
+    const script expected{ operations{ { opcode::pick } } };
+    const script::cptr instance{ to_shared(expected) };
+    const auto value = json::value_from(instance);
+    BOOST_REQUIRE(value == json::value_from(*instance));
+    BOOST_REQUIRE(*json::value_to<script::cptr>(value) == *instance);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

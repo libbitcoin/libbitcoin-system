@@ -446,5 +446,28 @@ BOOST_AUTO_TEST_CASE(program__is_true__dirty_stack_false_top__false)
     BOOST_REQUIRE(!machine->is_true(false));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+// script iteration
 
+BOOST_AUTO_TEST_CASE(program__end__empty_script__equals_begin)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(machine->begin() == machine->end());
+}
+
+BOOST_AUTO_TEST_CASE(program__end__two_operations__two_from_begin)
+{
+    const script instance{ operations{ { opcode::pick }, { opcode::roll } } };
+    machine_accessor<contiguous_stack> machine{ instance, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(std::distance(machine->begin(), machine->end()), 2);
+}
+
+// pop_chunks
+
+BOOST_AUTO_TEST_CASE(program__pop_chunks__insufficient__false)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    chunk_xptrs chunks{};
+    BOOST_REQUIRE(!machine->pop_chunks(chunks, one));
+}
+
+BOOST_AUTO_TEST_SUITE_END()

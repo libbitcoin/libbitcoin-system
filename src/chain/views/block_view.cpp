@@ -221,9 +221,8 @@ size_t block_view::malleated32_size() const NOEXCEPT
 
 bool block_view::is_malleated32(size_t width) const NOEXCEPT
 {
-    const auto malleated = txs_.size();
-    if (is_zero(width) || width > to_half(malleated))
-        return false;
+    // Caller bounds width, zero underflows the loop decrement.
+    BC_ASSERT(!is_zero(width) && width <= to_half(txs_.size()));
 
     auto mally = txs_.rbegin();
     auto legit = std::next(mally, width);
@@ -241,8 +240,7 @@ bool block_view::is_malleated32(size_t width) const NOEXCEPT
 
 hash_digest block_view::header_merkle_root() const NOEXCEPT
 {
-    if (txs_.empty() || buffer_->empty())
-        return null_hash;
+    BC_ASSERT(!txs_.empty() && !buffer_->empty());
 
     constexpr auto offset = sizeof(uint32_t) + hash_size;
     const auto start = std::next(buffer_->data(), offset);

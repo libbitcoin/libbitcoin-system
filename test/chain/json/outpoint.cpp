@@ -52,4 +52,13 @@ BOOST_AUTO_TEST_CASE(outpoint__json__conversions__expected)
     BOOST_REQUIRE(json::value_to<outpoint>(value) == instance);
 }
 
+BOOST_AUTO_TEST_CASE(outpoint__json__pointer_conversions__expected)
+{
+    const outpoint expected{ point{ one_hash, 42 }, 24 };
+    const outpoint::cptr instance{ to_shared(expected) };
+    const auto value = json::value_from(instance);
+    BOOST_REQUIRE(value == json::value_from(*instance));
+    BOOST_REQUIRE(*json::value_to<outpoint::cptr>(value) == *instance);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

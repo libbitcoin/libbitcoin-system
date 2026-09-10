@@ -44,4 +44,12 @@ BOOST_AUTO_TEST_CASE(operation__json__conversions__expected)
     BOOST_REQUIRE(json::value_to<operation>(value) == instance);
 }
 
+BOOST_AUTO_TEST_CASE(operation__json__pointer_conversions__expected)
+{
+    const operation::cptr instance{ to_shared(operation{ opcode::op_return }) };
+    const auto value = json::value_from(instance);
+    BOOST_REQUIRE(value == json::value_from(*instance));
+    BOOST_REQUIRE(*json::value_to<operation::cptr>(value) == *instance);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
