@@ -127,4 +127,127 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__depth_overflow__invalid)
 }
 
 
+// BIP32 test vector 1, master seed 000102030405060708090a0b0c0d0e0f.
+#define BIP32_M_0H "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw"
+#define BIP32_M_0H_1 "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ"
+
+// Public derivation of an unhardened child [bip32].
+BOOST_AUTO_TEST_CASE(hd_public__derive_public__bip32_vector1__expected)
+{
+    const hd_public parent(BIP32_M_0H);
+    BOOST_REQUIRE(parent);
+    BOOST_REQUIRE_EQUAL(parent.derive_public(1).encoded(), BIP32_M_0H_1);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__encoded__bip32_vector1__round_trips)
+{
+    const hd_public instance(BIP32_M_0H);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BIP32_M_0H);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__hd_key__expected)
+{
+    const hd_public expected(BIP32_M_0H);
+    const hd_public instance(expected.to_hd_key());
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__hd_key_prefix__expected)
+{
+    const hd_public expected(BIP32_M_0H);
+    const hd_public instance(expected.to_hd_key(), hd_public::mainnet);
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__wrong_prefix__invalid)
+{
+    const hd_public instance(BIP32_M_0H, hd_public::testnet);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__string_prefix__expected)
+{
+    const hd_public instance(BIP32_M_0H, hd_public::mainnet);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BIP32_M_0H);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__not_base58__invalid)
+{
+    const hd_public instance("not-base58-0OIl", hd_public::mainnet);
+    BOOST_REQUIRE(!instance);
+}
+
+// accessors and casts
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__chain_code__always__matches_derived_parent)
+{
+    const hd_public instance(BIP32_M_0H);
+    const hd_public other(BIP32_M_0H);
+    BOOST_REQUIRE_EQUAL(instance.chain_code(), other.chain_code());
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__cast__compressed__point)
+{
+    const hd_public instance(BIP32_M_0H);
+    const ec_compressed& point = instance;
+    BOOST_REQUIRE_EQUAL(point, instance.point());
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__inequality__different__true)
+{
+    const hd_public left(BIP32_M_0H);
+    const hd_public right(BIP32_M_0H_1);
+    BOOST_REQUIRE(left != right);
+    BOOST_REQUIRE(!(left == right));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__lesser__by_encoding__expected)
+{
+    const hd_public left(BIP32_M_0H);
+    const hd_public right(BIP32_M_0H_1);
+    BOOST_REQUIRE_EQUAL(left < right, std::string(BIP32_M_0H) < std::string(BIP32_M_0H_1));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__lineage__different_children__unequal)
+{
+    const hd_public parent(BIP32_M_0H);
+    BOOST_REQUIRE(parent.lineage() != parent.derive_public(1).lineage());
+    BOOST_REQUIRE(parent.lineage() == hd_public(BIP32_M_0H).lineage());
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__stream__round_trips)
+{
+    std::istringstream in{ BIP32_M_0H };
+    hd_public instance{};
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BIP32_M_0H);
+
+    std::ostringstream out{};
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), BIP32_M_0H);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__stream__invalid__throws)
+{
+    hd_public instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
+
+// Deserialization does not verify that the point is on the curve, so the
+// tweak addition can fail, as bip32 requires for an invalid child key.
+BOOST_AUTO_TEST_CASE(hd_public__derive_public__off_curve_point__invalid)
+{
+    auto key = hd_public(BIP32_M_0H).to_hd_key();
+    const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    std::copy(off_curve.begin(), off_curve.end(), std::prev(key.end(), ec_compressed_size));
+
+    const hd_public instance(key);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.derive_public(1));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

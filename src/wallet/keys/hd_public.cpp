@@ -259,7 +259,7 @@ std::istream& operator>>(std::istream& in, hd_public& to)
 {
     std::string value;
     in >> value;
-    to.from_string(value);
+    to = hd_public(value);
 
     if (!to)
         throw istream_exception(value);
