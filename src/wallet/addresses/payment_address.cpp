@@ -243,7 +243,7 @@ payment_address::list payment_address::extract_input(
         {
             return
             {
-                { ec_public{ script.ops().front().data() }, p2kh_prefix }
+                { ec_public{ script.ops().back().data() }, p2kh_prefix }
                 ////,{ bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
