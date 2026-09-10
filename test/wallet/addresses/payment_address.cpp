@@ -456,4 +456,52 @@ BOOST_AUTO_TEST_CASE(payment_address__stream__invalid__throws)
     BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
 
+// construction failure paths
+// ----------------------------------------------------------------------------
+
+// Decodes to the correct size but the checksum does not validate.
+BOOST_AUTO_TEST_CASE(payment_address__construct__bad_checksum__invalid)
+{
+    const payment_address instance("1FsSia9rv4NeEwvJ2GvXrX7LyxYspbN2mp");
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__invalid_secret__invalid)
+{
+    const payment_address instance(ec_private{});
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__invalid_point__invalid)
+{
+    const payment_address instance(ec_public{});
+    BOOST_REQUIRE(!instance);
+}
+
+// An off curve point cannot be decompressed, so it cannot be serialized.
+BOOST_AUTO_TEST_CASE(payment_address__construct__uncompressible_point__invalid)
+{
+    const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    const ec_public point{ off_curve, false };
+    BOOST_REQUIRE(point);
+    BOOST_REQUIRE(!payment_address(point));
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__invalid_script__invalid)
+{
+    const chain::script script(data_chunk{}, true);
+    BOOST_REQUIRE(!script.is_valid());
+    BOOST_REQUIRE(!payment_address(script));
+}
+
+// Input extraction is preferred over output extraction.
+BOOST_AUTO_TEST_CASE(payment_address__extract__input_script__input_address)
+{
+    const chain::operations ops{ { data_chunk(70, 0x42), true }, { base16_chunk(COMPRESSED), true } };
+    const chain::script script{ ops };
+    const auto addresses = payment_address::extract(script);
+    BOOST_REQUIRE_EQUAL(addresses.size(), 1u);
+    BOOST_REQUIRE_EQUAL(addresses.front().encoded(), ADDRESS_COMPRESSED);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
