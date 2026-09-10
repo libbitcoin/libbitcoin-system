@@ -300,7 +300,7 @@ std::istream& operator>>(std::istream& in, hd_private& to)
 {
     std::string value;
     in >> value;
-    to.from_string(value, hd_public::mainnet);
+    to = hd_private(value, hd_public::mainnet);
 
     if (!to)
         throw istream_exception(value);
