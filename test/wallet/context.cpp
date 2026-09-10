@@ -52,6 +52,19 @@ BOOST_AUTO_TEST_CASE(context__to_payment_address__ltc_mainnet__ltc_prefix)
     BOOST_REQUIRE_EQUAL(secret.to_payment_address().prefix(), prefix::p2kh::main::ltc);
 }
 
+BOOST_AUTO_TEST_CASE(context__output_script__ltc_p2sh_address__pay_script_hash)
+{
+    const payment_address address(null_short_hash, ctx::ltc::main.p2sh);
+    const auto script = address.output_script(ctx::ltc::main.p2kh, ctx::ltc::main.p2sh);
+    BOOST_REQUIRE(script.output_pattern() == chain::script_pattern::pay_script_hash);
+}
+
+BOOST_AUTO_TEST_CASE(context__output_script__ltc_p2sh_address_btc_context__empty)
+{
+    const payment_address address(null_short_hash, ctx::ltc::main.p2sh);
+    BOOST_REQUIRE(address.output_script(ctx::btc::main.p2kh, ctx::btc::main.p2sh).ops().empty());
+}
+
 BOOST_AUTO_TEST_CASE(context__construct__ltc_wif_btc_versions__invalid)
 {
     BOOST_REQUIRE(!ec_private(LTC_WIF_COMPRESSED, ctx::btc::main.versions()));
