@@ -237,23 +237,24 @@ BOOST_AUTO_TEST_CASE(hd_public__stream__invalid__throws)
     BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
 
-// Deserialization does not verify that the point is on the curve, so the
-// tweak addition can fail, as bip32 requires for an invalid child key.
-BOOST_AUTO_TEST_CASE(hd_public__derive_public__off_curve_point__invalid)
+BOOST_AUTO_TEST_CASE(hd_public__construct__off_curve_point__invalid)
 {
     auto key = hd_public(BIP32_M_0H).to_hd_key();
     const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
     std::copy(off_curve.begin(), off_curve.end(), std::prev(key.end(), checksum_default_size + ec_compressed_size));
     insert_checksum(key);
 
-    const hd_public instance(key);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(!instance.derive_public(1));
+    BOOST_REQUIRE(!hd_public(key));
 }
 
 
 // bip32 test vector 5 (invalid extended keys).
 // ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__public_version_private_mismatch__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6LBpB85b3D2yc8sfvZU521AAwdZafEz7mnzBBsz4wKY5fTtTQBm"));
+}
 
 BOOST_AUTO_TEST_CASE(hd_public__constructor__zero_depth_nonzero_parent_fingerprint__invalid)
 {
@@ -269,5 +270,20 @@ BOOST_AUTO_TEST_CASE(hd_public__constructor__zero_depth_nonzero_index__invalid)
 BOOST_AUTO_TEST_CASE(hd_public__constructor__invalid_checksum__invalid)
 {
     BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcetL"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__public_key_prefix_04__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Txnt3siSujt9RCVYsx4qHZGc62TG4McvMGcAUjeuwZdduYEvFn"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__public_key_prefix_01__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6N8ZMMXctdiCjxTNq964yKkwrkBJJwpzZS4HS2fxvyYUA4q2Xe4"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__point_not_on_curve__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Q5JXayek4PRsn35jii4veMimro1xefsM58PgBMrvdYre8QyULY"));
 }
 BOOST_AUTO_TEST_SUITE_END()

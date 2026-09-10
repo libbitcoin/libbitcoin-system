@@ -129,6 +129,10 @@ hd_public hd_public::from_key(const hd_key& key, uint32_t prefix) NOEXCEPT
     if (is_zero(depth) && !(is_zero(parent) && is_zero(child)))
         return {};
 
+    // Validate the point.
+    if (!verify_point(compressed))
+        return {};
+
     // The private prefix will be zero'd here, but there's no way to access it.
     const hd_lineage lineage
     {
