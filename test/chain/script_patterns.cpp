@@ -1564,4 +1564,21 @@ BOOST_AUTO_TEST_CASE(script__signature_operations__multisig_inaccurate__default)
     BOOST_REQUIRE_EQUAL(instance.signature_operations(false), multisig_default_sigops);
 }
 
+// The general sign_script_hash pattern subsumes these, so ordering decides.
+
+BOOST_AUTO_TEST_CASE(script__input_pattern__lone_endorsement__sign_public_key)
+{
+    const script instance(endorsement);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::sign_public_key);
+}
+
+BOOST_AUTO_TEST_CASE(script__input_pattern__empty_push_and_endorsements__sign_multisig)
+{
+    const std::string text = "0 " + endorsement + " " + endorsement;
+    const script instance(text);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::sign_multisig);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

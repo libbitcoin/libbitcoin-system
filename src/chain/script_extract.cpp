@@ -154,15 +154,15 @@ script_pattern script::input_pattern() const NOEXCEPT
     if (is_sign_key_hash_pattern(ops()))
         return script_pattern::sign_key_hash;
 
-    // This must follow is_sign_key_hash_pattern for ambiguity comment to hold.
-    if (is_sign_script_hash_pattern(ops()))
-        return script_pattern::sign_script_hash;
-
     if (is_sign_public_key_pattern(ops()))
         return script_pattern::sign_public_key;
 
     if (is_sign_multisig_pattern(ops()))
         return script_pattern::sign_multisig;
+
+    // This must follow the above, each of which it subsumes.
+    if (is_sign_script_hash_pattern(ops()))
+        return script_pattern::sign_script_hash;
 
     return script_pattern::non_standard;
 }

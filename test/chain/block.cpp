@@ -1594,11 +1594,23 @@ BOOST_AUTO_TEST_CASE(block__accept__unpopulated_spend__missing_prevout)
     BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
-BOOST_AUTO_TEST_CASE(block__confirm__unpopulated_spend__coinbase_maturity)
+// An unpopulated prevout height is above any block height.
+BOOST_AUTO_TEST_CASE(block__confirm__unpopulated_spend__unconfirmed_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto ec = unpopulated_block().confirm(ctx);
-    BOOST_REQUIRE_EQUAL(ec, error::coinbase_maturity);
+    BOOST_REQUIRE_EQUAL(ec, error::unconfirmed_spend);
+}
+
+// The prevout is confirmed, but the coinbase it spends is not yet mature.
+BOOST_AUTO_TEST_CASE(block__confirm__immature_coinbase_spend__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, 50, 0, 0, 0 };
+    const auto instance = unpopulated_block();
+    const auto& in = instance.transactions_ptr()->back()->inputs_ptr()->front();
+    in->metadata.coinbase = true;
+    in->metadata.prevout_height = 10;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
 }
 
 BOOST_AUTO_TEST_CASE(block__connect__empty__block_success)

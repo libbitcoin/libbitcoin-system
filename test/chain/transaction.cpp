@@ -2151,14 +2151,14 @@ BOOST_AUTO_TEST_CASE(transaction__confirm__confirmed_double_spend__confirmed_dou
     BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::confirmed_double_spend);
 }
 
-// The unconfirmed spend condition (height < prevout_height) is a subset of
-// the non-coinbase immaturity condition, which is evaluated first.
-BOOST_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__coinbase_maturity)
+// The immaturity condition subsumes the unconfirmed spend condition
+// (height < prevout_height), so the more specific error is evaluated first.
+BOOST_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__unconfirmed_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const auto instance = triad_confirmable();
     instance.inputs_ptr()->front()->metadata.prevout_height = 200;
-    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::unconfirmed_spend);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__confirm__relative_locked_bip68_off__transaction_success)
