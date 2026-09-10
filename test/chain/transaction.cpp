@@ -2508,4 +2508,98 @@ BOOST_AUTO_TEST_CASE(transaction__connect__coinbase__transaction_success)
     BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
 }
 
+// Taproot eliminates the one_hash return, so a single sigop without a
+// corresponding output fails the signature hash [bip341].
+BOOST_AUTO_TEST_CASE(transaction__check_signature__taproot_single_overflow__false)
+{
+    const auto instance = spends_transaction();
+    const ec_signature signature{ 0x01_u8 };
+    const data_chunk key(ec_compressed_size, 0x02_u8);
+    BOOST_REQUIRE(!instance.check_signature(signature, key, {}, 1, 0, coverage::hash_single, script_version::taproot, flags::bip342_rule));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__create_endorsement__taproot_single_overflow__false)
+{
+    const auto instance = spends_transaction();
+    endorsement out{};
+    const ec_secret secret{ 0x01_u8 };
+    BOOST_REQUIRE(!instance.create_endorsement(out, secret, {}, 1, 0, coverage::hash_single, script_version::taproot, flags::bip342_rule));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__create_endorsement__invalid_secret__false)
+{
+    const auto instance = spends_transaction();
+    endorsement out{};
+    const ec_secret secret{};
+    BOOST_REQUIRE(!instance.create_endorsement(out, secret, {}, 0, 0, coverage::hash_all, script_version::unversioned, 0));
+}
+
+// Witness data present but not requested is skipped, not read.
+BOOST_AUTO_TEST_CASE(transaction__construct__witness_data_without_witness__not_segregated)
+{
+    const chain::inputs ins{ input{ point{ one_hash, 42 }, script{}, witness{ "[424242]" }, 24 } };
+    const chain::outputs outs{ output{ 24, script{} } };
+    const transaction expected{ 1, ins, outs, 0 };
+    BOOST_REQUIRE(expected.is_segregated());
+
+    const transaction instance{ expected.to_data(true), false };
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(!instance.is_segregated());
+}
+
+// A rolling script is evaluated on the linked stack.
+BOOST_AUTO_TEST_CASE(transaction__connect__roller_input_script__script_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const script roller{ operations{ { data_chunk{ 0x01 }, false }, { data_chunk{}, false }, { opcode::roll } } };
+    const chain::inputs ins{ input{ point{ one_hash, 0 }, roller, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    const auto& in = instance.inputs_ptr()->front();
+    in->prevout = to_shared<output>(0, script{});
+    BOOST_REQUIRE(in->is_roller());
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
+}
+
+// version1 signature hash [bip341]
+
+static transaction taproot_tx(const chunk_cptrs& stack) NOEXCEPT
+{
+    const chain::inputs ins{ input{ point{ one_hash, 0 }, script{}, chain::witness{ stack }, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction out{ 1, ins, outs, 0 };
+    out.inputs_ptr()->front()->prevout = to_shared<output>(0, script{});
+    return out;
+}
+
+// The annex is committed by the signature hash [bip341].
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__differs)
+{
+    const chunk_cptrs plain{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x51 }) };
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto without = taproot_tx(plain);
+    const auto with = taproot_tx(annexed);
+    BOOST_REQUIRE(!without.inputs_ptr()->front()->witness().annex());
+    BOOST_REQUIRE(with.inputs_ptr()->front()->witness().annex());
+
+    hash_digest out1{}, out2{};
+    BOOST_REQUIRE(without.signature_hash(out1, without.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(with.signature_hash(out2, with.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE_NE(out1, out2);
+}
+
+// Only the codeseparator position is committed, not the subscript itself.
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__tapscript_subscript__separator_only)
+{
+    const chunk_cptrs plain{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x51 }) };
+    const auto instance = taproot_tx(plain);
+    const auto tapleaf = to_shared<hash_digest>(one_hash);
+    const script ops{ operations{ { opcode::pick }, { opcode::roll } } };
+
+    hash_digest out1{}, out2{};
+    BOOST_REQUIRE(instance.signature_hash(out1, instance.inputs_ptr()->begin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(out2, instance.inputs_ptr()->begin(), ops, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(out1, out2);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

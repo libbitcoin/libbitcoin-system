@@ -456,4 +456,13 @@ BOOST_AUTO_TEST_CASE(block_view__is_invalid_witness_commitment__valid__false)
     BOOST_CHECK(!view.is_invalid_witness_commitment());
 }
 
+// A segregated serialization whose witnesses are all empty is superfluous,
+// and is treated as an invalid serialization [bip144].
+BOOST_AUTO_TEST_CASE(block_view__construct__superfluous_witness__invalid)
+{
+    auto data = base16_chunk("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010100000000010100000000000000000000000000000000000000000000000000000000000000000000000000ffffffff010000000000000000000000000000");
+    const chain::block_view view{ std::move(data), true };
+    BOOST_CHECK(!view.is_valid());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

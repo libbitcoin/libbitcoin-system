@@ -1577,4 +1577,41 @@ BOOST_AUTO_TEST_CASE(script__input_pattern__empty_push_and_endorsements__sign_mu
     BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::sign_multisig);
 }
 
+// pattern builders reject invalid input
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__oversized__empty)
+{
+    const data_chunk data(add1(max_null_data_size), 0x00);
+    BOOST_REQUIRE(script::to_pay_null_data_pattern(data).empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_public_key_pattern__invalid_point__empty)
+{
+    BOOST_REQUIRE(script::to_pay_public_key_pattern(data_chunk{ 0x02 }).empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__zero_signatures__empty)
+{
+    const data_stack points{ base16_chunk("02abababababababababababababababababababababababababababababababab") };
+    BOOST_REQUIRE(script::to_pay_multisig_pattern(0, points).empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__signatures_above_points__empty)
+{
+    const data_stack points{ base16_chunk("02abababababababababababababababababababababababababababababababab") };
+    BOOST_REQUIRE(script::to_pay_multisig_pattern(2, points).empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__no_points__empty)
+{
+    BOOST_REQUIRE(script::to_pay_multisig_pattern(1, data_stack{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__invalid_point__empty)
+{
+    const data_stack points{ data_chunk{ 0x02 } };
+    BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
