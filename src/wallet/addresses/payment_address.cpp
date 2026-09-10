@@ -237,14 +237,13 @@ payment_address::list payment_address::extract_input(
     switch (pattern)
     {
         // Given lack of context (prevout) sign_key_hash is always ambiguous
-        // with sign_script_hash, so return both potentially-correct addresses.
+        // with sign_script_hash, so this address may not be the correct one.
         // A server can differentiate by extracting from the previous output.
         case chain::script_pattern::sign_key_hash:
         {
             return
             {
                 { ec_public{ script.ops().back().data() }, p2kh_prefix }
-                ////,{ bitcoin_short_hash(script.back().data()), p2sh_prefix }
             };
         }
         case chain::script_pattern::sign_script_hash:
