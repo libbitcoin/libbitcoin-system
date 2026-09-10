@@ -222,4 +222,22 @@ BOOST_AUTO_TEST_CASE(ec_point__multiply_assign__invalid_self__unchanged)
     BOOST_REQUIRE(!instance);
 }
 
+// Validity is a prefix test only, so a valid point may not be on the curve.
+// The x coordinate here exceeds the field prime, so it cannot be parsed.
+const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+BOOST_AUTO_TEST_CASE(ec_point__negate__off_curve__invalid)
+{
+    const ec_point instance{ off_curve };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!(-instance));
+}
+
+BOOST_AUTO_TEST_CASE(ec_point__multiply__off_curve__invalid)
+{
+    const ec_point instance{ off_curve };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!(instance * ec_scalar{ 2 }));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
