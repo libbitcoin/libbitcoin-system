@@ -2466,9 +2466,7 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__index_out_of_range__false)
     const auto instance = spends_transaction();
     const ec_signature signature{ 0x01_u8 };
     const data_chunk key(ec_compressed_size, 0x02_u8);
-    const auto result = instance.check_signature(signature, key, {}, 2, 0,
-        coverage::hash_all, script_version::unversioned, 0);
-    BOOST_REQUIRE(!result);
+    BOOST_REQUIRE(!instance.check_signature(signature, key, {}, 2, 0, coverage::hash_all, script_version::unversioned, 0));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__create_endorsement__index_out_of_range__false)
@@ -2476,9 +2474,7 @@ BOOST_AUTO_TEST_CASE(transaction__create_endorsement__index_out_of_range__false)
     const auto instance = spends_transaction();
     endorsement out{};
     const ec_secret secret{ 0x01_u8 };
-    const auto result = instance.create_endorsement(out, secret, {}, 2, 0,
-        coverage::hash_all, script_version::unversioned, 0);
-    BOOST_REQUIRE(!result);
+    BOOST_REQUIRE(!instance.create_endorsement(out, secret, {}, 2, 0, coverage::hash_all, script_version::unversioned, 0));
 }
 
 // bip68 relative locktime application

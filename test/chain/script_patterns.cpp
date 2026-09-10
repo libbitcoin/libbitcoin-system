@@ -1525,15 +1525,11 @@ BOOST_AUTO_TEST_CASE(script__output_pattern__pay_public_key__expected)
 // input_pattern
 // -----------------------------------------------------------------------------
 
-static const std::string endorsement =
-    "[30440220011111111111111111111111111111111111111111111111111111111111"
-    "1111022002222222222222222222222222222222222222222222222222222222222222"
-    "2201]";
+static const std::string endorsement = "[3044022001111111111111111111111111111111111111111111111111111111111111110220022222222222222222222222222222222222222222222222222222222222222201]";
 
 BOOST_AUTO_TEST_CASE(script__input_pattern__sign_key_hash__expected)
 {
-    const std::string text = endorsement +
-        " [02abababababababababababababababababababababababababababababababab]";
+    const std::string text = endorsement + " [02abababababababababababababababababababababababababababababababab]";
     const script instance(text);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE(instance.input_pattern() == chain::script_pattern::sign_key_hash);
