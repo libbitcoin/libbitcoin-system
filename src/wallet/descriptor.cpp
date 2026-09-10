@@ -155,8 +155,8 @@ static bool parse_path(std_vector<uint32_t>& path, bool& wildcard,
     return true;
 }
 
-bool descriptor::parse_key(key_expression& out,
-    const std::string& text) NOEXCEPT
+bool descriptor::parse_key(key_expression& out, const std::string& text,
+    const context& context) NOEXCEPT
 {
     auto rest = text;
 
@@ -207,7 +207,7 @@ bool descriptor::parse_key(key_expression& out,
     const auto prefix = rest.substr(0, slash);
     const auto path = (slash == std::string::npos) ? "" : rest.substr(slash);
 
-    const hd_private extended_private{ prefix };
+    const hd_private extended_private{ prefix, context.hd_prefixes() };
     if (extended_private)
     {
         out.form = key_form::extended_private;
@@ -215,7 +215,7 @@ bool descriptor::parse_key(key_expression& out,
         return parse_path(out.path, out.wildcard, out.hardened, path);
     }
 
-    const hd_public extended_public{ prefix };
+    const hd_public extended_public{ prefix, context.hd.pub };
     if (extended_public)
     {
         out.form = key_form::extended_public;
@@ -224,7 +224,7 @@ bool descriptor::parse_key(key_expression& out,
     }
 
     // A wallet import format secret (no path).
-    const ec_private secret{ prefix };
+    const ec_private secret{ prefix, context.versions() };
     if (secret && slash == std::string::npos)
     {
         data_chunk point{};
@@ -333,7 +333,8 @@ bool descriptor::key_expression::derive(psbt::derivation& out,
 // Parse.
 // ----------------------------------------------------------------------------
 
-bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
+bool descriptor::parse(node& out, const std::string& body,
+    const context& context) NOEXCEPT
 {
     const auto open = body.find('(');
     if (open == std::string::npos || body.back() != ')')
@@ -369,7 +370,7 @@ bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
         case function::wsh:
         {
             out.child = std::make_shared<node>();
-            return parse(*out.child, inner);
+            return parse(*out.child, inner, context);
         }
         case function::multi:
         case function::sortedmulti:
@@ -389,7 +390,7 @@ bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
                 part != parts.end(); ++part)
             {
                 key_expression key{};
-                if (!parse_key(key, *part))
+                if (!parse_key(key, *part, context))
                     return false;
 
                 out.keys.push_back(std::move(key));
@@ -409,7 +410,7 @@ bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
         default:
         {
             key_expression key{};
-            if (!parse_key(key, inner))
+            if (!parse_key(key, inner, context))
                 return false;
 
             out.keys.push_back(std::move(key));
@@ -422,7 +423,7 @@ bool descriptor::parse(node& out, const std::string& body) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 bool descriptor::derive_signings(signing::list& out, const node& tree,
-    uint32_t index, bool top) NOEXCEPT
+    uint32_t index, bool top, const context& context) NOEXCEPT
 {
     switch (tree.type)
     {
@@ -470,7 +471,7 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
         case function::sh:
         {
             signing::list inner{};
-            if (top && derive_signings(inner, *tree.child, index, false) &&
+            if (top && derive_signings(inner, *tree.child, index, false, context) &&
                 is_one(inner.size()))
             {
                 auto& item = inner.front();
@@ -489,7 +490,7 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
             signing::list inner{};
             if (tree.child->type != function::wpkh &&
                 tree.child->type != function::wsh &&
-                derive_signings(inner, *tree.child, index, false) &&
+                derive_signings(inner, *tree.child, index, false, context) &&
                 is_one(inner.size()))
             {
                 auto& item = inner.front();
@@ -587,12 +588,16 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
             const payment_address base58{ tree.address };
             if (base58)
             {
-                out.push_back({ base58.output_script(), {}, {}, {} });
+                auto script = base58.output_script(context.p2kh, context.p2sh);
+                if (script.ops().empty())
+                    return false;
+
+                out.push_back({ std::move(script), {}, {}, {} });
                 return true;
             }
 
             const witness_address witness{ tree.address };
-            if (witness)
+            if (witness && witness.prefix() == context.p2w)
             {
                 out.push_back({ witness.script(), {}, {}, {} });
                 return true;
@@ -621,18 +626,21 @@ descriptor::descriptor() NOEXCEPT
 {
 }
 
-descriptor::descriptor(const std::string& expression) NOEXCEPT
-  : descriptor(from_string(expression))
+descriptor::descriptor(const std::string& expression,
+    const context& context) NOEXCEPT
+  : descriptor(from_string(expression, context))
 {
 }
 
-descriptor::descriptor(bool valid, std::string&& body,
-    node&& tree) NOEXCEPT
-  : valid_(valid), body_(std::move(body)), tree_(std::move(tree))
+descriptor::descriptor(bool valid, std::string&& body, node&& tree,
+    const context& context) NOEXCEPT
+  : valid_(valid), body_(std::move(body)), tree_(std::move(tree)),
+    context_(context)
 {
 }
 
-descriptor descriptor::from_string(const std::string& expression) NOEXCEPT
+descriptor descriptor::from_string(const std::string& expression,
+    const context& context) NOEXCEPT
 {
     auto body = expression;
     const auto hash = expression.find('#');
@@ -644,10 +652,10 @@ descriptor descriptor::from_string(const std::string& expression) NOEXCEPT
     }
 
     node tree{};
-    if (!parse(tree, body))
+    if (!parse(tree, body, context))
         return {};
 
-    return { true, std::move(body), std::move(tree) };
+    return { true, std::move(body), std::move(tree), context };
 }
 
 // Operators.
@@ -732,7 +740,7 @@ chain::scripts descriptor::scripts(uint32_t index) const NOEXCEPT
 descriptor::signing::list descriptor::signings(uint32_t index) const NOEXCEPT
 {
     signing::list out{};
-    if (!valid_ || !derive_signings(out, tree_, index, true))
+    if (!valid_ || !derive_signings(out, tree_, index, true, context_))
         return {};
 
     return out;

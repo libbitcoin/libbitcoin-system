@@ -194,16 +194,14 @@ BOOST_AUTO_TEST_CASE(descriptor__scripts__hardened_wildcard_private__expected)
     BOOST_REQUIRE(scripts.front().ops() == chain::operations(expected));
 }
 
-BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_private__invalid)
+BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_private_mainnet_context__invalid)
 {
     BOOST_REQUIRE(!descriptor("pkh(" TESTNET_M "/1/*)"));
 }
 
-BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_public__expected)
+BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_public_mainnet_context__invalid)
 {
-    const descriptor instance("pkh(" TESTNET_M_PUBLIC "/1/*)");
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.scripts(7).size(), 1u);
+    BOOST_REQUIRE(!descriptor("pkh(" TESTNET_M_PUBLIC "/1/*)"));
 }
 
 // signings

@@ -23,6 +23,7 @@
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_public.hpp>
 #include <bitcoin/system/wallet/psbt/entry.hpp>
@@ -55,7 +56,8 @@ public:
 
     /// Constructors.
     descriptor() NOEXCEPT;
-    descriptor(const std::string& expression) NOEXCEPT;
+    descriptor(const std::string& expression,
+        const context& context=btc_mainnet) NOEXCEPT;
 
     /// Operators.
     bool operator==(const descriptor& other) const NOEXCEPT;
@@ -126,20 +128,24 @@ protected:
         std::shared_ptr<node> child{};
     };
 
-    static bool parse(node& out, const std::string& body) NOEXCEPT;
-    static bool parse_key(key_expression& out,
-        const std::string& text) NOEXCEPT;
+    static bool parse(node& out, const std::string& body,
+        const context& context) NOEXCEPT;
+    static bool parse_key(key_expression& out, const std::string& text,
+        const context& context) NOEXCEPT;
     static bool derive_signings(signing::list& out, const node& tree,
-        uint32_t index, bool top) NOEXCEPT;
+        uint32_t index, bool top, const context& context) NOEXCEPT;
 
 private:
-    static descriptor from_string(const std::string& expression) NOEXCEPT;
+    static descriptor from_string(const std::string& expression,
+        const context& context) NOEXCEPT;
 
-    descriptor(bool valid, std::string&& body, node&& tree) NOEXCEPT;
+    descriptor(bool valid, std::string&& body, node&& tree,
+        const context& context) NOEXCEPT;
 
     bool valid_{};
     std::string body_{};
     node tree_{};
+    context context_{};
 };
 
 } // namespace wallet
