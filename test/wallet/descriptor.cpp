@@ -38,6 +38,10 @@ using namespace bc::system::wallet;
 #define TESTNET_M "tprv8ZgxMBicQKsPeDgjzdC36fs6bMjGApWDNLR9erAXMs5skhMv36j9MV5ecvfavji5khqjWaWSFhN3YcCUUdiKH6isR4Pwy3U5y5egddBr16m"
 #define TESTNET_M_PUBLIC "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
 
+// Null short hash in each network p2kh serialization.
+#define MAINNET_P2KH_ADDRESS "1111111111111111111114oLvT2"
+#define TESTNET_P2KH_ADDRESS "mfWxJ45yp2SFn7UciZyNpvDKrzbhyfKrY8"
+
 // checksum (bip380 and bitcoind vectors)
 
 BOOST_AUTO_TEST_CASE(descriptor__to_checksum__wpkh__expected)
@@ -202,6 +206,34 @@ BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_private_mainnet_context__inv
 BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_public_mainnet_context__invalid)
 {
     BOOST_REQUIRE(!descriptor("pkh(" TESTNET_M_PUBLIC "/1/*)"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__mainnet_private_testnet_context__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" VECTOR1_M0H_PRIVATE "/1/*)", ctx::btc::test));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_private_testnet_context__matches_public)
+{
+    const descriptor secret("pkh(" TESTNET_M "/1/*)", ctx::btc::test);
+    const descriptor point("pkh(" TESTNET_M_PUBLIC "/1/*)", ctx::btc::test);
+    BOOST_REQUIRE(secret);
+    BOOST_REQUIRE(point);
+    BOOST_REQUIRE(secret.scripts(7).front().ops() == point.scripts(7).front().ops());
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_address_testnet_context__expected)
+{
+    const descriptor instance("addr(" TESTNET_P2KH_ADDRESS ")", ctx::btc::test);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.scripts(0).size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_address_mainnet_context__empty)
+{
+    const descriptor instance("addr(" TESTNET_P2KH_ADDRESS ")");
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.scripts(0).empty());
 }
 
 // signings
