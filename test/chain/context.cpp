@@ -87,14 +87,14 @@ BOOST_AUTO_TEST_CASE(context__is_early_timestamp__not_retarget_height__false)
 // The bound is exclusive, so the limit itself is not early.
 BOOST_AUTO_TEST_CASE(context__is_early_timestamp__at_limit__false)
 {
-    constexpr auto limit = 10000u - max_timewarp;
+    constexpr auto limit = possible_narrow_cast<uint32_t>(10000u - max_timewarp);
     const context instance{ flags::time_warp_patch, limit, 0, 2016, 0, 0, 10000 };
     BOOST_REQUIRE(!instance.is_early_timestamp(2016));
 }
 
 BOOST_AUTO_TEST_CASE(context__is_early_timestamp__below_limit__true)
 {
-    constexpr auto limit = 10000u - max_timewarp;
+    constexpr auto limit = possible_narrow_cast<uint32_t>(10000u - max_timewarp);
     const context instance{ flags::time_warp_patch, sub1(limit), 0, 2016, 0, 0, 10000 };
     BOOST_REQUIRE(instance.is_early_timestamp(2016));
 }
