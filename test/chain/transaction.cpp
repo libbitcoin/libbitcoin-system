@@ -2547,4 +2547,18 @@ BOOST_AUTO_TEST_CASE(transaction__construct__witness_data_without_witness__not_s
     BOOST_REQUIRE(!instance.is_segregated());
 }
 
+// A rolling script is evaluated on the linked stack.
+BOOST_AUTO_TEST_CASE(transaction__connect__roller_input_script__script_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const script roller{ operations{ { data_chunk{ 0x01 }, false }, { data_chunk{}, false }, { opcode::roll } } };
+    const chain::inputs ins{ input{ point{ one_hash, 0 }, roller, 0xffffffff } };
+    const chain::outputs outs{ output{ 0, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    const auto& in = instance.inputs_ptr()->front();
+    in->prevout = to_shared<output>(0, script{});
+    BOOST_REQUIRE(in->is_roller());
+    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

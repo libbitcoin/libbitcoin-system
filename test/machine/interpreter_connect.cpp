@@ -426,5 +426,26 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__dirty_embedded_witness__dirt
     BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::dirty_embed);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+// bip341 reference commitment: op_1 leaf, tapscript version, even parity.
+static const auto tapscript_program = base16_chunk("81d6ccecd0da56aafd816eb5548c4aec7342287fe7cdd2781140d2d162f0f88a");
+static const auto tapscript_control = base16_chunk("c0d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d");
 
+// A residual stack element leaves the script unclean [bip342].
+BOOST_AUTO_TEST_CASE(interpreter__connect_witness__tapscript_dirty_stack__stack_false)
+{
+    const script prevout{ script::to_pay_witness_pattern(1, tapscript_program) };
+    const chunk_cptrs stack
+    {
+        to_shared<data_chunk>(data_chunk{ 0x01 }),
+        to_shared<data_chunk>(data_chunk{ 0x51 }),
+        to_shared<data_chunk>(tapscript_control)
+    };
+
+    const chain::witness spender{ stack };
+    const auto tx = connect_tx(script{}, prevout, spender);
+    const auto it = tx.inputs_ptr()->begin();
+    const signatures capture{};
+    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::stack_false);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
