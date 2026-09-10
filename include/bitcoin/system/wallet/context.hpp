@@ -73,10 +73,12 @@ namespace prefix
         namespace main
         {
             constexpr auto btc = 0x80;
+            constexpr auto ltc = 0xb0;
         }
         namespace test
         {
             constexpr auto btc = 0xef;
+            constexpr auto ltc = 0xef;
         }
     }
 
@@ -92,10 +94,12 @@ namespace prefix
             namespace main
             {
                 constexpr auto btc = 0x00;
+                constexpr auto ltc = 0x30;
             }
             namespace test
             {
                 constexpr auto btc = 0x6f;
+                constexpr auto ltc = 0x6f;
             }
         }
         namespace p2sh
@@ -103,10 +107,16 @@ namespace prefix
             namespace main
             {
                 constexpr auto btc = 0x05;
+
+                // Litecoin also accepts 0x05, but emits this value.
+                constexpr auto ltc = 0x32;
             }
             namespace test
             {
                 constexpr auto btc = 0xc4;
+
+                // Litecoin also accepts 0xc4, but emits this value.
+                constexpr auto ltc = 0x3a;
             }
         }
     }
@@ -299,15 +309,15 @@ namespace ctx
             {
                 prefix::ext::p2pkh::main::ltc,
                 prefix::wit::main::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
+                prefix::add::p2pkh::main::ltc,
+                prefix::wif::main::ltc
             };
             const context p2sh
             {
                 prefix::ext::p2sh::main::ltc,
                 prefix::wit::main::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
+                prefix::add::p2sh::main::ltc,
+                prefix::wif::main::ltc
             };
         }
         namespace test
@@ -316,15 +326,15 @@ namespace ctx
             {
                 prefix::ext::p2pkh::test::ltc,
                 prefix::wit::test::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
+                prefix::add::p2pkh::test::ltc,
+                prefix::wif::test::ltc
             };
             const context p2sh
             {
                 prefix::ext::undefined,
                 prefix::wit::test::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
+                prefix::add::p2sh::test::ltc,
+                prefix::wif::test::ltc
             };
         }
     }
