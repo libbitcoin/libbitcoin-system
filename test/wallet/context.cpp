@@ -82,4 +82,27 @@ BOOST_AUTO_TEST_CASE(context__construct__ltc_testnet_wif__round_trips)
     BOOST_REQUIRE(ec_private(secret.encoded(), ctx::ltc::test.versions()));
 }
 
+
+BOOST_AUTO_TEST_CASE(context__regtest__btc__testnet_versions_with_regtest_p2w)
+{
+    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.p2w, "bcrt");
+    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.versions(), ctx::btc::test.versions());
+    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.hd_prefixes(), ctx::btc::test.hd_prefixes());
+    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.p2sh, ctx::btc::test.p2sh);
+}
+
+BOOST_AUTO_TEST_CASE(context__regtest__ltc__testnet_versions_with_regtest_p2w)
+{
+    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.p2w, "rltc");
+    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.versions(), ctx::ltc::test.versions());
+    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.hd_prefixes(), ctx::ltc::test.hd_prefixes());
+    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.p2sh, ctx::ltc::test.p2sh);
+}
+
+BOOST_AUTO_TEST_CASE(context__construct__regtest_wif__round_trips)
+{
+    const ec_private secret(base16_array(SECRET), ctx::btc::regtest.versions());
+    BOOST_REQUIRE(ec_private(secret.encoded(), ctx::btc::regtest.versions()));
+    BOOST_REQUIRE(!ec_private(secret.encoded(), ctx::btc::main.versions()));
+}
 BOOST_AUTO_TEST_SUITE_END()
