@@ -203,9 +203,6 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/wallet/addresses/bitcoin_uri.cpp \
     ${srcdir}/../../src/wallet/addresses/payment_address.cpp \
     ${srcdir}/../../src/wallet/addresses/qr_code.cpp \
-    ${srcdir}/../../src/wallet/addresses/stealth_address.cpp \
-    ${srcdir}/../../src/wallet/addresses/stealth_receiver.cpp \
-    ${srcdir}/../../src/wallet/addresses/stealth_sender.cpp \
     ${srcdir}/../../src/wallet/addresses/tiff.cpp \
     ${srcdir}/../../src/wallet/addresses/uri.cpp \
     ${srcdir}/../../src/wallet/addresses/witness_address.cpp \
@@ -896,9 +893,6 @@ include_bitcoin_system_wallet_addresses_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/checked.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/payment_address.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_code.hpp \
-    ${srcdir}/../../include/bitcoin/system/wallet/addresses/stealth_address.hpp \
-    ${srcdir}/../../include/bitcoin/system/wallet/addresses/stealth_receiver.hpp \
-    ${srcdir}/../../include/bitcoin/system/wallet/addresses/stealth_sender.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/tiff.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/uri.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/uri_reader.hpp \
@@ -1212,9 +1206,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/wallet/addresses/checked.cpp \
     ${srcdir}/../../test/wallet/addresses/payment_address.cpp \
     ${srcdir}/../../test/wallet/addresses/qr_code.cpp \
-    ${srcdir}/../../test/wallet/addresses/stealth_address.cpp \
-    ${srcdir}/../../test/wallet/addresses/stealth_receiver.cpp \
-    ${srcdir}/../../test/wallet/addresses/stealth_sender.cpp \
     ${srcdir}/../../test/wallet/addresses/tiff.cpp \
     ${srcdir}/../../test/wallet/addresses/uri.cpp \
     ${srcdir}/../../test/wallet/addresses/uri_reader.cpp \

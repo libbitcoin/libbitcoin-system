@@ -417,9 +417,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_receiver.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_sender.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\uri_reader.cpp" />

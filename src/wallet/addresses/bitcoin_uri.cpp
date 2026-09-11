@@ -21,7 +21,6 @@
 #include <map>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
-#include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 #include <bitcoin/system/wallet/addresses/uri.hpp>
 #include <bitcoin/system/wallet/addresses/uri_reader.hpp>
 
@@ -98,11 +97,6 @@ payment_address bitcoin_uri::payment() const NOEXCEPT
     return payment_address(address_);
 }
 
-stealth_address bitcoin_uri::stealth() const NOEXCEPT
-{
-    return stealth_address(address_);
-}
-
 std::string bitcoin_uri::parameter(const std::string& key) const NOEXCEPT
 {
     const auto value = query_.find(key);
@@ -147,24 +141,12 @@ bool bitcoin_uri::set_address(const std::string& address) NOEXCEPT
         return true;
     }
 
-    stealth_address stealth(address);
-    if (stealth)
-    {
-        address_ = address;
-        return true;
-    }
-
     return false;
 }
 
 void bitcoin_uri::set_address(const payment_address& payment) NOEXCEPT
 {
     address_ = payment.encoded();
-}
-
-void bitcoin_uri::set_address(const stealth_address& stealth) NOEXCEPT
-{
-    address_ = stealth.encoded();
 }
 
 bool bitcoin_uri::set_amount(const std::string& satoshis) NOEXCEPT

@@ -149,4 +149,149 @@ BOOST_AUTO_TEST_CASE(bitfield_test4)
     BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
+
+// scripts
+
+BOOST_AUTO_TEST_CASE(stealth__to_stealth_prefix__non_stealth_script__false)
+{
+    uint32_t prefix{};
+    BOOST_REQUIRE(!to_stealth_prefix(prefix, chain::script{}));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__extract_ephemeral_key__non_stealth_script__false)
+{
+    ec_compressed point{};
+    BOOST_REQUIRE(!extract_ephemeral_key(point, chain::script{}));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__extract_ephemeral_key__unsigned_non_stealth_script__false)
+{
+    hash_digest unsigned_key{};
+    BOOST_REQUIRE(!extract_ephemeral_key(unsigned_key, chain::script{}));
+}
+
+// ephemeral key
+
+BOOST_AUTO_TEST_CASE(stealth__create_ephemeral_key__seed__even_public_key)
+{
+    ec_secret secret{};
+    BOOST_REQUIRE(create_ephemeral_key(secret, base16_chunk("baadf00d")));
+
+    ec_compressed point{};
+    BOOST_REQUIRE(secret_to_public(point, secret));
+    BOOST_REQUIRE(is_even_key(point));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__create_ephemeral_key__same_seed__same_secret)
+{
+    ec_secret first{};
+    ec_secret second{};
+    BOOST_REQUIRE(create_ephemeral_key(first, base16_chunk("baadf00d")));
+    BOOST_REQUIRE(create_ephemeral_key(second, base16_chunk("baadf00d")));
+    BOOST_REQUIRE_EQUAL(first, second);
+}
+
+// stealth data
+
+BOOST_AUTO_TEST_CASE(stealth__create_stealth_data__empty_filter__round_trips)
+{
+    chain::script script{};
+    ec_secret secret{};
+    BOOST_REQUIRE(create_stealth_data(script, secret, binary{}, base16_chunk("baadf00d")));
+    BOOST_REQUIRE(is_stealth_script(script));
+
+    ec_compressed expected{};
+    BOOST_REQUIRE(secret_to_public(expected, secret));
+
+    ec_compressed extracted{};
+    BOOST_REQUIRE(extract_ephemeral_key(extracted, script));
+    BOOST_REQUIRE_EQUAL(extracted, expected);
+}
+
+BOOST_AUTO_TEST_CASE(stealth__create_stealth_data__filter__mined_prefix)
+{
+    const binary filter{ 8u, data_chunk{ 0x2a } };
+    chain::script script{};
+    ec_secret secret{};
+    BOOST_REQUIRE(create_stealth_data(script, secret, filter, base16_chunk("baadf00d")));
+
+    uint32_t prefix{};
+    BOOST_REQUIRE(to_stealth_prefix(prefix, script));
+    BOOST_REQUIRE(filter == binary(filter.bits(), to_little_endian(prefix)));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__create_stealth_script__null_secret__false)
+{
+    chain::script script{};
+    BOOST_REQUIRE(!create_stealth_script(script, null_hash, binary{}, base16_chunk("baadf00d")));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__extract_ephemeral_key__unsigned_stealth_script__expected)
+{
+    chain::script script{};
+    ec_secret secret{};
+    BOOST_REQUIRE(create_stealth_data(script, secret, binary{}, base16_chunk("baadf00d")));
+
+    ec_compressed point{};
+    BOOST_REQUIRE(secret_to_public(point, secret));
+
+    hash_digest unsigned_key{};
+    BOOST_REQUIRE(extract_ephemeral_key(unsigned_key, script));
+    const auto expected = slice<one, ec_compressed_size>(point);
+    BOOST_REQUIRE_EQUAL(unsigned_key, expected);
+}
+
+// shared secret
+
+BOOST_AUTO_TEST_CASE(stealth__shared_secret__null_secret__false)
+{
+    ec_secret shared{};
+    ec_compressed point{};
+    BOOST_REQUIRE(decode_base16(point, SCAN_PUBLIC));
+    BOOST_REQUIRE(!shared_secret(shared, null_hash, point));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__uncover_stealth__public_null_secret__false)
+{
+    ec_compressed scan{};
+    ec_compressed spend{};
+    BOOST_REQUIRE(decode_base16(scan, SCAN_PUBLIC));
+    BOOST_REQUIRE(decode_base16(spend, SPEND_PUBLIC));
+
+    ec_compressed out{};
+    BOOST_REQUIRE(!uncover_stealth(out, scan, null_hash, spend));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__uncover_stealth__public_invalid_spend__false)
+{
+    ec_compressed scan{};
+    ec_secret ephemeral{};
+    BOOST_REQUIRE(decode_base16(scan, SCAN_PUBLIC));
+    BOOST_REQUIRE(decode_base16(ephemeral, EPHEMERAL_PRIVATE));
+
+    ec_compressed out{};
+    BOOST_REQUIRE(!uncover_stealth(out, scan, ephemeral, base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__uncover_stealth__secret_null_secret__false)
+{
+    ec_compressed scan{};
+    ec_secret spend{};
+    BOOST_REQUIRE(decode_base16(scan, SCAN_PUBLIC));
+    BOOST_REQUIRE(decode_base16(spend, SPEND_PRIVATE));
+
+    ec_secret out{};
+    BOOST_REQUIRE(!uncover_stealth(out, scan, null_hash, spend));
+}
+
+BOOST_AUTO_TEST_CASE(stealth__uncover_stealth__secret_null_spend__false)
+{
+    ec_compressed ephemeral{};
+    ec_secret scan{};
+    BOOST_REQUIRE(decode_base16(ephemeral, EPHEMERAL_PUBLIC));
+    BOOST_REQUIRE(decode_base16(scan, SCAN_PRIVATE));
+
+    ec_secret out{};
+    BOOST_REQUIRE(!uncover_stealth(out, ephemeral, scan, null_hash));
+}
 BOOST_AUTO_TEST_SUITE_END()
