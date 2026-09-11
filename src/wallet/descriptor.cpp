@@ -317,10 +317,11 @@ bool descriptor::key_expression::derive(psbt::derivation& out,
     }
     else
     {
-        const auto& point = (form == key_form::extended_private) ?
+        const auto& compressed = (form == key_form::extended_private) ?
             extended_private.point() : extended_public.point();
+
         to.fingerprint = from_little_endian<uint32_t>(
-            bitcoin_short_hash(point));
+            bitcoin_short_hash(compressed));
     }
 
     to.path.insert(to.path.end(), path.begin(), path.end());
