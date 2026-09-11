@@ -31,6 +31,17 @@ using namespace bc::system::wallet;
 #define VECTOR1_M0H "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw"
 #define VECTOR1_M0H_1 "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ"
 
+// bip32 test vector 1 private key (m/0H).
+#define VECTOR1_M0H_PRIVATE "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7"
+
+// bip32 test vector 1 master key, testnet serialization.
+#define TESTNET_M "tprv8ZgxMBicQKsPeDgjzdC36fs6bMjGApWDNLR9erAXMs5skhMv36j9MV5ecvfavji5khqjWaWSFhN3YcCUUdiKH6isR4Pwy3U5y5egddBr16m"
+#define TESTNET_M_PUBLIC "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
+
+// Null short hash in each network p2kh serialization.
+#define MAINNET_P2KH_ADDRESS "1111111111111111111114oLvT2"
+#define TESTNET_P2KH_ADDRESS "mfWxJ45yp2SFn7UciZyNpvDKrzbhyfKrY8"
+
 // checksum (bip380 and bitcoind vectors)
 
 BOOST_AUTO_TEST_CASE(descriptor__to_checksum__wpkh__expected)
@@ -156,6 +167,73 @@ BOOST_AUTO_TEST_CASE(descriptor__scripts__origin_prefix__parsed)
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.ranged());
     BOOST_REQUIRE_EQUAL(instance.scripts(0).size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__ranged_xprv__matches_xpub)
+{
+    const descriptor secret("pkh(" VECTOR1_M0H_PRIVATE "/1/*)");
+    const descriptor point("pkh(" VECTOR1_M0H "/1/*)");
+    BOOST_REQUIRE(secret);
+    BOOST_REQUIRE(point);
+
+    const auto secret_scripts = secret.scripts(7);
+    const auto point_scripts = point.scripts(7);
+    BOOST_REQUIRE_EQUAL(secret_scripts.size(), 1u);
+    BOOST_REQUIRE_EQUAL(point_scripts.size(), 1u);
+    BOOST_REQUIRE(secret_scripts.front().ops() == point_scripts.front().ops());
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__hardened_wildcard_private__expected)
+{
+    const descriptor instance("pkh(" VECTOR1_M0H_PRIVATE "/1/*h)");
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.ranged());
+
+    const hd_private branch{ VECTOR1_M0H_PRIVATE };
+    const auto derived = branch.derive_private(1).derive_private(7 + hd_first_hardened_key);
+    const auto expected = chain::script::to_pay_key_hash_pattern(bitcoin_short_hash(derived.point()));
+
+    const auto scripts = instance.scripts(7);
+    BOOST_REQUIRE_EQUAL(scripts.size(), 1u);
+    BOOST_REQUIRE(scripts.front().ops() == chain::operations(expected));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_private_mainnet_context__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" TESTNET_M "/1/*)"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__testnet_public_mainnet_context__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" TESTNET_M_PUBLIC "/1/*)"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__mainnet_private_testnet_context__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" VECTOR1_M0H_PRIVATE "/1/*)", ctx::btc::test));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_private_testnet_context__matches_public)
+{
+    const descriptor secret("pkh(" TESTNET_M "/1/*)", ctx::btc::test);
+    const descriptor point("pkh(" TESTNET_M_PUBLIC "/1/*)", ctx::btc::test);
+    BOOST_REQUIRE(secret);
+    BOOST_REQUIRE(point);
+    BOOST_REQUIRE(secret.scripts(7).front().ops() == point.scripts(7).front().ops());
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_address_testnet_context__expected)
+{
+    const descriptor instance("addr(" TESTNET_P2KH_ADDRESS ")", ctx::btc::test);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.scripts(0).size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__testnet_address_mainnet_context__empty)
+{
+    const descriptor instance("addr(" TESTNET_P2KH_ADDRESS ")");
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.scripts(0).empty());
 }
 
 // signings

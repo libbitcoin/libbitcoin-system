@@ -76,16 +76,12 @@ public:
 
     /// Constructors.
     ec_private() NOEXCEPT;
-    ec_private(const ec_scalar& scalar,
-        uint8_t address=mainnet_p2kh) NOEXCEPT;
-    ec_private(const data_chunk& entropy,
-        uint8_t address=mainnet_p2kh) NOEXCEPT;
-    ec_private(const std::string& wif,
-        uint8_t address=mainnet_p2kh) NOEXCEPT;
-    ec_private(const wif_compressed& wif,
-        uint8_t address=mainnet_p2kh) NOEXCEPT;
+    ec_private(const ec_scalar& scalar, uint16_t versions=mainnet) NOEXCEPT;
+    ec_private(const data_chunk& entropy, uint16_t versions=mainnet) NOEXCEPT;
+    ec_private(const std::string& wif, uint16_t versions=mainnet) NOEXCEPT;
+    ec_private(const wif_compressed& wif, uint16_t versions=mainnet) NOEXCEPT;
     ec_private(const wif_uncompressed& wif,
-        uint8_t address=mainnet_p2kh) NOEXCEPT;
+        uint16_t versions=mainnet) NOEXCEPT;
 
     /// The version is 16 bits. The most significant byte is the WIF prefix and
     /// the least significant byte is the address perfix. 0x8000 by default.
@@ -119,13 +115,13 @@ private:
 
     /// Factories.
     static ec_private from_string(const std::string& wif,
-        uint8_t address) NOEXCEPT;
+        uint16_t versions) NOEXCEPT;
     static ec_private from_entropy(const data_chunk& entropy,
-        uint8_t address) NOEXCEPT;
+        uint16_t versions) NOEXCEPT;
     static ec_private from_compressed(const wif_compressed& wif,
-        uint8_t address) NOEXCEPT;
+        uint16_t versions) NOEXCEPT;
     static ec_private from_uncompressed(const wif_uncompressed& wif,
-        uint8_t address) NOEXCEPT;
+        uint16_t versions) NOEXCEPT;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.

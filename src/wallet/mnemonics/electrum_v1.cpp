@@ -396,7 +396,7 @@ ec_private electrum_v1::to_seed(const context& context) const NOEXCEPT
 
     // Context sets the version byte for derived payment addresses.
     // The private key will be invalid if the value does not ec verify.
-    return { ec_scalar(seed), context.address_version, compression };
+    return { ec_scalar(seed), context.versions(), compression };
 }
 
 ec_public electrum_v1::to_public_key(const context& context) const NOEXCEPT

@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__depth_overflow__invalid)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
-    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQFSjf36";
+    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQB12ucr";
     const hd_private xprv_254(xprv_254_encoded);
     hd_public xpub_254 = xprv_254.to_public();
 
@@ -127,4 +127,163 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__depth_overflow__invalid)
 }
 
 
+// BIP32 test vector 1, master seed 000102030405060708090a0b0c0d0e0f.
+#define BIP32_M_0H "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw"
+#define BIP32_M_0H_1 "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ"
+
+// Public derivation of an unhardened child [bip32].
+BOOST_AUTO_TEST_CASE(hd_public__derive_public__bip32_vector1__expected)
+{
+    const hd_public parent(BIP32_M_0H);
+    BOOST_REQUIRE(parent);
+    BOOST_REQUIRE_EQUAL(parent.derive_public(1).encoded(), BIP32_M_0H_1);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__encoded__bip32_vector1__round_trips)
+{
+    const hd_public instance(BIP32_M_0H);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BIP32_M_0H);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__hd_key__expected)
+{
+    const hd_public expected(BIP32_M_0H);
+    const hd_public instance(expected.to_hd_key());
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__hd_key_prefix__expected)
+{
+    const hd_public expected(BIP32_M_0H);
+    const hd_public instance(expected.to_hd_key(), hd_public::mainnet);
+    BOOST_REQUIRE(instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__wrong_prefix__invalid)
+{
+    const hd_public instance(BIP32_M_0H, hd_public::testnet);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__string_prefix__expected)
+{
+    const hd_public instance(BIP32_M_0H, hd_public::mainnet);
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BIP32_M_0H);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__not_base58__invalid)
+{
+    const hd_public instance("not-base58-0OIl", hd_public::mainnet);
+    BOOST_REQUIRE(!instance);
+}
+
+// accessors and casts
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__chain_code__always__matches_derived_parent)
+{
+    const hd_public instance(BIP32_M_0H);
+    const hd_public other(BIP32_M_0H);
+    BOOST_REQUIRE_EQUAL(instance.chain_code(), other.chain_code());
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__cast__compressed__point)
+{
+    const hd_public instance(BIP32_M_0H);
+    const ec_compressed& point = instance;
+    BOOST_REQUIRE_EQUAL(point, instance.point());
+}
+
+// operators
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__inequality__different__true)
+{
+    const hd_public left(BIP32_M_0H);
+    const hd_public right(BIP32_M_0H_1);
+    BOOST_REQUIRE(left != right);
+    BOOST_REQUIRE(!(left == right));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__lesser__by_encoding__expected)
+{
+    const hd_public left(BIP32_M_0H);
+    const hd_public right(BIP32_M_0H_1);
+    BOOST_REQUIRE_EQUAL(left < right, std::string(BIP32_M_0H) < std::string(BIP32_M_0H_1));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__lineage__different_children__unequal)
+{
+    const hd_public parent(BIP32_M_0H);
+    BOOST_REQUIRE(parent.lineage() != parent.derive_public(1).lineage());
+    BOOST_REQUIRE(parent.lineage() == hd_public(BIP32_M_0H).lineage());
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__stream__round_trips)
+{
+    std::istringstream in{ BIP32_M_0H };
+    hd_public instance{};
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BIP32_M_0H);
+
+    std::ostringstream out{};
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), BIP32_M_0H);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__stream__invalid__throws)
+{
+    hd_public instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__construct__off_curve_point__invalid)
+{
+    auto key = hd_public(BIP32_M_0H).to_hd_key();
+    const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    std::copy(off_curve.begin(), off_curve.end(), std::prev(key.end(), checksum_default_size + ec_compressed_size));
+    insert_checksum(key);
+
+    BOOST_REQUIRE(!hd_public(key));
+}
+
+
+// bip32 test vector 5 (invalid extended keys).
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__public_version_private_mismatch__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6LBpB85b3D2yc8sfvZU521AAwdZafEz7mnzBBsz4wKY5fTtTQBm"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__zero_depth_nonzero_parent_fingerprint__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661no6RGEX3uJkY4bNnPcw4URcQTrSibUZ4NqJEw5eBkv7ovTwgiT91XX27VbEXGENhYRCf7hyEbWrR3FewATdCEebj6znwMfQkhRYHRLpJ"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__zero_depth_nonzero_index__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAuDcm6CRQ5N4qiHKrJ39Xe1R1NyfouMKTTWcguwVcfrZJaNvhpebzGerh7gucBvzEQWRugZDuDXjNDRmXzSZe4c7mnTK97pTvGS8"));
+}
+
+// Vector 1 with an altered final character.
+BOOST_AUTO_TEST_CASE(hd_public__constructor__invalid_checksum__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcetL"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__public_key_prefix_04__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Txnt3siSujt9RCVYsx4qHZGc62TG4McvMGcAUjeuwZdduYEvFn"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__public_key_prefix_01__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6N8ZMMXctdiCjxTNq964yKkwrkBJJwpzZS4HS2fxvyYUA4q2Xe4"));
+}
+
+BOOST_AUTO_TEST_CASE(hd_public__constructor__point_not_on_curve__invalid)
+{
+    BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Q5JXayek4PRsn35jii4veMimro1xefsM58PgBMrvdYre8QyULY"));
+}
 BOOST_AUTO_TEST_SUITE_END()

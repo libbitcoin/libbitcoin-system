@@ -117,8 +117,20 @@ hd_public hd_public::from_key(const hd_key& key, uint32_t prefix) NOEXCEPT
     const auto chain = source.read_forward<hd_chain_code_size>();
     const auto compressed = source.read_forward<ec_compressed_size>();
 
+    // Validate the key checksum.
+    if (!verify_checksum(key))
+        return {};
+
     // Validate the prefix against the provided value.
     if (actual_prefix != prefix)
+        return {};
+
+    // Validate the master key lineage.
+    if (is_zero(depth) && !(is_zero(parent) && is_zero(child)))
+        return {};
+
+    // Validate the point.
+    if (!verify_point(compressed))
         return {};
 
     // The private prefix will be zero'd here, but there's no way to access it.
@@ -259,7 +271,7 @@ std::istream& operator>>(std::istream& in, hd_public& to)
 {
     std::string value;
     in >> value;
-    to.from_string(value);
+    to = hd_public(value);
 
     if (!to)
         throw istream_exception(value);

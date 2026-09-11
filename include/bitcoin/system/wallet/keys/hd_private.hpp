@@ -32,8 +32,6 @@ namespace system {
 namespace wallet {
 
 /// An extended private key, as defined by BIP32.
-/// Additional prefix codes are documented in SLIP132.
-/// github.com/satoshilabs/slips/blob/master/slip-0132.md
 class BC_API hd_private
   : public hd_public
 {
@@ -58,12 +56,8 @@ public:
     /// Constructors.
     hd_private() NOEXCEPT;
     hd_private(const data_chunk& entropy, uint64_t prefixes=mainnet) NOEXCEPT;
-    hd_private(const hd_key& private_key) NOEXCEPT;
-    hd_private(const hd_key& private_key, uint64_t prefixes) NOEXCEPT;
-    hd_private(const hd_key& private_key, uint32_t public_prefix) NOEXCEPT;
-    hd_private(const std::string& encoded) NOEXCEPT;
-    hd_private(const std::string& encoded, uint64_t prefixes) NOEXCEPT;
-    hd_private(const std::string& encoded, uint32_t public_prefix) NOEXCEPT;
+    hd_private(const hd_key& private_key, uint64_t prefixes=mainnet) NOEXCEPT;
+    hd_private(const std::string& encoded, uint64_t prefixes=mainnet) NOEXCEPT;
     hd_private(const ec_secret& secret, const hd_chain_code& chain_code,
         uint64_t prefixes=mainnet) NOEXCEPT;
 
@@ -95,13 +89,9 @@ private:
     static hd_private from_entropy(const data_slice& seed,
         uint64_t prefixes) NOEXCEPT;
     static hd_private from_key(const hd_key& decoded,
-        uint32_t public_prefix) NOEXCEPT;
-    static hd_private from_key(const hd_key& decoded,
         uint64_t prefixes) NOEXCEPT;
     static hd_private from_private(const ec_secret& secret,
         const hd_chain_code& chain_code, uint64_t prefixes) NOEXCEPT;
-    static hd_private from_string(const std::string& encoded,
-        uint32_t public_prefix) NOEXCEPT;
     static hd_private from_string(const std::string& encoded,
         uint64_t prefixes) NOEXCEPT;
 

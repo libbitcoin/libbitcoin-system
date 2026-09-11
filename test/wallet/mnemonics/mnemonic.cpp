@@ -402,8 +402,8 @@ BOOST_AUTO_TEST_CASE(mnemonic__to_key__network__expected)
 {
     const mnemonic instance(words12);
     BOOST_CHECK(instance);
-    BOOST_CHECK(starts_with(instance.to_key("foo", btc_mainnet_p2kh).encoded(), "xprv"));
-    BOOST_CHECK(starts_with(instance.to_key("bar", btc_testnet_p2kh).encoded(), "tprv"));
+    BOOST_CHECK(starts_with(instance.to_key("foo", btc_mainnet).encoded(), "xprv"));
+    BOOST_CHECK(starts_with(instance.to_key("bar", btc_testnet).encoded(), "tprv"));
 }
 
 // to_seed

@@ -287,4 +287,221 @@ BOOST_AUTO_TEST_CASE(payment_address__hash__compressed_point__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(address.hash()), COMPRESSED_HASH);
 }
 
+// bitcoind cross-check, from its src/test/data/key_io_valid.json.
+#define BITCOIND_P2KH_ADDRESS "1FsSia9rv4NeEwvJ2GvXrX7LyxYspbN2mo"
+#define BITCOIND_P2KH_SCRIPT "76a914a31c06bd463e3923bc1aadbde48b16976c08071788ac"
+#define BITCOIND_P2SH_ADDRESS "36j4NfKv6Akva9amjWrLG6MuSQym1GuEmm"
+#define BITCOIND_P2SH_SCRIPT "a914373b819a068f32b7a6b38b6b38729647cfde01c287"
+#define BITCOIND_TESTNET_P2KH_ADDRESS "mzK2FFDEhxqHcmrJw1ysqFkVyhUULo45hZ"
+#define BITCOIND_TESTNET_P2KH_SCRIPT "76a914ce28b26c57472737f5c3561a1761185bd8589a4388ac"
+#define BITCOIND_TESTNET_P2SH_ADDRESS "2NC2hEhe28ULKAJkW5MjZ3jtTMJdvXmByvK"
+#define BITCOIND_TESTNET_P2SH_SCRIPT "a914ce0bba75891ff9ec60148d4bd4a09ee2dc5c933187"
+
+// output_script
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(payment_address__output_script__bitcoind_p2kh__expected)
+{
+    const payment_address instance(BITCOIND_P2KH_ADDRESS);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(encode_base16(instance.output_script().to_data(false)), BITCOIND_P2KH_SCRIPT);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__output_script__bitcoind_p2sh__expected)
+{
+    const payment_address instance(BITCOIND_P2SH_ADDRESS);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(encode_base16(instance.output_script().to_data(false)), BITCOIND_P2SH_SCRIPT);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__output_script__bitcoind_testnet_p2kh__expected)
+{
+    const payment_address instance(BITCOIND_TESTNET_P2KH_ADDRESS);
+    BOOST_REQUIRE(instance);
+    const auto script = instance.output_script(payment_address::testnet_p2kh, payment_address::testnet_p2sh);
+    BOOST_REQUIRE_EQUAL(encode_base16(script.to_data(false)), BITCOIND_TESTNET_P2KH_SCRIPT);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__output_script__bitcoind_testnet_p2sh__expected)
+{
+    const payment_address instance(BITCOIND_TESTNET_P2SH_ADDRESS);
+    BOOST_REQUIRE(instance);
+    const auto script = instance.output_script(payment_address::testnet_p2kh, payment_address::testnet_p2sh);
+    BOOST_REQUIRE_EQUAL(encode_base16(script.to_data(false)), BITCOIND_TESTNET_P2SH_SCRIPT);
+}
+
+// A prefix matching neither parameter yields no script.
+BOOST_AUTO_TEST_CASE(payment_address__output_script__unmatched_prefix__empty)
+{
+    const payment_address instance(BITCOIND_TESTNET_P2KH_ADDRESS);
+    BOOST_REQUIRE(instance.output_script().ops().empty());
+}
+
+// extract_output
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_output__bitcoind_p2kh__expected)
+{
+    const chain::script script(base16_chunk(BITCOIND_P2KH_SCRIPT), false);
+    BOOST_REQUIRE_EQUAL(payment_address::extract_output(script).encoded(), BITCOIND_P2KH_ADDRESS);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_output__bitcoind_p2sh__expected)
+{
+    const chain::script script(base16_chunk(BITCOIND_P2SH_SCRIPT), false);
+    BOOST_REQUIRE_EQUAL(payment_address::extract_output(script).encoded(), BITCOIND_P2SH_ADDRESS);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_output__bitcoind_testnet_p2kh__expected)
+{
+    const chain::script script(base16_chunk(BITCOIND_TESTNET_P2KH_SCRIPT), false);
+    const auto address = payment_address::extract_output(script, payment_address::testnet_p2kh, payment_address::testnet_p2sh);
+    BOOST_REQUIRE_EQUAL(address.encoded(), BITCOIND_TESTNET_P2KH_ADDRESS);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_output__bitcoind_testnet_p2sh__expected)
+{
+    const chain::script script(base16_chunk(BITCOIND_TESTNET_P2SH_SCRIPT), false);
+    const auto address = payment_address::extract_output(script, payment_address::testnet_p2kh, payment_address::testnet_p2sh);
+    BOOST_REQUIRE_EQUAL(address.encoded(), BITCOIND_TESTNET_P2SH_ADDRESS);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_output__non_standard__invalid)
+{
+    const chain::script script{ chain::operations{ { chain::opcode::pick } } };
+    BOOST_REQUIRE(!payment_address::extract_output(script));
+}
+
+// extract_input
+// ----------------------------------------------------------------------------
+
+// The sign_key_hash pattern is [endorsement][public key].
+BOOST_AUTO_TEST_CASE(payment_address__extract_input__sign_key_hash__public_key_address)
+{
+    const chain::operations ops{ { data_chunk(70, 0x42), true }, { base16_chunk(COMPRESSED), true } };
+    const chain::script script{ ops };
+    BOOST_REQUIRE(script.input_pattern() == chain::script_pattern::sign_key_hash);
+
+    const auto addresses = payment_address::extract_input(script);
+    BOOST_REQUIRE_EQUAL(addresses.size(), 1u);
+    BOOST_REQUIRE_EQUAL(addresses.front().encoded(), ADDRESS_COMPRESSED);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_input__sign_script_hash__embedded_script_address)
+{
+    const auto embedded = base16_chunk("51");
+    const chain::script script{ chain::operations{ { embedded, false } } };
+    BOOST_REQUIRE(script.input_pattern() == chain::script_pattern::sign_script_hash);
+
+    const auto addresses = payment_address::extract_input(script);
+    BOOST_REQUIRE_EQUAL(addresses.size(), 1u);
+    BOOST_REQUIRE_EQUAL(addresses.front().hash(), bitcoin_short_hash(embedded));
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__extract_input__non_standard__empty)
+{
+    const chain::script script{ chain::operations{ { chain::opcode::pick } } };
+    BOOST_REQUIRE(payment_address::extract_input(script).empty());
+}
+
+// extract prefers input extraction, falling back to output extraction.
+BOOST_AUTO_TEST_CASE(payment_address__extract__output_script__output_address)
+{
+    const chain::script script(base16_chunk(BITCOIND_P2KH_SCRIPT), false);
+    const auto addresses = payment_address::extract(script);
+    BOOST_REQUIRE_EQUAL(addresses.size(), 1u);
+    BOOST_REQUIRE_EQUAL(addresses.front().encoded(), BITCOIND_P2KH_ADDRESS);
+}
+
+// operators and accessors
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(payment_address__to_payment__always__round_trips)
+{
+    const payment_address instance(BITCOIND_P2KH_ADDRESS);
+    const payment_address copy(instance.to_payment());
+    BOOST_REQUIRE(copy == instance);
+    BOOST_REQUIRE(!(copy != instance));
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__inequality__different__true)
+{
+    const payment_address left(BITCOIND_P2KH_ADDRESS);
+    const payment_address right(BITCOIND_P2SH_ADDRESS);
+    BOOST_REQUIRE(left != right);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__lesser__by_encoding__expected)
+{
+    const payment_address left(BITCOIND_P2KH_ADDRESS);
+    const payment_address right(BITCOIND_P2SH_ADDRESS);
+    BOOST_REQUIRE_EQUAL(left < right, std::string(BITCOIND_P2KH_ADDRESS) < std::string(BITCOIND_P2SH_ADDRESS));
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__stream__round_trips)
+{
+    std::istringstream in{ BITCOIND_P2KH_ADDRESS };
+    payment_address instance{};
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), BITCOIND_P2KH_ADDRESS);
+
+    std::ostringstream out{};
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), BITCOIND_P2KH_ADDRESS);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__stream__invalid__throws)
+{
+    payment_address instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
+
+// construction failure paths
+// ----------------------------------------------------------------------------
+
+// Decodes to the correct size but the checksum does not validate.
+BOOST_AUTO_TEST_CASE(payment_address__construct__bad_checksum__invalid)
+{
+    const payment_address instance("1FsSia9rv4NeEwvJ2GvXrX7LyxYspbN2mp");
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__invalid_secret__invalid)
+{
+    const payment_address instance(ec_private{});
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__invalid_point__invalid)
+{
+    const payment_address instance(ec_public{});
+    BOOST_REQUIRE(!instance);
+}
+
+// An off curve point cannot be decompressed, so it cannot be serialized.
+BOOST_AUTO_TEST_CASE(payment_address__construct__uncompressible_point__invalid)
+{
+    const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    const ec_public point{ off_curve, false };
+    BOOST_REQUIRE(point);
+    BOOST_REQUIRE(!payment_address(point));
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__invalid_script__invalid)
+{
+    const chain::script script(data_chunk{}, true);
+    BOOST_REQUIRE(!script.is_valid());
+    BOOST_REQUIRE(!payment_address(script));
+}
+
+// Input extraction is preferred over output extraction.
+BOOST_AUTO_TEST_CASE(payment_address__extract__input_script__input_address)
+{
+    const chain::operations ops{ { data_chunk(70, 0x42), true }, { base16_chunk(COMPRESSED), true } };
+    const chain::script script{ ops };
+    const auto addresses = payment_address::extract(script);
+    BOOST_REQUIRE_EQUAL(addresses.size(), 1u);
+    BOOST_REQUIRE_EQUAL(addresses.front().encoded(), ADDRESS_COMPRESSED);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -105,7 +105,7 @@ std::istream& operator>>(std::istream& in, ek_token& to)
 {
     std::string value;
     in >> value;
-    to.from_string(value);
+    to = ek_token(value);
 
     if (!to)
         throw istream_exception(value);

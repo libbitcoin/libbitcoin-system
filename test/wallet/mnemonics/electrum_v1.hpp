@@ -90,7 +90,7 @@ electrum_v1_vectors vectors
     {
         // github.com/spesmilo/electrum/issues/3149
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "hurry idiot prefer sunset mention mist jaw inhale impossible kingdom rare squeeze",
         // [025d2f2d][00503691][003ca789][00ca155c]
         base16_chunk("025d2f2d00503691003ca78900ca155c"),
@@ -104,7 +104,7 @@ electrum_v1_vectors vectors
     {
         // electrum/tests/test_wallet_vertical.py
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "alone body father children lead goodbye phone twist exist grass kick join",
         // [14039a74][00162d9d][0cc3c31f][00168ddc]
         base16_chunk("14039a7400162d9d0cc3c31f00168ddc"),
@@ -118,7 +118,7 @@ electrum_v1_vectors vectors
     {
         // electrum/tests/test_wallet_vertical.py
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "powerful random nobody notice nothing important anyway look away hidden message over",
         base16_chunk("acb740e454c3134901d7c8f16497cc1c"),
         base16_array("04""e9d4b7866dd1e91c862aebf62a49548c7dbf7bcc6e4b7b8c9da820c7737968df9c09d5a3e271dc814a29981f81b3faaf2737b551ef5dcc6189cf0f8252c442b3")
@@ -127,7 +127,7 @@ electrum_v1_vectors vectors
     {
         // Minium value and length entropy.
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "like like like like like like like like like like like like",
         base16_chunk("00000000000000000000000000000000"),
         base16_array("04""4e13b0f311a55b8a5db9a32e959da9f011b131019d4cebe6141b9e2c93edcbfc0954c358b062a9f94111548e50bde5847a3096b8b7872dcffadb0e9579b9017b")
@@ -136,7 +136,7 @@ electrum_v1_vectors vectors
     {
         // Minium value and maximum length entropy.
         language::en,
-        btc_testnet_p2kh,
+        btc_testnet,
         "like like like like like like like like like like like like like like like like like like like like like like like like",
         base16_chunk("0000000000000000000000000000000000000000000000000000000000000000"),
         base16_array("04""60cd6d0d5d7f32b92c9ee7b37ff37c2327eaf22a6df66613b6f11fca22145465fd8a576a9ba858dd2426dd149714f0d0ad66cecd186e810b6148bf9f84d34a15")
@@ -145,7 +145,7 @@ electrum_v1_vectors vectors
     {
         // Maximum value for minimum length entropy.
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "fail husband howl fail husband howl fail husband howl fail husband howl",
         base16_chunk("ffffffffffffffffffffffffffffffff"),
         base16_array("04""102fb8009e8dc9af403831e50a000511cbd83cc550355fe8fbc5130b328e1de949c357031324e08985e51a66399e5215d863129f7e17d913cdbebabd46815624")
@@ -154,7 +154,7 @@ electrum_v1_vectors vectors
     {
         // Maximum value and maximum length entropy.
         language::en,
-        btc_testnet_p2kh,
+        btc_testnet,
         "fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl fail husband howl",
         base16_chunk("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
         base16_array("04""d4a9b63ffc2b5c30f241aac955f9d1b1900d833c283c2a690cde7b86817e02b460ce6a8c66098692df094d89c9f4500a818135ee789f53c94050d2a552b492a4")
@@ -163,7 +163,7 @@ electrum_v1_vectors vectors
     {
         // Same words will never overflow (no distance).
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "foe foe foe foe foe foe foe foe foe foe foe foe",
         base16_chunk("00000630000006300000063000000630"),
         base16_array("04""74b16e8c05d303df1f7b77e3308415fbc799286d11d84a4d5fab1a5a9bec04d084dd3f48e5952eedc6583fa46a389e45101ccb3bb4ad541fe7e3d29b658241b4")
@@ -172,7 +172,7 @@ electrum_v1_vectors vectors
     {
         // Double length of previous.
         language::en,
-        btc_testnet_p2kh,
+        btc_testnet,
         "foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe foe",
         base16_chunk("0000063000000630000006300000063000000630000006300000063000000630"),
         base16_array("04""0a5a88363d5ea336f02e74b9013daa0ffaa9981313aa35ee3dceeb0f0b8bee4e1a08377c4175127a33ccc30e652db27c000abd204583a431c98ceda5e38c144a")
@@ -181,7 +181,7 @@ electrum_v1_vectors vectors
     {
         // Half of previous, switch to pt.
         language::pt,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito",
         base16_chunk("00000630000006300000063000000630"),
         base16_array("04""74b16e8c05d303df1f7b77e3308415fbc799286d11d84a4d5fab1a5a9bec04d084dd3f48e5952eedc6583fa46a389e45101ccb3bb4ad541fe7e3d29b658241b4")
@@ -190,7 +190,7 @@ electrum_v1_vectors vectors
     {
         // Double length of previous.
         language::pt,
-        btc_testnet_p2kh,
+        btc_testnet,
         "vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito vomito",
         base16_chunk("0000063000000630000006300000063000000630000006300000063000000630"),
         base16_array("04""0a5a88363d5ea336f02e74b9013daa0ffaa9981313aa35ee3dceeb0f0b8bee4e1a08377c4175127a33ccc30e652db27c000abd204583a431c98ceda5e38c144a")
@@ -198,7 +198,7 @@ electrum_v1_vectors vectors
     electrum_v1_vector
     {
         language::en,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "blind faith blind faith blind faith blind faith blind faith blind faith",
         base16_chunk("c6e913bc397bef94c6e913bc397bef94"),
         base16_array("04""1ea1d1b78cdd8f7e7bd3dfd0098f19e62b308874ec2e8ebe68f9f6519a404760186168279849f8ec88a6e516e98a7ade141b2a7e08795474c77a0df0ec9f928f")
@@ -207,7 +207,7 @@ electrum_v1_vectors vectors
     {
         // Double length of previous.
         language::en,
-        btc_testnet_p2kh,
+        btc_testnet,
         "blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith blind faith",
         base16_chunk("c6e913bc397bef94c6e913bc397bef94c6e913bc397bef94c6e913bc397bef94"),
         base16_array("04""1b5349b64b1dcafe3d2137a5ee37e41f084a57b1b205f7ca8634d38ba5cc97a1254121136e5b9af099bfcedbd2911500571740b9354ef0aafce56cb6ec75af54")
@@ -215,7 +215,7 @@ electrum_v1_vectors vectors
     electrum_v1_vector
     {
         language::pt,
-        btc_mainnet_p2kh,
+        btc_mainnet,
         "gear ansioso medusa bicuspide lauto ciatico jesus doping iceberg empuxo harpista feixe",
         base16_chunk("85bd8950a3534bf1367b98dbeafc4022"),
         base16_array("04""6c2a2307f4c58897f4a94afb94f3cf7bef4acce3acfee3e497f7f41c25d83afa80211364d04406fd19b18c7a554b2dd114fa598040d0657ad6fcc25b64710518")
@@ -224,7 +224,7 @@ electrum_v1_vectors vectors
     {
         // Double length of previous and switch to en.
         language::en,
-        btc_testnet_p2kh,
+        btc_testnet,
         "bite start agree mother buy dear swallow carry knock parent gift offer bite start agree mother buy dear swallow carry knock parent gift offer",
         base16_chunk("85bd8950a3534bf1367b98dbeafc402285bd8950a3534bf1367b98dbeafc4022"),
         base16_array("04""da9b285c009ac42011ce635dafc96abb36fd221432bd7ba98660b586489e2f78e37f0cca8e107469ce516109600815abb8e65169c8b484b0dd86897aa6305eac")

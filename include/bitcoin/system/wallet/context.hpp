@@ -28,23 +28,18 @@ namespace system {
 namespace wallet {
 
 /// Prefix namespace tree.
+/// Values are those emitted by each network, provide an authoritative URL for
+/// any values added here.
 namespace prefix
 {
     typedef struct hds
     {
-        uint32_t xprv;
-        uint32_t xpub;
+        uint32_t prv;
+        uint32_t pub;
     } hds;
 
-    typedef struct versions
-    {
-        uint8_t add;
-        uint8_t wif;
-    } versions;
-
     /// Witness address prefixes.
-    /// Provide authoritative URL for any values added here.
-    namespace wit
+    namespace p2w
     {
         // Can be compared during execution to validate a parameter.
         constexpr auto undefined = "";
@@ -73,180 +68,105 @@ namespace prefix
         namespace main
         {
             constexpr auto btc = 0x80;
+            constexpr auto ltc = 0xb0;
         }
         namespace test
         {
             constexpr auto btc = 0xef;
+            constexpr auto ltc = 0xef;
         }
     }
 
-    /// Payment addresss version bytes.
-    namespace add
+    /// Pay to key hash address version bytes.
+    namespace p2kh
     {
         // Can be compared during execution to validate a parameter.
         // en.bitcoin.it/wiki/list_of_address_prefixes
         constexpr auto undefined = 0xff;
 
-        namespace p2pkh
+        namespace main
         {
-            namespace main
-            {
-                constexpr auto btc = 0x00;
-            }
-            namespace test
-            {
-                constexpr auto btc = 0x6f;
-            }
+            constexpr auto btc = 0x00;
+            constexpr auto ltc = 0x30;
         }
-        namespace p2sh
+        namespace test
         {
-            namespace main
-            {
-                constexpr auto btc = 0x05;
-            }
-            namespace test
-            {
-                constexpr auto btc = 0xc4;
-            }
+            constexpr auto btc = 0x6f;
+            constexpr auto ltc = 0x6f;
         }
     }
 
-    /// Extended (hd) keys, data from Satoshi Labs registry.
-    /// github.com/satoshilabs/slips/blob/master/slip-0132.md
-    namespace ext
+    /// Pay to script hash address version bytes.
+    namespace p2sh
+    {
+        // Can be compared during execution to validate a parameter.
+        // en.bitcoin.it/wiki/list_of_address_prefixes
+        constexpr auto undefined = 0xff;
+
+        namespace main
+        {
+            constexpr auto btc = 0x05;
+
+            // Litecoin also accepts 0x05, but emits this value.
+            constexpr auto ltc = 0x32;
+        }
+        namespace test
+        {
+            constexpr auto btc = 0xc4;
+
+            // Litecoin also accepts 0xc4, but emits this value.
+            constexpr auto ltc = 0x3a;
+        }
+    }
+
+    /// Extended (hd) key prefixes.
+    namespace hd
     {
         // Can be compared during execution to validate a parameter.
         constexpr auto undefined = hds{ 0xffffffff, 0xffffffff };
 
-        namespace p2pkh
+        // github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
+        // github.com/litecoin-project/litecoin/blob/master/src/chainparams.cpp
+        namespace main
         {
-            namespace main
-            {
-                // { xpub, xprv } m/44'/0'
-                constexpr auto btc = hds{ 0x0488ade4, 0x0488b21e };
-                // { Ltub, Ltpv } m/44'/2'
-                constexpr auto ltc = hds{ 0x019d9cfe, 0x019da462 };
-                // { vtcp, vtcv } m/44'/28'
-                constexpr auto vtc = hds{ 0x0488ade4, 0x0488b21e };
-                // { ppub, pprv } m/44'/1997'
-                constexpr auto polis = hds{ 0x03e25945, 0x03e25d7e };
-            }
-            namespace test
-            {
-                // { tpub, tprv } m/44'/1'
-                constexpr auto btc = hds{ 0x04358394, 0x043587cf };
-                // { ttub, ttpv } m/44'/1'
-                constexpr auto ltc = hds{ 0x0436ef7d, 0x0436f6e1 };
-            }
+            constexpr auto btc = hds{ 0x0488ade4, 0x0488b21e };
+            constexpr auto ltc = btc;
         }
-        namespace p2sh
+        namespace test
         {
-            namespace main
-            {
-                constexpr auto btc = p2pkh::main::btc;
-                constexpr auto ltc = p2pkh::main::ltc;
-                constexpr auto vtc = p2pkh::main::vtc;
-            }
-            namespace test
-            {
-                constexpr auto btc = p2pkh::test::btc;
-            }
-            namespace p2wpkh
-            {
-                namespace main
-                {
-                    // { ypub, yprv } m/49'/0'
-                    constexpr auto btc = hds{ 0x049d7878, 0x049d7cb2 };
-                    // { Mtub, Mtpv } m/49'/1'
-                    constexpr auto ltc = hds{ 0x01b26792, 0x01b26ef6 };
-                }
-                namespace test
-                {
-                    // { upub, uprv } m/49'/1'
-                    constexpr auto btc = hds{ 0x044a4e28, 0x044a5262 };
-                }
-            }
-            namespace p2wsh
-            {
-                namespace multisig
-                {
-                    namespace main
-                    {
-                        // { Ypub, Yprv }
-                        constexpr auto btc = hds{ 0x0295b005, 0x0295b43f };
-                    }
-                    namespace test
-                    {
-                        // { Upub, Uprv }
-                        constexpr auto btc = hds{ 0x024285b5, 0x024289ef };
-                    }
-                }
-            }
-        }
-        namespace p2wpkh
-        {
-            namespace main
-            {
-                // { zpub, zprv } m/84'/0'
-                constexpr auto btc = hds{ 0x04b2430c, 0x04b24746 };
-                // { zpub, zprv } m/84'/57'
-                constexpr auto sys = btc;
-            }
-            namespace test
-            {
-                // { vpub, vprv } m/84'/1'
-                constexpr auto btc = hds{ 0x045f18bc, 0x045f1cf6 };
-            }
-        }
-        namespace p2wsh
-        {
-            namespace multisig
-            {
-                namespace main
-                {
-                    // { Zpub, Zprv }
-                    constexpr auto btc = hds{ 0x02aa7a99, 0x02aa7ed3 };
-                    constexpr auto sys = btc;
-                }
-                namespace test
-                {
-                    // { Vpub, Vprv }
-                    constexpr auto btc = hds{ 0x02575048, 0x02575483 };
-                }
-            }
+            constexpr auto btc = hds{ 0x04358394, 0x043587cf };
+            constexpr auto ltc = btc;
         }
     }
 }
 
-/// Portable context for keys and addresses.
+/// Portable context for keys and addresses, the set of consistent prefixes
+/// for one network.
 struct BC_API context
 {
-    /// HD prefixes incorporate script typing.
-    /// Hierarchical-deterministic public/private key prefixes.
-    prefix::hds hd_prefix;
+    /// Extended (hd) private/public key prefixes.
+    prefix::hds hd;
 
-    /// Witness prefixes do not incorporate script typing.
     /// Witness address prefix.
-    std::string witness_prefix;
+    std::string p2w;
 
-    /// Address prefixes incorporate script typing.
-    /// Payment (legacy address) address version byte.
-    uint8_t address_version;
+    /// Pay to key hash address version byte.
+    uint8_t p2kh;
 
-    /// WIF prefixes do not incorporate script typing.
+    /// Pay to script hash address version byte.
+    uint8_t p2sh;
+
     /// WIF (legacy private key) version byte.
-    uint8_t wif_prefix;
+    uint8_t wif;
 
     uint64_t hd_prefixes() const NOEXCEPT
     {
-        // TODO: inconsistent order: private, public
-        return hd_private::to_prefixes(hd_prefix.xprv, hd_prefix.xpub);
+        return hd_private::to_prefixes(hd.prv, hd.pub);
     }
 
     uint16_t versions() const NOEXCEPT
     {
-        // TODO: inconsistenct order: public, private
-        return ec_private::to_versions(address_version, wif_prefix);
+        return ec_private::to_versions(p2kh, wif);
     }
 };
 
@@ -256,90 +176,51 @@ namespace ctx
 {
     namespace btc
     {
-        namespace main
+        const context main
         {
-            const context p2pkh
-            {
-                prefix::ext::p2pkh::main::btc,
-                prefix::wit::main::btc,
-                prefix::add::p2pkh::main::btc,
-                prefix::wif::main::btc
-            };
-            const context p2sh
-            {
-                prefix::ext::p2sh::main::btc,
-                prefix::wit::main::btc,
-                prefix::add::p2sh::main::btc,
-                prefix::wif::main::btc
-            };
-        }
-        namespace test
+            prefix::hd::main::btc,
+            prefix::p2w::main::btc,
+            prefix::p2kh::main::btc,
+            prefix::p2sh::main::btc,
+            prefix::wif::main::btc
+        };
+        const context test
         {
-            const context p2pkh
-            {
-                prefix::ext::p2pkh::test::btc,
-                prefix::wit::test::btc,
-                prefix::add::p2pkh::test::btc,
-                prefix::wif::test::btc
-            };
-            const context p2sh
-            {
-                prefix::ext::p2sh::test::btc,
-                prefix::wit::test::btc,
-                prefix::add::p2sh::test::btc,
-                prefix::wif::test::btc
-            };
-        }
+            prefix::hd::test::btc,
+            prefix::p2w::test::btc,
+            prefix::p2kh::test::btc,
+            prefix::p2sh::test::btc,
+            prefix::wif::test::btc
+        };
     }
     namespace ltc
     {
-        namespace main
+        const context main
         {
-            const context p2pkh
-            {
-                prefix::ext::p2pkh::main::ltc,
-                prefix::wit::main::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
-            };
-            const context p2sh
-            {
-                prefix::ext::p2sh::main::ltc,
-                prefix::wit::main::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
-            };
-        }
-        namespace test
+            prefix::hd::main::ltc,
+            prefix::p2w::main::ltc,
+            prefix::p2kh::main::ltc,
+            prefix::p2sh::main::ltc,
+            prefix::wif::main::ltc
+        };
+        const context test
         {
-            const context p2pkh
-            {
-                prefix::ext::p2pkh::test::ltc,
-                prefix::wit::test::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
-            };
-            const context p2sh
-            {
-                prefix::ext::undefined,
-                prefix::wit::test::ltc,
-                prefix::add::undefined,
-                prefix::wif::undefined
-            };
-        }
+            prefix::hd::test::ltc,
+            prefix::p2w::test::ltc,
+            prefix::p2kh::test::ltc,
+            prefix::p2sh::test::ltc,
+            prefix::wif::test::ltc
+        };
     }
 }
 
 // TODO: these are static initializations.
 
 /// Predefined contexts for use as default parameter values.
-extern const context btc_mainnet_p2kh;
-extern const context btc_mainnet_p2sh;
-extern const context btc_testnet_p2kh;
-extern const context btc_testnet_p2sh;
-
 extern const context btc_mainnet;
 extern const context btc_testnet;
+extern const context ltc_mainnet;
+extern const context ltc_testnet;
 
 extern const context btc;
 

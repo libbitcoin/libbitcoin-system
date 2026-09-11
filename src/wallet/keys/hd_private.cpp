@@ -45,34 +45,9 @@ hd_private::hd_private(const data_chunk& entropy, uint64_t prefixes) NOEXCEPT
 {
 }
 
-// This reads the private version and sets the public to mainnet.
-hd_private::hd_private(const hd_key& private_key) NOEXCEPT
-  : hd_private(from_key(private_key, hd_public::mainnet))
-{
-}
-// This reads the private version and sets the public.
-hd_private::hd_private(const hd_key& private_key,
-    uint32_t public_prefix) NOEXCEPT
-  : hd_private(from_key(private_key, public_prefix))
-{
-}
-
 // This validates the private version and sets the public.
 hd_private::hd_private(const hd_key& private_key, uint64_t prefixes) NOEXCEPT
   : hd_private(from_key(private_key, prefixes))
-{
-}
-
-// This reads the private version and sets the public to mainnet.
-hd_private::hd_private(const std::string& encoded) NOEXCEPT
-  : hd_private(from_string(encoded, hd_public::mainnet))
-{
-}
-
-// This reads the private version and sets the public.
-hd_private::hd_private(const std::string& encoded,
-    uint32_t public_prefix) NOEXCEPT
-  : hd_private(from_string(encoded, public_prefix))
 {
 }
 
@@ -128,13 +103,6 @@ hd_private hd_private::from_entropy(const data_slice& entropy,
     return { intermediate.first, intermediate.second, prefixes };
 }
 
-hd_private hd_private::from_key(const hd_key& key,
-    uint32_t public_prefix) NOEXCEPT
-{
-    const auto prefix = from_big_endian<uint32_t>(key);
-    return from_key(key, to_prefixes(prefix, public_prefix));
-}
-
 hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
 {
     read::bytes::copy source(key);
@@ -147,12 +115,20 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
     const auto padding = source.read_byte();
     const auto secret = source.read_hash();
 
+    // Validate the key checksum.
+    if (!verify_checksum(key))
+        return {};
+
     // Validate the prefix against the provided value.
     if (prefix != to_prefix(prefixes))
         return {};
 
     // Validate the key padding.
     if (padding != 0x00)
+        return {};
+
+    // Validate the master key lineage.
+    if (is_zero(depth) && !(is_zero(parent) && is_zero(child)))
         return {};
 
     const hd_lineage lineage
@@ -164,16 +140,6 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
     };
 
     return { secret, chain, lineage };
-}
-
-hd_private hd_private::from_string(const std::string& encoded,
-    uint32_t public_prefix) NOEXCEPT
-{
-    hd_key key;
-    if (!decode_base58(key, encoded))
-        return {};
-
-    return hd_private(from_key(key, public_prefix));
 }
 
 hd_private hd_private::from_string(const std::string& encoded,
@@ -232,8 +198,8 @@ hd_key hd_private::to_hd_key() const NOEXCEPT
 
 hd_public hd_private::to_public() const NOEXCEPT
 {
-	if (!valid_)
-	    return {};
+    if (!valid_)
+        return {};
 
     const auto key = static_cast<hd_public>(*this).to_hd_key();
     return { key, hd_public::to_prefix(lineage_.prefixes) };
@@ -293,14 +259,11 @@ bool hd_private::operator!=(const hd_private& other) const NOEXCEPT
     return !(*this == other);
 }
 
-// We must assume mainnet for public version here.
-// When converting this to public a clone of this key should be used, with the
-// public version specified - after validating the private version.
 std::istream& operator>>(std::istream& in, hd_private& to)
 {
     std::string value;
     in >> value;
-    to.from_string(value, hd_public::mainnet);
+    to = hd_private(value);
 
     if (!to)
         throw istream_exception(value);
