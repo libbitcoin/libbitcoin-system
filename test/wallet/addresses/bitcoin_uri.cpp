@@ -208,4 +208,63 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri__parameters_all__complex_uri__expected)
     BOOST_REQUIRE_EQUAL(uri.parameter("r"), "http://example.com?purchase=shoes&user=bob");
 }
 
+
+// authority
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__authority_in_place_of_path__expected)
+{
+    const bitcoin_uri uri("bitcoin://113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(uri);
+    BOOST_REQUIRE_EQUAL(uri.address(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__authority_not_an_address__false)
+{
+    BOOST_REQUIRE(!bitcoin_uri("bitcoin://bogus"));
+}
+
+// amount
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__non_numeric_amount__false)
+{
+    BOOST_REQUIRE(!bitcoin_uri("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=bogus"));
+}
+
+// operators
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__equality__same__equal)
+{
+    const bitcoin_uri left("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    const bitcoin_uri right("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(left == right);
+    BOOST_REQUIRE(!(left != right));
+    BOOST_REQUIRE(!(left < right));
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__equality__different_query__unequal)
+{
+    const bitcoin_uri left("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    const bitcoin_uri right("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=1");
+    BOOST_REQUIRE(left != right);
+    BOOST_REQUIRE(left < right);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__stream__valid__round_trips)
+{
+    const std::string expected{ "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD" };
+    std::istringstream in{ expected };
+    bitcoin_uri instance{};
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), expected);
+
+    std::ostringstream out{};
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__stream__invalid__throws)
+{
+    bitcoin_uri instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
 BOOST_AUTO_TEST_SUITE_END()

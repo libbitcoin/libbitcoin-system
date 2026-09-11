@@ -507,4 +507,45 @@ BOOST_AUTO_TEST_CASE(ec_scalar__product__zero_by_generator__zero)
     BOOST_REQUIRE(!product);
 }
 
+
+// assignment
+
+BOOST_AUTO_TEST_CASE(ec_scalar__assign__secret_copy__expected)
+{
+    const auto secret = secret1a;
+    ec_scalar instance{};
+    instance = secret;
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.secret(), secret);
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__assign__secret_move__expected)
+{
+    auto secret = secret1a;
+    ec_scalar instance{};
+    instance = std::move(secret);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.secret(), secret1a);
+}
+
+// integer comparison (reversed and negated forms are synthesized)
+
+BOOST_AUTO_TEST_CASE(ec_scalar__equality__integer__expected)
+{
+    const ec_scalar instance{ 42_i64 };
+    BOOST_REQUIRE(instance == 42_i64);
+    BOOST_REQUIRE(!(instance == 43_i64));
+    BOOST_REQUIRE(instance != 43_i64);
+    BOOST_REQUIRE(!(instance != 42_i64));
+}
+
+BOOST_AUTO_TEST_CASE(ec_scalar__equality__integer_reversed__expected)
+{
+    const ec_scalar instance{ 42_i64 };
+    BOOST_REQUIRE(42_i64 == instance);
+    BOOST_REQUIRE(!(43_i64 == instance));
+    BOOST_REQUIRE(43_i64 != instance);
+    BOOST_REQUIRE(!(42_i64 != instance));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

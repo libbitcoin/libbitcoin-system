@@ -1445,4 +1445,59 @@ BOOST_AUTO_TEST_CASE(electrum__construct_sentence__vectors__expected)
 
 #endif // VERIFIED_VECTORS
 
+
+// to_prefix
+
+BOOST_AUTO_TEST_CASE(electrum__to_prefix__electrum_v1_words__old)
+{
+    const string_list v1_words
+    {
+        "blind", "faith", "blind", "faith", "blind", "faith",
+        "blind", "faith", "blind", "faith", "blind", "faith"
+    };
+
+    BOOST_REQUIRE(electrum::to_prefix(v1_words) == electrum::seed_prefix::old);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__to_prefix__not_in_any_dictionary__none)
+{
+    BOOST_REQUIRE(electrum::to_prefix(string_list(12, "bogus")) == electrum::seed_prefix::none);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__to_prefix__sentence__matches_words)
+{
+    const std::string sentence{ "blind faith blind faith blind faith blind faith blind faith blind faith" };
+    BOOST_REQUIRE(electrum::to_prefix(sentence) == electrum::seed_prefix::old);
+}
+
+BOOST_AUTO_TEST_CASE(electrum__is_prefix__sentence__expected)
+{
+    const std::string sentence{ "blind faith blind faith blind faith blind faith blind faith blind faith" };
+    BOOST_REQUIRE(electrum::is_prefix(sentence, electrum::seed_prefix::old));
+}
+
+// to_seed
+
+BOOST_AUTO_TEST_CASE(electrum__to_seed__invalid__empty)
+{
+    BOOST_REQUIRE_EQUAL(electrum{}.to_seed(""), long_hash{});
+}
+
+// keys
+
+BOOST_AUTO_TEST_CASE(electrum__to_key__seed__round_trips)
+{
+    long_hash seed{};
+    seed.fill(0x42);
+    const auto key = electrum::to_key(seed, btc_mainnet);
+    BOOST_REQUIRE(key);
+    BOOST_REQUIRE_EQUAL(electrum::to_seed(key), seed);
+}
+
+// The first half of the seed is the secret, which must ec verify.
+BOOST_AUTO_TEST_CASE(electrum__to_key__null_seed__invalid)
+{
+    BOOST_REQUIRE(!electrum::to_key(long_hash{}, btc_mainnet));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

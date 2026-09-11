@@ -612,4 +612,71 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_ja__expected)
 
 #endif // VERIFIED_VECTORS
 
+
+// sizers
+
+BOOST_AUTO_TEST_CASE(mnemonic__checksum_bits__entropy__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::checksum_bits(data_chunk(16, 0x00)), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::checksum_bits(data_chunk(32, 0x00)), 8u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__checksum_bits__words__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::checksum_bits(string_list(12, "word")), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::checksum_bits(string_list(24, "word")), 8u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__entropy_bits__entropy__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(16, 0x00)), 128u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(data_chunk(32, 0x00)), 256u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__entropy_bits__words__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(12, "word")), 128u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_bits(string_list(24, "word")), 256u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__entropy_size__words__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(12, "word")), 16u);
+    BOOST_REQUIRE_EQUAL(accessor::entropy_size(string_list(24, "word")), 32u);
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__word_count__entropy__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(16, 0x00)), 12u);
+    BOOST_REQUIRE_EQUAL(accessor::word_count(data_chunk(32, 0x00)), 24u);
+}
+
+// guards
+
+BOOST_AUTO_TEST_CASE(mnemonic__from_entropy__invalid_size__invalid)
+{
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(15, 0x00), language::en));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__from_entropy__undefined_language__invalid)
+{
+    BOOST_REQUIRE(!accessor::from_entropy(data_chunk(16, 0x00), language::none));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__from_words__language_mismatch__invalid)
+{
+    const auto instance = accessor::from_entropy(data_chunk(16, 0x00), language::en);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!accessor::from_words(instance.words(), language::es));
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__decoder__not_in_dictionary__empty)
+{
+    BOOST_REQUIRE(accessor::decoder(string_list(12, "bogus"), language::en).empty());
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__to_seed__invalid__empty)
+{
+    BOOST_REQUIRE_EQUAL(mnemonic{}.to_seed(""), long_hash{});
+}
 BOOST_AUTO_TEST_SUITE_END()
