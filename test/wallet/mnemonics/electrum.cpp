@@ -1500,4 +1500,19 @@ BOOST_AUTO_TEST_CASE(electrum__to_key__null_seed__invalid)
     BOOST_REQUIRE(!electrum::to_key(long_hash{}, btc_mainnet));
 }
 
+
+// Only native entropy prefixes are seedable.
+BOOST_AUTO_TEST_CASE(electrum__to_seed__electrum_v1_prefix__empty)
+{
+    const string_list v1_words
+    {
+        "blind", "faith", "blind", "faith", "blind", "faith",
+        "blind", "faith", "blind", "faith", "blind", "faith"
+    };
+
+    const electrum instance(v1_words, language::en);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::old);
+    BOOST_REQUIRE_EQUAL(instance.to_seed(""), long_hash{});
+}
 BOOST_AUTO_TEST_SUITE_END()

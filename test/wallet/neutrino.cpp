@@ -3594,4 +3594,53 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
     BOOST_REQUIRE(!neutrino::match_filter(filter, addresses));
 }
 
+
+// empty inputs
+
+BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_script__false)
+{
+    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::script{}));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_scripts__false)
+{
+    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::scripts{}));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__match_filter__scripts_all_empty__false)
+{
+    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::scripts(2)));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_addresses__false)
+{
+    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, wallet::payment_address::list{}));
+}
+
+// exhausted filter
+
+BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_filter_script__false)
+{
+    const neutrino::block_filter filter{};
+    const auto script = chain::script{ chain::script::to_pay_key_hash_pattern(null_short_hash) };
+    BOOST_REQUIRE(!neutrino::match_filter(filter, script));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_filter_scripts__false)
+{
+    const neutrino::block_filter filter{};
+    const chain::scripts scripts{ chain::script{ chain::script::to_pay_key_hash_pattern(null_short_hash) } };
+    BOOST_REQUIRE(!neutrino::match_filter(filter, scripts));
+}
+
+// header
+
+BOOST_AUTO_TEST_CASE(neutrino__compute_header__filter_hash_out__matches)
+{
+    const auto filter = base16_chunk("0123456789");
+    hash_digest filter_hash{};
+    const auto header = neutrino::compute_header(filter_hash, null_hash, filter);
+    BOOST_REQUIRE_EQUAL(filter_hash, bitcoin_hash(filter));
+    BOOST_REQUIRE_EQUAL(header, neutrino::compute_header(null_hash, filter));
+}
 BOOST_AUTO_TEST_SUITE_END()
