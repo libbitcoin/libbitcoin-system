@@ -274,7 +274,6 @@ hd_private mnemonic::to_key(const std::string& passphrase,
     if (!(*this))
         return {};
 
-    // The key will be invalid if the secret does not ec verify.
     return { to_chunk(to_seed(passphrase)), context.hd_prefixes() };
 }
 

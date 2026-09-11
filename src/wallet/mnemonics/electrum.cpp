@@ -603,7 +603,6 @@ hd_private electrum::to_key(const std::string& passphrase,
     // Bypass a BIP32 step, splitting directly to secret/chaincode.
     const auto halves = system::split(to_seed(passphrase));
 
-    // The key will be invalid if the secret (part.first) does not ec verify.
     return { halves.first, halves.second, context.hd_prefixes() };
 }
 
