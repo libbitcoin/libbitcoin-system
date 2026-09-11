@@ -34,6 +34,9 @@ using namespace bc::system::wallet;
 // bip32 test vector 1 private key (m/0H).
 #define VECTOR1_M0H_PRIVATE "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7"
 
+// bip32 test vector 1 master key, depth manually set to 254.
+#define XPRV_254 "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQB12ucr"
+
 // bip32 test vector 1 master key, testnet serialization.
 #define TESTNET_M "tprv8ZgxMBicQKsPeDgjzdC36fs6bMjGApWDNLR9erAXMs5skhMv36j9MV5ecvfavji5khqjWaWSFhN3YcCUUdiKH6isR4Pwy3U5y5egddBr16m"
 #define TESTNET_M_PUBLIC "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
@@ -389,4 +392,118 @@ BOOST_AUTO_TEST_CASE(descriptor__scripts__pkh_xonly__empty)
     BOOST_REQUIRE(instance.scripts(0).empty());
 }
 
+
+// key expression guards
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__origin_without_path__valid)
+{
+    const descriptor instance("pkh([d34db33f]" VECTOR1_M0H "/1/*)");
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.scripts(0).size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__origin_path_without_slash__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh([d34db33f44h]" VECTOR1_M0H ")"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__origin_short_bracket__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh([d34db3]" VECTOR1_M0H ")"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__origin_unterminated_bracket__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh([d34db33f" VECTOR1_M0H ")"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__origin_not_base16__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh([zzzzzzzz]" VECTOR1_M0H ")"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__origin_wildcard__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh([d34db33f/*]" VECTOR1_M0H ")"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__element_after_wildcard__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" VECTOR1_M0H "/*/1)"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__non_numeric_element__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" VECTOR1_M0H "/abc)"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__element_above_hardened__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(" VECTOR1_M0H "/2147483648)"));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__construct__short_hex_key__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pk(0102)"));
+}
+
+// The secret is valid (non-null) but exceeds the curve order.
+BOOST_AUTO_TEST_CASE(descriptor__construct__wif_above_curve_order__invalid)
+{
+    BOOST_REQUIRE(!descriptor("pkh(L5oLkpV3aqBjhki6LmvChTCq73v9gyymzzMpBbhDLjDpKCuAXpsi)"));
+}
+
+// derivation guards
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__hardened_element_on_public__empty)
+{
+    const descriptor instance("pkh(" VECTOR1_M0H "/0h/0)");
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.scripts(0).empty());
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__private_depth_overflow__empty)
+{
+    const auto expression = std::string("pkh(") + XPRV_254 + "/0/0)";
+    const descriptor instance(expression);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.scripts(0).empty());
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__scripts__public_depth_overflow__empty)
+{
+    const auto xpub = hd_private(XPRV_254, hd_private::mainnet).to_public().encoded();
+    const auto expression = std::string("pkh(") + xpub + "/0/0)";
+    const descriptor instance(expression);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.scripts(0).empty());
+}
+
+// operators and accessors
+
+BOOST_AUTO_TEST_CASE(descriptor__equality__same__equal)
+{
+    const descriptor left("pkh(" VECTOR1_M0H "/1/*)");
+    const descriptor right("pkh(" VECTOR1_M0H "/1/*)");
+    BOOST_REQUIRE(left == right);
+    BOOST_REQUIRE(!(left != right));
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__equality__different__unequal)
+{
+    const descriptor left("pkh(" VECTOR1_M0H "/1/*)");
+    const descriptor right("pkh(" VECTOR1_M0H "/2/*)");
+    BOOST_REQUIRE(left != right);
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__checksum__valid__matches_encoded)
+{
+    const descriptor instance("pkh(" VECTOR1_M0H "/1/*)");
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "pkh(" VECTOR1_M0H "/1/*)#" + instance.checksum());
+}
+
+BOOST_AUTO_TEST_CASE(descriptor__solvable__invalid__false)
+{
+    BOOST_REQUIRE(!descriptor{}.solvable());
+}
 BOOST_AUTO_TEST_SUITE_END()
