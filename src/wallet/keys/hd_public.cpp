@@ -215,6 +215,8 @@ hd_key hd_public::to_hd_key() const NOEXCEPT
 
 hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
 {
+    BC_ASSERT(valid_);
+
     if (index >= hd_first_hardened_key)
         return {};
 

@@ -207,6 +207,8 @@ hd_public hd_private::to_public() const NOEXCEPT
 
 hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
 {
+    BC_ASSERT(valid_);
+
     constexpr uint8_t depth = 0;
 
     const auto data = (index >= hd_first_hardened_key) ?
