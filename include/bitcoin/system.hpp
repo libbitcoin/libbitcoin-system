@@ -313,7 +313,6 @@
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 #include <bitcoin/system/wallet/keys/hd_public.hpp>
 #include <bitcoin/system/wallet/keys/mini_keys.hpp>
-#include <bitcoin/system/wallet/keys/stealth.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>

@@ -507,4 +507,17 @@ BOOST_AUTO_TEST_CASE(descriptor__solvable__invalid__false)
     BOOST_REQUIRE(!descriptor{}.solvable());
 }
 
+class descriptor_accessor
+  : public descriptor
+{
+public:
+    using descriptor::key_expression;
+};
+
+BOOST_AUTO_TEST_CASE(descriptor__key_expression_derive__invalid_form__false)
+{
+    data_chunk out{};
+    BOOST_REQUIRE(!descriptor_accessor::key_expression{}.derive(out, 0));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -29,21 +29,17 @@ using namespace boost::urls;
 
 bool uri::decode(const std::string& encoded) NOEXCEPT
 {
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     if (!encoded.empty())
     {
-        try
+        if (const auto parts = parse_uri_reference(encoded))
         {
-            // throw std::length_error only for s.size() > url_view::max_size.
-            if (const auto parts = parse_uri_reference(encoded))
-            {
-                url_ = { parts.value() };
-                return true;
-            }
-        }
-        catch (...)
-        {
+            url_ = { parts.value() };
+            return true;
         }
     }
+    BC_POP_WARNING()
 
     url_.clear();
     return false;
@@ -129,15 +125,11 @@ std::string uri::path() const NOEXCEPT
 
 bool uri::set_path(const std::string& path) NOEXCEPT
 {
-    try
-    {
-        url_.set_path(path);
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    url_.set_path(path);
+    BC_POP_WARNING()
+    return true;
 }
 
 std::string uri::query() const NOEXCEPT
@@ -155,15 +147,11 @@ bool uri::has_query() const NOEXCEPT
 
 bool uri::set_query(const std::string& query) NOEXCEPT
 {
-    try
-    {
-        url_.set_query(query);
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    url_.set_query(query);
+    BC_POP_WARNING()
+    return true;
 }
 
 void uri::remove_query() NOEXCEPT
@@ -186,15 +174,11 @@ bool uri::has_fragment() const NOEXCEPT
 
 bool uri::set_fragment(const std::string& fragment) NOEXCEPT
 {
-    try
-    {
-        url_.set_fragment(fragment);
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    url_.set_fragment(fragment);
+    BC_POP_WARNING()
+    return true;
 }
 
 void uri::remove_fragment() NOEXCEPT

@@ -122,12 +122,8 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     if (width > max_uint16)
         return safe_free_and_return(qrcode, false);
 
-    // Bound: (2^32 - 1)^2 < 2^64.
-    const auto data_area = qrcode->width * static_cast<uint64_t>(qrcode->width);
-
-    // Guard: data_chunk overflow (32 bit builds).
-    if (data_area > max_size_t)
-        return safe_free_and_return(qrcode, false);
+    // Bound: QRSPEC_WIDTH_MAX^2.
+    const auto data_area = qrcode->width * static_cast<size_t>(qrcode->width);
 
     // Copy coded data into a data_chunk.
     data_chunk data(qrcode->data, qrcode->data + data_area);
@@ -158,7 +154,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     const auto height_coded = width_coded;
 
     // Bound: (2^32 - 1)^2 < 2^64.
-    const auto size = width_coded * height_coded;
+    const auto size = width_coded * static_cast<uint64_t>(height_coded);
 
     // Guard: mismatched sizes.
     if (coded.size() != size)

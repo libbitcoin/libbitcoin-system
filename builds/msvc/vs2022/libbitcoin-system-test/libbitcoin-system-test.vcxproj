@@ -433,7 +433,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\keys\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\hd_public.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\keys\mini_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\keys\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\electrum.cpp">
       <ObjectFileName>$(IntDir)test_wallet_mnemonics_electrum.obj</ObjectFileName>

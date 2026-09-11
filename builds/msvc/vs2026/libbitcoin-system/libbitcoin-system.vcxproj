@@ -338,7 +338,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_token.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\keys\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\electrum.cpp">
       <ObjectFileName>$(IntDir)src_wallet_mnemonics_electrum.obj</ObjectFileName>
@@ -669,7 +668,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\hd_private.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\hd_public.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\mini_keys.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum_v1.hpp" />

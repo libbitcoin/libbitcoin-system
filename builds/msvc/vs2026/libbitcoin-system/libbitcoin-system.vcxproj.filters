@@ -732,9 +732,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_token.cpp">
       <Filter>src\wallet\keys\parse_encrypted_keys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\keys\stealth.cpp">
-      <Filter>src\wallet\keys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -1665,9 +1662,6 @@
       <Filter>include\bitcoin\system\wallet\keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\mini_keys.hpp">
-      <Filter>include\bitcoin\system\wallet\keys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\keys\stealth.hpp">
       <Filter>include\bitcoin\system\wallet\keys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\message.hpp">
