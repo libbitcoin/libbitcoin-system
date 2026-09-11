@@ -188,4 +188,5 @@ BOOST_AUTO_TEST_CASE(ec_public__stream__invalid__throws)
     ec_public instance{};
     BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

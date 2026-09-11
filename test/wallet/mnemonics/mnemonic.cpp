@@ -679,4 +679,5 @@ BOOST_AUTO_TEST_CASE(mnemonic__to_seed__invalid__empty)
 {
     BOOST_REQUIRE_EQUAL(mnemonic{}.to_seed(""), long_hash{});
 }
+
 BOOST_AUTO_TEST_SUITE_END()

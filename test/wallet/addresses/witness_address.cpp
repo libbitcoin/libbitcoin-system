@@ -1080,4 +1080,10 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__invalid_address10__payload_too_sho
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, "bc1gmk9yu") == result::payload_too_short);
 }
 
+
+BOOST_AUTO_TEST_CASE(witness_address__script__invalid__empty)
+{
+    BOOST_REQUIRE(witness_address{}.script().ops().empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

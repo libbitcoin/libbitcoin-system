@@ -3643,4 +3643,5 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_header__filter_hash_out__matches)
     BOOST_REQUIRE_EQUAL(filter_hash, bitcoin_hash(filter));
     BOOST_REQUIRE_EQUAL(header, neutrino::compute_header(null_hash, filter));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

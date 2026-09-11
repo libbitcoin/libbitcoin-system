@@ -197,6 +197,7 @@ BOOST_AUTO_TEST_CASE(message__sign_message__null_secret__false)
     message_signature out_signature;
     BOOST_REQUIRE(!sign_message(out_signature, to_chunk(std::string("Compressed")), ec_secret{}, true));
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(messages__verify_message)
@@ -278,6 +279,7 @@ BOOST_AUTO_TEST_CASE(message__verify_message__unrecoverable_uncompressed__false)
     const auto signature = base16_array("1b" "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
     BOOST_REQUIRE(!verify_message(to_chunk(std::string("Uncompressed")), address, signature));
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

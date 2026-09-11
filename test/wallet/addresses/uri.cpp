@@ -366,4 +366,5 @@ BOOST_AUTO_TEST_CASE(uri__decode__empty__false)
     uri instance;
     BOOST_REQUIRE(!instance.decode(""));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

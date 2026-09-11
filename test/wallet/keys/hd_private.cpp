@@ -406,4 +406,5 @@ BOOST_AUTO_TEST_CASE(hd_private__construct__null_secret__invalid)
 {
     BOOST_REQUIRE(!hd_private(null_hash, hd_chain_code{}, hd_private::mainnet));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

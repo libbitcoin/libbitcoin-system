@@ -105,4 +105,5 @@ BOOST_AUTO_TEST_CASE(context__construct__regtest_wif__round_trips)
     BOOST_REQUIRE(ec_private(secret.encoded(), ctx::btc::regtest.versions()));
     BOOST_REQUIRE(!ec_private(secret.encoded(), ctx::btc::main.versions()));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

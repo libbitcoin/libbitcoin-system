@@ -1515,4 +1515,5 @@ BOOST_AUTO_TEST_CASE(electrum__to_seed__electrum_v1_prefix__empty)
     BOOST_REQUIRE(instance.prefix() == electrum::seed_prefix::old);
     BOOST_REQUIRE_EQUAL(instance.to_seed(""), long_hash{});
 }
+
 BOOST_AUTO_TEST_SUITE_END()

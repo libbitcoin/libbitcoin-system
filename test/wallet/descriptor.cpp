@@ -506,4 +506,5 @@ BOOST_AUTO_TEST_CASE(descriptor__solvable__invalid__false)
 {
     BOOST_REQUIRE(!descriptor{}.solvable());
 }
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -267,4 +267,5 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri__stream__invalid__throws)
     bitcoin_uri instance{};
     BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

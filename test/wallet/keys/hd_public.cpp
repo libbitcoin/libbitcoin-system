@@ -286,4 +286,5 @@ BOOST_AUTO_TEST_CASE(hd_public__constructor__point_not_on_curve__invalid)
 {
     BOOST_REQUIRE(!hd_public("xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Q5JXayek4PRsn35jii4veMimro1xefsM58PgBMrvdYre8QyULY"));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

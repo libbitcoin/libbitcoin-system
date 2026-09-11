@@ -294,4 +294,5 @@ BOOST_AUTO_TEST_CASE(stealth__uncover_stealth__secret_null_spend__false)
     ec_secret out{};
     BOOST_REQUIRE(!uncover_stealth(out, ephemeral, scan, null_hash));
 }
+
 BOOST_AUTO_TEST_SUITE_END()
