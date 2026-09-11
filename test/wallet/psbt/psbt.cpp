@@ -909,4 +909,434 @@ BOOST_AUTO_TEST_CASE(psbt__join__duplicate_inputs__false)
     BOOST_REQUIRE(!first.join(second));
 }
 
+
+// operators
+
+BOOST_AUTO_TEST_CASE(psbt__equality__same_encoding__equal)
+{
+    const transaction left{ VALID_EMPTY_TX };
+    const transaction right{ VALID_EMPTY_TX };
+    BOOST_REQUIRE(left == right);
+    BOOST_REQUIRE(!(left != right));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__equality__different_encoding__unequal)
+{
+    const transaction left{ VALID_EMPTY_TX };
+    const transaction right{ VALID_NO_INPUTS };
+    BOOST_REQUIRE(left != right);
+    BOOST_REQUIRE(!(left == right));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__equality__default_and_invalid__equal)
+{
+    const transaction left{};
+    const transaction right{ INVALID_NO_UNSIGNED_TX };
+    BOOST_REQUIRE(left == right);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__stream__valid__round_trips)
+{
+    std::istringstream in{ VALID_EMPTY_TX };
+    transaction instance{};
+    in >> instance;
+    BOOST_REQUIRE_EQUAL(instance.encoded(), VALID_EMPTY_TX);
+
+    std::ostringstream out{};
+    out << instance;
+    BOOST_REQUIRE_EQUAL(out.str(), VALID_EMPTY_TX);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__stream__invalid__throws)
+{
+    transaction instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
+
+// accessors
+
+BOOST_AUTO_TEST_CASE(psbt__others__no_global_unknowns__empty)
+{
+    const transaction instance{ VALID_EMPTY_TX };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.others().empty());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__fallback_locktime__version_0__none)
+{
+    const transaction instance{ VALID_EMPTY_TX };
+    BOOST_REQUIRE(!instance.fallback_locktime().has_value());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__fallback_locktime__lock_fallback_zero__zero)
+{
+    const transaction instance{ VALID_LOCK_FALLBACK_ZERO };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.fallback_locktime().value_or(max_uint32), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_modifiable__version_0__none)
+{
+    const transaction instance{ VALID_EMPTY_TX };
+    BOOST_REQUIRE(!instance.tx_modifiable().has_value());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_modifiable__both_modifiable__has_value)
+{
+    const transaction instance{ VALID_V2_BOTH_MODIFIABLE };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.tx_modifiable().has_value());
+}
+
+// prevout
+
+BOOST_AUTO_TEST_CASE(psbt__prevout__index_out_of_range__null)
+{
+    const transaction instance{ VALID_EMPTY_TX };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.prevout(0));
+}
+
+// construct
+
+BOOST_AUTO_TEST_CASE(psbt__tx_construct__invalid_transaction__invalid)
+{
+    BOOST_REQUIRE(!transaction{ chain::transaction{} });
+}
+
+// finalize
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__invalid__false)
+{
+    transaction instance{};
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__no_inputs__false)
+{
+    transaction instance{ VALID_NO_INPUTS };
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+// finalize (satisfaction)
+
+#define SIGNER_POINT "029583bf39ae0a609747ad199addd634fa6108559d6c5cd39b4c2183f1ab96e07f"
+#define SIGNER_SIGNATURE "304402206b2fea5b1e3c3e2a5d3e9c8a6b0f8a3d1c4e5f60718293a4b5c6d7e8f901a2b302203c4d5e6f708192a3b4c5d6e7f80912a3b4c5d6e7f80912a3b4c5d6e7f8091201"
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__pay_public_key__final_script_sig)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+    BOOST_REQUIRE(instance);
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_public_key_pattern(base16_chunk(SIGNER_POINT)) });
+    in.partial_signatures.push_back({ splice(data_chunk{ 0x02 }, base16_chunk(SIGNER_POINT)), base16_chunk(SIGNER_SIGNATURE) });
+
+    BOOST_REQUIRE(instance.finalize());
+    BOOST_REQUIRE(in.final_script_sig);
+    BOOST_REQUIRE(in.partial_signatures.empty());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__pay_public_key_wrong_key__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_public_key_pattern(base16_chunk(SIGNER_POINT)) });
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__pay_key_hash__final_script_sig)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_key_hash_pattern(bitcoin_short_hash(base16_chunk(SIGNER_POINT))) });
+    in.partial_signatures.push_back({ splice(data_chunk{ 0x02 }, base16_chunk(SIGNER_POINT)), base16_chunk(SIGNER_SIGNATURE) });
+
+    BOOST_REQUIRE(instance.finalize());
+    BOOST_REQUIRE(in.final_script_sig);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__pay_key_hash_wrong_key__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_key_hash_pattern(bitcoin_short_hash(base16_chunk(SIGNER_POINT))) });
+    in.partial_signatures.push_back({ splice(data_chunk{ 0x02 }, base16_chunk("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")), base16_chunk(SIGNER_SIGNATURE) });
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__unsupported_pattern__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::operations{ { chain::opcode::op_return } } });
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__no_prevout__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__pay_witness_key_hash__final_script_witness)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_witness_key_hash_pattern(bitcoin_short_hash(base16_chunk(SIGNER_POINT))) });
+    in.partial_signatures.push_back({ splice(data_chunk{ 0x02 }, base16_chunk(SIGNER_POINT)), base16_chunk(SIGNER_SIGNATURE) });
+
+    BOOST_REQUIRE(instance.finalize());
+    BOOST_REQUIRE(in.final_script_witness);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__pay_witness_key_hash_wrong_key__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_witness_key_hash_pattern(bitcoin_short_hash(base16_chunk(SIGNER_POINT))) });
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__script_hash_without_embedded__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_script_hash_pattern(null_short_hash) });
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__script_hash_embedded_mismatch__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_script_hash_pattern(null_short_hash) });
+    in.embedded_script = to_shared<chain::script>(chain::script::to_pay_public_key_pattern(base16_chunk(SIGNER_POINT)));
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__witness_script_hash_without_script__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_witness_script_hash_pattern(null_hash) });
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__finalize__witness_script_hash_mismatch__false)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+
+    auto& in = instance.inputs().at(0);
+    in.witness_utxo = to_shared<chain::output>(99u, chain::script{ chain::script::to_pay_witness_script_hash_pattern(null_hash) });
+    in.witness_script = to_shared<chain::script>(chain::script::to_pay_public_key_pattern(base16_chunk(SIGNER_POINT)));
+
+    BOOST_REQUIRE(!instance.finalize());
+}
+
+// prevout
+
+BOOST_AUTO_TEST_CASE(psbt__prevout__non_witness_utxo_hash_mismatch__null)
+{
+    const chain::inputs ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    transaction instance{ chain::transaction{ 2u, ins, outs, 0u } };
+    BOOST_REQUIRE(instance);
+
+    auto& in = instance.inputs().at(0);
+    in.non_witness_utxo = to_shared<chain::transaction>(2u, ins, outs, 0u);
+
+    BOOST_REQUIRE(!instance.prevout(0));
+    BOOST_REQUIRE(!instance.fee().has_value());
+}
+
+// fee
+
+BOOST_AUTO_TEST_CASE(psbt__fee__version_2__expected)
+{
+    transaction instance{ 2u };
+    instance.inputs().resize(1);
+    instance.outputs().resize(1);
+    instance.inputs().at(0).witness_utxo = to_shared<chain::output>(1000u, chain::script{});
+    instance.outputs().at(0).amount = 900u;
+
+    BOOST_REQUIRE_EQUAL(instance.fee().value_or(0), 100u);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__fee__outputs_exceed_inputs__nullopt)
+{
+    transaction instance{ 2u };
+    instance.inputs().resize(1);
+    instance.outputs().resize(1);
+    instance.inputs().at(0).witness_utxo = to_shared<chain::output>(900u, chain::script{});
+    instance.outputs().at(0).amount = 1000u;
+
+    BOOST_REQUIRE(!instance.fee().has_value());
+}
+
+// combine
+
+BOOST_AUTO_TEST_CASE(psbt__combine__version_0_distinct_transactions__false)
+{
+    const chain::outputs outs{ { 42u, chain::script{} } };
+    const chain::inputs left_ins{ { chain::point{ null_hash, 0u }, chain::script{}, max_uint32 } };
+    const chain::inputs right_ins{ { chain::point{ one_hash, 0u }, chain::script{}, max_uint32 } };
+    transaction left{ chain::transaction{ 2u, left_ins, outs, 0u } };
+    const transaction right{ chain::transaction{ 2u, right_ins, outs, 0u } };
+    BOOST_REQUIRE(left);
+    BOOST_REQUIRE(right);
+    BOOST_REQUIRE(!left.combine(right));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__combine__version_2_distinct_tx_versions__false)
+{
+    transaction left{ 2u };
+    const transaction right{ 3u };
+    BOOST_REQUIRE(!left.combine(right));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__combine__version_2_distinct_points__false)
+{
+    transaction left{ 2u };
+    transaction right{ 2u };
+    left.inputs().resize(1);
+    right.inputs().resize(1);
+    left.inputs().at(0).previous_txid = null_hash;
+    right.inputs().at(0).previous_txid = one_hash;
+    BOOST_REQUIRE(!left.combine(right));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__combine__version_2_same_points__true)
+{
+    transaction left{ 2u };
+    transaction right{ 2u };
+    left.inputs().resize(1);
+    right.inputs().resize(1);
+    left.inputs().at(0).previous_txid = null_hash;
+    right.inputs().at(0).previous_txid = null_hash;
+    BOOST_REQUIRE(left.combine(right));
+}
+
+// VALID_EMPTY_TX with one global xpub (bip32 vector 1 master).
+#define GLOBAL_XPUB_EMPTY_TX "cHNidP8BAAoAAAAAAAAAAAAATwEEiLIeAAAAAAAAAAAAhz3/gcAvUlYj/R/lFn6sOlWgSd49MUu0LuIn/+031QgDOaNgEzAVl9rvQfvlk6AsxRPQtVUn7C3xBQ4uj/SchcIEAAAAAAA="
+
+BOOST_AUTO_TEST_CASE(psbt__combine__global_xpub__merged)
+{
+    transaction left{ VALID_EMPTY_TX };
+    const transaction right{ GLOBAL_XPUB_EMPTY_TX };
+    BOOST_REQUIRE(left);
+    BOOST_REQUIRE(right);
+    BOOST_REQUIRE(left.xpubs().empty());
+    BOOST_REQUIRE_EQUAL(right.xpubs().size(), 1u);
+
+    BOOST_REQUIRE(left.combine(right));
+    BOOST_REQUIRE_EQUAL(left.xpubs().size(), 1u);
+
+    BOOST_REQUIRE(left.combine(right));
+    BOOST_REQUIRE_EQUAL(left.xpubs().size(), 1u);
+}
+
+// join
+
+BOOST_AUTO_TEST_CASE(psbt__join__distinct_versions__false)
+{
+    transaction left{ VALID_EMPTY_TX };
+    const transaction right{ 2u };
+    BOOST_REQUIRE(left);
+    BOOST_REQUIRE(right);
+    BOOST_REQUIRE(!left.join(right));
+}
+
+// extract
+
+BOOST_AUTO_TEST_CASE(psbt__extract__version_2_finalized__expected)
+{
+    transaction instance{ 2u };
+    instance.inputs().resize(1);
+    instance.outputs().resize(1);
+    instance.inputs().at(0).previous_txid = one_hash;
+    instance.inputs().at(0).output_index = 1u;
+    instance.inputs().at(0).final_script_sig = to_shared<chain::script>();
+    instance.inputs().at(0).final_script_witness = to_shared<chain::witness>();
+    instance.outputs().at(0).amount = 77u;
+    BOOST_REQUIRE(instance.is_final());
+
+    const auto tx = instance.extract();
+    BOOST_REQUIRE(tx.is_valid());
+    BOOST_REQUIRE_EQUAL(tx.inputs_ptr()->size(), 1u);
+    BOOST_REQUIRE_EQUAL(tx.inputs_ptr()->front()->point().hash(), one_hash);
+    BOOST_REQUIRE_EQUAL(tx.inputs_ptr()->front()->point().index(), 1u);
+    BOOST_REQUIRE_EQUAL(tx.outputs_ptr()->size(), 1u);
+    BOOST_REQUIRE_EQUAL(tx.outputs_ptr()->front()->value(), 77u);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__extract__unsatisfiable_locktime__invalid)
+{
+    transaction instance{ 2u };
+    instance.inputs().resize(2);
+    instance.inputs().at(0).final_script_sig = to_shared<chain::script>();
+    instance.inputs().at(1).final_script_sig = to_shared<chain::script>();
+    instance.inputs().at(0).required_height_locktime = 500u;
+    instance.inputs().at(1).required_time_locktime = 500000000u;
+    BOOST_REQUIRE(instance.is_final());
+    BOOST_REQUIRE(!instance.locktime().has_value());
+    BOOST_REQUIRE(!instance.extract().is_valid());
+}
+
+// global map (constructed from VALID_EMPTY_TX)
+
+#define INVALID_DUPLICATE_GLOBAL_KEY "cHNidP8BAAoAAAAAAAAAAAAAAQAKAAAAAAAAAAAAAAA="
+#define INVALID_GLOBAL_VERSION_SIZE "cHNidP8BAAoAAAAAAAAAAAAAAfsDAAAAAA=="
+
+BOOST_AUTO_TEST_CASE(psbt__string_construct__duplicate_global_key__invalid)
+{
+    BOOST_REQUIRE(!transaction{ INVALID_DUPLICATE_GLOBAL_KEY });
+}
+
+BOOST_AUTO_TEST_CASE(psbt__string_construct__global_version_wrong_size__invalid)
+{
+    BOOST_REQUIRE(!transaction{ INVALID_GLOBAL_VERSION_SIZE });
+}
 BOOST_AUTO_TEST_SUITE_END()

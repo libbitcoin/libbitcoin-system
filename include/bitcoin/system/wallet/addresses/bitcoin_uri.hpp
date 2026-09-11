@@ -22,7 +22,6 @@
 #include <map>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
-#include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 #include <bitcoin/system/wallet/addresses/uri_reader.hpp>
 
 namespace libbitcoin {
@@ -62,7 +61,6 @@ public:
     std::string r() const NOEXCEPT;
     std::string address() const NOEXCEPT;
     payment_address payment() const NOEXCEPT;
-    stealth_address stealth() const NOEXCEPT;
     std::string parameter(const std::string& key) const NOEXCEPT;
 
     /// Property setters.
@@ -72,7 +70,6 @@ public:
     void set_r(const std::string& r) NOEXCEPT;
     bool set_address(const std::string& address) NOEXCEPT;
     void set_address(const payment_address& payment) NOEXCEPT;
-    void set_address(const stealth_address& stealth) NOEXCEPT;
 
     /// uri_reader implementation.
     bool set_scheme(const std::string& scheme) NOEXCEPT;

@@ -68,7 +68,7 @@ AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
-repository_root_dir="@abs_top_srcdir@/../.."
+repository_root_dir=`cd "${srcdir}/../.." && pwd`
 
 # Check for baseline language coverage in the compiler for the C++20 standard.
 #------------------------------------------------------------------------------

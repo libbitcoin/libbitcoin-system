@@ -61,7 +61,7 @@ project( libbitcoin-system
   LANGUAGES C CXX )
 
 
-set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../../" )
+set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../.." )
 
 if ( MSVC )
   set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )

@@ -675,15 +675,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\split.c">
       <Filter>src\wallet\addresses\qrencode</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_address.cpp">
-      <Filter>src\wallet\addresses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_receiver.cpp">
-      <Filter>src\wallet\addresses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\stealth_sender.cpp">
-      <Filter>src\wallet\addresses</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\addresses\tiff.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
@@ -1623,15 +1614,6 @@
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_code.hpp">
-      <Filter>include\bitcoin\system\wallet\addresses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\stealth_address.hpp">
-      <Filter>include\bitcoin\system\wallet\addresses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\stealth_receiver.hpp">
-      <Filter>include\bitcoin\system\wallet\addresses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\stealth_sender.hpp">
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\tiff.hpp">

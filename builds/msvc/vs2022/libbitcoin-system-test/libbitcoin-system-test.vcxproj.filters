@@ -798,15 +798,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_address.cpp">
-      <Filter>src\wallet\addresses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_receiver.cpp">
-      <Filter>src\wallet\addresses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_sender.cpp">
-      <Filter>src\wallet\addresses</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>

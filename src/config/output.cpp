@@ -41,7 +41,7 @@ static bool decode_output(chain::output& output,
         return false;
 
     uint64_t value;
-    if (!!deserialize(value, tokens[1]))
+    if (!deserialize(value, tokens[1]))
         return false;
 
     // Throws istream_exception.
