@@ -24,8 +24,10 @@ namespace wallet {
 
 const context btc_mainnet = ctx::btc::main;
 const context btc_testnet = ctx::btc::test;
+const context btc_regtest = ctx::btc::regtest;
 const context ltc_mainnet = ctx::ltc::main;
 const context ltc_testnet = ctx::ltc::test;
+const context ltc_regtest = ctx::ltc::regtest;
 
 const context btc = btc_mainnet;
 

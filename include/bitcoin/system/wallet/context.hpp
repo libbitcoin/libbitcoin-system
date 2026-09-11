@@ -56,6 +56,13 @@ namespace prefix
             constexpr auto btc = "tb";
             constexpr auto ltc = "tltc";
         }
+        // Not in bip173, defined by each implementation.
+        // github.com/bitcoin/bitcoin/blob/master/src/kernel/chainparams.cpp
+        namespace regtest
+        {
+            constexpr auto btc = "bcrt";
+            constexpr auto ltc = "rltc";
+        }
     }
 
     /// WIF key prefix bytes.
@@ -75,6 +82,11 @@ namespace prefix
             constexpr auto btc = 0xef;
             constexpr auto ltc = 0xef;
         }
+        namespace regtest
+        {
+            constexpr auto btc = test::btc;
+            constexpr auto ltc = test::ltc;
+        }
     }
 
     /// Pay to key hash address version bytes.
@@ -93,6 +105,11 @@ namespace prefix
         {
             constexpr auto btc = 0x6f;
             constexpr auto ltc = 0x6f;
+        }
+        namespace regtest
+        {
+            constexpr auto btc = test::btc;
+            constexpr auto ltc = test::ltc;
         }
     }
 
@@ -117,6 +134,11 @@ namespace prefix
             // Litecoin also accepts 0xc4, but emits this value.
             constexpr auto ltc = 0x3a;
         }
+        namespace regtest
+        {
+            constexpr auto btc = test::btc;
+            constexpr auto ltc = test::ltc;
+        }
     }
 
     /// Extended (hd) key prefixes.
@@ -136,6 +158,11 @@ namespace prefix
         {
             constexpr auto btc = hds{ 0x04358394, 0x043587cf };
             constexpr auto ltc = btc;
+        }
+        namespace regtest
+        {
+            constexpr auto btc = test::btc;
+            constexpr auto ltc = test::ltc;
         }
     }
 }
@@ -192,6 +219,14 @@ namespace ctx
             prefix::p2sh::test::btc,
             prefix::wif::test::btc
         };
+        const context regtest
+        {
+            prefix::hd::regtest::btc,
+            prefix::p2w::regtest::btc,
+            prefix::p2kh::regtest::btc,
+            prefix::p2sh::regtest::btc,
+            prefix::wif::regtest::btc
+        };
     }
     namespace ltc
     {
@@ -211,6 +246,14 @@ namespace ctx
             prefix::p2sh::test::ltc,
             prefix::wif::test::ltc
         };
+        const context regtest
+        {
+            prefix::hd::regtest::ltc,
+            prefix::p2w::regtest::ltc,
+            prefix::p2kh::regtest::ltc,
+            prefix::p2sh::regtest::ltc,
+            prefix::wif::regtest::ltc
+        };
     }
 }
 
@@ -219,8 +262,10 @@ namespace ctx
 /// Predefined contexts for use as default parameter values.
 extern const context btc_mainnet;
 extern const context btc_testnet;
+extern const context btc_regtest;
 extern const context ltc_mainnet;
 extern const context ltc_testnet;
+extern const context ltc_regtest;
 
 extern const context btc;
 
