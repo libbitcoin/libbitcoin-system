@@ -83,8 +83,8 @@ output::output(const std::string& tuple) THROWS
 }
 std::istream& operator>>(std::istream& stream, output& argument) THROWS
 {
-    std::string tuple;
-    stream >> tuple;
+    std::istreambuf_iterator<char> end;
+    std::string tuple(std::istreambuf_iterator<char>(stream), end);
 
     if (!decode_output(argument, tuple))
         throw istream_exception(tuple);
