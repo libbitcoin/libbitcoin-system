@@ -31,24 +31,24 @@ namespace config {
 using namespace boost::program_options;
 
 // Input format is currently private to bx:
-// "script:txhash:index:sequence=max_input_sequence"
+// "txhash:index:sequence=max_input_sequence"
 
 static bool decode_input(chain::input& input,
     const std::string& tuple) THROWS
 {
     const auto tokens = split(tuple, point::delimiter);
-    if (tokens.size() != 3 && tokens.size() != 4)
+    if (tokens.size() != 2 && tokens.size() != 3)
         return false;
 
     auto sequence = chain::max_input_sequence;
-    if (tokens.size() == 4 && !deserialize(sequence, tokens[3]))
+    if (tokens.size() == 3 && !deserialize(sequence, tokens[2]))
         return false;
 
     // Throws istream_exception.
     input = chain::input
     {
-        point{ tokens[1] + point::delimiter + tokens[2] },
-        script{ tokens[0] },
+        point{ tokens[0] + point::delimiter + tokens[1] },
+        chain::script{ chain::operations{} },
         sequence
     };
 
@@ -58,8 +58,7 @@ static bool decode_input(chain::input& input,
 static std::string encode_input(const chain::input& input) NOEXCEPT
 {
     std::ostringstream result;
-    result << script(input.script()) << point(input.point())
-        << point::delimiter << input.sequence();
+    result << point(input.point()) << point::delimiter << input.sequence();
     return result.str();
 }
 
