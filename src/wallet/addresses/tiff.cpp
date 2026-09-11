@@ -148,7 +148,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data,
     if (data.size() > max_image_bytes)
         return false;
 
-    const auto size = static_cast<uint32_t>(data.size());
+    const auto size = possible_narrow_cast<uint32_t>(data.size());
 
     // The width > 0 and therefore row_bytes > 0.
     const auto row_bytes = ceilinged_divide(width, byte_bits);

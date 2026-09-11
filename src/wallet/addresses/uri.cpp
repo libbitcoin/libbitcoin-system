@@ -29,7 +29,6 @@ using namespace boost::urls;
 
 bool uri::decode(const std::string& encoded) NOEXCEPT
 {
-    // String allocation exception only.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     if (!encoded.empty())
     {
@@ -125,7 +124,6 @@ std::string uri::path() const NOEXCEPT
 
 bool uri::set_path(const std::string& path) NOEXCEPT
 {
-    // String allocation exception only.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     url_.set_path(path);
     BC_POP_WARNING()
@@ -147,7 +145,6 @@ bool uri::has_query() const NOEXCEPT
 
 bool uri::set_query(const std::string& query) NOEXCEPT
 {
-    // String allocation exception only.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     url_.set_query(query);
     BC_POP_WARNING()
@@ -174,7 +171,6 @@ bool uri::has_fragment() const NOEXCEPT
 
 bool uri::set_fragment(const std::string& fragment) NOEXCEPT
 {
-    // String allocation exception only.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     url_.set_fragment(fragment);
     BC_POP_WARNING()

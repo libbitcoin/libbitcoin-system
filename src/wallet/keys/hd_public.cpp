@@ -223,8 +223,10 @@ hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
     auto child = point_;
+    LCOV_EXCL_START("Requires parse256(IL) >= n or Ki at infinity.")
     if (!ec_add(child, intermediate.first))
         return {};
+    LCOV_EXCL_STOP()
 
     if (lineage_.depth == max_uint8)
         return {};

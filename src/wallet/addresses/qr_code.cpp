@@ -100,7 +100,7 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
         return false;
 
     // Make otherwise safe sign cast explicit.
-    const auto signed_version = static_cast<int>(version);
+    const auto signed_version = wide_sign_cast<int>(version);
     const auto sensitive = to_int(case_sensitive);
 
     // External (embedded) qrencode library function.
@@ -122,8 +122,8 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     if (width > max_uint16)
         return safe_free_and_return(qrcode, false);
 
-    // Bound: QRSPEC_WIDTH_MAX^2.
-    const auto data_area = qrcode->width * static_cast<size_t>(qrcode->width);
+    const auto coded_width = to_unsigned(qrcode->width);
+    const auto data_area = coded_width * coded_width;
 
     // Copy coded data into a data_chunk.
     data_chunk data(qrcode->data, qrcode->data + data_area);
@@ -132,8 +132,7 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     const auto pixels = to_pixels(data, qrcode->width, scale, margin);
 
     // Convert to TIFF image stream.
-    const auto result = tiff::to_image(out, pixels,
-        static_cast<uint16_t>(width));
+    const auto result = tiff::to_image(out, pixels, narrow_cast<uint16_t>(width));
 
     return safe_free_and_return(qrcode, result);
 }
@@ -153,15 +152,13 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     // For readability (image is always square).
     const auto height_coded = width_coded;
 
-    // Bound: (2^32 - 1)^2 < 2^64.
-    const auto size = width_coded * static_cast<uint64_t>(height_coded);
-
     // Guard: mismatched sizes.
-    if (coded.size() != size)
+    if (is_multiply_overflow(width_coded, height_coded) ||
+        coded.size() != width_coded * height_coded)
         return {};
 
     // Bound: 2^16 * 2^32 < 2^48 < 2^64.
-    const auto width_scaled = scale * static_cast<uint64_t>(width_coded);
+    const auto width_scaled = wide_cast<uint64_t>(scale) * width_coded;
 
     // Bound: 2^48 + 2^1 * 2^16 < 2^48 + 2^17 < 2^1 * 2^48 < 2^64.
     const auto width_pixels = (margin + width_scaled + margin);
@@ -175,8 +172,8 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
         return {};
 
     // Cast guarded width and define height for readability.
-    const auto width = static_cast<size_t>(width_pixels);
-    const auto height = static_cast<size_t>(height_coded);
+    const auto width = possible_narrow_cast<size_t>(width_pixels);
+    const auto height = possible_wide_cast<size_t>(height_coded);
 
     // Horizontal margins and full row copies can be done bytewise.
     const auto row_bytes = ceilinged_divide(width, byte_bits);

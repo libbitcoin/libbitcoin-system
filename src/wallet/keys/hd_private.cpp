@@ -217,8 +217,10 @@ hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
 
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;
+    LCOV_EXCL_START("Requires parse256(IL) >= n or ki == 0.")
     if (!ec_add(child, intermediate.first))
         return {};
+    LCOV_EXCL_STOP()
 
     if (lineage_.depth == max_uint8)
         return {};

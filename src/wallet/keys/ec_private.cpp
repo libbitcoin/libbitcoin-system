@@ -144,8 +144,10 @@ ec_private ec_private::from_entropy(const data_chunk& entropy,
     const hd_private key(entropy);
 
     // The key is invalid if parse256(IL) >= n or 0:
+    LCOV_EXCL_START("Requires parse256(IL) >= n.")
     if (!key)
         return {};
+    LCOV_EXCL_STOP()
 
     return { key.secret(), versions, true };
 }
