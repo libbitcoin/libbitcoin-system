@@ -63,7 +63,7 @@ class BC_API electrum_v1
   : public words::languages
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(electrum_v1);
+    DEFAULT_COPY_MOVE(electrum_v1);
 
     typedef words::electrum_v1::catalog dictionary;
     typedef words::electrum_v1::catalogs dictionaries;

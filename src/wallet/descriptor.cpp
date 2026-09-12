@@ -259,13 +259,13 @@ bool descriptor::key_expression::derive(data_chunk& out,
             auto key = extended_public;
             for (const auto& element: path)
             {
-                if (element >= hardened_bit)
+                if (element >= hardened_bit || !key)
                     return false;
 
                 key = key.derive_public(element);
             }
 
-            if (wildcard)
+            if (wildcard && key)
                 key = key.derive_public(index);
 
             if (!key)
@@ -278,9 +278,14 @@ bool descriptor::key_expression::derive(data_chunk& out,
         {
             auto key = extended_private;
             for (const auto& element: path)
-                key = key.derive_private(element);
+            {
+                if (!key)
+                    return false;
 
-            if (wildcard)
+                key = key.derive_private(element);
+            }
+
+            if (wildcard && key)
                 key = key.derive_private(hardened ?
                     bit_or(index, hardened_bit) : index);
 

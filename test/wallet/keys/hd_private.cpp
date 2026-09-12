@@ -372,4 +372,39 @@ BOOST_AUTO_TEST_CASE(hd_private__constructor__invalid_checksum__invalid)
 {
     BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"));
 }
+
+// operators
+
+BOOST_AUTO_TEST_CASE(hd_private__equality__same__equal)
+{
+    const hd_private left(MAINNET_M, hd_private::mainnet);
+    const hd_private right(MAINNET_M, hd_private::mainnet);
+    BOOST_REQUIRE(left == right);
+    BOOST_REQUIRE(!(left != right));
+    BOOST_REQUIRE(!(left < right));
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__equality__different__unequal)
+{
+    const hd_private left(MAINNET_M, hd_private::mainnet);
+    const hd_private right = left.derive_private(0);
+    BOOST_REQUIRE(left != right);
+}
+
+// cast
+
+BOOST_AUTO_TEST_CASE(hd_private__secret_cast__valid__matches_secret)
+{
+    const hd_private instance(MAINNET_M, hd_private::mainnet);
+    const ec_secret& secret = instance;
+    BOOST_REQUIRE_EQUAL(secret, instance.secret());
+}
+
+// construct
+
+BOOST_AUTO_TEST_CASE(hd_private__construct__null_secret__invalid)
+{
+    BOOST_REQUIRE(!hd_private(null_hash, hd_chain_code{}, hd_private::mainnet));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

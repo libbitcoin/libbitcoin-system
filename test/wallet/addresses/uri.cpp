@@ -327,4 +327,44 @@ BOOST_AUTO_TEST_CASE(uri__parse__http1_1_targets__expected)
     BOOST_REQUIRE(!parsed.decode("/path%GG"));
 }
 
+
+// setter validation
+
+BOOST_AUTO_TEST_CASE(uri__set_scheme__invalid__false)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("bitcoin:test"));
+    BOOST_REQUIRE(!instance.set_scheme("1bitcoin"));
+    BOOST_REQUIRE_EQUAL(instance.scheme(), "bitcoin");
+}
+
+BOOST_AUTO_TEST_CASE(uri__set_scheme__valid__expected)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("bitcoin:test"));
+    BOOST_REQUIRE(instance.set_scheme("http"));
+    BOOST_REQUIRE_EQUAL(instance.scheme(), "http");
+}
+
+BOOST_AUTO_TEST_CASE(uri__set_authority__invalid__false)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("bitcoin://host/test"));
+    BOOST_REQUIRE(!instance.set_authority("%zz"));
+}
+
+BOOST_AUTO_TEST_CASE(uri__set_authority__valid__expected)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("bitcoin://host/test"));
+    BOOST_REQUIRE(instance.set_authority("other"));
+    BOOST_REQUIRE_EQUAL(instance.authority(), "other");
+}
+
+BOOST_AUTO_TEST_CASE(uri__decode__empty__false)
+{
+    uri instance;
+    BOOST_REQUIRE(!instance.decode(""));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -1022,4 +1022,10 @@ BOOST_AUTO_TEST_CASE(electrum_v1__construct__vectors__expected)
 
 #endif // VERIFIED_VECTORS
 
+
+BOOST_AUTO_TEST_CASE(electrum_v1__to_seed__invalid__invalid)
+{
+    BOOST_REQUIRE(!electrum_v1{}.to_seed());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

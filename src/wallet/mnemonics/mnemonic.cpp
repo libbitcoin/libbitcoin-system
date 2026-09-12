@@ -240,9 +240,6 @@ mnemonic mnemonic::from_words(const string_list& words,
     if (lexicon == language::none)
         return {};
 
-    if (identifier != language::none && lexicon != identifier)
-        return {};
-
     // HACK: en-fr dictionary ambiguity.
     if (is_ambiguous(tokens, identifier, lexicon))
         return {};
@@ -274,7 +271,6 @@ hd_private mnemonic::to_key(const std::string& passphrase,
     if (!(*this))
         return {};
 
-    // The key will be invalid if the secret does not ec verify.
     return { to_chunk(to_seed(passphrase)), context.hd_prefixes() };
 }
 

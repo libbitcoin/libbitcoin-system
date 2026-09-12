@@ -144,6 +144,7 @@
 /// Virtual concrete classes should define public virtual destructor.
 /// Abstract base classes may define protected non-virtual destructor.
 /// Non-virtual (final) classes may define public non-virtual destructor.
+/// Non-virtual base classes may define public non-virtual destructor.
 /// Pure virtual base classes do not define destructor.
 
 #define DELETE_COPY(name) \

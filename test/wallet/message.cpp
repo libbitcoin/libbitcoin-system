@@ -178,6 +178,26 @@ BOOST_AUTO_TEST_CASE(message__sign_message_wif__uncompressed__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(out_signature), SIGNATURE_WIF_UNCOMPRESSED);
 }
 
+
+BOOST_AUTO_TEST_CASE(message__sign_message_wif__invalid_wif__false)
+{
+    message_signature out_signature;
+    BOOST_REQUIRE(!sign_message(out_signature, to_chunk(std::string("Compressed")), std::string("bogus")));
+}
+
+BOOST_AUTO_TEST_CASE(message__sign_message_wif__valid_wif__expected)
+{
+    message_signature out_signature;
+    BOOST_REQUIRE(sign_message(out_signature, to_chunk(std::string("Compressed")), std::string(WIF_COMPRESSED)));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_signature), SIGNATURE_WIF_COMPRESSED);
+}
+
+BOOST_AUTO_TEST_CASE(message__sign_message__null_secret__false)
+{
+    message_signature out_signature;
+    BOOST_REQUIRE(!sign_message(out_signature, to_chunk(std::string("Compressed")), ec_secret{}, true));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(messages__verify_message)
@@ -236,6 +256,28 @@ BOOST_AUTO_TEST_CASE(message__verify_message__electrum_incorrect_address__false)
     const payment_address address("1Em1SX7qQq1pTmByqLRafhL1ypx2V786tP");
     const auto message = to_chunk(std::string("Nakomoto"));
     BOOST_REQUIRE(!verify_message(message, address, signature));
+}
+
+
+BOOST_AUTO_TEST_CASE(message__verify_message__invalid_magic__false)
+{
+    const payment_address address(base16_array(SECRET));
+    const auto signature = base16_array("00" "c0ae26619db18abd1e8a84d005bafd336512eda7207cf7f4f6c36c9614ed6bcf531a954929ddc0a86578f4d28a26e19b676c890a49881d6f25e393befd6d1682");
+    BOOST_REQUIRE(!verify_message(to_chunk(std::string("Compressed")), address, signature));
+}
+
+BOOST_AUTO_TEST_CASE(message__verify_message__unrecoverable_compressed__false)
+{
+    const payment_address address(base16_array(SECRET));
+    const auto signature = base16_array("1f" "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    BOOST_REQUIRE(!verify_message(to_chunk(std::string("Compressed")), address, signature));
+}
+
+BOOST_AUTO_TEST_CASE(message__verify_message__unrecoverable_uncompressed__false)
+{
+    const payment_address address({ base16_array(SECRET), 0x00, false });
+    const auto signature = base16_array("1b" "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    BOOST_REQUIRE(!verify_message(to_chunk(std::string("Uncompressed")), address, signature));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

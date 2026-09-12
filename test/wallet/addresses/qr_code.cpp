@@ -395,4 +395,11 @@ BOOST_AUTO_TEST_CASE(qr_code__to_pixels__little_endian_dependent__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(pixels), encode_base16(expected));
 }
 
+
+BOOST_AUTO_TEST_CASE(qr_code__to_pixels__size_mismatch__empty)
+{
+    static const data_chunk data{ 0xff };
+    BOOST_REQUIRE(qr_code_accessor::to_pixels(data, 2, 8, 2).empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

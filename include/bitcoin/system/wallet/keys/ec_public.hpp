@@ -37,7 +37,7 @@ class BC_API ec_public
   : public ec_point
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(ec_public);
+    DEFAULT_COPY_MOVE(ec_public);
 
     static const uint8_t mainnet_p2kh;
     static const uint8_t testnet_p2kh;

@@ -180,4 +180,22 @@ BOOST_AUTO_TEST_CASE(checked__equality__same__true)
     BOOST_REQUIRE_EQUAL(encode_base16(long_instance.checksum()), "2aed29c75b84cdaf");
 }
 
+
+BOOST_AUTO_TEST_CASE(checked__assign_copy__always__expected)
+{
+    const short_checked instance1(short_prefix, test_short_hash);
+    short_checked instance2{};
+    instance2 = instance1;
+    BOOST_REQUIRE(instance2 == instance1);
+}
+
+BOOST_AUTO_TEST_CASE(checked__assign_move__always__expected)
+{
+    short_checked instance1(short_prefix, test_short_hash);
+    const short_checked expected(instance1);
+    short_checked instance2{};
+    instance2 = std::move(instance1);
+    BOOST_REQUIRE(instance2 == expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

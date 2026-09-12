@@ -130,9 +130,11 @@ bool sign_message(message_signature& out_signature, const data_slice& message,
     if (!ecdsa::sign_recoverable(recoverable, secret, hash_message(message)))
         return false;
 
-    uint8_t magic;
-    if (!recovery_id_to_magic(magic, recoverable.recovery_id, compressed))
-        return false;
+    // The recovery id is bounded by the signing implementation.
+    uint8_t magic{};
+    BC_DEBUG_ONLY(const auto assigned =) recovery_id_to_magic(magic,
+        recoverable.recovery_id, compressed);
+    BC_ASSERT(assigned);
 
     out_signature = splice(to_array(magic), recoverable.signature);
     return true;

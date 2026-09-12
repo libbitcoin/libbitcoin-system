@@ -840,9 +840,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\keys\mini_keys.cpp">
       <Filter>src\wallet\keys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\keys\stealth.cpp">
-      <Filter>src\wallet\keys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>

@@ -178,4 +178,17 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__perfect_square__expected_true)
     BOOST_REQUIRE_EQUAL(encode_base16(tiff), encode_base16(expected));
 }
 
+BOOST_AUTO_TEST_CASE(tiff__to_image__excessive_image_size__false)
+{
+    const auto maximum = tiff::max_image_bytes;
+    tiff::max_image_bytes = 1;
+
+    data_chunk bitmap(2, 'x');
+    data_chunk image;
+    stream::out::data stream(image);
+    const auto result = tiff::to_image(stream, bitmap, 5);
+    tiff::max_image_bytes = maximum;
+    BOOST_REQUIRE(!result);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

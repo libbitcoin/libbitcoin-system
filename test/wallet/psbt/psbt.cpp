@@ -1339,4 +1339,82 @@ BOOST_AUTO_TEST_CASE(psbt__string_construct__global_version_wrong_size__invalid)
 {
     BOOST_REQUIRE(!transaction{ INVALID_GLOBAL_VERSION_SIZE });
 }
+
+// map fields
+
+#define PUBLIC_KEY "03b1341ccba7683b6af4f1238cd6e97e7167d569fac47f1e48d47541844355bd46"
+
+static bool parse_output(output& out, const data_chunk& data, uint32_t version) NOEXCEPT
+{
+    read::bytes::copy source(data);
+    return out.from_data(source, version);
+}
+
+static bool parse_input(input& in, const data_chunk& data, uint32_t version) NOEXCEPT
+{
+    read::bytes::copy source(data);
+    return in.from_data(source, version);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__output_from_data__duplicate_key__false)
+{
+    output instance{};
+    BOOST_REQUIRE(!parse_output(instance, base16_chunk("010001510100015100"), transaction::version_0));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__output_from_data__scripts__expected)
+{
+    output instance{};
+    BOOST_REQUIRE(parse_output(instance, base16_chunk("010001510101015200"), transaction::version_0));
+    BOOST_REQUIRE_EQUAL(encode_base16(instance.embedded_script->to_data(false)), "51");
+    BOOST_REQUIRE_EQUAL(encode_base16(instance.witness_script->to_data(false)), "52");
+}
+
+BOOST_AUTO_TEST_CASE(psbt__output_from_data__derivation_value_size__false)
+{
+    output instance{};
+    BOOST_REQUIRE(!parse_output(instance, base16_chunk("2202" PUBLIC_KEY "03" "030000" "00"), transaction::version_0));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__output_to_data__scripts__round_trips)
+{
+    output instance{};
+    BOOST_REQUIRE(parse_output(instance, base16_chunk("010001510101015200"), transaction::version_0));
+
+    data_chunk data{};
+    stream::out::data stream(data);
+    write::bytes::ostream sink(stream);
+    instance.to_data(sink, transaction::version_0);
+    sink.flush();
+    BOOST_REQUIRE_EQUAL(encode_base16(data), "010001510101015200");
+}
+
+BOOST_AUTO_TEST_CASE(psbt__output_combine__derivations__merged)
+{
+    output instance{};
+    output other{};
+    BOOST_REQUIRE(parse_output(other, base16_chunk("2202" PUBLIC_KEY "08" "b4a6ba6700000080" "00"), transaction::version_0));
+    instance.combine(other);
+    BOOST_REQUIRE_EQUAL(instance.derivations.size(), one);
+    instance.combine(other);
+    BOOST_REQUIRE_EQUAL(instance.derivations.size(), one);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__input_from_data__sighash_value_size__false)
+{
+    input instance{};
+    BOOST_REQUIRE(!parse_input(instance, base16_chunk("010303010000" "00"), transaction::version_0));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__input_combine__derivations__merged)
+{
+    input instance{};
+    input other{};
+    BOOST_REQUIRE(parse_input(other, base16_chunk("2206" PUBLIC_KEY "08" "b4a6ba6700000080" "00"), transaction::version_0));
+    instance.combine(other);
+    BOOST_REQUIRE_EQUAL(instance.derivations.size(), one);
+    instance.combine(other);
+    BOOST_REQUIRE_EQUAL(instance.derivations.size(), one);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

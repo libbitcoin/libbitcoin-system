@@ -226,7 +226,6 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/wallet/keys/hd_private.cpp \
     ${srcdir}/../../src/wallet/keys/hd_public.cpp \
     ${srcdir}/../../src/wallet/keys/mini_keys.cpp \
-    ${srcdir}/../../src/wallet/keys/stealth.cpp \
     ${srcdir}/../../src/wallet/keys/parse_encrypted_keys/parse_encrypted_private.cpp \
     ${srcdir}/../../src/wallet/keys/parse_encrypted_keys/parse_encrypted_public.cpp \
     ${srcdir}/../../src/wallet/keys/parse_encrypted_keys/parse_encrypted_token.cpp \
@@ -912,8 +911,7 @@ include_bitcoin_system_wallet_keys_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/keys/encrypted_keys.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/keys/hd_private.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/keys/hd_public.hpp \
-    ${srcdir}/../../include/bitcoin/system/wallet/keys/mini_keys.hpp \
-    ${srcdir}/../../include/bitcoin/system/wallet/keys/stealth.hpp
+    ${srcdir}/../../include/bitcoin/system/wallet/keys/mini_keys.hpp
 
 include_bitcoin_system_wallet_mnemonicsdir = \
     ${includedir}/bitcoin/system/wallet/mnemonics
@@ -1218,7 +1216,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/wallet/keys/hd_private.cpp \
     ${srcdir}/../../test/wallet/keys/hd_public.cpp \
     ${srcdir}/../../test/wallet/keys/mini_keys.cpp \
-    ${srcdir}/../../test/wallet/keys/stealth.cpp \
     ${srcdir}/../../test/wallet/mnemonics/electrum.cpp \
     ${srcdir}/../../test/wallet/mnemonics/electrum_v1.cpp \
     ${srcdir}/../../test/wallet/mnemonics/mnemonic.cpp \

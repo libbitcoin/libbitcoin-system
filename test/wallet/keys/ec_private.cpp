@@ -208,4 +208,5 @@ BOOST_AUTO_TEST_CASE(ec_private__construct__wif_wrong_size__invalid)
 {
     BOOST_REQUIRE(!ec_private{ "3" });
 }
+
 BOOST_AUTO_TEST_SUITE_END()
