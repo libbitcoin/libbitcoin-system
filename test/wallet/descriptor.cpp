@@ -470,6 +470,14 @@ BOOST_AUTO_TEST_CASE(descriptor__scripts__private_depth_overflow__empty)
     BOOST_REQUIRE(instance.scripts(0).empty());
 }
 
+BOOST_AUTO_TEST_CASE(descriptor__scripts__private_depth_overflow_deep_path__empty)
+{
+    const auto expression = std::string("pkh(") + XPRV_254 + "/0/0/0)";
+    const descriptor instance(expression);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE(instance.scripts(0).empty());
+}
+
 BOOST_AUTO_TEST_CASE(descriptor__scripts__public_depth_overflow__empty)
 {
     const auto xpub = hd_private(XPRV_254, hd_private::mainnet).to_public().encoded();
