@@ -556,9 +556,6 @@ electrum electrum::from_words(const string_list& words,
     if (lexicon == language::none)
         return {};
 
-    if (identifier != language::none && lexicon != identifier)
-        return {};
-
     // HACK: en-fr dictionary ambiguity.
     if (is_ambiguous(tokens, identifier, lexicon))
         return {};
