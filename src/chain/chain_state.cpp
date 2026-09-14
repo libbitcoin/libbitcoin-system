@@ -621,28 +621,8 @@ size_t chain_state::bip9_bit2_height(size_t height,
 chain_state::map chain_state::get_map(size_t height,
     const system::settings& settings) NOEXCEPT
 {
-    if (is_zero(height))
-        return {};
-
     const auto& forks = settings.forks;
-    const auto interval = settings.retargeting_interval();
     map map{};
-
-    // The height bound of the reverse (high to low) retarget search.
-    map.bits.high = sub1(height);
-    map.bits.count = bits_count(height, forks, interval);
-
-    // The height bound of the median time past function.
-    map.timestamp.high = sub1(height);
-    map.timestamp.count = timestamp_count(height, forks);
-
-    // The height bound of the version sample for activations.
-    map.version.high = sub1(height);
-    map.version.count = version_count(height, forks,
-        settings.bip34_activation_sample);
-
-    // The most recent past retarget height.
-    map.timestamp_retarget = retarget_height(height, forks, interval);
 
     // The checkpoint at/above which bip30_deactivate rule is enforced.
     if (forks.bip30 && forks.bip30_deactivate)
@@ -663,6 +643,28 @@ chain_state::map chain_state::get_map(size_t height,
     if (forks.bip341 || forks.bip342)
         map.bip9_bit2_height = bip9_bit2_height(height,
             settings.bip9_bit2_active_checkpoint);
+
+    // Genesis has no preceding block data (regtest checkpoints are at genesis).
+    if (is_zero(height))
+        return map;
+
+    const auto interval = settings.retargeting_interval();
+
+    // The height bound of the reverse (high to low) retarget search.
+    map.bits.high = sub1(height);
+    map.bits.count = bits_count(height, forks, interval);
+
+    // The height bound of the median time past function.
+    map.timestamp.high = sub1(height);
+    map.timestamp.count = timestamp_count(height, forks);
+
+    // The height bound of the version sample for activations.
+    map.version.high = sub1(height);
+    map.version.count = version_count(height, forks,
+        settings.bip34_activation_sample);
+
+    // The most recent past retarget height.
+    map.timestamp_retarget = retarget_height(height, forks, interval);
 
     return map;
 }
