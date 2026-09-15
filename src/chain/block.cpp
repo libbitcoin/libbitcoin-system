@@ -805,8 +805,8 @@ code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
     const auto& self = txs.front()->get_hash(false);
+    constexpr auto matures = !is_zero(coinbase_maturity);
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
-    const auto matures = coinbase && !is_zero(coinbase_maturity);
     const auto begin = coinbase ? std::next(txs.cbegin()) : txs.cbegin();
 
     // Populate prevouts from hash table, determine get locked and maturity.
@@ -818,7 +818,10 @@ code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
             const cref_point key{ in->point().hash(), in->point().index() };
             if (const auto it = points.find(key); it != points.end())
             {
-                if (matures && in->point().hash() == self)
+                in->metadata.coinbase = coinbase &&
+                    (in->point().hash() == self);
+
+                if (matures && in->metadata.coinbase)
                     return error::coinbase_maturity;
 
                 if (bip68 && (*tx)->is_internally_locked(*in))
