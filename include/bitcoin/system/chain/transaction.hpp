@@ -242,6 +242,10 @@ protected:
     /// Requires input.metadata.prevout_height, unconfirmed prevout is mature.
     bool is_unconfirmed_immature(size_t height) const NOEXCEPT;
 
+    /// Requires input.metadata.spender_height, zero implies unconfirmed.
+    bool is_confirmed_conflict() const NOEXCEPT;
+    bool is_unconfirmed_conflict() const NOEXCEPT;
+
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
     typedef struct

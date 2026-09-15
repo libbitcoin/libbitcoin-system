@@ -822,6 +822,32 @@ bool transaction::is_unconfirmed_immature(size_t height) const NOEXCEPT
     return std::any_of(inputs_->begin(), inputs_->end(), immature);
 }
 
+// Any spender is a conflict, but only a confirmed spender has a height.
+bool transaction::is_confirmed_conflict() const NOEXCEPT
+{
+    BC_ASSERT(!is_coinbase());
+
+    const auto spent = [](const auto& input) NOEXCEPT
+    {
+        const auto height = input->metadata.spender_height;
+        return !is_zero(height) && (height != max_uint32);
+    };
+
+    return std::any_of(inputs_->begin(), inputs_->end(), spent);
+}
+
+bool transaction::is_unconfirmed_conflict() const NOEXCEPT
+{
+    BC_ASSERT(!is_coinbase());
+
+    const auto spent = [](const auto& input) NOEXCEPT
+    {
+        return is_zero(input->metadata.spender_height);
+    };
+
+    return std::any_of(inputs_->begin(), inputs_->end(), spent);
+}
+
 // Guards (for tx pool without compact blocks).
 // ----------------------------------------------------------------------------
 
@@ -864,8 +890,11 @@ code transaction::confirm_guard(const context& ctx) const NOEXCEPT
         return error::relative_time_locked;
     if (is_unconfirmed_immature(ctx.height))
         return error::coinbase_maturity;
-    if (is_confirmed_double_spend(ctx.height))
+    // A confirmed conflict precedes, as a spender may not evade it with one.
+    if (is_confirmed_conflict())
         return error::confirmed_double_spend;
+    if (is_unconfirmed_conflict())
+        return error::double_spend;
 
     return error::transaction_success;
 }
