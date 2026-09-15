@@ -766,22 +766,36 @@ bool block::is_signature_operations_limited(bool bip16,
 // Search is unordered, forward refs (and duplicates) caught by block.check.
 code block::populate(const chain::context& ctx) const NOEXCEPT
 {
-    if (txs_->empty())
+    return populate(*txs_, ctx, true);
+}
+
+// static
+code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
+    bool coinbase) NOEXCEPT
+{
+    if (txs.empty())
         return error::block_success;
 
-    const auto& self = txs_->front()->get_hash(false);
-    constexpr auto matures = !is_zero(coinbase_maturity);
-    const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
-    unordered_map_of_cref_point_to_output_cptr_cref points(outputs());
+    const auto sum = [](size_t total, const auto& tx) NOEXCEPT
+    {
+        return ceilinged_add(total, tx->outputs());
+    };
+    const auto count = std::accumulate(txs.begin(), txs.cend(), zero, sum);
+    unordered_map_of_cref_point_to_output_cptr_cref points(count);
     uint32_t index{};
 
     // Populate outputs hash table (coinbase included).
-    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
+    for (auto tx = txs.cbegin(); tx != txs.cend(); ++tx, index = {})
         for (const auto& out: *(*tx)->outputs_ptr())
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
+    const auto& self = txs.front()->get_hash(false);
+    const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
+    const auto matures = coinbase && !is_zero(coinbase_maturity);
+    const auto begin = coinbase ? std::next(txs.cbegin()) : txs.cbegin();
+
     // Populate prevouts from hash table, determine get locked and maturity.
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    for (auto tx = begin; tx != txs.cend(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {

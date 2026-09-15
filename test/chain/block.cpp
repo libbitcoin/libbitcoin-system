@@ -1345,6 +1345,80 @@ BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_off__block_success
     BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
 }
 
+// populate (collection)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__populate_collection__empty__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(block::populate(transaction_cptrs{}, ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate_collection__internal_spend__prevout_populated)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const auto tx1 = to_shared<transaction>(1, ins1, outputs{ output{ 42, script{} } }, 0);
+    const inputs ins2{ input{ point{ tx1->hash(false), 0 }, script{}, max_input_sequence } };
+    const auto tx2 = to_shared<transaction>(1, ins2, outputs{ output{ 40, script{} } }, 0);
+
+    const transaction_cptrs txs{ tx1, tx2 };
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BOOST_REQUIRE(tx2->inputs_ptr()->front()->prevout);
+    BOOST_REQUIRE_EQUAL(tx2->inputs_ptr()->front()->prevout->value(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate_collection__external_spend__prevout_unpopulated)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const auto spend = to_shared<transaction>(1, ins, outputs{ output{ 40, script{} } }, 0);
+
+    BOOST_REQUIRE_EQUAL(block::populate(transaction_cptrs{ spend }, ctx, false), error::block_success);
+    BOOST_REQUIRE(!spend->inputs_ptr()->front()->prevout);
+}
+
+// The first tx of a package is a spender, unlike the coinbase of a block.
+BOOST_AUTO_TEST_CASE(block__populate_collection__first_tx_spend__prevout_populated)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins2{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const auto tx2 = to_shared<transaction>(1, ins2, outputs{ output{ 42, script{} } }, 0);
+    const inputs ins1{ input{ point{ tx2->hash(false), 0 }, script{}, max_input_sequence } };
+    const auto tx1 = to_shared<transaction>(1, ins1, outputs{ output{ 40, script{} } }, 0);
+
+    const transaction_cptrs txs{ tx1, tx2 };
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BOOST_REQUIRE(tx1->inputs_ptr()->front()->prevout);
+    BOOST_REQUIRE_EQUAL(tx1->inputs_ptr()->front()->prevout->value(), 42u);
+}
+
+// Spending the first tx is coinbase_maturity for a block, allowed otherwise.
+BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto first = to_shared<transaction>(populate_coinbase());
+    const inputs ins{ input{ point{ first->hash(false), 0 }, script{}, max_input_sequence } };
+    const auto spend = to_shared<transaction>(1, ins, outputs{ output{ 40, script{} } }, 0);
+
+    const transaction_cptrs txs{ first, spend };
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BOOST_REQUIRE(spend->inputs_ptr()->front()->prevout);
+}
+
+BOOST_AUTO_TEST_CASE(block__populate_collection__internally_locked_bip68_on__relative_time_locked)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const auto tx1 = to_shared<transaction>(1, ins1, outputs{ output{ 42, script{} } }, 0);
+    const inputs ins2{ input{ point{ tx1->hash(false), 0 }, script{}, 1 } };
+    const auto tx2 = to_shared<transaction>(2, ins2, outputs{ output{ 40, script{} } }, 0);
+
+    const transaction_cptrs txs{ tx1, tx2 };
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::relative_time_locked);
+}
+
 // confirm
 // ----------------------------------------------------------------------------
 

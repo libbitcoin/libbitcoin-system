@@ -47,6 +47,8 @@ public:
     static hashes merkle_branch(size_t position, hashes&& leaves) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
+    static code populate(const transaction_cptrs& txs, const context& ctx,
+        bool coinbase) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
