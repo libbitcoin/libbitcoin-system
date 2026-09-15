@@ -418,11 +418,26 @@ bool block::is_forward_reference() const NOEXCEPT
 // bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT
 {
-    if (txs_->empty())
+    return is_internal_double_spend(*txs_, true);
+}
+
+// static
+bool block::is_internal_double_spend(const transaction_cptrs& txs,
+    bool coinbase) NOEXCEPT
+{
+    if (txs.empty())
         return false;
 
-    unordered_set_of_point_cref points(spends());
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    const auto sum = [](size_t total, const auto& tx) NOEXCEPT
+    {
+        return ceilinged_add(total, tx->inputs());
+    };
+
+    unordered_set_of_point_cref points(
+        std::accumulate(txs.begin(), txs.end(), zero, sum));
+
+    for (auto tx = coinbase ? std::next(txs.begin()) : txs.begin();
+        tx != txs.end(); ++tx)
         for (const auto& in: *(*tx)->inputs_ptr())
             if (!points.emplace(in->point()).second)
                 return true;
