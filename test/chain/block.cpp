@@ -1309,6 +1309,20 @@ BOOST_AUTO_TEST_CASE(block__populate__external_spend__prevout_unpopulated)
     BOOST_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->prevout);
 }
 
+// The prevout of an internal spend is that of a non-coinbase transaction.
+BOOST_AUTO_TEST_CASE(block__populate__internal_spend__coinbase_metadata_false)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
+    const transaction tx1{ 1, ins1, outputs{ output{ 42, script{} } }, 0 };
+    const inputs ins2{ input{ point{ tx1.hash(false), 0 }, script{}, max_input_sequence } };
+    const transaction tx2{ 1, ins2, outputs{ output{ 40, script{} } }, 0 };
+
+    const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BOOST_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->metadata.coinbase);
+}
+
 // The coinbase output of a block cannot be spent within that block.
 BOOST_AUTO_TEST_CASE(block__populate__spend_of_block_coinbase__coinbase_maturity)
 {
@@ -1405,6 +1419,22 @@ BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__block_succes
     BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
     BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
     BOOST_REQUIRE(spend->inputs_ptr()->front()->prevout);
+}
+
+// The first tx is the coinbase of a block and a spendable tx otherwise.
+BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__coinbase_metadata_populated)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto first = to_shared<transaction>(populate_coinbase());
+    const inputs ins{ input{ point{ first->hash(false), 0 }, script{}, max_input_sequence } };
+    const auto spend = to_shared<transaction>(1, ins, outputs{ output{ 40, script{} } }, 0);
+
+    const transaction_cptrs txs{ first, spend };
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
+    BOOST_REQUIRE(spend->inputs_ptr()->front()->metadata.coinbase);
+
+    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BOOST_REQUIRE(!spend->inputs_ptr()->front()->metadata.coinbase);
 }
 
 BOOST_AUTO_TEST_CASE(block__populate_collection__internally_locked_bip68_on__relative_time_locked)

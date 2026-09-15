@@ -108,6 +108,7 @@ public:
     using transaction::is_relative_locked;
     using transaction::is_unconfirmed_spend;
     using transaction::is_confirmed_double_spend;
+    using transaction::is_unconfirmed_immature;
 };
 
 // constructors
@@ -1413,6 +1414,94 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__spent_input__true)
     BOOST_REQUIRE(instance.is_confirmed_double_spend(42));
 }
 
+// is_unconfirmed_immature
+
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__empty_inputs__false)
+{
+    const accessor instance;
+    BOOST_REQUIRE(!instance.is_unconfirmed_immature(coinbase_maturity));
+}
+
+// An unpopulated prevout has no height and is presumed to be a coinbase.
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__default_inputs__true)
+{
+    const accessor instance
+    {
+        0,
+        inputs{ {}, {} },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(instance.is_unconfirmed_immature(coinbase_maturity));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__genesis_coinbase__true)
+{
+    const input input{ { hash_digest{}, 42 }, {}, 0 };
+    input.metadata.prevout_height = 0;
+    input.metadata.coinbase = true;
+    const accessor instance
+    {
+        0,
+        { input },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(instance.is_unconfirmed_immature(coinbase_maturity));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__premature_coinbase__true)
+{
+    const input input{ { hash_digest{}, 42 }, {}, 0 };
+    input.metadata.prevout_height = 1;
+    input.metadata.coinbase = true;
+    const accessor instance
+    {
+        0,
+        { input },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(instance.is_unconfirmed_immature(coinbase_maturity));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__mature_coinbase__false)
+{
+    const input input{ { hash_digest{}, 42 }, {}, 0 };
+    input.metadata.prevout_height = 1;
+    input.metadata.coinbase = true;
+    const accessor instance
+    {
+        0,
+        { input },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(!instance.is_unconfirmed_immature(add1(coinbase_maturity)));
+}
+
+// Maturity does not apply to the unconfirmed prevout of a non-coinbase.
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__unconfirmed_non_coinbase__false)
+{
+    const input input{ { hash_digest{}, 42 }, {}, 0 };
+    input.metadata.prevout_height = max_uint32;
+    input.metadata.coinbase = false;
+    const accessor instance
+    {
+        0,
+        { input },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(instance.is_immature(coinbase_maturity));
+    BOOST_REQUIRE(!instance.is_unconfirmed_immature(coinbase_maturity));
+}
+
 // check_signature
 
 BOOST_AUTO_TEST_CASE(transaction__check_signature__single__uses_one_hash)
@@ -2275,6 +2364,89 @@ BOOST_AUTO_TEST_CASE(transaction__accept_guard__populated__transaction_success)
     const auto instance = triad_spend();
     instance.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
     BOOST_REQUIRE_EQUAL(instance.accept_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__coinbase__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_coinbase(triad_coinbase_script());
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__mature_confirmed_spend__transaction_success)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_confirmable().confirm_guard(ctx), error::transaction_success);
+}
+
+// The prevout of a pooled spend is presumed to confirm before the spend.
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__unconfirmed_prevout__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.prevout_height = max_uint32;
+    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::unconfirmed_spend);
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__immature_coinbase_prevout__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 50;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::coinbase_maturity);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__genesis_coinbase_prevout__coinbase_maturity)
+{
+    const context ctx{ flags::no_rules, 0, 0, max_size_t, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 0;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::coinbase_maturity);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__coinbase_prevout_at_maturity__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 101, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.coinbase = true;
+    instance.inputs_ptr()->front()->metadata.prevout_height = 1;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::transaction_success);
+}
+
+// A pooled spend is populated with a zero spender height for any spender.
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__spent_prevout__confirmed_double_spend)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.spender_height = 0;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::confirmed_double_spend);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__relative_locked_bip68_on__relative_time_locked)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable(1, 2);
+    instance.inputs_ptr()->front()->metadata.prevout_height = 100;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::relative_time_locked);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__relative_locked_bip68_off__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable(1, 2);
+    instance.inputs_ptr()->front()->metadata.prevout_height = 100;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::transaction_success);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__relative_locked_version_one__transaction_success)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable(1, 1);
+    instance.inputs_ptr()->front()->metadata.prevout_height = 100;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::transaction_success);
 }
 
 // is_coinbase_immature

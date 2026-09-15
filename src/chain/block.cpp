@@ -418,11 +418,26 @@ bool block::is_forward_reference() const NOEXCEPT
 // bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT
 {
-    if (txs_->empty())
+    return is_internal_double_spend(*txs_, true);
+}
+
+// static
+bool block::is_internal_double_spend(const transaction_cptrs& txs,
+    bool coinbase) NOEXCEPT
+{
+    if (txs.empty())
         return false;
 
-    unordered_set_of_point_cref points(spends());
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    const auto sum = [](size_t total, const auto& tx) NOEXCEPT
+    {
+        return ceilinged_add(total, tx->inputs());
+    };
+
+    unordered_set_of_point_cref points(
+        std::accumulate(txs.begin(), txs.end(), zero, sum));
+
+    for (auto tx = coinbase ? std::next(txs.begin()) : txs.begin();
+        tx != txs.end(); ++tx)
         for (const auto& in: *(*tx)->inputs_ptr())
             if (!points.emplace(in->point()).second)
                 return true;
@@ -790,8 +805,8 @@ code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
     const auto& self = txs.front()->get_hash(false);
+    constexpr auto matures = !is_zero(coinbase_maturity);
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
-    const auto matures = coinbase && !is_zero(coinbase_maturity);
     const auto begin = coinbase ? std::next(txs.cbegin()) : txs.cbegin();
 
     // Populate prevouts from hash table, determine get locked and maturity.
@@ -803,7 +818,10 @@ code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
             const cref_point key{ in->point().hash(), in->point().index() };
             if (const auto it = points.find(key); it != points.end())
             {
-                if (matures && in->point().hash() == self)
+                in->metadata.coinbase = coinbase &&
+                    (in->point().hash() == self);
+
+                if (matures && in->metadata.coinbase)
                     return error::coinbase_maturity;
 
                 if (bip68 && (*tx)->is_internally_locked(*in))
