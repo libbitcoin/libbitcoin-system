@@ -808,6 +808,20 @@ bool transaction::is_confirmed_double_spend(size_t height) const NOEXCEPT
     return std::any_of(inputs_->begin(), inputs_->end(), spent);
 }
 
+// An unconfirmed prevout is presumed to confirm first, and is not a coinbase.
+bool transaction::is_unconfirmed_immature(size_t height) const NOEXCEPT
+{
+    BC_ASSERT(!is_coinbase());
+
+    const auto immature = [=](const auto& input) NOEXCEPT
+    {
+        return input->metadata.coinbase &&
+            is_coinbase_immature(input->metadata.prevout_height, height);
+    };
+
+    return std::any_of(inputs_->begin(), inputs_->end(), immature);
+}
+
 // Guards (for tx pool without compact blocks).
 // ----------------------------------------------------------------------------
 
@@ -835,6 +849,23 @@ code transaction::check_guard(const context& ctx) const NOEXCEPT
         return error::unexpected_witness_transaction;
      if (bip141 && is_overweight())
         return error::transaction_weight_limit;
+
+    return error::transaction_success;
+}
+
+// Redundant with block confirmation, which is by confirmed height.
+code transaction::confirm_guard(const context& ctx) const NOEXCEPT
+{
+    const auto bip68 = ctx.is_enabled(bip68_rule);
+
+    if (is_coinbase())
+        return error::transaction_success;
+    if (bip68 && is_relative_locked(ctx.height, ctx.median_time_past))
+        return error::relative_time_locked;
+    if (is_unconfirmed_immature(ctx.height))
+        return error::coinbase_maturity;
+    if (is_confirmed_double_spend(ctx.height))
+        return error::confirmed_double_spend;
 
     return error::transaction_success;
 }

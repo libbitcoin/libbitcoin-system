@@ -162,6 +162,7 @@ public:
     code check_guard() const NOEXCEPT;
     code check_guard(const context& ctx) const NOEXCEPT;
     code accept_guard(const context& ctx) const NOEXCEPT;
+    code confirm_guard(const context& ctx) const NOEXCEPT;
 
     /// Validation (consensus checks).
     /// -----------------------------------------------------------------------
@@ -237,6 +238,9 @@ protected:
 
     /// Requires input.metadata.spender_height.
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
+
+    /// Requires input.metadata.prevout_height, unconfirmed prevout is mature.
+    bool is_unconfirmed_immature(size_t height) const NOEXCEPT;
 
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
