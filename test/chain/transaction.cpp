@@ -109,6 +109,8 @@ public:
     using transaction::is_unconfirmed_spend;
     using transaction::is_confirmed_double_spend;
     using transaction::is_unconfirmed_immature;
+    using transaction::is_confirmed_conflict;
+    using transaction::is_unconfirmed_conflict;
 };
 
 // constructors
@@ -1502,6 +1504,67 @@ BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_immature__unconfirmed_non_coinb
     BOOST_REQUIRE(!instance.is_unconfirmed_immature(coinbase_maturity));
 }
 
+// is_confirmed_conflict / is_unconfirmed_conflict
+
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_conflict__empty_inputs__false)
+{
+    const accessor instance;
+    BOOST_REQUIRE(!instance.is_confirmed_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_conflict__default_inputs__false)
+{
+    const accessor instance
+    {
+        0,
+        inputs{ {}, {} },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(!instance.is_confirmed_conflict());
+    BOOST_REQUIRE(!instance.is_unconfirmed_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_confirmed_conflict__spender_at_height__true)
+{
+    const input input{ { hash_digest{}, 42 }, {}, 0 };
+    input.metadata.spender_height = 41;
+    const accessor instance
+    {
+        0,
+        { input },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(instance.is_confirmed_conflict());
+    BOOST_REQUIRE(!instance.is_unconfirmed_conflict());
+}
+
+// A confirmed spender cannot be at zero, as the genesis coinbase is unspendable.
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_conflict__spender_at_zero__true)
+{
+    const input input{ { hash_digest{}, 42 }, {}, 0 };
+    input.metadata.spender_height = 0;
+    const accessor instance
+    {
+        0,
+        { input },
+        {},
+        0
+    };
+
+    BOOST_REQUIRE(instance.is_unconfirmed_conflict());
+    BOOST_REQUIRE(!instance.is_confirmed_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_unconfirmed_conflict__empty_inputs__false)
+{
+    const accessor instance;
+    BOOST_REQUIRE(!instance.is_unconfirmed_conflict());
+}
+
 // check_signature
 
 BOOST_AUTO_TEST_CASE(transaction__check_signature__single__uses_one_hash)
@@ -2417,11 +2480,38 @@ BOOST_AUTO_TEST_CASE(transaction__confirm_guard__coinbase_prevout_at_maturity__t
 }
 
 // A pooled spend is populated with a zero spender height for any spender.
-BOOST_AUTO_TEST_CASE(transaction__confirm_guard__spent_prevout__confirmed_double_spend)
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__confirmed_spender__confirmed_double_spend)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = triad_confirmable();
+    instance.inputs_ptr()->front()->metadata.spender_height = 50;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::confirmed_double_spend);
+}
+
+// A pooled spend is populated with a zero spender height when unconfirmed.
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__unconfirmed_spender__double_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const auto instance = triad_confirmable();
     instance.inputs_ptr()->front()->metadata.spender_height = 0;
+    BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::double_spend);
+}
+
+// A confirmed conflict is not evaded by attaching an unconfirmed one.
+BOOST_AUTO_TEST_CASE(transaction__confirm_guard__both_spenders__confirmed_double_spend)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence }, input{ point{ one_hash, 1 }, script{}, max_input_sequence } };
+    const transaction instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    for (const auto& in: *instance.inputs_ptr())
+    {
+        in->prevout = to_shared(output{ 42, script{} });
+        in->metadata.coinbase = false;
+        in->metadata.prevout_height = 1;
+    }
+
+    instance.inputs_ptr()->front()->metadata.spender_height = 0;
+    instance.inputs_ptr()->back()->metadata.spender_height = 50;
     BOOST_REQUIRE_EQUAL(instance.confirm_guard(ctx), error::confirmed_double_spend);
 }
 
