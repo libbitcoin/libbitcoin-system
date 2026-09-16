@@ -12,11 +12,47 @@
 # Declare the required version of Autoconf.
 AC_PREREQ([2.65])
 
-# Process command-line arguments and perform initialization and verification.
-AC_INIT([libbitcoin-system], [4.0.0], [eric@voskuil.org])
+m4_define([_GIT_COMMIT_HASH],
+    m4_dquote(m4_esyscmd_s([git rev-parse HEAD 2>/dev/null || echo unknown])))
 
-# Do compilation tests.
-AC_LANG(C++)
+m4_define([_GIT_COMMIT_HEIGHT],
+    m4_esyscmd_s([git rev-list --count HEAD 2>/dev/null || echo 0]))
+
+m4_define([_git_dirty],
+    m4_esyscmd_s([if git status --porcelain 2>/dev/null | grep -q . ; then echo 1; else echo 0; fi]))
+
+m4_define([_GIT_DIRTY], m4_ifnblank(_git_dirty, [_git_dirty], [0]))
+
+m4_define([_GIT_ORIGIN_URL],
+    m4_dquote(m4_esyscmd_s([git remote get-url origin 2>/dev/null || echo https://github.com/libbitcoin/libbitcoin-system])))
+
+m4_define([_LIBBITCOIN_VERSION_MAJOR], [4])
+m4_define([_LIBBITCOIN_VERSION_MINOR], [0])
+m4_define([_LIBBITCOIN_VERSION_PATCH], [_GIT_COMMIT_HEIGHT])
+
+m4_define([_LIBBITCOIN_VERSION],
+    [_LIBBITCOIN_VERSION_MAJOR._LIBBITCOIN_VERSION_MINOR._LIBBITCOIN_VERSION_PATCH])
+
+# Process command-line arguments and perform initialization and verification.
+AC_INIT([libbitcoin-system],
+    [_LIBBITCOIN_VERSION],
+    [eric@voskuil.org])
+
+AC_SUBST([GIT_COMMIT_HASH], [_GIT_COMMIT_HASH])
+AC_MSG_NOTICE([GIT_COMMIT_HASH : ${GIT_COMMIT_HASH}])
+AC_SUBST([GIT_COMMIT_HEIGHT], [_GIT_COMMIT_HEIGHT])
+AC_MSG_NOTICE([GIT_COMMIT_HEIGHT : ${GIT_COMMIT_HEIGHT}])
+AC_SUBST([GIT_DIRTY], [_GIT_DIRTY])
+AC_MSG_NOTICE([GIT_DIRTY : ${GIT_DIRTY}])
+AC_SUBST([GIT_ORIGIN_URL], [_GIT_ORIGIN_URL])
+AC_MSG_NOTICE([GIT_ORIGIN_URL : ${GIT_ORIGIN_URL}])
+
+AC_SUBST([LIBBITCOIN_VERSION_MAJOR], [_LIBBITCOIN_VERSION_MAJOR])
+AC_MSG_NOTICE([LIBBITCOIN_VERSION_MAJOR : ${LIBBITCOIN_VERSION_MAJOR}])
+AC_SUBST([LIBBITCOIN_VERSION_MINOR], [_LIBBITCOIN_VERSION_MINOR])
+AC_MSG_NOTICE([LIBBITCOIN_VERSION_MINOR : ${LIBBITCOIN_VERSION_MINOR}])
+AC_SUBST([LIBBITCOIN_VERSION_PATCH], [_LIBBITCOIN_VERSION_PATCH])
+AC_MSG_NOTICE([LIBBITCOIN_VERSION_PATCH : ${LIBBITCOIN_VERSION_PATCH}])
 
 # Specify the temporary directory for build tools.
 AC_CONFIG_AUX_DIR([build-aux])
@@ -24,10 +60,17 @@ AC_CONFIG_AUX_DIR([build-aux])
 # Specify the directory of additional local Autoconf macros.
 AC_CONFIG_MACRO_DIR([m4])
 
+# Compute the canonical host-system type variable host, including host_os.
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
+
 # Run macros for operation of generated Makefiles, enable non-recursive make.
 # Unless [foreign] is specified standard GNU files will be required,
 # specifically: AUTHORS, COPYING, INSTALL, NEWS, README and ChangeLog.
 AM_INIT_AUTOMAKE([subdir-objects])
+
+# Do compilation tests.
+AC_LANG(C++)
 
 # Enable C and POSIX extensions that may be disabled on certain platforms.
 AC_USE_SYSTEM_EXTENSIONS
@@ -47,9 +90,6 @@ AC_PROG_CXX
 
 # Enable sed for substitution.
 AC_PROG_SED
-
-# Compute the canonical host-system type variable host, including host_os.
-AC_CANONICAL_HOST
 
 # Enable silent rules option.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
