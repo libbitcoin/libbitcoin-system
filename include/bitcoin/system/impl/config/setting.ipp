@@ -44,8 +44,9 @@ std::string serialize(const Type& value) NOEXCEPT
 }
 
 template <typename Type>
-setting_value<Type>::setting_value(Type* store) THROWS
-  : boost::program_options::typed_value<Type>(store), store_(store)
+setting_value<Type>::setting_value(Type* store, bool secret) THROWS
+  : boost::program_options::typed_value<Type>(store), store_(store),
+    secret_(secret)
 {
 }
 
@@ -66,6 +67,11 @@ string_list setting_value<Type>::values() const NOEXCEPT
         out.push_back(serialize(*store_));
     }
 
+    // A set secret reports one empty value, so that it displays as configured
+    // without disclosure, and an unset secret remains indistinguishable.
+    if (secret_ && !out.empty())
+        out = string_list{ {} };
+
     return out;
 }
 
@@ -73,6 +79,12 @@ template <typename Type>
 setting_value<Type>* setting(Type* store) THROWS
 {
     return new setting_value<Type>(store);
+}
+
+template <typename Type>
+setting_value<Type>* secret(Type* store) THROWS
+{
+    return new setting_value<Type>(store, true);
 }
 
 BC_POP_WARNING()

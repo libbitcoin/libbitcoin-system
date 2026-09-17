@@ -50,18 +50,24 @@ class setting_value
     public printable
 {
 public:
-    setting_value(Type* store) THROWS;
+    setting_value(Type* store, bool secret=false) THROWS;
 
     /// The bound value(s), one per entry, empty only for a collection.
+    /// A secret reports one empty value, disclosing only that it is set.
     string_list values() const NOEXCEPT override;
 
 private:
     const Type* store_;
+    bool secret_;
 };
 
 /// Declare a configuration file setting bound to store.
 template <typename Type>
 setting_value<Type>* setting(Type* store) THROWS;
+
+/// Declare a setting whose value is withheld from display.
+template <typename Type>
+setting_value<Type>* secret(Type* store) THROWS;
 
 } // namespace config
 } // namespace system
