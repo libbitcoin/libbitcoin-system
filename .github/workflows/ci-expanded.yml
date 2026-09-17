@@ -9,6 +9,10 @@ name: Expanded Continuous Integration
 
 on: [ workflow_dispatch ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository_owner == 'libbitcoin' && (github.event.pull_request.number || github.run_id) || github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   gnu:
