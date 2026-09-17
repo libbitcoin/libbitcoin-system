@@ -77,9 +77,9 @@ struct forks
     bool block_storm_patch;
 
     /// Litecoin deviations from Bitcoin.
-    bool ltc_time_warp_patch;         // litecoin
-    bool ltc_retarget_overflow_patch; // litecoin
-    bool ltc_scrypt_proof_of_work;    // litecoin
+    bool ltc_time_warp_patch;
+    bool ltc_retarget_overflow_patch;
+    bool ltc_scrypt_proof_of_work;
 
     bool operator==(const forks& other) const NOEXCEPT = default;
 };
