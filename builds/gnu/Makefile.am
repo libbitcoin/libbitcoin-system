@@ -133,6 +133,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/point.cpp \
     ${srcdir}/../../src/config/printer.cpp \
     ${srcdir}/../../src/config/script.cpp \
+    ${srcdir}/../../src/config/setting.cpp \
     ${srcdir}/../../src/config/transaction.cpp \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
@@ -149,8 +150,8 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/x25519.cpp \
     ${srcdir}/../../src/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ellswift.cpp \
     ${srcdir}/../../src/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
@@ -373,6 +374,7 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/point.hpp \
     ${srcdir}/../../include/bitcoin/system/config/printer.hpp \
     ${srcdir}/../../include/bitcoin/system/config/script.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/setting.hpp \
     ${srcdir}/../../include/bitcoin/system/config/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/config/url.hpp \
     ${srcdir}/../../include/bitcoin/system/config/utilities.hpp \
@@ -509,6 +511,12 @@ include_bitcoin_system_impl_chain_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/chain/tapscript.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/chain/transaction_patterns.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/chain/witness_patterns.ipp
+
+include_bitcoin_system_impl_configdir = \
+    ${includedir}/bitcoin/system/impl/config
+
+include_bitcoin_system_impl_config_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
 
 include_bitcoin_system_impl_datadir = \
     ${includedir}/bitcoin/system/impl/data
@@ -1041,6 +1049,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/parameter.cpp \
     ${srcdir}/../../test/config/parser.cpp \
     ${srcdir}/../../test/config/printer.cpp \
+    ${srcdir}/../../test/config/setting.cpp \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \
     ${srcdir}/../../test/config/version.cpp \

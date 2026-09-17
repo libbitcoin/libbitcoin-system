@@ -51,6 +51,15 @@ public:
         const std::string& description="") NOEXCEPT;
 
     /// Construct an instance of the printer class.
+    /// settings     Populated config file settings metadata.
+    /// variables    Parsed variables, for setting provenance.
+    /// application  This application (e.g. 'bitcoin_server').
+    /// description  This application description (e.g. 'Server').
+    printer(const options_metadata& settings, const variables_map& variables,
+        const std::string& application,
+        const std::string& description="") NOEXCEPT;
+
+    /// Construct an instance of the printer class.
     /// options      Populated command line options metadata.
     /// arguments    Populated command line arguments metadata.
     /// application  This application (e.g. 'bx').
@@ -96,6 +105,7 @@ public:
     /// Virtual property declarations, passed on construct.
     BC_PROPERTY(options_metadata, options);
     BC_PROPERTY(arguments_metadata, arguments);
+    BC_PROPERTY(variables_map, variables);
     BC_PROPERTY(std::string, application);
     BC_PROPERTY(std::string, description);
     BC_PROPERTY(std::string, command);

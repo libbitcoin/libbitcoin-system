@@ -236,6 +236,7 @@
     <ClCompile Include="..\..\..\..\src\config\script.cpp">
       <ObjectFileName>$(IntDir)src_config_script.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\setting.cpp" />
     <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
       <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
     </ClCompile>
@@ -452,6 +453,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\setting.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\url.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\utilities.hpp" />
@@ -716,6 +718,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\tapscript.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />
