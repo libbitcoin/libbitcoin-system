@@ -38,6 +38,9 @@ public:
     static std::string format_invalid_parameter(
         const std::string& message) NOEXCEPT;
 
+    /// The parsed variables, retained for provenance queries.
+    const variables_map& variables() const NOEXCEPT;
+
     /// True if set by command line, environment, or configuration file.
     /// False if unset or obtained from a declared option default value.
     bool is_configured(const std::string& name) const NOEXCEPT;

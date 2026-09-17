@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_PARAMETER_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_PARAMETER_HPP
 
+#include <bitcoin/system/config/setting.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -72,8 +73,10 @@ public:
     /// Populate with normalized parameter data.
     /// option     The metadata of the option to test.
     /// arguments  The list of supported positional arguments.
+    /// variables  The parsed variables, for provenance.
     void initialize(const option_metadata& option,
-        const argument_list& arguments) NOEXCEPT;
+        const argument_list& arguments,
+        const variables_map& variables={}) NOEXCEPT;
 
     /// Determine if the option is an argument by testing for it by name in the
     /// positional options collection and if so return the position.
@@ -98,8 +101,10 @@ public:
     /// Property declarations.
     BC_PROPERTY(int, position);
     BC_PROPERTY(bool, required);
+    BC_PROPERTY(bool, configured);
     BC_PROPERTY(char, short_name);
     BC_PROPERTY(unsigned, args_limit);
+    BC_PROPERTY(string_list, values);
     BC_PROPERTY(std::string, long_name);
     BC_PROPERTY(std::string, description);
     BC_PROPERTY(std::string, format_name);

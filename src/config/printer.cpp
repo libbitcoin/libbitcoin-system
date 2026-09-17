@@ -62,6 +62,8 @@ namespace config {
 #define BC_PRINTER_SETTING_MULTIPLE_FORMAT "%1% = <%2%>\n%1% = <%2%>\n...\n"
 #define BC_PRINTER_SETTING_OPTIONAL_FORMAT "%1% = <%2%>\n"
 #define BC_PRINTER_SETTING_REQUIRED_FORMAT "%1% = %2%\n"
+#define BC_PRINTER_SETTING_VALUE_FORMAT "%1% = %2%\n"
+#define BC_PRINTER_SETTING_CONFIGURED_FORMAT "%1% = %2% # configured\n"
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
@@ -79,6 +81,14 @@ printer::printer(const options_metadata& options,
 printer::printer(const options_metadata& settings,
     const std::string& application, const std::string& description) NOEXCEPT
   : options_(settings), application_(application), description_(description)
+{
+}
+
+printer::printer(const options_metadata& settings,
+    const variables_map& variables, const std::string& application,
+    const std::string& description) NOEXCEPT
+  : options_(settings), variables_(variables), application_(application),
+    description_(description)
 {
 }
 
@@ -213,6 +223,19 @@ static std::string format_setting(const parameter& value,
     return (format(formatter) % name % BC_PRINTER_VALUE_TEXT).str();
 }
 
+static std::string format_setting_values(const parameter& value,
+    const std::string& name) NOEXCEPT
+{
+    const auto formatter = value.configured() ?
+        BC_PRINTER_SETTING_CONFIGURED_FORMAT : BC_PRINTER_SETTING_VALUE_FORMAT;
+
+    std::ostringstream output;
+    for (const auto& item: value.values())
+        output << format(formatter) % name % item;
+
+    return output.str();
+}
+
 // Requires at least one period in each setting (i.e. no unnamed sections).
 // The name is the text following the last period, allowing nested sections
 // (e.g. "table.header.rate" is "rate" within section "table.header").
@@ -257,7 +280,11 @@ std::string printer::format_settings_table() NOEXCEPT
         output << format(BC_PRINTER_SETTING_COMMENT_FORMAT) %
             parameter.description();
 
-        output << format_setting(parameter, name);
+        // An unbound or empty setting has no value to display.
+        if (parameter.values().empty())
+            output << format_setting(parameter, name);
+        else
+            output << format_setting_values(parameter, name);
     }
 
     return output.str();
@@ -455,7 +482,7 @@ void printer::generate_parameters() NOEXCEPT
     parameter param;
     for (auto option_ptr: opts.options())
     {
-        param.initialize(*option_ptr, argument_names);
+        param.initialize(*option_ptr, argument_names, variables());
 
         // Sort non-positional parameters (i.e. options).
         if (param.position() == parameter::not_positional)

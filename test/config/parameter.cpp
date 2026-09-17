@@ -142,6 +142,46 @@ BOOST_AUTO_TEST_SUITE_END()
 // ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(parameter__initialize)
 
+BOOST_AUTO_TEST_CASE(parameter__initialize__unbound__no_values_unconfigured)
+{
+    CONFIG_TEST_PARAMETER_SETUP(opt::simple);
+    parameter.initialize(option, names);
+    BOOST_REQUIRE_EQUAL(parameter.values(), (string_list{}));
+    BOOST_REQUIRE_EQUAL(parameter.configured(), false);
+}
+
+BOOST_AUTO_TEST_CASE(parameter__initialize__bound__values_unconfigured)
+{
+    uint32_t threads = 42;
+    po::options_description options;
+    options.add_options()("bound", setting(&threads), "Bound setting.");
+    const auto& option = *options.options().front();
+
+    argument_list names;
+    config::parameter parameter;
+    parameter.initialize(option, names);
+    BOOST_REQUIRE_EQUAL(parameter.values(), (string_list{ "42" }));
+    BOOST_REQUIRE_EQUAL(parameter.configured(), false);
+}
+
+BOOST_AUTO_TEST_CASE(parameter__initialize__bound_specified__values_configured)
+{
+    uint32_t threads = 42;
+    po::options_description options;
+    options.add_options()("bound", setting(&threads), "Bound setting.");
+    const auto& option = *options.options().front();
+
+    po::variables_map variables;
+    const char* argv[]{ "test", "--bound", "42" };
+    po::store(po::command_line_parser(3, argv).options(options).run(), variables);
+
+    argument_list names;
+    config::parameter parameter;
+    parameter.initialize(option, names, variables);
+    BOOST_REQUIRE_EQUAL(parameter.values(), (string_list{ "42" }));
+    BOOST_REQUIRE_EQUAL(parameter.configured(), true);
+}
+
 BOOST_AUTO_TEST_CASE(parameter__initialize__short_long__sets_limit_0)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::short_long);

@@ -297,6 +297,91 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__one_section__expected)
     );
 }
 
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_setting__value)
+{
+    uint32_t threads = 42;
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("network.threads", setting(&threads), "Thread count."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Thread count.\n"
+        "threads = 42\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__placeholder)
+{
+    string_list hosts{};
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("network.host", setting(&hosts), "Host name."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Host name.\n"
+        "host = <value>\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_collection__line_each)
+{
+    string_list hosts{ "alpha", "beta" };
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("network.host", setting(&hosts), "Host name."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Host name.\n"
+        "host = alpha\n"
+        "host = beta\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
+{
+    uint32_t threads = 42;
+    po::options_description options;
+    options.add_options()
+        ("network.threads", setting(&threads), "Thread count.");
+
+    po::variables_map variables;
+    const char* argv[]{ "test", "--network.threads", "42" };
+    po::store(po::command_line_parser(3, argv).options(options).run(), variables);
+
+    printer help(options, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
+    help.initialize();
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Thread count.\n"
+        "threads = 42 # configured\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmarked)
+{
+    uint32_t threads = 42;
+    po::options_description options;
+    options.add_options()
+        ("network.threads", setting(&threads), "Thread count.");
+
+    po::variables_map variables;
+    const char* argv[]{ "test" };
+    po::store(po::command_line_parser(1, argv).options(options).run(), variables);
+
+    printer help(options, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
+    help.initialize();
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Thread count.\n"
+        "threads = 42\n"
+    );
+}
+
 BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()

@@ -20,6 +20,7 @@
 
 #include <filesystem>
 #include <sstream>
+#include <bitcoin/system/config/setting.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
@@ -42,10 +43,15 @@ std::string parser::format_invalid_parameter(
     return "Error: " + clean_message;
 }
 
+const variables_map& parser::variables() const NOEXCEPT
+{
+    return variables_;
+}
+
 // Defaulted implies the value was declared by an option, not specified.
 bool parser::is_configured(const std::string& name) const NOEXCEPT
 {
-    return !variables_[name].empty() && !variables_[name].defaulted();
+    return config::is_configured(variables_, name);
 }
 
 std::filesystem::path parser::get_config_option(

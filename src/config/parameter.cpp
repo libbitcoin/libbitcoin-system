@@ -28,11 +28,16 @@ const char parameter::option_prefix_char = '-';
 // A required argument may only be preceded by required arguments.
 // Requiredness may be in error if the metadata is inconsistent.
 void parameter::initialize(const option_metadata& option,
-    const argument_list& arguments) NOEXCEPT
+    const argument_list& arguments, const variables_map& variables) NOEXCEPT
 {
+    const auto semantic = option.semantic();
+    const auto bound = dynamic_cast<const printable*>(semantic.get());
+
     set_position(position(option, arguments));
     set_args_limit(arguments_limit(position(), option, arguments));
-    set_required(option.semantic()->is_required());
+    set_required(semantic->is_required());
+    set_configured(is_configured(variables, option.long_name()));
+    set_values(bound ? bound->values() : string_list{});
     set_long_name(option.long_name());
     set_short_name(short_name(option));
     set_description(option.description());
