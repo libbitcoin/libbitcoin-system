@@ -41,8 +41,15 @@ public:
 
     /// Deserialize from utf8 string.
     path(const std::string& value) NOEXCEPT;
+    path(const char* value) NOEXCEPT;
 
     operator const type&() const NOEXCEPT;
+
+    bool operator==(const path& other) const NOEXCEPT;
+    bool operator!=(const path& other) const NOEXCEPT;
+
+    /// True if the path is unset.
+    bool empty() const NOEXCEPT;
 
     /// The path as a utf8 encoded string.
     std::string to_string() const NOEXCEPT;
@@ -58,6 +65,10 @@ public:
 private:
     type value_;
 };
+
+/// Append a relative path, as the underlying type.
+BC_API std::filesystem::path operator/(const path& left,
+    const std::filesystem::path& right) NOEXCEPT;
 
 /// Assign the token as the path, bypassing stream extraction, which cannot
 /// obtain an empty token and terminates a token at its first space.

@@ -34,6 +34,18 @@ BOOST_AUTO_TEST_CASE(path__construct__string__expected)
     BOOST_REQUIRE_EQUAL(instance.to_string(), "foo/bar");
 }
 
+BOOST_AUTO_TEST_CASE(path__construct__literal__expected)
+{
+    const path instance{ "foo/bar" };
+    BOOST_REQUIRE_EQUAL(instance.to_string(), "foo/bar");
+}
+
+BOOST_AUTO_TEST_CASE(path__construct__empty_literal__empty)
+{
+    const path instance{ "" };
+    BOOST_REQUIRE(instance.to_string().empty());
+}
+
 BOOST_AUTO_TEST_CASE(path__construct__empty_string__empty)
 {
     const path instance{ std::string{} };
@@ -51,6 +63,39 @@ BOOST_AUTO_TEST_CASE(path__cast__value__expected)
     const path instance{ std::string{ "foo/bar" } };
     const std::filesystem::path& value = instance;
     BOOST_REQUIRE(value == std::filesystem::path{ "foo/bar" });
+}
+
+BOOST_AUTO_TEST_CASE(path__equality__same__true)
+{
+    BOOST_REQUIRE(path{ "foo/bar" } == path{ "foo/bar" });
+    BOOST_REQUIRE(!(path{ "foo/bar" } != path{ "foo/bar" }));
+}
+
+BOOST_AUTO_TEST_CASE(path__equality__different__false)
+{
+    BOOST_REQUIRE(path{ "foo" } != path{ "bar" });
+    BOOST_REQUIRE(!(path{ "foo" } == path{ "bar" }));
+}
+
+BOOST_AUTO_TEST_CASE(path__equality__literal__true)
+{
+    BOOST_REQUIRE(path{ "foo" } == "foo");
+}
+
+BOOST_AUTO_TEST_CASE(path__empty__default__true)
+{
+    BOOST_REQUIRE(path{}.empty());
+}
+
+BOOST_AUTO_TEST_CASE(path__empty__value__false)
+{
+    BOOST_REQUIRE(!path{ std::string{ "foo" } }.empty());
+}
+
+BOOST_AUTO_TEST_CASE(path__divide__relative__appended)
+{
+    const path instance{ std::string{ "foo" } };
+    BOOST_REQUIRE((instance / "bar") == std::filesystem::path{ "foo" } / "bar");
 }
 
 BOOST_AUTO_TEST_CASE(path__stream_out__empty__empty)

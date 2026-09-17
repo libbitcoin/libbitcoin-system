@@ -42,14 +42,40 @@ path::path(const std::string& value) NOEXCEPT
 {
 }
 
+path::path(const char* value) NOEXCEPT
+  : value_(to_path(value))
+{
+}
+
 path::operator const path::type&() const NOEXCEPT
 {
     return value_;
 }
 
+bool path::operator==(const path& other) const NOEXCEPT
+{
+    return value_ == other.value_;
+}
+
+bool path::operator!=(const path& other) const NOEXCEPT
+{
+    return !(*this == other);
+}
+
+bool path::empty() const NOEXCEPT
+{
+    return value_.empty();
+}
+
 std::string path::to_string() const NOEXCEPT
 {
     return from_path(value_);
+}
+
+std::filesystem::path operator/(const path& left,
+    const std::filesystem::path& right) NOEXCEPT
+{
+    return static_cast<const path::type&>(left) / right;
 }
 
 std::istream& operator>>(std::istream& input, path& argument) NOEXCEPT
