@@ -59,11 +59,11 @@ namespace config {
 
 #define BC_PRINTER_SETTING_SECTION_FORMAT "[%1%]\n"
 #define BC_PRINTER_SETTING_COMMENT_FORMAT "# %1%\n"
-#define BC_PRINTER_SETTING_MULTIPLE_FORMAT "%1% = <%2%>\n%1% = <%2%>\n...\n"
-#define BC_PRINTER_SETTING_OPTIONAL_FORMAT "%1% = <%2%>\n"
-#define BC_PRINTER_SETTING_REQUIRED_FORMAT "%1% = %2%\n"
 #define BC_PRINTER_SETTING_VALUE_FORMAT "%1% = %2%\n"
 #define BC_PRINTER_SETTING_CONFIGURED_FORMAT "%1% = %2% # configured\n"
+#define BC_PRINTER_SETTING_EMPTY_FORMAT "%1% =\n"
+#define BC_PRINTER_SETTING_EMPTY_CONFIGURED_FORMAT "%1% = # configured\n"
+#define BC_PRINTER_SETTING_UNSET_FORMAT "#%1% =\n"
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
@@ -202,36 +202,34 @@ std::string printer::format_paragraph(const std::string& paragraph) NOEXCEPT
     return output.str();
 }
 
+static std::string format_setting_value(bool configured,
+    const std::string& name, const std::string& item) NOEXCEPT
+{
+    if (item.empty())
+    {
+        const auto empty = configured ?
+            BC_PRINTER_SETTING_EMPTY_CONFIGURED_FORMAT :
+            BC_PRINTER_SETTING_EMPTY_FORMAT;
+
+        return (format(empty) % name).str();
+    }
+
+    const auto formatter = configured ?
+        BC_PRINTER_SETTING_CONFIGURED_FORMAT : BC_PRINTER_SETTING_VALUE_FORMAT;
+
+    return (format(formatter) % name % item).str();
+}
+
+// A collection with no entries has no value, so the name is commented.
 static std::string format_setting(const parameter& value,
     const std::string& name) NOEXCEPT
 {
-    // A required argument may only be preceded by required arguments.
-    // Requiredness may be in error if the metadata is inconsistent.
-    auto required = value.required();
-
-    // In terms of formatting we also treat multivalued as not required.
-    auto optional = is_one(value.args_limit());
-
-    std::string formatter;
-    if (required)
-        formatter = BC_PRINTER_SETTING_REQUIRED_FORMAT;
-    else if (optional)
-        formatter = BC_PRINTER_SETTING_OPTIONAL_FORMAT;
-    else
-        formatter = BC_PRINTER_SETTING_MULTIPLE_FORMAT;
-
-    return (format(formatter) % name % BC_PRINTER_VALUE_TEXT).str();
-}
-
-static std::string format_setting_values(const parameter& value,
-    const std::string& name) NOEXCEPT
-{
-    const auto formatter = value.configured() ?
-        BC_PRINTER_SETTING_CONFIGURED_FORMAT : BC_PRINTER_SETTING_VALUE_FORMAT;
+    if (value.values().empty())
+        return (format(BC_PRINTER_SETTING_UNSET_FORMAT) % name).str();
 
     std::ostringstream output;
     for (const auto& item: value.values())
-        output << format(formatter) % name % item;
+        output << format_setting_value(value.configured(), name, item);
 
     return output.str();
 }
@@ -280,11 +278,7 @@ std::string printer::format_settings_table() NOEXCEPT
         output << format(BC_PRINTER_SETTING_COMMENT_FORMAT) %
             parameter.description();
 
-        // An unbound or empty setting has no value to display.
-        if (parameter.values().empty())
-            output << format_setting(parameter, name);
-        else
-            output << format_setting_values(parameter, name);
+        output << format_setting(parameter, name);
     }
 
     return output.str();

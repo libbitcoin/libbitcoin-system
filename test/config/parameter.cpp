@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_SUITE_END()
 // ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(parameter__initialize)
 
-BOOST_AUTO_TEST_CASE(parameter__initialize__unbound__no_values_unconfigured)
+BOOST_AUTO_TEST_CASE(parameter__initialize__command_line_option__no_values_unconfigured)
 {
     CONFIG_TEST_PARAMETER_SETUP(opt::simple);
     parameter.initialize(option, names);

@@ -38,7 +38,7 @@ class BC_API printable
 public:
     virtual ~printable() NOEXCEPT = default;
 
-    /// The bound value(s), one element per configuration file entry.
+    /// The bound value(s), one per entry, empty only for a collection.
     virtual string_list values() const NOEXCEPT = 0;
 };
 
@@ -52,7 +52,7 @@ class setting_value
 public:
     setting_value(Type* store) THROWS;
 
-    /// The bound value(s), one element per configuration file entry.
+    /// The bound value(s), one per entry, empty only for a collection.
     string_list values() const NOEXCEPT override;
 
 private:
