@@ -144,7 +144,7 @@ private:
     void* do_allocate(size_t bytes, size_t align) override
     {
         if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
-            throw std::bad_alloc();
+            throw allocation_exception();
 
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         const auto ptr = ::operator new(bytes);

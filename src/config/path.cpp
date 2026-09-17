@@ -99,8 +99,10 @@ void validate(boost::any& value, const string_list& tokens, path*,
     po::validators::check_first_occurrence(value);
 
     if (tokens.size() > one)
-        throw po::validation_error{
-            po::validation_error::multiple_values_not_allowed };
+        throw validation_exception
+        {
+            validation_exception::multiple_values_not_allowed
+        };
 
     value = boost::any{ path{ tokens.empty() ? std::string{} :
         tokens.front() } };
