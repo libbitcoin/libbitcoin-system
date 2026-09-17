@@ -286,14 +286,15 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__empty__empty)
 
 BOOST_AUTO_TEST_CASE(printer__format_settings_table__one_section__expected)
 {
+    std::string threads{ "1" };
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
-        ("network.threads", po::value<std::string>(), "Thread count."));
+        ("network.threads", setting(&threads), "Thread count."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
     BOOST_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Thread count.\n"
-        "threads = <value>\n"
+        "threads = 1\n"
     );
 }
 
@@ -311,7 +312,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_setting__value)
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__placeholder)
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__commented)
 {
     string_list hosts{};
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
@@ -321,7 +322,21 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__pla
         "\n"
         "[network]\n"
         "# Host name.\n"
-        "host = <value>\n"
+        "#host =\n"
+    );
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_string__empty_value)
+{
+    std::string host{};
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
+        ("network.host", setting(&host), "Host name."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Host name.\n"
+        "host =\n"
     );
 }
 
@@ -384,35 +399,39 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmar
 
 BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
 {
+    std::string rate{ "5" };
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
-        ("table.header.rate", po::value<std::string>(), "Growth rate."));
+        ("table.header.rate", setting(&rate), "Growth rate."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
     BOOST_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[table.header]\n"
         "# Growth rate.\n"
-        "rate = <value>\n"
+        "rate = 5\n"
     );
 }
 
 BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_sections__grouped_by_section)
 {
+    std::string txs_rate{ "1" };
+    std::string buckets{ "2" };
+    std::string header_rate{ "3" };
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
-        ("table.txs.rate", po::value<std::string>(), "Txs growth rate.")
-        ("table.header.buckets", po::value<std::string>(), "Header buckets.")
-        ("table.header.rate", po::value<std::string>(), "Header growth rate."));
+        ("table.txs.rate", setting(&txs_rate), "Txs growth rate.")
+        ("table.header.buckets", setting(&buckets), "Header buckets.")
+        ("table.header.rate", setting(&header_rate), "Header growth rate."));
     CONFIG_PRINTER_INITIALIZE(3u, 0u);
     BOOST_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[table.header]\n"
         "# Header buckets.\n"
-        "buckets = <value>\n"
+        "buckets = 2\n"
         "# Header growth rate.\n"
-        "rate = <value>\n"
+        "rate = 3\n"
         "\n"
         "[table.txs]\n"
         "# Txs growth rate.\n"
-        "rate = <value>\n"
+        "rate = 1\n"
     );
 }
 
@@ -436,7 +455,6 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_
 
 BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_parameters__sorted_parameters)
 {
-    using namespace std::filesystem;
     using namespace boost::program_options;
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("short_long,s", "Long and short name.")
@@ -444,7 +462,7 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_paramet
         ("longy", value<int>()->required(), "Long name only.")
         ("SIMPLE", value<std::string>(), "Simple string.")
         ("defaulty", value<bool>()->default_value(true), "Defaulted bool.")
-        ("required", value<path>()->required(), "Required path.")
+        ("required", value<std::filesystem::path>()->required(), "Required path.")
         ("untoggled", value<bool>()->zero_tokens(), "Zero token but not short.")
         ("toggled,t", value<bool>()->zero_tokens(), "Toggled, zero token and short.")
         ("ARRAY", value<std::vector<std::string>>(), "String vector.")

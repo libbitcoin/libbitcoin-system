@@ -83,7 +83,7 @@ struct noalloc_allocator
                 return ptr;
             }
 
-            throw std::bad_alloc();
+            throw allocation_exception();
         }
     }
  

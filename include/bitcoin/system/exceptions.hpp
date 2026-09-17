@@ -47,21 +47,14 @@ namespace libbitcoin {
 /// UTF8 Everywhere initialization failure.
 using runtime_exception = std::runtime_error;
 
-// ICU initialization failure.
-using dependency_exception = std::runtime_error;
-
 /// Maths.
 using overflow_exception = std::overflow_error;
-
-/// This is used as a guard for math operations that should not fail under
-/// expected conditions (such as block height exceeding max_uint32). This should
-/// eventually be replaced with common parameter guards.
-using range_exception = std::range_error;
 
 /// Streams.
 using ostream_exception = std::iostream::failure;
 using istream_exception = boost::program_options::invalid_option_value;
 using ifstream_exception = boost::program_options::reading_file;
+using validation_exception = boost::program_options::validation_error;
 
 /// Allocation.
 using allocation_exception = std::bad_alloc;

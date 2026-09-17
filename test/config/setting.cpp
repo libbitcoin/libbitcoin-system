@@ -56,6 +56,13 @@ BOOST_AUTO_TEST_CASE(setting__values__empty_string__empty_element)
     BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "" }));
 }
 
+BOOST_AUTO_TEST_CASE(setting__values__empty_path__empty_element)
+{
+    std::filesystem::path store{};
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "" }));
+}
+
 BOOST_AUTO_TEST_CASE(setting__values__path__unquoted_text)
 {
     std::filesystem::path store{ "bitcoin.cfg" };

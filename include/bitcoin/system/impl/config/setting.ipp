@@ -52,20 +52,21 @@ setting_value<Type>::setting_value(Type* store) THROWS
 template <typename Type>
 string_list setting_value<Type>::values() const NOEXCEPT
 {
+    string_list out{};
+
     if constexpr (is_std_vector<Type>)
     {
-        string_list out{};
         out.reserve(store_->size());
 
         for (const auto& element: *store_)
             out.push_back(serialize(element));
-
-        return out;
     }
     else
     {
-        return { serialize(*store_) };
+        out.push_back(serialize(*store_));
     }
+
+    return out;
 }
 
 template <typename Type>

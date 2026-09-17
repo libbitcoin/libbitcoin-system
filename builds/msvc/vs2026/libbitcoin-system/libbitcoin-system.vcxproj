@@ -229,6 +229,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parser.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\path.cpp" />
     <ClCompile Include="..\..\..\..\src\config\point.cpp">
       <ObjectFileName>$(IntDir)src_config_point.obj</ObjectFileName>
     </ClCompile>
@@ -450,6 +451,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\parameter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\path.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />

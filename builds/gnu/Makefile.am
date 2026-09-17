@@ -130,6 +130,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/output.cpp \
     ${srcdir}/../../src/config/parameter.cpp \
     ${srcdir}/../../src/config/parser.cpp \
+    ${srcdir}/../../src/config/path.cpp \
     ${srcdir}/../../src/config/point.cpp \
     ${srcdir}/../../src/config/printer.cpp \
     ${srcdir}/../../src/config/script.cpp \
@@ -371,6 +372,7 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/output.hpp \
     ${srcdir}/../../include/bitcoin/system/config/parameter.hpp \
     ${srcdir}/../../include/bitcoin/system/config/parser.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/path.hpp \
     ${srcdir}/../../include/bitcoin/system/config/point.hpp \
     ${srcdir}/../../include/bitcoin/system/config/printer.hpp \
     ${srcdir}/../../include/bitcoin/system/config/script.hpp \
@@ -1048,6 +1050,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/hash256.cpp \
     ${srcdir}/../../test/config/parameter.cpp \
     ${srcdir}/../../test/config/parser.cpp \
+    ${srcdir}/../../test/config/path.cpp \
     ${srcdir}/../../test/config/printer.cpp \
     ${srcdir}/../../test/config/setting.cpp \
     ${srcdir}/../../test/config/url.cpp \

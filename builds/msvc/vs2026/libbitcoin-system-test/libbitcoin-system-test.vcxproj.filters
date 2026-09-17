@@ -291,6 +291,9 @@
     <ClCompile Include="..\..\..\..\test\config\parser.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\path.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\printer.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
