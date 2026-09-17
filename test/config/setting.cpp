@@ -84,6 +84,34 @@ BOOST_AUTO_TEST_CASE(setting__values__vector__element_each)
     BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "alpha", "beta" }));
 }
 
+BOOST_AUTO_TEST_CASE(secret__values__set_scalar__one_empty_value)
+{
+    std::string store{ "password" };
+    const std::unique_ptr<const printable> instance{ secret(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "" }));
+}
+
+BOOST_AUTO_TEST_CASE(secret__values__unset_scalar__one_empty_value)
+{
+    std::string store{};
+    const std::unique_ptr<const printable> instance{ secret(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "" }));
+}
+
+BOOST_AUTO_TEST_CASE(secret__values__set_collection__one_empty_value)
+{
+    string_list store{ "user:pass", "other:pass" };
+    const std::unique_ptr<const printable> instance{ secret(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "" }));
+}
+
+BOOST_AUTO_TEST_CASE(secret__values__unset_collection__empty)
+{
+    string_list store{};
+    const std::unique_ptr<const printable> instance{ secret(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{}));
+}
+
 BOOST_AUTO_TEST_CASE(setting__values__mutated_store__current_value)
 {
     uint32_t store = 1;
