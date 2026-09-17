@@ -87,6 +87,17 @@ BOOST_AUTO_TEST_CASE(path__empty__default__true)
     BOOST_REQUIRE(path{}.empty());
 }
 
+BOOST_AUTO_TEST_CASE(path__string__default__empty)
+{
+    BOOST_REQUIRE(path{}.string().empty());
+}
+
+BOOST_AUTO_TEST_CASE(path__string__value__native)
+{
+    const path instance{ "foo/bar" };
+    BOOST_REQUIRE_EQUAL(instance.string(), std::filesystem::path{ "foo/bar" }.string());
+}
+
 BOOST_AUTO_TEST_CASE(path__empty__value__false)
 {
     BOOST_REQUIRE(!path{ std::string{ "foo" } }.empty());

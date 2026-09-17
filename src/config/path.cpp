@@ -67,6 +67,11 @@ bool path::empty() const NOEXCEPT
     return value_.empty();
 }
 
+std::string path::string() const NOEXCEPT
+{
+    return value_.string();
+}
+
 std::string path::to_string() const NOEXCEPT
 {
     return from_path(value_);

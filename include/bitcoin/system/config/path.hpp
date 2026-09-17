@@ -51,6 +51,9 @@ public:
     /// True if the path is unset.
     bool empty() const NOEXCEPT;
 
+    /// The path as a native encoded string, for platform interfaces.
+    std::string string() const NOEXCEPT;
+
     /// The path as a utf8 encoded string.
     std::string to_string() const NOEXCEPT;
 
