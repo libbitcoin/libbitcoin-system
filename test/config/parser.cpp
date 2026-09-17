@@ -34,7 +34,7 @@ public:
     {
         options_metadata description;
         description.add_options()
-            ("config,c", po::value<std::filesystem::path>(&configured_), "")
+            ("config,c", po::value<config::path>(&configured_), "")
             ("with_default", po::value<bool>()->default_value(false), "")
             ("without_default", po::value<bool>(), "");
         return description;
@@ -59,7 +59,7 @@ public:
     using parser::load_configuration_variables;
 
 private:
-    std::filesystem::path configured_;
+    config::path configured_;
 };
 
 // Load --config <path> into the instance, as the command line would.

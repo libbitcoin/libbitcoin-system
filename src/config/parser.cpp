@@ -20,6 +20,7 @@
 
 #include <filesystem>
 #include <sstream>
+#include <bitcoin/system/config/path.hpp>
 #include <bitcoin/system/config/setting.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
@@ -64,9 +65,7 @@ std::filesystem::path parser::get_config_option(
     if (config.empty())
         return {};
 
-    // TODO: if we create config::path for utf8 path decoding this changes too.
-    ////return { config.as<std::u8string>() };
-    return { config.as<std::filesystem::path>() };
+    return config.as<config::path>();
 }
 
 bool parser::get_option(const std::string& name) const NOEXCEPT
