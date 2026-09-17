@@ -455,7 +455,6 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_
 
 BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_parameters__sorted_parameters)
 {
-    using namespace std::filesystem;
     using namespace boost::program_options;
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("short_long,s", "Long and short name.")
@@ -463,7 +462,7 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_paramet
         ("longy", value<int>()->required(), "Long name only.")
         ("SIMPLE", value<std::string>(), "Simple string.")
         ("defaulty", value<bool>()->default_value(true), "Defaulted bool.")
-        ("required", value<path>()->required(), "Required path.")
+        ("required", value<std::filesystem::path>()->required(), "Required path.")
         ("untoggled", value<bool>()->zero_tokens(), "Zero token but not short.")
         ("toggled,t", value<bool>()->zero_tokens(), "Toggled, zero token and short.")
         ("ARRAY", value<std::vector<std::string>>(), "String vector.")

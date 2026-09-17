@@ -40,7 +40,6 @@ enum opt
 
 static void load_test_options(po::options_description& options)
 {
-    using namespace std::filesystem;
     using namespace boost::program_options;
     options.add_options()
         ("short_long,s", "Long and short name.")
@@ -48,7 +47,7 @@ static void load_test_options(po::options_description& options)
         ("longy", value<std::string>()->required(), "Long name only.")
         ("simple", value<std::string>(), "Simple string.")
         ("defaulty", value<bool>()->default_value(true), "Defaulted bool.")
-        ("required", value<path>()->required(), "Required path.")
+        ("required", value<std::filesystem::path>()->required(), "Required path.")
         ("toggled", value<bool>()->zero_tokens(), "Toggle only bool.")
         /* The enumerability of the data types does not control multiple,
            instance behavior but it is necessary to capture multiples. */

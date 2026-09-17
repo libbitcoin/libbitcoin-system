@@ -37,6 +37,7 @@
 #include <bitcoin/system/config/output.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/config/parser.hpp>
+#include <bitcoin/system/config/path.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>

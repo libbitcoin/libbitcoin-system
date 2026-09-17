@@ -22,4 +22,24 @@ BOOST_AUTO_TEST_SUITE(base85_tests)
 
 using namespace bc::system::config;
 
+BOOST_AUTO_TEST_CASE(base85__validate__empty_token__empty)
+{
+    boost::any value{};
+    validate(value, string_list{ "" }, static_cast<base85*>(nullptr), 0);
+    BOOST_REQUIRE(boost::any_cast<base85>(value).to_string().empty());
+}
+
+BOOST_AUTO_TEST_CASE(base85__validate__no_tokens__empty)
+{
+    boost::any value{};
+    validate(value, string_list{}, static_cast<base85*>(nullptr), 0);
+    BOOST_REQUIRE(boost::any_cast<base85>(value).to_string().empty());
+}
+
+BOOST_AUTO_TEST_CASE(base85__validate__multiple_tokens__throws)
+{
+    boost::any value{};
+    BOOST_REQUIRE_THROW(validate(value, string_list{ "foo", "bar" }, static_cast<base85*>(nullptr), 0), boost::program_options::validation_error);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -86,6 +86,20 @@ std::ostream& operator<<(std::ostream& stream, const base85& argument)
     return stream;
 }
 
+void validate(boost::any& value, const string_list& tokens, base85*,
+    int) THROWS
+{
+    namespace po = boost::program_options;
+    po::validators::check_first_occurrence(value);
+
+    if (tokens.size() > one)
+        throw po::validation_error{
+            po::validation_error::multiple_values_not_allowed };
+
+    value = boost::any{ base85{ tokens.empty() ? std::string{} :
+        tokens.front() } };
+}
+
 } // namespace config
 } // namespace system
 } // namespace libbitcoin
