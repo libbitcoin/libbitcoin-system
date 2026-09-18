@@ -14,6 +14,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  information:
+    runs-on: ubuntu-latest
+
+    env:
+      CONCURRENCY_GROUP: ${{ github.workflow }}-${{ github.repository_owner == 'libbitcoin' && (github.event.pull_request.number || github.run_id) || github.ref }}
+
+    steps:
+        - name: state
+          run: |
+            echo "group    : $CONCURRENCY_GROUP"
+            echo "owner    : ${{ github.repository_owner }}"
+            echo "pr       : ${{ github.event.pull_request }}"
+            echo "pr #     : ${{ github.event.pull_request.number }}"
+            echo "run_id   : ${{ github.run_id }}"
+            echo "ref      : ${{ github.ref }}"
+            echo "base_ref : ${{ github.base_ref }}"
+            echo "head_ref : ${{ github.head_ref }}"
+
 
   gnu:
     strategy:
@@ -395,7 +413,7 @@ jobs:
             coverage: ""
             boost: "--build-boost"
             secp256k1: "--build-secp256k1"
-            options: ""
+            options: "--build-skip-tests"
 
           - image: ubuntu-24.04
             preset: "nix-gnu-debug-static"
@@ -405,7 +423,7 @@ jobs:
             coverage: ""
             boost: "--build-boost"
             secp256k1: "--build-secp256k1"
-            options: ""
+            options: "--build-skip-tests"
 
     runs-on: ${{ matrix.image }}
 

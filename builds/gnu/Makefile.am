@@ -151,8 +151,8 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/x25519.cpp \
     ${srcdir}/../../src/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ellswift.cpp \
     ${srcdir}/../../src/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
@@ -514,12 +514,6 @@ include_bitcoin_system_impl_chain_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/chain/transaction_patterns.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/chain/witness_patterns.ipp
 
-include_bitcoin_system_impl_configdir = \
-    ${includedir}/bitcoin/system/impl/config
-
-include_bitcoin_system_impl_config_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
-
 include_bitcoin_system_impl_datadir = \
     ${includedir}/bitcoin/system/impl/data
 
@@ -699,6 +693,12 @@ include_bitcoin_system_impl_wordsdir = \
 include_bitcoin_system_impl_words_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/words/dictionaries.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/words/dictionary.ipp
+
+include_bitcoin_system_impl_configdir = \
+    ${includedir}/bitcoin/system/impl/config
+
+include_bitcoin_system_impl_config_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
 
 include_bitcoin_system_intrinsicsdir = \
     ${includedir}/bitcoin/system/intrinsics
