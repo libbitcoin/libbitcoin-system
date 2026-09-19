@@ -11,6 +11,11 @@
 # python bytecode
 *.pyc
 
+# store
+*.bin
+*.head
+*.data
+
 # gnu
 .deps
 Makefile

@@ -7,7 +7,8 @@
 
 name: Expanded Continuous Integration
 
-on: [ workflow_dispatch ]
+on:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.repository_owner == 'libbitcoin' && (github.event.pull_request.number || github.run_id) || github.ref }}
@@ -34,6 +35,8 @@ jobs:
 
 
   gnu:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -422,11 +425,13 @@ jobs:
           fi
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: ${{ github.repository }}
+
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -524,6 +529,8 @@ jobs:
           if-no-files-found: warn
 
   cmake:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -912,11 +919,13 @@ jobs:
           fi
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: ${{ github.repository }}
+
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -1014,6 +1023,8 @@ jobs:
           if-no-files-found: warn
 
   presets:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -1330,11 +1341,13 @@ jobs:
           fi
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: ${{ github.repository }}
+
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -1427,6 +1440,8 @@ jobs:
           if-no-files-found: warn
 
   msvc:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -1475,6 +1490,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
