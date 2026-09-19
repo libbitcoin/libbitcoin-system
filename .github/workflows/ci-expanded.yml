@@ -422,11 +422,13 @@ jobs:
           fi
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: ${{ github.repository }}
+
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -912,11 +914,13 @@ jobs:
           fi
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: ${{ github.repository }}
+
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -1330,11 +1334,13 @@ jobs:
           fi
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: ${{ github.repository }}
+
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -1475,6 +1481,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
