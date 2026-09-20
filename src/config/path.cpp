@@ -37,12 +37,12 @@ path::path(type value) NOEXCEPT
 {
 }
 
-path::path(const std::string& value) NOEXCEPT
+path::path(const char* value) NOEXCEPT
   : value_(to_path(value))
 {
 }
 
-path::path(const char* value) NOEXCEPT
+path::path(const std::string& value) NOEXCEPT
   : value_(to_path(value))
 {
 }
@@ -109,8 +109,10 @@ void validate(boost::any& value, const string_list& tokens, path*,
             validation_exception::multiple_values_not_allowed
         };
 
-    value = boost::any{ path{ tokens.empty() ? std::string{} :
-        tokens.front() } };
+    value = boost::any
+    {
+        path{ tokens.empty() ? std::string{} : tokens.front() }
+    };
 }
 
 } // namespace config
