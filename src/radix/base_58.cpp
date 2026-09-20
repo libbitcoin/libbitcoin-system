@@ -106,12 +106,12 @@ std::string encode_base58(const data_slice& unencoded) NOEXCEPT
 
     // Translate the result into a string.
     std::string encoded;
-    const size_t estimated_size = leading_zeros + (indexes.end() - it);
+    const size_t estimated_size = leading_zeros + (indexes.cend() - it);
     encoded.reserve(estimated_size);
     encoded.assign(leading_zeros, '1');
 
     // Set actual main bytes.
-    for (; it != indexes.end(); ++it)
+    for (; it != indexes.cend(); ++it)
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
@@ -181,7 +181,7 @@ bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT
     const auto first_nonzero = find_first_nonzero(data);
 
     // Copy result into output vector.
-    const size_t estimated_size = leading_zeros + (data.end() - first_nonzero);
+    const size_t estimated_size = leading_zeros + (data.cend() - first_nonzero);
     out.reserve(estimated_size);
     out.assign(leading_zeros, 0x00_u8);
     out.insert(out.end(), first_nonzero, data.cend());

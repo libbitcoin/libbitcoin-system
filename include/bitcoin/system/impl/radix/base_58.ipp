@@ -32,7 +32,7 @@ bool decode_base58(data_array<Size>& out, const std::string& in) NOEXCEPT
     if (!decode_base58(data, in) || (data.size() != Size))
         return false;
 
-    std::copy(data.begin(), data.end(), out.begin());
+    std::copy(data.cbegin(), data.cend(), out.begin());
     return true;
 }
 

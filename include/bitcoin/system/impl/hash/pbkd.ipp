@@ -124,7 +124,7 @@ key(data_array<Size>& out, const data_slice& password,
         // rfc8018
         // Concatenate blocks and extract first dkLen octets to produce DK.
         // DK = T_1 || T_2 ||  ...  || T_l<0..r-1>
-        it = std::copy_n(t.begin(), (i == l ? r : t.size()), it);
+        it = std::copy_n(t.cbegin(), (i == l ? r : t.size()), it);
     }
 }
 

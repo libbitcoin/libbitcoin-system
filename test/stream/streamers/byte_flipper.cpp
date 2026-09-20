@@ -1452,9 +1452,9 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_string__two_bytes__expected)
     constexpr auto size = varint_two_bytes;
     std::string expected(size, '*');
     writer.write_string(expected);
-    expected.insert(expected.begin(), 0x00);
-    expected.insert(expected.begin(), '\xfd');
-    expected.insert(expected.begin(), '\xfd');
+    expected.insert(expected.cbegin(), 0x00);
+    expected.insert(expected.cbegin(), '\xfd');
+    expected.insert(expected.cbegin(), '\xfd');
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }

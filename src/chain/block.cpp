@@ -816,7 +816,7 @@ code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
         {
             // Map chain::point to cref_point for search, should optimize away.
             const cref_point key{ in->point().hash(), in->point().index() };
-            if (const auto it = points.find(key); it != points.end())
+            if (const auto it = points.find(key); it != points.cend())
             {
                 in->metadata.coinbase = coinbase &&
                     (in->point().hash() == self);

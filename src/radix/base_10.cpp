@@ -63,11 +63,11 @@ bool decode_base10(uint64_t& out, const std::string& amount,
 
     // Remove the decimal point.
     auto point = std::find(value.begin(), value.end(), '.');
-    if (point != value.end())
+    if (point != value.cend())
         point = value.erase(point);
 
     // Only digits should remain (this also precludes negatives).
-    if (!std::all_of(value.begin(), value.end(), is_digit))
+    if (!std::all_of(value.cbegin(), value.cend(), is_digit))
         return false;
 
     // Add digits to the end if there are too few.

@@ -41,7 +41,7 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 static bool is_duplicate(std_vector<data_chunk>& keys,
     const data_chunk& key) NOEXCEPT
 {
-    if (std::find(keys.begin(), keys.end(), key) != keys.end())
+    if (std::find(keys.cbegin(), keys.cend(), key) != keys.cend())
         return true;
 
     keys.push_back(key);
@@ -353,17 +353,17 @@ void input::combine(const input& other) NOEXCEPT
         required_height_locktime = other.required_height_locktime;
 
     for (const auto& signature: other.partial_signatures)
-        if (std::find(partial_signatures.begin(), partial_signatures.end(),
-            signature) == partial_signatures.end())
+        if (std::find(partial_signatures.cbegin(), partial_signatures.cend(),
+            signature) == partial_signatures.cend())
             partial_signatures.push_back(signature);
 
     for (const auto& derivation: other.derivations)
-        if (std::find(derivations.begin(), derivations.end(), derivation) ==
-            derivations.end())
+        if (std::find(derivations.cbegin(), derivations.cend(), derivation) ==
+            derivations.cend())
             derivations.push_back(derivation);
 
     for (const auto& entry: other.others)
-        if (std::find(others.begin(), others.end(), entry) == others.end())
+        if (std::find(others.cbegin(), others.cend(), entry) == others.cend())
             others.push_back(entry);
 }
 

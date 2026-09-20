@@ -41,7 +41,7 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 static bool is_duplicate(std_vector<data_chunk>& keys,
     const data_chunk& key) NOEXCEPT
 {
-    if (std::find(keys.begin(), keys.end(), key) != keys.end())
+    if (std::find(keys.cbegin(), keys.cend(), key) != keys.cend())
         return true;
 
     keys.push_back(key);
@@ -196,12 +196,12 @@ void output::combine(const output& other) NOEXCEPT
         script = other.script;
 
     for (const auto& derivation: other.derivations)
-        if (std::find(derivations.begin(), derivations.end(), derivation) ==
-            derivations.end())
+        if (std::find(derivations.cbegin(), derivations.cend(), derivation) ==
+            derivations.cend())
             derivations.push_back(derivation);
 
     for (const auto& entry: other.others)
-        if (std::find(others.begin(), others.end(), entry) == others.end())
+        if (std::find(others.cbegin(), others.cend(), entry) == others.cend())
             others.push_back(entry);
 }
 

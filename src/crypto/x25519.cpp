@@ -113,7 +113,7 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     clamped = {};
 
     // An all zero result indicates a low order point.
-    return std::any_of(out.begin(), out.end(), [](uint8_t byte) NOEXCEPT
+    return std::any_of(out.cbegin(), out.cend(), [](uint8_t byte) NOEXCEPT
     {
         return !is_zero(byte);
     });

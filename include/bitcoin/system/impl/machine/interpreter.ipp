@@ -1156,7 +1156,7 @@ op_check_multisig_verify() NOEXCEPT
     if (this->try_batch_multisig_verification(keys, endorsements))
         return error::op_success;
 
-    auto it = endorsements.begin();
+    auto it = endorsements.cbegin();
     const auto subscript = this->subscript(endorsements);
     const auto bip66 = this->is_enabled(flags::bip66_rule);
 
@@ -1168,7 +1168,7 @@ op_check_multisig_verify() NOEXCEPT
     for (const auto& key: keys)
     {
         // Implies that all signatures are valid.
-        if (it == endorsements.end())
+        if (it == endorsements.cend())
             break;
 
         // Empty endorsement does not increment iterator.
@@ -1195,7 +1195,7 @@ op_check_multisig_verify() NOEXCEPT
     }
 
     // All endorsements must be verified against a key.
-    if (it != endorsements.end())
+    if (it != endorsements.cend())
         return error::op_check_multisig_mismatch;
 
     // TODO: use sighash and key to generate signature in sign mode.

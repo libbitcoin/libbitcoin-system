@@ -80,7 +80,7 @@ static xpub::list sorted(const xpub::list& entries) NOEXCEPT
 static bool is_duplicate(std_vector<data_chunk>& keys,
     const data_chunk& key) NOEXCEPT
 {
-    if (std::find(keys.begin(), keys.end(), key) != keys.end())
+    if (std::find(keys.cbegin(), keys.cend(), key) != keys.cend())
         return true;
 
     keys.push_back(key);
@@ -652,12 +652,12 @@ bool transaction::combine(const transaction& other) NOEXCEPT
         outputs_.at(index).combine(other.outputs_.at(index));
 
     for (const auto& xpub: other.xpubs_)
-        if (std::find(xpubs_.begin(), xpubs_.end(), xpub) == xpubs_.end())
+        if (std::find(xpubs_.cbegin(), xpubs_.cend(), xpub) == xpubs_.cend())
             xpubs_.push_back(xpub);
 
     for (const auto& entry: other.others_)
-        if (std::find(others_.begin(), others_.end(), entry) ==
-            others_.end())
+        if (std::find(others_.cbegin(), others_.cend(), entry) ==
+            others_.cend())
             others_.push_back(entry);
 
     if (!fallback_locktime_.has_value())
@@ -847,7 +847,7 @@ bool transaction::finalize(input& in, uint32_t index) NOEXCEPT
         const auto hash = unsafe_array_cast<uint8_t, short_hash_size>(
             spend.ops().at(1).data().data());
         const auto found = find_entry_by_hash(in.partial_signatures, hash);
-        if (found == in.partial_signatures.end())
+        if (found == in.partial_signatures.cend())
             return false;
 
         witnessed = true;
