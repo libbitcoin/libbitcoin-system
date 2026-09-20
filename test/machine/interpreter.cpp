@@ -2080,8 +2080,8 @@ BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__s
     BOOST_REQUIRE(schnorr::sign(second_signature, secret, second, one_hash));
 
     // Witness elements, the last of which is the top of the execution stack.
-    const data_chunk second_chunk{ second_signature.begin(), second_signature.end() };
-    const data_chunk first_chunk{ first_signature.begin(), first_signature.end() };
+    const data_chunk second_chunk{ second_signature.cbegin(), second_signature.cend() };
+    const data_chunk first_chunk{ first_signature.cbegin(), first_signature.cend() };
     const chunk_cptrs elements{ to_shared<data_chunk>(second_chunk), to_shared<data_chunk>(first_chunk) };
 
     // Both signatures verify only if the second sigop takes its own hash. A

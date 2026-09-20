@@ -65,7 +65,7 @@ output(const state_t& state) NOEXCEPT
     output_(bytes, state, std::make_index_sequence<SHA3::block_words>{});
 
     digest_t digest{};
-    std::copy_n(bytes.begin(), array_count<digest_t>, digest.begin());
+    std::copy_n(bytes.cbegin(), array_count<digest_t>, digest.begin());
     return digest;
 }
 

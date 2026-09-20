@@ -212,10 +212,10 @@ BOOST_AUTO_TEST_CASE(uri__parse__query__expected)
     BOOST_REQUIRE_EQUAL(parsed.query(), "&&x=y&z");
 
     auto map = parsed.decode_query();
-    BOOST_REQUIRE(map.end() != map.find(""));
-    BOOST_REQUIRE(map.end() != map.find("x"));
-    BOOST_REQUIRE(map.end() != map.find("z"));
-    BOOST_REQUIRE(map.end() == map.find("y"));
+    BOOST_REQUIRE(map.cend() != map.find(""));
+    BOOST_REQUIRE(map.cend() != map.find("x"));
+    BOOST_REQUIRE(map.cend() != map.find("z"));
+    BOOST_REQUIRE(map.cend() == map.find("y"));
 
     BOOST_REQUIRE_EQUAL(map[""], "");
     BOOST_REQUIRE_EQUAL(map["x"], "y");

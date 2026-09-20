@@ -568,10 +568,10 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
             ec_compressed lifted{};
             lifted.front() = ec_even_sign;
             if (point.size() == ec_xonly_size)
-                std::copy(point.begin(), point.end(),
+                std::copy(point.cbegin(), point.cend(),
                     std::next(lifted.begin()));
             else if (is_compressed_key(point))
-                std::copy(std::next(point.begin()), point.end(),
+                std::copy(std::next(point.cbegin()), point.cend(),
                     std::next(lifted.begin()));
             else
                 return false;

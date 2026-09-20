@@ -130,7 +130,7 @@ std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
     // The returned size does not include the null terminator, and cannot
     // exceed the original, but does become smaller, so resize accordingly.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return { directory.begin(), std::next(directory.begin(), size) };
+    return { directory.cbegin(), std::next(directory.cbegin(), size) };
     BC_POP_WARNING()
 }
 
@@ -167,7 +167,7 @@ std::filesystem::path module_path() NOEXCEPT
         if (length < size)
         {
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            return { buffer.begin(), std::next(buffer.begin(), length) };
+            return { buffer.cbegin(), std::next(buffer.cbegin(), length) };
             BC_POP_WARNING()
         }
     }
@@ -206,8 +206,8 @@ std::filesystem::path module_path() NOEXCEPT
         // The link is not null terminated, and is truncated when it fills.
         const auto chars = possible_narrow_sign_cast<size_t>(length);
         if (chars < size)
-            return { std::string{ buffer.begin(),
-                std::next(buffer.begin(), length) } };
+            return { std::string{ buffer.cbegin(),
+                std::next(buffer.cbegin(), length) } };
     }
 
     return {};

@@ -143,7 +143,7 @@ script::script(const operations& ops, bool valid, bool easier, bool failer,
     failer_(failer),
     roller_(roller),
     size_(size),
-    offset(ops_.begin())
+    offset(ops_.cbegin())
 {
 }
 
@@ -158,7 +158,7 @@ script& script::operator=(script&& other) NOEXCEPT
     failer_ = other.failer_;
     roller_ = other.roller_;
     size_ = other.size_;
-    offset = ops_.begin();
+    offset = ops_.cbegin();
     return *this;
 }
 
@@ -170,7 +170,7 @@ script& script::operator=(const script& other) NOEXCEPT
     failer_ = other.failer_;
     roller_ = other.roller_;
     size_ = other.size_;
-    offset = ops_.begin();
+    offset = ops_.cbegin();
     return *this;
 }
 

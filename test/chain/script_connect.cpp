@@ -1068,7 +1068,7 @@ static data_chunk threshold_control(ec_xonly& out_key) NOEXCEPT
     const auto parity = to_int<uint8_t>(point.front() == 0x03_u8);
 
     data_chunk control{ bit_or<uint8_t>(tapscript_version, parity) };
-    control.insert(control.end(), internal.begin(), internal.end());
+    control.insert(control.cend(), internal.begin(), internal.end());
     return control;
 }
 

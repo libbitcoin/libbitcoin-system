@@ -80,7 +80,7 @@ data_chunk mnemonic::decoder(const string_list& words,
 
     // Entropy is always byte aligned.
     // Checksum is in high order bits of last buffer byte, zero-padded.
-    const data_chunk entropy{ buffer.begin(), std::prev(buffer.end()) };
+    const data_chunk entropy{ buffer.cbegin(), std::prev(buffer.cend()) };
     return buffer.back() == checksum_byte(entropy) ? entropy : data_chunk{};
 }
 

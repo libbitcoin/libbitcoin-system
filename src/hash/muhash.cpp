@@ -60,7 +60,7 @@ muhash3072::element muhash3072::to_element(const hash_digest& hash) NOEXCEPT
     cipher.stream(bytes);
 
     element value{};
-    boost::multiprecision::import_bits(value, bytes.begin(), bytes.end(),
+    boost::multiprecision::import_bits(value, bytes.cbegin(), bytes.cend(),
         byte_bits, false);
 
     if (value >= modulus())

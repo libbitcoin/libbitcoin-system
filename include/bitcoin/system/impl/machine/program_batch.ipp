@@ -224,8 +224,8 @@ parse_ecdsa_signatures(uint8_t& sighash, sigs_array& out,
         else if (byte != sig->back())
             return false;
 
-        const auto end = std::prev(sig->end());
-        if (!decode_signature(*it++, { sig->begin(), end }, strict))
+        const auto end = std::prev(sig->cend());
+        if (!decode_signature(*it++, { sig->cbegin(), end }, strict))
             return false;
     }
 
