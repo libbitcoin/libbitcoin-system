@@ -1078,6 +1078,17 @@ BOOST_AUTO_TEST_CASE(interpreter__op_add1__value__incremented)
     BOOST_REQUIRE_EQUAL(value, 42);
 }
 
+BOOST_AUTO_TEST_CASE(interpreter__op_add1__negative__incremented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-2);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add1() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -1);
+}
+
 BOOST_AUTO_TEST_CASE(interpreter__op_add1__max_int32__five_byte_result)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
@@ -1108,6 +1119,17 @@ BOOST_AUTO_TEST_CASE(interpreter__op_sub1__value__decremented)
     int32_t value{};
     BOOST_REQUIRE(machine->pop_signed32(value));
     BOOST_REQUIRE_EQUAL(value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sub1__negative__decremented)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sub1() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -2);
 }
 
 BOOST_AUTO_TEST_CASE(interpreter__op_sub1__empty_stack__op_sub1)
@@ -1226,6 +1248,18 @@ BOOST_AUTO_TEST_CASE(interpreter__op_sub__five_less_three__two)
     int32_t value{};
     BOOST_REQUIRE(machine->pop_signed32(value));
     BOOST_REQUIRE_EQUAL(value, 2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_sub__three_less_five__negative_two)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(3);
+    machine->push_signed64(5);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_sub() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -2);
 }
 
 BOOST_AUTO_TEST_CASE(interpreter__op_sub__one__op_sub)
@@ -1700,6 +1734,83 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig_verify__more_signatures_than
     BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig_verify() }, error::op_check_multisig_verify6);
 }
 
+// op_check_multisig maps each verify code through its own disjunction.
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__empty_stack__op_check_multisig_verify1)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_verify1);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__twenty_one_keys__op_check_multisig_verify2)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{});
+    machine->push_signed64(0);
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(21);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_verify2);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__operation_count_exceeded__op_check_multisig_verify3)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    BOOST_REQUIRE(machine->ops_increment(199));
+    machine->push_chunk(data_chunk{});
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_chunk(data_chunk{ 0x02 });
+    machine->push_signed64(3);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_verify3);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__invalid_signature_count__op_check_multisig_verify5)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01, 0x02, 0x03, 0x04, 0x05 });
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_verify5);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__more_signatures_than_keys__op_check_multisig_verify6)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_signed64(1);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_verify6);
+}
+
+BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__nonnull_dummy_bip147__op_check_multisig_verify9)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_chunk(data_chunk{ 0x01 });
+    machine->push_signed64(0);
+    machine->push_signed64(0);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_multisig() }, error::op_check_multisig_verify9);
+}
+
 BOOST_AUTO_TEST_CASE(interpreter__op_check_multisig__invalid_der_no_rules__false_pushed)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
@@ -1753,6 +1864,14 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__type_mismatch__op_ch
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 42 };
     machine->push_signed64(500000000);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify3);
+}
+
+// A transaction locktime equal to the threshold is a timestamp, not a height.
+BOOST_AUTO_TEST_CASE(interpreter__op_check_locktime_verify__transaction_locktime_threshold__op_check_locktime_verify3)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules, 0, 500000000 };
+    machine->push_signed64(0);
     BOOST_REQUIRE_EQUAL(code{ machine->op_check_locktime_verify() }, error::op_check_locktime_verify3);
 }
 
@@ -2622,6 +2741,27 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__empty_endorsement__unchanged
     int32_t value{};
     BOOST_REQUIRE(accessor.pop_signed32(value));
     BOOST_REQUIRE_EQUAL(value, 7);
+}
+
+// An unknown key type skips verification, so the accumulator is incremented.
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_add__negative_accumulator__incremented)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.push_chunk(data_chunk{ 0x30 });
+    accessor.push_signed64(-2);
+    accessor.push_chunk(data_chunk(ec_compressed_size, 0x02));
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig_add() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(accessor.pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -1);
 }
 
 // The sigop budget is 50 per signature, from add1(50) plus witness size [bip342].
