@@ -34,14 +34,10 @@ class BC_API path final
 public:
     typedef std::filesystem::path type;
 
-    DEFAULT_COPY_MOVE_DESTRUCT(path);
-
     path() NOEXCEPT;
     path(type value) NOEXCEPT;
-
-    /// Deserialize from utf8 string.
-    path(const std::string& value) NOEXCEPT;
     path(const char* value) NOEXCEPT;
+    path(const std::string& value) NOEXCEPT;
 
     operator const type&() const NOEXCEPT;
 
@@ -51,7 +47,7 @@ public:
     /// True if the path is unset.
     bool empty() const NOEXCEPT;
 
-    /// The path as a native encoded string, for platform interfaces.
+    /// The path as a NATIVE-ENCODED string, for platform interfaces.
     std::string string() const NOEXCEPT;
 
     /// The path as a utf8 encoded string.
