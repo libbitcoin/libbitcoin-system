@@ -451,6 +451,10 @@ BOOST_AUTO_TEST_CASE(chain_state__get_map__genesis__default)
     BOOST_REQUIRE_EQUAL(map.bits.count, 0u);
     BOOST_REQUIRE_EQUAL(map.version.count, 0u);
     BOOST_REQUIRE_EQUAL(map.timestamp.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.bip30_deactivate_height, chain_state::map::unrequested);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, chain_state::map::unrequested);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit1_height, chain_state::map::unrequested);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit2_height, chain_state::map::unrequested);
 }
 
 BOOST_AUTO_TEST_CASE(chain_state__get_map__mainnet_height__expected_ranges)
@@ -519,6 +523,19 @@ BOOST_AUTO_TEST_CASE(chain_state__get_map__at_bip9_bit0_checkpoint__requested)
     const auto height = settings.bip9_bit0_active_checkpoint.height();
     const auto map = chain_state::get_map(height, settings);
     BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, height);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__get_map__genesis_checkpoints__requested)
+{
+    const settings settings(selection::regtest);
+    const auto map = chain_state::get_map(0, settings);
+    BOOST_REQUIRE_EQUAL(map.bits.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.version.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.timestamp.count, 0u);
+    BOOST_REQUIRE_EQUAL(map.bip30_deactivate_height, 0u);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit0_height, 0u);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit1_height, 0u);
+    BOOST_REQUIRE_EQUAL(map.bip9_bit2_height, 0u);
 }
 
 // signal_version
