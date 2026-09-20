@@ -1096,11 +1096,8 @@ op_check_multisig() NOEXCEPT
     if (ec == error::op_check_multisig_verify1 ||
         ec == error::op_check_multisig_verify2 ||
         ec == error::op_check_multisig_verify3 ||
-        ec == error::op_check_multisig_verify4 ||
         ec == error::op_check_multisig_verify5 ||
         ec == error::op_check_multisig_verify6 ||
-        ec == error::op_check_multisig_verify7 ||
-        ec == error::op_check_multisig_verify8 ||
         ec == error::op_check_multisig_verify9)
         return ec;
 
@@ -1131,8 +1128,8 @@ op_check_multisig_verify() NOEXCEPT
         return error::op_check_multisig_verify3;
 
     chunk_xptrs keys;
-    if (!this->pop_chunks(keys, count))
-        return error::op_check_multisig_verify4;
+    BC_DEBUG_ONLY(const auto popped_keys =) this->pop_chunks(keys, count);
+    BC_ASSERT(popped_keys);
 
     if (!this->pop_index32(count))
         return error::op_check_multisig_verify5;
@@ -1141,11 +1138,9 @@ op_check_multisig_verify() NOEXCEPT
         return error::op_check_multisig_verify6;
 
     chunk_xptrs endorsements;
-    if (!this->pop_chunks(endorsements, count))
-        return error::op_check_multisig_verify7;
-
-    if (this->is_stack_empty())
-        return error::op_check_multisig_verify8;
+    BC_DEBUG_ONLY(const auto popped_sigs =) this->pop_chunks(endorsements, count);
+    BC_ASSERT(popped_sigs);
+    BC_ASSERT(!this->is_stack_empty());
 
     // BIP147: Satoshi bug, discard stack element, malleable until active.
     const auto bip147 = this->is_enabled(flags::bip147_rule);
