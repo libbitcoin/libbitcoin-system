@@ -650,7 +650,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\bitcoin_uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\checked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\payment_address.hpp" />
@@ -816,6 +815,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionaries.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionary.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\version.hpp.in" />
     <None Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.ipp" />
     <None Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_prefix.ipp" />
     <None Include="packages.config" />
