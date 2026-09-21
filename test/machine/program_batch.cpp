@@ -352,6 +352,45 @@ static script batch_key_path() NOEXCEPT
     return script{ ops };
 }
 
+// The taproot key path script is fabricated in witness::extract_taproot.
+static script batch_taproot_key_path() NOEXCEPT
+{
+    const operations ops
+    {
+        operation{ opcode::checksig }
+    };
+
+    return script{ ops };
+}
+
+static script batch_tapscript_timelock() NOEXCEPT
+{
+    const operations ops
+    {
+        operation{ operation::opcode_from_positive(1_u8) },
+        operation{ opcode::checklocktimeverify },
+        operation{ opcode::drop },
+        operation{ to_chunk(batch_xonly(batch_secret)), false },
+        operation{ opcode::checksig }
+    };
+
+    return script{ ops };
+}
+
+static script batch_tapscript_inscription() NOEXCEPT
+{
+    const operations ops
+    {
+        operation{ to_chunk(batch_xonly(batch_secret)), false },
+        operation{ opcode::checksig },
+        operation{ opcode::push_size_0 },
+        operation{ opcode::if_ },
+        operation{ opcode::endif }
+    };
+
+    return script{ ops };
+}
+
 BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__batchable_script__captured)
 {
     auto& rows = chain::signatures::ecdsa_rows();
@@ -414,6 +453,89 @@ BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__batchable_script__captur
     BOOST_REQUIRE(capture.batched.load());
     BOOST_REQUIRE_EQUAL(rows.rows().size(), one);
     BOOST_REQUIRE(rows.verify());
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__key_hash_script__captured)
+{
+    auto& rows = chain::signatures::ecdsa_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    const batch_accessor out{ in, to_shared<script>(batch_p2kh()) };
+
+    const auto point = batch_key();
+    const hash_digest hash{};
+    const ec_signature signature{};
+    BOOST_REQUIRE(out.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.groups(), one);
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__taproot_key_path_script__captured)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    batch_accessor out{ in, to_shared<script>(batch_taproot_key_path()) };
+    out.push_chunk(data_chunk{ 0x42_u8 });
+
+    const hash_digest hash{};
+    const auto point = to_chunk(batch_xonly(batch_secret));
+    const auto signature = batch_schnorr(batch_secret, hash);
+    BOOST_REQUIRE(out.verify_schnorr_signature(point, hash, signature));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), one);
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__tapscript_timelock_script__captured)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    batch_accessor out{ in, to_shared<script>(batch_tapscript_timelock()) };
+    out.push_chunk(data_chunk{ 0x42_u8 });
+
+    const hash_digest hash{};
+    const auto point = to_chunk(batch_xonly(batch_secret));
+    const auto signature = batch_schnorr(batch_secret, hash);
+    BOOST_REQUIRE(out.verify_schnorr_signature(point, hash, signature));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), one);
+    rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__tapscript_inscription_script__captured)
+{
+    auto& rows = chain::signatures::schnorr_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    batch_accessor out{ in, to_shared<script>(batch_tapscript_inscription()) };
+    out.push_chunk(data_chunk{ 0x42_u8 });
+
+    const hash_digest hash{};
+    const auto point = to_chunk(batch_xonly(batch_secret));
+    const auto signature = batch_schnorr(batch_secret, hash);
+    BOOST_REQUIRE(out.verify_schnorr_signature(point, hash, signature));
+    BOOST_REQUIRE(capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.rows().size(), one);
     rows.clear();
 }
 

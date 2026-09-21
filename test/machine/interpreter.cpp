@@ -1223,6 +1223,18 @@ BOOST_AUTO_TEST_CASE(interpreter__op_add__two_and_three__five)
     BOOST_REQUIRE_EQUAL(value, 5);
 }
 
+BOOST_AUTO_TEST_CASE(interpreter__op_add__negative_result__expected)
+{
+    machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
+    machine->push_signed64(-2);
+    machine->push_signed64(1);
+    BOOST_REQUIRE_EQUAL(code{ machine->op_add() }, error::op_success);
+
+    int32_t value{};
+    BOOST_REQUIRE(machine->pop_signed32(value));
+    BOOST_REQUIRE_EQUAL(value, -1);
+}
+
 BOOST_AUTO_TEST_CASE(interpreter__op_add__five_byte_operand__op_add)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
@@ -2664,6 +2676,22 @@ BOOST_AUTO_TEST_CASE(interpreter__op_check_sig_verify__mocked_hash_failure__op_c
     BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig_verify() }, error::op_check_sig_schnorr2);
 }
 
+BOOST_AUTO_TEST_CASE(interpreter__op_check_sig__mocked_hash_failure__op_check_sig_schnorr2)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto execution = std::make_shared<chunk_cptrs>();
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack, mocked> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    accessor.hash_result = false;
+    accessor.push_chunk(data_chunk(ec_signature_size, 0x11));
+    accessor.push_chunk(data_chunk(ec_xonly_size, 0x02));
+    BOOST_REQUIRE_EQUAL(code{ accessor.op_check_sig() }, error::op_check_sig_schnorr2);
+}
+
 // tapscript initial stack and operation limits [bip342]
 
 BOOST_AUTO_TEST_CASE(interpreter__initialize__tapscript_overflow__stack_size)
@@ -2679,6 +2707,26 @@ BOOST_AUTO_TEST_CASE(interpreter__initialize__tapscript_overflow__stack_size)
     const signatures capture{};
     interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
     BOOST_REQUIRE(accessor.initialize() == error::invalid_stack_size);
+}
+
+// The primary and alternate stacks share one limit [bip342].
+BOOST_AUTO_TEST_CASE(interpreter__is_stack_overflow__at_limit_then_alternate__expected)
+{
+    const auto leaf = to_minimal_leaf_script();
+    const auto tx = to_spending_transaction(to_tapscript_witness(leaf));
+    const auto in = tx.inputs_ptr()->begin();
+    const auto element = to_shared<data_chunk>();
+    const auto execution = std::make_shared<chunk_cptrs>(chain::max_unified_stack_size, element);
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto leaf_ptr = to_shared<script>(leaf);
+    const signatures capture{};
+    interpreter_accessor<contiguous_stack> accessor{ tx, in, leaf_ptr, taproot_rules, script_version::taproot, execution, tapleaf, capture };
+    BOOST_REQUIRE(accessor.initialize() != error::invalid_stack_size);
+    BOOST_REQUIRE_EQUAL(accessor.stack_size(), chain::max_unified_stack_size);
+    BOOST_REQUIRE(!accessor.is_stack_overflow());
+
+    accessor.push_alternate(stack_variant{ true });
+    BOOST_REQUIRE(accessor.is_stack_overflow());
 }
 
 BOOST_AUTO_TEST_CASE(interpreter__initialize__tapscript_oversized__witness_stack)
