@@ -656,8 +656,9 @@ op_negate() NOEXCEPT
     if (!this->pop_signed32(number))
         return error::op_negate;
 
-    // negate(minimum) overflow precluded by domain increase.
-    this->push_signed64(negate<int64_t>(number));
+    // The script number domain is symmetric, excluding min_int32.
+    BC_ASSERT(number != min_int32);
+    this->push_signed64(negate(number));
     return error::op_success;
 }
 
@@ -669,8 +670,9 @@ op_abs() NOEXCEPT
     if (!this->pop_signed32(number))
         return error::op_abs;
 
-    // absolute(minimum) overflow precluded by domain increase.
-    this->push_signed64(absolute<int64_t>(number));
+    // The script number domain is symmetric, excluding min_int32.
+    BC_ASSERT(number != min_int32);
+    this->push_signed64(to_signed(absolute(number)));
     return error::op_success;
 }
 
