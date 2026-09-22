@@ -237,4 +237,5 @@ BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_minimal__true)
 {
     BOOST_REQUIRE(lax(base16_chunk("3006020101020101")));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

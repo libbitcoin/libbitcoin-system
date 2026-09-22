@@ -478,4 +478,5 @@ BOOST_AUTO_TEST_CASE(utilities__is_member__mixed_families__false)
     BOOST_REQUIRE(!is_member(ip4, ip6, 8));
     BOOST_REQUIRE(!is_member(ip6, ip4, 8));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

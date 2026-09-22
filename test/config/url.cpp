@@ -294,4 +294,5 @@ BOOST_AUTO_TEST_CASE(url__construct__asio_address__expected)
     const config::url instance(authority.ip(), 42);
     BOOST_REQUIRE_EQUAL(instance.port(), 42u);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

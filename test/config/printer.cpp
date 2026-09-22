@@ -724,4 +724,5 @@ BOOST_AUTO_TEST_CASE(printer__construct__settings_only__expected)
     help.settings(output);
     BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

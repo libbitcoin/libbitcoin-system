@@ -1819,4 +1819,5 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw0__empty__not_null_valid)
     BOOST_REQUIRE(reader);
     allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

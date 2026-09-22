@@ -281,4 +281,5 @@ BOOST_AUTO_TEST_CASE(endpoint__ostream__populated__expected)
     output << instance;
     BOOST_REQUIRE_EQUAL(output.str(), instance.to_string());
 }
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -97,4 +97,5 @@ BOOST_AUTO_TEST_CASE(base85__stream_out__unaligned__throws_ostream_exception)
     std::ostringstream output{};
     BOOST_REQUIRE_THROW(output << instance, ostream_exception);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -171,4 +171,5 @@ BOOST_AUTO_TEST_CASE(path__construct__type__expected)
     const config::path instance(value);
     BOOST_REQUIRE((const config::path::type&)instance == value);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

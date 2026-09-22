@@ -501,4 +501,5 @@ BOOST_AUTO_TEST_CASE(authority__to_endpoint__ipv4__expected)
     BOOST_REQUIRE_EQUAL(endpoint.port(), 42u);
     BOOST_REQUIRE_EQUAL(endpoint.address(), instance.ip());
 }
+
 BOOST_AUTO_TEST_SUITE_END()

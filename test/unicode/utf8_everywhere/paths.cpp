@@ -211,6 +211,7 @@ BOOST_AUTO_TEST_CASE(paths__default_config_path__empty__does_not_throw)
 {
     BOOST_REQUIRE_NO_THROW(default_config_path({}));
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

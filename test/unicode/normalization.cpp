@@ -838,4 +838,5 @@ BOOST_AUTO_TEST_CASE(normalization__to_upper__cafe__uppercased)
     to_upper(value);
     BOOST_REQUIRE_EQUAL(value, "CAF\xc3\x89");
 }
+
 BOOST_AUTO_TEST_SUITE_END()

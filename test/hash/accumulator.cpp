@@ -331,5 +331,6 @@ BOOST_AUTO_TEST_CASE(accumulator__hash__chunk_and_string__same)
     BOOST_REQUIRE_EQUAL(accumulator<sha256>::hash(data), accumulator<sha256>::hash(text));
     BOOST_REQUIRE_EQUAL(accumulator<sha256>::hash_chunk(data), accumulator<sha256>::hash_chunk(text));
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

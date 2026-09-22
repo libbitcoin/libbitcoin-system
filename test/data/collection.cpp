@@ -644,4 +644,5 @@ BOOST_AUTO_TEST_CASE(collection__pop__empty__default)
     BOOST_REQUIRE_EQUAL(pop(stack), 0_u8);
     BOOST_REQUIRE(stack.empty());
 }
+
 BOOST_AUTO_TEST_SUITE_END()

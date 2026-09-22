@@ -122,4 +122,5 @@ BOOST_AUTO_TEST_CASE(endian_integrals__to__runtime_offset__round_trip)
     BOOST_REQUIRE_EQUAL(to_big_test<2>(value32), (data_array<6>{ 0, 0, 1, 2, 3, 4 }));
     BOOST_REQUIRE_EQUAL(to_little_test<2>(value32), (data_array<6>{ 0, 0, 4, 3, 2, 1 }));
 }
+
 BOOST_AUTO_TEST_SUITE_END()

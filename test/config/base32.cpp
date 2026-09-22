@@ -67,4 +67,5 @@ BOOST_AUTO_TEST_CASE(base32__construct__default__empty)
     const config::base32 instance{};
     BOOST_REQUIRE((const data_chunk&)instance == data_chunk{});
 }
+
 BOOST_AUTO_TEST_SUITE_END()

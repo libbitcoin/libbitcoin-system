@@ -532,4 +532,5 @@ BOOST_AUTO_TEST_CASE(rmd160__accumulate__multiple_blocks__matches_single_writes)
 
     BOOST_REQUIRE_EQUAL(streamed.flush(), written.flush());
 }
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -81,6 +81,7 @@ BOOST_AUTO_TEST_CASE(hash256__stream__invalid__throws_istream_exception)
     hash256 instance{};
     BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -76,4 +76,5 @@ BOOST_AUTO_TEST_CASE(base58__stream__round_trip__expected)
     std::istringstream(output.str()) >> parsed;
     BOOST_REQUIRE_EQUAL((const data_chunk&)parsed, value);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

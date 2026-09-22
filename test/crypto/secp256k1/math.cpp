@@ -201,4 +201,5 @@ BOOST_AUTO_TEST_CASE(secp256k1__ec_negate__secret_and_points__round_trips)
     BOOST_REQUIRE(ec_negate(uncompressed));
     BOOST_REQUIRE_EQUAL(uncompressed, expected_uncompressed);
 }
+
 BOOST_AUTO_TEST_SUITE_END()
