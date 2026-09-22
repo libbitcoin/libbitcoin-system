@@ -173,4 +173,16 @@ BOOST_AUTO_TEST_CASE(block__ostream__populated__expected)
     BOOST_REQUIRE_EQUAL(serialized.str(), encoded_genesis_block);
 }
 
+
+BOOST_AUTO_TEST_CASE(block__istream__invalid_base16__throws_istream_exception)
+{
+    config::block instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(block__istream__invalid_block__throws_istream_exception)
+{
+    config::block instance{};
+    BOOST_REQUIRE_THROW(std::istringstream("00") >> instance, istream_exception);
+}
 BOOST_AUTO_TEST_SUITE_END()

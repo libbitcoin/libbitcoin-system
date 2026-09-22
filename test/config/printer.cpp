@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <sstream>
 
 BOOST_AUTO_TEST_SUITE(printer_tests)
 
@@ -636,4 +637,91 @@ BOOST_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_s
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+// printers
+
+BOOST_AUTO_TEST_CASE(printer__format_paragraph__short__single_line)
+{
+    CONFIG_PRINTER_SETUP();
+    BOOST_REQUIRE_EQUAL(help.format_paragraph("foo"), "foo                                                                      \n");
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_paragraph__empty__empty_line)
+{
+    CONFIG_PRINTER_SETUP();
+    BOOST_REQUIRE_EQUAL(help.format_paragraph(""), "");
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_usage__named_option__contains_application)
+{
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()("long", "Long name only."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+    BOOST_REQUIRE(help.format_usage().find(CONFIG_APPLICATION) != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(printer__format_description__always__contains_description)
+{
+    CONFIG_PRINTER_SETUP();
+    CONFIG_PRINTER_INITIALIZE(0u, 0u);
+    BOOST_REQUIRE(help.format_description().find(CONFIG_DESCRIPTION) != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(printer__commandline__named_option__contains_usage_and_table)
+{
+    CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()("long", "Long name only."));
+    CONFIG_PRINTER_INITIALIZE(1u, 0u);
+
+    std::ostringstream output{};
+    help.commandline(output);
+    BOOST_REQUIRE(output.str().find(CONFIG_APPLICATION) != std::string::npos);
+    BOOST_REQUIRE(output.str().find("--long") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(printer__commandline__no_parameters__no_table_headers)
+{
+    CONFIG_PRINTER_SETUP();
+    CONFIG_PRINTER_INITIALIZE(0u, 0u);
+
+    std::ostringstream output{};
+    help.commandline(output);
+    BOOST_REQUIRE(output.str().find("--long") == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(printer__settings__described__contains_description)
+{
+    po::options_description options;
+    po::positional_options_description arguments;
+    options.add_options()("section.name", "Setting.");
+    printer help(options, arguments, CONFIG_APPLICATION, CONFIG_DESCRIPTION, CONFIG_COMMAND);
+    help.initialize();
+
+    std::ostringstream output{};
+    help.settings(output);
+    BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(printer__settings__undescribed__no_description)
+{
+    po::options_description options;
+    po::positional_options_description arguments;
+    options.add_options()("section.name", "Setting.");
+    printer help(options, arguments, CONFIG_APPLICATION, "", CONFIG_COMMAND);
+    help.initialize();
+
+    std::ostringstream output{};
+    help.settings(output);
+    BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(printer__construct__settings_only__expected)
+{
+    po::options_description settings;
+    settings.add_options()("section.name", "Setting.");
+    printer help(settings, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
+    help.initialize();
+
+    std::ostringstream output{};
+    help.settings(output);
+    BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
+}
 BOOST_AUTO_TEST_SUITE_END()

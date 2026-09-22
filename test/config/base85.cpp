@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <sstream>
 
 BOOST_AUTO_TEST_SUITE(base85_tests)
 
@@ -42,4 +43,58 @@ BOOST_AUTO_TEST_CASE(base85__validate__multiple_tokens__throws)
     BOOST_REQUIRE_THROW(validate(value, string_list{ "foo", "bar" }, static_cast<base85*>(nullptr), 0), boost::program_options::validation_error);
 }
 
+
+BOOST_AUTO_TEST_CASE(base85__construct__default__empty_and_aligned)
+{
+    const config::base85 instance{};
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE((const data_chunk&)instance == data_chunk{});
+}
+
+BOOST_AUTO_TEST_CASE(base85__construct__copy_chunk__expected)
+{
+    const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base85 instance(value);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE((const data_chunk&)instance == value);
+}
+
+BOOST_AUTO_TEST_CASE(base85__construct__move_chunk__expected)
+{
+    data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const data_chunk expected{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base85 instance(std::move(value));
+    BOOST_REQUIRE((const data_chunk&)instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(base85__construct__unaligned_chunk__false)
+{
+    const config::base85 instance(data_chunk{ 0x01, 0x02, 0x03 });
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(base85__construct__string__round_trips)
+{
+    const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base85 instance(value);
+    const config::base85 parsed(instance.to_string());
+    BOOST_REQUIRE((const data_chunk&)parsed == value);
+}
+
+BOOST_AUTO_TEST_CASE(base85__construct__invalid_string__throws_istream_exception)
+{
+    BOOST_REQUIRE_THROW(config::base85("\x01\x01\x01\x01\x01"), istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(base85__construct__unaligned_string__throws_istream_exception)
+{
+    BOOST_REQUIRE_THROW(config::base85("abc"), istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(base85__stream_out__unaligned__throws_ostream_exception)
+{
+    const config::base85 instance(data_chunk{ 0x01, 0x02, 0x03 });
+    std::ostringstream output{};
+    BOOST_REQUIRE_THROW(output << instance, ostream_exception);
+}
 BOOST_AUTO_TEST_SUITE_END()

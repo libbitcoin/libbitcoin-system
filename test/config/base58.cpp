@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include <sstream>
 
 BOOST_AUTO_TEST_SUITE(base58_tests)
 
@@ -42,4 +43,37 @@ BOOST_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
     BOOST_REQUIRE(original == instance);
 }
 
+
+BOOST_AUTO_TEST_CASE(base58__construct__copy_chunk__expected)
+{
+    const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base58 instance(value);
+    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, value);
+}
+
+BOOST_AUTO_TEST_CASE(base58__construct__move_chunk__expected)
+{
+    data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const data_chunk expected{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base58 instance(std::move(value));
+    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, expected);
+}
+
+BOOST_AUTO_TEST_CASE(base58__construct__invalid_string__throws_istream_exception)
+{
+    BOOST_REQUIRE_THROW(config::base58("0OIl"), istream_exception);
+}
+
+BOOST_AUTO_TEST_CASE(base58__stream__round_trip__expected)
+{
+    const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base58 instance(value);
+
+    std::ostringstream output{};
+    output << instance;
+
+    config::base58 parsed{};
+    std::istringstream(output.str()) >> parsed;
+    BOOST_REQUIRE_EQUAL((const data_chunk&)parsed, value);
+}
 BOOST_AUTO_TEST_SUITE_END()

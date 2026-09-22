@@ -245,4 +245,40 @@ BOOST_AUTO_TEST_CASE(endpoint__inequality1__same_v6__false)
     BOOST_REQUIRE(!(host1 != host2));
 }
 
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__host_port__expected)
+{
+    const config::endpoint instance("libbitcoin.org", 42);
+    BOOST_REQUIRE_EQUAL(instance.host(), "libbitcoin.org");
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__authority__expected)
+{
+    const config::authority authority("42.42.42.42:42");
+    const config::endpoint instance(authority);
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__asio_endpoint__expected)
+{
+    const config::authority authority("42.42.42.42:42");
+    const config::endpoint instance(authority.to_endpoint());
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__asio_address__expected)
+{
+    const config::authority authority("42.42.42.42:42");
+    const config::endpoint instance(authority.ip(), 42);
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__ostream__populated__expected)
+{
+    const config::endpoint instance("libbitcoin.org", 42);
+    std::ostringstream output{};
+    output << instance;
+    BOOST_REQUIRE_EQUAL(output.str(), instance.to_string());
+}
 BOOST_AUTO_TEST_SUITE_END()

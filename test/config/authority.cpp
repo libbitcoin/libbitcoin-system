@@ -493,4 +493,12 @@ BOOST_AUTO_TEST_CASE(authority__inequality__ipv6_ipv6__false)
     BOOST_REQUIRE(!(host1 != host2));
 }
 
+
+BOOST_AUTO_TEST_CASE(authority__to_endpoint__ipv4__expected)
+{
+    const authority instance("42.42.42.42:42");
+    const auto endpoint = instance.to_endpoint();
+    BOOST_REQUIRE_EQUAL(endpoint.port(), 42u);
+    BOOST_REQUIRE_EQUAL(endpoint.address(), instance.ip());
+}
 BOOST_AUTO_TEST_SUITE_END()
