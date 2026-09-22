@@ -1781,4 +1781,41 @@ BOOST_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50_off__not_applied)
     BOOST_REQUIRE_NE(instance.check(ctx, false), error::temporary_hash_limit);
 }
 
+
+// The size and weight limits are inclusive, so the boundary must be tested.
+BOOST_AUTO_TEST_CASE(block__is_oversized__at_limit__false)
+{
+    const script big{ operations{ operation{ data_chunk(max_block_size, 0x00), false } } };
+    const accessor probe{ header{}, transactions{ coinbase_transaction(0, big) } };
+    const auto excess = probe.serialized_size(false) - max_block_size;
+
+    const script exact{ operations{ operation{ data_chunk(max_block_size - excess, 0x00), false } } };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, exact) } };
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), max_block_size);
+    BOOST_REQUIRE(!instance.is_oversized());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_oversized__one_over_limit__true)
+{
+    const script big{ operations{ operation{ data_chunk(max_block_size, 0x00), false } } };
+    const accessor probe{ header{}, transactions{ coinbase_transaction(0, big) } };
+    const auto excess = probe.serialized_size(false) - max_block_size;
+
+    const script over{ operations{ operation{ data_chunk(add1(max_block_size - excess), 0x00), false } } };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, over) } };
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), add1(max_block_size));
+    BOOST_REQUIRE(instance.is_oversized());
+}
+
+BOOST_AUTO_TEST_CASE(block__is_overweight__at_limit__false)
+{
+    const script big{ operations{ operation{ data_chunk(max_block_size, 0x00), false } } };
+    const accessor probe{ header{}, transactions{ coinbase_transaction(0, big) } };
+    const auto excess = (probe.weight() - max_block_weight) / light_weight_factor;
+
+    const script exact{ operations{ operation{ data_chunk(max_block_size - excess, 0x00), false } } };
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, exact) } };
+    BOOST_REQUIRE_EQUAL(instance.weight(), max_block_weight);
+    BOOST_REQUIRE(!instance.is_overweight());
+}
 BOOST_AUTO_TEST_SUITE_END()
