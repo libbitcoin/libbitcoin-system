@@ -790,4 +790,52 @@ BOOST_AUTO_TEST_CASE(normalization__has_whitespace__foobar__false)
     BOOST_REQUIRE(!has_whitespace("foobar"));
 }
 
+
+// boundary and degenerate sequences
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__single_character__unchanged)
+{
+    auto value = std::string{ "a" };
+    to_canonical_composition(value);
+    BOOST_REQUIRE_EQUAL(value, "a");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__empty__unchanged)
+{
+    auto value = std::string{};
+    to_canonical_composition(value);
+    BOOST_REQUIRE(value.empty());
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfc__leading_combining_mark__unchanged)
+{
+    // U+0301 combining acute accent with no preceding starter.
+    auto value = std::string{ "\xcc\x81" "a" };
+    const auto expected = value;
+    to_canonical_composition(value);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(normalization__nfd__leading_combining_mark__unchanged)
+{
+    auto value = std::string{ "\xcc\x81" "a" };
+    const auto expected = value;
+    to_canonical_decomposition(value);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+
+BOOST_AUTO_TEST_CASE(normalization__to_upper__ascii_letters__uppercased)
+{
+    auto value = std::string{ "abc" };
+    to_upper(value);
+    BOOST_REQUIRE_EQUAL(value, "ABC");
+}
+
+BOOST_AUTO_TEST_CASE(normalization__to_upper__cafe__uppercased)
+{
+    auto value = std::string{ "caf\xc3\xa9" };
+    to_upper(value);
+    BOOST_REQUIRE_EQUAL(value, "CAF\xc3\x89");
+}
 BOOST_AUTO_TEST_SUITE_END()
