@@ -323,6 +323,35 @@ BOOST_AUTO_TEST_CASE(input__is_relative_locked__disabled_time_type_sequence_age_
     BOOST_REQUIRE(!instance.is_relative_locked(0, instance.metadata.median_time_past + age_seconds));
 }
 
+// These express the sequence as a literal, so they pin the bit layout that
+// the parameterized cases above take from the same constants as the code.
+
+// BIP68: only the low 16 bits of the sequence encode the lock.
+BOOST_AUTO_TEST_CASE(input__is_relative_locked__block_type_bit_above_mask__false)
+{
+    constexpr uint32_t sequence = 0x00010000;
+    const input instance(point{}, {}, sequence);
+    instance.metadata.prevout_height = 0;
+    BOOST_REQUIRE(!instance.is_relative_locked(0, 0));
+}
+
+// BIP68: bit 22 selects seconds, each unit 512 seconds.
+BOOST_AUTO_TEST_CASE(input__is_relative_locked__time_type_age_below_512_seconds__true)
+{
+    constexpr uint32_t sequence = 0x00400001;
+    const input instance(point{}, {}, sequence);
+    instance.metadata.median_time_past = 0;
+    BOOST_REQUIRE(instance.is_relative_locked(0, 511));
+}
+
+BOOST_AUTO_TEST_CASE(input__is_relative_locked__time_type_age_at_512_seconds__false)
+{
+    constexpr uint32_t sequence = 0x00400001;
+    const input instance(point{}, {}, sequence);
+    instance.metadata.median_time_past = 0;
+    BOOST_REQUIRE(!instance.is_relative_locked(0, 512));
+}
+
 // metadata (chain::prevout)
 // ----------------------------------------------------------------------------
 // The prevout defaults fail closed, so unpopulated metadata rejects.

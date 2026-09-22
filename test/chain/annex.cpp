@@ -66,6 +66,17 @@ BOOST_AUTO_TEST_CASE(annex__is_annex_pattern__two_elements_unprefixed__false)
     BOOST_REQUIRE(!annex::is_annex_pattern(stack));
 }
 
+BOOST_AUTO_TEST_CASE(annex__is_annex_pattern__two_elements_empty_top__false)
+{
+    const chunk_cptrs stack
+    {
+        to_shared(base16_chunk("0102")),
+        to_shared(data_chunk{})
+    };
+
+    BOOST_REQUIRE(!annex::is_annex_pattern(stack));
+}
+
 // from_stack
 
 BOOST_AUTO_TEST_CASE(annex__from_stack__annex_pattern__last_element)
