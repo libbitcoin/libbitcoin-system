@@ -486,7 +486,6 @@ BOOST_AUTO_TEST_CASE(transaction__spend__two_outputs__sum)
         0
     };
 
-
     // ceilinged_add(spend0, spend1)
     BOOST_REQUIRE_EQUAL(instance.spend(), spend0 + spend1);
 }
@@ -2834,6 +2833,49 @@ static transaction taproot_tx(const chunk_cptrs& stack) NOEXCEPT
     return out;
 }
 
+// The annex is committed with its size prefix [bip341].
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("43f5e669234797e57bbcd5d3dbce8dabba005c1e282e3ec06875311d9961900e"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex_single__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_single, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("27849d2ce26971ac0058fd81468d5998d0ed3cc4109d32b2625b06eccd0acdec"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex_all_anyone_can_pay__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::all_anyone_can_pay, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("e8ce62f56bab0627d317648011197c55c5d84fe931cfb1be7c13915a4fb2259c"));
+}
+
+// The tapscript extension follows the annex commitment [bip342].
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__tapscript_annex__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+    const auto tapleaf = to_shared<hash_digest>(one_hash);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("04b4b4559279d6696b2dbaca5dee86a2e36d0bde098f66d40336e205923a49a4"));
+}
+
 // The annex is committed by the signature hash [bip341].
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__differs)
 {
@@ -2862,6 +2904,85 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__tapscript_subscript__separator
     BOOST_REQUIRE(instance.signature_hash(out1, instance.inputs_ptr()->begin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
     BOOST_REQUIRE(instance.signature_hash(out2, instance.inputs_ptr()->begin(), ops, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
     BOOST_REQUIRE_EQUAL(out1, out2);
+}
+
+// The size and weight limits are inclusive, so the boundary must be tested.
+BOOST_AUTO_TEST_CASE(transaction__is_oversized__at_limit__false)
+{
+    const accessor probe{ 0, { { {}, { data_chunk(max_block_size, 0x00), false }, 0 } }, {}, 0 };
+    const auto excess = probe.serialized_size(false) - max_block_size;
+
+    const accessor instance{ 0, { { {}, { data_chunk(max_block_size - excess, 0x00), false }, 0 } }, {}, 0 };
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), max_block_size);
+    BOOST_REQUIRE(!instance.is_oversized());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_oversized__one_over_limit__true)
+{
+    const accessor probe{ 0, { { {}, { data_chunk(max_block_size, 0x00), false }, 0 } }, {}, 0 };
+    const auto excess = probe.serialized_size(false) - max_block_size;
+
+    const accessor instance{ 0, { { {}, { data_chunk(add1(max_block_size - excess), 0x00), false }, 0 } }, {}, 0 };
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), add1(max_block_size));
+    BOOST_REQUIRE(instance.is_oversized());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_overweight__at_limit__false)
+{
+    const accessor probe{ 0, { { {}, { data_chunk(max_block_size, 0x00), false }, 0 } }, {}, 0 };
+    const auto excess = (probe.weight() - max_block_weight) / light_weight_factor;
+
+    const accessor instance{ 0, { { {}, { data_chunk(max_block_size - excess, 0x00), false }, 0 } }, {}, 0 };
+    BOOST_REQUIRE_EQUAL(instance.weight(), max_block_weight);
+    BOOST_REQUIRE(!instance.is_overweight());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_overweight__one_over_limit__true)
+{
+    const accessor probe{ 0, { { {}, { data_chunk(max_block_size, 0x00), false }, 0 } }, {}, 0 };
+    const auto excess = (probe.weight() - max_block_weight) / light_weight_factor;
+
+    const accessor instance{ 0, { { {}, { data_chunk(add1(max_block_size - excess), 0x00), false }, 0 } }, {}, 0 };
+    BOOST_REQUIRE(instance.is_overweight());
+}
+
+// A locktime equal to the threshold is a timestamp, not a height.
+BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_at_threshold__true)
+{
+    constexpr bool bip113 = false;
+    constexpr size_t height = locktime_threshold + 1u;
+    constexpr uint32_t time = locktime_threshold;
+    constexpr uint32_t past = 0;
+    constexpr uint32_t locktime = locktime_threshold;
+    constexpr uint32_t sequence = 1;
+
+    const accessor instance
+    {
+        0,
+        { { {}, script{}, sequence } },
+        {},
+        locktime
+    };
+
+    BOOST_REQUIRE(instance.is_absolute_locked(height, time, past, bip113));
+}
+
+// The sigop limit is inclusive, so the boundary must be tested.
+BOOST_AUTO_TEST_CASE(transaction__is_signature_operations_limited__at_limit__false)
+{
+    const script sigops{ operations(max_block_sigops, operation{ opcode::checksig }) };
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const accessor instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), max_block_sigops);
+    BOOST_REQUIRE(!instance.is_signature_operations_limited(false, false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__is_signature_operations_limited__one_over_limit__true)
+{
+    const script sigops{ operations(add1(max_block_sigops), operation{ opcode::checksig }) };
+    const inputs ins{ input{ point{ one_hash, 0 }, sigops, max_input_sequence } };
+    const accessor instance{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
+    BOOST_REQUIRE(instance.is_signature_operations_limited(false, false));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -43,7 +43,6 @@ BOOST_AUTO_TEST_CASE(base85__validate__multiple_tokens__throws)
     BOOST_REQUIRE_THROW(validate(value, string_list{ "foo", "bar" }, static_cast<base85*>(nullptr), 0), boost::program_options::validation_error);
 }
 
-
 BOOST_AUTO_TEST_CASE(base85__construct__default__empty_and_aligned)
 {
     const config::base85 instance{};

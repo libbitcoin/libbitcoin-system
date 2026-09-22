@@ -617,4 +617,32 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_program_size__unencumbe
     BOOST_REQUIRE(stack->empty());
 }
 
+// A 32 byte v1 program with no witness stack has no spend type [bip341].
+BOOST_AUTO_TEST_CASE(witness__extract_taproot__empty_stack__invalid_witness)
+{
+    hash_cptr leaf{};
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = taproot_prevout(c0_program);
+    const chain::witness instance{ chunk_cptrs{} };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
+}
+
+// The annex is discarded before the spend type is determined [bip341].
+BOOST_AUTO_TEST_CASE(witness__extract_taproot__annexed_key_path__success_with_checksig)
+{
+    hash_cptr leaf{};
+    script::cptr out{};
+    chunk_cptrs_ptr stack{};
+    const auto prevout = taproot_prevout(c0_program);
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x24_u8 }), to_shared<data_chunk>(data_chunk{ 0x50_u8, 0x42_u8 }) } };
+
+    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
+    BOOST_REQUIRE(!leaf);
+    BOOST_REQUIRE(*out == script{ { { opcode::checksig } } });
+    BOOST_REQUIRE_EQUAL(stack->size(), two);
+    BOOST_REQUIRE_EQUAL(*stack->back(), c0_program);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

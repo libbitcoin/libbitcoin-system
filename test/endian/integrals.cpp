@@ -87,7 +87,6 @@ static_assert(from_little<uint32_t, 4>(data_array<8>{ 8, 7, 6, 5, 4, 3, 2, 1 }) 
 static_assert(from_big   <uint64_t, 8>(data_array<16>{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }) == 0x090a0b0c0d0e0f10_u64);
 static_assert(from_little<uint64_t, 8>(data_array<16>{ 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }) == 0x0102030405060708_u64);
 
-
 // Runtime instances, as the assertions above are evaluated by the compiler.
 
 BOOST_AUTO_TEST_CASE(endian_integrals__to_from__runtime_widths__round_trip)

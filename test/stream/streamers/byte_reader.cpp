@@ -1780,7 +1780,6 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_line__multiple_lines__returns_sequential)
 
 BC_POP_WARNING()
 
-
 BOOST_AUTO_TEST_CASE(byte_reader__read_size__exceeds_limit__zero_invalid)
 {
     std::istringstream stream{ "\x2a" };
@@ -1819,7 +1818,6 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw0__empty__not_null_valid)
     BOOST_REQUIRE(reader);
     allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
-
 
 // Deleting a derived reader through its base invokes the virtual destructor.
 BOOST_AUTO_TEST_CASE(byte_reader__destruct__through_base_pointer__expected)

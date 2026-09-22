@@ -199,7 +199,6 @@ BOOST_AUTO_TEST_CASE(paths__extended_path__extended__unchanged)
     BOOST_REQUIRE_EQUAL(extended_path(test_maximum_extended), test_maximum_extended);
 }
 
-
 BOOST_AUTO_TEST_CASE(paths__default_config_path__subdirectory__appended)
 {
     const auto subdirectory = std::filesystem::path{ "libbitcoin" };

@@ -263,7 +263,6 @@ BOOST_AUTO_TEST_CASE(collection__is_sorted__sorted_non_distinct__true)
     BOOST_REQUIRE(is_sorted(data_chunk{ 0, 2, 2, 6, 8 }));
 }
 
-
 BOOST_AUTO_TEST_CASE(collection__is_sorted__unsorted__false)
 {
     BOOST_REQUIRE(!is_sorted(data_chunk{ 0, 2, 4, 2, 8 }));
@@ -628,7 +627,6 @@ BOOST_AUTO_TEST_CASE(collection__starts_with__matched_arrays__true)
     const auto result = starts_with(buffer.begin(), buffer.end(), sequence);
     BOOST_REQUIRE(result);
 }
-
 
 BOOST_AUTO_TEST_CASE(collection__binary_search__value_less_than_middle__found)
 {

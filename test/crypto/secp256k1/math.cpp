@@ -93,7 +93,6 @@ BOOST_AUTO_TEST_CASE(secp256k1__ec_multiply__expected)
 
 // negation
 
-
 // uncompressed and point-to-point overloads
 
 BOOST_AUTO_TEST_CASE(secp256k1__ec_add__uncompressed_point_secret__expected)

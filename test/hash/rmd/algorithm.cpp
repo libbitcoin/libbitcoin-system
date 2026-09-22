@@ -515,7 +515,6 @@ static_assert(accessor160::functor<143>() == accessor160::get_f1());
 static_assert(accessor160::functor<144>() == accessor160::get_f0());
 static_assert(accessor160::functor<159>() == accessor160::get_f0());
 
-
 // Multiple whole blocks stream through the iterable accumulate overload.
 BOOST_AUTO_TEST_CASE(rmd160__accumulate__multiple_blocks__matches_single_writes)
 {

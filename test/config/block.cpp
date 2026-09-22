@@ -173,7 +173,6 @@ BOOST_AUTO_TEST_CASE(block__ostream__populated__expected)
     BOOST_REQUIRE_EQUAL(serialized.str(), encoded_genesis_block);
 }
 
-
 BOOST_AUTO_TEST_CASE(block__istream__invalid_base16__throws_istream_exception)
 {
     config::block instance{};

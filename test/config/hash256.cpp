@@ -31,7 +31,6 @@ BOOST_AUTO_TEST_CASE(hash256__construct__default__null_hash)
     BOOST_REQUIRE_EQUAL((const hash_digest&)uninitialized_hash, null_hash);
 }
 
-
 #define HASH256 "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
 
 BOOST_AUTO_TEST_CASE(hash256__construct__copy_digest__expected)

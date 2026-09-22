@@ -637,7 +637,6 @@ BOOST_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_s
 
 BOOST_AUTO_TEST_SUITE_END()
 
-
 // printers
 
 BOOST_AUTO_TEST_CASE(printer__format_paragraph__short__single_line)

@@ -411,6 +411,17 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_within_limit__last
     BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), 0x1e0ffff0u);
 }
 
+// The easy allowance applies only past the limit, not at it.
+BOOST_AUTO_TEST_CASE(chain_state__work_required__testnet_easy_time_at_limit__last_non_limit_bits)
+{
+    settings settings(selection::testnet3);
+    auto values = get_values(settings.retargeting_interval());
+    values.height = settings.retargeting_interval() + 5u;
+    values.bits.ordered.push_back(settings.proof_of_work_limit);
+    values.timestamp.self = 1692625u + shift_left(settings.block_spacing_seconds);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), 0x1e0ffff0u);
+}
+
 BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__mainnet_limit__proof_of_work_limit)
 {
     settings settings(selection::mainnet);
@@ -439,6 +450,45 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled
     settings.forks.ltc_retarget_overflow_patch = true;
     const auto work = test_chain_state::work_required(values, settings.forks, settings);
     BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
+}
+
+// The timespan is clamped to the configured bounds, so any two timespans
+// beyond a bound retarget alike. The limit is raised so the result is not
+// saturated to proof_of_work_limit.
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_above_maximum__clamped)
+{
+    settings settings(chain::selection::mainnet);
+    settings.proof_of_work_limit = 0x1e0fffff;
+    auto values = get_values(settings.retargeting_interval());
+    values.timestamp.ordered.push_back(add1(settings.maximum_timespan()));
+    const auto first = test_chain_state::work_required(values, settings.forks, settings);
+
+    values.timestamp.ordered.push_back(settings.maximum_timespan() * 8u);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), first);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_below_minimum__clamped)
+{
+    settings settings(chain::selection::mainnet);
+    settings.proof_of_work_limit = 0x1e0fffff;
+    auto values = get_values(settings.retargeting_interval());
+    values.timestamp.ordered.push_back(sub1(settings.minimum_timespan()));
+    const auto first = test_chain_state::work_required(values, settings.forks, settings);
+
+    values.timestamp.ordered.push_back(settings.minimum_timespan() / 8u);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), first);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_clamps__differ)
+{
+    settings settings(chain::selection::mainnet);
+    settings.proof_of_work_limit = 0x1e0fffff;
+    auto values = get_values(settings.retargeting_interval());
+    values.timestamp.ordered.push_back(settings.maximum_timespan() * 8u);
+    const auto high = test_chain_state::work_required(values, settings.forks, settings);
+
+    values.timestamp.ordered.push_back(settings.minimum_timespan() / 8u);
+    BOOST_REQUIRE_NE(test_chain_state::work_required(values, settings.forks, settings), high);
 }
 
 // get_map

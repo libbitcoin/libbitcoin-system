@@ -46,7 +46,6 @@ BOOST_AUTO_TEST_CASE(base32__stream__data__canonical)
     BOOST_REQUIRE_EQUAL(stream.str(), "MZXW6YTBOI======");
 }
 
-
 BOOST_AUTO_TEST_CASE(base32__construct__copy_chunk__expected)
 {
     const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };

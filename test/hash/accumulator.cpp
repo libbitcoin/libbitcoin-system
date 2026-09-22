@@ -226,7 +226,6 @@ BOOST_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
     BOOST_REQUIRE_EQUAL(writer.double_flush(), expected);
 }
 
-
 // Runtime instances, as distinct from the constexpr cases above, which the
 // compiler evaluates without generating code.
 

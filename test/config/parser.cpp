@@ -157,7 +157,6 @@ BOOST_AUTO_TEST_CASE(parser__is_configured__specified_as_default_value__true)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-
 BOOST_AUTO_TEST_SUITE(parser__accessors)
 
 BOOST_AUTO_TEST_CASE(parser__format_invalid_parameter__option_message__cleaned)
