@@ -46,4 +46,26 @@ BOOST_AUTO_TEST_CASE(base32__stream__data__canonical)
     BOOST_REQUIRE_EQUAL(stream.str(), "MZXW6YTBOI======");
 }
 
+
+BOOST_AUTO_TEST_CASE(base32__construct__copy_chunk__expected)
+{
+    const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base32 instance(value);
+    BOOST_REQUIRE((const data_chunk&)instance == value);
+}
+
+BOOST_AUTO_TEST_CASE(base32__construct__move_chunk__expected)
+{
+    data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
+    const data_chunk expected{ 0x01, 0x02, 0x03, 0x04 };
+    const config::base32 instance(std::move(value));
+    BOOST_REQUIRE((const data_chunk&)instance == expected);
+}
+
+BOOST_AUTO_TEST_CASE(base32__construct__default__empty)
+{
+    const config::base32 instance{};
+    BOOST_REQUIRE((const data_chunk&)instance == data_chunk{});
+}
+
 BOOST_AUTO_TEST_SUITE_END()

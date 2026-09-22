@@ -259,4 +259,40 @@ BOOST_AUTO_TEST_CASE(url__inequality1__same_v6__false)
     BOOST_REQUIRE(!(instance1 != instance2));
 }
 
+
+BOOST_AUTO_TEST_CASE(url__construct__host_port__expected)
+{
+    const config::url instance("libbitcoin.org", 42);
+    BOOST_REQUIRE_EQUAL(instance.host(), "libbitcoin.org");
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+    BOOST_REQUIRE_EQUAL(instance.to_uri(), "libbitcoin.org:42");
+}
+
+BOOST_AUTO_TEST_CASE(url__construct__host_zero_port__no_port_in_authority)
+{
+    const config::url instance("libbitcoin.org", 0);
+    BOOST_REQUIRE_EQUAL(instance.to_uri(), "libbitcoin.org");
+}
+
+BOOST_AUTO_TEST_CASE(url__construct__authority__expected)
+{
+    const config::authority authority("42.42.42.42:42");
+    const config::url instance(authority);
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(url__construct__asio_endpoint__expected)
+{
+    const config::authority authority("42.42.42.42:42");
+    const config::url instance(authority.to_endpoint());
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(url__construct__asio_address__expected)
+{
+    const config::authority authority("42.42.42.42:42");
+    const config::url instance(authority.ip(), 42);
+    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

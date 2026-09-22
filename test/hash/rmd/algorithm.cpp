@@ -515,4 +515,22 @@ static_assert(accessor160::functor<143>() == accessor160::get_f1());
 static_assert(accessor160::functor<144>() == accessor160::get_f0());
 static_assert(accessor160::functor<159>() == accessor160::get_f0());
 
+
+// Multiple whole blocks stream through the iterable accumulate overload.
+BOOST_AUTO_TEST_CASE(rmd160__accumulate__multiple_blocks__matches_single_writes)
+{
+    constexpr auto block_size = array_count<rmd160::block_t>;
+    const data_chunk data(3u * block_size, 0x42);
+
+    accumulator<rmd160> streamed{};
+    BOOST_REQUIRE(streamed.write(data));
+
+    accumulator<rmd160> written{};
+    BOOST_REQUIRE(written.write(data_chunk(block_size, 0x42)));
+    BOOST_REQUIRE(written.write(data_chunk(block_size, 0x42)));
+    BOOST_REQUIRE(written.write(data_chunk(block_size, 0x42)));
+
+    BOOST_REQUIRE_EQUAL(streamed.flush(), written.flush());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

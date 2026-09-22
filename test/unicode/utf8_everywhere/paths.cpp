@@ -199,6 +199,19 @@ BOOST_AUTO_TEST_CASE(paths__extended_path__extended__unchanged)
     BOOST_REQUIRE_EQUAL(extended_path(test_maximum_extended), test_maximum_extended);
 }
 
+
+BOOST_AUTO_TEST_CASE(paths__default_config_path__subdirectory__appended)
+{
+    const auto subdirectory = std::filesystem::path{ "libbitcoin" };
+    const auto path = default_config_path(subdirectory);
+    BOOST_REQUIRE_EQUAL(path.filename(), subdirectory);
+}
+
+BOOST_AUTO_TEST_CASE(paths__default_config_path__empty__does_not_throw)
+{
+    BOOST_REQUIRE_NO_THROW(default_config_path({}));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

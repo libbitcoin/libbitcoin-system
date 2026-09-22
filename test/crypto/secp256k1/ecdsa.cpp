@@ -145,4 +145,97 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
     BOOST_CHECK(verify_signature(compressed, sighash, expected_signature));
 }
 
+
+// Lax DER parsing [pre-bip66], malformed encodings.
+
+static bool lax(const data_chunk& der) NOEXCEPT
+{
+    using namespace system::ecdsa;
+    ec_signature out{};
+    return decode_signature(out, der, false);
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_empty__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_wrong_sequence_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("31")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_sequence_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("30")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_sequence_length_overflow__false)
+{
+    // 0x81 indicates one length byte follows, but none does.
+    BOOST_REQUIRE(!lax(base16_chunk("3082")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_missing_r_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("3002")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_wrong_r_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("300203")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_r_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("300202")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_long_length_overflow__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("3003028f")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_length_exceeds_input__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("300302207f")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_missing_s_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("3003020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_s_tag__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("300402010102")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_s_long_length_overflow__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("3005020101028f")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_s_length_exceeds_input__false)
+{
+    BOOST_REQUIRE(!lax(base16_chunk("300502010102207f")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_lengths__true)
+{
+    // Long-form sequence, r and s lengths (one length byte each).
+    BOOST_REQUIRE(lax(base16_chunk("3081060281010102810102")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_leading_zeros__true)
+{
+    // Two length bytes each, the first zero, exercising the skip loops.
+    BOOST_REQUIRE(lax(base16_chunk("3082000a02820001010282000102")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_minimal__true)
+{
+    BOOST_REQUIRE(lax(base16_chunk("3006020101020101")));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -226,5 +226,111 @@ BOOST_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
     BOOST_REQUIRE_EQUAL(writer.double_flush(), expected);
 }
 
+
+// Runtime instances, as distinct from the constexpr cases above, which the
+// compiler evaluates without generating code.
+
+BOOST_AUTO_TEST_CASE(accumulator__serialize__runtime__matches_constexpr)
+{
+    constexpr auto expected = checked::serialize(42);
+    const auto size = 42_size;
+    BOOST_REQUIRE_EQUAL(checked::serialize(size), expected);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__runtime_state__empty_and_full__expected)
+{
+    checked writer{};
+    BOOST_REQUIRE(writer.is_full());
+    BOOST_REQUIRE(writer.is_empty());
+    BOOST_REQUIRE(!writer.is_buffer_overflow(zero));
+    BOOST_REQUIRE_EQUAL(writer.next(), zero);
+    BOOST_REQUIRE_EQUAL(writer.gap(), block_size);
+
+    BOOST_REQUIRE(writer.write(data_chunk(one, 0x00)));
+    BOOST_REQUIRE(!writer.is_full());
+    BOOST_REQUIRE(!writer.is_empty());
+    BOOST_REQUIRE_EQUAL(writer.next(), one);
+    BOOST_REQUIRE_EQUAL(writer.gap(), sub1(block_size));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__write__data_chunk_and_string__same_digest)
+{
+    const std::string text{ "libbitcoin" };
+    const data_chunk data{ text.begin(), text.end() };
+
+    accumulator<sha256> from_chunk{};
+    BOOST_REQUIRE(from_chunk.write(data));
+
+    accumulator<sha256> from_string{};
+    BOOST_REQUIRE(from_string.write(text));
+
+    BOOST_REQUIRE_EQUAL(from_chunk.flush(), from_string.flush());
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__flush__data_chunk_out__matches_digest)
+{
+    accumulator<sha256> writer{};
+    accumulator<sha256> other{};
+    BOOST_REQUIRE(writer.write(std::string{ "libbitcoin" }));
+    BOOST_REQUIRE(other.write(std::string{ "libbitcoin" }));
+
+    data_chunk out(array_count<sha256::digest_t>, 0x00);
+    writer.flush(out);
+    BOOST_REQUIRE_EQUAL(out, to_chunk(other.flush()));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__double_flush__digest_out__matches_return)
+{
+    accumulator<sha256> left{};
+    accumulator<sha256> right{};
+    BOOST_REQUIRE(left.write(std::string{ "libbitcoin" }));
+    BOOST_REQUIRE(right.write(std::string{ "libbitcoin" }));
+
+    sha256::digest_t digest{};
+    left.double_flush(digest);
+    BOOST_REQUIRE_EQUAL(digest, right.double_flush());
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__double_flush__empty__matches_written)
+{
+    accumulator<sha256> writer{};
+    const auto expected = writer.double_flush();
+
+    accumulator<sha256> other{};
+    sha256::digest_t digest{};
+    other.double_flush(digest);
+    BOOST_REQUIRE_EQUAL(digest, expected);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__double_hash__chunk_and_string__same)
+{
+    const std::string text{ "libbitcoin" };
+    const data_chunk data{ text.begin(), text.end() };
+    BOOST_REQUIRE_EQUAL(accumulator<sha256>::double_hash(data), accumulator<sha256>::double_hash(text));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__double_hash_chunk__chunk_and_string__same)
+{
+    const std::string text{ "libbitcoin" };
+    const data_chunk data{ text.begin(), text.end() };
+    BOOST_REQUIRE_EQUAL(accumulator<sha256>::double_hash_chunk(data), accumulator<sha256>::double_hash_chunk(text));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__double_hash__multiple_blocks__matches_accumulated)
+{
+    const data_chunk data(2u * array_count<sha256::block_t>, 0x42);
+    accumulator<sha256> writer{};
+    BOOST_REQUIRE(writer.write(data));
+    BOOST_REQUIRE_EQUAL(accumulator<sha256>::double_hash(data), writer.double_flush());
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__hash__chunk_and_string__same)
+{
+    const std::string text{ "libbitcoin" };
+    const data_chunk data{ text.begin(), text.end() };
+    BOOST_REQUIRE_EQUAL(accumulator<sha256>::hash(data), accumulator<sha256>::hash(text));
+    BOOST_REQUIRE_EQUAL(accumulator<sha256>::hash_chunk(data), accumulator<sha256>::hash_chunk(text));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

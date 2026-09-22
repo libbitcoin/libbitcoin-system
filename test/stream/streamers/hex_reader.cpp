@@ -110,4 +110,70 @@ BOOST_AUTO_TEST_CASE(hex_reader__istream_stream__genesis_block__expected)
     BOOST_REQUIRE(block == genesis());
 }
 
+
+// guards and accessors
+
+BOOST_AUTO_TEST_CASE(hex_reader__read_bytes__non_base16__invalid)
+{
+    std::istringstream hex{ "zz" };
+    read::base16::istream hexer{ hex };
+    data_chunk out(one, 0x00);
+    hexer.read_bytes(out.data(), one);
+    BOOST_REQUIRE(!hexer);
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__read_bytes__overflow__invalid)
+{
+    std::istringstream hex{ "42" };
+    read::base16::istream hexer{ hex };
+    data_chunk out(one, 0x00);
+    hexer.read_bytes(out.data(), max_size_t);
+    BOOST_REQUIRE(!hexer);
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__peek_byte__valid__expected)
+{
+    std::istringstream hex{ "4243" };
+    read::base16::istream hexer{ hex };
+    BOOST_REQUIRE_EQUAL(hexer.peek_byte(), 0x42_u8);
+    BOOST_REQUIRE_EQUAL(hexer.read_byte(), 0x42_u8);
+    BOOST_REQUIRE_EQUAL(hexer.read_byte(), 0x43_u8);
+    BOOST_REQUIRE(hexer);
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__skip_bytes__valid__advances)
+{
+    std::istringstream hex{ "4243" };
+    read::base16::istream hexer{ hex };
+    hexer.skip_bytes(one);
+    BOOST_REQUIRE_EQUAL(hexer.read_byte(), 0x43_u8);
+    BOOST_REQUIRE(hexer);
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__skip_bytes__overflow__invalid)
+{
+    std::istringstream hex{ "4243" };
+    read::base16::istream hexer{ hex };
+    hexer.skip_bytes(max_size_t);
+    BOOST_REQUIRE(!hexer);
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__rewind_bytes__valid__rereads)
+{
+    std::istringstream hex{ "4243" };
+    read::base16::istream hexer{ hex };
+    BOOST_REQUIRE_EQUAL(hexer.read_byte(), 0x42_u8);
+    hexer.rewind_bytes(one);
+    BOOST_REQUIRE_EQUAL(hexer.read_byte(), 0x42_u8);
+    BOOST_REQUIRE(hexer);
+}
+
+BOOST_AUTO_TEST_CASE(hex_reader__rewind_bytes__overflow__invalid)
+{
+    std::istringstream hex{ "4243" };
+    read::base16::istream hexer{ hex };
+    hexer.rewind_bytes(max_size_t);
+    BOOST_REQUIRE(!hexer);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

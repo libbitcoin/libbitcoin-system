@@ -57,6 +57,7 @@ public:
 
     using parser::load_command_variables;
     using parser::load_configuration_variables;
+    using parser::load_environment_variables;
 
 private:
     config::path configured_;
@@ -156,4 +157,56 @@ BOOST_AUTO_TEST_CASE(parser__is_configured__specified_as_default_value__true)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+BOOST_AUTO_TEST_SUITE(parser__accessors)
+
+BOOST_AUTO_TEST_CASE(parser__format_invalid_parameter__option_message__cleaned)
+{
+    BOOST_REQUIRE_EQUAL(parser::format_invalid_parameter("the value for option is invalid"), "Error: the value is invalid");
+}
+
+BOOST_AUTO_TEST_CASE(parser__format_invalid_parameter__other_message__prefixed)
+{
+    BOOST_REQUIRE_EQUAL(parser::format_invalid_parameter("bogus"), "Error: bogus");
+}
+
+BOOST_AUTO_TEST_CASE(parser__variables__unparsed__empty)
+{
+    const mock_parser instance{};
+    BOOST_REQUIRE(instance.variables().empty());
+}
+
+BOOST_AUTO_TEST_CASE(parser__get_option__unset__false)
+{
+    const mock_parser instance{};
+    BOOST_REQUIRE(!instance.get_option("without_default"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__get_option__set__true)
+{
+    mock_parser instance{};
+    const char* argv[]{ "test", "--without_default", "1" };
+    instance.load_command_variables(3, argv);
+    BOOST_REQUIRE(instance.get_option("without_default"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__get_config_option__unset__empty)
+{
+    const mock_parser instance{};
+    BOOST_REQUIRE(instance.get_config_option("config").empty());
+}
+
+BOOST_AUTO_TEST_CASE(parser__load_environment_variables__empty_prefix__does_not_throw)
+{
+    mock_parser instance{};
+    BOOST_REQUIRE_NO_THROW(instance.load_environment_variables("BC_TEST_UNUSED_"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__unspecified__false)
+{
+    mock_parser instance{};
+    BOOST_REQUIRE(!instance.load_configuration_variables("config"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

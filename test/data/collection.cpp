@@ -629,4 +629,20 @@ BOOST_AUTO_TEST_CASE(collection__starts_with__matched_arrays__true)
     BOOST_REQUIRE(result);
 }
 
+
+BOOST_AUTO_TEST_CASE(collection__binary_search__value_less_than_middle__found)
+{
+    const std_vector<uint8_t> sorted{ 1, 3, 5, 7, 9 };
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, 1_u8), 0);
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, 9_u8), 4);
+    BOOST_REQUIRE_EQUAL(binary_search(sorted, 4_u8), -1);
+}
+
+BOOST_AUTO_TEST_CASE(collection__pop__empty__default)
+{
+    std_vector<uint8_t> stack{};
+    BOOST_REQUIRE_EQUAL(pop(stack), 0_u8);
+    BOOST_REQUIRE(stack.empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
