@@ -259,7 +259,6 @@ BOOST_AUTO_TEST_CASE(url__inequality1__same_v6__false)
     BOOST_REQUIRE(!(instance1 != instance2));
 }
 
-
 BOOST_AUTO_TEST_CASE(url__construct__host_port__expected)
 {
     const config::url instance("libbitcoin.org", 42);

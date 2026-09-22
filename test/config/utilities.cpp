@@ -470,7 +470,6 @@ BOOST_AUTO_TEST_CASE(utilities__parse_url__invalids__false_expected)
     BOOST_REQUIRE(!parse_url(scheme, host, port, ""));
 }
 
-
 BOOST_AUTO_TEST_CASE(utilities__is_member__mixed_families__false)
 {
     const auto ip4 = from_host("42.42.42.42");

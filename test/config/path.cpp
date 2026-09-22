@@ -164,7 +164,6 @@ BOOST_AUTO_TEST_CASE(path__validate__multiple_tokens__throws)
     BOOST_REQUIRE_THROW(validate(value, string_list{ "foo", "bar" }, static_cast<path*>(nullptr), 0), boost::program_options::validation_error);
 }
 
-
 BOOST_AUTO_TEST_CASE(path__construct__type__expected)
 {
     const config::path::type value{ "foo/bar" };

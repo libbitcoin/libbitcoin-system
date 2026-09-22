@@ -245,7 +245,6 @@ BOOST_AUTO_TEST_CASE(endpoint__inequality1__same_v6__false)
     BOOST_REQUIRE(!(host1 != host2));
 }
 
-
 BOOST_AUTO_TEST_CASE(endpoint__construct__host_port__expected)
 {
     const config::endpoint instance("libbitcoin.org", 42);

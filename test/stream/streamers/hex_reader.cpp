@@ -110,7 +110,6 @@ BOOST_AUTO_TEST_CASE(hex_reader__istream_stream__genesis_block__expected)
     BOOST_REQUIRE(block == genesis());
 }
 
-
 // guards and accessors
 
 BOOST_AUTO_TEST_CASE(hex_reader__read_bytes__non_base16__invalid)

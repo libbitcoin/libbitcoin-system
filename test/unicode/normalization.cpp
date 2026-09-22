@@ -790,7 +790,6 @@ BOOST_AUTO_TEST_CASE(normalization__has_whitespace__foobar__false)
     BOOST_REQUIRE(!has_whitespace("foobar"));
 }
 
-
 // boundary and degenerate sequences
 
 BOOST_AUTO_TEST_CASE(normalization__nfc__single_character__unchanged)
@@ -823,7 +822,6 @@ BOOST_AUTO_TEST_CASE(normalization__nfd__leading_combining_mark__unchanged)
     to_canonical_decomposition(value);
     BOOST_REQUIRE_EQUAL(value, expected);
 }
-
 
 BOOST_AUTO_TEST_CASE(normalization__to_upper__ascii_letters__uppercased)
 {

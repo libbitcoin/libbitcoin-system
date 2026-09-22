@@ -43,7 +43,6 @@ BOOST_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
     BOOST_REQUIRE(original == instance);
 }
 
-
 BOOST_AUTO_TEST_CASE(base58__construct__copy_chunk__expected)
 {
     const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };

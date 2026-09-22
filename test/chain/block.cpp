@@ -689,7 +689,6 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
     const auto tx1_hash = txs[1].hash(false);
     const auto tx2_hash = txs[2].hash(false);
 
-
     // Test transaction at position 0
     {
         const auto branch = block.merkle_branch(0, false);
@@ -1780,7 +1779,6 @@ BOOST_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50_off__not_applied)
     const auto instance = hash_limit_block();
     BOOST_REQUIRE_NE(instance.check(ctx, false), error::temporary_hash_limit);
 }
-
 
 // The size and weight limits are inclusive, so the boundary must be tested.
 BOOST_AUTO_TEST_CASE(block__is_oversized__at_limit__false)
