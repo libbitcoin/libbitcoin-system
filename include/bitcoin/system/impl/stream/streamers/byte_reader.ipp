@@ -288,11 +288,13 @@ data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
         return {};
 
     const auto cptr = to_allocated<data_array<Size>>(get_arena());
+    LCOV_EXCL_START("Allocation failure throws rather than returning null.")
     if (!cptr)
     {
         invalidate();
         return cptr;
     }
+    LCOV_EXCL_STOP()
 
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
@@ -443,11 +445,13 @@ chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
 
     // TODO: bypass vector byte fill.
     const auto cptr = to_allocated<data_chunk>(get_arena(), size);
+    LCOV_EXCL_START("Allocation failure throws rather than returning null.")
     if (!cptr)
     {
         invalidate();
         return cptr;
     }
+    LCOV_EXCL_STOP()
 
     if (is_zero(size))
         return cptr;
@@ -473,11 +477,13 @@ data_chunk* byte_reader<IStream>::read_bytes_raw(size_t size) NOEXCEPT
     // TODO: bypass vector byte fill.
     // std::uses_allocator_construction_args supplies allocator to vector.
     const auto raw = allocator_.new_object<data_chunk>(size);
+    LCOV_EXCL_START("Allocation failure throws rather than returning null.")
     if (raw == nullptr)
     {
         invalidate();
         return raw;
     }
+    LCOV_EXCL_STOP()
 
     if (is_zero(size))
         return raw;

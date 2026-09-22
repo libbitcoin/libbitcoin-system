@@ -33,7 +33,7 @@ class BC_API version
 public:
     typedef std::shared_ptr<version> ptr;
 
-    DEFAULT_COPY_MOVE_DESTRUCT(version);
+    DEFAULT_COPY_MOVE(version);
 
     version() NOEXCEPT;
 

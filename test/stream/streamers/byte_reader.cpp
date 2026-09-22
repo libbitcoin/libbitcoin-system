@@ -1820,4 +1820,15 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw0__empty__not_null_valid)
     allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
 
+
+// Deleting a derived reader through its base invokes the virtual destructor.
+BOOST_AUTO_TEST_CASE(byte_reader__destruct__through_base_pointer__expected)
+{
+    std::istringstream stream{ "*" };
+    auto reader = std::make_unique<bit_reader<std::istringstream>>(stream);
+    std::unique_ptr<byte_reader<std::istringstream>> base{ std::move(reader) };
+    BOOST_REQUIRE(*base);
+    base.reset();
+    BOOST_REQUIRE(!base);
+}
 BOOST_AUTO_TEST_SUITE_END()

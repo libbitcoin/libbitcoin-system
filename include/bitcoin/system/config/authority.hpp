@@ -34,7 +34,7 @@ class BC_API authority
 public:
     typedef std::shared_ptr<authority> ptr;
 
-    DEFAULT_COPY_MOVE_DESTRUCT(authority);
+    DEFAULT_COPY_MOVE(authority);
 
     authority() NOEXCEPT;
 
