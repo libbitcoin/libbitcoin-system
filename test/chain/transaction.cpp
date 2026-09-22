@@ -2844,6 +2844,38 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__expected)
     BOOST_REQUIRE_EQUAL(sighash, base16_array("43f5e669234797e57bbcd5d3dbce8dabba005c1e282e3ec06875311d9961900e"));
 }
 
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex_single__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_single, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("27849d2ce26971ac0058fd81468d5998d0ed3cc4109d32b2625b06eccd0acdec"));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex_all_anyone_can_pay__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::all_anyone_can_pay, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("e8ce62f56bab0627d317648011197c55c5d84fe931cfb1be7c13915a4fb2259c"));
+}
+
+// The tapscript extension follows the annex commitment [bip342].
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__tapscript_annex__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+    const auto tapleaf = to_shared<hash_digest>(one_hash);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("04b4b4559279d6696b2dbaca5dee86a2e36d0bde098f66d40336e205923a49a4"));
+}
+
 // The annex is committed by the signature hash [bip341].
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__differs)
 {
