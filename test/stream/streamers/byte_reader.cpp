@@ -1780,4 +1780,43 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_line__multiple_lines__returns_sequential)
 
 BC_POP_WARNING()
 
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_size__exceeds_limit__zero_invalid)
+{
+    std::istringstream stream{ "\x2a" };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_size(41), zero);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_size__within_limit__expected)
+{
+    std::istringstream stream{ "\x2a" };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_size(42), 42u);
+    BOOST_REQUIRE(reader);
+}
+
+// A pointer is returned, undefined behavior to dereference it, must destroy.
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw0__to_end__not_null_valid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    const auto ptr = reader.read_bytes_raw();
+    BOOST_REQUIRE(ptr != nullptr);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+    allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
+}
+
+// A pointer is returned, undefined behavior to dereference it, must destroy.
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw0__empty__not_null_valid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    const auto ptr = reader.read_bytes_raw();
+    BOOST_REQUIRE(ptr != nullptr);
+    BOOST_REQUIRE(reader);
+    allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
+}
 BOOST_AUTO_TEST_SUITE_END()
