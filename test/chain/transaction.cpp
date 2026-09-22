@@ -2833,6 +2833,17 @@ static transaction taproot_tx(const chunk_cptrs& stack) NOEXCEPT
     return out;
 }
 
+// The annex is committed with its size prefix [bip341].
+BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__expected)
+{
+    const chunk_cptrs annexed{ to_shared<data_chunk>(data_chunk{ 0x01 }), to_shared<data_chunk>(data_chunk{ 0x50, 0x42 }) };
+    const auto instance = taproot_tx(annexed);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE_EQUAL(sighash, base16_array("43f5e669234797e57bbcd5d3dbce8dabba005c1e282e3ec06875311d9961900e"));
+}
+
 // The annex is committed by the signature hash [bip341].
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__differs)
 {
