@@ -1831,4 +1831,5 @@ BOOST_AUTO_TEST_CASE(byte_reader__destruct__through_base_pointer__expected)
     base.reset();
     BOOST_REQUIRE(!base);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

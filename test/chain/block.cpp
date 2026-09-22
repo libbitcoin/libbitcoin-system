@@ -1818,4 +1818,5 @@ BOOST_AUTO_TEST_CASE(block__is_overweight__at_limit__false)
     BOOST_REQUIRE_EQUAL(instance.weight(), max_block_weight);
     BOOST_REQUIRE(!instance.is_overweight());
 }
+
 BOOST_AUTO_TEST_SUITE_END()
