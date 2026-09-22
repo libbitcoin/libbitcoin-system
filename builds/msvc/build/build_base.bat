@@ -1,7 +1,5 @@
 @ECHO OFF
-REM Usage: [buildbase.bat vs2017 libbitcoin "Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"]
-REM Usage: [buildbase.bat vs2015 libbitcoin "Microsoft Visual Studio 14.0\VC"]
-REM Usage: [buildbase.bat vs2013 libbitcoin "Microsoft Visual Studio 12.0\VC"]
+REM Usage: [buildbase.bat vs2026 libbitcoin "Microsoft Visual Studio\18\Community\VC\Auxiliary\Build"]
 
 SET studio=%1
 SET project=%2
