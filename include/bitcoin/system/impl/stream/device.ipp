@@ -103,20 +103,26 @@ template <typename Container>
 typename device<Container>::sequence
 device<Container>::do_sequence() const NOEXCEPT
 {
+    LCOV_EXCL_START("Base device requires an override.")
     BC_ASSERT_MSG(false, "device<Container>::do_sequence() not implemented");
     return {};
+    LCOV_EXCL_STOP()
 }
 
 template <typename Container>
 void device<Container>::do_read(value_type*, size_type) NOEXCEPT
 {
+    LCOV_EXCL_START("Base device requires an override.")
     BC_ASSERT_MSG(false, "device<Container>::do_read() not implemented");
+    LCOV_EXCL_STOP()
 }
 
 template <typename Container>
 void device<Container>::do_write(const value_type*, size_type) NOEXCEPT
 {
+    LCOV_EXCL_START("Base device requires an override.")
     BC_ASSERT_MSG(false, "device<Container>::do_write() not implemented");
+    LCOV_EXCL_STOP()
 }
 
 template <typename Container>
