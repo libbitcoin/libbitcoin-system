@@ -452,6 +452,45 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled
     BOOST_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
 }
 
+// The timespan is clamped to the configured bounds, so any two timespans
+// beyond a bound retarget alike. The limit is raised so the result is not
+// saturated to proof_of_work_limit.
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_above_maximum__clamped)
+{
+    settings settings(chain::selection::mainnet);
+    settings.proof_of_work_limit = 0x1e0fffff;
+    auto values = get_values(settings.retargeting_interval());
+    values.timestamp.ordered.push_back(add1(settings.maximum_timespan()));
+    const auto first = test_chain_state::work_required(values, settings.forks, settings);
+
+    values.timestamp.ordered.push_back(settings.maximum_timespan() * 8u);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), first);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_below_minimum__clamped)
+{
+    settings settings(chain::selection::mainnet);
+    settings.proof_of_work_limit = 0x1e0fffff;
+    auto values = get_values(settings.retargeting_interval());
+    values.timestamp.ordered.push_back(sub1(settings.minimum_timespan()));
+    const auto first = test_chain_state::work_required(values, settings.forks, settings);
+
+    values.timestamp.ordered.push_back(settings.minimum_timespan() / 8u);
+    BOOST_REQUIRE_EQUAL(test_chain_state::work_required(values, settings.forks, settings), first);
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_clamps__differ)
+{
+    settings settings(chain::selection::mainnet);
+    settings.proof_of_work_limit = 0x1e0fffff;
+    auto values = get_values(settings.retargeting_interval());
+    values.timestamp.ordered.push_back(settings.maximum_timespan() * 8u);
+    const auto high = test_chain_state::work_required(values, settings.forks, settings);
+
+    values.timestamp.ordered.push_back(settings.minimum_timespan() / 8u);
+    BOOST_REQUIRE_NE(test_chain_state::work_required(values, settings.forks, settings), high);
+}
+
 // get_map
 // ----------------------------------------------------------------------------
 
