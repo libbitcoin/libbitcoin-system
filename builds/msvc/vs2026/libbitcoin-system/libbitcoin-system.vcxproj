@@ -109,6 +109,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup Label="Prebuild">
+    <GeneratedIncludeDirBase>$(ProjectDir)..\..\..\..\non-persistent\</GeneratedIncludeDirBase>
+    <GeneratedIncludeDir>$(GeneratedIncludeDirBase)include\</GeneratedIncludeDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ConfigurableFile Include="version">
+      <FileInput>$(RepoRoot)include\bitcoin\system\version.hpp.in</FileInput>
+      <FileOutput>$(GeneratedIncludeDirBase)include\bitcoin\system\version.hpp</FileOutput>
+    </ConfigurableFile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="%(ConfigurableFile.FileInput)" />
+    <ClInclude Include="%(ConfigurableFile.FileOutput)">
+      <DependentUpon>%(ConfigurableFile.FileInput)</DependentUpon>
+    </ClInclude>
+  </ItemGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType Condition="$(Configuration.IndexOf('DLL')) == -1">StaticLibrary</ConfigurationType>
     <ConfigurationType Condition="$(Configuration.IndexOf('DLL')) != -1">DynamicLibrary</ConfigurationType>

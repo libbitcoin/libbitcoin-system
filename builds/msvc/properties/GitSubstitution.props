@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_PropertySheetDisplayName>Git Substitution (ConfigurableFile)</_PropertySheetDisplayName>
+
+    <!-- Output root for generated headers (overridable from vcxproj) -->
+    <GeneratedIncludeDir Condition="'$(GeneratedIncludeDir)' == ''">$(IntDir)generated\include\</GeneratedIncludeDir>
+
+    <!-- @TOKEN@ names in .in files (overridable from vcxproj) -->
+    <VersionMajorToken Condition="'$(VersionMajorToken)' == ''">LIBBITCOIN_VERSION_MAJOR</VersionMajorToken>
+    <VersionMinorToken Condition="'$(VersionMinorToken)' == ''">LIBBITCOIN_VERSION_MINOR</VersionMinorToken>
+    <VersionPatchToken Condition="'$(VersionPatchToken)' == ''">LIBBITCOIN_VERSION_PATCH</VersionPatchToken>
+    <GitCommitHashToken Condition="'$(GitCommitHashToken)' == ''">GIT_COMMIT_HASH</GitCommitHashToken>
+    <GitOriginUrlToken Condition="'$(GitOriginUrlToken)' == ''">GIT_ORIGIN_URL</GitOriginUrlToken>
+    <GitDirtyToken Condition="'$(GitDirtyToken)' == ''">GIT_DIRTY</GitDirtyToken>
+
+    <!-- Substituted values (overridable from vcxproj; patch filled in target if still empty) -->
+    <VersionMajorValue Condition="'$(VersionMajorValue)' == ''">4</VersionMajorValue>
+    <VersionMinorValue Condition="'$(VersionMinorValue)' == ''">0</VersionMinorValue>
+  </PropertyGroup>
+
+  <!-- Prepend generated include dir unless disabled by caller -->
+  <ItemDefinitionGroup Condition="'$(GitSubstitutionAddIncludeDir)' != 'false'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>
+        $(GeneratedIncludeDir);%(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <Target Name="GenerateConfiguredHeaders"
+          BeforeTargets="ClCompile"
+          Condition="'@(ConfigurableFile)' != ''"
+          Inputs="%(ConfigurableFile.FileInput)"
+          Outputs="%(ConfigurableFile.FileOutput)">
+
+    <!-- Resolve RepoRoot; fall back to empty if unset so git -C still runs safely -->
+    <PropertyGroup>
+      <_GitRepoRoot Condition="'$(RepoRoot)' != ''">$([System.IO.Path]::GetFullPath('$(RepoRoot)').TrimEnd('\'))</_GitRepoRoot>
+      <_GitRepoRoot Condition="'$(RepoRoot)' == ''">.</_GitRepoRoot>
+    </PropertyGroup>
+
+    <Exec Command="git -C &quot;$(_GitRepoRoot)&quot; rev-parse HEAD"
+          ConsoleToMSBuild="true"
+          IgnoreExitCode="true"
+          StandardOutputImportance="low"
+          Condition="'$(GitCommitHash)' == ''">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
+      <Output TaskParameter="ExitCode" PropertyName="_GitRevParseExit" />
+    </Exec>
+
+    <Exec Command="git -C &quot;$(_GitRepoRoot)&quot; rev-list --count HEAD"
+          ConsoleToMSBuild="true"
+          IgnoreExitCode="true"
+          StandardOutputImportance="low"
+          Condition="'$(GitCommitHeight)' == ''">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHeight" />
+    </Exec>
+
+    <Exec Command="git -C &quot;$(_GitRepoRoot)&quot; remote get-url origin"
+          ConsoleToMSBuild="true"
+          IgnoreExitCode="true"
+          StandardOutputImportance="low"
+          Condition="'$(GitOriginUrl)' == ''">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitOriginUrl" />
+    </Exec>
+
+    <Exec Command="git -C &quot;$(_GitRepoRoot)&quot; status --porcelain"
+          ConsoleToMSBuild="true"
+          IgnoreExitCode="true"
+          StandardOutputImportance="low"
+          Condition="'$(GitDirty)' == ''">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitStatus" />
+    </Exec>
+
+    <!-- Sanitize git outputs: reject multi-line / non-hash / empty results from failed git -->
+    <PropertyGroup>
+      <!-- Commit hash: keep only a plausible single-line hex hash; else unknown -->
+      <GitCommitHash Condition="'$(GitCommitHash)' == '' or $(GitCommitHash.Contains($([System.Environment]::NewLine))) or $(GitCommitHash.Contains(' '))">unknown</GitCommitHash>
+      <GitCommitHash Condition="'$(GitCommitHash)' == ''">unknown</GitCommitHash>
+
+      <!-- Height: digits only; else 0 -->
+      <GitCommitHeight Condition="'$(GitCommitHeight)' == '' or $([System.Text.RegularExpressions.Regex]::IsMatch('$(GitCommitHeight)', '[^0-9]'))">0</GitCommitHeight>
+      <GitCommitHeight Condition="'$(GitCommitHeight)' == ''">0</GitCommitHeight>
+
+      <!-- Origin URL: clear if it looks like an error message -->
+      <GitOriginUrl Condition="$(GitOriginUrl.Contains('fatal:')) or $(GitOriginUrl.Contains('error:'))"></GitOriginUrl>
+      <GitOriginUrl Condition="'$(GitOriginUrl)' == ''"></GitOriginUrl>
+
+      <!-- Dirty: any non-empty porcelain status => 1 -->
+      <GitDirty Condition="'$(GitStatus)' != '' and !$(GitStatus.Contains('fatal:'))">1</GitDirty>
+      <GitDirty Condition="'$(GitDirty)' == ''">0</GitDirty>
+
+      <VersionPatchValue Condition="'$(VersionPatchValue)' == ''">$(GitCommitHeight)</VersionPatchValue>
+    </PropertyGroup>
+
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('%(ConfigurableFile.FileOutput)'))" />
+
+    <!-- Invoke external script; values passed as discrete arguments (avoids cmd/PowerShell quoting bugs) -->
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)GitSubstitute.ps1&quot; -InputPath &quot;%(ConfigurableFile.FileInput)&quot; -OutputPath &quot;%(ConfigurableFile.FileOutput)&quot; -VersionMajorToken &quot;$(VersionMajorToken)&quot; -VersionMinorToken &quot;$(VersionMinorToken)&quot; -VersionPatchToken &quot;$(VersionPatchToken)&quot; -GitCommitHashToken &quot;$(GitCommitHashToken)&quot; -GitOriginUrlToken &quot;$(GitOriginUrlToken)&quot; -GitDirtyToken &quot;$(GitDirtyToken)&quot; -VersionMajorValue &quot;$(VersionMajorValue)&quot; -VersionMinorValue &quot;$(VersionMinorValue)&quot; -VersionPatchValue &quot;$(VersionPatchValue)&quot; -GitCommitHash &quot;$(GitCommitHash)&quot; -GitOriginUrl &quot;$(GitOriginUrl)&quot; -GitDirty &quot;$(GitDirty)&quot;" />
+  </Target>
+
+</Project>

@@ -52,6 +52,7 @@ builds/gnu/*.pc
 bin
 build
 obj
+non-persistent
 
 # KDevelop IDE
 /*.kdev4
