@@ -34,6 +34,9 @@ builds/gnu/.dirstamp
 # pkg-config pc file from .pc.in
 builds/gnu/*.pc
 
+# configured headers from in-tree configure
+builds/gnu/include
+
 # msbuild/msvc
 /.vs
 *.db
@@ -52,7 +55,6 @@ builds/gnu/*.pc
 bin
 build
 obj
-non-persistent
 
 # KDevelop IDE
 /*.kdev4

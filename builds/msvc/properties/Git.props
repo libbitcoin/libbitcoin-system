@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_PropertySheetDisplayName>Git Settings</_PropertySheetDisplayName>
+  </PropertyGroup>
+
+  <!-- Substitutes @TOKEN@ values into each ConfigurableFile, writing %(Generated) only when its content changes. -->
+  <Target Name="ConfigureFiles" BeforeTargets="ClCompile;ResourceCompile" Inputs="%(ConfigurableFile.Identity)" Outputs="%(ConfigurableFile.Generated)">
+
+    <Exec Command="git -C &quot;$(RepoRoot).&quot; rev-parse HEAD 2&gt;nul" Condition="'$(GitCommitHash)' == ''" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
+    </Exec>
+    <Exec Command="git -C &quot;$(RepoRoot).&quot; rev-list --count HEAD 2&gt;nul" Condition="'$(GitCommitHeight)' == ''" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHeight" />
+    </Exec>
+    <Exec Command="git -C &quot;$(RepoRoot).&quot; status --porcelain 2&gt;nul" Condition="'$(GitDirty)' == ''" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_GitStatus" />
+    </Exec>
+    <Exec Command="git -C &quot;$(RepoRoot).&quot; ls-remote --get-url 2&gt;nul" Condition="'$(GitOriginUrl)' == ''" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitOriginUrl" />
+    </Exec>
+
+    <PropertyGroup>
+      <GitCommitHash Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(GitCommitHash)', '^[0-9a-f]{40}$'))">unknown</GitCommitHash>
+      <GitCommitHeight Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(GitCommitHeight)', '^[0-9]+$'))">0</GitCommitHeight>
+      <GitDirty Condition="'$(GitDirty)' == '' And '$(_GitStatus)' != ''">1</GitDirty>
+      <GitDirty Condition="'$(GitDirty)' == ''">0</GitDirty>
+      <GitOriginUrl Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(GitOriginUrl)', '^(https?|ssh|git)://[^;\s]+$|^[^@;\s]+@[^:;\s]+:[^;\s]+$'))">unknown</GitOriginUrl>
+      <VersionPatch Condition="'$(VersionPatch)' == ''">$(GitCommitHeight)</VersionPatch>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <_Configured>$([System.IO.File]::ReadAllText('%(ConfigurableFile.FullPath)'))</_Configured>
+      <_Configured>$(_Configured.Replace('@LIBBITCOIN_VERSION_MAJOR@', '$(VersionMajor)'))</_Configured>
+      <_Configured>$(_Configured.Replace('@LIBBITCOIN_VERSION_MINOR@', '$(VersionMinor)'))</_Configured>
+      <_Configured>$(_Configured.Replace('@LIBBITCOIN_VERSION_PATCH@', '$(VersionPatch)'))</_Configured>
+      <_Configured>$(_Configured.Replace('@GIT_COMMIT_HASH@', '$(GitCommitHash)'))</_Configured>
+      <_Configured>$(_Configured.Replace('@GIT_ORIGIN_URL@', '$(GitOriginUrl)'))</_Configured>
+      <_Configured>$(_Configured.Replace('@GIT_DIRTY@', '$(GitDirty)'))</_Configured>
+    </PropertyGroup>
+
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('%(ConfigurableFile.Generated)'))" />
+    <WriteLinesToFile File="%(ConfigurableFile.Generated)" Lines="$([MSBuild]::Escape($(_Configured.TrimEnd())))" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <Message Text="Configured        : %(ConfigurableFile.Generated)" Importance="high" />
+  </Target>
+
+  <Target Name="CleanConfiguredFiles" AfterTargets="Clean">
+    <Delete Files="@(ConfigurableFile->'%(Generated)')" />
+  </Target>
+
+</Project>
