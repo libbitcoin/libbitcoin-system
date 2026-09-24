@@ -25,6 +25,7 @@
   
   <ImportGroup Label="PropertySheets">
     <Import Project="Messages.props" />
+    <Import Project="Git.props" />
   </ImportGroup>    
   
 </Project>

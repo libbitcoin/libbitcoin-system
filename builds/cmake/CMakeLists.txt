@@ -11,7 +11,7 @@ find_package(Git QUIET)
 set( GIT_COMMIT_HASH "unknown" )
 set( GIT_COMMIT_HEIGHT 0 )
 set( GIT_DIRTY 0 )
-set( GIT_ORIGIN_URL "https://github.com/libbitcoin/libbitcoin-system" )
+set( GIT_ORIGIN_URL "unknown" )
 
 if ( GIT_EXECUTABLE )
     execute_process(
@@ -20,6 +20,10 @@ if ( GIT_EXECUTABLE )
         OUTPUT_VARIABLE GIT_COMMIT_HASH
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET )
+
+    if ( NOT GIT_COMMIT_HASH )
+        set( GIT_COMMIT_HASH "unknown" )
+    endif()
 
     execute_process(
         COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
@@ -33,11 +37,15 @@ if ( GIT_EXECUTABLE )
     endif()
 
     execute_process(
-        COMMAND ${GIT_EXECUTABLE} remote get-url origin
+        COMMAND ${GIT_EXECUTABLE} ls-remote --get-url
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE GIT_ORIGIN_URL
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET )
+
+    if ( NOT GIT_ORIGIN_URL MATCHES "://|@" )
+        set( GIT_ORIGIN_URL "unknown" )
+    endif()
 
     execute_process(
         COMMAND ${GIT_EXECUTABLE} status --porcelain

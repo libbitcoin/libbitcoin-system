@@ -24,7 +24,7 @@ m4_define([_git_dirty],
 m4_define([_GIT_DIRTY], m4_ifnblank(_git_dirty, [_git_dirty], [0]))
 
 m4_define([_GIT_ORIGIN_URL],
-    m4_dquote(m4_esyscmd_s([git remote get-url origin 2>/dev/null || echo https://github.com/libbitcoin/libbitcoin-system])))
+    m4_dquote(m4_esyscmd_s([git ls-remote --get-url 2>/dev/null | grep -e '://' -e '@' || echo unknown])))
 
 m4_define([_LIBBITCOIN_VERSION_MAJOR], [4])
 m4_define([_LIBBITCOIN_VERSION_MINOR], [0])

@@ -193,92 +193,89 @@
     <Filter Include="include\bitcoin\system\words\catalogs">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resource">
+    <Filter Include="src">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src">
+    <Filter Include="src\chain">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain">
+    <Filter Include="src\chain\enums">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\enums">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\chain\json">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\chain\views">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\config">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\crypto">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\crypto\secp256k1">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\data">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\endian">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\error">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\filter">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\math">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\radix">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\serial">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\unicode">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\unicode\utf8_everywhere">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet">
+    <Filter Include="src\config">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses">
+    <Filter Include="src\crypto">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses\qrencode">
+    <Filter Include="src\crypto\secp256k1">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys">
+    <Filter Include="src\data">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys\parse_encrypted_keys">
+    <Filter Include="src\endian">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\error">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\psbt">
+    <Filter Include="src\filter">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\hash">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\radix">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\serial">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stream">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\unicode">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\unicode\utf8_everywhere">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\addresses">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\addresses\qrencode">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\keys">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\keys\parse_encrypted_keys">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\psbt">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\words">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000014}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words\catalogs">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A5}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000014}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -788,9 +785,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\builds\msvc\resource.h">
-      <Filter>resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
@@ -1795,6 +1789,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\build\include\bitcoin\system\version.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\annex.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
@@ -2117,10 +2116,5 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\debug.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\..\..\..\builds\msvc\resource.rc">
-      <Filter>resource</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>
