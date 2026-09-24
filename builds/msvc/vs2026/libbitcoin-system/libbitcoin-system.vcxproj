@@ -109,6 +109,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup Label="Prebuild">
+    <GeneratedIncludeDirBase>$(ProjectDir)..\..\..\..\non-persistent\</GeneratedIncludeDirBase>
+    <GeneratedIncludeDir>$(GeneratedIncludeDirBase)include\</GeneratedIncludeDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ConfigurableFile Include="version">
+      <FileInput>$(RepoRoot)include\bitcoin\system\version.hpp.in</FileInput>
+      <FileOutput>$(GeneratedIncludeDirBase)include\bitcoin\system\version.hpp</FileOutput>
+    </ConfigurableFile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="%(ConfigurableFile.FileInput)" />
+    <ClInclude Include="%(ConfigurableFile.FileOutput)">
+      <DependentUpon>%(ConfigurableFile.FileInput)</DependentUpon>
+    </ClInclude>
+  </ItemGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType Condition="$(Configuration.IndexOf('DLL')) == -1">StaticLibrary</ConfigurationType>
     <ConfigurationType Condition="$(Configuration.IndexOf('DLL')) != -1">DynamicLibrary</ConfigurationType>
@@ -650,7 +666,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\bitcoin_uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\checked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\payment_address.hpp" />
@@ -816,6 +831,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionaries.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionary.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\version.hpp.in" />
     <None Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.ipp" />
     <None Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_prefix.ipp" />
     <None Include="packages.config" />

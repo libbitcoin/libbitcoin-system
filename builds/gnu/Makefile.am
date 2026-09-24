@@ -37,6 +37,7 @@ lib_LTLIBRARIES = src/libbitcoin-system.la
 src_libbitcoin_system_la_LIBS = src/libbitcoin-system.la
 
 src_libbitcoin_system_la_CPPFLAGS = \
+    -I${top_builddir}/include \
     -I${srcdir}/../../include \
     ${boost_BUILD_CPPFLAGS} \
     ${boost_container_BUILD_CPPFLAGS} \
@@ -269,8 +270,8 @@ include_bitcoin_system_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/settings.hpp \
     ${srcdir}/../../include/bitcoin/system/typelets.hpp \
     ${srcdir}/../../include/bitcoin/system/types.hpp \
-    ${srcdir}/../../include/bitcoin/system/version.hpp \
-    ${srcdir}/../../include/bitcoin/system/warnings.hpp
+    ${srcdir}/../../include/bitcoin/system/warnings.hpp \
+    include/bitcoin/system/version.hpp
 
 include_bitcoin_system_chaindir = \
     ${includedir}/bitcoin/system/chain
@@ -514,6 +515,12 @@ include_bitcoin_system_impl_chain_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/chain/transaction_patterns.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/chain/witness_patterns.ipp
 
+include_bitcoin_system_impl_configdir = \
+    ${includedir}/bitcoin/system/impl/config
+
+include_bitcoin_system_impl_config_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
+
 include_bitcoin_system_impl_datadir = \
     ${includedir}/bitcoin/system/impl/data
 
@@ -693,12 +700,6 @@ include_bitcoin_system_impl_wordsdir = \
 include_bitcoin_system_impl_words_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/words/dictionaries.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/words/dictionary.ipp
-
-include_bitcoin_system_impl_configdir = \
-    ${includedir}/bitcoin/system/impl/config
-
-include_bitcoin_system_impl_config_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
 
 include_bitcoin_system_intrinsicsdir = \
     ${includedir}/bitcoin/system/intrinsics

@@ -492,6 +492,7 @@ AS_IF([test "x${with_ultrafast}" != "xno"],
 AC_CONFIG_FILES([
     Makefile
     libbitcoin-system.pc
+    include/bitcoin/system/version.hpp:${repository_root_dir}/include/bitcoin/system/version.hpp.in
   ])
 
 AC_OUTPUT
