@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(base_16_tests)
 
 BOOST_AUTO_TEST_CASE(base16__is_base16__limits__false)
 {
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>(0)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>(0)));
     BOOST_REQUIRE(!is_base16(max_uint8));
 }
 
@@ -64,12 +64,12 @@ BOOST_AUTO_TEST_CASE(base16__is_base16__upper_case__true)
 
 BOOST_AUTO_TEST_CASE(base16__is_base16__boundaries__false)
 {
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>('0' - 1)));
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>('9' + 1)));
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>('a' - 1)));
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>('f' + 1)));
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>('A' - 1)));
-    BOOST_REQUIRE(!is_base16(narrow_cast<char>('F' + 1)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>('0' - 1)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>('9' + 1)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>('a' - 1)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>('f' + 1)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>('A' - 1)));
+    BOOST_REQUIRE(!is_base16(possible_narrow_and_sign_cast<char>('F' + 1)));
 }
 
 // encode_octet
