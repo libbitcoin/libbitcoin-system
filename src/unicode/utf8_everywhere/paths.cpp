@@ -166,8 +166,10 @@ std::filesystem::path module_path() NOEXCEPT
 
         if (length < size)
         {
+            // The path may contain relative segments, so qualify it.
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            return { buffer.cbegin(), std::next(buffer.cbegin(), length) };
+            return qualified_path({ buffer.cbegin(),
+                std::next(buffer.cbegin(), length) });
             BC_POP_WARNING()
         }
     }
