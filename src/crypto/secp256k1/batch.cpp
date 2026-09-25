@@ -20,7 +20,6 @@
 
 #include <atomic>
 #include <numeric>
-#include <shared_mutex>
 #include <span>
 #if defined(HAVE_ULTRAFAST)
     #include <ufsecp/libbitcoin.hpp>
