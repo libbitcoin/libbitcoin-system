@@ -456,6 +456,33 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
     BOOST_REQUIRE(instance.is_forward_reference());
 }
 
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_empty__false)
+{
+    BOOST_REQUIRE(!block::is_forward_reference({}, false));
+    BOOST_REQUIRE(!block::is_forward_reference({}, true));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_backward_reference__false)
+{
+    const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
+    const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
+    BOOST_REQUIRE(!block::is_forward_reference({ to, from }, false));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_forward_reference__true)
+{
+    const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
+    const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
+    BOOST_REQUIRE(block::is_forward_reference({ from, to }, false));
+}
+
+BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_coinbase_forward_reference__false)
+{
+    const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
+    const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
+    BOOST_REQUIRE(!block::is_forward_reference({ from, to }, true));
+}
+
 BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__empty__false)
 {
     const accessor instance;

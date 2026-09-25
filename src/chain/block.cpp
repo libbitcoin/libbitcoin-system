@@ -397,11 +397,20 @@ bool block::is_extra_coinbases() const NOEXCEPT
 //*****************************************************************************
 bool block::is_forward_reference() const NOEXCEPT
 {
-    if (txs_->empty())
+    return is_forward_reference(*txs_, true);
+}
+
+// static
+bool block::is_forward_reference(const transaction_cptrs& txs,
+    bool coinbase) NOEXCEPT
+{
+    if (txs.empty())
         return false;
 
-    unordered_set_of_hash_cref hashes(sub1(txs_->size()));
-    for (auto tx = txs_->rbegin(); tx != std::prev(txs_->rend()); ++tx)
+    const auto count = coinbase ? sub1(txs.size()) : txs.size();
+    const auto end = coinbase ? std::prev(txs.rend()) : txs.rend();
+    unordered_set_of_hash_cref hashes(count);
+    for (auto tx = txs.rbegin(); tx != end; ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
             if (hashes.contains(in->point().hash()))

@@ -49,6 +49,8 @@ public:
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
     static code populate(const transaction_cptrs& txs, const context& ctx,
         bool coinbase) NOEXCEPT;
+    static bool is_forward_reference(const transaction_cptrs& txs,
+        bool coinbase) NOEXCEPT;
     static bool is_internal_double_spend(const transaction_cptrs& txs,
         bool coinbase) NOEXCEPT;
 
