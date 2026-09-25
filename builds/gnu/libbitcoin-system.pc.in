@@ -33,6 +33,7 @@ Cflags: \
     @avx2@ \
     @avx512@ \
     @shani@ \
+    @crypto@ \
     @sse41@ \
     @boost_CPPFLAGS@
 

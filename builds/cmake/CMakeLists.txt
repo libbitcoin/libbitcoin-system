@@ -83,6 +83,7 @@ option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
+option( enable-crypto "Use ARM Crypto Extensions." OFF )
 option( with-ultrafast "Use shrec/UltrafastSecp256k1 library." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." ON )
 option( with-tests "Compile with unit tests." ON )
@@ -175,6 +176,21 @@ if ( enable-shani )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_SHANI )
     message( FATAL_ERROR "Compiler does not support '-msse4 -msha'." )
+  endif()
+endif()
+
+if ( enable-crypto )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -march=armv8-a+crypto" )
+  check_cxx_source_compiles( "
+    #include <arm_neon.h>
+      int main() {
+      uint32x4_t a = vdupq_n_u32(0);
+      return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
+      }" SUPPORTS_FLAG_CRYPTO )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_CRYPTO )
+    message( FATAL_ERROR "Compiler does not support '-march=armv8-a+crypto'." )
   endif()
 endif()
 
@@ -289,6 +305,7 @@ target_compile_options( libbitcoin-system
     $<$<BOOL:${enable-avx2}>:-mavx -mavx2>
     $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw>
     $<$<BOOL:${enable-shani}>:-msse4 -msha>
+    $<$<BOOL:${enable-crypto}>:-march=armv8-a+crypto>
     $<$<BOOL:${enable-sse41}>:-msse4.1>
   PRIVATE
     -Wall

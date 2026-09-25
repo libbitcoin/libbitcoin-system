@@ -16,6 +16,8 @@
 #                               Default: --disable-sse41
 # --<enable/disable>-shani    Use Intel/ARM SHA Extensions.
 #                               Default: --disable-shani
+# --<enable/disable>-crypto   Use ARM Crypto Extensions.
+#                               Default: --disable-crypto
 # --<with/without>-ultrafast  Use shrec/UltrafastSecp256k1 library.
 #                               Default: --without-ultrafast
 # --<with/without>-secp256k1  Use bitcoin-core/secp256k1 library.
@@ -1208,6 +1210,8 @@ help()
     msg "                              Default: --disable-sse41"
     msg "--<enable/disable>-shani    Use Intel/ARM SHA Extensions."
     msg "                              Default: --disable-shani"
+    msg "--<enable/disable>-crypto   Use ARM Crypto Extensions."
+    msg "                              Default: --disable-crypto"
     msg "--<with/without>-ultrafast  Use shrec/UltrafastSecp256k1 library."
     msg "                              Default: --without-ultrafast"
     msg "--<with/without>-secp256k1  Use bitcoin-core/secp256k1 library."

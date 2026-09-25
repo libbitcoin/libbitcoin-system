@@ -200,6 +200,15 @@ AC_ARG_ENABLE([shani],
 AC_MSG_RESULT([$enable_shani])
 AM_CONDITIONAL([ENABLE_SHANI], [test "x${enable_shani}" != "xno"])
 
+AC_MSG_CHECKING([--enable-crypto option])
+AC_ARG_ENABLE([crypto],
+    AS_HELP_STRING([--enable-crypto],
+        [Use ARM Crypto Extensions. @<:@default=no@:>@]),
+    [enable_crypto=$enableval],
+    [enable_crypto=no])
+AC_MSG_RESULT([$enable_crypto])
+AM_CONDITIONAL([ENABLE_CRYPTO], [test "x${enable_crypto}" != "xno"])
+
 AC_MSG_CHECKING([--with-ultrafast option])
 AC_ARG_WITH([ultrafast],
     AS_HELP_STRING([--with-ultrafast],
@@ -290,6 +299,29 @@ AS_IF([test "x${enable_shani}" != "xno"],
             __m128i b = _mm_set1_epi32(15);
             __m128i k = _mm_set1_epi32(31);
             return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_crypto}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-march=armv8-a+crypto],
+      [
+        CFLAGS="${CFLAGS} -march=armv8-a+crypto";
+        CXXFLAGS="${CXXFLAGS} -march=armv8-a+crypto";
+        AC_SUBST([crypto], ["-march=armv8-a+crypto"])
+      ],[
+        AC_MSG_ERROR([-march=armv8-a+crypto not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <arm_neon.h>
+          ]],
+          [[
+            uint32x4_t a = vdupq_n_u32(0);
+            return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
           ]])
       ])
   ])

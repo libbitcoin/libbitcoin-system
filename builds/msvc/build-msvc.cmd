@@ -11,7 +11,11 @@ REM ###########################################################################
 REM Script managing the build of libbitcoin-system.
 REM
 REM Script options:
+REM --enable-avx2               Use Intel AVX2 intrinsics.
+REM --enable-avx512             Use Intel AVX512 intrinsics.
+REM --enable-sse41              Use SSE4.1 hardware instructions.
 REM --enable-shani              Use Intel/ARM SHA Extensions.
+REM --enable-crypto             Use ARM Crypto Extensions.
 REM --build-config config       Build configuration.
 REM --build-platform platform   Build platform.
 REM --build-version version     Build MSVC version.
@@ -181,7 +185,31 @@ if "!libbitcoin_system_TAG!" == "" (
 :parse_input
     if "%~1" == "" (
         goto :end_parse_input
+    ) else if "%~1" == "--enable-avx2" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions2"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions2"
+        )
+    ) else if "%~1" == "--enable-avx512" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions512"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions512"
+        )
+    ) else if "%~1" == "--enable-sse41" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions"
+        )
     ) else if "%~1" == "--enable-shani" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-sha=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha=true"
+        )
+    ) else if "%~1" == "--enable-crypto" (
         if "!libbitcoin-system_PARAMS!" == "" (
             set "libbitcoin-system_PARAMS=/p:Option-sha=true"
         ) else (
@@ -424,7 +452,11 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "Script managing the build of libbitcoin-system."
     call :msg ""
     call :msg "Script options:"
+    call :msg "--enable-avx2               Use Intel AVX2 intrinsics."
+    call :msg "--enable-avx512             Use Intel AVX512 intrinsics."
+    call :msg "--enable-sse41              Use SSE4.1 hardware instructions."
     call :msg "--enable-shani              Use Intel/ARM SHA Extensions."
+    call :msg "--enable-crypto             Use ARM Crypto Extensions."
     call :msg "--build-config config       Build configuration."
     call :msg "--build-platform platform   Build platform."
     call :msg "--build-version version     Build MSVC version."

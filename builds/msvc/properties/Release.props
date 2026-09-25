@@ -13,7 +13,7 @@
 
   <!-- Overridable per machine (e.g. Directory.Build.props above repos, or environment). -->
   <PropertyGroup>
-    <Option-arch Condition="'$(Option-arch)' == ''">AdvancedVectorExtensions2</Option-arch>
+    <Option-arch Condition="'$(Option-arch)' == '' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'Win32')">AdvancedVectorExtensions2</Option-arch>
   </PropertyGroup>
   
   <!-- DebugInformationFormat and GenerateDebugInformation were formerly disabled. -->
