@@ -18,3 +18,22 @@
  */
 #define BOOST_TEST_MODULE libbitcoin_test
 #include <boost/test/unit_test.hpp>
+#include <bitcoin/system.hpp>
+
+#if defined(HAVE_ULTRAFAST)
+    #include <secp256k1/process_resources.hpp>
+
+    struct ultrafast_resources
+    {
+        void setup() NOEXCEPT
+        {
+        }
+
+        void teardown() NOEXCEPT
+        {
+            secp256k1::release_process_resources();
+        }
+    };
+
+    BOOST_TEST_GLOBAL_FIXTURE(ultrafast_resources);
+#endif

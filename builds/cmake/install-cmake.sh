@@ -16,6 +16,8 @@
 #                               Default: OFF
 # -Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions.
 #                               Default: OFF
+# -Denable-crypto=<ON/OFF>    Use ARM Crypto Extensions.
+#                               Default: OFF
 # -Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1 library.
 #                               Default: OFF
 # -Dwith-secp256k1=<ON/OFF>   Use bitcoin-core/secp256k1 library.
@@ -977,6 +979,8 @@ help()
     msg "-Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions."
     msg "                              Default: OFF"
     msg "-Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions."
+    msg "                              Default: OFF"
+    msg "-Denable-crypto=<ON/OFF>    Use ARM Crypto Extensions."
     msg "                              Default: OFF"
     msg "-Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1 library."
     msg "                              Default: OFF"
