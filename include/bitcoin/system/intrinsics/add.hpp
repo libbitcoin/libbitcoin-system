@@ -47,7 +47,9 @@ INLINE bool add_carry64(uint64_t& sum, uint64_t left, uint64_t right,
     bool carry) NOEXCEPT
 {
 #if defined(HAVE_MSC) && defined(HAVE_X64)
-    unsigned long long out{};
+    BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
+    unsigned long long out;
+    BC_POP_WARNING()
     const auto overflow = _addcarry_u64(static_cast<unsigned char>(carry),
         left, right, &out);
     sum = out;
