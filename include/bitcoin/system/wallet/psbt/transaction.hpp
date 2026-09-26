@@ -45,10 +45,12 @@ public:
 
     /// Constructors.
     transaction() NOEXCEPT;
+    transaction(uint32_t tx_version) NOEXCEPT;
     transaction(const data_chunk& decoded) NOEXCEPT;
     transaction(const std::string& encoded) NOEXCEPT;
     transaction(const chain::transaction& unsigned_tx) NOEXCEPT;
-    transaction(uint32_t tx_version) NOEXCEPT;
+    transaction(const chain::transaction& unsigned_tx,
+        uint32_t version) NOEXCEPT;
 
     /// Operators.
     bool operator==(const transaction& other) const NOEXCEPT;
@@ -110,7 +112,8 @@ private:
     /// Factories.
     static transaction from_data(const data_chunk& decoded) NOEXCEPT;
     static transaction from_string(const std::string& encoded) NOEXCEPT;
-    static transaction from_transaction(const chain::transaction& tx) NOEXCEPT;
+    static transaction from_transaction(const chain::transaction& tx,
+        uint32_t version) NOEXCEPT;
 
     bool parse(reader& source) NOEXCEPT;
     bool parse_global(reader& source) NOEXCEPT;
