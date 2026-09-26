@@ -180,31 +180,13 @@
         #define HAVE_128
     #endif
 
-    // -mavx512ifma (52 bit integer fused multiply-add, EVEX encoded).
+    // -mavx512ifma (-mavx512vl for 256/128)
     // vc++: AVX512IFMA not independently configurable (requires custom option).
-    #if defined(__AVX512IFMA__)
-        #define HAVE_AVX512IFMA
+    #if defined(__AVX512IFMA__) && defined(HAVE_AVX512)
+        #define HAVE_IFMA_512
     #endif
-
-    // -mavxifma (52 bit integer fused multiply-add, VEX encoded, 256/128).
-    #if defined(__AVXIFMA__)
-        #define HAVE_AVXIFMA
-    #endif
-#endif
-
-/// Map 52 bit integer fused multiply-add availability by vector width.
-/// AVX512IFMA provides the 512 bit form and, with AVX512VL, the 256/128 bit
-/// forms. AVXIFMA provides only the 256/128 bit (VEX encoded) forms.
-/// ---------------------------------------------------------------------------
-
-#if defined(HAVE_AVX512IFMA) && defined(HAVE_512)
-    #define HAVE_IFMA_512
-#endif
-#if (defined(HAVE_AVX512IFMA) && defined(__AVX512VL__)) || defined(HAVE_AVXIFMA)
-    #if defined(HAVE_256)
+    #if defined(__AVX512IFMA__) && defined(__AVX512VL__) && defined(HAVE_AVX2)
         #define HAVE_IFMA_256
-    #endif
-    #if defined(HAVE_128)
         #define HAVE_IFMA_128
     #endif
 #endif
