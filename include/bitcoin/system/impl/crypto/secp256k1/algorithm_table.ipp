@@ -33,12 +33,11 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // of 2a (where 2a is affine). Each multiple is then scaled to the z of the
 // last by the product of later z ratios, so that all are affine on the curve
 // isomorphic by scale (the z of 2a times the z of the last).
-template <typename Word>
-constexpr void algorithm::multiples(points_t<Word>& r, field_t<Word>& scale,
-    const affine_t<Word>& a) NOEXCEPT
+template <size_t Size, typename Word>
+constexpr void algorithm::multiples(std_array<affine_t<Word>, Size>& r,
+    field_t<Word>& scale, const affine_t<Word>& a) NOEXCEPT
 {
-    constexpr auto size = table_size<point_bits>;
-    std_array<field_t<Word>, size> ratios{};
+    std_array<field_t<Word>, Size> ratios{};
     jacobian_t<Word> sum{}, twice{};
     field_t<Word> zz{}, zzz{};
 
@@ -51,14 +50,14 @@ constexpr void algorithm::multiples(points_t<Word>& r, field_t<Word>& scale,
     multiply(sum.y, a.y, zzz);
 
     r.front() = { sum.x, sum.y };
-    for (auto point = one; point < size; ++point)
+    for (auto point = one; point < Size; ++point)
     {
         add(sum, ratios[point], sum, step, sum.z);
         r[point] = { sum.x, sum.y };
     }
 
     auto factor = ratios.back();
-    for (auto point = sub1(size); is_nonzero(point--);)
+    for (auto point = sub1(Size); is_nonzero(point--);)
     {
         square(zz, factor);
         multiply(zzz, zz, factor);

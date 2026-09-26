@@ -168,10 +168,10 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 
         top = greater(top, half < two ?
             naf<generator_bits>(digits[half], magnitude) :
-            naf<point_bits>(digits[half], magnitude));
+            naf<naf_bits>(digits[half], magnitude));
     }
 
-    points_t<uint64_t> a_first{}, a_second{};
+    points_t<uint64_t, naf_bits> a_first{}, a_second{};
     field_t<uint64_t> scale{};
     multiples(a_first, scale, a);
     for (size_t point{}; point < a_first.size(); ++point)

@@ -566,9 +566,11 @@ protected:
     /// Window tables.
     /// -----------------------------------------------------------------------
 
-    /// Window bits of generator and point tables.
+    /// Window bits of generator and point tables, and of point tables of
+    /// sparse digits.
     static constexpr size_t generator_bits = 10;
     static constexpr size_t point_bits = 5;
+    static constexpr size_t naf_bits = 4;
 
     /// Number of odd multiples (1, 3, ..., 2^Bits - 1) in a window table.
     template <size_t Bits>
@@ -583,13 +585,13 @@ protected:
     };
 
     /// Odd multiples of a point per lane, affine on an isomorphic curve.
-    template <typename Word>
-    using points_t = std_array<affine_t<Word>, table_size<point_bits>>;
+    template <typename Word, size_t Bits = point_bits>
+    using points_t = std_array<affine_t<Word>, table_size<Bits>>;
 
     /// r = odd multiples of a, as (x * s^2, y * s^3) for s = scale.
-    template <typename Word>
-    static constexpr void multiples(points_t<Word>& r, field_t<Word>& scale,
-        const affine_t<Word>& a) NOEXCEPT;
+    template <size_t Size, typename Word>
+    static constexpr void multiples(std_array<affine_t<Word>, Size>& r,
+        field_t<Word>& scale, const affine_t<Word>& a) NOEXCEPT;
 
     /// Table internals.
     /// -----------------------------------------------------------------------
