@@ -83,9 +83,9 @@ protected:
     /// -----------------------------------------------------------------------
 
     static constexpr auto limb_bits = 52u;
-    static constexpr auto top_bits = 48u;
+    static constexpr auto  top_bits = 48u;
     static constexpr uint64_t limb_mask = 0x000fffffffffffff;
-    static constexpr uint64_t top_mask = 0x0000ffffffffffff;
+    static constexpr uint64_t  top_mask = 0x0000ffffffffffff;
 
     /// 2^256 mod p and 2^260 mod p.
     static constexpr uint64_t fold_256 = 0x00000001000003d1;
@@ -103,20 +103,29 @@ protected:
     /// Endomorphism eigenvalue, beta^3 = 1 mod p.
     static constexpr field_t<uint64_t> beta
     {
-        0x00096c28719501ee, 0x0007512f58995c13, 0x000c3434e99cf049,
-        0x00007106e64479ea, 0x00007ae96a2b657c
+        0x00096c28719501ee,
+        0x0007512f58995c13,
+        0x000c3434e99cf049,
+        0x00007106e64479ea,
+        0x00007ae96a2b657c
     };
 
     /// Generator.
     static constexpr affine_t<uint64_t> generator
     {
         {
-            0x0002815b16f81798, 0x000db2dce28d959f, 0x000e870b07029bfc,
-            0x000bbac55a06295c, 0x000079be667ef9dc
+            0x0002815b16f81798,
+            0x000db2dce28d959f,
+            0x000e870b07029bfc,
+            0x000bbac55a06295c,
+            0x000079be667ef9dc
         },
         {
-            0x0007d08ffb10d4b8, 0x00048a68554199c4, 0x000e1108a8fd17b4,
-            0x000c4655da4fbfc0, 0x0000483ada7726a3
+            0x0007d08ffb10d4b8,
+            0x00048a68554199c4,
+            0x000e1108a8fd17b4,
+            0x000c4655da4fbfc0,
+            0x0000483ada7726a3
         }
     };
 
@@ -241,53 +250,53 @@ protected:
     /// n (group order), 2^256 - n, and n / 2.
     static constexpr scalar_t order
     {
-        0xbfd25e8cd0364141, 0xbaaedce6af48a03b, 0xfffffffffffffffe,
-        0xffffffffffffffff
+        0xbfd25e8cd0364141, 0xbaaedce6af48a03b,
+        0xfffffffffffffffe, 0xffffffffffffffff
     };
 
     static constexpr scalar_t order_complement
     {
-        0x402da1732fc9bebf, 0x4551231950b75fc4, 0x0000000000000001,
-        0x0000000000000000
+        0x402da1732fc9bebf, 0x4551231950b75fc4,
+        0x0000000000000001, 0x0000000000000000
     };
 
     static constexpr scalar_t half_order
     {
-        0xdfe92f46681b20a0, 0x5d576e7357a4501d, 0xffffffffffffffff,
-        0x7fffffffffffffff
+        0xdfe92f46681b20a0, 0x5d576e7357a4501d,
+        0xffffffffffffffff, 0x7fffffffffffffff
     };
 
     /// Endomorphism eigenvalue, lambda^3 = 1 mod n.
     static constexpr scalar_t lambda
     {
-        0xdf02967c1b23bd72, 0x122e22ea20816678, 0xa5261c028812645a,
-        0x5363ad4cc05c30e0
+        0xdf02967c1b23bd72, 0x122e22ea20816678,
+        0xa5261c028812645a, 0x5363ad4cc05c30e0
     };
 
     /// Lattice basis terms -b1 and -b2 mod n.
     static constexpr scalar_t minus_b1
     {
-        0x6f547fa90abfe4c3, 0xe4437ed6010e8828, 0x0000000000000000,
-        0x0000000000000000
+        0x6f547fa90abfe4c3, 0xe4437ed6010e8828,
+        0x0000000000000000, 0x0000000000000000
     };
 
     static constexpr scalar_t minus_b2
     {
-        0xd765cda83db1562c, 0x8a280ac50774346d, 0xfffffffffffffffe,
-        0xffffffffffffffff
+        0xd765cda83db1562c, 0x8a280ac50774346d,
+        0xfffffffffffffffe, 0xffffffffffffffff
     };
 
     /// round(2^384 * b2 / n) and round(2^384 * -b1 / n).
     static constexpr scalar_t g1
     {
-        0xe893209a45dbb031, 0x3daa8a1471e8ca7f, 0xe86c90e49284eb15,
-        0x3086d221a7d46bcd
+        0xe893209a45dbb031, 0x3daa8a1471e8ca7f,
+        0xe86c90e49284eb15, 0x3086d221a7d46bcd
     };
 
     static constexpr scalar_t g2
     {
-        0x1571b4ae8ac47f71, 0x221208ac9df506c6, 0x6f547fa90abfe4c4,
-        0xe4437ed6010e8828
+        0x1571b4ae8ac47f71, 0x221208ac9df506c6,
+        0x6f547fa90abfe4c4, 0xe4437ed6010e8828
     };
 
     /// Scalar arithmetic (less than n).
@@ -328,8 +337,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// r from bytes mod n, false if bytes not less than n.
-    static constexpr bool from_bytes(scalar_t& r,
-        const bytes_t& bytes) NOEXCEPT;
+    static constexpr bool from_bytes(scalar_t& r, const bytes_t& bytes) NOEXCEPT;
 
     /// bytes from a.
     static constexpr void to_bytes(bytes_t& out, const scalar_t& a) NOEXCEPT;
@@ -338,9 +346,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
-
     static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
-
     static constexpr void reduce(scalar_t& r, const wide_t& value) NOEXCEPT;
 
     static constexpr void multiply_add(wide_t& r, size_t position,

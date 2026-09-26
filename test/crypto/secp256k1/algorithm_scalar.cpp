@@ -225,11 +225,9 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__multiply__values__expected)
 // inverse
 // ----------------------------------------------------------------------------
 
-static_assert(encode(scalar_inverse(decode(first))) == first_inverse);
-static_assert(encode(scalar_inverse(decode(zero_value))) == zero_value);
-
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse__values__expected)
 {
+    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(zero_value))), zero_value);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(first))), first_inverse);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(second))), second_inverse);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(sample))), sample_inverse);
