@@ -40,24 +40,23 @@ constexpr void algorithm::double_(jacobian_t<Word>& r,
     square(yy, a.y);
     square(xx, a.x);
     multiply(s, a.x, yy);
-    scale<4>(s, s);
-    carry(s);
     scale<3>(m, xx);
-    carry(m);
-    square(y4, yy);
-    scale<8>(y4, y4);
-    carry(y4);
+    carry_extended(m);
 
     square(x3, m);
-    scale<2>(t, s);
-    carry(t);
-    subtract(x3, x3, t);
+    negate(t, s);
+    scale<8>(t, t);
+    add(x3, x3, t);
     carry(x3);
 
+    scale<4>(s, s);
     subtract(t, s, x3);
-    carry(t);
+    carry_extended(t);
     multiply(y3, m, t);
-    subtract(y3, y3, y4);
+    square(y4, yy);
+    negate(y4, y4);
+    scale<8>(y4, y4);
+    add(y3, y3, y4);
     carry(y3);
 
     multiply(z3, a.y, a.z);
@@ -104,9 +103,9 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     multiply(s2, b.y, a.z);
     multiply(s2, s2, z1z1);
     subtract(h, u2, u1);
-    carry(h);
+    carry_extended(h);
     subtract(rh, s2, s1);
-    carry(rh);
+    carry_extended(rh);
 
     square(hh, h);
     multiply(hhh, h, hh);
@@ -114,13 +113,12 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
 
     square(x3, rh);
     subtract(x3, x3, hhh);
-    scale<2>(t, v);
-    carry(t);
-    subtract(x3, x3, t);
+    subtract(x3, x3, v);
+    subtract(x3, x3, v);
     carry(x3);
 
     subtract(t, v, x3);
-    carry(t);
+    carry_extended(t);
     multiply(y3, rh, t);
     multiply(t, s1, hhh);
     subtract(y3, y3, t);
@@ -333,9 +331,9 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
     multiply(s2, b.y, zz);
     multiply(s2, s2, z);
     subtract(h, u2, a.x);
-    carry(h);
+    carry_extended(h);
     subtract(rh, s2, a.y);
-    carry(rh);
+    carry_extended(rh);
 
     square(hh, h);
     multiply(hhh, h, hh);
@@ -343,13 +341,12 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
 
     square(x3, rh);
     subtract(x3, x3, hhh);
-    scale<2>(t, v);
-    carry(t);
-    subtract(x3, x3, t);
+    subtract(x3, x3, v);
+    subtract(x3, x3, v);
     carry(x3);
 
     subtract(t, v, x3);
-    carry(t);
+    carry_extended(t);
     multiply(y3, rh, t);
     multiply(t, a.y, hhh);
     subtract(y3, y3, t);

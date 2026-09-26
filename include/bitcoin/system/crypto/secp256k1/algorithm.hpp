@@ -160,7 +160,7 @@ protected:
     static constexpr void subtract(field_t<Word>& r, const field_t<Word>& a,
         const field_t<Word>& b) NOEXCEPT;
 
-    /// r = Factor * a (loose from weak).
+    /// r = Factor * a (loose from loose, limbs of the product below 2^62).
     template <size_t Factor, typename Word>
     static constexpr void scale(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;
@@ -179,16 +179,23 @@ protected:
     template <typename Word>
     static constexpr void carry(field_t<Word>& a) NOEXCEPT;
 
+    /// a = a (weak from loose) for extended words, as only their products
+    /// require weak operands.
+    template <typename Word>
+    static constexpr void carry_extended(field_t<Word>& a) NOEXCEPT;
+
     /// a = a mod p (normal from loose).
     template <typename Word>
     static constexpr void normalize(field_t<Word>& a) NOEXCEPT;
 
-    /// r = a * b (weak from weak).
+    /// r = a * b (weak from weak, or integral weak from limbs below 2^56 and
+    /// fifth limb below 2^52).
     template <typename Word>
     static constexpr void multiply(field_t<Word>& r, const field_t<Word>& a,
         const field_t<Word>& b) NOEXCEPT;
 
-    /// r = a^2 (weak from weak).
+    /// r = a^2 (weak from weak, or integral weak from limbs below 2^56 and
+    /// fifth limb below 2^52).
     template <typename Word>
     static constexpr void square(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;

@@ -229,6 +229,15 @@ constexpr void algorithm::carry(field_t<Word>& a) NOEXCEPT
 }
 
 template <typename Word>
+constexpr void algorithm::carry_extended(field_t<Word>& a) NOEXCEPT
+{
+    if constexpr (!is_same_type<Word, uint64_t>)
+    {
+        carry(a);
+    }
+}
+
+template <typename Word>
 constexpr void algorithm::normalize(field_t<Word>& a) NOEXCEPT
 {
     carry(a);
