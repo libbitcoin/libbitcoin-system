@@ -299,22 +299,36 @@ constexpr void algorithm::square(field_t<Word>& r,
         square(r, r);
 }
 
-// Exponent p - 2 is 1s blocks of { 223, 22, 1, 2, 1 } separated by 0s.
+// Integral words invert by safegcd, and lanes by exponent p - 2, which is 1s
+// blocks of { 223, 22, 1, 2, 1 } separated by 0s.
 template <typename Word>
 constexpr void algorithm::inverse(field_t<Word>& r,
     const field_t<Word>& a) NOEXCEPT
 {
-    field_t<Word> x2{}, x22{}, x223{}, t{};
-    powers(x2, x22, x223, a);
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        auto value = a;
+        normalize(value);
 
-    square<23>(t, x223);
-    multiply(t, t, x22);
-    square<5>(t, t);
-    multiply(t, t, a);
-    square<3>(t, t);
-    multiply(t, t, x2);
-    square<2>(t, t);
-    multiply(r, t, a);
+        signed62_t x{};
+        to_signed62(x, value);
+        invert(x, prime_modulus);
+        from_signed62(r, x);
+    }
+    else
+    {
+        field_t<Word> x2{}, x22{}, x223{}, t{};
+        powers(x2, x22, x223, a);
+
+        square<23>(t, x223);
+        multiply(t, t, x22);
+        square<5>(t, t);
+        multiply(t, t, a);
+        square<3>(t, t);
+        multiply(t, t, x2);
+        square<2>(t, t);
+        multiply(r, t, a);
+    }
 }
 
 // Exponent (p + 1) / 4 is 1s blocks of { 223, 22, 2 } separated by 0s.

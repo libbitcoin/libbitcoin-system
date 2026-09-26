@@ -1791,6 +1791,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_group.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_inversion.ipp">
+      <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_multiply.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>

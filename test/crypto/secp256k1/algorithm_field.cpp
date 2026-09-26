@@ -69,6 +69,8 @@ constexpr auto gx_squared = base16_array("8550e7d238fcf3086ba9adcf0fb52a9de36521
 constexpr auto gy_squared = base16_array("4866d6a5ab41ab2c6bcc57ccd3735da5f16f80a548e5e20a44e4e9b8118c26f2");
 constexpr auto sample_times_half = base16_array("0a3d709bc4d5c82a8f5c28f5d43aa14adc760fa942dc760fb25d076f3b6d1d0f");
 constexpr auto sample_squared = base16_array("e5fac473f7a6ab795dfd35e77c6717c6fc0017821c9e0698335021bdd8c498f2");
+constexpr auto two_value = base16_array("0000000000000000000000000000000000000000000000000000000000000002");
+constexpr auto two_inverse = base16_array("7fffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffe18");
 constexpr auto gx_inverse = base16_array("237afdf1d2938d86870aaeb8ad77626a67b8e794abfb076be61d003687ca9ef6");
 constexpr auto gy_inverse = base16_array("6fc6340c9dae9a629bcf20238be148d582aac046a7b87a681f7d5dda2ecf511d");
 constexpr auto sample_inverse = base16_array("75e927d5286dbac0cc9c7ab7b2938cde7deb9bcfd864f2f7416b9ebe7ddb9304");
@@ -296,9 +298,13 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__curve__generator__on_curve)
 
 static_assert(encode(field_inverse(decode(gx))) == gx_inverse);
 static_assert(encode(field_inverse(decode(zero_value))) == zero_value);
+static_assert(encode(field_inverse(decode(two_value))) == two_inverse);
+static_assert(encode(field_inverse(decode(prime_minus_one))) == prime_minus_one);
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse__values__expected)
 {
+    BOOST_CHECK_EQUAL(encode(field_inverse(decode(two_value))), two_inverse);
+    BOOST_CHECK_EQUAL(encode(field_inverse(decode(prime_minus_one))), prime_minus_one);
     BOOST_CHECK_EQUAL(encode(field_inverse(decode(gx))), gx_inverse);
     BOOST_CHECK_EQUAL(encode(field_inverse(decode(gy))), gy_inverse);
     BOOST_CHECK_EQUAL(encode(field_inverse(decode(sample))), sample_inverse);

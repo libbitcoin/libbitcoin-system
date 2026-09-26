@@ -373,6 +373,73 @@ protected:
     static constexpr void multiply_shift(scalar_t& r, const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
 
+    /// Inversion (variable time).
+    /// -----------------------------------------------------------------------
+    /// Bernstein-Yang safegcd in batches of 62 divsteps, over five signed 62
+    /// bit limbs (value is the sum of v[i] * 2^(62 * i)).
+
+    using signed62_t = std_array<int64_t, 5>;
+
+    /// Signed 128 bit accumulator, as two's complement high and low words.
+    struct signed128_t
+    {
+        uint64_t high{};
+        uint64_t low{};
+    };
+
+    /// Transition matrix of 62 divsteps.
+    struct transition_t
+    {
+        int64_t u{};
+        int64_t v{};
+        int64_t q{};
+        int64_t r{};
+    };
+
+    /// Odd modulus and its inverse modulo 2^62.
+    struct modulus_t
+    {
+        signed62_t value{};
+        uint64_t inverse{};
+    };
+
+    static constexpr modulus_t prime_modulus
+    {
+        { -0x00000001000003d1, 0, 0, 0, 256 },
+        0x27c7f6e22ddacacf
+    };
+
+    static constexpr modulus_t order_modulus
+    {
+        { 0x3fd25e8cd0364141, 0x2abb739abd2280ee, -0x0000000000000015, 0, 256 },
+        0x34f20099aa774ec1
+    };
+
+    /// x = x^-1 mod m in [0, m), zero for zero, x in [0, m).
+    static constexpr void invert(signed62_t& x, const modulus_t& m) NOEXCEPT;
+
+    static constexpr int64_t divsteps(transition_t& t, int64_t eta,
+        uint64_t f, uint64_t g) NOEXCEPT;
+    static constexpr void update_de(signed62_t& d, signed62_t& e,
+        const transition_t& t, const modulus_t& m) NOEXCEPT;
+    static constexpr void update_fg(signed62_t& f, signed62_t& g,
+        size_t length, const transition_t& t) NOEXCEPT;
+    static constexpr void normalize(signed62_t& r, int64_t sign,
+        const modulus_t& m) NOEXCEPT;
+
+    static constexpr void multiply_add(signed128_t& r, int64_t a,
+        int64_t b) NOEXCEPT;
+    static constexpr void shift(signed128_t& r) NOEXCEPT;
+
+    static constexpr void to_signed62(signed62_t& r,
+        const field_t<uint64_t>& a) NOEXCEPT;
+    static constexpr void to_signed62(signed62_t& r,
+        const scalar_t& a) NOEXCEPT;
+    static constexpr void from_signed62(field_t<uint64_t>& r,
+        const signed62_t& a) NOEXCEPT;
+    static constexpr void from_signed62(scalar_t& r,
+        const signed62_t& a) NOEXCEPT;
+
     /// Group arithmetic (weak coordinates).
     /// -----------------------------------------------------------------------
 
@@ -660,6 +727,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_inversion.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp>

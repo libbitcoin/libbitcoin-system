@@ -65,6 +65,8 @@ constexpr auto first_plus_second = base16_array("c1f940f620808011b3455e91dc9813a
 constexpr auto first_times_second = base16_array("805714a252d0c0b58910907e85b5b801fff610a36bdf46847a4bf5d9ae2d10ed");
 constexpr auto sample_squared = base16_array("9a4a5698ace6ddd6c4076262d1fda179dc8f9e951d3247798be1fad71e2c5082");
 constexpr auto first_negated = base16_array("8641998106234453aa5f9d6a3178f4f7b812e00b817a776265dfdd31b93e29a9");
+constexpr auto two_value = base16_array("0000000000000000000000000000000000000000000000000000000000000002");
+constexpr auto two_inverse = base16_array("7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a1");
 constexpr auto first_inverse = base16_array("1dd887b3eaf153260a95e8b9fd31f60ac115d26ccbe1f572c0b8d7a6dec520fe");
 constexpr auto second_inverse = base16_array("cadc1521998f02828b4f5959bb4518dd8c4cb2baebc2f4a993e1ae3fc8728dff");
 constexpr auto sample_inverse = base16_array("c181574534e1e07a7709d64d63897410eef00b22fd7ba34f3342caf8b365a168");
@@ -226,8 +228,14 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__multiply__values__expected)
 // inverse
 // ----------------------------------------------------------------------------
 
+static_assert(encode(scalar_inverse(decode(zero_value))) == zero_value);
+static_assert(encode(scalar_inverse(decode(first))) == first_inverse);
+static_assert(encode(scalar_inverse(decode(two_value))) == two_inverse);
+static_assert(encode(scalar_inverse(decode(order_minus_one))) == order_minus_one);
+
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse__values__expected)
 {
+    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(two_value))), two_inverse);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(zero_value))), zero_value);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(first))), first_inverse);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(second))), second_inverse);

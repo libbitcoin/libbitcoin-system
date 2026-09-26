@@ -151,37 +151,12 @@ constexpr void algorithm::multiply(scalar_t& r, const scalar_t& a,
     reduce(r, value);
 }
 
-// a^(n - 2) by fixed four bit windows.
 constexpr void algorithm::inverse(scalar_t& r, const scalar_t& a) NOEXCEPT
 {
-    constexpr size_t window = 4;
-    constexpr auto mask = unmask_right<uint64_t>(window);
-    constexpr auto per_limb = bits<uint64_t> / window;
-    constexpr scalar_t exponent
-    {
-        system::subtract<uint64_t>(order[0], two), order[1], order[2], order[3]
-    };
-
-    std_array<scalar_t, power2(window)> powers{};
-    powers[0] = { 1 };
-    for (auto power = one; power < powers.size(); ++power)
-        multiply(powers[power], powers[sub1(power)], a);
-
-    scalar_t result{ 1 };
-    for (auto digit = exponent.size() * per_limb; is_nonzero(digit--);)
-    {
-        for (size_t square{}; square < window; ++square)
-            multiply(result, result, result);
-
-        const auto limb = exponent[digit / per_limb];
-        const auto shift = (digit % per_limb) * window;
-        const auto index = possible_narrow_cast<size_t>(
-            bit_and(shift_right(limb, shift), mask));
-        if (is_nonzero(index))
-            multiply(result, result, powers[index]);
-    }
-
-    r = result;
+    signed62_t x{};
+    to_signed62(x, a);
+    invert(x, order_modulus);
+    from_signed62(r, x);
 }
 
 constexpr void algorithm::split(scalar_t& k1, scalar_t& k2,
@@ -215,7 +190,7 @@ constexpr void algorithm::recode(digits_t<Count>& digits,
     auto remainder = value;
     for (size_t digit{}; digit < sub1(Count); ++digit)
     {
-        const auto low = sign_cast<int64_t>(remainder[0] & window);
+        const auto low = to_signed(remainder[0] & window);
         digits[digit] = narrow_cast<int16_t>(low - offset);
 
         remainder[0] = set_right((remainder[0] >> Bits) | (remainder[1] << rest));
