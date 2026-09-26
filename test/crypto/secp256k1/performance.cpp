@@ -254,6 +254,17 @@ static void report_batches(const std::string& name) NOEXCEPT
         report_batch<Word>(name);
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__combined)
+{
+    const auto& in = signed_vectors();
+    const auto time = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return accessor::verify_schnorr(in.xonlys, in.hashes, in.schnorrs);
+    });
+
+    report("schnorr combined per signature", time / count);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch)
 {
     report_batches<uint64_t>("integral");

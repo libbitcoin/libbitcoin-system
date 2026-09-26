@@ -770,6 +770,33 @@ protected:
         std::span<const hash_digest> messages,
         std::span<const ec_signature> signatures) NOEXCEPT;
 
+    /// BIP340 verification of all rows by random linear combination, true if
+    /// all rows are valid (false does not identify invalid rows).
+    static bool verify_schnorr(std::span<const ec_xonly> keys,
+        std::span<const hash_digest> messages,
+        std::span<const ec_signature> signatures) NOEXCEPT;
+
+    /// Multiscalar multiplication.
+    /// -----------------------------------------------------------------------
+
+    /// Point and scalar of a sum of products, scalar below 2^130.
+    struct term_t
+    {
+        affine_t<uint64_t> point{};
+        scalar_t scalar{};
+    };
+
+    /// r = sum of scalar * point over terms, all cases (Pippenger buckets).
+    static void multiply(jacobian_t<uint64_t>& r,
+        std::span<const term_t> terms) NOEXCEPT;
+
+    /// Bucket window bits minimizing additions for a count of terms.
+    static constexpr size_t bucket_bits(size_t count) NOEXCEPT;
+
+    /// Appends the split halves of scalar * point, signs applied to points.
+    static void append(std::vector<term_t>& terms,
+        const affine_t<uint64_t>& point, const scalar_t& scalar) NOEXCEPT;
+
     /// Batch internals.
     /// -----------------------------------------------------------------------
 
@@ -803,6 +830,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_batch.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_pippenger.ipp>
 
 BC_POP_WARNING()
 

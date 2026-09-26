@@ -530,6 +530,7 @@ include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_inversion.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_pippenger.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp

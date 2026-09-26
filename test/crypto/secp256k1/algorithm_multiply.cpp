@@ -33,6 +33,7 @@ public:
     template <typename Word>
     using scalars_t = algorithm::scalars_t<Word>;
     using scalar_t = algorithm::scalar_t;
+    using term_t = algorithm::term_t;
     using bytes_t = algorithm::bytes_t;
     using algorithm::multiply;
     using algorithm::multiply_complete;
@@ -62,6 +63,7 @@ constexpr auto second = base16_array("483ada7726a3c4655da4fbfc0e1108a8fd17b448a6
 
 constexpr auto gx = base16_array("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
 constexpr auto gy = base16_array("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
+constexpr auto gy_negated = base16_array("b7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777");
 constexpr auto gx_beta = base16_array("bcace2e99da01887ab0102b696902325872844067f15e98da7bba04400b88fcb");
 constexpr auto g2x = base16_array("c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5");
 constexpr auto g2y = base16_array("1ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a");
@@ -208,6 +210,41 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__infinite__faults)
 {
     BOOST_CHECK(f::any(faults(number(zero_value), p1, number(zero_value))));
     BOOST_CHECK(f::any(faults(number(one_value), g1, number(order_minus_one))));
+}
+
+// multiscalar
+// ----------------------------------------------------------------------------
+
+using terms = std::vector<accessor::term_t>;
+
+constexpr scalar small1{ 0x123456789abcdef0, 0x0fedcba987654321, 0, 0 };
+constexpr scalar small2{ 0xfedcba9876543210, 0xffffffffffffffff, 3, 0 };
+constexpr affine g1_negated{ decode(gx), decode(gy_negated) };
+
+static jacobian sum(const terms& in) NOEXCEPT
+{
+    jacobian out{};
+    accessor::multiply(out, in);
+    return out;
+}
+
+static bool is_equal(const jacobian& a, const jacobian& b) NOEXCEPT
+{
+    affine left{}, right{};
+    accessor::to_affine(left, a);
+    accessor::to_affine(right, b);
+    return encode(left.x) == encode(right.x) &&
+        encode(left.y) == encode(right.y);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__terms__expected)
+{
+    BOOST_CHECK(is_point(sum({ { g1, scalar{ 1 } } }), gx, gy));
+    BOOST_CHECK(is_point(sum({ { g1, scalar{ 1 } }, { g1, scalar{ 1 } } }), g2x, g2y));
+    BOOST_CHECK(is_point(sum({ { g1, scalar{ 3 } }, { g2, scalar{ 2 } } }), g7x, g7y));
+    BOOST_CHECK(is_equal(sum({ { g1, small1 }, { p1, small2 } }), complete(small1, p1, small2)));
+    BOOST_CHECK(f::any(sum({ { g1, scalar{ 1 } }, { g1_negated, scalar{ 1 } } }).infinity));
+    BOOST_CHECK(f::any(sum({}).infinity));
 }
 
 // lanes

@@ -1803,6 +1803,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_multiply.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_pippenger.ipp">
+      <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_scalar.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>

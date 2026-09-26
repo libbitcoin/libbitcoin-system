@@ -463,6 +463,47 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__lanes__expected)
     check_batches<xint512_t>();
 }
 
+static bool combined(const rows_t<ec_xonly>& rows, size_t first,
+    size_t count) NOEXCEPT
+{
+    return accessor::verify_schnorr(
+        std::span{ rows.keys }.subspan(first, count),
+        std::span{ rows.hashes }.subspan(first, count),
+        std::span{ rows.signatures }.subspan(first, count));
+}
+
+static const rows_t<ec_xonly>& duplicate_rows() NOEXCEPT
+{
+    static const auto rows = []() NOEXCEPT
+    {
+        const auto& in = schnorr_rows();
+        rows_t<ec_xonly> out{};
+        add_row(out, in.keys[1], in.hashes[1], in.signatures[1], true);
+        add_row(out, in.keys[1], in.hashes[1], in.signatures[1], true);
+        add_row(out, in.keys[2], in.hashes[2], in.signatures[2], true);
+        return out;
+    }();
+
+    return rows;
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__combined__expected)
+{
+    const auto& rows = schnorr_rows();
+    BOOST_CHECK(combined(rows, 0, 0));
+    BOOST_CHECK(combined(rows, 0, 5));
+    BOOST_CHECK(combined(rows, 15, 4));
+    BOOST_CHECK(combined(duplicate_rows(), 0, 3));
+    BOOST_CHECK(!combined(rows, 0, 6));
+    BOOST_CHECK(!combined(rows, 15, 5));
+    BOOST_CHECK(!combined(rows, 6, 1));
+    BOOST_CHECK(!combined(rows, 7, 1));
+    BOOST_CHECK(!combined(rows, 8, 1));
+    BOOST_CHECK(!combined(rows, 9, 1));
+    BOOST_CHECK(!combined(rows, 10, 1));
+    BOOST_CHECK(!combined(rows, 11, 1));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__valid_rows__true)
 {
     const auto& rows = ecdsa_rows();
