@@ -1,0 +1,74 @@
+###############################################################################
+#  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+
+name: Create version tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to use for tag generation.'
+        required: false
+        default: 'master'
+        type: string
+      description:
+        description: 'Description to accompany tag.'
+        required: false
+        default: ''
+        type: string
+      suffix:
+        description: 'Suffix applied to version tag.'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  tag-version:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v6
+          with:
+            fetch-depth: 0
+            ref: ${{ github.event.inputs.branch || 'master' }}
+
+        - name: Configure git identity
+          run: |
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        - name: Compute version
+          id: version
+          run: |
+            MAJOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MAJOR\s+\K[0-9]+' builds/cmake/CMakeLists.txt)
+            MINOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MINOR\s+\K[0-9]+' builds/cmake/CMakeLists.txt)
+            PATCH=$(git rev-list --count HEAD)
+            TAG="v${MAJOR}.${MINOR}.${PATCH}${{ github.event.inputs.suffix || '' }}"
+            echo "major=$MAJOR" >> $GITHUB_OUTPUT
+            echo "minor=$MINOR" >> $GITHUB_OUTPUT
+            echo "patch=$PATCH" >> $GITHUB_OUTPUT
+            echo "tag=$TAG"     >> $GITHUB_OUTPUT
+            echo "Computed tag: $TAG"
+
+        - name: Create tag
+          run: |
+            if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+              echo "::error::Tag ${{ steps.version.outputs.tag }} already exists."
+              exit 1
+            fi
+            git tag -a "${{ steps.version.outputs.tag }}" -m "${{ github.event.inputs.description || '' }}"
+            git push origin "${{ steps.version.outputs.tag }}"
+            echo "Created tag '${{ steps.version.outputs.tag }}'."
+
