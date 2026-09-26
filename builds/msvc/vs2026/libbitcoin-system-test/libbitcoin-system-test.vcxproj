@@ -240,7 +240,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_group.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_multiply.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_scalar.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_verify.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
     </ClCompile>

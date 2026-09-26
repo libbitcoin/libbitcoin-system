@@ -1,0 +1,409 @@
+/**
+ * Copyright (c) 2011-2026 libbitcoin developers
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include "../../test.hpp"
+
+BOOST_AUTO_TEST_SUITE(secp256k1_algorithm_multiply_tests)
+
+class accessor
+  : public secp256k1::algorithm
+{
+public:
+    template <typename Word>
+    using field_t = algorithm::field_t<Word>;
+    template <typename Word>
+    using affine_t = algorithm::affine_t<Word>;
+    template <typename Word>
+    using jacobian_t = algorithm::jacobian_t<Word>;
+    template <typename Word>
+    using scalars_t = algorithm::scalars_t<Word>;
+    using scalar_t = algorithm::scalar_t;
+    using bytes_t = algorithm::bytes_t;
+    using algorithm::multiply;
+    using algorithm::multiply_complete;
+    using algorithm::to_affine;
+    using algorithm::from_bytes;
+    using algorithm::to_bytes;
+
+    static constexpr const auto& generator_table() NOEXCEPT
+    {
+        return generators<generator_bits>;
+    }
+
+    static constexpr const auto& endomorphism_table() NOEXCEPT
+    {
+        return endomorphisms<generator_bits>;
+    }
+};
+
+using field = accessor::field_t<uint64_t>;
+using affine = accessor::affine_t<uint64_t>;
+using jacobian = accessor::jacobian_t<uint64_t>;
+using scalar = accessor::scalar_t;
+using bytes = accessor::bytes_t;
+
+// vectors
+// ----------------------------------------------------------------------------
+
+constexpr auto zero_value = base16_array("0000000000000000000000000000000000000000000000000000000000000000");
+constexpr auto one_value = base16_array("0000000000000000000000000000000000000000000000000000000000000001");
+constexpr auto order_minus_one = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");
+constexpr auto order_minus_two = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036413f");
+constexpr auto sample = base16_array("123456789abcdef0fedcba9876543210112233445566778899aabbccddeeff00");
+constexpr auto first = base16_array("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
+constexpr auto second = base16_array("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
+
+constexpr auto gx = base16_array("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
+constexpr auto gy = base16_array("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
+constexpr auto gx_beta = base16_array("bcace2e99da01887ab0102b696902325872844067f15e98da7bba04400b88fcb");
+constexpr auto g2x = base16_array("c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5");
+constexpr auto g2y = base16_array("1ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a");
+constexpr auto g3x = base16_array("f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9");
+constexpr auto g3y = base16_array("388f7b0f632de8140fe337e62a37f3566500a99934c2231b6cb9fd7584b8e672");
+constexpr auto g7x = base16_array("5cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc");
+constexpr auto g7y = base16_array("6aebca40ba255960a3178d6d861a54dba813d0b813fde7b5a5082628087264da");
+constexpr auto g127x = base16_array("841d6063a586fa475a724604da03bc5b92a2e0d2e0a36acfe4c73a5514742881");
+constexpr auto g127y = base16_array("073867f59c0659e81904f9a1c7543698e62562d6744c169ce7a36de01a8d6154");
+constexpr auto px = base16_array("74e8586b1604b6409cb198eef8a40ef97294fcfb38f770e1c7b111163f57c99b");
+constexpr auto py = base16_array("88a13c2536d83144543c105147aeb62795c99d6d17577ffdbe4fba047946c4b1");
+
+// sample * G + first * P, and (n - 1) * G + (n - 2) * P.
+constexpr auto sum1x = base16_array("790161baa4ad68e25fda5ce43e0dd602434b9d4cd9dde402ba8744a4afc17431");
+constexpr auto sum1y = base16_array("f3d8926a99955c5823f45393de1a4a001d7bab1979ffa4f5c8ec650f1b8af96f");
+constexpr auto sum2x = base16_array("4cfbbe145caa965ec1ea94384d162f78e9c32a851ce9dff664d634310d270db7");
+constexpr auto sum2y = base16_array("7e43fceb6c4239a973f348dd61c628a7ab9abca26a0f36e1ebca8c9563fd6b19");
+
+// helpers
+// ----------------------------------------------------------------------------
+
+constexpr field decode(const bytes& value) NOEXCEPT
+{
+    field out{};
+    accessor::from_bytes(out, value);
+    return out;
+}
+
+constexpr bytes encode(const field& value) NOEXCEPT
+{
+    bytes out{};
+    accessor::to_bytes(out, value);
+    return out;
+}
+
+constexpr scalar number(const bytes& value) NOEXCEPT
+{
+    scalar out{};
+    accessor::from_bytes(out, value);
+    return out;
+}
+
+template <typename Table>
+constexpr affine entry(const Table& table, size_t index) NOEXCEPT
+{
+    return
+    {
+        {
+            table.x[0][index],
+            table.x[1][index],
+            table.x[2][index],
+            table.x[3][index],
+            table.x[4][index]
+        },
+        {
+            table.y[0][index],
+            table.y[1][index],
+            table.y[2][index],
+            table.y[3][index],
+            table.y[4][index]
+        }
+    };
+}
+
+constexpr bool is_point(const affine& a, const bytes& x, const bytes& y) NOEXCEPT
+{
+    return encode(a.x) == x && encode(a.y) == y;
+}
+
+static bool is_point(const jacobian& a, const bytes& x, const bytes& y) NOEXCEPT
+{
+    affine out{};
+    accessor::to_affine(out, a);
+    return is_point(out, x, y);
+}
+
+static jacobian product(const scalar& g, const affine& a, const scalar& k) NOEXCEPT
+{
+    jacobian out{};
+    accessor::multiply(out, accessor::scalars_t<uint64_t>{ g }, a,
+        accessor::scalars_t<uint64_t>{ k });
+    return out;
+}
+
+static uint64_t faults(const scalar& g, const affine& a, const scalar& k) NOEXCEPT
+{
+    jacobian out{};
+    return accessor::multiply(out, accessor::scalars_t<uint64_t>{ g }, a,
+        accessor::scalars_t<uint64_t>{ k });
+}
+
+static jacobian complete(const scalar& g, const affine& a, const scalar& k) NOEXCEPT
+{
+    jacobian out{};
+    accessor::multiply_complete(out, g, a, k);
+    return out;
+}
+
+constexpr affine g1{ decode(gx), decode(gy) };
+constexpr affine g2{ decode(g2x), decode(g2y) };
+constexpr affine g3{ decode(g3x), decode(g3y) };
+constexpr affine p1{ decode(px), decode(py) };
+
+// tables
+// ----------------------------------------------------------------------------
+
+static_assert(is_point(entry(accessor::generator_table(), 0), gx, gy));
+static_assert(is_point(entry(accessor::generator_table(), 1), g3x, g3y));
+static_assert(is_point(entry(accessor::generator_table(), 3), g7x, g7y));
+static_assert(is_point(entry(accessor::generator_table(), 63), g127x, g127y));
+static_assert(is_point(entry(accessor::endomorphism_table(), 0), gx_beta, gy));
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expected)
+{
+    BOOST_CHECK(is_point(entry(accessor::generator_table(), 0), gx, gy));
+    BOOST_CHECK(is_point(entry(accessor::generator_table(), 1), g3x, g3y));
+    BOOST_CHECK(is_point(entry(accessor::generator_table(), 3), g7x, g7y));
+    BOOST_CHECK(is_point(entry(accessor::generator_table(), 63), g127x, g127y));
+    BOOST_CHECK(is_point(entry(accessor::endomorphism_table(), 0), gx_beta, gy));
+}
+
+// multiply
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__values__expected)
+{
+    BOOST_CHECK(is_point(product(number(sample), p1, number(first)), sum1x, sum1y));
+    BOOST_CHECK(is_point(product(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
+    BOOST_CHECK(is_point(product(number(one_value), p1, number(zero_value)), gx, gy));
+    BOOST_CHECK(is_point(product(number(zero_value), g1, number(one_value)), gx, gy));
+    BOOST_CHECK(is_point(product(number(one_value), g1, number(one_value)), g2x, g2y));
+    BOOST_CHECK_EQUAL(faults(number(sample), p1, number(first)), 0_u64);
+    BOOST_CHECK_EQUAL(faults(number(order_minus_one), p1, number(order_minus_two)), 0_u64);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply_complete__values__expected)
+{
+    BOOST_CHECK(is_point(complete(number(sample), p1, number(first)), sum1x, sum1y));
+    BOOST_CHECK(is_point(complete(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
+    BOOST_CHECK(is_point(complete(number(one_value), p1, number(zero_value)), gx, gy));
+    BOOST_CHECK(is_point(complete(number(one_value), g1, number(one_value)), g2x, g2y));
+    BOOST_CHECK(f::any(complete(number(zero_value), p1, number(zero_value)).infinity));
+    BOOST_CHECK(f::any(complete(number(one_value), g1, number(order_minus_one)).infinity));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__infinite__faults)
+{
+    BOOST_CHECK(f::any(faults(number(zero_value), p1, number(zero_value))));
+    BOOST_CHECK(f::any(faults(number(one_value), g1, number(order_minus_one))));
+}
+
+// lanes
+// ----------------------------------------------------------------------------
+
+template <typename xWord>
+using xfield = accessor::field_t<xWord>;
+template <typename xWord>
+using xaffine = accessor::affine_t<xWord>;
+template <typename xWord>
+using xjacobian = accessor::jacobian_t<xWord>;
+
+template <typename xWord>
+constexpr auto lanes = capacity<xWord, uint64_t>;
+
+using fields = std_array<field, 8>;
+using affines = std_array<affine, 8>;
+using scalars = std_array<scalar, 8>;
+using masks = std_array<uint64_t, 8>;
+
+static const scalars left_scalars
+{
+    number(sample), number(order_minus_one), number(one_value),
+    number(zero_value), number(first), number(zero_value), number(second),
+    number(one_value)
+};
+
+static const affines points
+{
+    p1, p1, p1, g1, g2, p1, g3, g1
+};
+
+static const scalars right_scalars
+{
+    number(first), number(order_minus_two), number(zero_value),
+    number(one_value), number(second), number(zero_value), number(sample),
+    number(order_minus_one)
+};
+
+template <typename xWord>
+static xWord pack(const masks& in) NOEXCEPT
+{
+    if constexpr (lanes<xWord> == 8)
+        return f::set<xWord>(in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7]);
+    else if constexpr (lanes<xWord> == 4)
+        return f::set<xWord>(in[0], in[1], in[2], in[3]);
+    else
+        return f::set<xWord>(in[0], in[1]);
+}
+
+template <typename xWord, size_t Limb>
+static xWord pack_limb(const fields& in) NOEXCEPT
+{
+    const masks limbs
+    {
+        in[0][Limb], in[1][Limb], in[2][Limb], in[3][Limb],
+        in[4][Limb], in[5][Limb], in[6][Limb], in[7][Limb]
+    };
+
+    return pack<xWord>(limbs);
+}
+
+template <typename xWord>
+static xfield<xWord> pack(const fields& in) NOEXCEPT
+{
+    return
+    {
+        pack_limb<xWord, 0>(in),
+        pack_limb<xWord, 1>(in),
+        pack_limb<xWord, 2>(in),
+        pack_limb<xWord, 3>(in),
+        pack_limb<xWord, 4>(in)
+    };
+}
+
+template <typename xWord>
+static xaffine<xWord> pack(const affines& in) NOEXCEPT
+{
+    const fields x
+    {
+        in[0].x, in[1].x, in[2].x, in[3].x, in[4].x, in[5].x, in[6].x, in[7].x
+    };
+
+    const fields y
+    {
+        in[0].y, in[1].y, in[2].y, in[3].y, in[4].y, in[5].y, in[6].y, in[7].y
+    };
+
+    return { pack<xWord>(x), pack<xWord>(y) };
+}
+
+template <typename xWord>
+static accessor::scalars_t<xWord> pack(const scalars& in) NOEXCEPT
+{
+    if constexpr (lanes<xWord> == 8)
+        return { in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7] };
+    else if constexpr (lanes<xWord> == 4)
+        return { in[0], in[1], in[2], in[3] };
+    else
+        return { in[0], in[1] };
+}
+
+template <size_t Lane, typename xWord>
+static jacobian unpack(const xjacobian<xWord>& in) NOEXCEPT
+{
+    return
+    {
+        {
+            f::get<uint64_t, Lane>(in.x[0]),
+            f::get<uint64_t, Lane>(in.x[1]),
+            f::get<uint64_t, Lane>(in.x[2]),
+            f::get<uint64_t, Lane>(in.x[3]),
+            f::get<uint64_t, Lane>(in.x[4])
+        },
+        {
+            f::get<uint64_t, Lane>(in.y[0]),
+            f::get<uint64_t, Lane>(in.y[1]),
+            f::get<uint64_t, Lane>(in.y[2]),
+            f::get<uint64_t, Lane>(in.y[3]),
+            f::get<uint64_t, Lane>(in.y[4])
+        },
+        {
+            f::get<uint64_t, Lane>(in.z[0]),
+            f::get<uint64_t, Lane>(in.z[1]),
+            f::get<uint64_t, Lane>(in.z[2]),
+            f::get<uint64_t, Lane>(in.z[3]),
+            f::get<uint64_t, Lane>(in.z[4])
+        },
+        f::get<uint64_t, Lane>(in.infinity)
+    };
+}
+
+template <size_t Lane, typename xWord>
+static void check_lane(const xjacobian<xWord>& out, xWord lane_faults)
+{
+    const auto& g = left_scalars[Lane];
+    const auto& a = points[Lane];
+    const auto& k = right_scalars[Lane];
+    const auto expected = faults(g, a, k);
+    BOOST_CHECK_EQUAL((f::get<uint64_t, Lane>(lane_faults)), expected);
+
+    if (!f::any(expected))
+    {
+        affine actual{}, reference{};
+        accessor::to_affine(actual, unpack<Lane>(out));
+        accessor::to_affine(reference, complete(g, a, k));
+        BOOST_CHECK_EQUAL(encode(actual.x), encode(reference.x));
+        BOOST_CHECK_EQUAL(encode(actual.y), encode(reference.y));
+    }
+}
+
+template <typename xWord>
+static void check_multiply()
+{
+    if constexpr (have<xWord>)
+    {
+        xjacobian<xWord> out{};
+        const auto lane_faults = accessor::multiply(out,
+            pack<xWord>(left_scalars), pack<xWord>(points),
+            pack<xWord>(right_scalars));
+
+        check_lane<0>(out, lane_faults);
+        check_lane<1>(out, lane_faults);
+
+        if constexpr (lanes<xWord> >= 4)
+        {
+            check_lane<2>(out, lane_faults);
+            check_lane<3>(out, lane_faults);
+        }
+
+        if constexpr (lanes<xWord> >= 8)
+        {
+            check_lane<4>(out, lane_faults);
+            check_lane<5>(out, lane_faults);
+            check_lane<6>(out, lane_faults);
+            check_lane<7>(out, lane_faults);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__lanes__match_integral)
+{
+    check_multiply<xint128_t>();
+    check_multiply<xint256_t>();
+    check_multiply<xint512_t>();
+}
+
+BOOST_AUTO_TEST_SUITE_END()

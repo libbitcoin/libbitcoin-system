@@ -19,8 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_ALGORITHM_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_ALGORITHM_HPP
 
+#include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -214,9 +216,10 @@ protected:
     /// Field encoding.
     /// -----------------------------------------------------------------------
 
-    /// r from bytes (normal), false if bytes not less than p.
+    /// r from bytes at Offset (normal), false if bytes not less than p.
+    template <size_t Offset = zero, size_t Size = array_count<bytes_t>>
     static constexpr bool from_bytes(field_t<uint64_t>& r,
-        const bytes_t& bytes) NOEXCEPT;
+        const data_array<Size>& bytes) NOEXCEPT;
 
     /// bytes from a (normal).
     static constexpr void to_bytes(bytes_t& out,
@@ -342,10 +345,22 @@ protected:
     /// bytes from a.
     static constexpr void to_bytes(bytes_t& out, const scalar_t& a) NOEXCEPT;
 
+    /// Scalar encoding internals.
+    /// -----------------------------------------------------------------------
+
+    /// r from 32 big-endian bytes at Offset.
+    template <size_t Offset = zero, size_t Size = array_count<bytes_t>>
+    static constexpr void decode(scalar_t& r,
+        const data_array<Size>& bytes) NOEXCEPT;
+
+    /// out as 32 big-endian bytes of a.
+    static constexpr void encode(bytes_t& out, const scalar_t& a) NOEXCEPT;
+
     /// Scalar internals.
     /// -----------------------------------------------------------------------
 
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
+    static constexpr bool is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, const wide_t& value) NOEXCEPT;
 
@@ -432,6 +447,209 @@ protected:
     template <typename Word>
     static constexpr void to_affine(affine_t<Word>& r,
         const jacobian_t<Word>& a, const field_t<Word>& inverse_z) NOEXCEPT;
+
+    /// r = mask ? a : b, per lane.
+    template <typename Word>
+    static constexpr void select(jacobian_t<Word>& r, Word mask,
+        const jacobian_t<Word>& a, const jacobian_t<Word>& b) NOEXCEPT;
+
+    /// r = mask ? -a : a, per lane.
+    template <typename Word>
+    static constexpr void negate(affine_t<Word>& r, const affine_t<Word>& a,
+        Word mask) NOEXCEPT;
+
+    /// Window tables.
+    /// -----------------------------------------------------------------------
+
+    /// Window bits of generator and point tables.
+    static constexpr size_t generator_bits = 7;
+    static constexpr size_t point_bits = 5;
+
+    /// Number of odd multiples (1, 3, ..., 2^Bits - 1) in a window table.
+    template <size_t Bits>
+    static constexpr size_t table_size = power2(sub1(Bits));
+
+    /// Odd multiples as limb columns, for gather by index (normal).
+    template <size_t Bits>
+    struct table_t
+    {
+        std_array<std_array<uint64_t, table_size<Bits>>, 5> x{};
+        std_array<std_array<uint64_t, table_size<Bits>>, 5> y{};
+    };
+
+    /// Odd multiples of a point per lane (normal).
+    template <typename Word>
+    using points_t = std_array<affine_t<Word>, table_size<point_bits>>;
+
+    /// r = odd multiples of a.
+    template <typename Word>
+    static constexpr void multiples(points_t<Word>& r,
+        const affine_t<Word>& a) NOEXCEPT;
+
+    /// Table internals.
+    /// -----------------------------------------------------------------------
+    /// Generator tables are computed in chunks, each within the step limits of
+    /// a single constant evaluation, sharing one inversion.
+
+    static constexpr size_t chunk_size = 16;
+
+    template <size_t Bits>
+    static constexpr size_t chunk_count = table_size<Bits> / chunk_size;
+
+    /// Multiples and prefix products of their z coordinates.
+    struct forward_t
+    {
+        std_array<jacobian_t<uint64_t>, chunk_size> points{};
+        std_array<field_t<uint64_t>, chunk_size> products{};
+    };
+
+    /// Affine multiples and inverse of the prefix product before the chunk.
+    struct backward_t
+    {
+        std_array<affine_t<uint64_t>, chunk_size> points{};
+        field_t<uint64_t> inverse{};
+    };
+
+    template <size_t Bits, size_t Chunk>
+    static constexpr forward_t forward() NOEXCEPT;
+
+    template <size_t Bits, size_t Chunk>
+    static constexpr backward_t backward() NOEXCEPT;
+
+    template <size_t Bits, size_t Chunk = 0>
+    static constexpr void tabulate(table_t<Bits>& r, bool mapped) NOEXCEPT;
+
+    template <size_t Bits>
+    static constexpr table_t<Bits> tabulate(bool mapped) NOEXCEPT;
+
+    template <size_t Bits, size_t Chunk>
+    static constexpr forward_t forwards = forward<Bits, Chunk>();
+
+    template <size_t Bits, size_t Chunk>
+    static constexpr backward_t backwards = backward<Bits, Chunk>();
+
+    /// Generator tables.
+    /// -----------------------------------------------------------------------
+
+    /// Odd multiples of G.
+    template <size_t Bits>
+    static constexpr table_t<Bits> generators = tabulate<Bits>(false);
+
+    /// Odd multiples of lambda * G.
+    template <size_t Bits>
+    static constexpr table_t<Bits> endomorphisms = tabulate<Bits>(true);
+
+    /// Multiplication (weak coordinates).
+    /// -----------------------------------------------------------------------
+
+    /// Number of 64 bit lanes in a word.
+    template <typename Word>
+    static constexpr size_t lanes = capacity<Word, uint64_t>;
+
+    /// Scalar per lane.
+    template <typename Word>
+    using scalars_t = std_array<scalar_t, lanes<Word>>;
+
+    /// r = g * G + k * a, mask of lanes not computed (exceptional).
+    template <typename Word>
+    static constexpr Word multiply(jacobian_t<Word>& r,
+        const scalars_t<Word>& g, const affine_t<Word>& a,
+        const scalars_t<Word>& k) NOEXCEPT;
+
+    /// r = g * G + k * a, all cases.
+    static constexpr void multiply_complete(jacobian_t<uint64_t>& r,
+        const scalar_t& g, const affine_t<uint64_t>& a,
+        const scalar_t& k) NOEXCEPT;
+
+    /// Multiplication internals.
+    /// -----------------------------------------------------------------------
+
+    /// Split half magnitude bound (below 2^128, and at most 2^128 made odd).
+    static constexpr size_t half_bits = 129;
+
+    /// Number of window digits of a split half.
+    template <size_t Bits>
+    static constexpr size_t digit_count = ceilinged_divide(half_bits, Bits);
+
+    /// Split half as window digits of its odd magnitude.
+    template <size_t Bits>
+    struct recoded_t
+    {
+        digits_t<digit_count<Bits>> digits{};
+        bool negative{};
+        bool even{};
+    };
+
+    template <size_t Bits, typename Word>
+    using recodes_t = std_array<recoded_t<Bits>, lanes<Word>>;
+
+    template <size_t Bits>
+    static constexpr void recode(recoded_t<Bits>& r,
+        const scalar_t& half) NOEXCEPT;
+
+    template <typename Word>
+    static constexpr Word pack(
+        const std_array<uint64_t, lanes<Word>>& values) NOEXCEPT;
+
+    template <size_t Bits, typename Word>
+    static constexpr void digit(Word& index, Word& negative,
+        const recodes_t<Bits, Word>& halves, size_t position,
+        bool interleaved) NOEXCEPT;
+
+    template <size_t Bits, typename Word>
+    static constexpr void lookup(affine_t<Word>& r, const table_t<Bits>& table,
+        Word index, Word negative) NOEXCEPT;
+
+    template <typename Word>
+    static constexpr void lookup(affine_t<Word>& r, const points_t<Word>& table,
+        Word offset, Word negative) NOEXCEPT;
+
+    template <typename Word>
+    static constexpr void add_point(jacobian_t<Word>& r,
+        const affine_t<Word>& b, Word& faults) NOEXCEPT;
+
+    template <size_t Bits, typename Word>
+    static constexpr void correct(jacobian_t<Word>& r, const affine_t<Word>& a,
+        const recodes_t<Bits, Word>& halves, Word& faults) NOEXCEPT;
+
+    /// Verification.
+    /// -----------------------------------------------------------------------
+
+    /// n as a field element, and p - n.
+    static constexpr field_t<uint64_t> order_field
+    {
+        0x00025e8cd0364141,
+        0x000e6af48a03bbfd,
+        0x000ffffffebaaedc,
+        0x000fffffffffffff,
+        0x0000ffffffffffff
+    };
+
+    static constexpr scalar_t prime_minus_order
+    {
+        0x402da1722fc9baee, 0x4551231950b75fc4,
+        0x0000000000000001, 0x0000000000000000
+    };
+
+    /// r from compressed key, false if invalid (normal).
+    static constexpr bool from_bytes(affine_t<uint64_t>& r,
+        const ec_compressed& key) NOEXCEPT;
+
+    /// r from uncompressed or hybrid key, false if invalid (normal).
+    static constexpr bool from_bytes(affine_t<uint64_t>& r,
+        const ec_uncompressed& key) NOEXCEPT;
+
+    /// ECDSA verification of hash by point, s high or low.
+    static constexpr bool verify_ecdsa(const affine_t<uint64_t>& point,
+        const bytes_t& hash, const bytes_t& r, const bytes_t& s) NOEXCEPT;
+
+    /// BIP340 challenge hash of r, x-only key, and message.
+    static hash_digest challenge(const bytes_t& r, const bytes_t& key,
+        const data_slice& message) NOEXCEPT;
+
+    /// BIP340 verification of challenge hash by x-only key.
+    static constexpr bool verify_schnorr(const bytes_t& key,
+        const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT;
 };
 
 } // namespace secp256k1
@@ -443,6 +661,9 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp>
 
 BC_POP_WARNING()
 

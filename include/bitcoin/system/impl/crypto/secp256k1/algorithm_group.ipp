@@ -340,6 +340,31 @@ constexpr Word algorithm::is_on_curve(const affine_t<Word>& a) NOEXCEPT
     return equal(left, right);
 }
 
+// Group internals.
+// ----------------------------------------------------------------------------
+// protected
+
+template <typename Word>
+constexpr void algorithm::select(jacobian_t<Word>& r, Word mask,
+    const jacobian_t<Word>& a, const jacobian_t<Word>& b) NOEXCEPT
+{
+    select(r.x, mask, a.x, b.x);
+    select(r.y, mask, a.y, b.y);
+    select(r.z, mask, a.z, b.z);
+    r.infinity = f::select(mask, a.infinity, b.infinity);
+}
+
+template <typename Word>
+constexpr void algorithm::negate(affine_t<Word>& r, const affine_t<Word>& a,
+    Word mask) NOEXCEPT
+{
+    field_t<Word> y{};
+    negate(y, a.y);
+    carry(y);
+    select(y, mask, y, a.y);
+    r = { a.x, y };
+}
+
 } // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin

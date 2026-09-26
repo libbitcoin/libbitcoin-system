@@ -38,6 +38,15 @@ constexpr bool algorithm::is_overflow(const scalar_t& a) NOEXCEPT
     return true;
 }
 
+constexpr bool algorithm::is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT
+{
+    for (auto limb = a.size(); is_nonzero(limb--);)
+        if (a[limb] != b[limb])
+            return a[limb] < b[limb];
+
+    return false;
+}
+
 // Adds 2^256 - n (modulo 2^256), which subtracts n from a value not below n.
 constexpr void algorithm::reduce(scalar_t& r, bool overflow) NOEXCEPT
 {
@@ -243,14 +252,7 @@ constexpr bool algorithm::is_high(const scalar_t& a) NOEXCEPT
 constexpr bool algorithm::from_bytes(scalar_t& r,
     const bytes_t& bytes) NOEXCEPT
 {
-    r = {};
-    constexpr auto size = sizeof(uint64_t);
-    for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
-    {
-        auto& limb = r[sub1(r.size()) - (byte / size)];
-        limb = bit_or<uint64_t>(shift_left(limb, byte_bits), bytes[byte]);
-    }
-
+    decode(r, bytes);
     const auto overflow = is_overflow(r);
     reduce(r, overflow);
     return !overflow;
@@ -258,12 +260,55 @@ constexpr bool algorithm::from_bytes(scalar_t& r,
 
 constexpr void algorithm::to_bytes(bytes_t& out, const scalar_t& a) NOEXCEPT
 {
+    encode(out, a);
+}
+
+// Scalar encoding internals.
+// ----------------------------------------------------------------------------
+// protected
+
+// Limbs are least significant first, and bytes are big-endian.
+template <size_t Offset, size_t Size>
+constexpr void algorithm::decode(scalar_t& r,
+    const data_array<Size>& bytes) NOEXCEPT
+{
     constexpr auto size = sizeof(uint64_t);
-    for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
+    if (std::is_constant_evaluated())
     {
-        const auto limb = a[sub1(a.size()) - (byte / size)];
-        const auto shift = to_bits(sub1(size) - (byte % size));
-        out[byte] = narrow_cast<uint8_t>(shift_right(limb, shift));
+        from_big<Offset + 3 * size>(r[0], bytes);
+        from_big<Offset + 2 * size>(r[1], bytes);
+        from_big<Offset + 1 * size>(r[2], bytes);
+        from_big<Offset + 0 * size>(r[3], bytes);
+    }
+    else
+    {
+        const auto& words = array_cast<uint64_t, array_count<scalar_t>,
+            Offset>(bytes);
+
+        r[0] = native_from_big_end(words[3]);
+        r[1] = native_from_big_end(words[2]);
+        r[2] = native_from_big_end(words[1]);
+        r[3] = native_from_big_end(words[0]);
+    }
+}
+
+constexpr void algorithm::encode(bytes_t& out, const scalar_t& a) NOEXCEPT
+{
+    constexpr auto size = sizeof(uint64_t);
+    if (std::is_constant_evaluated())
+    {
+        to_big<0 * size>(out, a[3]);
+        to_big<1 * size>(out, a[2]);
+        to_big<2 * size>(out, a[1]);
+        to_big<3 * size>(out, a[0]);
+    }
+    else
+    {
+        auto& words = array_cast<uint64_t>(out);
+        words[0] = native_to_big_end(a[3]);
+        words[1] = native_to_big_end(a[2]);
+        words[2] = native_to_big_end(a[1]);
+        words[3] = native_to_big_end(a[0]);
     }
 }
 
