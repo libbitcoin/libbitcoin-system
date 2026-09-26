@@ -352,43 +352,97 @@ static xWord pack(const masks& in) NOEXCEPT
 template <typename xWord, size_t Limb>
 static xWord pack_limb(const std_array<field, 8>& in) NOEXCEPT
 {
-    return pack<xWord>(masks{ in[0][Limb], in[1][Limb], in[2][Limb], in[3][Limb], in[4][Limb], in[5][Limb], in[6][Limb], in[7][Limb] });
+    const masks limbs
+    {
+        in[0][Limb], in[1][Limb], in[2][Limb], in[3][Limb],
+        in[4][Limb], in[5][Limb], in[6][Limb], in[7][Limb]
+    };
+
+    return pack<xWord>(limbs);
 }
 
 template <typename xWord>
 static xfield<xWord> pack(const std_array<field, 8>& in) NOEXCEPT
 {
-    return { pack_limb<xWord, 0>(in), pack_limb<xWord, 1>(in), pack_limb<xWord, 2>(in), pack_limb<xWord, 3>(in), pack_limb<xWord, 4>(in) };
+    return
+    {
+        pack_limb<xWord, 0>(in),
+        pack_limb<xWord, 1>(in),
+        pack_limb<xWord, 2>(in),
+        pack_limb<xWord, 3>(in),
+        pack_limb<xWord, 4>(in)
+    };
 }
 
 template <typename xWord>
 static xaffine<xWord> pack(const affines& in) NOEXCEPT
 {
-    const std_array<field, 8> x{ in[0].x, in[1].x, in[2].x, in[3].x, in[4].x, in[5].x, in[6].x, in[7].x };
-    const std_array<field, 8> y{ in[0].y, in[1].y, in[2].y, in[3].y, in[4].y, in[5].y, in[6].y, in[7].y };
+    const std_array<field, 8> x
+    {
+        in[0].x, in[1].x, in[2].x, in[3].x, in[4].x, in[5].x, in[6].x, in[7].x
+    };
+
+    const std_array<field, 8> y
+    {
+        in[0].y, in[1].y, in[2].y, in[3].y, in[4].y, in[5].y, in[6].y, in[7].y
+    };
+
     return { pack<xWord>(x), pack<xWord>(y) };
 }
 
 template <typename xWord>
 static xjacobian<xWord> pack(const jacobians& in) NOEXCEPT
 {
-    const std_array<field, 8> x{ in[0].x, in[1].x, in[2].x, in[3].x, in[4].x, in[5].x, in[6].x, in[7].x };
-    const std_array<field, 8> y{ in[0].y, in[1].y, in[2].y, in[3].y, in[4].y, in[5].y, in[6].y, in[7].y };
-    const std_array<field, 8> z{ in[0].z, in[1].z, in[2].z, in[3].z, in[4].z, in[5].z, in[6].z, in[7].z };
-    const masks infinities{ in[0].infinity, in[1].infinity, in[2].infinity, in[3].infinity, in[4].infinity, in[5].infinity, in[6].infinity, in[7].infinity };
-    return { pack<xWord>(x), pack<xWord>(y), pack<xWord>(z), pack<xWord>(infinities) };
+    const std_array<field, 8> x
+    {
+        in[0].x, in[1].x, in[2].x, in[3].x, in[4].x, in[5].x, in[6].x, in[7].x
+    };
+
+    const std_array<field, 8> y
+    {
+        in[0].y, in[1].y, in[2].y, in[3].y, in[4].y, in[5].y, in[6].y, in[7].y
+    };
+
+    const std_array<field, 8> z
+    {
+        in[0].z, in[1].z, in[2].z, in[3].z, in[4].z, in[5].z, in[6].z, in[7].z
+    };
+
+    const masks infinities
+    {
+        in[0].infinity, in[1].infinity, in[2].infinity, in[3].infinity,
+        in[4].infinity, in[5].infinity, in[6].infinity, in[7].infinity
+    };
+
+    return
+    {
+        pack<xWord>(x), pack<xWord>(y), pack<xWord>(z), pack<xWord>(infinities)
+    };
 }
 
 template <size_t Lane, typename xWord>
 static field unpack(const xfield<xWord>& in) NOEXCEPT
 {
-    return { f::get<uint64_t, Lane>(in[0]), f::get<uint64_t, Lane>(in[1]), f::get<uint64_t, Lane>(in[2]), f::get<uint64_t, Lane>(in[3]), f::get<uint64_t, Lane>(in[4]) };
+    return
+    {
+        f::get<uint64_t, Lane>(in[0]),
+        f::get<uint64_t, Lane>(in[1]),
+        f::get<uint64_t, Lane>(in[2]),
+        f::get<uint64_t, Lane>(in[3]),
+        f::get<uint64_t, Lane>(in[4])
+    };
 }
 
 template <size_t Lane, typename xWord>
 static jacobian unpack(const xjacobian<xWord>& in) NOEXCEPT
 {
-    return { unpack<Lane>(in.x), unpack<Lane>(in.y), unpack<Lane>(in.z), f::get<uint64_t, Lane>(in.infinity) };
+    return
+    {
+        unpack<Lane>(in.x),
+        unpack<Lane>(in.y),
+        unpack<Lane>(in.z),
+        f::get<uint64_t, Lane>(in.infinity)
+    };
 }
 
 template <size_t Lane, typename xWord>
@@ -398,7 +452,8 @@ static affine unpack(const xaffine<xWord>& in) NOEXCEPT
 }
 
 template <size_t Lane, typename xWord>
-static void check_lane(const xjacobian<xWord>& out, xWord uncomputed, const jacobians& expected, const masks& expected_uncomputed)
+static void check_lane(const xjacobian<xWord>& out, xWord uncomputed,
+    const jacobians& expected, const masks& expected_uncomputed)
 {
     BOOST_CHECK_EQUAL((f::get<uint64_t, Lane>(uncomputed)), expected_uncomputed[Lane]);
     if (!f::any(expected_uncomputed[Lane]) && !f::any(expected[Lane].infinity))
@@ -409,7 +464,8 @@ static void check_lane(const xjacobian<xWord>& out, xWord uncomputed, const jaco
 }
 
 template <typename xWord>
-static void check_lanes(const xjacobian<xWord>& out, xWord uncomputed, const jacobians& expected, const masks& expected_uncomputed)
+static void check_lanes(const xjacobian<xWord>& out, xWord uncomputed,
+    const jacobians& expected, const masks& expected_uncomputed)
 {
     check_lane<0>(out, uncomputed, expected, expected_uncomputed);
     check_lane<1>(out, uncomputed, expected, expected_uncomputed);
@@ -429,12 +485,30 @@ static void check_lanes(const xjacobian<xWord>& out, xWord uncomputed, const jac
     }
 }
 
+static const jacobians mixed_left
+{
+    g2j, g1j, infinity, g1j, p1j, p1j, g4j, g3j
+};
 
-static const jacobians mixed_left{ g2j, g1j, infinity, g1j, p1j, p1j, g4j, g3j };
-static const affines mixed_right{ g1, g1, g1, negated(g1), g1, g2, g3, g1 };
-static const jacobians jacobian_left{ g2j, g2j, infinity, g2j, g4j, p1j, g1j, g3j };
-static const jacobians jacobian_right{ projective(g1), g2j, g1j, negated(g2j), g3j, g2j, infinity, g4j };
-static const jacobians doubled_in{ g1j, infinity, g2j, p1j, g3j, g4j, negated(g1j), sum(g4j, g3j) };
+static const affines mixed_right
+{
+    g1, g1, g1, negated(g1), g1, g2, g3, g1
+};
+
+static const jacobians jacobian_left
+{
+    g2j, g2j, infinity, g2j, g4j, p1j, g1j, g3j
+};
+
+static const jacobians jacobian_right
+{
+    projective(g1), g2j, g1j, negated(g2j), g3j, g2j, infinity, g4j
+};
+
+static const jacobians doubled_in
+{
+    g1j, infinity, g2j, p1j, g3j, g4j, negated(g1j), sum(g4j, g3j)
+};
 
 template <typename xWord>
 static void check_mixed()
@@ -442,9 +516,33 @@ static void check_mixed()
     if constexpr (have<xWord>)
     {
         xjacobian<xWord> out{};
-        const auto uncomputed_lanes = accessor::add(out, pack<xWord>(mixed_left), pack<xWord>(mixed_right));
-        const jacobians expected{ sum(mixed_left[0], mixed_right[0]), sum(mixed_left[1], mixed_right[1]), sum(mixed_left[2], mixed_right[2]), sum(mixed_left[3], mixed_right[3]), sum(mixed_left[4], mixed_right[4]), sum(mixed_left[5], mixed_right[5]), sum(mixed_left[6], mixed_right[6]), sum(mixed_left[7], mixed_right[7]) };
-        const masks expected_uncomputed{ uncomputed(mixed_left[0], mixed_right[0]), uncomputed(mixed_left[1], mixed_right[1]), uncomputed(mixed_left[2], mixed_right[2]), uncomputed(mixed_left[3], mixed_right[3]), uncomputed(mixed_left[4], mixed_right[4]), uncomputed(mixed_left[5], mixed_right[5]), uncomputed(mixed_left[6], mixed_right[6]), uncomputed(mixed_left[7], mixed_right[7]) };
+        const auto uncomputed_lanes = accessor::add(out,
+            pack<xWord>(mixed_left), pack<xWord>(mixed_right));
+
+        const jacobians expected
+        {
+            sum(mixed_left[0], mixed_right[0]),
+            sum(mixed_left[1], mixed_right[1]),
+            sum(mixed_left[2], mixed_right[2]),
+            sum(mixed_left[3], mixed_right[3]),
+            sum(mixed_left[4], mixed_right[4]),
+            sum(mixed_left[5], mixed_right[5]),
+            sum(mixed_left[6], mixed_right[6]),
+            sum(mixed_left[7], mixed_right[7])
+        };
+
+        const masks expected_uncomputed
+        {
+            uncomputed(mixed_left[0], mixed_right[0]),
+            uncomputed(mixed_left[1], mixed_right[1]),
+            uncomputed(mixed_left[2], mixed_right[2]),
+            uncomputed(mixed_left[3], mixed_right[3]),
+            uncomputed(mixed_left[4], mixed_right[4]),
+            uncomputed(mixed_left[5], mixed_right[5]),
+            uncomputed(mixed_left[6], mixed_right[6]),
+            uncomputed(mixed_left[7], mixed_right[7])
+        };
+
         check_lanes(out, uncomputed_lanes, expected, expected_uncomputed);
     }
 }
@@ -455,9 +553,33 @@ static void check_jacobian()
     if constexpr (have<xWord>)
     {
         xjacobian<xWord> out{};
-        const auto uncomputed_lanes = accessor::add(out, pack<xWord>(jacobian_left), pack<xWord>(jacobian_right));
-        const jacobians expected{ sum(jacobian_left[0], jacobian_right[0]), sum(jacobian_left[1], jacobian_right[1]), sum(jacobian_left[2], jacobian_right[2]), sum(jacobian_left[3], jacobian_right[3]), sum(jacobian_left[4], jacobian_right[4]), sum(jacobian_left[5], jacobian_right[5]), sum(jacobian_left[6], jacobian_right[6]), sum(jacobian_left[7], jacobian_right[7]) };
-        const masks expected_uncomputed{ uncomputed(jacobian_left[0], jacobian_right[0]), uncomputed(jacobian_left[1], jacobian_right[1]), uncomputed(jacobian_left[2], jacobian_right[2]), uncomputed(jacobian_left[3], jacobian_right[3]), uncomputed(jacobian_left[4], jacobian_right[4]), uncomputed(jacobian_left[5], jacobian_right[5]), uncomputed(jacobian_left[6], jacobian_right[6]), uncomputed(jacobian_left[7], jacobian_right[7]) };
+        const auto uncomputed_lanes = accessor::add(out,
+            pack<xWord>(jacobian_left), pack<xWord>(jacobian_right));
+
+        const jacobians expected
+        {
+            sum(jacobian_left[0], jacobian_right[0]),
+            sum(jacobian_left[1], jacobian_right[1]),
+            sum(jacobian_left[2], jacobian_right[2]),
+            sum(jacobian_left[3], jacobian_right[3]),
+            sum(jacobian_left[4], jacobian_right[4]),
+            sum(jacobian_left[5], jacobian_right[5]),
+            sum(jacobian_left[6], jacobian_right[6]),
+            sum(jacobian_left[7], jacobian_right[7])
+        };
+
+        const masks expected_uncomputed
+        {
+            uncomputed(jacobian_left[0], jacobian_right[0]),
+            uncomputed(jacobian_left[1], jacobian_right[1]),
+            uncomputed(jacobian_left[2], jacobian_right[2]),
+            uncomputed(jacobian_left[3], jacobian_right[3]),
+            uncomputed(jacobian_left[4], jacobian_right[4]),
+            uncomputed(jacobian_left[5], jacobian_right[5]),
+            uncomputed(jacobian_left[6], jacobian_right[6]),
+            uncomputed(jacobian_left[7], jacobian_right[7])
+        };
+
         check_lanes(out, uncomputed_lanes, expected, expected_uncomputed);
     }
 }
@@ -469,8 +591,23 @@ static void check_double()
     {
         xjacobian<xWord> out{};
         accessor::double_(out, pack<xWord>(doubled_in));
-        const jacobians expected{ twice(doubled_in[0]), twice(doubled_in[1]), twice(doubled_in[2]), twice(doubled_in[3]), twice(doubled_in[4]), twice(doubled_in[5]), twice(doubled_in[6]), twice(doubled_in[7]) };
-        const masks infinities{ doubled_in[0].infinity, doubled_in[1].infinity, doubled_in[2].infinity, doubled_in[3].infinity, doubled_in[4].infinity, doubled_in[5].infinity, doubled_in[6].infinity, doubled_in[7].infinity };
+
+        const jacobians expected
+        {
+            twice(doubled_in[0]), twice(doubled_in[1]),
+            twice(doubled_in[2]), twice(doubled_in[3]),
+            twice(doubled_in[4]), twice(doubled_in[5]),
+            twice(doubled_in[6]), twice(doubled_in[7])
+        };
+
+        const masks infinities
+        {
+            doubled_in[0].infinity, doubled_in[1].infinity,
+            doubled_in[2].infinity, doubled_in[3].infinity,
+            doubled_in[4].infinity, doubled_in[5].infinity,
+            doubled_in[6].infinity, doubled_in[7].infinity
+        };
+
         check_lanes(out, out.infinity, expected, infinities);
     }
 }
@@ -480,8 +617,20 @@ static void check_lift()
 {
     if constexpr (have<xWord>)
     {
-        const std_array<field, 8> xs{ decode(g2x), decode(g2x), decode(zero_value), decode(gx), decode(px), decode(g3x), decode(g7x), decode(g4x) };
+        const std_array<field, 8> xs
+        {
+            decode(g2x),
+            decode(g2x),
+            decode(zero_value),
+            decode(gx),
+            decode(px),
+            decode(g3x),
+            decode(g7x),
+            decode(g4x)
+        };
+
         const masks odds{ 0, max_uint64, 0, 0, max_uint64, 0, 0, 0 };
+
         xaffine<xWord> out{};
         const auto valid = accessor::lift(out, pack<xWord>(xs), pack<xWord>(odds));
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(valid)), max_uint64);
@@ -511,7 +660,11 @@ static void check_to_affine()
 {
     if constexpr (have<xWord>)
     {
-        const std_array<xjacobian<xWord>, 2> in{ pack<xWord>(mixed_left), pack<xWord>(doubled_in) };
+        const std_array<xjacobian<xWord>, 2> in
+        {
+            pack<xWord>(mixed_left), pack<xWord>(doubled_in)
+        };
+
         std_array<xaffine<xWord>, 2> out{};
         accessor::to_affine(out, in);
         BOOST_CHECK_EQUAL(unpack<0>(out[0]).x, flat(mixed_left[0]).x);

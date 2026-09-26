@@ -111,7 +111,8 @@ constexpr bytes encode(field value) NOEXCEPT
 
 constexpr bool is_weak(const field& value) NOEXCEPT
 {
-    return value[0] <= mask && value[1] <= mask && value[2] <= mask && value[3] <= mask && value[4] <= ((top << 1) | 1);
+    return value[0] <= mask && value[1] <= mask && value[2] <= mask &&
+        value[3] <= mask && value[4] <= ((top << 1) | 1);
 }
 
 constexpr bool is_decodable(const bytes& value) NOEXCEPT
@@ -356,27 +357,32 @@ using masks = std_array<uint64_t, 8>;
 
 constexpr fields left
 {
-    weak_limbs, decode(gx), decode(prime_minus_one), decode(zero_value), decode(gy), decode(sample), decode(seven_value), decode(one_value)
+    weak_limbs, decode(gx), decode(prime_minus_one), decode(zero_value),
+    decode(gy), decode(sample), decode(seven_value), decode(one_value)
 };
 
 constexpr fields right
 {
-    weak_limbs, decode(gy), decode(prime_minus_one), decode(sample), decode(half_value), decode(one_value), decode(gy_squared), decode(gx)
+    weak_limbs, decode(gy), decode(prime_minus_one), decode(sample),
+    decode(half_value), decode(one_value), decode(gy_squared), decode(gx)
 };
 
 constexpr fields loosed
 {
-    loose_limbs, all_limbs, power_limbs, prime_limbs, prime_plus_one, weak_limbs, decode(gx), decode(zero_value)
+    loose_limbs, all_limbs, power_limbs, prime_limbs,
+    prime_plus_one, weak_limbs, decode(gx), decode(zero_value)
 };
 
 constexpr fields normals
 {
-    decode(gx), decode(zero_value), decode(prime_minus_one), decode(one_value), decode(gy), decode(gx), decode(seven_value), decode(sample)
+    decode(gx), decode(zero_value), decode(prime_minus_one), decode(one_value),
+    decode(gy), decode(gx), decode(seven_value), decode(sample)
 };
 
 constexpr fields generators
 {
-    decode(gx), decode(gx), decode(gx), decode(gx), decode(gx), decode(gx), decode(gx), decode(gx)
+    decode(gx), decode(gx), decode(gx), decode(gx),
+    decode(gx), decode(gx), decode(gx), decode(gx)
 };
 
 constexpr field normal(field value) NOEXCEPT
@@ -413,22 +419,45 @@ constexpr uint64_t field_equal(const field& a, const field& b) NOEXCEPT
 
 constexpr fields expect(auto function, const fields& a) NOEXCEPT
 {
-    return { normal(function(a[0])), normal(function(a[1])), normal(function(a[2])), normal(function(a[3])), normal(function(a[4])), normal(function(a[5])), normal(function(a[6])), normal(function(a[7])) };
+    return
+    {
+        normal(function(a[0])), normal(function(a[1])),
+        normal(function(a[2])), normal(function(a[3])),
+        normal(function(a[4])), normal(function(a[5])),
+        normal(function(a[6])), normal(function(a[7]))
+    };
 }
 
 constexpr fields expect(auto function, const fields& a, const fields& b) NOEXCEPT
 {
-    return { normal(function(a[0], b[0])), normal(function(a[1], b[1])), normal(function(a[2], b[2])), normal(function(a[3], b[3])), normal(function(a[4], b[4])), normal(function(a[5], b[5])), normal(function(a[6], b[6])), normal(function(a[7], b[7])) };
+    return
+    {
+        normal(function(a[0], b[0])), normal(function(a[1], b[1])),
+        normal(function(a[2], b[2])), normal(function(a[3], b[3])),
+        normal(function(a[4], b[4])), normal(function(a[5], b[5])),
+        normal(function(a[6], b[6])), normal(function(a[7], b[7]))
+    };
 }
 
 constexpr masks expect_masks(auto function, const fields& a) NOEXCEPT
 {
-    return { function(a[0]), function(a[1]), function(a[2]), function(a[3]), function(a[4]), function(a[5]), function(a[6]), function(a[7]) };
+    return
+    {
+        function(a[0]), function(a[1]), function(a[2]), function(a[3]),
+        function(a[4]), function(a[5]), function(a[6]), function(a[7])
+    };
 }
 
-constexpr masks expect_masks(auto function, const fields& a, const fields& b) NOEXCEPT
+constexpr masks expect_masks(auto function, const fields& a,
+    const fields& b) NOEXCEPT
 {
-    return { function(a[0], b[0]), function(a[1], b[1]), function(a[2], b[2]), function(a[3], b[3]), function(a[4], b[4]), function(a[5], b[5]), function(a[6], b[6]), function(a[7], b[7]) };
+    return
+    {
+        function(a[0], b[0]), function(a[1], b[1]),
+        function(a[2], b[2]), function(a[3], b[3]),
+        function(a[4], b[4]), function(a[5], b[5]),
+        function(a[6], b[6]), function(a[7], b[7])
+    };
 }
 
 template <typename xWord>
@@ -438,11 +467,16 @@ static xfield<xWord> pack(const fields& in) NOEXCEPT
     {
         return
         {
-            f::set<xWord>(in[0][0], in[1][0], in[2][0], in[3][0], in[4][0], in[5][0], in[6][0], in[7][0]),
-            f::set<xWord>(in[0][1], in[1][1], in[2][1], in[3][1], in[4][1], in[5][1], in[6][1], in[7][1]),
-            f::set<xWord>(in[0][2], in[1][2], in[2][2], in[3][2], in[4][2], in[5][2], in[6][2], in[7][2]),
-            f::set<xWord>(in[0][3], in[1][3], in[2][3], in[3][3], in[4][3], in[5][3], in[6][3], in[7][3]),
-            f::set<xWord>(in[0][4], in[1][4], in[2][4], in[3][4], in[4][4], in[5][4], in[6][4], in[7][4])
+            f::set<xWord>(in[0][0], in[1][0], in[2][0], in[3][0],
+                in[4][0], in[5][0], in[6][0], in[7][0]),
+            f::set<xWord>(in[0][1], in[1][1], in[2][1], in[3][1],
+                in[4][1], in[5][1], in[6][1], in[7][1]),
+            f::set<xWord>(in[0][2], in[1][2], in[2][2], in[3][2],
+                in[4][2], in[5][2], in[6][2], in[7][2]),
+            f::set<xWord>(in[0][3], in[1][3], in[2][3], in[3][3],
+                in[4][3], in[5][3], in[6][3], in[7][3]),
+            f::set<xWord>(in[0][4], in[1][4], in[2][4], in[3][4],
+                in[4][4], in[5][4], in[6][4], in[7][4])
         };
     }
     else if constexpr (lanes<xWord> == 4)
@@ -472,7 +506,14 @@ static xfield<xWord> pack(const fields& in) NOEXCEPT
 template <size_t Lane, typename xWord>
 static field unpack(const xfield<xWord>& in) NOEXCEPT
 {
-    return { f::get<uint64_t, Lane>(in[0]), f::get<uint64_t, Lane>(in[1]), f::get<uint64_t, Lane>(in[2]), f::get<uint64_t, Lane>(in[3]), f::get<uint64_t, Lane>(in[4]) };
+    return
+    {
+        f::get<uint64_t, Lane>(in[0]),
+        f::get<uint64_t, Lane>(in[1]),
+        f::get<uint64_t, Lane>(in[2]),
+        f::get<uint64_t, Lane>(in[3]),
+        f::get<uint64_t, Lane>(in[4])
+    };
 }
 
 template <typename xWord>
@@ -598,7 +639,8 @@ static void check_predicates()
         const auto in = pack<xWord>(normals);
         check_masks(accessor::is_zero(in), expect_masks(field_is_zero, normals));
         check_masks(accessor::is_odd(in), expect_masks(field_is_odd, normals));
-        check_masks(accessor::equal(in, pack<xWord>(generators)), expect_masks(field_equal, normals, generators));
+        check_masks(accessor::equal(in, pack<xWord>(generators)),
+            expect_masks(field_equal, normals, generators));
     }
 }
 

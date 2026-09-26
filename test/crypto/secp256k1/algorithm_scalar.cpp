@@ -147,7 +147,8 @@ constexpr scalar split_second(const scalar& k) NOEXCEPT
 
 constexpr bool is_joined(const scalar& k) NOEXCEPT
 {
-    return scalar_add(split_first(k), scalar_multiply(split_second(k), accessor::lambda)) == k;
+    return scalar_add(split_first(k),
+        scalar_multiply(split_second(k), accessor::lambda)) == k;
 }
 
 constexpr bool is_small(const scalar& a) NOEXCEPT
@@ -273,10 +274,40 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__split__values__joined_and_small
 // recode
 // ----------------------------------------------------------------------------
 
-constexpr accessor::digits_t<33> one_digits{ -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, 1 };
-constexpr accessor::digits_t<33> max_digits{ 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 1 };
-constexpr accessor::digits_t<33> sample_digits4{ -15, 3, -13, 5, -11, 7, -9, 9, -7, 11, -5, 13, -3, 15, -1, 1, -1, 15, -3, 13, -5, 11, -7, 9, -9, 7, -11, 5, -13, 3, -15, -15, 1 };
-constexpr accessor::digits_t<26> sample_digits5{ 1, -7, -15, -21, 23, -29, 7, 21, -21, 15, 27, -1, 17, 23, 23, 25, 11, -19, 3, -17, -9, 3, -19, 5, -31, 1 };
+constexpr accessor::digits_t<33> one_digits
+{
+    -15, -15, -15, -15, -15, -15, -15, -15,
+    -15, -15, -15, -15, -15, -15, -15, -15,
+    -15, -15, -15, -15, -15, -15, -15, -15,
+    -15, -15, -15, -15, -15, -15, -15, -15,
+    1
+};
+
+constexpr accessor::digits_t<33> max_digits
+{
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15,
+    1
+};
+
+constexpr accessor::digits_t<33> sample_digits4
+{
+    -15, 3, -13, 5, -11, 7, -9, 9,
+    -7, 11, -5, 13, -3, 15, -1, 1,
+    -1, 15, -3, 13, -5, 11, -7, 9,
+    -9, 7, -11, 5, -13, 3, -15, -15,
+    1
+};
+
+constexpr accessor::digits_t<26> sample_digits5
+{
+    1, -7, -15, -21, 23, -29, 7, 21,
+    -21, 15, 27, -1, 17, 23, 23, 25,
+    11, -19, 3, -17, -9, 3, -19, 5,
+    -31, 1
+};
 
 static_assert(recoded<4, 33>(small_one) == one_digits);
 static_assert(recoded<4, 33>(small_max) == max_digits);
