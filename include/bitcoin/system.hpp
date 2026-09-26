@@ -126,6 +126,7 @@
 #include <bitcoin/system/crypto/secp256k1_batch.hpp>
 #include <bitcoin/system/crypto/x25519.hpp>
 #include <bitcoin/system/crypto/xsalsa20_poly1305.hpp>
+#include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>

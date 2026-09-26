@@ -90,6 +90,12 @@ INLINE constexpr auto add(Word a, Word b) NOEXCEPT
     return depromote<Word>(a + b);
 }
 
+template <auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto sub(Word a, Word b) NOEXCEPT
+{
+    return depromote<Word>(a - b);
+}
+
 template <auto K, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto addc(Word a) NOEXCEPT
 {

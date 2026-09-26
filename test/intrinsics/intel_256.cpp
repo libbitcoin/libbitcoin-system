@@ -112,6 +112,21 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_256__byteswap64__expected)
     }
 }
 
+// sub
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_256__sub64__expected)
+{
+    if constexpr (have_256)
+    {
+        const auto xword = f::sub<64>(f::set<xint256_t>(5_u64, 0_u64, 7_u64, max_uint64), f::set<xint256_t>(3_u64, 1_u64, 7_u64, 1_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 2_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), max_uint64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), sub1(max_uint64));
+    }
+}
+
 // compare/select
 // ----------------------------------------------------------------------------
 

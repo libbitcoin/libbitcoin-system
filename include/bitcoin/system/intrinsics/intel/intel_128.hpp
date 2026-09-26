@@ -131,6 +131,20 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
 }
 
 // SSE2
+template <auto S>
+INLINE xint128_t sub(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_sub_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_sub_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_sub_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm_sub_epi64(a, b);
+}
+
+// SSE2
 template <auto K, auto S>
 INLINE xint128_t addc(xint128_t a) NOEXCEPT
 {

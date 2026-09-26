@@ -138,6 +138,20 @@ INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_add_epi64(a, b);
 }
 
+// AVX2
+template <auto S>
+INLINE xint256_t sub(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_sub_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_sub_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_sub_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_sub_epi64(a, b);
+}
+
 // AVX
 template <auto K, auto S>
 INLINE xint256_t addc(xint256_t a) NOEXCEPT

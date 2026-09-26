@@ -86,6 +86,31 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_128__byteswap64__expected)
     }
 }
 
+// sub
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_128__sub64__expected)
+{
+    if constexpr (have_128)
+    {
+        const auto xword = f::sub<64>(f::set<xint128_t>(5_u64, 0_u64), f::set<xint128_t>(3_u64, 1_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 2_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), max_uint64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_128__sub32__expected)
+{
+    if constexpr (have_128)
+    {
+        const auto xword = f::sub<32>(f::set<xint128_t>(5_u32, 0_u32, 7_u32, 9_u32), f::set<xint128_t>(3_u32, 1_u32, 7_u32, 1_u32));
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 0>(xword)), 2_u32);
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 1>(xword)), max_uint32);
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 2>(xword)), 0_u32);
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 3>(xword)), 8_u32);
+    }
+}
+
 // compare/select
 // ----------------------------------------------------------------------------
 

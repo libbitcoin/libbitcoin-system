@@ -125,6 +125,20 @@ INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
         return _mm512_add_epi64(a, b);
 }
 
+// AVX512BW
+template <auto S>
+INLINE xint512_t sub(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm512_sub_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm512_sub_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_sub_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_sub_epi64(a, b);
+}
+
 // AVX512F
 template <auto K, auto S>
 INLINE xint512_t addc(xint512_t a) NOEXCEPT
