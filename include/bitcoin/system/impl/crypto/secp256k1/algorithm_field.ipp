@@ -133,12 +133,11 @@ template <typename Word>
 constexpr void algorithm::negate(field_t<Word>& r,
     const field_t<Word>& a) NOEXCEPT
 {
-    constexpr auto twice = 2u;
-    r[0] = f::sub<64>(f::broadcast<Word>(prime[0] << twice), a[0]);
-    r[1] = f::sub<64>(f::broadcast<Word>(prime[1] << twice), a[1]);
-    r[2] = f::sub<64>(f::broadcast<Word>(prime[2] << twice), a[2]);
-    r[3] = f::sub<64>(f::broadcast<Word>(prime[3] << twice), a[3]);
-    r[4] = f::sub<64>(f::broadcast<Word>(prime[4] << twice), a[4]);
+    r[0] = f::sub<64>(f::broadcast<Word>(prime[0] << two), a[0]);
+    r[1] = f::sub<64>(f::broadcast<Word>(prime[1] << two), a[1]);
+    r[2] = f::sub<64>(f::broadcast<Word>(prime[2] << two), a[2]);
+    r[3] = f::sub<64>(f::broadcast<Word>(prime[3] << two), a[3]);
+    r[4] = f::sub<64>(f::broadcast<Word>(prime[4] << two), a[4]);
 }
 
 template <typename Word>
@@ -346,9 +345,7 @@ constexpr Word algorithm::square_root(field_t<Word>& r,
 template <typename Word>
 constexpr Word algorithm::is_zero(const field_t<Word>& a) NOEXCEPT
 {
-    const auto merged = f::or_(f::or_(f::or_(f::or_(a[0], a[1]), a[2]), a[3]),
-        a[4]);
-
+    const auto merged = f::or_(f::or_(f::or_(f::or_(a[0], a[1]), a[2]), a[3]), a[4]);
     return f::eq<64>(merged, f::broadcast<Word>(uint64_t{}));
 }
 
@@ -390,11 +387,11 @@ constexpr bool algorithm::from_bytes(field_t<uint64_t>& r,
         word = (word << byte_bits) | bytes[byte];
     }
 
-    r[0] = words[0] & limb_mask;
+    r[0] =   words[0]                            & limb_mask;
     r[1] = ((words[0] >> 52) | (words[1] << 12)) & limb_mask;
     r[2] = ((words[1] >> 40) | (words[2] << 24)) & limb_mask;
     r[3] = ((words[2] >> 28) | (words[3] << 36)) & limb_mask;
-    r[4] = words[3] >> 16;
+    r[4] =   words[3] >> 16;
 
     return !((r[4] == top_mask) && ((r[1] & r[2] & r[3]) == limb_mask) &&
         (r[0] >= prime[0]));
@@ -406,7 +403,7 @@ constexpr void algorithm::to_bytes(bytes_t& out,
     constexpr auto size = sizeof(uint64_t);
     const std_array<uint64_t, 4> words
     {
-        a[0] | (a[1] << 52),
+        (a[0] >>  0) | (a[1] << 52),
         (a[1] >> 12) | (a[2] << 40),
         (a[2] >> 24) | (a[3] << 28),
         (a[3] >> 36) | (a[4] << 16)
@@ -414,7 +411,7 @@ constexpr void algorithm::to_bytes(bytes_t& out,
 
     for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
     {
-        const auto word = words[sub1(words.size()) - byte / size];
+        const auto word = words[sub1(words.size()) - (byte / size)];
         const auto shift = (sub1(size) - byte % size) * byte_bits;
         out[byte] = narrow_cast<uint8_t>(word >> shift);
     }

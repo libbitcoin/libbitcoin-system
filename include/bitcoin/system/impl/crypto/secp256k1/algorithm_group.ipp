@@ -292,7 +292,7 @@ constexpr void algorithm::to_affine(std_array<affine_t<Word>, Count>& r,
 
     std_array<field_t<Word>, Count> prefix{};
     prefix[0] = a[0].z;
-    for (size_t point = 1; point < Count; ++point)
+    for (auto point = one; point < Count; ++point)
         multiply(prefix[point], prefix[sub1(point)], a[point].z);
 
     field_t<Word> inverted{}, inverse_z{};

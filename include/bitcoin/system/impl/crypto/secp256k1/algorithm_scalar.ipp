@@ -239,8 +239,8 @@ constexpr bool algorithm::is_high(const scalar_t& a) NOEXCEPT
 constexpr bool algorithm::from_bytes(scalar_t& r,
     const bytes_t& bytes) NOEXCEPT
 {
-    constexpr auto size = sizeof(uint64_t);
     r = {};
+    constexpr auto size = sizeof(uint64_t);
     for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
     {
         auto& limb = r[sub1(r.size()) - byte / size];
