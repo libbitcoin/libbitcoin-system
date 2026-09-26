@@ -39,16 +39,8 @@ public:
     using algorithm::to_affine;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
-
-    static constexpr const auto& generator_table() NOEXCEPT
-    {
-        return generators<generator_bits>;
-    }
-
-    static constexpr const auto& endomorphism_table() NOEXCEPT
-    {
-        return endomorphisms<generator_bits>;
-    }
+    using algorithm::generator_table;
+    using algorithm::endomorphism_table;
 };
 
 using field = accessor::field_t<uint64_t>;
@@ -79,6 +71,8 @@ constexpr auto g7x = base16_array("5cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e
 constexpr auto g7y = base16_array("6aebca40ba255960a3178d6d861a54dba813d0b813fde7b5a5082628087264da");
 constexpr auto g127x = base16_array("841d6063a586fa475a724604da03bc5b92a2e0d2e0a36acfe4c73a5514742881");
 constexpr auto g127y = base16_array("073867f59c0659e81904f9a1c7543698e62562d6744c169ce7a36de01a8d6154");
+constexpr auto g1023x = base16_array("c7a363246aeb7c8c991b2aa710abdf5cfff2991230b3a69fbe2dd4817c7c3e0a");
+constexpr auto g1023y = base16_array("1298fdd70e448d2d799863026b4b2d4902b32148d6d1e5f815f5b0c005c9e21f");
 constexpr auto px = base16_array("74e8586b1604b6409cb198eef8a40ef97294fcfb38f770e1c7b111163f57c99b");
 constexpr auto py = base16_array("88a13c2536d83144543c105147aeb62795c99d6d17577ffdbe4fba047946c4b1");
 
@@ -176,19 +170,14 @@ constexpr affine p1{ decode(px), decode(py) };
 // tables
 // ----------------------------------------------------------------------------
 
-static_assert(is_point(entry(accessor::generator_table(), 0), gx, gy));
-static_assert(is_point(entry(accessor::generator_table(), 1), g3x, g3y));
-static_assert(is_point(entry(accessor::generator_table(), 3), g7x, g7y));
-static_assert(is_point(entry(accessor::generator_table(), 63), g127x, g127y));
-static_assert(is_point(entry(accessor::endomorphism_table(), 0), gx_beta, gy));
-
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expected)
 {
-    BOOST_CHECK(is_point(entry(accessor::generator_table(), 0), gx, gy));
-    BOOST_CHECK(is_point(entry(accessor::generator_table(), 1), g3x, g3y));
-    BOOST_CHECK(is_point(entry(accessor::generator_table(), 3), g7x, g7y));
-    BOOST_CHECK(is_point(entry(accessor::generator_table(), 63), g127x, g127y));
-    BOOST_CHECK(is_point(entry(accessor::endomorphism_table(), 0), gx_beta, gy));
+    BOOST_CHECK(is_point(entry(accessor::generator_table, 0), gx, gy));
+    BOOST_CHECK(is_point(entry(accessor::generator_table, 1), g3x, g3y));
+    BOOST_CHECK(is_point(entry(accessor::generator_table, 3), g7x, g7y));
+    BOOST_CHECK(is_point(entry(accessor::generator_table, 63), g127x, g127y));
+    BOOST_CHECK(is_point(entry(accessor::generator_table, 511), g1023x, g1023y));
+    BOOST_CHECK(is_point(entry(accessor::endomorphism_table, 0), gx_beta, gy));
 }
 
 // multiply

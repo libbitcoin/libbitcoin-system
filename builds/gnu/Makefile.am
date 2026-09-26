@@ -151,6 +151,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/salsa20.cpp \
     ${srcdir}/../../src/crypto/x25519.cpp \
     ${srcdir}/../../src/crypto/xsalsa20_poly1305.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/algorithm.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \

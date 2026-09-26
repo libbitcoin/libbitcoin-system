@@ -263,6 +263,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\algorithm.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp" />

@@ -561,7 +561,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Window bits of generator and point tables.
-    static constexpr size_t generator_bits = 7;
+    static constexpr size_t generator_bits = 10;
     static constexpr size_t point_bits = 5;
 
     /// Number of odd multiples (1, 3, ..., 2^Bits - 1) in a window table.
@@ -630,13 +630,10 @@ protected:
     /// Generator tables.
     /// -----------------------------------------------------------------------
 
-    /// Odd multiples of G.
-    template <size_t Bits>
-    static constexpr table_t<Bits> generators = tabulate<Bits>(false);
-
-    /// Odd multiples of lambda * G.
-    template <size_t Bits>
-    static constexpr table_t<Bits> endomorphisms = tabulate<Bits>(true);
+    /// Odd multiples of G, and of lambda * G, computed at compile time in one
+    /// translation unit.
+    static const table_t<generator_bits> generator_table;
+    static const table_t<generator_bits> endomorphism_table;
 
     /// Multiplication (weak coordinates).
     /// -----------------------------------------------------------------------

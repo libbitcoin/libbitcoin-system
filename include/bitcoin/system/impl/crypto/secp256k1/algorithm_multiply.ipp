@@ -44,8 +44,6 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
         generator_bits;
     constexpr auto point_top = sub1(digit_count<point_bits>) * point_bits;
     constexpr auto top = greater(generator_top, point_top);
-    const auto& generator_table = generators<generator_bits>;
-    const auto& endomorphism_table = endomorphisms<generator_bits>;
 
     recodes_t<generator_bits, Word> g_first{}, g_second{};
     recodes_t<point_bits, Word> k_first{}, k_second{};
