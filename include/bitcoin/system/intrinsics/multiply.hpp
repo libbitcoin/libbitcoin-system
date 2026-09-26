@@ -78,8 +78,7 @@ INLINE constexpr void mul_wide(Unsigned& hi, Unsigned& lo, Unsigned left,
 {
     if constexpr (sizeof(Unsigned) < sizeof(uint64_t))
     {
-        using wide = std::conditional_t<sizeof(Unsigned) < sizeof(uint32_t),
-            uint32_t, uint64_t>;
+        using wide = iif<sizeof(Unsigned) < sizeof(uint32_t), uint32_t, uint64_t>;
 
         const auto product = wide{ left } * wide{ right };
         hi = static_cast<Unsigned>(product >> bits<Unsigned>);

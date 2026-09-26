@@ -68,8 +68,7 @@ INLINE constexpr bool add_carry(Unsigned& sum, Unsigned left, Unsigned right,
 {
     if constexpr (sizeof(Unsigned) < sizeof(uint64_t))
     {
-        using wide = std::conditional_t<sizeof(Unsigned) < sizeof(uint32_t),
-            uint32_t, uint64_t>;
+        using wide = iif<sizeof(Unsigned) < sizeof(uint32_t), uint32_t, uint64_t>;
 
         const auto total = wide{ left } + wide{ right } + wide{ carry };
         sum = static_cast<Unsigned>(total);
