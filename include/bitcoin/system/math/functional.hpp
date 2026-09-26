@@ -114,14 +114,8 @@ INLINE constexpr Word broadcast(Word a) NOEXCEPT
     return a;
 }
 
-/// wide multiplication
+/// 52 bit fused multiply-add
 /// ---------------------------------------------------------------------------
-
-template <typename Word, if_unsigned_integral_integer<Word> = true>
-INLINE constexpr void mul_wide(Word& hi, Word& lo, Word a, Word b) NOEXCEPT
-{
-    system::mul_wide(hi, lo, a, b);
-}
 
 template <auto S = 0, typename Word, if_same<Word, uint64_t> = true>
 INLINE constexpr Word madd52lo(Word c, Word a, Word b) NOEXCEPT
