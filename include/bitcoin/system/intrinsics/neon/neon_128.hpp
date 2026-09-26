@@ -161,6 +161,22 @@ INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
             vmovn_u64((uint64x2_t)b));
 }
 
+template <auto S>
+INLINE xint128_t madd52lo(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vmadd52loq_u64((uint64x2_t)c, (uint64x2_t)a,
+            (uint64x2_t)b);
+}
+
+template <auto S>
+INLINE xint128_t madd52hi(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vmadd52hiq_u64((uint64x2_t)c, (uint64x2_t)a,
+            (uint64x2_t)b);
+}
+
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------
 

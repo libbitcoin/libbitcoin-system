@@ -117,13 +117,13 @@ INLINE constexpr void mul_wide(Word& hi, Word& lo, Word a, Word b) NOEXCEPT
     system::mul_wide(hi, lo, a, b);
 }
 
-template <typename Word, if_same<Word, uint64_t> = true>
+template <auto S = 0, typename Word, if_same<Word, uint64_t> = true>
 INLINE constexpr Word madd52lo(Word c, Word a, Word b) NOEXCEPT
 {
     return system::madd52lo(c, a, b);
 }
 
-template <typename Word, if_same<Word, uint64_t> = true>
+template <auto S = 0, typename Word, if_same<Word, uint64_t> = true>
 INLINE constexpr Word madd52hi(Word c, Word a, Word b) NOEXCEPT
 {
     return system::madd52hi(c, a, b);

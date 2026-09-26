@@ -71,3 +71,21 @@
 #else
     static_assert(!have_sha);
 #endif
+
+#if defined(HAVE_IFMA_128)
+    static_assert(have_ifma_128);
+#else
+    static_assert(!have_ifma_128);
+#endif
+
+#if defined(HAVE_IFMA_256)
+    static_assert(have_ifma_256);
+#else
+    static_assert(!have_ifma_256);
+#endif
+
+#if defined(HAVE_IFMA_512)
+    static_assert(have_ifma_512);
+#else
+    static_assert(!have_ifma_512);
+#endif

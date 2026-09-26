@@ -166,29 +166,21 @@ INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
         return _mm_mul_epu32(a, b);
 }
 
-#if defined(HAVE_IFMA_128)
-
-// AVX512IFMA+AVX512VL / AVXIFMA
+// AVX512IFMA+AVX512VL (SSE2)
+template <auto S>
 INLINE xint128_t madd52lo(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
 {
-#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
-    return _mm_madd52lo_avx_epu64(c, a, b);
-#else
-    return _mm_madd52lo_epu64(c, a, b);
-#endif
+    if constexpr (S == bits<uint64_t>)
+        return mm_madd52lo_epu64(c, a, b);
 }
 
-// AVX512IFMA+AVX512VL / AVXIFMA
+// AVX512IFMA+AVX512VL (SSE2)
+template <auto S>
 INLINE xint128_t madd52hi(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
 {
-#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
-    return _mm_madd52hi_avx_epu64(c, a, b);
-#else
-    return _mm_madd52hi_epu64(c, a, b);
-#endif
+    if constexpr (S == bits<uint64_t>)
+        return mm_madd52hi_epu64(c, a, b);
 }
-
-#endif // HAVE_IFMA_128
 
 /// broadcast/get/get/set
 /// ---------------------------------------------------------------------------
