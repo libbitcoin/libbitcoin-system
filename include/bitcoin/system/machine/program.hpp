@@ -207,8 +207,9 @@ protected:
     /// Signature verify (with batching).
     /// -----------------------------------------------------------------------
     virtual inline bool verify_ecdsa_signature(const data_chunk& point,
-        const hash_digest& hash, const ec_signature& signature,
-        bool capture=true) const NOEXCEPT;
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
+    virtual inline bool verify_ecdsa_unbatched(const data_chunk& point,
+        const hash_digest& hash, const ec_signature& signature) const NOEXCEPT;
     virtual inline bool try_batch_multisig_verification(const chunk_xptrs& points,
         const chunk_xptrs& endorsements) const NOEXCEPT;
     virtual inline bool verify_schnorr_signature(const data_chunk& point,
