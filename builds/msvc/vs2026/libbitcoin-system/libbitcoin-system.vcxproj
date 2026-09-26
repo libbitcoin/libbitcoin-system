@@ -716,6 +716,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_batch.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_group.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_inversion.ipp" />

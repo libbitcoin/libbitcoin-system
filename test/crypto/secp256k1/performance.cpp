@@ -223,6 +223,45 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__multiply__lanes)
     report_lanes<xint512_t>("multiply 8 lanes per signature");
 }
 
+// batch
+// ----------------------------------------------------------------------------
+
+template <typename Word>
+static void report_batch(const std::string& name) NOEXCEPT
+{
+    const auto& in = signed_vectors();
+    data_chunk results{};
+    const auto ecdsa = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return accessor::verify_ecdsa<Word>(results, in.keys, in.hashes, in.canonicals);
+    });
+
+    const auto schnorr = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return accessor::verify_schnorr<Word>(results, in.xonlys, in.hashes, in.schnorrs);
+    });
+
+    report("ecdsa batch " + name + " per signature", ecdsa / count);
+    report("schnorr batch " + name + " per signature", schnorr / count);
+}
+
+template <typename Word>
+static void report_batches(const std::string& name) NOEXCEPT
+{
+    if constexpr (is_same_type<Word, uint64_t>)
+        report_batch<Word>(name);
+    else if constexpr (have<Word>)
+        report_batch<Word>(name);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch)
+{
+    report_batches<uint64_t>("integral");
+    report_batches<xint128_t>("2 lanes");
+    report_batches<xint256_t>("4 lanes");
+    report_batches<xint512_t>("8 lanes");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #endif

@@ -312,4 +312,166 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__signed__agrees)
     BOOST_CHECK(schnorr_signed(secret4, message4, true));
 }
 
+// batch
+// ----------------------------------------------------------------------------
+
+template <typename Key>
+struct rows_t
+{
+    std::vector<Key> keys{};
+    std::vector<hash_digest> hashes{};
+    std::vector<ec_signature> signatures{};
+    data_chunk expected{};
+};
+
+template <typename Key>
+static void add_row(rows_t<Key>& rows, const Key& key, const hash_digest& hash,
+    const ec_signature& signature, bool valid) NOEXCEPT
+{
+    rows.keys.push_back(key);
+    rows.hashes.push_back(hash);
+    rows.signatures.push_back(signature);
+    rows.expected.push_back(to_int<uint8_t>(valid));
+}
+
+// Canonical (r || s) ECDSA signature by libsecp256k1.
+static ec_signature ecdsa_signature(ec_compressed& key, const ec_secret& secret,
+    const hash_digest& hash) NOEXCEPT
+{
+    ec_signature signature{}, canonical{};
+    secret_to_public(key, secret);
+    ecdsa::sign(signature, secret, hash);
+    ecdsa::canonicalize_signature(canonical, signature);
+    return canonical;
+}
+
+// BIP340 signature by libsecp256k1.
+static ec_signature schnorr_signature(ec_xonly& key, const ec_secret& secret,
+    const hash_digest& hash) NOEXCEPT
+{
+    ec_compressed point{};
+    ec_signature signature{};
+    secret_to_public(point, secret);
+    schnorr::sign(signature, secret, hash, hash);
+    key = array_cast<uint8_t, ec_xonly_size, one>(point);
+    return signature;
+}
+
+static const rows_t<ec_compressed>& ecdsa_rows() NOEXCEPT
+{
+    static const auto rows = []() NOEXCEPT
+    {
+        rows_t<ec_compressed> out{};
+        ec_compressed key{};
+        add_row(out, key2, sighash2, splice(r2, s2), true);
+        add_row(out, key2, sighash2, splice(r2, s2_negated), true);
+        add_row(out, overflow_key, overflow_hash, splice(overflow_r, overflow_s), true);
+        add_row(out, key2, overflow_hash, splice(r2, s2), false);
+        add_row(out, key2, sighash2, splice(zero_value, s2), false);
+        add_row(out, bad_sign, sighash2, splice(r2, s2), false);
+        add_row(out, zero_x, sighash2, splice(r2, s2), false);
+        add_row(out, key, message1, ecdsa_signature(key, secret1, message1), true);
+        add_row(out, key, message2, ecdsa_signature(key, secret2, message2), true);
+        add_row(out, key, message3, ecdsa_signature(key, secret3, message3), true);
+        add_row(out, key, message4, ecdsa_signature(key, secret4, message4), true);
+        add_row(out, key, message1, ecdsa_signature(key, secret4, message4), false);
+        return out;
+    }();
+
+    return rows;
+}
+
+static const rows_t<ec_xonly>& schnorr_rows() NOEXCEPT
+{
+    static const auto rows = []() NOEXCEPT
+    {
+        rows_t<ec_xonly> out{};
+        ec_xonly key{};
+        const auto message = [](const data_chunk& bytes) NOEXCEPT
+        {
+            return data_slice{ bytes }.to_array<hash_size>();
+        };
+
+        add_row(out, bip340_key0, message(bip340_message0), bip340_signature0, true);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature1, true);
+        add_row(out, bip340_key2, message(bip340_message2), bip340_signature2, true);
+        add_row(out, bip340_key3, message(bip340_message3), bip340_signature3, true);
+        add_row(out, bip340_key4, message(bip340_message4), bip340_signature4, true);
+        add_row(out, bip340_key5, message(bip340_message1), bip340_signature5, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature6, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature7, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature8, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature9, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature10, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature11, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature12, false);
+        add_row(out, bip340_key1, message(bip340_message1), bip340_signature13, false);
+        add_row(out, bip340_key14, message(bip340_message1), bip340_signature14, false);
+        add_row(out, key, message1, schnorr_signature(key, secret1, message1), true);
+        add_row(out, key, message2, schnorr_signature(key, secret2, message2), true);
+        add_row(out, key, message3, schnorr_signature(key, secret3, message3), true);
+        add_row(out, key, message4, schnorr_signature(key, secret4, message4), true);
+        add_row(out, key, message1, schnorr_signature(key, secret4, message4), false);
+        return out;
+    }();
+
+    return rows;
+}
+
+template <typename Word>
+static void check_ecdsa_batch()
+{
+    const auto& rows = ecdsa_rows();
+    data_chunk results{};
+    BOOST_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.hashes, rows.signatures));
+    BOOST_CHECK_EQUAL(results, rows.expected);
+}
+
+template <typename Word>
+static void check_schnorr_batch()
+{
+    const auto& rows = schnorr_rows();
+    data_chunk results{};
+    BOOST_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.hashes, rows.signatures));
+    BOOST_CHECK_EQUAL(results, rows.expected);
+}
+
+template <typename Word>
+static void check_batches()
+{
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        check_ecdsa_batch<Word>();
+        check_schnorr_batch<Word>();
+    }
+    else if constexpr (have<Word>)
+    {
+        check_ecdsa_batch<Word>();
+        check_schnorr_batch<Word>();
+    }
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__integral__expected)
+{
+    check_batches<uint64_t>();
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__lanes__expected)
+{
+    check_batches<xint128_t>();
+    check_batches<xint256_t>();
+    check_batches<xint512_t>();
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__valid_rows__true)
+{
+    const auto& rows = ecdsa_rows();
+    const std::span<const ec_compressed> keys{ rows.keys.data(), 3 };
+    const std::span<const hash_digest> hashes{ rows.hashes.data(), 3 };
+    const std::span<const ec_signature> signatures{ rows.signatures.data(), 3 };
+    data_chunk results{};
+    BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, keys, hashes, signatures));
+    BOOST_CHECK_EQUAL(results, data_chunk({ 1, 1, 1 }));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

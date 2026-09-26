@@ -524,6 +524,7 @@ include_bitcoin_system_impl_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/impl/crypto/secp256k1
 
 include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_batch.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_inversion.ipp \

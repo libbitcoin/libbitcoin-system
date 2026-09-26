@@ -234,6 +234,10 @@ protected:
     static constexpr void to_bytes(bytes_t& out,
         const field_t<uint64_t>& a) NOEXCEPT;
 
+    /// r from 256 bit words, least significant first (normal if below p).
+    static constexpr void to_field(field_t<uint64_t>& r,
+        const scalar_t& words) NOEXCEPT;
+
     /// Field internals.
     /// -----------------------------------------------------------------------
 
@@ -732,6 +736,41 @@ protected:
     /// BIP340 verification of challenge hash by x-only key.
     static constexpr bool verify_schnorr(const bytes_t& key,
         const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT;
+
+    /// Batch verification.
+    /// -----------------------------------------------------------------------
+    /// Rows verify in lanes of Word, with results of one for each valid row,
+    /// and true if all rows are valid. Signatures are r and s, big-endian.
+
+    template <typename Word>
+    static bool verify_ecdsa(data_chunk& results,
+        std::span<const ec_compressed> keys,
+        std::span<const hash_digest> hashes,
+        std::span<const ec_signature> signatures) NOEXCEPT;
+
+    template <typename Word>
+    static bool verify_schnorr(data_chunk& results,
+        std::span<const ec_xonly> keys,
+        std::span<const hash_digest> messages,
+        std::span<const ec_signature> signatures) NOEXCEPT;
+
+    /// Batch internals.
+    /// -----------------------------------------------------------------------
+
+    /// Each value = value^-1 by one inversion, no value zero.
+    template <typename Element>
+    static void inverse(std::vector<Element>& values) NOEXCEPT;
+
+    template <typename Word>
+    static std_array<uint64_t, lanes<Word>> unpack(Word value) NOEXCEPT;
+
+    template <typename Word>
+    static void pack(field_t<Word>& r,
+        const std_array<field_t<uint64_t>, lanes<Word>>& rows) NOEXCEPT;
+
+    template <typename Word>
+    static void unpack(std_array<jacobian_t<uint64_t>, lanes<Word>>& rows,
+        const jacobian_t<Word>& a) NOEXCEPT;
 };
 
 } // namespace secp256k1
@@ -747,6 +786,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_batch.ipp>
 
 BC_POP_WARNING()
 

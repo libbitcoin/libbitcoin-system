@@ -1785,6 +1785,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp">
       <Filter>include\bitcoin\system\impl\config</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_batch.ipp">
+      <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>

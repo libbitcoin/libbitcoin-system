@@ -489,15 +489,20 @@ constexpr bool algorithm::from_bytes(field_t<uint64_t>& r,
 {
     scalar_t words{};
     decode<Offset>(words, bytes);
+    to_field(r, words);
 
+    return !((r[4] == top_mask) && ((r[1] & r[2] & r[3]) == limb_mask) &&
+        (r[0] >= prime[0]));
+}
+
+constexpr void algorithm::to_field(field_t<uint64_t>& r,
+    const scalar_t& words) NOEXCEPT
+{
     r[0] =   words[0]                            & limb_mask;
     r[1] = ((words[0] >> 52) | (words[1] << 12)) & limb_mask;
     r[2] = ((words[1] >> 40) | (words[2] << 24)) & limb_mask;
     r[3] = ((words[2] >> 28) | (words[3] << 36)) & limb_mask;
     r[4] =   words[3] >> 16;
-
-    return !((r[4] == top_mask) && ((r[1] & r[2] & r[3]) == limb_mask) &&
-        (r[0] >= prime[0]));
 }
 
 constexpr void algorithm::to_bytes(bytes_t& out,
