@@ -553,6 +553,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha3\sha3.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\add.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byte_swap.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\cpuid.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\detection.hpp" />
@@ -732,6 +733,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_scalar.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

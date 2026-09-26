@@ -239,6 +239,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_scalar.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
     </ClCompile>
@@ -321,6 +322,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha3\sha3.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\add.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp" />

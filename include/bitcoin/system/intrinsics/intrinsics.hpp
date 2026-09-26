@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_INTRINSICS_INTRINSICS_HPP
 #define LIBBITCOIN_SYSTEM_INTRINSICS_INTRINSICS_HPP
 
+#include <bitcoin/system/intrinsics/add.hpp>
 #include <bitcoin/system/intrinsics/byte_swap.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 #include <bitcoin/system/intrinsics/detection.hpp>

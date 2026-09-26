@@ -531,7 +531,8 @@ include_bitcoin_system_impl_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/impl/crypto/secp256k1
 
 include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp
 
 include_bitcoin_system_impl_datadir = \
     ${includedir}/bitcoin/system/impl/data
@@ -717,6 +718,7 @@ include_bitcoin_system_intrinsicsdir = \
     ${includedir}/bitcoin/system/intrinsics
 
 include_bitcoin_system_intrinsics_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/add.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/byte_swap.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/cpuid.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/detection.hpp \
@@ -1081,6 +1083,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/x25519.cpp \
     ${srcdir}/../../test/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../test/crypto/secp256k1/algorithm_field.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/algorithm_scalar.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ellswift.cpp \
@@ -1142,6 +1145,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/sha/vector.cpp \
     ${srcdir}/../../test/hash/sha3/algorithm.cpp \
     ${srcdir}/../../test/hash/sha3/sha3.cpp \
+    ${srcdir}/../../test/intrinsics/add.cpp \
     ${srcdir}/../../test/intrinsics/byte_swap.cpp \
     ${srcdir}/../../test/intrinsics/cpuid.cpp \
     ${srcdir}/../../test/intrinsics/detection.cpp \
