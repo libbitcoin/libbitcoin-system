@@ -52,7 +52,7 @@ inline bool algorithm::verify_schnorr(std::span<const ec_xonly> keys,
     }
 
     const auto seed = seeder.flush();
-    std::vector<term_t> terms{};
+    std_vector<term_t> terms{};
     terms.reserve(add1(two) * count + two);
     scalar_t total{};
 
@@ -117,8 +117,8 @@ inline void algorithm::multiply(jacobian_t<uint64_t>& r,
 
     jacobian_t<uint64_t> empty{};
     empty.infinity = max_uint64;
-    std::vector<jacobian_t<uint64_t>> buckets(possible_narrow_cast<size_t>(half));
-    std::vector<jacobian_t<uint64_t>> sums(windows);
+    std_vector<jacobian_t<uint64_t>> buckets(possible_narrow_cast<size_t>(half));
+    std_vector<jacobian_t<uint64_t>> sums(windows);
     data_chunk carries(terms.size());
 
     for (size_t window{}; window < windows; ++window)
@@ -218,7 +218,7 @@ constexpr size_t algorithm::bucket_bits(size_t count) NOEXCEPT
 }
 
 // Halves of k = k1 + k2 lambda add as magnitudes, the point negated if high.
-inline void algorithm::append(std::vector<term_t>& terms,
+inline void algorithm::append(std_vector<term_t>& terms,
     const affine_t<uint64_t>& point, const scalar_t& scalar) NOEXCEPT
 {
     scalar_t first{}, second{};

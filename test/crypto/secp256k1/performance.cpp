@@ -29,6 +29,8 @@ class accessor
 {
 public:
     template <typename Word>
+    using field_t = algorithm::field_t<Word>;
+    template <typename Word>
     using affine_t = algorithm::affine_t<Word>;
     template <typename Word>
     using jacobian_t = algorithm::jacobian_t<Word>;
@@ -46,6 +48,9 @@ public:
     using algorithm::double_;
     using algorithm::add;
     using algorithm::to_jacobian;
+    using algorithm::inverse;
+    using algorithm::square_root;
+    using algorithm::is_zero_scalar;
 };
 
 using affine = accessor::affine_t<uint64_t>;
@@ -61,13 +66,13 @@ constexpr scalar right{ 0x0fedcba987654321, 0x123456789abcdef0, 0x33333333333333
 
 struct vectors
 {
-    std::vector<ec_compressed> keys{};
-    std::vector<ec_xonly> xonlys{};
-    std::vector<hash_digest> hashes{};
-    std::vector<ec_signature> ecdsas{};
-    std::vector<ec_signature> canonicals{};
-    std::vector<ec_signature> schnorrs{};
-    std::vector<affine> points{};
+    ec_compresseds keys{};
+    ec_xonlys xonlys{};
+    hashes messages{};
+    ec_signatures ecdsas{};
+    ec_signatures canonicals{};
+    ec_signatures schnorrs{};
+    std_vector<affine> points{};
 };
 
 static const vectors& signed_vectors() NOEXCEPT
@@ -89,7 +94,7 @@ static const vectors& signed_vectors() NOEXCEPT
             accessor::from_bytes(point, key);
             out.keys.push_back(key);
             out.xonlys.push_back(array_cast<uint8_t, ec_xonly_size, one>(key));
-            out.hashes.push_back(hash);
+            out.messages.push_back(hash);
             out.ecdsas.push_back(ecdsa);
             out.canonicals.push_back(canonical);
             out.schnorrs.push_back(schnorr);
@@ -113,13 +118,13 @@ static hash_digest challenge(const ec_signature& signature,
     return context.flush();
 }
 
-static std::vector<hash_digest> challenges(const vectors& in) NOEXCEPT
+static hashes challenges(const vectors& in) NOEXCEPT
 {
-    std::vector<hash_digest> out{};
+    hashes out{};
     out.reserve(count);
     for (size_t index{}; index < count; ++index)
         out.push_back(challenge(in.schnorrs[index], in.xonlys[index],
-            in.hashes[index]));
+            in.messages[index]));
 
     return out;
 }
@@ -207,6 +212,36 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__field__integral)
     BOOST_CHECK(!f::any(accessor::is_zero_element(value)));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1_performance__inverse__integral)
+{
+    const auto& in = signed_vectors();
+    accessor::field_t<uint64_t> element{}, squared{};
+    report("field inverse", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        accessor::inverse(element, in.points[index].x);
+        return !f::any(accessor::is_zero_element(element));
+    }));
+
+    report("field square root", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        accessor::square(squared, in.points[index].y);
+        return f::any(accessor::square_root(element, squared));
+    }));
+
+    accessor::scalar_t value{};
+    report("scalar inverse", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        accessor::inverse(value, accessor::scalar_t{ in.points[index].x[0], 1, 2, 3 });
+        return !accessor::is_zero_scalar(value);
+    }));
+
+    affine point{};
+    report("key parse", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        return accessor::from_bytes(point, in.keys[index]);
+    }));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1_performance__group__integral)
 {
     const auto& in = signed_vectors();
@@ -237,7 +272,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__libsecp256k1)
     const auto& in = signed_vectors();
     report("ecdsa libsecp256k1", microseconds(count, [&](size_t index) NOEXCEPT
     {
-        return ecdsa::verify_signature(in.keys[index], in.hashes[index], in.ecdsas[index]);
+        return ecdsa::verify_signature(in.keys[index], in.messages[index], in.ecdsas[index]);
     }));
 }
 
@@ -250,7 +285,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__local)
         const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
         const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
         affine point{};
-        return accessor::from_bytes(point, in.keys[index]) && accessor::verify_ecdsa(point, in.hashes[index], r, s);
+        return accessor::from_bytes(point, in.keys[index]) && accessor::verify_ecdsa(point, in.messages[index], r, s);
     }));
 }
 
@@ -259,7 +294,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__libsecp256k1)
     const auto& in = signed_vectors();
     report("schnorr libsecp256k1", microseconds(count, [&](size_t index) NOEXCEPT
     {
-        return schnorr::verify_signature(in.xonlys[index], in.hashes[index], in.schnorrs[index]);
+        return schnorr::verify_signature(in.xonlys[index], in.messages[index], in.schnorrs[index]);
     }));
 }
 
@@ -272,7 +307,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
         const auto& key = in.xonlys[index];
         const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
         const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
-        return accessor::verify_schnorr(key, challenge(signature, key, in.hashes[index]), r, s);
+        return accessor::verify_schnorr(key, challenge(signature, key, in.messages[index]), r, s);
     }));
 }
 
@@ -306,7 +341,7 @@ static void report_batch(const std::string& name) NOEXCEPT
     data_chunk results{};
     const auto ecdsa = microseconds(one, [&](size_t) NOEXCEPT
     {
-        return accessor::verify_ecdsa<Word>(results, in.keys, in.hashes, in.canonicals);
+        return accessor::verify_ecdsa<Word>(results, in.keys, in.messages, in.canonicals);
     });
 
     const auto schnorr = microseconds(one, [&](size_t) NOEXCEPT

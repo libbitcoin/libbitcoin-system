@@ -328,9 +328,9 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__signed__agrees)
 template <typename Key>
 struct rows_t
 {
-    std::vector<Key> keys{};
-    std::vector<hash_digest> hashes{};
-    std::vector<ec_signature> signatures{};
+    std_vector<Key> keys{};
+    hashes digests{};
+    ec_signatures signatures{};
     data_chunk expected{};
 };
 
@@ -339,7 +339,7 @@ static void add_row(rows_t<Key>& rows, const Key& key, const hash_digest& hash,
     const ec_signature& signature, bool valid) NOEXCEPT
 {
     rows.keys.push_back(key);
-    rows.hashes.push_back(hash);
+    rows.digests.push_back(hash);
     rows.signatures.push_back(signature);
     rows.expected.push_back(to_int<uint8_t>(valid));
 }
@@ -440,7 +440,7 @@ static void check_ecdsa_batch()
 {
     const auto& rows = ecdsa_rows();
     data_chunk results{};
-    BOOST_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.hashes, rows.signatures));
+    BOOST_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.digests, rows.signatures));
     BOOST_CHECK_EQUAL(results, rows.expected);
 }
 
@@ -449,7 +449,7 @@ static void check_schnorr_batch()
 {
     const auto& rows = schnorr_rows();
     data_chunk results{};
-    BOOST_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.hashes, rows.signatures));
+    BOOST_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.digests, rows.signatures));
     BOOST_CHECK_EQUAL(results, rows.expected);
 }
 
@@ -485,7 +485,7 @@ static bool combined(const rows_t<ec_xonly>& rows, size_t first,
 {
     return accessor::verify_schnorr(
         std::span{ rows.keys }.subspan(first, count),
-        std::span{ rows.hashes }.subspan(first, count),
+        std::span{ rows.digests }.subspan(first, count),
         std::span{ rows.signatures }.subspan(first, count));
 }
 
@@ -495,9 +495,9 @@ static const rows_t<ec_xonly>& duplicate_rows() NOEXCEPT
     {
         const auto& in = schnorr_rows();
         rows_t<ec_xonly> out{};
-        add_row(out, in.keys[1], in.hashes[1], in.signatures[1], true);
-        add_row(out, in.keys[1], in.hashes[1], in.signatures[1], true);
-        add_row(out, in.keys[2], in.hashes[2], in.signatures[2], true);
+        add_row(out, in.keys[1], in.digests[1], in.signatures[1], true);
+        add_row(out, in.keys[1], in.digests[1], in.signatures[1], true);
+        add_row(out, in.keys[2], in.digests[2], in.signatures[2], true);
         return out;
     }();
 
@@ -525,10 +525,10 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__valid_rows__true)
 {
     const auto& rows = ecdsa_rows();
     const std::span<const ec_compressed> keys{ rows.keys.data(), 3 };
-    const std::span<const hash_digest> hashes{ rows.hashes.data(), 3 };
+    const std::span<const hash_digest> digests{ rows.digests.data(), 3 };
     const std::span<const ec_signature> signatures{ rows.signatures.data(), 3 };
     data_chunk results{};
-    BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, keys, hashes, signatures));
+    BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, keys, digests, signatures));
     BOOST_CHECK_EQUAL(results, data_chunk({ 1, 1, 1 }));
 }
 

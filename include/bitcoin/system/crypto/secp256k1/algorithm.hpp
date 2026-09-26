@@ -811,7 +811,7 @@ protected:
     static constexpr size_t bucket_bits(size_t count) NOEXCEPT;
 
     /// Appends the split halves of scalar * point, signs applied to points.
-    static void append(std::vector<term_t>& terms,
+    static void append(std_vector<term_t>& terms,
         const affine_t<uint64_t>& point, const scalar_t& scalar) NOEXCEPT;
 
     /// Batch internals.
@@ -819,7 +819,7 @@ protected:
 
     /// Each value = value^-1 by one inversion, no value zero.
     template <typename Element>
-    static void inverse(std::vector<Element>& values) NOEXCEPT;
+    static void inverse(std_vector<Element>& values) NOEXCEPT;
 
     template <typename Word>
     static std_array<uint64_t, lanes<Word>> unpack(Word value) NOEXCEPT;

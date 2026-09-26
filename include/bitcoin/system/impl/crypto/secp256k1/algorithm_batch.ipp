@@ -43,7 +43,7 @@ bool algorithm::verify_ecdsa(data_chunk& results,
     results.assign(count, uint8_t{});
 
     data_chunk valid(count);
-    std::vector<scalar_t> r(count), w(count), z(count);
+    std_vector<scalar_t> r(count), w(count), z(count);
     for (size_t row{}; row < count; ++row)
     {
         const auto& signature = signatures[row];
@@ -163,8 +163,8 @@ bool algorithm::verify_schnorr(data_chunk& results,
     const auto count = keys.size();
     results.assign(count, uint8_t{});
 
-    std::vector<size_t> pending{};
-    std::vector<jacobian_t<uint64_t>> sums{};
+    std_vector<size_t> pending{};
+    std_vector<jacobian_t<uint64_t>> sums{};
     pending.reserve(count);
     sums.reserve(count);
 
@@ -230,7 +230,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
         }
     }
 
-    std::vector<field_t<uint64_t>> inverses(sums.size());
+    std_vector<field_t<uint64_t>> inverses(sums.size());
     for (size_t index{}; index < sums.size(); ++index)
         inverses[index] = sums[index].z;
 
@@ -257,12 +257,12 @@ bool algorithm::verify_schnorr(data_chunk& results,
 
 // Prefix products share one inversion, unwound from the last value.
 template <typename Element>
-void algorithm::inverse(std::vector<Element>& values) NOEXCEPT
+void algorithm::inverse(std_vector<Element>& values) NOEXCEPT
 {
     if (values.empty())
         return;
 
-    std::vector<Element> prefix(values.size());
+    std_vector<Element> prefix(values.size());
     prefix.front() = values.front();
     for (auto index = one; index < values.size(); ++index)
         multiply(prefix[index], prefix[sub1(index)], values[index]);

@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__window__expected)
 // multiscalar
 // ----------------------------------------------------------------------------
 
-using terms = std::vector<accessor::term_t>;
+using terms = std_vector<accessor::term_t>;
 
 constexpr scalar small1{ 0x123456789abcdef0, 0x0fedcba987654321, 0, 0 };
 constexpr scalar small2{ 0xfedcba9876543210, 0xffffffffffffffff, 3, 0 };
