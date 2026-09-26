@@ -122,7 +122,13 @@ transaction::transaction(const std::string& encoded) NOEXCEPT
 }
 
 transaction::transaction(const chain::transaction& unsigned_tx) NOEXCEPT
-  : transaction(from_transaction(unsigned_tx))
+  : transaction(from_transaction(unsigned_tx, version_0))
+{
+}
+
+transaction::transaction(const chain::transaction& unsigned_tx,
+    uint32_t version) NOEXCEPT
+  : transaction(from_transaction(unsigned_tx, version))
 {
 }
 
@@ -150,8 +156,9 @@ transaction transaction::from_string(const std::string& encoded) NOEXCEPT
     return decode_base64(decoded, encoded) ? transaction(decoded) : transaction{};
 }
 
-// The creator role (BIP174).
-transaction transaction::from_transaction(const chain::transaction& tx) NOEXCEPT
+// The creator role (BIP174 version 0, BIP370 version 2).
+transaction transaction::from_transaction(const chain::transaction& tx,
+    uint32_t version) NOEXCEPT
 {
     const auto unsigned_input = [](const auto& in) NOEXCEPT
     {
@@ -159,15 +166,41 @@ transaction transaction::from_transaction(const chain::transaction& tx) NOEXCEPT
     };
 
     const auto& inputs = *tx.inputs_ptr();
-    if (!tx.is_valid() ||
+    const auto& outputs = *tx.outputs_ptr();
+    if (!tx.is_valid() || (version != version_0 && version != version_2) ||
         !std::all_of(inputs.begin(), inputs.end(), unsigned_input))
         return {};
 
     transaction out{};
     out.valid_ = true;
-    out.tx_ = tx;
+    out.version_ = version;
     out.inputs_.resize(inputs.size());
-    out.outputs_.resize(tx.outputs_ptr()->size());
+    out.outputs_.resize(outputs.size());
+    if (version == version_0)
+    {
+        out.tx_ = tx;
+        return out;
+    }
+
+    out.tx_version_ = tx.version();
+    out.fallback_locktime_ = tx.locktime();
+    for (size_t index{}; index < inputs.size(); ++index)
+    {
+        const auto& in = *inputs.at(index);
+        auto& put = out.inputs_.at(index);
+        put.previous_txid = in.point().hash();
+        put.output_index = in.point().index();
+        put.sequence = in.sequence();
+    }
+
+    for (size_t index{}; index < outputs.size(); ++index)
+    {
+        const auto& output = *outputs.at(index);
+        auto& put = out.outputs_.at(index);
+        put.amount = output.value();
+        put.script = output.script_ptr();
+    }
+
     return out;
 }
 

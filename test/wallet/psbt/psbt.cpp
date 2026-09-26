@@ -791,6 +791,96 @@ BOOST_AUTO_TEST_CASE(psbt__tx_construct__bip174_creator__expected_encoding)
     BOOST_REQUIRE_EQUAL(instance.encoded(), FLOW_CREATOR);
 }
 
+static chain::transaction creator_tx(uint32_t locktime) NOEXCEPT
+{
+    hash_digest one{};
+    hash_digest two{};
+    data_chunk script_one{};
+    data_chunk script_two{};
+    decode_hash(one, "75ddabb27b8845f5247975c8a5ba7c6f336c4570708ebe230caf6db5217ae858");
+    decode_hash(two, "1dea7cd05979072a3578cab271c02244ea8a090bbb46aa680a65ecd027048d83");
+    decode_base16(script_one, "0014d85c2b71d0060b09c9886aeb815e50991dda124d");
+    decode_base16(script_two, "001400aea9a2e5f0f876a588df5546e8742d1d87008f");
+    const chain::inputs inputs
+    {
+        { chain::point{ one, 0u }, chain::script{}, 0xfffffffe },
+        { chain::point{ two, 1u }, chain::script{}, max_uint32 }
+    };
+    const chain::outputs outputs
+    {
+        { 149990000u, chain::script{ script_one, false } },
+        { 100000000u, chain::script{ script_two, false } }
+    };
+
+    return { 2u, inputs, outputs, locktime };
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_version_construct__version_0__bip174_creator)
+{
+    const auto tx = creator_tx(0);
+    const transaction instance(tx, transaction::version_0);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.version(), transaction::version_0);
+    BOOST_REQUIRE(instance == transaction(tx));
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_version_construct__version_2__bip370_fields)
+{
+    const auto tx = creator_tx(42);
+    const transaction instance(tx, transaction::version_2);
+    BOOST_REQUIRE(instance);
+    BOOST_REQUIRE_EQUAL(instance.version(), transaction::version_2);
+    BOOST_REQUIRE_EQUAL(instance.tx_version(), 2u);
+    BOOST_REQUIRE_EQUAL(instance.fallback_locktime().value(), 42u);
+    BOOST_REQUIRE_EQUAL(instance.locktime().value(), 42u);
+    BOOST_REQUIRE_EQUAL(instance.inputs().size(), 2u);
+    BOOST_REQUIRE_EQUAL(instance.outputs().size(), 2u);
+
+    const auto& in0 = instance.inputs().at(0);
+    const auto& in1 = instance.inputs().at(1);
+    BOOST_REQUIRE(in0.previous_txid.value() == tx.inputs_ptr()->at(0)->point().hash());
+    BOOST_REQUIRE_EQUAL(in0.output_index.value(), 0u);
+    BOOST_REQUIRE_EQUAL(in0.sequence.value(), 0xfffffffe);
+    BOOST_REQUIRE(in1.previous_txid.value() == tx.inputs_ptr()->at(1)->point().hash());
+    BOOST_REQUIRE_EQUAL(in1.output_index.value(), 1u);
+    BOOST_REQUIRE_EQUAL(in1.sequence.value(), max_uint32);
+
+    const auto& out0 = instance.outputs().at(0);
+    const auto& out1 = instance.outputs().at(1);
+    BOOST_REQUIRE_EQUAL(out0.amount.value(), 149990000u);
+    BOOST_REQUIRE(*out0.script == tx.outputs_ptr()->at(0)->script());
+    BOOST_REQUIRE_EQUAL(out1.amount.value(), 100000000u);
+    BOOST_REQUIRE(*out1.script == tx.outputs_ptr()->at(1)->script());
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_version_construct__version_2__round_trip)
+{
+    const transaction instance(creator_tx(42), transaction::version_2);
+    const transaction copy(instance.encoded());
+    BOOST_REQUIRE(copy);
+    BOOST_REQUIRE(copy == instance);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_version_construct__version_1__invalid)
+{
+    const transaction instance(creator_tx(0), 1u);
+    BOOST_REQUIRE(!instance);
+}
+
+BOOST_AUTO_TEST_CASE(psbt__tx_version_construct__version_2_signed_input__invalid)
+{
+    const chain::transaction signed_tx
+    {
+        2u,
+        chain::inputs{ { chain::point{ null_hash, 0u }, chain::script{ chain::operations{ { chain::opcode::op_return } } }, max_uint32 } },
+        chain::outputs{},
+        0u
+    };
+
+    const transaction instance(signed_tx, transaction::version_2);
+    BOOST_REQUIRE(!instance);
+}
+
 // combiner
 
 BOOST_AUTO_TEST_CASE(psbt__combine__two_signed__expected)
