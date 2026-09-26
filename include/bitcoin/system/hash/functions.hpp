@@ -23,6 +23,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -134,6 +135,11 @@ INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT;
 /// Taproot tagged hashing (use sha256t_writer for best performance).
 INLINE hash_digest tagged_hash(const std::string& tag,
     const data_slice& message) NOEXCEPT;
+
+/// Taproot tagged hash state after sha256(Tag) || sha256(Tag) [bip340].
+template <data_t Tag>
+constexpr sha256::state_t tagged_midstate = sha256::midstate(
+    sha256::simple_hash(Tag.data), sha256::simple_hash(Tag.data));
 
 /// Merkle root from a bitcoin_hash set [chain].
 INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT;
