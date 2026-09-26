@@ -481,7 +481,7 @@ static void check_lift()
     if constexpr (have<xWord>)
     {
         const std_array<field, 8> xs{ decode(g2x), decode(g2x), decode(zero_value), decode(gx), decode(px), decode(g3x), decode(g7x), decode(g4x) };
-        const masks odds{ 0, max_uint64, 0, 0, max_uint64, 0, max_uint64, max_uint64 };
+        const masks odds{ 0, max_uint64, 0, 0, max_uint64, 0, 0, 0 };
         xaffine<xWord> out{};
         const auto valid = accessor::lift(out, pack<xWord>(xs), pack<xWord>(odds));
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(valid)), max_uint64);
