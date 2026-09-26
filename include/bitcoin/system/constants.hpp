@@ -74,6 +74,24 @@ namespace libbitcoin {
     constexpr auto have_sha = false;
 #endif
 
+#if defined(HAVE_IFMA_128)
+    constexpr auto have_ifma_128 = true;
+#else
+    constexpr auto have_ifma_128 = false;
+#endif
+
+#if defined(HAVE_IFMA_256)
+    constexpr auto have_ifma_256 = true;
+#else
+    constexpr auto have_ifma_256 = false;
+#endif
+
+#if defined(HAVE_IFMA_512)
+    constexpr auto have_ifma_512 = true;
+#else
+    constexpr auto have_ifma_512 = false;
+#endif
+
 #if defined(HAVE_FAST_MATH)
     constexpr auto have_fast_math = true;
 #else

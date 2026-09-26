@@ -98,6 +98,12 @@
     #endif
 #endif
 
+/// vc++: There is no flag for AVX512IFMA, so use custom WITH_IFMA option.
+/// Requires /arch:AVX512, which also defines __AVX512VL__ (AVX512IFMA+VL).
+#if defined(HAVE_MSC) && defined(WITH_IFMA) && defined(HAVE_XCPU)
+    #define __AVX512IFMA__
+#endif
+
 // Custom options to use extended SVE variable width.
 #if defined(__ARM_FEATURE_SVE)
     #if defined(WITH_512)
@@ -172,6 +178,34 @@
     #if defined(__SSE4_1__)
         #define HAVE_SSE4
         #define HAVE_128
+    #endif
+
+    // -mavx512ifma (52 bit integer fused multiply-add, EVEX encoded).
+    // vc++: AVX512IFMA not independently configurable (requires custom option).
+    #if defined(__AVX512IFMA__)
+        #define HAVE_AVX512IFMA
+    #endif
+
+    // -mavxifma (52 bit integer fused multiply-add, VEX encoded, 256/128).
+    #if defined(__AVXIFMA__)
+        #define HAVE_AVXIFMA
+    #endif
+#endif
+
+/// Map 52 bit integer fused multiply-add availability by vector width.
+/// AVX512IFMA provides the 512 bit form and, with AVX512VL, the 256/128 bit
+/// forms. AVXIFMA provides only the 256/128 bit (VEX encoded) forms.
+/// ---------------------------------------------------------------------------
+
+#if defined(HAVE_AVX512IFMA) && defined(HAVE_512)
+    #define HAVE_IFMA_512
+#endif
+#if (defined(HAVE_AVX512IFMA) && defined(__AVX512VL__)) || defined(HAVE_AVXIFMA)
+    #if defined(HAVE_256)
+        #define HAVE_IFMA_256
+    #endif
+    #if defined(HAVE_128)
+        #define HAVE_IFMA_128
     #endif
 #endif
 

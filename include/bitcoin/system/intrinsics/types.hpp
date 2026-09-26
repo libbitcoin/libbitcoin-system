@@ -135,6 +135,23 @@ constexpr bool have_() NOEXCEPT
 template <typename Extended, if_extended<Extended> = true>
 constexpr bool have = have_<Extended>();
 
+template <typename Extended, if_extended<Extended> = true>
+constexpr bool have_ifma_() NOEXCEPT
+{
+    if constexpr (is_same_type<Extended, xint512_t>)
+        return have_ifma_512;
+    else if constexpr (is_same_type<Extended, xint256_t>)
+        return have_ifma_256;
+    else if constexpr (is_same_type<Extended, xint128_t>)
+        return have_ifma_128;
+    else
+        return false;
+}
+
+/// Availability of 52 bit fused multiply-add (madd52) for extended integer.
+template <typename Extended, if_extended<Extended> = true>
+constexpr bool have_ifma = have_ifma_<Extended>();
+
 template <typename Integral, size_t Lanes,
     if_integral<Integral> = true>
 constexpr bool have_lanes_() NOEXCEPT

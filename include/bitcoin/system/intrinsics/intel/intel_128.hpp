@@ -166,6 +166,30 @@ INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
         return _mm_mul_epu32(a, b);
 }
 
+#if defined(HAVE_IFMA_128)
+
+// AVX512IFMA+AVX512VL / AVXIFMA
+INLINE xint128_t madd52lo(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
+{
+#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
+    return _mm_madd52lo_avx_epu64(c, a, b);
+#else
+    return _mm_madd52lo_epu64(c, a, b);
+#endif
+}
+
+// AVX512IFMA+AVX512VL / AVXIFMA
+INLINE xint128_t madd52hi(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
+{
+#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
+    return _mm_madd52hi_avx_epu64(c, a, b);
+#else
+    return _mm_madd52hi_epu64(c, a, b);
+#endif
+}
+
+#endif // HAVE_IFMA_128
+
 /// broadcast/get/get/set
 /// ---------------------------------------------------------------------------
 
@@ -294,6 +318,55 @@ INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
 INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
     _mm_store_si128(&bytes, a);
+}
+
+/// compare/select
+/// ---------------------------------------------------------------------------
+/// Masks are all bits set (true) or unset (false) per word.
+
+// SSE2
+INLINE xint128_t andnot(xint128_t a, xint128_t b) NOEXCEPT
+{
+    return _mm_andnot_si128(a, b);
+}
+
+// SSE4.1
+template <auto S>
+INLINE xint128_t eq(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_cmpeq_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_cmpeq_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_cmpeq_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm_cmpeq_epi64(a, b);
+}
+
+// SSE4.1
+INLINE xint128_t select(xint128_t mask, xint128_t a, xint128_t b) NOEXCEPT
+{
+    return _mm_blendv_epi8(b, a, mask);
+}
+
+// SSE4.1
+INLINE bool any(xint128_t a) NOEXCEPT
+{
+    return is_zero(_mm_testz_si128(a, a));
+}
+
+/// gather
+/// ---------------------------------------------------------------------------
+
+// SSE4.1
+INLINE xint128_t gather(const uint64_t* table, xint128_t index) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint128_t>(
+        table[get<uint64_t, 0>(index)],
+        table[get<uint64_t, 1>(index)]);
+    BC_POP_WARNING()
 }
 
 

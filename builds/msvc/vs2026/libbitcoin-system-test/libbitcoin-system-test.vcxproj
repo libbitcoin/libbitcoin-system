@@ -326,6 +326,7 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\intel_128.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\intel_256.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\intel_512.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\multiply.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\intel.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\neon.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\sve.cpp" />
@@ -353,6 +354,7 @@
     <ClCompile Include="..\..\..\..\test\math\cast.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\expectations.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\functional.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\logarithm.cpp" />
     <ClCompile Include="..\..\..\..\test\math\multiplication.cpp" />

@@ -13,6 +13,7 @@ REM
 REM Script options:
 REM --enable-avx2               Use Intel AVX2 intrinsics.
 REM --enable-avx512             Use Intel AVX512 intrinsics.
+REM --enable-ifma               Use Intel AVX512 IFMA intrinsics.
 REM --enable-sse41              Use SSE4.1 hardware instructions.
 REM --enable-shani              Use Intel/ARM SHA Extensions.
 REM --enable-crypto             Use ARM Crypto Extensions.
@@ -196,6 +197,12 @@ if "!libbitcoin_system_TAG!" == "" (
             set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions512"
         ) else (
             set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions512"
+        )
+    ) else if "%~1" == "--enable-ifma" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-ifma=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-ifma=true"
         )
     ) else if "%~1" == "--enable-sse41" (
         if "!libbitcoin-system_PARAMS!" == "" (
@@ -454,6 +461,7 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "Script options:"
     call :msg "--enable-avx2               Use Intel AVX2 intrinsics."
     call :msg "--enable-avx512             Use Intel AVX512 intrinsics."
+    call :msg "--enable-ifma               Use Intel AVX512 IFMA intrinsics."
     call :msg "--enable-sse41              Use SSE4.1 hardware instructions."
     call :msg "--enable-shani              Use Intel/ARM SHA Extensions."
     call :msg "--enable-crypto             Use ARM Crypto Extensions."

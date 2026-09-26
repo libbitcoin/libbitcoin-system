@@ -1313,6 +1313,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\multiply.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon.hpp">
       <Filter>include\bitcoin\system\intrinsics\neon</Filter>
     </ClInclude>

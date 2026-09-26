@@ -81,6 +81,7 @@ endif()
 #------------------------------------------------------------------------------
 option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
+option( enable-ifma "Use Intel AVX512 IFMA intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
 option( enable-crypto "Use ARM Crypto Extensions." OFF )
@@ -158,6 +159,23 @@ if ( enable-avx512 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_AVX512 )
     message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw'." )
+  endif()
+endif()
+
+if ( enable-ifma )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512ifma -mavx512vl" )
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m512i a = _mm512_set1_epi64(3);
+      __m256i b = _mm256_set1_epi64x(5);
+      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
+      }" SUPPORTS_FLAG_IFMA )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_IFMA )
+    message( FATAL_ERROR "Compiler does not support '-mavx512ifma -mavx512vl'." )
   endif()
 endif()
 
@@ -304,6 +322,7 @@ target_compile_options( libbitcoin-system
   PUBLIC
     $<$<BOOL:${enable-avx2}>:-mavx -mavx2>
     $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw>
+    $<$<BOOL:${enable-ifma}>:-mavx512ifma -mavx512vl>
     $<$<BOOL:${enable-shani}>:-msse4 -msha>
     $<$<BOOL:${enable-crypto}>:-march=armv8-a+crypto>
     $<$<BOOL:${enable-sse41}>:-msse4.1>

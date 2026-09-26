@@ -298,6 +298,55 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
     vst1q_u32((uint32_t*)&bytes, a);
 }
 
+/// compare/select
+/// ---------------------------------------------------------------------------
+/// Masks are all bits set (true) or unset (false) per word.
+
+INLINE xint128_t andnot(xint128_t a, xint128_t b) NOEXCEPT
+{
+    return vbicq_u32(b, a);
+}
+
+template <auto S>
+INLINE xint128_t eq(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return (xint128_t)vceqq_u8((uint8x16_t)a, (uint8x16_t)b);
+    if constexpr (S == bits<uint16_t>)
+        return (xint128_t)vceqq_u16((uint16x8_t)a, (uint16x8_t)b);
+    if constexpr (S == bits<uint32_t>)
+        return vceqq_u32(a, b);
+    if constexpr (S == bits<uint64_t>)
+    {
+        // A 64 bit word is equal iff both of its 32 bit words are equal.
+        const auto words = vceqq_u32(a, b);
+        return vandq_u32(words, vrev64q_u32(words));
+    }
+}
+
+INLINE xint128_t select(xint128_t mask, xint128_t a, xint128_t b) NOEXCEPT
+{
+    return vbslq_u32(mask, a, b);
+}
+
+INLINE bool any(xint128_t a) NOEXCEPT
+{
+    const auto halves = vorr_u32(vget_low_u32(a), vget_high_u32(a));
+    return !is_zero(vget_lane_u32(vpmax_u32(halves, halves), 0));
+}
+
+/// gather
+/// ---------------------------------------------------------------------------
+
+INLINE xint128_t gather(const uint64_t* table, xint128_t index) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint128_t>(
+        table[get<uint64_t, 0>(index)],
+        table[get<uint64_t, 1>(index)]);
+    BC_POP_WARNING()
+}
+
 
 /// interleave (for matrix transposition)
 /// ---------------------------------------------------------------------------
