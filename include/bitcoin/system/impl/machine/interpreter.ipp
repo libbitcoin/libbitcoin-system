@@ -1187,7 +1187,7 @@ op_check_multisig_verify() NOEXCEPT
             this->set_hash(*subscript, sighash_flags);
 
         // Verify ECDSA signature against public key and cache signature hash.
-        if (this->verify_ecdsa_signature(*key, this->cached_hash(), sig, false))
+        if (this->verify_ecdsa_unbatched(*key, this->cached_hash(), sig))
             ++it;
     }
 
