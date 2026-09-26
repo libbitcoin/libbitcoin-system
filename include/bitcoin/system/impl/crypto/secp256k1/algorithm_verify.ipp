@@ -116,10 +116,10 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
 inline hash_digest algorithm::challenge(const bytes_t& r, const bytes_t& key,
     const data_slice& message) NOEXCEPT
 {
-    const auto tag = sha256_hash(std::string{ "BIP0340/challenge" });
-    accumulator<sha256> context{};
-    context.write(tag);
-    context.write(tag);
+    constexpr data_t name{ "BIP0340/challenge" };
+    constexpr auto tag = sha256::simple_hash(name.data);
+    constexpr auto midstate = sha256::midstate(tag, tag);
+    accumulator<sha256> context{ midstate, one };
     context.write(r);
     context.write(key);
     context.write(message.size(), message.data());

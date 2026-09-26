@@ -42,6 +42,11 @@ public:
     using algorithm::verify_ecdsa;
     using algorithm::verify_schnorr;
     using algorithm::challenge;
+    using algorithm::square;
+    using algorithm::is_zero_element;
+    using algorithm::double_;
+    using algorithm::add;
+    using algorithm::to_jacobian;
 };
 
 using affine = accessor::affine_t<uint64_t>;
@@ -154,6 +159,53 @@ static void report_lanes(const std::string& name) NOEXCEPT
 
         report(name, time / lanes);
     }
+}
+
+// field and group
+// ----------------------------------------------------------------------------
+
+constexpr size_t operations = 1'000'000;
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__field__integral)
+{
+    const auto& in = signed_vectors();
+    auto value = in.points[0].x;
+    const auto& factor = in.points[1].y;
+    report("field multiply", microseconds(operations, [&](size_t) NOEXCEPT
+    {
+        accessor::multiply(value, value, factor);
+        return true;
+    }));
+
+    report("field square", microseconds(operations, [&](size_t) NOEXCEPT
+    {
+        accessor::square(value, value);
+        return true;
+    }));
+
+    BOOST_CHECK(!f::any(accessor::is_zero_element(value)));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__group__integral)
+{
+    const auto& in = signed_vectors();
+    accessor::jacobian_t<uint64_t> sum{};
+    accessor::to_jacobian(sum, in.points[0]);
+    report("group double", microseconds(operations, [&](size_t) NOEXCEPT
+    {
+        accessor::double_(sum, sum);
+        return true;
+    }));
+
+    report("group add", microseconds(operations, [&](size_t) NOEXCEPT
+    {
+        accessor::jacobian_t<uint64_t> out{};
+        const auto faults = accessor::add(out, sum, in.points[1]);
+        sum = out;
+        return !f::any(faults);
+    }));
+
+    BOOST_CHECK(!f::any(sum.infinity));
 }
 
 // verify
