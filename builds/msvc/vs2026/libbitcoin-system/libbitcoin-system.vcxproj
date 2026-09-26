@@ -482,6 +482,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\x25519.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\xsalsa20_poly1305.hpp" />
@@ -730,6 +731,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

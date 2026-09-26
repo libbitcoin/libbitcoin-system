@@ -402,6 +402,12 @@ include_bitcoin_system_crypto_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/x25519.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/xsalsa20_poly1305.hpp
 
+include_bitcoin_system_crypto_secp256k1dir = \
+    ${includedir}/bitcoin/system/crypto/secp256k1
+
+include_bitcoin_system_crypto_secp256k1_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp
+
 include_bitcoin_system_datadir = \
     ${includedir}/bitcoin/system/data
 
@@ -520,6 +526,12 @@ include_bitcoin_system_impl_configdir = \
 
 include_bitcoin_system_impl_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
+
+include_bitcoin_system_impl_crypto_secp256k1dir = \
+    ${includedir}/bitcoin/system/impl/crypto/secp256k1
+
+include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp
 
 include_bitcoin_system_impl_datadir = \
     ${includedir}/bitcoin/system/impl/data
@@ -1068,6 +1080,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/salsa20.cpp \
     ${srcdir}/../../test/crypto/x25519.cpp \
     ${srcdir}/../../test/crypto/xsalsa20_poly1305.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/algorithm_field.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ellswift.cpp \

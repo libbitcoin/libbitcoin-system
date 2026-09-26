@@ -168,6 +168,25 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_512__byteswap64__get_expected)
     }
 }
 
+// sub
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__sub64__expected)
+{
+    if constexpr (have_512)
+    {
+        const auto xword = f::sub<64>(f::set<xint512_t>(5_u64, 0_u64, 7_u64, max_uint64, 9_u64, 1_u64, 2_u64, 3_u64), f::set<xint512_t>(3_u64, 1_u64, 7_u64, 1_u64, 9_u64, 0_u64, 3_u64, 1_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 2_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), max_uint64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), sub1(max_uint64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), 1_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(xword)), max_uint64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), 2_u64);
+    }
+}
+
 // compare/select
 // ----------------------------------------------------------------------------
 

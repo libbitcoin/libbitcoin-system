@@ -339,6 +339,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp">
+      <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>

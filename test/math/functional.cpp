@@ -72,6 +72,21 @@ BOOST_AUTO_TEST_CASE(functional__madd52__runtime__expected)
     BOOST_CHECK_EQUAL(f::madd52hi(7_u64, max52, max52), 0x000ffffffffffffe_u64 + 7_u64);
 }
 
+// sub
+// ----------------------------------------------------------------------------
+
+static_assert(f::sub(5_u64, 3_u64) == 2_u64);
+static_assert(f::sub(0_u64, 1_u64) == max_uint64);
+static_assert(f::sub<64>(0x0010000000000000_u64, 1_u64) == 0x000fffffffffffff_u64);
+static_assert(f::sub(0_u8, 1_u8) == max_uint8);
+static_assert(f::sub(0x42_u8, 0x02_u8) == 0x40_u8);
+
+BOOST_AUTO_TEST_CASE(functional__sub__runtime__expected)
+{
+    BOOST_CHECK_EQUAL(f::sub(0_u64, 1_u64), max_uint64);
+    BOOST_CHECK_EQUAL(f::sub<64>(0x0010000000000000_u64, 1_u64), 0x000fffffffffffff_u64);
+}
+
 // andnot/eq/select/any
 // ----------------------------------------------------------------------------
 
