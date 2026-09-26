@@ -53,8 +53,8 @@ constexpr void algorithm::reduce(scalar_t& r, bool overflow) NOEXCEPT
 // 258 to 257 bits, leaving at most one subtraction of n.
 constexpr void algorithm::reduce(scalar_t& r, const wide_t& value) NOEXCEPT
 {
-    constexpr auto folds = 3u;
-    constexpr auto terms = 3u;
+    constexpr size_t folds = 3;
+    constexpr size_t terms = 3;
     constexpr auto half = to_half(array_count<wide_t>);
 
     auto limbs = value;
@@ -145,14 +145,17 @@ constexpr void algorithm::multiply(scalar_t& r, const scalar_t& a,
 // a^(n - 2) by fixed four bit windows.
 constexpr void algorithm::inverse(scalar_t& r, const scalar_t& a) NOEXCEPT
 {
-    constexpr auto window = 4u;
-    constexpr auto mask = 0x0fu;
+    constexpr size_t window = 4;
+    constexpr auto mask = unmask_right<uint64_t>(window);
     constexpr auto per_limb = bits<uint64_t> / window;
-    constexpr scalar_t exponent{ order[0] - two, order[1], order[2], order[3] };
+    constexpr scalar_t exponent
+    {
+        system::subtract<uint64_t>(order[0], two), order[1], order[2], order[3]
+    };
 
-    std_array<scalar_t, add1(mask)> powers{};
+    std_array<scalar_t, power2(window)> powers{};
     powers[0] = { 1 };
-    for (size_t power = 1; power < powers.size(); ++power)
+    for (auto power = one; power < powers.size(); ++power)
         multiply(powers[power], powers[sub1(power)], a);
 
     scalar_t result{ 1 };
@@ -162,8 +165,9 @@ constexpr void algorithm::inverse(scalar_t& r, const scalar_t& a) NOEXCEPT
             multiply(result, result, result);
 
         const auto limb = exponent[digit / per_limb];
+        const auto shift = (digit % per_limb) * window;
         const auto index = possible_narrow_cast<size_t>(
-            (limb >> ((digit % per_limb) * window)) & mask);
+            bit_and(shift_right(limb, shift), mask));
         if (is_nonzero(index))
             multiply(result, result, powers[index]);
     }
@@ -205,7 +209,7 @@ constexpr void algorithm::recode(digits_t<Count>& digits,
         const auto low = sign_cast<int64_t>(remainder[0] & window);
         digits[digit] = narrow_cast<int16_t>(low - offset);
 
-        remainder[0] = (remainder[0] >> Bits) | (remainder[1] << rest) | 1u;
+        remainder[0] = set_right((remainder[0] >> Bits) | (remainder[1] << rest));
         remainder[1] = (remainder[1] >> Bits) | (remainder[2] << rest);
         remainder[2] = (remainder[2] >> Bits) | (remainder[3] << rest);
         remainder[3] = (remainder[3] >> Bits);
@@ -220,7 +224,7 @@ constexpr void algorithm::recode(digits_t<Count>& digits,
 
 constexpr bool algorithm::is_zero(const scalar_t& a) NOEXCEPT
 {
-    return libbitcoin::is_zero(a[0] | a[1] | a[2] | a[3]);
+    return bc::is_zero(a[0] | a[1] | a[2] | a[3]);
 }
 
 constexpr bool algorithm::is_high(const scalar_t& a) NOEXCEPT
@@ -243,8 +247,8 @@ constexpr bool algorithm::from_bytes(scalar_t& r,
     constexpr auto size = sizeof(uint64_t);
     for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
     {
-        auto& limb = r[sub1(r.size()) - byte / size];
-        limb = (limb << byte_bits) | bytes[byte];
+        auto& limb = r[sub1(r.size()) - (byte / size)];
+        limb = bit_or<uint64_t>(shift_left(limb, byte_bits), bytes[byte]);
     }
 
     const auto overflow = is_overflow(r);
@@ -257,9 +261,9 @@ constexpr void algorithm::to_bytes(bytes_t& out, const scalar_t& a) NOEXCEPT
     constexpr auto size = sizeof(uint64_t);
     for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
     {
-        const auto limb = a[sub1(a.size()) - byte / size];
-        const auto shift = (sub1(size) - byte % size) * byte_bits;
-        out[byte] = narrow_cast<uint8_t>(limb >> shift);
+        const auto limb = a[sub1(a.size()) - (byte / size)];
+        const auto shift = to_bits(sub1(size) - (byte % size));
+        out[byte] = narrow_cast<uint8_t>(shift_right(limb, shift));
     }
 }
 

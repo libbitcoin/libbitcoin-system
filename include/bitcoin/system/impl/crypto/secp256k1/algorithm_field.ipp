@@ -156,7 +156,7 @@ constexpr void algorithm::scale(field_t<Word>& r,
     static_assert(is_nonzero(Factor) && Factor < 1024u);
 
     field_t<Word> out{ a };
-    for (size_t term = 1; term < Factor; ++term)
+    for (auto term = one; term < Factor; ++term)
         add(out, out, a);
 
     r = out;
@@ -383,8 +383,8 @@ constexpr bool algorithm::from_bytes(field_t<uint64_t>& r,
     std_array<uint64_t, 4> words{};
     for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
     {
-        auto& word = words[sub1(words.size()) - byte / size];
-        word = (word << byte_bits) | bytes[byte];
+        auto& word = words[sub1(words.size()) - (byte / size)];
+        word = bit_or<uint64_t>(shift_left(word, byte_bits), bytes[byte]);
     }
 
     r[0] =   words[0]                            & limb_mask;
@@ -412,7 +412,7 @@ constexpr void algorithm::to_bytes(bytes_t& out,
     for (size_t byte{}; byte < array_count<bytes_t>; ++byte)
     {
         const auto word = words[sub1(words.size()) - (byte / size)];
-        const auto shift = (sub1(size) - byte % size) * byte_bits;
+        const auto shift = to_bits(sub1(size) - (byte % size));
         out[byte] = narrow_cast<uint8_t>(word >> shift);
     }
 }

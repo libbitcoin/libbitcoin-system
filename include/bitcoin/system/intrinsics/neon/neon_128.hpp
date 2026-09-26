@@ -371,8 +371,8 @@ INLINE xint128_t gather(const uint64_t* table, xint128_t index) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     return set<xint128_t>(
-        table[get<uint64_t, 0>(index)],
-        table[get<uint64_t, 1>(index)]);
+        table[possible_narrow_cast<size_t>(get<uint64_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 1>(index))]);
     BC_POP_WARNING()
 }
 
