@@ -67,48 +67,22 @@ constexpr void algorithm::double_(jacobian_t<Word>& r,
     r = { x3, y3, z3, a.infinity };
 }
 
-// u2 = x2 z1^2, s2 = y2 z1^3, h = u2 - x1, r = s2 - y1, v = x1 h^2,
-// x3 = r^2 - h^3 - 2v, y3 = r(v - x3) - y1 h^3, z3 = z1 h.
 template <typename Word>
 constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     const affine_t<Word>& b) NOEXCEPT
 {
-    field_t<Word> zz{}, u2{}, s2{}, h{}, rh{}, hh{}, hhh{}, v{}, x3{}, y3{},
-        z3{}, t{};
+    field_t<Word> h{};
+    return add(r, h, a, b, a.z);
+}
 
-    square(zz, a.z);
-    multiply(u2, b.x, zz);
-    multiply(s2, b.y, zz);
-    multiply(s2, s2, a.z);
-    subtract(h, u2, a.x);
-    carry(h);
-    subtract(rh, s2, a.y);
-    carry(rh);
-
-    square(hh, h);
-    multiply(hhh, h, hh);
-    multiply(v, a.x, hh);
-
-    square(x3, rh);
-    subtract(x3, x3, hhh);
-    scale<2>(t, v);
-    carry(t);
-    subtract(x3, x3, t);
-    carry(x3);
-
-    subtract(t, v, x3);
-    carry(t);
-    multiply(y3, rh, t);
-    multiply(t, a.y, hhh);
-    subtract(y3, y3, t);
-    carry(y3);
-
-    multiply(z3, a.z, h);
-
-    field_t<Word> normal{ h };
-    normalize(normal);
-    r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
-    return f::or_(a.infinity, is_zero(normal));
+// b is (x * s^2, y * s^3) for scale s, as z1 is replaced by z1 s in u2 and s2.
+template <typename Word>
+constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
+    const affine_t<Word>& b, const field_t<Word>& scale) NOEXCEPT
+{
+    field_t<Word> h{}, z{};
+    multiply(z, a.z, scale);
+    return add(r, h, a, b, z);
 }
 
 // u1 = x1 z2^2, u2 = x2 z1^2, s1 = y1 z2^3, s2 = y2 z1^3, h = u2 - u1,
@@ -343,6 +317,51 @@ constexpr Word algorithm::is_on_curve(const affine_t<Word>& a) NOEXCEPT
 // Group internals.
 // ----------------------------------------------------------------------------
 // protected
+
+// u2 = x2 z^2, s2 = y2 z^3, h = u2 - x1, r = s2 - y1, v = x1 h^2,
+// x3 = r^2 - h^3 - 2v, y3 = r(v - x3) - y1 h^3, z3 = z1 h.
+template <typename Word>
+constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
+    const jacobian_t<Word>& a, const affine_t<Word>& b,
+    const field_t<Word>& z) NOEXCEPT
+{
+    field_t<Word> zz{}, u2{}, s2{}, rh{}, hh{}, hhh{}, v{}, x3{}, y3{},
+        z3{}, t{};
+
+    square(zz, z);
+    multiply(u2, b.x, zz);
+    multiply(s2, b.y, zz);
+    multiply(s2, s2, z);
+    subtract(h, u2, a.x);
+    carry(h);
+    subtract(rh, s2, a.y);
+    carry(rh);
+
+    square(hh, h);
+    multiply(hhh, h, hh);
+    multiply(v, a.x, hh);
+
+    square(x3, rh);
+    subtract(x3, x3, hhh);
+    scale<2>(t, v);
+    carry(t);
+    subtract(x3, x3, t);
+    carry(x3);
+
+    subtract(t, v, x3);
+    carry(t);
+    multiply(y3, rh, t);
+    multiply(t, a.y, hhh);
+    subtract(y3, y3, t);
+    carry(y3);
+
+    multiply(z3, a.z, h);
+
+    field_t<Word> normal{ h };
+    normalize(normal);
+    r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
+    return f::or_(a.infinity, is_zero(normal));
+}
 
 template <typename Word>
 constexpr void algorithm::select(jacobian_t<Word>& r, Word mask,

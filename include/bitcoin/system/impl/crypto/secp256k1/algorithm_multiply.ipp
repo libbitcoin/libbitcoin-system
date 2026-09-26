@@ -60,8 +60,11 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
         recode(k_second[lane], second);
     }
 
+    // Point multiples are affine on the curve isomorphic by scale, where the
+    // sum is computed, so generator multiples are added by that scale.
     points_t<Word> a_first{}, a_second{};
-    multiples(a_first, a);
+    field_t<Word> scale{};
+    multiples(a_first, scale, a);
     for (size_t point{}; point < a_first.size(); ++point)
         endomorphism(a_second[point], a_first[point]);
 
@@ -81,10 +84,10 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
             const auto position = bit / generator_bits;
             digit(index, negative, g_first, position, false);
             lookup(addend, generator_table, index, negative);
-            add_point(sum, addend, faults);
+            add_point(sum, addend, scale, faults);
             digit(index, negative, g_second, position, false);
             lookup(addend, endomorphism_table, index, negative);
-            add_point(sum, addend, faults);
+            add_point(sum, addend, scale, faults);
         }
 
         if (bit <= point_top && bc::is_zero(bit % point_bits))
@@ -102,12 +105,14 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
     affine_t<Word> base{ broadcast<Word>(generator.x),
         broadcast<Word>(generator.y) };
 
-    correct(sum, base, g_first, faults);
+    const auto unit = broadcast<Word>({ 1 });
+    correct(sum, base, scale, g_first, faults);
     endomorphism(base, base);
-    correct(sum, base, g_second, faults);
-    correct(sum, a_first.front(), k_first, faults);
-    correct(sum, a_second.front(), k_second, faults);
+    correct(sum, base, scale, g_second, faults);
+    correct(sum, a_first.front(), unit, k_first, faults);
+    correct(sum, a_second.front(), unit, k_second, faults);
 
+    multiply(sum.z, sum.z, scale);
     r = sum;
     return faults;
 }
@@ -270,10 +275,40 @@ constexpr void algorithm::add_point(jacobian_t<Word>& r,
     r = sum;
 }
 
+// Lanes at infinity take b mapped by scale, and other exceptional lanes are
+// faults.
+template <typename Word>
+constexpr void algorithm::add_point(jacobian_t<Word>& r,
+    const affine_t<Word>& b, const field_t<Word>& scale, Word& faults) NOEXCEPT
+{
+    jacobian_t<Word> sum{};
+    const auto uncomputed = add(sum, r, b, scale);
+    if (f::any(r.infinity))
+    {
+        field_t<Word> ss{}, sss{};
+        square(ss, scale);
+        multiply(sss, ss, scale);
+
+        jacobian_t<Word> lifted{};
+        to_jacobian(lifted, b);
+        multiply(lifted.x, lifted.x, ss);
+        multiply(lifted.y, lifted.y, sss);
+        select(sum, r.infinity, lifted, sum);
+        faults = f::or_(faults, f::andnot(r.infinity, uncomputed));
+    }
+    else
+    {
+        faults = f::or_(faults, uncomputed);
+    }
+
+    r = sum;
+}
+
 // A half made odd added its signed base once more, so subtract it where even.
 template <size_t Bits, typename Word>
 constexpr void algorithm::correct(jacobian_t<Word>& r, const affine_t<Word>& a,
-    const recodes_t<Bits, Word>& halves, Word& faults) NOEXCEPT
+    const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
+    Word& faults) NOEXCEPT
 {
     std_array<uint64_t, lanes<Word>> evens{}, positives{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
@@ -291,7 +326,7 @@ constexpr void algorithm::correct(jacobian_t<Word>& r, const affine_t<Word>& a,
 
     auto sum = r;
     auto fault = f::broadcast<Word>(uint64_t{});
-    add_point(sum, addend, fault);
+    add_point(sum, addend, scale, fault);
     select(r, even, sum, r);
     faults = f::or_(faults, f::and_(fault, even));
 }

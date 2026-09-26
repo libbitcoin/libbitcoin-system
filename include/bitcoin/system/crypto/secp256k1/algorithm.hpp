@@ -472,6 +472,12 @@ protected:
     static constexpr Word add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
         const affine_t<Word>& b) NOEXCEPT;
 
+    /// r = a + (x * s^2, y * s^3) of b, for s the scale of an isomorphism,
+    /// mask of lanes not computed.
+    template <typename Word>
+    static constexpr Word add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
+        const affine_t<Word>& b, const field_t<Word>& scale) NOEXCEPT;
+
     /// r = a + b, mask of lanes not computed (a or b infinite, a = b or -b).
     template <typename Word>
     static constexpr Word add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
@@ -534,6 +540,13 @@ protected:
     static constexpr void to_affine(affine_t<Word>& r,
         const jacobian_t<Word>& a, const field_t<Word>& inverse_z) NOEXCEPT;
 
+    /// r = a + b, with z in place of the z of a in u2 and s2, and h the ratio
+    /// of the z of r to the z of a.
+    template <typename Word>
+    static constexpr Word add(jacobian_t<Word>& r, field_t<Word>& h,
+        const jacobian_t<Word>& a, const affine_t<Word>& b,
+        const field_t<Word>& z) NOEXCEPT;
+
     /// r = mask ? a : b, per lane.
     template <typename Word>
     static constexpr void select(jacobian_t<Word>& r, Word mask,
@@ -563,13 +576,13 @@ protected:
         std_array<std_array<uint64_t, table_size<Bits>>, 5> y{};
     };
 
-    /// Odd multiples of a point per lane (normal).
+    /// Odd multiples of a point per lane, affine on an isomorphic curve.
     template <typename Word>
     using points_t = std_array<affine_t<Word>, table_size<point_bits>>;
 
-    /// r = odd multiples of a.
+    /// r = odd multiples of a, as (x * s^2, y * s^3) for s = scale.
     template <typename Word>
-    static constexpr void multiples(points_t<Word>& r,
+    static constexpr void multiples(points_t<Word>& r, field_t<Word>& scale,
         const affine_t<Word>& a) NOEXCEPT;
 
     /// Table internals.
@@ -694,9 +707,15 @@ protected:
     static constexpr void add_point(jacobian_t<Word>& r,
         const affine_t<Word>& b, Word& faults) NOEXCEPT;
 
+    template <typename Word>
+    static constexpr void add_point(jacobian_t<Word>& r,
+        const affine_t<Word>& b, const field_t<Word>& scale,
+        Word& faults) NOEXCEPT;
+
     template <size_t Bits, typename Word>
     static constexpr void correct(jacobian_t<Word>& r, const affine_t<Word>& a,
-        const recodes_t<Bits, Word>& halves, Word& faults) NOEXCEPT;
+        const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
+        Word& faults) NOEXCEPT;
 
     /// Verification.
     /// -----------------------------------------------------------------------

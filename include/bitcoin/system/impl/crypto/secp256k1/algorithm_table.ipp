@@ -29,19 +29,46 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 // protected
 
-// Odd multiples by repeated addition of 2a, with one inversion for all.
+// Odd multiples by repeated addition of 2a, on the curve isomorphic by the z
+// of 2a (where 2a is affine). Each multiple is then scaled to the z of the
+// last by the product of later z ratios, so that all are affine on the curve
+// isomorphic by scale (the z of 2a times the z of the last).
 template <typename Word>
-constexpr void algorithm::multiples(points_t<Word>& r,
+constexpr void algorithm::multiples(points_t<Word>& r, field_t<Word>& scale,
     const affine_t<Word>& a) NOEXCEPT
 {
-    std_array<jacobian_t<Word>, table_size<point_bits>> points{};
-    jacobian_t<Word> twice{};
-    to_jacobian(points[0], a);
-    double_(twice, points[0]);
-    for (auto point = one; point < points.size(); ++point)
-        add(points[point], points[sub1(point)], twice);
+    constexpr auto size = table_size<point_bits>;
+    std_array<field_t<Word>, size> ratios{};
+    jacobian_t<Word> sum{}, twice{};
+    field_t<Word> zz{}, zzz{};
 
-    to_affine(r, points);
+    to_jacobian(sum, a);
+    double_(twice, sum);
+    const affine_t<Word> step{ twice.x, twice.y };
+    square(zz, twice.z);
+    multiply(zzz, zz, twice.z);
+    multiply(sum.x, a.x, zz);
+    multiply(sum.y, a.y, zzz);
+
+    r.front() = { sum.x, sum.y };
+    for (auto point = one; point < size; ++point)
+    {
+        add(sum, ratios[point], sum, step, sum.z);
+        r[point] = { sum.x, sum.y };
+    }
+
+    auto factor = ratios.back();
+    for (auto point = sub1(size); is_nonzero(point--);)
+    {
+        square(zz, factor);
+        multiply(zzz, zz, factor);
+        multiply(r[point].x, r[point].x, zz);
+        multiply(r[point].y, r[point].y, zzz);
+        if (is_nonzero(point))
+            multiply(factor, factor, ratios[point]);
+    }
+
+    multiply(scale, sum.z, twice.z);
 }
 
 // Table internals.
