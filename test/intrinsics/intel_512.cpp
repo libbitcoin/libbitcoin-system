@@ -168,6 +168,143 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_512__byteswap64__get_expected)
     }
 }
 
+// compare/select
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__andnot__expected)
+{
+    if constexpr (have_512)
+    {
+        const auto xword = f::andnot(f::set<xint512_t>(0xf0f0_u64, 0xffff_u64, 0_u64, max_uint64, 0_u64, 0_u64, 0_u64, 0_u64), f::set<xint512_t>(0xffff_u64, 0x0f0f_u64, 42_u64, 42_u64, 0_u64, 0_u64, 0_u64, 1_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 0x0f0f_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 0x0000_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 42_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), 1_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__eq64__expected)
+{
+    if constexpr (have_512)
+    {
+        const auto xword = f::eq<64>(f::set<xint512_t>(1_u64, 2_u64, 3_u64, 4_u64, 5_u64, 6_u64, 7_u64, 8_u64), f::set<xint512_t>(1_u64, 3_u64, 3_u64, 0_u64, 5_u64, 0_u64, 0_u64, 8_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), max_uint64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), max_uint64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(xword)), max_uint64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), max_uint64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__eq32__expected)
+{
+    if constexpr (have_512)
+    {
+        const auto xword = f::eq<32>(f::set<xint512_t>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16), f::set<xint512_t>(1, 0, 3, 0, 5, 0, 7, 0, 9, 0, 11, 0, 13, 0, 15, 0));
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 0>(xword)), max_uint32);
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 1>(xword)), 0_u32);
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 14>(xword)), max_uint32);
+        BOOST_CHECK_EQUAL((f::get<uint32_t, 15>(xword)), 0_u32);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__select__expected)
+{
+    if constexpr (have_512)
+    {
+        const auto mask = f::set<xint512_t>(max_uint64, 0_u64, 0_u64, max_uint64, max_uint64, 0_u64, 0_u64, max_uint64);
+        const auto xword = f::select(mask, f::set<xint512_t>(1_u64, 2_u64, 3_u64, 4_u64, 5_u64, 6_u64, 7_u64, 8_u64), f::set<xint512_t>(11_u64, 12_u64, 13_u64, 14_u64, 15_u64, 16_u64, 17_u64, 18_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 1_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 12_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 13_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), 4_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(xword)), 5_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), 16_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(xword)), 17_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), 8_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__any__expected)
+{
+    if constexpr (have_512)
+    {
+        BOOST_CHECK(!f::any(f::set<xint512_t>(0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64)));
+        BOOST_CHECK(f::any(f::set<xint512_t>(0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 1_u64)));
+        BOOST_CHECK(f::any(f::set<xint512_t>(0x8000000000000000_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64, 0_u64)));
+    }
+}
+
+// gather
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__gather__expected)
+{
+    if constexpr (have_512)
+    {
+        constexpr std_array<uint64_t, 16> table{ 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115 };
+        const auto xword = f::gather(table.data(), f::set<xint512_t>(3_u64, 0_u64, 15_u64, 5_u64, 8_u64, 8_u64, 1_u64, 12_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 103_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 100_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 115_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), 105_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(xword)), 108_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), 108_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(xword)), 101_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), 112_u64);
+    }
+}
+
+// madd52
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__madd52lo__expected)
+{
+    if constexpr (have_ifma_512)
+    {
+        constexpr auto max52 = 0x000fffffffffffff_u64;
+        constexpr auto high = 0x8000000000000003_u64;
+        const auto xword = f::madd52lo(f::set<xint512_t>(7_u64, 1_u64, 0_u64, max_uint64, 0_u64, 0_u64, 0_u64, 9_u64), f::set<xint512_t>(max52, high, 1_u64, 1_u64, 0_u64, max52, 3_u64, 0_u64), f::set<xint512_t>(max52, 5_u64, 0_u64, 2_u64, max52, 1_u64, 3_u64, max52));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 8_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 16_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), 1_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), max52);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(xword)), 9_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), 9_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), f::madd52lo(7_u64, max52, max52));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), f::madd52lo(1_u64, high, 5_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), f::madd52lo(max_uint64, 1_u64, 2_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), f::madd52lo(0_u64, max52, 1_u64));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__intel_512__madd52hi__expected)
+{
+    if constexpr (have_ifma_512)
+    {
+        constexpr auto max52 = 0x000fffffffffffff_u64;
+        constexpr auto high = 0x8000000000000003_u64;
+        const auto xword = f::madd52hi(f::set<xint512_t>(7_u64, 1_u64, 0_u64, 3_u64, 0_u64, 0_u64, 0_u64, 9_u64), f::set<xint512_t>(max52, high, 1_u64, max52, 0_u64, max52, 3_u64, 0_u64), f::set<xint512_t>(max52, 5_u64, 0_u64, 2_u64, max52, 1_u64, 3_u64, max52));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 0x000ffffffffffffe_u64 + 7_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 1_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), 4_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(xword)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(xword)), 9_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), f::madd52hi(7_u64, max52, max52));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), f::madd52hi(1_u64, high, 5_u64));
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(xword)), f::madd52hi(3_u64, max52, 2_u64));
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #endif // HAVE_AVX512

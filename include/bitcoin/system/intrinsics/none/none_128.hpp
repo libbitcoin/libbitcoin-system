@@ -119,6 +119,38 @@ INLINE void store_aligned(xint128_t&, xint128_t) NOEXCEPT
 {
 }
 
+/// compare/select
+/// ---------------------------------------------------------------------------
+
+INLINE xint128_t andnot(xint128_t, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
+template <auto S>
+INLINE xint128_t eq(xint128_t, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
+INLINE xint128_t select(xint128_t, xint128_t, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
+INLINE bool any(xint128_t) NOEXCEPT
+{
+    return false;
+}
+
+/// gather
+/// ---------------------------------------------------------------------------
+
+INLINE xint128_t gather(const uint64_t*, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
 /// interleave (for matrix transposition)
 /// ---------------------------------------------------------------------------
 

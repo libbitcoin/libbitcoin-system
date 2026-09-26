@@ -174,6 +174,30 @@ INLINE xint256_t mul(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_mul_epu32(a, b);
 }
 
+#if defined(HAVE_IFMA_256)
+
+// AVX512IFMA+AVX512VL / AVXIFMA
+INLINE xint256_t madd52lo(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
+{
+#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
+    return _mm256_madd52lo_avx_epu64(c, a, b);
+#else
+    return _mm256_madd52lo_epu64(c, a, b);
+#endif
+}
+
+// AVX512IFMA+AVX512VL / AVXIFMA
+INLINE xint256_t madd52hi(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
+{
+#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
+    return _mm256_madd52hi_avx_epu64(c, a, b);
+#else
+    return _mm256_madd52hi_epu64(c, a, b);
+#endif
+}
+
+#endif // HAVE_IFMA_256
+
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------
 
@@ -318,6 +342,52 @@ INLINE xint256_t load_aligned(const xint256_t& bytes) NOEXCEPT
 INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
 {
     _mm256_store_si256(&bytes, a);
+}
+
+/// compare/select
+/// ---------------------------------------------------------------------------
+/// Masks are all bits set (true) or unset (false) per word.
+
+// AVX2
+INLINE xint256_t andnot(xint256_t a, xint256_t b) NOEXCEPT
+{
+    return _mm256_andnot_si256(a, b);
+}
+
+// AVX2
+template <auto S>
+INLINE xint256_t eq(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_cmpeq_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_cmpeq_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_cmpeq_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_cmpeq_epi64(a, b);
+}
+
+// AVX2
+INLINE xint256_t select(xint256_t mask, xint256_t a, xint256_t b) NOEXCEPT
+{
+    return _mm256_blendv_epi8(b, a, mask);
+}
+
+// AVX
+INLINE bool any(xint256_t a) NOEXCEPT
+{
+    return is_zero(_mm256_testz_si256(a, a));
+}
+
+/// gather
+/// ---------------------------------------------------------------------------
+
+// AVX2
+INLINE xint256_t gather(const uint64_t* table, xint256_t index) NOEXCEPT
+{
+    return _mm256_i64gather_epi64(pointer_cast<const long long>(table),
+        index, sizeof(uint64_t));
 }
 
 

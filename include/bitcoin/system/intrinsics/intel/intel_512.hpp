@@ -161,6 +161,22 @@ INLINE xint512_t mul(xint512_t a, xint512_t b) NOEXCEPT
         return _mm512_mul_epu32(a, b);
 }
 
+#if defined(HAVE_IFMA_512)
+
+// AVX512IFMA
+INLINE xint512_t madd52lo(xint512_t c, xint512_t a, xint512_t b) NOEXCEPT
+{
+    return _mm512_madd52lo_epu64(c, a, b);
+}
+
+// AVX512IFMA
+INLINE xint512_t madd52hi(xint512_t c, xint512_t a, xint512_t b) NOEXCEPT
+{
+    return _mm512_madd52hi_epu64(c, a, b);
+}
+
+#endif // HAVE_IFMA_512
+
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------
 
@@ -334,6 +350,53 @@ INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
 INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
     _mm512_store_si512(&bytes, a);
+}
+
+/// compare/select
+/// ---------------------------------------------------------------------------
+/// Masks are all bits set (true) or unset (false) per word.
+
+// AVX512F
+INLINE xint512_t andnot(xint512_t a, xint512_t b) NOEXCEPT
+{
+    return _mm512_andnot_si512(a, b);
+}
+
+// AVX512BW
+template <auto S>
+INLINE xint512_t eq(xint512_t a, xint512_t b) NOEXCEPT
+{
+    // Compare yields an opmask, expanded to a word mask (all ones) by set1.
+    if constexpr (S == bits<uint8_t>)
+        return _mm512_maskz_set1_epi8(_mm512_cmpeq_epi8_mask(a, b), -1);
+    if constexpr (S == bits<uint16_t>)
+        return _mm512_maskz_set1_epi16(_mm512_cmpeq_epi16_mask(a, b), -1);
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_maskz_set1_epi32(_mm512_cmpeq_epi32_mask(a, b), -1);
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_maskz_set1_epi64(_mm512_cmpeq_epi64_mask(a, b), -1);
+}
+
+// AVX512F
+INLINE xint512_t select(xint512_t mask, xint512_t a, xint512_t b) NOEXCEPT
+{
+    // Bitwise (mask & a) | (~mask & b).
+    return _mm512_ternarylogic_epi64(mask, a, b, 0xca);
+}
+
+// AVX512F
+INLINE bool any(xint512_t a) NOEXCEPT
+{
+    return !is_zero(_mm512_test_epi64_mask(a, a));
+}
+
+/// gather
+/// ---------------------------------------------------------------------------
+
+// AVX512F
+INLINE xint512_t gather(const uint64_t* table, xint512_t index) NOEXCEPT
+{
+    return _mm512_i64gather_epi64(index, table, sizeof(uint64_t));
 }
 
 

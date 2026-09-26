@@ -555,6 +555,9 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\intel_512.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\multiply.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\intel.cpp">
       <Filter>src\intrinsics\platforms</Filter>
     </ClCompile>
@@ -622,6 +625,9 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\expectations.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\functional.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">

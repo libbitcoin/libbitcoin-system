@@ -120,6 +120,16 @@ static_assert(have<xint512_t> == have_512);
 static_assert(have<xint256_t> == have_256);
 static_assert(have<xint128_t> == have_128);
 
+// have_ifma
+// ----------------------------------------------------------------------------
+
+static_assert(have_ifma<xint512_t> == have_ifma_512);
+static_assert(have_ifma<xint256_t> == have_ifma_256);
+static_assert(have_ifma<xint128_t> == have_ifma_128);
+static_assert(!have_ifma_512 || have_512);
+static_assert(!have_ifma_256 || have_256);
+static_assert(!have_ifma_128 || have_128);
+
 // have_lanes
 // ----------------------------------------------------------------------------
 
