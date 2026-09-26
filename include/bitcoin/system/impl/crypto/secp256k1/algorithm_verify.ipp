@@ -62,7 +62,7 @@ constexpr bool algorithm::from_bytes(affine_t<uint64_t>& r,
     if (!from_bytes<one>(x, key) || !from_bytes<add1(size)>(y, key))
         return false;
 
-    if (hybrid && (f::any(is_odd(y)) != (sign == ec_hybrid_odd_sign)))
+    if (hybrid && (f::any(is_odd_element(y)) != (sign == ec_hybrid_odd_sign)))
         return false;
 
     r = { x, y };
@@ -76,7 +76,7 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
 {
     scalar_t scalar_r{}, scalar_s{}, scalar_z{};
     if (!from_bytes(scalar_r, r) || !from_bytes(scalar_s, s) ||
-        is_zero(scalar_r) || is_zero(scalar_s))
+        is_zero_scalar(scalar_r) || is_zero_scalar(scalar_s))
         return false;
 
     /* bool */ from_bytes(scalar_z, hash);
@@ -153,7 +153,7 @@ constexpr bool algorithm::verify_schnorr(const bytes_t& key,
 
     affine_t<uint64_t> result{};
     to_affine(result, sum);
-    return !f::any(is_odd(result.y)) && f::any(equal(result.x, r_x));
+    return !f::any(is_odd_element(result.y)) && f::any(equal(result.x, r_x));
 }
 
 } // namespace secp256k1

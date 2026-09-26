@@ -213,10 +213,10 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <typename Word>
-    static constexpr Word is_zero(const field_t<Word>& a) NOEXCEPT;
+    static constexpr Word is_zero_element(const field_t<Word>& a) NOEXCEPT;
 
     template <typename Word>
-    static constexpr Word is_odd(const field_t<Word>& a) NOEXCEPT;
+    static constexpr Word is_odd_element(const field_t<Word>& a) NOEXCEPT;
 
     template <typename Word>
     static constexpr Word equal(const field_t<Word>& a,
@@ -350,7 +350,7 @@ protected:
     /// Scalar predicates.
     /// -----------------------------------------------------------------------
 
-    static constexpr bool is_zero(const scalar_t& a) NOEXCEPT;
+    static constexpr bool is_zero_scalar(const scalar_t& a) NOEXCEPT;
 
     /// a greater than n / 2 (negative in signed interpretation).
     static constexpr bool is_high(const scalar_t& a) NOEXCEPT;

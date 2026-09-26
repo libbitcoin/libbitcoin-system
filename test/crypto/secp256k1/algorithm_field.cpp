@@ -38,8 +38,8 @@ public:
     using algorithm::square;
     using algorithm::inverse;
     using algorithm::square_root;
-    using algorithm::is_zero;
-    using algorithm::is_odd;
+    using algorithm::is_zero_element;
+    using algorithm::is_odd_element;
     using algorithm::equal;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
@@ -342,11 +342,11 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__non_squares__false)
 // predicates
 // ----------------------------------------------------------------------------
 
-static_assert(f::any(accessor::is_zero(decode(zero_value))));
-static_assert(!f::any(accessor::is_zero(decode(one_value))));
-static_assert(f::any(accessor::is_odd(decode(one_value))));
-static_assert(!f::any(accessor::is_odd(decode(zero_value))));
-static_assert(!f::any(accessor::is_odd(decode(gy))));
+static_assert(f::any(accessor::is_zero_element(decode(zero_value))));
+static_assert(!f::any(accessor::is_zero_element(decode(one_value))));
+static_assert(f::any(accessor::is_odd_element(decode(one_value))));
+static_assert(!f::any(accessor::is_odd_element(decode(zero_value))));
+static_assert(!f::any(accessor::is_odd_element(decode(gy))));
 static_assert(f::any(accessor::equal(decode(gx), decode(gx))));
 static_assert(!f::any(accessor::equal(decode(gx), decode(gy))));
 
@@ -411,12 +411,12 @@ constexpr uint64_t field_square_mask(const field& a) NOEXCEPT
 
 constexpr uint64_t field_is_zero(const field& a) NOEXCEPT
 {
-    return accessor::is_zero(a);
+    return accessor::is_zero_element(a);
 }
 
 constexpr uint64_t field_is_odd(const field& a) NOEXCEPT
 {
-    return accessor::is_odd(a);
+    return accessor::is_odd_element(a);
 }
 
 constexpr uint64_t field_equal(const field& a, const field& b) NOEXCEPT
@@ -644,8 +644,8 @@ static void check_predicates()
     if constexpr (have<xWord>)
     {
         const auto in = pack<xWord>(normals);
-        check_masks(accessor::is_zero(in), expect_masks(field_is_zero, normals));
-        check_masks(accessor::is_odd(in), expect_masks(field_is_odd, normals));
+        check_masks(accessor::is_zero_element(in), expect_masks(field_is_zero, normals));
+        check_masks(accessor::is_odd_element(in), expect_masks(field_is_odd, normals));
         check_masks(accessor::equal(in, pack<xWord>(generators)),
             expect_masks(field_equal, normals, generators));
     }

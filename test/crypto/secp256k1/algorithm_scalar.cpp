@@ -37,7 +37,7 @@ public:
     using algorithm::inverse;
     using algorithm::split;
     using algorithm::recode;
-    using algorithm::is_zero;
+    using algorithm::is_zero_scalar;
     using algorithm::is_high;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
@@ -331,8 +331,8 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__recode__values__expected)
 // predicates
 // ----------------------------------------------------------------------------
 
-static_assert(accessor::is_zero(decode(zero_value)));
-static_assert(!accessor::is_zero(decode(one_value)));
+static_assert(accessor::is_zero_scalar(decode(zero_value)));
+static_assert(!accessor::is_zero_scalar(decode(one_value)));
 static_assert(!accessor::is_high(accessor::half_order));
 static_assert(accessor::is_high(scalar_add(accessor::half_order, decode(one_value))));
 static_assert(accessor::is_high(decode(order_minus_one)));

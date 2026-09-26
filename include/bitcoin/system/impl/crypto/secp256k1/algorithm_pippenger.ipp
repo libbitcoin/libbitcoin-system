@@ -147,7 +147,7 @@ inline void algorithm::multiply(jacobian_t<uint64_t>& r,
             if (negative)
                 value = full - value;
 
-            if (bc::is_zero(value))
+            if (is_zero(value))
                 continue;
 
             affine_t<uint64_t> addend{ term.point };

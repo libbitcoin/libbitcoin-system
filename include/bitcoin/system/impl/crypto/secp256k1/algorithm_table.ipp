@@ -79,14 +79,14 @@ constexpr void algorithm::multiples(points_t<Word>& r, field_t<Word>& scale,
 template <size_t Bits, size_t Chunk>
 constexpr algorithm::forward_t algorithm::forward() NOEXCEPT
 {
-    static_assert(bc::is_zero(table_size<Bits> % chunk_size));
+    static_assert(is_zero(table_size<Bits> % chunk_size));
 
     jacobian_t<uint64_t> first{}, twice{};
     to_jacobian(first, generator);
     double_(twice, first);
 
     forward_t out{};
-    if constexpr (bc::is_zero(Chunk))
+    if constexpr (is_zero(Chunk))
     {
         out.points[0] = first;
         out.products[0] = first.z;
@@ -132,7 +132,7 @@ constexpr algorithm::backward_t algorithm::backward() NOEXCEPT
         field_t<uint64_t> inverse_z{};
         for (auto point = chunk_size; is_nonzero(point--);)
         {
-            const auto& before = bc::is_zero(point) ? prior :
+            const auto& before = is_zero(point) ? prior :
                 chunk.products[sub1(point)];
 
             multiply(inverse_z, out.inverse, before);

@@ -50,9 +50,9 @@ bool algorithm::verify_ecdsa(data_chunk& results,
         valid[row] = to_int<uint8_t>(
             from_bytes(r[row], array_cast<uint8_t, size>(signature)) &&
             from_bytes(w[row], array_cast<uint8_t, size, size>(signature)) &&
-            !is_zero(r[row]) && !is_zero(w[row]));
+            !is_zero_scalar(r[row]) && !is_zero_scalar(w[row]));
 
-        if (bc::is_zero(valid[row]))
+        if (is_zero(valid[row]))
             w[row] = { 1 };
 
         /* bool */ from_bytes(z[row], hashes[row]);
@@ -71,7 +71,7 @@ bool algorithm::verify_ecdsa(data_chunk& results,
             xs[lane] = generator.x;
             u1[lane] = { 1 };
             u2[lane] = { 1 };
-            if (row >= count || bc::is_zero(valid[row]))
+            if (row >= count || is_zero(valid[row]))
                 continue;
 
             const auto& key = keys[row];
@@ -125,8 +125,8 @@ bool algorithm::verify_ecdsa(data_chunk& results,
         for (size_t lane{}; lane < width; ++lane)
         {
             const auto row = base + lane;
-            if (row >= count || bc::is_zero(valid[row]) ||
-                bc::is_zero(on[lane]))
+            if (row >= count || is_zero(valid[row]) ||
+                is_zero(on[lane]))
                 continue;
 
             if (is_nonzero(faults[lane]))
@@ -142,7 +142,7 @@ bool algorithm::verify_ecdsa(data_chunk& results,
             else
             {
                 results[row] = to_int<uint8_t>(is_nonzero(matches[lane]) &&
-                    bc::is_zero(infinities[lane]));
+                    is_zero(infinities[lane]));
             }
         }
     }
@@ -212,7 +212,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
         for (size_t lane{}; lane < width; ++lane)
         {
             const auto row = base + lane;
-            if (!used[lane] || bc::is_zero(on[lane]))
+            if (!used[lane] || is_zero(on[lane]))
                 continue;
 
             if (is_nonzero(faults[lane]))
@@ -224,7 +224,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
                     challenge(r, key, messages[row]), r,
                     array_cast<uint8_t, size, size>(signature)));
             }
-            else if (bc::is_zero(rows[lane].infinity))
+            else if (is_zero(rows[lane].infinity))
             {
                 pending.push_back(row);
                 sums.push_back(rows[lane]);
@@ -245,7 +245,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
         field_t<uint64_t> rx{};
         to_affine(point, sums[index], inverses[index]);
         /* bool */ from_bytes(rx, array_cast<uint8_t, size>(signatures[row]));
-        results[row] = to_int<uint8_t>(!f::any(is_odd(point.y)) &&
+        results[row] = to_int<uint8_t>(!f::any(is_odd_element(point.y)) &&
             f::any(equal(point.x, rx)));
     }
 

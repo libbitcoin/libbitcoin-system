@@ -50,20 +50,20 @@ constexpr void algorithm::invert(signed62_t& x, const modulus_t& m) NOEXCEPT
         update_de(d, e, t, m);
         update_fg(f, g, length, t);
 
-        if (bc::is_zero(g[0]))
+        if (is_zero(g[0]))
         {
             int64_t rest{};
             for (auto limb = one; limb < length; ++limb)
                 rest |= g[limb];
 
-            if (bc::is_zero(rest))
+            if (is_zero(rest))
                 break;
         }
 
         // Shorten when the top limbs of f and g are both sign extension.
         const auto top_f = f[sub1(length)];
         const auto top_g = g[sub1(length)];
-        if (length > one && bc::is_zero((top_f ^ (top_f >> 63)) |
+        if (length > one && is_zero((top_f ^ (top_f >> 63)) |
             (top_g ^ (top_g >> 63))))
         {
             f[length - two] |= to_signed(shift_left(to_unsigned(top_f), 62));
@@ -99,7 +99,7 @@ constexpr int64_t algorithm::divsteps(transition_t& t, int64_t eta,
         v <<= zeros;
         eta -= possible_narrow_and_sign_cast<int64_t>(zeros);
         remaining -= zeros;
-        if (bc::is_zero(remaining))
+        if (is_zero(remaining))
             break;
 
         uint64_t w{};

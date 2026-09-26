@@ -132,7 +132,7 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     field_t<Word> normal{ h };
     normalize(normal);
     r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
-    return f::or_(f::or_(a.infinity, b.infinity), is_zero(normal));
+    return f::or_(f::or_(a.infinity, b.infinity), is_zero_element(normal));
 }
 
 // An uncomputed sum is of an infinite operand, or of equal x, where equal y
@@ -296,7 +296,7 @@ constexpr Word algorithm::lift(affine_t<Word>& r, const field_t<Word>& x,
     negate(negated, y);
     normalize(negated);
 
-    select(y, f::xor_(is_odd(y), odd), negated, y);
+    select(y, f::xor_(is_odd_element(y), odd), negated, y);
     r = { x, y };
     return valid;
 }
@@ -360,7 +360,7 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
     field_t<Word> normal{ h };
     normalize(normal);
     r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
-    return f::or_(a.infinity, is_zero(normal));
+    return f::or_(a.infinity, is_zero_element(normal));
 }
 
 template <typename Word>

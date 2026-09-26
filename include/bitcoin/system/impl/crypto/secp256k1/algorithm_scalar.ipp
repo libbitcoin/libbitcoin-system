@@ -132,7 +132,7 @@ constexpr void algorithm::add(scalar_t& r, const scalar_t& a,
 // n - a as n + ~a + 1, for nonzero a less than n.
 constexpr void algorithm::negate(scalar_t& r, const scalar_t& a) NOEXCEPT
 {
-    if (is_zero(a))
+    if (is_zero_scalar(a))
     {
         r = {};
         return;
@@ -206,9 +206,9 @@ constexpr void algorithm::recode(digits_t<Count>& digits,
 // ----------------------------------------------------------------------------
 // protected
 
-constexpr bool algorithm::is_zero(const scalar_t& a) NOEXCEPT
+constexpr bool algorithm::is_zero_scalar(const scalar_t& a) NOEXCEPT
 {
-    return bc::is_zero(a[0] | a[1] | a[2] | a[3]);
+    return is_zero(a[0] | a[1] | a[2] | a[3]);
 }
 
 constexpr bool algorithm::is_high(const scalar_t& a) NOEXCEPT

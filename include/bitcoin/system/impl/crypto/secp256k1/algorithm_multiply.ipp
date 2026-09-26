@@ -84,7 +84,7 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
             if (bit != top)
                 double_(sum, sum);
 
-            if (bit <= generator_top && bc::is_zero(bit % generator_bits))
+            if (bit <= generator_top && is_zero(bit % generator_bits))
             {
                 const auto position = bit / generator_bits;
                 digit(index, negative, g_first, position, false);
@@ -95,7 +95,7 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
                 add_point(sum, addend, scale, faults);
             }
 
-            if (bit <= point_top && bc::is_zero(bit % point_bits))
+            if (bit <= point_top && is_zero(bit % point_bits))
             {
                 const auto position = bit / point_bits;
                 digit(index, negative, k_first, position, true);
@@ -184,13 +184,13 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 
     for (auto bit = top; is_nonzero(bit--);)
     {
-        if (bc::is_zero(sum.infinity))
+        if (is_zero(sum.infinity))
             double_(sum, sum);
 
         for (size_t half{}; half < halves.size(); ++half)
         {
             const auto value = digits[half][bit];
-            if (bc::is_zero(value))
+            if (is_zero(value))
                 continue;
 
             const size_t magnitude = absolute(value);
@@ -200,7 +200,7 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 
             if (half < two)
             {
-                lookup(addend, bc::is_zero(half) ? generator_table :
+                lookup(addend, is_zero(half) ? generator_table :
                     endomorphism_table, uint64_t{ entry }, negative);
                 add_point(sum, addend, scale, faults);
             }

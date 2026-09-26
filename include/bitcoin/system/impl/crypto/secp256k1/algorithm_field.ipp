@@ -450,14 +450,14 @@ constexpr Word algorithm::square_root(field_t<Word>& r,
 // protected
 
 template <typename Word>
-constexpr Word algorithm::is_zero(const field_t<Word>& a) NOEXCEPT
+constexpr Word algorithm::is_zero_element(const field_t<Word>& a) NOEXCEPT
 {
     const auto merged = f::or_(f::or_(f::or_(f::or_(a[0], a[1]), a[2]), a[3]), a[4]);
     return f::eq<64>(merged, f::broadcast<Word>(uint64_t{}));
 }
 
 template <typename Word>
-constexpr Word algorithm::is_odd(const field_t<Word>& a) NOEXCEPT
+constexpr Word algorithm::is_odd_element(const field_t<Word>& a) NOEXCEPT
 {
     const auto one = f::broadcast<Word>(uint64_t{ 1 });
     return f::eq<64>(f::and_(a[0], one), one);
