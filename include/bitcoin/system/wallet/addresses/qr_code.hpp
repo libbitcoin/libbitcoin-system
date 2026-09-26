@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_QRENCODE_HPP
-#define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_QRENCODE_HPP
+#ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_QR_CODE_HPP
+#define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_QR_CODE_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/wallet/addresses/qr_encoder.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -29,21 +30,17 @@ namespace wallet {
 class BC_API qr_code
 {
 public:
-    enum class encode_mode
-    {
-        eight_bit = 2,
-        kanji = 3
-    };
+    using encode_mode = qr_encoder::encode_mode;
+    using recovery_level = qr_encoder::recovery_level;
 
-    enum class recovery_level
-    {
-        low = 0,
-        medium,
-        high,
-        highest
-    };
+    static constexpr uint8_t maximum_version = qr_encoder::maximum_version;
 
-    static uint8_t maximum_version;
+    /// Masked modules, row major, one byte per module (0x01 is dark).
+    /// Empty on failure, otherwise width is the symbol width in modules.
+    static data_chunk to_modules(size_t& width, const std::string& value,
+        uint8_t version=0, recovery_level level=recovery_level::low,
+        encode_mode mode=encode_mode::eight_bit,
+        bool case_sensitive=true) NOEXCEPT;
 
     /// False if version > maximum_version or size > tiff::max_image_bytes.
     /// Create a TIFF formatter QR code representing the given string value.

@@ -41,7 +41,6 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__excessive_character_value__false)
     data_chunk out;
     stream::out::data sink(out);
 
-    // ERANGE returned by qrencode.
     std::string value(bc::max_uint16, 0x42);
     BOOST_REQUIRE(!qr_code::encode(sink, value));
 }
@@ -167,7 +166,6 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__invalid_version__false)
     data_chunk out;
     stream::out::data sink(out);
 
-    // EINVAL returned by qrencode.
     BOOST_REQUIRE(!qr_code::encode(sink, "X", qr_code::maximum_version + 1u));
 }
 
@@ -247,6 +245,38 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__encode_mode_kanji__expected_size)
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, low, qr_code::encode_mode::kanji));
     BOOST_REQUIRE_EQUAL(out.size(), 219u);
+}
+
+// to_modules
+
+BOOST_AUTO_TEST_CASE(qr_code__to_modules__empty__empty_zero_width)
+{
+    size_t width{ 42 };
+    BOOST_REQUIRE(qr_code::to_modules(width, "").empty());
+    BOOST_REQUIRE_EQUAL(width, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__to_modules__invalid_version__empty_zero_width)
+{
+    size_t width{ 42 };
+    BOOST_REQUIRE(qr_code::to_modules(width, "X", qr_code::maximum_version + 1u).empty());
+    BOOST_REQUIRE_EQUAL(width, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__to_modules__one_character__version_1)
+{
+    size_t width{};
+    const auto modules = qr_code::to_modules(width, "X");
+    BOOST_REQUIRE_EQUAL(width, 21u);
+    BOOST_REQUIRE_EQUAL(modules.size(), 441u);
+}
+
+BOOST_AUTO_TEST_CASE(qr_code__to_modules__minimum_version__minimum_version_width)
+{
+    size_t width{};
+    const auto modules = qr_code::to_modules(width, "X", 7);
+    BOOST_REQUIRE_EQUAL(width, 45u);
+    BOOST_REQUIRE_EQUAL(modules.size(), 2025u);
 }
 
 // to_pixels

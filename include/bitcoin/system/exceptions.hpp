@@ -26,7 +26,7 @@ namespace libbitcoin {
 
 /// We do not use exceptions for general purpose error handling.
 
-/// Dependencies, including boost and qrencode sources may throw.
+/// Dependencies, including boost, may throw.
 /// We try to avoid the use of external API calls that throw.
 /// If an external API is documented to throw for non-exceptional results, we
 /// catch and squash. If an external API throws unepxectedly, our pervasize use

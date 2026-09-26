@@ -256,9 +256,6 @@
     <Filter Include="src\wallet\addresses">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses\qrencode">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
@@ -654,32 +651,11 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_code.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_encoder.cpp">
+      <Filter>src\wallet\addresses</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mask.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mmask.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\mqrspec.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrencode.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrinput.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\qrspec.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\rsecc.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\addresses\qrencode\split.c">
-      <Filter>src\wallet\addresses\qrencode</Filter>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_matrix.cpp">
+      <Filter>src\wallet\addresses</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\addresses\tiff.cpp">
       <Filter>src\wallet\addresses</Filter>
@@ -1622,6 +1598,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_code.hpp">
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_encoder.hpp">
+      <Filter>include\bitcoin\system\wallet\addresses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_matrix.hpp">
+      <Filter>include\bitcoin\system\wallet\addresses</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\tiff.hpp">
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
@@ -1741,39 +1723,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp">
       <Filter>src\crypto\secp256k1</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\license.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mask.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mmask.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mqrspec.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\qrencode.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\qrencode_inner.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\qrinput.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\qrspec.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\rsecc.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\split.h">
-      <Filter>src\wallet\addresses\qrencode</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.hpp">
       <Filter>src\wallet\keys\parse_encrypted_keys</Filter>
