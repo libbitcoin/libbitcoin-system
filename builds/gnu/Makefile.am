@@ -709,6 +709,7 @@ include_bitcoin_system_intrinsics_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/cpuid.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/detection.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intrinsics.hpp \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/multiply.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/rotate.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/types.hpp
 
@@ -1134,6 +1135,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/intrinsics/intel_128.cpp \
     ${srcdir}/../../test/intrinsics/intel_256.cpp \
     ${srcdir}/../../test/intrinsics/intel_512.cpp \
+    ${srcdir}/../../test/intrinsics/multiply.cpp \
     ${srcdir}/../../test/intrinsics/rotate.cpp \
     ${srcdir}/../../test/intrinsics/types.cpp \
     ${srcdir}/../../test/intrinsics/platforms/intel.cpp \
@@ -1155,6 +1157,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/math/cast.cpp \
     ${srcdir}/../../test/math/division.cpp \
     ${srcdir}/../../test/math/expectations.cpp \
+    ${srcdir}/../../test/math/functional.cpp \
     ${srcdir}/../../test/math/limits.cpp \
     ${srcdir}/../../test/math/logarithm.cpp \
     ${srcdir}/../../test/math/multiplication.cpp \

@@ -22,6 +22,7 @@
 #include <bitcoin/system/intrinsics/byte_swap.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 #include <bitcoin/system/intrinsics/detection.hpp>
+#include <bitcoin/system/intrinsics/multiply.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_128.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_256.hpp>

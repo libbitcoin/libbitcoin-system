@@ -70,6 +70,42 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_shani__always__match)
         get_right(ebx, cpu7_0::shani_ebx_bit), try_shani());
 }
 
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512ifma__always__match)
+{
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    BOOST_CHECK_EQUAL(
+        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
+        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
+        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
+        get_right(ecx, cpu1_0::avx_ecx_bit) &&
+        get_xcr(extended, xcr0::feature) &&
+        get_right(extended, xcr0::sse_bit) &&
+        get_right(extended, xcr0::avx_bit) &&
+        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
+        get_right(ebx, cpu7_0::avx2_ebx_bit) &&
+        get_right(ebx, cpu7_0::avx512bw_ebx_bit) &&
+        get_right(ebx, cpu7_0::avx512ifma_ebx_bit), try_avx512ifma());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avxifma__always__match)
+{
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    BOOST_CHECK_EQUAL(
+        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
+        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
+        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
+        get_right(ecx, cpu1_0::avx_ecx_bit) &&
+        get_xcr(extended, xcr0::feature) &&
+        get_right(extended, xcr0::sse_bit) &&
+        get_right(extended, xcr0::avx_bit) &&
+        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
+        get_right(ebx, cpu7_0::avx2_ebx_bit) &&
+        get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf) &&
+        get_right(eax, cpu7_1::avxifma_eax_bit), try_avxifma());
+}
+
 // try_neon
 // try_crypto
 

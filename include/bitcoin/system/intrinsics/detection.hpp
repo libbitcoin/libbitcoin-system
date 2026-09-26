@@ -55,6 +55,14 @@ namespace cpu7_0
     ////constexpr auto avx512f_ebx_bit = 16;
     constexpr auto avx512bw_ebx_bit = 30;
     constexpr auto shani_ebx_bit = 29;
+    constexpr auto avx512ifma_ebx_bit = 21;
+}
+
+namespace cpu7_1
+{
+    constexpr auto leaf = 7;
+    constexpr auto subleaf = 1;
+    constexpr auto avxifma_eax_bit = 23;
 }
 
 namespace xcr0
@@ -96,6 +104,40 @@ inline bool try_avx512() NOEXCEPT
         && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2 (implied?)
         && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx);  // AVX512BW
+}
+
+inline bool try_avx512ifma() NOEXCEPT
+{
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
+        && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
+        && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
+        && get_xcr(extended, xcr0::feature)
+        && get_bit<xcr0::sse_bit>(extended)
+        && get_bit<xcr0::avx_bit>(extended)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
+        && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx)   // AVX512BW
+        && get_bit<cpu7_0::avx512ifma_ebx_bit>(ebx);// AVX512IFMA
+}
+
+inline bool try_avxifma() NOEXCEPT
+{
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
+        && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
+        && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
+        && get_xcr(extended, xcr0::feature)
+        && get_bit<xcr0::sse_bit>(extended)
+        && get_bit<xcr0::avx_bit>(extended)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
+        && get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf)
+        && get_bit<cpu7_1::avxifma_eax_bit>(eax);   // AVXIFMA
 }
 
 inline bool try_avx2() NOEXCEPT
