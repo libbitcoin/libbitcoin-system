@@ -33,7 +33,6 @@ public:
     using algorithm::from_bytes;
     using algorithm::verify_ecdsa;
     using algorithm::verify_schnorr;
-    using algorithm::challenge;
 };
 
 using field = accessor::field_t<uint64_t>;
@@ -176,12 +175,23 @@ static bool ecdsa_signed(const ec_secret& secret, const hash_digest& hash,
         valid == !mutate;
 }
 
+// BIP340 challenge hash of r, x-only key, and message.
+static hash_digest challenge(const ec_signature& signature, const bytes& key,
+    const data_slice& message) NOEXCEPT
+{
+    accumulator<sha256> context{ tagged_midstate<"BIP0340/challenge">, one };
+    context.write(array_cast<uint8_t, ec_secret_size>(signature));
+    context.write(key);
+    context.write(message.size(), message.data());
+    return context.flush();
+}
+
 static bool schnorr_verify(const bytes& key, const data_slice& message,
     const ec_signature& signature) NOEXCEPT
 {
     const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
     const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
-    return accessor::verify_schnorr(key, accessor::challenge(r, key, message), r, s);
+    return accessor::verify_schnorr(key, challenge(signature, key, message), r, s);
 }
 
 // Local verification of a libsecp256k1 signature, agreeing with libsecp256k1.
@@ -334,6 +344,13 @@ static void add_row(rows_t<Key>& rows, const Key& key, const hash_digest& hash,
     rows.expected.push_back(to_int<uint8_t>(valid));
 }
 
+static void add_schnorr(rows_t<ec_xonly>& rows, const ec_xonly& key,
+    const hash_digest& message, const ec_signature& signature,
+    bool valid) NOEXCEPT
+{
+    add_row(rows, key, challenge(signature, key, message), signature, valid);
+}
+
 // Canonical (r || s) ECDSA signature by libsecp256k1.
 static ec_signature ecdsa_signature(ec_compressed& key, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
@@ -392,26 +409,26 @@ static const rows_t<ec_xonly>& schnorr_rows() NOEXCEPT
             return data_slice{ bytes }.to_array<hash_size>();
         };
 
-        add_row(out, bip340_key0, message(bip340_message0), bip340_signature0, true);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature1, true);
-        add_row(out, bip340_key2, message(bip340_message2), bip340_signature2, true);
-        add_row(out, bip340_key3, message(bip340_message3), bip340_signature3, true);
-        add_row(out, bip340_key4, message(bip340_message4), bip340_signature4, true);
-        add_row(out, bip340_key5, message(bip340_message1), bip340_signature5, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature6, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature7, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature8, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature9, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature10, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature11, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature12, false);
-        add_row(out, bip340_key1, message(bip340_message1), bip340_signature13, false);
-        add_row(out, bip340_key14, message(bip340_message1), bip340_signature14, false);
-        add_row(out, key, message1, schnorr_signature(key, secret1, message1), true);
-        add_row(out, key, message2, schnorr_signature(key, secret2, message2), true);
-        add_row(out, key, message3, schnorr_signature(key, secret3, message3), true);
-        add_row(out, key, message4, schnorr_signature(key, secret4, message4), true);
-        add_row(out, key, message1, schnorr_signature(key, secret4, message4), false);
+        add_schnorr(out, bip340_key0, message(bip340_message0), bip340_signature0, true);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature1, true);
+        add_schnorr(out, bip340_key2, message(bip340_message2), bip340_signature2, true);
+        add_schnorr(out, bip340_key3, message(bip340_message3), bip340_signature3, true);
+        add_schnorr(out, bip340_key4, message(bip340_message4), bip340_signature4, true);
+        add_schnorr(out, bip340_key5, message(bip340_message1), bip340_signature5, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature6, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature7, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature8, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature9, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature10, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature11, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature12, false);
+        add_schnorr(out, bip340_key1, message(bip340_message1), bip340_signature13, false);
+        add_schnorr(out, bip340_key14, message(bip340_message1), bip340_signature14, false);
+        add_schnorr(out, key, message1, schnorr_signature(key, secret1, message1), true);
+        add_schnorr(out, key, message2, schnorr_signature(key, secret2, message2), true);
+        add_schnorr(out, key, message3, schnorr_signature(key, secret3, message3), true);
+        add_schnorr(out, key, message4, schnorr_signature(key, secret4, message4), true);
+        add_schnorr(out, key, message1, schnorr_signature(key, secret4, message4), false);
         return out;
     }();
 

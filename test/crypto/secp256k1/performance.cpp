@@ -41,7 +41,6 @@ public:
     using algorithm::from_bytes;
     using algorithm::verify_ecdsa;
     using algorithm::verify_schnorr;
-    using algorithm::challenge;
     using algorithm::square;
     using algorithm::is_zero_element;
     using algorithm::double_;
@@ -101,6 +100,28 @@ static const vectors& signed_vectors() NOEXCEPT
     }();
 
     return instance;
+}
+
+// BIP340 challenge hash of r, x-only key, and message.
+static hash_digest challenge(const ec_signature& signature,
+    const ec_xonly& key, const hash_digest& message) NOEXCEPT
+{
+    accumulator<sha256> context{ tagged_midstate<"BIP0340/challenge">, one };
+    context.write(array_cast<uint8_t, ec_secret_size>(signature));
+    context.write(key);
+    context.write(message);
+    return context.flush();
+}
+
+static std::vector<hash_digest> challenges(const vectors& in) NOEXCEPT
+{
+    std::vector<hash_digest> out{};
+    out.reserve(count);
+    for (size_t index{}; index < count; ++index)
+        out.push_back(challenge(in.schnorrs[index], in.xonlys[index],
+            in.hashes[index]));
+
+    return out;
 }
 
 // Microseconds per call of function(index), which is expected to be true.
@@ -251,7 +272,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
         const auto& key = in.xonlys[index];
         const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
         const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
-        return accessor::verify_schnorr(key, accessor::challenge(r, key, in.hashes[index]), r, s);
+        return accessor::verify_schnorr(key, challenge(signature, key, in.hashes[index]), r, s);
     }));
 }
 
@@ -290,7 +311,7 @@ static void report_batch(const std::string& name) NOEXCEPT
 
     const auto schnorr = microseconds(one, [&](size_t) NOEXCEPT
     {
-        return accessor::verify_schnorr<Word>(results, in.xonlys, in.hashes, in.schnorrs);
+        return accessor::verify_schnorr<Word>(results, in.xonlys, challenges(in), in.schnorrs);
     });
 
     report("ecdsa batch " + name + " per signature", ecdsa / count);
@@ -311,7 +332,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__combined)
     const auto& in = signed_vectors();
     const auto time = microseconds(one, [&](size_t) NOEXCEPT
     {
-        return accessor::verify_schnorr(in.xonlys, in.hashes, in.schnorrs);
+        return accessor::verify_schnorr(in.xonlys, challenges(in), in.schnorrs);
     });
 
     report("schnorr combined per signature", time / count);

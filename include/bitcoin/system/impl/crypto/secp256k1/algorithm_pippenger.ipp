@@ -37,7 +37,7 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // weights a of one (first) and 128 random bits (others), derived by hashing
 // the batch.
 inline bool algorithm::verify_schnorr(std::span<const ec_xonly> keys,
-    std::span<const hash_digest> messages,
+    std::span<const hash_digest> challenges,
     std::span<const ec_signature> signatures) NOEXCEPT
 {
     constexpr auto size = array_count<bytes_t>;
@@ -47,7 +47,7 @@ inline bool algorithm::verify_schnorr(std::span<const ec_xonly> keys,
     for (size_t row{}; row < count; ++row)
     {
         seeder.write(keys[row]);
-        seeder.write(messages[row]);
+        seeder.write(challenges[row]);
         seeder.write(signatures[row]);
     }
 
@@ -83,7 +83,7 @@ inline bool algorithm::verify_schnorr(std::span<const ec_xonly> keys,
             set_right_into(weight[0]);
         }
 
-        /* bool */ from_bytes(e, challenge(r, key, messages[row]));
+        /* bool */ from_bytes(e, challenges[row]);
         multiply(e, e, weight);
         multiply(s, s, weight);
         add(total, total, s);

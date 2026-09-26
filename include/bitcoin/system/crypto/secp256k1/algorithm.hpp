@@ -766,10 +766,6 @@ protected:
     static constexpr bool verify_ecdsa(const affine_t<uint64_t>& point,
         const bytes_t& hash, const bytes_t& r, const bytes_t& s) NOEXCEPT;
 
-    /// BIP340 challenge hash of r, x-only key, and message.
-    static hash_digest challenge(const bytes_t& r, const bytes_t& key,
-        const data_slice& message) NOEXCEPT;
-
     /// BIP340 verification of challenge hash by x-only key.
     static constexpr bool verify_schnorr(const bytes_t& key,
         const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT;
@@ -788,13 +784,13 @@ protected:
     template <typename Word>
     static bool verify_schnorr(data_chunk& results,
         std::span<const ec_xonly> keys,
-        std::span<const hash_digest> messages,
+        std::span<const hash_digest> challenges,
         std::span<const ec_signature> signatures) NOEXCEPT;
 
     /// BIP340 verification of all rows by random linear combination, true if
     /// all rows are valid (false does not identify invalid rows).
     static bool verify_schnorr(std::span<const ec_xonly> keys,
-        std::span<const hash_digest> messages,
+        std::span<const hash_digest> challenges,
         std::span<const ec_signature> signatures) NOEXCEPT;
 
     /// Multiscalar multiplication.

@@ -155,7 +155,7 @@ bool algorithm::verify_ecdsa(data_chunk& results,
 // lanes with an exceptional addition verify alone.
 template <typename Word>
 bool algorithm::verify_schnorr(data_chunk& results,
-    std::span<const ec_xonly> keys, std::span<const hash_digest> messages,
+    std::span<const ec_xonly> keys, std::span<const hash_digest> challenges,
     std::span<const ec_signature> signatures) NOEXCEPT
 {
     constexpr auto width = lanes<Word>;
@@ -194,7 +194,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
                 continue;
             }
 
-            /* bool */ from_bytes(e[lane], challenge(r, key, messages[row]));
+            /* bool */ from_bytes(e[lane], challenges[row]);
             negate(e[lane], e[lane]);
             used[lane] = true;
         }
@@ -217,11 +217,9 @@ bool algorithm::verify_schnorr(data_chunk& results,
 
             if (is_nonzero(faults[lane]))
             {
-                const auto& key = keys[row];
                 const auto& signature = signatures[row];
-                const auto& r = array_cast<uint8_t, size>(signature);
-                results[row] = to_int<uint8_t>(verify_schnorr(key,
-                    challenge(r, key, messages[row]), r,
+                results[row] = to_int<uint8_t>(verify_schnorr(keys[row],
+                    challenges[row], array_cast<uint8_t, size>(signature),
                     array_cast<uint8_t, size, size>(signature)));
             }
             else if (is_zero(rows[lane].infinity))

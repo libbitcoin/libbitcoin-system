@@ -113,19 +113,6 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     return f::any(equal(expected, sum.x));
 }
 
-inline hash_digest algorithm::challenge(const bytes_t& r, const bytes_t& key,
-    const data_slice& message) NOEXCEPT
-{
-    constexpr data_t name{ "BIP0340/challenge" };
-    constexpr auto tag = sha256::simple_hash(name.data);
-    constexpr auto midstate = sha256::midstate(tag, tag);
-    accumulator<sha256> context{ midstate, one };
-    context.write(r);
-    context.write(key);
-    context.write(message.size(), message.data());
-    return context.flush();
-}
-
 // R = sG - eP, valid if R is finite with even y and x(R) is r.
 constexpr bool algorithm::verify_schnorr(const bytes_t& key,
     const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT
