@@ -142,7 +142,7 @@ INLINE constexpr auto andnot(Word a, Word b) NOEXCEPT
 template <auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto eq(Word a, Word b) NOEXCEPT
 {
-    return depromote<Word>(a == b ? ~Word{} : Word{});
+    return a == b ? bit_all<Word> : Word{};
 }
 
 template <typename Word, if_integral_integer<Word> = true>
@@ -164,7 +164,7 @@ template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr Word gather(const Word* table, Word index) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    return table[index];
+    return table[possible_narrow_cast<size_t>(index)];
     BC_POP_WARNING()
 }
 

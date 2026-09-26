@@ -100,7 +100,7 @@ INLINE constexpr void mul_wide(Unsigned& hi, Unsigned& lo, Unsigned left,
 /// The 104 bit product of the low 52 bits of left and right is split into 52
 /// bit low and high halves, and one half is added (wrapping) to accumulator.
 
-constexpr auto madd52_bits = 52u;
+constexpr size_t madd52_bits = 52;
 constexpr uint64_t madd52_mask = 0x000fffffffffffff;
 
 INLINE constexpr uint64_t madd52lo(uint64_t accumulator, uint64_t left,

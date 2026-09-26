@@ -291,7 +291,7 @@ constexpr void algorithm::to_affine(std_array<affine_t<Word>, Count>& r,
     static_assert(is_nonzero(Count));
 
     std_array<field_t<Word>, Count> prefix{};
-    prefix[0] = a[0].z;
+    prefix[zero] = a[zero].z;
     for (auto point = one; point < Count; ++point)
         multiply(prefix[point], prefix[sub1(point)], a[point].z);
 
@@ -304,7 +304,7 @@ constexpr void algorithm::to_affine(std_array<affine_t<Word>, Count>& r,
         to_affine(r[point], a[point], inverse_z);
     }
 
-    to_affine(r[0], a[0], inverted);
+    to_affine(r[zero], a[zero], inverted);
 }
 
 template <typename Word>

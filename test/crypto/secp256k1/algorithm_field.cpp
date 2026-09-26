@@ -83,12 +83,13 @@ constexpr auto loose_reduced = base16_array("0000000003ff00000000003ff0000000000
 
 constexpr auto mask = accessor::limb_mask;
 constexpr auto top = accessor::top_mask;
+constexpr auto weak_top = bit_or<uint64_t>(shift_left(top), one);
 constexpr uint64_t loose = 0x3fffffffffffffff;
 constexpr field prime_limbs{ accessor::prime };
-constexpr field prime_plus_one{ accessor::prime[0] + 1, mask, mask, mask, top };
+constexpr field prime_plus_one{ add1(accessor::prime[0]), mask, mask, mask, top };
 constexpr field all_limbs{ mask, mask, mask, mask, top };
-constexpr field power_limbs{ 0, 0, 0, 0, top + 1 };
-constexpr field weak_limbs{ mask, mask, mask, mask, (top << 1) | 1 };
+constexpr field power_limbs{ 0, 0, 0, 0, add1(top) };
+constexpr field weak_limbs{ mask, mask, mask, mask, weak_top };
 constexpr field loose_limbs{ loose, loose, loose, loose, loose };
 
 // helpers
@@ -112,7 +113,7 @@ constexpr bytes encode(field value) NOEXCEPT
 constexpr bool is_weak(const field& value) NOEXCEPT
 {
     return value[0] <= mask && value[1] <= mask && value[2] <= mask &&
-        value[3] <= mask && value[4] <= ((top << 1) | 1);
+        value[3] <= mask && value[4] <= weak_top;
 }
 
 constexpr bool is_decodable(const bytes& value) NOEXCEPT
