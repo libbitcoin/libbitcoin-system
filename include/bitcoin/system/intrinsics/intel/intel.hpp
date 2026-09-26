@@ -223,6 +223,171 @@ inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
 
 #endif // HAVE_512
 
+/// Provide 52 bit fused multiply-add to complete matrix.
+/// ---------------------------------------------------------------------------
+/// Emulated from 26 bit halves where there is no ifma for the width.
+
+#if defined(HAVE_IFMA_128)
+
+// AVX512IFMA+AVX512VL
+inline auto mm_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm_madd52lo_epu64(c, a, b);
+}
+
+// AVX512IFMA+AVX512VL
+inline auto mm_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm_madd52hi_epu64(c, a, b);
+}
+
+#elif defined(HAVE_128)
+
+// SSE2
+inline void mm_mul52_epu64(auto& lo, auto& hi, auto a, auto b) NOEXCEPT
+{
+    const auto mask52 = _mm_set1_epi64x(0x000fffffffffffff);
+    const auto mask26 = _mm_set1_epi64x(0x0000000003ffffff);
+    const auto x = _mm_and_si128(a, mask52);
+    const auto y = _mm_and_si128(b, mask52);
+    const auto x0 = _mm_and_si128(x, mask26);
+    const auto y0 = _mm_and_si128(y, mask26);
+    const auto x1 = _mm_srli_epi64(x, 26);
+    const auto y1 = _mm_srli_epi64(y, 26);
+    const auto mid = _mm_add_epi64(_mm_mul_epu32(x0, y1), _mm_mul_epu32(x1, y0));
+    const auto low = _mm_add_epi64(_mm_mul_epu32(x0, y0),
+        _mm_slli_epi64(_mm_and_si128(mid, mask26), 26));
+    lo = _mm_and_si128(low, mask52);
+    hi = _mm_add_epi64(_mm_add_epi64(_mm_mul_epu32(x1, y1),
+        _mm_srli_epi64(mid, 26)), _mm_srli_epi64(low, 52));
+}
+
+// SSE2
+inline auto mm_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    decltype(c) lo{}, hi{};
+    mm_mul52_epu64(lo, hi, a, b);
+    return _mm_add_epi64(c, lo);
+}
+
+// SSE2
+inline auto mm_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    decltype(c) lo{}, hi{};
+    mm_mul52_epu64(lo, hi, a, b);
+    return _mm_add_epi64(c, hi);
+}
+
+#endif // HAVE_IFMA_128
+
+#if defined(HAVE_IFMA_256)
+
+// AVX512IFMA+AVX512VL
+inline auto mm256_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm256_madd52lo_epu64(c, a, b);
+}
+
+// AVX512IFMA+AVX512VL
+inline auto mm256_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm256_madd52hi_epu64(c, a, b);
+}
+
+#elif defined(HAVE_256)
+
+// AVX2
+inline void mm256_mul52_epu64(auto& lo, auto& hi, auto a, auto b) NOEXCEPT
+{
+    const auto mask52 = _mm256_set1_epi64x(0x000fffffffffffff);
+    const auto mask26 = _mm256_set1_epi64x(0x0000000003ffffff);
+    const auto x = _mm256_and_si256(a, mask52);
+    const auto y = _mm256_and_si256(b, mask52);
+    const auto x0 = _mm256_and_si256(x, mask26);
+    const auto y0 = _mm256_and_si256(y, mask26);
+    const auto x1 = _mm256_srli_epi64(x, 26);
+    const auto y1 = _mm256_srli_epi64(y, 26);
+    const auto mid = _mm256_add_epi64(_mm256_mul_epu32(x0, y1),
+        _mm256_mul_epu32(x1, y0));
+    const auto low = _mm256_add_epi64(_mm256_mul_epu32(x0, y0),
+        _mm256_slli_epi64(_mm256_and_si256(mid, mask26), 26));
+    lo = _mm256_and_si256(low, mask52);
+    hi = _mm256_add_epi64(_mm256_add_epi64(_mm256_mul_epu32(x1, y1),
+        _mm256_srli_epi64(mid, 26)), _mm256_srli_epi64(low, 52));
+}
+
+// AVX2
+inline auto mm256_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    decltype(c) lo{}, hi{};
+    mm256_mul52_epu64(lo, hi, a, b);
+    return _mm256_add_epi64(c, lo);
+}
+
+// AVX2
+inline auto mm256_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    decltype(c) lo{}, hi{};
+    mm256_mul52_epu64(lo, hi, a, b);
+    return _mm256_add_epi64(c, hi);
+}
+
+#endif // HAVE_IFMA_256
+
+#if defined(HAVE_IFMA_512)
+
+// AVX512IFMA
+inline auto mm512_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm512_madd52lo_epu64(c, a, b);
+}
+
+// AVX512IFMA
+inline auto mm512_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm512_madd52hi_epu64(c, a, b);
+}
+
+#elif defined(HAVE_512)
+
+// AVX512F
+inline void mm512_mul52_epu64(auto& lo, auto& hi, auto a, auto b) NOEXCEPT
+{
+    const auto mask52 = _mm512_set1_epi64(0x000fffffffffffff);
+    const auto mask26 = _mm512_set1_epi64(0x0000000003ffffff);
+    const auto x = _mm512_and_si512(a, mask52);
+    const auto y = _mm512_and_si512(b, mask52);
+    const auto x0 = _mm512_and_si512(x, mask26);
+    const auto y0 = _mm512_and_si512(y, mask26);
+    const auto x1 = _mm512_srli_epi64(x, 26);
+    const auto y1 = _mm512_srli_epi64(y, 26);
+    const auto mid = _mm512_add_epi64(_mm512_mul_epu32(x0, y1),
+        _mm512_mul_epu32(x1, y0));
+    const auto low = _mm512_add_epi64(_mm512_mul_epu32(x0, y0),
+        _mm512_slli_epi64(_mm512_and_si512(mid, mask26), 26));
+    lo = _mm512_and_si512(low, mask52);
+    hi = _mm512_add_epi64(_mm512_add_epi64(_mm512_mul_epu32(x1, y1),
+        _mm512_srli_epi64(mid, 26)), _mm512_srli_epi64(low, 52));
+}
+
+// AVX512F
+inline auto mm512_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    decltype(c) lo{}, hi{};
+    mm512_mul52_epu64(lo, hi, a, b);
+    return _mm512_add_epi64(c, lo);
+}
+
+// AVX512F
+inline auto mm512_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    decltype(c) lo{}, hi{};
+    mm512_mul52_epu64(lo, hi, a, b);
+    return _mm512_add_epi64(c, hi);
+}
+
+#endif // HAVE_IFMA_512
+
 } // namespace system
 } // namespace libbitcoin
 

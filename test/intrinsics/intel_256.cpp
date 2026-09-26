@@ -198,11 +198,11 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_256__gather__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__intel_256__madd52lo__expected)
 {
-    if constexpr (have_ifma_256)
+    if constexpr (have_256)
     {
         constexpr auto max52 = 0x000fffffffffffff_u64;
         constexpr auto high = 0x8000000000000003_u64;
-        const auto xword = f::madd52lo(f::set<xint256_t>(7_u64, 1_u64, 0_u64, max_uint64), f::set<xint256_t>(max52, high, 1_u64, 1_u64), f::set<xint256_t>(max52, 5_u64, 0_u64, 2_u64));
+        const auto xword = f::madd52lo<64>(f::set<xint256_t>(7_u64, 1_u64, 0_u64, max_uint64), f::set<xint256_t>(max52, high, 1_u64, 1_u64), f::set<xint256_t>(max52, 5_u64, 0_u64, 2_u64));
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 8_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 16_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 0_u64);
@@ -215,11 +215,11 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_256__madd52lo__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__intel_256__madd52hi__expected)
 {
-    if constexpr (have_ifma_256)
+    if constexpr (have_256)
     {
         constexpr auto max52 = 0x000fffffffffffff_u64;
         constexpr auto high = 0x8000000000000003_u64;
-        const auto xword = f::madd52hi(f::set<xint256_t>(7_u64, 1_u64, 0_u64, 3_u64), f::set<xint256_t>(max52, high, 1_u64, max52), f::set<xint256_t>(max52, 5_u64, 0_u64, 2_u64));
+        const auto xword = f::madd52hi<64>(f::set<xint256_t>(7_u64, 1_u64, 0_u64, 3_u64), f::set<xint256_t>(max52, high, 1_u64, max52), f::set<xint256_t>(max52, 5_u64, 0_u64, 2_u64));
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 0x000ffffffffffffe_u64 + 7_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 1_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(xword)), 0_u64);

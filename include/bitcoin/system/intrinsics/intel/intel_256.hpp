@@ -188,41 +188,21 @@ INLINE xint256_t mul(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_mul_epu32(a, b);
 }
 
-#if defined(HAVE_IFMA_256)
-
-// AVX512IFMA+AVX512VL / AVXIFMA
+// AVX512IFMA+AVX512VL (AVX2)
+template <auto S>
 INLINE xint256_t madd52lo(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
 {
-#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
-    return _mm256_madd52lo_avx_epu64(c, a, b);
-#else
-    return _mm256_madd52lo_epu64(c, a, b);
-#endif
+    if constexpr (S == bits<uint64_t>)
+        return mm256_madd52lo_epu64(c, a, b);
 }
 
-// AVX512IFMA+AVX512VL / AVXIFMA
+// AVX512IFMA+AVX512VL (AVX2)
+template <auto S>
 INLINE xint256_t madd52hi(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
 {
-#if defined(HAVE_AVXIFMA) && !defined(HAVE_AVX512IFMA)
-    return _mm256_madd52hi_avx_epu64(c, a, b);
-#else
-    return _mm256_madd52hi_epu64(c, a, b);
-#endif
+    if constexpr (S == bits<uint64_t>)
+        return mm256_madd52hi_epu64(c, a, b);
 }
-
-#else
-
-INLINE xint256_t madd52lo(xint256_t, xint256_t, xint256_t) NOEXCEPT
-{
-    return {};
-}
-
-INLINE xint256_t madd52hi(xint256_t, xint256_t, xint256_t) NOEXCEPT
-{
-    return {};
-}
-
-#endif // HAVE_IFMA_256
 
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------

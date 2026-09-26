@@ -175,33 +175,21 @@ INLINE xint512_t mul(xint512_t a, xint512_t b) NOEXCEPT
         return _mm512_mul_epu32(a, b);
 }
 
-#if defined(HAVE_IFMA_512)
-
-// AVX512IFMA
+// AVX512IFMA (AVX512F)
+template <auto S>
 INLINE xint512_t madd52lo(xint512_t c, xint512_t a, xint512_t b) NOEXCEPT
 {
-    return _mm512_madd52lo_epu64(c, a, b);
+    if constexpr (S == bits<uint64_t>)
+        return mm512_madd52lo_epu64(c, a, b);
 }
 
-// AVX512IFMA
+// AVX512IFMA (AVX512F)
+template <auto S>
 INLINE xint512_t madd52hi(xint512_t c, xint512_t a, xint512_t b) NOEXCEPT
 {
-    return _mm512_madd52hi_epu64(c, a, b);
+    if constexpr (S == bits<uint64_t>)
+        return mm512_madd52hi_epu64(c, a, b);
 }
-
-#else
-
-INLINE xint512_t madd52lo(xint512_t, xint512_t, xint512_t) NOEXCEPT
-{
-    return {};
-}
-
-INLINE xint512_t madd52hi(xint512_t, xint512_t, xint512_t) NOEXCEPT
-{
-    return {};
-}
-
-#endif // HAVE_IFMA_512
 
 /// broadcast/get/set
 /// ---------------------------------------------------------------------------

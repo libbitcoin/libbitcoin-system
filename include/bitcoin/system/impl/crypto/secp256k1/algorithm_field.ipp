@@ -41,8 +41,8 @@ INLINE constexpr void algorithm::accumulate(product_t<Word>& c,
 {
     constexpr auto low = Left + Right;
     constexpr auto high = add1(low);
-    c[low] = f::madd52lo(c[low], a[Left], b[Right]);
-    c[high] = f::madd52hi(c[high], a[Left], b[Right]);
+    c[low] = f::madd52lo<64>(c[low], a[Left], b[Right]);
+    c[high] = f::madd52hi<64>(c[high], a[Left], b[Right]);
 }
 
 template <size_t Index, typename Word>
@@ -50,8 +50,8 @@ INLINE constexpr void algorithm::fold(product_t<Word>& c, Word value,
     Word factor) NOEXCEPT
 {
     constexpr auto next = add1(Index);
-    c[Index] = f::madd52lo(c[Index], value, factor);
-    c[next] = f::madd52hi(c[next], value, factor);
+    c[Index] = f::madd52lo<64>(c[Index], value, factor);
+    c[next] = f::madd52hi<64>(c[next], value, factor);
 }
 
 template <typename Word>
@@ -72,12 +72,12 @@ INLINE constexpr void algorithm::reduce(field_t<Word>& r,
     propagate<7>(c, mask);
     propagate<8>(c, mask);
 
-    const auto top = f::madd52hi(zero, c[9], factor);
+    const auto top = f::madd52hi<64>(zero, c[9], factor);
     fold<0>(c, c[5], factor);
     fold<1>(c, c[6], factor);
     fold<2>(c, c[7], factor);
     fold<3>(c, c[8], factor);
-    c[4] = f::madd52lo(c[4], c[9], factor);
+    c[4] = f::madd52lo<64>(c[4], c[9], factor);
     fold<0>(c, top, factor);
 
     r = { c[0], c[1], c[2], c[3], c[4] };
@@ -147,7 +147,7 @@ constexpr void algorithm::carry(field_t<Word>& a) NOEXCEPT
     const auto mask = f::broadcast<Word>(limb_mask);
     const auto over = f::shr<top_bits, 64>(a[4]);
     a[4] = f::and_(a[4], f::broadcast<Word>(top_mask));
-    a[0] = f::madd52lo(a[0], over, f::broadcast<Word>(fold_256));
+    a[0] = f::madd52lo<64>(a[0], over, f::broadcast<Word>(fold_256));
 
     propagate<0>(a, mask);
     propagate<1>(a, mask);
@@ -167,7 +167,7 @@ constexpr void algorithm::normalize(field_t<Word>& a) NOEXCEPT
     const auto high = f::and_(f::eq<64>(a[4], top), f::eq<64>(middle, mask));
     const auto low = f::shr<limb_bits, 64>(f::add<64>(a[0], factor));
     const auto over = f::or_(f::shr<top_bits, 64>(a[4]), f::and_(high, low));
-    a[0] = f::madd52lo(a[0], over, factor);
+    a[0] = f::madd52lo<64>(a[0], over, factor);
 
     propagate<0>(a, mask);
     propagate<1>(a, mask);

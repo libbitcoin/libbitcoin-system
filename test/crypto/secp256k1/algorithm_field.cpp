@@ -520,7 +520,7 @@ static void check_masks(xWord out, const masks& expected)
 template <typename xWord>
 static void check_add_negate()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         xfield<xWord> negated{}, out{};
         accessor::negate(negated, pack<xWord>(right));
@@ -533,7 +533,7 @@ static void check_add_negate()
 template <typename xWord>
 static void check_multiply()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         xfield<xWord> out{};
         accessor::multiply(out, pack<xWord>(left), pack<xWord>(right));
@@ -545,7 +545,7 @@ static void check_multiply()
 template <typename xWord>
 static void check_square()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         xfield<xWord> out{};
         accessor::square(out, pack<xWord>(left));
@@ -557,7 +557,7 @@ static void check_square()
 template <typename xWord>
 static void check_inverse()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         xfield<xWord> out{};
         accessor::inverse(out, pack<xWord>(left));
@@ -569,7 +569,7 @@ static void check_inverse()
 template <typename xWord>
 static void check_square_root()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         xfield<xWord> out{};
         const auto squares = accessor::square_root(out, pack<xWord>(right));
@@ -582,7 +582,7 @@ static void check_square_root()
 template <typename xWord>
 static void check_normalize()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         auto out = pack<xWord>(loosed);
         accessor::normalize(out);
@@ -593,7 +593,7 @@ static void check_normalize()
 template <typename xWord>
 static void check_predicates()
 {
-    if constexpr (have_ifma<xWord>)
+    if constexpr (have<xWord>)
     {
         const auto in = pack<xWord>(normals);
         check_masks(accessor::is_zero(in), expect_masks(field_is_zero, normals));

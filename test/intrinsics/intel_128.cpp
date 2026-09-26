@@ -186,11 +186,11 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_128__gather__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__intel_128__madd52lo__expected)
 {
-    if constexpr (have_ifma_128)
+    if constexpr (have_128)
     {
         constexpr auto max52 = 0x000fffffffffffff_u64;
         constexpr auto high = 0x8000000000000003_u64;
-        const auto xword = f::madd52lo(f::set<xint128_t>(7_u64, 1_u64), f::set<xint128_t>(max52, high), f::set<xint128_t>(max52, 5_u64));
+        const auto xword = f::madd52lo<64>(f::set<xint128_t>(7_u64, 1_u64), f::set<xint128_t>(max52, high), f::set<xint128_t>(max52, 5_u64));
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 8_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 16_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), f::madd52lo(7_u64, max52, max52));
@@ -200,11 +200,11 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_128__madd52lo__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__intel_128__madd52hi__expected)
 {
-    if constexpr (have_ifma_128)
+    if constexpr (have_128)
     {
         constexpr auto max52 = 0x000fffffffffffff_u64;
         constexpr auto high = 0x8000000000000003_u64;
-        const auto xword = f::madd52hi(f::set<xint128_t>(7_u64, 1_u64), f::set<xint128_t>(max52, high), f::set<xint128_t>(max52, 5_u64));
+        const auto xword = f::madd52hi<64>(f::set<xint128_t>(7_u64, 1_u64), f::set<xint128_t>(max52, high), f::set<xint128_t>(max52, 5_u64));
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), 0x000ffffffffffffe_u64 + 7_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(xword)), 1_u64);
         BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(xword)), f::madd52hi(7_u64, max52, max52));
