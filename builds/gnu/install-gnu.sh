@@ -12,6 +12,8 @@
 #                               Default: --disable-avx2
 # --<enable/disable>-avx512   Use Intel AVX512 intrinsics.
 #                               Default: --disable-avx512
+# --<enable/disable>-ifma     Use Intel AVX512 IFMA intrinsics.
+#                               Default: --disable-ifma
 # --<enable/disable>-sse41    Use SSE4.1 hardware instructions.
 #                               Default: --disable-sse41
 # --<enable/disable>-shani    Use Intel/ARM SHA Extensions.
@@ -1206,6 +1208,8 @@ help()
     msg "                              Default: --disable-avx2"
     msg "--<enable/disable>-avx512   Use Intel AVX512 intrinsics."
     msg "                              Default: --disable-avx512"
+    msg "--<enable/disable>-ifma     Use Intel AVX512 IFMA intrinsics."
+    msg "                              Default: --disable-ifma"
     msg "--<enable/disable>-sse41    Use SSE4.1 hardware instructions."
     msg "                              Default: --disable-sse41"
     msg "--<enable/disable>-shani    Use Intel/ARM SHA Extensions."

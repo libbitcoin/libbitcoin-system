@@ -20,11 +20,16 @@
       <!--<Category Name="256" DisplayName="256" />-->
       <!--<Category Name="128" DisplayName="128" />-->
       <Category Name="sha" DisplayName="sha" />
+      <Category Name="ifma" DisplayName="ifma" />
     </Rule.Categories>
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
     </Rule.DataSource>
     <EnumProperty Name="Option-sha" DisplayName="Enable SHA Native Hashing" Description="Requires SHANI (xcpu) or Neon (arm) CPU." Category="sha">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-ifma" DisplayName="Enable AVX512 IFMA Multiplication" Description="Requires AVX512 IFMA (xcpu) CPU and /arch:AVX512." Category="ifma">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>

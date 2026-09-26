@@ -32,6 +32,7 @@ Cflags: \
     -I${includedir} \
     @avx2@ \
     @avx512@ \
+    @ifma@ \
     @shani@ \
     @crypto@ \
     @sse41@ \

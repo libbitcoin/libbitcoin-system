@@ -21,6 +21,7 @@
     <!--<Option-256>true</Option-256>-->
     <!--<Option-128>true</Option-128>-->
     <Option-sha Condition="'$(Option-sha)' == ''">false</Option-sha>
+    <Option-ifma Condition="'$(Option-ifma)' == ''">false</Option-ifma>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
     <Option-ultrafast Condition="'$(Option-ultrafast)' == ''">false</Option-ultrafast>
     <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
@@ -39,6 +40,7 @@
 
   <Target Name="SystemOptionInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Option-sha        : $(Option-sha)" Importance="high"/>
+    <Message Text="Option-ifma       : $(Option-ifma)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
     <Message Text="Option-ultrafast  : $(Option-ultrafast)" Importance="high"/>
     <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
@@ -62,6 +64,7 @@
       <!-- Enable use of CPU intrinsics. -->
       <!-- Eventually these options will be used to select SVE levels. -->
       <PreprocessorDefinitions Condition="'$(Option-sha)' == 'true'">WITH_SHA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-ifma)' == 'true'">WITH_IFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!--<PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
       <!--<PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
       <!--<PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->

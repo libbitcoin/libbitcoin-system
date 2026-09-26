@@ -182,6 +182,15 @@ AC_ARG_ENABLE([avx512],
 AC_MSG_RESULT([$enable_avx512])
 AM_CONDITIONAL([ENABLE_AVX512], [test "x${enable_avx512}" != "xno"])
 
+AC_MSG_CHECKING([--enable-ifma option])
+AC_ARG_ENABLE([ifma],
+    AS_HELP_STRING([--enable-ifma],
+        [Use Intel AVX512 IFMA intrinsics. @<:@default=no@:>@]),
+    [enable_ifma=$enableval],
+    [enable_ifma=no])
+AC_MSG_RESULT([$enable_ifma])
+AM_CONDITIONAL([ENABLE_IFMA], [test "x${enable_ifma}" != "xno"])
+
 AC_MSG_CHECKING([--enable-sse41 option])
 AC_ARG_ENABLE([sse41],
     AS_HELP_STRING([--enable-sse41],
@@ -273,6 +282,31 @@ AS_IF([test "x${enable_avx512}" != "xno"],
           [[
             __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
             return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_ifma}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-mavx512ifma -mavx512vl],
+      [
+        CFLAGS="${CFLAGS} -mavx512ifma -mavx512vl";
+        CXXFLAGS="${CXXFLAGS} -mavx512ifma -mavx512vl";
+        AC_SUBST([ifma], ["-mavx512ifma -mavx512vl"])
+      ],[
+        AC_MSG_ERROR([-mavx512ifma -mavx512vl not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m512i a = _mm512_set1_epi64(3);
+            __m256i b = _mm256_set1_epi64x(5);
+            return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
           ]])
       ])
   ])
