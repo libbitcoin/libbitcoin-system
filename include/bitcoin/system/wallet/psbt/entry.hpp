@@ -114,6 +114,11 @@ struct BC_API entry
         return !(*this == other);
     }
 
+    bool operator<(const entry& other) const NOEXCEPT
+    {
+        return key < other.key;
+    }
+
     data_chunk key;
     data_chunk value;
 };
@@ -156,6 +161,11 @@ struct BC_API derivation
         return !(*this == other);
     }
 
+    bool operator<(const derivation& other) const NOEXCEPT
+    {
+        return point < other.point;
+    }
+
     data_chunk point;
     key_origin origin;
 };
@@ -173,6 +183,11 @@ struct BC_API xpub
     bool operator!=(const xpub& other) const NOEXCEPT
     {
         return !(*this == other);
+    }
+
+    bool operator<(const xpub& other) const NOEXCEPT
+    {
+        return key < other.key;
     }
 
     data_chunk key;

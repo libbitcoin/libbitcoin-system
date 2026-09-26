@@ -57,32 +57,6 @@ static bool to_uint32(uint32_t& out, const data_chunk& value) NOEXCEPT
     return true;
 }
 
-
-// Serialization emits repeated-type entries in key order (deterministic).
-static entry::list sorted(const entry::list& entries) NOEXCEPT
-{
-    auto copy = entries;
-    std::sort(copy.begin(), copy.end(),
-        [](const entry& left, const entry& right) NOEXCEPT
-        {
-            return left.key < right.key;
-        });
-
-    return copy;
-}
-
-static derivation::list sorted(const derivation::list& entries) NOEXCEPT
-{
-    auto copy = entries;
-    std::sort(copy.begin(), copy.end(),
-        [](const derivation& left, const derivation& right) NOEXCEPT
-        {
-            return left.point < right.point;
-        });
-
-    return copy;
-}
-
 bool input::from_data(reader& source, uint32_t version) NOEXCEPT
 {
     const auto version0 = (version == transaction::version_0);
@@ -249,7 +223,7 @@ void input::to_data(writer& sink, uint32_t) const NOEXCEPT
     if (witness_utxo)
         write(input_key::witness_utxo, {}, witness_utxo->to_data());
 
-    for (const auto& signature: sorted(partial_signatures))
+    for (const auto& signature: sort_copy(partial_signatures))
         signature.to_data(sink);
 
     if (sighash_type.has_value())
@@ -264,7 +238,7 @@ void input::to_data(writer& sink, uint32_t) const NOEXCEPT
         write(input_key::witness_script, {},
             witness_script->to_data(false));
 
-    for (const auto& derived: sorted(derivations))
+    for (const auto& derived: sort_copy(derivations))
         write(input_key::bip32_derivation, derived.point,
             derived.origin.to_value());
 
@@ -296,7 +270,7 @@ void input::to_data(writer& sink, uint32_t) const NOEXCEPT
         write(input_key::required_height_locktime, {},
             to_chunk(to_little_endian(required_height_locktime.value())));
 
-    for (const auto& field: sorted(others))
+    for (const auto& field: sort_copy(others))
         field.to_data(sink);
 
     // The map terminator.
