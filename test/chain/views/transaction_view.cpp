@@ -273,6 +273,34 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__tx4_witness__expected)
     BOOST_CHECK_EQUAL(witness, expected);
 }
 
+// witnesses
+
+BOOST_AUTO_TEST_CASE(transaction_view__witnesses__genesis__empty)
+{
+    const auto block = test::genesis.to_data(true);
+    stream::in::fast istream{ block };
+    read::bytes::fast reader{ istream };
+    reader.skip_bytes(chain::header::serialized_size());
+    reader.read_variable();
+
+    const chain::transaction_view view{ reader, block, true, true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK(view.witnesses().empty());
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__witnesses__tx4_witness__expected)
+{
+    const auto transaction = test::tx4.to_data(true);
+    stream::in::fast istream{ transaction };
+    read::bytes::fast reader{ istream };
+
+    const auto expected = base16_chunk("01032525250103353535");
+    const chain::transaction_view view{ reader, transaction, false, true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK(view.is_segregated());
+    BOOST_CHECK_EQUAL(view.witnesses().to_chunk(), expected);
+}
+
 // to_data
 
 BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_witness__matches_transaction)
