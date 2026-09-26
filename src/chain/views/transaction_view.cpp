@@ -184,6 +184,12 @@ uint32_t transaction_view::locktime() const NOEXCEPT
     return unsafe_from_little_endian<uint32_t>(offset);
 }
 
+data_slice transaction_view::witnesses() const NOEXCEPT
+{
+    const auto begin = at_witnesses();
+    return { begin, std::next(begin, witnesses_size()) };
+}
+
 size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
 {
     return witness && is_segregated() ? size_ : stripped_size();
