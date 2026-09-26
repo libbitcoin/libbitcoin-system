@@ -53,11 +53,9 @@ protected:
         uint64_t low{};
     };
 
-    /// Field product, ten columns of 52 bit limb products, where integral
-    /// words accumulate full limb products in 128 bit columns.
+    /// Field product, ten columns of 52 bit limb products.
     template <typename Word>
-    using product_t = iif<is_same_type<Word, uint64_t>,
-        std_array<unsigned128_t, 10>, std_array<Word, 10>>;
+    using product_t = std_array<Word, 10>;
 
     /// Affine point, never infinity.
     template <typename Word>
@@ -98,9 +96,10 @@ protected:
     static constexpr uint64_t limb_mask = 0x000fffffffffffff;
     static constexpr uint64_t  top_mask = 0x0000ffffffffffff;
 
-    /// 2^256 mod p and 2^260 mod p.
+    /// 2^256 mod p, 2^260 mod p and 2^272 mod p.
     static constexpr uint64_t fold_256 = 0x00000001000003d1;
     static constexpr uint64_t fold_260 = 0x0000001000003d10;
+    static constexpr uint64_t fold_272 = 0x0001000003d10000;
 
     /// p = 2^256 - 2^32 - 977.
     static constexpr field_t<uint64_t> prime
