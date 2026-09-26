@@ -48,6 +48,24 @@ protected:
     template <typename Word>
     using product_t = std_array<Word, 10>;
 
+    /// Affine point, never infinity.
+    template <typename Word>
+    struct affine_t
+    {
+        field_t<Word> x{};
+        field_t<Word> y{};
+    };
+
+    /// Jacobian point (x / z^2, y / z^3), infinity as a mask.
+    template <typename Word>
+    struct jacobian_t
+    {
+        field_t<Word> x{};
+        field_t<Word> y{};
+        field_t<Word> z{};
+        Word infinity{};
+    };
+
     /// Scalar, four 64 bit limbs.
     using scalar_t = std_array<uint64_t, 4>;
 
@@ -79,6 +97,29 @@ protected:
         0x000ffffefffffc2f, limb_mask, limb_mask, limb_mask, top_mask
     };
 
+    /// Curve y^2 = x^3 + b.
+    static constexpr field_t<uint64_t> curve_b{ 7 };
+
+    /// Endomorphism eigenvalue, beta^3 = 1 mod p.
+    static constexpr field_t<uint64_t> beta
+    {
+        0x00096c28719501ee, 0x0007512f58995c13, 0x000c3434e99cf049,
+        0x00007106e64479ea, 0x00007ae96a2b657c
+    };
+
+    /// Generator.
+    static constexpr affine_t<uint64_t> generator
+    {
+        {
+            0x0002815b16f81798, 0x000db2dce28d959f, 0x000e870b07029bfc,
+            0x000bbac55a06295c, 0x000079be667ef9dc
+        },
+        {
+            0x0007d08ffb10d4b8, 0x00048a68554199c4, 0x000e1108a8fd17b4,
+            0x000c4655da4fbfc0, 0x0000483ada7726a3
+        }
+    };
+
     /// Field arithmetic.
     /// -----------------------------------------------------------------------
     /// loose: limbs below 2^62.
@@ -94,6 +135,26 @@ protected:
     template <typename Word>
     static constexpr void negate(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;
+
+    /// r = a - b (loose from loose a and weak b).
+    template <typename Word>
+    static constexpr void subtract(field_t<Word>& r, const field_t<Word>& a,
+        const field_t<Word>& b) NOEXCEPT;
+
+    /// r = Factor * a (loose from weak).
+    template <size_t Factor, typename Word>
+    static constexpr void scale(field_t<Word>& r,
+        const field_t<Word>& a) NOEXCEPT;
+
+    /// r = mask ? a : b, per lane.
+    template <typename Word>
+    static constexpr void select(field_t<Word>& r, Word mask,
+        const field_t<Word>& a, const field_t<Word>& b) NOEXCEPT;
+
+    /// Constant expanded to all lanes.
+    template <typename Word>
+    static constexpr field_t<Word> broadcast(
+        const field_t<uint64_t>& a) NOEXCEPT;
 
     /// a = a (weak from loose).
     template <typename Word>
@@ -290,6 +351,81 @@ protected:
 
     static constexpr void multiply_shift(scalar_t& r, const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
+
+    /// Group arithmetic (weak coordinates).
+    /// -----------------------------------------------------------------------
+
+    /// r = 2a.
+    template <typename Word>
+    static constexpr void double_(jacobian_t<Word>& r,
+        const jacobian_t<Word>& a) NOEXCEPT;
+
+    /// r = a + b, mask of lanes not computed (a infinite or a = b or -b).
+    template <typename Word>
+    static constexpr Word add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
+        const affine_t<Word>& b) NOEXCEPT;
+
+    /// r = a + b, mask of lanes not computed (a or b infinite, a = b or -b).
+    template <typename Word>
+    static constexpr Word add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
+        const jacobian_t<Word>& b) NOEXCEPT;
+
+    /// r = a + b, all cases.
+    static constexpr void add_complete(jacobian_t<uint64_t>& r,
+        const jacobian_t<uint64_t>& a, const affine_t<uint64_t>& b) NOEXCEPT;
+
+    /// r = a + b, all cases.
+    static constexpr void add_complete(jacobian_t<uint64_t>& r,
+        const jacobian_t<uint64_t>& a, const jacobian_t<uint64_t>& b) NOEXCEPT;
+
+    /// r = -a.
+    template <typename Word>
+    static constexpr void negate(affine_t<Word>& r,
+        const affine_t<Word>& a) NOEXCEPT;
+
+    /// r = -a.
+    template <typename Word>
+    static constexpr void negate(jacobian_t<Word>& r,
+        const jacobian_t<Word>& a) NOEXCEPT;
+
+    /// r = lambda * a, as (beta * x, y).
+    template <typename Word>
+    static constexpr void endomorphism(affine_t<Word>& r,
+        const affine_t<Word>& a) NOEXCEPT;
+
+    /// Group conversion.
+    /// -----------------------------------------------------------------------
+
+    /// r = a.
+    template <typename Word>
+    static constexpr void to_jacobian(jacobian_t<Word>& r,
+        const affine_t<Word>& a) NOEXCEPT;
+
+    /// r = a (normal), a not infinite.
+    template <typename Word>
+    static constexpr void to_affine(affine_t<Word>& r,
+        const jacobian_t<Word>& a) NOEXCEPT;
+
+    /// r = a (normal) by one inversion, no element infinite.
+    template <size_t Count, typename Word>
+    static constexpr void to_affine(std_array<affine_t<Word>, Count>& r,
+        const std_array<jacobian_t<Word>, Count>& a) NOEXCEPT;
+
+    /// r = (x, y) with y parity of odd mask, mask of x on the curve (normal).
+    template <typename Word>
+    static constexpr Word lift(affine_t<Word>& r, const field_t<Word>& x,
+        Word odd) NOEXCEPT;
+
+    /// Mask of a on the curve (normal).
+    template <typename Word>
+    static constexpr Word is_on_curve(const affine_t<Word>& a) NOEXCEPT;
+
+    /// Group internals.
+    /// -----------------------------------------------------------------------
+
+    template <typename Word>
+    static constexpr void to_affine(affine_t<Word>& r,
+        const jacobian_t<Word>& a, const field_t<Word>& inverse_z) NOEXCEPT;
 };
 
 } // namespace secp256k1
@@ -300,6 +436,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp>
 
 BC_POP_WARNING()
 
