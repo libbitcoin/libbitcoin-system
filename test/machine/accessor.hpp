@@ -214,6 +214,7 @@ public:
 
     // Signature verify.
     using base::verify_ecdsa_signature;
+    using base::verify_ecdsa_unbatched;
     using base::try_batch_multisig_verification;
     using base::verify_schnorr_signature;
 };
@@ -270,7 +271,7 @@ protected:
     }
 
     bool verify_ecdsa_signature(const data_chunk&, const hash_digest&,
-        const ec_signature&, bool=true) const NOEXCEPT override
+        const ec_signature&) const NOEXCEPT override
     {
         if (is_nonzero(ecdsa_failures))
         {
@@ -279,6 +280,13 @@ protected:
         }
 
         return ecdsa_result;
+    }
+
+    bool verify_ecdsa_unbatched(const data_chunk& point,
+        const hash_digest& hash,
+        const ec_signature& signature) const NOEXCEPT override
+    {
+        return verify_ecdsa_signature(point, hash, signature);
     }
 
     bool try_batch_multisig_verification(const chunk_xptrs&,

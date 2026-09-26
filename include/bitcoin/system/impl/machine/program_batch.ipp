@@ -38,9 +38,9 @@ namespace machine {
 TEMPLATE
 inline bool CLASS::
 verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
-    const ec_signature& signature, bool capture) const NOEXCEPT
+    const ec_signature& signature) const NOEXCEPT
 {
-    if (capture_.enabled && capture)
+    if (capture_.enabled)
     {
         if (is_ecdsa_batchable())
         {
@@ -73,6 +73,14 @@ verify_ecdsa_signature(const data_chunk& point, const hash_digest& hash,
         }
     }
 
+    return ecdsa::verify_signature(point, hash, signature);
+}
+
+TEMPLATE
+inline bool CLASS::
+verify_ecdsa_unbatched(const data_chunk& point, const hash_digest& hash,
+    const ec_signature& signature) const NOEXCEPT
+{
     return ecdsa::verify_signature(point, hash, signature);
 }
 

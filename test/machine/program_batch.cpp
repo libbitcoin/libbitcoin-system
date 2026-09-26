@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__uncompressible_point__fals
     const data_chunk point(short_hash_size, 0x00);
     const hash_digest hash{};
     const ec_signature signature{};
-    BOOST_REQUIRE(!out.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(!out.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(!capture.batched.load());
 }
 
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__unbatchable_script__false)
     const auto point = batch_key();
     const hash_digest hash{};
     const ec_signature signature{};
-    BOOST_REQUIRE(!out.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(!out.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(!capture.batched.load());
 }
 
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__input_script__false)
     const auto point = batch_key();
     const hash_digest hash{};
     const ec_signature signature{};
-    BOOST_REQUIRE(!in.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(!in.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(!capture.batched.load());
 }
 
@@ -405,10 +405,29 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__batchable_script__captured
     const auto point = batch_key();
     const hash_digest hash{};
     const ec_signature signature{};
-    BOOST_REQUIRE(out.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(out.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(capture.batched.load());
     BOOST_REQUIRE_EQUAL(rows.groups(), one);
     rows.clear();
+}
+
+BOOST_AUTO_TEST_CASE(program__verify_ecdsa_unbatched__batchable_script__not_captured)
+{
+    auto& rows = chain::signatures::ecdsa_rows();
+    rows.clear();
+
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    const batch_accessor out{ in, to_shared<script>(batch_p2pk()) };
+
+    const auto point = batch_key();
+    const hash_digest hash{};
+    const ec_signature signature{};
+    BOOST_REQUIRE(!out.verify_ecdsa_unbatched(point, hash, signature));
+    BOOST_REQUIRE(!capture.batched.load());
+    BOOST_REQUIRE_EQUAL(rows.groups(), zero);
 }
 
 BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__batchable_group__captured)
@@ -470,7 +489,7 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__key_hash_script__captured)
     const auto point = batch_key();
     const hash_digest hash{};
     const ec_signature signature{};
-    BOOST_REQUIRE(out.verify_ecdsa_signature(point, hash, signature, true));
+    BOOST_REQUIRE(out.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(capture.batched.load());
     BOOST_REQUIRE_EQUAL(rows.groups(), one);
     rows.clear();
