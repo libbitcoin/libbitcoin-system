@@ -532,6 +532,7 @@ include_bitcoin_system_impl_crypto_secp256k1dir = \
 
 include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp
 
 include_bitcoin_system_impl_datadir = \
@@ -1083,6 +1084,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/x25519.cpp \
     ${srcdir}/../../test/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../test/crypto/secp256k1/algorithm_field.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/algorithm_group.cpp \
     ${srcdir}/../../test/crypto/secp256k1/algorithm_scalar.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ecdsa.cpp \

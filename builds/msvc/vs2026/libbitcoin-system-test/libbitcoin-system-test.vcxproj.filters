@@ -342,6 +342,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_group.cpp">
+      <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_scalar.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>

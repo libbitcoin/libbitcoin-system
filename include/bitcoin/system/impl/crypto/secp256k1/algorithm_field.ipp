@@ -142,6 +142,53 @@ constexpr void algorithm::negate(field_t<Word>& r,
 }
 
 template <typename Word>
+constexpr void algorithm::subtract(field_t<Word>& r, const field_t<Word>& a,
+    const field_t<Word>& b) NOEXCEPT
+{
+    field_t<Word> negated{};
+    negate(negated, b);
+    add(r, a, negated);
+}
+
+template <size_t Factor, typename Word>
+constexpr void algorithm::scale(field_t<Word>& r,
+    const field_t<Word>& a) NOEXCEPT
+{
+    static_assert(is_nonzero(Factor) && Factor < 1024u);
+
+    field_t<Word> out{ a };
+    for (size_t term = 1; term < Factor; ++term)
+        add(out, out, a);
+
+    r = out;
+}
+
+template <typename Word>
+constexpr void algorithm::select(field_t<Word>& r, Word mask,
+    const field_t<Word>& a, const field_t<Word>& b) NOEXCEPT
+{
+    r[0] = f::select(mask, a[0], b[0]);
+    r[1] = f::select(mask, a[1], b[1]);
+    r[2] = f::select(mask, a[2], b[2]);
+    r[3] = f::select(mask, a[3], b[3]);
+    r[4] = f::select(mask, a[4], b[4]);
+}
+
+template <typename Word>
+constexpr algorithm::field_t<Word> algorithm::broadcast(
+    const field_t<uint64_t>& a) NOEXCEPT
+{
+    return
+    {
+        f::broadcast<Word>(a[0]),
+        f::broadcast<Word>(a[1]),
+        f::broadcast<Word>(a[2]),
+        f::broadcast<Word>(a[3]),
+        f::broadcast<Word>(a[4])
+    };
+}
+
+template <typename Word>
 constexpr void algorithm::carry(field_t<Word>& a) NOEXCEPT
 {
     const auto mask = f::broadcast<Word>(limb_mask);
