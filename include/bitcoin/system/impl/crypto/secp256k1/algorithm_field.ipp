@@ -41,8 +41,15 @@ INLINE constexpr void algorithm::accumulate(product_t<Word>& c,
 {
     constexpr auto low = Left + Right;
     constexpr auto high = add1(low);
-    c[low] = f::madd52lo<64>(c[low], a[Left], b[Right]);
-    c[high] = f::madd52hi<64>(c[high], a[Left], b[Right]);
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        multiply_add(c[low], a[Left], b[Right]);
+    }
+    else
+    {
+        c[low] = f::madd52lo<64>(c[low], a[Left], b[Right]);
+        c[high] = f::madd52hi<64>(c[high], a[Left], b[Right]);
+    }
 }
 
 template <size_t Index, typename Word>
@@ -54,34 +61,107 @@ INLINE constexpr void algorithm::fold(product_t<Word>& c, Word value,
     c[next] = f::madd52hi<64>(c[next], value, factor);
 }
 
+// Integral columns carry into limbs above 2^260 which fold by 2^260 mod p,
+// then carry into limbs below it, where bits above 2^256 fold by 2^256 mod p.
 template <typename Word>
 INLINE constexpr void algorithm::reduce(field_t<Word>& r,
     product_t<Word>& c) NOEXCEPT
 {
-    const auto mask = f::broadcast<Word>(limb_mask);
-    const auto factor = f::broadcast<Word>(fold_260);
-    const auto zero = f::broadcast<Word>(uint64_t{});
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        field_t<uint64_t> high{};
+        high[0] = take(c[5]);
+        add(c[6], c[5]);
+        high[1] = take(c[6]);
+        add(c[7], c[6]);
+        high[2] = take(c[7]);
+        add(c[8], c[7]);
+        high[3] = take(c[8]);
+        high[4] = c[8].low;
 
-    propagate<0>(c, mask);
-    propagate<1>(c, mask);
-    propagate<2>(c, mask);
-    propagate<3>(c, mask);
-    propagate<4>(c, mask);
-    propagate<5>(c, mask);
-    propagate<6>(c, mask);
-    propagate<7>(c, mask);
-    propagate<8>(c, mask);
+        multiply_add(c[0], high[0], fold_260);
+        multiply_add(c[1], high[1], fold_260);
+        multiply_add(c[2], high[2], fold_260);
+        multiply_add(c[3], high[3], fold_260);
+        multiply_add(c[4], high[4], fold_260);
 
-    const auto top = f::madd52hi<64>(zero, c[9], factor);
-    fold<0>(c, c[5], factor);
-    fold<1>(c, c[6], factor);
-    fold<2>(c, c[7], factor);
-    fold<3>(c, c[8], factor);
-    c[4] = f::madd52lo<64>(c[4], c[9], factor);
-    fold<0>(c, top, factor);
+        r[0] = take(c[0]);
+        add(c[1], c[0]);
+        r[1] = take(c[1]);
+        add(c[2], c[1]);
+        r[2] = take(c[2]);
+        add(c[3], c[2]);
+        r[3] = take(c[3]);
+        add(c[4], c[3]);
+        r[4] = c[4].low & top_mask;
 
-    r = { c[0], c[1], c[2], c[3], c[4] };
-    carry(r);
+        unsigned128_t over{ 0, r[0] };
+        multiply_add(over, (c[4].low >> top_bits) |
+            (c[4].high << (bits<uint64_t> - top_bits)), fold_256);
+
+        r[0] = take(over);
+        r[1] += over.low;
+        r[2] += r[1] >> limb_bits;
+        r[1] &= limb_mask;
+        r[3] += r[2] >> limb_bits;
+        r[2] &= limb_mask;
+        r[4] += r[3] >> limb_bits;
+        r[3] &= limb_mask;
+    }
+    else
+    {
+        const auto mask = f::broadcast<Word>(limb_mask);
+        const auto factor = f::broadcast<Word>(fold_260);
+        const auto zero = f::broadcast<Word>(uint64_t{});
+
+        propagate<0>(c, mask);
+        propagate<1>(c, mask);
+        propagate<2>(c, mask);
+        propagate<3>(c, mask);
+        propagate<4>(c, mask);
+        propagate<5>(c, mask);
+        propagate<6>(c, mask);
+        propagate<7>(c, mask);
+        propagate<8>(c, mask);
+
+        const auto top = f::madd52hi<64>(zero, c[9], factor);
+        fold<0>(c, c[5], factor);
+        fold<1>(c, c[6], factor);
+        fold<2>(c, c[7], factor);
+        fold<3>(c, c[8], factor);
+        c[4] = f::madd52lo<64>(c[4], c[9], factor);
+        fold<0>(c, top, factor);
+
+        r = { c[0], c[1], c[2], c[3], c[4] };
+        carry(r);
+    }
+}
+
+// r = a * b + r.
+INLINE constexpr void algorithm::multiply_add(unsigned128_t& r, uint64_t a,
+    uint64_t b) NOEXCEPT
+{
+    uint64_t high{}, low{};
+    mul_wide(high, low, a, b);
+    const auto carry = add_carry(r.low, r.low, low, false);
+    add_carry(r.high, r.high, high, carry);
+}
+
+// r = r + a.
+INLINE constexpr void algorithm::add(unsigned128_t& r,
+    const unsigned128_t& a) NOEXCEPT
+{
+    const auto carry = add_carry(r.low, r.low, a.low, false);
+    add_carry(r.high, r.high, a.high, carry);
+}
+
+// Low 52 bits of a, with a shifted right by 52.
+INLINE constexpr uint64_t algorithm::take(unsigned128_t& a) NOEXCEPT
+{
+    const auto low = a.low & limb_mask;
+    a.low = (a.low >> limb_bits) | (a.high << (bits<uint64_t> - limb_bits));
+    a.high >>= limb_bits;
+    return low;
 }
 
 template <typename Word>
@@ -271,16 +351,29 @@ constexpr void algorithm::square(field_t<Word>& r,
     accumulate<2, 4>(c, a, a);
     accumulate<3, 4>(c, a, a);
 
-    c[0] = f::add<64>(c[0], c[0]);
-    c[1] = f::add<64>(c[1], c[1]);
-    c[2] = f::add<64>(c[2], c[2]);
-    c[3] = f::add<64>(c[3], c[3]);
-    c[4] = f::add<64>(c[4], c[4]);
-    c[5] = f::add<64>(c[5], c[5]);
-    c[6] = f::add<64>(c[6], c[6]);
-    c[7] = f::add<64>(c[7], c[7]);
-    c[8] = f::add<64>(c[8], c[8]);
-    c[9] = f::add<64>(c[9], c[9]);
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        add(c[1], c[1]);
+        add(c[2], c[2]);
+        add(c[3], c[3]);
+        add(c[4], c[4]);
+        add(c[5], c[5]);
+        add(c[6], c[6]);
+        add(c[7], c[7]);
+    }
+    else
+    {
+        c[0] = f::add<64>(c[0], c[0]);
+        c[1] = f::add<64>(c[1], c[1]);
+        c[2] = f::add<64>(c[2], c[2]);
+        c[3] = f::add<64>(c[3], c[3]);
+        c[4] = f::add<64>(c[4], c[4]);
+        c[5] = f::add<64>(c[5], c[5]);
+        c[6] = f::add<64>(c[6], c[6]);
+        c[7] = f::add<64>(c[7], c[7]);
+        c[8] = f::add<64>(c[8], c[8]);
+        c[9] = f::add<64>(c[9], c[9]);
+    }
 
     accumulate<0, 0>(c, a, a);
     accumulate<1, 1>(c, a, a);

@@ -46,9 +46,18 @@ protected:
     template <typename Word>
     using field_t = std_array<Word, 5>;
 
-    /// Field product, ten columns of 52 bit limb products.
+    /// Unsigned 128 bit accumulator, as high and low words.
+    struct unsigned128_t
+    {
+        uint64_t high{};
+        uint64_t low{};
+    };
+
+    /// Field product, ten columns of 52 bit limb products, where integral
+    /// words accumulate full limb products in 128 bit columns.
     template <typename Word>
-    using product_t = std_array<Word, 10>;
+    using product_t = iif<is_same_type<Word, uint64_t>,
+        std_array<unsigned128_t, 10>, std_array<Word, 10>>;
 
     /// Affine point, never infinity.
     template <typename Word>
@@ -84,8 +93,8 @@ protected:
     /// Constants.
     /// -----------------------------------------------------------------------
 
-    static constexpr auto limb_bits = 52u;
-    static constexpr auto  top_bits = 48u;
+    static constexpr size_t limb_bits = 52;
+    static constexpr size_t  top_bits = 48;
     static constexpr uint64_t limb_mask = 0x000fffffffffffff;
     static constexpr uint64_t  top_mask = 0x0000ffffffffffff;
 
@@ -242,6 +251,12 @@ protected:
     template <typename Word>
     INLINE static constexpr void reduce(field_t<Word>& r,
         product_t<Word>& c) NOEXCEPT;
+
+    INLINE static constexpr void multiply_add(unsigned128_t& r, uint64_t a,
+        uint64_t b) NOEXCEPT;
+    INLINE static constexpr void add(unsigned128_t& r,
+        const unsigned128_t& a) NOEXCEPT;
+    INLINE static constexpr uint64_t take(unsigned128_t& a) NOEXCEPT;
 
     template <typename Word>
     static constexpr void powers(field_t<Word>& x2, field_t<Word>& x22,
