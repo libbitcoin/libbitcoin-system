@@ -714,6 +714,19 @@ protected:
         const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
         Word& faults) NOEXCEPT;
 
+    /// Split half magnitude as digits at each bit position, mostly zero.
+    using naf_t = std_array<int16_t, add1(half_bits)>;
+
+    /// Odd digits below 2^Bits in magnitude, each followed by at least Bits
+    /// zeros, returning the number of positions through the last digit.
+    template <size_t Bits>
+    static constexpr size_t naf(naf_t& r, const scalar_t& magnitude) NOEXCEPT;
+
+    /// r = g * G + k * a, nonzero if not computed (exceptional).
+    static constexpr uint64_t multiply_naf(jacobian_t<uint64_t>& r,
+        const scalar_t& g, const affine_t<uint64_t>& a,
+        const scalar_t& k) NOEXCEPT;
+
     /// Verification.
     /// -----------------------------------------------------------------------
 

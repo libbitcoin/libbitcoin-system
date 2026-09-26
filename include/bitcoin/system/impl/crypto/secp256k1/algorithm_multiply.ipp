@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
@@ -34,85 +34,93 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 // Each scalar splits into two halves, each window of each half adds a table
 // point, and halves made odd are corrected at the end. Lanes in which an
-// addition was exceptional are reported, not computed.
+// addition was exceptional are reported, not computed. A single word adds
+// sparse digits in place of windows.
 template <typename Word>
 constexpr Word algorithm::multiply(jacobian_t<Word>& r,
     const scalars_t<Word>& g, const affine_t<Word>& a,
     const scalars_t<Word>& k) NOEXCEPT
 {
-    constexpr auto generator_top = sub1(digit_count<generator_bits>) *
-        generator_bits;
-    constexpr auto point_top = sub1(digit_count<point_bits>) * point_bits;
-    constexpr auto top = greater(generator_top, point_top);
-
-    recodes_t<generator_bits, Word> g_first{}, g_second{};
-    recodes_t<point_bits, Word> k_first{}, k_second{};
-    for (size_t lane{}; lane < lanes<Word>; ++lane)
+    if constexpr (is_same_type<Word, uint64_t>)
     {
-        scalar_t first{}, second{};
-        split(first, second, g[lane]);
-        recode(g_first[lane], first);
-        recode(g_second[lane], second);
-        split(first, second, k[lane]);
-        recode(k_first[lane], first);
-        recode(k_second[lane], second);
+        return multiply_naf(r, g.front(), a, k.front());
     }
-
-    // Point multiples are affine on the curve isomorphic by scale, where the
-    // sum is computed, so generator multiples are added by that scale.
-    points_t<Word> a_first{}, a_second{};
-    field_t<Word> scale{};
-    multiples(a_first, scale, a);
-    for (size_t point{}; point < a_first.size(); ++point)
-        endomorphism(a_second[point], a_first[point]);
-
-    auto faults = f::broadcast<Word>(uint64_t{});
-    Word index{}, negative{};
-    affine_t<Word> addend{};
-    jacobian_t<Word> sum{};
-    sum.infinity = f::broadcast<Word>(max_uint64);
-
-    for (auto bit = add1(top); is_nonzero(bit--);)
+    else
     {
-        if (bit != top)
-            double_(sum, sum);
+        constexpr auto generator_top = sub1(digit_count<generator_bits>) *
+            generator_bits;
+        constexpr auto point_top = sub1(digit_count<point_bits>) * point_bits;
+        constexpr auto top = greater(generator_top, point_top);
 
-        if (bit <= generator_top && bc::is_zero(bit % generator_bits))
+        recodes_t<generator_bits, Word> g_first{}, g_second{};
+        recodes_t<point_bits, Word> k_first{}, k_second{};
+        for (size_t lane{}; lane < lanes<Word>; ++lane)
         {
-            const auto position = bit / generator_bits;
-            digit(index, negative, g_first, position, false);
-            lookup(addend, generator_table, index, negative);
-            add_point(sum, addend, scale, faults);
-            digit(index, negative, g_second, position, false);
-            lookup(addend, endomorphism_table, index, negative);
-            add_point(sum, addend, scale, faults);
+            scalar_t first{}, second{};
+            split(first, second, g[lane]);
+            recode(g_first[lane], first);
+            recode(g_second[lane], second);
+            split(first, second, k[lane]);
+            recode(k_first[lane], first);
+            recode(k_second[lane], second);
         }
 
-        if (bit <= point_top && bc::is_zero(bit % point_bits))
+        // Point multiples are affine on the curve isomorphic by scale, where
+        // the sum is computed, so generator multiples are added by that scale.
+        points_t<Word> a_first{}, a_second{};
+        field_t<Word> scale{};
+        multiples(a_first, scale, a);
+        for (size_t point{}; point < a_first.size(); ++point)
+            endomorphism(a_second[point], a_first[point]);
+
+        auto faults = f::broadcast<Word>(uint64_t{});
+        Word index{}, negative{};
+        affine_t<Word> addend{};
+        jacobian_t<Word> sum{};
+        sum.infinity = f::broadcast<Word>(max_uint64);
+
+        for (auto bit = add1(top); is_nonzero(bit--);)
         {
-            const auto position = bit / point_bits;
-            digit(index, negative, k_first, position, true);
-            lookup(addend, a_first, index, negative);
-            add_point(sum, addend, faults);
-            digit(index, negative, k_second, position, true);
-            lookup(addend, a_second, index, negative);
-            add_point(sum, addend, faults);
+            if (bit != top)
+                double_(sum, sum);
+
+            if (bit <= generator_top && bc::is_zero(bit % generator_bits))
+            {
+                const auto position = bit / generator_bits;
+                digit(index, negative, g_first, position, false);
+                lookup(addend, generator_table, index, negative);
+                add_point(sum, addend, scale, faults);
+                digit(index, negative, g_second, position, false);
+                lookup(addend, endomorphism_table, index, negative);
+                add_point(sum, addend, scale, faults);
+            }
+
+            if (bit <= point_top && bc::is_zero(bit % point_bits))
+            {
+                const auto position = bit / point_bits;
+                digit(index, negative, k_first, position, true);
+                lookup(addend, a_first, index, negative);
+                add_point(sum, addend, faults);
+                digit(index, negative, k_second, position, true);
+                lookup(addend, a_second, index, negative);
+                add_point(sum, addend, faults);
+            }
         }
+
+        affine_t<Word> base{ broadcast<Word>(generator.x),
+            broadcast<Word>(generator.y) };
+
+        const auto unit = broadcast<Word>({ 1 });
+        correct(sum, base, scale, g_first, faults);
+        endomorphism(base, base);
+        correct(sum, base, scale, g_second, faults);
+        correct(sum, a_first.front(), unit, k_first, faults);
+        correct(sum, a_second.front(), unit, k_second, faults);
+
+        multiply(sum.z, sum.z, scale);
+        r = sum;
+        return faults;
     }
-
-    affine_t<Word> base{ broadcast<Word>(generator.x),
-        broadcast<Word>(generator.y) };
-
-    const auto unit = broadcast<Word>({ 1 });
-    correct(sum, base, scale, g_first, faults);
-    endomorphism(base, base);
-    correct(sum, base, scale, g_second, faults);
-    correct(sum, a_first.front(), unit, k_first, faults);
-    correct(sum, a_second.front(), unit, k_second, faults);
-
-    multiply(sum.z, sum.z, scale);
-    r = sum;
-    return faults;
 }
 
 // Double and add of each bit, without tables or exceptions.
@@ -138,6 +146,78 @@ constexpr void algorithm::multiply_complete(jacobian_t<uint64_t>& r,
     r = sum;
 }
 
+// Each half adds a table point at each of its nonzero digits, with doubling
+// from the highest digit of any half.
+constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
+    const scalar_t& g, const affine_t<uint64_t>& a,
+    const scalar_t& k) NOEXCEPT
+{
+    std_array<scalar_t, 4> halves{};
+    split(halves[0], halves[1], g);
+    split(halves[2], halves[3], k);
+
+    std_array<naf_t, 4> digits{};
+    std_array<bool, 4> negatives{};
+    size_t top{};
+    for (size_t half{}; half < halves.size(); ++half)
+    {
+        auto& magnitude = halves[half];
+        negatives[half] = is_high(magnitude);
+        if (negatives[half])
+            negate(magnitude, magnitude);
+
+        top = greater(top, half < two ?
+            naf<generator_bits>(digits[half], magnitude) :
+            naf<point_bits>(digits[half], magnitude));
+    }
+
+    points_t<uint64_t> a_first{}, a_second{};
+    field_t<uint64_t> scale{};
+    multiples(a_first, scale, a);
+    for (size_t point{}; point < a_first.size(); ++point)
+        endomorphism(a_second[point], a_first[point]);
+
+    uint64_t faults{};
+    affine_t<uint64_t> addend{};
+    jacobian_t<uint64_t> sum{};
+    sum.infinity = max_uint64;
+
+    for (auto bit = top; is_nonzero(bit--);)
+    {
+        if (bc::is_zero(sum.infinity))
+            double_(sum, sum);
+
+        for (size_t half{}; half < halves.size(); ++half)
+        {
+            const auto value = digits[half][bit];
+            if (bc::is_zero(value))
+                continue;
+
+            const size_t magnitude = absolute(value);
+            const auto entry = to_half(sub1(magnitude));
+            const auto negative = is_negative(value) != negatives[half] ?
+                max_uint64 : 0_u64;
+
+            if (half < two)
+            {
+                lookup(addend, bc::is_zero(half) ? generator_table :
+                    endomorphism_table, uint64_t{ entry }, negative);
+                add_point(sum, addend, scale, faults);
+            }
+            else
+            {
+                negate(addend, half == two ? a_first[entry] :
+                    a_second[entry], negative);
+                add_point(sum, addend, faults);
+            }
+        }
+    }
+
+    multiply(sum.z, sum.z, scale);
+    r = sum;
+    return faults;
+}
+
 // Multiplication internals.
 // ----------------------------------------------------------------------------
 // protected
@@ -157,6 +237,48 @@ constexpr void algorithm::recode(recoded_t<Bits>& r,
         set_right_into(magnitude[0]);
 
     recode<Bits, digit_count<Bits>>(r.digits, magnitude);
+}
+
+// Each digit is the next Bits + 1 bits with a carry from the last, made
+// negative with a carry where its top bit is set.
+template <size_t Bits>
+constexpr size_t algorithm::naf(naf_t& r, const scalar_t& magnitude) NOEXCEPT
+{
+    constexpr auto width = add1(Bits);
+    constexpr auto size = array_count<naf_t>;
+    constexpr auto limb_size = bits<uint64_t>;
+
+    r = {};
+    size_t top{};
+    auto carry = false;
+    for (size_t bit{}; bit < size;)
+    {
+        const auto limb = bit / limb_size;
+        const auto shift = bit % limb_size;
+        if (get_right(magnitude[limb], shift) == carry)
+        {
+            ++bit;
+            continue;
+        }
+
+        const auto count = lesser(width, size - bit);
+        auto value = magnitude[limb] >> shift;
+        if (shift + count > limb_size && add1(limb) < array_count<scalar_t>)
+            value |= magnitude[add1(limb)] << (limb_size - shift);
+
+        value &= unmask_right<uint64_t>(count);
+        value += to_int<uint64_t>(carry);
+        carry = get_right(value, Bits);
+
+        const auto digit = to_signed(value);
+        r[bit] = narrow_cast<int16_t>(carry ? digit - power2<int64_t>(width) :
+            digit);
+
+        top = add1(bit);
+        bit += count;
+    }
+
+    return top;
 }
 
 template <typename Word>

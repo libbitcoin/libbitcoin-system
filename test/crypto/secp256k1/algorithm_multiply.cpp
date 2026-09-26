@@ -37,6 +37,8 @@ public:
     using bytes_t = algorithm::bytes_t;
     using algorithm::multiply;
     using algorithm::multiply_complete;
+    using algorithm::naf_t;
+    using algorithm::naf;
     using algorithm::to_affine;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
@@ -191,7 +193,6 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__values__expected)
     BOOST_CHECK(is_point(product(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
     BOOST_CHECK(is_point(product(number(one_value), p1, number(zero_value)), gx, gy));
     BOOST_CHECK(is_point(product(number(zero_value), g1, number(one_value)), gx, gy));
-    BOOST_CHECK(is_point(product(number(one_value), g1, number(one_value)), g2x, g2y));
     BOOST_CHECK_EQUAL(faults(number(sample), p1, number(first)), 0_u64);
     BOOST_CHECK_EQUAL(faults(number(order_minus_one), p1, number(order_minus_two)), 0_u64);
 }
@@ -206,10 +207,44 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply_complete__values__ex
     BOOST_CHECK(f::any(complete(number(one_value), g1, number(order_minus_one)).infinity));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__infinite__faults)
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__zero__infinity)
 {
-    BOOST_CHECK(f::any(faults(number(zero_value), p1, number(zero_value))));
+    BOOST_CHECK_EQUAL(faults(number(zero_value), p1, number(zero_value)), 0_u64);
+    BOOST_CHECK(f::any(product(number(zero_value), p1, number(zero_value)).infinity));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__exceptional__faults)
+{
+    BOOST_CHECK(f::any(faults(number(one_value), g1, number(one_value))));
     BOOST_CHECK(f::any(faults(number(one_value), g1, number(order_minus_one))));
+}
+
+// naf
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__zero__empty)
+{
+    accessor::naf_t digits{};
+    BOOST_CHECK_EQUAL(accessor::naf<5>(digits, scalar{}), 0u);
+    BOOST_CHECK_EQUAL(std::count(digits.begin(), digits.end(), 0), 130);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__ones__carried)
+{
+    accessor::naf_t digits{};
+    BOOST_CHECK_EQUAL(accessor::naf<5>(digits, scalar{ max_uint64, max_uint64, 0, 0 }), 129u);
+    BOOST_CHECK_EQUAL(digits[0], -1);
+    BOOST_CHECK_EQUAL(digits[128], 1);
+    BOOST_CHECK_EQUAL(std::count(digits.begin(), digits.end(), 0), 128);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__window__expected)
+{
+    accessor::naf_t digits{};
+    BOOST_CHECK_EQUAL(accessor::naf<10>(digits, scalar{ 0x1003ff, 0, 0, 0 }), 21u);
+    BOOST_CHECK_EQUAL(digits[0], 1023);
+    BOOST_CHECK_EQUAL(digits[20], 1);
+    BOOST_CHECK_EQUAL(std::count(digits.begin(), digits.end(), 0), 128);
 }
 
 // multiscalar
@@ -380,17 +415,19 @@ static jacobian unpack(const xjacobian<xWord>& in) NOEXCEPT
 template <size_t Lane, typename xWord>
 static void check_lane(const xjacobian<xWord>& out, xWord lane_faults)
 {
-    const auto& g = left_scalars[Lane];
-    const auto& a = points[Lane];
-    const auto& k = right_scalars[Lane];
-    const auto expected = faults(g, a, k);
-    BOOST_CHECK_EQUAL((f::get<uint64_t, Lane>(lane_faults)), expected);
+    if (is_nonzero(f::get<uint64_t, Lane>(lane_faults)))
+        return;
 
-    if (!f::any(expected))
+    const auto sum = unpack<Lane>(out);
+    const auto expected = complete(left_scalars[Lane], points[Lane],
+        right_scalars[Lane]);
+    BOOST_CHECK_EQUAL(f::any(sum.infinity), f::any(expected.infinity));
+
+    if (!f::any(expected.infinity))
     {
         affine actual{}, reference{};
-        accessor::to_affine(actual, unpack<Lane>(out));
-        accessor::to_affine(reference, complete(g, a, k));
+        accessor::to_affine(actual, sum);
+        accessor::to_affine(reference, expected);
         BOOST_CHECK_EQUAL(encode(actual.x), encode(reference.x));
         BOOST_CHECK_EQUAL(encode(actual.y), encode(reference.y));
     }
@@ -406,6 +443,8 @@ static void check_multiply()
             pack<xWord>(left_scalars), pack<xWord>(points),
             pack<xWord>(right_scalars));
 
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(lane_faults)), 0_u64);
+        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(lane_faults)), 0_u64);
         check_lane<0>(out, lane_faults);
         check_lane<1>(out, lane_faults);
 
