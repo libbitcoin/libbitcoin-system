@@ -369,6 +369,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\math.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\performance.cpp">
+      <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>

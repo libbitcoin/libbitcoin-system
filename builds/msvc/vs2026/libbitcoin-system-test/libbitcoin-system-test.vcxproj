@@ -250,6 +250,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ellswift.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\math.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\performance.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp" />
@@ -302,7 +305,9 @@
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\muhash.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp">
+      <ObjectFileName>$(IntDir)test_hash_performance_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
     </ClCompile>

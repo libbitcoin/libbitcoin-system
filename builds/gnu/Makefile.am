@@ -1091,6 +1091,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/secp256k1/ellswift.cpp \
     ${srcdir}/../../test/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../test/crypto/secp256k1/math.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/performance.cpp \
     ${srcdir}/../../test/crypto/secp256k1/schnorr.cpp \
     ${srcdir}/../../test/data/array_cast.cpp \
     ${srcdir}/../../test/data/byte_cast.cpp \
