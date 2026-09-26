@@ -926,6 +926,80 @@ BOOST_AUTO_TEST_CASE(script__verify__multisig_invalid_signature_batched__success
     rows.clear();
 }
 
+static data_chunk multisig_endorsement(const transaction& tx,
+    const script& subscript) NOEXCEPT
+{
+    hash_digest sighash{};
+    const auto it = tx.inputs_ptr()->begin();
+    const auto version = script_version::unversioned;
+    tx.signature_hash(sighash, it, subscript, batch_value, {}, version,
+        coverage::hash_all, flags::no_rules);
+
+    ec_signature signature{};
+    ecdsa::sign(signature, batch_secret, sighash);
+    der_signature der{};
+    ecdsa::encode_signature(der, signature);
+
+    auto endorsement = to_chunk(der);
+    endorsement.push_back(coverage::hash_all);
+    return endorsement;
+}
+
+// Each multisig op strips its own endorsements from its subscript, so with the
+// first endorsement embedded in the script the two subscripts differ. A hash
+// cached (same sighash flags) by the first op must not be reused by the second.
+BOOST_AUTO_TEST_CASE(script__verify__multisig_distinct_stripped_subscripts__success)
+{
+    ec_compressed public_key{};
+    secret_to_public(public_key, batch_secret);
+    const auto key = to_chunk(public_key);
+    const auto positive1 = operation::opcode_from_positive(1_u8);
+    const operations tail
+    {
+        operation{ opcode::drop },
+        operation{ positive1 },
+        operation{ key, false },
+        operation{ positive1 },
+        operation{ opcode::checkmultisigverify },
+        operation{ positive1 },
+        operation{ key, false },
+        operation{ positive1 },
+        operation{ opcode::checkmultisig }
+    };
+
+    const inputs ins
+    {
+        input{ point{ one_hash, 0 }, script{}, max_input_sequence }
+    };
+    const outputs outs{ output{ batch_value, script{} } };
+    const transaction unsigned_tx{ 1, ins, outs, 0 };
+
+    // First endorsement commits to the script stripped of itself.
+    const auto first = multisig_endorsement(unsigned_tx, script{ tail });
+
+    // Second endorsement commits to the full script (it is not embedded).
+    auto ops = tail;
+    ops.insert(ops.begin(), operation{ first, false });
+    const script prevout_script{ ops };
+    const auto second = multisig_endorsement(unsigned_tx, prevout_script);
+
+    const operations in_ops
+    {
+        operation{ data_chunk{}, true },
+        operation{ second, false },
+        operation{ data_chunk{}, true },
+        operation{ first, false }
+    };
+    const inputs signed_ins
+    {
+        input{ point{ one_hash, 0 }, script{ in_ops }, max_input_sequence }
+    };
+    const transaction_accessor tx{ 1, signed_ins, outs, 0 };
+    const output prevout{ batch_value, prevout_script };
+    (*tx.inputs_ptr())[0]->prevout = to_shared(prevout);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
+}
+
 static ec_xonly batch_xonly() NOEXCEPT
 {
     ec_compressed public_key{};
