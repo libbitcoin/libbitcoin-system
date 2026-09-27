@@ -597,7 +597,7 @@ int secp256k1_ec_pubkey_tweak_add(const secp256k1_context*,
     const auto valid = local::load<zero>(point, pubkey->data);
     pubkey->data = {};
     if (!valid || !local::to_scalar(tweak, tweak32) ||
-        !local::linear(sum, tweak, point, { 1 }))
+        !local::linear(sum, tweak, point))
         return failure;
 
     local::save<zero>(pubkey->data, sum);
@@ -879,7 +879,7 @@ int secp256k1_xonly_pubkey_tweak_add_check(const secp256k1_context*,
     local::scalar tweak{};
     if (!local::load<zero>(point, internal_pubkey->data) ||
         !local::to_scalar(tweak, tweak32) ||
-        !local::linear(sum, tweak, point, { 1 }))
+        !local::linear(sum, tweak, point))
         return failure;
 
     local::bytes x{};

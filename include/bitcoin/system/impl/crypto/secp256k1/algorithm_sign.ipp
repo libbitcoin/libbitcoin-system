@@ -46,6 +46,22 @@ constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
     return true;
 }
 
+constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
+    const affine_t<uint64_t>& a) NOEXCEPT
+{
+    jacobian_t<uint64_t> sum{};
+    if (f::any(multiply(sum, scalars_t<uint64_t>{ g }, a,
+        scalars_t<uint64_t>{})))
+        multiply_complete(sum, g, a, {});
+
+    add_complete(sum, sum, a);
+    if (f::any(sum.infinity))
+        return false;
+
+    to_affine(r, sum);
+    return true;
+}
+
 constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     const scalar_t& k, const scalar_t& m) NOEXCEPT
 {

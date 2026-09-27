@@ -784,6 +784,10 @@ protected:
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,
         const affine_t<uint64_t>& a, const scalar_t& k) NOEXCEPT;
 
+    /// r = g * G + a (normal), false if infinity.
+    static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,
+        const affine_t<uint64_t>& a) NOEXCEPT;
+
     /// r = k * G (normal) by blind m, k and m nonzero.
     static constexpr void secret_multiply(affine_t<uint64_t>& r,
         const scalar_t& k, const scalar_t& m) NOEXCEPT;

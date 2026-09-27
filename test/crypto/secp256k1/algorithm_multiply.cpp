@@ -37,6 +37,7 @@ public:
     using bytes_t = algorithm::bytes_t;
     using algorithm::multiply;
     using algorithm::multiply_complete;
+    using algorithm::linear;
     using algorithm::naf_t;
     using algorithm::naf;
     using algorithm::to_affine;
@@ -256,6 +257,37 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__exceptional__faults
 {
     BOOST_CHECK(f::any(faults(number(one_value), g1, number(one_value))));
     BOOST_CHECK(f::any(faults(number(one_value), g1, number(order_minus_one))));
+}
+
+// linear
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point__matches_unit_scalar)
+{
+    affine sum{}, expected{};
+    BOOST_REQUIRE(accessor::linear(sum, number(sample), p1));
+    BOOST_REQUIRE(accessor::linear(expected, number(sample), p1, number(one_value)));
+    BOOST_CHECK(sum.x == expected.x && sum.y == expected.y);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_zero__point)
+{
+    affine sum{};
+    BOOST_REQUIRE(accessor::linear(sum, number(zero_value), p1));
+    BOOST_CHECK(is_point(sum, px, py));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_generator__doubled)
+{
+    affine sum{};
+    BOOST_REQUIRE(accessor::linear(sum, number(one_value), g1));
+    BOOST_CHECK(is_point(sum, g2x, g2y));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_negated__infinity)
+{
+    affine sum{};
+    BOOST_CHECK(!accessor::linear(sum, number(order_minus_one), g1));
 }
 
 // naf
