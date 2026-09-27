@@ -282,8 +282,7 @@ constexpr size_t algorithm::naf(naf_t& r, const scalar_t& magnitude) NOEXCEPT
 }
 
 template <typename Word>
-constexpr Word algorithm::pack(
-    const std_array<uint64_t, lanes<Word>>& values) NOEXCEPT
+constexpr Word algorithm::pack(const words_t<Word>& values) NOEXCEPT
 {
     if constexpr (is_same_type<Word, uint64_t>)
     {
@@ -314,7 +313,7 @@ constexpr void algorithm::digit(Word& index, Word& negative,
 {
     constexpr auto stride = two * array_count<field_t<Word>> * lanes<Word>;
 
-    std_array<uint64_t, lanes<Word>> indexes{}, negatives{};
+    words_t<Word> indexes{}, negatives{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
         const auto& half = halves[lane];
@@ -438,7 +437,7 @@ constexpr void algorithm::correct(jacobian_t<Word>& r, const affine_t<Word>& a,
     const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
     Word& faults) NOEXCEPT
 {
-    std_array<uint64_t, lanes<Word>> evens{}, positives{};
+    words_t<Word> evens{}, positives{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
         evens[lane] = halves[lane].even ? max_uint64 : 0_u64;

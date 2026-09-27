@@ -281,8 +281,7 @@ void algorithm::inverse(std_vector<Element>& values) NOEXCEPT
 }
 
 template <typename Word>
-std_array<uint64_t, algorithm::lanes<Word>> algorithm::unpack(
-    Word value) NOEXCEPT
+algorithm::words_t<Word> algorithm::unpack(Word value) NOEXCEPT
 {
     if constexpr (is_same_type<Word, uint64_t>)
     {
@@ -318,7 +317,7 @@ void algorithm::pack(field_t<Word>& r,
 {
     for (size_t limb{}; limb < r.size(); ++limb)
     {
-        std_array<uint64_t, lanes<Word>> values{};
+        words_t<Word> values{};
         for (size_t lane{}; lane < values.size(); ++lane)
             values[lane] = rows[lane][limb];
 

@@ -677,6 +677,10 @@ protected:
     template <typename Word>
     using scalars_t = std_array<scalar_t, lanes<Word>>;
 
+    /// Integral word per lane.
+    template <typename Word>
+    using words_t = std_array<uint64_t, lanes<Word>>;
+
     /// r = g * G + k * a, mask of lanes not computed (exceptional).
     template <typename Word>
     static constexpr Word multiply(jacobian_t<Word>& r,
@@ -715,8 +719,7 @@ protected:
         const scalar_t& half) NOEXCEPT;
 
     template <typename Word>
-    static constexpr Word pack(
-        const std_array<uint64_t, lanes<Word>>& values) NOEXCEPT;
+    static constexpr Word pack(const words_t<Word>& values) NOEXCEPT;
 
     template <size_t Bits, typename Word>
     static constexpr void digit(Word& index, Word& negative,
@@ -846,7 +849,7 @@ protected:
     static void inverse(std_vector<Element>& values) NOEXCEPT;
 
     template <typename Word>
-    static std_array<uint64_t, lanes<Word>> unpack(Word value) NOEXCEPT;
+    static words_t<Word> unpack(Word value) NOEXCEPT;
 
     template <typename Word>
     static void pack(field_t<Word>& r,
