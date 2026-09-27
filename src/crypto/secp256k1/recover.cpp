@@ -37,9 +37,13 @@ static bool recover_public(const secp256k1_context* context,
     data_array<Size>& out, const recoverable_signature& recoverable,
     const hash_digest& hash) NOEXCEPT
 {
+    static constexpr auto maximum_recovery_id = 3;
+    const auto recovery_id = sign_cast<int>(recoverable.recovery_id);
+    if (recovery_id > maximum_recovery_id)
+        return false;
+
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sign;
-    const auto recovery_id = sign_cast<int>(recoverable.recovery_id);
     return
         secp256k1_ecdsa_recoverable_signature_parse_compact(context,
             &sign, recoverable.signature.data(), recovery_id) == ec_success &&
