@@ -51,7 +51,8 @@ namespace secp256k1 {
 
 /// libsecp256k1 compatible interface to the local implementation, for the
 /// functions used by the library. Operations on secret values are blinded
-/// but variable time. Opaque types are implementation defined.
+/// but variable time. Opaque types other than the ecdsa signature are
+/// implementation defined.
 
 /// Types.
 /// ---------------------------------------------------------------------------
@@ -63,6 +64,7 @@ struct secp256k1_pubkey
     data_array<64> data;
 };
 
+/// r then s, each as four native 64 bit words, least significant first.
 struct secp256k1_ecdsa_signature
 {
     data_array<64> data;

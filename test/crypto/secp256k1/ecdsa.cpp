@@ -69,6 +69,22 @@ BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__positive__expected)
     BOOST_REQUIRE_EQUAL(signature, der_signature3);
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__lax__expected)
+{
+    using namespace system::ecdsa;
+    ec_signature signature;
+    BOOST_REQUIRE(decode_signature(signature, der_signature3, false));
+    BOOST_REQUIRE_EQUAL(signature, signature3);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__strict__expected)
+{
+    using namespace system::ecdsa;
+    ec_signature signature;
+    BOOST_REQUIRE(decode_signature(signature, der_signature3, true));
+    BOOST_REQUIRE_EQUAL(signature, signature3);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_positive__expected)
 {
     using namespace system::ecdsa;
