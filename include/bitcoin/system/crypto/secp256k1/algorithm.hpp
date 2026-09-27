@@ -195,8 +195,8 @@ protected:
     /// r = a * b (weak from weak, or integral weak from limbs below 2^56 and
     /// fifth limb below 2^52).
     template <typename Word>
-    static constexpr void multiply(field_t<Word>& r, const field_t<Word>& a,
-        const field_t<Word>& b) NOEXCEPT;
+    static constexpr void multiply(field_t<Word>& r,
+        const field_t<Word>& a, const field_t<Word>& b) NOEXCEPT;
 
     /// r = a^2 (weak from weak, or integral weak from limbs below 2^56 and
     /// fifth limb below 2^52).

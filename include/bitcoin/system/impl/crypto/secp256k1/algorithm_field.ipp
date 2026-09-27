@@ -295,185 +295,185 @@ constexpr void algorithm::normalize(field_t<Word>& a) NOEXCEPT
     a[4] = f::and_(a[4], top);
 }
 
+template <typename Word>
+constexpr void algorithm::multiply(field_t<Word>& r,
+    const field_t<Word>& a, const field_t<Word>& b) NOEXCEPT
+{
+    product_t<Word> c{};
+    accumulate<0, 0>(c, a, b);
+    accumulate<0, 1>(c, a, b);
+    accumulate<0, 2>(c, a, b);
+    accumulate<0, 3>(c, a, b);
+    accumulate<0, 4>(c, a, b);
+    accumulate<1, 0>(c, a, b);
+    accumulate<1, 1>(c, a, b);
+    accumulate<1, 2>(c, a, b);
+    accumulate<1, 3>(c, a, b);
+    accumulate<1, 4>(c, a, b);
+    accumulate<2, 0>(c, a, b);
+    accumulate<2, 1>(c, a, b);
+    accumulate<2, 2>(c, a, b);
+    accumulate<2, 3>(c, a, b);
+    accumulate<2, 4>(c, a, b);
+    accumulate<3, 0>(c, a, b);
+    accumulate<3, 1>(c, a, b);
+    accumulate<3, 2>(c, a, b);
+    accumulate<3, 3>(c, a, b);
+    accumulate<3, 4>(c, a, b);
+    accumulate<4, 0>(c, a, b);
+    accumulate<4, 1>(c, a, b);
+    accumulate<4, 2>(c, a, b);
+    accumulate<4, 3>(c, a, b);
+    accumulate<4, 4>(c, a, b);
+    reduce(r, c);
+}
+
 // Integral products accumulate in two 128 bit columns, where each column above
 // 2^256 folds into a column below it as it completes.
-template <typename Word>
-constexpr void algorithm::multiply(field_t<Word>& r, const field_t<Word>& a,
-    const field_t<Word>& b) NOEXCEPT
+template <>
+INLINE constexpr void algorithm::multiply<uint64_t>(field_t<uint64_t>& r,
+    const field_t<uint64_t>& a, const field_t<uint64_t>& b) NOEXCEPT
 {
-    if constexpr (is_same_type<Word, uint64_t>)
-    {
-        field_t<uint64_t> out{};
-        unsigned128_t c{}, d{};
-        multiply_add(d, a[0], b[3]);
-        multiply_add(d, a[1], b[2]);
-        multiply_add(d, a[2], b[1]);
-        multiply_add(d, a[3], b[0]);
-        multiply_add(c, a[4], b[4]);
-        multiply_add(d, low(c), fold_260);
-        shift_word(c);
-        const auto t3 = take(d);
+    field_t<uint64_t> out{};
+    unsigned128_t c{}, d{};
+    multiply_add(d, a[0], b[3]);
+    multiply_add(d, a[1], b[2]);
+    multiply_add(d, a[2], b[1]);
+    multiply_add(d, a[3], b[0]);
+    multiply_add(c, a[4], b[4]);
+    multiply_add(d, low(c), fold_260);
+    shift_word(c);
+    const auto t3 = take(d);
 
-        multiply_add(d, a[0], b[4]);
-        multiply_add(d, a[1], b[3]);
-        multiply_add(d, a[2], b[2]);
-        multiply_add(d, a[3], b[1]);
-        multiply_add(d, a[4], b[0]);
-        multiply_add(d, low(c), fold_272);
-        auto t4 = take(d);
-        const auto tx = t4 >> top_bits;
-        t4 &= top_mask;
+    multiply_add(d, a[0], b[4]);
+    multiply_add(d, a[1], b[3]);
+    multiply_add(d, a[2], b[2]);
+    multiply_add(d, a[3], b[1]);
+    multiply_add(d, a[4], b[0]);
+    multiply_add(d, low(c), fold_272);
+    auto t4 = take(d);
+    const auto tx = t4 >> top_bits;
+    t4 &= top_mask;
 
-        c = {};
-        multiply_add(c, a[0], b[0]);
-        multiply_add(d, a[1], b[4]);
-        multiply_add(d, a[2], b[3]);
-        multiply_add(d, a[3], b[2]);
-        multiply_add(d, a[4], b[1]);
-        multiply_add(c, (take(d) << 4) | tx, fold_256);
-        out[0] = take(c);
+    c = {};
+    multiply_add(c, a[0], b[0]);
+    multiply_add(d, a[1], b[4]);
+    multiply_add(d, a[2], b[3]);
+    multiply_add(d, a[3], b[2]);
+    multiply_add(d, a[4], b[1]);
+    multiply_add(c, (take(d) << 4) | tx, fold_256);
+    out[0] = take(c);
 
-        multiply_add(c, a[0], b[1]);
-        multiply_add(c, a[1], b[0]);
-        multiply_add(d, a[2], b[4]);
-        multiply_add(d, a[3], b[3]);
-        multiply_add(d, a[4], b[2]);
-        multiply_add(c, take(d), fold_260);
-        out[1] = take(c);
+    multiply_add(c, a[0], b[1]);
+    multiply_add(c, a[1], b[0]);
+    multiply_add(d, a[2], b[4]);
+    multiply_add(d, a[3], b[3]);
+    multiply_add(d, a[4], b[2]);
+    multiply_add(c, take(d), fold_260);
+    out[1] = take(c);
 
-        multiply_add(c, a[0], b[2]);
-        multiply_add(c, a[1], b[1]);
-        multiply_add(c, a[2], b[0]);
-        multiply_add(d, a[3], b[4]);
-        multiply_add(d, a[4], b[3]);
-        multiply_add(c, low(d), fold_260);
-        shift_word(d);
-        out[2] = take(c);
+    multiply_add(c, a[0], b[2]);
+    multiply_add(c, a[1], b[1]);
+    multiply_add(c, a[2], b[0]);
+    multiply_add(d, a[3], b[4]);
+    multiply_add(d, a[4], b[3]);
+    multiply_add(c, low(d), fold_260);
+    shift_word(d);
+    out[2] = take(c);
 
-        multiply_add(c, low(d), fold_272);
-        add(c, t3);
-        out[3] = take(c);
-        out[4] = low(c) + t4;
-        r = out;
-    }
-    else
-    {
-        product_t<Word> c{};
-        accumulate<0, 0>(c, a, b);
-        accumulate<0, 1>(c, a, b);
-        accumulate<0, 2>(c, a, b);
-        accumulate<0, 3>(c, a, b);
-        accumulate<0, 4>(c, a, b);
-        accumulate<1, 0>(c, a, b);
-        accumulate<1, 1>(c, a, b);
-        accumulate<1, 2>(c, a, b);
-        accumulate<1, 3>(c, a, b);
-        accumulate<1, 4>(c, a, b);
-        accumulate<2, 0>(c, a, b);
-        accumulate<2, 1>(c, a, b);
-        accumulate<2, 2>(c, a, b);
-        accumulate<2, 3>(c, a, b);
-        accumulate<2, 4>(c, a, b);
-        accumulate<3, 0>(c, a, b);
-        accumulate<3, 1>(c, a, b);
-        accumulate<3, 2>(c, a, b);
-        accumulate<3, 3>(c, a, b);
-        accumulate<3, 4>(c, a, b);
-        accumulate<4, 0>(c, a, b);
-        accumulate<4, 1>(c, a, b);
-        accumulate<4, 2>(c, a, b);
-        accumulate<4, 3>(c, a, b);
-        accumulate<4, 4>(c, a, b);
-        reduce(r, c);
-    }
+    multiply_add(c, low(d), fold_272);
+    add(c, t3);
+    out[3] = take(c);
+    out[4] = low(c) + t4;
+    r = out;
 }
 
 template <typename Word>
 constexpr void algorithm::square(field_t<Word>& r,
     const field_t<Word>& a) NOEXCEPT
 {
-    if constexpr (is_same_type<Word, uint64_t>)
-    {
-        const auto a0 = shift_left(a[0]);
-        const auto a1 = shift_left(a[1]);
-        const auto a2 = shift_left(a[2]);
-        const auto a4 = shift_left(a[4]);
+    product_t<Word> c{};
+    accumulate<0, 1>(c, a, a);
+    accumulate<0, 2>(c, a, a);
+    accumulate<0, 3>(c, a, a);
+    accumulate<0, 4>(c, a, a);
+    accumulate<1, 2>(c, a, a);
+    accumulate<1, 3>(c, a, a);
+    accumulate<1, 4>(c, a, a);
+    accumulate<2, 3>(c, a, a);
+    accumulate<2, 4>(c, a, a);
+    accumulate<3, 4>(c, a, a);
 
-        field_t<uint64_t> out{};
-        unsigned128_t c{}, d{};
-        multiply_add(d, a0, a[3]);
-        multiply_add(d, a1, a[2]);
-        multiply_add(c, a[4], a[4]);
-        multiply_add(d, low(c), fold_260);
-        shift_word(c);
-        const auto t3 = take(d);
+    c[0] = f::add<64>(c[0], c[0]);
+    c[1] = f::add<64>(c[1], c[1]);
+    c[2] = f::add<64>(c[2], c[2]);
+    c[3] = f::add<64>(c[3], c[3]);
+    c[4] = f::add<64>(c[4], c[4]);
+    c[5] = f::add<64>(c[5], c[5]);
+    c[6] = f::add<64>(c[6], c[6]);
+    c[7] = f::add<64>(c[7], c[7]);
+    c[8] = f::add<64>(c[8], c[8]);
+    c[9] = f::add<64>(c[9], c[9]);
 
-        multiply_add(d, a[0], a4);
-        multiply_add(d, a1, a[3]);
-        multiply_add(d, a[2], a[2]);
-        multiply_add(d, low(c), fold_272);
-        auto t4 = take(d);
-        const auto tx = t4 >> top_bits;
-        t4 &= top_mask;
+    accumulate<0, 0>(c, a, a);
+    accumulate<1, 1>(c, a, a);
+    accumulate<2, 2>(c, a, a);
+    accumulate<3, 3>(c, a, a);
+    accumulate<4, 4>(c, a, a);
+    reduce(r, c);
+}
 
-        c = {};
-        multiply_add(c, a[0], a[0]);
-        multiply_add(d, a[1], a4);
-        multiply_add(d, a2, a[3]);
-        multiply_add(c, (take(d) << 4) | tx, fold_256);
-        out[0] = take(c);
+template <>
+INLINE constexpr void algorithm::square<uint64_t>(field_t<uint64_t>& r,
+    const field_t<uint64_t>& a) NOEXCEPT
+{
+    const auto a0 = shift_left(a[0]);
+    const auto a1 = shift_left(a[1]);
+    const auto a2 = shift_left(a[2]);
+    const auto a4 = shift_left(a[4]);
 
-        multiply_add(c, a0, a[1]);
-        multiply_add(d, a[2], a4);
-        multiply_add(d, a[3], a[3]);
-        multiply_add(c, take(d), fold_260);
-        out[1] = take(c);
+    field_t<uint64_t> out{};
+    unsigned128_t c{}, d{};
+    multiply_add(d, a0, a[3]);
+    multiply_add(d, a1, a[2]);
+    multiply_add(c, a[4], a[4]);
+    multiply_add(d, low(c), fold_260);
+    shift_word(c);
+    const auto t3 = take(d);
 
-        multiply_add(c, a0, a[2]);
-        multiply_add(c, a[1], a[1]);
-        multiply_add(d, a[3], a4);
-        multiply_add(c, low(d), fold_260);
-        shift_word(d);
-        out[2] = take(c);
+    multiply_add(d, a[0], a4);
+    multiply_add(d, a1, a[3]);
+    multiply_add(d, a[2], a[2]);
+    multiply_add(d, low(c), fold_272);
+    auto t4 = take(d);
+    const auto tx = t4 >> top_bits;
+    t4 &= top_mask;
 
-        multiply_add(c, low(d), fold_272);
-        add(c, t3);
-        out[3] = take(c);
-        out[4] = low(c) + t4;
-        r = out;
-    }
-    else
-    {
-        product_t<Word> c{};
-        accumulate<0, 1>(c, a, a);
-        accumulate<0, 2>(c, a, a);
-        accumulate<0, 3>(c, a, a);
-        accumulate<0, 4>(c, a, a);
-        accumulate<1, 2>(c, a, a);
-        accumulate<1, 3>(c, a, a);
-        accumulate<1, 4>(c, a, a);
-        accumulate<2, 3>(c, a, a);
-        accumulate<2, 4>(c, a, a);
-        accumulate<3, 4>(c, a, a);
+    c = {};
+    multiply_add(c, a[0], a[0]);
+    multiply_add(d, a[1], a4);
+    multiply_add(d, a2, a[3]);
+    multiply_add(c, (take(d) << 4) | tx, fold_256);
+    out[0] = take(c);
 
-        c[0] = f::add<64>(c[0], c[0]);
-        c[1] = f::add<64>(c[1], c[1]);
-        c[2] = f::add<64>(c[2], c[2]);
-        c[3] = f::add<64>(c[3], c[3]);
-        c[4] = f::add<64>(c[4], c[4]);
-        c[5] = f::add<64>(c[5], c[5]);
-        c[6] = f::add<64>(c[6], c[6]);
-        c[7] = f::add<64>(c[7], c[7]);
-        c[8] = f::add<64>(c[8], c[8]);
-        c[9] = f::add<64>(c[9], c[9]);
+    multiply_add(c, a0, a[1]);
+    multiply_add(d, a[2], a4);
+    multiply_add(d, a[3], a[3]);
+    multiply_add(c, take(d), fold_260);
+    out[1] = take(c);
 
-        accumulate<0, 0>(c, a, a);
-        accumulate<1, 1>(c, a, a);
-        accumulate<2, 2>(c, a, a);
-        accumulate<3, 3>(c, a, a);
-        accumulate<4, 4>(c, a, a);
-        reduce(r, c);
-    }
+    multiply_add(c, a0, a[2]);
+    multiply_add(c, a[1], a[1]);
+    multiply_add(d, a[3], a4);
+    multiply_add(c, low(d), fold_260);
+    shift_word(d);
+    out[2] = take(c);
+
+    multiply_add(c, low(d), fold_272);
+    add(c, t3);
+    out[3] = take(c);
+    out[4] = low(c) + t4;
+    r = out;
 }
 
 template <size_t Count, typename Word>
