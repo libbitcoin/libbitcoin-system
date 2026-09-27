@@ -16,42 +16,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES256_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_AES256_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_AES_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_AES_AES_HPP
 
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace aes {
 
-/// Advanced Encryption Standard (AES) 256.
-class BC_API aes256 final
+struct aesk_t{};
+
+template <size_t Strength,
+    bool_if<Strength == 128 || Strength == 256> = true>
+struct k
 {
-public:
-    /// AES block is always 128 bits.
-    typedef data_array<bytes<128>> block;
-
-    /// AES-256 secret is always 256 bits.
-    typedef data_array<bytes<256>> secret;
-
-    /// nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf
-    static void encrypt_ecb(block& bytes, const secret& key) NOEXCEPT;
-    static void decrypt_ecb(block& bytes, const secret& key) NOEXCEPT;
-
-private:
-    struct context
-    {
-        secret key;
-        secret enckey;
-        secret deckey;
-    };
-
-    static void initialize(context& context, const secret& key) NOEXCEPT;
-    static void encrypt_ecb(context& context, block& bytes) NOEXCEPT;
-    static void decrypt_ecb(context& context, block& bytes) NOEXCEPT;
+    using T = aesk_t;
+    static constexpr auto strength   = Strength;
+    static constexpr auto key_words  = strength / bits<uint32_t>;
+    static constexpr auto rounds     = key_words + 6_size;
+    static constexpr auto round_keys = add1(rounds);
 };
 
+using k128 = k<128>;
+using k256 = k<256>;
+
+} // namespace aes
 } // namespace system
 } // namespace libbitcoin
 

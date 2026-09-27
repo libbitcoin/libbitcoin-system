@@ -19,7 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 
-#include <bitcoin/system/crypto/aes256.hpp>
+#include <bitcoin/system/crypto/aes/aes.hpp>
+#include <bitcoin/system/crypto/aes/algorithm.hpp>
+#include <bitcoin/system/crypto/aes/ghash.hpp>
+#include <bitcoin/system/crypto/aes128_gcm.hpp>
+#include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/crypto/chacha20.hpp>
 #include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/fschacha20.hpp>
