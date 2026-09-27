@@ -154,8 +154,8 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     multiply(z3, a.z, b.z);
     multiply(z3, z3, h);
 
-    r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
     const auto infinity = f::or_(a.infinity, b.infinity);
+    r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
     if constexpr (is_same_type<Word, uint64_t>)
     {
         return normalizes_to_zero(h) ? max_uint64 : infinity;
@@ -401,8 +401,9 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
         multiply(hhh, hhh, a.y);
         add(y3, y3, hhh);
 
+        const auto uncomputed = normalizes_to_zero(h) ? max_uint64 : a.infinity;
         r = { x3, y3, z3, 0_u64 };
-        return normalizes_to_zero(h) ? max_uint64 : a.infinity;
+        return uncomputed;
     }
     else
     {
@@ -437,10 +438,11 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
 
         multiply(z3, a.z, h);
 
-        r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
         field_t<Word> normal{ h };
         normalize(normal);
-        return f::or_(a.infinity, is_zero_element(normal));
+        const auto uncomputed = f::or_(a.infinity, is_zero_element(normal));
+        r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
+        return uncomputed;
     }
 }
 
