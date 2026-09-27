@@ -41,6 +41,7 @@ public:
     using algorithm::is_zero_element;
     using algorithm::is_odd_element;
     using algorithm::equal;
+    using algorithm::normalizes_to_zero;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
 };
@@ -349,6 +350,12 @@ static_assert(!f::any(accessor::is_odd_element(decode(zero_value))));
 static_assert(!f::any(accessor::is_odd_element(decode(gy))));
 static_assert(f::any(accessor::equal(decode(gx), decode(gx))));
 static_assert(!f::any(accessor::equal(decode(gx), decode(gy))));
+static_assert(accessor::normalizes_to_zero(decode(zero_value)));
+static_assert(accessor::normalizes_to_zero(prime_limbs));
+static_assert(accessor::normalizes_to_zero(field_negate(decode(zero_value))));
+static_assert(!accessor::normalizes_to_zero(decode(one_value)));
+static_assert(!accessor::normalizes_to_zero(prime_plus_one));
+static_assert(!accessor::normalizes_to_zero(all_limbs));
 
 // lanes
 // ----------------------------------------------------------------------------

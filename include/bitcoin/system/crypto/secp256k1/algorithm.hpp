@@ -232,6 +232,10 @@ protected:
     static constexpr Word equal(const field_t<Word>& a,
         const field_t<Word>& b) NOEXCEPT;
 
+    /// a = 0 mod p (loose, limbs below 2^56), in variable time.
+    static constexpr bool normalizes_to_zero(
+        const field_t<uint64_t>& a) NOEXCEPT;
+
     /// Field encoding.
     /// -----------------------------------------------------------------------
 

@@ -127,10 +127,18 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     multiply(z3, a.z, b.z);
     multiply(z3, z3, h);
 
-    field_t<Word> normal{ h };
-    normalize(normal);
     r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
-    return f::or_(f::or_(a.infinity, b.infinity), is_zero_element(normal));
+    const auto infinity = f::or_(a.infinity, b.infinity);
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        return normalizes_to_zero(h) ? max_uint64 : infinity;
+    }
+    else
+    {
+        field_t<Word> normal{ h };
+        normalize(normal);
+        return f::or_(infinity, is_zero_element(normal));
+    }
 }
 
 // An uncomputed sum is of an infinite operand, or of equal x, where equal y
@@ -354,10 +362,17 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
 
     multiply(z3, a.z, h);
 
-    field_t<Word> normal{ h };
-    normalize(normal);
     r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
-    return f::or_(a.infinity, is_zero_element(normal));
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        return normalizes_to_zero(h) ? max_uint64 : a.infinity;
+    }
+    else
+    {
+        field_t<Word> normal{ h };
+        normalize(normal);
+        return f::or_(a.infinity, is_zero_element(normal));
+    }
 }
 
 template <typename Word>
