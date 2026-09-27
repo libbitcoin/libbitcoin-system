@@ -317,7 +317,7 @@ struct backward
 template <size Slice>
 constexpr jacobian first() noexcept
 {
-    constexpr auto multiple = 2 * Slice * slice_size + 1;
+    constexpr word multiple = 2 * Slice * slice_size + 1;
 
     jacobian r{ generator.x, generator.y, { { 1 } } };
     auto bit = size{ 63 };
