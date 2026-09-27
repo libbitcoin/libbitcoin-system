@@ -361,9 +361,13 @@ static xWord pack_limb(const std_array<field, 8>& in) NOEXCEPT
     return pack<xWord>(limbs);
 }
 
+// Lanes take weak coordinates, which integral results need not be.
 template <typename xWord>
-static xfield<xWord> pack(const std_array<field, 8>& in) NOEXCEPT
+static xfield<xWord> pack(std_array<field, 8> in) NOEXCEPT
 {
+    for (auto& value: in)
+        accessor::normalize(value);
+
     return
     {
         pack_limb<xWord, 0>(in),

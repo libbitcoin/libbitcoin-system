@@ -148,14 +148,15 @@ protected:
     /// loose: limbs below 2^62.
     /// weak: limbs below 2^52, fifth limb below 2^49.
     /// normal: weak and less than p.
+    /// magnitude m: limbs below m * 2^53, fifth limb below m * 2^49.
 
     /// r = a + b (loose from loose).
     template <typename Word>
     static constexpr void add(field_t<Word>& r, const field_t<Word>& a,
         const field_t<Word>& b) NOEXCEPT;
 
-    /// r = -a (loose from weak).
-    template <typename Word>
+    /// r = -a (magnitude Magnitude + 1 from magnitude Magnitude).
+    template <size_t Magnitude = one, typename Word>
     static constexpr void negate(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;
 
@@ -168,6 +169,10 @@ protected:
     template <size_t Factor, typename Word>
     static constexpr void scale(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;
+
+    /// r = a / 2 (magnitude m / 2 + 1 from magnitude m).
+    static constexpr void halve(field_t<uint64_t>& r,
+        const field_t<uint64_t>& a) NOEXCEPT;
 
     /// r = mask ? a : b, per lane.
     template <typename Word>
@@ -479,7 +484,7 @@ protected:
     static constexpr void from_signed62(scalar_t& r,
         const signed62_t& a) NOEXCEPT;
 
-    /// Group arithmetic (weak coordinates).
+    /// Group arithmetic (weak coordinates, integral of magnitude at most four).
     /// -----------------------------------------------------------------------
 
     /// r = 2a.

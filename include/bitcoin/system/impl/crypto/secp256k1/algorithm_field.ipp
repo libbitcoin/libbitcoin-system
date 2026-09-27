@@ -193,15 +193,16 @@ constexpr void algorithm::add(field_t<Word>& r, const field_t<Word>& a,
     r[4] = f::add<64>(a[4], b[4]);
 }
 
-template <typename Word>
+template <size_t Magnitude, typename Word>
 constexpr void algorithm::negate(field_t<Word>& r,
     const field_t<Word>& a) NOEXCEPT
 {
-    r[0] = f::sub<64>(f::broadcast<Word>(prime[0] << two), a[0]);
-    r[1] = f::sub<64>(f::broadcast<Word>(prime[1] << two), a[1]);
-    r[2] = f::sub<64>(f::broadcast<Word>(prime[2] << two), a[2]);
-    r[3] = f::sub<64>(f::broadcast<Word>(prime[3] << two), a[3]);
-    r[4] = f::sub<64>(f::broadcast<Word>(prime[4] << two), a[4]);
+    constexpr auto factor = two * add1(Magnitude);
+    r[0] = f::sub<64>(f::broadcast<Word>(prime[0] * factor), a[0]);
+    r[1] = f::sub<64>(f::broadcast<Word>(prime[1] * factor), a[1]);
+    r[2] = f::sub<64>(f::broadcast<Word>(prime[2] * factor), a[2]);
+    r[3] = f::sub<64>(f::broadcast<Word>(prime[3] * factor), a[3]);
+    r[4] = f::sub<64>(f::broadcast<Word>(prime[4] * factor), a[4]);
 }
 
 template <typename Word>
@@ -224,6 +225,25 @@ constexpr void algorithm::scale(field_t<Word>& r,
         add(out, out, a);
 
     r = out;
+}
+
+// An odd value is made even by adding p, then each limb takes the low bit of
+// the next as its top bit.
+constexpr void algorithm::halve(field_t<uint64_t>& r,
+    const field_t<uint64_t>& a) NOEXCEPT
+{
+    constexpr auto top = sub1(limb_bits);
+    const auto mask = 0_u64 - (a[0] & 1_u64);
+    const auto t0 = a[0] + (prime[0] & mask);
+    const auto t1 = a[1] + (prime[1] & mask);
+    const auto t2 = a[2] + (prime[2] & mask);
+    const auto t3 = a[3] + (prime[3] & mask);
+    const auto t4 = a[4] + (prime[4] & mask);
+    r[0] = (t0 >> one) + ((t1 & 1_u64) << top);
+    r[1] = (t1 >> one) + ((t2 & 1_u64) << top);
+    r[2] = (t2 >> one) + ((t3 & 1_u64) << top);
+    r[3] = (t3 >> one) + ((t4 & 1_u64) << top);
+    r[4] = (t4 >> one);
 }
 
 template <typename Word>

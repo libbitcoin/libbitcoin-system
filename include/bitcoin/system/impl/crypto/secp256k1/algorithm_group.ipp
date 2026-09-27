@@ -30,40 +30,67 @@ namespace secp256k1 {
 // ----------------------------------------------------------------------------
 // protected
 
-// m = 3x^2, s = 4xy^2, x3 = m^2 - 2s, y3 = m(s - x3) - 8y^4, z3 = 2yz.
+// m = 3x^2, s = 4xy^2, x3 = m^2 - 2s, y3 = m(s - x3) - 8y^4, z3 = 2yz, which
+// integrally is scaled by 1/2 as l = m / 2, t = -xy^2, x3 = l^2 + 2t,
+// y3 = -(l(x3 + t) + y^4), z3 = yz.
 template <typename Word>
 constexpr void algorithm::double_(jacobian_t<Word>& r,
     const jacobian_t<Word>& a) NOEXCEPT
 {
-    field_t<Word> yy{}, xx{}, s{}, m{}, y4{}, x3{}, y3{}, z3{}, t{};
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        field_t<uint64_t> yy{}, l{}, t{}, x3{}, y3{}, z3{};
 
-    square(yy, a.y);
-    square(xx, a.x);
-    multiply(s, a.x, yy);
-    scale<3>(m, xx);
-    carry_extended(m);
+        multiply(z3, a.y, a.z);
+        square(yy, a.y);
+        square(l, a.x);
+        scale<3>(l, l);
+        halve(l, l);
+        negate(t, yy);
+        multiply(t, t, a.x);
+        square(x3, l);
+        add(x3, x3, t);
+        add(x3, x3, t);
+        square(yy, yy);
+        add(t, t, x3);
+        multiply(y3, t, l);
+        add(y3, y3, yy);
+        negate<2>(y3, y3);
 
-    square(x3, m);
-    negate(t, s);
-    scale<8>(t, t);
-    add(x3, x3, t);
-    carry(x3);
+        r = { x3, y3, z3, a.infinity };
+    }
+    else
+    {
+        field_t<Word> yy{}, xx{}, s{}, m{}, y4{}, x3{}, y3{}, z3{}, t{};
 
-    scale<4>(s, s);
-    subtract(t, s, x3);
-    carry_extended(t);
-    multiply(y3, m, t);
-    square(y4, yy);
-    negate(y4, y4);
-    scale<8>(y4, y4);
-    add(y3, y3, y4);
-    carry(y3);
+        square(yy, a.y);
+        square(xx, a.x);
+        multiply(s, a.x, yy);
+        scale<3>(m, xx);
+        carry(m);
 
-    multiply(z3, a.y, a.z);
-    scale<2>(z3, z3);
-    carry(z3);
+        square(x3, m);
+        negate(t, s);
+        scale<8>(t, t);
+        add(x3, x3, t);
+        carry(x3);
 
-    r = { x3, y3, z3, a.infinity };
+        scale<4>(s, s);
+        subtract(t, s, x3);
+        carry(t);
+        multiply(y3, m, t);
+        square(y4, yy);
+        negate(y4, y4);
+        scale<8>(y4, y4);
+        add(y3, y3, y4);
+        carry(y3);
+
+        multiply(z3, a.y, a.z);
+        scale<2>(z3, z3);
+        carry(z3);
+
+        r = { x3, y3, z3, a.infinity };
+    }
 }
 
 template <typename Word>
@@ -205,7 +232,7 @@ constexpr void algorithm::negate(affine_t<Word>& r,
     const affine_t<Word>& a) NOEXCEPT
 {
     field_t<Word> y{};
-    negate(y, a.y);
+    negate<4>(y, a.y);
     carry(y);
     r = { a.x, y };
 }
@@ -215,7 +242,7 @@ constexpr void algorithm::negate(jacobian_t<Word>& r,
     const jacobian_t<Word>& a) NOEXCEPT
 {
     field_t<Word> y{};
-    negate(y, a.y);
+    negate<4>(y, a.y);
     carry(y);
     r = { a.x, y, a.z, a.infinity };
 }
@@ -325,50 +352,80 @@ constexpr Word algorithm::is_on_curve(const affine_t<Word>& a) NOEXCEPT
 // protected
 
 // u2 = x2 z^2, s2 = y2 z^3, h = u2 - x1, r = s2 - y1, v = x1 h^2,
-// x3 = r^2 - h^3 - 2v, y3 = r(v - x3) - y1 h^3, z3 = z1 h.
+// x3 = r^2 - h^3 - 2v, y3 = r(v - x3) - y1 h^3, z3 = z1 h, which integrally
+// is of i = -r and negated h^2 as x3 = i^2 - h^3 - 2v, y3 = i(x3 - v) - y1 h^3.
 template <typename Word>
 constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
     const jacobian_t<Word>& a, const affine_t<Word>& b,
     const field_t<Word>& z) NOEXCEPT
 {
-    field_t<Word> zz{}, u2{}, s2{}, rh{}, hh{}, hhh{}, v{}, x3{}, y3{},
-        z3{}, t{};
-
-    square(zz, z);
-    multiply(u2, b.x, zz);
-    multiply(s2, b.y, zz);
-    multiply(s2, s2, z);
-    subtract(h, u2, a.x);
-    carry_extended(h);
-    subtract(rh, s2, a.y);
-    carry_extended(rh);
-
-    square(hh, h);
-    multiply(hhh, h, hh);
-    multiply(v, a.x, hh);
-
-    square(x3, rh);
-    subtract(x3, x3, hhh);
-    subtract(x3, x3, v);
-    subtract(x3, x3, v);
-    carry(x3);
-
-    subtract(t, v, x3);
-    carry_extended(t);
-    multiply(y3, rh, t);
-    multiply(t, a.y, hhh);
-    subtract(y3, y3, t);
-    carry(y3);
-
-    multiply(z3, a.z, h);
-
-    r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
     if constexpr (is_same_type<Word, uint64_t>)
     {
+        field_t<uint64_t> zz{}, u2{}, s2{}, i{}, hh{}, hhh{}, t{}, x3{}, y3{},
+            z3{};
+
+        square(zz, z);
+        multiply(u2, b.x, zz);
+        multiply(s2, b.y, zz);
+        multiply(s2, s2, z);
+        negate<4>(h, a.x);
+        add(h, h, u2);
+        negate(i, s2);
+        add(i, i, a.y);
+
+        multiply(z3, a.z, h);
+        square(hh, h);
+        negate(hh, hh);
+        multiply(hhh, hh, h);
+        multiply(t, a.x, hh);
+
+        square(x3, i);
+        add(x3, x3, hhh);
+        add(x3, x3, t);
+        add(x3, x3, t);
+
+        add(t, t, x3);
+        multiply(y3, t, i);
+        multiply(hhh, hhh, a.y);
+        add(y3, y3, hhh);
+
+        r = { x3, y3, z3, 0_u64 };
         return normalizes_to_zero(h) ? max_uint64 : a.infinity;
     }
     else
     {
+        field_t<Word> zz{}, u2{}, s2{}, rh{}, hh{}, hhh{}, v{}, x3{}, y3{},
+            z3{}, t{};
+
+        square(zz, z);
+        multiply(u2, b.x, zz);
+        multiply(s2, b.y, zz);
+        multiply(s2, s2, z);
+        subtract(h, u2, a.x);
+        carry(h);
+        subtract(rh, s2, a.y);
+        carry(rh);
+
+        square(hh, h);
+        multiply(hhh, h, hh);
+        multiply(v, a.x, hh);
+
+        square(x3, rh);
+        subtract(x3, x3, hhh);
+        subtract(x3, x3, v);
+        subtract(x3, x3, v);
+        carry(x3);
+
+        subtract(t, v, x3);
+        carry(t);
+        multiply(y3, rh, t);
+        multiply(t, a.y, hhh);
+        subtract(y3, y3, t);
+        carry(y3);
+
+        multiply(z3, a.z, h);
+
+        r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
         field_t<Word> normal{ h };
         normalize(normal);
         return f::or_(a.infinity, is_zero_element(normal));
@@ -390,7 +447,7 @@ constexpr void algorithm::negate(affine_t<Word>& r, const affine_t<Word>& a,
     Word mask) NOEXCEPT
 {
     field_t<Word> y{};
-    negate(y, a.y);
+    negate<4>(y, a.y);
     carry(y);
     select(y, mask, y, a.y);
     r = { a.x, y };
