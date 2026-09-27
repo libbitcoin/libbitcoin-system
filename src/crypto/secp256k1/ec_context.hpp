@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_EC_CONTEXT_HPP
 
 #include <bitcoin/system/define.hpp>
-#if defined(HAVE_SECP256K1)
+#if defined(HAVE_SECP256K1) || defined(HAVE_ULTRAFAST)
     #include <secp256k1.h>
     #include <secp256k1_ellswift.h>
     #include <secp256k1_recovery.h>
