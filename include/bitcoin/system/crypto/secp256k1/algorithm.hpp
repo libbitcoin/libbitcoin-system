@@ -581,7 +581,7 @@ protected:
     static constexpr void select(jacobian_t<Word>& r, Word mask,
         const jacobian_t<Word>& a, const jacobian_t<Word>& b) NOEXCEPT;
 
-    /// r = mask ? -a : a, per lane.
+    /// r = mask ? -a : a, per lane (integral y of magnitude at most five).
     template <typename Word>
     static constexpr void negate(affine_t<Word>& r, const affine_t<Word>& a,
         Word mask) NOEXCEPT;
