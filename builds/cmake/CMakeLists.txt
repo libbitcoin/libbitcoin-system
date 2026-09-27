@@ -89,7 +89,7 @@ option( enable-crypto "Use ARM Crypto Extensions." OFF )
 option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
 option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
 option( with-ultrafast "Use shrec/UltrafastSecp256k1 library." OFF )
-option( with-secp256k1 "Use bitcoin-core/secp256k1 library." ON )
+option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( with-tests "Compile with unit tests." ON )
 option( with-examples "Compile with examples." ON )
 
@@ -396,6 +396,11 @@ target_compile_options( libbitcoin-system
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
     $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
     $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
+)
+
+target_compile_definitions( libbitcoin-system
+  PRIVATE
+    $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
 )
 
 file( GLOB_RECURSE libbitcoin_system_HEADERS CONFIGURE_DEPENDS

@@ -18,9 +18,9 @@
  */
 #include <bitcoin/system/crypto/der_parser.hpp>
 
-#include <secp256k1.h>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include "secp256k1/ec_context.hpp"
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
@@ -92,10 +92,13 @@ bool is_valid_bip66_signature_encoding(
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
 
-bool ecdsa_signature_parse_der_lax(const secp256k1_context* ctx,
-    secp256k1_ecdsa_signature* sig, const uint8_t* input,
-    size_t inputlen) NOEXCEPT
+bool ecdsa_signature_parse_der_lax(bc::system::ec_signature& out,
+    const uint8_t* input, size_t inputlen) NOEXCEPT
 {
+    const auto ctx = bc::system::ec_context_verify::context();
+    const auto sig = bc::system::pointer_cast<secp256k1_ecdsa_signature>(
+        out.data());
+
     unsigned char tmpsig[64]{};
     size_t rpos, rlen, spos, slen;
     size_t pos = 0;

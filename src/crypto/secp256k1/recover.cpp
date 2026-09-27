@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
-#include <secp256k1.h>
-#include <secp256k1_recovery.h>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "ec_context.hpp"

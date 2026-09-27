@@ -19,8 +19,16 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_EC_CONTEXT_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_EC_CONTEXT_HPP
 
-#include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
+#if defined(HAVE_SECP256K1)
+    #include <secp256k1.h>
+    #include <secp256k1_ellswift.h>
+    #include <secp256k1_recovery.h>
+    #include <secp256k1_schnorrsig.h>
+#else
+    #include <bitcoin/system/crypto/secp256k1/interface.hpp>
+    using namespace libbitcoin::system::secp256k1;
+#endif
 
 namespace libbitcoin {
 namespace system {

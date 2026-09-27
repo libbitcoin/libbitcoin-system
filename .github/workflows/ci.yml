@@ -53,7 +53,7 @@ jobs:
             flags: ""
             coverage: ""
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -65,7 +65,7 @@ jobs:
             coverage: ""
             package: "clang-19 clang++-19"
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -77,7 +77,7 @@ jobs:
             coverage: ""
             boost: "--build-boost"
             secp256k1: "--build-secp256k1"
-            options: "--enable-isystem"
+            options: "--enable-isystem --with-secp256k1"
 
           - image: ubuntu-24.04
             config: "debug"
@@ -87,7 +87,7 @@ jobs:
             flags: "--coverage -fprofile-update=atomic"
             coverage: "lcov"
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -99,7 +99,7 @@ jobs:
             coverage: ""
             package: "g++-15 gcc-15"
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: "--enable-isystem"
 
     runs-on: ${{ matrix.image }}
@@ -240,7 +240,7 @@ jobs:
             flags: ""
             coverage: ""
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: ""
 
           - image: ubuntu-24.04
@@ -252,7 +252,7 @@ jobs:
             coverage: ""
             package: "clang-19 clang++-19"
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: ""
 
           - image: ubuntu-24.04
@@ -263,7 +263,7 @@ jobs:
             flags: ""
             coverage: ""
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: ""
 
           - image: ubuntu-24.04
@@ -274,7 +274,7 @@ jobs:
             flags: ""
             coverage: ""
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: ""
 
           - image: ubuntu-24.04
@@ -286,7 +286,7 @@ jobs:
             coverage: ""
             package: "g++-16 gcc-16"
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: ""
 
     runs-on: ${{ matrix.image }}
@@ -436,7 +436,7 @@ jobs:
             flags: ""
             coverage: ""
             boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
+            secp256k1: ""
             options: "--build-skip-tests"
 
     runs-on: ${{ matrix.image }}
