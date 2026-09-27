@@ -59,47 +59,121 @@ constexpr void algorithm::reduce(scalar_t& r, bool overflow) NOEXCEPT
 }
 
 // Folds limbs above 2^256 by 2^256 = 2^256 - n (mod n), from 512 to 385 to
-// 258 to 257 bits, leaving at most one subtraction of n.
-constexpr void algorithm::reduce(scalar_t& r, const wide_t& value) NOEXCEPT
+// 258 to 256 bits, leaving at most one subtraction of n, where 2^256 - n is
+// (c0, c1, 1).
+constexpr void algorithm::reduce(scalar_t& r, const wide_t& l) NOEXCEPT
 {
-    constexpr size_t folds = 3;
-    constexpr size_t terms = 3;
-    constexpr auto half = to_half(array_count<wide_t>);
+    constexpr auto c0 = order_complement[0];
+    constexpr auto c1 = order_complement[1];
+    static_assert(order_complement[2] == 1u && is_zero(order_complement[3]));
 
-    auto limbs = value;
-    for (size_t fold{}; fold < folds; ++fold)
-    {
-        wide_t next{ limbs[0], limbs[1], limbs[2], limbs[3] };
-        for (size_t high{}; high < half; ++high)
-            for (size_t term{}; term < terms; ++term)
-                multiply_add(next, high + term, limbs[half + high],
-                    order_complement[term]);
+    column_t c{ l[0], 0, 0 };
+    multiply_add(c, l[4], c0);
+    const auto m0 = take(c);
+    add(c, l[1]);
+    multiply_add(c, l[5], c0);
+    multiply_add(c, l[4], c1);
+    const auto m1 = take(c);
+    add(c, l[2]);
+    multiply_add(c, l[6], c0);
+    multiply_add(c, l[5], c1);
+    add(c, l[4]);
+    const auto m2 = take(c);
+    add(c, l[3]);
+    multiply_add(c, l[7], c0);
+    multiply_add(c, l[6], c1);
+    add(c, l[5]);
+    const auto m3 = take(c);
+    multiply_add(c, l[7], c1);
+    add(c, l[6]);
+    const auto m4 = take(c);
+    add(c, l[7]);
+    const auto m5 = take(c);
+    const auto m6 = c[0];
 
-        limbs = next;
-    }
+    c = { m0, 0, 0 };
+    multiply_add(c, m4, c0);
+    const auto p0 = take(c);
+    add(c, m1);
+    multiply_add(c, m5, c0);
+    multiply_add(c, m4, c1);
+    const auto p1 = take(c);
+    add(c, m2);
+    multiply_add(c, m6, c0);
+    multiply_add(c, m5, c1);
+    add(c, m4);
+    const auto p2 = take(c);
+    add(c, m3);
+    multiply_add(c, m6, c1);
+    add(c, m5);
+    const auto p3 = take(c);
+    const auto p4 = c[0] + m6;
 
-    r = { limbs[0], limbs[1], limbs[2], limbs[3] };
-    reduce(r, is_nonzero(limbs[half]) || is_overflow(r));
+    c = { p0, 0, 0 };
+    multiply_add(c, p4, c0);
+    r[0] = take(c);
+    add(c, p1);
+    multiply_add(c, p4, c1);
+    r[1] = take(c);
+    add(c, p2);
+    add(c, p4);
+    r[2] = take(c);
+    add(c, p3);
+    r[3] = take(c);
+    reduce(r, is_nonzero(c[0]) || is_overflow(r));
 }
 
-constexpr void algorithm::multiply_add(wide_t& r, size_t position,
-    uint64_t a, uint64_t b) NOEXCEPT
+INLINE constexpr void algorithm::multiply_add(column_t& r, uint64_t a,
+    uint64_t b) NOEXCEPT
 {
     uint64_t high{}, low{};
     mul_wide(high, low, a, b);
-    auto carry = add_carry(r[position], r[position], low, false);
-    carry = add_carry(r[add1(position)], r[add1(position)], high, carry);
-    for (auto limb = position + two; carry && limb < r.size(); ++limb)
-        carry = add_carry(r[limb], r[limb], uint64_t{}, carry);
+    const auto carry = add_carry(r[0], r[0], low, false);
+    r[2] += to_int<uint64_t>(add_carry(r[1], r[1], high, carry));
 }
 
+INLINE constexpr void algorithm::add(column_t& r, uint64_t a) NOEXCEPT
+{
+    const auto carry = add_carry(r[0], r[0], a, false);
+    r[2] += to_int<uint64_t>(add_carry(r[1], r[1], uint64_t{}, carry));
+}
+
+INLINE constexpr uint64_t algorithm::take(column_t& a) NOEXCEPT
+{
+    const auto word = a[0];
+    a = { a[1], a[2], 0 };
+    return word;
+}
+
+// Columns of the product, low first.
 constexpr void algorithm::product(wide_t& r, const scalar_t& a,
     const scalar_t& b) NOEXCEPT
 {
-    r = {};
-    for (size_t left{}; left < a.size(); ++left)
-        for (size_t right{}; right < b.size(); ++right)
-            multiply_add(r, left + right, a[left], b[right]);
+    column_t c{};
+    multiply_add(c, a[0], b[0]);
+    r[0] = take(c);
+    multiply_add(c, a[0], b[1]);
+    multiply_add(c, a[1], b[0]);
+    r[1] = take(c);
+    multiply_add(c, a[0], b[2]);
+    multiply_add(c, a[1], b[1]);
+    multiply_add(c, a[2], b[0]);
+    r[2] = take(c);
+    multiply_add(c, a[0], b[3]);
+    multiply_add(c, a[1], b[2]);
+    multiply_add(c, a[2], b[1]);
+    multiply_add(c, a[3], b[0]);
+    r[3] = take(c);
+    multiply_add(c, a[1], b[3]);
+    multiply_add(c, a[2], b[2]);
+    multiply_add(c, a[3], b[1]);
+    r[4] = take(c);
+    multiply_add(c, a[2], b[3]);
+    multiply_add(c, a[3], b[2]);
+    r[5] = take(c);
+    multiply_add(c, a[3], b[3]);
+    r[6] = take(c);
+    r[7] = c[0];
 }
 
 // r = round(a * b / 2^384).

@@ -401,10 +401,14 @@ protected:
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
     static constexpr bool is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
-    static constexpr void reduce(scalar_t& r, const wide_t& value) NOEXCEPT;
+    static constexpr void reduce(scalar_t& r, const wide_t& l) NOEXCEPT;
 
-    static constexpr void multiply_add(wide_t& r, size_t position,
-        uint64_t a, uint64_t b) NOEXCEPT;
+    /// Three word column accumulator.
+    using column_t = std_array<uint64_t, 3>;
+    INLINE static constexpr void multiply_add(column_t& r, uint64_t a,
+        uint64_t b) NOEXCEPT;
+    INLINE static constexpr void add(column_t& r, uint64_t a) NOEXCEPT;
+    INLINE static constexpr uint64_t take(column_t& a) NOEXCEPT;
 
     static constexpr void product(wide_t& r, const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
