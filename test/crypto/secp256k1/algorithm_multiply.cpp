@@ -44,6 +44,9 @@ public:
     using algorithm::to_bytes;
     using algorithm::generator_table;
     using algorithm::endomorphism_table;
+    using algorithm::block_size;
+    using algorithm::beta;
+    using algorithm::normalize;
 };
 
 using field = accessor::field_t<uint64_t>;
@@ -113,23 +116,52 @@ constexpr scalar number(const bytes& value) NOEXCEPT
 template <typename Table>
 constexpr affine entry(const Table& table, size_t index) NOEXCEPT
 {
+    const auto& block = table[index / accessor::block_size];
+    const auto column = index % accessor::block_size;
     return
     {
         {
-            table.x[0][index],
-            table.x[1][index],
-            table.x[2][index],
-            table.x[3][index],
-            table.x[4][index]
+            block.x[0][column],
+            block.x[1][column],
+            block.x[2][column],
+            block.x[3][column],
+            block.x[4][column]
         },
         {
-            table.y[0][index],
-            table.y[1][index],
-            table.y[2][index],
-            table.y[3][index],
-            table.y[4][index]
+            block.y[0][column],
+            block.y[1][column],
+            block.y[2][column],
+            block.y[3][column],
+            block.y[4][column]
         }
     };
+}
+
+// Generator table entry is (2 * index + 1)G, as computed by libsecp256k1.
+static bool is_multiple(size_t index) NOEXCEPT
+{
+    const auto multiple = add1(two * index);
+    ec_secret secret{};
+    secret[30] = narrow_cast<uint8_t>(multiple >> byte_bits);
+    secret[31] = narrow_cast<uint8_t>(multiple);
+
+    ec_compressed key{};
+    const auto point = entry(accessor::generator_table, index);
+    const auto x = encode(point.x);
+    return secret_to_public(key, secret) &&
+        std::equal(x.begin(), x.end(), std::next(key.begin())) &&
+        (key.front() == ec_odd_sign) == get_right(point.y[0]);
+}
+
+// Entry of the endomorphism table is that of the generator table with x * beta.
+static bool is_mapped(size_t index) NOEXCEPT
+{
+    const auto point = entry(accessor::generator_table, index);
+    const auto mapped = entry(accessor::endomorphism_table, index);
+    field x{};
+    accessor::multiply(x, point.x, accessor::beta);
+    accessor::normalize(x);
+    return x == mapped.x && point.y == mapped.y;
 }
 
 constexpr bool is_point(const affine& a, const bytes& x, const bytes& y) NOEXCEPT
@@ -182,6 +214,16 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expect
     BOOST_CHECK(is_point(entry(accessor::generator_table, 63), g127x, g127y));
     BOOST_CHECK(is_point(entry(accessor::generator_table, 511), g1023x, g1023y));
     BOOST_CHECK(is_point(entry(accessor::endomorphism_table, 0), gx_beta, gy));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__computed_multiples__expected)
+{
+    BOOST_CHECK(is_multiple(0));
+    BOOST_CHECK(is_multiple(255));
+    BOOST_CHECK(is_multiple(511));
+    BOOST_CHECK(is_mapped(0));
+    BOOST_CHECK(is_mapped(255));
+    BOOST_CHECK(is_mapped(511));
 }
 
 // multiply

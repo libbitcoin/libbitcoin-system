@@ -25,10 +25,10 @@ namespace system {
 namespace secp256k1 {
 
 constinit const algorithm::table_t<algorithm::generator_bits>
-algorithm::generator_table = tabulate<generator_bits>(false);
+algorithm::generator_table = tabulate<generator_bits, false>();
 
 constinit const algorithm::table_t<algorithm::generator_bits>
-algorithm::endomorphism_table = tabulate<generator_bits>(true);
+algorithm::endomorphism_table = tabulate<generator_bits, true>();
 
 } // namespace secp256k1
 } // namespace system

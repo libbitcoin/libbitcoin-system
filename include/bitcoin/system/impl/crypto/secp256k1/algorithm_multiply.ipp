@@ -201,7 +201,7 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
             if (half < two)
             {
                 lookup(addend, is_zero(half) ? generator_table :
-                    endomorphism_table, uint64_t{ entry }, negative);
+                    endomorphism_table, uint64_t{ locate(entry) }, negative);
                 add_point(sum, addend, scale, faults);
             }
             else
@@ -304,8 +304,9 @@ constexpr Word algorithm::pack(
     }
 }
 
-// Tables hold odd multiples 1, 3, ..., so digit d is at (|d| - 1) / 2, and a
-// point table interleaves lanes within each of the ten limbs of an entry.
+// Tables hold odd multiples 1, 3, ..., so digit d is entry (|d| - 1) / 2, at
+// its block position in a generator table, and a point table interleaves
+// lanes within each of the ten limbs of an entry.
 template <size_t Bits, typename Word>
 constexpr void algorithm::digit(Word& index, Word& negative,
     const recodes_t<Bits, Word>& halves, size_t position,
@@ -320,7 +321,8 @@ constexpr void algorithm::digit(Word& index, Word& negative,
         const auto value = half.digits[position];
         const size_t magnitude = absolute(value);
         const auto entry = to_half(sub1(magnitude));
-        indexes[lane] = interleaved ? entry * stride + lane : entry;
+        indexes[lane] = interleaved ? entry * stride + lane :
+            locate(entry);
         negatives[lane] = is_negative(value) != half.negative ? max_uint64 :
             0_u64;
     }
@@ -329,16 +331,22 @@ constexpr void algorithm::digit(Word& index, Word& negative,
     negative = pack<Word>(negatives);
 }
 
-template <size_t Bits, typename Word>
-constexpr void algorithm::lookup(affine_t<Word>& r, const table_t<Bits>& table,
-    Word index, Word negative) NOEXCEPT
+// Limb i of an entry at position p is at p + i * b for block size b.
+template <size_t Count, typename Word>
+constexpr void algorithm::lookup(affine_t<Word>& r,
+    const std_array<block_t, Count>& table, Word index, Word negative) NOEXCEPT
 {
+    constexpr auto size = array_count<field_t<Word>>;
+    const auto base = pointer_cast<const uint64_t>(table.data());
+
     affine_t<Word> entry{};
-    for (size_t limb{}; limb < entry.x.size(); ++limb)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    for (size_t limb{}; limb < size; ++limb)
     {
-        entry.x[limb] = f::gather(table.x[limb].data(), index);
-        entry.y[limb] = f::gather(table.y[limb].data(), index);
+        entry.x[limb] = f::gather(base + limb * block_size, index);
+        entry.y[limb] = f::gather(base + (size + limb) * block_size, index);
     }
+    BC_POP_WARNING()
 
     negate(r, entry, negative);
 }

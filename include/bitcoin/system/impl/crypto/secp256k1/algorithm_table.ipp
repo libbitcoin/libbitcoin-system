@@ -70,34 +70,68 @@ constexpr void algorithm::multiples(std_array<affine_t<Word>, Size>& r,
     multiply(scale, sum.z, twice.z);
 }
 
+// Table location.
+// ----------------------------------------------------------------------------
+// protected
+
+// Entry i is column i mod b of block i / b, where each block holds ten limb
+// columns of b values.
+constexpr size_t algorithm::locate(size_t entry) NOEXCEPT
+{
+    constexpr auto stride = two * array_count<field_t<uint64_t>> * block_size;
+    return (entry / block_size) * stride + (entry % block_size);
+}
+
 // Table internals.
 // ----------------------------------------------------------------------------
 // protected
 
-// Multiples (2i + 1)G of the chunk, and running products of their z.
-template <size_t Bits, size_t Chunk>
+// Group g starts with multiple (2gs + 1)G for group size s, the start of the
+// prior group plus 2sG.
+template <size_t Group>
+constexpr algorithm::jacobian_t<uint64_t> algorithm::start() NOEXCEPT
+{
+    jacobian_t<uint64_t> out{};
+    if constexpr (is_zero(Group))
+    {
+        to_jacobian(out, generator);
+    }
+    else
+    {
+        jacobian_t<uint64_t> stride{};
+        to_jacobian(stride, generator);
+        for (size_t bit{}; bit <= group_bits; ++bit)
+            double_(stride, stride);
+
+        add(out, starts<sub1(Group)>, stride);
+    }
+
+    return out;
+}
+
+// Multiples (2i + 1)G of the block, and running products of their z within
+// the group.
+template <size_t Group, size_t Block>
 constexpr algorithm::forward_t algorithm::forward() NOEXCEPT
 {
-    static_assert(is_zero(table_size<Bits> % chunk_size));
-
     jacobian_t<uint64_t> first{}, twice{};
     to_jacobian(first, generator);
     double_(twice, first);
 
     forward_t out{};
-    if constexpr (is_zero(Chunk))
+    if constexpr (is_zero(Block))
     {
-        out.points[0] = first;
-        out.products[0] = first.z;
+        out.points[0] = starts<Group>;
+        out.products[0] = out.points[0].z;
     }
     else
     {
-        const auto& prior = forwards<Bits, sub1(Chunk)>;
+        const auto& prior = forwards<Group, sub1(Block)>;
         add(out.points[0], prior.points.back(), twice);
         multiply(out.products[0], prior.products.back(), out.points[0].z);
     }
 
-    for (auto point = one; point < chunk_size; ++point)
+    for (auto point = one; point < block_size; ++point)
     {
         add(out.points[point], out.points[sub1(point)], twice);
         multiply(out.products[point], out.products[sub1(point)],
@@ -107,29 +141,29 @@ constexpr algorithm::forward_t algorithm::forward() NOEXCEPT
     return out;
 }
 
-// The chunk after the last holds only the inverse of the full product, and
-// each chunk unwinds its prefix products into affine points.
-template <size_t Bits, size_t Chunk>
+// The block after the last of a group holds only the inverse of the group
+// product, and each block unwinds its prefix products into affine points.
+template <size_t Group, size_t Block>
 constexpr algorithm::backward_t algorithm::backward() NOEXCEPT
 {
-    constexpr auto last = sub1(chunk_count<Bits>);
+    constexpr auto last = sub1(group_blocks);
 
     backward_t out{};
-    if constexpr (Chunk > last)
+    if constexpr (Block > last)
     {
-        inverse(out.inverse, forwards<Bits, last>.products.back());
+        inverse(out.inverse, forwards<Group, last>.products.back());
     }
     else
     {
-        const auto& chunk = forwards<Bits, Chunk>;
+        const auto& chunk = forwards<Group, Block>;
         field_t<uint64_t> prior{ 1 };
-        if constexpr (is_nonzero(Chunk))
-            prior = forwards<Bits, sub1(Chunk)>.products.back();
+        if constexpr (is_nonzero(Block))
+            prior = forwards<Group, sub1(Block)>.products.back();
 
-        out.inverse = backwards<Bits, add1(Chunk)>.inverse;
+        out.inverse = backwards<Group, add1(Block)>.inverse;
 
         field_t<uint64_t> inverse_z{};
-        for (auto point = chunk_size; is_nonzero(point--);)
+        for (auto point = block_size; is_nonzero(point--);)
         {
             const auto& before = is_zero(point) ? prior :
                 chunk.products[sub1(point)];
@@ -143,37 +177,42 @@ constexpr algorithm::backward_t algorithm::backward() NOEXCEPT
     return out;
 }
 
-template <size_t Bits, size_t Chunk>
-constexpr void algorithm::tabulate(table_t<Bits>& r, bool mapped) NOEXCEPT
+template <size_t Block, bool Mapped>
+constexpr algorithm::block_t algorithm::block() NOEXCEPT
 {
-    const auto& chunk = backwards<Bits, Chunk>;
-    for (size_t point{}; point < chunk_size; ++point)
+    const auto& chunk = backwards<Block / group_blocks, Block % group_blocks>;
+
+    block_t out{};
+    for (size_t point{}; point < block_size; ++point)
     {
         auto entry = chunk.points[point];
-        if (mapped)
+        if constexpr (Mapped)
         {
             endomorphism(entry, entry);
             normalize(entry.x);
         }
 
-        const auto index = Chunk * chunk_size + point;
         for (size_t limb{}; limb < entry.x.size(); ++limb)
         {
-            r.x[limb][index] = entry.x[limb];
-            r.y[limb][index] = entry.y[limb];
+            out.x[limb][point] = entry.x[limb];
+            out.y[limb][point] = entry.y[limb];
         }
     }
 
-    if constexpr (Chunk < sub1(chunk_count<Bits>))
-        tabulate<Bits, add1(Chunk)>(r, mapped);
+    return out;
 }
 
-template <size_t Bits>
-constexpr algorithm::table_t<Bits> algorithm::tabulate(bool mapped) NOEXCEPT
+template <size_t Bits, bool Mapped, size_t... Blocks>
+constexpr algorithm::table_t<Bits> algorithm::tabulate(
+    std::index_sequence<Blocks...>) NOEXCEPT
 {
-    table_t<Bits> out{};
-    tabulate<Bits>(out, mapped);
-    return out;
+    return { blocks<Blocks, Mapped>... };
+}
+
+template <size_t Bits, bool Mapped>
+constexpr algorithm::table_t<Bits> algorithm::tabulate() NOEXCEPT
+{
+    return tabulate<Bits, Mapped>(std::make_index_sequence<block_count<Bits>>{});
 }
 
 BC_POP_WARNING()

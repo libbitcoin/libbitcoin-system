@@ -576,13 +576,23 @@ protected:
     template <size_t Bits>
     static constexpr size_t table_size = power2(sub1(Bits));
 
-    /// Odd multiples as limb columns, for gather by index (normal).
-    template <size_t Bits>
-    struct table_t
+    /// Odd multiples in blocks of limb columns, for gather by position.
+    static constexpr size_t block_size = 16;
+
+    struct block_t
     {
-        std_array<std_array<uint64_t, table_size<Bits>>, 5> x{};
-        std_array<std_array<uint64_t, table_size<Bits>>, 5> y{};
+        std_array<std_array<uint64_t, block_size>, 5> x{};
+        std_array<std_array<uint64_t, block_size>, 5> y{};
     };
+
+    template <size_t Bits>
+    static constexpr size_t block_count = table_size<Bits> / block_size;
+
+    template <size_t Bits>
+    using table_t = std_array<block_t, block_count<Bits>>;
+
+    /// Position of the first limb of an entry relative to the table start.
+    static constexpr size_t locate(size_t entry) NOEXCEPT;
 
     /// Odd multiples of a point per lane, affine on an isomorphic curve.
     template <typename Word, size_t Bits = point_bits>
@@ -595,45 +605,58 @@ protected:
 
     /// Table internals.
     /// -----------------------------------------------------------------------
-    /// Generator tables are computed in chunks, each within the step limits of
-    /// a single constant evaluation, sharing one inversion.
+    /// Generator tables are computed a block at a time, each within the step
+    /// limits of a single constant evaluation, in groups of blocks sharing one
+    /// inversion, which bound the depth of dependent evaluations.
 
-    static constexpr size_t chunk_size = 16;
-
-    template <size_t Bits>
-    static constexpr size_t chunk_count = table_size<Bits> / chunk_size;
+    static constexpr size_t group_bits = 9;
+    static constexpr size_t group_size = power2(group_bits);
+    static constexpr size_t group_blocks = group_size / block_size;
 
     /// Multiples and prefix products of their z coordinates.
     struct forward_t
     {
-        std_array<jacobian_t<uint64_t>, chunk_size> points{};
-        std_array<field_t<uint64_t>, chunk_size> products{};
+        std_array<jacobian_t<uint64_t>, block_size> points{};
+        std_array<field_t<uint64_t>, block_size> products{};
     };
 
-    /// Affine multiples and inverse of the prefix product before the chunk.
+    /// Affine multiples and inverse of the prefix product before the block.
     struct backward_t
     {
-        std_array<affine_t<uint64_t>, chunk_size> points{};
+        std_array<affine_t<uint64_t>, block_size> points{};
         field_t<uint64_t> inverse{};
     };
 
-    template <size_t Bits, size_t Chunk>
+    template <size_t Group>
+    static constexpr jacobian_t<uint64_t> start() NOEXCEPT;
+
+    template <size_t Group, size_t Block>
     static constexpr forward_t forward() NOEXCEPT;
 
-    template <size_t Bits, size_t Chunk>
+    template <size_t Group, size_t Block>
     static constexpr backward_t backward() NOEXCEPT;
 
-    template <size_t Bits, size_t Chunk = 0>
-    static constexpr void tabulate(table_t<Bits>& r, bool mapped) NOEXCEPT;
+    template <size_t Block, bool Mapped>
+    static constexpr block_t block() NOEXCEPT;
 
-    template <size_t Bits>
-    static constexpr table_t<Bits> tabulate(bool mapped) NOEXCEPT;
+    template <size_t Bits, bool Mapped, size_t... Blocks>
+    static constexpr table_t<Bits> tabulate(
+        std::index_sequence<Blocks...>) NOEXCEPT;
 
-    template <size_t Bits, size_t Chunk>
-    static constexpr forward_t forwards = forward<Bits, Chunk>();
+    template <size_t Bits, bool Mapped>
+    static constexpr table_t<Bits> tabulate() NOEXCEPT;
 
-    template <size_t Bits, size_t Chunk>
-    static constexpr backward_t backwards = backward<Bits, Chunk>();
+    template <size_t Group>
+    static constexpr jacobian_t<uint64_t> starts = start<Group>();
+
+    template <size_t Group, size_t Block>
+    static constexpr forward_t forwards = forward<Group, Block>();
+
+    template <size_t Group, size_t Block>
+    static constexpr backward_t backwards = backward<Group, Block>();
+
+    template <size_t Block, bool Mapped>
+    static constexpr block_t blocks = block<Block, Mapped>();
 
     /// Generator tables.
     /// -----------------------------------------------------------------------
@@ -700,9 +723,10 @@ protected:
         const recodes_t<Bits, Word>& halves, size_t position,
         bool interleaved) NOEXCEPT;
 
-    template <size_t Bits, typename Word>
-    static constexpr void lookup(affine_t<Word>& r, const table_t<Bits>& table,
-        Word index, Word negative) NOEXCEPT;
+    template <size_t Count, typename Word>
+    static constexpr void lookup(affine_t<Word>& r,
+        const std_array<block_t, Count>& table, Word index,
+        Word negative) NOEXCEPT;
 
     template <typename Word>
     static constexpr void lookup(affine_t<Word>& r, const points_t<Word>& table,
