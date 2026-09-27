@@ -42,9 +42,11 @@ public:
     using algorithm::to_affine;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
-    using algorithm::generator_table;
-    using algorithm::endomorphism_table;
+    using algorithm::generator_slices;
+    using algorithm::slice_size;
+    using algorithm::table_words;
     using algorithm::block_size;
+    using algorithm::locate;
     using algorithm::beta;
     using algorithm::normalize;
 };
@@ -113,28 +115,19 @@ constexpr scalar number(const bytes& value) NOEXCEPT
     return out;
 }
 
-template <typename Table>
-constexpr affine entry(const Table& table, size_t index) NOEXCEPT
+static affine entry(size_t index, bool mapped) NOEXCEPT
 {
-    const auto& block = table[index / accessor::block_size];
-    const auto column = index % accessor::block_size;
-    return
+    const auto slice = accessor::generator_slices[index / accessor::slice_size];
+    const auto offset = accessor::locate(index % accessor::slice_size) + (mapped ? accessor::table_words : 0u);
+    affine out{};
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    for (size_t limb{}; limb < out.x.size(); ++limb)
     {
-        {
-            block.x[0][column],
-            block.x[1][column],
-            block.x[2][column],
-            block.x[3][column],
-            block.x[4][column]
-        },
-        {
-            block.y[0][column],
-            block.y[1][column],
-            block.y[2][column],
-            block.y[3][column],
-            block.y[4][column]
-        }
-    };
+        out.x[limb] = slice[offset + limb * accessor::block_size];
+        out.y[limb] = slice[offset + (out.x.size() + limb) * accessor::block_size];
+    }
+    BC_POP_WARNING()
+    return out;
 }
 
 // Generator table entry is (2 * index + 1)G, as computed by libsecp256k1.
@@ -146,7 +139,7 @@ static bool is_multiple(size_t index) NOEXCEPT
     secret[31] = narrow_cast<uint8_t>(multiple);
 
     ec_compressed key{};
-    const auto point = entry(accessor::generator_table, index);
+    const auto point = entry(index, false);
     const auto x = encode(point.x);
     return secret_to_public(key, secret) &&
         std::equal(x.begin(), x.end(), std::next(key.begin())) &&
@@ -156,8 +149,8 @@ static bool is_multiple(size_t index) NOEXCEPT
 // Entry of the endomorphism table is that of the generator table with x * beta.
 static bool is_mapped(size_t index) NOEXCEPT
 {
-    const auto point = entry(accessor::generator_table, index);
-    const auto mapped = entry(accessor::endomorphism_table, index);
+    const auto point = entry(index, false);
+    const auto mapped = entry(index, true);
     field x{};
     accessor::multiply(x, point.x, accessor::beta);
     accessor::normalize(x);
@@ -208,22 +201,26 @@ constexpr affine p1{ decode(px), decode(py) };
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expected)
 {
-    BOOST_CHECK(is_point(entry(accessor::generator_table, 0), gx, gy));
-    BOOST_CHECK(is_point(entry(accessor::generator_table, 1), g3x, g3y));
-    BOOST_CHECK(is_point(entry(accessor::generator_table, 3), g7x, g7y));
-    BOOST_CHECK(is_point(entry(accessor::generator_table, 63), g127x, g127y));
-    BOOST_CHECK(is_point(entry(accessor::generator_table, 511), g1023x, g1023y));
-    BOOST_CHECK(is_point(entry(accessor::endomorphism_table, 0), gx_beta, gy));
+    BOOST_CHECK(is_point(entry(0, false), gx, gy));
+    BOOST_CHECK(is_point(entry(1, false), g3x, g3y));
+    BOOST_CHECK(is_point(entry(3, false), g7x, g7y));
+    BOOST_CHECK(is_point(entry(63, false), g127x, g127y));
+    BOOST_CHECK(is_point(entry(511, false), g1023x, g1023y));
+    BOOST_CHECK(is_point(entry(0, true), gx_beta, gy));
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__computed_multiples__expected)
 {
     BOOST_CHECK(is_multiple(0));
-    BOOST_CHECK(is_multiple(255));
     BOOST_CHECK(is_multiple(511));
+    BOOST_CHECK(is_multiple(512));
+    BOOST_CHECK(is_multiple(4095));
+    BOOST_CHECK(is_multiple(7680));
+    BOOST_CHECK(is_multiple(8191));
     BOOST_CHECK(is_mapped(0));
-    BOOST_CHECK(is_mapped(255));
     BOOST_CHECK(is_mapped(511));
+    BOOST_CHECK(is_mapped(512));
+    BOOST_CHECK(is_mapped(8191));
 }
 
 // multiply

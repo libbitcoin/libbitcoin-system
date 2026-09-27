@@ -19,16 +19,31 @@
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 
 #include <bitcoin/system/define.hpp>
+#include "generator/generator.hpp"
 
 namespace libbitcoin {
 namespace system {
 namespace secp256k1 {
 
-constinit const algorithm::table_t<algorithm::generator_bits>
-algorithm::generator_table = tabulate<generator_bits, false>();
+constinit const algorithm::slices_t algorithm::generator_slices = []() consteval
+{
+    static_assert(precompute::slice_size == slice_size);
+    static_assert(precompute::block_size == block_size);
+    static_assert(precompute::table_words == table_words);
+    static_assert(slice_count == 16);
 
-constinit const algorithm::table_t<algorithm::generator_bits>
-algorithm::endomorphism_table = tabulate<generator_bits, true>();
+    return slices_t
+    {
+        generator_slice_00.data(), generator_slice_01.data(),
+        generator_slice_02.data(), generator_slice_03.data(),
+        generator_slice_04.data(), generator_slice_05.data(),
+        generator_slice_06.data(), generator_slice_07.data(),
+        generator_slice_08.data(), generator_slice_09.data(),
+        generator_slice_10.data(), generator_slice_11.data(),
+        generator_slice_12.data(), generator_slice_13.data(),
+        generator_slice_14.data(), generator_slice_15.data()
+    };
+}();
 
 } // namespace secp256k1
 } // namespace system

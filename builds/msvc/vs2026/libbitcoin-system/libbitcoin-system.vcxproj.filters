@@ -226,62 +226,65 @@
     <Filter Include="src\crypto\secp256k1">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\data">
+    <Filter Include="src\crypto\secp256k1\generator">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\endian">
+    <Filter Include="src\data">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\error">
+    <Filter Include="src\endian">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\filter">
+    <Filter Include="src\error">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\hash">
+    <Filter Include="src\filter">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\math">
+    <Filter Include="src\hash">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\radix">
+    <Filter Include="src\math">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\serial">
+    <Filter Include="src\radix">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\stream">
+    <Filter Include="src\serial">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\unicode">
+    <Filter Include="src\stream">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\unicode\utf8_everywhere">
+    <Filter Include="src\unicode">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet">
+    <Filter Include="src\unicode\utf8_everywhere">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses">
+    <Filter Include="src\wallet">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys">
+    <Filter Include="src\wallet\addresses">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys\parse_encrypted_keys">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\wallet\keys\parse_encrypted_keys">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\psbt">
+    <Filter Include="src\wallet\mnemonics">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000014}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words">
+    <Filter Include="src\wallet\psbt">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words\catalogs">
+    <Filter Include="src\words">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\words\catalogs">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -515,6 +518,54 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp">
       <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_00.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_01.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_02.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_03.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_04.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_05.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_06.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_07.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_08.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_09.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_10.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_11.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_12.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_13.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_14.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_15.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\keys.cpp">
       <Filter>src\crypto\secp256k1</Filter>
@@ -1738,6 +1789,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp">
       <Filter>src\crypto\secp256k1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp">
       <Filter>src\crypto\secp256k1</Filter>

@@ -88,10 +88,10 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
             {
                 const auto position = bit / generator_bits;
                 digit(index, negative, g_first, position, false);
-                lookup(addend, generator_table, index, negative);
+                lookup(addend, index, false, negative);
                 add_point(sum, addend, scale, faults);
                 digit(index, negative, g_second, position, false);
-                lookup(addend, endomorphism_table, index, negative);
+                lookup(addend, index, true, negative);
                 add_point(sum, addend, scale, faults);
             }
 
@@ -200,8 +200,8 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 
             if (half < two)
             {
-                lookup(addend, is_zero(half) ? generator_table :
-                    endomorphism_table, uint64_t{ locate(entry) }, negative);
+                lookup(addend, uint64_t{ entry }, is_nonzero(half),
+                    negative);
                 add_point(sum, addend, scale, faults);
             }
             else
@@ -303,9 +303,8 @@ constexpr Word algorithm::pack(const words_t<Word>& values) NOEXCEPT
     }
 }
 
-// Tables hold odd multiples 1, 3, ..., so digit d is entry (|d| - 1) / 2, at
-// its block position in a generator table, and a point table interleaves
-// lanes within each of the ten limbs of an entry.
+// Tables hold odd multiples 1, 3, ..., so digit d is entry (|d| - 1) / 2, and
+// a point table interleaves lanes within each of the ten limbs of an entry.
 template <size_t Bits, typename Word>
 constexpr void algorithm::digit(Word& index, Word& negative,
     const recodes_t<Bits, Word>& halves, size_t position,
@@ -320,8 +319,7 @@ constexpr void algorithm::digit(Word& index, Word& negative,
         const auto value = half.digits[position];
         const size_t magnitude = absolute(value);
         const auto entry = to_half(sub1(magnitude));
-        indexes[lane] = interleaved ? entry * stride + lane :
-            locate(entry);
+        indexes[lane] = interleaved ? entry * stride + lane : entry;
         negatives[lane] = is_negative(value) != half.negative ? max_uint64 :
             0_u64;
     }
@@ -330,24 +328,41 @@ constexpr void algorithm::digit(Word& index, Word& negative,
     negative = pack<Word>(negatives);
 }
 
-// Limb i of an entry at position p is at p + i * b for block size b.
-template <size_t Count, typename Word>
-constexpr void algorithm::lookup(affine_t<Word>& r,
-    const std_array<block_t, Count>& table, Word index, Word negative) NOEXCEPT
+// Entry e is in slice e / s at offset locate(e mod s), from which limb i of x
+// is at i * b and limb i of y at (5 + i) * b, and the endomorphism table
+// follows the generator table in each slice.
+template <typename Word>
+constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
+    Word negative) NOEXCEPT
 {
     constexpr auto size = array_count<field_t<Word>>;
-    const auto base = pointer_cast<const uint64_t>(table.data());
+    const auto entries = unpack(entry);
+    const auto table = mapped ? table_words : zero;
 
-    affine_t<Word> entry{};
+    std_array<words_t<Word>, size> xs{}, ys{};
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    for (size_t limb{}; limb < size; ++limb)
+    for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
-        entry.x[limb] = f::gather(base + limb * block_size, index);
-        entry.y[limb] = f::gather(base + (size + limb) * block_size, index);
+        const auto value = possible_narrow_cast<size_t>(entries[lane]);
+        const auto base = generator_slices[value / slice_size] + table +
+            locate(value % slice_size);
+
+        for (size_t limb{}; limb < size; ++limb)
+        {
+            xs[limb][lane] = base[limb * block_size];
+            ys[limb][lane] = base[(size + limb) * block_size];
+        }
     }
     BC_POP_WARNING()
 
-    negate(r, entry, negative);
+    affine_t<Word> point{};
+    for (size_t limb{}; limb < size; ++limb)
+    {
+        point.x[limb] = pack<Word>(xs[limb]);
+        point.y[limb] = pack<Word>(ys[limb]);
+    }
+
+    negate(r, point, negative);
 }
 
 // Limb i of lane l of point table entry e is at (10e + i) * lanes + l, where

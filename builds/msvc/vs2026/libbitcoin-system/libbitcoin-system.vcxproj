@@ -268,6 +268,22 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_00.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_01.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_02.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_03.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_04.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_05.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_06.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_07.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_08.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_09.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_10.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_11.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_12.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_13.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_14.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_15.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\math.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_math.obj</ObjectFileName>
@@ -701,6 +717,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\languages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\words.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_prefix.hpp" />

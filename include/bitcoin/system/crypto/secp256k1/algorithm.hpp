@@ -582,31 +582,13 @@ protected:
 
     /// Window bits of generator and point tables, and of point tables of
     /// sparse digits.
-    static constexpr size_t generator_bits = 10;
+    static constexpr size_t generator_bits = 14;
     static constexpr size_t point_bits = 5;
     static constexpr size_t naf_bits = 4;
 
     /// Number of odd multiples (1, 3, ..., 2^Bits - 1) in a window table.
     template <size_t Bits>
     static constexpr size_t table_size = power2(sub1(Bits));
-
-    /// Odd multiples in blocks of limb columns, for gather by position.
-    static constexpr size_t block_size = 16;
-
-    struct block_t
-    {
-        std_array<std_array<uint64_t, block_size>, 5> x{};
-        std_array<std_array<uint64_t, block_size>, 5> y{};
-    };
-
-    template <size_t Bits>
-    static constexpr size_t block_count = table_size<Bits> / block_size;
-
-    template <size_t Bits>
-    using table_t = std_array<block_t, block_count<Bits>>;
-
-    /// Position of the first limb of an entry relative to the table start.
-    static constexpr size_t locate(size_t entry) NOEXCEPT;
 
     /// Odd multiples of a point per lane, affine on an isomorphic curve.
     template <typename Word, size_t Bits = point_bits>
@@ -617,69 +599,29 @@ protected:
     static constexpr void multiples(std_array<affine_t<Word>, Size>& r,
         field_t<Word>& scale, const affine_t<Word>& a) NOEXCEPT;
 
-    /// Table internals.
+    /// Generator table.
     /// -----------------------------------------------------------------------
-    /// Generator tables are computed a block at a time, each within the step
-    /// limits of a single constant evaluation, in groups of blocks sharing one
-    /// inversion, which bound the depth of dependent evaluations.
+    /// Odd multiples of G (normal), then those of lambda * G, in slices each
+    /// computed at compile time in its own translation unit. A slice is blocks
+    /// of limb columns, x then y.
 
-    static constexpr size_t group_bits = 9;
-    static constexpr size_t group_size = power2(group_bits);
-    static constexpr size_t group_blocks = group_size / block_size;
+    static constexpr size_t block_size = 16;
+    static constexpr size_t slice_size = 512;
+    static constexpr size_t slice_count = table_size<generator_bits> /
+        slice_size;
+    static constexpr size_t table_words = two *
+        array_count<field_t<uint64_t>> * slice_size;
 
-    /// Multiples and prefix products of their z coordinates.
-    struct forward_t
-    {
-        std_array<jacobian_t<uint64_t>, block_size> points{};
-        std_array<field_t<uint64_t>, block_size> products{};
-    };
+    using slices_t = std_array<const uint64_t*, slice_count>;
+    static const slices_t generator_slices;
 
-    /// Affine multiples and inverse of the prefix product before the block.
-    struct backward_t
-    {
-        std_array<affine_t<uint64_t>, block_size> points{};
-        field_t<uint64_t> inverse{};
-    };
+    /// Offset of an entry in 64 bit words relative to its slice.
+    static constexpr size_t locate(size_t entry) NOEXCEPT;
 
-    template <size_t Group>
-    static constexpr jacobian_t<uint64_t> start() NOEXCEPT;
-
-    template <size_t Group, size_t Block>
-    static constexpr forward_t forward() NOEXCEPT;
-
-    template <size_t Group, size_t Block>
-    static constexpr backward_t backward() NOEXCEPT;
-
-    template <size_t Block, bool Mapped>
-    static constexpr block_t block() NOEXCEPT;
-
-    template <size_t Bits, bool Mapped, size_t... Blocks>
-    static constexpr table_t<Bits> tabulate(
-        std::index_sequence<Blocks...>) NOEXCEPT;
-
-    template <size_t Bits, bool Mapped>
-    static constexpr table_t<Bits> tabulate() NOEXCEPT;
-
-    template <size_t Group>
-    static constexpr jacobian_t<uint64_t> starts = start<Group>();
-
-    template <size_t Group, size_t Block>
-    static constexpr forward_t forwards = forward<Group, Block>();
-
-    template <size_t Group, size_t Block>
-    static constexpr backward_t backwards = backward<Group, Block>();
-
-    template <size_t Block, bool Mapped>
-    static constexpr block_t blocks = block<Block, Mapped>();
-
-    /// Generator tables.
-    /// -----------------------------------------------------------------------
-
-    /// Odd multiples of G, and of lambda * G, computed at compile time in one
-    /// translation unit.
-    static const table_t<generator_bits> generator_table;
-    static const table_t<generator_bits> endomorphism_table;
-
+    /// r = entry of the generator or endomorphism table, negated per lane.
+    template <typename Word>
+    static constexpr void lookup(affine_t<Word>& r, Word entry, bool mapped,
+        Word negative) NOEXCEPT;
     /// Multiplication (weak coordinates).
     /// -----------------------------------------------------------------------
 
@@ -739,11 +681,6 @@ protected:
     static constexpr void digit(Word& index, Word& negative,
         const recodes_t<Bits, Word>& halves, size_t position,
         bool interleaved) NOEXCEPT;
-
-    template <size_t Count, typename Word>
-    static constexpr void lookup(affine_t<Word>& r,
-        const std_array<block_t, Count>& table, Word index,
-        Word negative) NOEXCEPT;
 
     template <typename Word>
     static constexpr void lookup(affine_t<Word>& r, const points_t<Word>& table,

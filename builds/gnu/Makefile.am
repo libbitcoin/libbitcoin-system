@@ -160,6 +160,22 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
     ${srcdir}/../../src/crypto/secp256k1/recover.cpp \
     ${srcdir}/../../src/crypto/secp256k1/schnorr.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_00.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_01.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_02.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_03.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_04.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_05.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_06.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_07.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_08.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_09.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_10.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_11.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_12.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_13.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_14.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/slice_15.cpp \
     ${srcdir}/../../src/data/data_chunk.cpp \
     ${srcdir}/../../src/data/string.cpp \
     ${srcdir}/../../src/endian/endian.cpp \
