@@ -84,32 +84,69 @@ INLINE constexpr void algorithm::reduce(field_t<Word>& r,
     carry(r);
 }
 
+BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+
 // r = a * b + r.
 INLINE constexpr void algorithm::multiply_add(unsigned128_t& r, uint64_t a,
     uint64_t b) NOEXCEPT
 {
-    uint64_t high{}, low{};
-    mul_wide(high, low, a, b);
-    const auto carry = add_carry(r.low, r.low, low, false);
-    add_carry(r.high, r.high, high, carry);
+#if defined(__SIZEOF_INT128__)
+    r += unsigned128_t{ a } * b;
+#else
+    uint64_t upper{}, lower{};
+    mul_wide(upper, lower, a, b);
+    const auto carry = add_carry(r.low, r.low, lower, false);
+    add_carry(r.high, r.high, upper, carry);
+#endif
 }
 
 // r = r + a.
-INLINE constexpr void algorithm::add(unsigned128_t& r,
-    const unsigned128_t& a) NOEXCEPT
+INLINE constexpr void algorithm::add(unsigned128_t& r, uint64_t a) NOEXCEPT
 {
-    const auto carry = add_carry(r.low, r.low, a.low, false);
-    add_carry(r.high, r.high, a.high, carry);
+#if defined(__SIZEOF_INT128__)
+    r += a;
+#else
+    const auto carry = add_carry(r.low, r.low, a, false);
+    add_carry(r.high, r.high, 0_u64, carry);
+#endif
 }
 
 // Low 52 bits of a, with a shifted right by 52.
 INLINE constexpr uint64_t algorithm::take(unsigned128_t& a) NOEXCEPT
 {
-    const auto low = a.low & limb_mask;
+#if defined(__SIZEOF_INT128__)
+    const auto value = static_cast<uint64_t>(a) & limb_mask;
+    a >>= limb_bits;
+    return value;
+#else
+    const auto value = a.low & limb_mask;
     a.low = (a.low >> limb_bits) | (a.high << (bits<uint64_t> - limb_bits));
     a.high >>= limb_bits;
-    return low;
+    return value;
+#endif
 }
+
+// Low 64 bits of a.
+INLINE constexpr uint64_t algorithm::low(const unsigned128_t& a) NOEXCEPT
+{
+#if defined(__SIZEOF_INT128__)
+    return static_cast<uint64_t>(a);
+#else
+    return a.low;
+#endif
+}
+
+// a = a >> 64.
+INLINE constexpr void algorithm::shift_word(unsigned128_t& a) NOEXCEPT
+{
+#if defined(__SIZEOF_INT128__)
+    a >>= bits<uint64_t>;
+#else
+    a = { 0, a.high };
+#endif
+}
+
+BC_POP_WARNING()
 
 template <typename Word>
 constexpr void algorithm::powers(field_t<Word>& x2, field_t<Word>& x22,
@@ -273,8 +310,8 @@ constexpr void algorithm::multiply(field_t<Word>& r, const field_t<Word>& a,
         multiply_add(d, a[2], b[1]);
         multiply_add(d, a[3], b[0]);
         multiply_add(c, a[4], b[4]);
-        multiply_add(d, c.low, fold_260);
-        c = { 0, c.high };
+        multiply_add(d, low(c), fold_260);
+        shift_word(c);
         const auto t3 = take(d);
 
         multiply_add(d, a[0], b[4]);
@@ -282,7 +319,7 @@ constexpr void algorithm::multiply(field_t<Word>& r, const field_t<Word>& a,
         multiply_add(d, a[2], b[2]);
         multiply_add(d, a[3], b[1]);
         multiply_add(d, a[4], b[0]);
-        multiply_add(d, c.low, fold_272);
+        multiply_add(d, low(c), fold_272);
         auto t4 = take(d);
         const auto tx = t4 >> top_bits;
         t4 &= top_mask;
@@ -309,14 +346,14 @@ constexpr void algorithm::multiply(field_t<Word>& r, const field_t<Word>& a,
         multiply_add(c, a[2], b[0]);
         multiply_add(d, a[3], b[4]);
         multiply_add(d, a[4], b[3]);
-        multiply_add(c, d.low, fold_260);
-        d = { 0, d.high };
+        multiply_add(c, low(d), fold_260);
+        shift_word(d);
         out[2] = take(c);
 
-        multiply_add(c, d.low, fold_272);
-        add(c, { 0, t3 });
+        multiply_add(c, low(d), fold_272);
+        add(c, t3);
         out[3] = take(c);
-        out[4] = c.low + t4;
+        out[4] = low(c) + t4;
         r = out;
     }
     else
@@ -367,14 +404,14 @@ constexpr void algorithm::square(field_t<Word>& r,
         multiply_add(d, a0, a[3]);
         multiply_add(d, a1, a[2]);
         multiply_add(c, a[4], a[4]);
-        multiply_add(d, c.low, fold_260);
-        c = { 0, c.high };
+        multiply_add(d, low(c), fold_260);
+        shift_word(c);
         const auto t3 = take(d);
 
         multiply_add(d, a[0], a4);
         multiply_add(d, a1, a[3]);
         multiply_add(d, a[2], a[2]);
-        multiply_add(d, c.low, fold_272);
+        multiply_add(d, low(c), fold_272);
         auto t4 = take(d);
         const auto tx = t4 >> top_bits;
         t4 &= top_mask;
@@ -395,14 +432,14 @@ constexpr void algorithm::square(field_t<Word>& r,
         multiply_add(c, a0, a[2]);
         multiply_add(c, a[1], a[1]);
         multiply_add(d, a[3], a4);
-        multiply_add(c, d.low, fold_260);
-        d = { 0, d.high };
+        multiply_add(c, low(d), fold_260);
+        shift_word(d);
         out[2] = take(c);
 
-        multiply_add(c, d.low, fold_272);
-        add(c, { 0, t3 });
+        multiply_add(c, low(d), fold_272);
+        add(c, t3);
         out[3] = take(c);
-        out[4] = c.low + t4;
+        out[4] = low(c) + t4;
         r = out;
     }
     else

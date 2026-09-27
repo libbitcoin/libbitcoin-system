@@ -46,12 +46,16 @@ protected:
     template <typename Word>
     using field_t = std_array<Word, 5>;
 
-    /// Unsigned 128 bit accumulator, as high and low words.
+    /// Unsigned 128 bit accumulator, native where available.
+#if defined(__SIZEOF_INT128__)
+    using unsigned128_t = unsigned __int128;
+#else
     struct unsigned128_t
     {
         uint64_t high{};
         uint64_t low{};
     };
+#endif
 
     /// Field product, ten columns of 52 bit limb products.
     template <typename Word>
@@ -264,9 +268,10 @@ protected:
 
     INLINE static constexpr void multiply_add(unsigned128_t& r, uint64_t a,
         uint64_t b) NOEXCEPT;
-    INLINE static constexpr void add(unsigned128_t& r,
-        const unsigned128_t& a) NOEXCEPT;
+    INLINE static constexpr void add(unsigned128_t& r, uint64_t a) NOEXCEPT;
     INLINE static constexpr uint64_t take(unsigned128_t& a) NOEXCEPT;
+    INLINE static constexpr uint64_t low(const unsigned128_t& a) NOEXCEPT;
+    INLINE static constexpr void shift_word(unsigned128_t& a) NOEXCEPT;
 
     template <typename Word>
     static constexpr void powers(field_t<Word>& x2, field_t<Word>& x22,
