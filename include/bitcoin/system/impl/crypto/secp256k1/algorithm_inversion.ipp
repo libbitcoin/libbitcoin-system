@@ -164,8 +164,8 @@ constexpr void algorithm::update_de(signed62_t& d, signed62_t& e,
     multiply_add(ce, t.q, d[0]);
     multiply_add(ce, t.r, e[0]);
 
-    md -= to_signed(bit_and(m.inverse * cd.low + to_unsigned(md), mask));
-    me -= to_signed(bit_and(m.inverse * ce.low + to_unsigned(me), mask));
+    md -= to_signed(bit_and(m.inverse * low(cd) + to_unsigned(md), mask));
+    me -= to_signed(bit_and(m.inverse * low(ce) + to_unsigned(me), mask));
 
     multiply_add(cd, m.value[0], md);
     multiply_add(ce, m.value[0], me);
@@ -180,14 +180,14 @@ constexpr void algorithm::update_de(signed62_t& d, signed62_t& e,
         multiply_add(ce, t.r, e[limb]);
         multiply_add(cd, m.value[limb], md);
         multiply_add(ce, m.value[limb], me);
-        d[sub1(limb)] = to_signed(bit_and(cd.low, mask));
-        e[sub1(limb)] = to_signed(bit_and(ce.low, mask));
+        d[sub1(limb)] = to_signed(bit_and(low(cd), mask));
+        e[sub1(limb)] = to_signed(bit_and(low(ce), mask));
         shift(cd);
         shift(ce);
     }
 
-    d[4] = to_signed(cd.low);
-    e[4] = to_signed(ce.low);
+    d[4] = to_signed(low(cd));
+    e[4] = to_signed(low(ce));
 }
 
 constexpr void algorithm::update_fg(signed62_t& f, signed62_t& g,
@@ -209,14 +209,14 @@ constexpr void algorithm::update_fg(signed62_t& f, signed62_t& g,
         multiply_add(cf, t.v, g[limb]);
         multiply_add(cg, t.q, f[limb]);
         multiply_add(cg, t.r, g[limb]);
-        f[sub1(limb)] = to_signed(bit_and(cf.low, mask));
-        g[sub1(limb)] = to_signed(bit_and(cg.low, mask));
+        f[sub1(limb)] = to_signed(bit_and(low(cf), mask));
+        g[sub1(limb)] = to_signed(bit_and(low(cg), mask));
         shift(cf);
         shift(cg);
     }
 
-    f[sub1(length)] = to_signed(cf.low);
-    g[sub1(length)] = to_signed(cg.low);
+    f[sub1(length)] = to_signed(low(cf));
+    g[sub1(length)] = to_signed(low(cg));
 }
 
 // From (-2m, m) to [0, m), negated if sign is negative.
@@ -250,31 +250,53 @@ constexpr void algorithm::normalize(signed62_t& r, int64_t sign,
     }
 }
 
+BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+
 // r = a * b + r, as signed 128 bit values.
-constexpr void algorithm::multiply_add(signed128_t& r, int64_t a,
+INLINE constexpr void algorithm::multiply_add(signed128_t& r, int64_t a,
     int64_t b) NOEXCEPT
 {
+#if defined(__SIZEOF_INT128__)
+    r += signed128_t{ a } * b;
+#else
     const auto left = to_unsigned(a);
     const auto right = to_unsigned(b);
 
-    uint64_t high{}, low{};
-    mul_wide(high, low, left, right);
+    uint64_t upper{}, lower{};
+    mul_wide(upper, lower, left, right);
     if (is_negative(a))
-        high -= right;
+        upper -= right;
 
     if (is_negative(b))
-        high -= left;
+        upper -= left;
 
-    const auto carry = add_carry(r.low, r.low, low, false);
-    add_carry(r.high, r.high, high, carry);
+    const auto carry = add_carry(r.low, r.low, lower, false);
+    add_carry(r.high, r.high, upper, carry);
+#endif
 }
 
 // r = r / 2^62, rounded toward negative infinity.
-constexpr void algorithm::shift(signed128_t& r) NOEXCEPT
+INLINE constexpr void algorithm::shift(signed128_t& r) NOEXCEPT
 {
+#if defined(__SIZEOF_INT128__)
+    r >>= 62;
+#else
     r.low = bit_or(shift_right(r.low, 62), shift_left(r.high, 2));
     r.high = to_unsigned(to_signed(r.high) >> 62);
+#endif
 }
+
+// Low 64 bits of a.
+INLINE constexpr uint64_t algorithm::low(const signed128_t& a) NOEXCEPT
+{
+#if defined(__SIZEOF_INT128__)
+    return static_cast<uint64_t>(a);
+#else
+    return a.low;
+#endif
+}
+
+BC_POP_WARNING()
 
 constexpr void algorithm::to_signed62(signed62_t& r,
     const field_t<uint64_t>& a) NOEXCEPT

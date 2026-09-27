@@ -414,12 +414,16 @@ protected:
 
     using signed62_t = std_array<int64_t, 5>;
 
-    /// Signed 128 bit accumulator, as two's complement high and low words.
+    /// Signed 128 bit accumulator, native where available.
+#if defined(__SIZEOF_INT128__)
+    using signed128_t = __int128;
+#else
     struct signed128_t
     {
         uint64_t high{};
         uint64_t low{};
     };
+#endif
 
     /// Transition matrix of 62 divsteps.
     struct transition_t
@@ -461,9 +465,10 @@ protected:
     static constexpr void normalize(signed62_t& r, int64_t sign,
         const modulus_t& m) NOEXCEPT;
 
-    static constexpr void multiply_add(signed128_t& r, int64_t a,
+    INLINE static constexpr void multiply_add(signed128_t& r, int64_t a,
         int64_t b) NOEXCEPT;
-    static constexpr void shift(signed128_t& r) NOEXCEPT;
+    INLINE static constexpr void shift(signed128_t& r) NOEXCEPT;
+    INLINE static constexpr uint64_t low(const signed128_t& a) NOEXCEPT;
 
     static constexpr void to_signed62(signed62_t& r,
         const field_t<uint64_t>& a) NOEXCEPT;
