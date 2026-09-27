@@ -69,22 +69,29 @@ constexpr bool algorithm::from_bytes(affine_t<uint64_t>& r,
     return f::any(is_on_curve(r));
 }
 
-// R = (z / s)G + (r / s)Q, valid if x(R) mod n is r. Since n < p, x(R) mod n
-// is r if x(R) is r, or is r + n where r + n < p, compared as X = x * Z^2.
 constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     const bytes_t& hash, const bytes_t& r, const bytes_t& s) NOEXCEPT
 {
     scalar_t scalar_r{}, scalar_s{}, scalar_z{};
-    if (!from_bytes(scalar_r, r) || !from_bytes(scalar_s, s) ||
-        is_zero_scalar(scalar_r) || is_zero_scalar(scalar_s))
+    if (!from_bytes(scalar_r, r) || !from_bytes(scalar_s, s))
         return false;
 
     /* bool */ from_bytes(scalar_z, hash);
+    return verify_ecdsa(point, scalar_z, scalar_r, scalar_s);
+}
+
+// R = (z / s)G + (r / s)Q, valid if x(R) mod n is r. Since n < p, x(R) mod n
+// is r if x(R) is r, or is r + n where r + n < p, compared as X = x * Z^2.
+constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
+    const scalar_t& z, const scalar_t& r, const scalar_t& s) NOEXCEPT
+{
+    if (is_zero_scalar(r) || is_zero_scalar(s))
+        return false;
 
     scalar_t w{}, u1{}, u2{};
-    inverse(w, scalar_s);
-    multiply(u1, scalar_z, w);
-    multiply(u2, scalar_r, w);
+    inverse(w, s);
+    multiply(u1, z, w);
+    multiply(u2, r, w);
 
     jacobian_t<uint64_t> sum{};
     if (f::any(multiply(sum, scalars_t<uint64_t>{ u1 }, point,
@@ -97,13 +104,13 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     field_t<uint64_t> x{}, zz{}, expected{};
     normalize(sum.x);
     square(zz, sum.z);
-    /* bool */ from_bytes(x, r);
+    to_field(x, r);
     multiply(expected, x, zz);
     normalize(expected);
     if (f::any(equal(expected, sum.x)))
         return true;
 
-    if (!is_less(scalar_r, prime_minus_order))
+    if (!is_less(r, prime_minus_order))
         return false;
 
     add(x, x, order_field);
@@ -113,7 +120,6 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     return f::any(equal(expected, sum.x));
 }
 
-// R = sG - eP, valid if R is finite with even y and x(R) is r.
 constexpr bool algorithm::verify_schnorr(const bytes_t& key,
     const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT
 {
@@ -128,12 +134,21 @@ constexpr bool algorithm::verify_schnorr(const bytes_t& key,
         return false;
 
     /* bool */ from_bytes(scalar_e, digest);
-    negate(scalar_e, scalar_e);
+    return verify_schnorr(point, scalar_e, r_x, scalar_s);
+}
+
+// R = sG - eP, valid if R is finite with even y and x(R) is r.
+constexpr bool algorithm::verify_schnorr(const affine_t<uint64_t>& point,
+    const scalar_t& e, const field_t<uint64_t>& r_x,
+    const scalar_t& s) NOEXCEPT
+{
+    scalar_t minus_e{};
+    negate(minus_e, e);
 
     jacobian_t<uint64_t> sum{};
-    if (f::any(multiply(sum, scalars_t<uint64_t>{ scalar_s }, point,
-        scalars_t<uint64_t>{ scalar_e })))
-        multiply_complete(sum, scalar_s, point, scalar_e);
+    if (f::any(multiply(sum, scalars_t<uint64_t>{ s }, point,
+        scalars_t<uint64_t>{ minus_e })))
+        multiply_complete(sum, s, point, minus_e);
 
     if (f::any(sum.infinity))
         return false;

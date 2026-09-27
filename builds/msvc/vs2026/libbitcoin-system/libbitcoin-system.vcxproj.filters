@@ -567,6 +567,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_15.cpp">
       <Filter>src\crypto\secp256k1\generator</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\interface.cpp">
+      <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\keys.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
@@ -1116,6 +1119,9 @@
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp">
+      <Filter>include\bitcoin\system\crypto\secp256k1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\interface.hpp">
       <Filter>include\bitcoin\system\crypto\secp256k1</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp">
@@ -1845,6 +1851,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_batch.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_ellswift.ipp">
+      <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>
@@ -1861,6 +1870,9 @@
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_scalar.ipp">
+      <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_sign.ipp">
       <Filter>include\bitcoin\system\impl\crypto\secp256k1</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_table.ipp">

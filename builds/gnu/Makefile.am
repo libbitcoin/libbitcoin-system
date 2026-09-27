@@ -156,6 +156,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/ec_context.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../src/crypto/secp256k1/ellswift.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/interface.cpp \
     ${srcdir}/../../src/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
     ${srcdir}/../../src/crypto/secp256k1/recover.cpp \
@@ -416,7 +417,8 @@ include_bitcoin_system_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/crypto/secp256k1
 
 include_bitcoin_system_crypto_secp256k1_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/interface.hpp
 
 include_bitcoin_system_datadir = \
     ${includedir}/bitcoin/system/data
@@ -542,12 +544,14 @@ include_bitcoin_system_impl_crypto_secp256k1dir = \
 
 include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_batch.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_ellswift.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_field.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_group.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_inversion.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_pippenger.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_scalar.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_sign.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp
 

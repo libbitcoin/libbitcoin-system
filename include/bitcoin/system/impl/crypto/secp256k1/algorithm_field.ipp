@@ -650,17 +650,20 @@ constexpr void algorithm::to_field(field_t<uint64_t>& r,
     r[4] =   words[3] >> 16;
 }
 
+constexpr void algorithm::to_words(scalar_t& r,
+    const field_t<uint64_t>& a) NOEXCEPT
+{
+    r[0] = (a[0] >>  0) | (a[1] << 52);
+    r[1] = (a[1] >> 12) | (a[2] << 40);
+    r[2] = (a[2] >> 24) | (a[3] << 28);
+    r[3] = (a[3] >> 36) | (a[4] << 16);
+}
+
 constexpr void algorithm::to_bytes(bytes_t& out,
     const field_t<uint64_t>& a) NOEXCEPT
 {
-    const scalar_t words
-    {
-        (a[0] >>  0) | (a[1] << 52),
-        (a[1] >> 12) | (a[2] << 40),
-        (a[2] >> 24) | (a[3] << 28),
-        (a[3] >> 36) | (a[4] << 16)
-    };
-
+    scalar_t words{};
+    to_words(words, a);
     encode(out, words);
 }
 

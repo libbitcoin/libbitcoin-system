@@ -172,10 +172,13 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
     }
 
     points_t<uint64_t, naf_bits> a_first{}, a_second{};
-    field_t<uint64_t> scale{};
-    multiples(a_first, scale, a);
-    for (size_t point{}; point < a_first.size(); ++point)
-        endomorphism(a_second[point], a_first[point]);
+    field_t<uint64_t> scale{ 1 };
+    if (!is_zero_scalar(k))
+    {
+        multiples(a_first, scale, a);
+        for (size_t point{}; point < a_first.size(); ++point)
+            endomorphism(a_second[point], a_first[point]);
+    }
 
     uint64_t faults{};
     affine_t<uint64_t> addend{};

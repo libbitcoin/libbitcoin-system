@@ -257,6 +257,10 @@ protected:
     static constexpr void to_field(field_t<uint64_t>& r,
         const scalar_t& words) NOEXCEPT;
 
+    /// r as 256 bit words, least significant first (a normal).
+    static constexpr void to_words(scalar_t& r,
+        const field_t<uint64_t>& a) NOEXCEPT;
+
     /// Field internals.
     /// -----------------------------------------------------------------------
 
@@ -758,9 +762,112 @@ protected:
     static constexpr bool verify_ecdsa(const affine_t<uint64_t>& point,
         const bytes_t& hash, const bytes_t& r, const bytes_t& s) NOEXCEPT;
 
+    /// ECDSA verification of z by point, r and s nonzero, s high or low.
+    static constexpr bool verify_ecdsa(const affine_t<uint64_t>& point,
+        const scalar_t& z, const scalar_t& r, const scalar_t& s) NOEXCEPT;
+
     /// BIP340 verification of challenge hash by x-only key.
     static constexpr bool verify_schnorr(const bytes_t& key,
         const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT;
+
+    /// BIP340 verification of challenge e by point (even y), r_x normal.
+    static constexpr bool verify_schnorr(const affine_t<uint64_t>& point,
+        const scalar_t& e, const field_t<uint64_t>& r_x,
+        const scalar_t& s) NOEXCEPT;
+
+    /// Keys and signing (variable time, secrets blinded).
+    /// -----------------------------------------------------------------------
+    /// A secret multiple k * a is computed as (k / m) * (m * a) for a random
+    /// blind m, so that each multiplication is of a value independent of k.
+
+    /// r = g * G + k * a (normal), false if infinity.
+    static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,
+        const affine_t<uint64_t>& a, const scalar_t& k) NOEXCEPT;
+
+    /// r = k * G (normal) by blind m, k and m nonzero.
+    static constexpr void secret_multiply(affine_t<uint64_t>& r,
+        const scalar_t& k, const scalar_t& m) NOEXCEPT;
+
+    /// r = k * a (normal) by blind m, k and m nonzero.
+    static constexpr void secret_multiply(affine_t<uint64_t>& r,
+        const scalar_t& k, const affine_t<uint64_t>& a,
+        const scalar_t& m) NOEXCEPT;
+
+    /// r = a^-1 by blind m, a and m nonzero.
+    static constexpr void secret_inverse(scalar_t& r, const scalar_t& a,
+        const scalar_t& m) NOEXCEPT;
+
+    /// ECDSA (r, s) of z by secret d and nonce k, low s, with recovery id,
+    /// blinded by m and b (d, k, m, b nonzero), false if r or s is zero.
+    static constexpr bool sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,
+        const scalar_t& d, const scalar_t& z, const scalar_t& k,
+        const scalar_t& m, const scalar_t& b) NOEXCEPT;
+
+    /// BIP340 nonce point x of k (blinded by m), and k negated if its point
+    /// has odd y (k and m nonzero).
+    static constexpr void nonce_schnorr(bytes_t& r_x, scalar_t& k,
+        const scalar_t& m) NOEXCEPT;
+
+    /// r = public key of an ECDSA signature by recovery id, false if none.
+    static constexpr bool recover(affine_t<uint64_t>& r, const scalar_t& z,
+        const scalar_t& sig_r, const scalar_t& sig_s, uint8_t id) NOEXCEPT;
+
+    /// ElligatorSwift (variable time).
+    /// -----------------------------------------------------------------------
+
+    /// c1 = (sqrt(-3) - 1) / 2, c3 = (1 - sqrt(-3)) / 2 and
+    /// c4 = (sqrt(-3) + 1) / 2, where c2 = (-sqrt(-3) - 1) / 2 is beta.
+    static constexpr field_t<uint64_t> swift_c1
+    {
+        0x000693d68e6afa40,
+        0x0008aed0a766a3ec,
+        0x0003cbcb16630fb6,
+        0x000f8ef919bb8615,
+        0x0000851695d49a83
+    };
+
+    static constexpr field_t<uint64_t> swift_c3
+    {
+        0x00096c28719501ef,
+        0x0007512f58995c13,
+        0x000c3434e99cf049,
+        0x00007106e64479ea,
+        0x00007ae96a2b657c
+    };
+
+    static constexpr field_t<uint64_t> swift_c4
+    {
+        0x000693d68e6afa41,
+        0x0008aed0a766a3ec,
+        0x0003cbcb16630fb6,
+        0x000f8ef919bb8615,
+        0x0000851695d49a83
+    };
+
+    /// x of (u, t) as fraction xn / xd.
+    static constexpr void swift_fraction(field_t<uint64_t>& xn,
+        field_t<uint64_t>& xd, const field_t<uint64_t>& u,
+        const field_t<uint64_t>& t) NOEXCEPT;
+
+    /// r = point of (u, t), y parity that of t (normal).
+    static constexpr void swift_decode(affine_t<uint64_t>& r,
+        const field_t<uint64_t>& u, const field_t<uint64_t>& t) NOEXCEPT;
+
+    /// t such that (u, t) decodes to x (on the curve) by branch c (below 8),
+    /// false if none (normal).
+    static constexpr bool swift_inverse(field_t<uint64_t>& t,
+        const field_t<uint64_t>& x, const field_t<uint64_t>& u,
+        uint8_t c) NOEXCEPT;
+
+    /// x^3 + 7 is square.
+    static constexpr bool is_curve_x(const field_t<uint64_t>& x) NOEXCEPT;
+
+    /// (xn / xd)^3 + 7 is square, xd nonzero.
+    static constexpr bool is_curve_fraction(const field_t<uint64_t>& xn,
+        const field_t<uint64_t>& xd) NOEXCEPT;
+
+    /// a is square (including zero).
+    static constexpr bool is_square(const field_t<uint64_t>& a) NOEXCEPT;
 
     /// Batch verification.
     /// -----------------------------------------------------------------------
@@ -838,6 +945,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_multiply.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_sign.ipp>
+#include <bitcoin/system/impl/crypto/secp256k1/algorithm_ellswift.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_batch.ipp>
 #include <bitcoin/system/impl/crypto/secp256k1/algorithm_pippenger.ipp>
 
