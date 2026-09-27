@@ -342,19 +342,19 @@ using affines = std_array<affine, 8>;
 using scalars = std_array<scalar, 8>;
 using masks = std_array<uint64_t, 8>;
 
-static const scalars left_scalars
+[[maybe_unused]] static const scalars left_scalars
 {
     number(sample), number(order_minus_one), number(one_value),
     number(zero_value), number(first), number(zero_value), number(second),
     number(one_value)
 };
 
-static const affines points
+[[maybe_unused]] static const affines points
 {
     p1, p1, p1, g1, g2, p1, g3, g1
 };
 
-static const scalars right_scalars
+[[maybe_unused]] static const scalars right_scalars
 {
     number(first), number(order_minus_two), number(zero_value),
     number(one_value), number(second), number(zero_value), number(sample),

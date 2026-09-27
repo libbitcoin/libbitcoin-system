@@ -675,11 +675,11 @@ protected:
 
     /// Scalar per lane.
     template <typename Word>
-    using scalars_t = std_array<scalar_t, lanes<Word>>;
+    using scalars_t = std_array<scalar_t, capacity<Word, uint64_t>>;
 
     /// Integral word per lane.
     template <typename Word>
-    using words_t = std_array<uint64_t, lanes<Word>>;
+    using words_t = std_array<uint64_t, capacity<Word, uint64_t>>;
 
     /// r = g * G + k * a, mask of lanes not computed (exceptional).
     template <typename Word>
@@ -712,7 +712,7 @@ protected:
     };
 
     template <size_t Bits, typename Word>
-    using recodes_t = std_array<recoded_t<Bits>, lanes<Word>>;
+    using recodes_t = std_array<recoded_t<Bits>, capacity<Word, uint64_t>>;
 
     template <size_t Bits>
     static constexpr void recode(recoded_t<Bits>& r,

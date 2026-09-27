@@ -485,27 +485,27 @@ static void check_lanes(const xjacobian<xWord>& out, xWord uncomputed,
     }
 }
 
-static const jacobians mixed_left
+[[maybe_unused]] static const jacobians mixed_left
 {
     g2j, g1j, infinity, g1j, p1j, p1j, g4j, g3j
 };
 
-static const affines mixed_right
+[[maybe_unused]] static const affines mixed_right
 {
     g1, g1, g1, negated(g1), g1, g2, g3, g1
 };
 
-static const jacobians jacobian_left
+[[maybe_unused]] static const jacobians jacobian_left
 {
     g2j, g2j, infinity, g2j, g4j, p1j, g1j, g3j
 };
 
-static const jacobians jacobian_right
+[[maybe_unused]] static const jacobians jacobian_right
 {
     projective(g1), g2j, g1j, negated(g2j), g3j, g2j, infinity, g4j
 };
 
-static const jacobians doubled_in
+[[maybe_unused]] static const jacobians doubled_in
 {
     g1j, infinity, g2j, p1j, g3j, g4j, negated(g1j), sum(g4j, g3j)
 };
