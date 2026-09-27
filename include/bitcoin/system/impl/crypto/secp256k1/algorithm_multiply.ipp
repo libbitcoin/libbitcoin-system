@@ -179,13 +179,13 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 
     uint64_t faults{};
     affine_t<uint64_t> addend{};
-    jacobian_t<uint64_t> sum{};
-    sum.infinity = max_uint64;
+    r = {};
+    r.infinity = max_uint64;
 
     for (auto bit = top; is_nonzero(bit--);)
     {
-        if (is_zero(sum.infinity))
-            double_(sum, sum);
+        if (is_zero(r.infinity))
+            double_(r, r);
 
         for (size_t half{}; half < halves.size(); ++half)
         {
@@ -202,19 +202,18 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
             {
                 lookup(addend, uint64_t{ entry }, is_nonzero(half),
                     negative);
-                add_point(sum, addend, scale, faults);
+                add_point(r, addend, scale, faults);
             }
             else
             {
                 negate(addend, half == two ? a_first[entry] :
                     a_second[entry], negative);
-                add_point(sum, addend, faults);
+                add_point(r, addend, faults);
             }
         }
     }
 
-    multiply(sum.z, sum.z, scale);
-    r = sum;
+    multiply(r.z, r.z, scale);
     return faults;
 }
 
