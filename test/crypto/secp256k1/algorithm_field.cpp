@@ -32,6 +32,7 @@ public:
     using algorithm::prime;
     using algorithm::add;
     using algorithm::negate;
+    using algorithm::halve;
     using algorithm::carry;
     using algorithm::normalize;
     using algorithm::multiply;
@@ -139,6 +140,20 @@ constexpr field field_negate(const field& a) NOEXCEPT
     return out;
 }
 
+constexpr field field_negate_four(const field& a) NOEXCEPT
+{
+    field out{};
+    accessor::negate<4>(out, a);
+    return out;
+}
+
+constexpr field field_halve(const field& a) NOEXCEPT
+{
+    field out{};
+    accessor::halve(out, a);
+    return out;
+}
+
 constexpr field field_carry(field value) NOEXCEPT
 {
     accessor::carry(value);
@@ -242,12 +257,35 @@ static_assert(encode(field_negate(decode(gx))) == gx_negated);
 static_assert(encode(field_negate(decode(zero_value))) == zero_value);
 static_assert(encode(field_add(decode(gx), field_negate(decode(gx)))) == zero_value);
 static_assert(encode(field_add(weak_limbs, field_negate(weak_limbs))) == zero_value);
+static_assert(encode(field_negate_four(decode(gx))) == gx_negated);
+static_assert(encode(field_add(field_add(field_add(field_add(decode(gx), decode(gx)), decode(gx)), decode(gx)), field_negate_four(field_add(field_add(field_add(decode(gx), decode(gx)), decode(gx)), decode(gx))))) == zero_value);
+static_assert(encode(field_add(field_add(field_add(field_add(weak_limbs, weak_limbs), weak_limbs), weak_limbs), field_negate_four(field_add(field_add(field_add(weak_limbs, weak_limbs), weak_limbs), weak_limbs)))) == zero_value);
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__add_negate__values__expected)
 {
     BOOST_CHECK_EQUAL(encode(field_add(decode(gx), decode(gy))), gx_plus_gy);
     BOOST_CHECK_EQUAL(encode(field_negate(decode(gx))), gx_negated);
     BOOST_CHECK_EQUAL(encode(field_add(weak_limbs, field_negate(weak_limbs))), zero_value);
+    BOOST_CHECK_EQUAL(encode(field_negate_four(decode(gx))), gx_negated);
+}
+
+// halve
+// ----------------------------------------------------------------------------
+
+static_assert(encode(field_halve(decode(two_value))) == one_value);
+static_assert(encode(field_halve(decode(one_value))) == two_inverse);
+static_assert(encode(field_halve(decode(zero_value))) == zero_value);
+static_assert(encode(field_add(field_halve(decode(gx)), field_halve(decode(gx)))) == gx);
+static_assert(encode(field_add(field_halve(decode(gy)), field_halve(decode(gy)))) == gy);
+static_assert(encode(field_add(field_halve(weak_limbs), field_halve(weak_limbs))) == weak_reduced);
+static_assert(encode(field_add(field_halve(prime_plus_one), field_halve(prime_plus_one))) == one_value);
+static_assert(encode(field_halve(field_add(field_add(decode(gx), decode(gx)), decode(gx)))) == encode(field_add(field_add(decode(gx), decode(gx)), field_negate(field_halve(decode(gx))))));
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__halve__values__expected)
+{
+    BOOST_CHECK_EQUAL(encode(field_halve(decode(two_value))), one_value);
+    BOOST_CHECK_EQUAL(encode(field_halve(decode(one_value))), two_inverse);
+    BOOST_CHECK_EQUAL(encode(field_add(field_halve(decode(gx)), field_halve(decode(gx)))), gx);
 }
 
 // multiply/square
