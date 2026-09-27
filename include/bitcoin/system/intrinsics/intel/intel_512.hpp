@@ -408,9 +408,25 @@ INLINE bool any(xint512_t a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX512F
+// vc++ (19.51) can encode a gather index in zmm16-31 with EVEX.P1[2] clear,
+// which is illegal without APX, so its gathers load each lane.
 INLINE xint512_t gather(const uint64_t* table, xint512_t index) NOEXCEPT
 {
+#if defined(HAVE_MSC)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint512_t>(
+        table[possible_narrow_cast<size_t>(get<uint64_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 1>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 2>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 3>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 4>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 5>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 6>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 7>(index))]);
+    BC_POP_WARNING()
+#else
     return _mm512_i64gather_epi64(index, table, sizeof(uint64_t));
+#endif
 }
 
 
