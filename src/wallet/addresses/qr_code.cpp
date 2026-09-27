@@ -22,119 +22,50 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
+#include <bitcoin/system/wallet/addresses/qr_encoder.hpp>
+#include <bitcoin/system/wallet/addresses/qr_matrix.hpp>
 #include <bitcoin/system/wallet/addresses/tiff.hpp>
-#include <bitcoin/system/wallet/addresses/qr_code.hpp>
-#include "qrencode/qrencode.h"
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// External (embedded) qrencode library types.
-static QRecLevel recovery_level_to_qr_recovery_level(
-    qr_code::recovery_level level) NOEXCEPT
+data_chunk qr_code::to_modules(size_t& width, const std::string& value,
+    uint8_t version, recovery_level level, encode_mode mode,
+    bool case_sensitive) NOEXCEPT
 {
-    switch (level)
-    {
-        case qr_code::recovery_level::low:
-            return QR_ECLEVEL_L;
-        case qr_code::recovery_level::medium:
-            return QR_ECLEVEL_M;
-        case qr_code::recovery_level::high:
-            return QR_ECLEVEL_Q;
-        default:
-            return QR_ECLEVEL_H;
-    }
+    auto actual = version;
+    const auto codewords = qr_encoder::encode(actual, value, level, mode,
+        case_sensitive);
+
+    auto modules = qr_matrix::encode(codewords, actual, level);
+    width = modules.empty() ? zero : qr_matrix::width(actual);
+    return modules;
 }
 
-// External (embedded) qrencode library types.
-static QRencodeMode encode_mode_to_qr_encode_mode(
-    qr_code::encode_mode mode) NOEXCEPT
-{
-    switch (mode)
-    {
-        // These are not supported by QRcode_encodeString.
-        ////case qr_code::encode_mode::numeric:
-        ////    return QR_MODE_NUM;
-        ////case qr_code::encode_mode::alpha_numeric:
-        ////    return QR_MODE_AN;
-        ////case qr_code::encode_mode::eci_mode:
-        ////    return QR_MODE_ECI;
-        ////case qr_code::encode_mode::fcn1_1:
-        ////    return QR_MODE_FNC1FIRST;
-        ////case qr_code::encode_mode::fcn1_2:
-        ////    return QR_MODE_FNC1SECOND;
-        ////default:
-        ////    return QR_MODE_NUL;
-        case qr_code::encode_mode::kanji:
-            return QR_MODE_KANJI;
-        default:
-        case qr_code::encode_mode::eight_bit:
-            return QR_MODE_8;
-    }
-}
-
-// The maximum version is 40.
-uint8_t qr_code::maximum_version = QRSPEC_VERSION_MAX;
-
-// Free qrcode->data allocated memory and return specified result.
-static bool safe_free_and_return(QRcode* qrcode, bool result) NOEXCEPT
-{
-    if (qrcode != nullptr)
-    {
-        // External (embedded) qrencode library function.
-        QRcode_free(qrcode);
-    }
-
-    return result;
-}
-
-// TODO: remove scale and margin, call to_pixels() independently.
-// TODO: create independent method to perform scaling and margining.
 bool qr_code::encode(std::ostream& out, const std::string& value,
     uint8_t version, uint16_t scale, uint16_t margin, recovery_level level,
     encode_mode mode, bool case_sensitive) NOEXCEPT
 {
-    // Guard integer conversion, encode would return null pointer.
-    if (version > maximum_version)
+    size_t coded_width{};
+    const auto modules = to_modules(coded_width, value, version, level, mode,
+        case_sensitive);
+
+    if (modules.empty())
         return false;
 
-    // Make otherwise safe sign cast explicit.
-    const auto signed_version = wide_sign_cast<int>(version);
-    const auto sensitive = to_int(case_sensitive);
-
-    // External (embedded) qrencode library function.
-    // QRcode_encodeString supports only QR_MODE_8 and QR_MODE_KANJI.
-    // TODO: look into supporting other modes via QRcode_encodeDataStructured.
-    const auto qrcode = QRcode_encodeString(value.c_str(), signed_version,
-        recovery_level_to_qr_recovery_level(level),
-        encode_mode_to_qr_encode_mode(mode), sensitive);
-
-    // Zero check guards later data assignment.
-    // Empty or excessive value string should return null pointer.
-    if (qrcode == nullptr || is_zero(qrcode->width))
-        return safe_free_and_return(qrcode, false);
-
-    // Bound: 2^1 * 2^16 + 2^32 < 2^64.
-    const auto width = uint64_t(2) * margin + scale * qrcode->width;
+    // Bound: 2^1 * 2^16 + 2^16 * 2^8 < 2^64.
+    const auto width = two * wide_cast<uint64_t>(margin) +
+        wide_cast<uint64_t>(scale) * coded_width;
 
     // Guard: TIFF parameter overflow.
     if (width > max_uint16)
-        return safe_free_and_return(qrcode, false);
+        return false;
 
-    const auto coded_width = to_unsigned(qrcode->width);
-    const auto data_area = coded_width * coded_width;
+    const auto pixels = to_pixels(modules,
+        narrow_cast<uint32_t>(coded_width), scale, margin);
 
-    // Copy coded data into a data_chunk.
-    data_chunk data(qrcode->data, qrcode->data + data_area);
-
-    // Convert to scaled and margined image pixel bit stream.
-    const auto pixels = to_pixels(data, qrcode->width, scale, margin);
-
-    // Convert to TIFF image stream.
-    const auto result = tiff::to_image(out, pixels, narrow_cast<uint16_t>(width));
-
-    return safe_free_and_return(qrcode, result);
+    return tiff::to_image(out, pixels, narrow_cast<uint16_t>(width));
 }
 
 // TODO: accept and return stream and split out scaling and margining.
@@ -144,7 +75,7 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     uint16_t scale, uint16_t margin) NOEXCEPT
 {
-    // Pixel is the least significant bit of a qrencode byte.
+    // Pixel is the least significant bit of a module byte.
     constexpr auto pixel_mask = uint8_t{ 0x01 };
     constexpr auto pixels_off = uint8_t{ 0x00 };
     constexpr auto pixel_off = false;
@@ -164,7 +95,7 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     const auto width_pixels = (margin + width_scaled + margin);
 
     // Guard: empty image and division by zero.
-    if (width_pixels == 0u)
+    if (is_zero(width_pixels))
         return {};
 
     // Guard: area overflow (all below limited to size_t).
@@ -191,12 +122,12 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     write::bits::data image_bit_sink(image_out);
 
     // ------------------------- Write top margin -------------------------
-    for (size_t row = 0; row < margin; ++row)
+    for (size_t row{}; row < margin; ++row)
         image_bit_sink.write_bytes(row_margin);
     // --------------------------------------------------------------------
 
     // Write each row.
-    for (size_t row = 0; row < height_coded; ++row)
+    for (size_t row{}; row < height_coded; ++row)
     {
         // For repeatedly writing a row buffer.
         data_chunk row_out;
@@ -204,23 +135,24 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
         write::bits::data row_bit_sink(row_out);
 
         // ------------------------ Buffer left margin ------------------------
-        for (size_t column = 0; column < margin; ++column)
+        for (size_t column{}; column < margin; ++column)
             row_bit_sink.write_bit(pixel_off);
         // --------------------------------------------------------------------
 
         // Buffer scaled row pixels.
-        for (size_t column = 0; column < width_coded; ++column)
+        for (size_t column{}; column < width_coded; ++column)
         {
             // Read byte and extract pixel (least significant) bit.
-            const auto pixel_on = (image_reader.read_byte() & pixel_mask) != 0;
+            const auto pixel_on = !is_zero(bit_and(image_reader.read_byte(),
+                pixel_mask));
 
             // Buffer scaled pixel.
-            for (size_t scaled = 0; scaled < scale; ++scaled)
+            for (size_t scaled{}; scaled < scale; ++scaled)
                 row_bit_sink.write_bit(pixel_on);
         }
 
         // ------------------------ Buffer right margin -----------------------
-        for (size_t column = 0; column < margin; ++column)
+        for (size_t column{}; column < margin; ++column)
             row_bit_sink.write_bit(pixel_off);
         // --------------------------------------------------------------------
 
@@ -228,12 +160,12 @@ data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
         row_bit_sink.flush();
 
         // Write row buffer scale times.
-        for (size_t scaled = 0; scaled < scale; ++scaled)
+        for (size_t scaled{}; scaled < scale; ++scaled)
             image_bit_sink.write_bytes(row_out);
     }
 
     // ------------------------ Write bottom margin -----------------------
-    for (size_t row = 0; row < margin; ++row)
+    for (size_t row{}; row < margin; ++row)
         image_bit_sink.write_bytes(row_margin);
     // --------------------------------------------------------------------
 

@@ -810,6 +810,12 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_encoder.cpp">
+      <Filter>src\wallet\addresses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_matrix.cpp">
+      <Filter>src\wallet\addresses</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
