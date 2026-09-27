@@ -400,21 +400,31 @@ template <typename Word>
 constexpr void algorithm::add_point(jacobian_t<Word>& r,
     const affine_t<Word>& b, Word& faults) NOEXCEPT
 {
-    jacobian_t<Word> sum{};
-    const auto uncomputed = add(sum, r, b);
-    if (f::any(r.infinity))
+    if constexpr (is_same_type<Word, uint64_t>)
     {
-        jacobian_t<Word> lifted{};
-        to_jacobian(lifted, b);
-        select(sum, r.infinity, lifted, sum);
-        faults = f::or_(faults, f::andnot(r.infinity, uncomputed));
+        if (is_nonzero(r.infinity))
+            to_jacobian(r, b);
+        else
+            faults |= add(r, r, b);
     }
     else
     {
-        faults = f::or_(faults, uncomputed);
-    }
+        jacobian_t<Word> sum{};
+        const auto uncomputed = add(sum, r, b);
+        if (f::any(r.infinity))
+        {
+            jacobian_t<Word> lifted{};
+            to_jacobian(lifted, b);
+            select(sum, r.infinity, lifted, sum);
+            faults = f::or_(faults, f::andnot(r.infinity, uncomputed));
+        }
+        else
+        {
+            faults = f::or_(faults, uncomputed);
+        }
 
-    r = sum;
+        r = sum;
+    }
 }
 
 // Lanes at infinity take b mapped by scale, and other exceptional lanes are
@@ -423,27 +433,31 @@ template <typename Word>
 constexpr void algorithm::add_point(jacobian_t<Word>& r,
     const affine_t<Word>& b, const field_t<Word>& scale, Word& faults) NOEXCEPT
 {
-    jacobian_t<Word> sum{};
-    const auto uncomputed = add(sum, r, b, scale);
-    if (f::any(r.infinity))
+    if constexpr (is_same_type<Word, uint64_t>)
     {
-        field_t<Word> ss{}, sss{};
-        square(ss, scale);
-        multiply(sss, ss, scale);
-
-        jacobian_t<Word> lifted{};
-        to_jacobian(lifted, b);
-        multiply(lifted.x, lifted.x, ss);
-        multiply(lifted.y, lifted.y, sss);
-        select(sum, r.infinity, lifted, sum);
-        faults = f::or_(faults, f::andnot(r.infinity, uncomputed));
+        if (is_nonzero(r.infinity))
+            to_jacobian(r, b, scale);
+        else
+            faults |= add(r, r, b, scale);
     }
     else
     {
-        faults = f::or_(faults, uncomputed);
-    }
+        jacobian_t<Word> sum{};
+        const auto uncomputed = add(sum, r, b, scale);
+        if (f::any(r.infinity))
+        {
+            jacobian_t<Word> lifted{};
+            to_jacobian(lifted, b, scale);
+            select(sum, r.infinity, lifted, sum);
+            faults = f::or_(faults, f::andnot(r.infinity, uncomputed));
+        }
+        else
+        {
+            faults = f::or_(faults, uncomputed);
+        }
 
-    r = sum;
+        r = sum;
+    }
 }
 
 // A half made odd added its signed base once more, so subtract it where even.

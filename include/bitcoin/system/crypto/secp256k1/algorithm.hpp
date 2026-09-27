@@ -543,6 +543,11 @@ protected:
     static constexpr void to_jacobian(jacobian_t<Word>& r,
         const affine_t<Word>& a) NOEXCEPT;
 
+    /// r = (x * s^2, y * s^3) of a, for s the scale of an isomorphism.
+    template <typename Word>
+    static constexpr void to_jacobian(jacobian_t<Word>& r,
+        const affine_t<Word>& a, const field_t<Word>& scale) NOEXCEPT;
+
     /// r = a (normal), a not infinite.
     template <typename Word>
     static constexpr void to_affine(affine_t<Word>& r,

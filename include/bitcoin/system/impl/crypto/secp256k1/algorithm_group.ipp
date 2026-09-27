@@ -268,6 +268,18 @@ constexpr void algorithm::to_jacobian(jacobian_t<Word>& r,
 }
 
 template <typename Word>
+constexpr void algorithm::to_jacobian(jacobian_t<Word>& r,
+    const affine_t<Word>& a, const field_t<Word>& scale) NOEXCEPT
+{
+    field_t<Word> ss{}, sss{}, x{}, y{};
+    square(ss, scale);
+    multiply(sss, ss, scale);
+    multiply(x, a.x, ss);
+    multiply(y, a.y, sss);
+    r = { x, y, broadcast<Word>({ 1 }), f::broadcast<Word>(uint64_t{}) };
+}
+
+template <typename Word>
 constexpr void algorithm::to_affine(affine_t<Word>& r,
     const jacobian_t<Word>& a, const field_t<Word>& inverse_z) NOEXCEPT
 {
