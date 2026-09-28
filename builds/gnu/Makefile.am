@@ -161,6 +161,9 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/math.cpp \
     ${srcdir}/../../src/crypto/secp256k1/recover.cpp \
     ${srcdir}/../../src/crypto/secp256k1/schnorr.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/comb_00.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/comb_01.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/generator/comb_02.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_00.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_01.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_02.cpp \

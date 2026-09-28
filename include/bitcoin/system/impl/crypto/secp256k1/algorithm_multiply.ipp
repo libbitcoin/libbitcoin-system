@@ -220,6 +220,45 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
     return faults;
 }
 
+// Each window adds the entry of its signed digit, where a digit above half the
+// window span is taken negative with a carry into the next window.
+constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
+    uint64_t& faults) NOEXCEPT
+{
+    constexpr auto limb_size = bits<uint64_t>;
+    constexpr auto span = power2<uint64_t>(comb_bits);
+    constexpr auto mask = sub1(span);
+
+    affine_t<uint64_t> addend{};
+    auto carry = false;
+    for (size_t window{}; window < comb_windows; ++window)
+    {
+        const auto bit = window * comb_bits;
+        const auto limb = bit / limb_size;
+        const auto shift = bit % limb_size;
+
+        uint64_t digit{};
+        if (limb < array_count<scalar_t>)
+        {
+            digit = k[limb] >> shift;
+            if (shift > limb_size - comb_bits &&
+                add1(limb) < array_count<scalar_t>)
+                digit |= k[add1(limb)] << (limb_size - shift);
+        }
+
+        digit = (digit & mask) + to_int(carry);
+        carry = digit > comb_size;
+        if (carry)
+            digit = span - digit;
+
+        if (is_zero(digit))
+            continue;
+
+        lookup_comb(addend, window, sub1(digit), carry);
+        add_point(r, addend, faults);
+    }
+}
+
 // Multiplication internals.
 // ----------------------------------------------------------------------------
 // protected

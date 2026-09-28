@@ -45,6 +45,21 @@ constinit const algorithm::slices_t algorithm::generator_slices = []() consteval
     };
 }();
 
+constinit const algorithm::comb_parts_t algorithm::comb_parts = []() consteval
+{
+    static_assert(precompute::comb_bits == comb_bits);
+    static_assert(precompute::comb_size == comb_size);
+    static_assert(precompute::comb_windows == comb_windows);
+    static_assert(precompute::comb_part_windows == comb_part_windows);
+    static_assert(precompute::comb_words == comb_words);
+    static_assert(comb_part_count == 3);
+
+    return comb_parts_t
+    {
+        comb_part_00.data(), comb_part_01.data(), comb_part_02.data()
+    };
+}();
+
 } // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin

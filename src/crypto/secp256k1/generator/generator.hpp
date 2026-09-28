@@ -459,6 +459,179 @@ constexpr std::array<word, slice_words> slice() noexcept
     return slice<Slice>(std::make_index_sequence<slice_blocks>{});
 }
 
+// Comb table computation.
+// ----------------------------------------------------------------------------
+
+/// Comb shape, matching the algorithm class.
+constexpr size comb_bits = 6;
+constexpr size comb_size = size{ 1 } << (comb_bits - 1);
+constexpr size comb_windows = (256 + comb_bits) / comb_bits;
+constexpr size comb_part_windows = 15;
+constexpr size comb_words = 2 * limbs;
+constexpr size comb_part_words = comb_part_windows * comb_size * comb_words;
+
+constexpr affine normal(const jacobian& a) noexcept
+{
+    const auto inverse_z = inverse(a.z);
+    const auto zz = square(inverse_z);
+    return { multiply(a.x, zz), multiply(a.y, multiply(zz, inverse_z)) };
+}
+
+constexpr size comb_blocks = comb_size / block_size;
+
+template <size Window>
+constexpr affine based() noexcept;
+
+template <size Window>
+constexpr affine bases = based<Window>();
+
+// 2^(comb_bits * Window) * G.
+template <size Window>
+constexpr affine based() noexcept
+{
+    if constexpr (Window == 0)
+    {
+        return generator;
+    }
+    else
+    {
+        const auto& prior = bases<Window - 1>;
+        jacobian r{ prior.x, prior.y, { { 1 } } };
+        for (size bit = 0; bit < comb_bits; ++bit)
+            r = twofold(r);
+
+        return normal(r);
+    }
+}
+
+template <size Window, size Block>
+constexpr forward comb_forwarded() noexcept;
+
+template <size Window, size Block>
+constexpr backward comb_backwarded() noexcept;
+
+template <size Window, size Block>
+constexpr forward comb_forwards = comb_forwarded<Window, Block>();
+
+template <size Window, size Block>
+constexpr backward comb_backwards = comb_backwarded<Window, Block>();
+
+// Multiples 16 * Block + 1 through 16 * Block + 16 of the window base.
+template <size Window, size Block>
+constexpr forward comb_forwarded() noexcept
+{
+    const auto& base = bases<Window>;
+    forward out{};
+    size point{};
+    if constexpr (Block == 0)
+    {
+        out.points[0] = { base.x, base.y, { { 1 } } };
+        out.products[0] = out.points[0].z;
+        out.points[1] = twofold(out.points[0]);
+        out.products[1] = multiply(out.products[0], out.points[1].z);
+        point = 2;
+    }
+    else
+    {
+        const auto& prior = comb_forwards<Window, Block - 1>;
+        out.points[0] = sum(prior.points[block_size - 1], base);
+        out.products[0] = multiply(prior.products[block_size - 1],
+            out.points[0].z);
+        point = 1;
+    }
+
+    for (; point < block_size; ++point)
+    {
+        out.points[point] = sum(out.points[point - 1], base);
+        out.products[point] = multiply(out.products[point - 1],
+            out.points[point].z);
+    }
+
+    return out;
+}
+
+// The block after the last holds only the inverse of the window product, and
+// each block unwinds its prefix products into affine points.
+template <size Window, size Block>
+constexpr backward comb_backwarded() noexcept
+{
+    backward out{};
+    if constexpr (Block == comb_blocks)
+    {
+        const auto& last = comb_forwards<Window, comb_blocks - 1>;
+        out.inverse = inverse(last.products[block_size - 1]);
+    }
+    else
+    {
+        const auto& chunk = comb_forwards<Window, Block>;
+        out.inverse = comb_backwards<Window, Block + 1>.inverse;
+        for (size point = block_size; point-- > 0;)
+        {
+            element inverse_z{};
+            if (point != 0)
+                inverse_z = multiply(out.inverse, chunk.products[point - 1]);
+            else if constexpr (Block != 0)
+                inverse_z = multiply(out.inverse,
+                    comb_forwards<Window, Block - 1>.products[block_size - 1]);
+            else
+                inverse_z = out.inverse;
+
+            out.inverse = multiply(out.inverse, chunk.points[point].z);
+            const auto zz = square(inverse_z);
+            out.points[point] =
+            {
+                multiply(chunk.points[point].x, zz),
+                multiply(chunk.points[point].y, multiply(zz, inverse_z))
+            };
+        }
+    }
+
+    return out;
+}
+
+// Window entry j is (j + 1) * base, x limbs then y limbs.
+template <size Window, size... Blocks>
+constexpr void comb_emit(std::array<word, comb_part_words>& out, size offset,
+    std::index_sequence<Blocks...>) noexcept
+{
+    const auto emit_block = [&](const backward& chunk, size block) noexcept
+    {
+        for (size point = 0; point < block_size; ++point)
+        {
+            const auto at = offset + (block * block_size + point) * comb_words;
+            limbs52(&out[at], 1, chunk.points[point].x);
+            limbs52(&out[at + limbs], 1, chunk.points[point].y);
+        }
+    };
+
+    (emit_block(comb_backwards<Window, Blocks>, Blocks), ...);
+}
+
+template <size Window>
+constexpr void comb_emit(std::array<word, comb_part_words>& out,
+    size offset) noexcept
+{
+    if constexpr (Window < comb_windows)
+        comb_emit<Window>(out, offset,
+            std::make_index_sequence<comb_blocks>{});
+}
+
+template <size Part, size... Windows>
+constexpr std::array<word, comb_part_words> comb(
+    std::index_sequence<Windows...>) noexcept
+{
+    std::array<word, comb_part_words> out{};
+    (comb_emit<Part * comb_part_windows + Windows>(out,
+        Windows * comb_size * comb_words), ...);
+    return out;
+}
+
+template <size Part>
+constexpr std::array<word, comb_part_words> comb() noexcept
+{
+    return comb<Part>(std::make_index_sequence<comb_part_windows>{});
+}
+
 } // namespace precompute
 
 /// Generator table slices, each defined in its own translation unit.
@@ -469,6 +642,10 @@ extern const std::array<precompute::word, precompute::slice_words>
     generator_slice_09, generator_slice_10, generator_slice_11,
     generator_slice_12, generator_slice_13, generator_slice_14,
     generator_slice_15;
+
+/// Comb table parts, each defined in its own translation unit.
+extern const std::array<precompute::word, precompute::comb_part_words>
+    comb_part_00, comb_part_01, comb_part_02;
 
 } // namespace secp256k1
 } // namespace system

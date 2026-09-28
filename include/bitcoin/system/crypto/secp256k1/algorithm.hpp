@@ -640,6 +640,32 @@ protected:
     template <typename Word>
     static constexpr void lookup(affine_t<Word>& r, Word entry, bool mapped,
         Word negative) NOEXCEPT;
+
+    /// Comb table.
+    /// -----------------------------------------------------------------------
+    /// Multiples j * 2^(comb_bits * w) * G (normal) for j in 1..comb_size, of
+    /// each window w, in parts each computed at compile time in its own
+    /// translation unit. An entry is x limbs then y limbs.
+
+    static constexpr size_t comb_bits = 6;
+    static constexpr size_t comb_size = power2(sub1(comb_bits));
+    static constexpr size_t comb_windows = (256 + comb_bits) / comb_bits;
+    static constexpr size_t comb_part_windows = 15;
+    static constexpr size_t comb_part_count = ceilinged_divide(comb_windows,
+        comb_part_windows);
+    static constexpr size_t comb_words = two * array_count<field_t<uint64_t>>;
+
+    using comb_parts_t = std_array<const uint64_t*, comb_part_count>;
+    static const comb_parts_t comb_parts;
+
+    /// r = entry of a comb window (1 + entry times its base), negated.
+    static constexpr void lookup_comb(affine_t<uint64_t>& r, size_t window,
+        size_t entry, bool negative) NOEXCEPT;
+
+    /// r += k * G, by one addition per signed digit, without doubling.
+    static constexpr void add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
+        uint64_t& faults) NOEXCEPT;
+
     /// Multiplication (weak coordinates).
     /// -----------------------------------------------------------------------
 
@@ -777,8 +803,9 @@ protected:
 
     /// Keys and signing (variable time, secrets blinded).
     /// -----------------------------------------------------------------------
-    /// A secret multiple k * a is computed as (k / m) * (m * a) for a random
-    /// blind m, so that each multiplication is of a value independent of k.
+    /// A secret multiple k * G is computed as (k - m) * G + m * G, and k * a
+    /// as (k / m) * (m * a), for a random blind m, so that each multiplication
+    /// is of a value independent of k.
 
     /// r = g * G + k * a (normal), false if infinity.
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,

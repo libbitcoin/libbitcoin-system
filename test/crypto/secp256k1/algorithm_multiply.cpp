@@ -38,6 +38,10 @@ public:
     using algorithm::multiply;
     using algorithm::multiply_complete;
     using algorithm::linear;
+    using algorithm::secret_multiply;
+    using algorithm::lookup_comb;
+    using algorithm::add_comb;
+    using algorithm::comb_bits;
     using algorithm::naf_t;
     using algorithm::naf;
     using algorithm::to_affine;
@@ -288,6 +292,96 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_negated__infini
 {
     affine sum{};
     BOOST_CHECK(!accessor::linear(sum, number(order_minus_one), g1));
+}
+
+// comb
+// ----------------------------------------------------------------------------
+
+static bool is_same(const affine& left, const affine& right) NOEXCEPT
+{
+    return encode(left.x) == encode(right.x) &&
+        encode(left.y) == encode(right.y);
+}
+
+static affine multiple(const scalar& k) NOEXCEPT
+{
+    affine out{};
+    accessor::to_affine(out, complete(k, g1, {}));
+    return out;
+}
+
+static bool is_comb(size_t window, size_t entry) NOEXCEPT
+{
+    scalar k{};
+    const auto bit = window * accessor::comb_bits;
+    k[bit / 64] = uint64_t{ add1(entry) } << (bit % 64);
+
+    affine positive{}, negative{};
+    accessor::lookup_comb(positive, window, entry, false);
+    accessor::lookup_comb(negative, window, entry, true);
+    const auto expected = multiple(k);
+    return is_same(positive, expected) &&
+        encode(negative.x) == encode(expected.x) &&
+        encode(negative.y) != encode(expected.y);
+}
+
+static bool is_comb_product(const scalar& k) NOEXCEPT
+{
+    uint64_t faults{};
+    jacobian sum{};
+    sum.infinity = max_uint64;
+    accessor::add_comb(sum, k, faults);
+    if (is_nonzero(faults))
+        return false;
+
+    const auto expected = complete(k, g1, {});
+    if (f::any(sum.infinity) || f::any(expected.infinity))
+        return f::any(sum.infinity) && f::any(expected.infinity);
+
+    affine out{};
+    accessor::to_affine(out, sum);
+    return is_same(out, multiple(k));
+}
+
+static bool is_secret_product(const scalar& k, const scalar& m) NOEXCEPT
+{
+    affine out{};
+    accessor::secret_multiply(out, k, m);
+    return is_same(out, multiple(k));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__entries__expected)
+{
+    BOOST_CHECK(is_comb(0, 0));
+    BOOST_CHECK(is_comb(0, 1));
+    BOOST_CHECK(is_comb(0, 31));
+    BOOST_CHECK(is_comb(1, 0));
+    BOOST_CHECK(is_comb(14, 31));
+    BOOST_CHECK(is_comb(15, 0));
+    BOOST_CHECK(is_comb(29, 17));
+    BOOST_CHECK(is_comb(30, 5));
+    BOOST_CHECK(is_comb(42, 0));
+    BOOST_CHECK(is_comb(42, 7));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__values__expected)
+{
+    constexpr scalar carried{ max_uint64, max_uint64, max_uint64, 0x0fffffffffffffff };
+    BOOST_CHECK(is_comb_product(number(zero_value)));
+    BOOST_CHECK(is_comb_product(number(one_value)));
+    BOOST_CHECK(is_comb_product(number(sample)));
+    BOOST_CHECK(is_comb_product(number(first)));
+    BOOST_CHECK(is_comb_product(number(order_minus_one)));
+    BOOST_CHECK(is_comb_product(number(order_minus_two)));
+    BOOST_CHECK(is_comb_product(carried));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__generator__expected)
+{
+    BOOST_CHECK(is_secret_product(number(sample), number(first)));
+    BOOST_CHECK(is_secret_product(number(one_value), number(order_minus_one)));
+    BOOST_CHECK(is_secret_product(number(order_minus_one), number(one_value)));
+    BOOST_CHECK(is_secret_product(number(sample), number(sample)));
 }
 
 // naf

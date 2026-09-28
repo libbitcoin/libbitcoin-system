@@ -519,6 +519,15 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_00.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_01.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_02.cpp">
+      <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_00.cpp">
       <Filter>src\crypto\secp256k1\generator</Filter>
     </ClCompile>

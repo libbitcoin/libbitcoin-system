@@ -49,9 +49,11 @@ constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
 constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
     const affine_t<uint64_t>& a) NOEXCEPT
 {
+    uint64_t faults{};
     jacobian_t<uint64_t> sum{};
-    if (f::any(multiply(sum, scalars_t<uint64_t>{ g }, a,
-        scalars_t<uint64_t>{})))
+    sum.infinity = max_uint64;
+    add_comb(sum, g, faults);
+    if (is_nonzero(faults))
         multiply_complete(sum, g, a, {});
 
     add_complete(sum, sum, a);
@@ -65,12 +67,24 @@ constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
 constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     const scalar_t& k, const scalar_t& m) NOEXCEPT
 {
-    affine_t<uint64_t> blinded{};
-    scalar_t quotient{};
-    /* bool */ linear(blinded, m, generator, {});
-    inverse(quotient, m);
-    multiply(quotient, quotient, k);
-    /* bool */ linear(r, {}, blinded, quotient);
+    scalar_t masked{};
+    negate(masked, m);
+    add(masked, masked, k);
+
+    uint64_t faults{};
+    jacobian_t<uint64_t> sum{};
+    sum.infinity = max_uint64;
+    add_comb(sum, masked, faults);
+    add_comb(sum, m, faults);
+    if (is_nonzero(faults))
+    {
+        jacobian_t<uint64_t> blind{};
+        multiply_complete(sum, masked, generator, {});
+        multiply_complete(blind, m, generator, {});
+        add_complete(sum, sum, blind);
+    }
+
+    to_affine(r, sum);
 }
 
 constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
