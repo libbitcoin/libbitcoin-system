@@ -40,7 +40,6 @@
 // address::from_string
 ////#define BOOST_ASIO_NO_DEPRECATED
 #include <boost/asio.hpp>
-#include <boost/format.hpp>
 
 // Headers only json.
 // #define BOOST_JSON_NO_LIB
@@ -55,11 +54,6 @@
 
 namespace libbitcoin
 {
-    // `boost::format` is an unusable name with urls included.
-    // boost::        typedef basic_format<char> format;
-    // boost::urls    void format(...)
-    using boost_format = boost::basic_format<char>;
-
     namespace system
     {
         namespace asio
