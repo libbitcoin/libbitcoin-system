@@ -189,6 +189,9 @@ BC_API bool is_compressed_key(const data_slice& point) NOEXCEPT;
 /// Fast detection of uncompressed public key structure.
 BC_API bool is_uncompressed_key(const data_slice& point) NOEXCEPT;
 
+/// Fast detection of hybrid public key structure.
+BC_API bool is_hybrid_key(const data_slice& point) NOEXCEPT;
+
 /// Fast detection of compressed or uncompressed public key structure.
 BC_API bool is_public_key(const data_slice& point) NOEXCEPT;
 
