@@ -149,6 +149,11 @@
     #define __SSE4_1__
 #endif
 
+/// vc++: AVX512 (/arch:AVX512) implies AVX512VL.
+#if defined(HAVE_MSC) && defined(__AVX512BW__) && !defined(__AVX512VL__)
+    #define __AVX512VL__
+#endif
+
 /// vc++: ARM implies NEON, SVE not supported, CRYPTO requires custom option.
 #if defined(HAVE_MSC) && defined(HAVE_ARM) && !defined(__ARM_NEON)
     #define __ARM_NEON
@@ -207,9 +212,11 @@
         #define HAVE_SHANI
         #define HAVE_SHA
     #endif
-    // -mavx512bw
+    // -mavx512bw -mavx512vl
     // vc++: Advanced Vector Extensions 512 (X86/X64) (/arch:AVX512)
-    #if defined(__AVX512BW__)
+    // AVX512VL is required because without it compilers widen 256 bit rotates
+    // to 512 bit, which lowers the clock of cpus that throttle avx512.
+    #if defined(__AVX512BW__) && defined(__AVX512VL__)
         #define HAVE_AVX512
         #define HAVE_512
     #endif
