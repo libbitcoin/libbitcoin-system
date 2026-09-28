@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Sink for ios::stream, copies bytes to Container.
+/// Sink for make_stream, copies bytes to Container.
 template <typename Container, if_base_of<data_slab, Container> = true>
 class copy_sink
   : public device<Container>
@@ -57,7 +57,7 @@ protected:
     }
 
 private:
-    const Container& container_;
+    const Container container_;
     typename Container::iterator next_;
 };
 

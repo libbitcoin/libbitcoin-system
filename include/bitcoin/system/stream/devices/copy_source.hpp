@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Source for ios::stream, copies bytes from Container.
+/// Source for make_stream, copies bytes from Container.
 template <typename Container, if_base_of<data_reference, Container> = true>
 class copy_source
   : public device<Container>
@@ -50,7 +50,7 @@ public:
 protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
-        // boost input_sequence/output_sequence both require non-const buffer
+        // input_sequence/output_sequence both require non-const buffer
         // ptrs, but the data member is const, so we must cast it for direct
         // devices. As a source the buffer should/must never be mutated.
         BC_PUSH_WARNING(NO_CONST_CAST)
@@ -64,7 +64,7 @@ protected:
     }
 
 private:
-    const Container& container_;
+    const Container container_;
     typename Container::const_iterator next_;
 };
 

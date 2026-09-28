@@ -130,7 +130,7 @@ typename device<Container>::size_type
 device<Container>::do_optimal_buffer_size() const NOEXCEPT
 {
     // Defaults to 4k bytes, override in indirect devices.
-    return BOOST_IOSTREAMS_DEFAULT_DEVICE_BUFFER_SIZE;
+    return 4096;
 }
 
 } // namespace system

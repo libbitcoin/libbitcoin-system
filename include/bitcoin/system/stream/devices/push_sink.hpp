@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Sink for ios::stream, appends bytes to Container.
+/// Sink for make_stream, appends bytes to Container.
 /// Container may be any insertable object with contiguous byte data.
 /// This is limited to std::string and std_vector of uint8_t.
 /// Push streams are buffered, indirect (inefficient) and require flush.

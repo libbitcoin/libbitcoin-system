@@ -41,7 +41,6 @@
 ////#define BOOST_ASIO_NO_DEPRECATED
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
-#include <boost/iostreams/stream.hpp>
 
 // Headers only json.
 // #define BOOST_JSON_NO_LIB
