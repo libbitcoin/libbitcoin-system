@@ -98,10 +98,18 @@ Sigma(auto x) NOEXCEPT
     // S'(n) = ((((n >>> (z-y)) ^ n) >>> (y-x)) ^ n) >>> x
 
     // This Sigma refactoring reduces normal form processing time by ~10%.
-    // Normal form, optimized.
-    //return (x >>> A) ^ (x >>> B) ^ (x >>> C)
     constexpr auto s = SHA::word_bits;
-    return f::ror<A, s>(f::xor_(f::ror<B - A, s>(f::xor_(f::ror<C - B, s>(x), x)), x));
+    if constexpr (is_extended<decltype(x)>)
+    {
+        // Normal form, unmodified.
+        return f::xor_(f::xor_(f::ror<A, s>(x), f::ror<B, s>(x)), f::ror<C, s>(x));
+    }
+    else
+    {
+        // Normal form, optimized.
+        //return (x >>> A) ^ (x >>> B) ^ (x >>> C)
+        return f::ror<A, s>(f::xor_(f::ror<B - A, s>(f::xor_(f::ror<C - B, s>(x), x)), x));
+    }
 }
 
 // Sigma dispatch

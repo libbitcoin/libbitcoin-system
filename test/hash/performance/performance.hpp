@@ -19,460 +19,279 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
 #define LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
 
+#include "../../test.hpp"
+
 #if defined(HAVE_PERFORMANCE_TESTS)
 
-#include "../../test.hpp"
+#include <algorithm>
 #include <chrono>
 
 namespace performance {
 
-constexpr bool use_csv = false;
-    
-// format timing results to ostream
-// ----------------------------------------------------------------------------
+template <typename SHA, bool Native, bool Vector, bool Cached = true>
+using sha_t = sha::algorithm<SHA, Native, Vector, Cached>;
 
-template <typename Precision>
-constexpr auto seconds_total(uint64_t time) noexcept
-{
-    return (1.0f * time) / Precision::period::den;
-}
+template <bool Native, bool Vector, bool Cached = true>
+using sha256_t = sha_t<sha::h256<>, Native, Vector, Cached>;
 
-template <size_t Count>
-constexpr auto ms_per_round(float seconds) noexcept
-{
-    return (seconds * std::milli::den) / Count;
-}
+using sha256_scalar = sha256_t<false, false>;
+using sha256_vector = sha256_t<false, true>;
+using sha256_native = sha256_t<true, false>;
+using sha256_both = sha256_t<true, true>;
+using sha256_uncached = sha256_t<false, false, false>;
 
-template <size_t Bytes>
-constexpr auto ms_per_byte(float seconds) noexcept
+class accessor
+  : public sha256_both
 {
-    return (seconds * std::milli::den) / Bytes;
-}
-
-template <size_t Bytes>
-constexpr auto mib_per_second(float seconds) noexcept
-{
-    return Bytes / seconds / power2(20u);
-}
-
-template <size_t Bytes>
-constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
-{
-    return (seconds * ghz * std::giga::num) / Bytes;
-}
-
-struct parameters
-{
-    static constexpr size_t strength{}; // algorithm strength (160/256/512|128/160).
-    static constexpr bool native{};     // intrinsic sha (ignored for rmd).
-    static constexpr bool vector{};     // algorithm vectorization.
-    static constexpr bool cached{};     // scheduled pad caching.
-    static constexpr bool chunked{};    // false for array data.
-    static constexpr bool ripemd{};     // false for sha algorithm.
+public:
+    using iblocks_t = sha256_both::iblocks_t;
+    using idigests_t = sha256_both::idigests_t;
+    using sha256_both::merkle_hash_vector;
+    using sha256_both::merkle_hash_native;
 };
 
-// Output performance run to given stream.
-template <
-    typename Parameters,
-    size_t Count,
-    size_t Size,
-    typename Algorithm,
-    typename Precision>
-void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
-{
-    using P = Parameters;
-    constexpr auto bytes = Size * Count;
-    const auto seconds = seconds_total<Precision>(time);
-    const auto delimiter = csv ? "," : "\n";
-    std::string algorithm{ typeid(Algorithm).name() };
-    replace(algorithm, "libbitcoin::system::", "");
-    replace(algorithm, "class ", "");
-    replace(algorithm, "struct ", "");
+constexpr size_t repeats = 5;
+constexpr size_t stream_bytes = 1'000'000;
+constexpr size_t merkle_blocks = 1024;
+constexpr size_t merkle_leaves = 9001;
 
-    // vector/native parameters of no effect if features not supported.
-    // Algorithm actual run is reflected in the type.
+// timing
+// ----------------------------------------------------------------------------
+
+using duration = std::chrono::duration<double, std::nano>;
+
+// Median nanoseconds per call of function() over repeats of calls.
+template <typename Function>
+double nanoseconds(size_t calls, Function&& function) NOEXCEPT
+{
+    std_array<double, repeats> times{};
+    for (auto& time: times)
+    {
+        const auto start = std::chrono::steady_clock::now();
+        for (size_t call{}; call < calls; ++call)
+            function();
+
+        const auto stop = std::chrono::steady_clock::now();
+        time = duration(stop - start).count() / calls;
+    }
+
+    std::sort(times.begin(), times.end());
+    return times[to_half(repeats)];
+}
+
+inline void report(const std::string& name, double time,
+    const std::string& unit) NOEXCEPT
+{
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    out << delimiter
-        << "test____________: " << TEST_NAME
-        << delimiter
-        << "algorithm_______: " << algorithm
-        << delimiter
-        << "test_rounds_____: " << serialize(Count)
-        << delimiter
-        << "bytes_per_round_: " << serialize(Size)
-        << delimiter
-        << "native__________: " << serialize(P::native)
-        << delimiter
-        << "vectorized______: " << serialize(P::vector)
-        << delimiter
-        << "cached__________: " << serialize(P::cached)
-        << delimiter
-        << "chunked_________: " << serialize(P::chunked)
-        << delimiter
-        << "seconds_total___: " << serialize(seconds)
-        << delimiter
-        << "mib_per_second__: " << serialize(mib_per_second<bytes>(seconds))
-        << delimiter
-        << "cycles_per_byte_: " << serialize(cycles_per_byte<bytes>(seconds, ghz))
-        << delimiter
-        << "ms_per_round____: " << serialize(ms_per_round<Count>(seconds))
-        << delimiter
-        << "ms_per_byte_____: " << serialize(ms_per_byte<bytes>(seconds))
-        << delimiter;
+    std::cout << name << ": " << time << " ns/" << unit << std::endl;
     BC_POP_WARNING()
 }
 
-// generate deterministic data from seed
+// data
 // ----------------------------------------------------------------------------
-// Generate a data_chunk or a data_array of specified size.
-// Each is hashed on the seed to preclude compiler/CPU optimization.
 
-template <size_t Size, bool Chunk = false>
-auto get_data(size_t seed) noexcept
+inline data_chunk get_bytes(size_t size) NOEXCEPT
 {
-    constexpr auto filler = [](auto seed, auto& data)
-    {
-        std::for_each(data.begin(), data.end(), [&](auto& byte)
-        {
-            byte = narrow_cast<uint8_t>((seed = hash_combine(42u, seed)));
-        });
-    };
+    data_chunk out(size);
+    for (size_t index{}; index < size; ++index)
+        out[index] = narrow_cast<uint8_t>(hash_combine(42u, index));
 
-    if constexpr (Chunk)
-    {
-        const auto data = std::make_shared<data_chunk>(Size);
-        filler(seed, *data);
-        return data;
-    }
-    else
-    {
-        const auto data = std::make_shared<data_array<Size>>();
-        filler(seed, *data);
-        return data;
-    }
+    return out;
 }
 
-// timer utility
-// ----------------------------------------------------------------------------
-
-template <typename Time = std::chrono::nanoseconds,
-    class Clock = std::chrono::system_clock>
-class timer
+inline hashes get_digests(size_t count) NOEXCEPT
 {
-public:
-    /// Returns the duration (in chrono's type system) of the elapsed time.
-    template <typename Function, typename ...Args>
-    static Time duration(const Function& func, Args&&... args) noexcept
-    {
-        const auto start = Clock::now();
-        
-        func(std::forward<Args>(args)...);
-        return std::chrono::duration_cast<Time>(Clock::now() - start);
-    }
+    hashes out{};
+    out.reserve(count);
+    for (size_t index{}; index < count; ++index)
+        out.push_back(sha256_hash(to_chunk(std::to_string(index))));
 
-    /// Returns the quantity (count) of the elapsed time as TimeT units.
-    template <typename Function, typename ...Args>
-    static typename Time::rep execution(const Function& func,
-        Args&&... args) noexcept
+    return out;
+}
+
+// workloads
+// ----------------------------------------------------------------------------
+// Each call feeds its result into the next call's input, so no call can be
+// elided and each workload's final state identifies the computation.
+
+// Streamed hash of 1,000,000 bytes, digest written over the leading bytes.
+template <typename Algorithm>
+struct stream_1m
+{
+    static data_chunk run(const std::string& name, size_t calls) NOEXCEPT
     {
-        return duration(func, std::forward<Args>(args)...).count();
+        auto data = get_bytes(stream_bytes);
+        report(name, nanoseconds(calls, [&]() NOEXCEPT
+        {
+            const auto digest = accumulator<Algorithm>::hash(data);
+            std::copy(digest.begin(), digest.end(), data.begin());
+        }) / stream_bytes, "byte");
+
+        return data;
     }
 };
 
-// hash selector
-// ----------------------------------------------------------------------------
-
-#if !defined(VISIBILE)
-template <size_t Strength>
-using rmd_algorithm = rmd::algorithm<
-    iif<Strength == 160, rmd::h160<>, rmd::h128<>>>;
-
-static_assert(is_same_type<rmd_algorithm<128>, rmd128>);
-static_assert(is_same_type<rmd_algorithm<160>, rmd160>);
-
-template <size_t Strength, bool Native, bool Vector, bool Cached>
-using sha_algorithm = sha::algorithm<
-    iif<Strength == 256, sha::h256<>,
-    iif<Strength == 512, sha::h512<>, sha::h160>>, Native, Vector, Cached>;
-
-////static_assert(is_same_type<sha_algorithm<160, true, true, true>, sha160>);
-////static_assert(is_same_type<sha_algorithm<256, true, true, true>, sha256>);
-////static_assert(is_same_type<sha_algorithm<512, true, true, true>, sha512>);
-
-template <size_t Strength, bool Native, bool Vector, bool Cached, bool Ripemd,
-    bool_if<
-       (!Ripemd && (Strength == 160 || Strength == 256 || Strength == 512)) ||
-        (Ripemd && (Strength == 128 || Strength == 160))> = true>
-using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
-    sha_algorithm<Strength, Native, Vector, Cached>>;
-
-////static_assert(is_same_type<hash_selector<128, true, true, false,  true>, rmd128>);
-////static_assert(is_same_type<hash_selector<160, true, true, false,  true>, rmd160>);
-////static_assert(is_same_type<hash_selector<160, true, true, true, false>, sha160>);
-////static_assert(is_same_type<hash_selector<256, true, true, true, false>, sha256>);
-////static_assert(is_same_type<hash_selector<512, true, true, true, false>, sha512>);
-
-static_assert(hash_selector< 160, true,  true, true, false>::native == /*have_sha*/ false);
-static_assert(hash_selector< 256, true,  true, true, false>::native == have_sha);
-static_assert(hash_selector< 512, true,  true, true, false>::native == /*have_sha*/ false);
-static_assert(!hash_selector<160, false, true, true, false>::native);
-static_assert(!hash_selector<256, false, true, true, false>::native);
-static_assert(!hash_selector<512, false, true, true, false>::native);
-
-static_assert(hash_selector< 160, true, true,  true, false>::vector == have_128 || have_256 || have_512);
-static_assert(hash_selector< 256, true, true,  true, false>::vector == have_128 || have_256 || have_512);
-static_assert(hash_selector< 512, true, true,  true, false>::vector == have_128 || have_256 || have_512);
-static_assert(!hash_selector<160, true, false, true, false>::vector);
-static_assert(!hash_selector<256, true, false, true, false>::vector);
-static_assert(!hash_selector<512, true, false, true, false>::vector);
-
-static_assert(hash_selector< 160, true, true, true,  false>::caching);
-static_assert(hash_selector< 256, true, true, true,  false>::caching);
-static_assert(hash_selector< 512, true, true, true,  false>::caching);
-static_assert(!hash_selector<160, true, true, false, false>::caching);
-static_assert(!hash_selector<256, true, true, false, false>::caching);
-static_assert(!hash_selector<512, true, true, false, false>::caching);
-
-#endif
-
-// Algorithm::hash() test runner.
-// ----------------------------------------------------------------------------
-// hash_digest/hash_chunk overloads are not exposed, only check and array.
-// There is no material performance difference between slice and chunk. The
-// meaningful performance distinction is between array and non-array, since
-// array size is resolved at compile time, allowing for various optimizations.
-
-// Defaults to 1Mi rounds over 1KiB data (1GiB).
-template<typename Parameters,
-    size_t Count = 1024 * 1024, // test iterations (1Mi)
-    size_t Size = 1024,         // bytes per iteration (1KiB)
-    if_base_of<parameters, Parameters> = true>
-bool test_accumulator(std::ostream& out, bool csv = use_csv,
-    float ghz = 3.0f) noexcept
+// Streamed hash of 32 bytes, digest replaces the input.
+template <typename Algorithm>
+struct stream_32
 {
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = hash_selector<
-        P::strength,
-        P::native,
-        P::vector,
-        P::cached,
-        P::ripemd>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
+    static hash_digest run(const std::string& name, size_t calls) NOEXCEPT
     {
-        const auto data = get_data<Size, P::chunked>(seed);
-        time += Timer::execution([&data]() noexcept
+        hash_digest data{};
+        report(name, nanoseconds(calls, [&]() NOEXCEPT
         {
-            accumulator<Algorithm>::hash(*data);
-        });
+            data = accumulator<Algorithm>::hash(data);
+        }) / hash_size, "byte");
+
+        return data;
     }
+};
 
-    // Dumping output also precludes compiler removal.
-    // Return value, check to preclude compiler removal if output is bypassed.
-    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
-}
-
-template<typename Parameters,
-    size_t Count = 1024 * 1024,
-    size_t Size = 1024,
-    bool_if<Size == 32 || Size == 64> = true,
-    bool_if<!Parameters::chunked> = true,
-    if_base_of<parameters, Parameters> = true>
-bool test_algorithm(std::ostream& out, bool csv = use_csv,
-    float ghz = 3.0f) noexcept
+// Fixed size hash of 32 bytes, digest replaces the input.
+template <typename Algorithm>
+struct fixed_32
 {
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = hash_selector<
-        P::strength,
-        P::native,
-        P::vector,
-        P::cached,
-        P::ripemd>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
+    static hash_digest run(const std::string& name, size_t calls) NOEXCEPT
     {
-        const auto data = get_data<Size, P::chunked>(seed);
-        time += Timer::execution([&data]() noexcept
+        hash_digest data{};
+        report(name, nanoseconds(calls, [&]() NOEXCEPT
         {
-            Algorithm::hash(*data);
-        });
+            data = Algorithm::hash(data);
+        }) / hash_size, "byte");
+
+        return data;
     }
+};
 
-    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
-}
-
-template<typename Parameters,
-    size_t Count = 1024 * 1024,
-    size_t Size = 1024,
-    bool_if<Size == 32 || Size == 64> = true,
-    bool_if<!Parameters::chunked> = true,
-    if_base_of<parameters, Parameters> = true>
-bool test_algorithm_pair(std::ostream& out, bool csv = use_csv,
-    float ghz = 3.0f) noexcept
+// Merkle root of 9001 leaves, root written over the first leaf.
+template <typename Algorithm>
+struct root_9001
 {
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = hash_selector<
-        P::strength,
-        P::native,
-        P::vector,
-        P::cached,
-        P::ripemd>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
+    static hash_digest run(const std::string& name, size_t calls) NOEXCEPT
     {
-        const auto data = get_data<Size, P::chunked>(seed);
-        time += Timer::execution([&data]() noexcept
+        auto leaves = get_digests(merkle_leaves);
+        report(name, nanoseconds(calls, [&]() NOEXCEPT
         {
-            Algorithm::hash(*data, *data);
-        });
+            hashes copy{};
+            copy.reserve(add1(leaves.size()));
+            copy.assign(leaves.begin(), leaves.end());
+            leaves.front() = Algorithm::merkle_root(std::move(copy));
+        }) / merkle_leaves, "leaf");
+
+        return leaves.front();
     }
+};
 
-    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
-}
-
-template<typename Parameters,
-    size_t Count = 1024 * 1024,
-    size_t Size = 1024,
-    bool_if<Size == 32 || Size == 64> = true,
-    bool_if<!Parameters::chunked> = true,
-    if_base_of<parameters, Parameters> = true>
-bool test_algorithm_pair_double(std::ostream& out, bool csv = use_csv,
-    float ghz = 3.0f) noexcept
+// Double hash of 1024 64 byte blocks, digests written over the leading bytes.
+template <typename Algorithm>
+hashes double_64(const std::string& name, size_t calls) NOEXCEPT
 {
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = hash_selector<
-        P::strength,
-        P::native,
-        P::vector,
-        P::cached,
-        P::ripemd>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
+    constexpr auto size = two * merkle_blocks * hash_size;
+    auto data = get_digests(two * merkle_blocks);
+    report(name, nanoseconds(calls, [&]() NOEXCEPT
     {
-        const auto data = get_data<Size, P::chunked>(seed);
-        time += Timer::execution([&data]() noexcept
+        for (size_t block{}; block < merkle_blocks; ++block)
         {
-            Algorithm::double_hash(*data, *data);
-        });
-    }
-
-    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
-}
-
-template<typename Parameters,
-    size_t Count = 1024 * 1024,
-    size_t Size = 1024,
-    bool_if<Size == 32 || Size == 64 || Size == 128> = true,
-    bool_if<!Parameters::chunked> = true,
-    if_base_of<parameters, Parameters> = true>
-bool test_algorithm_double(std::ostream& out, bool csv = use_csv,
-    float ghz = 3.0f) noexcept
-{
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = hash_selector<
-        P::strength,
-        P::native,
-        P::vector,
-        P::cached,
-        P::ripemd>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
-    {
-        const auto data = get_data<Size, P::chunked>(seed);
-        time += Timer::execution([&data]() noexcept
-        {
-            Algorithm::double_hash(*data);
-        });
-    }
-
-    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
-}
-
-template<typename Parameters,
-    size_t Count = 1024 * 1024,
-    size_t Size = 1024, // count of blocks (digests / 2)
-    bool_if<!Parameters::chunked && !Parameters::ripemd> = true,
-    if_base_of<parameters, Parameters> = true>
-bool test_merkle(std::ostream& out, bool csv = use_csv,
-    float ghz = 3.0f) noexcept
-{
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = hash_selector<
-        P::strength,
-        P::native,
-        P::vector,
-        P::cached,
-        P::ripemd>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
-    {
-        constexpr auto size = array_count<typename Algorithm::digest_t>;
-        std::vector<typename Algorithm::digest_t> digests{};
-        digests.reserve(Size * two);
-
-        for (size_t blocks = 0; blocks < Size; ++blocks)
-        {
-            digests.push_back(*get_data<size, false>(blocks + seed));
-            digests.push_back(*get_data<size, false>(blocks + add1(seed)));
+            const auto& left = data[two * block];
+            const auto& right = data[add1(two * block)];
+            data[block] = Algorithm::double_hash(left, right);
         }
+    }) / size, "byte");
 
-        time += Timer::execution([&]() noexcept
-        {
-            Algorithm::merkle_hash(digests);
-        });
-    }
-
-    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
+    return data;
 }
 
-// Algorithm::hash() test runner parameterization.
+// As double_64, with all blocks hashed in xWord lanes.
+template <typename xWord>
+hashes double_64_lanes(const std::string& name, size_t calls) NOEXCEPT
+{
+    constexpr auto size = two * merkle_blocks * hash_size;
+    auto data = get_digests(two * merkle_blocks);
+    report(name, nanoseconds(calls, [&]() NOEXCEPT
+    {
+        const auto start = data.front().data();
+        auto blocks = accessor::iblocks_t{ size, start };
+        auto digests = accessor::idigests_t{ to_half(size), start };
+        accessor::merkle_hash_vector<xWord>(digests, blocks);
+    }) / size, "byte");
+
+    return data;
+}
+
+// As double_64, with all blocks hashed in native pairs.
+inline hashes double_64_native(const std::string& name, size_t calls) NOEXCEPT
+{
+    constexpr auto size = two * merkle_blocks * hash_size;
+    auto data = get_digests(two * merkle_blocks);
+    report(name, nanoseconds(calls, [&]() NOEXCEPT
+    {
+        const auto start = data.front().data();
+        auto blocks = accessor::iblocks_t{ size, start };
+        auto digests = accessor::idigests_t{ to_half(size), start };
+        accessor::merkle_hash_native(digests, blocks);
+    }) / size, "byte");
+
+    return data;
+}
+
+// runners
 // ----------------------------------------------------------------------------
 
-template <bool Native, bool Vector, bool Cached, bool Chunked>
-struct sha256_parameters : parameters
+// Run each available dispatch of Workload over SHA and check that all agree.
+template <typename SHA, template <typename> class Workload>
+void run_sha(const std::string& name, size_t calls) NOEXCEPT
 {
-    static constexpr size_t strength{ 256 };
-    static constexpr bool native{ Native };
-    static constexpr bool vector{ Vector };
-    static constexpr bool cached{ Cached };
-    static constexpr bool chunked{ Chunked };
-    static constexpr bool ripemd{};
-};
+    using scalar_t = sha_t<SHA, false, false>;
+    using vector_t = sha_t<SHA, false, true>;
+    using native_t = sha_t<SHA, true, false>;
+    using both_t = sha_t<SHA, true, true>;
 
-template <bool Chunked>
-struct rmd160_parameters : parameters
+    const auto expected = Workload<scalar_t>::run(name + " scalar", calls);
+
+    if constexpr (vector_t::vector)
+    {
+        const auto vector = Workload<vector_t>::run(name + " vector", calls);
+        BOOST_CHECK_EQUAL(vector, expected);
+    }
+
+    if constexpr (native_t::native)
+    {
+        const auto native = Workload<native_t>::run(name + " native", calls);
+        BOOST_CHECK_EQUAL(native, expected);
+    }
+
+    if constexpr (both_t::native && both_t::vector)
+    {
+        const auto both = Workload<both_t>::run(name + " native vector", calls);
+        BOOST_CHECK_EQUAL(both, expected);
+    }
+}
+
+// Run stream_1m over rmd160 and check it against the chain as whole blocks.
+inline void run_rmd160(const std::string& name, size_t calls) NOEXCEPT
 {
-    static constexpr size_t strength{ 160 };
-    static constexpr bool native{};
-    static constexpr bool vector{};
-    static constexpr bool cached{};
-    static constexpr bool chunked{ Chunked };
-    static constexpr bool ripemd{ true };
-};
+    static_assert(is_zero(stream_bytes % array_count<rmd160::block_t>));
+
+    auto expected = get_bytes(stream_bytes);
+    for (size_t call{}; call < repeats * calls; ++call)
+    {
+        rmd160::iblocks_t blocks{ expected.size(), expected.data() };
+        const auto digest = rmd160::hash(std::move(blocks));
+        std::copy(digest.begin(), digest.end(), expected.begin());
+    }
+
+    BOOST_CHECK_EQUAL(stream_1m<rmd160>::run(name, calls), expected);
+}
+
+template <typename xWord>
+void run_double_64_lanes(const std::string& name, size_t calls,
+    const hashes& expected) NOEXCEPT
+{
+    if constexpr (have<xWord>)
+    {
+        BOOST_CHECK_EQUAL(double_64_lanes<xWord>(name, calls), expected);
+    }
+}
 
 } // namespace performance
 

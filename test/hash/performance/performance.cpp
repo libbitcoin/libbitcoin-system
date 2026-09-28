@@ -21,337 +21,71 @@
 
 #if defined(HAVE_PERFORMANCE_TESTS)
 
+BOOST_AUTO_TEST_SUITE(hash_performance_tests)
+
 using namespace performance;
-using rmd160a = rmd160_parameters<false>;
-using rmd160c = rmd160_parameters<true>;
-using sha256a = sha256_parameters<true, false, true, false>;
-using sha256c_cached = sha256_parameters<true, false, true, true>;
-using sha256c_uncached = sha256_parameters<true, false, false, true>;
 
-using sha256a_both = sha256_parameters<true, true, true, false>;
-using sha256a_comp = sha256_parameters<true, false, true, false>;
-using sha256a_vect = sha256_parameters<false, true, true, false>;
-using sha256a_none = sha256_parameters<false, false, true, false>;
+// sha256
+// ----------------------------------------------------------------------------
 
-using namespace baseline;
-using base_rmd160a = base::parameters<CRIPEMD160, false>;
-using base_rmd160c = base::parameters<CRIPEMD160, true>;
-using base_sha256a = base::parameters<CSHA256, false>;
-using base_sha256c = base::parameters<CSHA256, true>;
-
-struct v0
+BOOST_AUTO_TEST_CASE(hash_performance__sha256__stream_1m)
 {
-    static constexpr size_t c = 1024;
-    static constexpr size_t s = 1024 * 1024;
-};
-
-struct v1
-{
-    static constexpr size_t c = 1;
-    static constexpr size_t s = 1024 * 1024 * 1024;
-};
-
-struct v2
-{
-    static constexpr size_t c = 8 * 1024 * 1024;
-    static constexpr size_t s = 128;
-};
-
-struct v3
-{
-    static constexpr size_t c = 16 * 1024 * 1024;
-    static constexpr size_t s = 64;
-};
-
-struct v4
-{
-    static constexpr size_t c = 32 * 1024 * 1024;
-    static constexpr size_t s = 32;
-};
-
-struct mr
-{
-    static constexpr size_t c = 10 * 1024;
-};
-
-BOOST_AUTO_TEST_SUITE(performance_merkle_tests)
-
-BOOST_AUTO_TEST_CASE(performance__sha256a_base__merkle)
-{
-    auto complete = true;
-    complete &= base::test_merkle<base_sha256a, mr::c, 1>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 2>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 3>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 4>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 8>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 16>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 32>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 64>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 128>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 256>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 512>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 1024>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 2048>(std::cout);
-    complete &= base::test_merkle<base_sha256a, mr::c, 4096>(std::cout);
-    BOOST_CHECK(complete);
+    run_sha<sha::h256<>, stream_1m>("sha256 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_none__merkle)
+BOOST_AUTO_TEST_CASE(hash_performance__sha256__stream_32)
 {
-    auto complete = true;
-    complete &= test_merkle<sha256a_none, mr::c, 1>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 2>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 3>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 4>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 8>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 16>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 32>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 64>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 128>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 256>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 512>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 1024>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 2048>(std::cout);
-    complete &= test_merkle<sha256a_none, mr::c, 4096>(std::cout);
-    BOOST_CHECK(complete);
+    run_sha<sha::h256<>, stream_32>("sha256 stream 32", 1'000'000);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_vect__merkle)
+BOOST_AUTO_TEST_CASE(hash_performance__sha256__stream_32_uncached)
 {
-    auto complete = true;
-    complete &= test_merkle<sha256a_vect, mr::c, 1>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 2>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 3>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 4>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 8>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 16>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 32>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 64>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 128>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 256>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 512>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 1024>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 2048>(std::cout);
-    complete &= test_merkle<sha256a_vect, mr::c, 4096>(std::cout);
-    BOOST_CHECK(complete);
+    const auto expected = stream_32<sha256_scalar>::run("sha256 stream 32 scalar cached", 1'000'000);
+    BOOST_CHECK_EQUAL(stream_32<sha256_uncached>::run("sha256 stream 32 scalar uncached", 1'000'000), expected);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_comp__merkle)
+BOOST_AUTO_TEST_CASE(hash_performance__sha256__fixed_32)
 {
-    auto complete = true;
-    complete &= test_merkle<sha256a_comp, mr::c, 1>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 2>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 3>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 4>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 8>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 16>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 32>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 64>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 128>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 256>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 512>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 1024>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 2048>(std::cout);
-    complete &= test_merkle<sha256a_comp, mr::c, 4096>(std::cout);
-    BOOST_CHECK(complete);
+    run_sha<sha::h256<>, fixed_32>("sha256 fixed 32", 1'000'000);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_both__merkle)
+BOOST_AUTO_TEST_CASE(hash_performance__sha256__double_64)
 {
-    auto complete = true;
-    complete &= test_merkle<sha256a_both, mr::c, 1>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 2>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 3>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 4>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 8>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 16>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 32>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 64>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 128>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 256>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 512>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 1024>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 2048>(std::cout);
-    complete &= test_merkle<sha256a_both, mr::c, 4096>(std::cout);
-    BOOST_CHECK(complete);
+    constexpr size_t calls = 500;
+    const auto expected = double_64<sha256_scalar>("sha256 double 64 x 1024 scalar", calls);
+
+    if constexpr (sha256_native::native)
+    {
+        BOOST_CHECK_EQUAL(double_64<sha256_native>("sha256 double 64 x 1024 native", calls), expected);
+        BOOST_CHECK_EQUAL(double_64_native("sha256 double 64 x 1024 native 2 lanes", calls), expected);
+    }
+
+    run_double_64_lanes<xint128_t>("sha256 double 64 x 1024 4 lanes", calls, expected);
+    run_double_64_lanes<xint256_t>("sha256 double 64 x 1024 8 lanes", calls, expected);
+    run_double_64_lanes<xint512_t>("sha256 double 64 x 1024 16 lanes", calls, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(performance_sha256_tests)
-
-BOOST_AUTO_TEST_CASE(performance__base_sha256a)
+BOOST_AUTO_TEST_CASE(hash_performance__sha256__merkle_root)
 {
-    auto complete = true;
-    complete &= base::test_hash<base_sha256a, v0::c, v0::s>(std::cout);
-    complete &= base::test_hash<base_sha256a, v1::c, v1::s>(std::cout);
-
-    complete &= base::test_hash<base_sha256a, v2::c, v2::s>(std::cout);
-    complete &= base::test_hash<base_sha256a, v2::c, v2::s>(std::cout);
-
-    complete &= base::test_hash<base_sha256a, v3::c, v3::s>(std::cout);
-    complete &= base::test_hash_double<base_sha256a, v3::c, v3::s>(std::cout);
-
-    complete &= base::test_hash<base_sha256a, v4::c, v4::s>(std::cout);
-    complete &= base::test_hash_double<base_sha256a, v4::c, v4::s>(std::cout);
-
-    complete &= base::test_hash_pair<base_sha256a, v4::c, v4::s>(std::cout);
-    complete &= base::test_hash_pair_double<base_sha256a, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
+    run_sha<sha::h256<>, root_9001>("sha256 merkle root 9001", 100);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_none)
+// other
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hash_performance__sha160__stream_1m)
 {
-    auto complete = true;
-    complete &= test_accumulator<sha256a_none, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256a_none, v1::c, v1::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_none, v2::c, v2::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_none, v2::c, v2::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_none, v3::c, v3::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_none, v3::c, v3::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_none, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_none, v4::c, v4::s>(std::cout);
-
-    complete &= test_algorithm_pair<sha256a_none, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_pair_double<sha256a_none, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
+    run_sha<sha::h160, stream_1m>("sha160 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_vect)
+BOOST_AUTO_TEST_CASE(hash_performance__sha512__stream_1m)
 {
-    auto complete = true;
-    complete &= test_accumulator<sha256a_vect, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256a_vect, v1::c, v1::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_vect, v2::c, v2::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_vect, v2::c, v2::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_vect, v3::c, v3::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_vect, v3::c, v3::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_vect, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_vect, v4::c, v4::s>(std::cout);
-
-    complete &= test_algorithm_pair<sha256a_vect, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_pair_double<sha256a_vect, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
+    run_sha<sha::h512<>, stream_1m>("sha512 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_comp)
+BOOST_AUTO_TEST_CASE(hash_performance__rmd160__stream_1m)
 {
-    auto complete = true;
-    complete &= test_accumulator<sha256a_comp, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256a_comp, v1::c, v1::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_comp, v2::c, v2::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_comp, v2::c, v2::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_comp, v3::c, v3::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_comp, v3::c, v3::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_comp, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_comp, v4::c, v4::s>(std::cout);
-
-    complete &= test_algorithm_pair<sha256a_comp, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_pair_double<sha256a_comp, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_CASE(performance__sha256a_both)
-{
-    auto complete = true;
-    complete &= test_accumulator<sha256a_both, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256a_both, v1::c, v1::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_both, v2::c, v2::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_both, v2::c, v2::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_both, v3::c, v3::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_both, v3::c, v3::s>(std::cout);
-
-    complete &= test_accumulator<sha256a_both, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_double<sha256a_both, v4::c, v4::s>(std::cout);
-
-    complete &= test_algorithm_pair<sha256a_both, v4::c, v4::s>(std::cout);
-    complete &= test_algorithm_pair_double<sha256a_both, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(performance_sha256_accumulator_tests)
-
-BOOST_AUTO_TEST_CASE(performance__sha256__accumulator)
-{
-    auto complete = true;
-    complete &= test_accumulator<sha256a, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256a, v1::c, v1::s>(std::cout);
-    complete &= test_accumulator<sha256a, v2::c, v2::s>(std::cout);
-    complete &= test_accumulator<sha256a, v3::c, v3::s>(std::cout);
-    complete &= test_accumulator<sha256a, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_CASE(performance__sha256c_cached__accumulator)
-{
-    auto complete = true;
-    complete &= test_accumulator<sha256c_cached, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256c_cached, v1::c, v1::s>(std::cout);
-    complete &= test_accumulator<sha256c_cached, v2::c, v2::s>(std::cout);
-    complete &= test_accumulator<sha256c_cached, v3::c, v3::s>(std::cout);
-    complete &= test_accumulator<sha256c_cached, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_CASE(performance__sha256c_uncached__accumulator)
-{
-    auto complete = true;
-    complete &= test_accumulator<sha256c_uncached, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<sha256c_uncached, v1::c, v1::s>(std::cout);
-    complete &= test_accumulator<sha256c_uncached, v2::c, v2::s>(std::cout);
-    complete &= test_accumulator<sha256c_uncached, v3::c, v3::s>(std::cout);
-    complete &= test_accumulator<sha256c_uncached, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(performance_rmd160_tests)
-
-BOOST_AUTO_TEST_CASE(performance__rmd160__baseline)
-{
-    auto complete = true;
-    complete &= base::test_hash<base_rmd160a, v0::c, v0::s>(std::cout);
-    complete &= base::test_hash<base_rmd160a, v1::c, v1::s>(std::cout);
-    complete &= base::test_hash<base_rmd160a, v2::c, v2::s>(std::cout);
-    complete &= base::test_hash<base_rmd160a, v3::c, v3::s>(std::cout);
-    complete &= base::test_hash<base_rmd160a, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_CASE(performance__rmd160__algorithm)
-{
-    auto complete = true;
-    complete &= test_accumulator<rmd160a, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v1::c, v1::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v2::c, v2::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v3::c, v3::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_CASE(performance__rmd160__accumulator)
-{
-    auto complete = true;
-    complete &= test_accumulator<rmd160a, v0::c, v0::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v1::c, v1::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v2::c, v2::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v3::c, v3::s>(std::cout);
-    complete &= test_accumulator<rmd160a, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
+    run_rmd160("rmd160 stream 1m", 100);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -48,6 +48,47 @@ INLINE void unshuffle(xint128_t&, xint128_t&) NOEXCEPT
 {
 }
 
+INLINE void schedule_160(xint128_t&, xint128_t, xint128_t) NOEXCEPT
+{
+}
+
+INLINE void schedule_160(xint128_t&, xint128_t) NOEXCEPT
+{
+}
+
+template <size_t Round>
+INLINE void compress_160(xint128_t&, xint128_t&, xint128_t) NOEXCEPT
+{
+}
+
+INLINE xint128_t next_160(xint128_t, xint128_t e) NOEXCEPT
+{
+    return e;
+}
+
+INLINE xint128_t order_160(xint128_t message) NOEXCEPT
+{
+    return message;
+}
+
+INLINE void shuffle_160(xint128_t&) NOEXCEPT
+{
+}
+
+INLINE void unshuffle_160(xint128_t&) NOEXCEPT
+{
+}
+
+INLINE xint128_t set_160(uint32_t) NOEXCEPT
+{
+    return {};
+}
+
+INLINE uint32_t get_160(xint128_t) NOEXCEPT
+{
+    return {};
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
