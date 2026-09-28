@@ -123,4 +123,105 @@ INLINE uint32_t get_160(xint128_t e) NOEXCEPT
 
 #endif // HAVE_CRYPTO
 
+#if defined(HAVE_CRYPTO512)
+
+namespace libbitcoin {
+namespace system {
+namespace sha {
+
+/// Four 64 bit words.
+struct xquad_t
+{
+    uint64x2_t lo;
+    uint64x2_t hi;
+};
+
+INLINE xquad_t set_512(uint64_t a, uint64_t b, uint64_t c, uint64_t d) NOEXCEPT
+{
+    return
+    {
+        vcombine_u64(vcreate_u64(a), vcreate_u64(b)),
+        vcombine_u64(vcreate_u64(c), vcreate_u64(d))
+    };
+}
+
+INLINE xquad_t load_512(const xquad_t& words) NOEXCEPT
+{
+    return
+    {
+        vld1q_u64((const uint64_t*)&words),
+        vld1q_u64((const uint64_t*)&words + 2)
+    };
+}
+
+INLINE void store_512(xquad_t& words, xquad_t a) NOEXCEPT
+{
+    vst1q_u64((uint64_t*)&words, a.lo);
+    vst1q_u64((uint64_t*)&words + 2, a.hi);
+}
+
+INLINE xquad_t add_512(xquad_t a, xquad_t b) NOEXCEPT
+{
+    return { vaddq_u64(a.lo, b.lo), vaddq_u64(a.hi, b.hi) };
+}
+
+INLINE xquad_t swap_512(xquad_t a) NOEXCEPT
+{
+    return
+    {
+        (uint64x2_t)vrev64q_u8((uint8x16_t)a.lo),
+        (uint64x2_t)vrev64q_u8((uint8x16_t)a.hi)
+    };
+}
+
+INLINE void schedule_512(xquad_t& message0, xquad_t message1) NOEXCEPT
+{
+    message0.lo = vsha512su0q_u64(message0.lo, message0.hi);
+    message0.hi = vsha512su0q_u64(message0.hi, message1.lo);
+}
+
+INLINE void schedule_512(xquad_t& message0, xquad_t message1,
+    xquad_t message2) NOEXCEPT
+{
+    message0.lo = vsha512su1q_u64(message0.lo, message2.hi,
+        vextq_u64(message1.lo, message1.hi, 1));
+    message0.hi = vsha512su1q_u64(message0.hi, message0.lo,
+        vextq_u64(message1.hi, message2.lo, 1));
+}
+
+INLINE void compress_512(uint64x2_t& ab, uint64x2_t& cd, uint64x2_t& ef,
+    uint64x2_t& gh, uint64x2_t wk) NOEXCEPT
+{
+    const auto fg = vextq_u64(ef, gh, 1);
+    const auto de = vextq_u64(cd, ef, 1);
+    const auto hg = vaddq_u64(gh, vextq_u64(wk, wk, 1));
+    const auto t1 = vsha512hq_u64(hg, fg, de);
+    const auto next = vsha512h2q_u64(t1, cd, ab);
+    gh = ef;
+    ef = vaddq_u64(cd, t1);
+    cd = ab;
+    ab = next;
+}
+
+INLINE void compress_512(xquad_t& state0, xquad_t& state1,
+    xquad_t wk) NOEXCEPT
+{
+    compress_512(state0.lo, state0.hi, state1.lo, state1.hi, wk.lo);
+    compress_512(state0.lo, state0.hi, state1.lo, state1.hi, wk.hi);
+}
+
+INLINE void shuffle_512(xquad_t&, xquad_t&) NOEXCEPT
+{
+}
+
+INLINE void unshuffle_512(xquad_t&, xquad_t&) NOEXCEPT
+{
+}
+
+} // namespace sha
+} // namespace system
+} // namespace libbitcoin
+
+#endif // HAVE_CRYPTO512
+
 #endif

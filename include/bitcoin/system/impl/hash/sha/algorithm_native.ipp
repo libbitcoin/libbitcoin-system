@@ -83,7 +83,7 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t Strength, bool_if<Strength != 160>>
+template <size_t Strength, bool_if<Strength == 256>>
 INLINE void CLASS::
 native_rounds(xint128_t& lo, xint128_t& hi, xint128_t message0,
     xint128_t message1, xint128_t message2, xint128_t message3) NOEXCEPT
@@ -287,7 +287,7 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-template <size_t Strength, bool_if<Strength != 160>>
+template <size_t Strength, bool_if<Strength == 256>>
 void CLASS::
 native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
@@ -327,7 +327,7 @@ native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-template <bool Swap, size_t Strength, bool_if<Strength != 160>>
+template <bool Swap, size_t Strength, bool_if<Strength == 256>>
 void CLASS::
 native_transform(state_t& state, const auto& block) NOEXCEPT
 {
@@ -399,7 +399,7 @@ native_finalize(state_t& state, size_t blocks) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t Strength, bool_if<Strength != 160>>
+template <size_t Strength, bool_if<Strength == 256>>
 typename CLASS::digest_t CLASS::
 native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 {
@@ -857,6 +857,212 @@ native_double_hash(digest_t& digest0, digest_t& digest1,
     native_rounds<true>(lo0, hi0, lo1, hi1, block0, block1);
     native_rounds(lo0, hi0, lo1, hi1, pad);
     native_finalize_second(digest0, digest1, lo0, hi0, lo1, hi1);
+}
+
+// Native SHA512 (single lane)
+// ============================================================================
+// Four 64 bit word registers, as sha256 native but with 20 rounds of 4.
+
+TEMPLATE
+template <bool Swap>
+INLINE sha::xquad_t CLASS::
+endian(xquad_t message) NOEXCEPT
+{
+    if constexpr (Swap && !is_big_endian)
+        return sha::swap_512(message);
+    else
+        return message;
+}
+
+TEMPLATE
+INLINE void CLASS::
+shuffle(xquad_t& state0, xquad_t& state1) NOEXCEPT
+{
+    sha::shuffle_512(state0, state1);
+}
+
+TEMPLATE
+INLINE void CLASS::
+unshuffle(xquad_t& state0, xquad_t& state1) NOEXCEPT
+{
+    sha::unshuffle_512(state0, state1);
+}
+
+TEMPLATE
+INLINE void CLASS::
+prepare(xquad_t& message0, xquad_t message1) NOEXCEPT
+{
+    sha::schedule_512(message0, message1);
+}
+
+TEMPLATE
+INLINE void CLASS::
+prepare(xquad_t& message0, xquad_t message1, xquad_t message2) NOEXCEPT
+{
+    sha::schedule_512(message0, message1, message2);
+}
+
+TEMPLATE
+template <size_t Round>
+INLINE void CLASS::
+round_4(xquad_t& state0, xquad_t& state1, xquad_t message) NOEXCEPT
+{
+    constexpr auto r = Round * 4;
+    sha::compress_512(state0, state1, sha::add_512(message, sha::set_512(
+        K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3])));
+}
+
+TEMPLATE
+INLINE void CLASS::
+native_rounds(xquad_t& lo, xquad_t& hi, xquad_t message0, xquad_t message1,
+    xquad_t message2, xquad_t message3) NOEXCEPT
+{
+    const auto start_lo = lo;
+    const auto start_hi = hi;
+
+    round_4<0>(lo, hi, message0);
+    round_4<1>(lo, hi, message1);
+    round_4<2>(lo, hi, message2);
+    round_4<3>(lo, hi, message3);
+
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
+    round_4<4>(lo, hi, message0);
+
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
+    round_4<5>(lo, hi, message1);
+
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
+    round_4<6>(lo, hi, message2);
+
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
+    round_4<7>(lo, hi, message3);
+
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
+    round_4<8>(lo, hi, message0);
+
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
+    round_4<9>(lo, hi, message1);
+
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
+    round_4<10>(lo, hi, message2);
+
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
+    round_4<11>(lo, hi, message3);
+
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
+    round_4<12>(lo, hi, message0);
+
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
+    round_4<13>(lo, hi, message1);
+
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
+    round_4<14>(lo, hi, message2);
+
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
+    round_4<15>(lo, hi, message3);
+
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
+    round_4<16>(lo, hi, message0);
+
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
+    round_4<17>(lo, hi, message1);
+
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
+    round_4<18>(lo, hi, message2);
+
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
+    round_4<19>(lo, hi, message3);
+
+    lo = sha::add_512(lo, start_lo);
+    hi = sha::add_512(hi, start_hi);
+}
+
+TEMPLATE
+template <bool Swap>
+INLINE void CLASS::
+native_rounds(xquad_t& lo, xquad_t& hi, const block_t& block) NOEXCEPT
+{
+    const auto& wblock = array_cast<xquad_t>(block);
+    const auto message0 = endian<Swap>(sha::load_512(wblock[0]));
+    const auto message1 = endian<Swap>(sha::load_512(wblock[1]));
+    const auto message2 = endian<Swap>(sha::load_512(wblock[2]));
+    const auto message3 = endian<Swap>(sha::load_512(wblock[3]));
+    native_rounds(lo, hi, message0, message1, message2, message3);
+}
+
+TEMPLATE
+template <size_t Strength, bool_if<Strength == 512>>
+void CLASS::
+native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    auto& wstate = array_cast<xquad_t>(state);
+    auto lo = sha::load_512(wstate[0]);
+    auto hi = sha::load_512(wstate[1]);
+    shuffle(lo, hi);
+
+    // native_rounds must be inlined here (register boundary).
+    for (auto& block: blocks)
+        native_rounds<true>(lo, hi, block);
+
+    unshuffle(lo, hi);
+    sha::store_512(wstate[0], lo);
+    sha::store_512(wstate[1], hi);
+}
+
+TEMPLATE
+template <bool Swap, size_t Strength, bool_if<Strength == 512>>
+void CLASS::
+native_transform(state_t& state, const auto& block) NOEXCEPT
+{
+    auto& wstate = array_cast<xquad_t>(state);
+    auto lo = sha::load_512(wstate[0]);
+    auto hi = sha::load_512(wstate[1]);
+    shuffle(lo, hi);
+
+    // native_rounds must be inlined here (register boundary).
+    native_rounds<Swap>(lo, hi, array_cast<byte_t>(block));
+
+    unshuffle(lo, hi);
+    sha::store_512(wstate[0], lo);
+    sha::store_512(wstate[1], hi);
+}
+
+TEMPLATE
+template <size_t Strength, bool_if<Strength == 512>>
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state, const words_t& pad) NOEXCEPT
+{
+    auto& wstate = array_cast<xquad_t>(state);
+    auto lo = sha::load_512(wstate[0]);
+    auto hi = sha::load_512(wstate[1]);
+    shuffle(lo, hi);
+
+    // native_rounds must be inlined here (register boundary).
+    native_rounds<false>(lo, hi, array_cast<byte_t>(pad));
+    unshuffle(lo, hi);
+
+    // digest is copied so that state remains valid (LE).
+    state_t out{};
+    auto& wout = array_cast<xquad_t>(out);
+    sha::store_512(wout[0], lo);
+    sha::store_512(wout[1], hi);
+    return output(out);
 }
 
 } // namespace sha

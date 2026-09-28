@@ -390,7 +390,7 @@ merkle_hash_native(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
 
-    if constexpr (native)
+    if constexpr (native_double)
     {
         while (blocks.size() >= two)
         {
@@ -408,7 +408,7 @@ INLINE void CLASS::
 merkle_hash_vector(digests_t& digests) NOEXCEPT
 {
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
-    constexpr auto lanes = native ? two : min_lanes;
+    constexpr auto lanes = native_double ? two : min_lanes;
     auto next = zero;
 
     if (digests.size() >= lanes * two)
@@ -420,19 +420,19 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
         const auto start = iblocks.size();
 
         // Only use if shani is not available.
-        if constexpr (use_512 && !native)
+        if constexpr (use_512 && !native_double)
             merkle_hash_vector<xint512_t>(idigests, iblocks);
 
         // Only use if shani is not available.
-        if constexpr (use_256 && !native)
+        if constexpr (use_256 && !native_double)
             merkle_hash_vector<xint256_t>(idigests, iblocks);
 
         // Only use if shani is not available.
-        if constexpr (use_128 && !native)
+        if constexpr (use_128 && !native_double)
             merkle_hash_vector<xint128_t>(idigests, iblocks);
 
         // Always use if available.
-        if constexpr (native)
+        if constexpr (native_double)
             merkle_hash_native(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.
@@ -481,7 +481,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     {
         merkle_hash_(digests);
     }
-    else if constexpr (vector || native)
+    else if constexpr (vector || native_double)
     {
         // Merkle blocks are hashed at 2 native lanes (as available), otherwise
         // at 16/8/4 vector lanes (as available), and fall back to native or

@@ -98,6 +98,15 @@
     #endif
 #endif
 
+/// vc++: There are no flags for SHA512/SHA3, so use custom WITH_SHA512 option.
+#if defined(HAVE_MSC) && defined(WITH_SHA512)
+    #if defined(HAVE_XCPU)
+        #define __SHA512__
+    #elif defined(HAVE_ARM)
+        #define __ARM_FEATURE_SHA512
+    #endif
+#endif
+
 /// vc++: There are no flags for AVX512IFMA, AVXIFMA, AES-NI and VAES, so use
 /// custom WITH_AVX512IFMA, WITH_AVXIFMA, WITH_AESNI and WITH_VAES options.
 #if defined(HAVE_MSC) && defined(HAVE_XCPU)
@@ -175,6 +184,9 @@
 #if defined(__AVXIFMA__) && !defined(__AVX2__)
     #define __AVX2__
 #endif
+#if defined(__SHA512__) && !defined(__AVX2__)
+    #define __AVX2__
+#endif
 #if defined(__VAES__) && !defined(__AES__)
     #define __AES__
 #endif
@@ -199,6 +211,9 @@
 #if defined(__ARM_FEATURE_CRYPTO) && !defined(__ARM_NEON)
     #define __ARM_NEON
 #endif
+#if defined(__ARM_FEATURE_SHA512) && !defined(__ARM_NEON)
+    #define __ARM_NEON
+#endif
 #if defined(__ARM_FEATURE_SVE) && !defined(__ARM_NEON)
     #define __ARM_NEON
 #endif
@@ -211,6 +226,12 @@
     #if defined(__SHA__)
         #define HAVE_SHANI
         #define HAVE_SHA
+    #endif
+    // -mavx2 -msha512
+    // vc++: SHA512 not independently configurable (requires custom option).
+    #if defined(__SHA512__)
+        #define HAVE_SHANI512
+        #define HAVE_SHA512
     #endif
     // -mavx512bw -mavx512vl
     // vc++: Advanced Vector Extensions 512 (X86/X64) (/arch:AVX512)
@@ -273,6 +294,12 @@
         #define HAVE_CRYPTO
         #define HAVE_SHA
         #define HAVE_AES
+    #endif
+    // -march=armv8.2-a+crypto+sha3
+    // Requires 64 bit build.
+    #if defined(__ARM_FEATURE_SHA512)
+        #define HAVE_CRYPTO512
+        #define HAVE_SHA512
     #endif
     // -march=armv8-a+sve
     // Requires 64 bit build.

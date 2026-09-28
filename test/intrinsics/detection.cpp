@@ -82,6 +82,13 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512ifma__always__match)
     BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_right(extended, xcr0::opmask_bit) && get_right(extended, xcr0::zmm_upper_bit) && get_right(extended, xcr0::zmm_high_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && get_right(ebx, cpu7_0::avx512f_ebx_bit) && get_right(ebx, cpu7_0::avx512vl_ebx_bit) && get_right(ebx, cpu7_0::avx512ifma_ebx_bit), try_avx512ifma());
 }
 
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_sha512__always__match)
+{
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && eax >= cpu7_1::subleaf && get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf) && get_right(eax, cpu7_1::sha512_eax_bit), try_sha512());
+}
+
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avxifma__always__match)
 {
     uint64_t extended{};

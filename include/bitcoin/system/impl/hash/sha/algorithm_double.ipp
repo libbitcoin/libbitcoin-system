@@ -108,7 +108,7 @@ double_hash(const block_t& block) NOEXCEPT
     {
         return hasher(block);
     }
-    else if constexpr (native)
+    else if constexpr (native_double)
     {
         return native_double_hash(block);
     }
@@ -147,7 +147,7 @@ double_hash(const half_t& half) NOEXCEPT
     {
         return hasher(half);
     }
-    else if constexpr (native)
+    else if constexpr (native_double)
     {
         return native_double_hash(half);
     }
@@ -188,7 +188,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     {
         return hasher(left, right);
     }
-    else if constexpr (native)
+    else if constexpr (native_double)
     {
         return native_double_hash(left, right);
     }
