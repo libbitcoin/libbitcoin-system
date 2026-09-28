@@ -61,7 +61,7 @@ void foo<T>::f() {} // <= incompatible declaration error
 
 /// SHA hashing algorithm.
 /// Vectorization of message schedules and merkle hashes.
-/// Native sha256 (native sha160/sha512 not yet implemented).
+/// Native sha160/sha256, and sha512 (single lane).
 template <typename SHA, bool Native = true, bool Vector = true, bool Cached = true,
     if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm
@@ -165,10 +165,11 @@ protected:
     /// Intrinsics constants.
     /// -----------------------------------------------------------------------
 
-    static constexpr auto use_sha = Native && bc::have_sha;
     static constexpr auto use_128 = Vector && bc::have_128;
     static constexpr auto use_256 = Vector && bc::have_256;
     static constexpr auto use_512 = Vector && bc::have_512;
+    static constexpr auto use_sha = Native && bc::have_sha;
+    static constexpr auto use_sha512 = Native && bc::have_sha512;
 
     template <size_t Lanes>
     static constexpr auto is_valid_lanes =
@@ -428,7 +429,7 @@ protected:
     INLINE static void round_4(xint128_t& state0, xint128_t& state1,
         xint128_t message) NOEXCEPT;
 
-    template <size_t Strength = SHA::strength, bool_if<Strength != 160> = true>
+    template <size_t Strength = SHA::strength, bool_if<Strength == 256> = true>
     INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         xint128_t message0, xint128_t message1, xint128_t message2,
         xint128_t message3) NOEXCEPT;
@@ -446,23 +447,27 @@ protected:
     INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         const half_t& left, const chunk_t& pad) NOEXCEPT;
 
-    template <bool Swap, size_t Strength = SHA::strength,
-        bool_if<Strength != 160> = true>
+    template <bool Swap, size_t Strength = SHA::strength, bool_if<Strength == 256> = true>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
-    template <bool Swap, size_t Strength = SHA::strength,
-        bool_if<Strength == 160> = true>
+    template <bool Swap, size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
-    template <size_t Strength = SHA::strength, bool_if<Strength != 160> = true>
+    template <bool Swap, size_t Strength = SHA::strength, bool_if<Strength == 512> = true>
+    static void native_transform(state_t& state, const auto& block) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength == 256> = true>
     static void native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT;
     template <size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
+    static void native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength == 512> = true>
     static void native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     template <size_t Blocks>
     static digest_t native_finalize(state_t& state) NOEXCEPT;
     static digest_t native_finalize(state_t& state, size_t blocks) NOEXCEPT;
-    template <size_t Strength = SHA::strength, bool_if<Strength != 160> = true>
+    template <size_t Strength = SHA::strength, bool_if<Strength == 256> = true>
     static digest_t native_finalize(state_t& state, const words_t& pad) NOEXCEPT;
     template <size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
+    static digest_t native_finalize(state_t& state, const words_t& pad) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength == 512> = true>
     static digest_t native_finalize(state_t& state, const words_t& pad) NOEXCEPT;
 
     static digest_t native_finalize_second(const state_t& half) NOEXCEPT;
@@ -504,12 +509,39 @@ protected:
     static void native_double_hash(digest_t& digest0, digest_t& digest1,
         const block_t& block0, const block_t& block1) NOEXCEPT;
 
+    /// Native SHA512 optimizations (single blocks).
+    /// -----------------------------------------------------------------------
+
+    template <bool Swap>
+    INLINE static xquad_t endian(xquad_t message) NOEXCEPT;
+    INLINE static void shuffle(xquad_t& state0, xquad_t& state1) NOEXCEPT;
+    INLINE static void unshuffle(xquad_t& state0, xquad_t& state1) NOEXCEPT;
+    INLINE static void prepare(xquad_t& message0, xquad_t message1) NOEXCEPT;
+    INLINE static void prepare(xquad_t& message0, xquad_t message1,
+        xquad_t message2) NOEXCEPT;
+
+    template <size_t Round>
+    INLINE static void round_4(xquad_t& state0, xquad_t& state1,
+        xquad_t message) NOEXCEPT;
+
+    INLINE static void native_rounds(xquad_t& lo, xquad_t& hi,
+        xquad_t message0, xquad_t message1, xquad_t message2,
+        xquad_t message3) NOEXCEPT;
+
+    template <bool Swap>
+    INLINE static void native_rounds(xquad_t& lo, xquad_t& hi,
+        const block_t& block) NOEXCEPT;
+
+    /// Native register resident double hashing (sha256).
+    static constexpr auto native_double = use_sha && SHA::strength == 256;
+
 public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = use_sha && (SHA::strength == 256 ||
-        SHA::strength == 160);
+    static constexpr auto native =
+        (use_sha512 && (SHA::strength == 512)) ||
+        (use_sha    && (SHA::strength == 256 || SHA::strength == 160));
     static constexpr auto vector = (use_128 || use_256 || use_512);
 };
 

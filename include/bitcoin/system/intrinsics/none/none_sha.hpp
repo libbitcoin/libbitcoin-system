@@ -95,4 +95,64 @@ INLINE uint32_t get_160(xint128_t) NOEXCEPT
 
 #endif // HAVE_SHA
 
+#if !defined(HAVE_SHA512)
+
+namespace libbitcoin {
+namespace system {
+namespace sha {
+
+/// Four 64 bit words.
+using xquad_t = std_array<uint8_t, bytes<256>>;
+
+INLINE xquad_t set_512(uint64_t, uint64_t, uint64_t, uint64_t) NOEXCEPT
+{
+    return {};
+}
+
+INLINE xquad_t load_512(const xquad_t& words) NOEXCEPT
+{
+    return words;
+}
+
+INLINE void store_512(xquad_t& words, xquad_t a) NOEXCEPT
+{
+    words = a;
+}
+
+INLINE xquad_t add_512(xquad_t a, xquad_t) NOEXCEPT
+{
+    return a;
+}
+
+INLINE xquad_t swap_512(xquad_t a) NOEXCEPT
+{
+    return a;
+}
+
+INLINE void schedule_512(xquad_t&, xquad_t) NOEXCEPT
+{
+}
+
+INLINE void schedule_512(xquad_t&, xquad_t, xquad_t) NOEXCEPT
+{
+}
+
+INLINE void compress_512(xquad_t&, xquad_t&, xquad_t) NOEXCEPT
+{
+}
+
+INLINE void shuffle_512(xquad_t&, xquad_t&) NOEXCEPT
+{
+}
+
+INLINE void unshuffle_512(xquad_t&, xquad_t&) NOEXCEPT
+{
+}
+
+} // namespace sha
+} // namespace system
+} // namespace libbitcoin
+
+#endif // HAVE_SHA512
+
 #endif

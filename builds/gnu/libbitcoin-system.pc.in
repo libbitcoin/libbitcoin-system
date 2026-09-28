@@ -36,6 +36,8 @@ Cflags: \
     @avxifma@ \
     @shani@ \
     @crypto@ \
+    @sha512@ \
+    @sha3@ \
     @sse41@ \
     @aesni@ \
     @vaes@ \

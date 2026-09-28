@@ -20,6 +20,7 @@
       <!--<Category Name="256" DisplayName="256" />-->
       <!--<Category Name="128" DisplayName="128" />-->
       <Category Name="sha" DisplayName="sha" />
+      <Category Name="sha512" DisplayName="sha512" />
       <Category Name="arch" DisplayName="arch" />
       <Category Name="avx512ifma" DisplayName="avx512ifma" />
       <Category Name="avxifma" DisplayName="avxifma" />
@@ -29,6 +30,10 @@
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
     </Rule.DataSource>
+    <EnumProperty Name="Option-sha512" DisplayName="Enable SHA512 Native Hashing" Description="Requires SHA512 (xcpu) or SHA3 (arm) CPU." Category="sha512">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
     <EnumProperty Name="Option-sha" DisplayName="Enable SHA Native Hashing" Description="Requires SHANI (xcpu) or Neon (arm) CPU." Category="sha">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />

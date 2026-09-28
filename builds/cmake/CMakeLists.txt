@@ -86,6 +86,8 @@ option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
 option( enable-crypto "Use ARM Crypto Extensions." OFF )
+option( enable-sha512 "Use Intel SHA512 Extensions (implies AVX2)." OFF )
+option( enable-sha3 "Use ARM SHA3 Extensions for SHA512 (implies Crypto)." OFF )
 option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
 option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
 option( with-ultrafast "Use shrec/UltrafastSecp256k1 library." OFF )
@@ -153,17 +155,18 @@ endif()
 
 if ( enable-avx512 )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512f -mavx512bw" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512f -mavx512bw -mavx512vl" )
   check_cxx_source_compiles( "
     #include <stdint.h>
     #include <immintrin.h>
       int main() {
       __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
-      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);
+      __m256i b = _mm256_set1_epi32(3);
+      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
       }" SUPPORTS_FLAG_AVX512 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_AVX512 )
-    message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw'." )
+    message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw -mavx512vl'." )
   endif()
 endif()
 
@@ -231,6 +234,38 @@ if ( enable-crypto )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_CRYPTO )
     message( FATAL_ERROR "Compiler does not support '-march=armv8-a+crypto'." )
+  endif()
+endif()
+
+if ( enable-sha512 )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -msha512" )
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set1_epi64x(0);
+      __m128i k = _mm_set1_epi64x(15);
+      return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
+      }" SUPPORTS_FLAG_SHA512 )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_SHA512 )
+    message( FATAL_ERROR "Compiler does not support '-mavx2 -msha512'." )
+  endif()
+endif()
+
+if ( enable-sha3 )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -march=armv8.2-a+crypto+sha3" )
+  check_cxx_source_compiles( "
+    #include <arm_neon.h>
+      int main() {
+      uint64x2_t a = vdupq_n_u64(0);
+      return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
+      }" SUPPORTS_FLAG_SHA3 )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_SHA3 )
+    message( FATAL_ERROR "Compiler does not support '-march=armv8.2-a+crypto+sha3'." )
   endif()
 endif()
 
@@ -377,11 +412,13 @@ target_compile_features( libbitcoin-system
 target_compile_options( libbitcoin-system
   PUBLIC
     $<$<BOOL:${enable-avx2}>:-mavx -mavx2>
-    $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw>
+    $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw -mavx512vl>
     $<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>
     $<$<BOOL:${enable-avxifma}>:-mavxifma>
     $<$<BOOL:${enable-shani}>:-msse4 -msha>
     $<$<BOOL:${enable-crypto}>:-march=armv8-a+crypto>
+    $<$<BOOL:${enable-sha512}>:-mavx2 -msha512>
+    $<$<BOOL:${enable-sha3}>:-march=armv8.2-a+crypto+sha3>
     $<$<BOOL:${enable-sse41}>:-msse4.1>
     $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
     $<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>
