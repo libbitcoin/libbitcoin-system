@@ -137,6 +137,10 @@
     #define HAVE_ULTRAFAST
 #endif
 
+#if defined(HAVE_SECP256K1) && defined(HAVE_ULTRAFAST)
+    #error secp256k1 and ultrafast are mutually exclusive.
+#endif
+
 /// Platform features derived.
 /// ---------------------------------------------------------------------------
 
