@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 
 BOOST_AUTO_TEST_SUITE(intrinsics_intel_128_tests)
 
@@ -189,4 +189,4 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel_128__madd52hi__expected)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif // HAVE_SSE4
+#endif // HAVE_SSE41

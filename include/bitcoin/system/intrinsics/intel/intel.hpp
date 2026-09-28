@@ -227,7 +227,7 @@ inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 /// Emulated from 26 bit halves where there is no ifma for the width.
 
-#if defined(HAVE_IFMA_128)
+#if defined(HAVE_AVX512IFMA)
 
 // AVX512IFMA+AVX512VL
 inline auto mm_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
@@ -239,6 +239,20 @@ inline auto mm_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
 inline auto mm_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
 {
     return _mm_madd52hi_epu64(c, a, b);
+}
+
+#elif defined(HAVE_AVXIFMA)
+
+// AVXIFMA
+inline auto mm_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm_madd52lo_avx_epu64(c, a, b);
+}
+
+// AVXIFMA
+inline auto mm_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm_madd52hi_avx_epu64(c, a, b);
 }
 
 #elif defined(HAVE_128)
@@ -278,9 +292,9 @@ inline auto mm_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
     return _mm_add_epi64(c, hi);
 }
 
-#endif // HAVE_IFMA_128
+#endif // HAVE_AVX512IFMA
 
-#if defined(HAVE_IFMA_256)
+#if defined(HAVE_AVX512IFMA)
 
 // AVX512IFMA+AVX512VL
 inline auto mm256_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
@@ -292,6 +306,20 @@ inline auto mm256_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
 inline auto mm256_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
 {
     return _mm256_madd52hi_epu64(c, a, b);
+}
+
+#elif defined(HAVE_AVXIFMA)
+
+// AVXIFMA
+inline auto mm256_madd52lo_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm256_madd52lo_avx_epu64(c, a, b);
+}
+
+// AVXIFMA
+inline auto mm256_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
+{
+    return _mm256_madd52hi_avx_epu64(c, a, b);
 }
 
 #elif defined(HAVE_256)
@@ -332,7 +360,7 @@ inline auto mm256_madd52hi_epu64(auto c, auto a, auto b) NOEXCEPT
     return _mm256_add_epi64(c, hi);
 }
 
-#endif // HAVE_IFMA_256
+#endif // HAVE_AVX512IFMA
 
 #if defined(HAVE_IFMA_512)
 

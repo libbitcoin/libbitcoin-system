@@ -55,7 +55,7 @@ namespace libbitcoin {
 #else
     constexpr auto have_128 = false;
 #endif
-    
+
 #if defined(HAVE_256)
     constexpr auto have_256 = true;
 #else
@@ -74,6 +74,12 @@ namespace libbitcoin {
     constexpr auto have_sha = false;
 #endif
 
+#if defined(HAVE_AES)
+    constexpr auto have_aes = true;
+#else
+    constexpr auto have_aes = false;
+#endif
+
 #if defined(HAVE_IFMA_128)
     constexpr auto have_ifma_128 = true;
 #else
@@ -90,6 +96,66 @@ namespace libbitcoin {
     constexpr auto have_ifma_512 = true;
 #else
     constexpr auto have_ifma_512 = false;
+#endif
+
+#if defined(HAVE_SSE41)
+    constexpr auto have_sse41 = true;
+#else
+    constexpr auto have_sse41 = false;
+#endif
+
+#if defined(HAVE_AVX2)
+    constexpr auto have_avx2 = true;
+#else
+    constexpr auto have_avx2 = false;
+#endif
+
+#if defined(HAVE_AVX512)
+    constexpr auto have_avx512 = true;
+#else
+    constexpr auto have_avx512 = false;
+#endif
+
+#if defined(HAVE_SHANI)
+    constexpr auto have_shani = true;
+#else
+    constexpr auto have_shani = false;
+#endif
+
+#if defined(HAVE_AVX512IFMA)
+    constexpr auto have_avx512ifma = true;
+#else
+    constexpr auto have_avx512ifma = false;
+#endif
+
+#if defined(HAVE_AVXIFMA)
+    constexpr auto have_avxifma = true;
+#else
+    constexpr auto have_avxifma = false;
+#endif
+
+#if defined(HAVE_AESNI)
+    constexpr auto have_aesni = true;
+#else
+    constexpr auto have_aesni = false;
+#endif
+
+#if defined(HAVE_VAES)
+    constexpr auto have_vaes = true;
+#else
+    constexpr auto have_vaes = false;
+#endif
+
+#if defined(HAVE_NEON)
+    constexpr auto have_neon = true;
+#else
+    constexpr auto have_neon = false;
+#endif
+
+#if defined(HAVE_CRYPTO)
+    constexpr auto have_crypto = true;
+#else
+    constexpr auto have_crypto = false;
 #endif
 
 #if defined(HAVE_FAST_MATH)

@@ -72,6 +72,12 @@
     static_assert(!have_sha);
 #endif
 
+#if defined(HAVE_AES)
+    static_assert(have_aes);
+#else
+    static_assert(!have_aes);
+#endif
+
 #if defined(HAVE_IFMA_128)
     static_assert(have_ifma_128);
 #else
@@ -89,3 +95,73 @@
 #else
     static_assert(!have_ifma_512);
 #endif
+
+#if defined(HAVE_SSE41)
+    static_assert(have_sse41);
+#else
+    static_assert(!have_sse41);
+#endif
+
+#if defined(HAVE_AVX2)
+    static_assert(have_avx2);
+#else
+    static_assert(!have_avx2);
+#endif
+
+#if defined(HAVE_AVX512)
+    static_assert(have_avx512);
+#else
+    static_assert(!have_avx512);
+#endif
+
+#if defined(HAVE_SHANI)
+    static_assert(have_shani);
+#else
+    static_assert(!have_shani);
+#endif
+
+#if defined(HAVE_AVX512IFMA)
+    static_assert(have_avx512ifma);
+#else
+    static_assert(!have_avx512ifma);
+#endif
+
+#if defined(HAVE_AVXIFMA)
+    static_assert(have_avxifma);
+#else
+    static_assert(!have_avxifma);
+#endif
+
+#if defined(HAVE_AESNI)
+    static_assert(have_aesni);
+#else
+    static_assert(!have_aesni);
+#endif
+
+#if defined(HAVE_VAES)
+    static_assert(have_vaes);
+#else
+    static_assert(!have_vaes);
+#endif
+
+#if defined(HAVE_NEON)
+    static_assert(have_neon);
+#else
+    static_assert(!have_neon);
+#endif
+
+#if defined(HAVE_CRYPTO)
+    static_assert(have_crypto);
+#else
+    static_assert(!have_crypto);
+#endif
+
+// hierarchy
+static_assert(!have_avx2 || have_sse41);
+static_assert(!have_avx512 || have_avx2);
+static_assert(!have_avx512ifma || have_avx2);
+static_assert(!have_avxifma || have_avx2);
+static_assert(!have_shani || have_sse41);
+static_assert(!have_aesni || have_sse41);
+static_assert(!have_vaes || (have_aesni && have_avx2));
+static_assert(!have_crypto || have_neon);
