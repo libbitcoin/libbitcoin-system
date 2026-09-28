@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(intrinsics_platforms_intel_tests)
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 
 BOOST_AUTO_TEST_CASE(intrinsics__intel__mm_srli_epi8__expected)
 {
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel__mm_slli_epi8__expected)
     BOOST_CHECK_EQUAL(result[15], expected[15]);
 }
 
-#endif // HAVE_SSE4
+#endif // HAVE_SSE41
 
 #if defined(HAVE_AVX2)
 
@@ -462,7 +462,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__intel__mm512_extract_epi64__expected)
 
 #endif // HAVE_AVX512
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 
 BOOST_AUTO_TEST_CASE(intrinsics__intel__mm_extract_epi64__expected)
 {

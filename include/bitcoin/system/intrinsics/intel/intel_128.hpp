@@ -23,7 +23,7 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 
 namespace libbitcoin {
 namespace system {
@@ -166,7 +166,7 @@ INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
         return _mm_mul_epu32(a, b);
 }
 
-// AVX512IFMA+AVX512VL (SSE2)
+// AVX512IFMA+AVX512VL or AVXIFMA (SSE2)
 template <auto S>
 INLINE xint128_t madd52lo(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
 {
@@ -174,7 +174,7 @@ INLINE xint128_t madd52lo(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
         return mm_madd52lo_epu64(c, a, b);
 }
 
-// AVX512IFMA+AVX512VL (SSE2)
+// AVX512IFMA+AVX512VL or AVXIFMA (SSE2)
 template <auto S>
 INLINE xint128_t madd52hi(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
 {
@@ -407,6 +407,6 @@ INLINE xint128_t tile_hi(xint128_t, xint128_t b) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_SSE4
+#endif // HAVE_SSE41
 
 #endif

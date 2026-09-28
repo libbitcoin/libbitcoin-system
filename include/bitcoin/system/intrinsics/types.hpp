@@ -62,7 +62,7 @@ namespace libbitcoin {
     using xint512_t = MOCK_TYPE(512);
 #endif
 #if defined(HAVE_XCPU)
-    #if defined(HAVE_SSE4)
+    #if defined(HAVE_SSE41)
         using xint128_t = __m128i;
     #else
         using xint128_t = MOCK_TYPE(128);

@@ -13,10 +13,13 @@ REM
 REM Script options:
 REM --enable-avx2               Use Intel AVX2 intrinsics.
 REM --enable-avx512             Use Intel AVX512 intrinsics.
-REM --enable-ifma               Use Intel AVX512 IFMA intrinsics.
+REM --enable-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+REM --enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2).
 REM --enable-sse41              Use SSE4.1 hardware instructions.
 REM --enable-shani              Use Intel/ARM SHA Extensions.
 REM --enable-crypto             Use ARM Crypto Extensions.
+REM --enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics.
+REM --enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 REM --build-config config       Build configuration.
 REM --build-platform platform   Build platform.
 REM --build-version version     Build MSVC version.
@@ -188,27 +191,33 @@ if "!libbitcoin_system_TAG!" == "" (
         goto :end_parse_input
     ) else if "%~1" == "--enable-avx2" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions2"
+            set "libbitcoin-system_PARAMS=/p:Option-avx2=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions2"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-avx2=true"
         )
     ) else if "%~1" == "--enable-avx512" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions512"
+            set "libbitcoin-system_PARAMS=/p:Option-avx512=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions512"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-avx512=true"
         )
-    ) else if "%~1" == "--enable-ifma" (
+    ) else if "%~1" == "--enable-avx512ifma" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-ifma=true"
+            set "libbitcoin-system_PARAMS=/p:Option-avx512ifma=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-ifma=true"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-avx512ifma=true"
+        )
+    ) else if "%~1" == "--enable-avxifma" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-avxifma=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-avxifma=true"
         )
     ) else if "%~1" == "--enable-sse41" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-arch=AdvancedVectorExtensions"
+            set "libbitcoin-system_PARAMS=/p:Option-sse41=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-arch=AdvancedVectorExtensions"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sse41=true"
         )
     ) else if "%~1" == "--enable-shani" (
         if "!libbitcoin-system_PARAMS!" == "" (
@@ -221,6 +230,18 @@ if "!libbitcoin_system_TAG!" == "" (
             set "libbitcoin-system_PARAMS=/p:Option-sha=true"
         ) else (
             set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha=true"
+        )
+    ) else if "%~1" == "--enable-aesni" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-aesni=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-aesni=true"
+        )
+    ) else if "%~1" == "--enable-vaes" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-vaes=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-vaes=true"
         )
     ) else if "%~1" == "--build-config" (
         set "BUILD_CONFIG=%~2"
@@ -461,10 +482,13 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "Script options:"
     call :msg "--enable-avx2               Use Intel AVX2 intrinsics."
     call :msg "--enable-avx512             Use Intel AVX512 intrinsics."
-    call :msg "--enable-ifma               Use Intel AVX512 IFMA intrinsics."
+    call :msg "--enable-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    call :msg "--enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2)."
     call :msg "--enable-sse41              Use SSE4.1 hardware instructions."
     call :msg "--enable-shani              Use Intel/ARM SHA Extensions."
     call :msg "--enable-crypto             Use ARM Crypto Extensions."
+    call :msg "--enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics."
+    call :msg "--enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     call :msg "--build-config config       Build configuration."
     call :msg "--build-platform platform   Build platform."
     call :msg "--build-version version     Build MSVC version."

@@ -32,10 +32,13 @@ Cflags: \
     -I${includedir} \
     @avx2@ \
     @avx512@ \
-    @ifma@ \
+    @avx512ifma@ \
+    @avxifma@ \
     @shani@ \
     @crypto@ \
     @sse41@ \
+    @aesni@ \
+    @vaes@ \
     @boost_CPPFLAGS@
 
 Libs: \

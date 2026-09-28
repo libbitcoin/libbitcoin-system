@@ -98,10 +98,23 @@
     #endif
 #endif
 
-/// vc++: There is no flag for AVX512IFMA, so use custom WITH_IFMA option.
-/// Requires /arch:AVX512, which also defines __AVX512VL__ (AVX512IFMA+VL).
-#if defined(HAVE_MSC) && defined(WITH_IFMA) && defined(HAVE_XCPU)
-    #define __AVX512IFMA__
+/// vc++: There are no flags for AVX512IFMA, AVXIFMA, AES-NI and VAES, so use
+/// custom WITH_AVX512IFMA, WITH_AVXIFMA, WITH_AESNI and WITH_VAES options.
+#if defined(HAVE_MSC) && defined(HAVE_XCPU)
+    #if defined(WITH_AVX512IFMA)
+        #define __AVX512IFMA__
+    #endif
+    #if defined(WITH_AVXIFMA)
+        #define __AVXIFMA__
+    #endif
+    #if defined(WITH_AESNI)
+        #define __AES__
+        #define __PCLMUL__
+    #endif
+    #if defined(WITH_VAES)
+        #define __VAES__
+        #define __VPCLMULQDQ__
+    #endif
 #endif
 
 // Custom options to use extended SVE variable width.
@@ -133,11 +146,35 @@
 #endif
 
 /// Guard assumption of hierarchy.
-#if defined(__SHA__) && !defined(__SSE4_1__)
+#if defined(__AVX512IFMA__) && !defined(__AVX512VL__)
+    #define __AVX512VL__
+#endif
+#if defined(__AVX512VL__) && !defined(__AVX512F__)
+    #define __AVX512F__
+#endif
+#if defined(__AVX512BW__) && !defined(__AVX512F__)
+    #define __AVX512F__
+#endif
+#if defined(__AVX512F__) && !defined(__AVX2__)
+    #define __AVX2__
+#endif
+#if defined(__AVXIFMA__) && !defined(__AVX2__)
+    #define __AVX2__
+#endif
+#if defined(__VAES__) && !defined(__AES__)
+    #define __AES__
+#endif
+#if defined(__VPCLMULQDQ__) && !defined(__PCLMUL__)
+    #define __PCLMUL__
+#endif
+#if defined(__VAES__) && !defined(__AVX2__)
+    #define __AVX2__
+#endif
+#if defined(__AES__) && !defined(__SSE4_1__)
     #define __SSE4_1__
 #endif
-#if defined(__AVX512BW__) && !defined(__AVX2__)
-    #define __AVX2__
+#if defined(__SHA__) && !defined(__SSE4_1__)
+    #define __SSE4_1__
 #endif
 #if defined(__AVX2__) && !defined(__AVX__)
     #define __AVX__
@@ -176,18 +213,38 @@
     // -msse4.1
     // vc++: Use Advanced Vector Extensions (X86/X64) (/arch:AVX).
     #if defined(__SSE4_1__)
-        #define HAVE_SSE4
+        #define HAVE_SSE41
         #define HAVE_128
     #endif
-
-    // -mavx512ifma (-mavx512vl for 256/128)
+    // -mavx512ifma -mavx512vl
     // vc++: AVX512IFMA not independently configurable (requires custom option).
-    #if defined(__AVX512IFMA__) && defined(HAVE_AVX512)
-        #define HAVE_IFMA_512
+    #if defined(__AVX512IFMA__)
+        #define HAVE_AVX512IFMA
     #endif
-    #if defined(__AVX512IFMA__) && defined(__AVX512VL__) && defined(HAVE_AVX2)
+    // -mavxifma
+    // vc++: AVXIFMA not independently configurable (requires custom option).
+    #if defined(__AVXIFMA__)
+        #define HAVE_AVXIFMA
+    #endif
+    // -maes -mpclmul
+    // vc++: AES-NI not independently configurable (requires custom option).
+    #if defined(__AES__) && defined(__PCLMUL__)
+        #define HAVE_AESNI
+        #define HAVE_AES
+    #endif
+    // -mvaes -mvpclmulqdq
+    // vc++: VAES not independently configurable (requires custom option).
+    #if defined(__VAES__) && defined(__VPCLMULQDQ__)
+        #define HAVE_VAES
+    #endif
+
+    // 52 bit fused multiply-add by lane width.
+    #if defined(HAVE_AVX512IFMA) || defined(HAVE_AVXIFMA)
         #define HAVE_IFMA_256
         #define HAVE_IFMA_128
+    #endif
+    #if defined(HAVE_AVX512IFMA) && defined(HAVE_AVX512)
+        #define HAVE_IFMA_512
     #endif
 #endif
 
@@ -199,6 +256,7 @@
     #if defined(__ARM_FEATURE_CRYPTO)
         #define HAVE_CRYPTO
         #define HAVE_SHA
+        #define HAVE_AES
     #endif
     // -march=armv8-a+sve
     // Requires 64 bit build.

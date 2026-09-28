@@ -174,7 +174,7 @@ INLINE xint256_t mul(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_mul_epu32(a, b);
 }
 
-// AVX512IFMA+AVX512VL (AVX2)
+// AVX512IFMA+AVX512VL or AVXIFMA (AVX2)
 template <auto S>
 INLINE xint256_t madd52lo(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
 {
@@ -182,7 +182,7 @@ INLINE xint256_t madd52lo(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
         return mm256_madd52lo_epu64(c, a, b);
 }
 
-// AVX512IFMA+AVX512VL (AVX2)
+// AVX512IFMA+AVX512VL or AVXIFMA (AVX2)
 template <auto S>
 INLINE xint256_t madd52hi(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
 {

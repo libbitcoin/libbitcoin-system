@@ -21,6 +21,10 @@
 
 #include <bitcoin/system/define.hpp>
 
+#if defined(HAVE_XCPU) && defined(HAVE_APPLE)
+    #include <sys/sysctl.h>
+#endif
+
 /// Common CPU instructions used to locate CPU features.
 
 namespace libbitcoin {
@@ -28,7 +32,7 @@ namespace system {
 
 #if defined(HAVE_XCPU)
 
-inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
+inline bool read_xcr(uint64_t& value, uint32_t index) noexcept
 {
 #if defined(HAVE_XGETBV)
     value = _xgetbv(index);
@@ -43,7 +47,7 @@ inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 #endif
 }
 
-inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+inline bool read_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept
 {
 #if defined(HAVE_XCPUIDEX)
@@ -63,6 +67,35 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 #else
     return false;
 #endif
+}
+
+// macOS enables avx512 state (xcr0 bits 5-7) on first use.
+inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
+{
+#if defined(HAVE_APPLE)
+    constexpr uint64_t avx512_state = 0xe0;
+    int avx512{};
+    auto size = sizeof(int);
+    if (!read_xcr(value, index))
+        return false;
+
+    if (index == 0 && sysctlbyname("hw.optional.avx512f", &avx512, &size,
+        nullptr, 0) == 0 && avx512 != 0)
+        value |= avx512_state;
+
+    return true;
+#else
+    return read_xcr(value, index);
+#endif
+}
+
+// A leaf above the highest of its range (standard or extended) is invalid.
+inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+    uint32_t leaf, uint32_t subleaf) noexcept
+{
+    constexpr uint32_t extended = 0x80000000;
+    return read_cpu(a, b, c, d, leaf & extended, 0) && leaf <= a
+        && read_cpu(a, b, c, d, leaf, subleaf);
 }
 
 #else // HAVE_XCPU
