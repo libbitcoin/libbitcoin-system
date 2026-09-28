@@ -16,25 +16,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_X509_VERIFY_HPP
+#define LIBBITCOIN_SYSTEM_X509_VERIFY_HPP
 
-#include <bitcoin/system/error/block_error_t.hpp>
-#include <bitcoin/system/error/error_t.hpp>
-#include <bitcoin/system/error/errorno_t.hpp>
-#include <bitcoin/system/error/macros.hpp>
-#include <bitcoin/system/error/op_error_t.hpp>
-#include <bitcoin/system/error/script_error_t.hpp>
-#include <bitcoin/system/error/transaction_error_t.hpp>
-#include <bitcoin/system/error/x509_error_t.hpp>
-
-#include <system_error>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/x509/certificate.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace x509 {
 
-using code = std::error_code;
+/// The purpose for which the leaf certificate is verified.
+enum class purpose : uint8_t
+{
+    server,
+    client
+};
 
+/// Verify the chain (leaf first, then issuers in order) to a configured
+/// anchor at the time (unix seconds). An anchor is trusted as an issuer, and
+/// a leaf that is itself an anchor is trusted (pinned). There are no roots.
+BC_API code verify(const certificates& chain, const certificates& anchors,
+    uint64_t time, purpose intent) NOEXCEPT;
+
+} // namespace x509
 } // namespace system
 } // namespace libbitcoin
 

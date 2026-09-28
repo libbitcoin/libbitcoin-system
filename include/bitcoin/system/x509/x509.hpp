@@ -16,26 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_X509_X509_HPP
+#define LIBBITCOIN_SYSTEM_X509_X509_HPP
 
-#include <bitcoin/system/error/block_error_t.hpp>
-#include <bitcoin/system/error/error_t.hpp>
-#include <bitcoin/system/error/errorno_t.hpp>
-#include <bitcoin/system/error/macros.hpp>
-#include <bitcoin/system/error/op_error_t.hpp>
-#include <bitcoin/system/error/script_error_t.hpp>
-#include <bitcoin/system/error/transaction_error_t.hpp>
-#include <bitcoin/system/error/x509_error_t.hpp>
-
-#include <system_error>
-
-namespace libbitcoin {
-namespace system {
-
-using code = std::error_code;
-
-} // namespace system
-} // namespace libbitcoin
+#include <bitcoin/system/x509/builder.hpp>
+#include <bitcoin/system/x509/certificate.hpp>
+#include <bitcoin/system/x509/der.hpp>
+#include <bitcoin/system/x509/oids.hpp>
+#include <bitcoin/system/x509/pem.hpp>
+#include <bitcoin/system/x509/private_key.hpp>
+#include <bitcoin/system/x509/verify.hpp>
 
 #endif
