@@ -120,10 +120,12 @@ find_package( Boost 1.86.0 REQUIRED
 
 if ( with-secp256k1 )
   find_package( libsecp256k1 0.8.0 REQUIRED )
+  set( secp256k1_VERSION ${libsecp256k1_VERSION} )
 endif()
 
 if ( with-ultrafast )
   find_package( secp256k1-fast 4.0.0.0 REQUIRED )
+  set( UltrafastSecp256k1_VERSION ${secp256k1-fast_VERSION} )
 endif()
 
 #------------------------------------------------------------------------------
@@ -401,6 +403,7 @@ target_compile_options( libbitcoin-system
 target_compile_definitions( libbitcoin-system
   PRIVATE
     $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
+    $<$<BOOL:${with-secp256k1}>:SECP256K1_VERSION=${secp256k1_VERSION}>
 )
 
 file( GLOB_RECURSE libbitcoin_system_HEADERS CONFIGURE_DEPENDS

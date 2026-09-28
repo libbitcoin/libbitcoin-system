@@ -18,10 +18,31 @@
  */
 #include "ec_context.hpp"
 
+#include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/define.hpp>
+
+#if defined(HAVE_ULTRAFAST)
+    #include <ufsecp/ufsecp_version.h>
+#endif
+
+#define EC_TEXT(value) #value
+#define EC_STRING(value) EC_TEXT(value)
 
 namespace libbitcoin {
 namespace system {
+
+std::string secp256k1_library() NOEXCEPT
+{
+#if defined(HAVE_ULTRAFAST)
+    return std::string{ "ultrafast " } + ufsecp_version_string();
+#elif defined(HAVE_SECP256K1) && defined(SECP256K1_VERSION)
+    return "libsecp256k1 " EC_STRING(SECP256K1_VERSION);
+#elif defined(HAVE_SECP256K1)
+    return "libsecp256k1";
+#else
+    return "internal";
+#endif
+}
 
 // Protected constructor (abstract) base class.
 // ----------------------------------------------------------------------------
