@@ -298,7 +298,7 @@
     // -march=armv8.2-a+crypto+sha3
     // Requires 64 bit build.
     #if defined(__ARM_FEATURE_SHA512)
-        #define HAVE_CRYPTO512
+        #define HAVE_SHA3
         #define HAVE_SHA512
     #endif
     // -march=armv8-a+sve

@@ -123,7 +123,7 @@ INLINE uint32_t get_160(xint128_t e) NOEXCEPT
 
 #endif // HAVE_CRYPTO
 
-#if defined(HAVE_CRYPTO512)
+#if defined(HAVE_SHA3)
 
 namespace libbitcoin {
 namespace system {
@@ -222,6 +222,6 @@ INLINE void unshuffle_512(xquad_t&, xquad_t&) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_CRYPTO512
+#endif // HAVE_SHA3
 
 #endif

@@ -80,6 +80,12 @@ namespace libbitcoin {
     constexpr auto have_sha512 = false;
 #endif
 
+#if defined(HAVE_SHA3)
+    constexpr auto have_sha3 = true;
+#else
+    constexpr auto have_sha3 = false;
+#endif
+
 #if defined(HAVE_AES)
     constexpr auto have_aes = true;
 #else

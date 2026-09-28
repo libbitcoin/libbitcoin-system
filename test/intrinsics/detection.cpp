@@ -111,5 +111,6 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_vaes__always__match)
 
 // try_neon
 // try_crypto
+// try_sha3
 
 BOOST_AUTO_TEST_SUITE_END()
