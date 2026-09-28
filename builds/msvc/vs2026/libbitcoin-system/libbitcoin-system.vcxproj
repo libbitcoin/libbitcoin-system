@@ -12,30 +12,6 @@
     <ProjectName>libbitcoin-system</ProjectName>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugDLL|ARM">
-      <Configuration>DebugDLL</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDLL|ARM">
-      <Configuration>ReleaseDLL</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLTCG|ARM">
-      <Configuration>DebugLTCG</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLTCG|ARM">
-      <Configuration>ReleaseLTCG</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLIB|ARM">
-      <Configuration>DebugLIB</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLIB|ARM">
-      <Configuration>ReleaseLIB</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="DebugDLL|ARM64">
       <Configuration>DebugDLL</Configuration>
       <Platform>ARM64</Platform>
