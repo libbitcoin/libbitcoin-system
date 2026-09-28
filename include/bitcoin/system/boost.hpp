@@ -37,10 +37,6 @@
 // www.boost.org/doc/libs/1_78_0/boost/bind.hpp
 #define BOOST_BIND_NO_PLACEHOLDERS
 
-// Boost.Locale is still used by conversion.cpp and environment.cpp.
-// ICU backend is no longer required — normalization uses embedded tables.
-#include <boost/locale.hpp>
-
 // address::from_string
 ////#define BOOST_ASIO_NO_DEPRECATED
 #include <boost/asio.hpp>
@@ -60,9 +56,8 @@
 
 namespace libbitcoin
 {
-    // `boost::format` is and unusable name with locale or urls included.
+    // `boost::format` is an unusable name with urls included.
     // boost::        typedef basic_format<char> format;
-    // boost::locale  typedef basic_format<char> format;
     // boost::urls    void format(...)
     using boost_format = boost::basic_format<char>;
 

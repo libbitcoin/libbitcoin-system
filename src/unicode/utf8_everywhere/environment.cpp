@@ -19,7 +19,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 #include <cstdlib>
-#include <bitcoin/system/boost.hpp>
+#include <locale>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
@@ -223,9 +223,8 @@ int call_utf8_main(int argc, wchar_t* argv[],
     int(*main)(int argc, char* argv[])) NOEXCEPT
 {
     // TODO: verify std::filesystem::path is inbued as it was with boost.
-    constexpr auto utf8_locale_name = "en_US.UTF8";
-    boost::locale::generator locale{};
-    std::locale::global(locale(utf8_locale_name));
+    constexpr auto utf8_locale_name = ".UTF-8";
+    std::locale::global(std::locale(utf8_locale_name));
 
     auto backup = environ;
     auto environment = allocate_environment(_wenviron);

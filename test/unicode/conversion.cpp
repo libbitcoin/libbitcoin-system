@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf8_char32__ideographic_space__space)
 
 BOOST_AUTO_TEST_CASE(conversion__to_utf__invalid__empty)
 {
-    // Cause boost::locale::conv::utf_to_utf<>() to throw, which we suppress.
+    // Not a code point.
     const char32_t invalid = 0xffffffff;
     BOOST_REQUIRE(to_utf8(invalid).empty());
 }
@@ -262,6 +262,98 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf16__utf8_and_utf16_japanese_literals_roun
     BOOST_REQUIRE_EQUAL(widened.c_str(), utf16);
     BOOST_REQUIRE_EQUAL(narrowed, utf8);
 #endif
+}
+
+// non-ascii
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_char32__maximum__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_utf8(char32_t{ 0x0010ffff }), "\xf4\x8f\xbf\xbf");
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_char32__above_maximum__empty)
+{
+    BOOST_REQUIRE(to_utf8(char32_t{ 0x00110000 }).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_char32__surrogate__empty)
+{
+    BOOST_REQUIRE(to_utf8(char32_t{ 0x0000d800 }).empty());
+    BOOST_REQUIRE(to_utf8(char32_t{ 0x0000dfff }).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__multilingual__expected)
+{
+    const std::string utf8{ "acci\xc3\xb3n.\xd0\xba\xd0\xbe\xd1\x88\xd0\xba\xd0\xb0.\xe6\x97\xa5\xe6\x9c\xac\xe5\x9b\xbd" };
+    const std::u32string utf32{ U"acci\u00f3n.\u043a\u043e\u0448\u043a\u0430.\u65e5\u672c\u56fd" };
+    BOOST_REQUIRE(to_utf32(utf8) == utf32);
+    BOOST_REQUIRE_EQUAL(to_utf8(utf32), utf8);
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__supplementary__expected)
+{
+    BOOST_REQUIRE(to_utf32("\xf0\x9f\x98\x80") == U"\U0001f600");
+    BOOST_REQUIRE_EQUAL(to_utf8(U"\U0001f600"), "\xf0\x9f\x98\x80");
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf16__multilingual_round_trip__expected)
+{
+    const std::string utf8{ "acci\xc3\xb3n.\xd0\xba\xd0\xbe\xd1\x88\xd0\xba\xd0\xb0.\xe6\x97\xa5\xe6\x9c\xac\xe5\x9b\xbd" };
+    const std::u32string utf32{ U"acci\u00f3n.\u043a\u043e\u0448\u043a\u0430.\u65e5\u672c\u56fd" };
+    BOOST_REQUIRE_EQUAL(to_utf8(to_utf16(utf8)), utf8);
+    BOOST_REQUIRE(to_utf32(to_utf16(utf32)) == utf32);
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf16__supplementary_round_trip__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_utf8(to_utf16("\xf0\x9f\x98\x80")), "\xf0\x9f\x98\x80");
+    BOOST_REQUIRE(to_utf32(to_utf16(U"\U0001f600")) == U"\U0001f600");
+}
+
+// invalid
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__overlong__empty)
+{
+    BOOST_REQUIRE(to_utf32("\xc0\x80").empty());
+    BOOST_REQUIRE(to_utf32("\xe0\x80\x80").empty());
+    BOOST_REQUIRE(to_utf32("\xf0\x80\x80\x80").empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__truncated__empty)
+{
+    BOOST_REQUIRE(to_utf32("\xc3").empty());
+    BOOST_REQUIRE(to_utf32("\xe6\x97").empty());
+    BOOST_REQUIRE(to_utf32("ascii\xf0\x9f\x98").empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__invalid_lead_or_trail__empty)
+{
+    BOOST_REQUIRE(to_utf32("\x80").empty());
+    BOOST_REQUIRE(to_utf32("\xf8\x88\x80\x80\x80").empty());
+    BOOST_REQUIRE(to_utf32("\xc3\x41").empty());
+    BOOST_REQUIRE(to_utf32("\xff").empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__encoded_surrogate__empty)
+{
+    BOOST_REQUIRE(to_utf32("\xed\xa0\x80").empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf32_8__above_maximum__empty)
+{
+    BOOST_REQUIRE(to_utf32("\xf4\x90\x80\x80").empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_16__lone_surrogate__empty)
+{
+    BOOST_REQUIRE(to_utf8(std::wstring(1, static_cast<wchar_t>(0xd800))).empty());
+    BOOST_REQUIRE(to_utf8(std::wstring(1, static_cast<wchar_t>(0xdc00))).empty());
+}
+
+BOOST_AUTO_TEST_CASE(conversion__to_utf8_list_32__one_invalid__one_empty)
+{
+    const string_list expected{ "ascii", "" };
+    BOOST_REQUIRE(to_utf8(u32string_list{ U"ascii", std::u32string(1, char32_t{ 0x0000d800 }) }) == expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
