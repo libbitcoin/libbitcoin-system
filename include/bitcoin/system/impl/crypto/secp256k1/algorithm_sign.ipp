@@ -1,0 +1,188 @@
+/**
+ * Copyright (c) 2011-2026 libbitcoin developers
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_ALGORITHM_SIGN_IPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_ALGORITHM_SIGN_IPP
+
+// Based on:
+// secg.org/sec1-v2.pdf (ECDSA signing and public key recovery)
+// github.com/bitcoin/bips/blob/master/bip-0340.mediawiki
+
+namespace libbitcoin {
+namespace system {
+namespace secp256k1 {
+
+// Keys and signing.
+// ----------------------------------------------------------------------------
+// protected
+
+constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
+    const affine_t<uint64_t>& a, const scalar_t& k) NOEXCEPT
+{
+    jacobian_t<uint64_t> sum{};
+    if (f::any(multiply(sum, scalars_t<uint64_t>{ g }, a,
+        scalars_t<uint64_t>{ k })))
+        multiply_complete(sum, g, a, k);
+
+    if (f::any(sum.infinity))
+        return false;
+
+    to_affine(r, sum);
+    return true;
+}
+
+constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
+    const affine_t<uint64_t>& a) NOEXCEPT
+{
+    uint64_t faults{};
+    jacobian_t<uint64_t> sum{};
+    sum.infinity = max_uint64;
+    add_comb(sum, g, faults);
+    if (is_nonzero(faults))
+        multiply_complete(sum, g, a, {});
+
+    add_complete(sum, sum, a);
+    if (f::any(sum.infinity))
+        return false;
+
+    to_affine(r, sum);
+    return true;
+}
+
+constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
+    const scalar_t& k, const scalar_t& m) NOEXCEPT
+{
+    scalar_t masked{};
+    negate(masked, m);
+    add(masked, masked, k);
+
+    uint64_t faults{};
+    jacobian_t<uint64_t> sum{};
+    sum.infinity = max_uint64;
+    add_comb(sum, masked, faults);
+    add_comb(sum, m, faults);
+    if (is_nonzero(faults))
+    {
+        jacobian_t<uint64_t> blind{};
+        multiply_complete(sum, masked, generator, {});
+        multiply_complete(blind, m, generator, {});
+        add_complete(sum, sum, blind);
+    }
+
+    to_affine(r, sum);
+}
+
+constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
+    const scalar_t& k, const affine_t<uint64_t>& a,
+    const scalar_t& m) NOEXCEPT
+{
+    affine_t<uint64_t> blinded{};
+    scalar_t quotient{};
+    /* bool */ linear(blinded, {}, a, m);
+    inverse(quotient, m);
+    multiply(quotient, quotient, k);
+    /* bool */ linear(r, {}, blinded, quotient);
+}
+
+// a^-1 = (a * m)^-1 * m.
+constexpr void algorithm::secret_inverse(scalar_t& r, const scalar_t& a,
+    const scalar_t& m) NOEXCEPT
+{
+    scalar_t product{};
+    multiply(product, a, m);
+    inverse(product, product);
+    multiply(r, product, m);
+}
+
+// R = kG, r = x(R) mod n, s = (z + r d) / k, with s made low. The recovery id
+// is the parity of y(R), and 2 where x(R) is not below n.
+constexpr bool algorithm::sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,
+    const scalar_t& d, const scalar_t& z, const scalar_t& k,
+    const scalar_t& m, const scalar_t& b) NOEXCEPT
+{
+    affine_t<uint64_t> point{};
+    secret_multiply(point, k, m);
+
+    bytes_t x{};
+    to_bytes(x, point.x);
+    const auto overflow = !from_bytes(r, x);
+    auto odd = f::any(is_odd_element(point.y));
+
+    scalar_t numerator{}, inverse_k{};
+    multiply(numerator, r, d);
+    add(numerator, numerator, z);
+    secret_inverse(inverse_k, k, b);
+    multiply(s, inverse_k, numerator);
+
+    if (is_high(s))
+    {
+        negate(s, s);
+        odd = !odd;
+    }
+
+    id = narrow_cast<uint8_t>((overflow ? 2u : 0u) | (odd ? 1u : 0u));
+    return !is_zero_scalar(r) && !is_zero_scalar(s);
+}
+
+constexpr void algorithm::nonce_schnorr(bytes_t& r_x, scalar_t& k,
+    const scalar_t& m) NOEXCEPT
+{
+    affine_t<uint64_t> point{};
+    secret_multiply(point, k, m);
+    if (f::any(is_odd_element(point.y)))
+        negate(k, k);
+
+    to_bytes(r_x, point.x);
+}
+
+// Q = (s / r)R - (z / r)G, where x(R) is r, or r + n where id includes 2.
+constexpr bool algorithm::recover(affine_t<uint64_t>& r, const scalar_t& z,
+    const scalar_t& sig_r, const scalar_t& sig_s, uint8_t id) NOEXCEPT
+{
+    if (is_zero_scalar(sig_r) || is_zero_scalar(sig_s))
+        return false;
+
+    field_t<uint64_t> x{};
+    to_field(x, sig_r);
+    if (get_right(id, one))
+    {
+        if (!is_less(sig_r, prime_minus_order))
+            return false;
+
+        add(x, x, order_field);
+        normalize(x);
+    }
+
+    affine_t<uint64_t> point{};
+    const auto odd = get_right(id, zero) ? max_uint64 : 0_u64;
+    if (!f::any(lift(point, x, odd)))
+        return false;
+
+    scalar_t inverse_r{}, u1{}, u2{};
+    inverse(inverse_r, sig_r);
+    multiply(u1, inverse_r, z);
+    negate(u1, u1);
+    multiply(u2, inverse_r, sig_s);
+    return linear(r, u1, point, u2);
+}
+
+} // namespace secp256k1
+} // namespace system
+} // namespace libbitcoin
+
+#endif

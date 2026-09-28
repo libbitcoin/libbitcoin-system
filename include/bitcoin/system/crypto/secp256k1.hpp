@@ -53,7 +53,8 @@ static constexpr size_t ec_ellswift_size = 64;
 typedef data_array<ec_ellswift_size> ec_ellswift;
 typedef std_vector<ec_ellswift> ec_ellswifts;
 
-// Parsed ECDSA or Schnorr signature:
+// Parsed ECDSA signature (r then s, each as four native 64 bit words, least
+// significant first) or BIP340 Schnorr signature:
 static constexpr size_t ec_signature_size = 64;
 typedef data_array<ec_signature_size> ec_signature;
 typedef std_vector<ec_signature> ec_signatures;

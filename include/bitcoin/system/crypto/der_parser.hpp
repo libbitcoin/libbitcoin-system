@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
 
-#include <secp256k1.h>
+#include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -97,8 +97,7 @@ bool is_valid_bip66_signature_encoding(
  *  encoded numbers are out of range, signature validation with it is
  *  guaranteed to fail for every message and public key.
  */
-bool ecdsa_signature_parse_der_lax(const secp256k1_context* ctx,
-    secp256k1_ecdsa_signature* sig, const uint8_t* input,
-    size_t inputlen) NOEXCEPT;
+bool ecdsa_signature_parse_der_lax(bc::system::ec_signature& sig,
+    const uint8_t* input, size_t inputlen) NOEXCEPT;
 
 #endif // LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP

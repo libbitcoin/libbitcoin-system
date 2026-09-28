@@ -56,8 +56,6 @@ protected:
     void do_flush() NOEXCEPT override;
 
 private:
-    static constexpr sha256::state_t midstate() NOEXCEPT;
-
     void flusher() NOEXCEPT;
 
     accumulator<sha256> context_;

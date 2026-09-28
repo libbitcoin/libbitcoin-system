@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
-#include <secp256k1.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -104,15 +103,12 @@ bool decode_signature(ec_signature& out, const data_slice& der_signature,
     if (strict && !is_valid_bip66_signature_encoding(der_signature))
         return false;
 
-    const auto context = ec_context_verify::context();
-    auto parsed = pointer_cast<secp256k1_ecdsa_signature>(out.data());
-
     // ************************************************************************
     // CONSENSUS: This function parses DER with various errors as allowed by
     // Bitcoin prior to activation of BIP66. This attempts to codify the lax
     // rules applied by version(s) of OpenSSL in use up to that time.
     // ************************************************************************
-    return ecdsa_signature_parse_der_lax(context, parsed, der_signature.data(),
+    return ecdsa_signature_parse_der_lax(out, der_signature.data(),
         der_signature.size());
 }
 

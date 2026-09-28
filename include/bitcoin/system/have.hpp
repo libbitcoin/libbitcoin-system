@@ -127,7 +127,12 @@
     #endif
 #endif
 
-// shrec/UltrafastSecp256k1 (otherwise secp256k1)
+// bitcoin-core/secp256k1 (otherwise local secp256k1)
+#if defined(WITH_SECP256K1)
+    #define HAVE_SECP256K1
+#endif
+
+// shrec/UltrafastSecp256k1 (batch verification)
 #if defined(WITH_ULTRAFAST)
     #define HAVE_ULTRAFAST
 #endif

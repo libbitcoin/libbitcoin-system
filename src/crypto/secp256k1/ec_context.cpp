@@ -18,7 +18,6 @@
  */
 #include "ec_context.hpp"
 
-#include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

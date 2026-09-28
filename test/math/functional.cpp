@@ -20,42 +20,6 @@
 
 BOOST_AUTO_TEST_SUITE(functional_tests)
 
-// mul_wide
-// ----------------------------------------------------------------------------
-
-template <typename Word>
-constexpr Word mul_wide_hi(Word a, Word b) NOEXCEPT
-{
-    Word hi{}, lo{};
-    f::mul_wide(hi, lo, a, b);
-    return hi;
-}
-
-template <typename Word>
-constexpr Word mul_wide_lo(Word a, Word b) NOEXCEPT
-{
-    Word hi{}, lo{};
-    f::mul_wide(hi, lo, a, b);
-    return lo;
-}
-
-static_assert(mul_wide_hi(0xff_u8, 0xff_u8) == 0xfe_u8);
-static_assert(mul_wide_lo(0xff_u8, 0xff_u8) == 0x01_u8);
-static_assert(mul_wide_hi(0xffffffff_u32, 0xffffffff_u32) == 0xfffffffe_u32);
-static_assert(mul_wide_lo(0xffffffff_u32, 0xffffffff_u32) == 0x00000001_u32);
-static_assert(mul_wide_hi(max_uint64, max_uint64) == 0xfffffffffffffffe_u64);
-static_assert(mul_wide_lo(max_uint64, max_uint64) == 0x0000000000000001_u64);
-static_assert(mul_wide_hi(0x123456789abcdef0_u64, 0x0fedcba987654321_u64) == 0x0121fa00ad77d742_u64);
-static_assert(mul_wide_lo(0x123456789abcdef0_u64, 0x0fedcba987654321_u64) == 0x2236d88fe5618cf0_u64);
-
-BOOST_AUTO_TEST_CASE(functional__mul_wide__runtime__expected)
-{
-    uint64_t hi{}, lo{};
-    f::mul_wide(hi, lo, 0x123456789abcdef0_u64, 0x0fedcba987654321_u64);
-    BOOST_CHECK_EQUAL(hi, 0x0121fa00ad77d742_u64);
-    BOOST_CHECK_EQUAL(lo, 0x2236d88fe5618cf0_u64);
-}
-
 // madd52lo/madd52hi
 // ----------------------------------------------------------------------------
 
@@ -70,6 +34,21 @@ BOOST_AUTO_TEST_CASE(functional__madd52__runtime__expected)
 {
     BOOST_CHECK_EQUAL(f::madd52lo(7_u64, max52, max52), 8_u64);
     BOOST_CHECK_EQUAL(f::madd52hi(7_u64, max52, max52), 0x000ffffffffffffe_u64 + 7_u64);
+}
+
+// sub
+// ----------------------------------------------------------------------------
+
+static_assert(f::sub(5_u64, 3_u64) == 2_u64);
+static_assert(f::sub(0_u64, 1_u64) == max_uint64);
+static_assert(f::sub<64>(0x0010000000000000_u64, 1_u64) == 0x000fffffffffffff_u64);
+static_assert(f::sub(0_u8, 1_u8) == max_uint8);
+static_assert(f::sub(0x42_u8, 0x02_u8) == 0x40_u8);
+
+BOOST_AUTO_TEST_CASE(functional__sub__runtime__expected)
+{
+    BOOST_CHECK_EQUAL(f::sub(0_u64, 1_u64), max_uint64);
+    BOOST_CHECK_EQUAL(f::sub<64>(0x0010000000000000_u64, 1_u64), 0x000fffffffffffff_u64);
 }
 
 // andnot/eq/select/any

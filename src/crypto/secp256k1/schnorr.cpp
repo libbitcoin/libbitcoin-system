@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
-#include <secp256k1.h>
-#include <secp256k1_schnorrsig.h>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>

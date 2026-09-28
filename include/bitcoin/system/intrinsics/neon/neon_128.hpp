@@ -127,6 +127,19 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
         return (xint128_t)vaddq_u64((uint64x2_t)a, (uint64x2_t)b);
 }
 
+template <auto S>
+INLINE xint128_t sub(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return (xint128_t)vsubq_u8((uint8x16_t)a, (uint8x16_t)b);
+    if constexpr (S == bits<uint16_t>)
+        return (xint128_t)vsubq_u16((uint16x8_t)a, (uint16x8_t)b);
+    if constexpr (S == bits<uint32_t>)
+        return (xint128_t)vsubq_u32((uint32x4_t)a, (uint32x4_t)b);
+    if constexpr (S == bits<uint64_t>)
+        return (xint128_t)vsubq_u64((uint64x2_t)a, (uint64x2_t)b);
+}
+
 template <auto K, auto S>
 INLINE xint128_t addc(xint128_t a) NOEXCEPT
 {
@@ -358,8 +371,8 @@ INLINE xint128_t gather(const uint64_t* table, xint128_t index) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     return set<xint128_t>(
-        table[get<uint64_t, 0>(index)],
-        table[get<uint64_t, 1>(index)]);
+        table[possible_narrow_cast<size_t>(get<uint64_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 1>(index))]);
     BC_POP_WARNING()
 }
 

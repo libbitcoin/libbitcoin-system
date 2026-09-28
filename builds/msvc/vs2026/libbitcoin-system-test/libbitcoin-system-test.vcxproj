@@ -13,30 +13,6 @@
     <ProjectName>libbitcoin-system-test</ProjectName>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugDEXE|ARM">
-      <Configuration>DebugDEXE</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDEXE|ARM">
-      <Configuration>ReleaseDEXE</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLEXE|ARM">
-      <Configuration>DebugLEXE</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLEXE|ARM">
-      <Configuration>ReleaseLEXE</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugSEXE|ARM">
-      <Configuration>DebugSEXE</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseSEXE|ARM">
-      <Configuration>ReleaseSEXE</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="DebugDEXE|ARM64">
       <Configuration>DebugDEXE</Configuration>
       <Platform>ARM64</Platform>
@@ -238,6 +214,11 @@
     <ClCompile Include="..\..\..\..\test\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_group.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_multiply.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_scalar.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_verify.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
     </ClCompile>
@@ -245,6 +226,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ellswift.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\math.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\performance.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp" />
@@ -297,7 +281,9 @@
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\muhash.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp">
+      <ObjectFileName>$(IntDir)test_hash_performance_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
     </ClCompile>
@@ -320,6 +306,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha3\sha3.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\add.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp" />

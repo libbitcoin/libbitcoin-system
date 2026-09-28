@@ -29,7 +29,7 @@
 # --<with/without>-ultrafast    Use shrec/UltrafastSecp256k1 library.
 #                                 Default: --without-ultrafast
 # --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
-#                                 Default: --with-secp256k1
+#                                 Default: --without-secp256k1
 # --build-boost                 Build Boost libraries
 # --build-secp256k1             Build libsecp256k1 libraries
 # --build-ultrafast             Build UltrafastSecp256k1 libraries
@@ -1231,7 +1231,7 @@ help()
     msg "--<with/without>-ultrafast    Use shrec/UltrafastSecp256k1 library."
     msg "                                Default: --without-ultrafast"
     msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
-    msg "                                Default: --with-secp256k1"
+    msg "                                Default: --without-secp256k1"
     msg "--build-boost                 Build Boost libraries"
     msg "--build-secp256k1             Build libsecp256k1 libraries"
     msg "--build-ultrafast             Build UltrafastSecp256k1 libraries"

@@ -12,30 +12,6 @@
     <ProjectName>libbitcoin-system</ProjectName>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugDLL|ARM">
-      <Configuration>DebugDLL</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDLL|ARM">
-      <Configuration>ReleaseDLL</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLTCG|ARM">
-      <Configuration>DebugLTCG</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLTCG|ARM">
-      <Configuration>ReleaseLTCG</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLIB|ARM">
-      <Configuration>DebugLIB</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLIB|ARM">
-      <Configuration>ReleaseLIB</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="DebugDLL|ARM64">
       <Configuration>DebugDLL</Configuration>
       <Platform>ARM64</Platform>
@@ -263,10 +239,31 @@
     <ClCompile Include="..\..\..\..\src\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\algorithm.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_00.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_01.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_02.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_00.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_01.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_02.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_03.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_04.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_05.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_06.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_07.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_08.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_09.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_10.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_11.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_12.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_13.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_14.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\slice_15.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\interface.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\math.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_math.obj</ObjectFileName>
@@ -475,6 +472,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\interface.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\x25519.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\xsalsa20_poly1305.hpp" />
@@ -545,6 +544,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha3\sha3.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\add.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byte_swap.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\cpuid.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\detection.hpp" />
@@ -698,6 +698,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\languages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\words.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_prefix.hpp" />
@@ -714,6 +715,17 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_batch.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_ellswift.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_group.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_inversion.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_multiply.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_pippenger.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_scalar.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_sign.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_table.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_verify.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

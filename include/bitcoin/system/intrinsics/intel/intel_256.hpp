@@ -138,6 +138,20 @@ INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_add_epi64(a, b);
 }
 
+// AVX2
+template <auto S>
+INLINE xint256_t sub(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_sub_epi8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_sub_epi16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_sub_epi32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm256_sub_epi64(a, b);
+}
+
 // AVX
 template <auto K, auto S>
 INLINE xint256_t addc(xint256_t a) NOEXCEPT
@@ -376,10 +390,22 @@ INLINE bool any(xint256_t a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX2
+// vc++ (19.51) can encode a gather index in ymm16-31 with EVEX.P1[2] clear,
+// which is illegal without APX, so its gathers load each lane.
 INLINE xint256_t gather(const uint64_t* table, xint256_t index) NOEXCEPT
 {
+#if defined(HAVE_MSC)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint256_t>(
+        table[possible_narrow_cast<size_t>(get<uint64_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 1>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 2>(index))],
+        table[possible_narrow_cast<size_t>(get<uint64_t, 3>(index))]);
+    BC_POP_WARNING()
+#else
     return _mm256_i64gather_epi64(pointer_cast<const long long>(table),
         index, sizeof(uint64_t));
+#endif
 }
 
 

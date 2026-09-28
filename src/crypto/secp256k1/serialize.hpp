@@ -21,7 +21,6 @@
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
 
-#include <secp256k1.h>
 #include <bitcoin/system/data/data.hpp>
 #include "ec_context.hpp"
 

@@ -69,6 +69,22 @@ BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__positive__expected)
     BOOST_REQUIRE_EQUAL(signature, der_signature3);
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__lax__expected)
+{
+    using namespace system::ecdsa;
+    ec_signature signature;
+    BOOST_REQUIRE(decode_signature(signature, der_signature3, false));
+    BOOST_REQUIRE_EQUAL(signature, signature3);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__strict__expected)
+{
+    using namespace system::ecdsa;
+    ec_signature signature;
+    BOOST_REQUIRE(decode_signature(signature, der_signature3, true));
+    BOOST_REQUIRE_EQUAL(signature, signature3);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_positive__expected)
 {
     using namespace system::ecdsa;
@@ -235,6 +251,70 @@ BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_leading_zeros__true)
 BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_minimal__true)
 {
     BOOST_REQUIRE(lax(base16_chunk("3006020101020101")));
+}
+
+// recovery
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1__sign_recoverable__positive__expected_signature)
+{
+    using namespace system::ecdsa;
+    const ec_signature expected = base16_array("57d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8befe32483750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92");
+    recoverable_signature recoverable{};
+    BOOST_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
+    BOOST_REQUIRE_EQUAL(recoverable.signature, expected);
+    BOOST_REQUIRE_LT(recoverable.recovery_id, 4u);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__recover_public__signed__expected_keys)
+{
+    using namespace system::ecdsa;
+    for (const auto& secret: { secret1, secret3 })
+    {
+        recoverable_signature recoverable{};
+        BOOST_REQUIRE(sign_recoverable(recoverable, secret, sighash3));
+
+        ec_compressed expected_compressed{}, compressed{};
+        BOOST_REQUIRE(secret_to_public(expected_compressed, secret));
+        BOOST_REQUIRE(recover_public(compressed, recoverable, sighash3));
+        BOOST_REQUIRE_EQUAL(compressed, expected_compressed);
+
+        ec_uncompressed expected_uncompressed{}, uncompressed{};
+        BOOST_REQUIRE(secret_to_public(expected_uncompressed, secret));
+        BOOST_REQUIRE(recover_public(uncompressed, recoverable, sighash3));
+        BOOST_REQUIRE_EQUAL(uncompressed, expected_uncompressed);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__recover_public__other_hash__other_key)
+{
+    using namespace system::ecdsa;
+    recoverable_signature recoverable{};
+    BOOST_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
+
+    ec_compressed expected{}, compressed{};
+    BOOST_REQUIRE(secret_to_public(expected, secret3));
+    BOOST_REQUIRE(recover_public(compressed, recoverable, sighash2));
+    BOOST_REQUIRE_NE(compressed, expected);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__recover_public__invalid_recovery_id__false)
+{
+    using namespace system::ecdsa;
+    recoverable_signature recoverable{};
+    BOOST_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
+    recoverable.recovery_id = 4;
+
+    ec_compressed compressed{};
+    BOOST_REQUIRE(!recover_public(compressed, recoverable, sighash3));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__recover_public__zero_signature__false)
+{
+    using namespace system::ecdsa;
+    const recoverable_signature recoverable{};
+    ec_compressed compressed{};
+    BOOST_REQUIRE(!recover_public(compressed, recoverable, sighash3));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

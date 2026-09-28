@@ -58,7 +58,11 @@ INLINE void mul_wide64(uint64_t& hi, uint64_t& lo, uint64_t left,
     uint64_t right) NOEXCEPT
 {
 #if defined(HAVE_MSC) && defined(HAVE_X64)
-    lo = _umul128(left, right, &hi);
+    BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
+    unsigned long long high;
+    BC_POP_WARNING()
+    lo = _umul128(left, right, &high);
+    hi = high;
 #elif defined(HAVE_MSC) && defined(HAVE_ARM64)
     hi = __umulh(left, right);
     lo = left * right;
@@ -78,8 +82,7 @@ INLINE constexpr void mul_wide(Unsigned& hi, Unsigned& lo, Unsigned left,
 {
     if constexpr (sizeof(Unsigned) < sizeof(uint64_t))
     {
-        using wide = std::conditional_t<sizeof(Unsigned) < sizeof(uint32_t),
-            uint32_t, uint64_t>;
+        using wide = iif<sizeof(Unsigned) < sizeof(uint32_t), uint32_t, uint64_t>;
 
         const auto product = wide{ left } * wide{ right };
         hi = static_cast<Unsigned>(product >> bits<Unsigned>);
@@ -100,7 +103,7 @@ INLINE constexpr void mul_wide(Unsigned& hi, Unsigned& lo, Unsigned left,
 /// The 104 bit product of the low 52 bits of left and right is split into 52
 /// bit low and high halves, and one half is added (wrapping) to accumulator.
 
-constexpr auto madd52_bits = 52u;
+constexpr size_t madd52_bits = 52;
 constexpr uint64_t madd52_mask = 0x000fffffffffffff;
 
 INLINE constexpr uint64_t madd52lo(uint64_t accumulator, uint64_t left,

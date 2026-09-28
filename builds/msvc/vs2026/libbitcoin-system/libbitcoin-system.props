@@ -35,6 +35,7 @@
       <PreprocessorDefinitions Condition="'$(Option-avxifma)' == 'true'">WITH_AVXIFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-secp256k1)' == 'true'">WITH_SECP256K1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 
@@ -45,15 +46,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' != 'false'">dynamic</Linkage-secp256k1>
+    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">dynamic</Linkage-secp256k1>
     <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">dynamic</Linkage-ultrafast>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' != 'false'">ltcg</Linkage-secp256k1>
+    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">ltcg</Linkage-secp256k1>
     <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">ltcg</Linkage-ultrafast>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' != 'false'">static</Linkage-secp256k1>
+    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">static</Linkage-secp256k1>
     <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">static</Linkage-ultrafast>
   </PropertyGroup>
   
@@ -71,7 +72,7 @@
     <Option-avxifma Condition="'$(Option-avxifma)' == ''">false</Option-avxifma>
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
-    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
+    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
     <Option-ultrafast Condition="'$(Option-ultrafast)' == ''">false</Option-ultrafast>
     <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
   </PropertyGroup>

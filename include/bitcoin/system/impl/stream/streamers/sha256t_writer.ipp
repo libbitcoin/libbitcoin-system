@@ -33,13 +33,13 @@ namespace system {
 template <data_t Tag, typename OStream>
 sha256t_writer<Tag, OStream>::sha256t_writer() NOEXCEPT
   : base(),
-    context_(midstate(), one)
+    context_(tagged_midstate<Tag>, one)
 {
 }
 
 template <data_t Tag, typename OStream>
 sha256t_writer<Tag, OStream>::sha256t_writer(OStream& sink) NOEXCEPT
-  : base(sink), context_(midstate(), one)
+  : base(sink), context_(tagged_midstate<Tag>, one)
 {
 }
 
@@ -72,17 +72,6 @@ void sha256t_writer<Tag, OStream>::do_flush() NOEXCEPT
 // private
 // ----------------------------------------------------------------------------
 
-// static
-template <data_t Tag, typename OStream>
-constexpr sha256::state_t sha256t_writer<Tag, OStream>::midstate() NOEXCEPT
-{
-    // Cache midstate of tagged hash part that does not change for a given tag.
-    // sha256(sha256(tag) || sha256(tag) || message) [bip340].
-    constexpr auto tag1 = sha256::simple_hash(Tag.data);
-    constexpr auto tag2 = sha256::midstate(tag1, tag1);
-    return tag2;
-}
-
 // Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
 // The stream could invalidate, but writers shouldn't have to check this.
 template <data_t Tag, typename OStream>
@@ -92,7 +81,7 @@ void sha256t_writer<Tag, OStream>::flusher() NOEXCEPT
 
     // Finalize streaming hash.
     context_.flush(hash.data());
-    context_.reset(midstate(), one);
+    context_.reset(tagged_midstate<Tag>, one);
 
     // Write hash to stream.
     base::do_write_bytes(hash.data(), hash_size);

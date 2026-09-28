@@ -257,11 +257,17 @@ AM_CONDITIONAL([WITH_ULTRAFAST], [test "x${with_ultrafast}" != "xno"])
 AC_MSG_CHECKING([--with-secp256k1 option])
 AC_ARG_WITH([secp256k1],
     AS_HELP_STRING([--with-secp256k1],
-        [Use bitcoin-core/secp256k1 library. @<:@default=yes@:>@]),
+        [Use bitcoin-core/secp256k1 library. @<:@default=no@:>@]),
     [with_secp256k1=$withval],
-    [with_secp256k1=yes])
+    [with_secp256k1=no])
 AC_MSG_RESULT([$with_secp256k1])
 AM_CONDITIONAL([WITH_SECP256K1], [test "x${with_secp256k1}" != "xno"])
+
+# Set preprocessor defines.
+#==============================================================================
+AS_IF([test "x${with_secp256k1}" != "xno"], [
+        AC_DEFINE([WITH_SECP256K1])
+    ])
 
 # Set flags.
 #==============================================================================

@@ -90,6 +90,12 @@ INLINE constexpr auto add(Word a, Word b) NOEXCEPT
     return depromote<Word>(a + b);
 }
 
+template <auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto sub(Word a, Word b) NOEXCEPT
+{
+    return depromote<Word>(a - b);
+}
+
 template <auto K, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto addc(Word a) NOEXCEPT
 {
@@ -108,14 +114,8 @@ INLINE constexpr Word broadcast(Word a) NOEXCEPT
     return a;
 }
 
-/// wide multiplication
+/// 52 bit fused multiply-add
 /// ---------------------------------------------------------------------------
-
-template <typename Word, if_unsigned_integral_integer<Word> = true>
-INLINE constexpr void mul_wide(Word& hi, Word& lo, Word a, Word b) NOEXCEPT
-{
-    system::mul_wide(hi, lo, a, b);
-}
 
 template <auto S = 0, typename Word, if_same<Word, uint64_t> = true>
 INLINE constexpr Word madd52lo(Word c, Word a, Word b) NOEXCEPT
@@ -142,7 +142,7 @@ INLINE constexpr auto andnot(Word a, Word b) NOEXCEPT
 template <auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto eq(Word a, Word b) NOEXCEPT
 {
-    return depromote<Word>(a == b ? ~Word{} : Word{});
+    return a == b ? bit_all<Word> : Word{};
 }
 
 template <typename Word, if_integral_integer<Word> = true>
@@ -164,7 +164,7 @@ template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr Word gather(const Word* table, Word index) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    return table[index];
+    return table[possible_narrow_cast<size_t>(index)];
     BC_POP_WARNING()
 }
 
