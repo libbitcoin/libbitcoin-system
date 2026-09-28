@@ -419,8 +419,8 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
         auto idigests = idigests_t{ to_half(size), data };
         const auto start = iblocks.size();
 
-        // Always use if available.
-        if constexpr (use_512)
+        // Only use if shani is not available.
+        if constexpr (use_512 && !native)
             merkle_hash_vector<xint512_t>(idigests, iblocks);
 
         // Only use if shani is not available.
@@ -483,8 +483,8 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else if constexpr (vector || native)
     {
-        // Merkle block vectorization is applied at 16/8/4 lanes (as available),
-        // then native at 2 lanes (as available), and falls back to native or
+        // Merkle blocks are hashed at 2 native lanes (as available), otherwise
+        // at 16/8/4 vector lanes (as available), and fall back to native or
         // normal (as available) for any remaining block.
         merkle_hash_vector(digests);
     }
