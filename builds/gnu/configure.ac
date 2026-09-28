@@ -182,14 +182,23 @@ AC_ARG_ENABLE([avx512],
 AC_MSG_RESULT([$enable_avx512])
 AM_CONDITIONAL([ENABLE_AVX512], [test "x${enable_avx512}" != "xno"])
 
-AC_MSG_CHECKING([--enable-ifma option])
-AC_ARG_ENABLE([ifma],
-    AS_HELP_STRING([--enable-ifma],
-        [Use Intel AVX512 IFMA intrinsics. @<:@default=no@:>@]),
-    [enable_ifma=$enableval],
-    [enable_ifma=no])
-AC_MSG_RESULT([$enable_ifma])
-AM_CONDITIONAL([ENABLE_IFMA], [test "x${enable_ifma}" != "xno"])
+AC_MSG_CHECKING([--enable-avx512ifma option])
+AC_ARG_ENABLE([avx512ifma],
+    AS_HELP_STRING([--enable-avx512ifma],
+        [Use Intel AVX512 IFMA intrinsics (implies AVX512VL). @<:@default=no@:>@]),
+    [enable_avx512ifma=$enableval],
+    [enable_avx512ifma=no])
+AC_MSG_RESULT([$enable_avx512ifma])
+AM_CONDITIONAL([ENABLE_AVX512IFMA], [test "x${enable_avx512ifma}" != "xno"])
+
+AC_MSG_CHECKING([--enable-avxifma option])
+AC_ARG_ENABLE([avxifma],
+    AS_HELP_STRING([--enable-avxifma],
+        [Use Intel AVX IFMA intrinsics (implies AVX2). @<:@default=no@:>@]),
+    [enable_avxifma=$enableval],
+    [enable_avxifma=no])
+AC_MSG_RESULT([$enable_avxifma])
+AM_CONDITIONAL([ENABLE_AVXIFMA], [test "x${enable_avxifma}" != "xno"])
 
 AC_MSG_CHECKING([--enable-sse41 option])
 AC_ARG_ENABLE([sse41],
@@ -217,6 +226,24 @@ AC_ARG_ENABLE([crypto],
     [enable_crypto=no])
 AC_MSG_RESULT([$enable_crypto])
 AM_CONDITIONAL([ENABLE_CRYPTO], [test "x${enable_crypto}" != "xno"])
+
+AC_MSG_CHECKING([--enable-aesni option])
+AC_ARG_ENABLE([aesni],
+    AS_HELP_STRING([--enable-aesni],
+        [Use Intel AES-NI and PCLMULQDQ intrinsics. @<:@default=no@:>@]),
+    [enable_aesni=$enableval],
+    [enable_aesni=no])
+AC_MSG_RESULT([$enable_aesni])
+AM_CONDITIONAL([ENABLE_AESNI], [test "x${enable_aesni}" != "xno"])
+
+AC_MSG_CHECKING([--enable-vaes option])
+AC_ARG_ENABLE([vaes],
+    AS_HELP_STRING([--enable-vaes],
+        [Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2). @<:@default=no@:>@]),
+    [enable_vaes=$enableval],
+    [enable_vaes=no])
+AC_MSG_RESULT([$enable_vaes])
+AM_CONDITIONAL([ENABLE_VAES], [test "x${enable_vaes}" != "xno"])
 
 AC_MSG_CHECKING([--with-ultrafast option])
 AC_ARG_WITH([ultrafast],
@@ -286,13 +313,13 @@ AS_IF([test "x${enable_avx512}" != "xno"],
       ])
   ])
 
-AS_IF([test "x${enable_ifma}" != "xno"],
+AS_IF([test "x${enable_avx512ifma}" != "xno"],
   [
     AX_CHECK_COMPILE_FLAG([-mavx512ifma -mavx512vl],
       [
         CFLAGS="${CFLAGS} -mavx512ifma -mavx512vl";
         CXXFLAGS="${CXXFLAGS} -mavx512ifma -mavx512vl";
-        AC_SUBST([ifma], ["-mavx512ifma -mavx512vl"])
+        AC_SUBST([avx512ifma], ["-mavx512ifma -mavx512vl"])
       ],[
         AC_MSG_ERROR([-mavx512ifma -mavx512vl not supported.])
       ],
@@ -307,6 +334,31 @@ AS_IF([test "x${enable_ifma}" != "xno"],
             __m512i a = _mm512_set1_epi64(3);
             __m256i b = _mm256_set1_epi64x(5);
             return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_avxifma}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-mavxifma],
+      [
+        CFLAGS="${CFLAGS} -mavxifma";
+        CXXFLAGS="${CXXFLAGS} -mavxifma";
+        AC_SUBST([avxifma], ["-mavxifma"])
+      ],[
+        AC_MSG_ERROR([-mavxifma not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set1_epi64x(3);
+            __m128i b = _mm_set1_epi64x(5);
+            return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
           ]])
       ])
   ])
@@ -381,6 +433,56 @@ AS_IF([test "x${enable_sse41}" != "xno"],
             __m128i a = _mm_set1_epi32(0);
             __m128i b = _mm_set1_epi32(15);
             return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_aesni}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-msse4.1 -maes -mpclmul],
+      [
+        CFLAGS="${CFLAGS} -msse4.1 -maes -mpclmul";
+        CXXFLAGS="${CXXFLAGS} -msse4.1 -maes -mpclmul";
+        AC_SUBST([aesni], ["-msse4.1 -maes -mpclmul"])
+      ],[
+        AC_MSG_ERROR([-msse4.1 -maes -mpclmul not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m128i a = _mm_set1_epi32(1);
+            __m128i b = _mm_set1_epi32(3);
+            return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_vaes}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq],
+      [
+        CFLAGS="${CFLAGS} -mavx2 -maes -mpclmul -mvaes -mvpclmulqdq";
+        CXXFLAGS="${CXXFLAGS} -mavx2 -maes -mpclmul -mvaes -mvpclmulqdq";
+        AC_SUBST([vaes], ["-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq"])
+      ],[
+        AC_MSG_ERROR([-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set1_epi32(1);
+            __m256i b = _mm256_set1_epi32(3);
+            return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
           ]])
       ])
   ])

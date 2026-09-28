@@ -20,7 +20,11 @@
       <!--<Category Name="256" DisplayName="256" />-->
       <!--<Category Name="128" DisplayName="128" />-->
       <Category Name="sha" DisplayName="sha" />
-      <Category Name="ifma" DisplayName="ifma" />
+      <Category Name="arch" DisplayName="arch" />
+      <Category Name="avx512ifma" DisplayName="avx512ifma" />
+      <Category Name="avxifma" DisplayName="avxifma" />
+      <Category Name="aesni" DisplayName="aesni" />
+      <Category Name="vaes" DisplayName="vaes" />
     </Rule.Categories>
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
@@ -29,7 +33,25 @@
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
-    <EnumProperty Name="Option-ifma" DisplayName="Enable AVX512 IFMA Multiplication" Description="Requires AVX512 IFMA (xcpu) CPU and /arch:AVX512." Category="ifma">
+    <EnumProperty Name="Option-arch" DisplayName="Instruction Set" Description="Native instruction set, AVX implies SSE4.1." Category="arch">
+      <EnumValue Name="StreamingSIMDExtensions2" DisplayName="SSE2" />
+      <EnumValue Name="AdvancedVectorExtensions" DisplayName="AVX" />
+      <EnumValue Name="AdvancedVectorExtensions2" DisplayName="AVX2" />
+      <EnumValue Name="AdvancedVectorExtensions512" DisplayName="AVX512" />
+    </EnumProperty>
+    <EnumProperty Name="Option-avx512ifma" DisplayName="Enable AVX512 IFMA Multiplication" Description="Requires AVX512 IFMA and AVX512VL (xcpu) CPU." Category="avx512ifma">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-avxifma" DisplayName="Enable AVX IFMA Multiplication" Description="Requires AVX IFMA and AVX2 (xcpu) CPU." Category="avxifma">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-aesni" DisplayName="Enable AES-NI Encryption" Description="Requires AES-NI and PCLMULQDQ (xcpu) CPU." Category="aesni">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-vaes" DisplayName="Enable VAES Encryption" Description="Requires VAES, VPCLMULQDQ and AVX2 (xcpu) CPU." Category="vaes">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>

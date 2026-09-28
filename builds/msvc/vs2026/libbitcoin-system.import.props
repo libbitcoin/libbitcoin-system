@@ -21,10 +21,20 @@
     <!--<Option-256>true</Option-256>-->
     <!--<Option-128>true</Option-128>-->
     <Option-sha Condition="'$(Option-sha)' == ''">false</Option-sha>
-    <Option-ifma Condition="'$(Option-ifma)' == ''">false</Option-ifma>
+    <Option-avx512ifma Condition="'$(Option-avx512ifma)' == ''">false</Option-avx512ifma>
+    <Option-avxifma Condition="'$(Option-avxifma)' == ''">false</Option-avxifma>
+    <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
+    <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
     <Option-ultrafast Condition="'$(Option-ultrafast)' == ''">false</Option-ultrafast>
     <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
+  </PropertyGroup>
+
+  <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->
+  <PropertyGroup Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'Win32'">
+    <Option-arch Condition="'$(Option-sse41)' == 'true' And ('$(Option-arch)' == '' Or '$(Option-arch)' == 'StreamingSIMDExtensions' Or '$(Option-arch)' == 'StreamingSIMDExtensions2')">AdvancedVectorExtensions</Option-arch>
+    <Option-arch Condition="('$(Option-avx2)' == 'true' Or '$(Option-avxifma)' == 'true' Or '$(Option-vaes)' == 'true') And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions2</Option-arch>
+    <Option-arch Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</Option-arch>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -40,7 +50,10 @@
 
   <Target Name="SystemOptionInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Option-sha        : $(Option-sha)" Importance="high"/>
-    <Message Text="Option-ifma       : $(Option-ifma)" Importance="high"/>
+    <Message Text="Option-avx512ifma : $(Option-avx512ifma)" Importance="high"/>
+    <Message Text="Option-avxifma    : $(Option-avxifma)" Importance="high"/>
+    <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
+    <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
     <Message Text="Option-ultrafast  : $(Option-ultrafast)" Importance="high"/>
     <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
@@ -64,7 +77,10 @@
       <!-- Enable use of CPU intrinsics. -->
       <!-- Eventually these options will be used to select SVE levels. -->
       <PreprocessorDefinitions Condition="'$(Option-sha)' == 'true'">WITH_SHA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-ifma)' == 'true'">WITH_IFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-avx512ifma)' == 'true'">WITH_AVX512IFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-avxifma)' == 'true'">WITH_AVXIFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!--<PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
       <!--<PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
       <!--<PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->

@@ -81,10 +81,13 @@ endif()
 #------------------------------------------------------------------------------
 option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
-option( enable-ifma "Use Intel AVX512 IFMA intrinsics." OFF )
+option( enable-avx512ifma "Use Intel AVX512 IFMA intrinsics (implies AVX512VL)." OFF )
+option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
 option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
 option( enable-crypto "Use ARM Crypto Extensions." OFF )
+option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
+option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
 option( with-ultrafast "Use shrec/UltrafastSecp256k1 library." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." ON )
 option( with-tests "Compile with unit tests." ON )
@@ -162,7 +165,7 @@ if ( enable-avx512 )
   endif()
 endif()
 
-if ( enable-ifma )
+if ( enable-avx512ifma )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512ifma -mavx512vl" )
   check_cxx_source_compiles( "
@@ -172,10 +175,27 @@ if ( enable-ifma )
       __m512i a = _mm512_set1_epi64(3);
       __m256i b = _mm256_set1_epi64x(5);
       return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
-      }" SUPPORTS_FLAG_IFMA )
+      }" SUPPORTS_FLAG_AVX512IFMA )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_IFMA )
+  if ( !SUPPORTS_FLAG_AVX512IFMA )
     message( FATAL_ERROR "Compiler does not support '-mavx512ifma -mavx512vl'." )
+  endif()
+endif()
+
+if ( enable-avxifma )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavxifma" )
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set1_epi64x(3);
+      __m128i b = _mm_set1_epi64x(5);
+      return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
+      }" SUPPORTS_FLAG_AVXIFMA )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_AVXIFMA )
+    message( FATAL_ERROR "Compiler does not support '-mavxifma'." )
   endif()
 endif()
 
@@ -226,6 +246,40 @@ if ( enable-sse41 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_SSE41 )
     message( FATAL_ERROR "Compiler does not support '-msse4.1'." )
+  endif()
+endif()
+
+if ( enable-aesni )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1 -maes -mpclmul" )
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m128i a = _mm_set1_epi32(1);
+      __m128i b = _mm_set1_epi32(3);
+      return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
+      }" SUPPORTS_FLAG_AESNI )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_AESNI )
+    message( FATAL_ERROR "Compiler does not support '-msse4.1 -maes -mpclmul'." )
+  endif()
+endif()
+
+if ( enable-vaes )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -maes -mpclmul -mvaes -mvpclmulqdq" )
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set1_epi32(1);
+      __m256i b = _mm256_set1_epi32(3);
+      return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
+      }" SUPPORTS_FLAG_VAES )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_VAES )
+    message( FATAL_ERROR "Compiler does not support '-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq'." )
   endif()
 endif()
 
@@ -322,10 +376,13 @@ target_compile_options( libbitcoin-system
   PUBLIC
     $<$<BOOL:${enable-avx2}>:-mavx -mavx2>
     $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw>
-    $<$<BOOL:${enable-ifma}>:-mavx512ifma -mavx512vl>
+    $<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>
+    $<$<BOOL:${enable-avxifma}>:-mavxifma>
     $<$<BOOL:${enable-shani}>:-msse4 -msha>
     $<$<BOOL:${enable-crypto}>:-march=armv8-a+crypto>
     $<$<BOOL:${enable-sse41}>:-msse4.1>
+    $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
+    $<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>
   PRIVATE
     -Wall
     -Wextra

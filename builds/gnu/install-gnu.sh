@@ -8,48 +8,54 @@
 # Script managing the build and installation of libbitcoin-system and its dependencies.
 #
 # Script options:
-# --<enable/disable>-avx2     Use Intel AVX2 intrinsics.
-#                               Default: --disable-avx2
-# --<enable/disable>-avx512   Use Intel AVX512 intrinsics.
-#                               Default: --disable-avx512
-# --<enable/disable>-ifma     Use Intel AVX512 IFMA intrinsics.
-#                               Default: --disable-ifma
-# --<enable/disable>-sse41    Use SSE4.1 hardware instructions.
-#                               Default: --disable-sse41
-# --<enable/disable>-shani    Use Intel/ARM SHA Extensions.
-#                               Default: --disable-shani
-# --<enable/disable>-crypto   Use ARM Crypto Extensions.
-#                               Default: --disable-crypto
-# --<with/without>-ultrafast  Use shrec/UltrafastSecp256k1 library.
-#                               Default: --without-ultrafast
-# --<with/without>-secp256k1  Use bitcoin-core/secp256k1 library.
-#                               Default: --with-secp256k1
-# --build-boost               Build Boost libraries
-# --build-secp256k1           Build libsecp256k1 libraries
-# --build-ultrafast           Build UltrafastSecp256k1 libraries
-# --build-src-dir=<path>      Location for sources.
-#                               Default: $(pwd)
-# --build-obj-dir=<path>      Location for intermediate objects.
-#                               Default: obj
-# --build-obj-dir-relative    Interpret build-obj-dir as relative to project sources.
-# --build-config=<mode>       Specifies the build configuration.
-#                               Values: { debug, release }
-#                               Toolchain default behavior will occur if no value specified.
-# --build-link=<mode>         Specifies the link mode.
-#                               Values: { dynamic, static }
-#                               Toolchain default behavior will occur if no value specified.
-# --build-full-repositories   Sync full github repositories.
-#                               Default: git clone --depth 1 --single-branch
-# --build-post-install-clean  Clean dependencies after installation (saves space).
-# --build-skip-tests          Skip test compilation and execution.
-# --build-parallel=<int>      Number of jobs to run simultaneously.
-#                               Default: supported platforms use nproc/sysctl
-# --build-use-local-src       Use existing sources in relevant paths.
-# --prefix=<path>             Installation destination.
-#                               Default: /usr/local
-# --noninteractive            Disable any prompt using default.
-# --verbose                   Display verbose script output.
-# --help, -h                  Display usage, overriding script execution.
+# --<enable/disable>-avx2       Use Intel AVX2 intrinsics.
+#                                 Default: --disable-avx2
+# --<enable/disable>-avx512     Use Intel AVX512 intrinsics.
+#                                 Default: --disable-avx512
+# --<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+#                                 Default: --disable-avx512ifma
+# --<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2).
+#                                 Default: --disable-avxifma
+# --<enable/disable>-sse41      Use SSE4.1 hardware instructions.
+#                                 Default: --disable-sse41
+# --<enable/disable>-shani      Use Intel/ARM SHA Extensions.
+#                                 Default: --disable-shani
+# --<enable/disable>-crypto     Use ARM Crypto Extensions.
+#                                 Default: --disable-crypto
+# --<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics.
+#                                 Default: --disable-aesni
+# --<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
+#                                 Default: --disable-vaes
+# --<with/without>-ultrafast    Use shrec/UltrafastSecp256k1 library.
+#                                 Default: --without-ultrafast
+# --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
+#                                 Default: --with-secp256k1
+# --build-boost                 Build Boost libraries
+# --build-secp256k1             Build libsecp256k1 libraries
+# --build-ultrafast             Build UltrafastSecp256k1 libraries
+# --build-src-dir=<path>        Location for sources.
+#                                 Default: $(pwd)
+# --build-obj-dir=<path>        Location for intermediate objects.
+#                                 Default: obj
+# --build-obj-dir-relative      Interpret build-obj-dir as relative to project sources.
+# --build-config=<mode>         Specifies the build configuration.
+#                                 Values: { debug, release }
+#                                 Toolchain default behavior will occur if no value specified.
+# --build-link=<mode>           Specifies the link mode.
+#                                 Values: { dynamic, static }
+#                                 Toolchain default behavior will occur if no value specified.
+# --build-full-repositories     Sync full github repositories.
+#                                 Default: git clone --depth 1 --single-branch
+# --build-post-install-clean    Clean dependencies after installation (saves space).
+# --build-skip-tests            Skip test compilation and execution.
+# --build-parallel=<int>        Number of jobs to run simultaneously.
+#                                 Default: supported platforms use nproc/sysctl
+# --build-use-local-src         Use existing sources in relevant paths.
+# --prefix=<path>               Installation destination.
+#                                 Default: /usr/local
+# --noninteractive              Disable any prompt using default.
+# --verbose                     Display verbose script output.
+# --help, -h                    Display usage, overriding script execution.
 #
 # All unrecognized options provided shall be passed as configuration
 # options for all dependencies.
@@ -1204,48 +1210,54 @@ help()
     msg "Script managing the build and installation of libbitcoin-system and its dependencies."
     msg ""
     msg "Script options:"
-    msg "--<enable/disable>-avx2     Use Intel AVX2 intrinsics."
-    msg "                              Default: --disable-avx2"
-    msg "--<enable/disable>-avx512   Use Intel AVX512 intrinsics."
-    msg "                              Default: --disable-avx512"
-    msg "--<enable/disable>-ifma     Use Intel AVX512 IFMA intrinsics."
-    msg "                              Default: --disable-ifma"
-    msg "--<enable/disable>-sse41    Use SSE4.1 hardware instructions."
-    msg "                              Default: --disable-sse41"
-    msg "--<enable/disable>-shani    Use Intel/ARM SHA Extensions."
-    msg "                              Default: --disable-shani"
-    msg "--<enable/disable>-crypto   Use ARM Crypto Extensions."
-    msg "                              Default: --disable-crypto"
-    msg "--<with/without>-ultrafast  Use shrec/UltrafastSecp256k1 library."
-    msg "                              Default: --without-ultrafast"
-    msg "--<with/without>-secp256k1  Use bitcoin-core/secp256k1 library."
-    msg "                              Default: --with-secp256k1"
-    msg "--build-boost               Build Boost libraries"
-    msg "--build-secp256k1           Build libsecp256k1 libraries"
-    msg "--build-ultrafast           Build UltrafastSecp256k1 libraries"
-    msg "--build-src-dir=<path>      Location for sources."
-    msg "                              Default: $(pwd)"
-    msg "--build-obj-dir=<path>      Location for intermediate objects."
-    msg "                              Default: obj"
-    msg "--build-obj-dir-relative    Interpret build-obj-dir as relative to project sources."
-    msg "--build-config=<mode>       Specifies the build configuration."
-    msg "                              Values: { debug, release }"
-    msg "                              Toolchain default behavior will occur if no value specified."
-    msg "--build-link=<mode>         Specifies the link mode."
-    msg "                              Values: { dynamic, static }"
-    msg "                              Toolchain default behavior will occur if no value specified."
-    msg "--build-full-repositories   Sync full github repositories."
-    msg "                              Default: git clone --depth 1 --single-branch"
-    msg "--build-post-install-clean  Clean dependencies after installation (saves space)."
-    msg "--build-skip-tests          Skip test compilation and execution."
-    msg "--build-parallel=<int>      Number of jobs to run simultaneously."
-    msg "                              Default: supported platforms use nproc/sysctl"
-    msg "--build-use-local-src       Use existing sources in relevant paths."
-    msg "--prefix=<path>             Installation destination."
-    msg "                              Default: /usr/local"
-    msg "--noninteractive            Disable any prompt using default."
-    msg "--verbose                   Display verbose script output."
-    msg "--help, -h                  Display usage, overriding script execution."
+    msg "--<enable/disable>-avx2       Use Intel AVX2 intrinsics."
+    msg "                                Default: --disable-avx2"
+    msg "--<enable/disable>-avx512     Use Intel AVX512 intrinsics."
+    msg "                                Default: --disable-avx512"
+    msg "--<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    msg "                                Default: --disable-avx512ifma"
+    msg "--<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2)."
+    msg "                                Default: --disable-avxifma"
+    msg "--<enable/disable>-sse41      Use SSE4.1 hardware instructions."
+    msg "                                Default: --disable-sse41"
+    msg "--<enable/disable>-shani      Use Intel/ARM SHA Extensions."
+    msg "                                Default: --disable-shani"
+    msg "--<enable/disable>-crypto     Use ARM Crypto Extensions."
+    msg "                                Default: --disable-crypto"
+    msg "--<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics."
+    msg "                                Default: --disable-aesni"
+    msg "--<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+    msg "                                Default: --disable-vaes"
+    msg "--<with/without>-ultrafast    Use shrec/UltrafastSecp256k1 library."
+    msg "                                Default: --without-ultrafast"
+    msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
+    msg "                                Default: --with-secp256k1"
+    msg "--build-boost                 Build Boost libraries"
+    msg "--build-secp256k1             Build libsecp256k1 libraries"
+    msg "--build-ultrafast             Build UltrafastSecp256k1 libraries"
+    msg "--build-src-dir=<path>        Location for sources."
+    msg "                                Default: $(pwd)"
+    msg "--build-obj-dir=<path>        Location for intermediate objects."
+    msg "                                Default: obj"
+    msg "--build-obj-dir-relative      Interpret build-obj-dir as relative to project sources."
+    msg "--build-config=<mode>         Specifies the build configuration."
+    msg "                                Values: { debug, release }"
+    msg "                                Toolchain default behavior will occur if no value specified."
+    msg "--build-link=<mode>           Specifies the link mode."
+    msg "                                Values: { dynamic, static }"
+    msg "                                Toolchain default behavior will occur if no value specified."
+    msg "--build-full-repositories     Sync full github repositories."
+    msg "                                Default: git clone --depth 1 --single-branch"
+    msg "--build-post-install-clean    Clean dependencies after installation (saves space)."
+    msg "--build-skip-tests            Skip test compilation and execution."
+    msg "--build-parallel=<int>        Number of jobs to run simultaneously."
+    msg "                                Default: supported platforms use nproc/sysctl"
+    msg "--build-use-local-src         Use existing sources in relevant paths."
+    msg "--prefix=<path>               Installation destination."
+    msg "                                Default: /usr/local"
+    msg "--noninteractive              Disable any prompt using default."
+    msg "--verbose                     Display verbose script output."
+    msg "--help, -h                    Display usage, overriding script execution."
     msg ""
     msg "All unrecognized options provided shall be passed as configuration"
     msg "options for all dependencies."

@@ -12,13 +12,19 @@
 #                               Default: OFF
 # -Denable-avx512=<ON/OFF>    Use Intel AVX512 intrinsics.
 #                               Default: OFF
-# -Denable-ifma=<ON/OFF>      Use Intel AVX512 IFMA intrinsics.
+# -Denable-avx512ifma=<ON/OFF>Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+#                               Default: OFF
+# -Denable-avxifma=<ON/OFF>   Use Intel AVX IFMA intrinsics (implies AVX2).
 #                               Default: OFF
 # -Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions.
 #                               Default: OFF
 # -Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions.
 #                               Default: OFF
 # -Denable-crypto=<ON/OFF>    Use ARM Crypto Extensions.
+#                               Default: OFF
+# -Denable-aesni=<ON/OFF>     Use Intel AES-NI and PCLMULQDQ intrinsics.
+#                               Default: OFF
+# -Denable-vaes=<ON/OFF>      Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #                               Default: OFF
 # -Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1 library.
 #                               Default: OFF
@@ -978,13 +984,19 @@ help()
     msg "                              Default: OFF"
     msg "-Denable-avx512=<ON/OFF>    Use Intel AVX512 intrinsics."
     msg "                              Default: OFF"
-    msg "-Denable-ifma=<ON/OFF>      Use Intel AVX512 IFMA intrinsics."
+    msg "-Denable-avx512ifma=<ON/OFF>Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    msg "                              Default: OFF"
+    msg "-Denable-avxifma=<ON/OFF>   Use Intel AVX IFMA intrinsics (implies AVX2)."
     msg "                              Default: OFF"
     msg "-Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions."
     msg "                              Default: OFF"
     msg "-Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions."
     msg "                              Default: OFF"
     msg "-Denable-crypto=<ON/OFF>    Use ARM Crypto Extensions."
+    msg "                              Default: OFF"
+    msg "-Denable-aesni=<ON/OFF>     Use Intel AES-NI and PCLMULQDQ intrinsics."
+    msg "                              Default: OFF"
+    msg "-Denable-vaes=<ON/OFF>      Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg "                              Default: OFF"
     msg "-Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1 library."
     msg "                              Default: OFF"
