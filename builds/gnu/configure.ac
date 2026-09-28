@@ -227,6 +227,24 @@ AC_ARG_ENABLE([crypto],
 AC_MSG_RESULT([$enable_crypto])
 AM_CONDITIONAL([ENABLE_CRYPTO], [test "x${enable_crypto}" != "xno"])
 
+AC_MSG_CHECKING([--enable-sha512 option])
+AC_ARG_ENABLE([sha512],
+    AS_HELP_STRING([--enable-sha512],
+        [Use Intel SHA512 Extensions (implies AVX2). @<:@default=no@:>@]),
+    [enable_sha512=$enableval],
+    [enable_sha512=no])
+AC_MSG_RESULT([$enable_sha512])
+AM_CONDITIONAL([ENABLE_SHA512], [test "x${enable_sha512}" != "xno"])
+
+AC_MSG_CHECKING([--enable-sha3 option])
+AC_ARG_ENABLE([sha3],
+    AS_HELP_STRING([--enable-sha3],
+        [Use ARM SHA3 Extensions for SHA512 (implies Crypto). @<:@default=no@:>@]),
+    [enable_sha3=$enableval],
+    [enable_sha3=no])
+AC_MSG_RESULT([$enable_sha3])
+AM_CONDITIONAL([ENABLE_SHA3], [test "x${enable_sha3}" != "xno"])
+
 AC_MSG_CHECKING([--enable-aesni option])
 AC_ARG_ENABLE([aesni],
     AS_HELP_STRING([--enable-aesni],
@@ -291,13 +309,13 @@ AS_IF([test "x${enable_avx2}" != "xno"],
 
 AS_IF([test "x${enable_avx512}" != "xno"],
   [
-    AX_CHECK_COMPILE_FLAG([-mavx512f -mavx512bw],
+    AX_CHECK_COMPILE_FLAG([-mavx512f -mavx512bw -mavx512vl],
       [
-        CFLAGS="${CFLAGS} -mavx512f -mavx512bw";
-        CXXFLAGS="${CXXFLAGS} -mavx512f -mavx512bw";
-        AC_SUBST([avx512], ["-mavx512f -mavx512bw"])
+        CFLAGS="${CFLAGS} -mavx512f -mavx512bw -mavx512vl";
+        CXXFLAGS="${CXXFLAGS} -mavx512f -mavx512bw -mavx512vl";
+        AC_SUBST([avx512], ["-mavx512f -mavx512bw -mavx512vl"])
       ],[
-        AC_MSG_ERROR([-mavx512f -mavx512bw not supported.])
+        AC_MSG_ERROR([-mavx512f -mavx512bw -mavx512vl not supported.])
       ],
       [],
       [
@@ -308,7 +326,8 @@ AS_IF([test "x${enable_avx512}" != "xno"],
           ]],
           [[
             __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
-            return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);
+            __m256i b = _mm256_set1_epi32(3);
+            return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
           ]])
       ])
   ])
@@ -408,6 +427,54 @@ AS_IF([test "x${enable_crypto}" != "xno"],
           [[
             uint32x4_t a = vdupq_n_u32(0);
             return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_sha512}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-mavx2 -msha512],
+      [
+        CFLAGS="${CFLAGS} -mavx2 -msha512";
+        CXXFLAGS="${CXXFLAGS} -mavx2 -msha512";
+        AC_SUBST([sha512], ["-mavx2 -msha512"])
+      ],[
+        AC_MSG_ERROR([-mavx2 -msha512 not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set1_epi64x(0);
+            __m128i k = _mm_set1_epi64x(15);
+            return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_sha3}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-march=armv8.2-a+crypto+sha3],
+      [
+        CFLAGS="${CFLAGS} -march=armv8.2-a+crypto+sha3";
+        CXXFLAGS="${CXXFLAGS} -march=armv8.2-a+crypto+sha3";
+        AC_SUBST([sha3], ["-march=armv8.2-a+crypto+sha3"])
+      ],[
+        AC_MSG_ERROR([-march=armv8.2-a+crypto+sha3 not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <arm_neon.h>
+          ]],
+          [[
+            uint64x2_t a = vdupq_n_u64(0);
+            return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
           ]])
       ])
   ])

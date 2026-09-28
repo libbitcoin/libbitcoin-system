@@ -18,6 +18,8 @@ REM --enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2).
 REM --enable-sse41              Use SSE4.1 hardware instructions.
 REM --enable-shani              Use Intel/ARM SHA Extensions.
 REM --enable-crypto             Use ARM Crypto Extensions.
+REM --enable-sha512             Use Intel SHA512 Extensions (implies AVX2).
+REM --enable-sha3               Use ARM SHA3 Extensions for SHA512 (implies Crypto).
 REM --enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics.
 REM --enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 REM --build-config config       Build configuration.
@@ -230,6 +232,18 @@ if "!libbitcoin_system_TAG!" == "" (
             set "libbitcoin-system_PARAMS=/p:Option-sha=true"
         ) else (
             set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha=true"
+        )
+    ) else if "%~1" == "--enable-sha512" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-sha512=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha512=true"
+        )
+    ) else if "%~1" == "--enable-sha3" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-sha512=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha512=true"
         )
     ) else if "%~1" == "--enable-aesni" (
         if "!libbitcoin-system_PARAMS!" == "" (
@@ -487,6 +501,8 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "--enable-sse41              Use SSE4.1 hardware instructions."
     call :msg "--enable-shani              Use Intel/ARM SHA Extensions."
     call :msg "--enable-crypto             Use ARM Crypto Extensions."
+    call :msg "--enable-sha512             Use Intel SHA512 Extensions (implies AVX2)."
+    call :msg "--enable-sha3               Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
     call :msg "--enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics."
     call :msg "--enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     call :msg "--build-config config       Build configuration."

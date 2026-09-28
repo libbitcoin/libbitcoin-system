@@ -8,44 +8,48 @@
 # Script managing the build and installation of libbitcoin-system and its dependencies.
 #
 # Script options:
-# -Denable-avx2=<ON/OFF>      Use Intel AVX2 intrinsics.
-#                               Default: OFF
-# -Denable-avx512=<ON/OFF>    Use Intel AVX512 intrinsics.
-#                               Default: OFF
-# -Denable-avx512ifma=<ON/OFF>Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
-#                               Default: OFF
-# -Denable-avxifma=<ON/OFF>   Use Intel AVX IFMA intrinsics (implies AVX2).
-#                               Default: OFF
-# -Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions.
-#                               Default: OFF
-# -Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions.
-#                               Default: OFF
-# -Denable-crypto=<ON/OFF>    Use ARM Crypto Extensions.
-#                               Default: OFF
-# -Denable-aesni=<ON/OFF>     Use Intel AES-NI and PCLMULQDQ intrinsics.
-#                               Default: OFF
-# -Denable-vaes=<ON/OFF>      Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
-#                               Default: OFF
-# -Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1 library.
-#                               Default: OFF
-# -Dwith-secp256k1=<ON/OFF>   Use bitcoin-core/secp256k1 library.
-#                               Default: OFF
-# --build-boost               Build Boost libraries
-# --build-secp256k1           Build libsecp256k1 libraries
-# --build-ultrafast           Build UltrafastSecp256k1 libraries
-# --build-preset=<preset>     Specifies preset configuration to build.
-# --build-src-dir=<path>      Location for sources.
-#                               Default: $(pwd)
-# --build-full-repositories   Sync full github repositories.
-#                               Default: git clone --depth 1 --single-branch
-# --build-post-install-clean  Clean dependencies after installation (saves space).
-# --build-skip-tests          Skip test compilation and execution.
-# --build-parallel=<int>      Number of jobs to run simultaneously.
-#                               Default: supported platforms use nproc/sysctl
-# --build-use-local-src       Use existing sources in relevant paths.
-# --noninteractive            Disable any prompt using default.
-# --verbose                   Display verbose script output.
-# --help, -h                  Display usage, overriding script execution.
+# -Denable-avx2=<ON/OFF>       Use Intel AVX2 intrinsics.
+#                                Default: OFF
+# -Denable-avx512=<ON/OFF>     Use Intel AVX512 intrinsics.
+#                                Default: OFF
+# -Denable-avx512ifma=<ON/OFF> Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+#                                Default: OFF
+# -Denable-avxifma=<ON/OFF>    Use Intel AVX IFMA intrinsics (implies AVX2).
+#                                Default: OFF
+# -Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions.
+#                                Default: OFF
+# -Denable-shani=<ON/OFF>      Use Intel/ARM SHA Extensions.
+#                                Default: OFF
+# -Denable-crypto=<ON/OFF>     Use ARM Crypto Extensions.
+#                                Default: OFF
+# -Denable-sha512=<ON/OFF>     Use Intel SHA512 Extensions (implies AVX2).
+#                                Default: OFF
+# -Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512 (implies Crypto).
+#                                Default: OFF
+# -Denable-aesni=<ON/OFF>      Use Intel AES-NI and PCLMULQDQ intrinsics.
+#                                Default: OFF
+# -Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
+#                                Default: OFF
+# -Dwith-ultrafast=<ON/OFF>    Use shrec/UltrafastSecp256k1 library.
+#                                Default: OFF
+# -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
+#                                Default: OFF
+# --build-boost                Build Boost libraries
+# --build-secp256k1            Build libsecp256k1 libraries
+# --build-ultrafast            Build UltrafastSecp256k1 libraries
+# --build-preset=<preset>      Specifies preset configuration to build.
+# --build-src-dir=<path>       Location for sources.
+#                                Default: $(pwd)
+# --build-full-repositories    Sync full github repositories.
+#                                Default: git clone --depth 1 --single-branch
+# --build-post-install-clean   Clean dependencies after installation (saves space).
+# --build-skip-tests           Skip test compilation and execution.
+# --build-parallel=<int>       Number of jobs to run simultaneously.
+#                                Default: supported platforms use nproc/sysctl
+# --build-use-local-src        Use existing sources in relevant paths.
+# --noninteractive             Disable any prompt using default.
+# --verbose                    Display verbose script output.
+# --help, -h                   Display usage, overriding script execution.
 #
 # All unrecognized options provided shall be passed as configuration
 # options for all dependencies.
@@ -1058,44 +1062,48 @@ help()
     msg "Script managing the build and installation of libbitcoin-system and its dependencies."
     msg ""
     msg "Script options:"
-    msg "-Denable-avx2=<ON/OFF>      Use Intel AVX2 intrinsics."
-    msg "                              Default: OFF"
-    msg "-Denable-avx512=<ON/OFF>    Use Intel AVX512 intrinsics."
-    msg "                              Default: OFF"
-    msg "-Denable-avx512ifma=<ON/OFF>Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
-    msg "                              Default: OFF"
-    msg "-Denable-avxifma=<ON/OFF>   Use Intel AVX IFMA intrinsics (implies AVX2)."
-    msg "                              Default: OFF"
-    msg "-Denable-sse41=<ON/OFF>     Use SSE4.1 hardware instructions."
-    msg "                              Default: OFF"
-    msg "-Denable-shani=<ON/OFF>     Use Intel/ARM SHA Extensions."
-    msg "                              Default: OFF"
-    msg "-Denable-crypto=<ON/OFF>    Use ARM Crypto Extensions."
-    msg "                              Default: OFF"
-    msg "-Denable-aesni=<ON/OFF>     Use Intel AES-NI and PCLMULQDQ intrinsics."
-    msg "                              Default: OFF"
-    msg "-Denable-vaes=<ON/OFF>      Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
-    msg "                              Default: OFF"
-    msg "-Dwith-ultrafast=<ON/OFF>   Use shrec/UltrafastSecp256k1 library."
-    msg "                              Default: OFF"
-    msg "-Dwith-secp256k1=<ON/OFF>   Use bitcoin-core/secp256k1 library."
-    msg "                              Default: OFF"
-    msg "--build-boost               Build Boost libraries"
-    msg "--build-secp256k1           Build libsecp256k1 libraries"
-    msg "--build-ultrafast           Build UltrafastSecp256k1 libraries"
-    msg "--build-preset=<preset>     Specifies preset configuration to build."
-    msg "--build-src-dir=<path>      Location for sources."
-    msg "                              Default: $(pwd)"
-    msg "--build-full-repositories   Sync full github repositories."
-    msg "                              Default: git clone --depth 1 --single-branch"
-    msg "--build-post-install-clean  Clean dependencies after installation (saves space)."
-    msg "--build-skip-tests          Skip test compilation and execution."
-    msg "--build-parallel=<int>      Number of jobs to run simultaneously."
-    msg "                              Default: supported platforms use nproc/sysctl"
-    msg "--build-use-local-src       Use existing sources in relevant paths."
-    msg "--noninteractive            Disable any prompt using default."
-    msg "--verbose                   Display verbose script output."
-    msg "--help, -h                  Display usage, overriding script execution."
+    msg "-Denable-avx2=<ON/OFF>       Use Intel AVX2 intrinsics."
+    msg "                               Default: OFF"
+    msg "-Denable-avx512=<ON/OFF>     Use Intel AVX512 intrinsics."
+    msg "                               Default: OFF"
+    msg "-Denable-avx512ifma=<ON/OFF> Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    msg "                               Default: OFF"
+    msg "-Denable-avxifma=<ON/OFF>    Use Intel AVX IFMA intrinsics (implies AVX2)."
+    msg "                               Default: OFF"
+    msg "-Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions."
+    msg "                               Default: OFF"
+    msg "-Denable-shani=<ON/OFF>      Use Intel/ARM SHA Extensions."
+    msg "                               Default: OFF"
+    msg "-Denable-crypto=<ON/OFF>     Use ARM Crypto Extensions."
+    msg "                               Default: OFF"
+    msg "-Denable-sha512=<ON/OFF>     Use Intel SHA512 Extensions (implies AVX2)."
+    msg "                               Default: OFF"
+    msg "-Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
+    msg "                               Default: OFF"
+    msg "-Denable-aesni=<ON/OFF>      Use Intel AES-NI and PCLMULQDQ intrinsics."
+    msg "                               Default: OFF"
+    msg "-Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+    msg "                               Default: OFF"
+    msg "-Dwith-ultrafast=<ON/OFF>    Use shrec/UltrafastSecp256k1 library."
+    msg "                               Default: OFF"
+    msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
+    msg "                               Default: OFF"
+    msg "--build-boost                Build Boost libraries"
+    msg "--build-secp256k1            Build libsecp256k1 libraries"
+    msg "--build-ultrafast            Build UltrafastSecp256k1 libraries"
+    msg "--build-preset=<preset>      Specifies preset configuration to build."
+    msg "--build-src-dir=<path>       Location for sources."
+    msg "                               Default: $(pwd)"
+    msg "--build-full-repositories    Sync full github repositories."
+    msg "                               Default: git clone --depth 1 --single-branch"
+    msg "--build-post-install-clean   Clean dependencies after installation (saves space)."
+    msg "--build-skip-tests           Skip test compilation and execution."
+    msg "--build-parallel=<int>       Number of jobs to run simultaneously."
+    msg "                               Default: supported platforms use nproc/sysctl"
+    msg "--build-use-local-src        Use existing sources in relevant paths."
+    msg "--noninteractive             Disable any prompt using default."
+    msg "--verbose                    Display verbose script output."
+    msg "--help, -h                   Display usage, overriding script execution."
     msg ""
     msg "All unrecognized options provided shall be passed as configuration"
     msg "options for all dependencies."

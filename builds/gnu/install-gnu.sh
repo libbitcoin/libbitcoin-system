@@ -22,6 +22,10 @@
 #                                 Default: --disable-shani
 # --<enable/disable>-crypto     Use ARM Crypto Extensions.
 #                                 Default: --disable-crypto
+# --<enable/disable>-sha512     Use Intel SHA512 Extensions (implies AVX2).
+#                                 Default: --disable-sha512
+# --<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512 (implies Crypto).
+#                                 Default: --disable-sha3
 # --<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics.
 #                                 Default: --disable-aesni
 # --<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
@@ -1224,6 +1228,10 @@ help()
     msg "                                Default: --disable-shani"
     msg "--<enable/disable>-crypto     Use ARM Crypto Extensions."
     msg "                                Default: --disable-crypto"
+    msg "--<enable/disable>-sha512     Use Intel SHA512 Extensions (implies AVX2)."
+    msg "                                Default: --disable-sha512"
+    msg "--<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
+    msg "                                Default: --disable-sha3"
     msg "--<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics."
     msg "                                Default: --disable-aesni"
     msg "--<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
