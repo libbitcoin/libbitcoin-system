@@ -57,6 +57,7 @@ BOOST_AUTO_TEST_CASE(hash_performance__sha256__double_64)
     if constexpr (sha256_native::native)
     {
         BOOST_CHECK_EQUAL(double_64<sha256_native>("sha256 double 64 x 1024 native", calls), expected);
+        BOOST_CHECK_EQUAL(double_64_native("sha256 double 64 x 1024 native 2 lanes", calls), expected);
     }
 
     run_double_64_lanes<xint128_t>("sha256 double 64 x 1024 4 lanes", calls, expected);

@@ -405,6 +405,211 @@ native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
     return native_finalize(state, block);
 }
 
+// Two block transforms interleave the independent rounds of each block, so
+// that the latency of each native round is hidden by the other block.
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+template <bool Swap>
+INLINE void CLASS::
+native_rounds(xint128_t& lo0, xint128_t& hi0, xint128_t& lo1, xint128_t& hi1,
+    const block_t& block0, const block_t& block1) NOEXCEPT
+{
+    const auto& wblock0 = array_cast<xint128_t>(block0);
+    const auto& wblock1 = array_cast<xint128_t>(block1);
+
+    auto a0 = endian<Swap>(f::load(wblock0[0]));
+    auto a1 = endian<Swap>(f::load(wblock0[1]));
+    auto a2 = endian<Swap>(f::load(wblock0[2]));
+    auto a3 = endian<Swap>(f::load(wblock0[3]));
+    auto b0 = endian<Swap>(f::load(wblock1[0]));
+    auto b1 = endian<Swap>(f::load(wblock1[1]));
+    auto b2 = endian<Swap>(f::load(wblock1[2]));
+    auto b3 = endian<Swap>(f::load(wblock1[3]));
+
+    const auto start_lo0 = lo0;
+    const auto start_hi0 = hi0;
+    const auto start_lo1 = lo1;
+    const auto start_hi1 = hi1;
+
+    round_4<0>(lo0, hi0, a0);
+    round_4<0>(lo1, hi1, b0);
+    round_4<1>(lo0, hi0, a1);
+    round_4<1>(lo1, hi1, b1);
+    round_4<2>(lo0, hi0, a2);
+    round_4<2>(lo1, hi1, b2);
+    round_4<3>(lo0, hi0, a3);
+    round_4<3>(lo1, hi1, b3);
+
+    prepare(a0, a1);
+    prepare(b0, b1);
+    prepare(a0, a2, a3);
+    prepare(b0, b2, b3);
+    round_4<4>(lo0, hi0, a0);
+    round_4<4>(lo1, hi1, b0);
+
+    prepare(a1, a2);
+    prepare(b1, b2);
+    prepare(a1, a3, a0);
+    prepare(b1, b3, b0);
+    round_4<5>(lo0, hi0, a1);
+    round_4<5>(lo1, hi1, b1);
+
+    prepare(a2, a3);
+    prepare(b2, b3);
+    prepare(a2, a0, a1);
+    prepare(b2, b0, b1);
+    round_4<6>(lo0, hi0, a2);
+    round_4<6>(lo1, hi1, b2);
+
+    prepare(a3, a0);
+    prepare(b3, b0);
+    prepare(a3, a1, a2);
+    prepare(b3, b1, b2);
+    round_4<7>(lo0, hi0, a3);
+    round_4<7>(lo1, hi1, b3);
+
+    prepare(a0, a1);
+    prepare(b0, b1);
+    prepare(a0, a2, a3);
+    prepare(b0, b2, b3);
+    round_4<8>(lo0, hi0, a0);
+    round_4<8>(lo1, hi1, b0);
+
+    prepare(a1, a2);
+    prepare(b1, b2);
+    prepare(a1, a3, a0);
+    prepare(b1, b3, b0);
+    round_4<9>(lo0, hi0, a1);
+    round_4<9>(lo1, hi1, b1);
+
+    prepare(a2, a3);
+    prepare(b2, b3);
+    prepare(a2, a0, a1);
+    prepare(b2, b0, b1);
+    round_4<10>(lo0, hi0, a2);
+    round_4<10>(lo1, hi1, b2);
+
+    prepare(a3, a0);
+    prepare(b3, b0);
+    prepare(a3, a1, a2);
+    prepare(b3, b1, b2);
+    round_4<11>(lo0, hi0, a3);
+    round_4<11>(lo1, hi1, b3);
+
+    prepare(a0, a1);
+    prepare(b0, b1);
+    prepare(a0, a2, a3);
+    prepare(b0, b2, b3);
+    round_4<12>(lo0, hi0, a0);
+    round_4<12>(lo1, hi1, b0);
+
+    prepare(a1, a2);
+    prepare(b1, b2);
+    prepare(a1, a3, a0);
+    prepare(b1, b3, b0);
+    round_4<13>(lo0, hi0, a1);
+    round_4<13>(lo1, hi1, b1);
+
+    prepare(a2, a3);
+    prepare(b2, b3);
+    prepare(a2, a0, a1);
+    prepare(b2, b0, b1);
+    round_4<14>(lo0, hi0, a2);
+    round_4<14>(lo1, hi1, b2);
+
+    prepare(a3, a0);
+    prepare(b3, b0);
+    prepare(a3, a1, a2);
+    prepare(b3, b1, b2);
+    round_4<15>(lo0, hi0, a3);
+    round_4<15>(lo1, hi1, b3);
+
+    lo0 = f::add<word_t>(lo0, start_lo0);
+    hi0 = f::add<word_t>(hi0, start_hi0);
+    lo1 = f::add<word_t>(lo1, start_lo1);
+    hi1 = f::add<word_t>(hi1, start_hi1);
+}
+
+TEMPLATE
+template <bool Swap>
+void CLASS::
+native_transform(state_t& state0, state_t& state1, const auto& block0,
+    const auto& block1) NOEXCEPT
+{
+    auto& wstate0 = array_cast<xint128_t>(state0);
+    auto& wstate1 = array_cast<xint128_t>(state1);
+    auto lo0 = f::load(wstate0[0]);
+    auto hi0 = f::load(wstate0[1]);
+    auto lo1 = f::load(wstate1[0]);
+    auto hi1 = f::load(wstate1[1]);
+    shuffle(lo0, hi0);
+    shuffle(lo1, hi1);
+
+    // native_rounds must be inlined here (register boundary).
+    native_rounds<Swap>(lo0, hi0, lo1, hi1, array_cast<byte_t>(block0),
+        array_cast<byte_t>(block1));
+
+    unshuffle(lo0, hi0);
+    unshuffle(lo1, hi1);
+    f::store(wstate0[0], lo0);
+    f::store(wstate0[1], hi0);
+    f::store(wstate1[0], lo1);
+    f::store(wstate1[1], hi1);
+}
+
+TEMPLATE
+void CLASS::
+native_finalize(digest_t& digest0, digest_t& digest1, state_t& state0,
+    state_t& state1, const words_t& pad0, const words_t& pad1) NOEXCEPT
+{
+    auto& wstate0 = array_cast<xint128_t>(state0);
+    auto& wstate1 = array_cast<xint128_t>(state1);
+    auto lo0 = f::load(wstate0[0]);
+    auto hi0 = f::load(wstate0[1]);
+    auto lo1 = f::load(wstate1[0]);
+    auto hi1 = f::load(wstate1[1]);
+    shuffle(lo0, hi0);
+    shuffle(lo1, hi1);
+
+    // native_rounds must be inlined here (register boundary).
+    native_rounds<false>(lo0, hi0, lo1, hi1, array_cast<byte_t>(pad0),
+        array_cast<byte_t>(pad1));
+
+    unshuffle(lo0, hi0);
+    unshuffle(lo1, hi1);
+
+    auto& wdigest0 = array_cast<xint128_t>(digest0);
+    auto& wdigest1 = array_cast<xint128_t>(digest1);
+    f::store(wdigest0[0], f::byteswap<uint32_t>(lo0));
+    f::store(wdigest0[1], f::byteswap<uint32_t>(hi0));
+    f::store(wdigest1[0], f::byteswap<uint32_t>(lo1));
+    f::store(wdigest1[1], f::byteswap<uint32_t>(hi1));
+}
+
+TEMPLATE
+void CLASS::
+native_double_hash(digest_t& digest0, digest_t& digest1,
+    const block_t& block0, const block_t& block1) NOEXCEPT
+{
+    const auto pad = pad_block();
+    auto state0 = H::get;
+    auto state1 = H::get;
+    native_transform<true>(state0, state1, block0, block1);
+    native_transform<false>(state0, state1, pad, pad);
+
+    // Second hash
+    words_t second0{};
+    words_t second1{};
+    inject_left_half(second0, state0);
+    inject_left_half(second1, state1);
+    pad_half(second0);
+    pad_half(second1);
+    state0 = H::get;
+    state1 = H::get;
+    native_finalize(digest0, digest1, state0, state1, second0, second1);
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin

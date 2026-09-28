@@ -41,12 +41,13 @@ using sha256_both = sha256_t<true, true>;
 using sha256_uncached = sha256_t<false, false, false>;
 
 class accessor
-  : public sha256_vector
+  : public sha256_both
 {
 public:
-    using iblocks_t = sha256_vector::iblocks_t;
-    using idigests_t = sha256_vector::idigests_t;
-    using sha256_vector::merkle_hash_vector;
+    using iblocks_t = sha256_both::iblocks_t;
+    using idigests_t = sha256_both::idigests_t;
+    using sha256_both::merkle_hash_vector;
+    using sha256_both::merkle_hash_native;
 };
 
 constexpr size_t repeats = 5;
@@ -212,6 +213,22 @@ hashes double_64_lanes(const std::string& name, size_t calls) NOEXCEPT
         auto blocks = accessor::iblocks_t{ size, start };
         auto digests = accessor::idigests_t{ to_half(size), start };
         accessor::merkle_hash_vector<xWord>(digests, blocks);
+    }) / size, "byte");
+
+    return data;
+}
+
+// As double_64, with all blocks hashed in native pairs.
+inline hashes double_64_native(const std::string& name, size_t calls) NOEXCEPT
+{
+    constexpr auto size = two * merkle_blocks * hash_size;
+    auto data = get_digests(two * merkle_blocks);
+    report(name, nanoseconds(calls, [&]() NOEXCEPT
+    {
+        const auto start = data.front().data();
+        auto blocks = accessor::iblocks_t{ size, start };
+        auto digests = accessor::idigests_t{ to_half(size), start };
+        accessor::merkle_hash_native(digests, blocks);
     }) / size, "byte");
 
     return data;

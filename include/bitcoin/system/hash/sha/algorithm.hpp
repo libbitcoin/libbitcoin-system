@@ -376,6 +376,8 @@ protected:
     INLINE static void merkle_hash_vector(idigests_t& digests,
         iblocks_t& blocks) NOEXCEPT;
     INLINE static void merkle_hash_vector(digests_t& digests) NOEXCEPT;
+    INLINE static void merkle_hash_native(idigests_t& digests,
+        iblocks_t& blocks) NOEXCEPT;
     constexpr static void merkle_hash_(digests_t& digests,
         size_t offset=zero) NOEXCEPT;
 
@@ -454,6 +456,25 @@ protected:
     static digest_t native_double_hash(const block_t& block) NOEXCEPT;
     static digest_t native_double_hash(const half_t& half) NOEXCEPT;
     static digest_t native_double_hash(const half_t& left, const half_t& right) NOEXCEPT;
+
+    /// Native SHA optimizations (two blocks).
+    /// -----------------------------------------------------------------------
+
+    template <bool Swap>
+    INLINE static void native_rounds(xint128_t& lo0, xint128_t& hi0,
+        xint128_t& lo1, xint128_t& hi1, const block_t& block0,
+        const block_t& block1) NOEXCEPT;
+
+    template <bool Swap>
+    static void native_transform(state_t& state0, state_t& state1,
+        const auto& block0, const auto& block1) NOEXCEPT;
+
+    static void native_finalize(digest_t& digest0, digest_t& digest1,
+        state_t& state0, state_t& state1, const words_t& pad0,
+        const words_t& pad1) NOEXCEPT;
+
+    static void native_double_hash(digest_t& digest0, digest_t& digest1,
+        const block_t& block0, const block_t& block1) NOEXCEPT;
 
 public:
     /// Summary public values.
