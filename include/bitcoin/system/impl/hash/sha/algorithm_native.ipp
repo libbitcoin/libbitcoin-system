@@ -83,6 +83,7 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Strength, bool_if<Strength != 160>>
 INLINE void CLASS::
 native_rounds(xint128_t& lo, xint128_t& hi, xint128_t message0,
     xint128_t message1, xint128_t message2, xint128_t message3) NOEXCEPT
@@ -148,6 +149,95 @@ native_rounds(xint128_t& lo, xint128_t& hi, xint128_t message0,
 }
 
 TEMPLATE
+template <size_t Strength, bool_if<Strength == 160>>
+INLINE void CLASS::
+native_rounds(xint128_t& lo, xint128_t& hi, xint128_t message0,
+    xint128_t message1, xint128_t message2, xint128_t message3) NOEXCEPT
+{
+    const auto start_lo = lo;
+    const auto start_hi = hi;
+
+    // The carry is abcd before the last four rounds, seeded to produce e.
+    auto carry = f::rol<2, SHA::word_bits>(hi);
+    message0 = sha::order_160(message0);
+    message1 = sha::order_160(message1);
+    message2 = sha::order_160(message2);
+    message3 = sha::order_160(message3);
+
+    sha::compress_160<0>(lo, carry, message0);
+    sha::compress_160<0>(lo, carry, message1);
+    sha::compress_160<0>(lo, carry, message2);
+    sha::compress_160<0>(lo, carry, message3);
+
+    sha::schedule_160(message0, message1, message2);
+    sha::schedule_160(message0, message3);
+    sha::compress_160<0>(lo, carry, message0);
+
+    sha::schedule_160(message1, message2, message3);
+    sha::schedule_160(message1, message0);
+    sha::compress_160<1>(lo, carry, message1);
+
+    sha::schedule_160(message2, message3, message0);
+    sha::schedule_160(message2, message1);
+    sha::compress_160<1>(lo, carry, message2);
+
+    sha::schedule_160(message3, message0, message1);
+    sha::schedule_160(message3, message2);
+    sha::compress_160<1>(lo, carry, message3);
+
+    sha::schedule_160(message0, message1, message2);
+    sha::schedule_160(message0, message3);
+    sha::compress_160<1>(lo, carry, message0);
+
+    sha::schedule_160(message1, message2, message3);
+    sha::schedule_160(message1, message0);
+    sha::compress_160<1>(lo, carry, message1);
+
+    sha::schedule_160(message2, message3, message0);
+    sha::schedule_160(message2, message1);
+    sha::compress_160<2>(lo, carry, message2);
+
+    sha::schedule_160(message3, message0, message1);
+    sha::schedule_160(message3, message2);
+    sha::compress_160<2>(lo, carry, message3);
+
+    sha::schedule_160(message0, message1, message2);
+    sha::schedule_160(message0, message3);
+    sha::compress_160<2>(lo, carry, message0);
+
+    sha::schedule_160(message1, message2, message3);
+    sha::schedule_160(message1, message0);
+    sha::compress_160<2>(lo, carry, message1);
+
+    sha::schedule_160(message2, message3, message0);
+    sha::schedule_160(message2, message1);
+    sha::compress_160<2>(lo, carry, message2);
+
+    sha::schedule_160(message3, message0, message1);
+    sha::schedule_160(message3, message2);
+    sha::compress_160<3>(lo, carry, message3);
+
+    sha::schedule_160(message0, message1, message2);
+    sha::schedule_160(message0, message3);
+    sha::compress_160<3>(lo, carry, message0);
+
+    sha::schedule_160(message1, message2, message3);
+    sha::schedule_160(message1, message0);
+    sha::compress_160<3>(lo, carry, message1);
+
+    sha::schedule_160(message2, message3, message0);
+    sha::schedule_160(message2, message1);
+    sha::compress_160<3>(lo, carry, message2);
+
+    sha::schedule_160(message3, message0, message1);
+    sha::schedule_160(message3, message2);
+    sha::compress_160<3>(lo, carry, message3);
+
+    lo = f::add<word_t>(lo, start_lo);
+    hi = sha::next_160(carry, start_hi);
+}
+
+TEMPLATE
 INLINE void CLASS::
 native_rounds(xint128_t& lo, xint128_t& hi, const buffer_t& buffer) NOEXCEPT
 {
@@ -197,10 +287,12 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
+template <size_t Strength, bool_if<Strength != 160>>
 void CLASS::
 native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // Individual state vars are used vs. array to ensure register persistence.
+    // Individual state vars are used vs. array to ensure register
+    // persistence.
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = f::load(wstate[0]);
     auto hi = f::load(wstate[1]);
@@ -216,7 +308,26 @@ native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-template <bool Swap>
+template <size_t Strength, bool_if<Strength == 160>>
+void CLASS::
+native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    auto& wstate = array_cast<xint128_t, one>(state);
+    auto lo = f::load(wstate[0]);
+    auto hi = sha::set_160(state[4]);
+    sha::shuffle_160(lo);
+
+    // native_rounds must be inlined here (register boundary).
+    for (auto& block: blocks)
+        native_rounds<true>(lo, hi, block);
+
+    sha::unshuffle_160(lo);
+    f::store(wstate[0], lo);
+    state[4] = sha::get_160(hi);
+}
+
+TEMPLATE
+template <bool Swap, size_t Strength, bool_if<Strength != 160>>
 void CLASS::
 native_transform(state_t& state, const auto& block) NOEXCEPT
 {
@@ -231,6 +342,24 @@ native_transform(state_t& state, const auto& block) NOEXCEPT
     unshuffle(lo, hi);
     f::store(wstate[0], lo);
     f::store(wstate[1], hi);
+}
+
+TEMPLATE
+template <bool Swap, size_t Strength, bool_if<Strength == 160>>
+void CLASS::
+native_transform(state_t& state, const auto& block) NOEXCEPT
+{
+    auto& wstate = array_cast<xint128_t, one>(state);
+    auto lo = f::load(wstate[0]);
+    auto hi = sha::set_160(state[4]);
+    sha::shuffle_160(lo);
+
+    // native_rounds must be inlined here (register boundary).
+    native_rounds<Swap>(lo, hi, array_cast<byte_t>(block));
+
+    sha::unshuffle_160(lo);
+    f::store(wstate[0], lo);
+    state[4] = sha::get_160(hi);
 }
 
 // Finalization creates and/or applies a given padding block to the state
@@ -270,6 +399,7 @@ native_finalize(state_t& state, size_t blocks) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Strength, bool_if<Strength != 160>>
 typename CLASS::digest_t CLASS::
 native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 {
@@ -287,6 +417,27 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
     f::store(wdigest[0], f::byteswap<uint32_t>(lo));
     f::store(wdigest[1], f::byteswap<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);
+}
+
+TEMPLATE
+template <size_t Strength, bool_if<Strength == 160>>
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state, const words_t& pad) NOEXCEPT
+{
+    auto& wstate = array_cast<xint128_t, one>(state);
+    auto lo = f::load(wstate[0]);
+    auto hi = sha::set_160(state[4]);
+    sha::shuffle_160(lo);
+
+    // native_rounds must be inlined here (register boundary).
+    native_rounds<false>(lo, hi, array_cast<byte_t>(pad));
+    sha::unshuffle_160(lo);
+
+    // digest is copied so that state remains valid (LE).
+    state_t out{};
+    f::store(array_cast<xint128_t, one>(out)[0], lo);
+    out[4] = sha::get_160(hi);
+    return output(out);
 }
 
 TEMPLATE
@@ -335,9 +486,6 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 native_hash(const half_t& half) NOEXCEPT
 {
-    // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
-    static_assert(is_same_type<state_t, chunk_t>);
-
     // input_left is a non-native endianness conversion.
     auto state = H::get;
     words_t block{};

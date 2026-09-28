@@ -428,6 +428,11 @@ protected:
     INLINE static void round_4(xint128_t& state0, xint128_t& state1,
         xint128_t message) NOEXCEPT;
 
+    template <size_t Strength = SHA::strength, bool_if<Strength != 160> = true>
+    INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
+        xint128_t message0, xint128_t message1, xint128_t message2,
+        xint128_t message3) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
     INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         xint128_t message0, xint128_t message1, xint128_t message2,
         xint128_t message3) NOEXCEPT;
@@ -441,13 +446,23 @@ protected:
     INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         const half_t& left, const chunk_t& pad) NOEXCEPT;
 
-    template <bool Swap>
+    template <bool Swap, size_t Strength = SHA::strength,
+        bool_if<Strength != 160> = true>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
+    template <bool Swap, size_t Strength = SHA::strength,
+        bool_if<Strength == 160> = true>
+    static void native_transform(state_t& state, const auto& block) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength != 160> = true>
+    static void native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
     static void native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     template <size_t Blocks>
     static digest_t native_finalize(state_t& state) NOEXCEPT;
     static digest_t native_finalize(state_t& state, size_t blocks) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength != 160> = true>
+    static digest_t native_finalize(state_t& state, const words_t& pad) NOEXCEPT;
+    template <size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
     static digest_t native_finalize(state_t& state, const words_t& pad) NOEXCEPT;
 
     static digest_t native_finalize_second(const state_t& half) NOEXCEPT;
@@ -493,7 +508,8 @@ public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = use_sha && SHA::strength == 256;
+    static constexpr auto native = use_sha && (SHA::strength == 256 ||
+        SHA::strength == 160);
     static constexpr auto vector = (use_128 || use_256 || use_512);
 };
 
