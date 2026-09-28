@@ -195,6 +195,7 @@ public:
         algorithm::to_bytes(key, secret);
         maybe_random::fill(entropy);
 
+        LCOV_EXCL_START("Retry requires a hash of zero or above n.")
         for (uint8_t counter{};; ++counter)
         {
             hmac<sha256> mac{ key };
@@ -206,6 +207,7 @@ public:
             if (from_bytes(out, mac.flush()) && !is_zero_scalar(out))
                 return out;
         }
+        LCOV_EXCL_STOP()
     }
 
     // Nonces.
@@ -230,12 +232,18 @@ public:
         seed.insert(seed.end(), message.begin(), message.end());
         if (!is_null(data))
         {
+            LCOV_EXCL_START("Wrappers provide no extra data.")
             const auto& extra = to_array(static_cast<const uint8_t*>(data));
             seed.insert(seed.end(), extra.begin(), extra.end());
+            LCOV_EXCL_STOP()
         }
 
         if (!is_null(algo16))
+        {
+            LCOV_EXCL_START("Wrappers provide no algorithm.")
             seed.insert(seed.end(), algo16, std::next(algo16, 16));
+            LCOV_EXCL_STOP()
+        }
 
         hash_digest k{}, v{};
         v.fill(0x01);
@@ -254,6 +262,7 @@ public:
         update(zero_byte, seed);
         update(one_byte, seed);
 
+        LCOV_EXCL_START("Retry requires a nonce of zero or above n.")
         for (unsigned int call{};; ++call)
         {
             if (is_nonzero(call))
@@ -263,6 +272,7 @@ public:
             if (call == attempt)
                 break;
         }
+        LCOV_EXCL_STOP()
 
         std::copy(v.begin(), v.end(), nonce32);
         return success;
@@ -331,6 +341,7 @@ public:
         auto signed_ = false;
         const auto message = data_slice{ to_array(msg32) };
 
+        LCOV_EXCL_START("Retry requires a nonce of zero or above n.")
         for (unsigned int attempt{};; ++attempt)
         {
             bytes nonce32{};
@@ -350,6 +361,7 @@ public:
                 break;
             }
         }
+        LCOV_EXCL_STOP()
 
         if (!signed_ || !valid)
         {
@@ -374,9 +386,11 @@ public:
             to_secret(secret, keypair.data.data()))
             return true;
 
+        LCOV_EXCL_START("Wrappers create keypairs from valid secrets.")
         secret = { 1 };
         point = generator;
         return false;
+        LCOV_EXCL_STOP()
     }
 
     // Elligator swift.
@@ -723,8 +737,10 @@ int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     const auto total = 6u + r_size + s_size;
     if (*outputlen < total)
     {
+        LCOV_EXCL_START("Wrappers provide the maximal buffer.")
         *outputlen = total;
         return failure;
+        LCOV_EXCL_STOP()
     }
 
     *outputlen = total;
@@ -938,7 +954,11 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
 
     valid &= !local::is_zero_scalar(nonce);
     if (!valid)
+    {
+        LCOV_EXCL_START("Requires an invalid keypair or a zero nonce.")
         nonce = { 1 };
+        LCOV_EXCL_STOP()
+    }
 
     const auto message = data_slice{ local::to_array(msg32) };
     local::nonce_schnorr(r_x, nonce, local::blind(secret, message, 0));
@@ -951,7 +971,11 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
     std::copy(r_x.begin(), r_x.end(), sig64);
     local::to_bytes(std::next(sig64, size), s);
     if (!valid)
+    {
+        LCOV_EXCL_START("Requires an invalid keypair or a zero nonce.")
         std::fill_n(sig64, two * size, uint8_t{});
+        LCOV_EXCL_STOP()
+    }
 
     return valid ? success : failure;
 }
