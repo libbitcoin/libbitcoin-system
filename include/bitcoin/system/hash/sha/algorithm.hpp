@@ -428,6 +428,12 @@ protected:
     INLINE static void round_4(xint128_t& state0, xint128_t& state1,
         xint128_t message) NOEXCEPT;
 
+    INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
+        xint128_t message0, xint128_t message1, xint128_t message2,
+        xint128_t message3) NOEXCEPT;
+    INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
+        const buffer_t& buffer) NOEXCEPT;
+
     template <bool Swap>
     INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         const block_t& block) NOEXCEPT;
@@ -453,6 +459,10 @@ protected:
     static digest_t native_hash(const quart_t& left, const quart_t& right) NOEXCEPT;
     static digest_t native_hash(uint8_t byte) NOEXCEPT;
 
+    INLINE static void native_initialize(xint128_t& lo, xint128_t& hi) NOEXCEPT;
+    INLINE static digest_t native_finalize_second(xint128_t lo,
+        xint128_t hi) NOEXCEPT;
+
     static digest_t native_double_hash(const block_t& block) NOEXCEPT;
     static digest_t native_double_hash(const half_t& half) NOEXCEPT;
     static digest_t native_double_hash(const half_t& left, const half_t& right) NOEXCEPT;
@@ -460,18 +470,21 @@ protected:
     /// Native SHA optimizations (two blocks).
     /// -----------------------------------------------------------------------
 
+    INLINE static void native_rounds(xint128_t& lo0, xint128_t& hi0,
+        xint128_t& lo1, xint128_t& hi1, xint128_t a0, xint128_t a1,
+        xint128_t a2, xint128_t a3, xint128_t b0, xint128_t b1, xint128_t b2,
+        xint128_t b3) NOEXCEPT;
+    INLINE static void native_rounds(xint128_t& lo0, xint128_t& hi0,
+        xint128_t& lo1, xint128_t& hi1, const buffer_t& buffer) NOEXCEPT;
+
     template <bool Swap>
     INLINE static void native_rounds(xint128_t& lo0, xint128_t& hi0,
         xint128_t& lo1, xint128_t& hi1, const block_t& block0,
         const block_t& block1) NOEXCEPT;
 
-    template <bool Swap>
-    static void native_transform(state_t& state0, state_t& state1,
-        const auto& block0, const auto& block1) NOEXCEPT;
-
-    static void native_finalize(digest_t& digest0, digest_t& digest1,
-        state_t& state0, state_t& state1, const words_t& pad0,
-        const words_t& pad1) NOEXCEPT;
+    INLINE static void native_finalize_second(digest_t& digest0,
+        digest_t& digest1, xint128_t lo0, xint128_t hi0, xint128_t lo1,
+        xint128_t hi1) NOEXCEPT;
 
     static void native_double_hash(digest_t& digest0, digest_t& digest1,
         const block_t& block0, const block_t& block1) NOEXCEPT;

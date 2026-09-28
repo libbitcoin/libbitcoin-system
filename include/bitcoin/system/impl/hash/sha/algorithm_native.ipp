@@ -83,17 +83,10 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 }
 
 TEMPLATE
-template <bool Swap>
 INLINE void CLASS::
-native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
+native_rounds(xint128_t& lo, xint128_t& hi, xint128_t message0,
+    xint128_t message1, xint128_t message2, xint128_t message3) NOEXCEPT
 {
-    const auto& wblock = array_cast<xint128_t>(block);
-
-    auto message0 = endian<Swap>(f::load(wblock[0]));
-    auto message1 = endian<Swap>(f::load(wblock[1]));
-    auto message2 = endian<Swap>(f::load(wblock[2]));
-    auto message3 = endian<Swap>(f::load(wblock[3]));
-
     const auto start_lo = lo;
     const auto start_hi = hi;
 
@@ -154,6 +147,49 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
     hi = f::add<word_t>(hi, start_hi);
 }
 
+TEMPLATE
+INLINE void CLASS::
+native_rounds(xint128_t& lo, xint128_t& hi, const buffer_t& buffer) NOEXCEPT
+{
+    const auto& wbuffer = array_cast<xint128_t>(buffer);
+
+    const auto start_lo = lo;
+    const auto start_hi = hi;
+
+    sha::compress(lo, hi, f::load(wbuffer[0]));
+    sha::compress(lo, hi, f::load(wbuffer[1]));
+    sha::compress(lo, hi, f::load(wbuffer[2]));
+    sha::compress(lo, hi, f::load(wbuffer[3]));
+    sha::compress(lo, hi, f::load(wbuffer[4]));
+    sha::compress(lo, hi, f::load(wbuffer[5]));
+    sha::compress(lo, hi, f::load(wbuffer[6]));
+    sha::compress(lo, hi, f::load(wbuffer[7]));
+    sha::compress(lo, hi, f::load(wbuffer[8]));
+    sha::compress(lo, hi, f::load(wbuffer[9]));
+    sha::compress(lo, hi, f::load(wbuffer[10]));
+    sha::compress(lo, hi, f::load(wbuffer[11]));
+    sha::compress(lo, hi, f::load(wbuffer[12]));
+    sha::compress(lo, hi, f::load(wbuffer[13]));
+    sha::compress(lo, hi, f::load(wbuffer[14]));
+    sha::compress(lo, hi, f::load(wbuffer[15]));
+
+    lo = f::add<word_t>(lo, start_lo);
+    hi = f::add<word_t>(hi, start_hi);
+}
+
+TEMPLATE
+template <bool Swap>
+INLINE void CLASS::
+native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
+{
+    const auto& wblock = array_cast<xint128_t>(block);
+    const auto message0 = endian<Swap>(f::load(wblock[0]));
+    const auto message1 = endian<Swap>(f::load(wblock[1]));
+    const auto message2 = endian<Swap>(f::load(wblock[2]));
+    const auto message3 = endian<Swap>(f::load(wblock[3]));
+    native_rounds(lo, hi, message0, message1, message2, message3);
+}
+
 // Transforms perform scheduling and compression with optional endianness
 // conversion of the block input. State is normalized, which requires some
 // additional shuffle/unshuffle calls between transformations of same state.
@@ -209,14 +245,14 @@ native_transform(state_t& state, const auto& block) NOEXCEPT
 // TODO: These transitions require state to be unloaded/loaded and
 // shuffled/unshuffled, whereas this is not logically necessary. This is a
 // fixed cost imposed once for any accumulation (which is inconsequential for
-// larger iterations), but reduces efficiency for lower block counts and hash
-// doubling. Large iterations are 15-16% wheras small iterations are 20-26%.
+// larger iterations), but reduces efficiency for lower block counts. Large
+// iterations are 15-16% wheras small iterations are 20-26%.
 // native_transform -> native_transform -> native_finalize
 // native_transform -> native_finalize
 // This can be resolved in the non-iterator scenarios (below) through
-// implementation of a finalizing and a doubling native_transform. This means
-// that padding must be incorporated, however since it is not prescheduled or
-// cached this is not an issue.
+// implementation of a finalizing native_transform. This means that padding
+// must be incorporated, however since it is not prescheduled or cached this is
+// not an issue.
 
 TEMPLATE
 template <size_t Blocks>
@@ -352,57 +388,93 @@ native_hash(uint8_t byte) NOEXCEPT
 
 // Double hash functions start with BE data and end with BE digest_t.
 // ----------------------------------------------------------------------------
+// State is retained in registers across all blocks of a double hash.
+
+TEMPLATE
+INLINE void CLASS::
+native_initialize(xint128_t& lo, xint128_t& hi) NOEXCEPT
+{
+    const auto& wstate = array_cast<xint128_t>(H::get);
+    lo = f::load(wstate[0]);
+    hi = f::load(wstate[1]);
+    shuffle(lo, hi);
+}
+
+TEMPLATE
+INLINE typename CLASS::digest_t CLASS::
+native_finalize_second(xint128_t lo, xint128_t hi) NOEXCEPT
+{
+    static constexpr auto pad = chunk_pad();
+    const auto& wpad = array_cast<xint128_t>(pad);
+
+    // The first digest (normal form) is the first half of the second block.
+    unshuffle(lo, hi);
+    const auto message0 = lo;
+    const auto message1 = hi;
+    const auto message2 = f::load(wpad[0]);
+    const auto message3 = f::load(wpad[1]);
+
+    native_initialize(lo, hi);
+    native_rounds(lo, hi, message0, message1, message2, message3);
+    unshuffle(lo, hi);
+
+    std::array<xint128_t, 2> wdigest{};
+    f::store(wdigest[0], f::byteswap<uint32_t>(lo));
+    f::store(wdigest[1], f::byteswap<uint32_t>(hi));
+    return array_cast<byte_t, array_count<digest_t>>(wdigest);
+}
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const block_t& block) NOEXCEPT
 {
-    auto state = H::get;
-    native_transform<true>(state, block);
-    native_transform<false>(state, pad_block());
+    static constexpr auto pad = scheduled_pad<one>();
 
-    // Second hash
-    words_t block2{};
-    inject_left_half(block2, state);
-    pad_half(block2);
-    state = H::get;
-    return native_finalize(state, block2);
+    xint128_t lo{};
+    xint128_t hi{};
+    native_initialize(lo, hi);
+    native_rounds<true>(lo, hi, block);
+    native_rounds(lo, hi, pad);
+    return native_finalize_second(lo, hi);
 }
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const half_t& half) NOEXCEPT
 {
-    // input_left is a non-native endianness conversion.
-    auto state = H::get;
-    words_t block{};
-    input_left(block, half);
-    pad_half(block);
-    native_transform<false>(state, block);
+    static constexpr auto pad = chunk_pad();
+    const auto& wpad = array_cast<xint128_t>(pad);
+    const auto& whalf = array_cast<xint128_t>(half);
+    const auto message0 = endian<true>(f::load(whalf[0]));
+    const auto message1 = endian<true>(f::load(whalf[1]));
+    const auto message2 = f::load(wpad[0]);
+    const auto message3 = f::load(wpad[1]);
 
-    // Second hash
-    inject_left_half(block, state);
-    pad_half(block);
-    state = H::get;
-    return native_finalize(state, block);
+    xint128_t lo{};
+    xint128_t hi{};
+    native_initialize(lo, hi);
+    native_rounds(lo, hi, message0, message1, message2, message3);
+    return native_finalize_second(lo, hi);
 }
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
-    auto state = H::get;
-    words_t block{};
-    inject_left_half(block, array_cast<word_t>(left));
-    inject_right_half(block, array_cast<word_t>(right));
-    native_transform<true>(state, block);
-    native_transform<false>(state, pad_block());
+    static constexpr auto pad = scheduled_pad<one>();
+    const auto& wleft = array_cast<xint128_t>(left);
+    const auto& wright = array_cast<xint128_t>(right);
+    const auto message0 = endian<true>(f::load(wleft[0]));
+    const auto message1 = endian<true>(f::load(wleft[1]));
+    const auto message2 = endian<true>(f::load(wright[0]));
+    const auto message3 = endian<true>(f::load(wright[1]));
 
-    // Second hash
-    inject_left_half(block, state);
-    pad_half(block);
-    state = H::get;
-    return native_finalize(state, block);
+    xint128_t lo{};
+    xint128_t hi{};
+    native_initialize(lo, hi);
+    native_rounds(lo, hi, message0, message1, message2, message3);
+    native_rounds(lo, hi, pad);
+    return native_finalize_second(lo, hi);
 }
 
 // Two block transforms interleave the independent rounds of each block, so
@@ -410,23 +482,11 @@ native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-template <bool Swap>
 INLINE void CLASS::
 native_rounds(xint128_t& lo0, xint128_t& hi0, xint128_t& lo1, xint128_t& hi1,
-    const block_t& block0, const block_t& block1) NOEXCEPT
+    xint128_t a0, xint128_t a1, xint128_t a2, xint128_t a3, xint128_t b0,
+    xint128_t b1, xint128_t b2, xint128_t b3) NOEXCEPT
 {
-    const auto& wblock0 = array_cast<xint128_t>(block0);
-    const auto& wblock1 = array_cast<xint128_t>(block1);
-
-    auto a0 = endian<Swap>(f::load(wblock0[0]));
-    auto a1 = endian<Swap>(f::load(wblock0[1]));
-    auto a2 = endian<Swap>(f::load(wblock0[2]));
-    auto a3 = endian<Swap>(f::load(wblock0[3]));
-    auto b0 = endian<Swap>(f::load(wblock1[0]));
-    auto b1 = endian<Swap>(f::load(wblock1[1]));
-    auto b2 = endian<Swap>(f::load(wblock1[2]));
-    auto b3 = endian<Swap>(f::load(wblock1[3]));
-
     const auto start_lo0 = lo0;
     const auto start_hi0 = hi0;
     const auto start_lo1 = lo1;
@@ -532,50 +592,96 @@ native_rounds(xint128_t& lo0, xint128_t& hi0, xint128_t& lo1, xint128_t& hi1,
 }
 
 TEMPLATE
-template <bool Swap>
-void CLASS::
-native_transform(state_t& state0, state_t& state1, const auto& block0,
-    const auto& block1) NOEXCEPT
+INLINE void CLASS::
+native_rounds(xint128_t& lo0, xint128_t& hi0, xint128_t& lo1, xint128_t& hi1,
+    const buffer_t& buffer) NOEXCEPT
 {
-    auto& wstate0 = array_cast<xint128_t>(state0);
-    auto& wstate1 = array_cast<xint128_t>(state1);
-    auto lo0 = f::load(wstate0[0]);
-    auto hi0 = f::load(wstate0[1]);
-    auto lo1 = f::load(wstate1[0]);
-    auto hi1 = f::load(wstate1[1]);
-    shuffle(lo0, hi0);
-    shuffle(lo1, hi1);
+    const auto& wbuffer = array_cast<xint128_t>(buffer);
 
-    // native_rounds must be inlined here (register boundary).
-    native_rounds<Swap>(lo0, hi0, lo1, hi1, array_cast<byte_t>(block0),
-        array_cast<byte_t>(block1));
+    const auto start_lo0 = lo0;
+    const auto start_hi0 = hi0;
+    const auto start_lo1 = lo1;
+    const auto start_hi1 = hi1;
 
-    unshuffle(lo0, hi0);
-    unshuffle(lo1, hi1);
-    f::store(wstate0[0], lo0);
-    f::store(wstate0[1], hi0);
-    f::store(wstate1[0], lo1);
-    f::store(wstate1[1], hi1);
+    sha::compress(lo0, hi0, f::load(wbuffer[0]));
+    sha::compress(lo1, hi1, f::load(wbuffer[0]));
+    sha::compress(lo0, hi0, f::load(wbuffer[1]));
+    sha::compress(lo1, hi1, f::load(wbuffer[1]));
+    sha::compress(lo0, hi0, f::load(wbuffer[2]));
+    sha::compress(lo1, hi1, f::load(wbuffer[2]));
+    sha::compress(lo0, hi0, f::load(wbuffer[3]));
+    sha::compress(lo1, hi1, f::load(wbuffer[3]));
+    sha::compress(lo0, hi0, f::load(wbuffer[4]));
+    sha::compress(lo1, hi1, f::load(wbuffer[4]));
+    sha::compress(lo0, hi0, f::load(wbuffer[5]));
+    sha::compress(lo1, hi1, f::load(wbuffer[5]));
+    sha::compress(lo0, hi0, f::load(wbuffer[6]));
+    sha::compress(lo1, hi1, f::load(wbuffer[6]));
+    sha::compress(lo0, hi0, f::load(wbuffer[7]));
+    sha::compress(lo1, hi1, f::load(wbuffer[7]));
+    sha::compress(lo0, hi0, f::load(wbuffer[8]));
+    sha::compress(lo1, hi1, f::load(wbuffer[8]));
+    sha::compress(lo0, hi0, f::load(wbuffer[9]));
+    sha::compress(lo1, hi1, f::load(wbuffer[9]));
+    sha::compress(lo0, hi0, f::load(wbuffer[10]));
+    sha::compress(lo1, hi1, f::load(wbuffer[10]));
+    sha::compress(lo0, hi0, f::load(wbuffer[11]));
+    sha::compress(lo1, hi1, f::load(wbuffer[11]));
+    sha::compress(lo0, hi0, f::load(wbuffer[12]));
+    sha::compress(lo1, hi1, f::load(wbuffer[12]));
+    sha::compress(lo0, hi0, f::load(wbuffer[13]));
+    sha::compress(lo1, hi1, f::load(wbuffer[13]));
+    sha::compress(lo0, hi0, f::load(wbuffer[14]));
+    sha::compress(lo1, hi1, f::load(wbuffer[14]));
+    sha::compress(lo0, hi0, f::load(wbuffer[15]));
+    sha::compress(lo1, hi1, f::load(wbuffer[15]));
+
+    lo0 = f::add<word_t>(lo0, start_lo0);
+    hi0 = f::add<word_t>(hi0, start_hi0);
+    lo1 = f::add<word_t>(lo1, start_lo1);
+    hi1 = f::add<word_t>(hi1, start_hi1);
 }
 
 TEMPLATE
-void CLASS::
-native_finalize(digest_t& digest0, digest_t& digest1, state_t& state0,
-    state_t& state1, const words_t& pad0, const words_t& pad1) NOEXCEPT
+template <bool Swap>
+INLINE void CLASS::
+native_rounds(xint128_t& lo0, xint128_t& hi0, xint128_t& lo1, xint128_t& hi1,
+    const block_t& block0, const block_t& block1) NOEXCEPT
 {
-    auto& wstate0 = array_cast<xint128_t>(state0);
-    auto& wstate1 = array_cast<xint128_t>(state1);
-    auto lo0 = f::load(wstate0[0]);
-    auto hi0 = f::load(wstate0[1]);
-    auto lo1 = f::load(wstate1[0]);
-    auto hi1 = f::load(wstate1[1]);
-    shuffle(lo0, hi0);
-    shuffle(lo1, hi1);
+    const auto& wblock0 = array_cast<xint128_t>(block0);
+    const auto& wblock1 = array_cast<xint128_t>(block1);
+    const auto a0 = endian<Swap>(f::load(wblock0[0]));
+    const auto a1 = endian<Swap>(f::load(wblock0[1]));
+    const auto a2 = endian<Swap>(f::load(wblock0[2]));
+    const auto a3 = endian<Swap>(f::load(wblock0[3]));
+    const auto b0 = endian<Swap>(f::load(wblock1[0]));
+    const auto b1 = endian<Swap>(f::load(wblock1[1]));
+    const auto b2 = endian<Swap>(f::load(wblock1[2]));
+    const auto b3 = endian<Swap>(f::load(wblock1[3]));
+    native_rounds(lo0, hi0, lo1, hi1, a0, a1, a2, a3, b0, b1, b2, b3);
+}
 
-    // native_rounds must be inlined here (register boundary).
-    native_rounds<false>(lo0, hi0, lo1, hi1, array_cast<byte_t>(pad0),
-        array_cast<byte_t>(pad1));
+TEMPLATE
+INLINE void CLASS::
+native_finalize_second(digest_t& digest0, digest_t& digest1, xint128_t lo0,
+    xint128_t hi0, xint128_t lo1, xint128_t hi1) NOEXCEPT
+{
+    static constexpr auto pad = chunk_pad();
+    const auto& wpad = array_cast<xint128_t>(pad);
+    const auto pad0 = f::load(wpad[0]);
+    const auto pad1 = f::load(wpad[1]);
 
+    // The first digest (normal form) is the first half of the second block.
+    unshuffle(lo0, hi0);
+    unshuffle(lo1, hi1);
+    const auto a0 = lo0;
+    const auto a1 = hi0;
+    const auto b0 = lo1;
+    const auto b1 = hi1;
+
+    native_initialize(lo0, hi0);
+    native_initialize(lo1, hi1);
+    native_rounds(lo0, hi0, lo1, hi1, a0, a1, pad0, pad1, b0, b1, pad0, pad1);
     unshuffle(lo0, hi0);
     unshuffle(lo1, hi1);
 
@@ -592,22 +698,17 @@ void CLASS::
 native_double_hash(digest_t& digest0, digest_t& digest1,
     const block_t& block0, const block_t& block1) NOEXCEPT
 {
-    const auto pad = pad_block();
-    auto state0 = H::get;
-    auto state1 = H::get;
-    native_transform<true>(state0, state1, block0, block1);
-    native_transform<false>(state0, state1, pad, pad);
+    static constexpr auto pad = scheduled_pad<one>();
 
-    // Second hash
-    words_t second0{};
-    words_t second1{};
-    inject_left_half(second0, state0);
-    inject_left_half(second1, state1);
-    pad_half(second0);
-    pad_half(second1);
-    state0 = H::get;
-    state1 = H::get;
-    native_finalize(digest0, digest1, state0, state1, second0, second1);
+    xint128_t lo0{};
+    xint128_t hi0{};
+    xint128_t lo1{};
+    xint128_t hi1{};
+    native_initialize(lo0, hi0);
+    native_initialize(lo1, hi1);
+    native_rounds<true>(lo0, hi0, lo1, hi1, block0, block1);
+    native_rounds(lo0, hi0, lo1, hi1, pad);
+    native_finalize_second(digest0, digest1, lo0, hi0, lo1, hi1);
 }
 
 } // namespace sha
