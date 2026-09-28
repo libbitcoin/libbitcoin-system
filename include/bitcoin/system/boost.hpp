@@ -36,7 +36,6 @@
 // This arises when including <functional>, which declares std::placeholders.
 // www.boost.org/doc/libs/1_78_0/boost/bind.hpp
 #define BOOST_BIND_NO_PLACEHOLDERS
-#include <boost/bind.hpp>
 
 // Boost.Locale is still used by conversion.cpp and environment.cpp.
 // ICU backend is no longer required — normalization uses embedded tables.
