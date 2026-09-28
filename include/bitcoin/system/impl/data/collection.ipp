@@ -90,6 +90,21 @@ constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT
         });
 }
 
+template <typename Left, typename Right>
+constexpr bool constant_time_equal(const Left& left,
+    const Right& right) NOEXCEPT
+{
+    if (std::size(left) != std::size(right))
+        return false;
+
+    std::remove_cvref_t<decltype(*std::begin(left))> difference{};
+    auto other = std::begin(right);
+    for (const auto element: left)
+        difference |= bit_xor(element, *other++);
+
+    return is_zero(difference);
+}
+
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
     const Element& element) NOEXCEPT

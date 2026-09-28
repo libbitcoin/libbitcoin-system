@@ -83,6 +83,54 @@ BOOST_AUTO_TEST_CASE(performance__aead__aes128_gcm_chacha20_poly1305)
     });
 }
 
+constexpr size_t operations = 1024;
+
+template <typename Function>
+static void report_operations(const std::string& name, const Function& function)
+{
+    size_t valid{};
+    using Timer = timer<std::chrono::nanoseconds>;
+    const auto time = Timer::execution([&]() noexcept
+    {
+        for (size_t operation{}; operation < operations; ++operation)
+            valid += to_int<size_t>(function());
+    });
+
+    const auto seconds = seconds_total<std::chrono::nanoseconds>(time);
+    std::cout << name
+        << " operations_per_second: " << (operations / seconds)
+        << " valid: " << valid
+        << std::endl;
+}
+
+template <typename Curve>
+static void report_ecdsa(const std::string& name)
+{
+    const auto secret = Curve::generate();
+    const data_array<Curve::size> digest{ 42 };
+
+    typename Curve::point_t point{};
+    typename Curve::signature_t signature{};
+    BOOST_REQUIRE(Curve::public_key(point, secret));
+    BOOST_REQUIRE(Curve::sign(signature, secret, digest));
+
+    report_operations(name + "_sign", [&]() noexcept
+    {
+        return Curve::sign(signature, secret, digest);
+    });
+
+    report_operations(name + "_verify", [&]() noexcept
+    {
+        return Curve::verify(signature, point, digest);
+    });
+}
+
+BOOST_AUTO_TEST_CASE(performance__ecdsa__secp256r1_secp384r1)
+{
+    report_ecdsa<secp256r1>("secp256r1");
+    report_ecdsa<secp384r1>("secp384r1");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #endif

@@ -39,6 +39,12 @@ inline To projection(const From& source) NOEXCEPT;
 template <typename Left, typename Right>
 constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT;
 
+/// Determine if collections of integers have equal elements, in time
+/// independent of the elements (sizes are not concealed).
+template <typename Left, typename Right>
+constexpr bool constant_time_equal(const Left& left,
+    const Right& right) NOEXCEPT;
+
 /// C++20: list.contains(element)
 /// Determine if a collection contains the specified element.
 template <typename Collection, typename Element>

@@ -118,13 +118,10 @@ bool aes128_gcm::decrypt(byte_span plain, const_byte_span aad,
     block expected{};
     authenticate(expected, aad, text, iv);
 
-    uint8_t difference{};
-    const auto actual = cipher.last(expansion);
-    for (size_t byte{}; byte < expansion; ++byte)
-        difference |= bit_xor(expected[byte], actual[byte]);
+    const auto tag = cipher.last(expansion);
+    const auto authenticated = constant_time_equal(expected, tag);
 
     // Decryption uses the block counter starting at two.
-    const auto authenticated = is_zero(difference);
     if (authenticated)
     {
         auto next = counter(iv, 2_u32);

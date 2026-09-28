@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_ALGORITHMS_HPP
 
 #include <bitcoin/system/crypto/aes/algorithm.hpp>
+#include <bitcoin/system/crypto/nist/algorithm.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -28,6 +29,10 @@ namespace system {
 /// bc::system aes algorithm aliases (native, vectorized).
 using aes128 = aes::algorithm<aes::k128>;
 using aes256 = aes::algorithm<aes::k256>;
+
+/// bc::system nist curve algorithm aliases (ecdsa).
+using secp256r1 = nist::algorithm<nist::p256>;
+using secp384r1 = nist::algorithm<nist::p384>;
 
 } // namespace system
 } // namespace libbitcoin
