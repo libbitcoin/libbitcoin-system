@@ -1130,9 +1130,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp">
       <Filter>include\bitcoin\system\crypto\secp256k1</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\interface.hpp">
-      <Filter>include\bitcoin\system\crypto\secp256k1</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
@@ -1807,6 +1804,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp">
       <Filter>src\crypto\secp256k1\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\interface.hpp">
+      <Filter>src\crypto\secp256k1</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp">
       <Filter>src\crypto\secp256k1</Filter>

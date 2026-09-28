@@ -263,12 +263,6 @@ AC_ARG_WITH([secp256k1],
 AC_MSG_RESULT([$with_secp256k1])
 AM_CONDITIONAL([WITH_SECP256K1], [test "x${with_secp256k1}" != "xno"])
 
-# Set preprocessor defines.
-#==============================================================================
-AS_IF([test "x${with_secp256k1}" != "xno"], [
-        AC_DEFINE([WITH_SECP256K1])
-    ])
-
 # Set flags.
 #==============================================================================
 AS_IF([test "x${enable_avx2}" != "xno"],
@@ -627,8 +621,10 @@ AS_IF([test "x${with_secp256k1}" != "xno"],
         AC_MSG_ERROR([libsecp256k1 >= 0.8.0 is required but was not found.])
       ])
     AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.8.0'])
+    AC_SUBST([secp256k1_VERSION], [`${PKG_CONFIG} --modversion libsecp256k1`])
     AC_SUBST([secp256k1_CPPFLAGS], [${secp256k1_CFLAGS}])
     AC_SUBST([secp256k1_ISYS_CPPFLAGS], [`echo ${secp256k1_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
+    AC_MSG_NOTICE([secp256k1_VERSION : ${secp256k1_VERSION}])
     AC_MSG_NOTICE([secp256k1_CPPFLAGS : ${secp256k1_CPPFLAGS}])
     AC_MSG_NOTICE([secp256k1_ISYS_CPPFLAGS : ${secp256k1_ISYS_CPPFLAGS}])
     AC_MSG_NOTICE([secp256k1_OTHER_CFLAGS : ${secp256k1_OTHER_CFLAGS}])
@@ -650,8 +646,10 @@ AS_IF([test "x${with_ultrafast}" != "xno"],
         AC_MSG_ERROR([secp256k1-fast >= 4.0.0.0 is required but was not found.])
       ])
     AC_SUBST([UltrafastSecp256k1_PKG], ['secp256k1-fast >= 4.0.0.0'])
+    AC_SUBST([UltrafastSecp256k1_VERSION], [`${PKG_CONFIG} --modversion secp256k1-fast`])
     AC_SUBST([UltrafastSecp256k1_CPPFLAGS], [${UltrafastSecp256k1_CFLAGS}])
     AC_SUBST([UltrafastSecp256k1_ISYS_CPPFLAGS], [`echo ${UltrafastSecp256k1_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
+    AC_MSG_NOTICE([UltrafastSecp256k1_VERSION : ${UltrafastSecp256k1_VERSION}])
     AC_MSG_NOTICE([UltrafastSecp256k1_CPPFLAGS : ${UltrafastSecp256k1_CPPFLAGS}])
     AC_MSG_NOTICE([UltrafastSecp256k1_ISYS_CPPFLAGS : ${UltrafastSecp256k1_ISYS_CPPFLAGS}])
     AC_MSG_NOTICE([UltrafastSecp256k1_OTHER_CFLAGS : ${UltrafastSecp256k1_OTHER_CFLAGS}])
@@ -662,6 +660,16 @@ AS_IF([test "x${with_ultrafast}" != "xno"],
       [AC_SUBST([UltrafastSecp256k1_BUILD_CPPFLAGS], [${UltrafastSecp256k1_CPPFLAGS}])])
     AC_MSG_NOTICE([UltrafastSecp256k1_BUILD_CPPFLAGS : ${UltrafastSecp256k1_BUILD_CPPFLAGS}])
   ])
+
+# Set preprocessor defines.
+#==============================================================================
+AS_IF([test "x${with_secp256k1}" != "xno"], [
+        AC_DEFINE([WITH_SECP256K1])
+    ])
+
+AS_IF([test "x${with_secp256k1}" != "xno"], [
+        AC_DEFINE_UNQUOTED([SECP256K1_VERSION], [${secp256k1_VERSION}])
+    ])
 
 AC_CONFIG_FILES([
     Makefile

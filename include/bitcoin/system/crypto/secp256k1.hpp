@@ -99,6 +99,9 @@ struct BC_API recoverable_signature
     uint8_t recovery_id;
 };
 
+/// Name and version of the linked secp256k1 library, or "internal".
+BC_API std::string secp256k1_library() NOEXCEPT;
+
 /// Add EC values
 /// ---------------------------------------------------------------------------
 

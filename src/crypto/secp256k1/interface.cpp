@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/crypto/secp256k1/interface.hpp>
+#include "interface.hpp"
 
 #include <algorithm>
 #include <new>
@@ -27,9 +27,7 @@
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-namespace libbitcoin {
-namespace system {
-namespace secp256k1 {
+#if !defined(HAVE_SECP256K1) && !defined(HAVE_ULTRAFAST)
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
@@ -39,6 +37,10 @@ struct secp256k1_context
 {
     unsigned int flags{};
 };
+
+namespace libbitcoin {
+namespace system {
+namespace secp256k1 {
 
 // local
 // ----------------------------------------------------------------------------
@@ -428,6 +430,14 @@ public:
         to_bytes(std::next(ell64, array_count<bytes>), t);
     }
 };
+
+} // namespace secp256k1
+} // namespace system
+} // namespace libbitcoin
+
+using namespace libbitcoin;
+using namespace libbitcoin::system;
+using namespace libbitcoin::system::secp256k1;
 
 // Nonce and hash functions.
 // ----------------------------------------------------------------------------
@@ -1051,6 +1061,4 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-} // namespace secp256k1
-} // namespace system
-} // namespace libbitcoin
+#endif

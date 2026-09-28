@@ -26,8 +26,7 @@
     #include <secp256k1_recovery.h>
     #include <secp256k1_schnorrsig.h>
 #else
-    #include <bitcoin/system/crypto/secp256k1/interface.hpp>
-    using namespace libbitcoin::system::secp256k1;
+    #include "interface.hpp"
 #endif
 
 namespace libbitcoin {

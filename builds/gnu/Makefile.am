@@ -420,8 +420,7 @@ include_bitcoin_system_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/crypto/secp256k1
 
 include_bitcoin_system_crypto_secp256k1_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp \
-    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/interface.hpp
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp
 
 include_bitcoin_system_datadir = \
     ${includedir}/bitcoin/system/data
