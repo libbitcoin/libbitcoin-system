@@ -111,6 +111,17 @@ constexpr bool is_throttled(uint32_t signature) NOEXCEPT
         || signature == cpu1_0::knights_mill;
 }
 
+inline bool is_avx512_low() NOEXCEPT
+{
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf)
+        && ebx == cpu0_0::intel_ebx                 // Genu
+        && edx == cpu0_0::intel_edx                 // ineI
+        && ecx == cpu0_0::intel_ecx                 // ntel
+        && get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && is_throttled(eax);                       // Skylake-SP, Xeon Phi
+}
+
 inline bool try_shani() NOEXCEPT
 {
     uint32_t eax{}, ebx{}, ecx{}, edx{};
@@ -155,7 +166,9 @@ inline bool try_avx512() NOEXCEPT
         && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
         && get_bit<cpu7_0::avx512f_ebx_bit>(ebx)    // AVX512F
-        && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx);  // AVX512BW
+        && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx)   // AVX512BW
+        && get_bit<cpu7_0::avx512vl_ebx_bit>(ebx)   // AVX512VL
+        && !is_avx512_low();                        // Not throttled
 }
 
 inline bool try_avx512ifma() NOEXCEPT
@@ -177,18 +190,6 @@ inline bool try_avx512ifma() NOEXCEPT
         && get_bit<cpu7_0::avx512f_ebx_bit>(ebx)    // AVX512F
         && get_bit<cpu7_0::avx512vl_ebx_bit>(ebx)   // AVX512VL
         && get_bit<cpu7_0::avx512ifma_ebx_bit>(ebx);// AVX512IFMA
-}
-
-inline bool try_avx512_throttled() NOEXCEPT
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return try_avx512()
-        && get_cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf)
-        && ebx == cpu0_0::intel_ebx                 // Genu
-        && edx == cpu0_0::intel_edx                 // ineI
-        && ecx == cpu0_0::intel_ecx                 // ntel
-        && get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && is_throttled(eax);                       // Skylake-SP, Xeon Phi
 }
 
 inline bool try_avxifma() NOEXCEPT

@@ -37,13 +37,13 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512__always__match)
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_right(extended, xcr0::opmask_bit) && get_right(extended, xcr0::zmm_upper_bit) && get_right(extended, xcr0::zmm_high_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && get_right(ebx, cpu7_0::avx512f_ebx_bit) && get_right(ebx, cpu7_0::avx512bw_ebx_bit), try_avx512());
+    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_right(extended, xcr0::opmask_bit) && get_right(extended, xcr0::zmm_upper_bit) && get_right(extended, xcr0::zmm_high_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && get_right(ebx, cpu7_0::avx512f_ebx_bit) && get_right(ebx, cpu7_0::avx512bw_ebx_bit) && get_right(ebx, cpu7_0::avx512vl_ebx_bit) && !is_avx512_low(), try_avx512());
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512_throttled__always__match)
+BOOST_AUTO_TEST_CASE(intrinsics_detection__is_avx512_low__always__match)
 {
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(try_avx512() && get_cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf) && ebx == cpu0_0::intel_ebx && edx == cpu0_0::intel_edx && ecx == cpu0_0::intel_ecx && get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && is_throttled(eax), try_avx512_throttled());
+    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf) && ebx == cpu0_0::intel_ebx && edx == cpu0_0::intel_edx && ecx == cpu0_0::intel_ecx && get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && is_throttled(eax), is_avx512_low());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__is_throttled__signatures__expected)
