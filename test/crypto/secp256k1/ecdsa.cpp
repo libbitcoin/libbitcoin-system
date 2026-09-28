@@ -85,6 +85,28 @@ BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__strict__expected)
     BOOST_REQUIRE_EQUAL(signature, signature3);
 }
 
+// der_signature2 with s negated (high-s).
+const der_signature der_signature2_high = base16_chunk("3046022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a624378022100946c122950839a624bd3a8614cb5c5b204a2b431088c193e6d6b8a5d64aa8ac4");
+
+BOOST_AUTO_TEST_CASE(secp256k1__normalize_signature__high_s__normalized)
+{
+    using namespace system::ecdsa;
+    ec_signature high{}, low{}, out{};
+    BOOST_REQUIRE(decode_signature(high, der_signature2_high, true));
+    BOOST_REQUIRE(decode_signature(low, der_signature2, true));
+    BOOST_REQUIRE(normalize_signature(out, high));
+    BOOST_REQUIRE_EQUAL(out, low);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__normalize_signature__low_s__unchanged)
+{
+    using namespace system::ecdsa;
+    ec_signature low{}, out{};
+    BOOST_REQUIRE(decode_signature(low, der_signature2, true));
+    BOOST_REQUIRE(!normalize_signature(out, low));
+    BOOST_REQUIRE_EQUAL(out, low);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_positive__expected)
 {
     using namespace system::ecdsa;
@@ -253,6 +275,14 @@ BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_minimal__true)
     BOOST_REQUIRE(lax(base16_chunk("3006020101020101")));
 }
 
+BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_overflow__zero_signature)
+{
+    using namespace system::ecdsa;
+    ec_signature out{};
+    BOOST_REQUIRE(decode_signature(out, base16_chunk("3026022100fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141020101"), false));
+    BOOST_REQUIRE_EQUAL(out, ec_signature{});
+}
+
 // recovery
 // ----------------------------------------------------------------------------
 
@@ -307,6 +337,27 @@ BOOST_AUTO_TEST_CASE(secp256k1__recover_public__invalid_recovery_id__false)
 
     ec_compressed compressed{};
     BOOST_REQUIRE(!recover_public(compressed, recoverable, sighash3));
+}
+
+// Recovery id 2 takes x(R) as r + n, where r is below p - n.
+const hash_digest recovery2_hash = base16_array("7a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff0");
+const ec_compressed recovery2_key = base16_array("0269420d775d4752dd9781d49d58684a7185dc34becbc26836b2435c2e5947cd41");
+const recoverable_signature recovery2{ base16_array("00000000000000000000000000000000000000000000000000000000000000024b5a6978f0e1d2c3b4a5968778695a4b3c2d1e0f00112233445566778899aabb"), 2 };
+const recoverable_signature recovery2_overflow{ base16_array("000000000000000000000000000000014551231950b75fc4402da1722fc9baee4b5a6978f0e1d2c3b4a5968778695a4b3c2d1e0f00112233445566778899aabb"), 2 };
+
+BOOST_AUTO_TEST_CASE(secp256k1__recover_public__recovery_id_2__expected_key)
+{
+    using namespace system::ecdsa;
+    ec_compressed compressed{};
+    BOOST_REQUIRE(recover_public(compressed, recovery2, recovery2_hash));
+    BOOST_REQUIRE_EQUAL(compressed, recovery2_key);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__recover_public__recovery_id_2_r_not_below_p_minus_n__false)
+{
+    using namespace system::ecdsa;
+    ec_compressed compressed{};
+    BOOST_REQUIRE(!recover_public(compressed, recovery2_overflow, recovery2_hash));
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1__recover_public__zero_signature__false)

@@ -105,6 +105,12 @@ BOOST_AUTO_TEST_CASE(secp256k1__ellswift_create__zero_secret__false)
     BOOST_REQUIRE(!ellswift::create(key, {}, {}));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__ellswift_exchange__zero_secret__false)
+{
+    hash_digest secret{};
+    BOOST_REQUIRE(!ellswift::exchange(secret, {}, vector1_key_a, vector1_key_b, false));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__ellswift_exchange__initiating__expected)
 {
     hash_digest secret{};

@@ -68,6 +68,9 @@ constexpr auto overflow_r = base16_array("00000000000000000000000000000000000000
 constexpr auto overflow_s = base16_array("2222222222222222222222222222222222222222222222222222222222222222");
 const auto overflow_der = base16_chunk("302502010202202222222222222222222222222222222222222222222222222222222222222222");
 
+// ECDSA by key G with r = s = z = x(2G), so that u1 = u2 = 1 and G adds to G.
+constexpr auto doubled = base16_array("c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5");
+
 // ECDSA and Schnorr signing keys.
 constexpr ec_secret secret1 = base16_array("8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
 constexpr ec_secret secret2 = base16_array("33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce");
@@ -251,6 +254,12 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__vector__expected)
     BOOST_CHECK(!ecdsa_verify(overflow_key, sighash2, r2, s2));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__exceptional__expected)
+{
+    BOOST_CHECK(ecdsa_verify(ec_compressed_generator, doubled, doubled, doubled));
+    BOOST_CHECK(!ecdsa_verify(ec_compressed_generator, sighash2, doubled, doubled));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__out_of_range__false)
 {
     BOOST_CHECK(!ecdsa_verify(key2, sighash2, zero_value, s2));
@@ -392,6 +401,7 @@ static const rows_t<ec_compressed>& ecdsa_rows() NOEXCEPT
         add_row(out, key, message3, ecdsa_signature(key, secret3, message3), true);
         add_row(out, key, message4, ecdsa_signature(key, secret4, message4), true);
         add_row(out, key, message1, ecdsa_signature(key, secret4, message4), false);
+        add_row(out, ec_compressed_generator, doubled, splice(doubled, doubled), true);
         return out;
     }();
 
@@ -530,6 +540,13 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__valid_rows__true)
     data_chunk results{};
     BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, keys, digests, signatures));
     BOOST_CHECK_EQUAL(results, data_chunk({ 1, 1, 1 }));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__empty__true)
+{
+    data_chunk results{};
+    BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, std::span<const ec_compressed>{}, std::span<const hash_digest>{}, std::span<const ec_signature>{}));
+    BOOST_CHECK(results.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
