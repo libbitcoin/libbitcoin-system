@@ -323,6 +323,25 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_order__fa
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
 }
 
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__empty__false)
+{
+    BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern({}));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_key_size__false)
+{
+    auto ops = make_tapscript_threshold_ops(1, 1);
+    ops.front() = operation(data_chunk(33, 0x02), true);
+    BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_first_opcode__false)
+{
+    auto ops = make_tapscript_threshold_ops(1, 1);
+    ops[1] = operation(opcode::checksigverify);
+    BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
+}
+
 // is_pay_tapscript_multisig_pattern
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_1_of_1__true)
@@ -1256,6 +1275,19 @@ BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__non_minimal_count
     BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
 }
 
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_standard_pattern__wrong_final_opcode__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_standard_pattern(ops));
+}
+
 // is_pay_multisig_pattern
 
 BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__one_of_one__true)
@@ -1322,6 +1354,19 @@ BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__count_mismatch__false)
         { pattern_compressed, true },
         { operation::opcode_from_positive(1_u8) },
         { opcode::checkmultisig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__wrong_final_opcode__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checksig }
     };
 
     BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
@@ -1612,6 +1657,45 @@ BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__invalid_point__empty)
 {
     const data_stack points{ data_chunk{ 0x02 } };
     BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
+}
+
+// Only op_1..op_16 can encode the key count.
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__seventeen_points__empty)
+{
+    const data_stack points(17, pattern_compressed);
+    BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
+}
+
+// pattern builders encode data nominally
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__maximum_size__pay_null_data)
+{
+    const data_chunk data(max_null_data_size, 0x00);
+    const auto ops = script::to_pay_null_data_pattern(data);
+    BOOST_REQUIRE_EQUAL(ops.size(), 2u);
+    BOOST_REQUIRE(ops[1].data() == data);
+    BOOST_REQUIRE(script::is_pay_null_data_pattern(ops));
+}
+
+// A single byte numeric value is pushed as data, not as a number opcode.
+BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__numeric_byte__nominal_push)
+{
+    const data_chunk data{ 0x05 };
+    const auto ops = script::to_pay_null_data_pattern(data);
+    BOOST_REQUIRE_EQUAL(ops.size(), 2u);
+    BOOST_REQUIRE(ops[1].code() == opcode::push_size_1);
+    BOOST_REQUIRE(ops[1].data() == data);
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_witness_pattern__numeric_byte__nominal_push)
+{
+    const data_chunk data{ 0x01 };
+    const auto ops = script::to_pay_witness_pattern(0, data);
+    BOOST_REQUIRE_EQUAL(ops.size(), 2u);
+    BOOST_REQUIRE(ops[0].code() == opcode::push_size_0);
+    BOOST_REQUIRE(ops[1].code() == opcode::push_size_1);
+    BOOST_REQUIRE(ops[1].data() == data);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
