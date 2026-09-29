@@ -82,12 +82,9 @@ bool xsalsa20_poly1305::decrypt(byte_span plain, const nonce& nonce,
     mac.flush(expected);
     key = {};
 
-    uint8_t difference{};
-    const auto actual = cipher.first(expansion);
-    for (size_t byte{}; byte < expansion; ++byte)
-        difference |= bit_xor(expected[byte], actual[byte]);
+    const auto tag = cipher.first(expansion);
+    const auto authenticated = constant_time_equal(expected, tag);
 
-    const auto authenticated = is_zero(difference);
     if (authenticated)
         stream.crypt(text, plain);
     else

@@ -16,25 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_X509_PEM_HPP
+#define LIBBITCOIN_SYSTEM_X509_PEM_HPP
 
-#include <bitcoin/system/error/block_error_t.hpp>
-#include <bitcoin/system/error/error_t.hpp>
-#include <bitcoin/system/error/errorno_t.hpp>
-#include <bitcoin/system/error/macros.hpp>
-#include <bitcoin/system/error/op_error_t.hpp>
-#include <bitcoin/system/error/script_error_t.hpp>
-#include <bitcoin/system/error/transaction_error_t.hpp>
-#include <bitcoin/system/error/x509_error_t.hpp>
-
-#include <system_error>
+#include <string>
+#include <vector>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace x509 {
 
-using code = std::error_code;
+/// A textual encoding block (rfc7468): its label and decoded content.
+struct pem
+{
+    std::string label{};
+    data_chunk data{};
+};
 
+using pems = std::vector<pem>;
+
+/// Encode the data as a block with the label, in 64 character lines.
+BC_API std::string encode_pem(const std::string& label,
+    const_byte_span data) NOEXCEPT;
+
+/// Decode all blocks of the text, ignoring text between blocks.
+/// False if any block is malformed or has encapsulated headers.
+BC_API bool decode_pem(pems& out, const std::string& text) NOEXCEPT;
+
+} // namespace x509
 } // namespace system
 } // namespace libbitcoin
 

@@ -140,7 +140,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
-    ${srcdir}/../../src/crypto/aes256.cpp \
+    ${srcdir}/../../src/crypto/aes128_gcm.cpp \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../src/crypto/der_parser.cpp \
@@ -189,6 +189,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/error/op_error_t.cpp \
     ${srcdir}/../../src/error/script_error_t.cpp \
     ${srcdir}/../../src/error/transaction_error_t.cpp \
+    ${srcdir}/../../src/error/x509_error_t.cpp \
     ${srcdir}/../../src/filter/golomb.cpp \
     ${srcdir}/../../src/hash/accumulator.cpp \
     ${srcdir}/../../src/hash/checksum.cpp \
@@ -256,7 +257,13 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/words/languages.cpp \
     ${srcdir}/../../src/words/catalogs/electrum.cpp \
     ${srcdir}/../../src/words/catalogs/electrum_v1.cpp \
-    ${srcdir}/../../src/words/catalogs/mnemonic.cpp
+    ${srcdir}/../../src/words/catalogs/mnemonic.cpp \
+    ${srcdir}/../../src/x509/builder.cpp \
+    ${srcdir}/../../src/x509/certificate.cpp \
+    ${srcdir}/../../src/x509/der.cpp \
+    ${srcdir}/../../src/x509/pem.cpp \
+    ${srcdir}/../../src/x509/private_key.cpp \
+    ${srcdir}/../../src/x509/verify.cpp
 
 include_bitcoindir = \
     ${includedir}/bitcoin
@@ -401,7 +408,8 @@ include_bitcoin_system_cryptodir = \
     ${includedir}/bitcoin/system/crypto
 
 include_bitcoin_system_crypto_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/crypto/aes256.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/aes128_gcm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/algorithms.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/chacha20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/chacha20_poly1305.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/crypto.hpp \
@@ -415,6 +423,21 @@ include_bitcoin_system_crypto_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1_batch.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/x25519.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/xsalsa20_poly1305.hpp
+
+include_bitcoin_system_crypto_aesdir = \
+    ${includedir}/bitcoin/system/crypto/aes
+
+include_bitcoin_system_crypto_aes_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/crypto/aes/aes.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/aes/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/aes/ghash.hpp
+
+include_bitcoin_system_crypto_nistdir = \
+    ${includedir}/bitcoin/system/crypto/nist
+
+include_bitcoin_system_crypto_nist_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/crypto/nist/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/nist/nist.hpp
 
 include_bitcoin_system_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/crypto/secp256k1
@@ -469,7 +492,8 @@ include_bitcoin_system_error_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/error/macros.hpp \
     ${srcdir}/../../include/bitcoin/system/error/op_error_t.hpp \
     ${srcdir}/../../include/bitcoin/system/error/script_error_t.hpp \
-    ${srcdir}/../../include/bitcoin/system/error/transaction_error_t.hpp
+    ${srcdir}/../../include/bitcoin/system/error/transaction_error_t.hpp \
+    ${srcdir}/../../include/bitcoin/system/error/x509_error_t.hpp
 
 include_bitcoin_system_filterdir = \
     ${includedir}/bitcoin/system/filter
@@ -540,6 +564,30 @@ include_bitcoin_system_impl_configdir = \
 
 include_bitcoin_system_impl_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
+
+include_bitcoin_system_impl_crypto_aesdir = \
+    ${includedir}/bitcoin/system/impl/crypto/aes
+
+include_bitcoin_system_impl_crypto_aes_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/algorithm_bitslice.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/algorithm_ctr.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/algorithm_native.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/algorithm_rounds.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/algorithm_schedule.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/algorithm_single.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes/ghash.ipp
+
+include_bitcoin_system_impl_crypto_nistdir = \
+    ${includedir}/bitcoin/system/impl/crypto/nist
+
+include_bitcoin_system_impl_crypto_nist_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_der.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_ecdsa.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_keys.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_limbs.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_modular.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_multiply.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/nist/algorithm_points.ipp
 
 include_bitcoin_system_impl_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/impl/crypto/secp256k1
@@ -758,6 +806,7 @@ include_bitcoin_system_intrinsics_intel_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intel/intel_128.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intel/intel_256.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intel/intel_512.hpp \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/intel/intel_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intel/intel_sha.hpp
 
 include_bitcoin_system_intrinsics_neondir = \
@@ -766,6 +815,7 @@ include_bitcoin_system_intrinsics_neondir = \
 include_bitcoin_system_intrinsics_neon_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/neon/neon.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/neon/neon_128.hpp \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/neon/neon_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/neon/neon_sha.hpp
 
 include_bitcoin_system_intrinsics_nonedir = \
@@ -773,6 +823,7 @@ include_bitcoin_system_intrinsics_nonedir = \
 
 include_bitcoin_system_intrinsics_none_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_128.hpp \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_sha.hpp
 
 include_bitcoin_system_intrinsics_svedir = \
@@ -999,6 +1050,19 @@ include_bitcoin_system_words_catalogs_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/words/catalogs/electrum_v1.hpp \
     ${srcdir}/../../include/bitcoin/system/words/catalogs/mnemonic.hpp
 
+include_bitcoin_system_x509dir = \
+    ${includedir}/bitcoin/system/x509
+
+include_bitcoin_system_x509_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/x509/builder.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/certificate.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/der.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/oids.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/pem.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/private_key.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/verify.hpp \
+    ${srcdir}/../../include/bitcoin/system/x509/x509.hpp
+
 # Tests.
 #==============================================================================
 # Target test 'test/libbitcoin-system-test'
@@ -1097,12 +1161,16 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \
     ${srcdir}/../../test/config/version.cpp \
+    ${srcdir}/../../test/crypto/aes.cpp \
+    ${srcdir}/../../test/crypto/aes128_gcm.cpp \
     ${srcdir}/../../test/crypto/aes256.cpp \
     ${srcdir}/../../test/crypto/chacha20.cpp \
     ${srcdir}/../../test/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../test/crypto/fschacha20.cpp \
     ${srcdir}/../../test/crypto/fschacha20_poly1305.cpp \
     ${srcdir}/../../test/crypto/maybe_random.cpp \
+    ${srcdir}/../../test/crypto/nist.cpp \
+    ${srcdir}/../../test/crypto/performance.cpp \
     ${srcdir}/../../test/crypto/poly1305.cpp \
     ${srcdir}/../../test/crypto/salsa20.cpp \
     ${srcdir}/../../test/crypto/x25519.cpp \
@@ -1154,6 +1222,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/error/op_error_t.cpp \
     ${srcdir}/../../test/error/script_error_t.cpp \
     ${srcdir}/../../test/error/transaction_error_t.cpp \
+    ${srcdir}/../../test/error/x509_error_t.cpp \
     ${srcdir}/../../test/filter/bloom.cpp \
     ${srcdir}/../../test/filter/golomb.cpp \
     ${srcdir}/../../test/filter/sieve.cpp \
@@ -1292,7 +1361,13 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/words/languages.cpp \
     ${srcdir}/../../test/words/catalogs/electrum.cpp \
     ${srcdir}/../../test/words/catalogs/electrum_v1.cpp \
-    ${srcdir}/../../test/words/catalogs/mnemonic.cpp
+    ${srcdir}/../../test/words/catalogs/mnemonic.cpp \
+    ${srcdir}/../../test/x509/builder.cpp \
+    ${srcdir}/../../test/x509/certificate.cpp \
+    ${srcdir}/../../test/x509/der.cpp \
+    ${srcdir}/../../test/x509/pem.cpp \
+    ${srcdir}/../../test/x509/private_key.cpp \
+    ${srcdir}/../../test/x509/verify.cpp
 
 TESTS = test_runner.sh
 

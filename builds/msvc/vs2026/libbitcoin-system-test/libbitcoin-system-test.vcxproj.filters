@@ -121,6 +121,9 @@
     <Filter Include="src\words\catalogs">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\x509">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\allocator.cpp">
@@ -315,6 +318,12 @@
     <ClCompile Include="..\..\..\..\test\constraints.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\aes.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\aes128_gcm.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -331,6 +340,12 @@
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\maybe_random.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\nist.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\performance.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp">
@@ -487,6 +502,9 @@
       <Filter>src\error</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp">
+      <Filter>src\error</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\error\x509_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\filter\bloom.cpp">
@@ -930,10 +948,34 @@
     <ClCompile Include="..\..\..\..\test\words\languages.cpp">
       <Filter>src\words</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\x509\builder.cpp">
+      <Filter>src\x509</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\x509\certificate.cpp">
+      <Filter>src\x509</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\x509\der.cpp">
+      <Filter>src\x509</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\x509\pem.cpp">
+      <Filter>src\x509</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\x509\private_key.cpp">
+      <Filter>src\x509</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\x509\verify.cpp">
+      <Filter>src\x509</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\aes128_gcm.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\ecdsa.hpp">
+      <Filter>src\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\hash.hpp">
       <Filter>src\hash</Filter>
@@ -979,6 +1021,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\words\languages.hpp">
       <Filter>src\words</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\x509\fixtures.hpp">
+      <Filter>src\x509</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

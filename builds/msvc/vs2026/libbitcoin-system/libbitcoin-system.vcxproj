@@ -230,7 +230,7 @@
     <ClCompile Include="..\..\..\..\src\config\url.cpp" />
     <ClCompile Include="..\..\..\..\src\config\utilities.cpp" />
     <ClCompile Include="..\..\..\..\src\config\version.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\aes128_gcm.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
@@ -282,6 +282,7 @@
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\src\error\x509_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
@@ -373,6 +374,12 @@
       <ObjectFileName>$(IntDir)src_words_catalogs_mnemonic.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\languages.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\builder.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\certificate.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\der.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\pem.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\private_key.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\verify.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
@@ -461,7 +468,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes\aes.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes\ghash.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes128_gcm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\algorithms.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />
@@ -469,6 +480,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\maybe_random.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\nist\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\nist\nist.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
@@ -511,6 +524,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\op_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\x509_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\execution.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\bloom.hpp" />
@@ -551,13 +565,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_128.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_512.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_aes.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\multiply.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_128.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_aes.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_128.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_aes.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\sve\sve.hpp" />
@@ -696,6 +713,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\language.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\languages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\words.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\builder.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\certificate.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\der.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\oids.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\pem.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\private_key.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\verify.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\interface.hpp" />
@@ -715,6 +740,20 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_bitslice.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_ctr.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_native.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_rounds.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_schedule.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_single.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\ghash.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_der.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_ecdsa.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_keys.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_limbs.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_modular.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_multiply.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_points.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_batch.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_ellswift.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_field.ipp" />

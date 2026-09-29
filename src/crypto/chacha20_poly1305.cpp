@@ -118,13 +118,10 @@ bool chacha20_poly1305::decrypt(byte_span plain,
     cipher_.seek(nonce32, nonce64, zero);
     authenticate(expected, aad, text);
 
-    uint8_t difference{};
-    const auto actual = cipher.last(expansion);
-    for (size_t byte{}; byte < expansion; ++byte)
-        difference |= bit_xor(expected[byte], actual[byte]);
+    const auto tag = cipher.last(expansion);
+    const auto authenticated = constant_time_equal(expected, tag);
 
     // Decryption uses the ChaCha20 block counter starting at one.
-    const auto authenticated = is_zero(difference);
     if (authenticated)
     {
         cipher_.seek(nonce32, nonce64, one);

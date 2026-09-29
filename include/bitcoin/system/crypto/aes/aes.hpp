@@ -16,25 +16,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_AES_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_AES_AES_HPP
 
-#include <bitcoin/system/error/block_error_t.hpp>
-#include <bitcoin/system/error/error_t.hpp>
-#include <bitcoin/system/error/errorno_t.hpp>
-#include <bitcoin/system/error/macros.hpp>
-#include <bitcoin/system/error/op_error_t.hpp>
-#include <bitcoin/system/error/script_error_t.hpp>
-#include <bitcoin/system/error/transaction_error_t.hpp>
-#include <bitcoin/system/error/x509_error_t.hpp>
-
-#include <system_error>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace aes {
 
-using code = std::error_code;
+struct aesk_t{};
 
+template <size_t Strength,
+    bool_if<Strength == 128 || Strength == 256> = true>
+struct k
+{
+    using T = aesk_t;
+    static constexpr auto strength   = Strength;
+    static constexpr auto key_words  = strength / bits<uint32_t>;
+    static constexpr auto rounds     = key_words + 6_size;
+    static constexpr auto round_keys = add1(rounds);
+};
+
+using k128 = k<128>;
+using k256 = k<256>;
+
+} // namespace aes
 } // namespace system
 } // namespace libbitcoin
 

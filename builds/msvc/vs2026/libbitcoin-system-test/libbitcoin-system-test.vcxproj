@@ -206,12 +206,18 @@
     <ClCompile Include="..\..\..\..\test\config\version.cpp" />
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\aes.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\aes128_gcm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\maybe_random.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\nist.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\performance.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp" />
@@ -272,6 +278,7 @@
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\x509_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\bloom.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\sieve.cpp" />
@@ -455,9 +462,17 @@
     <ClCompile Include="..\..\..\..\test\words\dictionaries.cpp" />
     <ClCompile Include="..\..\..\..\test\words\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\test\words\languages.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\builder.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\certificate.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\der.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\pem.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\private_key.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\verify.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\aes128_gcm.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\ecdsa.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
@@ -473,6 +488,7 @@
     <ClInclude Include="..\..\..\..\test\words\dictionaries.hpp" />
     <ClInclude Include="..\..\..\..\test\words\dictionary.hpp" />
     <ClInclude Include="..\..\..\..\test\words\languages.hpp" />
+    <ClInclude Include="..\..\..\..\test\x509\fixtures.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

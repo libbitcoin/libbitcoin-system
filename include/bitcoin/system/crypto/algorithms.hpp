@@ -16,24 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
-#define LIBBITCOIN_SYSTEM_ERROR_ERROR_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_ALGORITHMS_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_ALGORITHMS_HPP
 
-#include <bitcoin/system/error/block_error_t.hpp>
-#include <bitcoin/system/error/error_t.hpp>
-#include <bitcoin/system/error/errorno_t.hpp>
-#include <bitcoin/system/error/macros.hpp>
-#include <bitcoin/system/error/op_error_t.hpp>
-#include <bitcoin/system/error/script_error_t.hpp>
-#include <bitcoin/system/error/transaction_error_t.hpp>
-#include <bitcoin/system/error/x509_error_t.hpp>
-
-#include <system_error>
+#include <bitcoin/system/crypto/aes/algorithm.hpp>
+#include <bitcoin/system/crypto/nist/algorithm.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-using code = std::error_code;
+/// bc::system aes algorithm aliases (native, vectorized).
+using aes128 = aes::algorithm<aes::k128>;
+using aes256 = aes::algorithm<aes::k256>;
+
+/// bc::system nist curve algorithm aliases (ecdsa).
+using secp256r1 = nist::algorithm<nist::p256>;
+using secp384r1 = nist::algorithm<nist::p384>;
 
 } // namespace system
 } // namespace libbitcoin
