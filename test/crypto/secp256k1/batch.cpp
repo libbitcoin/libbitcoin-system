@@ -386,6 +386,110 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
 }
 
+// chunked
+// ----------------------------------------------------------------------------
+// Rows beyond a chunk boundary, with failures in and beyond the first chunk.
+
+constexpr size_t chunked_rows = 300;
+constexpr size_t chunked_fail1 = 3;
+constexpr size_t chunked_fail2 = 257;
+
+static batched::link chunked_id(size_t row) NOEXCEPT
+{
+    return { narrow_cast<uint8_t>(row), narrow_cast<uint8_t>(row >> 8), 0 };
+}
+
+static batched::links_t chunked_ecdsa_failures() NOEXCEPT
+{
+    using namespace system;
+    using namespace system::ecdsa;
+    using correlate = batch::correlate_t;
+    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa-chunked"));
+
+    ec_compressed point{};
+    ec_signature signature{}, corrupt{};
+    if (!secret_to_public(point, secret0) || !sign(signature, secret0, hash))
+        return { max_uint32 };
+
+    corrupt = signature;
+    corrupt[10] ^= 0xff;
+
+    std::vector<correlate> correlates(chunked_rows);
+    std::vector<hash_digest> digests(chunked_rows, hash);
+    std::vector<ec_compressed> points(chunked_rows, point);
+    std::vector<ec_signature> signatures(chunked_rows, signature);
+    for (size_t row{}; row < chunked_rows; ++row)
+        correlates[row] = correlate{ chunked_id(row), 0, 0 };
+
+    signatures[chunked_fail1] = corrupt;
+    signatures[chunked_fail2] = corrupt;
+
+    const batch in
+    {
+        { correlates.data(), correlates.size() },
+        { digests.data(), digests.size() },
+        { points.data(), points.size() },
+        { signatures.data(), signatures.size() }
+    };
+
+    const stopper cancel{};
+    return batch::verify(cancel, in);
+}
+
+static batched::links_t chunked_schnorr_failures() NOEXCEPT
+{
+    using namespace system;
+    using namespace system::schnorr;
+    using correlate = batch::correlate_t;
+    const auto hash = bitcoin_hash(to_chunk("batch-schnorr-chunked"));
+
+    ec_compressed compressed{};
+    ec_signature signature{}, corrupt{};
+    if (!secret_to_public(compressed, secret0) || !sign(signature, secret0, hash, {}))
+        return { max_uint32 };
+
+    const auto& point = array_cast<uint8_t, ec_xonly_size, 1>(compressed);
+    corrupt = signature;
+    corrupt[10] ^= 0xff;
+
+    std::vector<correlate> correlates(chunked_rows);
+    std::vector<hash_digest> digests(chunked_rows, hash);
+    std::vector<ec_xonly> points(chunked_rows, point);
+    std::vector<ec_signature> signatures(chunked_rows, signature);
+    for (size_t row{}; row < chunked_rows; ++row)
+        correlates[row] = correlate{ chunked_id(row) };
+
+    signatures[chunked_fail1] = corrupt;
+    signatures[chunked_fail2] = corrupt;
+
+    const batch in
+    {
+        { correlates.data(), correlates.size() },
+        { digests.data(), digests.size() },
+        { points.data(), points.size() },
+        { signatures.data(), signatures.size() }
+    };
+
+    const stopper cancel{};
+    return batch::verify(cancel, in);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__chunked_two_invalid__expected)
+{
+    const auto tokens = chunked_ecdsa_failures();
+    BOOST_REQUIRE_EQUAL(tokens.size(), 2u);
+    BOOST_REQUIRE_EQUAL(tokens.at(0), from_little_array<batched::link_t>(chunked_id(chunked_fail1)));
+    BOOST_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__chunked_two_invalid__expected)
+{
+    const auto tokens = chunked_schnorr_failures();
+    BOOST_REQUIRE_EQUAL(tokens.size(), 2u);
+    BOOST_REQUIRE_EQUAL(tokens.at(0), from_little_array<batched::link_t>(chunked_id(chunked_fail1)));
+    BOOST_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
+}
+
 // accelerated
 // ----------------------------------------------------------------------------
 

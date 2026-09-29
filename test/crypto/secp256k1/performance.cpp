@@ -417,6 +417,53 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch)
     report_batches<xint512_t>("8 lanes");
 }
 
+static batched::link link_of(size_t row) NOEXCEPT
+{
+    return { narrow_cast<uint8_t>(row), narrow_cast<uint8_t>(row >> 8), 0 };
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch_wrappers)
+{
+    const auto& in = signed_vectors();
+    std_vector<ecdsa::batch::correlate_t> ecdsa_correlates(count);
+    std_vector<schnorr::batch::correlate_t> schnorr_correlates(count);
+    for (size_t row{}; row < count; ++row)
+    {
+        ecdsa_correlates[row] = { link_of(row), 0, 0 };
+        schnorr_correlates[row] = { link_of(row) };
+    }
+
+    const ecdsa::batch ecdsa_rows
+    {
+        { ecdsa_correlates.data(), count },
+        { in.messages.data(), count },
+        { in.keys.data(), count },
+        { in.ecdsas.data(), count }
+    };
+
+    const schnorr::batch schnorr_rows
+    {
+        { schnorr_correlates.data(), count },
+        { in.messages.data(), count },
+        { in.xonlys.data(), count },
+        { in.schnorrs.data(), count }
+    };
+
+    const stopper cancel{};
+    const auto ecdsa = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return ecdsa::batch::verify(cancel, ecdsa_rows).empty();
+    });
+
+    const auto schnorr = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return schnorr::batch::verify(cancel, schnorr_rows).empty();
+    });
+
+    report("ecdsa batch wrapper per signature", ecdsa / count);
+    report("schnorr batch wrapper per signature", schnorr / count);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #endif

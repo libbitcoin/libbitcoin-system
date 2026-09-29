@@ -254,7 +254,8 @@ constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
         if (is_zero(digit))
             continue;
 
-        lookup_comb(addend, window, sub1(digit), carry);
+        lookup_comb(addend, window, possible_narrow_cast<size_t>(sub1(digit)),
+            carry);
         add_point(r, addend, faults);
     }
 }
