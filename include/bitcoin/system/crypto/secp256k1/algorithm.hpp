@@ -658,7 +658,8 @@ protected:
     using comb_parts_t = std_array<const uint64_t*, comb_part_count>;
     static const comb_parts_t comb_parts;
 
-    /// r = entry of a comb window (1 + entry times its base), negated.
+    /// r = entry of a comb window (1 + entry times its base), negated, read by
+    /// scanning the window.
     static constexpr void lookup_comb(affine_t<uint64_t>& r, size_t window,
         size_t entry, bool negative) NOEXCEPT;
 
@@ -805,7 +806,9 @@ protected:
     /// -----------------------------------------------------------------------
     /// A secret multiple k * G is computed as (k - m) * G + m * G, and k * a
     /// as (k / m) * (m * a), for a random blind m, so that each multiplication
-    /// is of a value independent of k.
+    /// is of a value independent of k. Comb lookups read every entry of a
+    /// window, so memory access does not depend on the digit, and additions
+    /// are skipped only for zero digits.
 
     /// r = g * G + k * a (normal), false if infinity.
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,

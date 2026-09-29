@@ -460,20 +460,11 @@ template <typename Word>
 constexpr void algorithm::negate(affine_t<Word>& r, const affine_t<Word>& a,
     Word mask) NOEXCEPT
 {
-    if constexpr (is_same_type<Word, uint64_t>)
-    {
-        r = a;
-        if (is_nonzero(mask))
-            negate<4>(r.y, a.y);
-    }
-    else
-    {
-        field_t<Word> y{};
-        negate<4>(y, a.y);
-        carry(y);
-        select(y, mask, y, a.y);
-        r = { a.x, y };
-    }
+    field_t<Word> y{};
+    negate<4>(y, a.y);
+    carry_extended(y);
+    select(y, mask, y, a.y);
+    r = { a.x, y };
 }
 
 } // namespace secp256k1

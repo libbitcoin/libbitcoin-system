@@ -83,25 +83,31 @@ constexpr size_t algorithm::locate(size_t entry) NOEXCEPT
 }
 
 // Limb i of x of entry e of window w is at 10 * (w * comb_size + e) + i in
-// the part of the window, and limb i of y follows at 5 + i.
+// the part of the window, and limb i of y follows at 5 + i. Every entry of
+// the window is read, and the entry is taken by mask.
 constexpr void algorithm::lookup_comb(affine_t<uint64_t>& r, size_t window,
     size_t entry, bool negative) NOEXCEPT
 {
     constexpr auto size = array_count<field_t<uint64_t>>;
-    const auto offset = ((window % comb_part_windows) * comb_size + entry) *
-        comb_words;
+    const auto offset = (window % comb_part_windows) * comb_size * comb_words;
 
     affine_t<uint64_t> point{};
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    const auto base = comb_parts[window / comb_part_windows] + offset;
-    for (size_t limb{}; limb < size; ++limb)
+    auto at = comb_parts[window / comb_part_windows] + offset;
+    for (size_t index{}; index < comb_size; ++index)
     {
-        point.x[limb] = base[limb];
-        point.y[limb] = base[size + limb];
+        const auto mask = 0_u64 - to_int<uint64_t>(index == entry);
+        for (size_t limb{}; limb < size; ++limb)
+        {
+            point.x[limb] |= at[limb] & mask;
+            point.y[limb] |= at[size + limb] & mask;
+        }
+
+        std::advance(at, comb_words);
     }
     BC_POP_WARNING()
 
-    negate(r, point, negative ? max_uint64 : 0_u64);
+    negate(r, point, 0_u64 - to_int<uint64_t>(negative));
 }
 
 BC_POP_WARNING()
