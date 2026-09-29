@@ -36,6 +36,26 @@
 /// alone can enable array-casting other types. Use byte_cast for casting
 /// integrals to/from arrays of single byte types.
 
+/// Casting between element types is safe under the following constraints.
+/// Aliasing: one side must be a single byte type or an x86 intrinsic vector
+/// type (both may alias any type). Neon vector types may not, so neon casts
+/// are loaded and stored through element pointers. Casts between distinct
+/// multibyte integrals (e.g. uint32_t and uint64_t) may be reordered by
+/// type-based alias analysis (gcc/clang) where both are accessed in one scope
+/// and one is written.
+/// Alignment: a cast asserts the alignment of its element type, which the
+/// storage may not have (byte arrays are aligned to one). This is safe for
+/// scalar access on x86/x64/arm64, and for vector access through unaligned
+/// intrinsic load/store, provided that:
+/// - a vector cast of storage not vector aligned is never indexed directly,
+///   as that emits aligned moves, which fault.
+/// - a loop never iterates a multibyte cast of storage not so aligned, as it
+///   may be vectorized with alignment peeling and then aligned moves.
+/// On arm32 multibyte access to storage not so aligned may fault (ldrd/ldm),
+/// so such casts must not be dereferenced there.
+/// C++23: std::start_lifetime_as defines these casts, but only for storage
+/// aligned to the target element and not const. It does not relax alignment.
+
 namespace libbitcoin {
 namespace system {
     
