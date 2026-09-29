@@ -66,6 +66,7 @@ constexpr scalar right{ 0x0fedcba987654321, 0x123456789abcdef0, 0x33333333333333
 
 struct vectors
 {
+    ec_secrets secrets{};
     ec_compresseds keys{};
     ec_xonlys xonlys{};
     hashes messages{};
@@ -92,6 +93,7 @@ static const vectors& signed_vectors() NOEXCEPT
             ecdsa::canonicalize_signature(canonical, ecdsa);
             schnorr::sign(schnorr, secret, hash, hash);
             accessor::from_bytes(point, key);
+            out.secrets.push_back(secret);
             out.keys.push_back(key);
             out.xonlys.push_back(array_cast<uint8_t, ec_xonly_size, one>(key));
             out.messages.push_back(hash);
@@ -308,6 +310,40 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
         const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
         const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
         return accessor::verify_schnorr(key, challenge(signature, key, in.messages[index]), r, s);
+    }));
+}
+
+// sign
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__sign__wrappers)
+{
+    const auto& in = signed_vectors();
+    report("secret to public", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        ec_compressed key{};
+        return secret_to_public(key, in.secrets[index]);
+    }));
+
+    report("ecdsa sign", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        ec_signature signature{};
+        return ecdsa::sign(signature, in.secrets[index], in.messages[index]);
+    }));
+
+    report("schnorr sign", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        ec_signature signature{};
+        return schnorr::sign(signature, in.secrets[index], in.messages[index], in.messages[index]);
+    }));
+
+    ec_ellswift key_a{}, key_b{};
+    ellswift::create(key_a, in.secrets[0], in.messages[0]);
+    ellswift::create(key_b, in.secrets[1], in.messages[1]);
+    report("ellswift exchange", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        hash_digest shared{};
+        return ellswift::exchange(shared, in.secrets[index], key_a, key_b, false);
     }));
 }
 
