@@ -52,6 +52,7 @@ prepare(auto& buffer) NOEXCEPT
 }
 
 TEMPLATE
+template <bool Konstant>
 constexpr void CLASS::
 schedule_(auto& buffer) NOEXCEPT
 {
@@ -126,7 +127,8 @@ schedule_(auto& buffer) NOEXCEPT
         prepare<79>(buffer);
     }
 
-    konstant(buffer);
+    if constexpr (Konstant)
+        konstant(buffer);
 }
 
 TEMPLATE

@@ -235,11 +235,11 @@ pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 
 TEMPLATE
 template <typename xWord>
-INLINE void CLASS::
-schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+INLINE const auto& CLASS::
+scheduled_1() NOEXCEPT
 {
     static const auto xscheduled_pad = pack_schedule_1<xWord>();
-    xbuffer = xscheduled_pad;
+    return xscheduled_pad;
 }
 
 // expanded state
@@ -364,17 +364,16 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 
                 // xinput() advances block iterator by lanes.
                 xinput(xbuffer, blocks);
-                schedule_(xbuffer);
-                compress_(xstate, xbuffer);
-                schedule_1(xbuffer);
-                compress_(xstate, xbuffer);
+                schedule_<false>(xbuffer);
+                compress_<zero, true>(xstate, xbuffer);
+                compress_(xstate, scheduled_1<xWord>());
 
                 // Second hash
                 inject_left_half(xbuffer, xstate);
                 pad_half(xbuffer);
-                schedule_(xbuffer);
+                schedule_<false>(xbuffer);
                 xstate = initial;
-                compress_(xstate, xbuffer);
+                compress_<zero, true>(xstate, xbuffer);
 
                 // xoutput() advances digest iterator by lanes.
                 xoutput(digests, xstate);
