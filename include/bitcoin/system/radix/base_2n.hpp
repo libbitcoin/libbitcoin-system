@@ -30,7 +30,7 @@ namespace system {
 /// [precision <= span / log2(base)] and representation is integral:
 ///
 /// These two functions are defined:
-/// [compress(span).exponent = clog(base, span)]
+/// [compress(span).exponent = flog(base, span) + 1]
 /// [compress(span).mantissa = span * base^(exponent - precision)]]
 /// [expand(exponent, mantissa) = mantissa * base^(precision - exponent)]
 /// Where compression reduces span to precision.

@@ -64,7 +64,7 @@ base2n<Base, Precision, Span>::compress(const span_type& number) NOEXCEPT
         return 0;
 
     // This can only produce an exponent from [0..e_max] (zero excluded above).
-    const auto shift = raise(ceilinged_log<base>(number));
+    const auto shift = raise(ceilinged_divide(bit_width(number), factor));
     const auto mantissa = static_cast<small_type>
     (
         shift > precision ?

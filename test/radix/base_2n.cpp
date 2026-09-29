@@ -154,3 +154,15 @@ constexpr auto mantissa5 = 0x00ffffffu;
 constexpr auto compressed5 = (exponent5 << 24u) | mantissa5;
 constexpr auto maximum5 = bit_all<uint256_t>;
 static_assert(base256e::compress(maximum5) == compressed5);
+
+// exact powers of base produce a minimal mantissa (exponent is the digit count).
+static_assert(base256e::compress(uint256_t{ 1 }) == 0x01010000ul);
+static_assert(base256e::compress(uint256_t{ 1 } << 8u) == 0x02010000ul);
+static_assert(base256e::compress(uint256_t{ 1 } << 16u) == 0x03010000ul);
+static_assert(base256e::compress(uint256_t{ 1 } << 176u) == 0x17010000ul);
+static_assert(base256e::compress(uint256_t{ 1 } << 248u) == 0x20010000ul);
+static_assert(base256e::expand(base256e::compress(uint256_t{ 1 })) == uint256_t{ 1 });
+static_assert(base256e::expand(base256e::compress(uint256_t{ 1 } << 8u)) == uint256_t{ 1 } << 8u);
+static_assert(base256e::expand(base256e::compress(uint256_t{ 1 } << 16u)) == uint256_t{ 1 } << 16u);
+static_assert(base256e::expand(base256e::compress(uint256_t{ 1 } << 176u)) == uint256_t{ 1 } << 176u);
+static_assert(base256e::expand(base256e::compress(uint256_t{ 1 } << 248u)) == uint256_t{ 1 } << 248u);
