@@ -30,13 +30,13 @@ namespace aes {
 
 INLINE xint128_t inverse(xint128_t) NOEXCEPT
 {
-    return {};
+    return xint128_t{};
 }
 
 template <typename xWord>
 INLINE xWord replicate(xint128_t) NOEXCEPT
 {
-    return {};
+    return xWord{};
 }
 
 template <size_t Rounds, typename xWord, size_t Count>
@@ -53,12 +53,12 @@ INLINE void decrypt(std_array<xint128_t, Count>&,
 
 INLINE xint128_t sum(xint128_t, xint128_t) NOEXCEPT
 {
-    return {};
+    return xint128_t{};
 }
 
 INLINE xint128_t reflect(xint128_t) NOEXCEPT
 {
-    return {};
+    return xint128_t{};
 }
 
 INLINE void multiply(xint128_t&, xint128_t&, xint128_t, xint128_t) NOEXCEPT
@@ -67,7 +67,7 @@ INLINE void multiply(xint128_t&, xint128_t&, xint128_t, xint128_t) NOEXCEPT
 
 INLINE xint128_t reduce(xint128_t, xint128_t) NOEXCEPT
 {
-    return {};
+    return xint128_t{};
 }
 
 } // namespace aes
