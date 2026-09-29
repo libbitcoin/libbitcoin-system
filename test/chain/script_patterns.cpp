@@ -1659,4 +1659,16 @@ BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__invalid_point__empty)
     BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
 }
 
+// pattern builders encode data nominally
+// -----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__maximum_size__pay_null_data)
+{
+    const data_chunk data(max_null_data_size, 0x00);
+    const auto ops = script::to_pay_null_data_pattern(data);
+    BOOST_REQUIRE_EQUAL(ops.size(), 2u);
+    BOOST_REQUIRE(ops[1].data() == data);
+    BOOST_REQUIRE(script::is_pay_null_data_pattern(ops));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
