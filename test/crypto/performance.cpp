@@ -27,34 +27,24 @@ BOOST_AUTO_TEST_SUITE(performance_cipher_tests)
 
 // A tls record.
 constexpr size_t record = 16 * 1024;
-constexpr size_t rounds = 16 * 1024;
-constexpr size_t bytes = record * rounds;
+constexpr size_t records = 1024;
 
 template <typename Function>
-static void report(const std::string& name, const Function& function)
+static void report_cipher(const std::string& name, const Function& function)
 {
-    const auto data = get_data<record, true>(42);
+    const auto data = get_bytes(record);
     data_chunk out(record + 16u);
-
-    using Timer = timer<std::chrono::nanoseconds>;
-    const auto time = Timer::execution([&]() noexcept
+    report(name, nanoseconds(records, [&]() noexcept
     {
-        for (size_t round{}; round < rounds; ++round)
-            function(*data, out);
-    });
-
-    const auto seconds = seconds_total<std::chrono::nanoseconds>(time);
-    std::cout << name
-        << " mib_per_second: " << mib_per_second<bytes>(seconds)
-        << " cycles_per_byte (3 ghz): " << cycles_per_byte<bytes>(seconds, 3.0f)
-        << std::endl;
+        function(data, out);
+    }) / record, "byte");
 }
 
 template <typename Algorithm>
 static void report_ctr(const std::string& name)
 {
     const auto schedule = Algorithm::expand({});
-    report(name, [&](const data_chunk& in, data_chunk& out) noexcept
+    report_cipher(name, [&](const data_chunk& in, data_chunk& out) noexcept
     {
         typename Algorithm::block_t counter{};
         Algorithm::ctr(std::span{ out }.first(in.size()), in, counter, schedule);
@@ -71,13 +61,13 @@ BOOST_AUTO_TEST_CASE(performance__aes128_ctr__variants)
 BOOST_AUTO_TEST_CASE(performance__aead__aes128_gcm_chacha20_poly1305)
 {
     aes128_gcm gcm{ {} };
-    report("aes128_gcm", [&](const data_chunk& in, data_chunk& out) noexcept
+    report_cipher("aes128_gcm", [&](const data_chunk& in, data_chunk& out) noexcept
     {
         gcm.encrypt(in, {}, {}, out);
     });
 
     chacha20_poly1305 chacha{ {} };
-    report("chacha20_poly1305", [&](const data_chunk& in, data_chunk& out) noexcept
+    report_cipher("chacha20_poly1305", [&](const data_chunk& in, data_chunk& out) noexcept
     {
         chacha.encrypt(in, {}, 0, 0, out);
     });
@@ -89,18 +79,12 @@ template <typename Function>
 static void report_operations(const std::string& name, const Function& function)
 {
     size_t valid{};
-    using Timer = timer<std::chrono::nanoseconds>;
-    const auto time = Timer::execution([&]() noexcept
+    report(name, nanoseconds(operations, [&]() noexcept
     {
-        for (size_t operation{}; operation < operations; ++operation)
-            valid += to_int<size_t>(function());
-    });
+        valid += to_int<size_t>(function());
+    }), "operation");
 
-    const auto seconds = seconds_total<std::chrono::nanoseconds>(time);
-    std::cout << name
-        << " operations_per_second: " << (operations / seconds)
-        << " valid: " << valid
-        << std::endl;
+    BOOST_CHECK_EQUAL(valid, repeats * operations);
 }
 
 template <typename Curve>
