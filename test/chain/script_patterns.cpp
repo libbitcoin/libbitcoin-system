@@ -328,6 +328,13 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__empty__false)
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern({}));
 }
 
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_key_size__false)
+{
+    auto ops = make_tapscript_threshold_ops(1, 1);
+    ops.front() = operation(data_chunk(33, 0x02), true);
+    BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
+}
+
 // is_pay_tapscript_multisig_pattern
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_1_of_1__true)
