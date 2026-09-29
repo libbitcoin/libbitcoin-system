@@ -219,19 +219,25 @@ bool decode_private_key(secret& out, const std::string& text,
     if (!decode_pem(blocks, text))
         return false;
 
+    auto decoded = false;
     for (const auto& block: blocks)
     {
         if (block.label == sec1_label)
-            return decode_sec1(out, block.data);
+            decoded = decode_sec1(out, block.data);
+        else if (block.label == pkcs8_label)
+            decoded = decode_pkcs8(out, block.data);
+        else if (block.label == encrypted_label)
+            decoded = decode_encrypted_pkcs8(out, block.data, password);
+        else
+            continue;
 
-        if (block.label == pkcs8_label)
-            return decode_pkcs8(out, block.data);
-
-        if (block.label == encrypted_label)
-            return decode_encrypted_pkcs8(out, block.data, password);
+        break;
     }
 
-    return false;
+    for (auto& block: blocks)
+        wipe(block.data.data(), block.data.size());
+
+    return decoded;
 }
 
 // encode
