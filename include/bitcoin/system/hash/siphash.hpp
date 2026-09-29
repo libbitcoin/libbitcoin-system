@@ -32,11 +32,16 @@ namespace libbitcoin {
 namespace system {
 
 typedef std::tuple<uint64_t, uint64_t> siphash_key;
+typedef std_array<uint64_t, 4> siphash_words;
 
 BC_API uint64_t siphash(const siphash_key& key,
     const data_slice& message) NOEXCEPT;
 BC_API uint64_t siphash(const half_hash& hash,
     const data_slice& message) NOEXCEPT;
+
+/// A 32 byte message as four little-endian words (e.g. a hash).
+BC_API uint64_t siphash(const siphash_key& key,
+    const siphash_words& message) NOEXCEPT;
 
 constexpr siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
 {

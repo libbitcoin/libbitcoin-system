@@ -73,12 +73,37 @@ constexpr void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     v0 ^= word;
 }
 
+// local
+constexpr void initialize(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+    uint64_t& v3, const siphash_key& key) NOEXCEPT
+{
+    v0 = siphash_magic_0 ^ std::get<0>(key);
+    v1 = siphash_magic_1 ^ std::get<1>(key);
+    v2 = siphash_magic_2 ^ std::get<0>(key);
+    v3 = siphash_magic_3 ^ std::get<1>(key);
+}
+
+// local
+constexpr uint64_t finalize(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+    uint64_t& v3, uint64_t last, size_t bytes) NOEXCEPT
+{
+    constexpr auto eight = sizeof(uint64_t);
+    last ^= ((bytes % max_encoded_byte_count) << to_bits(sub1(eight)));
+    compression_round(v0, v1, v2, v3, last);
+
+    v2 ^= finalization;
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+    sip_round(v0, v1, v2, v3);
+
+    return v0 ^ v1 ^ v2 ^ v3;
+}
+
 uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
 {
-    auto v0 = siphash_magic_0 ^ std::get<0>(key);
-    auto v1 = siphash_magic_1 ^ std::get<1>(key);
-    auto v2 = siphash_magic_2 ^ std::get<0>(key);
-    auto v3 = siphash_magic_3 ^ std::get<1>(key);
+    uint64_t v0{}, v1{}, v2{}, v3{};
+    initialize(v0, v1, v2, v3, key);
 
     constexpr auto eight = sizeof(uint64_t);
     const auto bytes = message.size();
@@ -90,19 +115,21 @@ uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
 
     // Read zero to seven remainder bytes (zero padded, fails stream).
     BC_ASSERT(source);
-    auto last = source.read_8_bytes_little_endian();
+    const auto last = source.read_8_bytes_little_endian();
     BC_ASSERT(!source);
 
-    last ^= ((bytes % max_encoded_byte_count) << to_bits(sub1(eight)));
-    compression_round(v0, v1, v2, v3, last);
+    return finalize(v0, v1, v2, v3, last, bytes);
+}
 
-    v2 ^= finalization;
-    sip_round(v0, v1, v2, v3);
-    sip_round(v0, v1, v2, v3);
-    sip_round(v0, v1, v2, v3);
-    sip_round(v0, v1, v2, v3);
+uint64_t siphash(const siphash_key& key, const siphash_words& message) NOEXCEPT
+{
+    uint64_t v0{}, v1{}, v2{}, v3{};
+    initialize(v0, v1, v2, v3, key);
 
-    return v0 ^ v1 ^ v2 ^ v3;
+    for (const auto word: message)
+        compression_round(v0, v1, v2, v3, word);
+
+    return finalize(v0, v1, v2, v3, 0, sizeof(siphash_words));
 }
 
 uint64_t siphash(const half_hash& hash, const data_slice& message) NOEXCEPT
