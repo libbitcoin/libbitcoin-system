@@ -42,25 +42,27 @@ const std::vector<tweak_vector> tweak_vectors
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip341__ec_add__tweak_vectors__expected_key)
 {
-    for (const auto& vector: tweak_vectors)
+    for (size_t index{}; index < tweak_vectors.size(); ++index)
     {
+        const auto& vector = tweak_vectors[index];
         ec_compressed point = splice(data_array<1>{ ec_even_sign }, vector.internal);
-        BOOST_REQUIRE(ec_add(point, vector.tweak));
+        BOOST_REQUIRE_MESSAGE(ec_add(point, vector.tweak), index);
         const ec_xonly key = slice<one, ec_compressed_size>(point);
-        BOOST_REQUIRE_EQUAL(key, vector.tweaked);
+        BOOST_REQUIRE_MESSAGE(key == vector.tweaked, index);
     }
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip341__verify_commitment__tweak_vectors__expected)
 {
-    for (const auto& vector: tweak_vectors)
+    for (size_t index{}; index < tweak_vectors.size(); ++index)
     {
+        const auto& vector = tweak_vectors[index];
         ec_compressed point = splice(data_array<1>{ ec_even_sign }, vector.internal);
-        BOOST_REQUIRE(ec_add(point, vector.tweak));
+        BOOST_REQUIRE_MESSAGE(ec_add(point, vector.tweak), index);
 
         const auto parity = point.front() == ec_odd_sign;
-        BOOST_REQUIRE(schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, parity));
-        BOOST_REQUIRE(!schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, !parity));
+        BOOST_REQUIRE_MESSAGE(schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, parity), index);
+        BOOST_REQUIRE_MESSAGE(!schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, !parity), index);
     }
 }
 
@@ -89,42 +91,45 @@ const std::vector<spend_vector> spend_vectors
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip341__secret_to_public__spend_vectors__internal_key)
 {
-    for (const auto& vector: spend_vectors)
+    for (size_t index{}; index < spend_vectors.size(); ++index)
     {
+        const auto& vector = spend_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE(secret_to_public(point, vector.secret));
+        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
         const ec_xonly key = slice<one, ec_compressed_size>(point);
-        BOOST_REQUIRE_EQUAL(key, vector.internal);
+        BOOST_REQUIRE_MESSAGE(key == vector.internal, index);
     }
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip341__ec_add__spend_vectors__tweaked_secret)
 {
-    for (const auto& vector: spend_vectors)
+    for (size_t index{}; index < spend_vectors.size(); ++index)
     {
+        const auto& vector = spend_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE(secret_to_public(point, vector.secret));
+        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
 
         auto secret = vector.secret;
         if (point.front() == ec_odd_sign)
         {
-            BOOST_REQUIRE(ec_negate(secret));
+            BOOST_REQUIRE_MESSAGE(ec_negate(secret), index);
         }
 
-        BOOST_REQUIRE(ec_add(secret, vector.tweak));
-        BOOST_REQUIRE_EQUAL(secret, vector.tweaked);
+        BOOST_REQUIRE_MESSAGE(ec_add(secret, vector.tweak), index);
+        BOOST_REQUIRE_MESSAGE(secret == vector.tweaked, index);
     }
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip341__verify_signature__spend_vectors__true)
 {
-    for (const auto& vector: spend_vectors)
+    for (size_t index{}; index < spend_vectors.size(); ++index)
     {
+        const auto& vector = spend_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE(secret_to_public(point, vector.tweaked));
+        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.tweaked), index);
 
         const ec_xonly key = slice<one, ec_compressed_size>(point);
-        BOOST_REQUIRE(schnorr::verify_signature(key, vector.sighash, vector.signature));
+        BOOST_REQUIRE_MESSAGE(schnorr::verify_signature(key, vector.sighash, vector.signature), index);
     }
 }
 

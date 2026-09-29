@@ -183,6 +183,49 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
     BOOST_CHECK(verify_signature(compressed, sighash, expected_signature));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__high_bit__padded)
+{
+    using namespace system::ecdsa;
+    ec_signature signature{};
+    der_signature der{};
+    BOOST_REQUIRE(decode_signature(signature, der_signature2, true));
+    BOOST_REQUIRE(encode_signature(der, signature));
+    BOOST_REQUIRE_EQUAL(der, der_signature2);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__zero_and_one__minimal)
+{
+    using namespace system::ecdsa;
+    const auto minimal = base16_chunk("3006020100020101");
+    ec_signature signature{};
+    der_signature der{};
+    BOOST_REQUIRE(decode_signature(signature, minimal, false));
+    BOOST_REQUIRE(encode_signature(der, signature));
+    BOOST_REQUIRE_EQUAL(der, minimal);
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__sign__zero_secret__false)
+{
+    using namespace system::ecdsa;
+    ec_signature signature{};
+    BOOST_REQUIRE(!sign(signature, {}, sighash3));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__sign__order_secret__false)
+{
+    using namespace system::ecdsa;
+    const ec_secret order = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
+    ec_signature signature{};
+    BOOST_REQUIRE(!sign(signature, order, sighash3));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__sign_recoverable__zero_secret__false)
+{
+    using namespace system::ecdsa;
+    recoverable_signature recoverable{};
+    BOOST_REQUIRE(!sign_recoverable(recoverable, {}, sighash3));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__sign__hash_not_below_n__verifies)
 {
     using namespace system::ecdsa;

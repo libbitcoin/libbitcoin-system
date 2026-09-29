@@ -43,6 +43,13 @@ public:
     using algorithm::lookup_comb;
     using algorithm::add_comb;
     using algorithm::comb_bits;
+    using algorithm::comb_size;
+    using algorithm::comb_windows;
+    using algorithm::add;
+    using algorithm::add_complete;
+    using algorithm::append;
+    using algorithm::double_;
+    using algorithm::to_jacobian;
     using algorithm::naf_t;
     using algorithm::naf;
     using algorithm::to_affine;
@@ -50,6 +57,7 @@ public:
     using algorithm::to_bytes;
     using algorithm::generator_slices;
     using algorithm::slice_size;
+    using algorithm::slice_count;
     using algorithm::block_size;
     using algorithm::locate;
     using algorithm::lookup;
@@ -173,7 +181,8 @@ static bool is_mapped(size_t index) NOEXCEPT
     accessor::normalize(x);
     accessor::negate(y, point.y);
     accessor::normalize(y);
-    return x == mapped.x && point.y == mapped.y && point.x == negated.x && y == negated.y;
+    return x == mapped.x && point.y == mapped.y &&
+        point.x == negated.x && y == negated.y;
 }
 
 constexpr bool is_point(const affine& a, const bytes& x, const bytes& y) NOEXCEPT
@@ -241,6 +250,37 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__computed_multiples__e
     BOOST_CHECK(is_mapped(511));
     BOOST_CHECK(is_mapped(512));
     BOOST_CHECK(is_mapped(8191));
+}
+
+static bool is_same(const affine& left, const affine& right) NOEXCEPT
+{
+    return encode(left.x) == encode(right.x) &&
+        encode(left.y) == encode(right.y);
+}
+
+// Each entry is the prior plus 2G, and each mapped entry is its x * beta.
+static bool is_generator_table() NOEXCEPT
+{
+    constexpr auto entries = accessor::slice_size * accessor::slice_count;
+    jacobian sum{};
+    accessor::to_jacobian(sum, g1);
+    for (size_t index{}; index < entries; ++index)
+    {
+        affine expected{};
+        accessor::to_affine(expected, sum);
+        if (!is_same(entry(index), expected) || !is_mapped(index))
+            return false;
+
+        if (f::any(accessor::add(sum, sum, g2)))
+            return false;
+    }
+
+    return true;
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__all_entries__expected)
+{
+    BOOST_CHECK(is_generator_table());
 }
 
 // multiply
@@ -312,12 +352,6 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_negated__infini
 // comb
 // ----------------------------------------------------------------------------
 
-static bool is_same(const affine& left, const affine& right) NOEXCEPT
-{
-    return encode(left.x) == encode(right.x) &&
-        encode(left.y) == encode(right.y);
-}
-
 static affine multiple(const scalar& k) NOEXCEPT
 {
     affine out{};
@@ -363,6 +397,38 @@ static bool is_secret_product(const scalar& k, const scalar& m) NOEXCEPT
     affine out{};
     accessor::secret_multiply(out, k, m);
     return is_same(out, multiple(k));
+}
+
+// Each window entry is the prior plus the window base, which is 2^comb_bits
+// times the prior window base, from G.
+static bool is_comb_table() NOEXCEPT
+{
+    jacobian base{};
+    accessor::to_jacobian(base, g1);
+    for (size_t window{}; window < accessor::comb_windows; ++window)
+    {
+        affine expected{}, point{};
+        auto sum = base;
+        for (size_t index{}; index < accessor::comb_size; ++index)
+        {
+            accessor::lookup_comb(point, window, index, false);
+            accessor::to_affine(expected, sum);
+            if (!is_same(point, expected))
+                return false;
+
+            accessor::add_complete(sum, sum, base);
+        }
+
+        for (size_t bit{}; bit < accessor::comb_bits; ++bit)
+            accessor::double_(base, base);
+    }
+
+    return true;
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__all_entries__expected)
+{
+    BOOST_CHECK(is_comb_table());
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__entries__expected)
@@ -501,6 +567,69 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__terms__expected)
     BOOST_CHECK(is_equal(sum({ { g1, small1 }, { p1, small2 } }), complete(small1, p1, small2)));
     BOOST_CHECK(f::any(sum({ { g1, scalar{ 1 } }, { g1_negated, scalar{ 1 } } }).infinity));
     BOOST_CHECK(f::any(sum({}).infinity));
+}
+
+// pseudorandom
+// ----------------------------------------------------------------------------
+
+struct random_row
+{
+    scalar g{};
+    scalar k{};
+    affine point{};
+};
+
+static bool random_rows(std_vector<random_row>& rows, size_t seed,
+    size_t count) NOEXCEPT
+{
+    rows.resize(count);
+    for (size_t index{}; index < count; ++index)
+    {
+        const auto g = sha256_hash(to_little(seed + index));
+        const auto k = sha256_hash(g);
+        ec_compressed key{};
+        if (!secret_to_public(key, sha256_hash(k)))
+            return false;
+
+        if (!accessor::from_bytes(rows[index].point, key))
+            return false;
+
+        rows[index].g = number(g);
+        rows[index].k = number(k);
+    }
+
+    return true;
+}
+
+// Products by sparse windows and by buckets agree with those by bits.
+static bool is_consistent(size_t rounds) NOEXCEPT
+{
+    std_vector<random_row> rows{};
+    if (!random_rows(rows, 0, rounds))
+        return false;
+
+    for (const auto& row: rows)
+    {
+        if (f::any(faults(row.g, row.point, row.k)))
+            return false;
+
+        const auto expected = complete(row.g, row.point, row.k);
+        if (!is_equal(product(row.g, row.point, row.k), expected))
+            return false;
+
+        terms split{};
+        accessor::append(split, g1, row.g);
+        accessor::append(split, row.point, row.k);
+        if (!is_equal(sum(split), expected))
+            return false;
+    }
+
+    return true;
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__pseudorandom__consistent)
+{
+    BOOST_CHECK(is_consistent(64));
 }
 
 // lanes
@@ -690,6 +819,76 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__lanes__match_integr
     check_multiply<xint128_t>();
     check_multiply<xint256_t>();
     check_multiply<xint512_t>();
+}
+
+template <size_t Lane, typename xWord>
+static bool lane_matches(const xjacobian<xWord>& out, xWord lane_faults,
+    const std_vector<random_row>& rows) NOEXCEPT
+{
+    if (is_nonzero(f::get<uint64_t, Lane>(lane_faults)))
+        return false;
+
+    const auto& row = rows[Lane];
+    return is_equal(unpack<Lane>(out), complete(row.g, row.point, row.k));
+}
+
+template <typename xWord>
+static bool lanes_match(const xjacobian<xWord>& out, xWord lane_faults,
+    const std_vector<random_row>& rows) NOEXCEPT
+{
+    auto match = lane_matches<0>(out, lane_faults, rows) &&
+        lane_matches<1>(out, lane_faults, rows);
+
+    if constexpr (lanes<xWord> >= 4)
+        match = match && lane_matches<2>(out, lane_faults, rows) &&
+            lane_matches<3>(out, lane_faults, rows);
+
+    if constexpr (lanes<xWord> >= 8)
+        match = match && lane_matches<4>(out, lane_faults, rows) &&
+            lane_matches<5>(out, lane_faults, rows) &&
+            lane_matches<6>(out, lane_faults, rows) &&
+            lane_matches<7>(out, lane_faults, rows);
+
+    return match;
+}
+
+// Products in each lane agree with those by bits.
+template <typename xWord>
+static bool is_lanes_consistent(size_t rounds) NOEXCEPT
+{
+    if constexpr (have<xWord>)
+    {
+        for (size_t round{}; round < rounds; ++round)
+        {
+            std_vector<random_row> rows{};
+            if (!random_rows(rows, round * 8, 8))
+                return false;
+
+            scalars lefts{}, rights{};
+            affines bases{};
+            for (size_t lane{}; lane < 8; ++lane)
+            {
+                lefts[lane] = rows[lane].g;
+                rights[lane] = rows[lane].k;
+                bases[lane] = rows[lane].point;
+            }
+
+            xjacobian<xWord> out{};
+            const auto lane_faults = accessor::multiply(out,
+                pack<xWord>(lefts), pack<xWord>(bases), pack<xWord>(rights));
+            if (!lanes_match(out, lane_faults, rows))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__pseudorandom_lanes__consistent)
+{
+    BOOST_CHECK(is_lanes_consistent<xint128_t>(8));
+    BOOST_CHECK(is_lanes_consistent<xint256_t>(8));
+    BOOST_CHECK(is_lanes_consistent<xint512_t>(8));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

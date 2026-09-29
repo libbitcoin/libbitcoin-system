@@ -130,11 +130,12 @@ const std::vector<decode_vector> decode_vectors
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_decode__vectors__expected_x)
 {
-    for (const auto& vector: decode_vectors)
+    for (size_t index{}; index < decode_vectors.size(); ++index)
     {
+        const auto& vector = decode_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE(ellswift::decode(point, vector.encoded));
-        BOOST_REQUIRE_EQUAL(to_x(point), vector.x);
+        BOOST_REQUIRE_MESSAGE(ellswift::decode(point, vector.encoded), index);
+        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x, index);
     }
 }
 
@@ -186,22 +187,23 @@ const std::vector<inverse_vector> inverse_vectors
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip324__swift_inverse__vectors__expected_t)
 {
-    for (const auto& vector: inverse_vectors)
+    for (size_t index{}; index < inverse_vectors.size(); ++index)
     {
+        const auto& vector = inverse_vectors[index];
         field u{}, x{};
-        BOOST_REQUIRE(accessor::from_bytes(u, vector.u));
-        BOOST_REQUIRE(accessor::from_bytes(x, vector.x));
+        BOOST_REQUIRE_MESSAGE(accessor::from_bytes(u, vector.u), index);
+        BOOST_REQUIRE_MESSAGE(accessor::from_bytes(x, vector.x), index);
 
         for (uint8_t branch{}; branch < 8u; ++branch)
         {
             field t{};
             const auto valid = get_right(vector.valid, branch);
-            BOOST_REQUIRE_EQUAL(accessor::swift_inverse(t, x, u, branch), valid);
+            BOOST_REQUIRE_MESSAGE(accessor::swift_inverse(t, x, u, branch) == valid, (index << 8 | branch));
             if (valid)
             {
                 bytes out{};
                 accessor::to_bytes(out, t);
-                BOOST_REQUIRE_EQUAL(out, vector.t[branch]);
+                BOOST_REQUIRE_MESSAGE(out == vector.t[branch], (index << 8 | branch));
             }
         }
     }
@@ -233,35 +235,38 @@ const std::vector<packet_vector> packet_vectors
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_decode__packet_vectors__expected_x)
 {
-    for (const auto& vector: packet_vectors)
+    for (size_t index{}; index < packet_vectors.size(); ++index)
     {
+        const auto& vector = packet_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE(ellswift::decode(point, vector.ours));
-        BOOST_REQUIRE_EQUAL(to_x(point), vector.x_ours);
-        BOOST_REQUIRE(ellswift::decode(point, vector.theirs));
-        BOOST_REQUIRE_EQUAL(to_x(point), vector.x_theirs);
+        BOOST_REQUIRE_MESSAGE(ellswift::decode(point, vector.ours), index);
+        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x_ours, index);
+        BOOST_REQUIRE_MESSAGE(ellswift::decode(point, vector.theirs), index);
+        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x_theirs, index);
     }
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip324__secret_to_public__packet_vectors__expected_x)
 {
-    for (const auto& vector: packet_vectors)
+    for (size_t index{}; index < packet_vectors.size(); ++index)
     {
+        const auto& vector = packet_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE(secret_to_public(point, vector.secret));
-        BOOST_REQUIRE_EQUAL(to_x(point), vector.x_ours);
+        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
+        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x_ours, index);
     }
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_exchange__packet_vectors__expected_secret)
 {
-    for (const auto& vector: packet_vectors)
+    for (size_t index{}; index < packet_vectors.size(); ++index)
     {
+        const auto& vector = packet_vectors[index];
         hash_digest shared{};
         const auto& key_a = vector.initiating ? vector.ours : vector.theirs;
         const auto& key_b = vector.initiating ? vector.theirs : vector.ours;
-        BOOST_REQUIRE(ellswift::exchange(shared, vector.secret, key_a, key_b, !vector.initiating));
-        BOOST_REQUIRE_EQUAL(shared, vector.shared);
+        BOOST_REQUIRE_MESSAGE(ellswift::exchange(shared, vector.secret, key_a, key_b, !vector.initiating), index);
+        BOOST_REQUIRE_MESSAGE(shared == vector.shared, index);
     }
 }
 
