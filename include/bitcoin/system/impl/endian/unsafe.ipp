@@ -21,21 +21,33 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/integrals.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
 
 namespace libbitcoin {
 namespace system {
-    
+
 // Unguarded endian read from byte pointer.
 // ----------------------------------------------------------------------------
 // byte_cast is not constexpr.
+// Pointers are not aligned, and arm32 may fault on multibyte access.
 
 template <typename Integral, typename Byte,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
 inline Integral unsafe_from_big_endian(const Byte* data) NOEXCEPT
 {
-    return native_from_big_end(unsafe_byte_cast<Integral>(data));
+    if constexpr (have_arm32)
+    {
+        // integral, zero offset.
+        const auto& bytes = unsafe_array_cast<uint8_t, sizeof(Integral)>(data);
+        return from_big<Integral>(bytes);
+    }
+    else
+    {
+        // cast/swap.
+        return native_from_big_end(unsafe_byte_cast<Integral>(data));
+    }
 }
 
 template <typename Integral, typename Byte,
@@ -43,7 +55,17 @@ template <typename Integral, typename Byte,
     if_integral_integer<Integral>>
 inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT
 {
-    return native_from_little_end(unsafe_byte_cast<Integral>(data));
+    if constexpr (have_arm32)
+    {
+        // integral, zero offset.
+        const auto& bytes = unsafe_array_cast<uint8_t, sizeof(Integral)>(data);
+        return from_little<Integral>(bytes);
+    }
+    else
+    {
+        // cast/swap.
+        return native_from_little_end(unsafe_byte_cast<Integral>(data));
+    }
 }
 
 // Unguarded variable integer read from byte pointer (advancing).
@@ -85,13 +107,24 @@ inline uint64_t unsafe_from_variable(const Byte*& data) NOEXCEPT
 
 // Unguarded endian write from byte pointer.
 // ----------------------------------------------------------------------------
+// Pointers are not aligned, and arm32 may fault on multibyte access.
 
 template <typename Integral, typename Byte,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
 inline void unsafe_to_big_endian(Byte* data, Integral value) NOEXCEPT
 {
-    unsafe_byte_cast<Integral>(data) = native_to_big_end(value);
+    if constexpr (have_arm32)
+    {
+        // integral, zero offset.
+        auto& bytes = unsafe_array_cast<uint8_t, sizeof(Integral)>(data);
+        to_big(bytes, value);
+    }
+    else
+    {
+        // swap/cast.
+        unsafe_byte_cast<Integral>(data) = native_to_big_end(value);
+    }
 }
 
 template <typename Integral, typename Byte,
@@ -99,7 +132,17 @@ template <typename Integral, typename Byte,
     if_integral_integer<Integral>>
 inline void unsafe_to_little_endian(Byte* data, Integral value) NOEXCEPT
 {
-    unsafe_byte_cast<Integral>(data) = native_to_little_end(value);
+    if constexpr (have_arm32)
+    {
+        // integral, zero offset.
+        auto& bytes = unsafe_array_cast<uint8_t, sizeof(Integral)>(data);
+        to_little(bytes, value);
+    }
+    else
+    {
+        // swap/cast.
+        unsafe_byte_cast<Integral>(data) = native_to_little_end(value);
+    }
 }
 
 } // namespace system

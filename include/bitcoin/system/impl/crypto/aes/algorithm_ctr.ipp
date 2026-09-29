@@ -276,12 +276,13 @@ sliced_ctr(byte_span out, const_byte_span in, size_t start,
 
             xencrypt<Word>(xstream, wide);
 
-            // Whole passes are applied in words, directly to out.
+            // Whole passes are applied directly to out, in bytes, as caller
+            // buffers are not word aligned. A loop over word casts of them
+            // may be vectorized with aligned stores, which fault.
             if ((out.size() - byte) >= size)
             {
-                constexpr auto words = size / sizeof(uint64_t);
-                const auto& keystream = array_cast<uint64_t>(xstream);
-                auto& to = unsafe_array_cast<uint64_t, words>(
+                const auto& keystream = array_cast<uint8_t>(xstream);
+                auto& to = unsafe_array_cast<uint8_t, size>(
                     std::next(out.data(), byte));
 
                 if (in.empty())
@@ -290,11 +291,11 @@ sliced_ctr(byte_span out, const_byte_span in, size_t start,
                 }
                 else
                 {
-                    const auto& from = unsafe_array_cast<uint64_t, words>(
+                    const auto& from = unsafe_array_cast<uint8_t, size>(
                         std::next(in.data(), byte));
 
-                    for (size_t word{}; word < words; ++word)
-                        to[word] = bit_xor(from[word], keystream[word]);
+                    for (size_t index{}; index < size; ++index)
+                        to[index] = bit_xor(from[index], keystream[index]);
                 }
 
                 counter = next;

@@ -36,7 +36,7 @@ template <size_t Size>
 constexpr unsigned_type<Size>
 from_big_endian(const data_array<Size>& data) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         // integral, zero offset.
         return from_big<unsigned_type<Size>>(data);
@@ -52,7 +52,7 @@ template <size_t Size>
 constexpr unsigned_type<Size>
 from_little_endian(const data_array<Size>& data) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         // integral, zero offset.
         return from_little<unsigned_type<Size>>(data);

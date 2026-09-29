@@ -252,6 +252,8 @@ INLINE constexpr void CLASS::
 konstant(buffer_t& buffer) NOEXCEPT
 {
     // This optimization is neutral in 4/8/16 lane sha256 perf.
+    // Enabling requires f::load/f::store, as indexing a vector cast of
+    // storage not vector aligned emits aligned moves, which fault.
     ////if (std::is_constant_evaluated())
     ////{
     ////    konstant_(buffer);
