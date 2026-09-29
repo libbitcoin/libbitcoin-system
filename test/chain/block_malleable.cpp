@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(block__malleable__empty__false)
     BOOST_REQUIRE(!instance.is_malleable32());
     BOOST_REQUIRE(!instance.is_malleable32(0, 0));
     BOOST_REQUIRE(!instance.is_malleated32());
-    BOOST_REQUIRE(!instance.is_malleated32(0));
+    BOOST_REQUIRE(!block::is_malleated32({}, 0));
 }
 
 // is_malleable
