@@ -137,6 +137,9 @@ public:
     /// Requires no metadata, true if spend in own block would be locked.
     bool is_internally_locked(const input& in) const NOEXCEPT;
 
+    /// Input iterator at index (unguarded).
+    input_iterator input_at(uint32_t index) const NOEXCEPT;
+
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
@@ -268,7 +271,6 @@ private:
     static sizes serialized_size(const input_cptrs& inputs,
         const output_cptrs& outputs, bool segregated) NOEXCEPT;
 
-    input_iterator input_at(uint32_t index) const NOEXCEPT;
     chain::points points() const NOEXCEPT;
 
     // delegated

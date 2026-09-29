@@ -40,7 +40,7 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     uint32_t active_flags, const chain::signatures& capture) NOEXCEPT
   : transaction_(tx),
     input_(input),
-    script_((*input)->script_ptr()),
+    script_(traits::at(input).script_ptr()),
     flags_(bit_and(active_flags, bip342_mask)),
     value_(max_uint64),
     version_(script_version::unversioned),
@@ -97,7 +97,7 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     input_(input),
     script_(script),
     flags_(bit_and(active_flags, bip342_mask)),
-    value_((*input)->prevout->value()),
+    value_(traits::at(input).prevout->value()),
     version_(version),
     capture_(capture),
     witness_(witness),
@@ -120,7 +120,7 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     input_(input),
     script_(script),
     flags_(active_flags),
-    value_((*input)->prevout->value()),
+    value_(traits::at(input).prevout->value()),
     version_(version),
     capture_(capture),
     witness_(witness),
@@ -128,7 +128,7 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     primary_(projection<Stack>(*witness)),
     budget_(ceilinged_add(
         add1(chain::signature_cost),
-        (*input)->witness().serialized_size(true)))
+        traits::at(input).witness().serialized_size(true)))
 {
     script_->clear_offset();
 }

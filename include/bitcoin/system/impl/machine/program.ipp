@@ -106,17 +106,17 @@ end() const NOEXCEPT
 }
 
 TEMPLATE
-INLINE const chain::transaction& CLASS::
+INLINE const Tx& CLASS::
 tx() const NOEXCEPT
 {
     return transaction_;
 }
 
 TEMPLATE
-INLINE const chain::input& CLASS::
+INLINE const typename CLASS::input_t& CLASS::
 input() const NOEXCEPT
 {
-    return **input_;
+    return traits::at(input_);
 }
 
 TEMPLATE

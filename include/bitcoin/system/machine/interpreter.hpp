@@ -39,8 +39,10 @@ public:
 
     /// Aliases.
     using state = Program;
+    using traits = typename state::traits;
+    using transaction = typename state::transaction;
     using op_iterator = typename state::op_iterator;
-    using input_iterator = chain::input_cptrs::const_iterator;
+    using input_iterator = typename state::input_iterator;
 
     /// Use program constructors.
     using Program::Program;
@@ -50,11 +52,11 @@ public:
 
     /// Connect tx.input[#].script to tx.input[#].prevout.script.
     static code connect(const chain::context& state,
-        const chain::transaction& tx, uint32_t index) NOEXCEPT;
+        const transaction& tx, uint32_t index) NOEXCEPT;
 
     /// Connect tx.input[*].script to tx.input[*].prevout.script.
     static code connect(const chain::context& state,
-        const chain::transaction& tx, const input_iterator& it,
+        const transaction& tx, const input_iterator& it,
         const chain::signatures& capture) NOEXCEPT;
 
 protected:
@@ -65,12 +67,12 @@ protected:
 
     /// Embedded script handler.
     static code connect_embedded(const chain::context& state,
-        const chain::transaction& tx, const input_iterator& it,
+        const transaction& tx, const input_iterator& it,
         interpreter& in_program, const chain::signatures& capture) NOEXCEPT;
 
     /// Witnessed script handler.
     static code connect_witness(const chain::context& state,
-        const chain::transaction& tx, const input_iterator& it,
+        const transaction& tx, const input_iterator& it,
         const chain::script& prevout, bool embedded,
         const chain::signatures& capture) NOEXCEPT;
 
