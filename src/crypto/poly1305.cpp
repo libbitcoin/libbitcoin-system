@@ -84,6 +84,14 @@ poly1305::poly1305(const secret& key) NOEXCEPT
     pad_[3] = unsafe_from_little_endian<uint32_t>(&key[28]);
 }
 
+poly1305::~poly1305() NOEXCEPT
+{
+    wipe(r_);
+    wipe(h_);
+    wipe(pad_);
+    wipe(buffer_);
+}
+
 // multiplication
 // ----------------------------------------------------------------------------
 

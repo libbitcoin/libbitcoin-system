@@ -382,4 +382,35 @@ BOOST_AUTO_TEST_CASE(memory__to_unique4__values__expected)
     BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
+// wipe
+
+BOOST_AUTO_TEST_CASE(memory__wipe__pointer_and_size__zeroed)
+{
+    data_chunk value(42, 0xff);
+    wipe(value.data(), value.size());
+    BOOST_REQUIRE_EQUAL(value, data_chunk(42, 0x00));
+}
+
+BOOST_AUTO_TEST_CASE(memory__wipe__partial__prefix_zeroed)
+{
+    data_chunk value(4, 0xff);
+    wipe(value.data(), 2);
+    BOOST_REQUIRE_EQUAL(value, base16_chunk("0000ffff"));
+}
+
+BOOST_AUTO_TEST_CASE(memory__wipe__array__zeroed)
+{
+    auto value = base16_array("0123456789abcdef");
+    wipe(value);
+    BOOST_REQUIRE_EQUAL(value, base16_array("0000000000000000"));
+}
+
+BOOST_AUTO_TEST_CASE(memory__wipe__object__zeroed)
+{
+    type value{ 1, 2 };
+    wipe(value);
+    BOOST_REQUIRE_EQUAL(value.left, 0);
+    BOOST_REQUIRE_EQUAL(value.right, 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

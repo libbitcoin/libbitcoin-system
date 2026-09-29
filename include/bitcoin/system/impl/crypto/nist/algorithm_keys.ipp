@@ -44,13 +44,14 @@ bool CLASS::
 public_key(point_t& out, const secret_t& secret) NOEXCEPT
 {
     static const auto table = generator_table();
-    const auto d = to_limbs(secret);
+    auto d = to_limbs(secret);
     if (!is_scalar(d))
         return false;
 
     limbs_t x{}, y{};
     to_affine(x, y, multiply(table, d));
     out = serialize(x, y);
+    wipe(d);
     return true;
 }
 

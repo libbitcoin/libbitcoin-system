@@ -44,7 +44,10 @@ public:
     typedef data_array<tag_size> tag;
 
     /// Poly1305 accumulator, not resettable.
+    DEFAULT_COPY_MOVE(poly1305);
+
     poly1305(const secret& key) NOEXCEPT;
+    ~poly1305() NOEXCEPT;
 
     void write(const_byte_span data) NOEXCEPT;
     void flush(tag& out) NOEXCEPT;

@@ -33,10 +33,10 @@ template <typename Algorithm>
 class hmac
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(hmac);
+    DEFAULT_COPY_MOVE(hmac);
     using digest_t = typename Algorithm::digest_t;
 
-    /// hmac accumulator, not resettable.
+    /// hmac accumulator, not resettable (the owner wipes key material).
     inline hmac(const data_slice& key) NOEXCEPT;
 
     inline void write(const data_slice& data) NOEXCEPT;

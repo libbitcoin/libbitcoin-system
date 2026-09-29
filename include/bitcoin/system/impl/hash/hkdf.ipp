@@ -64,7 +64,10 @@ expand(data_array<Size>& out, const digest_t& key,
         mac.write(count);
         t = mac.flush();
         it = std::copy_n(t.cbegin(), (block == blocks ? remain : length), it);
+        wipe(mac);
     }
+
+    wipe(t);
 }
 
 TEMPLATE

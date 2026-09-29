@@ -378,6 +378,13 @@ chacha20::chacha20(const secret& key) NOEXCEPT
     set_key(key);
 }
 
+chacha20::~chacha20() NOEXCEPT
+{
+    wipe(key_);
+    wipe(nonce_);
+    wipe(buffer_);
+}
+
 void chacha20::set_key(const secret& key) NOEXCEPT
 {
     // The next eight words (4-11) are taken from the 256-bit key by reading

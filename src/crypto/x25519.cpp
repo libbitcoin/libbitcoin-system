@@ -110,7 +110,13 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     invert(c, c);
     multiply(a, a, c);
     pack(out, a);
-    clamped = {};
+    wipe(clamped);
+    wipe(a);
+    wipe(b);
+    wipe(c);
+    wipe(d);
+    wipe(e);
+    wipe(f);
 
     // An all zero result indicates a low order point.
     return std::any_of(out.cbegin(), out.cend(), [](uint8_t byte) NOEXCEPT

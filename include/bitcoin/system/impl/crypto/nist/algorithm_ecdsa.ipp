@@ -45,19 +45,21 @@ sign(signature_t& out, const secret_t& secret, const_byte_span digest) NOEXCEPT
     constexpr data_array<one> zero_byte{ 0x00 };
     constexpr data_array<one> one_byte{ 0x01 };
 
-    const auto d = to_limbs(secret);
+    auto d = to_limbs(secret);
     if (!is_scalar(d))
         return false;
 
     const auto e = to_scalar(digest);
     const auto h1 = to_bytes(e);
     const auto em = to_montgomery(e, n);
-    const auto dm = to_montgomery(d, n);
+    auto dm = to_montgomery(d, n);
     const auto mac = [](const digest_t& key, const auto&... parts) NOEXCEPT
     {
         hmac_t code{ key };
         (code.write(parts), ...);
-        return code.flush();
+        const auto digest = code.flush();
+        wipe(code);
+        return digest;
     };
 
     digest_t v{};
@@ -80,21 +82,30 @@ sign(signature_t& out, const secret_t& secret, const_byte_span digest) NOEXCEPT
             std::copy_n(v.cbegin(), count, to);
         }
 
-        const auto nonce = to_limbs(candidate);
+        auto nonce = to_limbs(candidate);
         if (is_scalar(nonce))
         {
             limbs_t x{}, y{};
             to_affine(x, y, multiply(table, nonce));
             const auto r = reduce(x);
             const auto rm = to_montgomery(r, n);
-            const auto km = to_montgomery(nonce, n);
-            const auto total = add(em, multiply(rm, dm, n), n);
-            const auto sm = multiply(inverse(km, n), total, n);
+            auto km = to_montgomery(nonce, n);
+            auto total = add(em, multiply(rm, dm, n), n);
+            auto sm = multiply(inverse(km, n), total, n);
             const auto s = from_montgomery(sm, n);
 
             if (!is_zero(r) && !is_zero(s))
             {
                 out = splice(to_bytes(r), to_bytes(s));
+                wipe(d);
+                wipe(dm);
+                wipe(k);
+                wipe(v);
+                wipe(candidate);
+                wipe(nonce);
+                wipe(km);
+                wipe(total);
+                wipe(sm);
                 return true;
             }
         }
