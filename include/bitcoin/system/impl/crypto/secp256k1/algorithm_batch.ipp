@@ -187,7 +187,8 @@ bool algorithm::verify_schnorr(data_chunk& results,
             const auto& r = array_cast<uint8_t, size>(signature);
             field_t<uint64_t> rx{};
             if (!from_bytes(xs[lane], key) || !from_bytes(rx, r) ||
-                !from_bytes(s[lane], array_cast<uint8_t, size, size>(signature)))
+                !from_bytes(s[lane],
+                    array_cast<uint8_t, size, size>(signature)))
             {
                 xs[lane] = generator.x;
                 s[lane] = { 1 };

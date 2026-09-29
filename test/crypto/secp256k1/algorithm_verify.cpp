@@ -156,7 +156,7 @@ static bool ecdsa_verify(const ec_compressed& key, const hash_digest& hash,
         accessor::verify_ecdsa(point, hash, r, s);
 }
 
-// Local verification of a libsecp256k1 signature, agreeing with libsecp256k1.
+// Local verification of a signature by the linked implementation.
 static bool ecdsa_signed(const ec_secret& secret, const hash_digest& hash,
     bool mutate) NOEXCEPT
 {
@@ -197,7 +197,7 @@ static bool schnorr_verify(const bytes& key, const data_slice& message,
     return accessor::verify_schnorr(key, challenge(signature, key, message), r, s);
 }
 
-// Local verification of a libsecp256k1 signature, agreeing with libsecp256k1.
+// Local verification of a signature by the linked implementation.
 static bool schnorr_signed(const ec_secret& secret, const hash_digest& hash,
     bool mutate) NOEXCEPT
 {

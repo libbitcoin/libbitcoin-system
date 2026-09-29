@@ -226,5 +226,4 @@ int secp256k1_ellswift_xdh(const secp256k1_context* ctx, uint8_t* output,
     int party, secp256k1_ellswift_xdh_hash_function hashfp,
     void* data) NOEXCEPT;
 
-
 #endif

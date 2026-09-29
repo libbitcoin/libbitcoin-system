@@ -565,7 +565,8 @@ constexpr Word algorithm::square_root(field_t<Word>& r,
 template <typename Word>
 constexpr Word algorithm::is_zero_element(const field_t<Word>& a) NOEXCEPT
 {
-    const auto merged = f::or_(f::or_(f::or_(f::or_(a[0], a[1]), a[2]), a[3]), a[4]);
+    const auto merged = f::or_(f::or_(f::or_(f::or_(a[0], a[1]), a[2]),
+        a[3]), a[4]);
     return f::eq<64>(merged, f::broadcast<Word>(uint64_t{}));
 }
 

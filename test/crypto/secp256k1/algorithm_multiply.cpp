@@ -135,11 +135,12 @@ static affine entry(size_t index) NOEXCEPT
     const auto slice = accessor::generator_slices[index / accessor::slice_size];
     const auto offset = accessor::locate(index % accessor::slice_size);
     affine out{};
+    const auto size = out.x.size();
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    for (size_t limb{}; limb < out.x.size(); ++limb)
+    for (size_t limb{}; limb < size; ++limb)
     {
         out.x[limb] = slice[offset + limb * accessor::block_size];
-        out.y[limb] = slice[offset + (out.x.size() + limb) * accessor::block_size];
+        out.y[limb] = slice[offset + (size + limb) * accessor::block_size];
     }
     BC_POP_WARNING()
     return out;
@@ -148,7 +149,8 @@ static affine entry(size_t index) NOEXCEPT
 static affine looked_up(size_t index, bool mapped, bool negative) NOEXCEPT
 {
     affine out{};
-    accessor::lookup(out, uint64_t{ index }, mapped, negative ? max_uint64 : 0_u64);
+    const auto mask = negative ? max_uint64 : 0_u64;
+    accessor::lookup(out, uint64_t{ index }, mapped, mask);
     accessor::normalize(out.x);
     accessor::normalize(out.y);
     return out;

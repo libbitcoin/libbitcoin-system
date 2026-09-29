@@ -35,7 +35,7 @@ namespace system {
 namespace secp256k1 {
 
 /// secp256k1 arithmetic over integral or extended integral words.
-/// Extended words compute one element per 64 bit lane (requires ifma).
+/// Extended words compute one element per 64 bit lane.
 class algorithm
 {
 protected:
@@ -383,7 +383,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// r from bytes mod n, false if bytes not less than n.
-    static constexpr bool from_bytes(scalar_t& r, const bytes_t& bytes) NOEXCEPT;
+    static constexpr bool from_bytes(scalar_t& r,
+        const bytes_t& bytes) NOEXCEPT;
 
     /// bytes from a.
     static constexpr void to_bytes(bytes_t& out, const scalar_t& a) NOEXCEPT;
@@ -403,7 +404,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
-    static constexpr bool is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT;
+    static constexpr bool is_less(const scalar_t& a,
+        const scalar_t& b) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, const wide_t& l) NOEXCEPT;
 

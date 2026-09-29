@@ -347,7 +347,7 @@ public:
 
         const auto nonce = is_null(noncefp) ? &rfc6979 : noncefp;
         const auto z = to_scalar(msg32);
-        auto signed_ = false;
+        auto done = false;
         const auto message = data_slice{ to_array(msg32) };
 
         scalar k{}, m{}, b{};
@@ -366,7 +366,7 @@ public:
             b = blind(d, message, 1);
             if (sign_ecdsa(r, s, id, d, z, k, m, b))
             {
-                signed_ = true;
+                done = true;
                 break;
             }
         }
@@ -377,7 +377,7 @@ public:
         wipe(m);
         wipe(b);
         wipe(nonce32);
-        if (!signed_ || !valid)
+        if (!done || !valid)
         {
             r = {};
             s = {};
@@ -501,9 +501,6 @@ int secp256k1_ec_pubkey_parse(const secp256k1_context*,
     secp256k1_pubkey* pubkey, const uint8_t* input, size_t inputlen) NOEXCEPT
 {
     pubkey->data = {};
-    if (is_null(input))
-        return failure;
-
     local::affine point{};
     if (inputlen == ec_compressed_size)
     {
@@ -537,7 +534,7 @@ int secp256k1_ec_pubkey_serialize(const secp256k1_context*, uint8_t* output,
     const auto required = compressed ? ec_compressed_size :
         ec_uncompressed_size;
 
-    if (is_null(outputlen) || *outputlen < required || is_null(output))
+    if (*outputlen < required)
         return failure;
 
     std::fill_n(output, *outputlen, uint8_t{});
@@ -688,7 +685,7 @@ int secp256k1_ec_pubkey_combine(const secp256k1_context*,
     size_t n) NOEXCEPT
 {
     out->data = {};
-    if (is_zero(n) || is_null(ins))
+    if (is_zero(n))
         return failure;
 
     local::jacobian sum{};
@@ -696,7 +693,7 @@ int secp256k1_ec_pubkey_combine(const secp256k1_context*,
     for (size_t index{}; index < n; ++index)
     {
         local::affine point{};
-        if (is_null(ins[index]) || !local::load<zero>(point, ins[index]->data))
+        if (!local::load<zero>(point, ins[index]->data))
             return failure;
 
         local::add_complete(sum, sum, point);
@@ -736,6 +733,10 @@ int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     const secp256k1_ecdsa_signature* sig) NOEXCEPT
 {
     constexpr auto size = array_count<local::bytes>;
+    constexpr uint8_t sequence = 0x30;
+    constexpr uint8_t integer = 0x02;
+    constexpr uint8_t sign = 0x80;
+    constexpr size_t tagged = two;
     local::scalar r{}, s{};
     local::load(r, s, sig->data);
 
@@ -747,7 +748,7 @@ int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     {
         size_t start{};
         while (start < size && is_zero(value[start]) &&
-            value[add1(start)] < 0x80u)
+            value[add1(start)] < sign)
             ++start;
 
         return start;
@@ -757,7 +758,8 @@ int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     const auto s_start = trim(s_bytes);
     const auto r_size = add1(size) - r_start;
     const auto s_size = add1(size) - s_start;
-    const auto total = 6u + r_size + s_size;
+    const auto content = tagged + r_size + tagged + s_size;
+    const auto total = tagged + content;
     if (*outputlen < total)
     {
         LCOV_EXCL_START("Wrappers provide the maximal buffer.")
@@ -767,16 +769,15 @@ int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     }
 
     *outputlen = total;
-    output[0] = 0x30;
-    output[1] = narrow_cast<uint8_t>(4u + r_size + s_size);
-    output[2] = 0x02;
-    output[3] = narrow_cast<uint8_t>(r_size);
-    std::copy_n(std::next(r_bytes.begin(), r_start), r_size,
-        std::next(output, 4));
-    output[4 + r_size] = 0x02;
-    output[5 + r_size] = narrow_cast<uint8_t>(s_size);
-    std::copy_n(std::next(s_bytes.begin(), s_start), s_size,
-        std::next(output, 6 + r_size));
+    auto out = output;
+    *out++ = sequence;
+    *out++ = narrow_cast<uint8_t>(content);
+    *out++ = integer;
+    *out++ = narrow_cast<uint8_t>(r_size);
+    out = std::copy_n(std::next(r_bytes.begin(), r_start), r_size, out);
+    *out++ = integer;
+    *out++ = narrow_cast<uint8_t>(s_size);
+    std::copy_n(std::next(s_bytes.begin(), s_start), s_size, out);
     return success;
 }
 
@@ -907,9 +908,6 @@ int secp256k1_xonly_pubkey_parse(const secp256k1_context*,
     secp256k1_xonly_pubkey* pubkey, const uint8_t* input32) NOEXCEPT
 {
     pubkey->data = {};
-    if (is_null(input32))
-        return failure;
-
     local::field x{};
     local::affine point{};
     if (!local::from_bytes(x, local::to_array(input32)) ||

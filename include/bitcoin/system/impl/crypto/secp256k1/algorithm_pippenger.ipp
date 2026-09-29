@@ -117,7 +117,8 @@ inline void algorithm::multiply(jacobian_t<uint64_t>& r,
 
     jacobian_t<uint64_t> empty{};
     empty.infinity = max_uint64;
-    std_vector<jacobian_t<uint64_t>> buckets(possible_narrow_cast<size_t>(half));
+    std_vector<jacobian_t<uint64_t>> buckets(
+        possible_narrow_cast<size_t>(half));
     std_vector<jacobian_t<uint64_t>> sums(windows);
     data_chunk carries(terms.size());
 

@@ -52,7 +52,8 @@ constexpr void algorithm::reduce(scalar_t& r, bool overflow) NOEXCEPT
     const auto mask = overflow ? max_uint64 : 0_u64;
     auto carry = false;
     for (size_t limb{}; limb < r.size(); ++limb)
-        carry = add_carry(r[limb], r[limb], order_complement[limb] & mask, carry);
+        carry = add_carry(r[limb], r[limb], order_complement[limb] & mask,
+            carry);
 }
 
 // Folds limbs above 2^256 by 2^256 = 2^256 - n (mod n), from 512 to 385 to
@@ -262,7 +263,8 @@ constexpr void algorithm::recode(digits_t<Count>& digits,
         const auto low = to_signed(remainder[0] & window);
         digits[digit] = narrow_cast<int16_t>(low - offset);
 
-        remainder[0] = set_right((remainder[0] >> Bits) | (remainder[1] << rest));
+        remainder[0] = set_right((remainder[0] >> Bits) |
+            (remainder[1] << rest));
         remainder[1] = (remainder[1] >> Bits) | (remainder[2] << rest);
         remainder[2] = (remainder[2] >> Bits) | (remainder[3] << rest);
         remainder[3] = (remainder[3] >> Bits);
