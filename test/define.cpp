@@ -72,6 +72,12 @@
     static_assert(!have_sha);
 #endif
 
+#if defined(HAVE_SHA512)
+    static_assert(have_sha512);
+#else
+    static_assert(!have_sha512);
+#endif
+
 #if defined(HAVE_AES)
     static_assert(have_aes);
 #else
@@ -156,6 +162,12 @@
     static_assert(!have_crypto);
 #endif
 
+#if defined(HAVE_SHA3)
+    static_assert(have_sha3);
+#else
+    static_assert(!have_sha3);
+#endif
+
 // hierarchy
 static_assert(!have_avx2 || have_sse41);
 static_assert(!have_avx512 || have_avx2);
@@ -165,3 +177,5 @@ static_assert(!have_shani || have_sse41);
 static_assert(!have_aesni || have_sse41);
 static_assert(!have_vaes || (have_aesni && have_avx2));
 static_assert(!have_crypto || have_neon);
+static_assert(!have_sha512 || have_avx2 || have_sha3);
+static_assert(!have_sha3 || (have_sha512 && have_neon));
