@@ -181,8 +181,8 @@ jobs:
           - image: ubuntu-24.04
             config: "debug"
             link: "dynamic"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -192,8 +192,8 @@ jobs:
           - image: ubuntu-24.04
             config: "debug"
             link: "static"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -203,8 +203,8 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "dynamic"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -214,8 +214,8 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "static"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -676,8 +676,8 @@ jobs:
           - image: ubuntu-24.04
             config: "debug"
             link: "dynamic"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -687,8 +687,8 @@ jobs:
           - image: ubuntu-24.04
             config: "debug"
             link: "static"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -698,8 +698,8 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "dynamic"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -709,8 +709,8 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "static"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -1118,8 +1118,8 @@ jobs:
 
           - image: ubuntu-24.04
             preset: "nix-gnu-debug-shared"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -1128,8 +1128,8 @@ jobs:
 
           - image: ubuntu-24.04
             preset: "nix-gnu-debug-static"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -1138,8 +1138,8 @@ jobs:
 
           - image: ubuntu-24.04
             preset: "nix-gnu-release-shared"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -1148,8 +1148,8 @@ jobs:
 
           - image: ubuntu-24.04
             preset: "nix-gnu-release-static"
-            cc: "gcc-12"
-            cxx: "g++-12"
+            cc: "gcc-13"
+            cxx: "g++-13"
             flags: ""
             coverage: ""
             boost: "--build-boost"
