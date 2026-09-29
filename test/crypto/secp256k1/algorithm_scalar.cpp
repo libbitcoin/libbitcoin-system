@@ -39,6 +39,8 @@ public:
     using algorithm::recode;
     using algorithm::is_zero_scalar;
     using algorithm::is_high;
+    using algorithm::is_less;
+    using algorithm::is_overflow;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
 };
@@ -337,5 +339,11 @@ static_assert(!accessor::is_high(accessor::half_order));
 static_assert(accessor::is_high(scalar_add(accessor::half_order, decode(one_value))));
 static_assert(accessor::is_high(decode(order_minus_one)));
 static_assert(!accessor::is_high(decode(one_value)));
+static_assert(accessor::is_less(decode(zero_value), decode(one_value)));
+static_assert(!accessor::is_less(decode(one_value), decode(one_value)));
+static_assert(!accessor::is_less(decode(one_value), decode(zero_value)));
+static_assert(accessor::is_less(decode(order_minus_one), accessor::order));
+static_assert(!accessor::is_overflow(decode(order_minus_one)));
+static_assert(accessor::is_overflow(accessor::order));
 
 BOOST_AUTO_TEST_SUITE_END()

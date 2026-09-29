@@ -183,6 +183,29 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
     BOOST_CHECK(verify_signature(compressed, sighash, expected_signature));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__sign__hash_not_below_n__verifies)
+{
+    using namespace system::ecdsa;
+    const hash_digest hash = base16_array("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    ec_compressed point;
+    BOOST_REQUIRE(secret_to_public(point, secret3));
+
+    ec_signature signature;
+    BOOST_REQUIRE(sign(signature, secret3, hash));
+    BOOST_REQUIRE(verify_signature(point, hash, signature));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__r_not_below_n__false)
+{
+    using namespace system::ecdsa;
+    ec_compressed point;
+    BOOST_REQUIRE(secret_to_public(point, secret3));
+
+    auto signature = signature3;
+    array_cast<uint64_t, 4>(signature) = { 0xbfd25e8cd0364141, 0xbaaedce6af48a03b, 0xfffffffffffffffe, 0xffffffffffffffff };
+    BOOST_REQUIRE(!verify_signature(point, sighash3, signature));
+}
+
 // Lax DER parsing [pre-bip66], malformed encodings.
 
 static bool lax(const data_chunk& der) NOEXCEPT

@@ -64,6 +64,7 @@ public:
     using algorithm::inverse;
     using algorithm::is_high;
     using algorithm::is_odd_element;
+    using algorithm::is_overflow;
     using algorithm::is_zero_scalar;
     using algorithm::lift;
     using algorithm::linear;
@@ -71,6 +72,7 @@ public:
     using algorithm::negate;
     using algorithm::nonce_schnorr;
     using algorithm::normalize;
+    using algorithm::normalizes_to_zero;
     using algorithm::recover;
     using algorithm::secret_multiply;
     using algorithm::swift_decode;
@@ -213,8 +215,8 @@ public:
     // Nonces.
     // ------------------------------------------------------------------------
 
-    // HMAC-SHA256 generator of RFC6979 3.2, over key, message mod n, and
-    // optional data and algorithm, returning the output of attempt + 1 calls.
+    // HMAC-SHA256 generator of RFC6979 3.2, over key, message, and optional
+    // data and algorithm, returning the output of attempt + 1 calls.
     static int rfc6979(uint8_t* nonce32, const uint8_t* msg32,
         const uint8_t* key32, const uint8_t* algo16, void* data,
         unsigned int attempt) NOEXCEPT
@@ -222,12 +224,10 @@ public:
         constexpr data_array<1> zero_byte{ 0x00 };
         constexpr data_array<1> one_byte{ 0x01 };
 
-        bytes message{};
-        algorithm::to_bytes(message, to_scalar(msg32));
-
         data_chunk seed{};
         seed.reserve(112);
         const auto& key = to_array(key32);
+        const auto& message = to_array(msg32);
         seed.insert(seed.end(), key.begin(), key.end());
         seed.insert(seed.end(), message.begin(), message.end());
         if (!is_null(data))
@@ -404,13 +404,13 @@ public:
         copy.flush(out.data());
     }
 
-    // Draws u and branches from hasher until the branch inverts x (u), then
-    // matches the parity of t to that of y.
+    // Draws branches and nonzero u below p from hasher until the branch
+    // inverts x, then matches the parity of t to that of y.
     static void encode(uint8_t* ell64, const affine& point,
         const accumulator<sha256>& hasher) NOEXCEPT
     {
         bytes branches{}, u32{};
-        field t{};
+        field u{}, t{};
         size_t remaining{};
         uint32_t counter{};
 
@@ -428,8 +428,9 @@ public:
                 (half >> (is_odd(remaining) ? 4u : 0u)) & 7u);
 
             random(u32, hasher, counter++);
-            auto u = to_element(u32.data());
-            normalize(u);
+            if (!from_bytes(u, u32) || normalizes_to_zero(u))
+                continue;
+
             if (swift_inverse(t, point.x, u, branch))
                 break;
         }
@@ -792,7 +793,8 @@ int secp256k1_ecdsa_verify(const secp256k1_context*,
     local::scalar r{}, s{};
     local::affine point{};
     local::load(r, s, sig->data);
-    return !local::is_high(s) && local::load<zero>(point, pubkey->data) &&
+    return !local::is_overflow(r) && !local::is_overflow(s) &&
+        !local::is_high(s) && local::load<zero>(point, pubkey->data) &&
         local::verify_ecdsa(point, local::to_scalar(msghash32), r, s) ?
             success : failure;
 }
