@@ -1671,4 +1671,14 @@ BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__maximum_size__pay_null_da
     BOOST_REQUIRE(script::is_pay_null_data_pattern(ops));
 }
 
+// A single byte numeric value is pushed as data, not as a number opcode.
+BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__numeric_byte__nominal_push)
+{
+    const data_chunk data{ 0x05 };
+    const auto ops = script::to_pay_null_data_pattern(data);
+    BOOST_REQUIRE_EQUAL(ops.size(), 2u);
+    BOOST_REQUIRE(ops[1].code() == opcode::push_size_1);
+    BOOST_REQUIRE(ops[1].data() == data);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
