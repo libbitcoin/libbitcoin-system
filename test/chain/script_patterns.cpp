@@ -1659,6 +1659,13 @@ BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__invalid_point__empty)
     BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
 }
 
+// Only op_1..op_16 can encode the key count.
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__seventeen_points__empty)
+{
+    const data_stack points(17, pattern_compressed);
+    BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
+}
+
 // pattern builders encode data nominally
 // -----------------------------------------------------------------------------
 
