@@ -24,9 +24,21 @@
 namespace libbitcoin {
 namespace system {
     
-namespace ios = boost::iostreams;
+/// Device categories, which determine the stream and its buffering.
+namespace ios
+{
+    struct input {};
+    struct output {};
+    struct input_seekable : input {};
+    struct output_seekable : output {};
+    struct seekable : input_seekable, output_seekable {};
+    struct sink_tag : output {};
+    struct direct_tag {};
+    struct flushable_tag {};
+    struct optimally_buffered_tag {};
+}
 
-/// Virtual base class for ios::stream devices.
+/// Virtual base class for make_stream devices.
 template <typename Container>
 class device
 {

@@ -63,10 +63,8 @@ static_assert(std::ios_base::badbit == 4);
 
 #ifdef STREAM_ISTREAM
 
-// Verify input stream behavior with our boost/copy_source and istringstream.
+// Verify input stream behavior with our copy_source and istringstream.
 // These test all of the istream methods utilized by byte_reader (all readers).
-// Empty failure behavior is inconsistent within and across implementations.
-// seekg behavior is also inconsistent in error handing (flag vs. exception).
 
 BOOST_AUTO_TEST_CASE(istream__bool__empty__true)
 {
@@ -203,9 +201,8 @@ BOOST_AUTO_TEST_CASE(istream__get__to_end__expected_valid)
     BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
 }
 
-BOOST_AUTO_TEST_CASE(istream__get__empty__inconsistent)
+BOOST_AUTO_TEST_CASE(istream__get__empty__eofbit_and_failbit)
 {
-    // -1, sets eof and fail, but not bad.
     std::istringstream isstream;
     BOOST_REQUIRE(isstream);
     BOOST_REQUIRE_EQUAL(isstream.get(), -1);
@@ -214,22 +211,14 @@ BOOST_AUTO_TEST_CASE(istream__get__empty__inconsistent)
     BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-    // zero, sets bad, but not eof or fail.
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
-
-    // zero on msvc, -1 on other platforms.
-#ifdef HAVE_MSC
-    BOOST_REQUIRE_EQUAL(istream.get(), 0x00);
+    BOOST_REQUIRE_EQUAL(istream.get(), -1);
     BOOST_REQUIRE(!istream);
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
-    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
-#else
-    istream.get();
-    BOOST_REQUIRE(!istream);
-#endif
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
 BOOST_AUTO_TEST_CASE(istream__get__past_end__eofbit_and_failbit)
@@ -252,9 +241,8 @@ BOOST_AUTO_TEST_CASE(istream__get__past_end__eofbit_and_failbit)
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(istream__peek__empty__inconsistent)
+BOOST_AUTO_TEST_CASE(istream__peek__empty__eofbit)
 {
-    // -1, eofbit
     std::istringstream isstream;
     BOOST_REQUIRE(isstream);
     BOOST_REQUIRE_EQUAL(isstream.peek(), -1);
@@ -263,22 +251,14 @@ BOOST_AUTO_TEST_CASE(istream__peek__empty__inconsistent)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::failbit));
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-    // 0, badbit
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
-
-    // zero on msvc, -1 on other platforms.
-#ifdef HAVE_MSC
-    BOOST_REQUIRE_EQUAL(istream.peek(), 0x00);
-    BOOST_REQUIRE(!istream);
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE_EQUAL(istream.peek(), -1);
+    BOOST_REQUIRE(istream);
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::eofbit));
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
-    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
-#else
-    istream.peek();
-    BOOST_REQUIRE(!istream);
-#endif
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
 BOOST_AUTO_TEST_CASE(istream__peek__failbit__failbit)
@@ -375,9 +355,8 @@ BOOST_AUTO_TEST_CASE(istream__read__empty_zero__valid)
     BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
 }
 
-BOOST_AUTO_TEST_CASE(istream__read__empty_one__inconsistent)
+BOOST_AUTO_TEST_CASE(istream__read__empty_one__eofbit_and_failbit)
 {
-    // sets eofbit and failbit
     std::istringstream isstream;
     std_vector<char> ssink(1, 0x00);
     BOOST_REQUIRE(isstream);
@@ -387,16 +366,15 @@ BOOST_AUTO_TEST_CASE(istream__read__empty_one__inconsistent)
     BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-    // sets badbit
     const std::string source;
     std_vector<char> sink(1, 0x00);
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
     BOOST_REQUIRE(!istream);
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::failbit));
-    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::badbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
 BOOST_AUTO_TEST_CASE(istream__read__to_end__expected_valid)
@@ -474,24 +452,20 @@ BOOST_AUTO_TEST_CASE(istream__read__failbit__failbit)
     BOOST_REQUIRE_EQUAL(sink, expected);
 }
 
-BOOST_AUTO_TEST_CASE(istream__seekg__empty_zero__inconsistent)
+BOOST_AUTO_TEST_CASE(istream__seekg__empty_zero__valid)
 {
-    // valid
     std::istringstream isstream;
     BOOST_REQUIRE(isstream);
     isstream.seekg(0, std::istringstream::cur);
     BOOST_REQUIRE(isstream);
     BOOST_REQUIRE_EQUAL(isstream.rdstate(), std::istream::goodbit);
 
-    // failbit
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.seekg(0, std::istream::cur);
-    BOOST_REQUIRE(!istream);
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
-    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
-    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
+    BOOST_REQUIRE(istream);
+    BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__non_empty_zero__valid)
@@ -576,7 +550,7 @@ BOOST_AUTO_TEST_CASE(istream__seekg__empty_negative_one__failbit)
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(istream__seekg__past_begin__inconsistent)
+BOOST_AUTO_TEST_CASE(istream__seekg__past_begin__failbit)
 {
     // failbit.
     std::istringstream isstream{ "*" };
@@ -586,21 +560,16 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_begin__inconsistent)
     BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-    // std::istream::failure
-    // Throws on msvc(prior to 2022).
     const std::string source{ "*" };
     stream::in::copy istream(source);
-#if defined(HAVE_MSC) && (_MSC_VER < 1931)
-    BOOST_REQUIRE_THROW(istream.seekg(-2, std::istream::cur), std::istream::failure);
-    BOOST_REQUIRE(istream);
-    BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
-#else
     istream.seekg(-2, std::istream::cur);
     BOOST_REQUIRE(!istream);
-#endif
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
-BOOST_AUTO_TEST_CASE(istream__seekg__past_end__inconsistent)
+BOOST_AUTO_TEST_CASE(istream__seekg__past_end__failbit)
 {
     // failbit
     std::istringstream isstream{ "*" };
@@ -610,25 +579,20 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_end__inconsistent)
     BOOST_REQUIRE(is_set(isstream.rdstate(), std::istringstream::failbit));
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
 
-    // std::istream::failure
-    // Throws on msvc prior to 2022.
     const std::string source{ "*" };
     stream::in::copy istream(source);
-#if defined(HAVE_MSC) && (_MSC_VER < 1931)
-    BOOST_REQUIRE_THROW(istream.seekg(2, std::istream::cur), std::istream::failure);
-    BOOST_REQUIRE(istream);
-    BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
-#else
     istream.seekg(2, std::istream::cur);
     BOOST_REQUIRE(!istream);
-#endif
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
+    BOOST_REQUIRE(is_set(istream.rdstate(), std::istream::failbit));
+    BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::badbit));
 }
 
 #endif // STREAM_ISTREAM
 
 #ifdef STREAM_OSTREAM
 
-// Verify output stream behavior with our two boost sinks and ostringstream.
+// Verify output stream behavior with our two sinks and ostringstream.
 // These test all of the ostream methods utilized by byte_writer (all writers).
 // Failure state when sink is "empty" is inconsistent across implementations.
 

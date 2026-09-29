@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/config/printer.hpp>
 
-////#include <format>
+#include <format>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -26,7 +26,6 @@
 #include <bitcoin/system/unicode/code_points.hpp>
 
 // We built this because po::options_description.print() sucks.
-// C++20: en.cppreference.com/w/cpp/utility/format/format
 
 namespace libbitcoin {
 namespace system {
@@ -35,39 +34,38 @@ namespace config {
 // TODO: parameterize these localized values.
 // Various shared localizable strings.
 #define BC_PRINTER_ARGUMENT_TABLE_HEADER "Arguments (positional):"
-#define BC_PRINTER_DESCRIPTION_FORMAT "Info: %1%"
+#define BC_PRINTER_DESCRIPTION_FORMAT "Info: {}"
 #define BC_PRINTER_OPTION_TABLE_HEADER "Options (named):"
-#define BC_PRINTER_USAGE_FORMAT "Usage: %1% %2% %3%"
+#define BC_PRINTER_USAGE_FORMAT "Usage: {} {} {}"
 #define BC_PRINTER_VALUE_TEXT "value"
 
 // Not localizable formatters.
-#define BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT " [--%1% %2%]..."
-#define BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT " [--%1% %2%]"
-#define BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT " --%1% %2%"
-#define BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT " [-%1%]"
-#define BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT " [--%1%]"
+#define BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT " [--{} {}]..."
+#define BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT " [--{} {}]"
+#define BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT " --{} {}"
+#define BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT " [-{}]"
+#define BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT " [--{}]"
 
-#define BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT " [%1%]..."
-#define BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT " [%1%]"
-#define BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT " %1%"
+#define BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT " [{}]..."
+#define BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT " [{}]"
+#define BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT " {}"
 
-#define BC_PRINTER_TABLE_OPTION_FORMAT "-%1% [--%2%]"
-#define BC_PRINTER_TABLE_OPTION_LONG_FORMAT "--%1%"
-#define BC_PRINTER_TABLE_OPTION_SHORT_FORMAT "-%1%"
+#define BC_PRINTER_TABLE_OPTION_FORMAT "-{} [--{}]"
+#define BC_PRINTER_TABLE_OPTION_LONG_FORMAT "--{}"
+#define BC_PRINTER_TABLE_OPTION_SHORT_FORMAT "-{}"
 
-#define BC_PRINTER_TABLE_ARGUMENT_FORMAT "%1%"
+#define BC_PRINTER_TABLE_ARGUMENT_FORMAT "{}"
 
-#define BC_PRINTER_SETTING_SECTION_FORMAT "[%1%]\n"
-#define BC_PRINTER_SETTING_COMMENT_FORMAT "# %1%\n"
-#define BC_PRINTER_SETTING_VALUE_FORMAT "%1% = %2%\n"
-#define BC_PRINTER_SETTING_CONFIGURED_FORMAT "%1% = %2% # configured\n"
-#define BC_PRINTER_SETTING_EMPTY_FORMAT "%1% =\n"
-#define BC_PRINTER_SETTING_EMPTY_CONFIGURED_FORMAT "%1% = # configured\n"
-#define BC_PRINTER_SETTING_UNSET_FORMAT "#%1% =\n"
+#define BC_PRINTER_SETTING_SECTION_FORMAT "[{}]\n"
+#define BC_PRINTER_SETTING_COMMENT_FORMAT "# {}\n"
+#define BC_PRINTER_SETTING_VALUE_FORMAT "{} = {}\n"
+#define BC_PRINTER_SETTING_CONFIGURED_FORMAT "{} = {} # configured\n"
+#define BC_PRINTER_SETTING_EMPTY_FORMAT "{} =\n"
+#define BC_PRINTER_SETTING_EMPTY_CONFIGURED_FORMAT "{} = # configured\n"
+#define BC_PRINTER_SETTING_UNSET_FORMAT "#{} =\n"
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-using format = boost_format;
 const int printer::max_arguments = 256;
 
 printer::printer(const options_metadata& options,
@@ -135,17 +133,17 @@ static std::string format_row_name(const parameter& value) NOEXCEPT
     // wants to be upper case but must match in case with the env var option.
 
     if (value.position() != parameter::not_positional)
-        return (format(BC_PRINTER_TABLE_ARGUMENT_FORMAT) %
-            ascii_to_upper(value.long_name())).str();
+        return std::format(BC_PRINTER_TABLE_ARGUMENT_FORMAT,
+            ascii_to_upper(value.long_name()));
     else if (value.short_name() == parameter::no_short_name)
-        return (format(BC_PRINTER_TABLE_OPTION_LONG_FORMAT) %
-            value.long_name()).str();
+        return std::format(BC_PRINTER_TABLE_OPTION_LONG_FORMAT,
+            value.long_name());
     else if (value.long_name().empty())
-        return (format(BC_PRINTER_TABLE_OPTION_SHORT_FORMAT) %
-            value.short_name()).str();
+        return std::format(BC_PRINTER_TABLE_OPTION_SHORT_FORMAT,
+            value.short_name());
     else
-        return (format(BC_PRINTER_TABLE_OPTION_FORMAT) %
-            value.short_name() % value.long_name()).str();
+        return std::format(BC_PRINTER_TABLE_OPTION_FORMAT,
+            value.short_name(), value.long_name());
 }
 
 static bool match_positional(bool positional, const parameter& value) NOEXCEPT
@@ -160,7 +158,6 @@ std::string printer::format_parameters_table(bool positional) NOEXCEPT
 {
     std::ostringstream output;
     const auto& parameters = get_parameters();
-    format table_format("%-20s %-52s\n");
 
     for (const auto& parameter: parameters)
     {
@@ -177,7 +174,7 @@ std::string printer::format_parameters_table(bool positional) NOEXCEPT
         // If there is no description the command is not output!
         for (const auto& row: rows)
         {
-            output << table_format % name % row;
+            output << std::format("{:<20} {:<52}\n", name, row);
 
             // The name is only set in the first row.
             name.clear();
@@ -192,12 +189,10 @@ std::string printer::format_parameters_table(bool positional) NOEXCEPT
 std::string printer::format_paragraph(const std::string& paragraph) NOEXCEPT
 {
     std::ostringstream output;
-    format paragraph_format("%-73s\n");
-
     const auto lines = columnize(paragraph, 73);
 
     for (const auto& line: lines)
-        output << paragraph_format % line;
+        output << std::format("{:<73}\n", line);
 
     return output.str();
 }
@@ -206,18 +201,13 @@ static std::string format_setting_value(bool configured,
     const std::string& name, const std::string& item) NOEXCEPT
 {
     if (item.empty())
-    {
-        const auto empty = configured ?
-            BC_PRINTER_SETTING_EMPTY_CONFIGURED_FORMAT :
-            BC_PRINTER_SETTING_EMPTY_FORMAT;
+        return configured ?
+            std::format(BC_PRINTER_SETTING_EMPTY_CONFIGURED_FORMAT, name) :
+            std::format(BC_PRINTER_SETTING_EMPTY_FORMAT, name);
 
-        return (format(empty) % name).str();
-    }
-
-    const auto formatter = configured ?
-        BC_PRINTER_SETTING_CONFIGURED_FORMAT : BC_PRINTER_SETTING_VALUE_FORMAT;
-
-    return (format(formatter) % name % item).str();
+    return configured ?
+        std::format(BC_PRINTER_SETTING_CONFIGURED_FORMAT, name, item) :
+        std::format(BC_PRINTER_SETTING_VALUE_FORMAT, name, item);
 }
 
 // A collection with no entries has no value, so the name is commented.
@@ -225,7 +215,7 @@ static std::string format_setting(const parameter& value,
     const std::string& name) NOEXCEPT
 {
     if (value.values().empty())
-        return (format(BC_PRINTER_SETTING_UNSET_FORMAT) % name).str();
+        return std::format(BC_PRINTER_SETTING_UNSET_FORMAT, name);
 
     std::ostringstream output;
     for (const auto& item: value.values())
@@ -270,13 +260,14 @@ std::string printer::format_settings_table() NOEXCEPT
             output << std::endl;
             if (!section.empty())
             {
-                output << format(BC_PRINTER_SETTING_SECTION_FORMAT) % section;
+                output << std::format(BC_PRINTER_SETTING_SECTION_FORMAT,
+                    section);
                 preceding_section = section;
             }
         }
 
-        output << format(BC_PRINTER_SETTING_COMMENT_FORMAT) %
-            parameter.description();
+        output << std::format(BC_PRINTER_SETTING_COMMENT_FORMAT,
+            parameter.description());
 
         output << format_setting(parameter, name);
     }
@@ -288,19 +279,14 @@ std::string printer::format_usage() NOEXCEPT
 {
     // USAGE: bx COMMAND [-hvt] -n VALUE [-m VALUE] [-w VALUE]... REQUIRED
     // [OPTIONAL] [MULTIPLE]...
-    const auto usage = format(BC_PRINTER_USAGE_FORMAT) % application() %
-        command() % format_usage_parameters();
-
-    return format_paragraph(usage.str());
+    return format_paragraph(std::format(BC_PRINTER_USAGE_FORMAT,
+        application(), command(), format_usage_parameters()));
 }
 
 std::string printer::format_description() NOEXCEPT
 {
-    // Info: %1%
-    const auto described = format(BC_PRINTER_DESCRIPTION_FORMAT) %
-        description();
-
-    return format_paragraph(described.str());
+    return format_paragraph(std::format(BC_PRINTER_DESCRIPTION_FORMAT,
+        description()));
 }
 
 std::string printer::format_usage_parameters() NOEXCEPT
@@ -367,36 +353,36 @@ std::string printer::format_usage_parameters() NOEXCEPT
     std::ostringstream usage;
 
     if (!toggle_short_options.empty())
-        usage << format(BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT) %
-            toggle_short_options;
+        usage << std::format(BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT,
+            toggle_short_options);
 
     for (const auto& required_option: required_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT) %
-            required_option % BC_PRINTER_VALUE_TEXT;
+        usage << std::format(BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT,
+            required_option, BC_PRINTER_VALUE_TEXT);
 
     for (const auto& toggle_long_option: toggle_long_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT) %
-            toggle_long_option;
+        usage << std::format(BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT,
+            toggle_long_option);
 
     for (const auto& optional_option: optional_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT) %
-            optional_option % BC_PRINTER_VALUE_TEXT;
+        usage << std::format(BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT,
+            optional_option, BC_PRINTER_VALUE_TEXT);
 
     for (const auto& multiple_option: multiple_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT) %
-            multiple_option % BC_PRINTER_VALUE_TEXT;
+        usage << std::format(BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT,
+            multiple_option, BC_PRINTER_VALUE_TEXT);
 
     for (const auto& required_argument: required_arguments)
-        usage << format(BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT) %
-            required_argument;
+        usage << std::format(BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT,
+            required_argument);
 
     for (const auto& optional_argument: optional_arguments)
-        usage << format(BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT) %
-            optional_argument;
+        usage << std::format(BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT,
+            optional_argument);
 
     for (const auto& multiple_argument: multiple_arguments)
-        usage << format(BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT) %
-            multiple_argument;
+        usage << std::format(BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT,
+            multiple_argument);
 
     return trim_copy(usage.str());
 }

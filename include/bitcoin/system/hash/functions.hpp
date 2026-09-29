@@ -200,9 +200,9 @@ inline bool operator!=(const bc::system::hash_cref& left,
 }
 } // namespace std
 
-/// Extend std and boost namespaces with djb2_hash.
+/// Extend std namespace with djb2_hash.
 /// ---------------------------------------------------------------------------
-/// This allows data_array/chunk to be incorporated into std/boost hash tables.
+/// This allows data_array/chunk to be incorporated into std hash tables.
 
 namespace std
 {
@@ -233,27 +233,6 @@ struct hash<bc::system::hash_cref>
     }
 };
 } // namespace std
-
-namespace boost
-{
-template <>
-struct hash<bc::system::data_chunk>
-{
-    size_t operator()(const bc::system::data_chunk& data) const NOEXCEPT
-    {
-        return bc::system::djb2_hash(data);
-    }
-};
-
-template <size_t Size>
-struct hash<bc::system::data_array<Size>>
-{
-    size_t operator()(const bc::system::data_array<Size>& data) const NOEXCEPT
-    {
-        return bc::system::djb2_hash(data);
-    }
-};
-} // namespace boost
 
 #include <bitcoin/system/impl/hash/functions.ipp>
 
