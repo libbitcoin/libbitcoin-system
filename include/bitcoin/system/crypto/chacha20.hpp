@@ -41,7 +41,10 @@ public:
     typedef data_array<block_size> block;
 
     /// Initialize at nonce {0, 0}, block counter zero.
+    DEFAULT_COPY_MOVE(chacha20);
+
     chacha20(const secret& key) NOEXCEPT;
+    ~chacha20() NOEXCEPT;
 
     /// Rekey, invalidating buffered keystream (seek to reposition).
     void set_key(const secret& key) NOEXCEPT;

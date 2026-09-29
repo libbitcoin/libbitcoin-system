@@ -40,7 +40,10 @@ public:
     typedef aes128::key_t secret;
     typedef data_array<nonce_size> nonce;
 
+    DEFAULT_COPY_MOVE(aes128_gcm);
+
     aes128_gcm(const secret& key) NOEXCEPT;
+    ~aes128_gcm() NOEXCEPT;
 
     /// Rekey.
     void set_key(const secret& key) NOEXCEPT;

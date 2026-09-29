@@ -41,6 +41,12 @@ aes128_gcm::aes128_gcm(const secret& key) NOEXCEPT
     set_key(key);
 }
 
+aes128_gcm::~aes128_gcm() NOEXCEPT
+{
+    wipe(schedule_);
+    wipe(key_);
+}
+
 void aes128_gcm::set_key(const secret& key) NOEXCEPT
 {
     // The hash subkey is the cipher of the zero block.

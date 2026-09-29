@@ -55,11 +55,14 @@ static void cbc_decrypt(data_chunk& text, const std::string& password,
     const data_slice phrase(password);
     const data_slice seed(salt.begin(), salt.end());
     constexpr auto size = array_count<typename Algorithm::key_t>;
-    const auto key = pbkd<sha256>::key<size>(phrase, seed, iterations);
+    auto key = pbkd<sha256>::key<size>(phrase, seed, iterations);
+    auto schedule = Algorithm::expand(key);
 
     typename Algorithm::block_t chain{};
     std::copy(iv.begin(), iv.end(), chain.begin());
-    Algorithm::cbc_decrypt(text, text, chain, Algorithm::expand(key));
+    Algorithm::cbc_decrypt(text, text, chain, schedule);
+    wipe(key);
+    wipe(schedule);
 }
 
 // decode
@@ -192,20 +195,21 @@ bool decode_encrypted_pkcs8(secret& out, const_byte_span der,
     // pkcs7 padding (rfc8018 6.1.1).
     const auto last = text.back();
     const auto pad = wide_cast<size_t>(last);
-    if (is_zero(pad) || (pad > block))
-        return false;
-
     const auto is_pad = [=](uint8_t byte) NOEXCEPT
     {
         return byte == last;
     };
 
-    const auto padding = std::next(text.begin(), text.size() - pad);
-    if (!std::all_of(padding, text.end(), is_pad))
-        return false;
+    auto valid = !is_zero(pad) && (pad <= block);
+    if (valid)
+    {
+        const auto padding = std::next(text.begin(), text.size() - pad);
+        valid = std::all_of(padding, text.end(), is_pad) &&
+            decode_pkcs8(out, const_byte_span{ text }.first(text.size() - pad));
+    }
 
-    text.resize(text.size() - pad);
-    return decode_pkcs8(out, text);
+    wipe(text.data(), text.size());
+    return valid;
 }
 
 bool decode_private_key(secret& out, const std::string& text,
