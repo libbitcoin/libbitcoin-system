@@ -19,6 +19,7 @@
 #include "interface.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <new>
 #include <bitcoin/system/crypto/maybe_random.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
@@ -80,6 +81,7 @@ public:
     using algorithm::to_affine;
     using algorithm::verify_ecdsa;
     using algorithm::verify_schnorr;
+    using algorithm::wipe;
 
     // Representations.
     // ------------------------------------------------------------------------
@@ -188,28 +190,33 @@ public:
     // Blinds.
     // ------------------------------------------------------------------------
 
-    // Nonzero scalar keyed by the secret, over entropy and a context, so that
-    // it remains secret where entropy is not.
+    // Nonzero scalar keyed by the secret, over entropy, a context and a call
+    // count, so that it remains secret and unrepeated where entropy is not.
     static scalar blind(const scalar& secret, const data_slice& context,
         uint8_t tag) NOEXCEPT
     {
+        static std::atomic<uint64_t> calls{};
         bytes key{}, entropy{};
         algorithm::to_bytes(key, secret);
         maybe_random::fill(entropy);
+        const auto call = to_little(calls++);
 
+        scalar out{};
         LCOV_EXCL_START("Retry requires a hash of zero or above n.")
         for (uint8_t counter{};; ++counter)
         {
             hmac<sha256> mac{ key };
             mac.write(entropy);
             mac.write(context);
+            mac.write(call);
             mac.write(data_array<2>{ tag, counter });
-
-            scalar out{};
             if (from_bytes(out, mac.flush()) && !is_zero_scalar(out))
-                return out;
+                break;
         }
         LCOV_EXCL_STOP()
+
+        wipe(key);
+        return out;
     }
 
     // Nonces.
@@ -275,6 +282,8 @@ public:
         LCOV_EXCL_STOP()
 
         std::copy(v.begin(), v.end(), nonce32);
+        wipe(seed);
+        wipe(k);
         return success;
     }
 
@@ -341,20 +350,20 @@ public:
         auto signed_ = false;
         const auto message = data_slice{ to_array(msg32) };
 
+        scalar k{}, m{}, b{};
+        bytes nonce32{};
         LCOV_EXCL_START("Retry requires a nonce of zero or above n.")
         for (unsigned int attempt{};; ++attempt)
         {
-            bytes nonce32{};
             if (is_zero(nonce(nonce32.data(), msg32, seckey, nullptr,
                 const_cast<void*>(ndata), attempt)))
                 break;
 
-            scalar k{};
             if (!to_secret(k, nonce32.data()))
                 continue;
 
-            const auto m = blind(d, message, 0);
-            const auto b = blind(d, message, 1);
+            m = blind(d, message, 0);
+            b = blind(d, message, 1);
             if (sign_ecdsa(r, s, id, d, z, k, m, b))
             {
                 signed_ = true;
@@ -363,6 +372,11 @@ public:
         }
         LCOV_EXCL_STOP()
 
+        wipe(d);
+        wipe(k);
+        wipe(m);
+        wipe(b);
+        wipe(nonce32);
         if (!signed_ || !valid)
         {
             r = {};
@@ -563,13 +577,16 @@ int secp256k1_ec_pubkey_create(const secp256k1_context*,
 {
     pubkey->data = {};
     local::scalar secret{};
-    if (!local::to_secret(secret, seckey))
-        return failure;
+    const auto valid = local::to_secret(secret, seckey);
+    if (valid)
+    {
+        local::affine point{};
+        local::secret_multiply(point, secret, local::blind(secret, {}, 0));
+        local::save<zero>(pubkey->data, point);
+    }
 
-    local::affine point{};
-    local::secret_multiply(point, secret, local::blind(secret, {}, 0));
-    local::save<zero>(pubkey->data, point);
-    return success;
+    local::wipe(secret);
+    return valid ? success : failure;
 }
 
 int secp256k1_ec_seckey_negate(const secp256k1_context*,
@@ -582,6 +599,7 @@ int secp256k1_ec_seckey_negate(const secp256k1_context*,
 
     local::negate(secret, secret);
     local::to_bytes(seckey, secret);
+    local::wipe(secret);
     return valid ? success : failure;
 }
 
@@ -611,6 +629,8 @@ int secp256k1_ec_seckey_tweak_add(const secp256k1_context*, uint8_t* seckey,
         secret = {};
 
     local::to_bytes(seckey, secret);
+    local::wipe(secret);
+    local::wipe(tweak);
     return valid ? success : failure;
 }
 
@@ -641,6 +661,8 @@ int secp256k1_ec_seckey_tweak_mul(const secp256k1_context*, uint8_t* seckey,
         secret = {};
 
     local::to_bytes(seckey, secret);
+    local::wipe(secret);
+    local::wipe(tweak);
     return valid ? success : failure;
 }
 
@@ -922,14 +944,17 @@ int secp256k1_keypair_create(const secp256k1_context*,
 {
     keypair->data = {};
     local::scalar secret{};
-    if (!local::to_secret(secret, seckey))
-        return failure;
+    const auto valid = local::to_secret(secret, seckey);
+    if (valid)
+    {
+        local::affine point{};
+        local::secret_multiply(point, secret, local::blind(secret, {}, 0));
+        local::to_bytes(keypair->data.data(), secret);
+        local::save<array_count<local::bytes>>(keypair->data, point);
+    }
 
-    local::affine point{};
-    local::secret_multiply(point, secret, local::blind(secret, {}, 0));
-    local::to_bytes(keypair->data.data(), secret);
-    local::save<array_count<local::bytes>>(keypair->data, point);
-    return success;
+    local::wipe(secret);
+    return valid ? success : failure;
 }
 
 // Schnorr.
@@ -963,11 +988,16 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
     }
 
     const auto message = data_slice{ local::to_array(msg32) };
-    local::nonce_schnorr(r_x, nonce, local::blind(secret, message, 0));
+    auto blinding = local::blind(secret, message, 0);
+    local::nonce_schnorr(r_x, nonce, blinding);
 
     local::scalar s{};
     local::multiply(s, local::challenge(r_x, key, message), secret);
     local::add(s, s, nonce);
+    local::wipe(secret);
+    local::wipe(secret_bytes);
+    local::wipe(nonce);
+    local::wipe(blinding);
 
     constexpr auto size = array_count<local::bytes>;
     std::copy(r_x.begin(), r_x.end(), sig64);
@@ -1040,6 +1070,7 @@ int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
         hasher.write(local::to_array(auxrnd32));
 
     local::encode(ell64, point, hasher);
+    local::wipe(secret);
     if (!valid)
         std::fill_n(ell64, ec_ellswift_size, uint8_t{});
 
@@ -1080,6 +1111,10 @@ int secp256k1_ellswift_xdh(const secp256k1_context*, uint8_t* output,
     const auto hashed = hashfp(output, shared_x.data(), ell_a64, ell_b64,
         data);
 
+    local::wipe(secret);
+    local::wipe(shared.x);
+    local::wipe(shared.y);
+    local::wipe(shared_x);
     return is_nonzero(hashed) && valid ? success : failure;
 }
 

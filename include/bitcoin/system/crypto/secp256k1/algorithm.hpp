@@ -828,6 +828,10 @@ protected:
     static constexpr void secret_inverse(scalar_t& r, const scalar_t& a,
         const scalar_t& m) NOEXCEPT;
 
+    /// secret = 0, by stores that are not elided.
+    template <typename Container>
+    static constexpr void wipe(Container& secret) NOEXCEPT;
+
     /// ECDSA (r, s) of z by secret d and nonce k, low s, with recovery id,
     /// blinded by m and b (d, k, m, b nonzero), false if r or s is zero.
     static constexpr bool sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,

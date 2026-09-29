@@ -39,6 +39,7 @@ public:
     using algorithm::multiply_complete;
     using algorithm::linear;
     using algorithm::secret_multiply;
+    using algorithm::wipe;
     using algorithm::lookup_comb;
     using algorithm::add_comb;
     using algorithm::comb_bits;
@@ -399,6 +400,30 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__continued_doubling_
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__exceptional__expected)
 {
     BOOST_CHECK(is_secret_product(scalar{ 128, 0, 0, 0 }, scalar{ 65, 0, 0, 0 }));
+}
+
+// wipe
+// ----------------------------------------------------------------------------
+
+constexpr scalar wiped(scalar value) NOEXCEPT
+{
+    accessor::wipe(value);
+    return value;
+}
+
+static_assert(wiped(number(sample)) == scalar{});
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__wipe__values__zero)
+{
+    auto value = number(sample);
+    auto field_value = decode(gx);
+    data_chunk chunk{ 1, 2, 3 };
+    accessor::wipe(value);
+    accessor::wipe(field_value);
+    accessor::wipe(chunk);
+    BOOST_CHECK_EQUAL(value, scalar{});
+    BOOST_CHECK_EQUAL(field_value, field{});
+    BOOST_CHECK_EQUAL(chunk, data_chunk(3, 0));
 }
 
 // naf
