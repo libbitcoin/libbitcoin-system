@@ -219,6 +219,14 @@ public:
         return out;
     }
 
+    // Point of the secret, by a blinded multiplication.
+    static affine public_point(const scalar& secret) NOEXCEPT
+    {
+        affine point{};
+        secret_multiply(point, secret, blind(secret, {}, 0));
+        return point;
+    }
+
     // Nonces.
     // ------------------------------------------------------------------------
 
@@ -576,11 +584,7 @@ int secp256k1_ec_pubkey_create(const secp256k1_context*,
     local::scalar secret{};
     const auto valid = local::to_secret(secret, seckey);
     if (valid)
-    {
-        local::affine point{};
-        local::secret_multiply(point, secret, local::blind(secret, {}, 0));
-        local::save<zero>(pubkey->data, point);
-    }
+        local::save<zero>(pubkey->data, local::public_point(secret));
 
     local::wipe(secret);
     return valid ? success : failure;
@@ -945,10 +949,9 @@ int secp256k1_keypair_create(const secp256k1_context*,
     const auto valid = local::to_secret(secret, seckey);
     if (valid)
     {
-        local::affine point{};
-        local::secret_multiply(point, secret, local::blind(secret, {}, 0));
         local::to_bytes(keypair->data.data(), secret);
-        local::save<array_count<local::bytes>>(keypair->data, point);
+        local::save<array_count<local::bytes>>(keypair->data,
+            local::public_point(secret));
     }
 
     local::wipe(secret);
@@ -1057,9 +1060,7 @@ int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
     if (!valid)
         secret = { 1 };
 
-    local::affine point{};
-    local::secret_multiply(point, secret, local::blind(secret, {}, 0));
-
+    const auto point = local::public_point(secret);
     accumulator<sha256> hasher{ tagged_midstate<"secp256k1_ellswift_create">,
         one };
     hasher.write(local::to_array(seckey32));

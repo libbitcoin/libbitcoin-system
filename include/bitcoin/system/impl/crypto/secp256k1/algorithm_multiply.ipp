@@ -377,30 +377,45 @@ constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
     Word negative) NOEXCEPT
 {
     constexpr auto size = array_count<field_t<Word>>;
-    const auto entries = unpack(entry);
+    affine_t<Word> point{};
 
-    std_array<words_t<Word>, size> xs{}, ys{};
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    for (size_t lane{}; lane < lanes<Word>; ++lane)
+    if constexpr (is_same_type<Word, uint64_t>)
     {
-        const auto value = possible_narrow_cast<size_t>(entries[lane]);
+        const auto value = possible_narrow_cast<size_t>(entry);
         const auto base = generator_slices[value / slice_size] +
             locate(value % slice_size);
 
         for (size_t limb{}; limb < size; ++limb)
         {
-            xs[limb][lane] = base[limb * block_size];
-            ys[limb][lane] = base[(size + limb) * block_size];
+            point.x[limb] = base[limb * block_size];
+            point.y[limb] = base[(size + limb) * block_size];
+        }
+    }
+    else
+    {
+        const auto entries = unpack(entry);
+        std_array<words_t<Word>, size> xs{}, ys{};
+        for (size_t lane{}; lane < lanes<Word>; ++lane)
+        {
+            const auto value = possible_narrow_cast<size_t>(entries[lane]);
+            const auto base = generator_slices[value / slice_size] +
+                locate(value % slice_size);
+
+            for (size_t limb{}; limb < size; ++limb)
+            {
+                xs[limb][lane] = base[limb * block_size];
+                ys[limb][lane] = base[(size + limb) * block_size];
+            }
+        }
+
+        for (size_t limb{}; limb < size; ++limb)
+        {
+            point.x[limb] = pack<Word>(xs[limb]);
+            point.y[limb] = pack<Word>(ys[limb]);
         }
     }
     BC_POP_WARNING()
-
-    affine_t<Word> point{};
-    for (size_t limb{}; limb < size; ++limb)
-    {
-        point.x[limb] = pack<Word>(xs[limb]);
-        point.y[limb] = pack<Word>(ys[limb]);
-    }
 
     if (mapped)
         endomorphism(point, point);
