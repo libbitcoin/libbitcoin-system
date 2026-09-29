@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_MEMORY_HPP
 #define LIBBITCOIN_SYSTEM_DATA_MEMORY_HPP
 
+#include <algorithm>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -147,6 +148,22 @@ template <typename Type, typename ...Args>
 inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
 {
     return std::make_unique<const Type>(std::forward<Args>(values)...);
+}
+
+/// wipe
+/// ---------------------------------------------------------------------------
+
+/// Zero memory by volatile stores, which are not elided by the optimizer.
+inline void wipe(void* data, size_t size) NOEXCEPT
+{
+    std::fill_n(static_cast<volatile uint8_t*>(data), size, uint8_t{});
+}
+
+/// Zero a trivially copyable object (such as an array of key material).
+template <typename Type, if_trivially_copyable<Type> = true>
+inline void wipe(Type& value) NOEXCEPT
+{
+    wipe(&value, sizeof(Type));
 }
 
 BC_POP_WARNING()

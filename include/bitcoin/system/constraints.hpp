@@ -159,6 +159,10 @@ using if_trivially_constructible = bool_if<
     std::is_trivially_constructible<Type>::value>;
 
 template <typename Type>
+using if_trivially_copyable = bool_if<
+    std::is_trivially_copyable<Type>::value>;
+
+template <typename Type>
 using if_unique_object_representations = bool_if<
     std::has_unique_object_representations<Type>::value>;
 
