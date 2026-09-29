@@ -36,6 +36,16 @@ BOOST_AUTO_TEST_CASE(siphash__hash__test_key__expected)
     BOOST_REQUIRE_EQUAL(siphash(hash, message), expected);
 }
 
+BOOST_AUTO_TEST_CASE(siphash__words__test_key__expected)
+{
+    half_hash hash{};
+    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+
+    constexpr auto message = base16_array("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+    const siphash_words words{ 0x0706050403020100, 0x0f0e0d0c0b0a0908, 0x1716151413121110, 0x1f1e1d1c1b1a1918 };
+    BOOST_REQUIRE_EQUAL(siphash(to_siphash_key(hash), words), siphash(hash, message));
+}
+
 BOOST_AUTO_TEST_CASE(siphash__hash__vectors__expected)
 {
     half_hash hash{};
