@@ -263,6 +263,8 @@ protected:
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
     static constexpr void schedule_(auto& buffer) NOEXCEPT;
     static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
+    static constexpr void schedule_compress(state_t& state,
+        buffer_t& buffer) NOEXCEPT;
 
     /// Parsing (endian sensitive).
     /// -----------------------------------------------------------------------
@@ -385,12 +387,8 @@ protected:
     /// sigma0 vectorization (single blocks).
     /// -----------------------------------------------------------------------
 
-    template <typename xWord, if_extended<xWord> = true>
-    INLINE static auto sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5,
-        auto x6, auto x7, auto x8) NOEXCEPT;
-
     template<size_t Round, size_t Offset>
-    INLINE static void prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT;
+    INLINE static void prepare_1(buffer_t& buffer, const auto& sigmas) NOEXCEPT;
 
     template<size_t Round>
     INLINE static void prepare_8(buffer_t& buffer) NOEXCEPT;
@@ -398,6 +396,13 @@ protected:
     template <typename xWord>
     INLINE static void schedule_sigma(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
     INLINE static void schedule_sigma(buffer_t& buffer) NOEXCEPT;
+
+    template<size_t Round>
+    INLINE static void konstant_8(buffer_t& wk, const buffer_t& buffer) NOEXCEPT;
+
+    template<size_t Round>
+    INLINE static void compress_8(state_t& state, const buffer_t& wk) NOEXCEPT;
+    static void schedule_compress_sigma(state_t& state, buffer_t& buffer) NOEXCEPT;
 
     /// [K]onstant vectorization (single and multiple blocks).
     /// -----------------------------------------------------------------------

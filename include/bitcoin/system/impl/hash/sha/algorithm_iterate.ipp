@@ -272,8 +272,7 @@ iterate_(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     for (auto& block: blocks)
     {
         input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
     }
 }
 
@@ -285,8 +284,7 @@ iterate_(state_t& state, iblocks_t& blocks) NOEXCEPT
     for (auto& block: blocks)
     {
         input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
     }
 }
 

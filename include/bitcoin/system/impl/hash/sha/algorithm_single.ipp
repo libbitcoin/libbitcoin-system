@@ -81,8 +81,7 @@ hash(const half_t& half) NOEXCEPT
         buffer_t buffer{};
         input_left(buffer, half);
         pad_half(buffer);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
         return output(state);
     };
 
@@ -110,8 +109,7 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
         buffer_t buffer{};
         input_left(buffer, left);
         input_right(buffer, right);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
         schedule_1(buffer);
         compress(state, buffer);
         return output(state);
@@ -140,8 +138,7 @@ midstate(const half_t& left, const half_t& right) NOEXCEPT
     buffer_t buffer{};
     input_left(buffer, left);
     input_right(buffer, right);
-    schedule(buffer);
-    compress(state, buffer);
+    schedule_compress(state, buffer);
     return state;
 }
 
@@ -156,8 +153,7 @@ hash(const quart_t& left, const quart_t& right) NOEXCEPT
         input_left(buffer, left);
         input_right(buffer, right);
         pad_half(buffer);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
         return output(state);
     };
 
@@ -196,8 +192,7 @@ simple_hash(const bytes_t<Size>& bytes) NOEXCEPT
         auto state = H::get;
         buffer_t buffer{};
         input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
         return output(state);
     };
 
