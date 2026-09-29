@@ -50,6 +50,12 @@ namespace libbitcoin {
     constexpr auto have_arm = false;
 #endif
 
+#ifdef HAVE_ARM32
+    constexpr auto have_arm32 = true;
+#else
+    constexpr auto have_arm32 = false;
+#endif
+
 #if defined(HAVE_128)
     constexpr auto have_128 = true;
 #else
