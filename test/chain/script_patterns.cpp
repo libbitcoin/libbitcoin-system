@@ -1688,4 +1688,14 @@ BOOST_AUTO_TEST_CASE(script__to_pay_null_data_pattern__numeric_byte__nominal_pus
     BOOST_REQUIRE(ops[1].data() == data);
 }
 
+BOOST_AUTO_TEST_CASE(script__to_pay_witness_pattern__numeric_byte__nominal_push)
+{
+    const data_chunk data{ 0x01 };
+    const auto ops = script::to_pay_witness_pattern(0, data);
+    BOOST_REQUIRE_EQUAL(ops.size(), 2u);
+    BOOST_REQUIRE(ops[0].code() == opcode::push_size_0);
+    BOOST_REQUIRE(ops[1].code() == opcode::push_size_1);
+    BOOST_REQUIRE(ops[1].data() == data);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
