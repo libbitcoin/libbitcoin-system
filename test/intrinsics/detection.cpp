@@ -233,35 +233,35 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try__faked_none__false)
 {
     BOOST_CHECK(!is_avx512_low<none_cpu>());
     BOOST_CHECK(!try_shani<none_cpu>());
-    BOOST_CHECK(!try_sha512<none_cpu, all_xcr>());
-    BOOST_CHECK(!try_avx512<none_cpu, all_xcr>());
-    BOOST_CHECK(!try_avx512ifma<none_cpu, all_xcr>());
-    BOOST_CHECK(!try_avxifma<none_cpu, all_xcr>());
-    BOOST_CHECK(!try_avx2<none_cpu, all_xcr>());
+    BOOST_CHECK((!try_sha512<none_cpu, all_xcr>()));
+    BOOST_CHECK((!try_avx512<none_cpu, all_xcr>()));
+    BOOST_CHECK((!try_avx512ifma<none_cpu, all_xcr>()));
+    BOOST_CHECK((!try_avxifma<none_cpu, all_xcr>()));
+    BOOST_CHECK((!try_avx2<none_cpu, all_xcr>()));
     BOOST_CHECK(!try_sse41<none_cpu>());
     BOOST_CHECK(!try_aesni<none_cpu>());
-    BOOST_CHECK(!try_vaes<none_cpu, all_xcr>());
+    BOOST_CHECK((!try_vaes<none_cpu, all_xcr>()));
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
 {
     BOOST_CHECK(!is_avx512_low<all_cpu>());
     BOOST_CHECK(try_shani<all_cpu>());
-    BOOST_CHECK(try_sha512<all_cpu, all_xcr>());
-    BOOST_CHECK(try_avx512<all_cpu, all_xcr>());
-    BOOST_CHECK(try_avx512ifma<all_cpu, all_xcr>());
-    BOOST_CHECK(try_avxifma<all_cpu, all_xcr>());
-    BOOST_CHECK(try_avx2<all_cpu, all_xcr>());
+    BOOST_CHECK((try_sha512<all_cpu, all_xcr>()));
+    BOOST_CHECK((try_avx512<all_cpu, all_xcr>()));
+    BOOST_CHECK((try_avx512ifma<all_cpu, all_xcr>()));
+    BOOST_CHECK((try_avxifma<all_cpu, all_xcr>()));
+    BOOST_CHECK((try_avx2<all_cpu, all_xcr>()));
     BOOST_CHECK(try_sse41<all_cpu>());
     BOOST_CHECK(try_aesni<all_cpu>());
-    BOOST_CHECK(try_vaes<all_cpu, all_xcr>());
+    BOOST_CHECK((try_vaes<all_cpu, all_xcr>()));
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512__faked_throttled__false)
 {
     BOOST_CHECK(is_avx512_low<throttled_cpu>());
-    BOOST_CHECK(!try_avx512<throttled_cpu, all_xcr>());
-    BOOST_CHECK(try_avx512ifma<throttled_cpu, all_xcr>());
+    BOOST_CHECK((!try_avx512<throttled_cpu, all_xcr>()));
+    BOOST_CHECK((try_avx512ifma<throttled_cpu, all_xcr>()));
 }
 
 // try_neon
