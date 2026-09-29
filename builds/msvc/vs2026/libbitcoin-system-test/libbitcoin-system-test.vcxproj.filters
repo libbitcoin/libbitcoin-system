@@ -246,6 +246,12 @@
     <ClCompile Include="..\..\..\..\test\chain\views\block_view.cpp">
       <Filter>src\chain\views</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\views\input_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\views\output_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\views\transaction_view.cpp">
       <Filter>src\chain\views</Filter>
     </ClCompile>

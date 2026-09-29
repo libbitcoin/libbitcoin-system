@@ -19,7 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BLOCK_VIEW_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_VIEW_HPP
 
+#include <bitcoin/system/chain/batch/batch.hpp>
 #include <bitcoin/system/chain/context.hpp>
+#include <bitcoin/system/chain/views/input_view.hpp>
+#include <bitcoin/system/chain/views/output_view.hpp>
 #include <bitcoin/system/chain/views/transaction_view.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -47,20 +50,68 @@ public:
     bool is_segregated() const NOEXCEPT;
     hash_digest hash() const NOEXCEPT;
     size_t transactions() const NOEXCEPT;
+    size_t spends() const NOEXCEPT;
     const transaction_views& views() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
-    /// Validation.
+    /// Populated properties (population required).
+    bool is_populated() const NOEXCEPT;
+    const input_views& inputs() const NOEXCEPT;
+    const output_views& prevouts() const NOEXCEPT;
+
+    /// Identity.
     code identify() const NOEXCEPT;
     code identify(const context& ctx) const NOEXCEPT;
 
+    /// Population.
+    /// Prevouts are the wire-encoded prevouts of each spend in block order.
+    /// Fails if any populated prevout is internally immature or locked.
+    code populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT;
+
+    /// Validation (population required).
+    code check() const NOEXCEPT;
+    code check(const context& ctx) const NOEXCEPT;
+    code accept(const context& ctx, size_t subsidy_interval,
+        uint64_t initial_subsidy) const NOEXCEPT;
+    code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
+
 protected:
-    /// Validation helpers.
+    /// Identity helpers.
     bool is_malleated() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;
 
+    /// Validation helpers.
+    bool is_oversized() const NOEXCEPT;
+    bool is_first_non_coinbase() const NOEXCEPT;
+    bool is_extra_coinbases() const NOEXCEPT;
+    bool is_forward_reference() const NOEXCEPT;
+    bool is_internal_double_spend() const NOEXCEPT;
+    bool is_overweight() const NOEXCEPT;
+    bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;
+    bool is_hash_limit_exceeded() const NOEXCEPT;
+    bool is_overspent(size_t height, uint64_t subsidy_interval,
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
+    bool is_signature_operations_limited(bool bip16,
+        bool bip141) const NOEXCEPT;
+
+    size_t weight() const NOEXCEPT;
+    uint64_t fees() const NOEXCEPT;
+    uint64_t claim() const NOEXCEPT;
+    uint64_t reward(size_t height, uint64_t subsidy_interval,
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
+    size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+
+    code check_transactions() const NOEXCEPT;
+    code check_transactions(const context& ctx) const NOEXCEPT;
+    code accept_transactions(const context& ctx) const NOEXCEPT;
+    code connect_transactions(const context& ctx,
+        const signatures& capture) const NOEXCEPT;
+
 private:
+    static bool is_coinbase(const transaction_view& tx) NOEXCEPT;
+    code malleated_or(const code& ec) const NOEXCEPT;
+
     // Malleation.
     static bool is_malleable64(const transaction_views& txs) NOEXCEPT;
     bool is_malleated32() const NOEXCEPT;
@@ -77,9 +128,19 @@ private:
     bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
     bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
+    // Population.
+    void populate_inputs() NOEXCEPT;
+    bool populate_prevouts(data_chunk&& prevouts) NOEXCEPT;
+    code populate_internal(const context& ctx) const NOEXCEPT;
+
     bool witness_;
     chunk_cptr buffer_;
     transaction_views txs_{};
+
+    // Populated (shared by copies).
+    chunk_cptr prevout_buffer_{};
+    std::shared_ptr<input_views> inputs_{};
+    std::shared_ptr<output_views> prevouts_{};
 };
 
 } // namespace chain

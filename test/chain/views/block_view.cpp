@@ -529,4 +529,355 @@ BOOST_AUTO_TEST_CASE(block_view__construct__superfluous_witness__invalid)
     BOOST_CHECK(!view.is_valid());
 }
 
+// populate/check/accept/connect
+// ----------------------------------------------------------------------------
+
+using namespace system::chain;
+
+constexpr uint64_t subsidy_interval = 210'000;
+constexpr uint64_t initial_subsidy = 5'000'000'000;
+constexpr auto bip143_flags = flags::bip141_rule | flags::bip143_rule;
+const context no_rules_context{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+
+static transaction view_coinbase(uint64_t value=initial_subsidy) NOEXCEPT
+{
+    const operation push{ data_chunk{ 0x01, 0x02 }, false };
+    const script coinbase_script{ operations{ push } };
+    const inputs ins{ input{ point{}, coinbase_script, max_input_sequence } };
+    return { 1, ins, outputs{ output{ value, script{} } }, 0 };
+}
+
+static transaction view_spend(const point& point, uint64_t value,
+    uint32_t sequence=max_input_sequence, uint32_t version=1) NOEXCEPT
+{
+    const inputs ins{ input{ point, script{}, sequence } };
+    return { version, ins, outputs{ output{ value, script{} } }, 0 };
+}
+
+static data_chunk view_block_data(const transactions& txs) NOEXCEPT
+{
+    return block{ header{}, txs }.to_data(true);
+}
+
+static data_chunk view_prevouts_data(const outputs& prevouts) NOEXCEPT
+{
+    data_chunk out{};
+    for (const auto& prevout: prevouts)
+    {
+        const auto data = prevout.to_data();
+        out.insert(out.end(), data.begin(), data.end());
+    }
+
+    return out;
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__coinbase_only__success)
+{
+    block_view view{ view_block_data({ view_coinbase() }), true };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_REQUIRE(!view.is_populated());
+    BOOST_REQUIRE_EQUAL(view.spends(), 0u);
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, {}), error::block_success);
+    BOOST_REQUIRE(view.is_populated());
+    BOOST_REQUIRE_EQUAL(view.inputs().size(), 1u);
+    BOOST_REQUIRE(view.prevouts().empty());
+    BOOST_REQUIRE(view.views().front().is_populated());
+    BOOST_REQUIRE(view.views().front().inputs_begin()->is_null_point());
+    BOOST_REQUIRE_EQUAL(view.check(), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(no_rules_context), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.connect(no_rules_context, {}), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__external_and_internal_spends__prevouts_assigned)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    const auto tx2 = view_spend({ tx1.hash(false), 0 }, 40);
+    block_view view{ view_block_data({ view_coinbase(), tx1, tx2 }), true };
+    BOOST_REQUIRE_EQUAL(view.spends(), 2u);
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} }, { 42, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.inputs().size(), 3u);
+    BOOST_REQUIRE_EQUAL(view.prevouts().size(), 2u);
+
+    const auto& spender = view.views().back();
+    BOOST_REQUIRE(spender.is_populated());
+    BOOST_REQUIRE(!is_null(spender.inputs_begin()->prevout));
+    BOOST_REQUIRE_EQUAL(spender.inputs_begin()->prevout->value(), 42u);
+    BOOST_REQUIRE_EQUAL(spender.value(), 42u);
+    BOOST_REQUIRE_EQUAL(spender.spend(), 40u);
+    BOOST_REQUIRE_EQUAL(spender.fee(), 2u);
+    BOOST_REQUIRE_EQUAL(view.check(), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__short_prevouts__missing_previous_output)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    block_view view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, {}), error::missing_previous_output);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__excess_prevouts__missing_previous_output)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    block_view view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} }, { 42, script{} } })), error::missing_previous_output);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__coinbase_spend__coinbase_maturity)
+{
+    const auto coinbase = view_coinbase();
+    const auto tx1 = view_spend({ coinbase.hash(false), 0 }, 42);
+    block_view view{ view_block_data({ coinbase, tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { initial_subsidy, script{} } })), error::coinbase_maturity);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__internal_relative_lock_bip68__relative_time_locked)
+{
+    const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    const auto tx2 = view_spend({ tx1.hash(false), 0 }, 40, 1, 2);
+    block_view view{ view_block_data({ view_coinbase(), tx1, tx2 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data({ { 50, script{} }, { 42, script{} } })), error::relative_time_locked);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__internal_relative_lock_bip68_off__success)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    const auto tx2 = view_spend({ tx1.hash(false), 0 }, 40, 1, 2);
+    block_view view{ view_block_data({ view_coinbase(), tx1, tx2 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} }, { 42, script{} } })), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check__first_not_coinbase__first_not_coinbase)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    block_view view{ view_block_data({ tx1, view_coinbase() }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { initial_subsidy, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(), error::first_not_coinbase);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check__extra_coinbases__extra_coinbases)
+{
+    block_view view{ view_block_data({ view_coinbase(), view_coinbase(1) }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 1, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(), error::extra_coinbases);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check__forward_reference__forward_reference)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    const auto tx2 = view_spend({ tx1.hash(false), 0 }, 40);
+    block_view view{ view_block_data({ view_coinbase(), tx2, tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 42, script{} }, { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(), error::forward_reference);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check__internal_double_spend__block_internal_double_spend)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    const auto tx2 = view_spend({ one_hash, 0 }, 40);
+    block_view view{ view_block_data({ view_coinbase(), tx1, tx2 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} }, { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(), error::block_internal_double_spend);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check__null_non_coinbase__previous_output_null)
+{
+    const auto tx1 = transaction{ 1, inputs{ input{ point{ one_hash, 0 }, script{}, max_input_sequence }, input{ point{}, script{}, max_input_sequence } }, outputs{ output{ 42, script{} } }, 0 };
+    block_view view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} }, { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(), error::previous_output_null);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__coinbase_height_bip34__coinbase_height_mismatch)
+{
+    const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
+    block_view view{ view_block_data({ view_coinbase() }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(ctx), error::coinbase_height_mismatch);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__absolute_locked__absolute_time_locked)
+{
+    const auto tx1 = transaction{ 1, inputs{ input{ point{ one_hash, 0 }, script{}, 0 } }, outputs{ output{ 42, script{} } }, 200 };
+    block_view view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(no_rules_context), error::absolute_time_locked);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__accept__claim_above_reward__coinbase_value_limit)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    block_view view{ view_block_data({ view_coinbase(initial_subsidy + 9), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::coinbase_value_limit);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__accept__claim_at_reward__block_success)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    block_view view{ view_block_data({ view_coinbase(initial_subsidy + 8), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__accept__overspent__spend_exceeds_value)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 51);
+    block_view view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} } })), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::spend_exceeds_value);
+}
+
+// bip143 native p2wpkh (inputs: p2pk, p2wpkh).
+static const auto bip143_tx_data = base16_chunk("01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee635711000000");
+static const script bip143_p2pk_script(base16_chunk("2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac"), false);
+static const script bip143_p2wpkh_script(base16_chunk("00141d0f172a0ecb48aee1be1f2687d2963ae33f71a1"), false);
+static const outputs bip143_prevouts
+{
+    { 625000000, bip143_p2pk_script },
+    { 600000000, bip143_p2wpkh_script }
+};
+
+static const std::vector<uint8_t> bip143_coverages
+{
+    coverage::hash_all,
+    coverage::hash_none,
+    coverage::hash_single,
+    coverage::all_anyone_can_pay,
+    coverage::none_anyone_can_pay,
+    coverage::single_anyone_can_pay
+};
+
+static block bip143_block() NOEXCEPT
+{
+    const transaction tx{ bip143_tx_data, true };
+    const block block{ header{}, transactions{ view_coinbase(), tx } };
+    const auto& spend = *block.transactions_ptr()->back();
+    (*spend.inputs_ptr())[0]->prevout = to_shared(bip143_prevouts[0]);
+    (*spend.inputs_ptr())[1]->prevout = to_shared(bip143_prevouts[1]);
+    return block;
+}
+
+BOOST_AUTO_TEST_CASE(block_view__connect__bip143_p2wpkh__script_success)
+{
+    const context ctx{ bip143_flags, 0, 0, 100, 0, 0, 0 };
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE(view.is_valid());
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.check(ctx), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.accept(ctx, subsidy_interval, initial_subsidy), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.connect(ctx, {}), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__connect__bip143_p2wpkh_without_bip143__stack_false)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 100, 0, 0, 0 };
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.connect(ctx, {}), error::stack_false);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__connect__bip143_p2wpkh_without_bip141__unexpected_witness)
+{
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data(bip143_prevouts)), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.connect(no_rules_context, {}), error::unexpected_witness);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__connect__bip143_p2wpkh_stripped__invalid_witness)
+{
+    const context ctx{ bip143_flags, 0, 0, 100, 0, 0, 0 };
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), false };
+    BOOST_REQUIRE(!view.is_segregated());
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+    BOOST_REQUIRE_EQUAL(view.connect(ctx, {}), error::invalid_witness);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__signature_operations__bip143__matches_block)
+{
+    const context ctx{ bip143_flags, 0, 0, 100, 0, 0, 0 };
+    const auto block = bip143_block();
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+
+    const auto& tx = *block.transactions_ptr()->back();
+    const auto& tx_view = view.views().back();
+    BOOST_REQUIRE_EQUAL(tx_view.signature_operations(true, true), tx.signature_operations(true, true));
+    BOOST_REQUIRE_EQUAL(tx_view.signature_operations(false, false), tx.signature_operations(false, false));
+    BOOST_REQUIRE_EQUAL(tx_view.fee(), tx.fee());
+    BOOST_REQUIRE_EQUAL(tx_view.value(), tx.value());
+    BOOST_REQUIRE_EQUAL(tx_view.spend(), tx.spend());
+}
+
+BOOST_AUTO_TEST_CASE(block_view__compute_filter__bip143__matches_block)
+{
+    const context ctx{ bip143_flags, 0, 0, 100, 0, 0, 0 };
+    const auto block = bip143_block();
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+
+    data_chunk expected{};
+    data_chunk actual{};
+    BOOST_REQUIRE(neutrino::compute_filter(expected, block));
+    BOOST_REQUIRE(neutrino::compute_filter(actual, view));
+    BOOST_REQUIRE_EQUAL(actual, expected);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__signature_hash__bip143_p2pk__matches_transaction)
+{
+    const context ctx{ bip143_flags, 0, 0, 100, 0, 0, 0 };
+    const auto block = bip143_block();
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+
+    const auto& tx = *block.transactions_ptr()->back();
+    const auto& tx_view = view.views().back();
+    const auto& prevout = bip143_prevouts[0];
+    const auto it = tx.input_at(0);
+    const auto it_view = tx_view.input_at(0);
+    const hash_cptr tapleaf{};
+    hash_digest expected{};
+    hash_digest actual{};
+
+    for (const auto sighash_flags: bip143_coverages)
+    {
+        BOOST_REQUIRE(tx.signature_hash(expected, it, prevout.script(), prevout.value(), tapleaf, script_version::unversioned, sighash_flags, flags::no_rules));
+        BOOST_REQUIRE(tx_view.signature_hash(actual, it_view, prevout.script(), prevout.value(), tapleaf, script_version::unversioned, sighash_flags, flags::no_rules));
+        BOOST_REQUIRE_EQUAL(actual, expected);
+        BOOST_REQUIRE(tx.signature_hash(expected, it, prevout.script(), prevout.value(), tapleaf, script_version::segwit, sighash_flags, bip143_flags));
+        BOOST_REQUIRE(tx_view.signature_hash(actual, it_view, prevout.script(), prevout.value(), tapleaf, script_version::segwit, sighash_flags, bip143_flags));
+        BOOST_REQUIRE_EQUAL(actual, expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(block_view__signature_hash__bip143_p2wpkh__matches_transaction)
+{
+    const context ctx{ bip143_flags, 0, 0, 100, 0, 0, 0 };
+    const auto block = bip143_block();
+    block_view view{ view_block_data({ view_coinbase(), transaction{ bip143_tx_data, true } }), true };
+    BOOST_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(bip143_prevouts)), error::block_success);
+
+    const auto& tx = *block.transactions_ptr()->back();
+    const auto& tx_view = view.views().back();
+    const auto& prevout = bip143_prevouts[1];
+    const auto it = tx.input_at(1);
+    const auto it_view = tx_view.input_at(1);
+    const hash_cptr tapleaf{};
+    hash_digest expected{};
+    hash_digest actual{};
+
+    for (const auto sighash_flags: bip143_coverages)
+    {
+        BOOST_REQUIRE(tx.signature_hash(expected, it, prevout.script(), prevout.value(), tapleaf, script_version::unversioned, sighash_flags, flags::no_rules));
+        BOOST_REQUIRE(tx_view.signature_hash(actual, it_view, prevout.script(), prevout.value(), tapleaf, script_version::unversioned, sighash_flags, flags::no_rules));
+        BOOST_REQUIRE_EQUAL(actual, expected);
+        BOOST_REQUIRE(tx.signature_hash(expected, it, prevout.script(), prevout.value(), tapleaf, script_version::segwit, sighash_flags, bip143_flags));
+        BOOST_REQUIRE(tx_view.signature_hash(actual, it_view, prevout.script(), prevout.value(), tapleaf, script_version::segwit, sighash_flags, bip143_flags));
+        BOOST_REQUIRE_EQUAL(actual, expected);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

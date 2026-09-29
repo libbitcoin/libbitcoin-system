@@ -50,6 +50,18 @@ struct transaction_traits<chain::transaction>
     }
 };
 
+template <>
+struct transaction_traits<chain::transaction_view>
+{
+    using input_t = chain::input_view;
+    using input_iterator = chain::input_views::const_iterator;
+
+    static INLINE const input_t& at(const input_iterator& it) NOEXCEPT
+    {
+        return *it;
+    }
+};
+
 /// A set of three stacks (primary, alternate, conditional) for script state.
 /// Primary stack is optimized by peekable, swappable, and eraseable elements.
 template <typename Stack, typename Tx = chain::transaction>

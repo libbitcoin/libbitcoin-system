@@ -178,6 +178,8 @@
       <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\views\block_view.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\views\input_view.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\views\output_view.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\views\transaction_view.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
       <ObjectFileName>$(IntDir)test_chain_witness.obj</ObjectFileName>
