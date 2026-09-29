@@ -211,24 +211,33 @@ bool block_view::is_malleated64() const NOEXCEPT
 size_t block_view::malleated32_size() const NOEXCEPT
 {
     const auto malleated = txs_.size();
-    for (auto mally = one; mally <= to_half(malleated); mally *= two)
-        if (block::is_malleable32(malleated - mally, mally) &&
-            is_malleated32(mally))
-            return mally;
+    for (auto width = one; width <= to_half(malleated); width *= two)
+        if (is_malleated32(width))
+            return width;
 
     return zero;
 }
 
+// A set of tx hashes has the merkle root of a shorter set if and only if at
+// some depth its node count is even and above two and its last two nodes are
+// equal: the shorter set has an odd count at that depth and clones its last
+// node, which the longer set holds. This is the test at width depth.
 bool block_view::is_malleated32(size_t width) const NOEXCEPT
 {
-    // Caller bounds width, zero underflows the loop decrement.
-    BC_ASSERT(!is_zero(width) && width <= to_half(txs_.size()));
+    // Caller bounds width.
+    BC_ASSERT(is_power2(width) && width <= to_half(txs_.size()));
 
-    auto mally = txs_.rbegin();
-    auto legit = std::next(mally, width);
+    const auto malleated = txs_.size();
+    const auto count = ceilinged_divide(malleated, width);
+    if (is_odd(count) || count <= two)
+        return false;
 
-    while (!is_zero(width--))
-        if ((*mally++).hash(false) != (*legit++).hash(false))
+    const auto last = sub1(count) * width;
+    const auto prior = last - width;
+    const auto leaves = malleated - last;
+    for (size_t at{}; at < width; ++at)
+        if (txs_[last + block::merkle_index(at, leaves, width)].hash(false) !=
+            txs_[prior + at].hash(false))
             return false;
 
     return true;

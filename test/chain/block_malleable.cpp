@@ -129,6 +129,27 @@ struct txs
     }
 };
 
+// Distinct transactions, none 64 bytes.
+static transaction tx(uint32_t index) NOEXCEPT
+{
+    return
+    {
+        42,
+        inputs{ { point{}, script{}, 42 } },
+        outputs{ { 42, script{} } },
+        index
+    };
+}
+
+static transactions tx_set(const std::vector<uint32_t>& indexes) NOEXCEPT
+{
+    transactions txs{};
+    for (const auto index: indexes)
+        txs.push_back(tx(index));
+
+    return txs;
+}
+
 BOOST_AUTO_TEST_CASE(block__transactions__sizes__expected)
 {
     BOOST_REQUIRE_EQUAL(txs::tx60().serialized_size(false), 60u);
@@ -275,6 +296,170 @@ BOOST_AUTO_TEST_CASE(block__is_malleated32__eight_two_duplicated__true)
     BOOST_REQUIRE(instance.is_malleated32());
 }
 
+// Padded five is 0 1 2 3 4 4 4 4, its prefixes of six to eight share its root.
+BOOST_AUTO_TEST_CASE(block__is_malleated32__five_one_trailing_clone__true)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4 }) };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated32__five_two_trailing_clones__true)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4, 4 }) };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated32__five_three_trailing_clones__true)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4, 4, 4 }) };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated32__nine_two_trailing_clones__true)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8 }) };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(block__is_malleated32__nine_four_trailing_clones__true)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8 }) };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 4u);
+}
+
+// Padded ten is 0..9 8 9 8 9 8 9, the last pair is cloned.
+BOOST_AUTO_TEST_CASE(block__is_malleated32__ten_two_trailing_pair_clones__true)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 9, 8, 9 }) };
+    BOOST_REQUIRE(instance.is_malleated32());
+    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 4u);
+}
+
+// Not a prefix of any padded set.
+BOOST_AUTO_TEST_CASE(block__is_malleated32__seven_two_distinct_trailing_clones__false)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 3, 4, 4 }) };
+    BOOST_REQUIRE(!instance.is_malleated32());
+}
+
+// Nine leaves are a depth deeper than any set of eight or fewer.
+BOOST_AUTO_TEST_CASE(block__is_malleated32__nine_five_trailing_clones__false)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4, 4, 4, 4 }) };
+    BOOST_REQUIRE(!instance.is_malleated32());
+}
+
+// Only the last node at a depth is cloned.
+BOOST_AUTO_TEST_CASE(block__is_malleated32__eight_leading_pair_clone__false)
+{
+    const accessor instance{ header, tx_set({ 0, 1, 0, 1, 2, 3, 4, 5 }) };
+    BOOST_REQUIRE(!instance.is_malleated32());
+}
+
+// merkle_index
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__one_of_one__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 1), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__one_of_two__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 2), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 1, 2), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__two_of_two__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 2, 2), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 2, 2), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__three_of_four__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 3, 4), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 3, 4), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 3, 4), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 3, 4), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__one_of_eight__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 1, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 1, 8), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__three_of_eight__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 3, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 3, 8), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 3, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 3, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 3, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 3, 8), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 3, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 3, 8), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__five_of_eight__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 5, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 5, 8), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 5, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 5, 8), 3u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 5, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 5, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 5, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 5, 8), 4u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__six_of_eight__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 6, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 6, 8), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 6, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 6, 8), 3u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 6, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 6, 8), 5u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 6, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 6, 8), 5u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__seven_of_eight__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 7, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 7, 8), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 7, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 7, 8), 3u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 7, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 7, 8), 5u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 7, 8), 6u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 7, 8), 6u);
+}
+
+BOOST_AUTO_TEST_CASE(block__merkle_index__eight_of_eight__expected)
+{
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 8, 8), 0u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 8, 8), 1u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 8, 8), 2u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 8, 8), 3u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 8, 8), 4u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 8, 8), 5u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 8, 8), 6u);
+    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 8, 8), 7u);
+}
+
 // is_malleable64
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__one_64__true)
@@ -322,103 +507,97 @@ BOOST_AUTO_TEST_CASE(block__is_malleable32__overflow__false)
     BOOST_REQUIRE(!accessor::is_malleable32(2, 100));
 }
 
+BOOST_AUTO_TEST_CASE(block__is_malleable32__not_power2_width__false)
+{
+    BOOST_REQUIRE(!accessor::is_malleable32(3, 3));
+    BOOST_REQUIRE(!accessor::is_malleable32(6, 3));
+    BOOST_REQUIRE(!accessor::is_malleable32(9, 3));
+    BOOST_REQUIRE(!accessor::is_malleable32(12, 6));
+}
+
+// True where the node count (trailing comment) is odd and above one.
 BOOST_AUTO_TEST_CASE(block__is_malleable32__various__expected)
 {
-    BOOST_REQUIRE(!accessor::is_malleable32(1, 1));
+    BOOST_REQUIRE(!accessor::is_malleable32(1, 1)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(2, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(2, 2));
+    BOOST_REQUIRE(!accessor::is_malleable32(2, 1)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(2, 2)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(3, 1)); // 4:1
-    BOOST_REQUIRE(!accessor::is_malleable32(3, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(3, 3));
+    BOOST_REQUIRE( accessor::is_malleable32(3, 1)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(3, 2)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(3, 4)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 4));
+    BOOST_REQUIRE(!accessor::is_malleable32(4, 1)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(4, 2)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(4, 4)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(5, 1)); // 6:1
-    BOOST_REQUIRE(!accessor::is_malleable32(5, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(5, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(5, 4));
-    BOOST_REQUIRE(!accessor::is_malleable32(5, 5));
+    BOOST_REQUIRE( accessor::is_malleable32(5, 1)); // 5
+    BOOST_REQUIRE( accessor::is_malleable32(5, 2)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(5, 4)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(5, 8)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(6, 2)); // 8:2
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 4));
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 5));
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 6));
+    BOOST_REQUIRE(!accessor::is_malleable32(6, 1)); // 6
+    BOOST_REQUIRE( accessor::is_malleable32(6, 2)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(6, 4)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(6, 8)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(7, 1)); // 8:1
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 4));
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 5));
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 6));
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 7));
+    BOOST_REQUIRE( accessor::is_malleable32(7, 1)); // 7
+    BOOST_REQUIRE(!accessor::is_malleable32(7, 2)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(7, 4)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(7, 8)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 4));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 5));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 6));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 7));
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 8));
+    BOOST_REQUIRE(!accessor::is_malleable32(8, 1)); // 8
+    BOOST_REQUIRE(!accessor::is_malleable32(8, 2)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(8, 4)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(8, 8)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(9, 1)); // 10:1
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 4));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 5));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 6));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 7));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 8));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 9));
+    BOOST_REQUIRE( accessor::is_malleable32(9, 1)); // 9
+    BOOST_REQUIRE( accessor::is_malleable32(9, 2)); // 5
+    BOOST_REQUIRE( accessor::is_malleable32(9, 4)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(9, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(9, 16)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(10, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(10, 2)); // 12:2
-    BOOST_REQUIRE(!accessor::is_malleable32(10, 3));
-    BOOST_REQUIRE( accessor::is_malleable32(11, 1)); // 12:1
-    BOOST_REQUIRE(!accessor::is_malleable32(11, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 3));
-    BOOST_REQUIRE( accessor::is_malleable32(12, 4)); // 16:4
-    BOOST_REQUIRE( accessor::is_malleable32(13, 1)); // 14:1
-    BOOST_REQUIRE(!accessor::is_malleable32(13, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(14, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(14, 2)); // 16:2
-    BOOST_REQUIRE(!accessor::is_malleable32(14, 3));
-    BOOST_REQUIRE( accessor::is_malleable32(15, 1)); // 16:1
-    BOOST_REQUIRE(!accessor::is_malleable32(16, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(17, 1)); // 18:1
-    BOOST_REQUIRE(!accessor::is_malleable32(18, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(18, 2)); // 20:2
-    BOOST_REQUIRE( accessor::is_malleable32(19, 1)); // 20:1
-    BOOST_REQUIRE(!accessor::is_malleable32(20, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(20, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(20, 3));
-    BOOST_REQUIRE( accessor::is_malleable32(20, 4)); // 24:4
-    BOOST_REQUIRE( accessor::is_malleable32(21, 1)); // 22:1
-    BOOST_REQUIRE(!accessor::is_malleable32(22, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(22, 2)); // 24:2
-    BOOST_REQUIRE( accessor::is_malleable32(23, 1)); // 24:1
-    BOOST_REQUIRE(!accessor::is_malleable32(24, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(25, 1)); // 26:1
-    BOOST_REQUIRE(!accessor::is_malleable32(26, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(26, 2)); // 28:2
-    BOOST_REQUIRE( accessor::is_malleable32(27, 1)); // 28:1
-    BOOST_REQUIRE(!accessor::is_malleable32(28, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(28, 2));
-    BOOST_REQUIRE(!accessor::is_malleable32(28, 3));
-    BOOST_REQUIRE( accessor::is_malleable32(28, 4)); // 32:4
-    BOOST_REQUIRE( accessor::is_malleable32(29, 1)); // 30:1
-    BOOST_REQUIRE(!accessor::is_malleable32(30, 1));
-    BOOST_REQUIRE( accessor::is_malleable32(30, 2)); // 32:2
-    BOOST_REQUIRE( accessor::is_malleable32(31, 1)); // 32:1
+    BOOST_REQUIRE(!accessor::is_malleable32(10, 1)); // 10
+    BOOST_REQUIRE( accessor::is_malleable32(10, 2)); // 5
+    BOOST_REQUIRE( accessor::is_malleable32(10, 4)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(10, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(10, 16)); // 1
+
+    BOOST_REQUIRE( accessor::is_malleable32(11, 1)); // 11
+    BOOST_REQUIRE(!accessor::is_malleable32(11, 2)); // 6
+    BOOST_REQUIRE( accessor::is_malleable32(11, 4)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(11, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(11, 16)); // 1
+
+    BOOST_REQUIRE(!accessor::is_malleable32(12, 1)); // 12
+    BOOST_REQUIRE(!accessor::is_malleable32(12, 2)); // 6
+    BOOST_REQUIRE( accessor::is_malleable32(12, 4)); // 3
+    BOOST_REQUIRE(!accessor::is_malleable32(12, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(12, 16)); // 1
+
+    BOOST_REQUIRE( accessor::is_malleable32(13, 1)); // 13
+    BOOST_REQUIRE( accessor::is_malleable32(13, 2)); // 7
+    BOOST_REQUIRE(!accessor::is_malleable32(13, 4)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(13, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(13, 16)); // 1
+
+    BOOST_REQUIRE(!accessor::is_malleable32(14, 1)); // 14
+    BOOST_REQUIRE( accessor::is_malleable32(14, 2)); // 7
+    BOOST_REQUIRE(!accessor::is_malleable32(14, 4)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(14, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(14, 16)); // 1
+
+    BOOST_REQUIRE( accessor::is_malleable32(15, 1)); // 15
+    BOOST_REQUIRE(!accessor::is_malleable32(15, 2)); // 8
+    BOOST_REQUIRE(!accessor::is_malleable32(15, 4)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(15, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(15, 16)); // 1
+
+    BOOST_REQUIRE(!accessor::is_malleable32(16, 1)); // 16
+    BOOST_REQUIRE(!accessor::is_malleable32(16, 2)); // 8
+    BOOST_REQUIRE(!accessor::is_malleable32(16, 4)); // 4
+    BOOST_REQUIRE(!accessor::is_malleable32(16, 8)); // 2
+    BOOST_REQUIRE(!accessor::is_malleable32(16, 16)); // 1
 }
 
 // is_malleated64
