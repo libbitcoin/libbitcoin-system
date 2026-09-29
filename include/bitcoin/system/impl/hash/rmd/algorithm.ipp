@@ -38,7 +38,7 @@ TEMPLATE
 INLINE constexpr auto CLASS::
 f0(auto x, auto y, auto z) NOEXCEPT
 {
-    return f::xor_(f::xor_(x, y), z);
+    return f::xor_(x, f::xor_(y, z));
 }
 
 TEMPLATE
