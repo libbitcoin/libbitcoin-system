@@ -113,6 +113,18 @@ static_assert(compact::compress(to_uintx(base16_hash("0000abcdefaabbccddeeff0011
 static_assert(compact::compress(to_uintx(base16_hash("00abcdefaabbccddeeff00112233445566778899aabbccddeeff001122334455"))) == 0x2000abcdul);
 static_assert(compact::compress(to_uintx(base16_hash("abcdefaabbccddeeff00112233445566778899aabbccddeeff00112233445566"))) == 0x2100abcdul);
 
+// exact powers of base produce a minimal mantissa (exponent is the digit count).
+static_assert(compact::compress(uint256_t{ 1 }) == 0x01010000ul);
+static_assert(compact::compress(uint256_t{ 1 } << 8u) == 0x02010000ul);
+static_assert(compact::compress(uint256_t{ 1 } << 16u) == 0x03010000ul);
+static_assert(compact::compress(uint256_t{ 1 } << 176u) == 0x17010000ul);
+static_assert(compact::compress(uint256_t{ 1 } << 248u) == 0x20010000ul);
+static_assert(compact::expand(compact::compress(uint256_t{ 1 })) == uint256_t{ 1 });
+static_assert(compact::expand(compact::compress(uint256_t{ 1 } << 8u)) == uint256_t{ 1 } << 8u);
+static_assert(compact::expand(compact::compress(uint256_t{ 1 } << 16u)) == uint256_t{ 1 } << 16u);
+static_assert(compact::expand(compact::compress(uint256_t{ 1 } << 176u)) == uint256_t{ 1 } << 176u);
+static_assert(compact::expand(compact::compress(uint256_t{ 1 } << 248u)) == uint256_t{ 1 } << 248u);
+
 constexpr uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantissa) NOEXCEPT
 {
     return ((logical_exponent + 3) << 24) | ((negative ? 1 : 0) << 23) | mantissa;
