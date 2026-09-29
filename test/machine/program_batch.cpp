@@ -79,10 +79,28 @@ static script batch_multisig() NOEXCEPT
     return script{ ops };
 }
 
+struct batch_misses
+{
+    size_t logged{};
+    size_t fired{};
+    chain::signatures::miss kind{};
+};
+
+static chain::signatures batch_capture(batch_misses& misses) NOEXCEPT
+{
+    return
+    {
+        true,
+        [&misses](const script&) NOEXCEPT { ++misses.logged; },
+        [&misses](chain::signatures::miss kind, size_t count) NOEXCEPT { misses.kind = kind; misses.fired += count; }
+    };
+}
+
 // A point of neither compressed nor uncompressed size verifies inline.
 BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__uncompressible_point__false)
 {
-    const chain::signatures capture{ true };
+    batch_misses misses{};
+    const auto capture = batch_capture(misses);
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
     const auto it = tx.inputs_ptr()->begin();
     const batch_accessor in{ tx, it, flags::no_rules, capture };
@@ -93,11 +111,15 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__uncompressible_point__fals
     const ec_signature signature{};
     BOOST_REQUIRE(!out.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(!capture.batched.load());
+    BOOST_REQUIRE(misses.kind == chain::signatures::miss::ecdsa);
+    BOOST_REQUIRE_EQUAL(misses.fired, one);
+    BOOST_REQUIRE_EQUAL(misses.logged, one);
 }
 
 BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__unbatchable_script__false)
 {
-    const chain::signatures capture{ true };
+    batch_misses misses{};
+    const auto capture = batch_capture(misses);
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
     const auto it = tx.inputs_ptr()->begin();
     const batch_accessor in{ tx, it, flags::no_rules, capture };
@@ -108,6 +130,9 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__unbatchable_script__false)
     const ec_signature signature{};
     BOOST_REQUIRE(!out.verify_ecdsa_signature(point, hash, signature));
     BOOST_REQUIRE(!capture.batched.load());
+    BOOST_REQUIRE(misses.kind == chain::signatures::miss::ecdsa);
+    BOOST_REQUIRE_EQUAL(misses.fired, one);
+    BOOST_REQUIRE_EQUAL(misses.logged, one);
 }
 
 // An input script is never batchable.
@@ -127,7 +152,8 @@ BOOST_AUTO_TEST_CASE(program__verify_ecdsa_signature__input_script__false)
 
 BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__unbatchable_script__false)
 {
-    const chain::signatures capture{ true };
+    batch_misses misses{};
+    const auto capture = batch_capture(misses);
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
     const auto it = tx.inputs_ptr()->begin();
     const batch_accessor in{ tx, it, flags::no_rules, capture };
@@ -138,6 +164,9 @@ BOOST_AUTO_TEST_CASE(program__verify_schnorr_signature__unbatchable_script__fals
     const ec_signature signature{};
     BOOST_REQUIRE(!out.verify_schnorr_signature(point, hash, signature));
     BOOST_REQUIRE(!capture.batched.load());
+    BOOST_REQUIRE(misses.kind == chain::signatures::miss::schnorr);
+    BOOST_REQUIRE_EQUAL(misses.fired, one);
+    BOOST_REQUIRE_EQUAL(misses.logged, one);
 }
 
 // A group must carry at least one signature.
@@ -186,7 +215,8 @@ static data_chunk batch_endorsement(uint8_t sighash) NOEXCEPT
 // One digest per group, so the sighash byte must be uniform.
 BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__mixed_sighash__false)
 {
-    const chain::signatures capture{ true };
+    batch_misses misses{};
+    const auto capture = batch_capture(misses);
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
     const auto it = tx.inputs_ptr()->begin();
     const batch_accessor in{ tx, it, flags::no_rules, capture };
@@ -198,11 +228,15 @@ BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__mixed_sighash__fa
     const chunk_xptrs points{ chunk_xptr{ key }, chunk_xptr{ key } };
     const chunk_xptrs endorsements{ chunk_xptr{ all }, chunk_xptr{ none } };
     BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
+    BOOST_REQUIRE(misses.kind == chain::signatures::miss::multisig);
+    BOOST_REQUIRE_EQUAL(misses.fired, two);
+    BOOST_REQUIRE_EQUAL(misses.logged, one);
 }
 
 BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__unbatchable_script__false)
 {
-    const chain::signatures capture{ true };
+    batch_misses misses{};
+    const auto capture = batch_capture(misses);
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
     const auto it = tx.inputs_ptr()->begin();
     const batch_accessor in{ tx, it, flags::no_rules, capture };
@@ -213,6 +247,41 @@ BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__unbatchable_scrip
     const chunk_xptrs points{ chunk_xptr{ key } };
     const chunk_xptrs endorsements{ chunk_xptr{ endorsement } };
     BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
+    BOOST_REQUIRE(misses.kind == chain::signatures::miss::multisig);
+    BOOST_REQUIRE_EQUAL(misses.fired, one);
+    BOOST_REQUIRE_EQUAL(misses.logged, one);
+}
+
+// Only the running output script is batchable.
+BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__input_script__false)
+{
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(batch_multisig(), max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+
+    const auto key = batch_key();
+    const auto endorsement = batch_endorsement(coverage::hash_all);
+    const chunk_xptrs points{ chunk_xptr{ key } };
+    const chunk_xptrs endorsements{ chunk_xptr{ endorsement } };
+    BOOST_REQUIRE(!in.try_batch_multisig_verification(points, endorsements));
+    BOOST_REQUIRE(!capture.batched.load());
+}
+
+BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__uncompressible_point__false)
+{
+    const chain::signatures capture{ true };
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const batch_accessor in{ tx, it, flags::no_rules, capture };
+    const batch_accessor out{ in, to_shared<script>(batch_multisig()) };
+
+    const auto off_curve = build_chunk({ base16_chunk("04"), data_chunk(sub1(ec_uncompressed_size), 0x00) });
+    const auto endorsement = batch_endorsement(coverage::hash_all);
+    const chunk_xptrs points{ chunk_xptr{ off_curve } };
+    const chunk_xptrs endorsements{ chunk_xptr{ endorsement } };
+    BOOST_REQUIRE(!out.try_batch_multisig_verification(points, endorsements));
+    BOOST_REQUIRE(!capture.batched.load());
 }
 
 BOOST_AUTO_TEST_CASE(program__try_batch_multisig_verification__undecodable_endorsement__false)

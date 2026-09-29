@@ -73,6 +73,20 @@ BOOST_AUTO_TEST_CASE(program__subscript__codeseparator__stripped)
     BOOST_REQUIRE_EQUAL(in.subscript(chunk_xptrs{ single })->ops().size(), one);
 }
 
+BOOST_AUTO_TEST_CASE(program__subscript__unversioned_bip143__stripped)
+{
+    const operations ops{ operation{ opcode::codeseparator }, operation{ opcode::dup } };
+    const auto tx = accessor_transaction(script{ ops }, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const chain::signatures capture{};
+    const verify_accessor in{ tx, it, flags::bip143_rule, capture };
+
+    const data_chunk endorsement{ 0x01_u8 };
+    const chunk_xptr single{ endorsement };
+    BOOST_REQUIRE_EQUAL(in.subscript(single)->ops().size(), one);
+    BOOST_REQUIRE_EQUAL(in.subscript(chunk_xptrs{ single })->ops().size(), one);
+}
+
 BOOST_AUTO_TEST_CASE(program__set_hash__subscript__cached)
 {
     const chain::signatures capture{};

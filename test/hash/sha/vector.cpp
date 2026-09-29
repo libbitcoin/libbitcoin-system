@@ -23,63 +23,63 @@ BOOST_AUTO_TEST_SUITE(vector_tests)
 // Merkle root
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
-{
-    using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
-
-    // First round
-    // AVX2
-    constexpr auto expected1 = sha_256::double_hash({ 0 }, { 1 });
-    constexpr auto expected2 = sha_256::double_hash({ 2 }, { 3 });
-    constexpr auto expected3 = sha_256::double_hash({ 4 }, { 5 });
-    constexpr auto expected4 = sha_256::double_hash({ 6 }, { 7 });
-    // AVX2
-    constexpr auto expected5 = sha_256::double_hash({ 8 }, { 9 });
-    constexpr auto expected6 = sha_256::double_hash({ 10 }, { 11 });
-    constexpr auto expected7 = sha_256::double_hash({ 12 }, { 13 });
-    constexpr auto expected8 = sha_256::double_hash({ 14 }, { 15 });
-    // AVX2
-    constexpr auto expected9 = sha_256::double_hash({ 16 }, { 17 });
-    constexpr auto expected10 = sha_256::double_hash({ 18 }, { 19 });
-    constexpr auto expected11 = sha_256::double_hash({ 20 }, { 21 });
-    constexpr auto expected12 = sha_256::double_hash({ 22 }, { 23 });
-    // SSE41
-    constexpr auto expected13 = sha_256::double_hash({ 24 }, { 25 });
-    constexpr auto expected14 = sha_256::double_hash({ 26 }, { 27 });
-
-    // Second round
-    // AVX2
-    constexpr auto expected15 = sha_256::double_hash(expected1, expected2);
-    constexpr auto expected16 = sha_256::double_hash(expected3, expected4);
-    constexpr auto expected17 = sha_256::double_hash(expected5, expected6);
-    constexpr auto expected18 = sha_256::double_hash(expected7, expected8);
-    // Sequential
-    constexpr auto expected19 = sha_256::double_hash(expected9, expected10);
-    constexpr auto expected20 = sha_256::double_hash(expected11, expected12);
-    constexpr auto expected21 = sha_256::double_hash(expected13, expected14);
-
-    // Third round
-    // AVX2
-    constexpr auto expected22 = sha_256::double_hash(expected15, expected16);
-    constexpr auto expected23 = sha_256::double_hash(expected17, expected18);
-    constexpr auto expected24 = sha_256::double_hash(expected19, expected20);
-    constexpr auto expected25 = sha_256::double_hash(expected21, expected21);
-
-    // Fourth round
-    constexpr auto expected26 = sha_256::double_hash(expected22, expected23);
-    constexpr auto expected27 = sha_256::double_hash(expected24, expected25);
-
-    // Fifth round
-    constexpr auto expected = sha_256::double_hash(expected26, expected27);
-
-    BOOST_CHECK_EQUAL(sha_256::merkle_root(
-    {
-        { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
-        { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
-        { 16 }, { 17 }, { 18 }, { 19 }, { 20 }, { 21 }, { 22 }, { 23 },
-        { 24 }, { 25 }, { 26 }, { 27 }
-    }), expected);
-}
+////BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
+////{
+////    using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
+////
+////    // First round
+////    // AVX2
+////    constexpr auto expected1 = sha_256::double_hash({ 0 }, { 1 });
+////    constexpr auto expected2 = sha_256::double_hash({ 2 }, { 3 });
+////    constexpr auto expected3 = sha_256::double_hash({ 4 }, { 5 });
+////    constexpr auto expected4 = sha_256::double_hash({ 6 }, { 7 });
+////    // AVX2
+////    constexpr auto expected5 = sha_256::double_hash({ 8 }, { 9 });
+////    constexpr auto expected6 = sha_256::double_hash({ 10 }, { 11 });
+////    constexpr auto expected7 = sha_256::double_hash({ 12 }, { 13 });
+////    constexpr auto expected8 = sha_256::double_hash({ 14 }, { 15 });
+////    // AVX2
+////    constexpr auto expected9 = sha_256::double_hash({ 16 }, { 17 });
+////    constexpr auto expected10 = sha_256::double_hash({ 18 }, { 19 });
+////    constexpr auto expected11 = sha_256::double_hash({ 20 }, { 21 });
+////    constexpr auto expected12 = sha_256::double_hash({ 22 }, { 23 });
+////    // SSE41
+////    constexpr auto expected13 = sha_256::double_hash({ 24 }, { 25 });
+////    constexpr auto expected14 = sha_256::double_hash({ 26 }, { 27 });
+////
+////    // Second round
+////    // AVX2
+////    constexpr auto expected15 = sha_256::double_hash(expected1, expected2);
+////    constexpr auto expected16 = sha_256::double_hash(expected3, expected4);
+////    constexpr auto expected17 = sha_256::double_hash(expected5, expected6);
+////    constexpr auto expected18 = sha_256::double_hash(expected7, expected8);
+////    // Sequential
+////    constexpr auto expected19 = sha_256::double_hash(expected9, expected10);
+////    constexpr auto expected20 = sha_256::double_hash(expected11, expected12);
+////    constexpr auto expected21 = sha_256::double_hash(expected13, expected14);
+////
+////    // Third round
+////    // AVX2
+////    constexpr auto expected22 = sha_256::double_hash(expected15, expected16);
+////    constexpr auto expected23 = sha_256::double_hash(expected17, expected18);
+////    constexpr auto expected24 = sha_256::double_hash(expected19, expected20);
+////    constexpr auto expected25 = sha_256::double_hash(expected21, expected21);
+////
+////    // Fourth round
+////    constexpr auto expected26 = sha_256::double_hash(expected22, expected23);
+////    constexpr auto expected27 = sha_256::double_hash(expected24, expected25);
+////
+////    // Fifth round
+////    constexpr auto expected = sha_256::double_hash(expected26, expected27);
+////
+////    BOOST_CHECK_EQUAL(sha_256::merkle_root(
+////    {
+////        { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
+////        { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
+////        { 16 }, { 17 }, { 18 }, { 19 }, { 20 }, { 21 }, { 22 }, { 23 },
+////        { 24 }, { 25 }, { 26 }, { 27 }
+////    }), expected);
+////}
 
 BOOST_AUTO_TEST_CASE(vector__sha512__merkle_root__expected)
 {

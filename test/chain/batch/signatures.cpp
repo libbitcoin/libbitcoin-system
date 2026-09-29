@@ -53,6 +53,29 @@ const ec_signature schnorr_sig = base16_array
     "25f66a4a85ea8b71e482a74f382d2ce5ebeee8fdb2172f477df4900d310536c0"
 );
 
+// multisig
+
+BOOST_AUTO_TEST_CASE(signatures__multisig_rows__two_of_three__four)
+{
+    BOOST_REQUIRE_EQUAL(multisig::rows(2, 3), 4u);
+}
+
+BOOST_AUTO_TEST_CASE(signatures__multisig_rows__sigs_above_keys__zero)
+{
+    BOOST_REQUIRE_EQUAL(multisig::rows(2, 1), zero);
+}
+
+BOOST_AUTO_TEST_CASE(signatures__multisig_rows__maximum_gap__zero)
+{
+    BOOST_REQUIRE_EQUAL(multisig::rows(0, max_size_t), zero);
+}
+
+BOOST_AUTO_TEST_CASE(signatures__multisig_rows__product_overflow__zero)
+{
+    constexpr auto half = power2<size_t>(to_half(bits<size_t>));
+    BOOST_REQUIRE_EQUAL(multisig::rows(half, half + half), zero);
+}
+
 // schnorr_signatures
 
 BOOST_AUTO_TEST_CASE(signatures__schnorr_signatures__default__empty)

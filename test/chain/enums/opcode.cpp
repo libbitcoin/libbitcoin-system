@@ -627,6 +627,12 @@ BOOST_AUTO_TEST_CASE(opcode__opcode_from_hexadecimal__8_bits__false)
     BOOST_REQUIRE(!opcode_from_hexadecimal(out_code, "0xf"));
 }
 
+BOOST_AUTO_TEST_CASE(opcode__opcode_from_hexadecimal__non_hex_digits__false)
+{
+    opcode out_code;
+    BOOST_REQUIRE(!opcode_from_hexadecimal(out_code, "0xzz"));
+}
+
 BOOST_AUTO_TEST_CASE(opcode__opcode_from_hexadecimal__16_bits__expected)
 {
     opcode out_code;
