@@ -234,6 +234,112 @@ pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Round, typename xWord>
+INLINE void CLASS::
+prepare_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    // Words 8..15 are constant padding, so terms of only those are constant.
+    constexpr auto s = SHA::word_bits;
+    constexpr auto pad = chunk_pad();
+
+    if constexpr (Round == 23)
+    {
+        constexpr auto constant = sigma0(pad[0]);
+        xbuffer[Round] = f::add<s>(
+            f::add<s>(xbuffer[Round - 16], f::broadcast<xWord>(constant)),
+            f::add<s>(xbuffer[Round - 7], sigma1(xbuffer[Round - 2])));
+    }
+    else if constexpr (Round >= 24 && Round <= 30)
+    {
+        constexpr auto constant = f::add<s>(pad[Round - 24],
+            sigma0(pad[Round - 23]));
+        xbuffer[Round] = f::add<s>(f::broadcast<xWord>(constant),
+            f::add<s>(xbuffer[Round - 7], sigma1(xbuffer[Round - 2])));
+    }
+    else
+    {
+        prepare<Round>(xbuffer);
+    }
+}
+
+TEMPLATE
+template <typename xWord>
+INLINE void CLASS::
+schedule_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    prepare_half<16>(xbuffer);
+    prepare_half<17>(xbuffer);
+    prepare_half<18>(xbuffer);
+    prepare_half<19>(xbuffer);
+    prepare_half<20>(xbuffer);
+    prepare_half<21>(xbuffer);
+    prepare_half<22>(xbuffer);
+    prepare_half<23>(xbuffer);
+    prepare_half<24>(xbuffer);
+    prepare_half<25>(xbuffer);
+    prepare_half<26>(xbuffer);
+    prepare_half<27>(xbuffer);
+    prepare_half<28>(xbuffer);
+    prepare_half<29>(xbuffer);
+    prepare_half<30>(xbuffer);
+    prepare_half<31>(xbuffer);
+
+    prepare_half<32>(xbuffer);
+    prepare_half<33>(xbuffer);
+    prepare_half<34>(xbuffer);
+    prepare_half<35>(xbuffer);
+    prepare_half<36>(xbuffer);
+    prepare_half<37>(xbuffer);
+    prepare_half<38>(xbuffer);
+    prepare_half<39>(xbuffer);
+    prepare_half<40>(xbuffer);
+    prepare_half<41>(xbuffer);
+    prepare_half<42>(xbuffer);
+    prepare_half<43>(xbuffer);
+    prepare_half<44>(xbuffer);
+    prepare_half<45>(xbuffer);
+    prepare_half<46>(xbuffer);
+    prepare_half<47>(xbuffer);
+
+    prepare_half<48>(xbuffer);
+    prepare_half<49>(xbuffer);
+    prepare_half<50>(xbuffer);
+    prepare_half<51>(xbuffer);
+    prepare_half<52>(xbuffer);
+    prepare_half<53>(xbuffer);
+    prepare_half<54>(xbuffer);
+    prepare_half<55>(xbuffer);
+    prepare_half<56>(xbuffer);
+    prepare_half<57>(xbuffer);
+    prepare_half<58>(xbuffer);
+    prepare_half<59>(xbuffer);
+    prepare_half<60>(xbuffer);
+    prepare_half<61>(xbuffer);
+    prepare_half<62>(xbuffer);
+    prepare_half<63>(xbuffer);
+
+    if constexpr (SHA::rounds == 80)
+    {
+        prepare_half<64>(xbuffer);
+        prepare_half<65>(xbuffer);
+        prepare_half<66>(xbuffer);
+        prepare_half<67>(xbuffer);
+        prepare_half<68>(xbuffer);
+        prepare_half<69>(xbuffer);
+        prepare_half<70>(xbuffer);
+        prepare_half<71>(xbuffer);
+        prepare_half<72>(xbuffer);
+        prepare_half<73>(xbuffer);
+        prepare_half<74>(xbuffer);
+        prepare_half<75>(xbuffer);
+        prepare_half<76>(xbuffer);
+        prepare_half<77>(xbuffer);
+        prepare_half<78>(xbuffer);
+        prepare_half<79>(xbuffer);
+    }
+}
+
+TEMPLATE
 template <typename xWord>
 INLINE const auto& CLASS::
 scheduled_1() NOEXCEPT
@@ -371,7 +477,7 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
                 // Second hash
                 inject_left_half(xbuffer, xstate);
                 pad_half(xbuffer);
-                schedule_<false>(xbuffer);
+                schedule_half(xbuffer);
                 xstate = initial;
                 compress_<zero, true>(xstate, xbuffer);
 

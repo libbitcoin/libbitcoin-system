@@ -363,6 +363,12 @@ protected:
     template <typename xWord>
     INLINE static void pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
+    template <size_t Round, typename xWord>
+    INLINE static void prepare_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void schedule_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
     template <typename xWord>
     INLINE static const auto& scheduled_1() NOEXCEPT;
 
