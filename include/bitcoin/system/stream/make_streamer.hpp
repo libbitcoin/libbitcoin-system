@@ -37,11 +37,11 @@ class stream_owner
 protected:
     template <typename Container>
     stream_owner(Container&& device) NOEXCEPT
-      : stream_(std::forward<Container>(device))
+      : owned_(std::forward<Container>(device))
     {
     }
 
-    Stream stream_;
+    Stream owned_;
 };
 
 /// Construct a stream and feed it to a streamer.
@@ -59,7 +59,7 @@ public:
     make_streamer(typename Device::container device) NOEXCEPT
       : stream_owner<Stream>(device), Streamer()
     {
-        Streamer::set_stream(&this->stream_);
+        Streamer::set_stream(&this->owned_);
     }
 };
 
