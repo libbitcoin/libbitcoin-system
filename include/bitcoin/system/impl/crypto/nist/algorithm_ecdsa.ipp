@@ -57,7 +57,9 @@ sign(signature_t& out, const secret_t& secret, const_byte_span digest) NOEXCEPT
     {
         hmac_t code{ key };
         (code.write(parts), ...);
-        return code.flush();
+        const auto digest = code.flush();
+        wipe(code);
+        return digest;
     };
 
     digest_t v{};

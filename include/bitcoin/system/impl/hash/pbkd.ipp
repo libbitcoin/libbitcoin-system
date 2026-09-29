@@ -89,9 +89,13 @@ key(data_array<Size>& out, const data_slice& password,
     // rfc8018
     // applied to the password P and the concatenation of the salt S [PS].
     // [salted and unsalted hmac accumulators are saved here for reuse.]
-    const hmac<Algorithm> hmac_p(password);
+    hmac<Algorithm> hmac_p(password);
     auto hmac_ps = hmac_p;
     hmac_ps.write(salt);
+    auto ps = hmac_ps;
+    auto p = hmac_p;
+    typename Algorithm::digest_t u{};
+    typename Algorithm::digest_t t{};
 
     // rfc8018
     // apply the function F to P, S, c, and index [i] to compute the block:
@@ -103,16 +107,16 @@ key(data_array<Size>& out, const data_slice& password,
         // of PRF applied to P and the concatenation of S and block index i.
 
         // U_1 = PRF (P, S || INT (i))
-        auto ps = hmac_ps;
+        ps = hmac_ps;
         ps.write(index.at(i));
-        auto u = ps.flush();
-        auto t = u;
+        u = ps.flush();
+        t = u;
 
         for (size_t c = 2; c <= count; ++c)
         {
             // rfc8018
             // U_c = PRF (P, U_{c-1})
-            auto p = hmac_p;
+            p = hmac_p;
             p.write(u);
             u = p.flush();
 
@@ -126,6 +130,13 @@ key(data_array<Size>& out, const data_slice& password,
         // DK = T_1 || T_2 ||  ...  || T_l<0..r-1>
         it = std::copy_n(t.cbegin(), (i == l ? r : t.size()), it);
     }
+
+    wipe(hmac_p);
+    wipe(hmac_ps);
+    wipe(ps);
+    wipe(p);
+    wipe(u);
+    wipe(t);
 }
 
 TEMPLATE

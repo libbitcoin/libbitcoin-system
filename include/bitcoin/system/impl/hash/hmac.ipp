@@ -51,14 +51,6 @@ hmac(const data_slice& key) NOEXCEPT
 }
 
 TEMPLATE
-inline CLASS::
-~hmac() NOEXCEPT
-{
-    wipe(inner_);
-    wipe(outer_);
-}
-
-TEMPLATE
 inline void CLASS::
 write(const data_slice& data) NOEXCEPT
 {
