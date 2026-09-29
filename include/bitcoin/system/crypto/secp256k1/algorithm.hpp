@@ -619,9 +619,9 @@ protected:
 
     /// Generator table.
     /// -----------------------------------------------------------------------
-    /// Odd multiples of G (normal), then those of lambda * G, in slices each
-    /// computed at compile time in its own translation unit. A slice is blocks
-    /// of limb columns, x then y.
+    /// Odd multiples of G (normal) in slices, each computed at compile time in
+    /// its own translation unit. A slice is blocks of limb columns, x then y.
+    /// Multiples of lambda * G are those of G by the endomorphism.
 
     static constexpr size_t block_size = 16;
     static constexpr size_t slice_size = 512;
@@ -636,7 +636,8 @@ protected:
     /// Offset of an entry in 64 bit words relative to its slice.
     static constexpr size_t locate(size_t entry) NOEXCEPT;
 
-    /// r = entry of the generator or endomorphism table, negated per lane.
+    /// r = entry of the generator table, or its endomorphism where mapped,
+    /// negated per lane.
     template <typename Word>
     static constexpr void lookup(affine_t<Word>& r, Word entry, bool mapped,
         Word negative) NOEXCEPT;

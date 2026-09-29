@@ -371,22 +371,20 @@ constexpr void algorithm::digit(Word& index, Word& negative,
 }
 
 // Entry e is in slice e / s at offset locate(e mod s), from which limb i of x
-// is at i * b and limb i of y at (5 + i) * b, and the endomorphism table
-// follows the generator table in each slice.
+// is at i * b and limb i of y at (5 + i) * b.
 template <typename Word>
 constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
     Word negative) NOEXCEPT
 {
     constexpr auto size = array_count<field_t<Word>>;
     const auto entries = unpack(entry);
-    const auto table = mapped ? table_words : zero;
 
     std_array<words_t<Word>, size> xs{}, ys{};
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
         const auto value = possible_narrow_cast<size_t>(entries[lane]);
-        const auto base = generator_slices[value / slice_size] + table +
+        const auto base = generator_slices[value / slice_size] +
             locate(value % slice_size);
 
         for (size_t limb{}; limb < size; ++limb)
@@ -403,6 +401,9 @@ constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
         point.x[limb] = pack<Word>(xs[limb]);
         point.y[limb] = pack<Word>(ys[limb]);
     }
+
+    if (mapped)
+        endomorphism(point, point);
 
     negate(r, point, negative);
 }

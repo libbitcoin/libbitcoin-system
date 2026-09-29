@@ -50,11 +50,12 @@ public:
     using algorithm::to_bytes;
     using algorithm::generator_slices;
     using algorithm::slice_size;
-    using algorithm::table_words;
     using algorithm::block_size;
     using algorithm::locate;
+    using algorithm::lookup;
     using algorithm::beta;
     using algorithm::normalize;
+    using algorithm::negate;
 };
 
 using field = accessor::field_t<uint64_t>;
@@ -121,10 +122,10 @@ constexpr scalar number(const bytes& value) NOEXCEPT
     return out;
 }
 
-static affine entry(size_t index, bool mapped) NOEXCEPT
+static affine entry(size_t index) NOEXCEPT
 {
     const auto slice = accessor::generator_slices[index / accessor::slice_size];
-    const auto offset = accessor::locate(index % accessor::slice_size) + (mapped ? accessor::table_words : 0u);
+    const auto offset = accessor::locate(index % accessor::slice_size);
     affine out{};
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     for (size_t limb{}; limb < out.x.size(); ++limb)
@@ -133,6 +134,15 @@ static affine entry(size_t index, bool mapped) NOEXCEPT
         out.y[limb] = slice[offset + (out.x.size() + limb) * accessor::block_size];
     }
     BC_POP_WARNING()
+    return out;
+}
+
+static affine looked_up(size_t index, bool mapped, bool negative) NOEXCEPT
+{
+    affine out{};
+    accessor::lookup(out, uint64_t{ index }, mapped, negative ? max_uint64 : 0_u64);
+    accessor::normalize(out.x);
+    accessor::normalize(out.y);
     return out;
 }
 
@@ -145,22 +155,25 @@ static bool is_multiple(size_t index) NOEXCEPT
     secret[31] = narrow_cast<uint8_t>(multiple);
 
     ec_compressed key{};
-    const auto point = entry(index, false);
+    const auto point = entry(index);
     const auto x = encode(point.x);
     return secret_to_public(key, secret) &&
         std::equal(x.begin(), x.end(), std::next(key.begin())) &&
         (key.front() == ec_odd_sign) == get_right(point.y[0]);
 }
 
-// Entry of the endomorphism table is that of the generator table with x * beta.
+// A mapped lookup is the entry with x * beta, and a negative one negated.
 static bool is_mapped(size_t index) NOEXCEPT
 {
-    const auto point = entry(index, false);
-    const auto mapped = entry(index, true);
-    field x{};
+    const auto point = entry(index);
+    const auto mapped = looked_up(index, true, false);
+    const auto negated = looked_up(index, false, true);
+    field x{}, y{};
     accessor::multiply(x, point.x, accessor::beta);
     accessor::normalize(x);
-    return x == mapped.x && point.y == mapped.y;
+    accessor::negate(y, point.y);
+    accessor::normalize(y);
+    return x == mapped.x && point.y == mapped.y && point.x == negated.x && y == negated.y;
 }
 
 constexpr bool is_point(const affine& a, const bytes& x, const bytes& y) NOEXCEPT
@@ -207,12 +220,13 @@ constexpr affine p1{ decode(px), decode(py) };
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expected)
 {
-    BOOST_CHECK(is_point(entry(0, false), gx, gy));
-    BOOST_CHECK(is_point(entry(1, false), g3x, g3y));
-    BOOST_CHECK(is_point(entry(3, false), g7x, g7y));
-    BOOST_CHECK(is_point(entry(63, false), g127x, g127y));
-    BOOST_CHECK(is_point(entry(511, false), g1023x, g1023y));
-    BOOST_CHECK(is_point(entry(0, true), gx_beta, gy));
+    BOOST_CHECK(is_point(entry(0), gx, gy));
+    BOOST_CHECK(is_point(entry(1), g3x, g3y));
+    BOOST_CHECK(is_point(entry(3), g7x, g7y));
+    BOOST_CHECK(is_point(entry(63), g127x, g127y));
+    BOOST_CHECK(is_point(entry(511), g1023x, g1023y));
+    BOOST_CHECK(is_point(looked_up(0, true, false), gx_beta, gy));
+    BOOST_CHECK(is_point(looked_up(0, false, true), gx, gy_negated));
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__computed_multiples__expected)

@@ -44,7 +44,7 @@ constexpr size limbs = 5;
 constexpr size slice_blocks = slice_size / block_size;
 constexpr size block_words = 2 * limbs * block_size;
 constexpr size table_words = slice_blocks * block_words;
-constexpr size slice_words = 2 * table_words;
+constexpr size slice_words = table_words;
 
 /// Field element, four 64 bit words (normal).
 struct element
@@ -87,12 +87,6 @@ constexpr affine twice
         0xc6047f9441ed7d6d } },
     { { 0x236431a950cfe52a, 0xf7f632653266d0e1, 0xa3c58419466ceaee,
         0x1ae168fea63dc339 } }
-};
-
-constexpr element beta
-{
-    { 0xc1396c28719501ee, 0x9cf0497512f58995, 0x6e64479eac3434e9,
-      0x7ae96a2b657c0710 }
 };
 
 // Field arithmetic.
@@ -304,12 +298,11 @@ struct forward
     element products[block_size]{};
 };
 
-/// Affine odd multiples of a block, their x * beta, and inverse of the product
-/// before the block.
+/// Affine odd multiples of a block, and inverse of the product before the
+/// block.
 struct backward
 {
     affine points[block_size]{};
-    element mapped[block_size]{};
     element inverse{};
 };
 
@@ -406,7 +399,6 @@ constexpr backward backwarded() noexcept
                 multiply(chunk.points[point].x, zz),
                 multiply(chunk.points[point].y, multiply(zz, inverse_z))
             };
-            out.mapped[point] = multiply(out.points[point].x, beta);
         }
     }
 
@@ -425,7 +417,7 @@ constexpr void limbs52(word* out, size stride, const element& a) noexcept
 }
 
 // Block b of a table holds x limbs then y limbs, each as a column of the block
-// size, and the endomorphism table (x * beta) follows the generator table.
+// size.
 template <size Slice, size Block>
 constexpr void emit(std::array<word, slice_words>& out) noexcept
 {
@@ -434,13 +426,9 @@ constexpr void emit(std::array<word, slice_words>& out) noexcept
     for (size point = 0; point < block_size; ++point)
     {
         const auto& entry = chunk.points[point];
-        const auto& mapped = chunk.mapped[point];
         const auto at = base + point;
         limbs52(&out[at], block_size, entry.x);
         limbs52(&out[at + limbs * block_size], block_size, entry.y);
-        limbs52(&out[table_words + at], block_size, mapped);
-        limbs52(&out[table_words + at + limbs * block_size], block_size,
-            entry.y);
     }
 }
 
