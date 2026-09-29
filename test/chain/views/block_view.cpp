@@ -205,11 +205,21 @@ static system::chain::transaction view_tx(uint32_t index) NOEXCEPT
 static system::hash_digest view_root(
     const system::chain::transactions& txs) NOEXCEPT
 {
-    using namespace system;
-    const auto left = bitcoin_hash(txs[0].hash(false), txs[1].hash(false));
-    if (txs.size() == two) return left;
-    const auto right = bitcoin_hash(txs[2].hash(false), txs[3].hash(false));
-    return bitcoin_hash(left, right);
+    system::hashes leaves{};
+    for (const auto& tx: txs)
+        leaves.push_back(tx.hash(false));
+
+    return system::merkle_root(std::move(leaves));
+}
+
+static system::chain::transactions view_txs(
+    const std::vector<uint32_t>& indexes) NOEXCEPT
+{
+    system::chain::transactions txs{};
+    for (const auto index: indexes)
+        txs.push_back(view_tx(index));
+
+    return txs;
 }
 
 static system::chain::block view_block(
@@ -285,6 +295,60 @@ BOOST_AUTO_TEST_CASE(block_view__identify__tail_clone_of_two__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(0) };
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+// Prefixes of a padded set share its root.
+BOOST_AUTO_TEST_CASE(block_view__identify__two_trailing_clones_of_seven__invalid_transaction_commitment)
+{
+    using namespace system;
+    const auto txs = view_txs({ 0, 1, 2, 3, 4, 4, 4 });
+    BOOST_REQUIRE_EQUAL(view_root(txs), view_root(view_txs({ 0, 1, 2, 3, 4 })));
+
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__four_trailing_clones_of_thirteen__invalid_transaction_commitment)
+{
+    using namespace system;
+    const auto txs = view_txs({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8 });
+    BOOST_REQUIRE_EQUAL(view_root(txs), view_root(view_txs({ 0, 1, 2, 3, 4, 5, 6, 7, 8 })));
+
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__identify__two_trailing_pair_clones_of_fourteen__invalid_transaction_commitment)
+{
+    using namespace system;
+    const auto txs = view_txs({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 9, 8, 9 });
+    BOOST_REQUIRE_EQUAL(view_root(txs), view_root(view_txs({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 })));
+
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+}
+
+// Not a prefix of any padded set.
+BOOST_AUTO_TEST_CASE(block_view__identify__two_distinct_trailing_clones_of_seven__block_success)
+{
+    using namespace system;
+    const auto txs = view_txs({ 0, 1, 2, 3, 3, 4, 4 });
+    const chain::block_view view{ view_block(txs).to_data(true), true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+}
+
+// Only the last node at a depth is cloned.
+BOOST_AUTO_TEST_CASE(block_view__identify__leading_pair_clone_of_eight__block_success)
+{
+    using namespace system;
+    const auto txs = view_txs({ 0, 1, 0, 1, 2, 3, 4, 5 });
     const chain::block_view view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK_EQUAL(view.identify(), error::block_success);

@@ -563,8 +563,8 @@ bool block::is_malleated() const NOEXCEPT
 bool block::is_malleable32() const NOEXCEPT
 {
     const auto unmalleated = txs_->size();
-    for (auto mally = one; mally <= unmalleated; mally *= two)
-        if (is_malleable32(unmalleated, mally))
+    for (auto width = one; width <= unmalleated; width *= two)
+        if (is_malleable32(unmalleated, width))
             return true;
 
     return false;
@@ -577,40 +577,84 @@ bool block::is_malleated32() const NOEXCEPT
 }
 
 // protected
-// The size of an actual malleation of this block, or zero.
+// The width of the node cloned by a malleation of this block, or zero.
 size_t block::malleated32_size() const NOEXCEPT
 {
     const auto malleated = txs_->size();
-    for (auto mally = one; mally <= to_half(malleated); mally *= two)
-        if (is_malleable32(malleated - mally, mally) && is_malleated32(mally))
-            return mally;
+    for (auto width = one; width <= to_half(malleated); width *= two)
+        if (is_malleated32(width))
+            return width;
 
     return zero;
 }
 
 // static
+// Merkle clones the last node at each depth with an odd count above one.
+// The tree over set leaves has ceilinged(set / width) nodes at width depth.
 bool block::is_malleable32(size_t set, size_t width) NOEXCEPT
 {
-    // Malleable when set is odd at width depth and not before and not one.
-    // This is the only case in which Merkle clones the last item in a set.
-    for (auto depth = one; depth <= width; depth *= two, set = to_half(set))
-        if (is_odd(set)) return depth == width && !is_one(set);
+    if (!is_power2(width))
+        return false;
 
-    return false;
+    const auto count = ceilinged_divide(set, width);
+    return is_odd(count) && !is_one(count);
+}
+
+// static
+// The last node at a depth covers the trailing count leaves, padded to width
+// by merkle cloning. Returns the leaf at position within the padded node.
+size_t block::merkle_index(size_t position, size_t count,
+    size_t width) NOEXCEPT
+{
+    BC_ASSERT(is_power2(width) && !is_zero(count));
+    BC_ASSERT(count <= width && position < width);
+
+    size_t base{};
+    while (count < width)
+    {
+        width = to_half(width);
+
+        if (count <= width)
+        {
+            position %= width;
+        }
+        else if (position < width)
+        {
+            break;
+        }
+        else
+        {
+            base += width;
+            position -= width;
+            count -= width;
+        }
+    }
+
+    return base + position;
 }
 
 // protected
-// True if the last width set of tx hashes repeats.
+// A set of tx hashes has the merkle root of a shorter set if and only if at
+// some depth its node count is even and above two and its last two nodes are
+// equal: the shorter set has an odd count at that depth and clones its last
+// node, which the longer set holds. This is the test at width depth.
 bool block::is_malleated32(size_t width) const NOEXCEPT
 {
     const auto malleated = txs_->size();
-    if (is_zero(width) || width > to_half(malleated))
+    if (!is_power2(width) || width > to_half(malleated))
         return false;
 
-    auto mally = txs_->rbegin();
-    auto legit = std::next(mally, width);
-    while (!is_zero(width--))
-        if ((*mally++)->get_hash(false) != (*legit++)->get_hash(false))
+    const auto count = ceilinged_divide(malleated, width);
+    if (is_odd(count) || count <= two)
+        return false;
+
+    const auto& txs = *txs_;
+    const auto last = sub1(count) * width;
+    const auto prior = last - width;
+    const auto leaves = malleated - last;
+    for (size_t at{}; at < width; ++at)
+        if (txs[last + merkle_index(at, leaves, width)]->get_hash(false) !=
+            txs[prior + at]->get_hash(false))
             return false;
 
     return true;

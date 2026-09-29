@@ -43,6 +43,8 @@ public:
     typedef std::shared_ptr<const block> cptr;
 
     static bool is_malleable32(size_t set, size_t width) NOEXCEPT;
+    static size_t merkle_index(size_t position, size_t count,
+        size_t width) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static hashes merkle_branch(size_t position, hashes&& leaves) NOEXCEPT;
     static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
