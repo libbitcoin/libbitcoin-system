@@ -259,8 +259,8 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "dynamic"
-            cc: "gcc-13"
-            cxx: "g++-13"
+            cc: "gcc-12"
+            cxx: "g++-12"
             flags: ""
             coverage: ""
             boost: "--build-boost"
@@ -433,8 +433,8 @@ jobs:
 
           - image: ubuntu-24.04
             preset: "nix-gnu-debug-static"
-            cc: "gcc-13"
-            cxx: "g++-13"
+            cc: "gcc-12"
+            cxx: "g++-12"
             flags: ""
             coverage: ""
             boost: "--build-boost"
