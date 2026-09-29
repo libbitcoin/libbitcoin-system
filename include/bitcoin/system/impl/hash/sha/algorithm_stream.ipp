@@ -119,8 +119,7 @@ finalize_second(const state_t& state) NOEXCEPT
         buffer_t buffer{};
         inject_left_half(buffer, state);
         pad_half(buffer);
-        schedule(buffer);
-        compress(state2, buffer);
+        schedule_compress(state2, buffer);
         return output(state2);
     };
 
@@ -153,9 +152,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
         auto state2 = H::get;
         inject_left_half(buffer, state);
         pad_half(buffer);
-        schedule(buffer);
-        compress(state2, buffer);
-
+        schedule_compress(state2, buffer);
         return output(state2);
     };
 

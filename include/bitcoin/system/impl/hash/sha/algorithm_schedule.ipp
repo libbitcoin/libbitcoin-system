@@ -148,6 +148,27 @@ schedule(buffer_t& buffer) NOEXCEPT
     }
 }
 
+TEMPLATE
+constexpr void CLASS::
+schedule_compress(state_t& state, buffer_t& buffer) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        schedule(buffer);
+        compress(state, buffer);
+    }
+    else if constexpr (vector && SHA::strength != 160 && have_lanes<word_t, 8>)
+    {
+        // Single block (without shani) interleaved scheduling optimization.
+        schedule_compress_sigma(state, buffer);
+    }
+    else
+    {
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin

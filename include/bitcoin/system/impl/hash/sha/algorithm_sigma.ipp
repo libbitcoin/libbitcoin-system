@@ -30,18 +30,9 @@ namespace sha {
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-template <typename xWord, if_extended<xWord>>
-INLINE auto CLASS::
-sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
-    auto x8) NOEXCEPT
-{
-    return sigma0(f::set<xWord>(x1, x2, x3, x4, x5, x6, x7, x8));
-}
-
-TEMPLATE
 template<size_t Round, size_t Offset>
 INLINE void CLASS::
-prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
+prepare_1(buffer_t& buffer, const auto& sigmas) NOEXCEPT
 {
     static_assert(Round >= 16);
     constexpr auto r02 = Round - 2;
@@ -50,7 +41,7 @@ prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
 
     // buffer[r07 + 7] is buffer[Round + 0], so sigma0 is limited to 8 lanes.
     buffer[Round + Offset] = add(
-        add(buffer[r16 + Offset], f::get<word_t, Offset>(xsigma0)),
+        add(buffer[r16 + Offset], sigmas[Offset]),
         add(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
 }
 
@@ -67,19 +58,20 @@ prepare_8(buffer_t& buffer) NOEXCEPT
     // Does not alter buffer structure, fully private to this method.
     // Tests with sigma1x2 half lanes vectorization show loss of ~10%.
     // Tests with sigma0x8 full lanes vectorization show gain of ~5%.
+    using xword = to_extended<word_t, 8>;
     constexpr auto r15 = Round - 15;
-    const auto xsigma0 = sigma0_8<to_extended<word_t, 8>>(
-        buffer[r15 + 0], buffer[r15 + 1], buffer[r15 + 2], buffer[r15 + 3],
-        buffer[r15 + 4], buffer[r15 + 5], buffer[r15 + 6], buffer[r15 + 7]);
+    std_array<word_t, 8> sigmas{};
+    const auto& xwords = array_cast<xword, one, r15>(buffer);
+    f::store(array_cast<xword>(sigmas).front(), sigma0(f::load(xwords.front())));
 
-    prepare_1<Round, 0>(buffer, xsigma0);
-    prepare_1<Round, 1>(buffer, xsigma0);
-    prepare_1<Round, 2>(buffer, xsigma0);
-    prepare_1<Round, 3>(buffer, xsigma0);
-    prepare_1<Round, 4>(buffer, xsigma0);
-    prepare_1<Round, 5>(buffer, xsigma0);
-    prepare_1<Round, 6>(buffer, xsigma0);
-    prepare_1<Round, 7>(buffer, xsigma0);
+    prepare_1<Round, 0>(buffer, sigmas);
+    prepare_1<Round, 1>(buffer, sigmas);
+    prepare_1<Round, 2>(buffer, sigmas);
+    prepare_1<Round, 3>(buffer, sigmas);
+    prepare_1<Round, 4>(buffer, sigmas);
+    prepare_1<Round, 5>(buffer, sigmas);
+    prepare_1<Round, 6>(buffer, sigmas);
+    prepare_1<Round, 7>(buffer, sigmas);
 }
 
 TEMPLATE
@@ -116,6 +108,91 @@ schedule_sigma(buffer_t& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
+}
+
+// Scheduling interleaved with compression (single blocks).
+// ----------------------------------------------------------------------------
+// Each group of eight words is prepared one group ahead of its rounds, so that
+// vector scheduling executes alongside scalar compression.
+
+TEMPLATE
+template<size_t Round>
+INLINE void CLASS::
+konstant_8(buffer_t& wk, const buffer_t& buffer) NOEXCEPT
+{
+    // Raw words remain in buffer for scheduling, so K is added to a copy.
+    using xword = to_extended<word_t, 8>;
+    const auto& xwords = array_cast<xword, one, Round>(buffer);
+    auto& xwk = array_cast<xword, one, Round>(wk);
+    f::store(xwk.front(), f::add<word_t>(f::load(xwords.front()),
+        f::set<xword>(
+            K::get[Round + 0], K::get[Round + 1], K::get[Round + 2],
+            K::get[Round + 3], K::get[Round + 4], K::get[Round + 5],
+            K::get[Round + 6], K::get[Round + 7])));
+}
+
+TEMPLATE
+template<size_t Round>
+INLINE void CLASS::
+compress_8(state_t& state, const buffer_t& wk) NOEXCEPT
+{
+    round<Round + 0, zero>(state, wk);
+    round<Round + 1, zero>(state, wk);
+    round<Round + 2, zero>(state, wk);
+    round<Round + 3, zero>(state, wk);
+    round<Round + 4, zero>(state, wk);
+    round<Round + 5, zero>(state, wk);
+    round<Round + 6, zero>(state, wk);
+    round<Round + 7, zero>(state, wk);
+}
+
+TEMPLATE
+void CLASS::
+schedule_compress_sigma(state_t& state, buffer_t& buffer) NOEXCEPT
+{
+    static_assert(SHA::strength != 160);
+    const auto start = state;
+    buffer_t wk{};
+
+    konstant_8<0>(wk, buffer);
+    compress_8<0>(state, wk);
+    prepare_8<16>(buffer);
+    konstant_8<8>(wk, buffer);
+    compress_8<8>(state, wk);
+    prepare_8<24>(buffer);
+    konstant_8<16>(wk, buffer);
+    compress_8<16>(state, wk);
+    prepare_8<32>(buffer);
+    konstant_8<24>(wk, buffer);
+    compress_8<24>(state, wk);
+    prepare_8<40>(buffer);
+    konstant_8<32>(wk, buffer);
+    compress_8<32>(state, wk);
+    prepare_8<48>(buffer);
+    konstant_8<40>(wk, buffer);
+    compress_8<40>(state, wk);
+    prepare_8<56>(buffer);
+    konstant_8<48>(wk, buffer);
+    compress_8<48>(state, wk);
+
+    if constexpr (SHA::rounds == 80)
+    {
+        prepare_8<64>(buffer);
+        konstant_8<56>(wk, buffer);
+        compress_8<56>(state, wk);
+        prepare_8<72>(buffer);
+        konstant_8<64>(wk, buffer);
+        compress_8<64>(state, wk);
+        konstant_8<72>(wk, buffer);
+        compress_8<72>(state, wk);
+    }
+    else
+    {
+        konstant_8<56>(wk, buffer);
+        compress_8<56>(state, wk);
+    }
+
+    summarize(state, start);
 }
 
 } // namespace sha

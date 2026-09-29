@@ -89,17 +89,15 @@ double_hash(const block_t& block) NOEXCEPT
         auto state = H::get;
         buffer_t buffer{};
         input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
         schedule_1(buffer);
         compress(state, buffer);
 
         // Second hash
         inject_left_half(buffer, state);
         pad_half(buffer);
-        schedule(buffer);
         state = H::get;
-        compress(state, buffer);
+        schedule_compress(state, buffer);
 
         return output(state);
     };
@@ -130,15 +128,13 @@ double_hash(const half_t& half) NOEXCEPT
         buffer_t buffer{};
         input_left(buffer, half);
         pad_half(buffer);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
 
         // Second hash
         inject_left_half(buffer, state);
         pad_half(buffer);
-        schedule(buffer);
         state = H::get;
-        compress(state, buffer);
+        schedule_compress(state, buffer);
 
         return output(state);
     };
@@ -169,17 +165,15 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
         buffer_t buffer{};
         input_left(buffer, left);
         input_right(buffer, right);
-        schedule(buffer);
-        compress(state, buffer);
+        schedule_compress(state, buffer);
         schedule_1(buffer);
         compress(state, buffer);
 
         // Second hash
         inject_left_half(buffer, state);
         pad_half(buffer);
-        schedule(buffer);
         state = H::get;
-        compress(state, buffer);
+        schedule_compress(state, buffer);
 
         return output(state);
     };
