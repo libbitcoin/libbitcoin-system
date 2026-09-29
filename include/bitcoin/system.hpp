@@ -112,7 +112,8 @@
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/config/version.hpp>
-#include <bitcoin/system/crypto/aes256.hpp>
+#include <bitcoin/system/crypto/aes128_gcm.hpp>
+#include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/crypto/chacha20.hpp>
 #include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -126,6 +127,11 @@
 #include <bitcoin/system/crypto/secp256k1_batch.hpp>
 #include <bitcoin/system/crypto/x25519.hpp>
 #include <bitcoin/system/crypto/xsalsa20_poly1305.hpp>
+#include <bitcoin/system/crypto/aes/aes.hpp>
+#include <bitcoin/system/crypto/aes/algorithm.hpp>
+#include <bitcoin/system/crypto/aes/ghash.hpp>
+#include <bitcoin/system/crypto/nist/algorithm.hpp>
+#include <bitcoin/system/crypto/nist/nist.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
@@ -161,6 +167,7 @@
 #include <bitcoin/system/error/op_error_t.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>
 #include <bitcoin/system/error/transaction_error_t.hpp>
+#include <bitcoin/system/error/x509_error_t.hpp>
 #include <bitcoin/system/filter/bloom.hpp>
 #include <bitcoin/system/filter/filter.hpp>
 #include <bitcoin/system/filter/golomb.hpp>
@@ -200,11 +207,14 @@
 #include <bitcoin/system/intrinsics/intel/intel_128.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_256.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_512.hpp>
+#include <bitcoin/system/intrinsics/intel/intel_aes.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_sha.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 #include <bitcoin/system/intrinsics/neon/neon_128.hpp>
+#include <bitcoin/system/intrinsics/neon/neon_aes.hpp>
 #include <bitcoin/system/intrinsics/neon/neon_sha.hpp>
 #include <bitcoin/system/intrinsics/none/none_128.hpp>
+#include <bitcoin/system/intrinsics/none/none_aes.hpp>
 #include <bitcoin/system/intrinsics/none/none_sha.hpp>
 #include <bitcoin/system/intrinsics/sve/sve.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
@@ -335,5 +345,13 @@
 #include <bitcoin/system/words/catalogs/electrum.hpp>
 #include <bitcoin/system/words/catalogs/electrum_v1.hpp>
 #include <bitcoin/system/words/catalogs/mnemonic.hpp>
+#include <bitcoin/system/x509/builder.hpp>
+#include <bitcoin/system/x509/certificate.hpp>
+#include <bitcoin/system/x509/der.hpp>
+#include <bitcoin/system/x509/oids.hpp>
+#include <bitcoin/system/x509/pem.hpp>
+#include <bitcoin/system/x509/private_key.hpp>
+#include <bitcoin/system/x509/verify.hpp>
+#include <bitcoin/system/x509/x509.hpp>
 
 #endif
