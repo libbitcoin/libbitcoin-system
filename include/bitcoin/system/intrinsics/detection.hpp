@@ -94,11 +94,18 @@ namespace xcr0
     constexpr auto zmm_high_bit = 7;
 }
 
-// Local util because no dependency on /math.
+// Local utils because no dependency on /math.
 template <size_t Bit, typename Value>
 constexpr bool get_bit(Value value) NOEXCEPT
 {
     constexpr auto mask = (Value{ 1 } << Bit);
+    return !is_zero(value & mask);
+}
+
+template <auto Mask, typename Value>
+constexpr bool get_mask(Value value) NOEXCEPT
+{
+    constexpr auto mask = static_cast<Value>(Mask);
     return !is_zero(value & mask);
 }
 
@@ -273,7 +280,7 @@ inline bool try_neon() NOEXCEPT
             constexpr auto hwcap = HWCAP_NEON;
         #endif
         const auto caps = getauxval(AT_HWCAP);
-        return to_bool(bit_and<uint64_t>(caps, hwcap));
+        return get_mask<hwcap>(caps);
     #elif defined(HAVE_APPLE)
         int value{};
         auto size = sizeof(int);
@@ -296,9 +303,9 @@ inline bool try_crypto() NOEXCEPT
     #if defined(HAVE_LINUX)
         const auto caps = getauxval(AT_HWCAP);
         return
-            to_bool(bit_and<uint64_t>(caps, HWCAP_AES)) &&
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA1)) &&
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA2));
+            get_mask<HWCAP_AES>(caps) &&
+            get_mask<HWCAP_SHA1>(caps) &&
+            get_mask<HWCAP_SHA2>(caps);
     #elif defined(HAVE_APPLE)
         int aes{}, sha1{}, sha256{};
         auto size = sizeof(int);
@@ -323,8 +330,8 @@ inline bool try_sha3() NOEXCEPT
     #if defined(HAVE_LINUX)
         const auto caps = getauxval(AT_HWCAP);
         return
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA3)) &&
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA512));
+            get_mask<HWCAP_SHA3>(caps) &&
+            get_mask<HWCAP_SHA512>(caps);
     #elif defined(HAVE_APPLE)
         int sha3{}, sha512{};
         auto size = sizeof(int);
