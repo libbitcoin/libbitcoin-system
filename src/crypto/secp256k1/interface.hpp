@@ -25,8 +25,7 @@
 // Based on:
 // github.com/bitcoin-core/secp256k1 (include/*.h, the used subset)
 
-// Flags are those of secp256k1.h, token for token, so either header may
-// follow the other.
+// Flags are of secp256k1.h, token for token, so header order doesn't matter.
 #define SECP256K1_FLAGS_TYPE_MASK ((1 << 8) - 1)
 #define SECP256K1_FLAGS_TYPE_CONTEXT (1 << 0)
 #define SECP256K1_FLAGS_TYPE_COMPRESSION (1 << 1)
@@ -46,8 +45,8 @@
 #define SECP256K1_TAG_PUBKEY_HYBRID_ODD 0x07
 
 /// libsecp256k1 compatible interface to the local implementation, for the
-/// functions used by the library. Operations on secret values are blinded
-/// but variable time. Opaque types other than the ecdsa signature are
+/// functions used by the library. Operations on secret values are blinded but
+/// variable time. Opaque types other than the ecdsa signature are
 /// implementation defined.
 
 /// Types.

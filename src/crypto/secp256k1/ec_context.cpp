@@ -31,19 +31,6 @@
 namespace libbitcoin {
 namespace system {
 
-std::string secp256k1_library() NOEXCEPT
-{
-#if defined(HAVE_ULTRAFAST)
-    return std::string{ "ultrafast " } + ufsecp_version_string();
-#elif defined(HAVE_SECP256K1) && defined(SECP256K1_VERSION)
-    return "libsecp256k1 " EC_STRING(SECP256K1_VERSION);
-#elif defined(HAVE_SECP256K1)
-    return "libsecp256k1";
-#else
-    return "internal";
-#endif
-}
-
 // Protected constructor (abstract) base class.
 // ----------------------------------------------------------------------------
 
@@ -89,6 +76,22 @@ const secp256k1_context* ec_context_verify::context() NOEXCEPT
     static ec_context_verify instance{};
     static auto context = instance.context_;
     return context;
+}
+
+// Dependency identifier.
+// ----------------------------------------------------------------------------
+
+std::string secp256k1_library() NOEXCEPT
+{
+#if defined(HAVE_ULTRAFAST)
+    return std::string{ "ultrafast " } + ufsecp_version_string();
+#elif defined(HAVE_SECP256K1) && defined(SECP256K1_VERSION)
+    return "libsecp256k1 " EC_STRING(SECP256K1_VERSION);
+#elif defined(HAVE_SECP256K1)
+    return "libsecp256k1";
+#else
+    return "internal";
+#endif
 }
 
 } // namespace system
