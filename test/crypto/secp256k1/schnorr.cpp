@@ -53,22 +53,24 @@ const std::vector<bip340_vector> bip340_vectors
 
 BOOST_AUTO_TEST_CASE(secp256k1__schnorr_sign__bip340_vectors__expected)
 {
-    for (const auto& vector: bip340_vectors)
+    for (size_t index{}; index < bip340_vectors.size(); ++index)
     {
+        const auto& vector = bip340_vectors[index];
         if (vector.secret == ec_secret{})
             continue;
 
         ec_signature signature{};
-        BOOST_REQUIRE(schnorr::sign(signature, vector.secret, vector.message, vector.auxiliary));
-        BOOST_REQUIRE_EQUAL(signature, vector.signature);
+        BOOST_REQUIRE_MESSAGE(schnorr::sign(signature, vector.secret, vector.message, vector.auxiliary), index);
+        BOOST_REQUIRE_MESSAGE(signature == vector.signature, index);
     }
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1__schnorr_verify_signature__bip340_vectors__expected)
 {
-    for (const auto& vector: bip340_vectors)
+    for (size_t index{}; index < bip340_vectors.size(); ++index)
     {
-        BOOST_REQUIRE_EQUAL(schnorr::verify_signature(vector.key, vector.message, vector.signature), vector.valid);
+        const auto& vector = bip340_vectors[index];
+        BOOST_REQUIRE_MESSAGE(schnorr::verify_signature(vector.key, vector.message, vector.signature) == vector.valid, index);
     }
 }
 

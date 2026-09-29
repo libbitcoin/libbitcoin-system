@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/transaction.hpp>
 
 #include <numeric>
+#include <ranges>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
@@ -366,6 +367,22 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const NOEXCEPT
     };
 
     return std::any_of(outputs_->begin(), outputs_->end(), dusty);
+}
+
+// Last output of commitment pattern holds the committed value [bip141].
+bool transaction::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
+{
+    for (const auto& output: std::views::reverse(*outputs_))
+        if (output->committed_hash(commitment))
+            return true;
+
+    return false;
+}
+
+// Coinbase input witness must be 32 byte witness reserved value [bip141].
+bool transaction::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
+{
+    return !inputs_->empty() && inputs_->front()->reserved_hash(reservation);
 }
 
 size_t transaction::signature_operations(bool bip16, bool bip141) const NOEXCEPT

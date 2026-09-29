@@ -30,8 +30,8 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // protected
 
 // The s of all rows invert together. Rows without a valid signature or key
-// fill their lanes with the generator and unit scalars, and are not read.
-// Lanes with an exceptional addition verify alone.
+// fill their lanes with the generator and distinct small scalars, and are not
+// read. Lanes with an exceptional addition verify alone.
 template <typename Word>
 bool algorithm::verify_ecdsa(data_chunk& results,
     std::span<const ec_compressed> keys, std::span<const hash_digest> hashes,
@@ -70,7 +70,7 @@ bool algorithm::verify_ecdsa(data_chunk& results,
             const auto row = base + lane;
             xs[lane] = generator.x;
             u1[lane] = { 1 };
-            u2[lane] = { 1 };
+            u2[lane] = { 2 };
             if (row >= count || is_zero(valid[row]))
                 continue;
 
@@ -178,7 +178,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
             const auto row = base + lane;
             xs[lane] = generator.x;
             s[lane] = { 1 };
-            e[lane] = { 1 };
+            e[lane] = { 2 };
             if (row >= count)
                 continue;
 
@@ -187,7 +187,8 @@ bool algorithm::verify_schnorr(data_chunk& results,
             const auto& r = array_cast<uint8_t, size>(signature);
             field_t<uint64_t> rx{};
             if (!from_bytes(xs[lane], key) || !from_bytes(rx, r) ||
-                !from_bytes(s[lane], array_cast<uint8_t, size, size>(signature)))
+                !from_bytes(s[lane],
+                    array_cast<uint8_t, size, size>(signature)))
             {
                 xs[lane] = generator.x;
                 s[lane] = { 1 };

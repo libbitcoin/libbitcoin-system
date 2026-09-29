@@ -66,6 +66,7 @@ constexpr scalar right{ 0x0fedcba987654321, 0x123456789abcdef0, 0x33333333333333
 
 struct vectors
 {
+    ec_secrets secrets{};
     ec_compresseds keys{};
     ec_xonlys xonlys{};
     hashes messages{};
@@ -92,6 +93,7 @@ static const vectors& signed_vectors() NOEXCEPT
             ecdsa::canonicalize_signature(canonical, ecdsa);
             schnorr::sign(schnorr, secret, hash, hash);
             accessor::from_bytes(point, key);
+            out.secrets.push_back(secret);
             out.keys.push_back(key);
             out.xonlys.push_back(array_cast<uint8_t, ec_xonly_size, one>(key));
             out.messages.push_back(hash);
@@ -311,6 +313,40 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
     }));
 }
 
+// sign
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__sign__wrappers)
+{
+    const auto& in = signed_vectors();
+    report("secret to public", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        ec_compressed key{};
+        return secret_to_public(key, in.secrets[index]);
+    }));
+
+    report("ecdsa sign", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        ec_signature signature{};
+        return ecdsa::sign(signature, in.secrets[index], in.messages[index]);
+    }));
+
+    report("schnorr sign", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        ec_signature signature{};
+        return schnorr::sign(signature, in.secrets[index], in.messages[index], in.messages[index]);
+    }));
+
+    ec_ellswift key_a{}, key_b{};
+    ellswift::create(key_a, in.secrets[0], in.messages[0]);
+    ellswift::create(key_b, in.secrets[1], in.messages[1]);
+    report("ellswift exchange", microseconds(count, [&](size_t index) NOEXCEPT
+    {
+        hash_digest shared{};
+        return ellswift::exchange(shared, in.secrets[index], key_a, key_b, false);
+    }));
+}
+
 // multiply
 // ----------------------------------------------------------------------------
 
@@ -379,6 +415,53 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch)
     report_batches<xint128_t>("2 lanes");
     report_batches<xint256_t>("4 lanes");
     report_batches<xint512_t>("8 lanes");
+}
+
+static batched::link link_of(size_t row) NOEXCEPT
+{
+    return { narrow_cast<uint8_t>(row), narrow_cast<uint8_t>(row >> 8), 0 };
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch_wrappers)
+{
+    const auto& in = signed_vectors();
+    std_vector<ecdsa::batch::correlate_t> ecdsa_correlates(count);
+    std_vector<schnorr::batch::correlate_t> schnorr_correlates(count);
+    for (size_t row{}; row < count; ++row)
+    {
+        ecdsa_correlates[row] = { link_of(row), 0, 0 };
+        schnorr_correlates[row] = { link_of(row) };
+    }
+
+    const ecdsa::batch ecdsa_rows
+    {
+        { ecdsa_correlates.data(), count },
+        { in.messages.data(), count },
+        { in.keys.data(), count },
+        { in.ecdsas.data(), count }
+    };
+
+    const schnorr::batch schnorr_rows
+    {
+        { schnorr_correlates.data(), count },
+        { in.messages.data(), count },
+        { in.xonlys.data(), count },
+        { in.schnorrs.data(), count }
+    };
+
+    const stopper cancel{};
+    const auto ecdsa = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return ecdsa::batch::verify(cancel, ecdsa_rows).empty();
+    });
+
+    const auto schnorr = microseconds(one, [&](size_t) NOEXCEPT
+    {
+        return schnorr::batch::verify(cancel, schnorr_rows).empty();
+    });
+
+    report("ecdsa batch wrapper per signature", ecdsa / count);
+    report("schnorr batch wrapper per signature", schnorr / count);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -45,9 +45,9 @@
 #define SECP256K1_TAG_PUBKEY_HYBRID_ODD 0x07
 
 /// libsecp256k1 compatible interface to the local implementation, for the
-/// functions used by the library. Operations on secret values are blinded but
-/// variable time. Opaque types other than the ecdsa signature are
-/// implementation defined.
+/// functions used by the library. Operations on secret values are blinded and
+/// their table lookups scan the table, but they are otherwise variable time.
+/// Opaque types other than the ecdsa signature are implementation defined.
 
 /// Types.
 /// ---------------------------------------------------------------------------
@@ -225,6 +225,5 @@ int secp256k1_ellswift_xdh(const secp256k1_context* ctx, uint8_t* output,
     const uint8_t* ell_a64, const uint8_t* ell_b64, const uint8_t* seckey32,
     int party, secp256k1_ellswift_xdh_hash_function hashfp,
     void* data) NOEXCEPT;
-
 
 #endif

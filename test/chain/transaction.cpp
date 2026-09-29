@@ -697,6 +697,38 @@ BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_at_lower__false)
     BOOST_REQUIRE(!instance.is_dusty(258000000));
 }
 
+BOOST_AUTO_TEST_CASE(transaction__get_witness_commitment__no_commitment__false)
+{
+    const transaction instance(tx1_data, true);
+    hash_cref commitment{ null_hash };
+    BOOST_REQUIRE(!instance.get_witness_commitment(commitment));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__get_witness_commitment__last_commitment__expected)
+{
+    const script commitment(base16_chunk("6a24aa21a9ed0100000000000000000000000000000000000000000000000000000000000000"), false);
+    const transaction instance{ 1, inputs{ input{ point{}, script{}, 0xffffffff } }, outputs{ output{ 0, script{} }, output{ 0, commitment } }, 0 };
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(instance.get_witness_commitment(out));
+    BOOST_REQUIRE_EQUAL(out.get(), one_hash);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__get_witness_reservation__no_witness__false)
+{
+    const transaction instance(tx1_data, true);
+    hash_cref reservation{ null_hash };
+    BOOST_REQUIRE(!instance.get_witness_reservation(reservation));
+}
+
+BOOST_AUTO_TEST_CASE(transaction__get_witness_reservation__reserved__expected)
+{
+    const witness reserved{ chunk_cptrs{ to_shared<data_chunk>(to_chunk(one_hash)) } };
+    const transaction instance{ 1, inputs{ input{ point{}, script{}, reserved, 0xffffffff } }, outputs{ output{ 0, script{} } }, 0 };
+    hash_cref out{ null_hash };
+    BOOST_REQUIRE(instance.get_witness_reservation(out));
+    BOOST_REQUIRE_EQUAL(out.get(), one_hash);
+}
+
 BOOST_AUTO_TEST_CASE(transaction__is_dusty__two_outputs_limit_between_both__true)
 {
     const transaction instance(tx1_data, true);

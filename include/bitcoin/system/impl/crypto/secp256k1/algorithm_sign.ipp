@@ -89,6 +89,7 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     }
 
     to_affine(r, sum);
+    wipe(masked);
 }
 
 constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
@@ -101,6 +102,7 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     inverse(quotient, m);
     multiply(quotient, quotient, k);
     /* bool */ linear(r, {}, blinded, quotient);
+    wipe(quotient);
 }
 
 // a^-1 = (a * m)^-1 * m.
@@ -111,6 +113,26 @@ constexpr void algorithm::secret_inverse(scalar_t& r, const scalar_t& a,
     multiply(product, a, m);
     inverse(product, product);
     multiply(r, product, m);
+    wipe(product);
+}
+
+template <typename Container>
+constexpr void algorithm::wipe(Container& secret) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        secret = {};
+    }
+    else
+    {
+        BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+        BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+        volatile auto* data = secret.data();
+        for (size_t index{}; index < secret.size(); ++index)
+            data[index] = 0;
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+    }
 }
 
 // R = kG, r = x(R) mod n, s = (z + r d) / k, with s made low. The recovery id
@@ -132,6 +154,8 @@ constexpr bool algorithm::sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,
     add(numerator, numerator, z);
     secret_inverse(inverse_k, k, b);
     multiply(s, inverse_k, numerator);
+    wipe(numerator);
+    wipe(inverse_k);
 
     if (is_high(s))
     {

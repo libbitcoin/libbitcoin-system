@@ -131,6 +131,8 @@ public:
 
     bool is_empty() const NOEXCEPT;
     bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
+    bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
+    bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
     /// Requires no metadata, true if spend in own block would be locked.
     bool is_internally_locked(const input& in) const NOEXCEPT;

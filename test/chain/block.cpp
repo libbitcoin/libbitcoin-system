@@ -1272,6 +1272,96 @@ BOOST_AUTO_TEST_CASE(block__identify__commitment_without_witness_bip141_off__blo
     BOOST_REQUIRE_EQUAL(instance.identify(ctx), error::block_success);
 }
 
+// identify (hashes)
+// ----------------------------------------------------------------------------
+
+static hashes witnessed_txids() NOEXCEPT
+{
+    const auto txs = witnessed_transactions();
+    return { txs.front().hash(false), txs.back().hash(false) };
+}
+
+static hashes witnessed_wtxids() NOEXCEPT
+{
+    const auto txs = witnessed_transactions();
+    return { txs.front().hash(true), txs.back().hash(true) };
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes__valid_merkle_root__block_success)
+{
+    const auto txids = witnessed_txids();
+    const auto root = bitcoin_hash(txids.front(), txids.back());
+    BOOST_REQUIRE_EQUAL(block::identify(root, txids, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes__bad_merkle_root__invalid_transaction_commitment)
+{
+    BOOST_REQUIRE_EQUAL(block::identify(null_hash, witnessed_txids(), false), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes__malleated64__invalid_transaction_commitment)
+{
+    const auto txids = witnessed_txids();
+    const auto root = bitcoin_hash(txids.front(), txids.back());
+    BOOST_REQUIRE_EQUAL(block::identify(root, txids, true), error::invalid_transaction_commitment);
+}
+
+// Four leaves with the last cloned from the third have the root of three.
+BOOST_AUTO_TEST_CASE(block__identify_hashes__malleated32__invalid_transaction_commitment)
+{
+    const auto txs = witnessed_transactions();
+    const hashes txids{ txs.front().hash(false), txs.back().hash(false), one_hash, one_hash };
+    const auto root = bitcoin_hash(bitcoin_hash(txids[0], txids[1]), bitcoin_hash(one_hash, one_hash));
+    BOOST_REQUIRE(block::is_malleated32(txids));
+    BOOST_REQUIRE_EQUAL(block::identify(root, txids, false), error::invalid_transaction_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes_context__segregated_bip141_off__invalid_witness_commitment)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const auto txs = witnessed_transactions();
+    BOOST_REQUIRE_EQUAL(block::identify(ctx, txs.front(), witnessed_wtxids(), true), error::invalid_witness_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes_context__segregated_bip141_on_no_commitment__invalid_witness_commitment)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const auto txs = witnessed_transactions();
+    BOOST_REQUIRE_EQUAL(block::identify(ctx, txs.front(), witnessed_wtxids(), true), error::invalid_witness_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes_context__unsegregated_bip141_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const auto coinbase = coinbase_transaction(0, coinbase_script);
+    BOOST_REQUIRE_EQUAL(block::identify(ctx, coinbase, { coinbase.hash(true) }, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes_context__commitment_without_reservation__invalid_witness_commitment)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const script commitment(base16_chunk("6a24aa21a9ed0000000000000000000000000000000000000000000000000000000000000000"), false);
+    const inputs ins{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, 0xffffffff } };
+    const transaction coinbase{ 1, ins, outputs{ output{ 0, commitment } }, 0 };
+    BOOST_REQUIRE_EQUAL(block::identify(ctx, coinbase, { coinbase.hash(true) }, false), error::invalid_witness_commitment);
+}
+
+BOOST_AUTO_TEST_CASE(block__identify_hashes_context__valid_commitment__block_success)
+{
+    const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
+    const auto txs = witnessed_transactions();
+    const auto spend_wtxid = txs.back().hash(true);
+    const auto commit = bitcoin_hash(bitcoin_hash(null_hash, spend_wtxid), null_hash);
+    const script commitment(splice(base16_chunk("6a24aa21a9ed"), commit), false);
+    const witness reserved{ chunk_cptrs{ to_shared(data_chunk(hash_size, 0x00)) } };
+    const inputs ins{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, reserved, 0xffffffff } };
+    const transaction coinbase{ 1, ins, outputs{ output{ 0, commitment } }, 0 };
+    const hashes wtxids{ coinbase.hash(true), spend_wtxid };
+    BOOST_REQUIRE_EQUAL(wtxids.front(), null_hash);
+    BOOST_REQUIRE_EQUAL(block::identify(ctx, coinbase, wtxids, true), error::block_success);
+}
+
 // accept
 // ----------------------------------------------------------------------------
 

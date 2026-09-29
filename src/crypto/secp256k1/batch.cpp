@@ -21,8 +21,11 @@
 #include <atomic>
 #include <numeric>
 #include <span>
+#include <thread>
 #if defined(HAVE_ULTRAFAST)
     #include <ufsecp/libbitcoin.hpp>
+#elif !defined(HAVE_SECP256K1)
+    #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #endif
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -133,6 +136,158 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
             results.data(), zero))
             results.clear();
     }
+
+    return results;
+}
+
+#elif !defined(HAVE_SECP256K1)
+
+// local
+// ----------------------------------------------------------------------------
+
+class dispatcher
+  : public secp256k1::algorithm
+{
+public:
+    using algorithm::verify_ecdsa;
+    using algorithm::verify_schnorr;
+
+    // A parsed ecdsa signature is r then s as native words.
+    static ec_signature canonical(const ec_signature& parsed) NOEXCEPT
+    {
+        constexpr auto size = array_count<bytes_t>;
+        constexpr auto words = array_count<scalar_t>;
+        ec_signature out{};
+        to_bytes(array_cast<uint8_t, size>(out),
+            array_cast<uint64_t, words>(parsed));
+        to_bytes(array_cast<uint8_t, size, size>(out),
+            array_cast<uint64_t, words, size>(parsed));
+        return out;
+    }
+
+    static hash_digest challenge(const ec_signature& signature,
+        const ec_xonly& key, const hash_digest& digest) NOEXCEPT
+    {
+        accumulator<sha256> hasher{ tagged_midstate<"BIP0340/challenge">,
+            one };
+        hasher.write(array_cast<uint8_t, array_count<bytes_t>>(signature));
+        hasher.write(key);
+        hasher.write(digest);
+        return hasher.flush();
+    }
+};
+
+// Lanes of Word are available where compiled and the processor executes them.
+template <typename Word>
+inline bool have_lanes() NOEXCEPT
+{
+    if constexpr (!have_ifma<Word>)
+    {
+        return false;
+    }
+    else if constexpr (is_same_type<Word, xint512_t>)
+    {
+        static const auto available = try_avx512ifma();
+        return available;
+    }
+    else
+    {
+        static const auto available = try_avx512ifma() || try_avxifma();
+        return available;
+    }
+}
+
+// Rows verify in the widest available lanes, or integrally.
+template <typename Verify>
+inline bool with_lanes(Verify&& verify) NOEXCEPT
+{
+    if constexpr (have_ifma<xint512_t>)
+        if (have_lanes<xint512_t>())
+            return verify.template operator()<xint512_t>();
+
+    if constexpr (have_ifma<xint256_t>)
+        if (have_lanes<xint256_t>())
+            return verify.template operator()<xint256_t>();
+
+    return verify.template operator()<uint64_t>();
+}
+
+inline bool verify_rows(data_chunk& results,
+    std::span<const ec_compressed> keys, std::span<const hash_digest> digests,
+    std::span<const ec_signature> parsed) NOEXCEPT
+{
+    ec_signatures signatures(parsed.size());
+    std::transform(parsed.begin(), parsed.end(), signatures.begin(),
+        &dispatcher::canonical);
+
+    return with_lanes([&]<typename Word>() NOEXCEPT
+    {
+        return dispatcher::verify_ecdsa<Word>(results, keys, digests,
+            signatures);
+    });
+}
+
+// Integral rows verify by one random linear combination, which identifies no
+// failing row, so rows verify alone where it fails.
+inline bool verify_rows(data_chunk& results, std::span<const ec_xonly> keys,
+    std::span<const hash_digest> digests,
+    std::span<const ec_signature> signatures) NOEXCEPT
+{
+    hashes challenges(keys.size());
+    for (size_t row{}; row < keys.size(); ++row)
+        challenges[row] = dispatcher::challenge(signatures[row], keys[row],
+            digests[row]);
+
+    return with_lanes([&]<typename Word>() NOEXCEPT
+    {
+        if constexpr (is_same_type<Word, uint64_t>)
+        {
+            if (dispatcher::verify_schnorr(keys, challenges, signatures))
+            {
+                results.assign(keys.size(), uint8_t{ 1 });
+                return true;
+            }
+        }
+
+        return dispatcher::verify_schnorr<Word>(results, keys, challenges,
+            signatures);
+    });
+}
+
+// Chunks of rows verify in parallel, each into its own results, sized to
+// occupy the processors twice over but not below a few lane groups.
+template <typename Batch>
+data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
+{
+    constexpr auto policy = poolstl::execution::par;
+    constexpr size_t minimum = 32;
+
+    const auto count = batch.correlates.size();
+    const auto threads = std::max(std::thread::hardware_concurrency(), 1u);
+    const auto rows = std::max(minimum, ceilinged_divide(count, two * threads));
+    std::vector<size_t> it(ceilinged_divide(count, rows));
+    std::iota(it.begin(), it.end(), zero);
+    stopper failed{};
+
+    data_chunk results(count);
+    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t chunk) NOEXCEPT
+    {
+        if (cancel) return;
+        const auto first = chunk * rows;
+        const auto size = std::min(rows, count - first);
+        data_chunk out{};
+        if (!verify_rows(out, batch.points.subspan(first, size),
+            batch.digests.subspan(first, size),
+            batch.signatures.subspan(first, size)))
+            failed.store(true);
+
+        std::copy(out.begin(), out.end(),
+            std::next(results.begin(), to_signed(first)));
+    });
+
+    // Empty implies fully-verified batch (or canceled, which caller gates).
+    if (cancel || !failed)
+        results.clear();
 
     return results;
 }

@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/block.hpp>
 
 #include <numeric>
-#include <ranges>
 #include <set>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/context.hpp>
@@ -580,9 +579,10 @@ bool block::is_malleated32() const NOEXCEPT
 // The width of the node cloned by a malleation of this block, or zero.
 size_t block::malleated32_size() const NOEXCEPT
 {
-    const auto malleated = txs_->size();
+    const auto txids = transaction_hashes(false);
+    const auto malleated = txids.size();
     for (auto width = one; width <= to_half(malleated); width *= two)
-        if (is_malleated32(width))
+        if (is_malleated32(txids, width))
             return width;
 
     return zero;
@@ -633,14 +633,25 @@ size_t block::merkle_index(size_t position, size_t count,
     return base + position;
 }
 
-// protected
+// static
+bool block::is_malleated32(const hashes& txids) NOEXCEPT
+{
+    const auto malleated = txids.size();
+    for (auto width = one; width <= to_half(malleated); width *= two)
+        if (is_malleated32(txids, width))
+            return true;
+
+    return false;
+}
+
+// static
 // A set of tx hashes has the merkle root of a shorter set if and only if at
 // some depth its node count is even and above two and its last two nodes are
 // equal: the shorter set has an odd count at that depth and clones its last
 // node, which the longer set holds. This is the test at width depth.
-bool block::is_malleated32(size_t width) const NOEXCEPT
+bool block::is_malleated32(const hashes& txids, size_t width) NOEXCEPT
 {
-    const auto malleated = txs_->size();
+    const auto malleated = txids.size();
     if (!is_power2(width) || width > to_half(malleated))
         return false;
 
@@ -648,13 +659,11 @@ bool block::is_malleated32(size_t width) const NOEXCEPT
     if (is_odd(count) || count <= two)
         return false;
 
-    const auto& txs = *txs_;
     const auto last = sub1(count) * width;
     const auto prior = last - width;
     const auto leaves = malleated - last;
     for (size_t at{}; at < width; ++at)
-        if (txs[last + merkle_index(at, leaves, width)]->get_hash(false) !=
-            txs[prior + at]->get_hash(false))
+        if (txids[last + merkle_index(at, leaves, width)] != txids[prior + at])
             return false;
 
     return true;
@@ -712,52 +721,34 @@ size_t block::segregated() const NOEXCEPT
     return std::count_if(txs_->begin(), txs_->end(), count_segregated);
 }
 
-// Last output of commitment pattern holds the committed value [bip141].
-bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
-{
-    // Caller guards empty, which the coinbase access would fault on.
-    BC_ASSERT(!txs_->empty());
-
-    const auto& outputs = *txs_->front()->outputs_ptr();
-    for (const auto& output: std::views::reverse(outputs))
-        if (output->committed_hash(commitment))
-            return true;
-
-    return false;
-}
-
-// Coinbase input witness must be 32 byte witness reserved value [bip141].
-bool block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
-{
-    // Caller guards empty, which the coinbase access would fault on.
-    BC_ASSERT(!txs_->empty());
-
-    const auto& inputs = *txs_->front()->inputs_ptr();
-    return !inputs.empty() && inputs.front()->reserved_hash(reservation);
-}
-
 // The witness merkle root is obtained from wtxids, subject to malleation just
 // as the txs commitment. However, since tx duplicates are precluded by the
 // malleable32 (or complete) block check, there is no opportunity for this.
 // Similarly the witness commitment cannot be malleable64.
 bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
-    if (txs_->empty())
-        return false;
+    return !txs_->empty() && is_invalid_witness_commitment(*txs_->front(),
+        transaction_hashes(true), is_segregated());
+}
 
+// static
+bool block::is_invalid_witness_commitment(const transaction& first,
+    const hashes& wtxids, bool segregated) NOEXCEPT
+{
     // Witness data (segregated) disallowed if no commitment [bip141].
     // If no block tx has witness data the commitment is optional [bip141].
     hash_cref commit{ null_hash };
-    if (!get_witness_commitment(commit))
-        return is_segregated();
+    if (!first.get_witness_commitment(commit))
+        return segregated;
 
     // If there is a witness reservation there must be a commitment [bip141].
     hash_cref reserve{ null_hash };
-    if (!get_witness_reservation(reserve))
+    if (!first.get_witness_reservation(reserve))
         return true;
 
     // If there is a valid commitment, return false (valid).
-    return commit != sha256::double_hash(generate_merkle_root(true), reserve);
+    const auto root = sha256::merkle_root(hashes{ wtxids });
+    return commit != sha256::double_hash(root, reserve);
 }
 
 //*****************************************************************************
@@ -950,17 +941,37 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 
 code block::identify() const NOEXCEPT
 {
-    if (is_malleated() || is_invalid_merkle_root())
+    return identify(header_->merkle_root(), transaction_hashes(false),
+        is_malleated64());
+}
+
+code block::identify(const context& ctx) const NOEXCEPT
+{
+    if (txs_->empty())
+        return error::block_success;
+
+    return identify(ctx, *txs_->front(), transaction_hashes(true),
+        is_segregated());
+}
+
+// static
+code block::identify(const hash_digest& merkle_root, const hashes& txids,
+    bool malleated64) NOEXCEPT
+{
+    if (malleated64 || is_malleated32(txids) ||
+        sha256::merkle_root(hashes{ txids }) != merkle_root)
         return error::invalid_transaction_commitment;
 
     return error::block_success;
 }
 
+// static
 // bip141 should be disabled when the node is not accepting witness data.
-code block::identify(const context& ctx) const NOEXCEPT
+code block::identify(const context& ctx, const transaction& first,
+    const hashes& wtxids, bool segregated) NOEXCEPT
 {
     const auto invalid = ctx.is_enabled(bip141_rule) ?
-        is_invalid_witness_commitment() : is_segregated();
+        is_invalid_witness_commitment(first, wtxids, segregated) : segregated;
 
     return invalid ? error::invalid_witness_commitment : error::block_success;
 }

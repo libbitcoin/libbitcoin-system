@@ -35,7 +35,7 @@ namespace system {
 namespace secp256k1 {
 
 /// secp256k1 arithmetic over integral or extended integral words.
-/// Extended words compute one element per 64 bit lane (requires ifma).
+/// Extended words compute one element per 64 bit lane.
 class algorithm
 {
 protected:
@@ -383,7 +383,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// r from bytes mod n, false if bytes not less than n.
-    static constexpr bool from_bytes(scalar_t& r, const bytes_t& bytes) NOEXCEPT;
+    static constexpr bool from_bytes(scalar_t& r,
+        const bytes_t& bytes) NOEXCEPT;
 
     /// bytes from a.
     static constexpr void to_bytes(bytes_t& out, const scalar_t& a) NOEXCEPT;
@@ -403,7 +404,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
-    static constexpr bool is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT;
+    static constexpr bool is_less(const scalar_t& a,
+        const scalar_t& b) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, const wide_t& l) NOEXCEPT;
 
@@ -619,9 +621,9 @@ protected:
 
     /// Generator table.
     /// -----------------------------------------------------------------------
-    /// Odd multiples of G (normal), then those of lambda * G, in slices each
-    /// computed at compile time in its own translation unit. A slice is blocks
-    /// of limb columns, x then y.
+    /// Odd multiples of G (normal) in slices, each computed at compile time in
+    /// its own translation unit. A slice is blocks of limb columns, x then y.
+    /// Multiples of lambda * G are those of G by the endomorphism.
 
     static constexpr size_t block_size = 16;
     static constexpr size_t slice_size = 512;
@@ -636,7 +638,8 @@ protected:
     /// Offset of an entry in 64 bit words relative to its slice.
     static constexpr size_t locate(size_t entry) NOEXCEPT;
 
-    /// r = entry of the generator or endomorphism table, negated per lane.
+    /// r = entry of the generator table, or its endomorphism where mapped,
+    /// negated per lane.
     template <typename Word>
     static constexpr void lookup(affine_t<Word>& r, Word entry, bool mapped,
         Word negative) NOEXCEPT;
@@ -658,7 +661,8 @@ protected:
     using comb_parts_t = std_array<const uint64_t*, comb_part_count>;
     static const comb_parts_t comb_parts;
 
-    /// r = entry of a comb window (1 + entry times its base), negated.
+    /// r = entry of a comb window (1 + entry times its base), negated, read by
+    /// scanning the window.
     static constexpr void lookup_comb(affine_t<uint64_t>& r, size_t window,
         size_t entry, bool negative) NOEXCEPT;
 
@@ -805,7 +809,9 @@ protected:
     /// -----------------------------------------------------------------------
     /// A secret multiple k * G is computed as (k - m) * G + m * G, and k * a
     /// as (k / m) * (m * a), for a random blind m, so that each multiplication
-    /// is of a value independent of k.
+    /// is of a value independent of k. Comb lookups read every entry of a
+    /// window, so memory access does not depend on the digit, and additions
+    /// are skipped only for zero digits.
 
     /// r = g * G + k * a (normal), false if infinity.
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,
@@ -827,6 +833,10 @@ protected:
     /// r = a^-1 by blind m, a and m nonzero.
     static constexpr void secret_inverse(scalar_t& r, const scalar_t& a,
         const scalar_t& m) NOEXCEPT;
+
+    /// secret = 0, by stores that are not elided.
+    template <typename Container>
+    static constexpr void wipe(Container& secret) NOEXCEPT;
 
     /// ECDSA (r, s) of z by secret d and nonce k, low s, with recovery id,
     /// blinded by m and b (d, k, m, b nonzero), false if r or s is zero.

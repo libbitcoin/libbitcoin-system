@@ -31,31 +31,29 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 constexpr bool algorithm::is_overflow(const scalar_t& a) NOEXCEPT
 {
-    for (auto limb = a.size(); is_nonzero(limb--);)
-        if (a[limb] != order[limb])
-            return a[limb] > order[limb];
-
-    return true;
+    return !is_less(a, order);
 }
 
+// The borrow of a - b is the complement of the carry of a + ~b + 1.
 constexpr bool algorithm::is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT
 {
-    for (auto limb = a.size(); is_nonzero(limb--);)
-        if (a[limb] != b[limb])
-            return a[limb] < b[limb];
+    uint64_t difference{};
+    auto carry = true;
+    for (size_t limb{}; limb < a.size(); ++limb)
+        carry = add_carry(difference, a[limb], ~b[limb], carry);
 
-    return false;
+    return !carry;
 }
 
-// Adds 2^256 - n (modulo 2^256), which subtracts n from a value not below n.
+// Adds 2^256 - n (modulo 2^256) where overflow, which subtracts n from a value
+// not below n.
 constexpr void algorithm::reduce(scalar_t& r, bool overflow) NOEXCEPT
 {
-    if (!overflow)
-        return;
-
+    const auto mask = overflow ? max_uint64 : 0_u64;
     auto carry = false;
     for (size_t limb{}; limb < r.size(); ++limb)
-        carry = add_carry(r[limb], r[limb], order_complement[limb], carry);
+        carry = add_carry(r[limb], r[limb], order_complement[limb] & mask,
+            carry);
 }
 
 // Folds limbs above 2^256 by 2^256 = 2^256 - n (mod n), from 512 to 385 to
@@ -203,18 +201,16 @@ constexpr void algorithm::add(scalar_t& r, const scalar_t& a,
     reduce(r, carry || is_overflow(r));
 }
 
-// n - a as n + ~a + 1, for nonzero a less than n.
+// n - a as n + ~a + 1, masked to zero for zero a.
 constexpr void algorithm::negate(scalar_t& r, const scalar_t& a) NOEXCEPT
 {
-    if (is_zero_scalar(a))
-    {
-        r = {};
-        return;
-    }
-
+    const auto mask = is_zero_scalar(a) ? 0_u64 : max_uint64;
     auto carry = true;
     for (size_t limb{}; limb < r.size(); ++limb)
+    {
         carry = add_carry(r[limb], order[limb], ~a[limb], carry);
+        r[limb] &= mask;
+    }
 }
 
 constexpr void algorithm::multiply(scalar_t& r, const scalar_t& a,
@@ -267,7 +263,8 @@ constexpr void algorithm::recode(digits_t<Count>& digits,
         const auto low = to_signed(remainder[0] & window);
         digits[digit] = narrow_cast<int16_t>(low - offset);
 
-        remainder[0] = set_right((remainder[0] >> Bits) | (remainder[1] << rest));
+        remainder[0] = set_right((remainder[0] >> Bits) |
+            (remainder[1] << rest));
         remainder[1] = (remainder[1] >> Bits) | (remainder[2] << rest);
         remainder[2] = (remainder[2] >> Bits) | (remainder[3] << rest);
         remainder[3] = (remainder[3] >> Bits);
@@ -287,11 +284,7 @@ constexpr bool algorithm::is_zero_scalar(const scalar_t& a) NOEXCEPT
 
 constexpr bool algorithm::is_high(const scalar_t& a) NOEXCEPT
 {
-    for (auto limb = a.size(); is_nonzero(limb--);)
-        if (a[limb] != half_order[limb])
-            return a[limb] > half_order[limb];
-
-    return false;
+    return is_less(half_order, a);
 }
 
 // Scalar encoding.
