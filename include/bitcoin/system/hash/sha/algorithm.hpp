@@ -247,11 +247,11 @@ protected:
     INLINE static constexpr void round(auto a, auto b, auto c, auto& d,
         auto e, auto f, auto g, auto& h, auto wk) NOEXCEPT;
 
-    template <size_t Round, size_t Lane>
+    template <size_t Round, size_t Lane, bool Konstant = false>
     INLINE static constexpr void round(auto& state, const auto& wk) NOEXCEPT;
     INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
 
-    template <size_t Lane = zero>
+    template <size_t Lane = zero, bool Konstant = false>
     static constexpr void compress_(auto& state, const auto& buffer) NOEXCEPT;
     template <size_t Lane = zero>
     static constexpr void compress(state_t& state, const buffer_t& buffer) NOEXCEPT;
@@ -261,6 +261,7 @@ protected:
 
     template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
+    template <bool Konstant = true>
     static constexpr void schedule_(auto& buffer) NOEXCEPT;
     static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
     static constexpr void schedule_compress(state_t& state,
@@ -362,8 +363,14 @@ protected:
     template <typename xWord>
     INLINE static void pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
+    template <size_t Round, typename xWord>
+    INLINE static void prepare_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
     template <typename xWord>
-    INLINE static void schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static void schedule_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static const auto& scheduled_1() NOEXCEPT;
 
     template <typename xWord>
     INLINE static auto pack(const state_t& state) NOEXCEPT;

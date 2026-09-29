@@ -88,11 +88,15 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 }
 
 TEMPLATE
-template<size_t Round, size_t Lane>
+template<size_t Round, size_t Lane, bool Konstant>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
     using word = array_element<decltype(state)>;
+    auto w = extract<word, Lane>(wk[Round]);
+
+    if constexpr (Konstant)
+        w = f::addc<K::get[Round], SHA::word_bits>(w);
 
     if constexpr (SHA::strength == 160)
     {
@@ -102,7 +106,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            extract<word, Lane>(wk[Round]));
+            w);
     }
     else
     {
@@ -115,7 +119,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            extract<word, Lane>(wk[Round]));
+            w);
     }
 }
 
@@ -139,99 +143,99 @@ summarize(auto& out, const auto& in) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t Lane>
+template <size_t Lane, bool Konstant>
 constexpr void CLASS::
 compress_(auto& state, const auto& buffer) NOEXCEPT
 {
     // This is a copy (state type varies due to vectorization).
     const auto start = state;
 
-    round< 0, Lane>(state, buffer);
-    round< 1, Lane>(state, buffer);
-    round< 2, Lane>(state, buffer);
-    round< 3, Lane>(state, buffer);
-    round< 4, Lane>(state, buffer);
-    round< 5, Lane>(state, buffer);
-    round< 6, Lane>(state, buffer);
-    round< 7, Lane>(state, buffer);
-    round< 8, Lane>(state, buffer);
-    round< 9, Lane>(state, buffer);
-    round<10, Lane>(state, buffer);
-    round<11, Lane>(state, buffer);
-    round<12, Lane>(state, buffer);
-    round<13, Lane>(state, buffer);
-    round<14, Lane>(state, buffer);
-    round<15, Lane>(state, buffer);
+    round< 0, Lane, Konstant>(state, buffer);
+    round< 1, Lane, Konstant>(state, buffer);
+    round< 2, Lane, Konstant>(state, buffer);
+    round< 3, Lane, Konstant>(state, buffer);
+    round< 4, Lane, Konstant>(state, buffer);
+    round< 5, Lane, Konstant>(state, buffer);
+    round< 6, Lane, Konstant>(state, buffer);
+    round< 7, Lane, Konstant>(state, buffer);
+    round< 8, Lane, Konstant>(state, buffer);
+    round< 9, Lane, Konstant>(state, buffer);
+    round<10, Lane, Konstant>(state, buffer);
+    round<11, Lane, Konstant>(state, buffer);
+    round<12, Lane, Konstant>(state, buffer);
+    round<13, Lane, Konstant>(state, buffer);
+    round<14, Lane, Konstant>(state, buffer);
+    round<15, Lane, Konstant>(state, buffer);
 
-    round<16, Lane>(state, buffer);
-    round<17, Lane>(state, buffer);
-    round<18, Lane>(state, buffer);
-    round<19, Lane>(state, buffer);
-    round<20, Lane>(state, buffer);
-    round<21, Lane>(state, buffer);
-    round<22, Lane>(state, buffer);
-    round<23, Lane>(state, buffer);
-    round<24, Lane>(state, buffer);
-    round<25, Lane>(state, buffer);
-    round<26, Lane>(state, buffer);
-    round<27, Lane>(state, buffer);
-    round<28, Lane>(state, buffer);
-    round<29, Lane>(state, buffer);
-    round<30, Lane>(state, buffer);
-    round<31, Lane>(state, buffer);
+    round<16, Lane, Konstant>(state, buffer);
+    round<17, Lane, Konstant>(state, buffer);
+    round<18, Lane, Konstant>(state, buffer);
+    round<19, Lane, Konstant>(state, buffer);
+    round<20, Lane, Konstant>(state, buffer);
+    round<21, Lane, Konstant>(state, buffer);
+    round<22, Lane, Konstant>(state, buffer);
+    round<23, Lane, Konstant>(state, buffer);
+    round<24, Lane, Konstant>(state, buffer);
+    round<25, Lane, Konstant>(state, buffer);
+    round<26, Lane, Konstant>(state, buffer);
+    round<27, Lane, Konstant>(state, buffer);
+    round<28, Lane, Konstant>(state, buffer);
+    round<29, Lane, Konstant>(state, buffer);
+    round<30, Lane, Konstant>(state, buffer);
+    round<31, Lane, Konstant>(state, buffer);
 
-    round<32, Lane>(state, buffer);
-    round<33, Lane>(state, buffer);
-    round<34, Lane>(state, buffer);
-    round<35, Lane>(state, buffer);
-    round<36, Lane>(state, buffer);
-    round<37, Lane>(state, buffer);
-    round<38, Lane>(state, buffer);
-    round<39, Lane>(state, buffer);
-    round<40, Lane>(state, buffer);
-    round<41, Lane>(state, buffer);
-    round<42, Lane>(state, buffer);
-    round<43, Lane>(state, buffer);
-    round<44, Lane>(state, buffer);
-    round<45, Lane>(state, buffer);
-    round<46, Lane>(state, buffer);
-    round<47, Lane>(state, buffer);
+    round<32, Lane, Konstant>(state, buffer);
+    round<33, Lane, Konstant>(state, buffer);
+    round<34, Lane, Konstant>(state, buffer);
+    round<35, Lane, Konstant>(state, buffer);
+    round<36, Lane, Konstant>(state, buffer);
+    round<37, Lane, Konstant>(state, buffer);
+    round<38, Lane, Konstant>(state, buffer);
+    round<39, Lane, Konstant>(state, buffer);
+    round<40, Lane, Konstant>(state, buffer);
+    round<41, Lane, Konstant>(state, buffer);
+    round<42, Lane, Konstant>(state, buffer);
+    round<43, Lane, Konstant>(state, buffer);
+    round<44, Lane, Konstant>(state, buffer);
+    round<45, Lane, Konstant>(state, buffer);
+    round<46, Lane, Konstant>(state, buffer);
+    round<47, Lane, Konstant>(state, buffer);
 
-    round<48, Lane>(state, buffer);
-    round<49, Lane>(state, buffer);
-    round<50, Lane>(state, buffer);
-    round<51, Lane>(state, buffer);
-    round<52, Lane>(state, buffer);
-    round<53, Lane>(state, buffer);
-    round<54, Lane>(state, buffer);
-    round<55, Lane>(state, buffer);
-    round<56, Lane>(state, buffer);
-    round<57, Lane>(state, buffer);
-    round<58, Lane>(state, buffer);
-    round<59, Lane>(state, buffer);
-    round<60, Lane>(state, buffer);
-    round<61, Lane>(state, buffer);
-    round<62, Lane>(state, buffer);
-    round<63, Lane>(state, buffer);
+    round<48, Lane, Konstant>(state, buffer);
+    round<49, Lane, Konstant>(state, buffer);
+    round<50, Lane, Konstant>(state, buffer);
+    round<51, Lane, Konstant>(state, buffer);
+    round<52, Lane, Konstant>(state, buffer);
+    round<53, Lane, Konstant>(state, buffer);
+    round<54, Lane, Konstant>(state, buffer);
+    round<55, Lane, Konstant>(state, buffer);
+    round<56, Lane, Konstant>(state, buffer);
+    round<57, Lane, Konstant>(state, buffer);
+    round<58, Lane, Konstant>(state, buffer);
+    round<59, Lane, Konstant>(state, buffer);
+    round<60, Lane, Konstant>(state, buffer);
+    round<61, Lane, Konstant>(state, buffer);
+    round<62, Lane, Konstant>(state, buffer);
+    round<63, Lane, Konstant>(state, buffer);
 
     if constexpr (SHA::rounds == 80)
     {
-        round<64, Lane>(state, buffer);
-        round<65, Lane>(state, buffer);
-        round<66, Lane>(state, buffer);
-        round<67, Lane>(state, buffer);
-        round<68, Lane>(state, buffer);
-        round<69, Lane>(state, buffer);
-        round<70, Lane>(state, buffer);
-        round<71, Lane>(state, buffer);
-        round<72, Lane>(state, buffer);
-        round<73, Lane>(state, buffer);
-        round<74, Lane>(state, buffer);
-        round<75, Lane>(state, buffer);
-        round<76, Lane>(state, buffer);
-        round<77, Lane>(state, buffer);
-        round<78, Lane>(state, buffer);
-        round<79, Lane>(state, buffer);
+        round<64, Lane, Konstant>(state, buffer);
+        round<65, Lane, Konstant>(state, buffer);
+        round<66, Lane, Konstant>(state, buffer);
+        round<67, Lane, Konstant>(state, buffer);
+        round<68, Lane, Konstant>(state, buffer);
+        round<69, Lane, Konstant>(state, buffer);
+        round<70, Lane, Konstant>(state, buffer);
+        round<71, Lane, Konstant>(state, buffer);
+        round<72, Lane, Konstant>(state, buffer);
+        round<73, Lane, Konstant>(state, buffer);
+        round<74, Lane, Konstant>(state, buffer);
+        round<75, Lane, Konstant>(state, buffer);
+        round<76, Lane, Konstant>(state, buffer);
+        round<77, Lane, Konstant>(state, buffer);
+        round<78, Lane, Konstant>(state, buffer);
+        round<79, Lane, Konstant>(state, buffer);
     }
 
     summarize(state, start);
