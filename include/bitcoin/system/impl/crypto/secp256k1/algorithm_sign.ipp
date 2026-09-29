@@ -54,7 +54,11 @@ constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
     sum.infinity = max_uint64;
     add_comb(sum, g, faults);
     if (is_nonzero(faults))
+    {
+        LCOV_EXCL_START("A comb from infinity by a scalar below n is regular.")
         multiply_complete(sum, g, a, {});
+        LCOV_EXCL_STOP()
+    }
 
     add_complete(sum, sum, a);
     if (f::any(sum.infinity))

@@ -1113,12 +1113,15 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/secp256k1/algorithm_scalar.cpp \
     ${srcdir}/../../test/crypto/secp256k1/algorithm_verify.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/bip324.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/bip341.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ecdsa.cpp \
     ${srcdir}/../../test/crypto/secp256k1/ellswift.cpp \
     ${srcdir}/../../test/crypto/secp256k1/keys.cpp \
     ${srcdir}/../../test/crypto/secp256k1/math.cpp \
     ${srcdir}/../../test/crypto/secp256k1/performance.cpp \
     ${srcdir}/../../test/crypto/secp256k1/schnorr.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/wycheproof.cpp \
     ${srcdir}/../../test/data/array_cast.cpp \
     ${srcdir}/../../test/data/byte_cast.cpp \
     ${srcdir}/../../test/data/collection.cpp \

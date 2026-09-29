@@ -81,7 +81,7 @@ INLINE void unshuffle_160(xint128_t&) NOEXCEPT
 
 INLINE xint128_t set_160(uint32_t) NOEXCEPT
 {
-    return {};
+    return xint128_t{};
 }
 
 INLINE uint32_t get_160(xint128_t) NOEXCEPT

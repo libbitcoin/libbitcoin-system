@@ -384,6 +384,23 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__generator__e
     BOOST_CHECK(is_secret_product(number(sample), number(sample)));
 }
 
+// A comb of 65 continuing a comb of 63 adds 64G to 64G.
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__continued_doubling__faults)
+{
+    uint64_t faults{};
+    jacobian sum{};
+    sum.infinity = max_uint64;
+    accessor::add_comb(sum, scalar{ 63, 0, 0, 0 }, faults);
+    BOOST_CHECK_EQUAL(faults, 0_u64);
+    accessor::add_comb(sum, scalar{ 65, 0, 0, 0 }, faults);
+    BOOST_CHECK(is_nonzero(faults));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__exceptional__expected)
+{
+    BOOST_CHECK(is_secret_product(scalar{ 128, 0, 0, 0 }, scalar{ 65, 0, 0, 0 }));
+}
+
 // naf
 // ----------------------------------------------------------------------------
 

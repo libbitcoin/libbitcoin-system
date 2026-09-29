@@ -94,11 +94,18 @@ namespace xcr0
     constexpr auto zmm_high_bit = 7;
 }
 
-// Local util because no dependency on /math.
+// Local utils because no dependency on /math.
 template <size_t Bit, typename Value>
 constexpr bool get_bit(Value value) NOEXCEPT
 {
     constexpr auto mask = (Value{ 1 } << Bit);
+    return !is_zero(value & mask);
+}
+
+template <auto Mask, typename Value>
+constexpr bool get_mask(Value value) NOEXCEPT
+{
+    constexpr auto mask = static_cast<Value>(Mask);
     return !is_zero(value & mask);
 }
 
@@ -111,150 +118,160 @@ constexpr bool is_throttled(uint32_t signature) NOEXCEPT
         || signature == cpu1_0::knights_mill;
 }
 
+template <auto Cpu = get_cpu>
 inline bool is_avx512_low() NOEXCEPT
 {
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf)
         && ebx == cpu0_0::intel_ebx                 // Genu
         && edx == cpu0_0::intel_edx                 // ineI
         && ecx == cpu0_0::intel_ecx                 // ntel
-        && get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && is_throttled(eax);                       // Skylake-SP, Xeon Phi
 }
 
+template <auto Cpu = get_cpu>
 inline bool try_shani() NOEXCEPT
 {
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::shani_ebx_bit>(ebx);     // SHA
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
 inline bool try_sha512() NOEXCEPT
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-        && get_xcr(extended, xcr0::feature)
+        && Xcr(extended, xcr0::feature)
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
         && eax >= cpu7_1::subleaf                   // Subleaf 1
-        && get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf)
         && get_bit<cpu7_1::sha512_eax_bit>(eax);    // SHA512
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
 inline bool try_avx512() NOEXCEPT
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-        && get_xcr(extended, xcr0::feature)
+        && Xcr(extended, xcr0::feature)
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
         && get_bit<xcr0::opmask_bit>(extended)
         && get_bit<xcr0::zmm_upper_bit>(extended)
         && get_bit<xcr0::zmm_high_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
         && get_bit<cpu7_0::avx512f_ebx_bit>(ebx)    // AVX512F
         && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx)   // AVX512BW
         && get_bit<cpu7_0::avx512vl_ebx_bit>(ebx)   // AVX512VL
-        && !is_avx512_low();                        // Not throttled
+        && !is_avx512_low<Cpu>();                   // Not throttled
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
 inline bool try_avx512ifma() NOEXCEPT
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-        && get_xcr(extended, xcr0::feature)
+        && Xcr(extended, xcr0::feature)
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
         && get_bit<xcr0::opmask_bit>(extended)
         && get_bit<xcr0::zmm_upper_bit>(extended)
         && get_bit<xcr0::zmm_high_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
         && get_bit<cpu7_0::avx512f_ebx_bit>(ebx)    // AVX512F
         && get_bit<cpu7_0::avx512vl_ebx_bit>(ebx)   // AVX512VL
         && get_bit<cpu7_0::avx512ifma_ebx_bit>(ebx);// AVX512IFMA
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
 inline bool try_avxifma() NOEXCEPT
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-        && get_xcr(extended, xcr0::feature)
+        && Xcr(extended, xcr0::feature)
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
         && eax >= cpu7_1::subleaf                   // Subleaf 1
-        && get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf)
         && get_bit<cpu7_1::avxifma_eax_bit>(eax);   // AVXIFMA
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
 inline bool try_avx2() NOEXCEPT
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-        && get_xcr(extended, xcr0::feature)
+        && Xcr(extended, xcr0::feature)
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx);      // AVX2
 }
 
+template <auto Cpu = get_cpu>
 inline bool try_sse41() NOEXCEPT
 {
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
 }
 
+template <auto Cpu = get_cpu>
 inline bool try_aesni() NOEXCEPT
 {
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::pclmulqdq_ecx_bit>(ecx)  // PCLMULQDQ
         && get_bit<cpu1_0::aes_ecx_bit>(ecx);       // AES
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
 inline bool try_vaes() NOEXCEPT
 {
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return Cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
         && get_bit<cpu1_0::pclmulqdq_ecx_bit>(ecx)  // PCLMULQDQ
         && get_bit<cpu1_0::aes_ecx_bit>(ecx)        // AES
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-        && get_xcr(extended, xcr0::feature)
+        && Xcr(extended, xcr0::feature)
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2
         && get_bit<cpu7_0::vaes_ecx_bit>(ecx)       // VAES
         && get_bit<cpu7_0::vpclmulqdq_ecx_bit>(ecx);// VPCLMULQDQ
@@ -273,7 +290,7 @@ inline bool try_neon() NOEXCEPT
             constexpr auto hwcap = HWCAP_NEON;
         #endif
         const auto caps = getauxval(AT_HWCAP);
-        return to_bool(bit_and<uint64_t>(caps, hwcap));
+        return get_mask<hwcap>(caps);
     #elif defined(HAVE_APPLE)
         int value{};
         auto size = sizeof(int);
@@ -296,9 +313,9 @@ inline bool try_crypto() NOEXCEPT
     #if defined(HAVE_LINUX)
         const auto caps = getauxval(AT_HWCAP);
         return
-            to_bool(bit_and<uint64_t>(caps, HWCAP_AES)) &&
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA1)) &&
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA2));
+            get_mask<HWCAP_AES>(caps) &&
+            get_mask<HWCAP_SHA1>(caps) &&
+            get_mask<HWCAP_SHA2>(caps);
     #elif defined(HAVE_APPLE)
         int aes{}, sha1{}, sha256{};
         auto size = sizeof(int);
@@ -323,8 +340,8 @@ inline bool try_sha3() NOEXCEPT
     #if defined(HAVE_LINUX)
         const auto caps = getauxval(AT_HWCAP);
         return
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA3)) &&
-            to_bool(bit_and<uint64_t>(caps, HWCAP_SHA512));
+            get_mask<HWCAP_SHA3>(caps) &&
+            get_mask<HWCAP_SHA512>(caps);
     #elif defined(HAVE_APPLE)
         int sha3{}, sha512{};
         auto size = sizeof(int);

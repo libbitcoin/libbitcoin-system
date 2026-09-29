@@ -159,6 +159,21 @@ BOOST_AUTO_TEST_CASE(secp256k1__ec_sum__invalid_point__false)
     BOOST_REQUIRE(!ec_sum(out, { ec_compressed{} }));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__ec_sum__negated_point__false)
+{
+    auto negated = ec_compressed_generator;
+    BOOST_REQUIRE(ec_negate(negated));
+
+    ec_compressed out;
+    BOOST_REQUIRE(!ec_sum(out, { ec_compressed_generator, negated }));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__ec_multiply__zero__false)
+{
+    auto point = ec_compressed_generator;
+    BOOST_REQUIRE(!ec_multiply(point, ec_secret{}));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__ec_multiply__uncompressed_point__matches_compressed)
 {
     const ec_secret secret{ { 1, 2, 3 } };

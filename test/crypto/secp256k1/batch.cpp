@@ -386,6 +386,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
     BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
 }
 
+// accelerated
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1__batched__accelerated__implies_compiled)
+{
+    BOOST_REQUIRE(!batched::accelerated() || batched::compiled());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

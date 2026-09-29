@@ -66,4 +66,39 @@ BOOST_AUTO_TEST_CASE(secp256k1__secret_to_public__uncompressed_positive__expecte
     BOOST_REQUIRE_EQUAL(point, uncompressed1);
 }
 
+// detect public keys
+
+BOOST_AUTO_TEST_CASE(secp256k1__is_even_key__even__true)
+{
+    BOOST_REQUIRE(is_even_key(ec_compressed_generator));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__is_even_key__odd__false)
+{
+    BOOST_REQUIRE(!is_even_key(compressed1));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__is_hybrid_key__hybrid__true)
+{
+    auto point = uncompressed1;
+    point.front() = ec_hybrid_even_sign;
+    BOOST_REQUIRE(is_hybrid_key(point));
+    point.front() = ec_hybrid_odd_sign;
+    BOOST_REQUIRE(is_hybrid_key(point));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__is_hybrid_key__not_hybrid__false)
+{
+    BOOST_REQUIRE(!is_hybrid_key(uncompressed1));
+    BOOST_REQUIRE(!is_hybrid_key(compressed1));
+}
+
+// library
+
+BOOST_AUTO_TEST_CASE(secp256k1__secp256k1_library__always__known)
+{
+    const auto library = secp256k1_library();
+    BOOST_REQUIRE(library == "internal" || library.starts_with("libsecp256k1") || library.starts_with("ultrafast "));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

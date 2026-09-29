@@ -93,4 +93,11 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_verify_commitment__tweaked__expected)
     BOOST_REQUIRE(!schnorr::verify_commitment(internal, {}, tweaked_key, parity));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_verify_commitment__tweak_overflow__false)
+{
+    const auto& internal = bip340_vectors.at(1).key;
+    const hash_digest tweak = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
+    BOOST_REQUIRE(!schnorr::verify_commitment(internal, tweak, internal, false));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

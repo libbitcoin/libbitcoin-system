@@ -222,6 +222,8 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip324.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip341.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ecdsa.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ellswift.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\keys.cpp" />
@@ -230,6 +232,7 @@
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_performance.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\wycheproof.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
