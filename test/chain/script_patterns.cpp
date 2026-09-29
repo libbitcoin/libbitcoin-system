@@ -342,6 +342,20 @@ BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__wrong_first_opc
     BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
 }
 
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__key_and_checksig_only__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+    const operations ops{ { xkey, true }, { opcode::checksig } };
+    BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_threshold_pattern__odd_length_trailing_key__false)
+{
+    const auto xkey = to_chunk(ec_xonly{});
+    const operations ops{ { xkey, true }, { opcode::checksig }, { xkey, true }, { opcode::checksigadd }, { xkey, true } };
+    BOOST_CHECK(!script::is_pay_tapscript_threshold_pattern(ops));
+}
+
 // is_pay_tapscript_multisig_pattern
 
 BOOST_AUTO_TEST_CASE(script__is_pay_tapscript_multisig_pattern__match_1_of_1__true)
@@ -919,6 +933,12 @@ BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__wrong_push_size__false)
 {
     const script commitment(base16_chunk("6a23aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), false);
     BOOST_CHECK(!script::is_commitment_pattern(commitment.ops()));
+}
+
+BOOST_AUTO_TEST_CASE(script__is_commitment_pattern__return_only__false)
+{
+    const operations ops{ { opcode::op_return } };
+    BOOST_CHECK(!script::is_commitment_pattern(ops));
 }
 
 // is_pay_null_data_pattern
@@ -1657,6 +1677,12 @@ BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__invalid_point__empty)
 {
     const data_stack points{ data_chunk{ 0x02 } };
     BOOST_REQUIRE(script::to_pay_multisig_pattern(1, points).empty());
+}
+
+BOOST_AUTO_TEST_CASE(script__to_pay_multisig_pattern__sixteen_points__expected)
+{
+    const data_stack points(16, pattern_compressed);
+    BOOST_REQUIRE_EQUAL(script::to_pay_multisig_pattern(1, points).size(), 19u);
 }
 
 // Only op_1..op_16 can encode the key count.
