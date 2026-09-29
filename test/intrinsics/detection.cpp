@@ -33,17 +33,71 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__get_cpu__above_highest_leaf__false)
     BOOST_CHECK(!get_cpu(eax, ebx, ecx, edx, 0xffffffff, 0));
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512__always__match)
+// actual registers
+
+struct registers
+{
+    bool valid{};
+    uint32_t eax{};
+    uint32_t ebx{};
+    uint32_t ecx{};
+    uint32_t edx{};
+};
+
+static registers get_registers(uint32_t leaf, uint32_t subleaf) NOEXCEPT
+{
+    registers out{};
+    out.valid = get_cpu(out.eax, out.ebx, out.ecx, out.edx, leaf, subleaf);
+    return out;
+}
+
+static bool get_avx(const registers& cpu1) NOEXCEPT
+{
+    return cpu1.valid
+        && get_right(cpu1.ecx, cpu1_0::sse41_ecx_bit)
+        && get_right(cpu1.ecx, cpu1_0::xsave_ecx_bit)
+        && get_right(cpu1.ecx, cpu1_0::avx_ecx_bit);
+}
+
+static bool get_xcr_avx() NOEXCEPT
 {
     uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_right(extended, xcr0::opmask_bit) && get_right(extended, xcr0::zmm_upper_bit) && get_right(extended, xcr0::zmm_high_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && get_right(ebx, cpu7_0::avx512f_ebx_bit) && get_right(ebx, cpu7_0::avx512bw_ebx_bit) && get_right(ebx, cpu7_0::avx512vl_ebx_bit) && !is_avx512_low(), try_avx512());
+    return get_xcr(extended, xcr0::feature)
+        && get_right(extended, xcr0::sse_bit)
+        && get_right(extended, xcr0::avx_bit);
+}
+
+static bool get_xcr_avx512() NOEXCEPT
+{
+    uint64_t extended{};
+    return get_xcr_avx()
+        && get_xcr(extended, xcr0::feature)
+        && get_right(extended, xcr0::opmask_bit)
+        && get_right(extended, xcr0::zmm_upper_bit)
+        && get_right(extended, xcr0::zmm_high_bit);
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512__always__match)
+{
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    const auto avx512f = get_right(cpu7.ebx, cpu7_0::avx512f_ebx_bit);
+    const auto avx512bw = get_right(cpu7.ebx, cpu7_0::avx512bw_ebx_bit);
+    const auto avx512vl = get_right(cpu7.ebx, cpu7_0::avx512vl_ebx_bit);
+    const auto expected = get_avx(cpu1) && get_xcr_avx512() && avx2;
+    BOOST_CHECK_EQUAL(expected && avx512f && avx512bw && avx512vl && !is_avx512_low(), try_avx512());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__is_avx512_low__always__match)
 {
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu0_0::leaf, cpu0_0::subleaf) && ebx == cpu0_0::intel_ebx && edx == cpu0_0::intel_edx && ecx == cpu0_0::intel_ecx && get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && is_throttled(eax), is_avx512_low());
+    const auto cpu0 = get_registers(cpu0_0::leaf, cpu0_0::subleaf);
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto genu = cpu0.ebx == cpu0_0::intel_ebx;
+    const auto inei = cpu0.edx == cpu0_0::intel_edx;
+    const auto ntel = cpu0.ecx == cpu0_0::intel_ecx;
+    const auto intel = cpu0.valid && genu && inei && ntel;
+    BOOST_CHECK_EQUAL(intel && cpu1.valid && is_throttled(cpu1.eax), is_avx512_low());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__is_throttled__signatures__expected)
@@ -58,55 +112,81 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__is_throttled__signatures__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx2__always__match)
 {
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit), try_avx2());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    BOOST_CHECK_EQUAL(get_avx(cpu1) && get_xcr_avx() && avx2, try_avx2());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_sse41__always__match)
 {
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit), try_sse41());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    BOOST_CHECK_EQUAL(cpu1.valid && get_right(cpu1.ecx, cpu1_0::sse41_ecx_bit), try_sse41());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_shani__always__match)
 {
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::shani_ebx_bit), try_shani());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto sse41 = cpu1.valid && get_right(cpu1.ecx, cpu1_0::sse41_ecx_bit);
+    const auto shani = cpu7.valid && get_right(cpu7.ebx, cpu7_0::shani_ebx_bit);
+    BOOST_CHECK_EQUAL(sse41 && shani, try_shani());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512ifma__always__match)
 {
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    uint64_t extended{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_right(extended, xcr0::opmask_bit) && get_right(extended, xcr0::zmm_upper_bit) && get_right(extended, xcr0::zmm_high_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && get_right(ebx, cpu7_0::avx512f_ebx_bit) && get_right(ebx, cpu7_0::avx512vl_ebx_bit) && get_right(ebx, cpu7_0::avx512ifma_ebx_bit), try_avx512ifma());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    const auto avx512f = get_right(cpu7.ebx, cpu7_0::avx512f_ebx_bit);
+    const auto avx512vl = get_right(cpu7.ebx, cpu7_0::avx512vl_ebx_bit);
+    const auto avx512ifma = get_right(cpu7.ebx, cpu7_0::avx512ifma_ebx_bit);
+    const auto expected = get_avx(cpu1) && get_xcr_avx512() && avx2;
+    BOOST_CHECK_EQUAL(expected && avx512f && avx512vl && avx512ifma, try_avx512ifma());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_sha512__always__match)
 {
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && eax >= cpu7_1::subleaf && get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf) && get_right(eax, cpu7_1::sha512_eax_bit), try_sha512());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto cpu71 = get_registers(cpu7_1::leaf, cpu7_1::subleaf);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    const auto leaf71 = cpu7.eax >= cpu7_1::subleaf && cpu71.valid;
+    const auto sha512 = get_right(cpu71.eax, cpu7_1::sha512_eax_bit);
+    BOOST_CHECK_EQUAL(get_avx(cpu1) && get_xcr_avx() && avx2 && leaf71 && sha512, try_sha512());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avxifma__always__match)
 {
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && eax >= cpu7_1::subleaf && get_cpu(eax, ebx, ecx, edx, cpu7_1::leaf, cpu7_1::subleaf) && get_right(eax, cpu7_1::avxifma_eax_bit), try_avxifma());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto cpu71 = get_registers(cpu7_1::leaf, cpu7_1::subleaf);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    const auto leaf71 = cpu7.eax >= cpu7_1::subleaf && cpu71.valid;
+    const auto avxifma = get_right(cpu71.eax, cpu7_1::avxifma_eax_bit);
+    BOOST_CHECK_EQUAL(get_avx(cpu1) && get_xcr_avx() && avx2 && leaf71 && avxifma, try_avxifma());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_aesni__always__match)
 {
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::pclmulqdq_ecx_bit) && get_right(ecx, cpu1_0::aes_ecx_bit), try_aesni());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto sse41 = cpu1.valid && get_right(cpu1.ecx, cpu1_0::sse41_ecx_bit);
+    const auto pclmulqdq = get_right(cpu1.ecx, cpu1_0::pclmulqdq_ecx_bit);
+    const auto aes = get_right(cpu1.ecx, cpu1_0::aes_ecx_bit);
+    BOOST_CHECK_EQUAL(sse41 && pclmulqdq && aes, try_aesni());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_vaes__always__match)
 {
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) && get_right(ecx, cpu1_0::sse41_ecx_bit) && get_right(ecx, cpu1_0::pclmulqdq_ecx_bit) && get_right(ecx, cpu1_0::aes_ecx_bit) && get_right(ecx, cpu1_0::xsave_ecx_bit) && get_right(ecx, cpu1_0::avx_ecx_bit) && get_xcr(extended, xcr0::feature) && get_right(extended, xcr0::sse_bit) && get_right(extended, xcr0::avx_bit) && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) && get_right(ebx, cpu7_0::avx2_ebx_bit) && get_right(ecx, cpu7_0::vaes_ecx_bit) && get_right(ecx, cpu7_0::vpclmulqdq_ecx_bit), try_vaes());
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto pclmulqdq = get_right(cpu1.ecx, cpu1_0::pclmulqdq_ecx_bit);
+    const auto aes = get_right(cpu1.ecx, cpu1_0::aes_ecx_bit);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    const auto vaes = get_right(cpu7.ecx, cpu7_0::vaes_ecx_bit);
+    const auto vpclmulqdq = get_right(cpu7.ecx, cpu7_0::vpclmulqdq_ecx_bit);
+    const auto expected = get_avx(cpu1) && pclmulqdq && aes && get_xcr_avx() && avx2;
+    BOOST_CHECK_EQUAL(expected && vaes && vpclmulqdq, try_vaes());
 }
 
 // faked registers
