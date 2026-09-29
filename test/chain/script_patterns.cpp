@@ -1359,6 +1359,19 @@ BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__count_mismatch__false)
     BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
 }
 
+BOOST_AUTO_TEST_CASE(script__is_pay_multisig_pattern__wrong_final_opcode__false)
+{
+    const operations ops
+    {
+        { operation::opcode_from_positive(1_u8) },
+        { pattern_compressed, true },
+        { operation::opcode_from_positive(1_u8) },
+        { opcode::checksig }
+    };
+
+    BOOST_REQUIRE(!script::is_pay_multisig_pattern(ops));
+}
+
 // is_sign_public_key_pattern
 
 BOOST_AUTO_TEST_CASE(script__is_sign_public_key_pattern__endorsement__true)
