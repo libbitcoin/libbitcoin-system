@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(setting__ungroup__malformed__unchanged)
 BOOST_AUTO_TEST_CASE(setting__parse__grouped_integer__expected)
 {
     uint32_t store{};
-    const std::unique_ptr<const setting_value<uint32_t>> instance{ setting(&store) };
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
     boost::any value{};
     instance->parse(value, { "950,000" }, true);
     BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 950000u);
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(setting__parse__grouped_integer__expected)
 BOOST_AUTO_TEST_CASE(setting__parse__malformed_grouping__throws)
 {
     uint32_t store{};
-    const std::unique_ptr<const setting_value<uint32_t>> instance{ setting(&store) };
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
     boost::any value{};
     BOOST_REQUIRE_THROW(instance->parse(value, { "95,0000" }, true), boost::program_options::error);
 }
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(setting__parse__malformed_grouping__throws)
 BOOST_AUTO_TEST_CASE(setting__parse__grouped_string__unchanged)
 {
     std::string store{};
-    const std::unique_ptr<const setting_value<std::string>> instance{ setting(&store) };
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
     boost::any value{};
     instance->parse(value, { "1,000" }, true);
     BOOST_REQUIRE_EQUAL(boost::any_cast<std::string>(value), "1,000");
