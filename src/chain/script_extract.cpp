@@ -184,6 +184,32 @@ constexpr bool is_multiple_sigop(opcode code) NOEXCEPT
     return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
 }
 
+// static
+size_t script::signature_operations(reader& source, bool accurate) NOEXCEPT
+{
+    size_t total{};
+    auto last = opcode::push_negative_1;
+
+    while (!source.is_exhausted())
+    {
+        const auto code = static_cast<opcode>(source.read_byte());
+        source.skip_bytes(operation::read_data_size(code, source));
+
+        if (is_single_sigop(code))
+        {
+            total = ceilinged_add(total, one);
+        }
+        else if (is_multiple_sigop(code))
+        {
+            total = ceilinged_add(total, multisig_sigops(accurate, last));
+        }
+
+        last = code;
+    }
+
+    return total;
+}
+
 // TODO: compute in or at script evaluation and add coinbase input scripts?
 // TODO: this would avoid second deserialization of script for sigop counting.
 size_t script::signature_operations(bool accurate) const NOEXCEPT

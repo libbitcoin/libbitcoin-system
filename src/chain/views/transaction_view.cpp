@@ -18,12 +18,17 @@
  */
 #include <bitcoin/system/chain/views/transaction_view.hpp>
 
+#include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
+#include <bitcoin/system/chain/views/input_view.hpp>
+#include <bitcoin/system/chain/views/output_view.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -464,6 +469,237 @@ size_t transaction_view::stripped_size() const NOEXCEPT
 {
     return is_zero(witnesses_size_) ? size_ :
         size_ - (witnesses_size_ + sentinels_size);
+}
+
+// public
+// ----------------------------------------------------------------------------
+// populated properties
+
+bool transaction_view::is_populated() const NOEXCEPT
+{
+    return populated_;
+}
+
+transaction_view::input_iterator transaction_view::inputs_begin() const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+    return inputs_begin_;
+}
+
+transaction_view::input_iterator transaction_view::inputs_end() const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+    return inputs_end_;
+}
+
+transaction_view::input_iterator transaction_view::input_at(
+    uint32_t index) const NOEXCEPT
+{
+    BC_ASSERT(populated_ && index < in_count_);
+    return std::next(inputs_begin_, index);
+}
+
+output_view transaction_view::output_at(uint32_t index) const NOEXCEPT
+{
+    BC_ASSERT(index < out_count_);
+    auto stream = get_outputs_stream();
+    read::bytes::fast source{ stream };
+
+    for (uint32_t out{}; out < index; ++out)
+    {
+        source.skip_bytes(value_size);
+        source.skip_bytes(source.read_size());
+    }
+
+    return { std::next(at_outputs(), source.get_read_position()) };
+}
+
+uint64_t transaction_view::fee() const NOEXCEPT
+{
+    // Underflow returns zero (and is_overspent() will be true).
+    return floored_subtract(value(), spend());
+}
+
+uint64_t transaction_view::spend() const NOEXCEPT
+{
+    auto stream = get_outputs_stream();
+    read::bytes::fast source{ stream };
+    uint64_t total{};
+
+    // Overflow returns max_uint64.
+    for (size_t out{}; out < out_count_; ++out)
+    {
+        total = ceilinged_add(total, source.read_8_bytes_little_endian());
+        source.skip_bytes(source.read_size());
+    }
+
+    return total;
+}
+
+uint64_t transaction_view::value() const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+    uint64_t total{};
+
+    // Overflow returns max_uint64. Not populated/coinbase return zero.
+    for (auto in = inputs_begin_; in != inputs_end_; ++in)
+        total = ceilinged_add(total, is_null(in->prevout) ? zero :
+            in->prevout->value());
+
+    return total;
+}
+
+size_t transaction_view::signature_operations(bool bip16,
+    bool bip141) const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+    const auto factor = bip141 ? heavy_sigops_factor : one;
+    size_t total{};
+
+    // Overflow returns max_size_t.
+    for (auto in = inputs_begin_; in != inputs_end_; ++in)
+        total = ceilinged_add(total, in->signature_operations(bip16, bip141));
+
+    auto stream = get_outputs_stream();
+    read::bytes::fast source{ stream };
+
+    for (size_t out{}; out < out_count_; ++out)
+    {
+        source.skip_bytes(value_size);
+        const auto size = source.read_size();
+        source.set_limit(size);
+        const auto sigops = script::signature_operations(source, false);
+        source.set_limit();
+        total = ceilinged_add(total, sigops * factor);
+    }
+
+    return total;
+}
+
+// public
+// ----------------------------------------------------------------------------
+// validation
+
+code transaction_view::check() const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+
+    if (is_zero(in_count_) || is_zero(out_count_))
+        return error::empty_transaction;
+    if (coinbase_ && is_invalid_coinbase_size())
+        return error::invalid_coinbase_script_size;
+    if (!coinbase_ && is_null_non_coinbase())
+        return error::previous_output_null;
+
+    return error::transaction_success;
+}
+
+code transaction_view::check(const context& ctx) const NOEXCEPT
+{
+    const auto bip113 = ctx.is_enabled(bip113_rule);
+
+    if (is_absolute_locked(ctx.height, ctx.timestamp, ctx.median_time_past, bip113))
+        return error::absolute_time_locked;
+
+    return error::transaction_success;
+}
+
+code transaction_view::accept(const context&) const NOEXCEPT
+{
+    if (coinbase_)
+        return error::transaction_success;
+    if (is_missing_prevouts())
+        return error::missing_previous_output;
+    if (is_overspent())
+        return error::spend_exceeds_value;
+
+    return error::transaction_success;
+}
+
+code transaction_view::connect(const context& ctx,
+    const signatures& capture) const NOEXCEPT
+{
+    if (coinbase_)
+        return error::transaction_success;
+
+    for (auto in = inputs_begin_; in != inputs_end_; ++in)
+        if (const auto ec = connect_input(ctx, in, capture))
+            return ec;
+
+    return error::transaction_success;
+}
+
+// protected
+// ----------------------------------------------------------------------------
+// validation helpers
+
+void transaction_view::set_inputs(const input_iterator& begin,
+    const input_iterator& end) NOEXCEPT
+{
+    inputs_begin_ = begin;
+    inputs_end_ = end;
+    populated_ = true;
+}
+
+bool transaction_view::is_invalid_coinbase_size() const NOEXCEPT
+{
+    BC_ASSERT(coinbase_ && populated_);
+    const auto script_size = inputs_begin_->script_size();
+    return script_size < min_coinbase_size || script_size > max_coinbase_size;
+}
+
+bool transaction_view::is_null_non_coinbase() const NOEXCEPT
+{
+    BC_ASSERT(!coinbase_ && populated_);
+    return std::any_of(inputs_begin_, inputs_end_, [](const auto& in) NOEXCEPT
+    {
+        return in.is_null_point();
+    });
+}
+
+bool transaction_view::is_absolute_locked(size_t height, uint32_t timestamp,
+    uint32_t median_time_past, bool bip113) const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+    const auto time = bip113 ? median_time_past : timestamp;
+    const auto lock = locktime();
+    const auto height_time = lock < locktime_threshold ? height : time;
+
+    return !(is_zero(lock) || lock < height_time ||
+        std::all_of(inputs_begin_, inputs_end_, [](const auto& in) NOEXCEPT
+        {
+            return in.is_final();
+        }));
+}
+
+bool transaction_view::is_missing_prevouts() const NOEXCEPT
+{
+    BC_ASSERT(!coinbase_ && populated_);
+    return std::any_of(inputs_begin_, inputs_end_, [](const auto& in) NOEXCEPT
+    {
+        return is_null(in.prevout);
+    });
+}
+
+bool transaction_view::is_overspent() const NOEXCEPT
+{
+    BC_ASSERT(!coinbase_);
+    return spend() > value();
+}
+
+code transaction_view::connect_input(const context& ctx,
+    const input_iterator& it, const signatures& capture) const NOEXCEPT
+{
+    using namespace machine;
+    if (is_null(it->prevout))
+        return error::missing_previous_output;
+
+    // Evaluate rolling scripts with linear search but constant erase.
+    if (it->is_roller())
+        return interpreter<linked_stack, program<linked_stack, transaction_view>>::connect(ctx, *this, it, capture);
+
+    // Evaluate non-rolling scripts with constant search but linear erase.
+    return interpreter<contiguous_stack, program<contiguous_stack, transaction_view>>::connect(ctx, *this, it, capture);
 }
 
 } // namespace chain

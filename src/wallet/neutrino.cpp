@@ -36,6 +36,21 @@ constexpr uint8_t golomb_bits = 19;
 constexpr uint64_t golomb_target_false_positive_rate = 784931;
 constexpr auto rate = golomb_target_false_positive_rate;
 
+static bool construct_filter(data_chunk& out, const siphash_key& key,
+    data_stack& scripts) NOEXCEPT
+{
+    distinct(scripts);
+
+    // A vector (push) stream is used because the size is not known a-priori.
+    stream::out::data stream(out);
+    write::bits::ostream writer(stream);
+
+    writer.write_variable(scripts.size());
+    golomb::construct(writer, scripts, golomb_bits, key, rate);
+    writer.flush();
+    return !!writer;
+}
+
 bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
 {
     const auto hash = block.hash();
@@ -68,16 +83,48 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
         }
     }
 
-    distinct(scripts);
+    return construct_filter(out, key, scripts);
+}
 
-    // A vector (push) stream is used because the size is not known a-priori.
-    stream::out::data stream(out);
-    write::bits::ostream writer(stream);
+bool compute_filter(data_chunk& out, const chain::block_view& block) NOEXCEPT
+{
+    const auto hash = block.hash();
+    const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
+    data_stack scripts{};
 
-    writer.write_variable(scripts.size());
-    golomb::construct(writer, scripts, golomb_bits, key, rate);
-    writer.flush();
-    return !!writer;
+    for (const auto& tx: block.views())
+    {
+        if (!tx.is_coinbase())
+        {
+            for (auto in = tx.inputs_begin(); in != tx.inputs_end(); ++in)
+            {
+                if (is_null(in->prevout))
+                    return false;
+
+                if (!is_zero(in->prevout->script_size()))
+                    scripts.push_back(in->prevout->script_data().to_chunk());
+            }
+        }
+
+        auto stream = tx.get_outputs_stream();
+        read::bytes::fast source{ stream };
+        for (size_t out{}; out < tx.outputs(); ++out)
+        {
+            // bip138: any "nil" items MUST NOT be included.
+            // bip138: exclude all outputs that start with OP_RETURN.
+            source.skip_bytes(sizeof(uint64_t));
+            const auto size = source.read_size();
+            const auto op_return = !is_zero(size) &&
+                (source.peek_byte() == to_value(chain::opcode::op_return));
+
+            if (is_zero(size) || op_return)
+                source.skip_bytes(size);
+            else
+                scripts.push_back(source.read_bytes(size));
+        }
+    }
+
+    return construct_filter(out, key, scripts);
 }
 
 hash_digest compute_header(const hash_digest& previous_header,

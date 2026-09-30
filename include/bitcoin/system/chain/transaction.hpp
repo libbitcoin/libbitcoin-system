@@ -58,6 +58,12 @@ public:
     static hash_digest desegregated_hash(size_t witnessed,
         size_t unwitnessed, const uint8_t* data) NOEXCEPT;
 
+    /// Signature hash flags.
+    static constexpr coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
+    static constexpr bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
+    static uint32_t subscript_v1(const script& script) NOEXCEPT;
+    static uint8_t spend_type_v1(bool annex, bool tapscript) NOEXCEPT;
+
     /// Constructors.
     /// -----------------------------------------------------------------------
 
@@ -136,6 +142,9 @@ public:
 
     /// Requires no metadata, true if spend in own block would be locked.
     bool is_internally_locked(const input& in) const NOEXCEPT;
+
+    /// Input iterator at index (unguarded).
+    input_iterator input_at(uint32_t index) const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
@@ -268,18 +277,11 @@ private:
     static sizes serialized_size(const input_cptrs& inputs,
         const output_cptrs& outputs, bool segregated) NOEXCEPT;
 
-    input_iterator input_at(uint32_t index) const NOEXCEPT;
     chain::points points() const NOEXCEPT;
 
     // delegated
     code connect_input(const context& ctx, const input_iterator& it,
         const signatures& capture) const NOEXCEPT;
-
-    // Patterns.
-    // ------------------------------------------------------------------------
-
-    static constexpr coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static constexpr bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
 
     // Caching.
     // ------------------------------------------------------------------------
@@ -310,8 +312,6 @@ private:
     // Signature hashing.
     // ------------------------------------------------------------------------
 
-    static uint32_t subscript_v1(const script& script) NOEXCEPT;
-    uint8_t spend_type_v1(bool annex, bool tapscript) const NOEXCEPT;
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
 
     bool output_overflow(size_t input) const NOEXCEPT;

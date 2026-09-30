@@ -42,6 +42,8 @@
 #include <bitcoin/system/chain/tapscript.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/views/block_view.hpp>
+#include <bitcoin/system/chain/views/input_view.hpp>
+#include <bitcoin/system/chain/views/output_view.hpp>
 #include <bitcoin/system/chain/views/transaction_view.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 

@@ -33,22 +33,22 @@ namespace machine {
 
 TEMPLATE
 code CLASS::
-connect(const chain::context& state, const chain::transaction& tx,
+connect(const chain::context& state, const transaction& tx,
     uint32_t index) NOEXCEPT
 {
     if (index >= tx.inputs())
         return error::inputs_overflow;
 
-    return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index), {});
+    return connect(state, tx, tx.input_at(index), {});
 }
 
 TEMPLATE
 code CLASS::
-connect(const chain::context& state, const chain::transaction& tx,
+connect(const chain::context& state, const transaction& tx,
     const input_iterator& it, const chain::signatures& capture) NOEXCEPT
 {
     using namespace chain;
-    const auto& input = **it;
+    const auto& input = traits::at(it);
     if (!input.prevout)
         return error::missing_previous_output;
 
@@ -97,11 +97,11 @@ connect(const chain::context& state, const chain::transaction& tx,
 // static/protected
 TEMPLATE
 code CLASS::connect_embedded(const chain::context& state,
-    const chain::transaction& tx, const input_iterator& it,
+    const transaction& tx, const input_iterator& it,
     interpreter& in_program, const chain::signatures& capture) NOEXCEPT
 {
     using namespace chain;
-    const auto& input = **it;
+    const auto& input = traits::at(it);
     const auto& ops = input.script().ops();
 
     // Input script is limited to relaxed push data operations [bip16].
@@ -143,12 +143,12 @@ code CLASS::connect_embedded(const chain::context& state,
 // static/protected
 TEMPLATE
 code CLASS::connect_witness(const chain::context& state,
-    const chain::transaction& tx, const input_iterator& it,
+    const transaction& tx, const input_iterator& it,
     const chain::script& prevout, bool embedded,
     const chain::signatures& capture) NOEXCEPT
 {
     using namespace chain;
-    const auto& input = **it;
+    const auto& input = traits::at(it);
     const auto flags = state.flags;
     const auto version = prevout.version();
     code ec;

@@ -164,6 +164,9 @@ public:
     /// Extraction.
     /// -----------------------------------------------------------------------
 
+    /// Consensus computation over a serialized script.
+    static size_t signature_operations(reader& source, bool accurate) NOEXCEPT;
+
     /// Common pattern detection.
     const chunk_cptr& witness_program() const NOEXCEPT;
     uint8_t version_value() const NOEXCEPT;

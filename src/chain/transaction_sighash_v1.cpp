@@ -54,7 +54,7 @@ uint32_t transaction::subscript_v1(const script& script) NOEXCEPT
 }
 
 // ext_flags and annex flag are combined into one byte, who knows why.
-uint8_t transaction::spend_type_v1(bool annex, bool tapscript) const NOEXCEPT
+uint8_t transaction::spend_type_v1(bool annex, bool tapscript) NOEXCEPT
 {
     const auto ext_flag = to_value(tapscript ? extension::tapscript :
         extension::taproot);

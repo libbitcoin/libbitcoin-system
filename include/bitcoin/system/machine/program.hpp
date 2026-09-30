@@ -32,18 +32,50 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
+/// Transaction model traits (chain::transaction or chain::transaction_view).
+template <typename Tx>
+struct transaction_traits
+{
+};
+
+template <>
+struct transaction_traits<chain::transaction>
+{
+    using input_t = chain::input;
+    using input_iterator = chain::input_cptrs::const_iterator;
+
+    static INLINE const input_t& at(const input_iterator& it) NOEXCEPT
+    {
+        return **it;
+    }
+};
+
+template <>
+struct transaction_traits<chain::transaction_view>
+{
+    using input_t = chain::input_view;
+    using input_iterator = chain::input_views::const_iterator;
+
+    static INLINE const input_t& at(const input_iterator& it) NOEXCEPT
+    {
+        return *it;
+    }
+};
+
 /// A set of three stacks (primary, alternate, conditional) for script state.
 /// Primary stack is optimized by peekable, swappable, and eraseable elements.
-template <typename Stack>
+template <typename Stack, typename Tx = chain::transaction>
 class program
 {
 public:
     DELETE_COPY_MOVE_DESTRUCT(program);
 
     using script = chain::script;
-    using transaction = chain::transaction;
+    using transaction = Tx;
+    using traits = transaction_traits<Tx>;
+    using input_t = typename traits::input_t;
     using script_version = chain::script_version;
-    using input_iterator = chain::input_cptrs::const_iterator;
+    using input_iterator = typename traits::input_iterator;
 
     /// Input script (default/empty stack).
     program(const transaction& transaction, const input_iterator& input,
@@ -91,7 +123,7 @@ protected:
     virtual INLINE op_iterator begin() const NOEXCEPT;
     virtual INLINE op_iterator end() const NOEXCEPT;
     virtual INLINE const transaction& tx() const NOEXCEPT;
-    virtual INLINE const chain::input& input() const NOEXCEPT;
+    virtual INLINE const input_t& input() const NOEXCEPT;
     virtual INLINE bool is_enabled(flags flag) const NOEXCEPT;
 
     /// Primary stack.
@@ -292,8 +324,8 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#define TEMPLATE template <typename Stack>
-#define CLASS program<Stack>
+#define TEMPLATE template <typename Stack, typename Tx>
+#define CLASS program<Stack, Tx>
 
 #include <bitcoin/system/impl/machine/program.ipp>
 #include <bitcoin/system/impl/machine/program_batch.ipp>

@@ -405,7 +405,16 @@
     <ClCompile Include="..\..\..\..\src\chain\views\block_view.cpp">
       <Filter>src\chain\views</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\views\input_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\views\output_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\views\transaction_view.cpp">
+      <Filter>src\chain\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\views\transaction_view_sighash.cpp">
       <Filter>src\chain\views</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
@@ -1035,6 +1044,12 @@
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\block_view.hpp">
+      <Filter>include\bitcoin\system\chain\views</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\input_view.hpp">
+      <Filter>include\bitcoin\system\chain\views</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\output_view.hpp">
       <Filter>include\bitcoin\system\chain\views</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\transaction_view.hpp">
