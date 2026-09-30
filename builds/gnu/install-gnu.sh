@@ -460,12 +460,8 @@ main()
 
     boost_OPTIONS=(
         "--with-container"
-        "--with-iostreams"
         "--with-json"
-        "--with-locale"
         "--with-program_options"
-        "--with-regex"
-        "--with-thread"
         "--with-url"
         "--with-test")
 

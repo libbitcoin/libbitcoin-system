@@ -41,11 +41,8 @@ src_libbitcoin_system_la_CPPFLAGS = \
     -I${srcdir}/../../include \
     ${boost_BUILD_CPPFLAGS} \
     ${boost_container_BUILD_CPPFLAGS} \
-    ${boost_iostreams_BUILD_CPPFLAGS} \
     ${boost_json_BUILD_CPPFLAGS} \
-    ${boost_locale_BUILD_CPPFLAGS} \
     ${boost_program_options_BUILD_CPPFLAGS} \
-    ${boost_thread_BUILD_CPPFLAGS} \
     ${boost_url_BUILD_CPPFLAGS} \
     ${secp256k1_BUILD_CPPFLAGS} \
     ${UltrafastSecp256k1_BUILD_CPPFLAGS}
@@ -53,11 +50,8 @@ src_libbitcoin_system_la_CPPFLAGS = \
 src_libbitcoin_system_la_LDFLAGS = \
     ${boost_LDFLAGS} \
     ${boost_container_LDFLAGS} \
-    ${boost_iostreams_LDFLAGS} \
     ${boost_json_LDFLAGS} \
-    ${boost_locale_LDFLAGS} \
     ${boost_program_options_LDFLAGS} \
-    ${boost_thread_LDFLAGS} \
     ${boost_url_LDFLAGS} \
     ${secp256k1_LDFLAGS} \
     ${UltrafastSecp256k1_LDFLAGS}
@@ -65,11 +59,8 @@ src_libbitcoin_system_la_LDFLAGS = \
 src_libbitcoin_system_la_LIBADD = \
     ${boost_LIBS} \
     ${boost_container_LIBS} \
-    ${boost_iostreams_LIBS} \
     ${boost_json_LIBS} \
-    ${boost_locale_LIBS} \
     ${boost_program_options_LIBS} \
-    ${boost_thread_LIBS} \
     ${boost_url_LIBS} \
     ${secp256k1_LIBS} \
     ${UltrafastSecp256k1_LIBS}
