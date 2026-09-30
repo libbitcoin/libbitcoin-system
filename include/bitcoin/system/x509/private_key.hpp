@@ -27,33 +27,43 @@ namespace libbitcoin {
 namespace system {
 namespace x509 {
 
-/// A P-256 private key.
+/// P-256 and P-384 private keys.
 using secret = secp256r1::secret_t;
+using secret384 = secp384r1::secret_t;
 
-/// Decode an ECPrivateKey (sec1, rfc5915).
+/// Decode an ECPrivateKey (sec1, rfc5915) of the curve.
 BC_API bool decode_sec1(secret& out, const_byte_span der) NOEXCEPT;
+BC_API bool decode_sec1(secret384& out, const_byte_span der) NOEXCEPT;
 
-/// Decode a PrivateKeyInfo (pkcs8, rfc5958).
+/// Decode a PrivateKeyInfo (pkcs8, rfc5958) of the curve.
 BC_API bool decode_pkcs8(secret& out, const_byte_span der) NOEXCEPT;
+BC_API bool decode_pkcs8(secret384& out, const_byte_span der) NOEXCEPT;
 
 /// Decode an EncryptedPrivateKeyInfo (pkcs8) of pbes2 with pbkdf2,
 /// hmacWithSHA256 and aes-128-cbc or aes-256-cbc (rfc8018).
 BC_API bool decode_encrypted_pkcs8(secret& out, const_byte_span der,
     const std::string& password) NOEXCEPT;
+BC_API bool decode_encrypted_pkcs8(secret384& out, const_byte_span der,
+    const std::string& password) NOEXCEPT;
 
 /// Decode the first "EC PRIVATE KEY", "PRIVATE KEY" or
-/// "ENCRYPTED PRIVATE KEY" block of the text.
+/// "ENCRYPTED PRIVATE KEY" block of the text, false if of another curve.
 BC_API bool decode_private_key(secret& out, const std::string& text,
+    const std::string& password={}) NOEXCEPT;
+BC_API bool decode_private_key(secret384& out, const std::string& text,
     const std::string& password={}) NOEXCEPT;
 
 /// Encode as ECPrivateKey (with curve and public key), empty if invalid.
 BC_API data_chunk encode_sec1(const secret& key) NOEXCEPT;
+BC_API data_chunk encode_sec1(const secret384& key) NOEXCEPT;
 
 /// Encode as PrivateKeyInfo, empty if invalid.
 BC_API data_chunk encode_pkcs8(const secret& key) NOEXCEPT;
+BC_API data_chunk encode_pkcs8(const secret384& key) NOEXCEPT;
 
 /// Encode as a "PRIVATE KEY" block, empty if invalid.
 BC_API std::string encode_private_key(const secret& key) NOEXCEPT;
+BC_API std::string encode_private_key(const secret384& key) NOEXCEPT;
 
 } // namespace x509
 } // namespace system

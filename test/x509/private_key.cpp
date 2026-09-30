@@ -469,4 +469,64 @@ BOOST_AUTO_TEST_CASE(private_key__encode_private_key__zero__empty)
     BOOST_REQUIRE(encode_private_key(secret{}).empty());
 }
 
+// p-384
+
+BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_sec1__expected)
+{
+    secret384 out{};
+    BOOST_REQUIRE(decode_private_key(out, fixture::key384_pem));
+    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+}
+
+BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_pkcs8__expected)
+{
+    secret384 out{};
+    BOOST_REQUIRE(decode_private_key(out, fixture::key384_pkcs8_pem));
+    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+}
+
+BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_pbes2_aes256__expected)
+{
+    secret384 out{};
+    BOOST_REQUIRE(decode_private_key(out, fixture::key384_aes256_pem, password));
+    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+}
+
+BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_as_secp256r1__false)
+{
+    secret out{};
+    BOOST_REQUIRE(!decode_private_key(out, fixture::key384_pem));
+    BOOST_REQUIRE(!decode_private_key(out, fixture::key384_pkcs8_pem));
+}
+
+BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp256r1_as_secp384r1__false)
+{
+    secret384 out{};
+    BOOST_REQUIRE(!decode_private_key(out, fixture::key_pem));
+    BOOST_REQUIRE(!decode_private_key(out, fixture::key_pkcs8_pem));
+}
+
+BOOST_AUTO_TEST_CASE(private_key__encode_private_key__secp384r1__round_trip)
+{
+    const auto text = encode_private_key(fixture::key384_secret);
+    BOOST_REQUIRE(text.starts_with("-----BEGIN PRIVATE KEY-----\n"));
+
+    secret384 out{};
+    BOOST_REQUIRE(decode_private_key(out, text));
+    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+}
+
+BOOST_AUTO_TEST_CASE(private_key__encode_sec1__secp384r1__round_trip)
+{
+    const auto der = encode_sec1(fixture::key384_secret);
+    secret384 out{};
+    BOOST_REQUIRE(decode_sec1(out, der));
+    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+}
+
+BOOST_AUTO_TEST_CASE(private_key__encode_private_key__secp384r1_zero__empty)
+{
+    BOOST_REQUIRE(encode_private_key(secret384{}).empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
