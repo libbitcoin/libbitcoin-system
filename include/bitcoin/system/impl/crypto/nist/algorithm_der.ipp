@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_NIST_ALGORITHM_DER_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_NIST_ALGORITHM_DER_IPP
 
-#include <algorithm>
-
 // DER
 // ============================================================================
 // ECDSA-Sig-Value ::= SEQUENCE { r INTEGER, s INTEGER }. For these sizes all

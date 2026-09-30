@@ -31,6 +31,10 @@ namespace config {
 BC_API bool is_configured(const variables_map& variables,
     const std::string& name) NOEXCEPT;
 
+/// The integer of the text, with optional comma digit grouping (1,000,000),
+/// as decimal text, or the text unchanged if it is not such an integer.
+BC_API std::string ungroup(const std::string& text) NOEXCEPT;
+
 /// Not thread safe, virtual.
 /// Interface for obtaining the current value of a bound option.
 class BC_API printable
@@ -55,6 +59,10 @@ public:
     /// The bound value(s), one per entry, empty only for a collection.
     /// A secret reports one empty value, disclosing only that it is set.
     string_list values() const NOEXCEPT override;
+
+    /// Parse the tokens, accepting comma digit grouping of an integer.
+    void xparse(boost::any& value_store,
+        const string_list& new_tokens) const THROWS override;
 
 private:
     const Type* store_;

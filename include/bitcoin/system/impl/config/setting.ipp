@@ -76,6 +76,26 @@ string_list setting_value<Type>::values() const NOEXCEPT
 }
 
 template <typename Type>
+void setting_value<Type>::xparse(boost::any& value_store,
+    const string_list& new_tokens) const THROWS
+{
+    using base = boost::program_options::typed_value<Type>;
+    if constexpr (is_integral<Type>)
+    {
+        string_list tokens{};
+        tokens.reserve(new_tokens.size());
+        for (const auto& token: new_tokens)
+            tokens.push_back(ungroup(token));
+
+        base::xparse(value_store, tokens);
+    }
+    else
+    {
+        base::xparse(value_store, new_tokens);
+    }
+}
+
+template <typename Type>
 setting_value<Type>* setting(Type* store) THROWS
 {
     return new setting_value<Type>(store);

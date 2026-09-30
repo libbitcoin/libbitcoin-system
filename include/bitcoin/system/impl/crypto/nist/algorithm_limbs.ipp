@@ -65,23 +65,27 @@ to_bytes(const limbs_t& limbs) NOEXCEPT
     return bytes;
 }
 
+// The carry is the high bit of the majority of a, b and not out.
 TEMPLATE
 INLINE constexpr uint64_t CLASS::
 add_carry(uint64_t& out, uint64_t a, uint64_t b, uint64_t carry) NOEXCEPT
 {
-    const auto sum = a + b;
-    out = sum + carry;
-    return to_int<uint64_t>(sum < a || out < sum);
+    out = a + b + carry;
+    const auto both = bit_and(a, b);
+    const auto either = bit_and(bit_or(a, b), bit_not(out));
+    return shift_right(bit_or(both, either), sub1(bits<uint64_t>));
 }
 
+// The borrow is the high bit of the majority of not a, b and out.
 TEMPLATE
 INLINE constexpr uint64_t CLASS::
 subtract_borrow(uint64_t& out, uint64_t a, uint64_t b,
     uint64_t borrow) NOEXCEPT
 {
-    const auto difference = a - b;
-    out = difference - borrow;
-    return to_int<uint64_t>(a < b || difference < borrow);
+    out = a - b - borrow;
+    const auto under = bit_and(bit_not(a), b);
+    const auto equal = bit_and(bit_not(bit_xor(a, b)), out);
+    return shift_right(bit_or(under, equal), sub1(bits<uint64_t>));
 }
 
 // t + a * b + carry, low word returned and high word to carry (no overflow).

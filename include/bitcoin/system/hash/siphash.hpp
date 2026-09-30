@@ -22,6 +22,7 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SIPHASH
 #define LIBBITCOIN_SYSTEM_HASH_SIPHASH
 
+#include <span>
 #include <tuple>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -33,6 +34,7 @@ namespace system {
 
 typedef std::tuple<uint64_t, uint64_t> siphash_key;
 typedef std_array<uint64_t, 4> siphash_words;
+typedef std_array<std::span<const uint64_t>, 4> siphash_columns;
 
 BC_API uint64_t siphash(const siphash_key& key,
     const data_slice& message) NOEXCEPT;
@@ -42,6 +44,11 @@ BC_API uint64_t siphash(const half_hash& hash,
 /// A 32 byte message as four little-endian words (e.g. a hash).
 BC_API uint64_t siphash(const siphash_key& key,
     const siphash_words& message) NOEXCEPT;
+
+/// Each row of four word columns as a 32 byte message, one hash per row of
+/// out (columns at least as long as out), computed across vector lanes.
+BC_API void siphash(const std::span<uint64_t>& out, const siphash_key& key,
+    const siphash_columns& columns) NOEXCEPT;
 
 constexpr siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
 {

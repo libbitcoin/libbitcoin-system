@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_GHASH_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_AES_GHASH_IPP
 
-#include <algorithm>
-
 // Portable multiplication derived in part from BearSSL (ghash_ctmul64.c):
 /*
  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_NIST_ALGORITHM_ECDSA_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_NIST_ALGORITHM_ECDSA_IPP
 
-#include <algorithm>
-
 // ECDSA
 // ============================================================================
 // The digest is converted to a scalar from its leftmost bits (bits2int),

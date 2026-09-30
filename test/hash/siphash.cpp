@@ -46,6 +46,35 @@ BOOST_AUTO_TEST_CASE(siphash__words__test_key__expected)
     BOOST_REQUIRE_EQUAL(siphash(to_siphash_key(hash), words), siphash(hash, message));
 }
 
+// 29 rows exercise 512, 256 and 128 bit lanes and the integral remainder.
+BOOST_AUTO_TEST_CASE(siphash__columns__rows__expected_by_row)
+{
+    half_hash hash{};
+    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+    const auto key = to_siphash_key(hash);
+
+    constexpr size_t rows = 29;
+    std_array<std_array<uint64_t, rows>, 4> words{};
+    for (size_t row{}; row < rows; ++row)
+        for (size_t column{}; column < words.size(); ++column)
+            words[column][row] = (row << 8) + column;
+
+    std_array<uint64_t, rows> out{};
+    const siphash_columns columns{ words[0], words[1], words[2], words[3] };
+    siphash(out, key, columns);
+
+    for (size_t row{}; row < rows; ++row)
+        BOOST_REQUIRE_EQUAL(out[row], siphash(key, siphash_words{ words[0][row], words[1][row], words[2][row], words[3][row] }));
+}
+
+BOOST_AUTO_TEST_CASE(siphash__columns__empty__unchanged)
+{
+    const siphash_columns columns{};
+    std::span<uint64_t> out{};
+    siphash(out, siphash_key{}, columns);
+    BOOST_REQUIRE(out.empty());
+}
+
 BOOST_AUTO_TEST_CASE(siphash__hash__vectors__expected)
 {
     half_hash hash{};

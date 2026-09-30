@@ -143,7 +143,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
-    ${srcdir}/../../src/crypto/aes128_gcm.cpp \
+    ${srcdir}/../../src/crypto/aes_gcm.cpp \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../src/crypto/der_parser.cpp \
@@ -413,7 +413,7 @@ include_bitcoin_system_cryptodir = \
     ${includedir}/bitcoin/system/crypto
 
 include_bitcoin_system_crypto_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/crypto/aes128_gcm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/aes_gcm.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/algorithms.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/chacha20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/chacha20_poly1305.hpp \
@@ -569,6 +569,12 @@ include_bitcoin_system_impl_configdir = \
 
 include_bitcoin_system_impl_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
+
+include_bitcoin_system_impl_cryptodir = \
+    ${includedir}/bitcoin/system/impl/crypto
+
+include_bitcoin_system_impl_crypto_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes_gcm.ipp
 
 include_bitcoin_system_impl_crypto_aesdir = \
     ${includedir}/bitcoin/system/impl/crypto/aes
@@ -1169,8 +1175,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/utilities.cpp \
     ${srcdir}/../../test/config/version.cpp \
     ${srcdir}/../../test/crypto/aes.cpp \
-    ${srcdir}/../../test/crypto/aes128_gcm.cpp \
     ${srcdir}/../../test/crypto/aes256.cpp \
+    ${srcdir}/../../test/crypto/aes_gcm.cpp \
     ${srcdir}/../../test/crypto/chacha20.cpp \
     ${srcdir}/../../test/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../test/crypto/fschacha20.cpp \

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include "aes128_gcm.hpp"
+#include "aes_gcm.hpp"
 
 BOOST_AUTO_TEST_SUITE(aes128_gcm_tests)
 
@@ -148,6 +148,45 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__tampered_aad__false_cleared)
     data_chunk decrypted(plain.size(), 0xff);
     BOOST_REQUIRE(!cipher.decrypt(decrypted, tampered, iv, out));
     BOOST_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(aes256_gcm_tests)
+
+// Wycheproof.
+
+BOOST_AUTO_TEST_CASE(aes256_gcm__encrypt__wycheproof_valid__expected)
+{
+    for (const auto& vector: aes256_gcm_valid_vectors)
+    {
+        aes256_gcm cipher{ vector.key };
+        data_chunk out(vector.plain.size() + aes256_gcm::expansion);
+        cipher.encrypt(vector.plain, vector.aad, vector.nonce, out);
+        BOOST_REQUIRE_MESSAGE(out == splice(vector.cipher, vector.tag), vector.id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(aes256_gcm__decrypt__wycheproof_valid__true_expected)
+{
+    for (const auto& vector: aes256_gcm_valid_vectors)
+    {
+        aes256_gcm cipher{ vector.key };
+        data_chunk plain(vector.plain.size());
+        BOOST_REQUIRE_MESSAGE(cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
+        BOOST_REQUIRE_MESSAGE(plain == vector.plain, vector.id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(aes256_gcm__decrypt__wycheproof_invalid__false_cleared)
+{
+    for (const auto& vector: aes256_gcm_invalid_vectors)
+    {
+        aes256_gcm cipher{ vector.key };
+        data_chunk plain(vector.plain.size(), 0xff);
+        BOOST_REQUIRE_MESSAGE(!cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
+        BOOST_REQUIRE_MESSAGE(plain == data_chunk(vector.plain.size(), 0x00), vector.id);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

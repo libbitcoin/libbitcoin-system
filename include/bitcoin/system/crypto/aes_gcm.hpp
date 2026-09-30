@@ -16,34 +16,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES128_GCM_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_AES128_GCM_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_GCM_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_AES_GCM_HPP
 
 #include <span>
 #include <bitcoin/system/crypto/aes/ghash.hpp>
 #include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// AES-128-GCM authenticated encryption with associated data (sp800-38d),
+/// AES-GCM authenticated encryption with associated data (sp800-38d),
 /// 96-bit nonce and 128-bit tag. The nonce MUST not be repeated for a key.
-class BC_API aes128_gcm final
+template <typename Aes>
+class aes_gcm final
 {
 public:
     /// Ciphertext expansion (the appended tag).
-    static constexpr size_t expansion = aes128::block_bytes;
+    static constexpr size_t expansion = Aes::block_bytes;
 
     static constexpr size_t nonce_size = 12;
-    typedef aes128::key_t secret;
+    typedef typename Aes::key_t secret;
     typedef data_array<nonce_size> nonce;
 
-    DEFAULT_COPY_MOVE(aes128_gcm);
+    DEFAULT_COPY_MOVE(aes_gcm);
 
-    aes128_gcm(const secret& key) NOEXCEPT;
-    ~aes128_gcm() NOEXCEPT;
+    aes_gcm(const secret& key) NOEXCEPT;
+    ~aes_gcm() NOEXCEPT;
 
     /// Rekey.
     void set_key(const secret& key) NOEXCEPT;
@@ -63,17 +66,32 @@ public:
         const_byte_span cipher) NOEXCEPT;
 
 private:
-    using block = aes128::block_t;
+    using block = typename Aes::block_t;
 
     static block counter(const nonce& iv, uint32_t value) NOEXCEPT;
     void authenticate(block& out, const_byte_span aad, const_byte_span cipher,
         const nonce& iv) const NOEXCEPT;
 
-    aes128::schedule_t schedule_{};
+    typename Aes::schedule_t schedule_{};
     block key_{};
 };
 
+using aes128_gcm = aes_gcm<aes128>;
+using aes256_gcm = aes_gcm<aes256>;
+
+/// Prevent implicit template instantiation.
+extern template class aes_gcm<aes128>;
+extern template class aes_gcm<aes256>;
+
 } // namespace system
 } // namespace libbitcoin
+
+#define TEMPLATE template <typename Aes>
+#define CLASS aes_gcm<Aes>
+
+#include <bitcoin/system/impl/crypto/aes_gcm.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

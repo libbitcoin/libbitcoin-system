@@ -16,15 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/crypto/aes128_gcm.hpp>
-
-#include <algorithm>
-#include <bitcoin/system/crypto/aes/ghash.hpp>
-#include <bitcoin/system/crypto/algorithms.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_GCM_IPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_AES_GCM_IPP
 
 // based on:
 // nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
@@ -36,29 +29,36 @@ BC_PUSH_WARNING(NO_USE_OF_SPAN)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-aes128_gcm::aes128_gcm(const secret& key) NOEXCEPT
+TEMPLATE
+CLASS::
+aes_gcm(const secret& key) NOEXCEPT
 {
     set_key(key);
 }
 
-aes128_gcm::~aes128_gcm() NOEXCEPT
+TEMPLATE
+CLASS::
+~aes_gcm() NOEXCEPT
 {
     wipe(schedule_);
     wipe(key_);
 }
 
-void aes128_gcm::set_key(const secret& key) NOEXCEPT
+TEMPLATE
+void CLASS::
+set_key(const secret& key) NOEXCEPT
 {
     // The hash subkey is the cipher of the zero block.
-    schedule_ = aes128::expand(key);
+    schedule_ = Aes::expand(key);
     key_ = {};
-    aes128::encrypt(key_, schedule_);
+    Aes::encrypt(key_, schedule_);
 }
 
 // private
 // The 96-bit nonce is followed by the 32-bit big-endian block counter.
-aes128_gcm::block aes128_gcm::counter(const nonce& iv,
-    uint32_t value) NOEXCEPT
+TEMPLATE
+typename CLASS::block CLASS::
+counter(const nonce& iv, uint32_t value) NOEXCEPT
 {
     block out{};
     std::copy(iv.cbegin(), iv.cend(), out.begin());
@@ -67,8 +67,10 @@ aes128_gcm::block aes128_gcm::counter(const nonce& iv,
 }
 
 // private
-void aes128_gcm::authenticate(block& out, const_byte_span aad,
-    const_byte_span cipher, const nonce& iv) const NOEXCEPT
+TEMPLATE
+void CLASS::
+authenticate(block& out, const_byte_span aad, const_byte_span cipher,
+    const nonce& iv) const NOEXCEPT
 {
     // The hash is of the aad and ciphertext, each zero padded, followed by
     // their lengths in bits as 64-bit big-endian words.
@@ -84,18 +86,22 @@ void aes128_gcm::authenticate(block& out, const_byte_span aad,
 
     // The tag is the hash masked by the cipher of the initial counter.
     auto mask = counter(iv, 1_u32);
-    aes128::encrypt(mask, schedule_);
+    Aes::encrypt(mask, schedule_);
     for (size_t byte{}; byte < expansion; ++byte)
         out[byte] = bit_xor(out[byte], mask[byte]);
 }
 
-void aes128_gcm::encrypt(const_byte_span plain, const_byte_span aad,
-    const nonce& iv, byte_span cipher) NOEXCEPT
+TEMPLATE
+void CLASS::
+encrypt(const_byte_span plain, const_byte_span aad, const nonce& iv,
+    byte_span cipher) NOEXCEPT
 {
     encrypt(plain, {}, aad, iv, cipher);
 }
 
-void aes128_gcm::encrypt(const_byte_span plain1, const_byte_span plain2,
+TEMPLATE
+void CLASS::
+encrypt(const_byte_span plain1, const_byte_span plain2,
     const_byte_span aad, const nonce& iv, byte_span cipher) NOEXCEPT
 {
     BC_ASSERT(cipher.size() == plain1.size() + plain2.size() + expansion);
@@ -108,14 +114,16 @@ void aes128_gcm::encrypt(const_byte_span plain1, const_byte_span plain2,
 
     // Encryption uses the block counter starting at two.
     auto next = counter(iv, 2_u32);
-    aes128::ctr(text, text, next, schedule_);
+    Aes::ctr(text, text, next, schedule_);
 
     authenticate(unsafe_array_cast<uint8_t, expansion>(
         cipher.last(expansion).data()), aad, text, iv);
 }
 
-bool aes128_gcm::decrypt(byte_span plain, const_byte_span aad,
-    const nonce& iv, const_byte_span cipher) NOEXCEPT
+TEMPLATE
+bool CLASS::
+decrypt(byte_span plain, const_byte_span aad, const nonce& iv,
+    const_byte_span cipher) NOEXCEPT
 {
     BC_ASSERT(cipher.size() == plain.size() + expansion);
     const auto text = cipher.first(plain.size());
@@ -131,7 +139,7 @@ bool aes128_gcm::decrypt(byte_span plain, const_byte_span aad,
     if (authenticated)
     {
         auto next = counter(iv, 2_u32);
-        aes128::ctr(plain, text, next, schedule_);
+        Aes::ctr(plain, text, next, schedule_);
     }
     else
     {
@@ -147,3 +155,5 @@ BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
+
+#endif

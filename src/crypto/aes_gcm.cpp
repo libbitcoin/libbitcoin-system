@@ -16,35 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_X509_PEM_HPP
-#define LIBBITCOIN_SYSTEM_X509_PEM_HPP
+#include <bitcoin/system/crypto/aes_gcm.hpp>
 
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace x509 {
 
-/// A textual encoding block (rfc7468): its label and decoded content.
-struct pem
-{
-    std::string label{};
-    data_chunk data{};
-};
+/// Explicit template instantiation.
+template class aes_gcm<aes128>;
+template class aes_gcm<aes256>;
 
-using pems = std::vector<pem>;
-
-/// Encode the data as a block with the label, in 64 character lines.
-BC_API std::string encode_pem(const std::string& label,
-    const_byte_span data) NOEXCEPT;
-
-/// Decode all blocks of the text, ignoring text between blocks.
-/// False if any block is malformed or has encapsulated headers.
-BC_API bool decode_pem(pems& out, const std::string& text) NOEXCEPT;
-
-} // namespace x509
 } // namespace system
 } // namespace libbitcoin
-
-#endif

@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/x509/private_key.hpp>
 
-#include <algorithm>
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -65,10 +63,20 @@ static void cbc_decrypt(data_chunk& text, const std::string& password,
     wipe(schedule);
 }
 
+template <typename Curve>
+static const_byte_span curve_oid() NOEXCEPT
+{
+    if constexpr (is_same_type<Curve, secp256r1>)
+        return oid::secp256r1;
+    else
+        return oid::secp384r1;
+}
+
 // decode
 // ----------------------------------------------------------------------------
 
-bool decode_sec1(secret& out, const_byte_span der) NOEXCEPT
+template <typename Curve>
+static bool sec1(typename Curve::secret_t& out, const_byte_span der) NOEXCEPT
 {
     reader outer{ der };
     auto key = outer.read_nested(sequence_tag);
@@ -79,7 +87,7 @@ bool decode_sec1(secret& out, const_byte_span der) NOEXCEPT
     {
         auto parameters = key.read_nested(explicit_tag(0));
         const auto curve = parameters.read_oid();
-        if (!parameters.is_complete() || !is_equal(curve, oid::secp256r1))
+        if (!parameters.is_complete() || !is_equal(curve, curve_oid<Curve>()))
             return false;
     }
 
@@ -96,11 +104,11 @@ bool decode_sec1(secret& out, const_byte_span der) NOEXCEPT
         (version != sec1_version) || (octets.size() != out.size()))
         return false;
 
-    secret value{};
+    typename Curve::secret_t value{};
     std::copy(octets.begin(), octets.end(), value.begin());
 
-    secp256r1::point_t expected{};
-    if (!secp256r1::public_key(expected, value))
+    typename Curve::point_t expected{};
+    if (!Curve::public_key(expected, value))
         return false;
 
     if (!point.empty() && !is_equal(point, expected))
@@ -110,7 +118,8 @@ bool decode_sec1(secret& out, const_byte_span der) NOEXCEPT
     return true;
 }
 
-bool decode_pkcs8(secret& out, const_byte_span der) NOEXCEPT
+template <typename Curve>
+static bool pkcs8(typename Curve::secret_t& out, const_byte_span der) NOEXCEPT
 {
     reader outer{ der };
     auto info = outer.read_nested(sequence_tag);
@@ -127,14 +136,15 @@ bool decode_pkcs8(secret& out, const_byte_span der) NOEXCEPT
     if (!outer.is_complete() || !info.is_complete() ||
         !algorithm.is_complete() || (version != pkcs8_version) ||
         !is_equal(key_type, oid::ec_public_key) ||
-        !is_equal(curve, oid::secp256r1))
+        !is_equal(curve, curve_oid<Curve>()))
         return false;
 
-    return decode_sec1(out, octets);
+    return sec1<Curve>(out, octets);
 }
 
-bool decode_encrypted_pkcs8(secret& out, const_byte_span der,
-    const std::string& password) NOEXCEPT
+template <typename Curve>
+static bool encrypted_pkcs8(typename Curve::secret_t& out,
+    const_byte_span der, const std::string& password) NOEXCEPT
 {
     reader outer{ der };
     auto info = outer.read_nested(sequence_tag);
@@ -205,15 +215,16 @@ bool decode_encrypted_pkcs8(secret& out, const_byte_span der,
     {
         const auto padding = std::next(text.begin(), text.size() - pad);
         valid = std::all_of(padding, text.end(), is_pad) &&
-            decode_pkcs8(out, const_byte_span{ text }.first(text.size() - pad));
+            pkcs8<Curve>(out, const_byte_span{ text }.first(text.size() - pad));
     }
 
     wipe(text.data(), text.size());
     return valid;
 }
 
-bool decode_private_key(secret& out, const std::string& text,
-    const std::string& password) NOEXCEPT
+template <typename Curve>
+static bool private_key(typename Curve::secret_t& out,
+    const std::string& text, const std::string& password) NOEXCEPT
 {
     pems blocks{};
     if (!decode_pem(blocks, text))
@@ -223,11 +234,11 @@ bool decode_private_key(secret& out, const std::string& text,
     for (const auto& block: blocks)
     {
         if (block.label == sec1_label)
-            decoded = decode_sec1(out, block.data);
+            decoded = sec1<Curve>(out, block.data);
         else if (block.label == pkcs8_label)
-            decoded = decode_pkcs8(out, block.data);
+            decoded = pkcs8<Curve>(out, block.data);
         else if (block.label == encrypted_label)
-            decoded = decode_encrypted_pkcs8(out, block.data, password);
+            decoded = encrypted_pkcs8<Curve>(out, block.data, password);
         else
             continue;
 
@@ -243,14 +254,15 @@ bool decode_private_key(secret& out, const std::string& text,
 // encode
 // ----------------------------------------------------------------------------
 
-data_chunk encode_sec1(const secret& key) NOEXCEPT
+template <typename Curve>
+static data_chunk to_sec1(const typename Curve::secret_t& key) NOEXCEPT
 {
-    secp256r1::point_t point{};
-    if (!secp256r1::public_key(point, key))
+    typename Curve::point_t point{};
+    if (!Curve::public_key(point, key))
         return {};
 
     writer curve{};
-    curve.write_oid(oid::secp256r1);
+    curve.write_oid(curve_oid<Curve>());
 
     writer public_key{};
     public_key.write_bit_string(point);
@@ -266,15 +278,16 @@ data_chunk encode_sec1(const secret& key) NOEXCEPT
     return out.data();
 }
 
-data_chunk encode_pkcs8(const secret& key) NOEXCEPT
+template <typename Curve>
+static data_chunk to_pkcs8(const typename Curve::secret_t& key) NOEXCEPT
 {
-    const auto sec1 = encode_sec1(key);
+    const auto sec1 = to_sec1<Curve>(key);
     if (sec1.empty())
         return {};
 
     writer algorithm{};
     algorithm.write_oid(oid::ec_public_key);
-    algorithm.write_oid(oid::secp256r1);
+    algorithm.write_oid(curve_oid<Curve>());
 
     writer body{};
     body.write_unsigned(pkcs8_version);
@@ -286,13 +299,91 @@ data_chunk encode_pkcs8(const secret& key) NOEXCEPT
     return out.data();
 }
 
-std::string encode_private_key(const secret& key) NOEXCEPT
+template <typename Curve>
+static std::string to_private_key(const typename Curve::secret_t& key) NOEXCEPT
 {
-    const auto pkcs8 = encode_pkcs8(key);
+    const auto pkcs8 = to_pkcs8<Curve>(key);
     if (pkcs8.empty())
         return {};
 
     return encode_pem(std::string{ pkcs8_label }, pkcs8);
+}
+
+// public
+// ----------------------------------------------------------------------------
+
+bool decode_sec1(secret& out, const_byte_span der) NOEXCEPT
+{
+    return sec1<secp256r1>(out, der);
+}
+
+bool decode_sec1(secret384& out, const_byte_span der) NOEXCEPT
+{
+    return sec1<secp384r1>(out, der);
+}
+
+bool decode_pkcs8(secret& out, const_byte_span der) NOEXCEPT
+{
+    return pkcs8<secp256r1>(out, der);
+}
+
+bool decode_pkcs8(secret384& out, const_byte_span der) NOEXCEPT
+{
+    return pkcs8<secp384r1>(out, der);
+}
+
+bool decode_encrypted_pkcs8(secret& out, const_byte_span der,
+    const std::string& password) NOEXCEPT
+{
+    return encrypted_pkcs8<secp256r1>(out, der, password);
+}
+
+bool decode_encrypted_pkcs8(secret384& out, const_byte_span der,
+    const std::string& password) NOEXCEPT
+{
+    return encrypted_pkcs8<secp384r1>(out, der, password);
+}
+
+bool decode_private_key(secret& out, const std::string& text,
+    const std::string& password) NOEXCEPT
+{
+    return private_key<secp256r1>(out, text, password);
+}
+
+bool decode_private_key(secret384& out, const std::string& text,
+    const std::string& password) NOEXCEPT
+{
+    return private_key<secp384r1>(out, text, password);
+}
+
+data_chunk encode_sec1(const secret& key) NOEXCEPT
+{
+    return to_sec1<secp256r1>(key);
+}
+
+data_chunk encode_sec1(const secret384& key) NOEXCEPT
+{
+    return to_sec1<secp384r1>(key);
+}
+
+data_chunk encode_pkcs8(const secret& key) NOEXCEPT
+{
+    return to_pkcs8<secp256r1>(key);
+}
+
+data_chunk encode_pkcs8(const secret384& key) NOEXCEPT
+{
+    return to_pkcs8<secp384r1>(key);
+}
+
+std::string encode_private_key(const secret& key) NOEXCEPT
+{
+    return to_private_key<secp256r1>(key);
+}
+
+std::string encode_private_key(const secret384& key) NOEXCEPT
+{
+    return to_private_key<secp384r1>(key);
 }
 
 } // namespace x509

@@ -209,8 +209,8 @@
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\aes128_gcm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\aes_gcm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20.cpp" />
@@ -473,7 +473,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\aes128_gcm.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\aes_gcm.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\ecdh.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\ecdsa.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp" />

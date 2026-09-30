@@ -57,6 +57,7 @@ public:
     using point_t      = data_array<add1(two * size)>;
     using compressed_t = data_array<add1(size)>;
     using signature_t  = data_array<two * size>;
+    using shared_t     = data_array<size>;
 
     /// Keys.
     /// -----------------------------------------------------------------------
@@ -73,6 +74,14 @@ public:
     /// Convert between uncompressed and compressed (sec1) points.
     static bool compress(compressed_t& out, const point_t& point) NOEXCEPT;
     static bool decompress(point_t& out, const compressed_t& point) NOEXCEPT;
+
+    /// ECDH (sp800-56a).
+    /// -----------------------------------------------------------------------
+
+    /// The x coordinate of secret * point, false if the uncompressed (sec1)
+    /// point is not on the curve or the secret is not in range.
+    static bool agree(shared_t& out, const secret_t& secret,
+        const point_t& point) NOEXCEPT;
 
     /// ECDSA.
     /// -----------------------------------------------------------------------

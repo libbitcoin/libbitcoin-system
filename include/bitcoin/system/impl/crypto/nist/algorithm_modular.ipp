@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_NIST_ALGORITHM_MODULAR_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_NIST_ALGORITHM_MODULAR_IPP
 
-#include <algorithm>
-
 // Modular arithmetic
 // ============================================================================
 // Montgomery multiplication (coarsely integrated operand scanning), with
