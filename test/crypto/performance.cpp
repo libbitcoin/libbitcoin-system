@@ -19,6 +19,10 @@
 #include "../test.hpp"
 #include "../hash/performance/performance.hpp"
 
+#include <cmath>
+#include <random>
+#include <vector>
+
 #if defined(HAVE_PERFORMANCE_TESTS)
 
 using namespace performance;
@@ -113,6 +117,65 @@ BOOST_AUTO_TEST_CASE(performance__ecdsa__secp256r1_secp384r1)
 {
     report_ecdsa<secp256r1>("secp256r1");
     report_ecdsa<secp384r1>("secp384r1");
+}
+
+// Welch's t statistic of signing time, a fixed secret against random secrets
+// (dudect), samples above the pooled percentile cropped. |t| > 4.5 is a leak.
+template <typename Curve>
+static double sign_timing(const typename Curve::secret_t& fixed,
+    size_t samples, double percentile)
+{
+    const data_array<Curve::size> digest{ 42 };
+    std::mt19937_64 source{ 42 };
+    std::vector<bool> fixeds(samples);
+    std::vector<typename Curve::secret_t> secrets(samples);
+    for (size_t index{}; index < samples; ++index)
+    {
+        fixeds[index] = is_odd(source());
+        secrets[index] = fixeds[index] ? fixed : Curve::generate();
+    }
+
+    std::vector<double> times(samples);
+    typename Curve::signature_t signature{};
+    for (size_t index{}; index < samples; ++index)
+    {
+        const auto start = std::chrono::steady_clock::now();
+        Curve::sign(signature, secrets[index], digest);
+        const auto stop = std::chrono::steady_clock::now();
+        times[index] = duration(stop - start).count();
+    }
+
+    auto sorted = times;
+    const auto rank = to_floored_integer<ptrdiff_t>(percentile * samples);
+    const auto cut = std::next(sorted.begin(), rank);
+    std::nth_element(sorted.begin(), cut, sorted.end());
+
+    std_array<double, 2> count{}, mean{}, square{};
+    for (size_t index{}; index < samples; ++index)
+    {
+        if (times[index] > *cut)
+            continue;
+
+        // Welford's running mean and sum of squared deviations.
+        const auto group = to_int<size_t>(fixeds[index]);
+        const auto delta = times[index] - mean[group];
+        count[group] += 1.0;
+        mean[group] += delta / count[group];
+        square[group] += delta * (times[index] - mean[group]);
+    }
+
+    const auto error0 = square[0] / (count[0] - 1.0) / count[0];
+    const auto error1 = square[1] / (count[1] - 1.0) / count[1];
+    return (mean[0] - mean[1]) / std::sqrt(error0 + error1);
+}
+
+BOOST_AUTO_TEST_CASE(performance__ecdsa__secp256r1_sign__constant_time)
+{
+    secp256r1::secret_t fixed{};
+    fixed.back() = 1;
+    const auto t = sign_timing<secp256r1>(fixed, 40000, 0.9);
+    std::cout << "secp256r1_sign_welch_t: " << t << std::endl;
+    BOOST_CHECK_LT(std::abs(t), 4.5);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
