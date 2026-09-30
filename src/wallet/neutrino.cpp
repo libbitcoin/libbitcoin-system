@@ -108,7 +108,7 @@ bool compute_filter(data_chunk& out, const chain::view::block& block) NOEXCEPT
 
         auto stream = tx.get_outputs_stream();
         read::bytes::fast source{ stream };
-        for (size_t out{}; out < tx.outputs(); ++out)
+        for (size_t output{}; output < tx.outputs(); ++output)
         {
             // bip138: any "nil" items MUST NOT be included.
             // bip138: exclude all outputs that start with OP_RETURN.
