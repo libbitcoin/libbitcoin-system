@@ -51,6 +51,7 @@
         #define UNREACHABLE_CODE 4702
         #define NOT_INLINED 4714
         #define DISCARDING_NON_DISCARDABLE 4834
+        #define DEPRECATED_DECLARATION 4996
 
         // Global (see below).
         #define LOCAL_HIDES_GLOBAL 4459
