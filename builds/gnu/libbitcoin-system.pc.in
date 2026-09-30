@@ -48,9 +48,6 @@ Libs: \
     -lbitcoin-system \
     @boost_LDFLAGS@ \
     @boost_container_LIBS@ \
-    @boost_iostreams_LIBS@ \
     @boost_json_LIBS@ \
-    @boost_locale_LIBS@ \
     @boost_program_options_LIBS@ \
-    @boost_thread_LIBS@ \
     @boost_url_LIBS@

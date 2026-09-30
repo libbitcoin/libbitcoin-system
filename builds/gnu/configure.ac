@@ -647,25 +647,13 @@ AX_BOOST_CONTAINER
 AC_SUBST([boost_container_LIBS], [${BOOST_CONTAINER_LIB}])
 AC_MSG_NOTICE([boost_container_LIBS : ${boost_container_LIBS}])
 
-AX_BOOST_IOSTREAMS
-AC_SUBST([boost_iostreams_LIBS], [${BOOST_IOSTREAMS_LIB}])
-AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])
-
 AX_BOOST_JSON
 AC_SUBST([boost_json_LIBS], [${BOOST_JSON_LIB}])
 AC_MSG_NOTICE([boost_json_LIBS : ${boost_json_LIBS}])
 
-AX_BOOST_LOCALE
-AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
-AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
-
 AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
-
-AX_BOOST_THREAD
-AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
-AC_MSG_NOTICE([boost_thread_LIBS : ${boost_thread_LIBS}])
 
 AX_BOOST_URL
 AC_SUBST([boost_url_LIBS], [${BOOST_URL_LIB}])

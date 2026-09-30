@@ -111,11 +111,8 @@ endif()
 find_package( Boost 1.86.0 REQUIRED
   COMPONENTS
     container
-    iostreams
     json
-    locale
     program_options
-    thread
     url
     unit_test_framework
 )
@@ -477,11 +474,8 @@ target_include_directories( libbitcoin-system
 target_link_libraries( libbitcoin-system
   PUBLIC
     Boost::container
-    Boost::iostreams
     Boost::json
-    Boost::locale
     Boost::program_options
-    Boost::thread
     Boost::url
     $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
     $<$<BOOL:${with-ultrafast}>:secp256k1::fastsecp256k1>
