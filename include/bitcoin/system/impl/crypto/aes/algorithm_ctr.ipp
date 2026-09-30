@@ -163,7 +163,7 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
 
         // The counter prefix is constant, only its low order word changes.
         const auto keys = native_encrypt_keys<xWord>(schedule);
-        xblocks_t<lanes> xstream{};
+        alignas(xWord) xblocks_t<lanes> xstream{};
         xstream.fill(counter);
 
         do
@@ -180,25 +180,31 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
 
             native_encrypt(state, keys);
 
-            // Whole passes are applied in words, directly to out.
+            // Whole passes are applied directly to out, in bytes, as caller
+            // buffers are not word aligned. Word casts of them may be
+            // compiled to aligned loads and stores, which fault.
             if ((out.size() - byte) >= size)
             {
-                auto& to = array_cast<xWord>(unsafe_array_cast<uint8_t, size>(
-                    std::next(out.data(), byte)));
+                alignas(xWord) xblocks_t<lanes> keystream{};
+                auto& stream = array_cast<xWord>(keystream);
+                for (size_t word{}; word < native_words; ++word)
+                    f::store(stream[word], state[word]);
+
+                const auto& bytes = array_cast<uint8_t>(keystream);
+                auto& to = unsafe_array_cast<uint8_t, size>(
+                    std::next(out.data(), byte));
 
                 if (in.empty())
                 {
-                    for (size_t word{}; word < native_words; ++word)
-                        f::store(to[word], state[word]);
+                    to = bytes;
                 }
                 else
                 {
-                    const auto& from = array_cast<xWord>(unsafe_array_cast<
-                        uint8_t, size>(std::next(in.data(), byte)));
+                    const auto& from = unsafe_array_cast<uint8_t, size>(
+                        std::next(in.data(), byte));
 
-                    for (size_t word{}; word < native_words; ++word)
-                        f::store(to[word], f::xor_(state[word],
-                            f::load(from[word])));
+                    for (size_t index{}; index < size; ++index)
+                        to[index] = bit_xor(from[index], bytes[index]);
                 }
 
                 to_big<12>(counter, value +
