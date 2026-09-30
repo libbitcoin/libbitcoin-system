@@ -120,4 +120,68 @@ BOOST_AUTO_TEST_CASE(setting__values__mutated_store__current_value)
     BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "2" }));
 }
 
+// ungroup
+
+BOOST_AUTO_TEST_CASE(setting__ungroup__grouped__ungrouped)
+{
+    BOOST_REQUIRE_EQUAL(ungroup("1,000"), "1000");
+    BOOST_REQUIRE_EQUAL(ungroup("20,160"), "20160");
+    BOOST_REQUIRE_EQUAL(ungroup("950,000"), "950000");
+    BOOST_REQUIRE_EQUAL(ungroup("100,000,000"), "100000000");
+}
+
+BOOST_AUTO_TEST_CASE(setting__ungroup__signed__ungrouped)
+{
+    BOOST_REQUIRE_EQUAL(ungroup("-1,000"), "-1000");
+    BOOST_REQUIRE_EQUAL(ungroup("+1,000"), "1000");
+}
+
+BOOST_AUTO_TEST_CASE(setting__ungroup__not_grouped__unchanged)
+{
+    BOOST_REQUIRE_EQUAL(ungroup(""), "");
+    BOOST_REQUIRE_EQUAL(ungroup("950000"), "950000");
+    BOOST_REQUIRE_EQUAL(ungroup("-42"), "-42");
+    BOOST_REQUIRE_EQUAL(ungroup("text"), "text");
+}
+
+BOOST_AUTO_TEST_CASE(setting__ungroup__malformed__unchanged)
+{
+    BOOST_REQUIRE_EQUAL(ungroup(",000"), ",000");
+    BOOST_REQUIRE_EQUAL(ungroup("1,00"), "1,00");
+    BOOST_REQUIRE_EQUAL(ungroup("1,0000"), "1,0000");
+    BOOST_REQUIRE_EQUAL(ungroup("1000,000"), "1000,000");
+    BOOST_REQUIRE_EQUAL(ungroup("1,000,"), "1,000,");
+    BOOST_REQUIRE_EQUAL(ungroup("1,000x"), "1,000x");
+    BOOST_REQUIRE_EQUAL(ungroup("a,000"), "a,000");
+    BOOST_REQUIRE_EQUAL(ungroup("1,a00"), "1,a00");
+}
+
+// xparse
+
+BOOST_AUTO_TEST_CASE(setting__parse__grouped_integer__expected)
+{
+    uint32_t store{};
+    const std::unique_ptr<const setting_value<uint32_t>> instance{ setting(&store) };
+    boost::any value{};
+    instance->parse(value, { "950,000" }, true);
+    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 950000u);
+}
+
+BOOST_AUTO_TEST_CASE(setting__parse__malformed_grouping__throws)
+{
+    uint32_t store{};
+    const std::unique_ptr<const setting_value<uint32_t>> instance{ setting(&store) };
+    boost::any value{};
+    BOOST_REQUIRE_THROW(instance->parse(value, { "95,0000" }, true), boost::program_options::error);
+}
+
+BOOST_AUTO_TEST_CASE(setting__parse__grouped_string__unchanged)
+{
+    std::string store{};
+    const std::unique_ptr<const setting_value<std::string>> instance{ setting(&store) };
+    boost::any value{};
+    instance->parse(value, { "1,000" }, true);
+    BOOST_REQUIRE_EQUAL(boost::any_cast<std::string>(value), "1,000");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
