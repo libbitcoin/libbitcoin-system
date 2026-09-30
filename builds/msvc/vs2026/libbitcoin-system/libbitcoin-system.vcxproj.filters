@@ -504,7 +504,7 @@
     <ClCompile Include="..\..\..\..\src\config\version.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\aes128_gcm.cpp">
+    <ClCompile Include="..\..\..\..\src\crypto\aes_gcm.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\chacha20.cpp">
@@ -1148,9 +1148,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes128_gcm.hpp">
-      <Filter>include\bitcoin\system\crypto</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes\aes.hpp">
       <Filter>include\bitcoin\system\crypto\aes</Filter>
     </ClInclude>
@@ -1159,6 +1156,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes\ghash.hpp">
       <Filter>include\bitcoin\system\crypto\aes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes_gcm.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\algorithms.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
@@ -1985,6 +1985,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\ghash.ipp">
       <Filter>include\bitcoin\system\impl\crypto\aes</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes_gcm.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_der.ipp">
       <Filter>include\bitcoin\system\impl\crypto\nist</Filter>

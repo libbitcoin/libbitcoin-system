@@ -114,7 +114,7 @@
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/config/version.hpp>
-#include <bitcoin/system/crypto/aes128_gcm.hpp>
+#include <bitcoin/system/crypto/aes_gcm.hpp>
 #include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/crypto/chacha20.hpp>
 #include <bitcoin/system/crypto/chacha20_poly1305.hpp>

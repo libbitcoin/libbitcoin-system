@@ -327,10 +327,10 @@
     <ClCompile Include="..\..\..\..\test\crypto\aes.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\aes128_gcm.cpp">
+    <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
+    <ClCompile Include="..\..\..\..\test\crypto\aes_gcm.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\chacha20.cpp">
@@ -977,7 +977,10 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\crypto\aes128_gcm.hpp">
+    <ClInclude Include="..\..\..\..\test\crypto\aes_gcm.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\ecdh.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\crypto\ecdsa.hpp">
