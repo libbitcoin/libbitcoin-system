@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include "ecdh.hpp"
 #include "ecdsa.hpp"
 
 // datatracker.ietf.org/doc/html/rfc6979 (A.2.5, A.2.6)
@@ -199,6 +200,48 @@ BOOST_AUTO_TEST_CASE(nist__secp256r1_decode__wycheproof_invalid__not_verified)
     }
 }
 
+BOOST_AUTO_TEST_CASE(nist__secp256r1_agree__wycheproof_valid__expected)
+{
+    for (const auto& vector: secp256r1_ecdh_valid_vectors)
+    {
+        secp256r1::shared_t shared{};
+        BOOST_REQUIRE_MESSAGE(secp256r1::agree(shared, vector.secret, vector.point), vector.id);
+        BOOST_REQUIRE_MESSAGE(shared == vector.shared, vector.id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp256r1_agree__wycheproof_invalid__false)
+{
+    for (const auto& vector: secp256r1_ecdh_invalid_vectors)
+    {
+        secp256r1::shared_t shared{};
+        BOOST_REQUIRE_MESSAGE(!secp256r1::agree(shared, vector.secret, vector.point), vector.id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp256r1_agree__zero_secret__false)
+{
+    constexpr secp256r1::secret_t zero{};
+    secp256r1::shared_t shared{};
+    BOOST_REQUIRE(!secp256r1::agree(shared, zero, p256_generator));
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp256r1_agree__generated_pair__same_shared)
+{
+    const auto secret1 = secp256r1::generate();
+    const auto secret2 = secp256r1::generate();
+    secp256r1::point_t point1{};
+    secp256r1::point_t point2{};
+    BOOST_REQUIRE(secp256r1::public_key(point1, secret1));
+    BOOST_REQUIRE(secp256r1::public_key(point2, secret2));
+
+    secp256r1::shared_t shared1{};
+    secp256r1::shared_t shared2{};
+    BOOST_REQUIRE(secp256r1::agree(shared1, secret1, point2));
+    BOOST_REQUIRE(secp256r1::agree(shared2, secret2, point1));
+    BOOST_REQUIRE_EQUAL(shared1, shared2);
+}
+
 // p-384
 
 constexpr auto p384_secret = base16_array("6b9d3dad2e1b8c1c05b19875b6659f4de23c3b667bf297ba9aa47740787137d896d5724e4c70a825f872c9ea60d2edf5");
@@ -291,6 +334,48 @@ BOOST_AUTO_TEST_CASE(nist__secp384r1_decode__wycheproof_sha256_invalid__not_veri
         secp384r1::decode(signature, vector.signature);
         BOOST_REQUIRE_MESSAGE(!secp384r1::verify(signature, vector.key, sha256_hash(vector.message)), vector.id);
     }
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp384r1_agree__wycheproof_valid__expected)
+{
+    for (const auto& vector: secp384r1_ecdh_valid_vectors)
+    {
+        secp384r1::shared_t shared{};
+        BOOST_REQUIRE_MESSAGE(secp384r1::agree(shared, vector.secret, vector.point), vector.id);
+        BOOST_REQUIRE_MESSAGE(shared == vector.shared, vector.id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp384r1_agree__wycheproof_invalid__false)
+{
+    for (const auto& vector: secp384r1_ecdh_invalid_vectors)
+    {
+        secp384r1::shared_t shared{};
+        BOOST_REQUIRE_MESSAGE(!secp384r1::agree(shared, vector.secret, vector.point), vector.id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp384r1_agree__zero_secret__false)
+{
+    constexpr secp384r1::secret_t zero{};
+    secp384r1::shared_t shared{};
+    BOOST_REQUIRE(!secp384r1::agree(shared, zero, p384_generator));
+}
+
+BOOST_AUTO_TEST_CASE(nist__secp384r1_agree__generated_pair__same_shared)
+{
+    const auto secret1 = secp384r1::generate();
+    const auto secret2 = secp384r1::generate();
+    secp384r1::point_t point1{};
+    secp384r1::point_t point2{};
+    BOOST_REQUIRE(secp384r1::public_key(point1, secret1));
+    BOOST_REQUIRE(secp384r1::public_key(point2, secret2));
+
+    secp384r1::shared_t shared1{};
+    secp384r1::shared_t shared2{};
+    BOOST_REQUIRE(secp384r1::agree(shared1, secret1, point2));
+    BOOST_REQUIRE(secp384r1::agree(shared2, secret2, point1));
+    BOOST_REQUIRE_EQUAL(shared1, shared2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

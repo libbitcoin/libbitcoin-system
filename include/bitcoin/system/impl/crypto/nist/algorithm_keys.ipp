@@ -101,6 +101,27 @@ decompress(point_t& out, const compressed_t& point) NOEXCEPT
     return true;
 }
 
+TEMPLATE
+bool CLASS::
+agree(shared_t& out, const secret_t& secret, const point_t& point) NOEXCEPT
+{
+    projective_t q{};
+    if (!parse(q, point))
+        return false;
+
+    auto d = to_limbs(secret);
+    if (!is_scalar(d))
+        return false;
+
+    limbs_t x{}, y{};
+    const auto valid = to_affine(x, y, multiply(make_table(q), d));
+    out = to_bytes(x);
+    wipe(d);
+    wipe(x);
+    wipe(y);
+    return valid;
+}
+
 } // namespace nist
 } // namespace system
 } // namespace libbitcoin
