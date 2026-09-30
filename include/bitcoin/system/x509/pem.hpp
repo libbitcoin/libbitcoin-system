@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_X509_PEM_HPP
 #define LIBBITCOIN_SYSTEM_X509_PEM_HPP
 
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

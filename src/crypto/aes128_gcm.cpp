@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/crypto/aes128_gcm.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/crypto/aes/ghash.hpp>
 #include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/data/data.hpp>

@@ -21,7 +21,6 @@
 
 #include <cmath>
 #include <random>
-#include <vector>
 
 #if defined(HAVE_PERFORMANCE_TESTS)
 

@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/x509/pem.hpp>
 
-#include <string>
-#include <string_view>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/radix/radix.hpp>

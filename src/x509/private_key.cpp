@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/x509/private_key.hpp>
 
-#include <algorithm>
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

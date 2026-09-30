@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/x509/verify.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>

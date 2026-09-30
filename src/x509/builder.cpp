@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/x509/builder.hpp>
 
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

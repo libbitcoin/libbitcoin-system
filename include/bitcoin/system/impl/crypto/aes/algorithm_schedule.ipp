@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_ALGORITHM_SCHEDULE_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_AES_ALGORITHM_SCHEDULE_IPP
 
-#include <algorithm>
-#include <iterator>
-
 // Key schedule
 // ============================================================================
 // Words are little-endian, so RotWord is a right rotation by one byte and

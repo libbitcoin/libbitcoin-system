@@ -20,7 +20,6 @@
 
 #include <locale>
 #include <sstream>
-#include <string>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

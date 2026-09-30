@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES_ALGORITHM_CTR_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_AES_ALGORITHM_CTR_IPP
 
-#include <algorithm>
-
 // Modes
 // ============================================================================
 // Counter blocks are independent, so are ciphered concurrently, widest words
