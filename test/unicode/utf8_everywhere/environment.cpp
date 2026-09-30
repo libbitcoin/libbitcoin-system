@@ -17,7 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include <cstdio>
 #include <cstring>
+#include <sstream>
 
 BOOST_AUTO_TEST_SUITE(utf8_environment_tests)
 
@@ -354,6 +356,31 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__null_terminati
     auto argv_terminator = narrow_args[argc];
     BOOST_REQUIRE_EQUAL(argv_terminator, (char*)nullptr);
     free_environment(narrow_args);
+}
+
+// call_utf8_main
+
+static int format_main(int, char*[])
+{
+    std::ostringstream out{};
+    out << 8333 << '/' << 1.5;
+
+    char text[8]{};
+    std::snprintf(text, sizeof(text), "%.1f", 1.5);
+    const auto stream = out.str() == "8333/1.5";
+    const auto print = std::string{ text } == "1.5";
+    return stream && print ? 0 : 1;
+}
+
+BOOST_AUTO_TEST_CASE(utf8_environment__call_utf8_main__numbers__classic_format)
+{
+    std_vector<const wchar_t*> wide_args = { L"ascii", nullptr };
+    auto argv = const_cast<wchar_t**>(&wide_args[0]);
+    const auto previous = std::locale();
+    const auto result = call_utf8_main(1, argv, &format_main);
+    std::locale::global(previous);
+
+    BOOST_REQUIRE_EQUAL(result, 0);
 }
 
 #endif // HAVE_MSC
