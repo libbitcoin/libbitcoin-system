@@ -28,18 +28,19 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 /// A view of a wire-encoded output (value and prefixed script).
-class BC_API output_view final
+class BC_API output final
 {
 public:
-    DEFAULT_COPY_MOVE(output_view);
+    DEFAULT_COPY_MOVE(output);
 
     /// Default view is invalid.
-    output_view() NOEXCEPT;
+    output() NOEXCEPT;
 
     /// Data must point to the first byte of a wire-encoded output.
-    output_view(const uint8_t* data) NOEXCEPT;
+    output(const uint8_t* data) NOEXCEPT;
 
     /// Serialization.
     void to_data(writer& sink) const NOEXCEPT;
@@ -68,8 +69,9 @@ private:
     mutable chain::script::cptr ptr_{};
 };
 
-using output_views = std::vector<output_view>;
+using outputs = std::vector<output>;
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

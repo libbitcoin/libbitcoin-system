@@ -28,7 +28,7 @@ static const script op_return_script(base16_chunk("6a0474657374"), false);
 
 BOOST_AUTO_TEST_CASE(output_view__construct__default__invalid)
 {
-    const output_view view{};
+    const chain::view::output view{};
     BOOST_CHECK(!view.is_valid());
     BOOST_CHECK(is_null(view.data()));
 }
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(output_view__construct__p2pkh__expected)
 {
     const output expected{ 42, p2pkh_script };
     const auto data = expected.to_data();
-    const output_view view{ data.data() };
+    const chain::view::output view{ data.data() };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK_EQUAL(view.value(), 42u);
     BOOST_CHECK_EQUAL(view.script_size(), p2pkh_script.serialized_size(false));
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(output_view__to_data__multisig__round_trips)
 {
     const output expected{ 0xffffffffffffffff, multisig_script };
     const auto data = expected.to_data();
-    const output_view view{ data.data() };
+    const chain::view::output view{ data.data() };
     data_chunk out(view.serialized_size());
     stream::out::fast ostream(out);
     write::bytes::fast sink(ostream);
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(output_view__is_pay_op_return_pattern__op_return__true)
 {
     const output expected{ 0, op_return_script };
     const auto data = expected.to_data();
-    const output_view view{ data.data() };
+    const chain::view::output view{ data.data() };
     BOOST_CHECK(view.is_pay_op_return_pattern());
 }
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(output_view__is_pay_op_return_pattern__empty__false)
 {
     const output expected{ 0, script{} };
     const auto data = expected.to_data();
-    const output_view view{ data.data() };
+    const chain::view::output view{ data.data() };
     BOOST_CHECK_EQUAL(view.script_size(), 0u);
     BOOST_CHECK(!view.is_pay_op_return_pattern());
 }
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(output_view__signature_operations__multisig__matches_output
 {
     const output expected{ 1, multisig_script };
     const auto data = expected.to_data();
-    const output_view view{ data.data() };
+    const chain::view::output view{ data.data() };
     BOOST_CHECK_EQUAL(view.signature_operations(false), expected.signature_operations(false));
     BOOST_CHECK_EQUAL(view.signature_operations(true), expected.signature_operations(true));
     BOOST_CHECK_EQUAL(view.signature_operations(false), 20u);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(output_view__signature_operations__p2pkh__matches_output)
 {
     const output expected{ 1, p2pkh_script };
     const auto data = expected.to_data();
-    const output_view view{ data.data() };
+    const chain::view::output view{ data.data() };
     BOOST_CHECK_EQUAL(view.signature_operations(false), expected.signature_operations(false));
     BOOST_CHECK_EQUAL(view.signature_operations(true), expected.signature_operations(true));
     BOOST_CHECK_EQUAL(view.signature_operations(false), 1u);

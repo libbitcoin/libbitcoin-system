@@ -32,7 +32,7 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-/// Transaction model traits (chain::transaction or chain::transaction_view).
+/// Transaction model traits (chain::transaction or chain::view::transaction).
 template <typename Tx>
 struct transaction_traits
 {
@@ -51,10 +51,10 @@ struct transaction_traits<chain::transaction>
 };
 
 template <>
-struct transaction_traits<chain::transaction_view>
+struct transaction_traits<chain::view::transaction>
 {
-    using input_t = chain::input_view;
-    using input_iterator = chain::input_views::const_iterator;
+    using input_t = chain::view::input;
+    using input_iterator = chain::view::inputs::const_iterator;
 
     static INLINE const input_t& at(const input_iterator& it) NOEXCEPT
     {

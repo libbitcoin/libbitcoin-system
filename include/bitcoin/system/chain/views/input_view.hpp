@@ -29,19 +29,20 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 /// A view of a wire-encoded input and its witness within a block buffer.
-class BC_API input_view final
+class BC_API input final
 {
 public:
-    DEFAULT_COPY_MOVE(input_view);
+    DEFAULT_COPY_MOVE(input);
 
     /// Default view is invalid.
-    input_view() NOEXCEPT;
+    input() NOEXCEPT;
 
     /// Data must point to the first byte of a wire-encoded input (point).
     /// Witness must point to the prefixed witness stack of the input (or null).
-    input_view(const uint8_t* data, const uint8_t* witness,
+    input(const uint8_t* data, const uint8_t* witness,
         size_t witness_size) NOEXCEPT;
 
     /// Properties.
@@ -66,7 +67,7 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
     /// Public mutable prevout, populated by block view (null if not).
-    mutable const output_view* prevout{};
+    mutable const output* prevout{};
 
 private:
     const uint8_t* data_{};
@@ -78,8 +79,9 @@ private:
     mutable chain::witness::cptr witness_ptr_{};
 };
 
-using input_views = std::vector<input_view>;
+using inputs = std::vector<input>;
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

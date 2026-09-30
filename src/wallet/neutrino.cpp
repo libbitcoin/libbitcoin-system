@@ -86,7 +86,7 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
     return construct_filter(out, key, scripts);
 }
 
-bool compute_filter(data_chunk& out, const chain::block_view& block) NOEXCEPT
+bool compute_filter(data_chunk& out, const chain::view::block& block) NOEXCEPT
 {
     const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));

@@ -29,17 +29,18 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 constexpr auto value_size = sizeof(uint64_t);
 
 // constructors
 // ----------------------------------------------------------------------------
 
-output_view::output_view() NOEXCEPT
+output::output() NOEXCEPT
 {
 }
 
-output_view::output_view(const uint8_t* data) NOEXCEPT
+output::output(const uint8_t* data) NOEXCEPT
   : data_{ data }
 {
     const auto* position = std::next(data, value_size);
@@ -50,7 +51,7 @@ output_view::output_view(const uint8_t* data) NOEXCEPT
 // serialization
 // ----------------------------------------------------------------------------
 
-void output_view::to_data(writer& sink) const NOEXCEPT
+void output::to_data(writer& sink) const NOEXCEPT
 {
     sink.write_bytes(data_, serialized_size());
 }
@@ -58,45 +59,45 @@ void output_view::to_data(writer& sink) const NOEXCEPT
 // properties
 // ----------------------------------------------------------------------------
 
-bool output_view::is_valid() const NOEXCEPT
+bool output::is_valid() const NOEXCEPT
 {
     return !is_null(data_);
 }
 
-uint64_t output_view::value() const NOEXCEPT
+uint64_t output::value() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return unsafe_from_little_endian<uint64_t>(data_);
 }
 
-const uint8_t* output_view::data() const NOEXCEPT
+const uint8_t* output::data() const NOEXCEPT
 {
     return data_;
 }
 
-data_slice output_view::script_data() const NOEXCEPT
+data_slice output::script_data() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return { script_, std::next(script_, size_) };
 }
 
-size_t output_view::script_size() const NOEXCEPT
+size_t output::script_size() const NOEXCEPT
 {
     return size_;
 }
 
-size_t output_view::serialized_size() const NOEXCEPT
+size_t output::serialized_size() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return std::distance(data_, script_) + size_;
 }
 
-const chain::script& output_view::script() const NOEXCEPT
+const chain::script& output::script() const NOEXCEPT
 {
     return *script_ptr();
 }
 
-const chain::script::cptr& output_view::script_ptr() const NOEXCEPT
+const chain::script::cptr& output::script_ptr() const NOEXCEPT
 {
     if (!ptr_)
         ptr_ = to_shared<chain::script>(script_data(), false);
@@ -107,7 +108,7 @@ const chain::script::cptr& output_view::script_ptr() const NOEXCEPT
 // methods
 // ----------------------------------------------------------------------------
 
-hash_digest output_view::hash() const NOEXCEPT
+hash_digest output::hash() const NOEXCEPT
 {
     hash_digest out{};
     stream::out::fast stream{ out };
@@ -117,13 +118,13 @@ hash_digest output_view::hash() const NOEXCEPT
     return out;
 }
 
-bool output_view::is_pay_op_return_pattern() const NOEXCEPT
+bool output::is_pay_op_return_pattern() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return !is_zero(size_) && (*script_ == to_value(opcode::op_return));
 }
 
-size_t output_view::signature_operations(bool bip141) const NOEXCEPT
+size_t output::signature_operations(bool bip141) const NOEXCEPT
 {
     const auto factor = bip141 ? heavy_sigops_factor : one;
     stream::in::fast istream{ script_data() };
@@ -131,6 +132,7 @@ size_t output_view::signature_operations(bool bip141) const NOEXCEPT
     return chain::script::signature_operations(source, false) * factor;
 }
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

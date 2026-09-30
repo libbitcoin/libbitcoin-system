@@ -31,14 +31,15 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
-class BC_API block_view
+class BC_API block
 {
 public:
-    DEFAULT_COPY_MOVE(block_view);
+    DEFAULT_COPY_MOVE(block);
 
     /// Segregation is managed and suppressed when witness is false.
-    block_view(data_chunk&& block_buffer, bool witness) NOEXCEPT;
+    block(data_chunk&& block_buffer, bool witness) NOEXCEPT;
 
     /// Serialization.
     data_chunk to_data(bool witness) const NOEXCEPT;
@@ -51,13 +52,13 @@ public:
     hash_digest hash() const NOEXCEPT;
     size_t transactions() const NOEXCEPT;
     size_t spends() const NOEXCEPT;
-    const transaction_views& views() const NOEXCEPT;
+    const view::transactions& views() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
     /// Populated properties (population required).
     bool is_populated() const NOEXCEPT;
-    const input_views& inputs() const NOEXCEPT;
-    const output_views& prevouts() const NOEXCEPT;
+    const view::inputs& inputs() const NOEXCEPT;
+    const view::outputs& prevouts() const NOEXCEPT;
 
     /// Identity.
     code identify() const NOEXCEPT;
@@ -109,11 +110,11 @@ protected:
         const signatures& capture) const NOEXCEPT;
 
 private:
-    static bool is_coinbase(const transaction_view& tx) NOEXCEPT;
+    static bool is_coinbase(const transaction& tx) NOEXCEPT;
     code malleated_or(const code& ec) const NOEXCEPT;
 
     // Malleation.
-    static bool is_malleable64(const transaction_views& txs) NOEXCEPT;
+    static bool is_malleable64(const view::transactions& txs) NOEXCEPT;
     bool is_malleated32() const NOEXCEPT;
     bool is_malleated64() const NOEXCEPT;
     size_t malleated32_size() const NOEXCEPT;
@@ -135,14 +136,15 @@ private:
 
     bool witness_;
     chunk_cptr buffer_;
-    transaction_views txs_{};
+    view::transactions txs_{};
 
     // Populated (shared by copies).
     chunk_cptr prevout_buffer_{};
-    std::shared_ptr<input_views> inputs_{};
-    std::shared_ptr<output_views> prevouts_{};
+    std::shared_ptr<view::inputs> inputs_{};
+    std::shared_ptr<view::outputs> prevouts_{};
 };
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

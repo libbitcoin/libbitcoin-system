@@ -34,17 +34,18 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
-class BC_API transaction_view final
+class BC_API transaction final
 {
 public:
-    DEFAULT_COPY_MOVE(transaction_view);
+    DEFAULT_COPY_MOVE(transaction);
 
-    using input_iterator = input_views::const_iterator;
+    using input_iterator = view::inputs::const_iterator;
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
-    transaction_view(reader& source, const data_chunk& block_buffer,
+    transaction(reader& source, const data_chunk& block_buffer,
         bool coinbase, bool witness) NOEXCEPT;
 
     /// Serialization.
@@ -90,7 +91,7 @@ public:
     input_iterator inputs_begin() const NOEXCEPT;
     input_iterator inputs_end() const NOEXCEPT;
     input_iterator input_at(uint32_t index) const NOEXCEPT;
-    output_view output_at(uint32_t index) const NOEXCEPT;
+    output output_at(uint32_t index) const NOEXCEPT;
 
     /// Computed properties.
     uint64_t fee() const NOEXCEPT;
@@ -113,7 +114,7 @@ public:
         uint32_t flags) const NOEXCEPT;
 
 protected:
-    friend class block_view;
+    friend class block;
 
     /// Population (block view).
     void set_inputs(const input_iterator& begin,
@@ -254,8 +255,9 @@ private:
     mutable std::shared_ptr<only_cache> v1_only_cache_{};
 };
 
-using transaction_views = std::vector<transaction_view>;
+using transactions = std::vector<transaction>;
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
