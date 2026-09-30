@@ -131,7 +131,7 @@
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
 /// Disable msc/x32 due to high level of rejection (warning volume).
-#if defined(HAVE_MSC) && !defined(HAVE_X32)
+#if defined(HAVE_MSC) && !defined(HAVE_X32) && defined(NDEBUG)
     #define INLINE __forceinline
 #elif defined(HAVE_GNUC) || defined(HAVE_CLANG)
     #define INLINE __attribute__((always_inline)) inline
