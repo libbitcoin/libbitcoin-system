@@ -36,13 +36,14 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 using namespace system;
 
 // constructor
 // ----------------------------------------------------------------------------
 
-block_view::block_view(data_chunk&& block_buffer, bool witness) NOEXCEPT
+block::block(data_chunk&& block_buffer, bool witness) NOEXCEPT
   : witness_{ witness }, buffer_{ to_shared(std::move(block_buffer)) }
 {
     stream::in::fast istream(*buffer_);
@@ -66,7 +67,7 @@ block_view::block_view(data_chunk&& block_buffer, bool witness) NOEXCEPT
 // serialization
 // ----------------------------------------------------------------------------
 
-data_chunk block_view::to_data(bool witness) const NOEXCEPT
+data_chunk block::to_data(bool witness) const NOEXCEPT
 {
     data_chunk data(serialized_size(witness));
     stream::out::fast ostream(data);
@@ -75,13 +76,13 @@ data_chunk block_view::to_data(bool witness) const NOEXCEPT
     return data;
 }
 
-void block_view::to_data(std::ostream& stream, bool witness) const NOEXCEPT
+void block::to_data(std::ostream& stream, bool witness) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out, witness);
 }
 
-void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
+void block::to_data(writer& sink, bool witness) const NOEXCEPT
 {
     // The witnessed form is the original buffer.
     if (witness)
@@ -100,12 +101,12 @@ void block_view::to_data(writer& sink, bool witness) const NOEXCEPT
 // public
 // ----------------------------------------------------------------------------
 
-bool block_view::is_valid() const NOEXCEPT
+bool block::is_valid() const NOEXCEPT
 {
     return !txs_.empty();
 }
 
-bool block_view::is_segregated() const NOEXCEPT
+bool block::is_segregated() const NOEXCEPT
 {
     return witness_ && std::any_of(txs_.begin(), txs_.end(),
         [](const auto& tx) NOEXCEPT
@@ -114,17 +115,17 @@ bool block_view::is_segregated() const NOEXCEPT
         });
 }
 
-hash_digest block_view::hash() const NOEXCEPT
+hash_digest block::hash() const NOEXCEPT
 {
     return bitcoin_hash(header::serialized_size(), buffer_->data());
 }
 
-size_t block_view::transactions() const NOEXCEPT
+size_t block::transactions() const NOEXCEPT
 {
     return txs_.size();
 }
 
-size_t block_view::spends() const NOEXCEPT
+size_t block::spends() const NOEXCEPT
 {
     // Overflow returns max_size_t.
     const auto sum = [](size_t total, const auto& tx) NOEXCEPT
@@ -136,29 +137,29 @@ size_t block_view::spends() const NOEXCEPT
         std::accumulate(std::next(txs_.begin()), txs_.end(), zero, sum);
 }
 
-bool block_view::is_populated() const NOEXCEPT
+bool block::is_populated() const NOEXCEPT
 {
     return !is_null(inputs_);
 }
 
-const input_views& block_view::inputs() const NOEXCEPT
+const view::inputs& block::inputs() const NOEXCEPT
 {
-    static const input_views empty{};
+    static const view::inputs empty{};
     return is_populated() ? *inputs_ : empty;
 }
 
-const output_views& block_view::prevouts() const NOEXCEPT
+const view::outputs& block::prevouts() const NOEXCEPT
 {
-    static const output_views empty{};
+    static const view::outputs empty{};
     return is_populated() ? *prevouts_ : empty;
 }
 
-const transaction_views& block_view::views() const NOEXCEPT
+const view::transactions& block::views() const NOEXCEPT
 {
     return txs_;
 }
 
-size_t block_view::serialized_size(bool witness) const NOEXCEPT
+size_t block::serialized_size(bool witness) const NOEXCEPT
 {
     if (witness)
         return buffer_->size();
@@ -170,7 +171,7 @@ size_t block_view::serialized_size(bool witness) const NOEXCEPT
     return total;
 }
 
-code block_view::identify() const NOEXCEPT
+code block::identify() const NOEXCEPT
 {
     if (txs_.empty())
         return error::empty_block;
@@ -181,7 +182,7 @@ code block_view::identify() const NOEXCEPT
     return error::block_success;
 }
 
-code block_view::identify(const context& ctx) const NOEXCEPT
+code block::identify(const context& ctx) const NOEXCEPT
 {
     const auto invalid = ctx.is_enabled(bip141_rule) ?
         is_invalid_witness_commitment() : is_segregated();
@@ -192,17 +193,17 @@ code block_view::identify(const context& ctx) const NOEXCEPT
 // protected
 // ----------------------------------------------------------------------------
 
-bool block_view::is_malleated() const NOEXCEPT
+bool block::is_malleated() const NOEXCEPT
 {
     return is_malleated64() || is_malleated32();
 }
 
-bool block_view::is_invalid_merkle_root() const NOEXCEPT
+bool block::is_invalid_merkle_root() const NOEXCEPT
 {
     return generate_merkle_root(false) != header_merkle_root();
 }
 
-bool block_view::is_invalid_witness_commitment() const NOEXCEPT
+bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
     if (txs_.empty())
         return false;
@@ -223,7 +224,7 @@ bool block_view::is_invalid_witness_commitment() const NOEXCEPT
 // private
 
 // static
-bool block_view::is_malleable64(const transaction_views& txs) NOEXCEPT
+bool block::is_malleable64(const view::transactions& txs) NOEXCEPT
 {
     return !txs.empty() && std::all_of(txs.begin(), txs.end(),
         [](const auto& tx) NOEXCEPT
@@ -232,19 +233,19 @@ bool block_view::is_malleable64(const transaction_views& txs) NOEXCEPT
         });
 }
 
-bool block_view::is_malleated32() const NOEXCEPT
+bool block::is_malleated32() const NOEXCEPT
 {
     return !is_zero(malleated32_size());
 }
 
-bool block_view::is_malleated64() const NOEXCEPT
+bool block::is_malleated64() const NOEXCEPT
 {
     // First tx check is not sufficient, null point must be checked.
     return !txs_.empty() && !txs_.front().is_null_point() &&
         is_malleable64(txs_);
 }
 
-size_t block_view::malleated32_size() const NOEXCEPT
+size_t block::malleated32_size() const NOEXCEPT
 {
     const auto malleated = txs_.size();
     for (auto width = one; width <= to_half(malleated); width *= two)
@@ -258,7 +259,7 @@ size_t block_view::malleated32_size() const NOEXCEPT
 // some depth its node count is even and above two and its last two nodes are
 // equal: the shorter set has an odd count at that depth and clones its last
 // node, which the longer set holds. This is the test at width depth.
-bool block_view::is_malleated32(size_t width) const NOEXCEPT
+bool block::is_malleated32(size_t width) const NOEXCEPT
 {
     // Caller bounds width.
     BC_ASSERT(is_power2(width) && width <= to_half(txs_.size()));
@@ -272,7 +273,7 @@ bool block_view::is_malleated32(size_t width) const NOEXCEPT
     const auto prior = last - width;
     const auto leaves = malleated - last;
     for (size_t at{}; at < width; ++at)
-        if (txs_[last + block::merkle_index(at, leaves, width)].hash(false) !=
+        if (txs_[last + chain::block::merkle_index(at, leaves, width)].hash(false) !=
             txs_[prior + at].hash(false))
             return false;
 
@@ -283,7 +284,7 @@ bool block_view::is_malleated32(size_t width) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // private
 
-hash_digest block_view::header_merkle_root() const NOEXCEPT
+hash_digest block::header_merkle_root() const NOEXCEPT
 {
     BC_ASSERT(!txs_.empty() && !buffer_->empty());
 
@@ -292,7 +293,7 @@ hash_digest block_view::header_merkle_root() const NOEXCEPT
     return unsafe_array_cast<uint8_t, hash_size>(start);
 }
 
-hashes block_view::transaction_hashes(bool witness) const NOEXCEPT
+hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
     hashes hashes{};
     hashes.reserve(txs_.size());
@@ -302,7 +303,7 @@ hashes block_view::transaction_hashes(bool witness) const NOEXCEPT
     return hashes;
 }
 
-hash_digest block_view::generate_merkle_root(bool witness) const NOEXCEPT
+hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
     return sha256::merkle_root(transaction_hashes(witness));
 }
@@ -311,12 +312,12 @@ hash_digest block_view::generate_merkle_root(bool witness) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // private
 
-bool block_view::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
+bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
 {
     return !txs_.empty() && txs_.front().get_witness_commitment(commitment);
 }
 
-bool block_view::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
+bool block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
 {
     return !txs_.empty() && txs_.front().get_witness_reservation(reservation);
 }
@@ -324,7 +325,7 @@ bool block_view::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
 // population
 // ----------------------------------------------------------------------------
 
-code block_view::populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT
+code block::populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT
 {
     if (txs_.empty())
         return error::empty_block;
@@ -337,7 +338,7 @@ code block_view::populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT
 }
 
 // private
-void block_view::populate_inputs() NOEXCEPT
+void block::populate_inputs() NOEXCEPT
 {
     constexpr auto point_size = chain::point::serialized_size();
     constexpr auto sequence_size = sizeof(uint32_t);
@@ -348,7 +349,7 @@ void block_view::populate_inputs() NOEXCEPT
         return ceilinged_add(total, tx.inputs());
     };
 
-    inputs_ = to_shared<input_views>();
+    inputs_ = to_shared<view::inputs>();
     inputs_->reserve(std::accumulate(txs_.begin(), txs_.end(), zero, sum));
 
     for (const auto& tx: txs_)
@@ -372,7 +373,7 @@ void block_view::populate_inputs() NOEXCEPT
             if (segregated)
             {
                 witness = std::next(witnesses, wsource.get_read_position());
-                witness_size = transaction_view::read_witness_size(wsource);
+                witness_size = transaction::read_witness_size(wsource);
             }
 
             inputs_->emplace_back(input, witness, witness_size);
@@ -390,10 +391,10 @@ void block_view::populate_inputs() NOEXCEPT
 }
 
 // private
-bool block_view::populate_prevouts(data_chunk&& prevouts) NOEXCEPT
+bool block::populate_prevouts(data_chunk&& prevouts) NOEXCEPT
 {
     prevout_buffer_ = to_shared(std::move(prevouts));
-    prevouts_ = to_shared<output_views>();
+    prevouts_ = to_shared<view::outputs>();
     prevouts_->reserve(spends());
 
     // The vector is not reallocated, so its element addresses are stable.
@@ -416,7 +417,7 @@ bool block_view::populate_prevouts(data_chunk&& prevouts) NOEXCEPT
 }
 
 // private
-code block_view::populate_internal(const context& ctx) const NOEXCEPT
+code block::populate_internal(const context& ctx) const NOEXCEPT
 {
     const auto& self = txs_.front().hash(false);
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
@@ -432,7 +433,7 @@ code block_view::populate_internal(const context& ctx) const NOEXCEPT
             if (in->point_hash() == self)
                 return error::coinbase_maturity;
 
-            if (!relative || !input::is_relative_locktime_applied(in->sequence()))
+            if (!relative || !chain::input::is_relative_locktime_applied(in->sequence()))
                 continue;
 
             if (hashes.empty())
@@ -441,7 +442,7 @@ code block_view::populate_internal(const context& ctx) const NOEXCEPT
 
             // An internal spend has zero age, so any relative lock applies.
             if (hashes.contains(in->point_hash()) &&
-                input::is_relative_locked(in->sequence(), zero, zero, zero, zero))
+                chain::input::is_relative_locked(in->sequence(), zero, zero, zero, zero))
                 return error::relative_time_locked;
         }
     }
@@ -452,7 +453,7 @@ code block_view::populate_internal(const context& ctx) const NOEXCEPT
 // validation
 // ----------------------------------------------------------------------------
 
-code block_view::check() const NOEXCEPT
+code block::check() const NOEXCEPT
 {
     BC_ASSERT(is_populated());
 
@@ -472,7 +473,7 @@ code block_view::check() const NOEXCEPT
     return check_transactions();
 }
 
-code block_view::check(const context& ctx) const NOEXCEPT
+code block::check(const context& ctx) const NOEXCEPT
 {
     BC_ASSERT(is_populated());
     const auto bip141 = ctx.is_enabled(bip141_rule);
@@ -489,7 +490,7 @@ code block_view::check(const context& ctx) const NOEXCEPT
     return check_transactions(ctx);
 }
 
-code block_view::accept(const context& ctx, size_t subsidy_interval,
+code block::accept(const context& ctx, size_t subsidy_interval,
     uint64_t initial_subsidy) const NOEXCEPT
 {
     BC_ASSERT(is_populated());
@@ -505,7 +506,7 @@ code block_view::accept(const context& ctx, size_t subsidy_interval,
     return accept_transactions(ctx);
 }
 
-code block_view::connect(const context& ctx,
+code block::connect(const context& ctx,
     const signatures& capture) const NOEXCEPT
 {
     BC_ASSERT(is_populated());
@@ -515,17 +516,17 @@ code block_view::connect(const context& ctx,
 // protected
 // ----------------------------------------------------------------------------
 
-bool block_view::is_oversized() const NOEXCEPT
+bool block::is_oversized() const NOEXCEPT
 {
     return serialized_size(false) > max_block_size;
 }
 
-bool block_view::is_first_non_coinbase() const NOEXCEPT
+bool block::is_first_non_coinbase() const NOEXCEPT
 {
     return !txs_.empty() && !is_coinbase(txs_.front());
 }
 
-bool block_view::is_extra_coinbases() const NOEXCEPT
+bool block::is_extra_coinbases() const NOEXCEPT
 {
     if (txs_.empty())
         return false;
@@ -537,7 +538,7 @@ bool block_view::is_extra_coinbases() const NOEXCEPT
         });
 }
 
-bool block_view::is_forward_reference() const NOEXCEPT
+bool block::is_forward_reference() const NOEXCEPT
 {
     if (txs_.empty())
         return false;
@@ -556,7 +557,7 @@ bool block_view::is_forward_reference() const NOEXCEPT
     return false;
 }
 
-bool block_view::is_internal_double_spend() const NOEXCEPT
+bool block::is_internal_double_spend() const NOEXCEPT
 {
     if (txs_.empty())
         return false;
@@ -570,12 +571,12 @@ bool block_view::is_internal_double_spend() const NOEXCEPT
     return false;
 }
 
-bool block_view::is_overweight() const NOEXCEPT
+bool block::is_overweight() const NOEXCEPT
 {
     return weight() > max_block_weight;
 }
 
-bool block_view::is_invalid_coinbase_script(size_t height) const NOEXCEPT
+bool block::is_invalid_coinbase_script(size_t height) const NOEXCEPT
 {
     if (txs_.empty() || is_zero(txs_.front().inputs()))
         return false;
@@ -584,7 +585,7 @@ bool block_view::is_invalid_coinbase_script(size_t height) const NOEXCEPT
     return !script::is_coinbase_pattern(script.ops(), height);
 }
 
-bool block_view::is_hash_limit_exceeded() const NOEXCEPT
+bool block::is_hash_limit_exceeded() const NOEXCEPT
 {
     if (txs_.empty())
         return false;
@@ -605,21 +606,21 @@ bool block_view::is_hash_limit_exceeded() const NOEXCEPT
     return hashes.size() > hash_limit;
 }
 
-bool block_view::is_overspent(size_t height, uint64_t subsidy_interval,
+bool block::is_overspent(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     return claim() > reward(height, subsidy_interval,
         initial_block_subsidy_satoshi, bip42);
 }
 
-bool block_view::is_signature_operations_limited(bool bip16,
+bool block::is_signature_operations_limited(bool bip16,
     bool bip141) const NOEXCEPT
 {
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
     return signature_operations(bip16, bip141) > limit;
 }
 
-size_t block_view::weight() const NOEXCEPT
+size_t block::weight() const NOEXCEPT
 {
     // Block weight is 3 * nominal size * + 1 * witness size [bip141].
     return ceilinged_add(
@@ -627,7 +628,7 @@ size_t block_view::weight() const NOEXCEPT
         ceilinged_multiply(total_size_contribution, serialized_size(true)));
 }
 
-uint64_t block_view::fees() const NOEXCEPT
+uint64_t block::fees() const NOEXCEPT
 {
     // Overflow returns max_uint64.
     const auto value = [](uint64_t total, const auto& tx) NOEXCEPT
@@ -638,20 +639,20 @@ uint64_t block_view::fees() const NOEXCEPT
     return std::accumulate(txs_.begin(), txs_.end(), 0_u64, value);
 }
 
-uint64_t block_view::claim() const NOEXCEPT
+uint64_t block::claim() const NOEXCEPT
 {
     return txs_.empty() ? zero : txs_.front().spend();
 }
 
-uint64_t block_view::reward(size_t height, uint64_t subsidy_interval,
+uint64_t block::reward(size_t height, uint64_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     // Overflow returns max_uint64.
-    return ceilinged_add(fees(), block::subsidy(height, subsidy_interval,
+    return ceilinged_add(fees(), chain::block::subsidy(height, subsidy_interval,
         initial_block_subsidy_satoshi, bip42));
 }
 
-size_t block_view::signature_operations(bool bip16, bool bip141) const NOEXCEPT
+size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
     // Overflow returns max_size_t.
     const auto value = [=](size_t total, const auto& tx) NOEXCEPT
@@ -662,7 +663,7 @@ size_t block_view::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     return std::accumulate(txs_.begin(), txs_.end(), zero, value);
 }
 
-code block_view::check_transactions() const NOEXCEPT
+code block::check_transactions() const NOEXCEPT
 {
     for (const auto& tx: txs_)
         if (const auto ec = tx.check())
@@ -671,7 +672,7 @@ code block_view::check_transactions() const NOEXCEPT
     return error::block_success;
 }
 
-code block_view::check_transactions(const context& ctx) const NOEXCEPT
+code block::check_transactions(const context& ctx) const NOEXCEPT
 {
     for (const auto& tx: txs_)
         if (const auto ec = tx.check(ctx))
@@ -680,7 +681,7 @@ code block_view::check_transactions(const context& ctx) const NOEXCEPT
     return error::block_success;
 }
 
-code block_view::accept_transactions(const context& ctx) const NOEXCEPT
+code block::accept_transactions(const context& ctx) const NOEXCEPT
 {
     if (!txs_.empty())
         for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
@@ -690,7 +691,7 @@ code block_view::accept_transactions(const context& ctx) const NOEXCEPT
     return error::block_success;
 }
 
-code block_view::connect_transactions(const context& ctx,
+code block::connect_transactions(const context& ctx,
     const signatures& capture) const NOEXCEPT
 {
     if (!txs_.empty())
@@ -705,16 +706,17 @@ code block_view::connect_transactions(const context& ctx,
 // ----------------------------------------------------------------------------
 
 // static
-bool block_view::is_coinbase(const transaction_view& tx) NOEXCEPT
+bool block::is_coinbase(const transaction& tx) NOEXCEPT
 {
     return is_one(tx.inputs()) && tx.is_null_point();
 }
 
-code block_view::malleated_or(const code& ec) const NOEXCEPT
+code block::malleated_or(const code& ec) const NOEXCEPT
 {
     return is_malleated() ? error::invalid_transaction_commitment : ec;
 }
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

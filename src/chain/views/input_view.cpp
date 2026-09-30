@@ -29,17 +29,18 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 constexpr auto point_size = chain::point::serialized_size();
 
 // constructors
 // ----------------------------------------------------------------------------
 
-input_view::input_view() NOEXCEPT
+input::input() NOEXCEPT
 {
 }
 
-input_view::input_view(const uint8_t* data, const uint8_t* witness,
+input::input(const uint8_t* data, const uint8_t* witness,
     size_t witness_size) NOEXCEPT
   : data_{ data }, witness_{ witness }, witness_size_{ witness_size }
 {
@@ -51,45 +52,45 @@ input_view::input_view(const uint8_t* data, const uint8_t* witness,
 // properties
 // ----------------------------------------------------------------------------
 
-bool input_view::is_valid() const NOEXCEPT
+bool input::is_valid() const NOEXCEPT
 {
     return !is_null(data_);
 }
 
-const uint8_t* input_view::point_data() const NOEXCEPT
+const uint8_t* input::point_data() const NOEXCEPT
 {
     return data_;
 }
 
-const hash_digest& input_view::point_hash() const NOEXCEPT
+const hash_digest& input::point_hash() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return unsafe_array_cast<uint8_t, hash_size>(data_);
 }
 
-uint32_t input_view::point_index() const NOEXCEPT
+uint32_t input::point_index() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return unsafe_from_little_endian<uint32_t>(std::next(data_, hash_size));
 }
 
-bool input_view::is_null_point() const NOEXCEPT
+bool input::is_null_point() const NOEXCEPT
 {
     return point_hash() == null_hash && point_index() == point::null_index;
 }
 
-data_slice input_view::script_data() const NOEXCEPT
+data_slice input::script_data() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return { script_, std::next(script_, size_) };
 }
 
-size_t input_view::script_size() const NOEXCEPT
+size_t input::script_size() const NOEXCEPT
 {
     return size_;
 }
 
-data_slice input_view::witness_data() const NOEXCEPT
+data_slice input::witness_data() const NOEXCEPT
 {
     if (is_null(witness_))
         return {};
@@ -97,23 +98,23 @@ data_slice input_view::witness_data() const NOEXCEPT
     return { witness_, std::next(witness_, witness_size_) };
 }
 
-uint32_t input_view::sequence() const NOEXCEPT
+uint32_t input::sequence() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return unsafe_from_little_endian<uint32_t>(std::next(script_, size_));
 }
 
-bool input_view::is_final() const NOEXCEPT
+bool input::is_final() const NOEXCEPT
 {
     return sequence() == max_input_sequence;
 }
 
-const chain::script& input_view::script() const NOEXCEPT
+const chain::script& input::script() const NOEXCEPT
 {
     return *script_ptr();
 }
 
-const chain::script::cptr& input_view::script_ptr() const NOEXCEPT
+const chain::script::cptr& input::script_ptr() const NOEXCEPT
 {
     if (!script_ptr_)
         script_ptr_ = to_shared<chain::script>(script_data(), false);
@@ -121,7 +122,7 @@ const chain::script::cptr& input_view::script_ptr() const NOEXCEPT
     return script_ptr_;
 }
 
-const chain::witness& input_view::witness() const NOEXCEPT
+const chain::witness& input::witness() const NOEXCEPT
 {
     static const auto empty = to_shared<chain::witness>();
 
@@ -135,13 +136,13 @@ const chain::witness& input_view::witness() const NOEXCEPT
 // methods
 // ----------------------------------------------------------------------------
 
-bool input_view::is_roller() const NOEXCEPT
+bool input::is_roller() const NOEXCEPT
 {
     return script().is_roller() || (!is_null(prevout) &&
         prevout->script().is_roller());
 }
 
-size_t input_view::signature_operations(bool bip16,
+size_t input::signature_operations(bool bip16,
     bool bip141) const NOEXCEPT
 {
     const auto factor = bip141 ? heavy_sigops_factor : one;
@@ -176,6 +177,7 @@ size_t input_view::signature_operations(bool bip16,
     return sigops;
 }
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

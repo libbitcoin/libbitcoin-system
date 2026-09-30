@@ -42,7 +42,7 @@ BC_API bool compute_filter(data_chunk& out,
 
 /// Block view population required.
 BC_API bool compute_filter(data_chunk& out,
-    const chain::block_view& block) NOEXCEPT;
+    const chain::view::block& block) NOEXCEPT;
 
 BC_API hash_digest compute_header(const hash_digest& previous_header,
     const data_chunk& filter) NOEXCEPT;

@@ -34,12 +34,13 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 constexpr auto point_size = chain::point::serialized_size();
 
 static const auto& null_output() NOEXCEPT
 {
-    static const auto null = output{}.to_data();
+    static const auto null = chain::output{}.to_data();
     return null;
 }
 
@@ -58,7 +59,7 @@ static const auto& zero_sequence() NOEXCEPT
 // Signature hashing.
 // ----------------------------------------------------------------------------
 
-bool transaction_view::signature_hash(hash_digest& out,
+bool transaction::signature_hash(hash_digest& out,
     const input_iterator& input, const script& subscript, uint64_t value,
     const hash_cptr& tapleaf, script_version version, uint8_t sighash_flags,
     uint32_t flags) const NOEXCEPT
@@ -87,19 +88,19 @@ bool transaction_view::signature_hash(hash_digest& out,
 // private
 // ----------------------------------------------------------------------------
 
-uint32_t transaction_view::input_index(
+uint32_t transaction::input_index(
     const input_iterator& input) const NOEXCEPT
 {
     return possible_narrow_and_sign_cast<uint32_t>(
         std::distance(inputs_begin_, input));
 }
 
-bool transaction_view::output_overflow(size_t input) const NOEXCEPT
+bool transaction::output_overflow(size_t input) const NOEXCEPT
 {
     return input >= out_count_;
 }
 
-void transaction_view::write_outputs(writer& sink) const NOEXCEPT
+void transaction::write_outputs(writer& sink) const NOEXCEPT
 {
     sink.write_variable(out_count_);
     sink.write_bytes(at_outputs(), outputs_size());
@@ -108,7 +109,7 @@ void transaction_view::write_outputs(writer& sink) const NOEXCEPT
 // Unversioned.
 // ----------------------------------------------------------------------------
 
-void transaction_view::signature_hash_single(writer& sink,
+void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
@@ -116,7 +117,7 @@ void transaction_view::signature_hash_single(writer& sink,
         writer& sink) NOEXCEPT
     {
         input_iterator in;
-        const auto anyone = transaction::is_anyone_can_pay(sighash_flags);
+        const auto anyone = chain::transaction::is_anyone_can_pay(sighash_flags);
         sink.write_variable(anyone ? one : in_count_);
 
         for (in = inputs_begin_; !anyone && in != input; ++in)
@@ -157,7 +158,7 @@ void transaction_view::signature_hash_single(writer& sink,
     sink.write_4_bytes_little_endian(sighash_flags);
 }
 
-void transaction_view::signature_hash_none(writer& sink,
+void transaction::signature_hash_none(writer& sink,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
@@ -165,7 +166,7 @@ void transaction_view::signature_hash_none(writer& sink,
         writer& sink) NOEXCEPT
     {
         input_iterator in;
-        const auto anyone = transaction::is_anyone_can_pay(sighash_flags);
+        const auto anyone = chain::transaction::is_anyone_can_pay(sighash_flags);
         sink.write_variable(anyone ? one : in_count_);
 
         for (in = inputs_begin_; !anyone && in != input; ++in)
@@ -194,7 +195,7 @@ void transaction_view::signature_hash_none(writer& sink,
     sink.write_4_bytes_little_endian(sighash_flags);
 }
 
-void transaction_view::signature_hash_all(writer& sink,
+void transaction::signature_hash_all(writer& sink,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
@@ -202,7 +203,7 @@ void transaction_view::signature_hash_all(writer& sink,
         writer& sink) NOEXCEPT
     {
         input_iterator in;
-        const auto anyone = transaction::is_anyone_can_pay(sighash_flags);
+        const auto anyone = chain::transaction::is_anyone_can_pay(sighash_flags);
         sink.write_variable(anyone ? one : in_count_);
 
         for (in = inputs_begin_; !anyone && in != input; ++in)
@@ -231,11 +232,11 @@ void transaction_view::signature_hash_all(writer& sink,
     sink.write_4_bytes_little_endian(sighash_flags);
 }
 
-void transaction_view::unversioned_sighash(hash_digest& out,
+void transaction::unversioned_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto flag = transaction::mask_sighash(sighash_flags);
+    const auto flag = chain::transaction::mask_sighash(sighash_flags);
 
     if (flag == coverage::hash_single && output_overflow(input_index(input)))
     {
@@ -265,7 +266,7 @@ void transaction_view::unversioned_sighash(hash_digest& out,
 // Version 0 (segwit).
 // ----------------------------------------------------------------------------
 
-hash_digest transaction_view::output_hash_v0(
+hash_digest transaction::output_hash_v0(
     const input_iterator& input) const NOEXCEPT
 {
     const auto index = input_index(input);
@@ -276,12 +277,12 @@ hash_digest transaction_view::output_hash_v0(
     return bitcoin_hash(output.serialized_size(), output.data());
 }
 
-void transaction_view::version0_sighash(hash_digest& out,
+void transaction::version0_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript, uint64_t value,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto flag = transaction::mask_sighash(sighash_flags);
-    const auto anyone = transaction::is_anyone_can_pay(sighash_flags);
+    const auto flag = chain::transaction::mask_sighash(sighash_flags);
+    const auto anyone = chain::transaction::is_anyone_can_pay(sighash_flags);
     const auto single = (flag == coverage::hash_single);
     const auto all = (flag == coverage::hash_all);
 
@@ -311,7 +312,7 @@ void transaction_view::version0_sighash(hash_digest& out,
 // Version 1 (taproot).
 // ----------------------------------------------------------------------------
 
-bool transaction_view::version1_sighash(hash_digest& out,
+bool transaction::version1_sighash(hash_digest& out,
     const input_iterator& input, const script& script, uint64_t value,
     const hash_cptr& tapleaf, uint8_t sighash_flags) const NOEXCEPT
 {
@@ -319,8 +320,8 @@ bool transaction_view::version1_sighash(hash_digest& out,
     const auto& in = *input;
     const auto& annex = in.witness().annex();
 
-    const auto flag = transaction::mask_sighash(sighash_flags);
-    const auto anyone = transaction::is_anyone_can_pay(sighash_flags);
+    const auto flag = chain::transaction::mask_sighash(sighash_flags);
+    const auto anyone = chain::transaction::is_anyone_can_pay(sighash_flags);
     const auto single = (flag == coverage::hash_single);
     const auto all = (flag == coverage::hash_all);
 
@@ -351,7 +352,7 @@ bool transaction_view::version1_sighash(hash_digest& out,
         sink.write_bytes(single_hash_outputs());
     }
 
-    sink.write_byte(transaction::spend_type_v1(annex, !is_null(tapleaf)));
+    sink.write_byte(chain::transaction::spend_type_v1(annex, !is_null(tapleaf)));
 
     if (anyone)
     {
@@ -380,7 +381,7 @@ bool transaction_view::version1_sighash(hash_digest& out,
     {
         sink.write_bytes(*tapleaf);
         sink.write_byte(to_value(key_version::tapscript));
-        sink.write_4_bytes_little_endian(transaction::subscript_v1(script));
+        sink.write_4_bytes_little_endian(chain::transaction::subscript_v1(script));
     }
 
     sink.flush();
@@ -390,7 +391,7 @@ bool transaction_view::version1_sighash(hash_digest& out,
 // Signature hash caching (not thread safe).
 // ----------------------------------------------------------------------------
 
-hash_digest transaction_view::x1_base_hash_points() const NOEXCEPT
+hash_digest transaction::x1_base_hash_points() const NOEXCEPT
 {
     hash_digest digest{};
     stream::out::fast stream{ digest };
@@ -402,7 +403,7 @@ hash_digest transaction_view::x1_base_hash_points() const NOEXCEPT
     return digest;
 }
 
-hash_digest transaction_view::x1_base_hash_sequences() const NOEXCEPT
+hash_digest transaction::x1_base_hash_sequences() const NOEXCEPT
 {
     hash_digest digest{};
     stream::out::fast stream{ digest };
@@ -414,13 +415,13 @@ hash_digest transaction_view::x1_base_hash_sequences() const NOEXCEPT
     return digest;
 }
 
-hash_digest transaction_view::x1_base_hash_outputs() const NOEXCEPT
+hash_digest transaction::x1_base_hash_outputs() const NOEXCEPT
 {
     return accumulator<sha256>::hash(outputs_size(), at_outputs());
 }
 
 // This requires ALL prevouts of the tx are populated (new in taproot).
-hash_digest transaction_view::v1_only_hash_amounts() const NOEXCEPT
+hash_digest transaction::v1_only_hash_amounts() const NOEXCEPT
 {
     hash_digest digest{};
     stream::out::fast stream{ digest };
@@ -433,7 +434,7 @@ hash_digest transaction_view::v1_only_hash_amounts() const NOEXCEPT
 }
 
 // This requires ALL prevouts of the tx are populated (new in taproot).
-hash_digest transaction_view::v1_only_hash_scripts() const NOEXCEPT
+hash_digest transaction::v1_only_hash_scripts() const NOEXCEPT
 {
     hash_digest digest{};
     stream::out::fast stream{ digest };
@@ -450,7 +451,7 @@ hash_digest transaction_view::v1_only_hash_scripts() const NOEXCEPT
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-void transaction_view::set_x1_base_hash() const NOEXCEPT
+void transaction::set_x1_base_hash() const NOEXCEPT
 {
     if (!x1_base_cache_)
         x1_base_cache_ = std::make_shared<base_cache>
@@ -461,7 +462,7 @@ void transaction_view::set_x1_base_hash() const NOEXCEPT
         );
 }
 
-void transaction_view::set_x2_base_hash() const NOEXCEPT
+void transaction::set_x2_base_hash() const NOEXCEPT
 {
     if (!x2_base_cache_)
         x2_base_cache_ = std::make_shared<base_cache>
@@ -472,7 +473,7 @@ void transaction_view::set_x2_base_hash() const NOEXCEPT
         );
 }
 
-void transaction_view::set_v1_only_hash() const NOEXCEPT
+void transaction::set_v1_only_hash() const NOEXCEPT
 {
     if (!v1_only_cache_)
         v1_only_cache_ = std::make_shared<only_cache>
@@ -484,54 +485,55 @@ void transaction_view::set_v1_only_hash() const NOEXCEPT
 
 BC_POP_WARNING()
 
-const hash_digest& transaction_view::single_hash_points() const NOEXCEPT
+const hash_digest& transaction::single_hash_points() const NOEXCEPT
 {
     set_x1_base_hash();
     return x1_base_cache_->points;
 }
 
-const hash_digest& transaction_view::single_hash_sequences() const NOEXCEPT
+const hash_digest& transaction::single_hash_sequences() const NOEXCEPT
 {
     set_x1_base_hash();
     return x1_base_cache_->sequences;
 }
 
-const hash_digest& transaction_view::single_hash_outputs() const NOEXCEPT
+const hash_digest& transaction::single_hash_outputs() const NOEXCEPT
 {
     set_x1_base_hash();
     return x1_base_cache_->outputs;
 }
 
-const hash_digest& transaction_view::single_hash_amounts() const NOEXCEPT
+const hash_digest& transaction::single_hash_amounts() const NOEXCEPT
 {
     set_v1_only_hash();
     return v1_only_cache_->amounts;
 }
 
-const hash_digest& transaction_view::single_hash_scripts() const NOEXCEPT
+const hash_digest& transaction::single_hash_scripts() const NOEXCEPT
 {
     set_v1_only_hash();
     return v1_only_cache_->scripts;
 }
 
-const hash_digest& transaction_view::double_hash_points() const NOEXCEPT
+const hash_digest& transaction::double_hash_points() const NOEXCEPT
 {
     set_x2_base_hash();
     return x2_base_cache_->points;
 }
 
-const hash_digest& transaction_view::double_hash_sequences() const NOEXCEPT
+const hash_digest& transaction::double_hash_sequences() const NOEXCEPT
 {
     set_x2_base_hash();
     return x2_base_cache_->sequences;
 }
 
-const hash_digest& transaction_view::double_hash_outputs() const NOEXCEPT
+const hash_digest& transaction::double_hash_outputs() const NOEXCEPT
 {
     set_x2_base_hash();
     return x2_base_cache_->outputs;
 }
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

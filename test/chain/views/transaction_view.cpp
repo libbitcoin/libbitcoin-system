@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__empty__invalid)
     reader.skip_bytes(chain::header::serialized_size());
     BOOST_CHECK_EQUAL(reader.read_variable(), 0x42u);
 
-    const chain::transaction_view view{ reader, block, false, true };
+    const chain::view::transaction view{ reader, block, false, true };
     BOOST_CHECK(!view.is_valid());
 }
 
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__genesis__valid)
     reader.skip_bytes(chain::header::serialized_size());
     BOOST_CHECK_EQUAL(reader.read_variable(), 1u);
 
-    const chain::transaction_view view{ reader, block, true, true };
+    const chain::view::transaction view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(view.is_coinbase());
     BOOST_CHECK(view.is_null_point());
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_witness__valid)
 
     // Parse buffer for a witness node (logically unstripped).
     constexpr auto witnessed = true;
-    const chain::transaction_view view{ reader, transaction, false, witnessed };
+    const chain::view::transaction view{ reader, transaction, false, witnessed };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(!view.is_coinbase());
     BOOST_CHECK(!view.is_null_point());
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_stripped__valid)
 
     // Parse buffer for a non-witness node (logically stripped).
     constexpr auto stripped = false;
-    const chain::transaction_view view{ reader, transaction, false, stripped };
+    const chain::view::transaction view{ reader, transaction, false, stripped };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(!view.is_coinbase());
     BOOST_CHECK(!view.is_null_point());
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_non_witnessed__valid)
     read::bytes::fast reader{ istream };
 
     // Parse buffer for a witness node (but doesn't exist).
-    const chain::transaction_view view{ reader, transaction, false, false };
+    const chain::view::transaction view{ reader, transaction, false, false };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(!view.is_coinbase());
     BOOST_CHECK(!view.is_null_point());
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__genesis__expected)
     reader.skip_bytes(chain::header::serialized_size());
     reader.read_variable();
 
-    const chain::transaction_view view{ reader, block, true, true };
+    const chain::view::transaction view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk script(expected.size(), 0xff);
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__genesis__expected)
     auto stream = view.get_inputs_stream();
     read::bytes::fast source{ stream };
 
-    chain::transaction_view::write_input_script(sink, source);
+    chain::view::transaction::write_input_script(sink, source);
     BOOST_CHECK_EQUAL(script, expected);
 }
 
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__tx4_witness__expected
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, false, true };
+    const chain::view::transaction view{ reader, transaction, false, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk script(expected.size(), 0xff);
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_input_script__tx4_witness__expected
     auto stream = view.get_inputs_stream();
     read::bytes::fast source{ stream };
 
-    chain::transaction_view::write_input_script(sink, source);
+    chain::view::transaction::write_input_script(sink, source);
     BOOST_CHECK_EQUAL(script, expected);
 }
 
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__genesis__expected)
     reader.skip_bytes(chain::header::serialized_size());
     reader.read_variable();
 
-    const chain::transaction_view view{ reader, block, true, true };
+    const chain::view::transaction view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk witness(expected.size(), 0xff);
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__genesis__expected)
     auto stream = view.get_witnesses_stream();
     read::bytes::fast source{ stream };
 
-    chain::transaction_view::write_witness(sink, source);
+    chain::view::transaction::write_witness(sink, source);
     BOOST_CHECK_EQUAL(witness, expected);
 }
 
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__tx4_witness__expected)
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, false, true };
+    const chain::view::transaction view{ reader, transaction, false, true };
     BOOST_CHECK(view.is_valid());
 
     data_chunk witness(expected.size(), 0xff);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__write_witness__tx4_witness__expected)
     auto stream = view.get_witnesses_stream();
     read::bytes::fast source{ stream };
 
-    chain::transaction_view::write_witness(sink, source);
+    chain::view::transaction::write_witness(sink, source);
     BOOST_CHECK_EQUAL(witness, expected);
 }
 
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__witnesses__genesis__empty)
     reader.skip_bytes(chain::header::serialized_size());
     reader.read_variable();
 
-    const chain::transaction_view view{ reader, block, true, true };
+    const chain::view::transaction view{ reader, block, true, true };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(view.witnesses().empty());
 }
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__witnesses__tx4_witness__expected)
     read::bytes::fast reader{ istream };
 
     const auto expected = base16_chunk("01032525250103353535");
-    const chain::transaction_view view{ reader, transaction, false, true };
+    const chain::view::transaction view{ reader, transaction, false, true };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(view.is_segregated());
     BOOST_CHECK_EQUAL(view.witnesses().to_chunk(), expected);
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_witness__matches_transaction
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, false, true };
+    const chain::view::transaction view{ reader, transaction, false, true };
     BOOST_REQUIRE(view.is_valid());
     BOOST_REQUIRE(view.is_segregated());
 
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_stripped_source__stripped)
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, false, false };
+    const chain::view::transaction view{ reader, transaction, false, false };
     BOOST_REQUIRE(view.is_valid());
     BOOST_REQUIRE(!view.is_segregated());
 
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__to_data__tx4_overloads__match_transaction
     stream::in::fast istream{ transaction };
     read::bytes::fast reader{ istream };
 
-    const chain::transaction_view view{ reader, transaction, false, true };
+    const chain::view::transaction view{ reader, transaction, false, true };
     BOOST_REQUIRE(view.is_valid());
     BOOST_REQUIRE(view.is_segregated());
 
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__input_table_size__unwitnessed__scripts_an
     reader.skip_bytes(chain::header::serialized_size());
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 1u);
 
-    const chain::transaction_view view{ reader, data, false, true };
+    const chain::view::transaction view{ reader, data, false, true };
     BOOST_REQUIRE(view.is_valid());
     BOOST_REQUIRE(!view.is_segregated());
 
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__input_table_size__pruned__two_per_input)
     reader.skip_bytes(chain::header::serialized_size());
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 1u);
 
-    const chain::transaction_view view{ reader, data, false, true };
+    const chain::view::transaction view{ reader, data, false, true };
     BOOST_REQUIRE(view.is_valid());
     BOOST_CHECK_EQUAL(view.input_table_size(true), 2u * view.inputs());
 }
@@ -440,7 +440,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__read_witness_size__populated__serialized_
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_CHECK_EQUAL(chain::transaction_view::read_witness_size(reader), data.size());
+    BOOST_CHECK_EQUAL(chain::view::transaction::read_witness_size(reader), data.size());
     BOOST_CHECK(reader);
     BOOST_CHECK(reader.is_exhausted());
 }
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(transaction_view__read_witness_size__empty_stack__prefix_on
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_CHECK_EQUAL(chain::transaction_view::read_witness_size(reader), data.size());
+    BOOST_CHECK_EQUAL(chain::view::transaction::read_witness_size(reader), data.size());
     BOOST_CHECK_EQUAL(data.size(), 1u);
 }
 

@@ -34,6 +34,7 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+namespace view {
 
 constexpr auto value_size = sizeof(uint64_t);
 constexpr auto version_size = sizeof(uint32_t);
@@ -46,7 +47,7 @@ constexpr auto sentinels_size = sizeof(witness_marker) +
 // constructor
 // ----------------------------------------------------------------------------
 
-transaction_view::transaction_view(reader& source,
+transaction::transaction(reader& source,
     const data_chunk& block_buffer, bool coinbase, bool witness) NOEXCEPT
   : coinbase_{ coinbase }
 {
@@ -124,7 +125,7 @@ transaction_view::transaction_view(reader& source,
     // set hash identifiers
     if (has_witness)
     {
-        txid_ = transaction::desegregated_hash(unstripped_size(),
+        txid_ = chain::transaction::desegregated_hash(unstripped_size(),
             stripped_size(), tx_ptr_);
 
         // non-witness and coinbase wtxid default to null_hash.
@@ -141,17 +142,17 @@ transaction_view::transaction_view(reader& source,
 // ----------------------------------------------------------------------------
 // properties
 
-bool transaction_view::is_valid() const NOEXCEPT
+bool transaction::is_valid() const NOEXCEPT
 {
     return !is_null(tx_ptr_);
 }
 
-bool transaction_view::is_coinbase() const NOEXCEPT
+bool transaction::is_coinbase() const NOEXCEPT
 {
     return coinbase_;
 }
 
-bool transaction_view::is_null_point() const NOEXCEPT
+bool transaction::is_null_point() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
 
@@ -161,46 +162,46 @@ bool transaction_view::is_null_point() const NOEXCEPT
         unsafe_from_little_endian<uint32_t>(index) == chain::point::null_index;
 }
 
-bool transaction_view::is_segregated() const NOEXCEPT
+bool transaction::is_segregated() const NOEXCEPT
 {
     return segregated_;
 }
 
-size_t transaction_view::inputs() const NOEXCEPT
+size_t transaction::inputs() const NOEXCEPT
 {
     return in_count_;
 }
 
-size_t transaction_view::outputs() const NOEXCEPT
+size_t transaction::outputs() const NOEXCEPT
 {
     return out_count_;
 }
 
-uint32_t transaction_view::version() const NOEXCEPT
+uint32_t transaction::version() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return unsafe_from_little_endian<uint32_t>(tx_ptr_);
 }
 
-uint32_t transaction_view::locktime() const NOEXCEPT
+uint32_t transaction::locktime() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     const auto offset = std::next(tx_ptr_, size_ - locktime_size);
     return unsafe_from_little_endian<uint32_t>(offset);
 }
 
-data_slice transaction_view::witnesses() const NOEXCEPT
+data_slice transaction::witnesses() const NOEXCEPT
 {
     const auto begin = at_witnesses();
     return { begin, std::next(begin, witnesses_size()) };
 }
 
-size_t transaction_view::serialized_size(bool witness) const NOEXCEPT
+size_t transaction::serialized_size(bool witness) const NOEXCEPT
 {
     return witness && is_segregated() ? size_ : stripped_size();
 }
 
-data_chunk transaction_view::to_data(bool witness) const NOEXCEPT
+data_chunk transaction::to_data(bool witness) const NOEXCEPT
 {
     data_chunk data(serialized_size(witness));
     stream::out::fast ostream(data);
@@ -209,14 +210,14 @@ data_chunk transaction_view::to_data(bool witness) const NOEXCEPT
     return data;
 }
 
-void transaction_view::to_data(std::ostream& stream,
+void transaction::to_data(std::ostream& stream,
     bool witness) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out, witness);
 }
 
-void transaction_view::to_data(writer& sink, bool witness) const NOEXCEPT
+void transaction::to_data(writer& sink, bool witness) const NOEXCEPT
 {
     // Witness can be stripped but never added (mirrors chain::transaction).
     if (witness && is_segregated())
@@ -237,7 +238,7 @@ void transaction_view::to_data(writer& sink, bool witness) const NOEXCEPT
     sink.write_bytes(std::next(tx_ptr_, size_ - locktime_size), locktime_size);
 }
 
-const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
+const hash_digest& transaction::hash(bool witness) const NOEXCEPT
 {
     return witness && is_segregated() ? wtxid_ : txid_;
 }
@@ -246,13 +247,13 @@ const hash_digest& transaction_view::hash(bool witness) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // store helpers
 
-size_t transaction_view::input_table_size(bool pruned) const NOEXCEPT
+size_t transaction::input_table_size(bool pruned) const NOEXCEPT
 {
     // pruned: (zero ins, zero wits) * inputs.
     return pruned ? two * inputs() : input_table_size_;
 }
 
-size_t transaction_view::output_table_size() const NOEXCEPT
+size_t transaction::output_table_size() const NOEXCEPT
 {
     return output_table_size_;
 }
@@ -262,7 +263,7 @@ size_t transaction_view::output_table_size() const NOEXCEPT
 // methods
 
 // Last output of commitment pattern holds the committed value [bip141].
-bool transaction_view::get_witness_commitment(
+bool transaction::get_witness_commitment(
     hash_cref& commitment) const NOEXCEPT
 {
     const auto output = at_outputs();
@@ -290,7 +291,7 @@ bool transaction_view::get_witness_commitment(
 }
 
 // Coinbase input witness must be 32 byte witness reserved value [bip141].
-bool transaction_view::get_witness_reservation(
+bool transaction::get_witness_reservation(
     hash_cref& reservation) const NOEXCEPT
 {
     const auto witness = at_witnesses();
@@ -306,7 +307,7 @@ bool transaction_view::get_witness_reservation(
 // ----------------------------------------------------------------------------
 // streamers
 
-void transaction_view::write_input_script(flipper& sink,
+void transaction::write_input_script(flipper& sink,
     reader& source) NOEXCEPT
 {
     // skip point (stored independently)
@@ -320,7 +321,7 @@ void transaction_view::write_input_script(flipper& sink,
     sink.write_bytes(source.read_bytes(size));
 }
 
-void transaction_view::write_witness(flipper& sink, reader& source) NOEXCEPT
+void transaction::write_witness(flipper& sink, reader& source) NOEXCEPT
 {
     // stack size
     const auto stack = source.read_size();
@@ -338,7 +339,7 @@ void transaction_view::write_witness(flipper& sink, reader& source) NOEXCEPT
     }
 }
 
-size_t transaction_view::read_witness_size(reader& source) NOEXCEPT
+size_t transaction::read_witness_size(reader& source) NOEXCEPT
 {
     // stack size
     const auto stack = source.read_size();
@@ -362,19 +363,19 @@ size_t transaction_view::read_witness_size(reader& source) NOEXCEPT
 // ----------------------------------------------------------------------------
 // istreams
 
-stream::in::fast transaction_view::get_inputs_stream() const NOEXCEPT
+stream::in::fast transaction::get_inputs_stream() const NOEXCEPT
 {
     const auto limit = possible_narrow_sign_cast<ptrdiff_t>(inputs_size());
     return { at_inputs(), limit };
 }
 
-stream::in::fast transaction_view::get_outputs_stream() const NOEXCEPT
+stream::in::fast transaction::get_outputs_stream() const NOEXCEPT
 {
     const auto limit = possible_narrow_sign_cast<ptrdiff_t>(outputs_size());
     return { at_outputs(), limit };
 }
 
-stream::in::fast transaction_view::get_witnesses_stream() const NOEXCEPT
+stream::in::fast transaction::get_witnesses_stream() const NOEXCEPT
 {
     const auto limit = possible_narrow_sign_cast<ptrdiff_t>(witnesses_size());
     return { at_witnesses(), limit };
@@ -388,7 +389,7 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-bool transaction_view::is_commitment_pattern(const uint8_t* script,
+bool transaction::is_commitment_pattern(const uint8_t* script,
     size_t size) NOEXCEPT
 {
     if (commitment_pattern_size + hash_size > size)
@@ -403,7 +404,7 @@ bool transaction_view::is_commitment_pattern(const uint8_t* script,
         && script[5] == header[3];
 }
 
-bool transaction_view::is_reserved_pattern(const uint8_t* stack,
+bool transaction::is_reserved_pattern(const uint8_t* stack,
     size_t size) NOEXCEPT
 {
     if (reserved_pattern_size + hash_size > size)
@@ -422,19 +423,19 @@ BC_POP_WARNING()
 // ----------------------------------------------------------------------------
 // buffer offsets
 
-const uint8_t* transaction_view::at_inputs() const NOEXCEPT
+const uint8_t* transaction::at_inputs() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return std::next(tx_ptr_, in_offset_);
 }
 
-const uint8_t* transaction_view::at_outputs() const NOEXCEPT
+const uint8_t* transaction::at_outputs() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     return std::next(tx_ptr_, out_offset_);
 }
 
-const uint8_t* transaction_view::at_witnesses() const NOEXCEPT
+const uint8_t* transaction::at_witnesses() const NOEXCEPT
 {
     BC_ASSERT(is_valid());
     const auto witness_offset = size_ - (witnesses_size() + locktime_size);
@@ -445,27 +446,27 @@ const uint8_t* transaction_view::at_witnesses() const NOEXCEPT
 // ----------------------------------------------------------------------------
 // computed sizes
 
-size_t transaction_view::inputs_size() const NOEXCEPT
+size_t transaction::inputs_size() const NOEXCEPT
 {
     return size_ - in_offset_ - (witnesses_size_ + locktime_size);
 }
 
-size_t transaction_view::outputs_size() const NOEXCEPT
+size_t transaction::outputs_size() const NOEXCEPT
 {
     return size_ - out_offset_ - (witnesses_size_ + locktime_size);
 }
 
-size_t transaction_view::witnesses_size() const NOEXCEPT
+size_t transaction::witnesses_size() const NOEXCEPT
 {
     return witnesses_size_;
 }
 
-size_t transaction_view::unstripped_size() const NOEXCEPT
+size_t transaction::unstripped_size() const NOEXCEPT
 {
     return size_;
 }
 
-size_t transaction_view::stripped_size() const NOEXCEPT
+size_t transaction::stripped_size() const NOEXCEPT
 {
     return is_zero(witnesses_size_) ? size_ :
         size_ - (witnesses_size_ + sentinels_size);
@@ -475,31 +476,31 @@ size_t transaction_view::stripped_size() const NOEXCEPT
 // ----------------------------------------------------------------------------
 // populated properties
 
-bool transaction_view::is_populated() const NOEXCEPT
+bool transaction::is_populated() const NOEXCEPT
 {
     return populated_;
 }
 
-transaction_view::input_iterator transaction_view::inputs_begin() const NOEXCEPT
+transaction::input_iterator transaction::inputs_begin() const NOEXCEPT
 {
     BC_ASSERT(populated_);
     return inputs_begin_;
 }
 
-transaction_view::input_iterator transaction_view::inputs_end() const NOEXCEPT
+transaction::input_iterator transaction::inputs_end() const NOEXCEPT
 {
     BC_ASSERT(populated_);
     return inputs_end_;
 }
 
-transaction_view::input_iterator transaction_view::input_at(
+transaction::input_iterator transaction::input_at(
     uint32_t index) const NOEXCEPT
 {
     BC_ASSERT(populated_ && index < in_count_);
     return std::next(inputs_begin_, index);
 }
 
-output_view transaction_view::output_at(uint32_t index) const NOEXCEPT
+output transaction::output_at(uint32_t index) const NOEXCEPT
 {
     BC_ASSERT(index < out_count_);
     auto stream = get_outputs_stream();
@@ -514,13 +515,13 @@ output_view transaction_view::output_at(uint32_t index) const NOEXCEPT
     return { std::next(at_outputs(), source.get_read_position()) };
 }
 
-uint64_t transaction_view::fee() const NOEXCEPT
+uint64_t transaction::fee() const NOEXCEPT
 {
     // Underflow returns zero (and is_overspent() will be true).
     return floored_subtract(value(), spend());
 }
 
-uint64_t transaction_view::spend() const NOEXCEPT
+uint64_t transaction::spend() const NOEXCEPT
 {
     auto stream = get_outputs_stream();
     read::bytes::fast source{ stream };
@@ -536,7 +537,7 @@ uint64_t transaction_view::spend() const NOEXCEPT
     return total;
 }
 
-uint64_t transaction_view::value() const NOEXCEPT
+uint64_t transaction::value() const NOEXCEPT
 {
     BC_ASSERT(populated_);
     uint64_t total{};
@@ -549,7 +550,7 @@ uint64_t transaction_view::value() const NOEXCEPT
     return total;
 }
 
-size_t transaction_view::signature_operations(bool bip16,
+size_t transaction::signature_operations(bool bip16,
     bool bip141) const NOEXCEPT
 {
     BC_ASSERT(populated_);
@@ -580,7 +581,7 @@ size_t transaction_view::signature_operations(bool bip16,
 // ----------------------------------------------------------------------------
 // validation
 
-code transaction_view::check() const NOEXCEPT
+code transaction::check() const NOEXCEPT
 {
     BC_ASSERT(populated_);
 
@@ -594,7 +595,7 @@ code transaction_view::check() const NOEXCEPT
     return error::transaction_success;
 }
 
-code transaction_view::check(const context& ctx) const NOEXCEPT
+code transaction::check(const context& ctx) const NOEXCEPT
 {
     const auto bip113 = ctx.is_enabled(bip113_rule);
 
@@ -604,7 +605,7 @@ code transaction_view::check(const context& ctx) const NOEXCEPT
     return error::transaction_success;
 }
 
-code transaction_view::accept(const context&) const NOEXCEPT
+code transaction::accept(const context&) const NOEXCEPT
 {
     if (coinbase_)
         return error::transaction_success;
@@ -616,7 +617,7 @@ code transaction_view::accept(const context&) const NOEXCEPT
     return error::transaction_success;
 }
 
-code transaction_view::connect(const context& ctx,
+code transaction::connect(const context& ctx,
     const signatures& capture) const NOEXCEPT
 {
     if (coinbase_)
@@ -633,7 +634,7 @@ code transaction_view::connect(const context& ctx,
 // ----------------------------------------------------------------------------
 // validation helpers
 
-void transaction_view::set_inputs(const input_iterator& begin,
+void transaction::set_inputs(const input_iterator& begin,
     const input_iterator& end) NOEXCEPT
 {
     inputs_begin_ = begin;
@@ -641,14 +642,14 @@ void transaction_view::set_inputs(const input_iterator& begin,
     populated_ = true;
 }
 
-bool transaction_view::is_invalid_coinbase_size() const NOEXCEPT
+bool transaction::is_invalid_coinbase_size() const NOEXCEPT
 {
     BC_ASSERT(coinbase_ && populated_);
     const auto script_size = inputs_begin_->script_size();
     return script_size < min_coinbase_size || script_size > max_coinbase_size;
 }
 
-bool transaction_view::is_null_non_coinbase() const NOEXCEPT
+bool transaction::is_null_non_coinbase() const NOEXCEPT
 {
     BC_ASSERT(!coinbase_ && populated_);
     return std::any_of(inputs_begin_, inputs_end_, [](const auto& in) NOEXCEPT
@@ -657,7 +658,7 @@ bool transaction_view::is_null_non_coinbase() const NOEXCEPT
     });
 }
 
-bool transaction_view::is_absolute_locked(size_t height, uint32_t timestamp,
+bool transaction::is_absolute_locked(size_t height, uint32_t timestamp,
     uint32_t median_time_past, bool bip113) const NOEXCEPT
 {
     BC_ASSERT(populated_);
@@ -672,7 +673,7 @@ bool transaction_view::is_absolute_locked(size_t height, uint32_t timestamp,
         }));
 }
 
-bool transaction_view::is_missing_prevouts() const NOEXCEPT
+bool transaction::is_missing_prevouts() const NOEXCEPT
 {
     BC_ASSERT(!coinbase_ && populated_);
     return std::any_of(inputs_begin_, inputs_end_, [](const auto& in) NOEXCEPT
@@ -681,13 +682,13 @@ bool transaction_view::is_missing_prevouts() const NOEXCEPT
     });
 }
 
-bool transaction_view::is_overspent() const NOEXCEPT
+bool transaction::is_overspent() const NOEXCEPT
 {
     BC_ASSERT(!coinbase_);
     return spend() > value();
 }
 
-code transaction_view::connect_input(const context& ctx,
+code transaction::connect_input(const context& ctx,
     const input_iterator& it, const signatures& capture) const NOEXCEPT
 {
     using namespace machine;
@@ -696,12 +697,13 @@ code transaction_view::connect_input(const context& ctx,
 
     // Evaluate rolling scripts with linear search but constant erase.
     if (it->is_roller())
-        return interpreter<linked_stack, program<linked_stack, transaction_view>>::connect(ctx, *this, it, capture);
+        return interpreter<linked_stack, program<linked_stack, transaction>>::connect(ctx, *this, it, capture);
 
     // Evaluate non-rolling scripts with constant search but linear erase.
-    return interpreter<contiguous_stack, program<contiguous_stack, transaction_view>>::connect(ctx, *this, it, capture);
+    return interpreter<contiguous_stack, program<contiguous_stack, transaction>>::connect(ctx, *this, it, capture);
 }
 
+} // namespace view
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

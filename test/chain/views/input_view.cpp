@@ -29,7 +29,7 @@ static const witness p2wpkh_witness(base16_chunk("02304402203609e17b84f6a7d30c80
 
 BOOST_AUTO_TEST_CASE(input_view__construct__default__invalid)
 {
-    const input_view view{};
+    const chain::view::input view{};
     BOOST_CHECK(!view.is_valid());
     BOOST_CHECK(is_null(view.prevout));
 }
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(input_view__construct__null_point__expected)
 {
     const input expected{ point{}, sign_script, max_input_sequence };
     const auto data = expected.to_data();
-    const input_view view{ data.data(), nullptr, 0 };
+    const chain::view::input view{ data.data(), nullptr, 0 };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(view.is_null_point());
     BOOST_CHECK_EQUAL(view.point_hash(), null_hash);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(input_view__construct__witnessed__expected)
     const input expected{ point{ one_hash, 7 }, script{}, p2wpkh_witness, 42 };
     const auto data = expected.to_data();
     const auto witness_data = p2wpkh_witness.to_data(true);
-    const input_view view{ data.data(), witness_data.data(), witness_data.size() };
+    const chain::view::input view{ data.data(), witness_data.data(), witness_data.size() };
     BOOST_CHECK(view.is_valid());
     BOOST_CHECK(!view.is_null_point());
     BOOST_CHECK_EQUAL(view.point_hash(), one_hash);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(input_view__signature_operations__no_prevout__input_script_
 {
     const input expected{ point{ one_hash, 0 }, sign_script, max_input_sequence };
     const auto data = expected.to_data();
-    const input_view view{ data.data(), nullptr, 0 };
+    const chain::view::input view{ data.data(), nullptr, 0 };
     BOOST_CHECK_EQUAL(view.signature_operations(true, true), expected.signature_operations(true, true));
     BOOST_CHECK_EQUAL(view.signature_operations(true, true), 0u);
 }
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(input_view__signature_operations__p2wpkh__matches_input)
     const auto data = expected.to_data();
     const auto witness_data = p2wpkh_witness.to_data(true);
     const auto prevout_data = prevout.to_data();
-    const output_view prevout_view{ prevout_data.data() };
-    const input_view view{ data.data(), witness_data.data(), witness_data.size() };
+    const chain::view::output prevout_view{ prevout_data.data() };
+    const chain::view::input view{ data.data(), witness_data.data(), witness_data.size() };
     view.prevout = &prevout_view;
 
     BOOST_CHECK_EQUAL(view.signature_operations(true, true), expected.signature_operations(true, true));
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE(input_view__signature_operations__p2sh_multisig__matches_in
 
     const auto data = expected.to_data();
     const auto prevout_data = prevout.to_data();
-    const output_view prevout_view{ prevout_data.data() };
-    const input_view view{ data.data(), nullptr, 0 };
+    const chain::view::output prevout_view{ prevout_data.data() };
+    const chain::view::input view{ data.data(), nullptr, 0 };
     view.prevout = &prevout_view;
 
     BOOST_CHECK_EQUAL(view.signature_operations(true, true), expected.signature_operations(true, true));
