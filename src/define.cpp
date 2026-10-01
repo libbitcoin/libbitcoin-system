@@ -263,6 +263,9 @@ DEFINED("HAVE_SECP256K1")
 #ifdef HAVE_PTX
 DEFINED("HAVE_PTX")
 #endif
+#ifdef HAVE_CUDA
+DEFINED("HAVE_CUDA")
+#endif
 
 // These messages are suppressed without this.
 #ifdef HAVE_MESSAGES
