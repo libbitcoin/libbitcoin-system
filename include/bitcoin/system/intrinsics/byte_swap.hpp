@@ -22,7 +22,12 @@
 #include <bitcoin/system/define.hpp>
 
 // Use intrinsics if available (portable).
-#if defined(HAVE_LINUX)
+#if defined(HAVE_PTX)
+    // Native implementation.
+    #define byte_swap16(value) byte_swap16_nominal(value)
+    #define byte_swap32(value) byte_swap32_nominal(value)
+    #define byte_swap64(value) byte_swap64_nominal(value)
+#elif defined(HAVE_LINUX)
     // man7.org/linux/man-pages/man3/bswap.3.html
     #include <byteswap.h>
     #define byte_swap16(value) bswap_16(value)
