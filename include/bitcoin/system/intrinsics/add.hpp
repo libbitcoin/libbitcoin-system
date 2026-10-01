@@ -43,8 +43,8 @@ INLINE constexpr bool add_carry64_nominal(uint64_t& sum, uint64_t left,
     return (partial < left) || (sum < partial);
 }
 
-INLINE bool add_carry64(uint64_t& sum, uint64_t left, uint64_t right,
-    bool carry) NOEXCEPT
+HOST_DEVICE INLINE bool add_carry64(uint64_t& sum, uint64_t left,
+    uint64_t right, bool carry) NOEXCEPT
 {
 #if defined(HAVE_MSC) && defined(HAVE_X64)
     BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)

@@ -54,8 +54,8 @@ INLINE constexpr void mul_wide64_nominal(uint64_t& hi, uint64_t& lo,
     hi = p3 + (p1 >> half) + (p2 >> half) + (mid >> half);
 }
 
-INLINE void mul_wide64(uint64_t& hi, uint64_t& lo, uint64_t left,
-    uint64_t right) NOEXCEPT
+HOST_DEVICE INLINE void mul_wide64(uint64_t& hi, uint64_t& lo,
+    uint64_t left, uint64_t right) NOEXCEPT
 {
 #if defined(HAVE_MSC) && defined(HAVE_X64)
     BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
