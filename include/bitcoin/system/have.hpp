@@ -150,6 +150,14 @@
     #error secp256k1 and ultrafast are mutually exclusive.
 #endif
 
+/// ENABLE_ build symbols.
+/// ---------------------------------------------------------------------------
+
+// Compilation of device kernels to ptx (developer).
+#if defined(ENABLE_PTX)
+    #define HAVE_PTX
+#endif
+
 /// Platform features derived.
 /// ---------------------------------------------------------------------------
 

@@ -263,6 +263,10 @@ DEFINED("HAVE_SECP256K1")
 DEFINED("HAVE_ULTRAFAST")
 #endif
 
+#ifdef HAVE_PTX
+DEFINED("HAVE_PTX")
+#endif
+
 // These messages are suppressed without this.
 #ifdef HAVE_MESSAGES
 DEFINED("HAVE_MESSAGES")
