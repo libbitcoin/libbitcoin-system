@@ -28,7 +28,7 @@
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-#if !defined(HAVE_SECP256K1) && !defined(HAVE_ULTRAFAST)
+#if !defined(HAVE_SECP256K1)
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
