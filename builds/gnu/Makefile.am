@@ -439,7 +439,8 @@ include_bitcoin_system_crypto_secp256k1dir = \
     ${includedir}/bitcoin/system/crypto/secp256k1
 
 include_bitcoin_system_crypto_secp256k1_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/tables.hpp
 
 include_bitcoin_system_datadir = \
     ${includedir}/bitcoin/system/data
@@ -793,6 +794,7 @@ include_bitcoin_system_intrinsicsdir = \
 include_bitcoin_system_intrinsics_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/add.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/byte_swap.hpp \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/count.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/cpuid.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/detection.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intrinsics.hpp \
