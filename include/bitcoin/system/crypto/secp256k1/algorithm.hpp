@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_ALGORITHM_HPP
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/crypto/secp256k1/tables.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -632,8 +633,7 @@ protected:
     static constexpr size_t table_words = two *
         array_count<field_t<uint64_t>> * slice_size;
 
-    using slices_t = std_array<const uint64_t*, slice_count>;
-    static const slices_t generator_slices;
+    static_assert(array_count<decltype(generator_slices)> == slice_count);
 
     /// Offset of an entry in 64 bit words relative to its slice.
     static constexpr size_t locate(size_t entry) NOEXCEPT;
@@ -658,8 +658,7 @@ protected:
         comb_part_windows);
     static constexpr size_t comb_words = two * array_count<field_t<uint64_t>>;
 
-    using comb_parts_t = std_array<const uint64_t*, comb_part_count>;
-    static const comb_parts_t comb_parts;
+    static_assert(array_count<decltype(comb_parts)> == comb_part_count);
 
     /// r = entry of a comb window (1 + entry times its base), negated, read by
     /// scanning the window.
