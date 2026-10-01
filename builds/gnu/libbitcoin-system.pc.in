@@ -25,8 +25,7 @@ Version: @PACKAGE_VERSION@
 # Variables
 #==============================================================================
 Requires: \
-    @secp256k1_PKG@ \
-    @UltrafastSecp256k1_PKG@
+    @secp256k1_PKG@
 
 Cflags: \
     -I${includedir} \

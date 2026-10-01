@@ -30,13 +30,10 @@
 #                                Default: OFF
 # -Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #                                Default: OFF
-# -Dwith-ultrafast=<ON/OFF>    Use shrec/UltrafastSecp256k1 library.
-#                                Default: OFF
 # -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
 #                                Default: OFF
 # --build-boost                Build Boost libraries
 # --build-secp256k1            Build libsecp256k1 libraries
-# --build-ultrafast            Build UltrafastSecp256k1 libraries
 # --build-src-dir=<path>       Location for sources.
 #                                Default: $(pwd)
 # --build-obj-dir=<path>       Location for intermediate objects.
@@ -86,13 +83,6 @@ if [[ -z ${secp256k1_TAG} ]]; then
     secp256k1_TAG="v0.8.0"
 fi
 
-if [[ -z ${UltrafastSecp256k1_OWNER} ]]; then
-    UltrafastSecp256k1_OWNER="shrec"
-fi
-if [[ -z ${UltrafastSecp256k1_TAG} ]]; then
-    UltrafastSecp256k1_TAG="main"
-fi
-
 if [[ -z ${libbitcoin_system_OWNER} ]]; then
     libbitcoin_system_OWNER="libbitcoin"
 fi
@@ -108,7 +98,6 @@ main()
         case ${OPTION} in
             (--build-boost)                 BUILD_boost="yes";;
             (--build-secp256k1)             BUILD_secp256k1="yes";;
-            (--build-ultrafast)             BUILD_ultrafast="yes";;
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
             (--build-obj-dir=*)             BUILD_OBJ_DIR="${OPTION#*=}";;
             (--build-obj-dir-relative)      BUILD_OBJ_DIR_RELATIVE="yes";;
@@ -134,7 +123,6 @@ main()
     CONFIGURE_OPTIONS=("$@")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-boost/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-secp256k1/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-ultrafast/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir-relative/}")
@@ -447,23 +435,6 @@ main()
         "-DSECP256K1_ENABLE_MODULE_RECOVERY=ON"
         "-DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON")
 
-    UltrafastSecp256k1_FLAGS=()
-
-    UltrafastSecp256k1_OPTIONS=(
-        "-DSECP256K1_BUILD_CABI=ON"
-        "-DSECP256K1_BUILD_CPU=ON"
-        "-DSECP256K1_BUILD_SHIM=ON"
-        "-DSECP256K1_USE_ULTRAFAST=ON"
-        "-DSECP256K1_BUILD_BENCH=OFF"
-        "-DSECP256K1_BUILD_EXAMPLES=OFF"
-        "-DSECP256K1_BUILD_JAVA=OFF"
-        "-DSECP256K1_BUILD_TESTS=OFF"
-        "-DSECP256K1_SHIM_BUILD_SHARED=OFF"
-        "-DUFSECP_BUILD_SHARED=OFF"
-        "-DSECP256K1_INSTALL=ON"
-        "-DSECP256K1_SHIM_INSTALL=ON"
-        "-DSECP256K1_INSTALL_PKGCONFIG=ON")
-
     libbitcoin_system_FLAGS=()
 
     libbitcoin_system_OPTIONS=()
@@ -484,18 +455,6 @@ main()
         install_cmake "secp256k1" "."
         if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
             clean_cmake "secp256k1" "."
-        fi
-        export CPPFLAGS="${SAVE_CPPFLAGS}"
-    fi
-
-    if [[ ${BUILD_ultrafast} == "yes" ]]; then
-        source_github "${UltrafastSecp256k1_OWNER}" "UltrafastSecp256k1" "${UltrafastSecp256k1_TAG}"
-        local SAVE_CPPFLAGS="${CPPFLAGS}"
-        export CPPFLAGS="${CPPFLAGS} ${UltrafastSecp256k1_FLAGS[@]}"
-        build_cmake "UltrafastSecp256k1" "." "." "${PARALLEL}" "${UltrafastSecp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
-        install_cmake "UltrafastSecp256k1" "."
-        if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-            clean_cmake "UltrafastSecp256k1" "."
         fi
         export CPPFLAGS="${SAVE_CPPFLAGS}"
     fi
@@ -923,7 +882,6 @@ display_build_variables()
 {
     msg "BUILD_boost                     : ${BUILD_boost}"
     msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
-    msg "BUILD_ultrafast                 : ${BUILD_ultrafast}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
     msg "BUILD_OBJ_DIR                   : ${BUILD_OBJ_DIR}"
     msg "BUILD_OBJ_DIR_RELATIVE          : ${BUILD_OBJ_DIR_RELATIVE}"
@@ -968,9 +926,6 @@ display_constants()
     msg "secp256k1_OWNER                 : ${secp256k1_OWNER}"
     msg "secp256k1_TAG                   : ${secp256k1_TAG}"
 
-    msg "UltrafastSecp256k1_OWNER        : ${UltrafastSecp256k1_OWNER}"
-    msg "UltrafastSecp256k1_TAG          : ${UltrafastSecp256k1_TAG}"
-
     msg "libbitcoin_system_OWNER         : ${libbitcoin_system_OWNER}"
     msg "libbitcoin_system_TAG           : ${libbitcoin_system_TAG}"
 }
@@ -1002,13 +957,10 @@ help()
     msg "                               Default: OFF"
     msg "-Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg "                               Default: OFF"
-    msg "-Dwith-ultrafast=<ON/OFF>    Use shrec/UltrafastSecp256k1 library."
-    msg "                               Default: OFF"
     msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
     msg "                               Default: OFF"
     msg "--build-boost                Build Boost libraries"
     msg "--build-secp256k1            Build libsecp256k1 libraries"
-    msg "--build-ultrafast            Build UltrafastSecp256k1 libraries"
     msg "--build-src-dir=<path>       Location for sources."
     msg "                               Default: $(pwd)"
     msg "--build-obj-dir=<path>       Location for intermediate objects."

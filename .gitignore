@@ -12,7 +12,6 @@
 *.pyc
 
 # store
-*.bin
 *.head
 *.data
 

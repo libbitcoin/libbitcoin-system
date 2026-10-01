@@ -17,9 +17,6 @@
   <!-- These will compile to the target regardless of the compiling platform. -->
   <!-- That will result in a crash of test/executable execution if mismatched. -->
   <PropertyGroup>
-    <!--<Option-512>false</Option-512>-->
-    <!--<Option-256>true</Option-256>-->
-    <!--<Option-128>true</Option-128>-->
     <Option-sha Condition="'$(Option-sha)' == ''">false</Option-sha>
     <Option-sha512 Condition="'$(Option-sha512)' == ''">false</Option-sha512>
     <Option-avx512ifma Condition="'$(Option-avx512ifma)' == ''">false</Option-avx512ifma>
@@ -27,8 +24,6 @@
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
-    <Option-ultrafast Condition="'$(Option-ultrafast)' == ''">false</Option-ultrafast>
-    <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
   </PropertyGroup>
 
   <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->
@@ -37,15 +32,6 @@
     <Option-arch Condition="('$(Option-avx2)' == 'true' Or '$(Option-avxifma)' == 'true' Or '$(Option-vaes)' == 'true' Or '$(Option-sha512)' == 'true') And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions2</Option-arch>
     <Option-arch Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</Option-arch>
   </PropertyGroup>
-  <ItemDefinitionGroup>
-    <ClCompile>
-      <!-- order matters -->
-      <!-- Native configuration now specifyies avx, avx2 or avx512 - in which case we run 128, 256, 512. -->
-      <!--<EnableEnhancedInstructionSet Condition="'$(Option-128)' == 'true'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>-->
-      <!--<EnableEnhancedInstructionSet Condition="'$(Option-256)' == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>-->
-      <!--<EnableEnhancedInstructionSet Condition="'$(Option-512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>-->
-    </ClCompile>
-  </ItemDefinitionGroup>
 
   <!-- Messages -->
 
@@ -57,11 +43,6 @@
     <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
     <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
-    <Message Text="Option-ultrafast  : $(Option-ultrafast)" Importance="high"/>
-    <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
-    <!--<Message Text="Option-512        : $(Option-512)" Importance="high"/>-->
-    <!--<Message Text="Option-256        : $(Option-256)" Importance="high"/>-->
-    <!--<Message Text="Option-128        : $(Option-128)" Importance="high"/>-->
   </Target>
 
   <!-- Linkage -->
@@ -84,9 +65,6 @@
       <PreprocessorDefinitions Condition="'$(Option-avxifma)' == 'true'">WITH_AVXIFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <!--<PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
-      <!--<PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
-      <!--<PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
     </ClCompile>    
     <Link>
       <!-- 4099: warns about missing PDB files. -->

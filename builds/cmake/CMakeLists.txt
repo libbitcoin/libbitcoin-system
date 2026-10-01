@@ -90,7 +90,6 @@ option( enable-sha512 "Use Intel SHA512 Extensions (implies AVX2)." OFF )
 option( enable-sha3 "Use ARM SHA3 Extensions for SHA512 (implies Crypto)." OFF )
 option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
 option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
-option( with-ultrafast "Use shrec/UltrafastSecp256k1 library." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( with-tests "Compile with unit tests." ON )
 option( with-examples "Compile with examples." ON )
@@ -101,11 +100,9 @@ option( with-examples "Compile with examples." ON )
 if ( BUILD_SHARED_LIBS )
   set( Boost_USE_STATIC_LIBS "OFF" )
   set( libsecp256k1_USE_STATIC_LIBS "OFF" )
-  set( secp256k1-fast_USE_STATIC_LIBS "OFF" )
 else()
   set( Boost_USE_STATIC_LIBS "ON" )
   set( libsecp256k1_USE_STATIC_LIBS "ON" )
-  set( secp256k1-fast_USE_STATIC_LIBS "ON" )
 endif()
 
 find_package( Boost 1.86.0 REQUIRED
@@ -120,11 +117,6 @@ find_package( Boost 1.86.0 REQUIRED
 if ( with-secp256k1 )
   find_package( libsecp256k1 0.8.0 REQUIRED )
   set( secp256k1_VERSION ${libsecp256k1_VERSION} )
-endif()
-
-if ( with-ultrafast )
-  find_package( secp256k1-fast 4.0.0.0 REQUIRED )
-  set( UltrafastSecp256k1_VERSION ${secp256k1-fast_VERSION} )
 endif()
 
 #------------------------------------------------------------------------------
@@ -478,7 +470,6 @@ target_link_libraries( libbitcoin-system
     Boost::program_options
     Boost::url
     $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
-    $<$<BOOL:${with-ultrafast}>:secp256k1::fastsecp256k1>
 )
 
 set_target_properties( libbitcoin-system
