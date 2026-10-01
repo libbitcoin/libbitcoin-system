@@ -37,22 +37,22 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         constexpr auto size = SHA::word_bytes;
-        from_big<0 * size>(buffer.at(0), block);
-        from_big<1 * size>(buffer.at(1), block);
-        from_big<2 * size>(buffer.at(2), block);
-        from_big<3 * size>(buffer.at(3), block);
-        from_big<4 * size>(buffer.at(4), block);
-        from_big<5 * size>(buffer.at(5), block);
-        from_big<6 * size>(buffer.at(6), block);
-        from_big<7 * size>(buffer.at(7), block);
-        from_big<8 * size>(buffer.at(8), block);
-        from_big<9 * size>(buffer.at(9), block);
-        from_big<10 * size>(buffer.at(10), block);
-        from_big<11 * size>(buffer.at(11), block);
-        from_big<12 * size>(buffer.at(12), block);
-        from_big<13 * size>(buffer.at(13), block);
-        from_big<14 * size>(buffer.at(14), block);
-        from_big<15 * size>(buffer.at(15), block);
+        from_big<0 * size>(buffer[0], block);
+        from_big<1 * size>(buffer[1], block);
+        from_big<2 * size>(buffer[2], block);
+        from_big<3 * size>(buffer[3], block);
+        from_big<4 * size>(buffer[4], block);
+        from_big<5 * size>(buffer[5], block);
+        from_big<6 * size>(buffer[6], block);
+        from_big<7 * size>(buffer[7], block);
+        from_big<8 * size>(buffer[8], block);
+        from_big<9 * size>(buffer[9], block);
+        from_big<10 * size>(buffer[10], block);
+        from_big<11 * size>(buffer[11], block);
+        from_big<12 * size>(buffer[12], block);
+        from_big<13 * size>(buffer[13], block);
+        from_big<14 * size>(buffer[14], block);
+        from_big<15 * size>(buffer[15], block);
     }
     else if constexpr (bc::is_little_endian)
     {
@@ -119,14 +119,14 @@ input_left(auto& buffer, const half_t& half) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         constexpr auto size = SHA::word_bytes;
-        from_big<0 * size>(buffer.at(0), half);
-        from_big<1 * size>(buffer.at(1), half);
-        from_big<2 * size>(buffer.at(2), half);
-        from_big<3 * size>(buffer.at(3), half);
-        from_big<4 * size>(buffer.at(4), half);
-        from_big<5 * size>(buffer.at(5), half);
-        from_big<6 * size>(buffer.at(6), half);
-        from_big<7 * size>(buffer.at(7), half);
+        from_big<0 * size>(buffer[0], half);
+        from_big<1 * size>(buffer[1], half);
+        from_big<2 * size>(buffer[2], half);
+        from_big<3 * size>(buffer[3], half);
+        from_big<4 * size>(buffer[4], half);
+        from_big<5 * size>(buffer[5], half);
+        from_big<6 * size>(buffer[6], half);
+        from_big<7 * size>(buffer[7], half);
     }
     else if constexpr (bc::is_little_endian)
     {
@@ -174,14 +174,14 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         constexpr auto size = SHA::word_bytes;
-        from_big<0 * size>(buffer.at(8), half);
-        from_big<1 * size>(buffer.at(9), half);
-        from_big<2 * size>(buffer.at(10), half);
-        from_big<3 * size>(buffer.at(11), half);
-        from_big<4 * size>(buffer.at(12), half);
-        from_big<5 * size>(buffer.at(13), half);
-        from_big<6 * size>(buffer.at(14), half);
-        from_big<7 * size>(buffer.at(15), half);
+        from_big<0 * size>(buffer[8], half);
+        from_big<1 * size>(buffer[9], half);
+        from_big<2 * size>(buffer[10], half);
+        from_big<3 * size>(buffer[11], half);
+        from_big<4 * size>(buffer[12], half);
+        from_big<5 * size>(buffer[13], half);
+        from_big<6 * size>(buffer[14], half);
+        from_big<7 * size>(buffer[15], half);
     }
     else if constexpr (bc::is_little_endian)
     {
@@ -230,10 +230,10 @@ input_left(auto& buffer, const quart_t& quarter) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         constexpr auto size = SHA::word_bytes;
-        from_big<0 * size>(buffer.at(0), quarter);
-        from_big<1 * size>(buffer.at(1), quarter);
-        from_big<2 * size>(buffer.at(2), quarter);
-        from_big<3 * size>(buffer.at(3), quarter);
+        from_big<0 * size>(buffer[0], quarter);
+        from_big<1 * size>(buffer[1], quarter);
+        from_big<2 * size>(buffer[2], quarter);
+        from_big<3 * size>(buffer[3], quarter);
     }
     else if constexpr (bc::is_little_endian)
     {
@@ -259,10 +259,10 @@ input_right(auto& buffer, const quart_t& quarter) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         constexpr auto size = SHA::word_bytes;
-        from_big<0 * size>(buffer.at(4), quarter);
-        from_big<1 * size>(buffer.at(5), quarter);
-        from_big<2 * size>(buffer.at(6), quarter);
-        from_big<3 * size>(buffer.at(7), quarter);
+        from_big<0 * size>(buffer[4], quarter);
+        from_big<1 * size>(buffer[5], quarter);
+        from_big<2 * size>(buffer[6], quarter);
+        from_big<3 * size>(buffer[7], quarter);
     }
     else if constexpr (bc::is_little_endian)
     {
@@ -309,9 +309,9 @@ output(const state_t& state) NOEXCEPT
         if constexpr (words > 2)
         {
             // Convert first three words.
-            to_big<0 * size>(digest, state.at(0));
-            to_big<1 * size>(digest, state.at(1));
-            to_big<2 * size>(digest, state.at(2));
+            to_big<0 * size>(digest, state[0]);
+            to_big<1 * size>(digest, state[1]);
+            to_big<2 * size>(digest, state[2]);
         }
 
         // sha512-224
@@ -319,34 +319,34 @@ output(const state_t& state) NOEXCEPT
         {
             // Convert fourth word into temporary.
             data_array<size> partial{};
-            to_big<0>(partial, state.at(3));
+            to_big<0>(partial, state[3]);
 
             // Copy first half of fourth word into end of digest.
-            digest.at(3 * size + 0) = partial.at(0);
-            digest.at(3 * size + 1) = partial.at(1);
-            digest.at(3 * size + 2) = partial.at(2);
-            digest.at(3 * size + 3) = partial.at(3);
+            digest[3 * size + 0] = partial[0];
+            digest[3 * size + 1] = partial[1];
+            digest[3 * size + 2] = partial[2];
+            digest[3 * size + 3] = partial[3];
         }
 
         // sha512-256
         if constexpr (words > 3)
-            to_big<3 * size>(digest, state.at(3));
+            to_big<3 * size>(digest, state[3]);
 
         // sha160
         if constexpr (words > 4)
-            to_big<4 * size>(digest, state.at(4));
+            to_big<4 * size>(digest, state[4]);
 
         // sha256-384
         if constexpr (words > 5)
-            to_big<5 * size>(digest, state.at(5));
+            to_big<5 * size>(digest, state[5]);
 
         // sha256-224
         if constexpr (words > 6)
-            to_big<6 * size>(digest, state.at(6));
+            to_big<6 * size>(digest, state[6]);
 
         // sha256, sha512
         if constexpr (words > 7)
-            to_big<7 * size>(digest, state.at(7));
+            to_big<7 * size>(digest, state[7]);
 
         return digest;
     }
