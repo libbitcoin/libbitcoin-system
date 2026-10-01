@@ -291,6 +291,43 @@ BOOST_AUTO_TEST_CASE(aes__ctr__sizes__variants_agree)
     }
 }
 
+BOOST_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
+{
+    constexpr auto initial = base16_array("000102030405060708090a0bfffffff0");
+    constexpr std_array<size_t, 5> offsets{ 1, 5, 16, 32, 48 };
+    alignas(64) data_array<sizes.back() + 64> data{};
+    alignas(64) data_array<sizes.back() + 64> out{};
+    chacha20{ key256 }.stream(data);
+
+    std::for_each(offsets.cbegin(), offsets.cend(), [&](size_t offset)
+    {
+        std::for_each(sizes.cbegin(), sizes.cend(), [&](size_t size)
+        {
+            const auto text = const_byte_span{ data }.subspan(offset, size);
+            const auto cipher = byte_span{ out }.subspan(offset, size);
+            auto counter1 = initial;
+            auto counter2 = initial;
+            auto counter3 = initial;
+            auto counter4 = initial;
+            const auto expected = crypt<aes256_sliced>(key256, counter1, text);
+
+            aes256_native::ctr(cipher, text, counter2, aes256_native::expand(key256));
+            BOOST_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
+
+            aes256_vector::ctr(cipher, text, counter3, aes256_vector::expand(key256));
+            BOOST_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
+
+            // In place.
+            std::copy(text.begin(), text.end(), cipher.begin());
+            aes256_native::ctr(cipher, cipher, counter4, aes256_native::expand(key256));
+            BOOST_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
+            BOOST_REQUIRE_EQUAL(counter2, counter1);
+            BOOST_REQUIRE_EQUAL(counter3, counter1);
+            BOOST_REQUIRE_EQUAL(counter4, counter1);
+        });
+    });
+}
+
 BOOST_AUTO_TEST_CASE(aes__ctr__keystream__encrypted_counters)
 {
     constexpr auto initial = base16_array("000102030405060708090a0bfffffffe");

@@ -150,6 +150,33 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__tampered_aad__false_cleared)
     BOOST_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00));
 }
 
+BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
+{
+    constexpr std_array<size_t, 5> offsets{ 1, 5, 16, 32, 48 };
+    const aes128_gcm::secret key{ 0x01, 0x02, 0x03 };
+    const aes128_gcm::nonce nonce{ 0x04, 0x05, 0x06 };
+    const data_chunk aad{ 0x17, 0x03, 0x03, 0x04, 0x5c };
+    const data_chunk plain(1100, 0x2a);
+    const auto size = plain.size() + aes128_gcm::expansion;
+
+    aes128_gcm cipher{ key };
+    data_chunk expected(size);
+    cipher.encrypt(plain, aad, nonce, expected);
+
+    std::for_each(offsets.cbegin(), offsets.cend(), [&](size_t offset)
+    {
+        data_chunk record(offset + size);
+        const auto out = byte_span{ record }.subspan(offset);
+        cipher.encrypt(plain, aad, nonce, out);
+        BOOST_REQUIRE_EQUAL(data_chunk(out.begin(), out.end()), expected);
+
+        data_chunk buffer(offset + plain.size());
+        const auto text = byte_span{ buffer }.subspan(offset);
+        BOOST_REQUIRE(cipher.decrypt(text, aad, nonce, out));
+        BOOST_REQUIRE_EQUAL(data_chunk(text.begin(), text.end()), plain);
+    });
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(aes256_gcm_tests)

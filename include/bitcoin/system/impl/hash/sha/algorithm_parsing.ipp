@@ -57,8 +57,8 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     else if constexpr (bc::is_little_endian)
     {
         // This optimization is neutral in 4/8/16 lane sha256 perf.
-        // Enabling requires f::load/f::store, as indexing a vector cast of
-        // storage not vector aligned emits aligned moves, which fault.
+        // Enabling requires vector aligned storage, as a vector cast of
+        // storage not so aligned may emit aligned moves, which fault.
         ////if constexpr (have_lanes<word_t, 16>)
         ////{
         ////    using xword_t = to_extended<word_t, 16>;
@@ -131,8 +131,8 @@ input_left(auto& buffer, const half_t& half) NOEXCEPT
     else if constexpr (bc::is_little_endian)
     {
         // This optimization is neutral in 4/8 lane sha256 perf.
-        // Enabling requires f::load/f::store, as indexing a vector cast of
-        // storage not vector aligned emits aligned moves, which fault.
+        // Enabling requires vector aligned storage, as a vector cast of
+        // storage not so aligned may emit aligned moves, which fault.
         ////if constexpr (have_lanes<word_t, 8>)
         ////{
         ////    using xword_t = to_extended<word_t, 8>;
@@ -186,8 +186,8 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
     else if constexpr (bc::is_little_endian)
     {
         // This optimization is neutral in 4/8 lane sha256 perf.
-        // Enabling requires f::load/f::store, as indexing a vector cast of
-        // storage not vector aligned emits aligned moves, which fault.
+        // Enabling requires vector aligned storage, as a vector cast of
+        // storage not so aligned may emit aligned moves, which fault.
         ////if constexpr (have_lanes<word_t, 8>)
         ////{
         ////    using xword_t = to_extended<word_t, 8>;
@@ -358,8 +358,8 @@ output(const state_t& state) NOEXCEPT
         if constexpr (SHA::strength != 160)
         {
             // This optimization is neutral in 4/8 lane sha256 perf.
-            // Enabling requires f::load/f::store, as indexing a vector cast of
-            // storage not vector aligned emits aligned moves, which fault.
+            // Enabling requires vector aligned storage, as a vector cast of
+            // storage not so aligned may emit aligned moves, which fault.
             ////if constexpr (have_lanes<word_t, 8>)
             ////{
             ////    using xword_t = to_extended<word_t, 8>;

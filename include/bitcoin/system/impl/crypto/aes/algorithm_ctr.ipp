@@ -163,7 +163,7 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
 
         // The counter prefix is constant, only its low order word changes.
         const auto keys = native_encrypt_keys<xWord>(schedule);
-        xblocks_t<lanes> xstream{};
+        alignas(xWord) xblocks_t<lanes> xstream{};
         xstream.fill(counter);
 
         do
@@ -180,25 +180,26 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
 
             native_encrypt(state, keys);
 
-            // Whole passes are applied in words, directly to out.
+            // Whole passes are applied directly to out, through bytes, as
+            // caller buffers are not vector aligned.
             if ((out.size() - byte) >= size)
             {
-                auto& to = array_cast<xWord>(unsafe_array_cast<uint8_t, size>(
-                    std::next(out.data(), byte)));
-
+                const auto to = std::next(out.data(), byte);
                 if (in.empty())
                 {
                     for (size_t word{}; word < native_words; ++word)
-                        f::store(to[word], state[word]);
+                        f::store(std::next(to, word * sizeof(xWord)),
+                            state[word]);
                 }
                 else
                 {
-                    const auto& from = array_cast<xWord>(unsafe_array_cast<
-                        uint8_t, size>(std::next(in.data(), byte)));
-
+                    const auto from = std::next(in.data(), byte);
                     for (size_t word{}; word < native_words; ++word)
-                        f::store(to[word], f::xor_(state[word],
-                            f::load(from[word])));
+                    {
+                        const auto at = word * sizeof(xWord);
+                        f::store(std::next(to, at), f::xor_(state[word],
+                            f::load<xWord>(std::next(from, at))));
+                    }
                 }
 
                 to_big<12>(counter, value +

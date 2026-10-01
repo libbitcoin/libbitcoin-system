@@ -110,6 +110,16 @@ INLINE void store(xint128_t&, xint128_t) NOEXCEPT
 {
 }
 
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t load(const uint8_t*) NOEXCEPT
+{
+    return {};
+}
+
+INLINE void store(uint8_t*, xint128_t) NOEXCEPT
+{
+}
+
 INLINE xint128_t load_aligned(const xint128_t&) NOEXCEPT
 {
     return {};

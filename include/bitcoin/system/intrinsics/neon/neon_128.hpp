@@ -317,6 +317,17 @@ INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
     vst1q_u32((uint32_t*)&bytes, a);
 }
 
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t load(const uint8_t* bytes) NOEXCEPT
+{
+    return (xint128_t)vld1q_u8(bytes);
+}
+
+INLINE void store(uint8_t* bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u8(bytes, (uint8x16_t)a);
+}
+
 INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
 {
     return vld1q_u32((uint32_t*)&bytes);

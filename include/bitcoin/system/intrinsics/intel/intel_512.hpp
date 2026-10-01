@@ -356,6 +356,17 @@ INLINE void store(xint512_t& bytes, xint512_t a) NOEXCEPT
     _mm512_storeu_si512(&bytes, a);
 }
 
+template <typename xWord, if_same<xWord, xint512_t> = true>
+INLINE xint512_t load(const uint8_t* bytes) NOEXCEPT
+{
+    return _mm512_loadu_si512(bytes);
+}
+
+INLINE void store(uint8_t* bytes, xint512_t a) NOEXCEPT
+{
+    _mm512_storeu_si512(bytes, a);
+}
+
 INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
 {
     return _mm512_load_si512(&bytes);

@@ -340,6 +340,17 @@ INLINE void store(xint256_t& bytes, xint256_t a) NOEXCEPT
     _mm256_storeu_si256(&bytes, a);
 }
 
+template <typename xWord, if_same<xWord, xint256_t> = true>
+INLINE xint256_t load(const uint8_t* bytes) NOEXCEPT
+{
+    return _mm256_loadu_si256(pointer_cast<const xint256_t>(bytes));
+}
+
+INLINE void store(uint8_t* bytes, xint256_t a) NOEXCEPT
+{
+    _mm256_storeu_si256(pointer_cast<xint256_t>(bytes), a);
+}
+
 INLINE xint256_t load_aligned(const xint256_t& bytes) NOEXCEPT
 {
     return _mm256_load_si256(&bytes);
