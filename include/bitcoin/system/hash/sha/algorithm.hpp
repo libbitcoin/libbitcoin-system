@@ -134,6 +134,10 @@ public:
     static constexpr state_t midstate(const half_t& left,
         const half_t& right) NOEXCEPT;
 
+    /// Hash of three halves following a one block midstate.
+    static constexpr digest_t hash(const state_t& midstate,
+        const half_t& first, const half_t& second, const half_t& third) NOEXCEPT;
+
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
 
