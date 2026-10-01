@@ -224,6 +224,13 @@ INLINE xint256_t broadcast(Word a) NOEXCEPT
 }
 
 // AVX2
+template <typename xWord, if_same<xWord, xint256_t> = true>
+INLINE xint256_t broadcast(xint128_t a) NOEXCEPT
+{
+    return _mm256_broadcastsi128_si256(a);
+}
+
+// AVX2
 // Lane zero is lowest order word.
 template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint256_t a) NOEXCEPT

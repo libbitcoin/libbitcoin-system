@@ -96,16 +96,7 @@ INLINE xint128_t inverse(xint128_t key) NOEXCEPT
 template <typename xWord>
 INLINE xWord replicate(xint128_t key) NOEXCEPT
 {
-    if constexpr (is_same_type<xWord, xint128_t>)
-        return key;
-#if defined(HAVE_VAES) && defined(HAVE_AVX2)
-    else if constexpr (is_same_type<xWord, xint256_t>)
-        return _mm256_broadcastsi128_si256(key);
-#endif
-#if defined(HAVE_VAES) && defined(HAVE_AVX512)
-    else if constexpr (is_same_type<xWord, xint512_t>)
-        return _mm512_broadcast_i32x4(key);
-#endif
+    return f::broadcast<xWord>(key);
 }
 
 /// Ciphers.

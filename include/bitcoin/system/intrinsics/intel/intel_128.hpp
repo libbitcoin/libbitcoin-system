@@ -215,6 +215,12 @@ INLINE xint128_t broadcast(Word a) NOEXCEPT
         return _mm_set1_epi64x(a);
 }
 
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t broadcast(xint128_t a) NOEXCEPT
+{
+    return a;
+}
+
 // SSE4.1
 // Lane zero is lowest order word.
 template <typename Word, auto Lane, if_integral_integer<Word> = true>

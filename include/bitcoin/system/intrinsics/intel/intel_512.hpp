@@ -210,6 +210,13 @@ INLINE xint512_t broadcast(Word a) NOEXCEPT
         return _mm512_set1_epi64(a);
 }
 
+// AVX512F
+template <typename xWord, if_same<xWord, xint512_t> = true>
+INLINE xint512_t broadcast(xint128_t a) NOEXCEPT
+{
+    return _mm512_broadcast_i32x4(a);
+}
+
 // AVX512BW
 // Lane zero is lowest order word.
 template <typename Word, auto Lane, if_integral_integer<Word> = true>
