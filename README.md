@@ -2,7 +2,7 @@
 
 [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-system/master)](https://coveralls.io/github/libbitcoin/libbitcoin-system?branch=master)
 
-# Libbitcoin
+# libbitcoin-system
 
 *The Bitcoin Development Library*
 
@@ -12,202 +12,225 @@
 
 All files in this repository fall under the license specified in [COPYING](COPYING). The project is licensed as [AGPL with a lesser clause](https://www.gnu.org/licenses/agpl-3.0.en.html). It may be used within a proprietary project, but the core library and any changes to it must be published online. Source code for this library must always remain free for everybody to access.
 
-**About Libbitcoin**
+**About libbitcoin**
 
-The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the base [libbitcoin-system](https://github.com/libbitcoin/libbitcoin-system) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) 1.14+ instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified in the automated build.
+The libbitcoin toolkit is a set of cross platform C++ libraries for building Bitcoin applications. The toolkit consists of several libraries, most of which depend on this foundational library. Each library's repository can be cloned and built separately.
 
-## Installation
+The master branch is current, pending the v4 release.
 
-The master branch is a staging area for the next major release and should be used only by libbitcoin developers. The current release branch is version3. Detailed installation instructions are provided below.
+## Contents
+- [Requirements](#requirements)
+- [Build from Source](#build-from-source)
+  - [GNU Autotools Build](#gnu-autotools-build)
+  - [CMake Build](#cmake-build)
+  - [CMake Presets Build](#cmake-presets-build)
+  - [macOS](#macos)
+  - [Windows](#windows)
+- [secp256k1](#secp256k1)
+- [Hardware](#hardware)
 
-  * [Debian/Ubuntu](#debianubuntu)
-  * [MacOS](#macos)
-  * [Windows](#windows)
+---
 
-### Autotools (advanced users)
+## Requirements
 
-On Linux and macOS libbitcoin is built using Autotools as follows.
-```sh
-$ ./autogen.sh
-$ ./configure
-$ make
-$ sudo make install
-$ sudo ldconfig
-```
-A minimal libbitcoin build requires boost and libsecp256k1. The [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1) repository is forked from [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build. The original repository can be used directly but recent changes to the public interface may cause build breaks. The `--enable-module-recovery` switch is required.
+| Requirement | Notes |
+|-------------|-------|
+| C++20 compiler | Verified in CI with GCC 13–16, Clang 18–19, Apple Clang and MSVC (Visual Studio 2026) |
+| Boost ≥ 1.86 | container, json, program_options, url, and unit_test_framework for tests |
+| Autoconf / Automake / Libtool, pkg-config | GNU Autotools builds |
+| CMake ≥ 3.30 | CMake builds |
+| git | Used by the installation scripts to clone dependencies |
 
-### Debian/Ubuntu
+On Ubuntu 24.04 LTS:
 
-Libbitcoin requires a C++11 compiler, currently minimum [GCC 4.8.0](https://gcc.gnu.org/projects/cxx0x.html) or Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html).
+```bash
+# For GNU Autotools builds:
+sudo apt install build-essential git autoconf automake libtool pkg-config
 
-Install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and git:
-```sh
-$ sudo apt-get install build-essential autoconf automake libtool pkg-config git
-```
-Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
-```sh
-$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
-$ chmod +x install.sh
-```
-Finally install libbitcoin with recommended build options:
-```sh
-$ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
+# Additionally for CMake builds:
+sudo apt install cmake
 ```
 
-Libbitcoin is now installed in `/home/me/myprefix/`.
+---
 
-### MacOS
+## Build from Source
 
-The macOS installation differs from Linux in the installation of the compiler and packaged dependencies. Libbitcoin supports both [Homebrew](http://brew.sh) and [MacPorts](https://www.macports.org) package managers. Both require Apple's [Xcode](https://developer.apple.com/xcode) command line tools. Neither requires Xcode as the tools may be installed independently.
+libbitcoin-system ships with **three installation scripts**, each targeting a different toolchain:
 
-Libbitcoin compiles with Clang on macOS and requires C++11 support. Installation has been verified using Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html). This version or newer should be installed as part of the Xcode command line tools.
+| Script | Toolchain | Best for |
+|--------|-----------|----------|
+| `builds/gnu/install-gnu.sh` | GNU Autotools (make) | Linux, macOS — traditional |
+| `builds/cmake/install-cmake.sh` | CMake | Linux, macOS — flexible |
+| `builds/cmake/install-presets.sh` | CMake with Presets | Linux — simplified, named configurations |
 
-To see your Clang/LLVM  version:
-```sh
-$ clang++ --version
-```
-You may encounter a prompt to install the Xcode command line developer tools, in which case accept the prompt.
-```
-Apple LLVM version 6.0 (clang-600.0.54) (based on LLVM 3.5svn)
-Target: x86_64-apple-darwin14.0.0
-Thread model: posix
-```
-If required update your version of the command line tools as follows:
-```sh
-$ xcode-select --install
-```
+Each script can download and build its dependencies (Boost and, optionally, a secp256k1 library) before building and installing libbitcoin-system. Unrecognized options are passed through as configuration options to all builds.
 
-#### Using Homebrew
+### GNU Autotools Build
 
-First install [Homebrew](https://brew.sh). 
+Uses `make` and Autotools (`autoconf`, `automake`, `libtool`). Well-tested and the reference build for CI.
 
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
-```sh
-$ brew install autoconf automake libtool pkgconfig wget
-```
-Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
-```sh
-$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
-$ chmod +x install.sh
-```
-Finally install libbitcoin with recommended build options:
-```sh
-$ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
+```bash
+git clone https://github.com/libbitcoin/libbitcoin-system
+cd libbitcoin-system
+
+./builds/gnu/install-gnu.sh \
+  --prefix=$HOME/libbitcoin \
+  --build-boost \
+  --build-config=release \
+  --build-link=static \
+  --build-post-install-clean
 ```
 
-Libbitcoin is now installed in `/home/me/myprefix/`.
+On success the headers and library are installed under `$HOME/libbitcoin`, along with `lib/pkgconfig/libbitcoin-system.pc`.
 
-#### Using MacPorts
+**Key options:**
 
-First install [MacPorts](https://www.macports.org/install.php).
+| Option | Values | Description |
+|--------|--------|-------------|
+| `--prefix=<path>` | absolute path | Installation destination (default `/usr/local`) |
+| `--build-config=<mode>` | `release`, `debug` | Build configuration |
+| `--build-link=<mode>` | `static`, `dynamic` | Link mode |
+| `--build-boost` | — | Build Boost from source |
+| `--build-secp256k1` | — | Build bitcoin-core/secp256k1 from source (with `--with-secp256k1`) |
+| `--build-ultrafast` | — | Build UltrafastSecp256k1 from source (with `--with-ultrafast`) |
+| `--build-use-local-src` | — | Reuse already-present source directories instead of cloning from GitHub |
+| `--build-skip-tests` | — | Skip test compilation and execution |
+| `--build-parallel=<n>` | integer | Number of parallel compile jobs |
+| `--build-post-install-clean` | — | Remove dependency build artifacts after installation |
 
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
-```sh
-$ sudo port install autoconf automake libtool pkgconfig wget
-```
-Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) and enable execution:
-```sh
-$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version3/install.sh
-$ chmod +x install.sh
-```
-Finally install libbitcoin with recommended build options:
-```sh
-$ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
-```
+See all options:
 
-Libbitcoin is now installed in `/home/me/myprefix/`.
-
-### Build Notes for Linux / macOS
-The [install script](https://github.com/libbitcoin/libbitcoin/blob/version3/install.sh) itself is commented so that the manual build steps for each dependency can be inferred by a developer.
-
-You can run the install script from any directory on your system. By default this will build libbitcoin in a subdirectory named `build-libbitcoin` and install it to `/usr/local/`. The install script requires `sudo` only if you do not have access to the installation location, which you can change using the `--prefix` option on the installer command line.
-
-The build script clones, builds and installs two unpackaged repositories, namely:
-
-- [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1)
-- [libbitcoin/libbitcoin](https://github.com/libbitcoin/libbitcoin)
-
-The script builds from the head of their `version7` and `version3` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
-
-#### Build Options
-
-Any set of `./configure` options can be passed via the build script, for example:
-```sh
-$ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
+```bash
+./builds/gnu/install-gnu.sh --help
 ```
 
-#### Compiling with ICU (International Components for Unicode)
+### CMake Build
 
-Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) and later [BIP-38](https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) and [Electrum](https://electrum.org) mnemnoic support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use passphrase normalization for these features libbitcoin must be compiled with the `--with-icu` option. Currently [libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer) is the only other library that accesses this feature, so if you do not intend to use passphrase normalization this dependency can be avoided.
-```sh
-$ ./install.sh --with-icu --build-icu --build-boost --disable-shared
+Uses CMake instead of Autotools. Configuration options use CMake's `-D` syntax.
+
+```bash
+git clone https://github.com/libbitcoin/libbitcoin-system
+cd libbitcoin-system
+
+./builds/cmake/install-cmake.sh \
+  --prefix=$HOME/libbitcoin \
+  --build-boost \
+  --build-config=release \
+  --build-link=static \
+  --build-post-install-clean
 ```
 
-#### Building ICU and/or Boost
+The script options are those of the Autotools script. The configuration options are:
 
-The installer can download and install these dependencies. ICU is a large package that is not typically preinstalled at a sufficient level. Using these builds ensures compiler and configuration compatibility across all of the build components. It is recommended to use a prefix directory when building these components.
-```sh
-$ ./install.sh --prefix=/home/me/myprefix --with-icu --build-icu --build-boost --disable-shared
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-Dwith-tests=<ON/OFF>` | `ON` | Compile with unit tests |
+| `-Dwith-examples=<ON/OFF>` | `ON` | Compile with examples |
+| `-Dwith-secp256k1=<ON/OFF>` | `OFF` | Use bitcoin-core/secp256k1 |
+| `-Dwith-ultrafast=<ON/OFF>` | `OFF` | Use UltrafastSecp256k1 |
+| `-Denable-<extension>=<ON/OFF>` | `OFF` | See [CPU Extensions](#cpu-extensions) |
+
+See all options:
+
+```bash
+./builds/cmake/install-cmake.sh --help
 ```
+
+### CMake Presets Build
+
+Named presets combine the toolchain, build type and link mode into a single `--build-preset` parameter. The install prefix and build directory are set relative to the source tree.
+
+| Preset | Config | Link |
+|--------|--------|------|
+| `nix-gnu-release-static` | release | static |
+| `nix-gnu-release-shared` | release | dynamic |
+| `nix-gnu-debug-static` | debug | static |
+| `nix-gnu-debug-shared` | debug | dynamic |
+
+```bash
+./builds/cmake/install-presets.sh \
+  --build-preset=nix-gnu-release-static \
+  --build-boost
+```
+
+See all options:
+
+```bash
+./builds/cmake/install-presets.sh --help
+```
+
+### macOS
+
+The Autotools and CMake scripts work on macOS with Apple Clang. Install the prerequisites with [Homebrew](https://brew.sh):
+
+```bash
+brew install autoconf automake libtool pkg-config cmake
+```
+
+Then follow the [GNU Autotools Build](#gnu-autotools-build) or [CMake Build](#cmake-build) instructions above.
 
 ### Windows
 
-Visual Studio solutions are maintained for all libbitcoin libraries. NuGet packages exist for all dependencies. ICU is integrated into Windows and therefore not required as an additional dependency when using ICU features.
+Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. Dependencies are NuGet packages, restored automatically when the solution is built. Only Boost is required; the secp256k1 libraries are optional replacements for the internal implementation (see [secp256k1](#secp256k1)):
 
-> The libbitcoin execution environment supports `Windows XP Service Pack 2` and newer.
+| Package | Version | Required |
+|---------|---------|----------|
+| `libbitcoin-boost` (with container, json, program_options, url and unit_test_framework) | 1.91.0 | yes |
+| `secp256k1_vc145` | 0.8.0 | no |
+| `UltrafastSecp256k1-vc145` | 4.6.0.0 | no |
 
-#### Supported Compilers
+Build from within Visual Studio, or from a command prompt with `builds\msvc\build-msvc.cmd`, which restores the NuGet packages and builds with MSBuild. The script runs `msbuild` and `nuget` from `PATH` (a Developer Command Prompt provides `msbuild`; `nuget.exe` must be downloaded). To use other executables, set the `MSBUILD_EXE` and `NUGET_EXE` environment variables before running it. Packages are restored to `.nuget\packages` under the source directory unless `NUGET_PKG_PATH` is set.
 
-Libbitcoin requires a C++11 compiler, which means Visual Studio 2013 (with a pre-release compiler update) or later. Download and install one of the following free tools as necessary:
+The script requires `--build-config`, set to a solution configuration (`StaticRelease` or `StaticDebug`). The platform defaults to `x64` unless set with `--build-platform` (`x64`, `Win32` or `ARM64`). It also accepts the same `--enable-<extension>` options as the other scripts.
 
-* [Visual Studio 2017 Express](https://www.visualstudio.com/downloads)
-* [Visual Studio 2015 Express](https://www.visualstudio.com/vs/older-downloads)
-* [Visual Studio 2013 Express](https://www.visualstudio.com/vs/older-downloads)
-  * [November 2013 CTP Compiler for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=41151)
-  * [November 2013 CTP Compiler installation issue](http://stackoverflow.com/a/34548651/1172329)
+```
+builds\msvc\build-msvc.cmd --build-config StaticRelease
+```
 
-#### NuGet Repository
+See `builds\msvc\build-msvc.cmd --help` for all options.
 
-Dependencies apart from the libbitcoin libraries are available as [NuGet packages](https://www.nuget.org):
+---
 
-* Packages maintained by [sergey.shandar](http://www.nuget.org/profiles/sergey.shandar)
-  * [boost](http://www.nuget.org/packages/boost)
-  * [boost\_atomic](http://www.nuget.org/packages/boost_atomic-vc120)
-  * [boost\_chrono](http://www.nuget.org/packages/boost_chrono-vc120)
-  * [boost\_date\_time](http://www.nuget.org/packages/boost_date_time-vc120)
-  * [boost\_filesystem](http://www.nuget.org/packages/boost_filesystem-vc120)
-  * [boost\_iostreams](http://www.nuget.org/packages/boost_iostreams-vc120)
-  * [boost\_locale](http://www.nuget.org/packages/boost_locale-vc120)
-  * [boost\_log](http://www.nuget.org/packages/boost_log-vc120)
-  * [boost\_log_setup](http://www.nuget.org/packages/boost_log_setup-vc120)
-  * [boost\_program\_options](http://www.nuget.org/packages/boost_program_options-vc120)
-  * [boost\_regex](http://www.nuget.org/packages/boost_regex-vc120)
-  * [boost\_system](http://www.nuget.org/packages/boost_system-vc120)
-  * [boost\_thread](http://www.nuget.org/packages/boost_thread-vc120)
-  * [boost\_unit\_test\_framework](http://www.nuget.org/packages/boost_unit_test_framework-vc120)
-* Packages maintained by [evoskuil](http://www.nuget.org/profiles/evoskuil)
-  * [secp256k1](http://www.nuget.org/packages/secp256k1_vc120)
-  * [libzmq](http://www.nuget.org/packages/libzmq_vc120) [required for client-server repositories only]
+## secp256k1
 
-The packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The package manager will prompt for download of any missing packages.
-  
-The libbitcoin solution files are configured with references to these packages. The location of the NuGet repository is controlled by the [nuget.config](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/nuget.config) file `repositoryPath` setting **and** the `NuGetPackageRoot` element of **each** [\[project\].props](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2017/libbitcoin-system/libbitcoin-system.props) file.
+The secp256k1 elliptic curve implementation is internal, and can be replaced by any library that provides the same interface. The build supports two, which are mutually exclusive:
 
-#### Build Libbitcoin Projects
+| Library | GNU | CMake | Notes |
+|---------|-----|-------|-------|
+| [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) | `--with-secp256k1` | `-Dwith-secp256k1=ON` | Add `--build-secp256k1` to build it from source |
+| [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1) | `--with-ultrafast` | `-Dwith-ultrafast=ON` | Batch signature verification. Add `--build-ultrafast` to build it from source |
 
-After cloning the the repository the libbitcoin build can be performed from within Visual Studio or using the `build_all.bat` script provided in the `builds\msvc\build\` subdirectory. The script automatically downloads all required NuGet packages.
+---
 
-> Tip: The `build_all.bat` script builds *all* valid configurations for *all* compilers. The build time can be significantly reduced by disabling all but the desired configuration in `build_base.bat` and `build_all.bat`.
+## Hardware
 
-The libbitcoin dynamic (DLL) build configurations do not compile, as the exports have not yet been fully implemented. These are currently disabled in the build scripts but you will encounter numerous errors if you build then manually.
+libbitcoin can be compiled with optional CPU acceleration for hashing and cryptography. All are disabled by default.
 
-#### Optional: Building External Dependencies
+| Extension | Flag (GNU) | Flag (CMake) | Description |
+|-----------|-----------|--------------|-------------|
+| SHA-NI | `--enable-shani` | `-Denable-shani=ON` | SHA hardware instructions (Intel/ARM) |
+| SSE4.1 | `--enable-sse41` | `-Denable-sse41=ON` | SIMD integer ops |
+| AVX2 | `--enable-avx2` | `-Denable-avx2=ON` | 256-bit SIMD |
+| AVX-512 | `--enable-avx512` | `-Denable-avx512=ON` | 512-bit SIMD |
+| AVX-512 IFMA | `--enable-avx512ifma` | `-Denable-avx512ifma=ON` | 52-bit multiply-add (implies AVX-512 VL) |
+| AVX IFMA | `--enable-avxifma` | `-Denable-avxifma=ON` | 52-bit multiply-add (implies AVX2) |
+| SHA512 | `--enable-sha512` | `-Denable-sha512=ON` | Intel SHA512 instructions (implies AVX2) |
+| AES-NI | `--enable-aesni` | `-Denable-aesni=ON` | AES and carry-less multiply |
+| VAES | `--enable-vaes` | `-Denable-vaes=ON` | Vector AES and carry-less multiply (implies AES-NI and AVX2) |
+| ARM Crypto | `--enable-crypto` | `-Denable-crypto=ON` | SHA and AES instructions (ARM) |
+| ARM SHA3 | `--enable-sha3` | `-Denable-sha3=ON` | ARM SHA3 instructions for SHA512 (implies Crypto) |
 
-The secp256k1 and libzmq package above are maintained using the same [Visual Studio template](https://github.com/evoskuil/visual-studio-template) as all libbitcoin libraries. If so desired these can be built locally, in the same manner as libbitcoin.
+> **Important:** These hardware options are not portable. The platform must provide the hardware or the process will terminate.
 
-* [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version7/builds/msvc)
-* [zeromq/libzmq](https://github.com/zeromq/libzmq/tree/master/builds/msvc)
+Example:
 
-This change is properly accomplished by disabling the "NuGet Dependencies" in the Visual Studio properties user interface and then importing `secp256k1.import.props`, which references `secp256k1.import.xml` and `libzmq.import.props`, which references `libzmq.import.xml`.
-
-See [boost documentation](http://www.boost.org/doc/libs/1_57_0/more/getting_started/windows.html) for building boost libraries for Visual C++.
+```bash
+./builds/gnu/install-gnu.sh \
+  --prefix=$HOME/libbitcoin \
+  --build-boost \
+  --build-config=release \
+  --build-link=static \
+  --enable-shani \
+  --enable-sse41 \
+  --enable-avx2
+```
