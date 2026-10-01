@@ -21,6 +21,7 @@
 
 #include <bit>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/count.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/logarithm.hpp>
 #include <bitcoin/system/math/sign.hpp>
@@ -52,13 +53,13 @@ constexpr size_t bit_width(Value value) NOEXCEPT
 template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t left_zeros(Value value) NOEXCEPT
 {
-    return to_unsigned(std::countl_zero<Value>(value));
+    return to_unsigned(count_left_zeros(value));
 }
 
 template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t right_zeros(Value value) NOEXCEPT
 {
-    return to_unsigned(std::countr_zero<Value>(value));
+    return to_unsigned(count_right_zeros(value));
 }
 
 template <typename Value, if_unsigned_integer<Value>>
