@@ -163,7 +163,7 @@ constexpr To possible_wide_cast(From value) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename To, typename From>
-inline To* pointer_cast(From* value) NOEXCEPT
+HOST_DEVICE inline To* pointer_cast(From* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)
     return reinterpret_cast<To*>(value);
@@ -171,7 +171,7 @@ inline To* pointer_cast(From* value) NOEXCEPT
 }
 
 template <typename To, typename From>
-inline To* possible_pointer_cast(From* value) NOEXCEPT
+HOST_DEVICE inline To* possible_pointer_cast(From* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)

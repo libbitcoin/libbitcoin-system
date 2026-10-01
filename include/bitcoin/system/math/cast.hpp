@@ -118,11 +118,11 @@ constexpr To possible_wide_cast(From value) NOEXCEPT;
 
 /// Cast of pointer.
 template <typename To, typename From>
-inline To* pointer_cast(From* value) NOEXCEPT;
+HOST_DEVICE inline To* pointer_cast(From* value) NOEXCEPT;
 
 /// Possible cast of pointer.
 template <typename To, typename From>
-inline To* possible_pointer_cast(From* value) NOEXCEPT;
+HOST_DEVICE inline To* possible_pointer_cast(From* value) NOEXCEPT;
 
 /// Sign casts.
 /// ---------------------------------------------------------------------------
