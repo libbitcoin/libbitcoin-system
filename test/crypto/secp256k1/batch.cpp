@@ -490,6 +490,164 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__chunked_two_invalid__expec
     BOOST_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
 }
 
+// distinct rows
+// ----------------------------------------------------------------------------
+// Rows of distinct keys and digests, verified on the device where available,
+// with failures at the first, a middle and the last row.
+
+constexpr size_t distinct_rows = 512;
+constexpr size_t distinct_fail1 = 0;
+constexpr size_t distinct_fail2 = 257;
+constexpr size_t distinct_fail3 = sub1(distinct_rows);
+
+static ec_secret distinct_secret(size_t row) NOEXCEPT
+{
+    return sha256_hash(to_little_endian<uint32_t>(row));
+}
+
+static hash_digest distinct_digest(size_t row) NOEXCEPT
+{
+    return bitcoin_hash(to_little_endian<uint32_t>(row));
+}
+
+static bool distinct_failed(size_t row) NOEXCEPT
+{
+    return row == distinct_fail1 || row == distinct_fail2 ||
+        row == distinct_fail3;
+}
+
+static batched::links_t distinct_ecdsa_failures(bool fail,
+    bool canceled) NOEXCEPT
+{
+    using namespace system;
+    using namespace system::ecdsa;
+    using correlate = batch::correlate_t;
+
+    std::vector<correlate> correlates(distinct_rows);
+    std::vector<hash_digest> digests(distinct_rows);
+    std::vector<ec_compressed> points(distinct_rows);
+    std::vector<ec_signature> signatures(distinct_rows);
+    for (size_t row{}; row < distinct_rows; ++row)
+    {
+        const auto secret = distinct_secret(row);
+        digests[row] = distinct_digest(row);
+        correlates[row] = correlate{ chunked_id(row), 0, 0 };
+        if (!secret_to_public(points[row], secret) ||
+            !sign(signatures[row], secret, digests[row]))
+            return { max_uint32 };
+
+        if (fail && distinct_failed(row))
+            digests[row] = distinct_digest(add1(row));
+    }
+
+    const batch in
+    {
+        { correlates.data(), correlates.size() },
+        { digests.data(), digests.size() },
+        { points.data(), points.size() },
+        { signatures.data(), signatures.size() }
+    };
+
+    const stopper cancel{ canceled };
+    return batch::verify(cancel, in);
+}
+
+static batched::links_t distinct_schnorr_failures(bool fail,
+    bool canceled) NOEXCEPT
+{
+    using namespace system;
+    using namespace system::schnorr;
+    using correlate = batch::correlate_t;
+
+    std::vector<correlate> correlates(distinct_rows);
+    std::vector<hash_digest> digests(distinct_rows);
+    std::vector<ec_xonly> points(distinct_rows);
+    std::vector<ec_signature> signatures(distinct_rows);
+    for (size_t row{}; row < distinct_rows; ++row)
+    {
+        ec_compressed compressed{};
+        const auto secret = distinct_secret(row);
+        digests[row] = distinct_digest(row);
+        correlates[row] = correlate{ chunked_id(row) };
+        if (!secret_to_public(compressed, secret) ||
+            !sign(signatures[row], secret, digests[row], {}))
+            return { max_uint32 };
+
+        points[row] = array_cast<uint8_t, ec_xonly_size, 1>(compressed);
+        if (fail && distinct_failed(row))
+            digests[row] = distinct_digest(add1(row));
+    }
+
+    const batch in
+    {
+        { correlates.data(), correlates.size() },
+        { digests.data(), digests.size() },
+        { points.data(), points.size() },
+        { signatures.data(), signatures.size() }
+    };
+
+    const stopper cancel{ canceled };
+    return batch::verify(cancel, in);
+}
+
+static batched::link_t distinct_token(size_t row) NOEXCEPT
+{
+    return from_little_array<batched::link_t>(chunked_id(row));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_all_valid__empty)
+{
+    BOOST_REQUIRE(distinct_ecdsa_failures(false, false).empty());
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_three_invalid__expected)
+{
+    const auto tokens = distinct_ecdsa_failures(true, false);
+    BOOST_REQUIRE_EQUAL(tokens.size(), 3u);
+    BOOST_REQUIRE_EQUAL(tokens.at(0), distinct_token(distinct_fail1));
+    BOOST_REQUIRE_EQUAL(tokens.at(1), distinct_token(distinct_fail2));
+    BOOST_REQUIRE_EQUAL(tokens.at(2), distinct_token(distinct_fail3));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_canceled__empty)
+{
+    BOOST_REQUIRE(distinct_ecdsa_failures(true, true).empty());
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_all_valid__empty)
+{
+    BOOST_REQUIRE(distinct_schnorr_failures(false, false).empty());
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_three_invalid__expected)
+{
+    const auto tokens = distinct_schnorr_failures(true, false);
+    BOOST_REQUIRE_EQUAL(tokens.size(), 3u);
+    BOOST_REQUIRE_EQUAL(tokens.at(0), distinct_token(distinct_fail1));
+    BOOST_REQUIRE_EQUAL(tokens.at(1), distinct_token(distinct_fail2));
+    BOOST_REQUIRE_EQUAL(tokens.at(2), distinct_token(distinct_fail3));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_canceled__empty)
+{
+    BOOST_REQUIRE(distinct_schnorr_failures(true, true).empty());
+}
+
+// empty
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__empty__empty)
+{
+    const stopper cancel{};
+    BOOST_REQUIRE(ecdsa::batch::verify(cancel, ecdsa::batch{}).empty());
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__empty__empty)
+{
+    const stopper cancel{};
+    BOOST_REQUIRE(schnorr::batch::verify(cancel, schnorr::batch{}).empty());
+}
+
 // accelerated
 // ----------------------------------------------------------------------------
 
