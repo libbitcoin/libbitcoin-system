@@ -139,6 +139,19 @@
     #define INLINE inline
 #endif
 
+/// Device compilation.
+/// ---------------------------------------------------------------------------
+
+/// Function callable from both host and device code.
+/// Variable resident in device memory.
+#if defined(HAVE_PTX)
+    #define HOST_DEVICE __attribute__((host, device))
+    #define DEVICE __attribute__((device))
+#else
+    #define HOST_DEVICE
+    #define DEVICE
+#endif
+
 /// Class helpers.
 /// ---------------------------------------------------------------------------
 /// Virtual concrete classes should define public virtual destructor.
