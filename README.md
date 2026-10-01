@@ -37,7 +37,7 @@ The master branch is current, pending the v4 release.
 |-------------|-------|
 | C++20 compiler | Verified in CI with GCC 13–16, Clang 18–19, Apple Clang and MSVC (Visual Studio 2026) |
 | Boost ≥ 1.86 | container, json, program_options, url, and unit_test_framework for tests |
-| Autoconf / Automake / Libtool, pkg-config | GNU Autotools builds |
+| Autoconf, Automake, Libtool, pkg-config | GNU Autotools builds |
 | CMake ≥ 3.30 | CMake builds |
 | git | Used by the installation scripts to clone dependencies |
 
