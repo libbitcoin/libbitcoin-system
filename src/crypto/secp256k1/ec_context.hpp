@@ -32,46 +32,33 @@
 namespace libbitcoin {
 namespace system {
 
-/// Base class for secp256k1 singleton context management.
+/// A secp256k1 context, destroyed with the instance.
 class BC_API ec_context
 {
 public:
-    /// Deletes.
-    ec_context(ec_context&&) = delete;
-    ec_context(const ec_context&) = delete;
-    ec_context& operator=(ec_context&&) = delete;
-    ec_context& operator=(const ec_context&) = delete;
+    DELETE_COPY_MOVE(ec_context);
 
-    /// Free the context if successfully initialized.
-    virtual ~ec_context() NOEXCEPT;
-
-protected:
     ec_context(int flags) NOEXCEPT;
+    ~ec_context() NOEXCEPT;
 
+    /// The context.
+    const secp256k1_context* get() const NOEXCEPT;
+
+private:
     // This unpublished header hides this external symbol.
     secp256k1_context* context_;
 };
 
-/// A signing context singleton initializer.
-class BC_API ec_context_sign
-  : public ec_context
+/// The signing context singleton.
+struct BC_API ec_context_sign
 {
-public:
     static const secp256k1_context* context() NOEXCEPT;
-
-protected:
-    ec_context_sign() NOEXCEPT;
 };
 
-/// A verification context singleton initializer.
-class BC_API ec_context_verify
-  : public ec_context
+/// The verification context singleton.
+struct BC_API ec_context_verify
 {
-public:
     static const secp256k1_context* context() NOEXCEPT;
-
-protected:
-    ec_context_verify() NOEXCEPT;
 };
 
 } // namespace system

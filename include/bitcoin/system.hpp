@@ -135,6 +135,7 @@
 #include <bitcoin/system/crypto/nist/algorithm.hpp>
 #include <bitcoin/system/crypto/nist/nist.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
+#include <bitcoin/system/crypto/secp256k1/tables.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>
@@ -199,6 +200,7 @@
 #include <bitcoin/system/hash/sha3/sha3.hpp>
 #include <bitcoin/system/intrinsics/add.hpp>
 #include <bitcoin/system/intrinsics/byte_swap.hpp>
+#include <bitcoin/system/intrinsics/count.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 #include <bitcoin/system/intrinsics/detection.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>

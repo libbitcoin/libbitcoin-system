@@ -47,7 +47,7 @@ scheduled_pad() NOEXCEPT
 
     buffer_t out{};
     out.front() = bit_hi<word_t>;
-    out.at(index) = possible_narrow_cast<word_t>(to_bits(bytes));
+    out[index] = possible_narrow_cast<word_t>(to_bits(bytes));
     schedule(out);
     return out;
 }
@@ -120,7 +120,7 @@ simple_pad(block_t& block) NOEXCEPT
     constexpr auto count = to_big_endian_size<SHA::word_bytes>(to_bits(Bytes));
     const auto lo_word = std::prev(block.end(), SHA::word_bytes);
     std::copy_n(count.begin(), SHA::word_bytes, lo_word);
-    block.at(Bytes) = bit_hi<byte_t>;
+    block[Bytes] = bit_hi<byte_t>;
 }
 
 TEMPLATE
@@ -148,11 +148,13 @@ pad_block() NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Blocks>
 consteval typename CLASS::chunk_t CLASS::
 chunk_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
+    constexpr auto bytes = possible_narrow_cast<word_t>(
+        Blocks * array_count<block_t> + array_count<half_t>);
 
     chunk_t out{};
     out.front() = bit_hi<word_t>;
@@ -176,22 +178,23 @@ stream_pad() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
+template <size_t Blocks>
 constexpr void CLASS::
 pad_half(auto& buffer) NOEXCEPT
 {
     // Pad for any half block, unscheduled buffer.
-    constexpr auto pad = chunk_pad();
+    constexpr auto pad = chunk_pad<Blocks>();
 
     if (std::is_constant_evaluated())
     {
-        buffer.at(8) = pad.at(0);
-        buffer.at(9) = pad.at(1);
-        buffer.at(10) = pad.at(2);
-        buffer.at(11) = pad.at(3);
-        buffer.at(12) = pad.at(4);
-        buffer.at(13) = pad.at(5);
-        buffer.at(14) = pad.at(6);
-        buffer.at(15) = pad.at(7);
+        buffer[8] = pad[0];
+        buffer[9] = pad[1];
+        buffer[10] = pad[2];
+        buffer[11] = pad[3];
+        buffer[12] = pad[4];
+        buffer[13] = pad[5];
+        buffer[14] = pad[6];
+        buffer[15] = pad[7];
     }
     else
     {
@@ -209,22 +212,22 @@ pad_n(auto& buffer, count_t blocks) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        buffer.at(0)  = pad.at(0);
-        buffer.at(1)  = pad.at(1);
-        buffer.at(2)  = pad.at(2);
-        buffer.at(3)  = pad.at(3);
-        buffer.at(4)  = pad.at(4);
-        buffer.at(5)  = pad.at(5);
-        buffer.at(6)  = pad.at(6);
-        buffer.at(7)  = pad.at(7);
-        buffer.at(8)  = pad.at(8);
-        buffer.at(9)  = pad.at(9);
-        buffer.at(10) = pad.at(10);
-        buffer.at(11) = pad.at(11);
-        buffer.at(12) = pad.at(12);
-        buffer.at(13) = pad.at(13);
-        buffer.at(14) = hi_word<word_t>(bits);
-        buffer.at(15) = lo_word<word_t>(bits);
+        buffer[0]  = pad[0];
+        buffer[1]  = pad[1];
+        buffer[2]  = pad[2];
+        buffer[3]  = pad[3];
+        buffer[4]  = pad[4];
+        buffer[5]  = pad[5];
+        buffer[6]  = pad[6];
+        buffer[7]  = pad[7];
+        buffer[8]  = pad[8];
+        buffer[9]  = pad[9];
+        buffer[10] = pad[10];
+        buffer[11] = pad[11];
+        buffer[12] = pad[12];
+        buffer[13] = pad[13];
+        buffer[14] = hi_word<word_t>(bits);
+        buffer[15] = lo_word<word_t>(bits);
     }
     else
     {

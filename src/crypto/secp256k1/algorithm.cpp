@@ -25,40 +25,36 @@ namespace libbitcoin {
 namespace system {
 namespace secp256k1 {
 
-constinit const algorithm::slices_t algorithm::generator_slices = []() consteval
+// The precomputed table shape matches the algorithm.
+struct shape
+  : algorithm
 {
     static_assert(precompute::slice_size == slice_size);
     static_assert(precompute::block_size == block_size);
     static_assert(precompute::table_words == table_words);
-    static_assert(slice_count == 16);
-
-    return slices_t
-    {
-        generator_slice_00.data(), generator_slice_01.data(),
-        generator_slice_02.data(), generator_slice_03.data(),
-        generator_slice_04.data(), generator_slice_05.data(),
-        generator_slice_06.data(), generator_slice_07.data(),
-        generator_slice_08.data(), generator_slice_09.data(),
-        generator_slice_10.data(), generator_slice_11.data(),
-        generator_slice_12.data(), generator_slice_13.data(),
-        generator_slice_14.data(), generator_slice_15.data()
-    };
-}();
-
-constinit const algorithm::comb_parts_t algorithm::comb_parts = []() consteval
-{
     static_assert(precompute::comb_bits == comb_bits);
     static_assert(precompute::comb_size == comb_size);
     static_assert(precompute::comb_windows == comb_windows);
     static_assert(precompute::comb_part_windows == comb_part_windows);
     static_assert(precompute::comb_words == comb_words);
-    static_assert(comb_part_count == 3);
+};
 
-    return comb_parts_t
-    {
-        comb_part_00.data(), comb_part_01.data(), comb_part_02.data()
-    };
-}();
+constinit const std_array<const uint64_t*, 16> generator_slices
+{
+    generator_slice_00.data(), generator_slice_01.data(),
+    generator_slice_02.data(), generator_slice_03.data(),
+    generator_slice_04.data(), generator_slice_05.data(),
+    generator_slice_06.data(), generator_slice_07.data(),
+    generator_slice_08.data(), generator_slice_09.data(),
+    generator_slice_10.data(), generator_slice_11.data(),
+    generator_slice_12.data(), generator_slice_13.data(),
+    generator_slice_14.data(), generator_slice_15.data()
+};
+
+constinit const std_array<const uint64_t*, 3> comb_parts
+{
+    comb_part_00.data(), comb_part_01.data(), comb_part_02.data()
+};
 
 } // namespace secp256k1
 } // namespace system

@@ -38,6 +38,12 @@ namespace libbitcoin {
     constexpr auto have_64b = true;
 #endif
 
+#ifdef HAVE_PTX
+    constexpr auto have_ptx = true;
+#else
+    constexpr auto have_ptx = false;
+#endif
+
 #ifdef HAVE_XCPU
     constexpr auto have_xcpu = true;
 #else

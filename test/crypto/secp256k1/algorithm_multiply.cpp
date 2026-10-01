@@ -55,7 +55,6 @@ public:
     using algorithm::to_affine;
     using algorithm::from_bytes;
     using algorithm::to_bytes;
-    using algorithm::generator_slices;
     using algorithm::slice_size;
     using algorithm::slice_count;
     using algorithm::block_size;
@@ -132,7 +131,7 @@ constexpr scalar number(const bytes& value) NOEXCEPT
 
 static affine entry(size_t index) NOEXCEPT
 {
-    const auto slice = accessor::generator_slices[index / accessor::slice_size];
+    const auto slice = secp256k1::generator_slices[index / accessor::slice_size];
     const auto offset = accessor::locate(index % accessor::slice_size);
     affine out{};
     const auto size = out.x.size();

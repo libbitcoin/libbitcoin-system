@@ -31,51 +31,39 @@
 namespace libbitcoin {
 namespace system {
 
-// Protected constructor (abstract) base class.
+// Context.
 // ----------------------------------------------------------------------------
 
 ec_context::ec_context(int flags) NOEXCEPT
   : context_(secp256k1_context_create(flags))
 {
-    BC_ASSERT(context_ != nullptr);
+    BC_ASSERT(!is_null(context_));
 }
 
 ec_context::~ec_context() NOEXCEPT
 {
-    BC_ASSERT(context_ != nullptr);
-
     if (!is_null(context_))
         secp256k1_context_destroy(context_);
 }
 
-// Concrete type for signing init.
-// ----------------------------------------------------------------------------
-
-ec_context_sign::ec_context_sign() NOEXCEPT
-  : ec_context(SECP256K1_CONTEXT_SIGN)
+const secp256k1_context* ec_context::get() const NOEXCEPT
 {
+    return context_;
 }
+
+// Singletons.
+// ----------------------------------------------------------------------------
 
 const secp256k1_context* ec_context_sign::context() NOEXCEPT
 {
-    static ec_context_sign instance{};
-    static auto context = instance.context_;
-    return context;
-}
-
-// Concrete type for verification init.
-// ----------------------------------------------------------------------------
-
-ec_context_verify::ec_context_verify() NOEXCEPT
-  : ec_context(SECP256K1_CONTEXT_VERIFY)
-{
+    static const ec_context instance{ SECP256K1_CONTEXT_SIGN };
+    return instance.get();
 }
 
 const secp256k1_context* ec_context_verify::context() NOEXCEPT
 {
-    static ec_context_verify instance{};
-    static auto context = instance.context_;
-    return context;
+    static const ec_context instance{ SECP256K1_CONTEXT_VERIFY };
+    return instance.get();
 }
 
 // Dependency identifier.

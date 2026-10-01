@@ -95,15 +95,15 @@ constexpr size_t proportion = (FromCount * size_of<From>()) / size_of<To>();
 /// Casting fractional portions of element T1 is precluded by "proportion".
 
 template <typename To, size_t Count, typename From>
-inline std_array<To, proportion<Count, From, To>>&
+HOST_DEVICE inline std_array<To, proportion<Count, From, To>>&
 array_cast(std_array<From, Count>& values) NOEXCEPT;
 
 template <typename To, size_t Count, typename From>
-inline const std_array<To, proportion<Count, From, To>>&
+HOST_DEVICE inline const std_array<To, proportion<Count, From, To>>&
 array_cast(const std_array<From, Count>& values) NOEXCEPT;
 
 template <typename To, size_t Count, typename From>
-inline std_array<To, proportion<Count, From, To>>
+HOST_DEVICE inline std_array<To, proportion<Count, From, To>>
 array_cast(std_array<From, Count>&& values) NOEXCEPT;
 
 /// Cast array(T1)& to not-greater-sized array(T2, Size)&, with offsetting.
@@ -115,19 +115,19 @@ template <typename To, size_t ToCount, size_t FromOffset = zero, typename From,
     size_t FromCount,
     if_lesser<FromOffset, FromCount> = true,
     if_portional<ToCount, To, FromCount - FromOffset, From> = true>
-inline std_array<To, ToCount>&
+HOST_DEVICE inline std_array<To, ToCount>&
 array_cast(std_array<From, FromCount>& values) NOEXCEPT;
 
 template <typename To, size_t ToCount, size_t FromOffset = zero, typename From,
     size_t FromCount,
     if_lesser<FromOffset, FromCount> = true,
     if_portional<ToCount, To, FromCount - FromOffset, From> = true>
-inline const std_array<To, ToCount>&
+HOST_DEVICE inline const std_array<To, ToCount>&
 array_cast(const std_array<From, FromCount>& values) NOEXCEPT;
 
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From> = true>
-inline std_array<To, ToCount>
+HOST_DEVICE inline std_array<To, ToCount>
 array_cast(std_array<From, FromCount>&& values) NOEXCEPT;
 
 /// Cast Integral1* to array(Integral2)&, defaults to singleton.
@@ -137,13 +137,13 @@ array_cast(std_array<From, FromCount>&& values) NOEXCEPT;
 template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-inline std_array<To, Size>&
+HOST_DEVICE inline std_array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT;
 
 template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-inline const std_array<To, Size>&
+HOST_DEVICE inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
 
 /// Cast Integral1* to array(array(Integral2), Size)&, defaults to singleton.
@@ -153,13 +153,13 @@ unsafe_array_cast(const From* bytes) NOEXCEPT;
 template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
     if_integral_array<To> = true>
-inline std_array<To, Size>&
+HOST_DEVICE inline std_array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT;
 
 template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
     if_integral_array<To> = true>
-inline const std_array<To, Size>&
+HOST_DEVICE inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
 
 /// Cast Integral1* to a vector(array(Integral)&, count).

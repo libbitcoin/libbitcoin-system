@@ -144,6 +144,22 @@ midstate(const half_t& left, const half_t& right) NOEXCEPT
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
+hash(const state_t& midstate, const half_t& first, const half_t& second,
+    const half_t& third) NOEXCEPT
+{
+    auto state = midstate;
+    buffer_t buffer{};
+    input_left(buffer, first);
+    input_right(buffer, second);
+    schedule_compress(state, buffer);
+    input_left(buffer, third);
+    pad_half<two>(buffer);
+    schedule_compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
 hash(const quart_t& left, const quart_t& right) NOEXCEPT
 {
     const auto hasher = [](const quart_t& left, const quart_t& right) NOEXCEPT

@@ -69,7 +69,7 @@ constexpr bool is_proportional(size_t from_count) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename To, size_t Count, typename From>
-inline std_array<To, proportion<Count, From, To>>&
+HOST_DEVICE inline std_array<To, proportion<Count, From, To>>&
 array_cast(std_array<From, Count>& values) NOEXCEPT
 {
     using to = std_array<To, proportion<Count, From, To>>;
@@ -77,7 +77,7 @@ array_cast(std_array<From, Count>& values) NOEXCEPT
 }
 
 template <typename To, size_t Count, typename From>
-inline const std_array<To, proportion<Count, From, To>>&
+HOST_DEVICE inline const std_array<To, proportion<Count, From, To>>&
 array_cast(const std_array<From, Count>& values) NOEXCEPT
 {
     using to = std_array<To, proportion<Count, From, To>>;
@@ -86,7 +86,7 @@ array_cast(const std_array<From, Count>& values) NOEXCEPT
 
 // Avoids cast of rvalue to reference, which would dangle.
 template <typename To, size_t Count, typename From>
-inline std_array<To, proportion<Count, From, To>>
+HOST_DEVICE inline std_array<To, proportion<Count, From, To>>
 array_cast(std_array<From, Count>&& values) NOEXCEPT
 {
     return array_cast<To>(unmove(values));
@@ -99,7 +99,7 @@ template <typename To, size_t ToCount, size_t FromOffset, typename From,
     size_t FromCount,
     if_lesser<FromOffset, FromCount>,
     if_portional<ToCount, To, FromCount - FromOffset, From>>
-inline std_array<To, ToCount>&
+HOST_DEVICE inline std_array<To, ToCount>&
 array_cast(std_array<From, FromCount>& values) NOEXCEPT
 {
     using to = std_array<To, ToCount>;
@@ -110,7 +110,7 @@ template <typename To, size_t ToCount, size_t FromOffset, typename From,
     size_t FromCount,
     if_lesser<FromOffset, FromCount>,
     if_portional<ToCount, To, FromCount - FromOffset, From>>
-inline const std_array<To, ToCount>&
+HOST_DEVICE inline const std_array<To, ToCount>&
 array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 {
     using to = std_array<To, ToCount>;
@@ -121,7 +121,7 @@ array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 // Cannot offset into move assignment as the whole instance must be moved.
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From>>
-inline std_array<To, ToCount>
+HOST_DEVICE inline std_array<To, ToCount>
 array_cast(std_array<From, FromCount>&& values) NOEXCEPT
 {
     return array_cast<To, ToCount>(unmove(values));
@@ -133,7 +133,7 @@ array_cast(std_array<From, FromCount>&& values) NOEXCEPT
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-inline std_array<To, Size>&
+HOST_DEVICE inline std_array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT
 {
     return *pointer_cast<std_array<To, Size>>(bytes);
@@ -142,7 +142,7 @@ unsafe_array_cast(From* bytes) NOEXCEPT
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-inline const std_array<To, Size>&
+HOST_DEVICE inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
     return *pointer_cast<const std_array<To, Size>>(bytes);
@@ -154,7 +154,7 @@ unsafe_array_cast(const From* bytes) NOEXCEPT
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_array<To>>
-inline std_array<To, Size>&
+HOST_DEVICE inline std_array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT
 {
     return *pointer_cast<std_array<To, Size>>(bytes);
@@ -163,7 +163,7 @@ unsafe_array_cast(From* bytes) NOEXCEPT
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_array<To>>
-inline const std_array<To, Size>&
+HOST_DEVICE inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
     return *pointer_cast<const std_array<To, Size>>(bytes);

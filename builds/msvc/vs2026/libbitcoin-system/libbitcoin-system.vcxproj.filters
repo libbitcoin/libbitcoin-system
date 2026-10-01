@@ -1202,6 +1202,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp">
       <Filter>include\bitcoin\system\crypto\secp256k1</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\tables.hpp">
+      <Filter>include\bitcoin\system\crypto\secp256k1</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
@@ -1419,6 +1422,9 @@
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byte_swap.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\count.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\cpuid.hpp">

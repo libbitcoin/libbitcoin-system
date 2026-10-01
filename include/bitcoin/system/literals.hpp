@@ -80,8 +80,9 @@ consteval Domain positive(integer_type value) noexcept(false)
     using limit = std::make_unsigned_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
 
-    if (value > upper<limit>())
-        throw overflow_exception{ "literal overflow" };
+    if constexpr (!have_ptx)
+        if (value > upper<limit>())
+            throw overflow_exception{ "literal overflow" };
 
     // Cast to unsigned width of domain.
     const auto narrowed = static_cast<narrow>(value);
@@ -97,8 +98,9 @@ consteval Domain negative(integer_type value) noexcept(false)
     using limit = std::make_signed_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
 
-    if (value > lower<limit>())
-        throw overflow_exception{ "literal overflow" };
+    if constexpr (!have_ptx)
+        if (value > lower<limit>())
+            throw overflow_exception{ "literal overflow" };
 
     // Cast to unsigned width of domain.
     const auto narrowed = static_cast<narrow>(value);
