@@ -148,11 +148,13 @@ pad_block() NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Blocks>
 consteval typename CLASS::chunk_t CLASS::
 chunk_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
+    constexpr auto bytes = possible_narrow_cast<word_t>(
+        Blocks * array_count<block_t> + array_count<half_t>);
 
     chunk_t out{};
     out.front() = bit_hi<word_t>;
@@ -176,11 +178,12 @@ stream_pad() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
+template <size_t Blocks>
 constexpr void CLASS::
 pad_half(auto& buffer) NOEXCEPT
 {
     // Pad for any half block, unscheduled buffer.
-    constexpr auto pad = chunk_pad();
+    constexpr auto pad = chunk_pad<Blocks>();
 
     if (std::is_constant_evaluated())
     {

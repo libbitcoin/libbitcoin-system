@@ -299,12 +299,14 @@ protected:
     /// Unscheduled padding (new objects).
     template <size_t Bytes>
     static constexpr void simple_pad(block_t& block) NOEXCEPT;
+    template <size_t Blocks = zero>
     static consteval chunk_t chunk_pad() NOEXCEPT;
     static consteval pad_t stream_pad() NOEXCEPT;
     static words_t pad_block() NOEXCEPT;
     static words_t pad_blocks(count_t blocks) NOEXCEPT;
 
     /// Unscheduled padding (update block or buffer object).
+    template <size_t Blocks = zero>
     static constexpr void pad_half(auto& buffer) NOEXCEPT;
     static constexpr void pad_n(auto& buffer, count_t blocks) NOEXCEPT;
 
