@@ -196,7 +196,7 @@ The secp256k1 elliptic curve implementation is internal, and can be replaced by 
 |---------|-----|-------|-------|
 | [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) | `--with-secp256k1` | `-Dwith-secp256k1=ON` | Add `--build-secp256k1` to build it from source |
 
-`WITH_SECP256K1` selects the libsecp256k1 interface, so any other implementation of it can be linked in place of bitcoin-core/secp256k1.
+`WITH_SECP256K1` replaces only the calls made through the libsecp256k1 interface, so any other implementation of it can be linked in place of bitcoin-core/secp256k1. Batch verification remains internal.
 
 ---
 

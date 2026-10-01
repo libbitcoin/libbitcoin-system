@@ -22,11 +22,9 @@
 #include <numeric>
 #include <span>
 #include <thread>
-#if !defined(HAVE_SECP256K1)
-    #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
-#endif
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -46,22 +44,6 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// polymorphic namespace selectors (template support)
-// ----------------------------------------------------------------------------
-// local
-
-inline bool verify_signature(const ecdsa::batch& batch, size_t row) NOEXCEPT
-{
-    return ecdsa::verify_signature(batch.points[row], batch.digests[row],
-        batch.signatures[row]);
-}
-
-inline bool verify_signature(const schnorr::batch& batch, size_t row) NOEXCEPT
-{
-    return schnorr::verify_signature(batch.points[row], batch.digests[row],
-        batch.signatures[row]);
-}
-
 // accelerated
 // ----------------------------------------------------------------------------
 
@@ -76,11 +58,6 @@ bool batched::accelerated() NOEXCEPT
 }
 
 // batch_verify
-// ----------------------------------------------------------------------------
-
-#if !defined(HAVE_SECP256K1)
-
-// local
 // ----------------------------------------------------------------------------
 
 class dispatcher
@@ -229,39 +206,6 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 
     return results;
 }
-
-#else
-
-template <typename Batch>
-data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
-{
-    constexpr auto policy = poolstl::execution::par;
-
-    const auto count = batch.correlates.size();
-    std::vector<size_t> it(count);
-    std::iota(it.begin(), it.end(), zero);
-    stopper failed{};
-
-    // Collect signature validation results as corresponding integer booleans.
-    // A failure cannot short-circuit, as remaining rows would then read as
-    // failures in correlation (failed batches consume the per-row results).
-    data_chunk results(count);
-    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
-    {
-        if (cancel) return;
-        const auto good = verify_signature(batch, row);
-        if (!good) failed.store(true);
-        results.at(row) = to_int<uint8_t>(good);
-    });
-
-    // Empty implies fully-verified batch (or canceled, which caller gates).
-    if (cancel || !failed)
-        results.clear();
-
-    return results;
-}
-
-#endif
 
 // local
 // ----------------------------------------------------------------------------
