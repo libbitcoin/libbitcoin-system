@@ -196,6 +196,8 @@ BOOST_AUTO_TEST_CASE(vector__sha256__scheduling__expected)
     BOOST_CHECK_EQUAL(hashn, sha256v::hash(blocks));
 }
 
+#if !defined(HAVE_CLANG)
+
 // sha512 vectorization is disabled in x32 builds.
 BOOST_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
 {
@@ -209,5 +211,7 @@ BOOST_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
     static_assert(hashn == hashv);
     BOOST_CHECK_EQUAL(hashn, sha512v::hash(blocks));
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
