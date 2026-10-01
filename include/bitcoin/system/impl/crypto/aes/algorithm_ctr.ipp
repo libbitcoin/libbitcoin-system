@@ -180,31 +180,26 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
 
             native_encrypt(state, keys);
 
-            // Whole passes are applied directly to out, in bytes, as caller
-            // buffers are not word aligned. Word casts of them may be
-            // compiled to aligned loads and stores, which fault.
+            // Whole passes are applied directly to out, through bytes, as
+            // caller buffers are not vector aligned.
             if ((out.size() - byte) >= size)
             {
-                alignas(xWord) xblocks_t<lanes> keystream{};
-                auto& stream = array_cast<xWord>(keystream);
-                for (size_t word{}; word < native_words; ++word)
-                    f::store(stream[word], state[word]);
-
-                const auto& bytes = array_cast<uint8_t>(keystream);
-                auto& to = unsafe_array_cast<uint8_t, size>(
-                    std::next(out.data(), byte));
-
+                const auto to = std::next(out.data(), byte);
                 if (in.empty())
                 {
-                    to = bytes;
+                    for (size_t word{}; word < native_words; ++word)
+                        f::store(std::next(to, word * sizeof(xWord)),
+                            state[word]);
                 }
                 else
                 {
-                    const auto& from = unsafe_array_cast<uint8_t, size>(
-                        std::next(in.data(), byte));
-
-                    for (size_t index{}; index < size; ++index)
-                        to[index] = bit_xor(from[index], bytes[index]);
+                    const auto from = std::next(in.data(), byte);
+                    for (size_t word{}; word < native_words; ++word)
+                    {
+                        const auto at = word * sizeof(xWord);
+                        f::store(std::next(to, at), f::xor_(state[word],
+                            f::load<xWord>(std::next(from, at))));
+                    }
                 }
 
                 to_big<12>(counter, value +

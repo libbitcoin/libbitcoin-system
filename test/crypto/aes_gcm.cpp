@@ -150,7 +150,6 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__tampered_aad__false_cleared)
     BOOST_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00));
 }
 
-// Caller buffers are not word aligned (e.g. a tls record follows its header).
 BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
 {
     constexpr std_array<size_t, 5> offsets{ 1, 5, 16, 32, 48 };
@@ -164,7 +163,7 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
     data_chunk expected(size);
     cipher.encrypt(plain, aad, nonce, expected);
 
-    for (const auto offset: offsets)
+    std::for_each(offsets.cbegin(), offsets.cend(), [&](size_t offset)
     {
         data_chunk record(offset + size);
         const auto out = byte_span{ record }.subspan(offset);
@@ -175,7 +174,7 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
         const auto text = byte_span{ buffer }.subspan(offset);
         BOOST_REQUIRE(cipher.decrypt(text, aad, nonce, out));
         BOOST_REQUIRE_EQUAL(data_chunk(text.begin(), text.end()), plain);
-    }
+    });
 }
 
 BOOST_AUTO_TEST_SUITE_END()

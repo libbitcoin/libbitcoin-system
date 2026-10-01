@@ -291,7 +291,6 @@ BOOST_AUTO_TEST_CASE(aes__ctr__sizes__variants_agree)
     }
 }
 
-// Caller buffers are not word aligned (e.g. a tls record follows its header).
 BOOST_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
 {
     constexpr auto initial = base16_array("000102030405060708090a0bfffffff0");
@@ -300,9 +299,9 @@ BOOST_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
     alignas(64) data_array<sizes.back() + 64> out{};
     chacha20{ key256 }.stream(data);
 
-    for (const auto offset: offsets)
+    std::for_each(offsets.cbegin(), offsets.cend(), [&](size_t offset)
     {
-        for (const auto size: sizes)
+        std::for_each(sizes.cbegin(), sizes.cend(), [&](size_t size)
         {
             const auto text = const_byte_span{ data }.subspan(offset, size);
             const auto cipher = byte_span{ out }.subspan(offset, size);
@@ -325,8 +324,8 @@ BOOST_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
             BOOST_REQUIRE_EQUAL(counter2, counter1);
             BOOST_REQUIRE_EQUAL(counter3, counter1);
             BOOST_REQUIRE_EQUAL(counter4, counter1);
-        }
-    }
+        });
+    });
 }
 
 BOOST_AUTO_TEST_CASE(aes__ctr__keystream__encrypted_counters)
