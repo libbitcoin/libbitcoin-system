@@ -291,6 +291,15 @@ BOOST_AUTO_TEST_CASE(sha512__midstate__half_blocks__expected)
     BOOST_CHECK_EQUAL(sha512::finalize(copy, one), sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }));
 }
 
+// sha512::hash(midstate, half, half, half)
+BOOST_AUTO_TEST_CASE(sha512__hash__midstate_halves__expected)
+{
+    constexpr auto expected = base16_array("475b0f294b647cca866720d5de214e0da3ef7f4e10f942ada673f9dbfecea493baacb784abee250e0bd43c738323f0aac158e08bd2dbed70f2624ef669ce9b0c");
+    constexpr auto midstate = sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 1 });
+    static_assert(sha512::hash(midstate, sha512::half_t{ 2 }, sha512::half_t{ 3 }, sha512::half_t{ 4 }) == expected);
+    BOOST_CHECK_EQUAL(sha512::hash(midstate, sha512::half_t{ 2 }, sha512::half_t{ 3 }, sha512::half_t{ 4 }), expected);
+}
+
 // sha512::simple_hash
 BOOST_AUTO_TEST_CASE(sha512__simple_hash__minimal__expected)
 {
