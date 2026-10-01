@@ -44,15 +44,17 @@
 /// type-based alias analysis (gcc/clang) where both are accessed in one scope
 /// and one is written.
 /// Alignment: a cast asserts the alignment of its element type, which the
-/// storage may not have (byte arrays are aligned to one). This is safe for
-/// scalar access on x86/x64/arm64, and for vector access through unaligned
-/// intrinsic load/store, provided that:
-/// - a vector cast of storage not vector aligned is never indexed directly,
-///   as that emits aligned moves, which fault.
-/// - a loop never iterates a multibyte cast of storage not so aligned, as it
-///   may be vectorized with alignment peeling and then aligned moves.
-/// On arm32 multibyte access to storage not so aligned may fault (ldrd/ldm),
-/// so such casts must not be dereferenced there.
+/// storage may not have (byte arrays are aligned to one), and any access
+/// through the cast may be compiled to aligned moves, which fault.
+/// - A vector cast requires vector aligned storage (alignas). This holds even
+///   where the cast is accessed through unaligned intrinsic load/store, as
+///   gcc derives alignment from the cast and emits aligned moves regardless.
+///   Unaligned memory is loaded and stored by byte pointer (f::load/store).
+/// - A multibyte integral cast of storage not so aligned is safe for scalar
+///   access on x86/x64/arm64, provided that a loop never iterates the cast,
+///   as it may be vectorized with alignment peeling and then aligned moves.
+/// - On arm32 multibyte access to storage not so aligned may fault (ldrd/ldm),
+///   so such casts must not be dereferenced there.
 /// C++23: std::start_lifetime_as defines these casts, but only for storage
 /// aligned to the target element and not const. It does not relax alignment.
 
