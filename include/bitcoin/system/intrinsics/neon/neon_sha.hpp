@@ -23,7 +23,7 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 
-#if defined(HAVE_CRYPTO)
+#if defined(HAVE_NEON_SHA)
 
 namespace libbitcoin {
 namespace system {
@@ -121,9 +121,9 @@ INLINE uint32_t get_160(xint128_t e) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_CRYPTO
+#endif // HAVE_NEON_SHA
 
-#if defined(HAVE_SHA3)
+#if defined(HAVE_NEON_SHA3)
 
 namespace libbitcoin {
 namespace system {
@@ -222,6 +222,6 @@ INLINE void unshuffle_512(xquad_t&, xquad_t&) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_SHA3
+#endif // HAVE_NEON_SHA3
 
 #endif

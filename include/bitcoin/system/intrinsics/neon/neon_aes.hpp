@@ -23,7 +23,7 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 
-#if defined(HAVE_CRYPTO)
+#if defined(HAVE_NEON_AES)
 
 namespace libbitcoin {
 namespace system {
@@ -208,6 +208,6 @@ INLINE xint128_t reduce(xint128_t lo, xint128_t hi) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_CRYPTO
+#endif // HAVE_NEON_AES
 
 #endif

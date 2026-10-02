@@ -265,7 +265,8 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512__faked_throttled__false)
 }
 
 // try_neon
-// try_crypto
-// try_sha3
+// try_neon_sha
+// try_neon_aes
+// try_neon_sha3
 
 BOOST_AUTO_TEST_SUITE_END()

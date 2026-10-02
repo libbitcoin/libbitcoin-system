@@ -92,10 +92,10 @@ namespace libbitcoin {
     constexpr auto have_sha512 = false;
 #endif
 
-#if defined(HAVE_SHA3)
-    constexpr auto have_sha3 = true;
+#if defined(HAVE_NEON_SHA3)
+    constexpr auto have_neon_sha3 = true;
 #else
-    constexpr auto have_sha3 = false;
+    constexpr auto have_neon_sha3 = false;
 #endif
 
 #if defined(HAVE_AES)
@@ -176,10 +176,16 @@ namespace libbitcoin {
     constexpr auto have_neon = false;
 #endif
 
-#if defined(HAVE_CRYPTO)
-    constexpr auto have_crypto = true;
+#if defined(HAVE_NEON_SHA)
+    constexpr auto have_neon_sha = true;
 #else
-    constexpr auto have_crypto = false;
+    constexpr auto have_neon_sha = false;
+#endif
+
+#if defined(HAVE_NEON_AES)
+    constexpr auto have_neon_aes = true;
+#else
+    constexpr auto have_neon_aes = false;
 #endif
 
 #if defined(HAVE_FAST_MATH)
