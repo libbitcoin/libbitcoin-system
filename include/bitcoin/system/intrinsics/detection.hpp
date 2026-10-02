@@ -277,7 +277,7 @@ inline bool try_vaes() NOEXCEPT
         && get_bit<cpu7_0::vpclmulqdq_ecx_bit>(ecx);// VPCLMULQDQ
 }
 
-/// Runtime checks for ARM NEON and CRYPTO availability.
+/// Runtime checks for ARM NEON, SHA, AES and SHA3 availability.
 /// ---------------------------------------------------------------------------
 
 inline bool try_neon() NOEXCEPT
@@ -294,7 +294,7 @@ inline bool try_neon() NOEXCEPT
     #elif defined(HAVE_APPLE)
         int value{};
         auto size = sizeof(int);
-        sysctlbyname("hw.optional.neon", &value, &size, nullptr, zero);
+        sysctlbyname("hw.optional.AdvSIMD", &value, &size, nullptr, zero);
         return to_bool(value);
     #elif defined(HAVE_MSC)
         constexpr auto neon_flag = PF_ARM_NEON_INSTRUCTIONS_AVAILABLE;
@@ -307,22 +307,21 @@ inline bool try_neon() NOEXCEPT
 #endif
 }
 
-inline bool try_crypto() NOEXCEPT
+inline bool try_neon_sha() NOEXCEPT
 {
 #if defined(HAVE_ARM)
     #if defined(HAVE_LINUX)
         const auto caps = getauxval(AT_HWCAP);
         return
-            get_mask<HWCAP_AES>(caps) &&
             get_mask<HWCAP_SHA1>(caps) &&
             get_mask<HWCAP_SHA2>(caps);
     #elif defined(HAVE_APPLE)
-        int aes{}, sha1{}, sha256{};
+        int sha1{}, sha256{};
         auto size = sizeof(int);
-        sysctlbyname("hw.optional.armv8_aes", &aes, &size, nullptr, zero);
-        sysctlbyname("hw.optional.armv8_sha1", &sha1, &size, nullptr, zero);
-        sysctlbyname("hw.optional.armv8_sha256",&sha256, &size, nullptr, zero);
-        return to_bool(aes) && to_bool(sha1) && to_bool(sha256);
+        sysctlbyname("hw.optional.arm.FEAT_SHA1", &sha1, &size, nullptr, zero);
+        sysctlbyname("hw.optional.arm.FEAT_SHA256", &sha256, &size, nullptr,
+            zero);
+        return to_bool(sha1) && to_bool(sha256);
     #elif defined(HAVE_MSC)
         constexpr auto crypto_flag = PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE;
         return to_bool(::IsProcessorFeaturePresent(crypto_flag));
@@ -334,7 +333,33 @@ inline bool try_crypto() NOEXCEPT
 #endif
 }
 
-inline bool try_sha3() NOEXCEPT
+inline bool try_neon_aes() NOEXCEPT
+{
+#if defined(HAVE_ARM)
+    #if defined(HAVE_LINUX)
+        const auto caps = getauxval(AT_HWCAP);
+        return
+            get_mask<HWCAP_AES>(caps) &&
+            get_mask<HWCAP_PMULL>(caps);
+    #elif defined(HAVE_APPLE)
+        int aes{}, pmull{};
+        auto size = sizeof(int);
+        sysctlbyname("hw.optional.arm.FEAT_AES", &aes, &size, nullptr, zero);
+        sysctlbyname("hw.optional.arm.FEAT_PMULL", &pmull, &size, nullptr,
+            zero);
+        return to_bool(aes) && to_bool(pmull);
+    #elif defined(HAVE_MSC)
+        constexpr auto crypto_flag = PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE;
+        return to_bool(::IsProcessorFeaturePresent(crypto_flag));
+    #else
+        return false;
+    #endif
+#else
+    return false;
+#endif
+}
+
+inline bool try_neon_sha3() NOEXCEPT
 {
 #if defined(HAVE_ARM)
     #if defined(HAVE_LINUX)
@@ -345,8 +370,9 @@ inline bool try_sha3() NOEXCEPT
     #elif defined(HAVE_APPLE)
         int sha3{}, sha512{};
         auto size = sizeof(int);
-        sysctlbyname("hw.optional.armv8_2_sha3", &sha3, &size, nullptr, zero);
-        sysctlbyname("hw.optional.armv8_2_sha512", &sha512, &size, nullptr, zero);
+        sysctlbyname("hw.optional.arm.FEAT_SHA3", &sha3, &size, nullptr, zero);
+        sysctlbyname("hw.optional.arm.FEAT_SHA512", &sha512, &size, nullptr,
+            zero);
         return to_bool(sha3) && to_bool(sha512);
     #elif defined(HAVE_MSC)
         constexpr auto sha3_flag = PF_ARM_SHA3_INSTRUCTIONS_AVAILABLE;

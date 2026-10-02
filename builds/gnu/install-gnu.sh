@@ -8,28 +8,30 @@
 # Script managing the build and installation of libbitcoin-system and its dependencies.
 #
 # Script options:
-# --<enable/disable>-avx2       Use Intel AVX2 intrinsics.
-#                                 Default: --disable-avx2
-# --<enable/disable>-avx512     Use Intel AVX512 intrinsics.
-#                                 Default: --disable-avx512
-# --<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
-#                                 Default: --disable-avx512ifma
-# --<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2).
-#                                 Default: --disable-avxifma
-# --<enable/disable>-sse41      Use SSE4.1 hardware instructions.
-#                                 Default: --disable-sse41
-# --<enable/disable>-shani      Use Intel/ARM SHA Extensions.
+# --<enable/disable>-shani      Use Intel SHA Extensions.
 #                                 Default: --disable-shani
-# --<enable/disable>-crypto     Use ARM Crypto Extensions.
-#                                 Default: --disable-crypto
 # --<enable/disable>-sha512     Use Intel SHA512 Extensions (implies AVX2).
 #                                 Default: --disable-sha512
-# --<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512 (implies Crypto).
-#                                 Default: --disable-sha3
 # --<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics.
 #                                 Default: --disable-aesni
 # --<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #                                 Default: --disable-vaes
+# --<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+#                                 Default: --disable-avx512ifma
+# --<enable/disable>-avx512     Use Intel AVX512 intrinsics.
+#                                 Default: --disable-avx512
+# --<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2).
+#                                 Default: --disable-avxifma
+# --<enable/disable>-avx2       Use Intel AVX2 intrinsics.
+#                                 Default: --disable-avx2
+# --<enable/disable>-sse41      Use SSE4.1 hardware instructions.
+#                                 Default: --disable-sse41
+# --<enable/disable>-sha        Use ARM SHA1/SHA256 Extensions.
+#                                 Default: --disable-sha
+# --<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512.
+#                                 Default: --disable-sha3
+# --<enable/disable>-aes        Use ARM AES and PMULL Extensions.
+#                                 Default: --disable-aes
 # --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
 #                                 Default: --without-secp256k1
 # --<enable/disable>-cuda       Use cuda (gpu) batch signature verification.
@@ -976,28 +978,30 @@ help()
     msg "Script managing the build and installation of libbitcoin-system and its dependencies."
     msg ""
     msg "Script options:"
-    msg "--<enable/disable>-avx2       Use Intel AVX2 intrinsics."
-    msg "                                Default: --disable-avx2"
-    msg "--<enable/disable>-avx512     Use Intel AVX512 intrinsics."
-    msg "                                Default: --disable-avx512"
-    msg "--<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
-    msg "                                Default: --disable-avx512ifma"
-    msg "--<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2)."
-    msg "                                Default: --disable-avxifma"
-    msg "--<enable/disable>-sse41      Use SSE4.1 hardware instructions."
-    msg "                                Default: --disable-sse41"
-    msg "--<enable/disable>-shani      Use Intel/ARM SHA Extensions."
+    msg "--<enable/disable>-shani      Use Intel SHA Extensions."
     msg "                                Default: --disable-shani"
-    msg "--<enable/disable>-crypto     Use ARM Crypto Extensions."
-    msg "                                Default: --disable-crypto"
     msg "--<enable/disable>-sha512     Use Intel SHA512 Extensions (implies AVX2)."
     msg "                                Default: --disable-sha512"
-    msg "--<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
-    msg "                                Default: --disable-sha3"
     msg "--<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics."
     msg "                                Default: --disable-aesni"
     msg "--<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg "                                Default: --disable-vaes"
+    msg "--<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    msg "                                Default: --disable-avx512ifma"
+    msg "--<enable/disable>-avx512     Use Intel AVX512 intrinsics."
+    msg "                                Default: --disable-avx512"
+    msg "--<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2)."
+    msg "                                Default: --disable-avxifma"
+    msg "--<enable/disable>-avx2       Use Intel AVX2 intrinsics."
+    msg "                                Default: --disable-avx2"
+    msg "--<enable/disable>-sse41      Use SSE4.1 hardware instructions."
+    msg "                                Default: --disable-sse41"
+    msg "--<enable/disable>-sha        Use ARM SHA1/SHA256 Extensions."
+    msg "                                Default: --disable-sha"
+    msg "--<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512."
+    msg "                                Default: --disable-sha3"
+    msg "--<enable/disable>-aes        Use ARM AES and PMULL Extensions."
+    msg "                                Default: --disable-aes"
     msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
     msg "                                Default: --without-secp256k1"
     msg "--<enable/disable>-cuda       Use cuda (gpu) batch signature verification."

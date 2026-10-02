@@ -79,17 +79,18 @@ endif()
 #------------------------------------------------------------------------------
 # Project options.
 #------------------------------------------------------------------------------
-option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
-option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
-option( enable-avx512ifma "Use Intel AVX512 IFMA intrinsics (implies AVX512VL)." OFF )
-option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
-option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
-option( enable-shani "Use Intel/ARM SHA Extensions." OFF )
-option( enable-crypto "Use ARM Crypto Extensions." OFF )
+option( enable-shani "Use Intel SHA Extensions." OFF )
 option( enable-sha512 "Use Intel SHA512 Extensions (implies AVX2)." OFF )
-option( enable-sha3 "Use ARM SHA3 Extensions for SHA512 (implies Crypto)." OFF )
 option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
 option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
+option( enable-avx512ifma "Use Intel AVX512 IFMA intrinsics (implies AVX512VL)." OFF )
+option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
+option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
+option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
+option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
+option( enable-sha "Use ARM SHA1/SHA256 Extensions." OFF )
+option( enable-sha3 "Use ARM SHA3 Extensions for SHA512." OFF )
+option( enable-aes "Use ARM AES and PMULL Extensions." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( enable-cuda "Use cuda (gpu) batch signature verification." OFF )
 option( with-tests "Compile with unit tests." ON )
@@ -126,6 +127,26 @@ endif()
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
+
+set( march-base "" )
+set( march-features "" )
+if ( enable-sha )
+  set( march-base "armv8-a" )
+  string( APPEND march-features "+sha2" )
+endif()
+if ( enable-aes )
+  set( march-base "armv8-a" )
+  string( APPEND march-features "+aes" )
+endif()
+if ( enable-sha3 )
+  set( march-base "armv8.2-a" )
+  string( APPEND march-features "+sha3" )
+endif()
+
+set( march "" )
+if ( NOT march-features STREQUAL "" )
+  set( march "-march=${march-base}${march-features}" )
+endif()
 
 if ( enable-avx2 )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
@@ -212,18 +233,33 @@ if ( enable-shani )
   endif()
 endif()
 
-if ( enable-crypto )
+if ( enable-sha )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -march=armv8-a+crypto" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${march}" )
   check_cxx_source_compiles( "
     #include <arm_neon.h>
       int main() {
       uint32x4_t a = vdupq_n_u32(0);
       return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-      }" SUPPORTS_FLAG_CRYPTO )
+      }" SUPPORTS_FLAG_SHA )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_CRYPTO )
-    message( FATAL_ERROR "Compiler does not support '-march=armv8-a+crypto'." )
+  if ( !SUPPORTS_FLAG_SHA )
+    message( FATAL_ERROR "Compiler does not support '${march}'." )
+  endif()
+endif()
+
+if ( enable-aes )
+  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${march}" )
+  check_cxx_source_compiles( "
+    #include <arm_neon.h>
+      int main() {
+      uint8x16_t a = vdupq_n_u8(0);
+      return vgetq_lane_u8(vaeseq_u8(a, a), 0);
+      }" SUPPORTS_FLAG_AES )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+  if ( !SUPPORTS_FLAG_AES )
+    message( FATAL_ERROR "Compiler does not support '${march}'." )
   endif()
 endif()
 
@@ -246,7 +282,7 @@ endif()
 
 if ( enable-sha3 )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -march=armv8.2-a+crypto+sha3" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${march}" )
   check_cxx_source_compiles( "
     #include <arm_neon.h>
       int main() {
@@ -255,7 +291,7 @@ if ( enable-sha3 )
       }" SUPPORTS_FLAG_SHA3 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_SHA3 )
-    message( FATAL_ERROR "Compiler does not support '-march=armv8.2-a+crypto+sha3'." )
+    message( FATAL_ERROR "Compiler does not support '${march}'." )
   endif()
 endif()
 
@@ -406,9 +442,8 @@ target_compile_options( libbitcoin-system
     $<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>
     $<$<BOOL:${enable-avxifma}>:-mavxifma>
     $<$<BOOL:${enable-shani}>:-msse4 -msha>
-    $<$<BOOL:${enable-crypto}>:-march=armv8-a+crypto>
+    ${march}
     $<$<BOOL:${enable-sha512}>:-mavx2 -msha512>
-    $<$<BOOL:${enable-sha3}>:-march=armv8.2-a+crypto+sha3>
     $<$<BOOL:${enable-sse41}>:-msse4.1>
     $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
     $<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>

@@ -8,27 +8,29 @@
 # Script managing the build and installation of libbitcoin-system and its dependencies.
 #
 # Script options:
-# -Denable-avx2=<ON/OFF>       Use Intel AVX2 intrinsics.
-#                                Default: OFF
-# -Denable-avx512=<ON/OFF>     Use Intel AVX512 intrinsics.
-#                                Default: OFF
-# -Denable-avx512ifma=<ON/OFF> Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
-#                                Default: OFF
-# -Denable-avxifma=<ON/OFF>    Use Intel AVX IFMA intrinsics (implies AVX2).
-#                                Default: OFF
-# -Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions.
-#                                Default: OFF
-# -Denable-shani=<ON/OFF>      Use Intel/ARM SHA Extensions.
-#                                Default: OFF
-# -Denable-crypto=<ON/OFF>     Use ARM Crypto Extensions.
+# -Denable-shani=<ON/OFF>      Use Intel SHA Extensions.
 #                                Default: OFF
 # -Denable-sha512=<ON/OFF>     Use Intel SHA512 Extensions (implies AVX2).
-#                                Default: OFF
-# -Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512 (implies Crypto).
 #                                Default: OFF
 # -Denable-aesni=<ON/OFF>      Use Intel AES-NI and PCLMULQDQ intrinsics.
 #                                Default: OFF
 # -Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
+#                                Default: OFF
+# -Denable-avx512ifma=<ON/OFF> Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+#                                Default: OFF
+# -Denable-avx512=<ON/OFF>     Use Intel AVX512 intrinsics.
+#                                Default: OFF
+# -Denable-avxifma=<ON/OFF>    Use Intel AVX IFMA intrinsics (implies AVX2).
+#                                Default: OFF
+# -Denable-avx2=<ON/OFF>       Use Intel AVX2 intrinsics.
+#                                Default: OFF
+# -Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions.
+#                                Default: OFF
+# -Denable-sha=<ON/OFF>        Use ARM SHA1/SHA256 Extensions.
+#                                Default: OFF
+# -Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512.
+#                                Default: OFF
+# -Denable-aes=<ON/OFF>        Use ARM AES and PMULL Extensions.
 #                                Default: OFF
 # -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
 #                                Default: OFF
@@ -937,27 +939,29 @@ help()
     msg "Script managing the build and installation of libbitcoin-system and its dependencies."
     msg ""
     msg "Script options:"
-    msg "-Denable-avx2=<ON/OFF>       Use Intel AVX2 intrinsics."
-    msg "                               Default: OFF"
-    msg "-Denable-avx512=<ON/OFF>     Use Intel AVX512 intrinsics."
-    msg "                               Default: OFF"
-    msg "-Denable-avx512ifma=<ON/OFF> Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
-    msg "                               Default: OFF"
-    msg "-Denable-avxifma=<ON/OFF>    Use Intel AVX IFMA intrinsics (implies AVX2)."
-    msg "                               Default: OFF"
-    msg "-Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions."
-    msg "                               Default: OFF"
-    msg "-Denable-shani=<ON/OFF>      Use Intel/ARM SHA Extensions."
-    msg "                               Default: OFF"
-    msg "-Denable-crypto=<ON/OFF>     Use ARM Crypto Extensions."
+    msg "-Denable-shani=<ON/OFF>      Use Intel SHA Extensions."
     msg "                               Default: OFF"
     msg "-Denable-sha512=<ON/OFF>     Use Intel SHA512 Extensions (implies AVX2)."
-    msg "                               Default: OFF"
-    msg "-Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
     msg "                               Default: OFF"
     msg "-Denable-aesni=<ON/OFF>      Use Intel AES-NI and PCLMULQDQ intrinsics."
     msg "                               Default: OFF"
     msg "-Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+    msg "                               Default: OFF"
+    msg "-Denable-avx512ifma=<ON/OFF> Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    msg "                               Default: OFF"
+    msg "-Denable-avx512=<ON/OFF>     Use Intel AVX512 intrinsics."
+    msg "                               Default: OFF"
+    msg "-Denable-avxifma=<ON/OFF>    Use Intel AVX IFMA intrinsics (implies AVX2)."
+    msg "                               Default: OFF"
+    msg "-Denable-avx2=<ON/OFF>       Use Intel AVX2 intrinsics."
+    msg "                               Default: OFF"
+    msg "-Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions."
+    msg "                               Default: OFF"
+    msg "-Denable-sha=<ON/OFF>        Use ARM SHA1/SHA256 Extensions."
+    msg "                               Default: OFF"
+    msg "-Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512."
+    msg "                               Default: OFF"
+    msg "-Denable-aes=<ON/OFF>        Use ARM AES and PMULL Extensions."
     msg "                               Default: OFF"
     msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
     msg "                               Default: OFF"
