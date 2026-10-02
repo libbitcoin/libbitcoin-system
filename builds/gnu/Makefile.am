@@ -1253,6 +1253,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/sha3/sha3.cpp \
     ${srcdir}/../../test/intrinsics/add.cpp \
     ${srcdir}/../../test/intrinsics/byte_swap.cpp \
+    ${srcdir}/../../test/intrinsics/count.cpp \
     ${srcdir}/../../test/intrinsics/cpuid.cpp \
     ${srcdir}/../../test/intrinsics/detection.cpp \
     ${srcdir}/../../test/intrinsics/intel_128.cpp \

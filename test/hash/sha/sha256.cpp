@@ -229,6 +229,24 @@ BOOST_AUTO_TEST_CASE(sha256__midstate__half_blocks__expected)
     BOOST_CHECK_EQUAL(sha256::finalize(copy, one), sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }));
 }
 
+// sha256::hash(midstate, half, half, half)
+BOOST_AUTO_TEST_CASE(sha256__hash__midstate_halves__expected)
+{
+    constexpr auto expected = base16_array("4d15b30bff844b820ef93243e53cd4c8600cce2b13f8999b09496a32d08cab7f");
+    constexpr auto midstate = sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 1 });
+    static_assert(sha256::hash(midstate, sha256::half_t{ 2 }, sha256::half_t{ 3 }, sha256::half_t{ 4 }) == expected);
+    BOOST_CHECK_EQUAL(sha256::hash(midstate, sha256::half_t{ 2 }, sha256::half_t{ 3 }, sha256::half_t{ 4 }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(sha256__hash__tagged_midstate_halves__tagged_hash)
+{
+    constexpr sha256::half_t first{ 1 };
+    constexpr sha256::half_t second{ 2 };
+    constexpr sha256::half_t third{ 3 };
+    const auto expected = tagged_hash("BIP0340/challenge", splice(first, second, third));
+    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0340/challenge">, first, second, third), expected);
+}
+
 // sha256::simple_hash
 BOOST_AUTO_TEST_CASE(sha256__simple_hash__minimal__expected)
 {

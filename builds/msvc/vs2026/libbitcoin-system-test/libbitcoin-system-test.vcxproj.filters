@@ -594,6 +594,9 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\count.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>

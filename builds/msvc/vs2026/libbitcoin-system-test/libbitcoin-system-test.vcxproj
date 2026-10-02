@@ -320,6 +320,7 @@
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\add.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\count.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\intel_128.cpp" />
