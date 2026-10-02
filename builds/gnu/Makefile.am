@@ -44,8 +44,7 @@ src_libbitcoin_system_la_CPPFLAGS = \
     ${boost_json_BUILD_CPPFLAGS} \
     ${boost_program_options_BUILD_CPPFLAGS} \
     ${boost_url_BUILD_CPPFLAGS} \
-    ${secp256k1_BUILD_CPPFLAGS} \
-    ${UltrafastSecp256k1_BUILD_CPPFLAGS}
+    ${secp256k1_BUILD_CPPFLAGS}
 
 src_libbitcoin_system_la_LDFLAGS = \
     ${boost_LDFLAGS} \
@@ -53,8 +52,7 @@ src_libbitcoin_system_la_LDFLAGS = \
     ${boost_json_LDFLAGS} \
     ${boost_program_options_LDFLAGS} \
     ${boost_url_LDFLAGS} \
-    ${secp256k1_LDFLAGS} \
-    ${UltrafastSecp256k1_LDFLAGS}
+    ${secp256k1_LDFLAGS}
 
 src_libbitcoin_system_la_LIBADD = \
     ${boost_LIBS} \
@@ -62,8 +60,7 @@ src_libbitcoin_system_la_LIBADD = \
     ${boost_json_LIBS} \
     ${boost_program_options_LIBS} \
     ${boost_url_LIBS} \
-    ${secp256k1_LIBS} \
-    ${UltrafastSecp256k1_LIBS}
+    ${secp256k1_LIBS}
 
 src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/arena.cpp \

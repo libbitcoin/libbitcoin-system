@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__is_hybrid_key__not_hybrid__false)
 BOOST_AUTO_TEST_CASE(secp256k1__secp256k1_library__always__known)
 {
     const auto library = secp256k1_library();
-    BOOST_REQUIRE(library == "internal" || library.starts_with("libsecp256k1") || library.starts_with("ultrafast "));
+    BOOST_REQUIRE(library == "internal" || library.starts_with("libsecp256k1"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

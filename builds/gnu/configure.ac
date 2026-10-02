@@ -263,15 +263,6 @@ AC_ARG_ENABLE([vaes],
 AC_MSG_RESULT([$enable_vaes])
 AM_CONDITIONAL([ENABLE_VAES], [test "x${enable_vaes}" != "xno"])
 
-AC_MSG_CHECKING([--with-ultrafast option])
-AC_ARG_WITH([ultrafast],
-    AS_HELP_STRING([--with-ultrafast],
-        [Use shrec/UltrafastSecp256k1 library. @<:@default=no@:>@]),
-    [with_ultrafast=$withval],
-    [with_ultrafast=no])
-AC_MSG_RESULT([$with_ultrafast])
-AM_CONDITIONAL([WITH_ULTRAFAST], [test "x${with_ultrafast}" != "xno"])
-
 AC_MSG_CHECKING([--with-secp256k1 option])
 AC_ARG_WITH([secp256k1],
     AS_HELP_STRING([--with-secp256k1],
@@ -689,31 +680,6 @@ AS_IF([test "x${with_secp256k1}" != "xno"],
       [AC_SUBST([secp256k1_BUILD_CPPFLAGS], [${secp256k1_ISYS_CPPFLAGS}])],
       [AC_SUBST([secp256k1_BUILD_CPPFLAGS], [${secp256k1_CPPFLAGS}])])
     AC_MSG_NOTICE([secp256k1_BUILD_CPPFLAGS : ${secp256k1_BUILD_CPPFLAGS}])
-  ])
-
-AS_IF([test "x${with_ultrafast}" != "xno"],
-  [
-    PKG_CHECK_MODULES(
-      [UltrafastSecp256k1],
-      [secp256k1-fast >= 4.0.0.0],
-      [],
-      [
-        AC_MSG_ERROR([secp256k1-fast >= 4.0.0.0 is required but was not found.])
-      ])
-    AC_SUBST([UltrafastSecp256k1_PKG], ['secp256k1-fast >= 4.0.0.0'])
-    AC_SUBST([UltrafastSecp256k1_VERSION], [`${PKG_CONFIG} --modversion secp256k1-fast`])
-    AC_SUBST([UltrafastSecp256k1_CPPFLAGS], [${UltrafastSecp256k1_CFLAGS}])
-    AC_SUBST([UltrafastSecp256k1_ISYS_CPPFLAGS], [`echo ${UltrafastSecp256k1_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
-    AC_MSG_NOTICE([UltrafastSecp256k1_VERSION : ${UltrafastSecp256k1_VERSION}])
-    AC_MSG_NOTICE([UltrafastSecp256k1_CPPFLAGS : ${UltrafastSecp256k1_CPPFLAGS}])
-    AC_MSG_NOTICE([UltrafastSecp256k1_ISYS_CPPFLAGS : ${UltrafastSecp256k1_ISYS_CPPFLAGS}])
-    AC_MSG_NOTICE([UltrafastSecp256k1_OTHER_CFLAGS : ${UltrafastSecp256k1_OTHER_CFLAGS}])
-    AC_MSG_NOTICE([UltrafastSecp256k1_INCLUDEDIR : ${UltrafastSecp256k1_INCLUDEDIR}])
-    AC_MSG_NOTICE([UltrafastSecp256k1_LIBS : ${UltrafastSecp256k1_LIBS}])
-    AS_IF([test "x${enable_isystem}" != "xno"],
-      [AC_SUBST([UltrafastSecp256k1_BUILD_CPPFLAGS], [${UltrafastSecp256k1_ISYS_CPPFLAGS}])],
-      [AC_SUBST([UltrafastSecp256k1_BUILD_CPPFLAGS], [${UltrafastSecp256k1_CPPFLAGS}])])
-    AC_MSG_NOTICE([UltrafastSecp256k1_BUILD_CPPFLAGS : ${UltrafastSecp256k1_BUILD_CPPFLAGS}])
   ])
 
 # Set preprocessor defines.

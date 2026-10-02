@@ -30,13 +30,10 @@
 #                                 Default: --disable-aesni
 # --<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #                                 Default: --disable-vaes
-# --<with/without>-ultrafast    Use shrec/UltrafastSecp256k1 library.
-#                                 Default: --without-ultrafast
 # --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
 #                                 Default: --without-secp256k1
 # --build-boost                 Build Boost libraries
 # --build-secp256k1             Build libsecp256k1 libraries
-# --build-ultrafast             Build UltrafastSecp256k1 libraries
 # --build-src-dir=<path>        Location for sources.
 #                                 Default: $(pwd)
 # --build-obj-dir=<path>        Location for intermediate objects.
@@ -86,13 +83,6 @@ if [[ -z ${secp256k1_TAG} ]]; then
     secp256k1_TAG="v0.8.0"
 fi
 
-if [[ -z ${UltrafastSecp256k1_OWNER} ]]; then
-    UltrafastSecp256k1_OWNER="shrec"
-fi
-if [[ -z ${UltrafastSecp256k1_TAG} ]]; then
-    UltrafastSecp256k1_TAG="main"
-fi
-
 if [[ -z ${libbitcoin_system_OWNER} ]]; then
     libbitcoin_system_OWNER="libbitcoin"
 fi
@@ -108,7 +98,6 @@ main()
         case ${OPTION} in
             (--build-boost)                 BUILD_boost="yes";;
             (--build-secp256k1)             BUILD_secp256k1="yes";;
-            (--build-ultrafast)             BUILD_ultrafast="yes";;
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
             (--build-obj-dir=*)             BUILD_OBJ_DIR="${OPTION#*=}";;
             (--build-obj-dir-relative)      BUILD_OBJ_DIR_RELATIVE="yes";;
@@ -130,7 +119,6 @@ main()
     CONFIGURE_OPTIONS=("$@")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-boost/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-secp256k1/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-ultrafast/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir-relative/}")
@@ -475,23 +463,6 @@ main()
         "--enable-module-recovery"
         "--enable-module-schnorrsig")
 
-    UltrafastSecp256k1_FLAGS=()
-
-    UltrafastSecp256k1_OPTIONS=(
-        "-DSECP256K1_BUILD_CABI=ON"
-        "-DSECP256K1_BUILD_CPU=ON"
-        "-DSECP256K1_BUILD_SHIM=ON"
-        "-DSECP256K1_USE_ULTRAFAST=ON"
-        "-DSECP256K1_BUILD_BENCH=OFF"
-        "-DSECP256K1_BUILD_EXAMPLES=OFF"
-        "-DSECP256K1_BUILD_JAVA=OFF"
-        "-DSECP256K1_BUILD_TESTS=OFF"
-        "-DSECP256K1_SHIM_BUILD_SHARED=OFF"
-        "-DUFSECP_BUILD_SHARED=OFF"
-        "-DSECP256K1_INSTALL=ON"
-        "-DSECP256K1_SHIM_INSTALL=ON"
-        "-DSECP256K1_INSTALL_PKGCONFIG=ON")
-
     libbitcoin_system_FLAGS=()
 
     libbitcoin_system_OPTIONS=(
@@ -514,18 +485,6 @@ main()
         install_gnu "secp256k1" "."
         if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
             clean_gnu "secp256k1" "."
-        fi
-        export CPPFLAGS="${SAVE_CPPFLAGS}"
-    fi
-
-    if [[ ${BUILD_ultrafast} == "yes" ]]; then
-        source_github "${UltrafastSecp256k1_OWNER}" "UltrafastSecp256k1" "${UltrafastSecp256k1_TAG}"
-        local SAVE_CPPFLAGS="${CPPFLAGS}"
-        export CPPFLAGS="${CPPFLAGS} ${UltrafastSecp256k1_FLAGS[@]}"
-        build_cmake "UltrafastSecp256k1" "." "." "${PARALLEL}" "${UltrafastSecp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
-        install_cmake "UltrafastSecp256k1" "."
-        if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-            clean_cmake "UltrafastSecp256k1" "."
         fi
         export CPPFLAGS="${SAVE_CPPFLAGS}"
     fi
@@ -824,197 +783,6 @@ build_gnu()
 }
 
 
-build_cmake()
-{
-    local PROJECT="$1"
-    local RELATIVE_SRC_PATH="$2"
-    local RELATIVE_OBJ_PATH="$3"
-    local JOBS="$4"
-    shift 4
-
-    local VERBOSITY_CMAKE=""
-    local VERBOSITY_MAKE=""
-
-    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
-        VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
-        VERBOSITY_MAKE="--verbose"
-    fi
-
-    msg_heading "Preparing to build ${PROJECT}"
-
-
-    # directory rationalization
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-    push_directory "${RELATIVE_SRC_PATH}"
-    local BUILD_PATH="$(pwd)"
-    pop_directory
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        create_directory_force "${BUILD_OBJ_DIR}"
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}"
-        create_directory_force "${PROJECT}"
-        pop_directory
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        create_directory_force "${RELATIVE_OBJ_PATH}"
-        push_directory "${RELATIVE_OBJ_PATH}"
-    fi
-
-    display_configure_options "$@"
-
-    cmake ${VERBOSITY_CMAKE} -LA "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_SRC_PATH}"
-
-    # make
-    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        cmake --build . -j${JOBS} ${VERBOSITY_MAKE}
-    else
-        cmake --build . ${VERBOSITY_MAKE}
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        pop_directory
-    fi
-
-    msg_success "'${PROJECT}' built successfully."
-}
-
-
-clean_cmake()
-{
-    local PROJECT="$1"
-    local RELATIVE_OBJ_PATH="$2"
-    shift 2
-
-    msg "Preparing to clean ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        push_directory "${RELATIVE_OBJ_PATH}"
-    fi
-
-    disable_exit_on_error
-
-    cmake --build . --target clean
-
-    local RESULT=$?
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        msg_error "Encountered error, please see test.log contents above."
-        exit ${RESULT}
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        pop_directory
-    fi
-
-    msg_success "'${PROJECT}' clean complete."
-}
-
-install_cmake()
-{
-    local PROJECT="$1"
-    local RELATIVE_OBJ_PATH="$2"
-    shift 2
-
-    msg "Preparing to install ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        push_directory "${RELATIVE_OBJ_PATH}"
-    fi
-
-    cmake --install .
-
-    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
-        ldconfig
-    fi
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        pop_directory
-    fi
-
-    msg_success "'${PROJECT}' installation complete."
-}
-
-test_cmake()
-{
-    local PROJECT="$1"
-    local RELATIVE_OBJ_PATH="$2"
-    local JOBS="$3"
-    shift 3
-
-    msg "Preparing to test ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        push_directory "${BUILD_OBJ_DIR}"
-    else
-        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
-    fi
-
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        push_directory "${RELATIVE_OBJ_PATH}"
-    fi
-
-    disable_exit_on_error
-
-    ctest --test-dir .
-
-    local RESULT=$?
-
-    if [[ -e "test-suite.log" ]]; then
-        msg_warn "begin error log: test-suite.log"
-        cat "test-suite.log"
-        msg_warn "  end error log: test-suite.log"
-    fi
-
-    if [[ -e "test.log" ]]; then
-        msg_warn "begin error log: test.log"
-        cat "test.log"
-        msg_warn "  end error log: test.log"
-    fi
-
-    if [[ ${RESULT} -ne 0 ]]; then
-        msg_error "Encountered error, please see test.log contents above."
-        exit ${RESULT}
-    fi
-
-    enable_exit_on_error
-
-    pop_directory # BUILD_OBJ_DIR
-    pop_directory # BUILD_SRC_DIR/PROJECT
-    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
-        pop_directory
-    fi
-
-    msg_success "'${PROJECT}' test complete."
-}
-
 clean_gnu()
 {
     local PROJECT="$1"
@@ -1153,7 +921,6 @@ display_build_variables()
 {
     msg "BUILD_boost                     : ${BUILD_boost}"
     msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
-    msg "BUILD_ultrafast                 : ${BUILD_ultrafast}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
     msg "BUILD_OBJ_DIR                   : ${BUILD_OBJ_DIR}"
     msg "BUILD_OBJ_DIR_RELATIVE          : ${BUILD_OBJ_DIR_RELATIVE}"
@@ -1198,9 +965,6 @@ display_constants()
     msg "secp256k1_OWNER                 : ${secp256k1_OWNER}"
     msg "secp256k1_TAG                   : ${secp256k1_TAG}"
 
-    msg "UltrafastSecp256k1_OWNER        : ${UltrafastSecp256k1_OWNER}"
-    msg "UltrafastSecp256k1_TAG          : ${UltrafastSecp256k1_TAG}"
-
     msg "libbitcoin_system_OWNER         : ${libbitcoin_system_OWNER}"
     msg "libbitcoin_system_TAG           : ${libbitcoin_system_TAG}"
 }
@@ -1232,13 +996,10 @@ help()
     msg "                                Default: --disable-aesni"
     msg "--<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg "                                Default: --disable-vaes"
-    msg "--<with/without>-ultrafast    Use shrec/UltrafastSecp256k1 library."
-    msg "                                Default: --without-ultrafast"
     msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
     msg "                                Default: --without-secp256k1"
     msg "--build-boost                 Build Boost libraries"
     msg "--build-secp256k1             Build libsecp256k1 libraries"
-    msg "--build-ultrafast             Build UltrafastSecp256k1 libraries"
     msg "--build-src-dir=<path>        Location for sources."
     msg "                                Default: $(pwd)"
     msg "--build-obj-dir=<path>        Location for intermediate objects."

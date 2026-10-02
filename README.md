@@ -92,7 +92,6 @@ On success the headers and library are installed under `$HOME/libbitcoin`, along
 | `--build-link=<mode>` | `static`, `dynamic` | Link mode |
 | `--build-boost` | — | Build Boost from source |
 | `--build-secp256k1` | — | Build bitcoin-core/secp256k1 from source (with `--with-secp256k1`) |
-| `--build-ultrafast` | — | Build UltrafastSecp256k1 from source (with `--with-ultrafast`) |
 | `--build-use-local-src` | — | Reuse already-present source directories instead of cloning from GitHub |
 | `--build-skip-tests` | — | Skip test compilation and execution |
 | `--build-parallel=<n>` | integer | Number of parallel compile jobs |
@@ -127,7 +126,6 @@ The script options are those of the Autotools script. The configuration options 
 | `-Dwith-tests=<ON/OFF>` | `ON` | Compile with unit tests |
 | `-Dwith-examples=<ON/OFF>` | `ON` | Compile with examples |
 | `-Dwith-secp256k1=<ON/OFF>` | `OFF` | Use bitcoin-core/secp256k1 |
-| `-Dwith-ultrafast=<ON/OFF>` | `OFF` | Use UltrafastSecp256k1 |
 | `-Denable-<extension>=<ON/OFF>` | `OFF` | See [CPU Extensions](#cpu-extensions) |
 
 See all options:
@@ -171,13 +169,12 @@ Then follow the [GNU Autotools Build](#gnu-autotools-build) or [CMake Build](#cm
 
 ### Windows
 
-Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. Dependencies are NuGet packages, restored automatically when the solution is built. Only Boost is required; the secp256k1 libraries are optional replacements for the internal implementation (see [secp256k1](#secp256k1)):
+Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. Dependencies are NuGet packages, restored automatically when the solution is built. Only Boost is required; the secp256k1 library is an optional replacement for the internal implementation (see [secp256k1](#secp256k1)):
 
 | Package | Version | Required |
 |---------|---------|----------|
 | `libbitcoin-boost` (with container, json, program_options, url and unit_test_framework) | 1.91.0 | yes |
 | `secp256k1_vc145` | 0.8.0 | no |
-| `UltrafastSecp256k1-vc145` | 4.6.0.0 | no |
 
 Build from within Visual Studio, or from a command prompt with `builds\msvc\build-msvc.cmd`, which restores the NuGet packages and builds with MSBuild. The script runs `msbuild` and `nuget` from `PATH` (a Developer Command Prompt provides `msbuild`; `nuget.exe` must be downloaded). To use other executables, set the `MSBUILD_EXE` and `NUGET_EXE` environment variables before running it. Packages are restored to `.nuget\packages` under the source directory unless `NUGET_PKG_PATH` is set.
 
@@ -193,12 +190,13 @@ See `builds\msvc\build-msvc.cmd --help` for all options.
 
 ## secp256k1
 
-The secp256k1 elliptic curve implementation is internal, and can be replaced by any library that provides the same interface. The build supports two, which are mutually exclusive:
+The secp256k1 elliptic curve implementation is internal, and can be replaced by any library that provides the libsecp256k1 interface. The build supports bitcoin-core/secp256k1:
 
 | Library | GNU | CMake | Notes |
 |---------|-----|-------|-------|
 | [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) | `--with-secp256k1` | `-Dwith-secp256k1=ON` | Add `--build-secp256k1` to build it from source |
-| [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1) | `--with-ultrafast` | `-Dwith-ultrafast=ON` | Batch signature verification. Add `--build-ultrafast` to build it from source |
+
+`WITH_SECP256K1` replaces only the calls made through the libsecp256k1 interface, so any other implementation of it can be linked in place of bitcoin-core/secp256k1. Batch verification remains internal.
 
 ---
 

@@ -22,13 +22,9 @@
 #include <numeric>
 #include <span>
 #include <thread>
-#if defined(HAVE_ULTRAFAST)
-    #include <ufsecp/libbitcoin.hpp>
-#elif !defined(HAVE_SECP256K1)
-    #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
-#endif
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -48,101 +44,20 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// polymorphic namespace selectors (template support)
-// ----------------------------------------------------------------------------
-// local
-
-inline bool verify_signature(const ecdsa::batch& batch, size_t row) NOEXCEPT
-{
-    return ecdsa::verify_signature(batch.points[row], batch.digests[row],
-        batch.signatures[row]);
-}
-
-inline bool verify_signature(const schnorr::batch& batch, size_t row) NOEXCEPT
-{
-    return schnorr::verify_signature(batch.points[row], batch.digests[row],
-        batch.signatures[row]);
-}
-
 // accelerated
 // ----------------------------------------------------------------------------
 
 bool batched::compiled() NOEXCEPT
 {
-    auto uf = false;
-
-    // Feature-gated, false until linked ufsecp exposes gpu_available().
-#if defined(HAVE_ULTRAFAST) && defined(UFSECP_LBTC_HAS_GPU_AVAILABLE)
-    uf = true;
-#endif
-
-    return uf;
+    return false;
 }
 
 bool batched::accelerated() NOEXCEPT
 {
-    auto gpu = false;
-
-    // Feature-gated, false until linked ufsecp exposes gpu_available().
-#if defined(HAVE_ULTRAFAST) && defined(UFSECP_LBTC_HAS_GPU_AVAILABLE)
-    gpu = ufsecp::lbtc::gpu_available();
-#endif
-
-    return gpu;
+    return false;
 }
 
 // batch_verify
-// ----------------------------------------------------------------------------
-
-#if defined(HAVE_ULTRAFAST)
-
-template <typename Batch>
-data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
-{
-    // Cancellation is batch-granular (batches are block-bounded).
-    const auto count = batch.correlates.size();
-    data_chunk results{};
-    if (cancel)
-        return results;
-
-    const auto digests = pointer_cast<const uint8_t>(batch.digests.data());
-    const auto points = pointer_cast<const uint8_t>(batch.points.data());
-    const auto sigs = pointer_cast<const uint8_t>(batch.signatures.data());
-
-    if constexpr (is_same_type<Batch, schnorr::batch>)
-    {
-        // Avoid results allocation in the almost-always case.
-        if (!ufsecp::lbtc::schnorr_verify_columns(digests, points, sigs, count,
-            nullptr, zero))
-        {
-            results.resize(count);
-
-            BC_PUSH_WARNING(NO_IGNORE_RETURN_VALUE)
-            BC_PUSH_WARNING(DISCARDING_NON_DISCARDABLE)
-            ufsecp::lbtc::schnorr_verify_columns(digests, points, sigs, count,
-                results.data(), zero);
-            BC_POP_WARNING()
-            BC_POP_WARNING()
-        }
-    }
-    else
-    {
-        // Ecdsa row results are always required, as multisig bands expect
-        // row misses (a failed row does not imply a failed batch), so the
-        // optimistic no-allocation call cannot apply. The converse holds:
-        // all rows valid implies a fully-verified batch.
-        results.resize(count);
-        if (ufsecp::lbtc::ecdsa_verify_columns(digests, points, sigs, count,
-            results.data(), zero))
-            results.clear();
-    }
-
-    return results;
-}
-
-#elif !defined(HAVE_SECP256K1)
-
-// local
 // ----------------------------------------------------------------------------
 
 class dispatcher
@@ -291,39 +206,6 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
 
     return results;
 }
-
-#else
-
-template <typename Batch>
-data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
-{
-    constexpr auto policy = poolstl::execution::par;
-
-    const auto count = batch.correlates.size();
-    std::vector<size_t> it(count);
-    std::iota(it.begin(), it.end(), zero);
-    stopper failed{};
-
-    // Collect signature validation results as corresponding integer booleans.
-    // A failure cannot short-circuit, as remaining rows would then read as
-    // failures in correlation (failed batches consume the per-row results).
-    data_chunk results(count);
-    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
-    {
-        if (cancel) return;
-        const auto good = verify_signature(batch, row);
-        if (!good) failed.store(true);
-        results.at(row) = to_int<uint8_t>(good);
-    });
-
-    // Empty implies fully-verified batch (or canceled, which caller gates).
-    if (cancel || !failed)
-        results.clear();
-
-    return results;
-}
-
-#endif
 
 // local
 // ----------------------------------------------------------------------------
@@ -512,35 +394,6 @@ links_t schnorr::batch::verify(const stopper& cancel,
 // The callback provides granular response when the query is very long-running,
 // which is consistent with the push notification public interface.
 
-#if defined(HAVE_ULTRAFAST)
-
-void silent::batch::scan(const stopper& , const batch& ,
-    const ec_secret& , const handler& , bool) NOEXCEPT
-{
-    ////static thread_local ufsecp_gpu_ctx* ctx = /* create */;
-    ////const auto count = batch.correlates.size();
-    ////std::vector<uint64_t> prefixes(count);
-    ////const auto tweaks = pointer_cast<const uint8_t>(batch.points.data());
-    ////
-    ////if (ufsecp_gpu_bip352_scan_batch
-    ////    (
-    ////        ctx,
-    ////        scan_key.data(),
-    ////        spend_pubkey.data(),
-    ////        tweaks,
-    ////        count, 
-    ////        prefixes.data()
-    ////    ) != UFSECP_OK) return;
-    ////
-    ////// Compare each computed prefix against known outputs (get_match), fire
-    ////// callback with tx_link on a candidate match.
-    ////for (size_t row{}; row < count && !cancel; ++row)
-    ////    if (get_match(/* prefixes[row] vs known outputs */))
-    ////        callback({}, from_little_array<tx_link_t>(batch.correlates[row]));
-}
-
-#else
-
 void silent::batch::scan(const stopper& cancel, const batch& batch,
     const ec_secret& scan_key, const handler& callback, bool turbo) NOEXCEPT
 {
@@ -565,8 +418,6 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
             callback({}, tx);
     });
 }
-
-#endif
 
 BC_POP_WARNING()
 BC_POP_WARNING()

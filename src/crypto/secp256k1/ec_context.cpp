@@ -21,10 +21,6 @@
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/define.hpp>
 
-#if defined(HAVE_ULTRAFAST)
-    #include <ufsecp/ufsecp_version.h>
-#endif
-
 #define EC_TEXT(value) #value
 #define EC_STRING(value) EC_TEXT(value)
 
@@ -71,9 +67,7 @@ const secp256k1_context* ec_context_verify::context() NOEXCEPT
 
 std::string secp256k1_library() NOEXCEPT
 {
-#if defined(HAVE_ULTRAFAST)
-    return std::string{ "ultrafast " } + ufsecp_version_string();
-#elif defined(HAVE_SECP256K1) && defined(SECP256K1_VERSION)
+#if defined(HAVE_SECP256K1) && defined(SECP256K1_VERSION)
     return "libsecp256k1 " EC_STRING(SECP256K1_VERSION);
 #elif defined(HAVE_SECP256K1)
     return "libsecp256k1";
