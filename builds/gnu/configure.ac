@@ -272,6 +272,15 @@ AC_ARG_WITH([secp256k1],
 AC_MSG_RESULT([$with_secp256k1])
 AM_CONDITIONAL([WITH_SECP256K1], [test "x${with_secp256k1}" != "xno"])
 
+AC_MSG_CHECKING([--enable-cuda option])
+AC_ARG_ENABLE([cuda],
+    AS_HELP_STRING([--enable-cuda],
+        [Use cuda (gpu) batch signature verification. @<:@default=no@:>@]),
+    [enable_cuda=$enableval],
+    [enable_cuda=no])
+AC_MSG_RESULT([$enable_cuda])
+AM_CONDITIONAL([ENABLE_CUDA], [test "x${enable_cuda}" != "xno"])
+
 # Set flags.
 #==============================================================================
 AS_IF([test "x${enable_avx2}" != "xno"],
@@ -690,6 +699,10 @@ AS_IF([test "x${with_secp256k1}" != "xno"], [
 
 AS_IF([test "x${with_secp256k1}" != "xno"], [
         AC_DEFINE_UNQUOTED([SECP256K1_VERSION], [${secp256k1_VERSION}])
+    ])
+
+AS_IF([test "x${enable_cuda}" != "xno"], [
+        AC_DEFINE([ENABLE_CUDA])
     ])
 
 AC_CONFIG_FILES([

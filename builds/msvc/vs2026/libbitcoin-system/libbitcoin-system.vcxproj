@@ -244,6 +244,8 @@
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\algorithm.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp" />
@@ -728,6 +730,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\private_key.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\interface.hpp" />

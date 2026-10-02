@@ -31,6 +31,7 @@
 #include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include "cuda/driver.hpp"
 
 namespace libbitcoin {
 namespace system {
@@ -49,12 +50,12 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 bool batched::compiled() NOEXCEPT
 {
-    return false;
+    return secp256k1::cuda::compiled();
 }
 
 bool batched::accelerated() NOEXCEPT
 {
-    return false;
+    return secp256k1::cuda::available();
 }
 
 // batch_verify
@@ -172,7 +173,7 @@ inline bool verify_rows(data_chunk& results, std::span<const ec_xonly> keys,
 // Chunks of rows verify in parallel, each into its own results, sized to
 // occupy the processors twice over but not below a few lane groups.
 template <typename Batch>
-data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
+data_chunk batch_verify_(const stopper& cancel, const Batch& batch) NOEXCEPT
 {
     constexpr auto policy = poolstl::execution::par;
     constexpr size_t minimum = 32;
@@ -205,6 +206,19 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
         results.clear();
 
     return results;
+}
+
+// Rows verify on the device where available, otherwise or upon its failure
+// on the processor.
+template <typename Batch>
+data_chunk batch_verify(const stopper& cancel, const Batch& batch) NOEXCEPT
+{
+    data_chunk results{};
+    if (secp256k1::cuda::available() &&
+        secp256k1::cuda::verify(results, cancel, batch))
+        return results;
+
+    return batch_verify_(cancel, batch);
 }
 
 // local

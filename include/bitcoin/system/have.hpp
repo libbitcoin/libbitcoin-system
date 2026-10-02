@@ -149,6 +149,11 @@
     #define HAVE_PTX
 #endif
 
+// Device (gpu) batch verification.
+#if defined(ENABLE_CUDA)
+    #define HAVE_CUDA
+#endif
+
 /// Platform features derived.
 /// ---------------------------------------------------------------------------
 

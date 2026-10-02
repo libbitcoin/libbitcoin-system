@@ -22,6 +22,7 @@ REM --enable-sha512             Use Intel SHA512 Extensions (implies AVX2).
 REM --enable-sha3               Use ARM SHA3 Extensions for SHA512 (implies Crypto).
 REM --enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics.
 REM --enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
+REM --enable-cuda               Use cuda (gpu) batch signature verification.
 REM --build-config config       Build configuration.
 REM --build-platform platform   Build platform.
 REM --build-version version     Build MSVC version.
@@ -256,6 +257,12 @@ if "!libbitcoin_system_TAG!" == "" (
             set "libbitcoin-system_PARAMS=/p:Option-vaes=true"
         ) else (
             set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-vaes=true"
+        )
+    ) else if "%~1" == "--enable-cuda" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-cuda=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-cuda=true"
         )
     ) else if "%~1" == "--build-config" (
         set "BUILD_CONFIG=%~2"
@@ -505,6 +512,7 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "--enable-sha3               Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
     call :msg "--enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics."
     call :msg "--enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+    call :msg "--enable-cuda               Use cuda (gpu) batch signature verification."
     call :msg "--build-config config       Build configuration."
     call :msg "--build-platform platform   Build platform."
     call :msg "--build-version version     Build MSVC version."
