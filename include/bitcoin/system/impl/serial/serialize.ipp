@@ -19,10 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_IPP
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_IPP
 
+#include <cmath>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
+#include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -93,6 +96,39 @@ std::string serialize(const Value& value, const std::string& fallback) NOEXCEPT
         ostream << value;
         const auto token = ostream.str();
         return token.empty() ? fallback : token;
+    }
+    catch (const std::exception&)
+    {
+        return {};
+    }
+}
+
+template <typename Float, if_floating_point<Float>>
+std::string serialize_fixed(Float value) NOEXCEPT
+{
+    if (!std::isfinite(value))
+        return serialize(value);
+
+    try
+    {
+        std::string token{};
+        for (size_t precision{}; precision <= fixed_decimals<Float>;
+            ++precision)
+        {
+            std::ostringstream ostream{};
+            ostream.precision(to_signed(precision));
+            ostream << std::fixed << value;
+            token = ostream.str();
+
+            Float parsed{};
+            if (deserialize(parsed, token) && parsed == value)
+                break;
+        }
+
+        if (token.find('.') == std::string::npos)
+            token += ".0";
+
+        return token;
     }
     catch (const std::exception&)
     {
