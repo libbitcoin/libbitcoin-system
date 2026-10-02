@@ -25,7 +25,8 @@ BOOST_AUTO_TEST_SUITE(secp256k1_batch_verify_tests)
 
 BOOST_AUTO_TEST_CASE(secp256k1__batched__accelerated__implies_compiled)
 {
-    BOOST_REQUIRE(!batched::accelerated() || batched::compiled());
+    const auto compiled = batched::compiled();
+    BOOST_REQUIRE(!batched::accelerated() || compiled);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

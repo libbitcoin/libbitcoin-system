@@ -115,6 +115,7 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
 
 // Rows verify on the device where available, otherwise or upon its failure
 // on the processor.
+LCOV_EXCL_START("Requires a device.")
 template <typename Batch, typename Verify>
 data_chunk batch_verify(const stopper& cancel, const Batch& batch,
     Verify&& verify) NOEXCEPT
@@ -126,6 +127,7 @@ data_chunk batch_verify(const stopper& cancel, const Batch& batch,
 
     return batch_verify_(cancel, batch, verify);
 }
+LCOV_EXCL_STOP()
 
 inline void push_fail(batched::links_t& fails,
     const batched::link& id) NOEXCEPT

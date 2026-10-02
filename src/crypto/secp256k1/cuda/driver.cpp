@@ -664,6 +664,7 @@ bool available() NOEXCEPT
     return false;
 }
 
+LCOV_EXCL_START("Not called where the device is not available.")
 bool verify(data_chunk&, const stopper&, const ecdsa::batch&) NOEXCEPT
 {
     return false;
@@ -673,6 +674,7 @@ bool verify(data_chunk&, const stopper&, const schnorr::batch&) NOEXCEPT
 {
     return false;
 }
+LCOV_EXCL_STOP()
 
 #endif
 
