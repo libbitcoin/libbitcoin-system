@@ -80,6 +80,14 @@ bool parser::get_option(const std::string& name) const NOEXCEPT
     return variable.as<bool>();
 }
 
+const options_metadata& parser::settings() THROWS
+{
+    if (!settings_)
+        settings_ = std::make_shared<options_metadata>(load_settings());
+
+    return *settings_;
+}
+
 void parser::load_command_variables(int argc, const char* argv[]) THROWS
 {
     const auto options = load_options();
@@ -99,7 +107,7 @@ void parser::load_environment_variables(const std::string& prefix) THROWS
 bool parser::load_configuration_variables(
     const std::string& option_name) THROWS
 {
-    const auto settings = load_settings();
+    const auto& metadata = settings();
     const auto path = get_config_option(option_name);
     const auto extended = extended_path(path);
 
@@ -113,14 +121,14 @@ bool parser::load_configuration_variables(
         if (!file.good())
             throw ifstream_exception{ from_path(extended).c_str() };
 
-        const auto config = parse_config_file(file, settings);
+        const auto config = parse_config_file(file, metadata);
         store(config, variables_);
         return true;
     }
 
     // Loading from an empty stream causes the defaults to populate.
     std::istringstream stream{};
-    const auto config = parse_config_file(stream, settings);
+    const auto config = parse_config_file(stream, metadata);
     store(config, variables_);
     return false;
 }

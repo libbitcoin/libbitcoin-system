@@ -48,6 +48,7 @@ setting_value<Type>::setting_value(Type* store, bool secret) THROWS
   : boost::program_options::typed_value<Type>(store), store_(store),
     secret_(secret)
 {
+    this->default_value(*store, join(values(), ", "));
 }
 
 template <typename Type>

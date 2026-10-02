@@ -120,6 +120,52 @@ BOOST_AUTO_TEST_CASE(setting__values__mutated_store__current_value)
     BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "2" }));
 }
 
+// default
+
+BOOST_AUTO_TEST_CASE(setting__apply_default__scalar__store_value)
+{
+    uint32_t store = 42;
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
+    boost::any value{};
+    BOOST_REQUIRE(instance->apply_default(value));
+    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(setting__apply_default__mutated_store__construction_value)
+{
+    uint32_t store = 1;
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
+    store = 2;
+    boost::any value{};
+    BOOST_REQUIRE(instance->apply_default(value));
+    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(setting__apply_default__vector__store_value)
+{
+    string_list store{ "a", "b" };
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
+    boost::any value{};
+    BOOST_REQUIRE(instance->apply_default(value));
+    BOOST_REQUIRE_EQUAL(boost::any_cast<string_list>(value), store);
+}
+
+BOOST_AUTO_TEST_CASE(secret__apply_default__scalar__store_value)
+{
+    std::string store{ "password" };
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ secret(&store) };
+    boost::any value{};
+    BOOST_REQUIRE(instance->apply_default(value));
+    BOOST_REQUIRE_EQUAL(boost::any_cast<std::string>(value), store);
+}
+
+BOOST_AUTO_TEST_CASE(secret__format_name__scalar__value_withheld)
+{
+    std::string store{ "password" };
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ secret(&store) };
+    BOOST_REQUIRE_EQUAL(instance->name().find("password"), std::string::npos);
+}
+
 // ungroup
 
 BOOST_AUTO_TEST_CASE(setting__ungroup__grouped__ungrouped)

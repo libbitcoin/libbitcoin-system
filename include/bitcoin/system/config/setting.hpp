@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_SETTING_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_SETTING_HPP
 
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
@@ -47,7 +48,8 @@ public:
 };
 
 /// Not thread safe, virtual.
-/// Option value that reports the current value of its store.
+/// Option value that reports the current value of its store, and declares
+/// the value of its store at construction as its default.
 template <typename Type>
 class setting_value
   : public boost::program_options::typed_value<Type>,
