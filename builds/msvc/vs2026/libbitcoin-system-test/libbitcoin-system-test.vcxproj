@@ -107,7 +107,9 @@
     <ClCompile Include="..\..\..\..\test\chain\checkpoint.cpp">
       <ObjectFileName>$(IntDir)test_chain_checkpoint.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\compact.cpp">
+      <ObjectFileName>$(IntDir)test_chain_compact.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\context.cpp">
       <ObjectFileName>$(IntDir)test_chain_context.obj</ObjectFileName>
     </ClCompile>
@@ -227,19 +229,36 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_multiply.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_scalar.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_verify.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch.cpp">
-      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch.obj</ObjectFileName>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\compact.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_compact.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\ecdsa.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_ecdsa.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\performance.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_performance.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\schnorr.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_schnorr.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\silent.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\verify.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_verify.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip324.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip341.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ecdsa.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ecdsa.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_ecdsa.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ellswift.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\keys.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\math.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\performance.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_performance.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\schnorr.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_schnorr.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\wycheproof.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp" />
@@ -260,9 +279,7 @@
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
     <ClCompile Include="..\..\..\..\test\define.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\batch.cpp">
-      <ObjectFileName>$(IntDir)test_endian_batch.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\batch.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integers.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
@@ -470,7 +487,9 @@
     <ClCompile Include="..\..\..\..\test\x509\der.cpp" />
     <ClCompile Include="..\..\..\..\test\x509\pem.cpp" />
     <ClCompile Include="..\..\..\..\test\x509\private_key.cpp" />
-    <ClCompile Include="..\..\..\..\test\x509\verify.cpp" />
+    <ClCompile Include="..\..\..\..\test\x509\verify.cpp">
+      <ObjectFileName>$(IntDir)test_x509_verify.obj</ObjectFileName>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
