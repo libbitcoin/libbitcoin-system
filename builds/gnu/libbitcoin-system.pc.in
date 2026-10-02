@@ -34,9 +34,8 @@ Cflags: \
     @avx512ifma@ \
     @avxifma@ \
     @shani@ \
-    @crypto@ \
+    @march@ \
     @sha512@ \
-    @sha3@ \
     @sse41@ \
     @aesni@ \
     @vaes@ \

@@ -164,68 +164,14 @@ AC_ARG_WITH([examples],
 AC_MSG_RESULT([$with_examples])
 AM_CONDITIONAL([WITH_EXAMPLES], [test "x${with_examples}" != "xno"])
 
-AC_MSG_CHECKING([--enable-avx2 option])
-AC_ARG_ENABLE([avx2],
-    AS_HELP_STRING([--enable-avx2],
-        [Use Intel AVX2 intrinsics. @<:@default=no@:>@]),
-    [enable_avx2=$enableval],
-    [enable_avx2=no])
-AC_MSG_RESULT([$enable_avx2])
-AM_CONDITIONAL([ENABLE_AVX2], [test "x${enable_avx2}" != "xno"])
-
-AC_MSG_CHECKING([--enable-avx512 option])
-AC_ARG_ENABLE([avx512],
-    AS_HELP_STRING([--enable-avx512],
-        [Use Intel AVX512 intrinsics. @<:@default=no@:>@]),
-    [enable_avx512=$enableval],
-    [enable_avx512=no])
-AC_MSG_RESULT([$enable_avx512])
-AM_CONDITIONAL([ENABLE_AVX512], [test "x${enable_avx512}" != "xno"])
-
-AC_MSG_CHECKING([--enable-avx512ifma option])
-AC_ARG_ENABLE([avx512ifma],
-    AS_HELP_STRING([--enable-avx512ifma],
-        [Use Intel AVX512 IFMA intrinsics (implies AVX512VL). @<:@default=no@:>@]),
-    [enable_avx512ifma=$enableval],
-    [enable_avx512ifma=no])
-AC_MSG_RESULT([$enable_avx512ifma])
-AM_CONDITIONAL([ENABLE_AVX512IFMA], [test "x${enable_avx512ifma}" != "xno"])
-
-AC_MSG_CHECKING([--enable-avxifma option])
-AC_ARG_ENABLE([avxifma],
-    AS_HELP_STRING([--enable-avxifma],
-        [Use Intel AVX IFMA intrinsics (implies AVX2). @<:@default=no@:>@]),
-    [enable_avxifma=$enableval],
-    [enable_avxifma=no])
-AC_MSG_RESULT([$enable_avxifma])
-AM_CONDITIONAL([ENABLE_AVXIFMA], [test "x${enable_avxifma}" != "xno"])
-
-AC_MSG_CHECKING([--enable-sse41 option])
-AC_ARG_ENABLE([sse41],
-    AS_HELP_STRING([--enable-sse41],
-        [Use SSE4.1 hardware instructions. @<:@default=no@:>@]),
-    [enable_sse41=$enableval],
-    [enable_sse41=no])
-AC_MSG_RESULT([$enable_sse41])
-AM_CONDITIONAL([ENABLE_SSE41], [test "x${enable_sse41}" != "xno"])
-
 AC_MSG_CHECKING([--enable-shani option])
 AC_ARG_ENABLE([shani],
     AS_HELP_STRING([--enable-shani],
-        [Use Intel/ARM SHA Extensions. @<:@default=no@:>@]),
+        [Use Intel SHA Extensions. @<:@default=no@:>@]),
     [enable_shani=$enableval],
     [enable_shani=no])
 AC_MSG_RESULT([$enable_shani])
 AM_CONDITIONAL([ENABLE_SHANI], [test "x${enable_shani}" != "xno"])
-
-AC_MSG_CHECKING([--enable-crypto option])
-AC_ARG_ENABLE([crypto],
-    AS_HELP_STRING([--enable-crypto],
-        [Use ARM Crypto Extensions. @<:@default=no@:>@]),
-    [enable_crypto=$enableval],
-    [enable_crypto=no])
-AC_MSG_RESULT([$enable_crypto])
-AM_CONDITIONAL([ENABLE_CRYPTO], [test "x${enable_crypto}" != "xno"])
 
 AC_MSG_CHECKING([--enable-sha512 option])
 AC_ARG_ENABLE([sha512],
@@ -235,15 +181,6 @@ AC_ARG_ENABLE([sha512],
     [enable_sha512=no])
 AC_MSG_RESULT([$enable_sha512])
 AM_CONDITIONAL([ENABLE_SHA512], [test "x${enable_sha512}" != "xno"])
-
-AC_MSG_CHECKING([--enable-sha3 option])
-AC_ARG_ENABLE([sha3],
-    AS_HELP_STRING([--enable-sha3],
-        [Use ARM SHA3 Extensions for SHA512 (implies Crypto). @<:@default=no@:>@]),
-    [enable_sha3=$enableval],
-    [enable_sha3=no])
-AC_MSG_RESULT([$enable_sha3])
-AM_CONDITIONAL([ENABLE_SHA3], [test "x${enable_sha3}" != "xno"])
 
 AC_MSG_CHECKING([--enable-aesni option])
 AC_ARG_ENABLE([aesni],
@@ -262,6 +199,78 @@ AC_ARG_ENABLE([vaes],
     [enable_vaes=no])
 AC_MSG_RESULT([$enable_vaes])
 AM_CONDITIONAL([ENABLE_VAES], [test "x${enable_vaes}" != "xno"])
+
+AC_MSG_CHECKING([--enable-avx512ifma option])
+AC_ARG_ENABLE([avx512ifma],
+    AS_HELP_STRING([--enable-avx512ifma],
+        [Use Intel AVX512 IFMA intrinsics (implies AVX512VL). @<:@default=no@:>@]),
+    [enable_avx512ifma=$enableval],
+    [enable_avx512ifma=no])
+AC_MSG_RESULT([$enable_avx512ifma])
+AM_CONDITIONAL([ENABLE_AVX512IFMA], [test "x${enable_avx512ifma}" != "xno"])
+
+AC_MSG_CHECKING([--enable-avx512 option])
+AC_ARG_ENABLE([avx512],
+    AS_HELP_STRING([--enable-avx512],
+        [Use Intel AVX512 intrinsics. @<:@default=no@:>@]),
+    [enable_avx512=$enableval],
+    [enable_avx512=no])
+AC_MSG_RESULT([$enable_avx512])
+AM_CONDITIONAL([ENABLE_AVX512], [test "x${enable_avx512}" != "xno"])
+
+AC_MSG_CHECKING([--enable-avxifma option])
+AC_ARG_ENABLE([avxifma],
+    AS_HELP_STRING([--enable-avxifma],
+        [Use Intel AVX IFMA intrinsics (implies AVX2). @<:@default=no@:>@]),
+    [enable_avxifma=$enableval],
+    [enable_avxifma=no])
+AC_MSG_RESULT([$enable_avxifma])
+AM_CONDITIONAL([ENABLE_AVXIFMA], [test "x${enable_avxifma}" != "xno"])
+
+AC_MSG_CHECKING([--enable-avx2 option])
+AC_ARG_ENABLE([avx2],
+    AS_HELP_STRING([--enable-avx2],
+        [Use Intel AVX2 intrinsics. @<:@default=no@:>@]),
+    [enable_avx2=$enableval],
+    [enable_avx2=no])
+AC_MSG_RESULT([$enable_avx2])
+AM_CONDITIONAL([ENABLE_AVX2], [test "x${enable_avx2}" != "xno"])
+
+AC_MSG_CHECKING([--enable-sse41 option])
+AC_ARG_ENABLE([sse41],
+    AS_HELP_STRING([--enable-sse41],
+        [Use SSE4.1 hardware instructions. @<:@default=no@:>@]),
+    [enable_sse41=$enableval],
+    [enable_sse41=no])
+AC_MSG_RESULT([$enable_sse41])
+AM_CONDITIONAL([ENABLE_SSE41], [test "x${enable_sse41}" != "xno"])
+
+AC_MSG_CHECKING([--enable-sha option])
+AC_ARG_ENABLE([sha],
+    AS_HELP_STRING([--enable-sha],
+        [Use ARM SHA1/SHA256 Extensions. @<:@default=no@:>@]),
+    [enable_sha=$enableval],
+    [enable_sha=no])
+AC_MSG_RESULT([$enable_sha])
+AM_CONDITIONAL([ENABLE_SHA], [test "x${enable_sha}" != "xno"])
+
+AC_MSG_CHECKING([--enable-sha3 option])
+AC_ARG_ENABLE([sha3],
+    AS_HELP_STRING([--enable-sha3],
+        [Use ARM SHA3 Extensions for SHA512. @<:@default=no@:>@]),
+    [enable_sha3=$enableval],
+    [enable_sha3=no])
+AC_MSG_RESULT([$enable_sha3])
+AM_CONDITIONAL([ENABLE_SHA3], [test "x${enable_sha3}" != "xno"])
+
+AC_MSG_CHECKING([--enable-aes option])
+AC_ARG_ENABLE([aes],
+    AS_HELP_STRING([--enable-aes],
+        [Use ARM AES and PMULL Extensions. @<:@default=no@:>@]),
+    [enable_aes=$enableval],
+    [enable_aes=no])
+AC_MSG_RESULT([$enable_aes])
+AM_CONDITIONAL([ENABLE_AES], [test "x${enable_aes}" != "xno"])
 
 AC_MSG_CHECKING([--with-secp256k1 option])
 AC_ARG_WITH([secp256k1],
@@ -408,29 +417,6 @@ AS_IF([test "x${enable_shani}" != "xno"],
       ])
   ])
 
-AS_IF([test "x${enable_crypto}" != "xno"],
-  [
-    AX_CHECK_COMPILE_FLAG([-march=armv8-a+crypto],
-      [
-        CFLAGS="${CFLAGS} -march=armv8-a+crypto";
-        CXXFLAGS="${CXXFLAGS} -march=armv8-a+crypto";
-        AC_SUBST([crypto], ["-march=armv8-a+crypto"])
-      ],[
-        AC_MSG_ERROR([-march=armv8-a+crypto not supported.])
-      ],
-      [],
-      [
-        AC_LANG_PROGRAM(
-          [[
-            #include <arm_neon.h>
-          ]],
-          [[
-            uint32x4_t a = vdupq_n_u32(0);
-            return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-          ]])
-      ])
-  ])
-
 AS_IF([test "x${enable_sha512}" != "xno"],
   [
     AX_CHECK_COMPILE_FLAG([-mavx2 -msha512],
@@ -452,29 +438,6 @@ AS_IF([test "x${enable_sha512}" != "xno"],
             __m256i a = _mm256_set1_epi64x(0);
             __m128i k = _mm_set1_epi64x(15);
             return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
-          ]])
-      ])
-  ])
-
-AS_IF([test "x${enable_sha3}" != "xno"],
-  [
-    AX_CHECK_COMPILE_FLAG([-march=armv8.2-a+crypto+sha3],
-      [
-        CFLAGS="${CFLAGS} -march=armv8.2-a+crypto+sha3";
-        CXXFLAGS="${CXXFLAGS} -march=armv8.2-a+crypto+sha3";
-        AC_SUBST([sha3], ["-march=armv8.2-a+crypto+sha3"])
-      ],[
-        AC_MSG_ERROR([-march=armv8.2-a+crypto+sha3 not supported.])
-      ],
-      [],
-      [
-        AC_LANG_PROGRAM(
-          [[
-            #include <arm_neon.h>
-          ]],
-          [[
-            uint64x2_t a = vdupq_n_u64(0);
-            return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
           ]])
       ])
   ])
@@ -620,6 +583,90 @@ AS_CASE([${CC}], [*gnu*],
 AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
   [
     CXXFLAGS="${CXXFLAGS} -fstack-protector-all";
+  ])
+
+march_base=""
+march_features=""
+AS_IF([test "x${enable_sha}" != "xno"],
+  [
+    march_base="armv8-a"
+    march_features="${march_features}+sha2"
+  ])
+AS_IF([test "x${enable_aes}" != "xno"],
+  [
+    march_base="armv8-a"
+    march_features="${march_features}+aes"
+  ])
+AS_IF([test "x${enable_sha3}" != "xno"],
+  [
+    march_base="armv8.2-a"
+    march_features="${march_features}+sha3"
+  ])
+
+AS_IF([test "x${march_features}" != "x"],
+  [
+    march="-march=${march_base}${march_features}"
+    march_CXXFLAGS="${CXXFLAGS}"
+    CXXFLAGS="${CXXFLAGS} ${march}"
+
+    AS_IF([test "x${enable_sha}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports sha])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+                #include <arm_neon.h>
+              ]],
+              [[
+                uint32x4_t a = vdupq_n_u32(0);
+                return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support sha.])])
+      ])
+
+    AS_IF([test "x${enable_aes}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports aes])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+                #include <arm_neon.h>
+              ]],
+              [[
+                uint8x16_t a = vdupq_n_u8(0);
+                return vgetq_lane_u8(vaeseq_u8(a, a), 0);
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support aes.])])
+      ])
+
+    AS_IF([test "x${enable_sha3}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports sha3])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+                #include <arm_neon.h>
+              ]],
+              [[
+                uint64x2_t a = vdupq_n_u64(0);
+                return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support sha3.])])
+      ])
+
+    CXXFLAGS="${march_CXXFLAGS}"
+    CFLAGS="${CFLAGS} ${march}"
+    CXXFLAGS="${CXXFLAGS} ${march}"
+    AC_SUBST([march], ["${march}"])
   ])
 
 # Check dependencies.
