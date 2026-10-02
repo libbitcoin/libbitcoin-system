@@ -16,13 +16,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_BATCH_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_BATCH_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_COMPACT_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_COMPACT_HPP
 
-#include <bitcoin/system/crypto/secp256k1/batch/compact.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/silent.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/verify.hpp>
+#include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+namespace compact {
+
+struct BC_API batch
+{
+};
+
+} // namespace compact
+} // namespace system
+} // namespace libbitcoin
 
 #endif

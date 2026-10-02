@@ -16,13 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_BATCH_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_BATCH_HPP
+#include "../../../test.hpp"
 
-#include <bitcoin/system/crypto/secp256k1/batch/compact.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/silent.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/verify.hpp>
+BOOST_AUTO_TEST_SUITE(secp256k1_batch_compact_tests)
 
-#endif
+BOOST_AUTO_TEST_SUITE_END()
