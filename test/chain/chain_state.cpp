@@ -1138,7 +1138,7 @@ BOOST_AUTO_TEST_CASE(chain_state__work_required__ltc_time_warp_patch__easier)
     const auto plain = warp_work_required(false);
     const auto patched = warp_work_required(true);
     BOOST_REQUIRE_NE(patched, plain);
-    BOOST_REQUIRE(compact::expand(patched) > compact::expand(plain));
+    BOOST_REQUIRE(chain::compact::expand(patched) > chain::compact::expand(plain));
 }
 
 // checkpoint caching

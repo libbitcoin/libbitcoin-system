@@ -126,7 +126,6 @@
 #include <bitcoin/system/crypto/poly1305.hpp>
 #include <bitcoin/system/crypto/salsa20.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
-#include <bitcoin/system/crypto/secp256k1_batch.hpp>
 #include <bitcoin/system/crypto/x25519.hpp>
 #include <bitcoin/system/crypto/xsalsa20_poly1305.hpp>
 #include <bitcoin/system/crypto/aes/aes.hpp>
@@ -136,6 +135,12 @@
 #include <bitcoin/system/crypto/nist/nist.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/crypto/secp256k1/tables.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/batch.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/compact.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/silent.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/verify.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>

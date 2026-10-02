@@ -18,14 +18,12 @@
  */
 #include "driver.hpp"
 
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <cstdio>
 #include <mutex>
 #include <span>
-#include <string>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/crypto/secp256k1/tables.hpp>
@@ -666,6 +664,7 @@ bool available() NOEXCEPT
     return false;
 }
 
+LCOV_EXCL_START("Not called where the device is not available.")
 bool verify(data_chunk&, const stopper&, const ecdsa::batch&) NOEXCEPT
 {
     return false;
@@ -675,6 +674,7 @@ bool verify(data_chunk&, const stopper&, const schnorr::batch&) NOEXCEPT
 {
     return false;
 }
+LCOV_EXCL_STOP()
 
 #endif
 

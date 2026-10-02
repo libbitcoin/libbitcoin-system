@@ -243,11 +243,23 @@
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\algorithm.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\compact.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\ecdsa.cpp">
+      <ObjectFileName>$(IntDir)src_crypto_secp256k1_batch_ecdsa.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\schnorr.cpp">
+      <ObjectFileName>$(IntDir)src_crypto_secp256k1_batch_schnorr.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\silent.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\verify.cpp">
+      <ObjectFileName>$(IntDir)src_crypto_secp256k1_batch_verify.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp">
+      <ObjectFileName>$(IntDir)src_crypto_secp256k1_ecdsa.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ellswift.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_00.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\generator\comb_01.cpp" />
@@ -274,7 +286,9 @@
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_math.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\recover.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\schnorr.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\schnorr.cpp">
+      <ObjectFileName>$(IntDir)src_crypto_secp256k1_schnorr.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
@@ -384,7 +398,9 @@
     <ClCompile Include="..\..\..\..\src\x509\der.cpp" />
     <ClCompile Include="..\..\..\..\src\x509\pem.cpp" />
     <ClCompile Include="..\..\..\..\src\x509\private_key.cpp" />
-    <ClCompile Include="..\..\..\..\src\x509\verify.cpp" />
+    <ClCompile Include="..\..\..\..\src\x509\verify.cpp">
+      <ObjectFileName>$(IntDir)src_x509_verify.obj</ObjectFileName>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
@@ -493,8 +509,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\batch.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\compact.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\ecdsa.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\schnorr.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\silent.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\tables.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1_batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\x25519.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\xsalsa20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp" />
@@ -730,6 +751,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\private_key.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp" />
