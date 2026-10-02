@@ -23,7 +23,6 @@
 
 #if defined(HAVE_PERFORMANCE_TESTS)
 
-#include <algorithm>
 #include <chrono>
 
 namespace performance {

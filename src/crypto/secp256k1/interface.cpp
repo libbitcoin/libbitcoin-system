@@ -18,7 +18,6 @@
  */
 #include "interface.hpp"
 
-#include <algorithm>
 #include <atomic>
 #include <new>
 #include <bitcoin/system/crypto/maybe_random.hpp>
