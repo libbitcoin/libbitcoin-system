@@ -38,18 +38,16 @@ inline std::string serialize(const std::filesystem::path& value) NOEXCEPT
 template <typename Type>
 std::string serialize(const Type& value) NOEXCEPT
 {
-    std::ostringstream stream{};
-    stream << std::boolalpha << value;
-    return stream.str();
-}
-
-template <typename Type>
-std::string format_element(const Type& value) NOEXCEPT
-{
     if constexpr (is_floating_point<Type>)
+    {
         return serialize_fixed(value);
+    }
     else
-        return serialize(value);
+    {
+        std::ostringstream stream{};
+        stream << std::boolalpha << value;
+        return stream.str();
+    }
 }
 
 template <typename Type>
@@ -60,11 +58,11 @@ std::string format_default(const Type& value) NOEXCEPT
     {
         items.reserve(value.size());
         for (const auto& element: value)
-            items.push_back(format_element(element));
+            items.push_back(serialize(element));
     }
     else
     {
-        items.push_back(format_element(value));
+        items.push_back(serialize(value));
     }
 
     if (items.empty() || (is_one(items.size()) && items.front().empty()))

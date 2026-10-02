@@ -49,6 +49,20 @@ BOOST_AUTO_TEST_CASE(setting__values__integer__decimal_text)
     BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "42" }));
 }
 
+BOOST_AUTO_TEST_CASE(setting__values__small_double__fixed_text)
+{
+    double store = 0.000001;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "0.000001" }));
+}
+
+BOOST_AUTO_TEST_CASE(setting__values__integral_double__decimal_text)
+{
+    double store = 0.0;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->values(), (string_list{ "0.0" }));
+}
+
 BOOST_AUTO_TEST_CASE(setting__values__empty_string__empty_element)
 {
     std::string store{};
