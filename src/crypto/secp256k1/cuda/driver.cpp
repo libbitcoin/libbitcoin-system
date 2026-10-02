@@ -21,7 +21,6 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
-#include <cstdio>
 #include <mutex>
 #include <span>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -117,7 +116,6 @@ struct functions
     result_t (*copy_from)(void*, pointer_t, size_t);
     result_t (*launch)(handle_t, unsigned, unsigned, unsigned, unsigned,
         unsigned, unsigned, unsigned, handle_t, void**, void**);
-    result_t (*error_name)(result_t, const char**);
 };
 
 template <typename Function>
@@ -150,8 +148,7 @@ static bool resolve(functions& out, void* library) NOEXCEPT
         resolve(out.free, library, "cuMemFree_v2") &&
         resolve(out.copy_to, library, "cuMemcpyHtoD_v2") &&
         resolve(out.copy_from, library, "cuMemcpyDtoH_v2") &&
-        resolve(out.launch, library, "cuLaunchKernel") &&
-        resolve(out.error_name, library, "cuGetErrorName");
+        resolve(out.launch, library, "cuLaunchKernel");
 }
 
 // Kernels.
@@ -362,7 +359,7 @@ public:
 
             if (result != success)
             {
-                fail(result);
+                failed_.store(true);
                 return false;
             }
         }
@@ -443,17 +440,6 @@ private:
                 staging_ + columns.results, size);
 
         return result;
-    }
-
-    void fail(result_t result) NOEXCEPT
-    {
-        if (failed_.exchange(true))
-            return;
-
-        const char* name{};
-        call_.error_name(result, &name);
-        std::fprintf(stderr, "cuda: device failed (%s), using cpu.\n",
-            is_null(name) ? "unknown" : name);
     }
 
     bool load() NOEXCEPT
