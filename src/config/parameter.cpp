@@ -40,7 +40,7 @@ void parameter::initialize(const option_metadata& option,
     set_values(bound ? bound->values() : string_list{});
     set_long_name(option.long_name());
     set_short_name(short_name(option));
-    set_description(option.description());
+    set_description(description(option));
     set_format_name(option.format_name());
     set_format_parameter(option.format_parameter());
 }
@@ -59,6 +59,15 @@ char parameter::short_name(const option_metadata& option) const NOEXCEPT
         name[1] != option_prefix_char;
 
     return is_short_name ? name[1] : no_short_name;
+}
+
+std::string parameter::description(
+    const option_metadata& option) const NOEXCEPT
+{
+    const auto semantic = option.semantic();
+    const auto bound = dynamic_cast<const printable*>(semantic.get());
+    return bound ? replace_copy(option.description(), "{}",
+        bound->default_text()) : option.description();
 }
 
 unsigned parameter::arguments_limit(int position, const option_metadata& option,

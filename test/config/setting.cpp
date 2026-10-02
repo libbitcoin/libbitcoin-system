@@ -166,6 +166,114 @@ BOOST_AUTO_TEST_CASE(secret__format_name__scalar__value_withheld)
     BOOST_REQUIRE_EQUAL(instance->name().find("password"), std::string::npos);
 }
 
+// default_text
+
+BOOST_AUTO_TEST_CASE(setting__default_text__true__quoted)
+{
+    auto store = true;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'true'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__false__quoted)
+{
+    auto store = false;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'false'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__integer__quoted_decimal)
+{
+    uint32_t store = 1048576;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'1048576'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__float__quoted_fixed)
+{
+    float store = 1.5f;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'1.5'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__integral_double__decimal_appended)
+{
+    double store = 0.0;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'0.0'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__small_double__fixed_not_scientific)
+{
+    double store = 0.000001;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'0.000001'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__string__quoted)
+{
+    std::string store{ "bitcoin" };
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'bitcoin'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__empty_string__empty)
+{
+    std::string store{};
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "empty");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__path__quoted)
+{
+    std::filesystem::path store{ "bitcoin" };
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'bitcoin'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__empty_path__empty)
+{
+    std::filesystem::path store{};
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "empty");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__empty_vector__empty)
+{
+    string_list store{};
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "empty");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__vector__quoted_list)
+{
+    string_list store{ "a", "b" };
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'a', 'b'");
+}
+
+BOOST_AUTO_TEST_CASE(secret__default_text__scalar__empty_text)
+{
+    std::string store{ "password" };
+    const std::unique_ptr<const printable> instance{ secret(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__mutated_store__construction_value)
+{
+    uint32_t store = 1;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    store = 2;
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'1'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__format_name__integer__default_text)
+{
+    uint32_t store = 42;
+    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
+    BOOST_REQUIRE_NE(instance->name().find("'42'"), std::string::npos);
+}
+
 // ungroup
 
 BOOST_AUTO_TEST_CASE(setting__ungroup__grouped__ungrouped)
