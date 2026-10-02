@@ -34,6 +34,7 @@
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-secp256k1)' == 'true'">WITH_SECP256K1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-cuda)' == 'true'">ENABLE_CUDA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 
@@ -66,6 +67,7 @@
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
+    <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
   </PropertyGroup>
 
   <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->
@@ -85,6 +87,7 @@
     <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
     <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
+    <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
   </Target>
 
   <!-- Linkage -->

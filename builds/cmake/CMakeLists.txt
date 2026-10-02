@@ -91,6 +91,7 @@ option( enable-sha3 "Use ARM SHA3 Extensions for SHA512 (implies Crypto)." OFF )
 option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
 option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
+option( enable-cuda "Use cuda (gpu) batch signature verification." OFF )
 option( with-tests "Compile with unit tests." ON )
 option( with-examples "Compile with examples." ON )
 
@@ -430,6 +431,7 @@ target_compile_definitions( libbitcoin-system
   PRIVATE
     $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
     $<$<BOOL:${with-secp256k1}>:SECP256K1_VERSION=${secp256k1_VERSION}>
+    $<$<BOOL:${enable-cuda}>:ENABLE_CUDA>
 )
 
 file( GLOB_RECURSE libbitcoin_system_HEADERS CONFIGURE_DEPENDS

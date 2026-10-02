@@ -9,6 +9,7 @@
       <Category Name="avxifma" DisplayName="avxifma" />
       <Category Name="aesni" DisplayName="aesni" />
       <Category Name="vaes" DisplayName="vaes" />
+      <Category Name="cuda" DisplayName="cuda" />
     </Rule.Categories>
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
@@ -40,6 +41,10 @@
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
     <EnumProperty Name="Option-vaes" DisplayName="Enable VAES Encryption" Description="Requires VAES, VPCLMULQDQ and AVX2 (xcpu) CPU." Category="vaes">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-cuda" DisplayName="Enable CUDA Batch Verification" Description="Uses an NVIDIA GPU where available at runtime, otherwise the CPU." Category="cuda">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>

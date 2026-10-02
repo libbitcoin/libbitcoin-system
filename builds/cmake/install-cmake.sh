@@ -32,6 +32,8 @@
 #                                Default: OFF
 # -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
 #                                Default: OFF
+# -Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification.
+#                                Default: OFF
 # --build-boost                Build Boost libraries
 # --build-secp256k1            Build libsecp256k1 libraries
 # --build-src-dir=<path>       Location for sources.
@@ -958,6 +960,8 @@ help()
     msg "-Denable-vaes=<ON/OFF>       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg "                               Default: OFF"
     msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
+    msg "                               Default: OFF"
+    msg "-Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification."
     msg "                               Default: OFF"
     msg "--build-boost                Build Boost libraries"
     msg "--build-secp256k1            Build libsecp256k1 libraries"
