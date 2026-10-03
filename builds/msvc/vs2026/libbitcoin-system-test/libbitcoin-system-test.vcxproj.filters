@@ -891,6 +891,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_matrix.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\silent_payment.cpp">
+      <Filter>src\wallet\addresses</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
@@ -1024,6 +1027,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\test.hpp">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\addresses\silent_payment_vectors.hpp">
+      <Filter>src\wallet\addresses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp">
       <Filter>src\wallet\mnemonics</Filter>
