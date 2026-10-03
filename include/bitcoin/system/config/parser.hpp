@@ -63,6 +63,9 @@ public:
     /// Load configuration file settings.
     virtual options_metadata load_settings() THROWS = 0;
 
+    /// Configuration file settings, loaded once and retained.
+    const options_metadata& settings() THROWS;
+
 protected:
     virtual void load_command_variables(int argc,
         const char* argv[]) THROWS;
@@ -75,6 +78,9 @@ protected:
 
     /// Populated by the loaders, retained for provenance queries.
     variables_map variables_{};
+
+private:
+    std::shared_ptr<options_metadata> settings_{};
 };
 
 } // namespace config

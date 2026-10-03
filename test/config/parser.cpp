@@ -52,12 +52,19 @@ public:
 
     options_metadata load_settings() THROWS override
     {
-        return {};
+        ++loads;
+        options_metadata description;
+        description.add_options()
+            ("section.value", setting(&value), "");
+        return description;
     }
 
     using parser::load_command_variables;
     using parser::load_configuration_variables;
     using parser::load_environment_variables;
+
+    size_t loads{};
+    uint32_t value{ 42 };
 
 private:
     config::path configured_;
@@ -95,6 +102,40 @@ BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__regular_file__returns
     BOOST_REQUIRE(test::create(TEST_PATH));
     configure(instance, TEST_PATH);
     BOOST_REQUIRE(instance.load_configuration_variables("config"));
+}
+
+BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__no_file__default_unconfigured)
+{
+    mock_parser instance;
+    const char* argv[]{ "test" };
+    instance.load_command_variables(1, argv);
+    BOOST_REQUIRE(!instance.load_configuration_variables("config"));
+    BOOST_REQUIRE(!instance.variables()["section.value"].empty());
+    BOOST_REQUIRE(instance.variables()["section.value"].defaulted());
+    BOOST_REQUIRE(!instance.is_configured("section.value"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(parser__settings)
+
+BOOST_AUTO_TEST_CASE(parser__settings__repeated__loaded_once)
+{
+    mock_parser instance;
+    const auto& first = instance.settings();
+    const auto& second = instance.settings();
+    BOOST_REQUIRE_EQUAL(&first, &second);
+    BOOST_REQUIRE_EQUAL(instance.loads, 1u);
+}
+
+BOOST_AUTO_TEST_CASE(parser__settings__mutated_store__construction_default)
+{
+    mock_parser instance;
+    const auto& settings = instance.settings();
+    instance.value = 7;
+    boost::any value{};
+    BOOST_REQUIRE(settings.find("section.value", false).semantic()->apply_default(value));
+    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 42u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

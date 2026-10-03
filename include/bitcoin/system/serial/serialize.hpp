@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -65,6 +66,18 @@ std::string serialize(const std_vector<Value>& values,
 template <typename Value>
 std::string serialize(const Value& value,
     const std::string& fallback="") NOEXCEPT;
+
+/// The decimal places sufficient to express any finite floating point value
+/// in fixed notation, such that the text deserializes to the value.
+template <typename Float, if_floating_point<Float> = true>
+constexpr size_t fixed_decimals = to_unsigned(
+    std::numeric_limits<Float>::max_digits10 -
+    std::numeric_limits<Float>::min_exponent10);
+
+/// Shortest fixed notation, with a decimal, that deserializes to the value.
+/// Any non-finite value is serialized by the general serializer.
+template <typename Float, if_floating_point<Float> = true>
+std::string serialize_fixed(Float value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

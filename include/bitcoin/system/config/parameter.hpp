@@ -98,6 +98,12 @@ public:
     /// return  The short name character or null character.
     char short_name(const option_metadata& option) const NOEXCEPT;
 
+    /// Get the option's description, with "{}" replaced by the default text of
+    /// a bound setting.
+    /// option  The metadata of the option to describe.
+    /// return  The description text.
+    std::string description(const option_metadata& option) const NOEXCEPT;
+
     /// Property declarations.
     BC_PROPERTY(int, position);
     BC_PROPERTY(bool, required);

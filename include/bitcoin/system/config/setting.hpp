@@ -19,7 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_SETTING_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_SETTING_HPP
 
+#include <bitcoin/system/data/string.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
@@ -44,10 +46,14 @@ public:
 
     /// The bound value(s), one per entry, empty only for a collection.
     virtual string_list values() const NOEXCEPT = 0;
+
+    /// The declared default value, formatted for display.
+    virtual std::string default_text() const NOEXCEPT = 0;
 };
 
 /// Not thread safe, virtual.
-/// Option value that reports the current value of its store.
+/// Option value that reports the current value of its store, and declares
+/// the value of its store at construction as its default.
 template <typename Type>
 class setting_value
   : public boost::program_options::typed_value<Type>,
@@ -60,6 +66,10 @@ public:
     /// A secret reports one empty value, disclosing only that it is set.
     string_list values() const NOEXCEPT override;
 
+    /// The declared default value, quoted, or 'empty' if it has no text.
+    /// A secret reports empty text, disclosing nothing.
+    std::string default_text() const NOEXCEPT override;
+
     /// Parse the tokens, accepting comma digit grouping of an integer.
     void xparse(boost::any& value_store,
         const string_list& new_tokens) const THROWS override;
@@ -67,9 +77,11 @@ public:
 private:
     const Type* store_;
     bool secret_;
+    std::string default_text_;
 };
 
-/// Declare a configuration file setting bound to store.
+/// Declare a configuration file setting bound to store, defaulted to its value.
+/// The default text replaces "{}" in the setting description.
 template <typename Type>
 setting_value<Type>* setting(Type* store) THROWS;
 

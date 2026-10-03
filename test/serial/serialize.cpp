@@ -327,4 +327,48 @@ BOOST_AUTO_TEST_CASE(serialize__value__stringstream__specified_fallback)
     BOOST_REQUIRE_EQUAL(out.str(), value);
 }
 
+// fixed_decimals<Float>
+
+static_assert(fixed_decimals<float> == 46u);
+static_assert(fixed_decimals<double> == 324u);
+static_assert(is_same_type<decltype(fixed_decimals<double>), const size_t>);
+
+// serialize_fixed
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__zero__decimal_appended)
+{
+    BOOST_REQUIRE_EQUAL(serialize_fixed(0.0), "0.0");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__whole__decimal_appended)
+{
+    BOOST_REQUIRE_EQUAL(serialize_fixed(42.0), "42.0");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__float__shortest)
+{
+    BOOST_REQUIRE_EQUAL(serialize_fixed(1.7f), "1.7");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__double__shortest)
+{
+    BOOST_REQUIRE_EQUAL(serialize_fixed(1.7), "1.7");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__small__not_scientific)
+{
+    BOOST_REQUIRE_EQUAL(serialize_fixed(0.000001), "0.000001");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__negative__shortest)
+{
+    BOOST_REQUIRE_EQUAL(serialize_fixed(-2.5), "-2.5");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_fixed__infinity__general)
+{
+    const auto value = std::numeric_limits<double>::infinity();
+    BOOST_REQUIRE_EQUAL(serialize_fixed(value), serialize(value));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -163,6 +163,31 @@ BOOST_AUTO_TEST_CASE(parameter__initialize__bound__values_unconfigured)
     BOOST_REQUIRE_EQUAL(parameter.configured(), false);
 }
 
+BOOST_AUTO_TEST_CASE(parameter__initialize__bound_placeholder__default_text_substituted)
+{
+    uint32_t threads = 42;
+    po::options_description options;
+    options.add_options()("bound", setting(&threads), "Threads, defaults to {} (0 disables).");
+    const auto& option = *options.options().front();
+
+    argument_list names;
+    config::parameter parameter;
+    parameter.initialize(option, names);
+    BOOST_REQUIRE_EQUAL(parameter.description(), "Threads, defaults to '42' (0 disables).");
+}
+
+BOOST_AUTO_TEST_CASE(parameter__initialize__unbound_placeholder__unchanged)
+{
+    po::options_description options;
+    options.add_options()("unbound", po::value<uint32_t>(), "Threads, defaults to {}.");
+    const auto& option = *options.options().front();
+
+    argument_list names;
+    config::parameter parameter;
+    parameter.initialize(option, names);
+    BOOST_REQUIRE_EQUAL(parameter.description(), "Threads, defaults to {}.");
+}
+
 BOOST_AUTO_TEST_CASE(parameter__initialize__bound_specified__values_configured)
 {
     uint32_t threads = 42;

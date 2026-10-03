@@ -38,16 +38,48 @@ inline std::string serialize(const std::filesystem::path& value) NOEXCEPT
 template <typename Type>
 std::string serialize(const Type& value) NOEXCEPT
 {
-    std::ostringstream stream{};
-    stream << std::boolalpha << value;
-    return stream.str();
+    if constexpr (is_floating_point<Type>)
+    {
+        return serialize_fixed(value);
+    }
+    else
+    {
+        std::ostringstream stream{};
+        stream << std::boolalpha << value;
+        return stream.str();
+    }
+}
+
+template <typename Type>
+std::string format_default(const Type& value) NOEXCEPT
+{
+    string_list items{};
+    if constexpr (is_std_vector<Type>)
+    {
+        items.reserve(value.size());
+        for (const auto& element: value)
+            items.push_back(serialize(element));
+    }
+    else
+    {
+        items.push_back(serialize(value));
+    }
+
+    if (items.empty() || (is_one(items.size()) && items.front().empty()))
+        return "empty";
+
+    for (auto& item: items)
+        item = "'" + item + "'";
+
+    return join(items, ", ");
 }
 
 template <typename Type>
 setting_value<Type>::setting_value(Type* store, bool secret) THROWS
   : boost::program_options::typed_value<Type>(store), store_(store),
-    secret_(secret)
+    secret_(secret), default_text_(secret ? "" : format_default(*store))
 {
+    this->default_value(*store, default_text_);
 }
 
 template <typename Type>
@@ -73,6 +105,12 @@ string_list setting_value<Type>::values() const NOEXCEPT
         out = string_list{ {} };
 
     return out;
+}
+
+template <typename Type>
+std::string setting_value<Type>::default_text() const NOEXCEPT
+{
+    return default_text_;
 }
 
 template <typename Type>
