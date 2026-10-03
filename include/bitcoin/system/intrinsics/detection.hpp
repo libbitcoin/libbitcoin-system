@@ -22,16 +22,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 
-#if defined(HAVE_ARM)
-    #if defined(HAVE_LINUX)
-        #include <sys/auxv.h>
-        #include <asm/hwcap.h>
-    #endif
-    #if defined(HAVE_APPLE)
-        #include <sys/sysctl.h>
-    #endif
-#endif
-
 namespace libbitcoin {
 namespace system {
 
@@ -99,13 +89,6 @@ template <size_t Bit, typename Value>
 constexpr bool get_bit(Value value) NOEXCEPT
 {
     constexpr auto mask = (Value{ 1 } << Bit);
-    return !is_zero(value & mask);
-}
-
-template <auto Mask, typename Value>
-constexpr bool get_mask(Value value) NOEXCEPT
-{
-    constexpr auto mask = static_cast<Value>(Mask);
     return !is_zero(value & mask);
 }
 
@@ -280,111 +263,31 @@ inline bool try_vaes() NOEXCEPT
 /// Runtime checks for ARM NEON, SHA, AES and SHA3 availability.
 /// ---------------------------------------------------------------------------
 
+template <auto Arm = get_arm>
 inline bool try_neon() NOEXCEPT
 {
-#if defined(HAVE_ARM)
-    #if defined(HAVE_LINUX)
-        #if defined(HAVE_ARM64)
-            constexpr auto hwcap = HWCAP_ASIMD;
-        #else
-            constexpr auto hwcap = HWCAP_NEON;
-        #endif
-        const auto caps = getauxval(AT_HWCAP);
-        return get_mask<hwcap>(caps);
-    #elif defined(HAVE_APPLE)
-        int value{};
-        auto size = sizeof(int);
-        sysctlbyname("hw.optional.AdvSIMD", &value, &size, nullptr, zero);
-        return to_bool(value);
-    #elif defined(HAVE_MSC)
-        constexpr auto neon_flag = PF_ARM_NEON_INSTRUCTIONS_AVAILABLE;
-        return to_bool(::IsProcessorFeaturePresent(neon_flag));
-    #else
-        return false;
-    #endif
-#else
-    return false;
-#endif
+    return Arm(arm_feature::neon);
 }
 
+template <auto Arm = get_arm>
 inline bool try_neon_sha() NOEXCEPT
 {
-#if defined(HAVE_ARM)
-    #if defined(HAVE_LINUX)
-        const auto caps = getauxval(AT_HWCAP);
-        return
-            get_mask<HWCAP_SHA1>(caps) &&
-            get_mask<HWCAP_SHA2>(caps);
-    #elif defined(HAVE_APPLE)
-        int sha1{}, sha256{};
-        auto size = sizeof(int);
-        sysctlbyname("hw.optional.arm.FEAT_SHA1", &sha1, &size, nullptr, zero);
-        sysctlbyname("hw.optional.arm.FEAT_SHA256", &sha256, &size, nullptr,
-            zero);
-        return to_bool(sha1) && to_bool(sha256);
-    #elif defined(HAVE_MSC)
-        constexpr auto crypto_flag = PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE;
-        return to_bool(::IsProcessorFeaturePresent(crypto_flag));
-    #else
-        return false;
-    #endif
-#else
-    return false;
-#endif
+    return Arm(arm_feature::sha1)
+        && Arm(arm_feature::sha256);
 }
 
+template <auto Arm = get_arm>
 inline bool try_neon_aes() NOEXCEPT
 {
-#if defined(HAVE_ARM)
-    #if defined(HAVE_LINUX)
-        const auto caps = getauxval(AT_HWCAP);
-        return
-            get_mask<HWCAP_AES>(caps) &&
-            get_mask<HWCAP_PMULL>(caps);
-    #elif defined(HAVE_APPLE)
-        int aes{}, pmull{};
-        auto size = sizeof(int);
-        sysctlbyname("hw.optional.arm.FEAT_AES", &aes, &size, nullptr, zero);
-        sysctlbyname("hw.optional.arm.FEAT_PMULL", &pmull, &size, nullptr,
-            zero);
-        return to_bool(aes) && to_bool(pmull);
-    #elif defined(HAVE_MSC)
-        constexpr auto crypto_flag = PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE;
-        return to_bool(::IsProcessorFeaturePresent(crypto_flag));
-    #else
-        return false;
-    #endif
-#else
-    return false;
-#endif
+    return Arm(arm_feature::aes)
+        && Arm(arm_feature::pmull);
 }
 
+template <auto Arm = get_arm>
 inline bool try_neon_sha3() NOEXCEPT
 {
-#if defined(HAVE_ARM)
-    #if defined(HAVE_LINUX)
-        const auto caps = getauxval(AT_HWCAP);
-        return
-            get_mask<HWCAP_SHA3>(caps) &&
-            get_mask<HWCAP_SHA512>(caps);
-    #elif defined(HAVE_APPLE)
-        int sha3{}, sha512{};
-        auto size = sizeof(int);
-        sysctlbyname("hw.optional.arm.FEAT_SHA3", &sha3, &size, nullptr, zero);
-        sysctlbyname("hw.optional.arm.FEAT_SHA512", &sha512, &size, nullptr,
-            zero);
-        return to_bool(sha3) && to_bool(sha512);
-    #elif defined(HAVE_MSC)
-        constexpr auto sha3_flag = PF_ARM_SHA3_INSTRUCTIONS_AVAILABLE;
-        constexpr auto sha512_flag = PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE;
-        return to_bool(::IsProcessorFeaturePresent(sha3_flag)) &&
-            to_bool(::IsProcessorFeaturePresent(sha512_flag));
-    #else
-        return false;
-    #endif
-#else
-    return false;
-#endif
+    return Arm(arm_feature::sha3)
+        && Arm(arm_feature::sha512);
 }
 
 } // namespace system
