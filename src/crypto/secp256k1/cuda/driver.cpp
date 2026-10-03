@@ -111,7 +111,7 @@ struct functions
     result_t (*module_global)(pointer_t*, size_t*, handle_t, const char*);
     result_t (*memory)(size_t*, size_t*);
     result_t (*allocate)(pointer_t*, size_t);
-    result_t (*free)(pointer_t);
+    result_t (*deallocate)(pointer_t);
     result_t (*copy_to)(pointer_t, const void*, size_t);
     result_t (*copy_to_async)(pointer_t, const void*, size_t, handle_t);
     result_t (*copy_from_async)(void*, pointer_t, size_t, handle_t);
@@ -148,7 +148,7 @@ static bool resolve(functions& out, void* library) NOEXCEPT
         resolve(out.module_global, library, "cuModuleGetGlobal_v2") &&
         resolve(out.memory, library, "cuMemGetInfo_v2") &&
         resolve(out.allocate, library, "cuMemAlloc_v2") &&
-        resolve(out.free, library, "cuMemFree_v2") &&
+        resolve(out.deallocate, library, "cuMemFree_v2") &&
         resolve(out.copy_to, library, "cuMemcpyHtoD_v2") &&
         resolve(out.copy_to_async, library, "cuMemcpyHtoDAsync_v2") &&
         resolve(out.copy_from_async, library, "cuMemcpyDtoHAsync_v2") &&
@@ -349,7 +349,7 @@ public:
                 call_.stream_destroy(stream);
 
         if (!is_zero(staging_))
-            call_.free(staging_);
+            call_.deallocate(staging_);
 
         if (!is_null(module_))
             call_.module_unload(module_);
