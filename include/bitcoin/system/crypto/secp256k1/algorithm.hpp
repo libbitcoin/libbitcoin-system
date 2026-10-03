@@ -690,6 +690,12 @@ protected:
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
 
+    /// r = g * G + k * a by point windows of Bits, mask of lanes not computed.
+    template <size_t Bits, typename Word>
+    static constexpr Word multiply_windows(jacobian_t<Word>& r,
+        const scalars_t<Word>& g, const affine_t<Word>& a,
+        const scalars_t<Word>& k) NOEXCEPT;
+
     /// r = g * G + k * a, all cases.
     static constexpr void multiply_complete(jacobian_t<uint64_t>& r,
         const scalar_t& g, const affine_t<uint64_t>& a,
@@ -729,9 +735,10 @@ protected:
         const recodes_t<Bits, Word>& halves, size_t position,
         bool interleaved) NOEXCEPT;
 
-    template <typename Word>
-    static constexpr void lookup(affine_t<Word>& r, const points_t<Word>& table,
-        Word offset, Word negative) NOEXCEPT;
+    template <size_t Size, typename Word>
+    static constexpr void lookup(affine_t<Word>& r,
+        const std_array<affine_t<Word>, Size>& table, Word offset,
+        Word negative) NOEXCEPT;
 
     template <typename Word>
     static constexpr void add_point(jacobian_t<Word>& r,
@@ -787,19 +794,27 @@ protected:
     static constexpr bool from_bytes(affine_t<uint64_t>& r,
         const ec_uncompressed& key) NOEXCEPT;
 
-    /// ECDSA verification of hash by point, s high or low.
+    /// ECDSA verification of hash by point, s high or low, by point windows
+    /// of Bits, or sparse digits where zero.
+    template <size_t Bits = zero>
     static constexpr bool verify_ecdsa(const affine_t<uint64_t>& point,
         const bytes_t& hash, const bytes_t& r, const bytes_t& s) NOEXCEPT;
 
-    /// ECDSA verification of z by point, r and s nonzero, s high or low.
+    /// ECDSA verification of z by point, r and s nonzero, s high or low, by
+    /// point windows of Bits, or sparse digits where zero.
+    template <size_t Bits = zero>
     static constexpr bool verify_ecdsa(const affine_t<uint64_t>& point,
         const scalar_t& z, const scalar_t& r, const scalar_t& s) NOEXCEPT;
 
-    /// BIP340 verification of challenge hash by x-only key.
+    /// BIP340 verification of challenge hash by x-only key, by point windows
+    /// of Bits, or sparse digits where zero.
+    template <size_t Bits = zero>
     static constexpr bool verify_schnorr(const bytes_t& key,
         const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT;
 
-    /// BIP340 verification of challenge e by point (even y), r_x normal.
+    /// BIP340 verification of challenge e by point (even y), r_x normal, by
+    /// point windows of Bits, or sparse digits where zero.
+    template <size_t Bits = zero>
     static constexpr bool verify_schnorr(const affine_t<uint64_t>& point,
         const scalar_t& e, const field_t<uint64_t>& r_x,
         const scalar_t& s) NOEXCEPT;
