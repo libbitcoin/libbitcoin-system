@@ -29,7 +29,6 @@ class accessor
   : public silent_payment
 {
 public:
-    using silent_payment::is_lesser;
     using silent_payment::input_hash;
     using silent_payment::shared_tweak;
     using silent_payment::label_tweak;
@@ -866,22 +865,6 @@ BOOST_AUTO_TEST_CASE(silent_payment__scan__invalid_prevouts_summary__false)
 
     bool matched{};
     BOOST_REQUIRE(!scanner.match(matched, null_ec_compressed, {}));
-}
-
-BOOST_AUTO_TEST_CASE(silent_payment__is_lesser__serialized_index__expected)
-{
-    const auto hash = digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16");
-    BOOST_REQUIRE(accessor::is_lesser({ hash, 256u }, { hash, 1u }));
-    BOOST_REQUIRE(!accessor::is_lesser({ hash, 1u }, { hash, 256u }));
-    BOOST_REQUIRE(!accessor::is_lesser({ hash, 1u }, { hash, 1u }));
-}
-
-BOOST_AUTO_TEST_CASE(silent_payment__is_lesser__serialized_hash__expected)
-{
-    const auto low = digest("0100000000000000000000000000000000000000000000000000000000000000");
-    const auto high = digest("0000000000000000000000000000000000000000000000000000000000000001");
-    BOOST_REQUIRE(accessor::is_lesser({ high, 0u }, { low, 0u }));
-    BOOST_REQUIRE(!accessor::is_lesser({ low, 0u }, { high, 0u }));
 }
 
 BOOST_AUTO_TEST_CASE(silent_payment__label_tweak__zero_label__nonzero)

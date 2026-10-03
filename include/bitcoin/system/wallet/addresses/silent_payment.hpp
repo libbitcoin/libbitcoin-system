@@ -57,15 +57,22 @@ public:
 
     using scan_matches = std_vector<scan_match>;
 
+    /// Serialized outpoint.
+    using outpoint = data_array<chain::point::serialized_size()>;
+
     /// The transaction's prevouts summary (input hash times the sum of its
     /// eligible input keys), false if the transaction is not eligible.
     /// Requires populated prevouts.
     static bool summarize(ec_compressed& out,
         const chain::transaction& tx) NOEXCEPT;
+    static bool summarize(ec_compressed& out,
+        const chain::view::transaction& tx) NOEXCEPT;
 
     /// The transaction's pay-to-taproot outputs, false if there are none.
     static bool get_outputs(scan_outputs& out,
         const chain::transaction& tx) NOEXCEPT;
+    static bool get_outputs(scan_outputs& out,
+        const chain::view::transaction& tx) NOEXCEPT;
 
     /// Scanner for the given scan secret, spend key and labels.
     silent_payment(const ec_secret& scan_secret,
@@ -91,12 +98,13 @@ protected:
     static constexpr ec_xonly nums_key = base16_array(
         "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0");
 
-    /// True if the left outpoint precedes the right in serialized order.
-    static bool is_lesser(const chain::point& left,
-        const chain::point& right) NOEXCEPT;
+    /// The prevouts summary of a non-coinbase transaction's inputs.
+    template <typename Iterator>
+    static bool summarize(ec_compressed& out, const Iterator& begin,
+        const Iterator& end) NOEXCEPT;
 
     /// BIP352 tagged hashes.
-    static bool input_hash(ec_secret& out, const chain::point& smallest,
+    static bool input_hash(ec_secret& out, const outpoint& smallest,
         const ec_compressed& sum) NOEXCEPT;
     static bool shared_tweak(ec_secret& out, const ec_compressed& shared,
         uint32_t k) NOEXCEPT;
@@ -104,15 +112,17 @@ protected:
         uint32_t label) NOEXCEPT;
 
     /// The public key contributed by an input, false if none.
-    static bool get_input_key(ec_compressed& out,
-        const chain::input& input) NOEXCEPT;
-    static bool get_witness_key(ec_compressed& out,
-        const chain::input& input) NOEXCEPT;
+    template <typename Input>
+    static bool get_input_key(ec_compressed& out, const Input& input) NOEXCEPT;
+    template <typename Input>
     static bool get_key_hash_key(ec_compressed& out,
-        const chain::input& input) NOEXCEPT;
+        const Input& input) NOEXCEPT;
+    template <typename Input>
     static bool get_taproot_key(ec_compressed& out,
-        const chain::input& input) NOEXCEPT;
-    static bool is_nums_spend(const chain::input& input) NOEXCEPT;
+        const Input& input) NOEXCEPT;
+    static bool get_witness_key(ec_compressed& out,
+        const chain::witness& witness) NOEXCEPT;
+    static bool is_nums_spend(const chain::witness& witness) NOEXCEPT;
 
     /// The output with the key that is not yet matched, false if none.
     static bool find_output(uint32_t& out, const scan_outputs& outputs,
