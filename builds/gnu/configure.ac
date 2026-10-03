@@ -284,9 +284,9 @@ AM_CONDITIONAL([WITH_SECP256K1], [test "x${with_secp256k1}" != "xno"])
 AC_MSG_CHECKING([--enable-cuda option])
 AC_ARG_ENABLE([cuda],
     AS_HELP_STRING([--enable-cuda],
-        [Use cuda (gpu) batch signature verification. @<:@default=no@:>@]),
+        [Use cuda (gpu) batch signature verification (inert on macOS). @<:@default=yes@:>@]),
     [enable_cuda=$enableval],
-    [enable_cuda=no])
+    [enable_cuda=yes])
 AC_MSG_RESULT([$enable_cuda])
 AM_CONDITIONAL([ENABLE_CUDA], [test "x${enable_cuda}" != "xno"])
 

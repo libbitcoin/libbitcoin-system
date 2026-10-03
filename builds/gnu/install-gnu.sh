@@ -34,8 +34,8 @@
 #                                 Default: --disable-aes
 # --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
 #                                 Default: --without-secp256k1
-# --<enable/disable>-cuda       Use cuda (gpu) batch signature verification.
-#                                 Default: --disable-cuda
+# --<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS).
+#                                 Default: --enable-cuda
 # --build-boost                 Build Boost libraries
 # --build-secp256k1             Build libsecp256k1 libraries
 # --build-src-dir=<path>        Location for sources.
@@ -1004,8 +1004,8 @@ help()
     msg "                                Default: --disable-aes"
     msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
     msg "                                Default: --without-secp256k1"
-    msg "--<enable/disable>-cuda       Use cuda (gpu) batch signature verification."
-    msg "                                Default: --disable-cuda"
+    msg "--<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS)."
+    msg "                                Default: --enable-cuda"
     msg "--build-boost                 Build Boost libraries"
     msg "--build-secp256k1             Build libsecp256k1 libraries"
     msg "--build-src-dir=<path>        Location for sources."

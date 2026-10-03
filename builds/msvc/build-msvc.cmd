@@ -23,7 +23,7 @@ REM --enable-sse41              Use SSE4.1 hardware instructions.
 REM --enable-sha                Use ARM SHA1/SHA256 Extensions.
 REM --enable-sha3               Use ARM SHA3 Extensions for SHA512.
 REM --enable-aes                Use ARM AES and PMULL Extensions.
-REM --enable-cuda               Use cuda (gpu) batch signature verification.
+REM --enable-cuda               Use cuda (gpu) batch signature verification (inert on macOS).
 REM --build-config config       Build configuration.
 REM --build-platform platform   Build platform.
 REM --build-version version     Build MSVC version.
@@ -520,7 +520,7 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "--enable-sha                Use ARM SHA1/SHA256 Extensions."
     call :msg "--enable-sha3               Use ARM SHA3 Extensions for SHA512."
     call :msg "--enable-aes                Use ARM AES and PMULL Extensions."
-    call :msg "--enable-cuda               Use cuda (gpu) batch signature verification."
+    call :msg "--enable-cuda               Use cuda (gpu) batch signature verification (inert on macOS)."
     call :msg "--build-config config       Build configuration."
     call :msg "--build-platform platform   Build platform."
     call :msg "--build-version version     Build MSVC version."
