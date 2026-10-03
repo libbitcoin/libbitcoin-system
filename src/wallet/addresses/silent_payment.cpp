@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2026 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
  *
@@ -19,257 +19,86 @@
 #include <bitcoin/system/wallet/addresses/silent_payment.hpp>
 
 #include <algorithm>
-#include <iterator>
-#include <utility>
-#include <bitcoin/system/chain/enums/script_pattern.hpp>
-#include <bitcoin/system/chain/enums/script_version.hpp>
-#include <bitcoin/system/chain/input.hpp>
-#include <bitcoin/system/chain/operation.hpp>
-#include <bitcoin/system/chain/output.hpp>
-#include <bitcoin/system/chain/point.hpp>
-#include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/tapscript.hpp>
-#include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
-namespace silent_payment {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-using chain::input;
-using chain::point;
-using chain::script;
-using chain::script_pattern;
-using chain::script_version;
-using chain::tapscript;
-using chain::transaction;
+// Sorting.
+// ----------------------------------------------------------------------------
 
-static constexpr auto bip341_nums_key = base16_array(
-    "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0");
-static constexpr auto ec_odd_sign = add1(ec_even_sign);
-static constexpr size_t maximum_outputs = 2323;
-
-typedef data_array<point::serialized_size()> outpoint_data;
-
-static outpoint_data to_outpoint_data(const point& value) NOEXCEPT
+bool silent_payment::scan_match::operator<(
+    const scan_match& other) const NOEXCEPT
 {
-    outpoint_data out{};
-    stream::out::fast stream{ out };
-    write::bytes::fast writer{ stream };
-    value.to_data(writer);
-    return out;
+    return index < other.index;
 }
 
-static bool outpoint_data_less(const outpoint_data& left,
-    const outpoint_data& right) NOEXCEPT
-{
-    return std::lexicographical_compare(left.begin(), left.end(),
-        right.begin(), right.end());
-}
+// Static.
+// ----------------------------------------------------------------------------
 
-static bool is_compressed_key_sign(uint8_t value) NOEXCEPT
+// The prevouts summary is input_hash * A, where A is the sum of the eligible
+// input keys and input_hash commits to the smallest outpoint and A [bip352].
+bool silent_payment::summarize(ec_compressed& out,
+    const chain::transaction& tx) NOEXCEPT
 {
-    return value == ec_even_sign || value == ec_odd_sign;
-}
-
-static bool copy_xonly(ec_xonly& out, const data_chunk& value) NOEXCEPT
-{
-    if (value.size() != ec_xonly_size)
+    if (tx.is_coinbase())
         return false;
 
-    std::copy_n(value.begin(), ec_xonly_size, out.begin());
-    return true;
-}
-
-static bool copy_compressed(ec_compressed& out,
-    const data_chunk& value) NOEXCEPT
-{
-    if (!is_compressed_key(value))
-        return false;
-
-    std::copy_n(value.begin(), ec_compressed_size, out.begin());
-    return true;
-}
-
-static ec_xonly to_xonly(const ec_uncompressed& point) NOEXCEPT
-{
-    ec_xonly out{};
-    std::copy_n(std::next(point.begin()), ec_xonly_size, out.begin());
-    return out;
-}
-
-static bool shared_secret_tweak(ec_secret& out,
-    const ec_compressed& shared_secret, uint32_t index) NOEXCEPT
-{
-    stream::out::fast stream{ out };
-    hash::sha256t::fast<"BIP0352/SharedSecret"> sink{ stream };
-    sink.write_bytes(shared_secret);
-    sink.write_4_bytes_big_endian(index);
-    sink.flush();
-    return verify(out);
-}
-
-static bool contains_match(const scan_matches& matches, uint32_t index) NOEXCEPT
-{
-    for (const auto& match: matches)
-        if (match.index == index)
-            return true;
-
-    return false;
-}
-
-static bool find_unmatched_output(uint32_t& out_index,
-    const std_vector<pay_witness_taproot_output>& outputs, const ec_xonly& key,
-    const scan_matches& matches) NOEXCEPT
-{
-    for (const auto& output: outputs)
+    const auto& inputs = *tx.inputs_ptr();
+    const auto& outputs = *tx.outputs_ptr();
+    if (std::none_of(outputs.begin(), outputs.end(), [](const auto& output)
     {
-        if (output.key != key || contains_match(matches, output.index))
-            continue;
-
-        out_index = output.index;
-        return true;
-    }
-
-    return false;
-}
-
-static bool contains_output(
-    const std_vector<pay_witness_taproot_output>& outputs,
-    const ec_xonly& key) NOEXCEPT
-{
-    for (const auto& output: outputs)
-        if (output.key == key)
-            return true;
-
-    return false;
-}
-
-static bool extract_last_witness_key(ec_compressed& out,
-    const input& in) NOEXCEPT
-{
-    const auto& stack = in.witness().stack();
-    if (stack.empty() || !stack.back())
+        return chain::script::is_pay_witness_taproot_pattern(
+            output->script().ops());
+    }))
         return false;
 
-    return copy_compressed(out, *stack.back());
-}
-
-static bool extract_p2pkh_key(ec_compressed& out, const input& in) NOEXCEPT
-{
-    const auto& ops = in.prevout->script().ops();
-    if (!script::is_pay_key_hash_pattern(ops))
-        return false;
-
-    const auto bytes = in.script().to_data(false);
-    if (bytes.size() < ec_compressed_size)
-        return false;
-
-    // P2PKH input scripts are malleable, so scan backward for the compressed
-    // key whose HASH160 matches the spent output rather than trusting the last
-    // push.
-    for (auto offset = bytes.size() - ec_compressed_size + one; offset > zero;
-        --offset)
+    ec_compresseds keys{};
+    keys.reserve(inputs.size());
+    for (const auto& input: inputs)
     {
-        const auto start = std::next(bytes.begin(), offset - one);
-        if (!is_compressed_key_sign(*start))
-            continue;
+        // Spends of future segwit versions exclude the transaction.
+        if (!input->prevout || input->prevout->script().version() ==
+            chain::script_version::reserved)
+            return false;
 
         ec_compressed key{};
-        std::copy_n(start, ec_compressed_size, key.begin());
-        const auto digest = bitcoin_short_hash(key);
-        const auto& hash = unsafe_array_cast<uint8_t, short_hash_size>(
-            ops.at(2).data().data());
-        if (digest == hash)
-        {
-            out = key;
-            return true;
-        }
+        if (get_input_key(key, *input))
+            keys.push_back(key);
     }
 
-    return false;
-}
-
-static bool to_even_compressed(ec_compressed& out,
-    const ec_xonly& point) NOEXCEPT
-{
-    out.front() = ec_even_sign;
-    std::copy(point.begin(), point.end(), std::next(out.begin()));
-    return verify(out);
-}
-
-static bool is_nums_internal_key(const input& in) NOEXCEPT
-{
-    const auto& stack = in.witness().stack();
-
-    // BIP352 only skips taproot script-path spends whose control block internal
-    // key is the BIP341 NUMS point H.
-    if (stack.size() <= one)
-        return false;
-
-    const auto control = in.witness().annex() ?
-        *std::prev(stack.end(), 2) : stack.back();
-    if (!control)
-        return false;
-
-    const tapscript script{ control };
-    return script.is_valid()
-        && script.is_tapscript()
-        && script.key() == bip341_nums_key;
-}
-
-static bool extract_taproot_key(ec_compressed& out, const input& in) NOEXCEPT
-{
-    if (is_nums_internal_key(in))
-        return false;
-
-    const auto& program = in.prevout->script().witness_program();
-    if (!program || program->size() != ec_xonly_size)
-        return false;
-
-    ec_xonly xonly{};
-    if (!copy_xonly(xonly, *program))
-        return false;
-
-    return to_even_compressed(out, xonly);
-}
-
-static bool extract_pay_witness_taproot_output(pay_witness_taproot_output& out,
-    const chain::output& output,
-    uint32_t index) NOEXCEPT
-{
-    if (!script::is_pay_witness_taproot_pattern(output.script().ops()))
-        return false;
-
-    const auto& program = output.script().witness_program();
-    if (!program || !copy_xonly(out.key, *program))
-        return false;
-
-    out.index = index;
-    return true;
-}
-
-static bool extract_pay_witness_taproot_outputs(
-    std_vector<pay_witness_taproot_output>& out,
-    const transaction& tx) NOEXCEPT
-{
-    const auto& outputs = *tx.outputs_ptr();
-    out.reserve(outputs.size());
-
-    uint32_t index{};
-    for (const auto& output: outputs)
+    const auto smallest = std::min_element(inputs.begin(), inputs.end(),
+        [](const auto& left, const auto& right) NOEXCEPT
     {
-        pay_witness_taproot_output entry{};
-        if (extract_pay_witness_taproot_output(entry, *output, index))
-            out.push_back(entry);
+        return is_lesser(left->point(), right->point());
+    });
+
+    ec_secret hash{};
+    return !keys.empty() && ec_sum(out, keys) &&
+        input_hash(hash, (*smallest)->point(), out) &&
+        ec_multiply(out, hash);
+}
+
+bool silent_payment::get_outputs(scan_outputs& out,
+    const chain::transaction& tx) NOEXCEPT
+{
+    out.clear();
+    uint32_t index{};
+    for (const auto& output: *tx.outputs_ptr())
+    {
+        const auto& script = output->script();
+        if (chain::script::is_pay_witness_taproot_pattern(script.ops()))
+            out.push_back({ index, unsafe_array_cast<uint8_t, ec_xonly_size>(
+                script.witness_program()->data()) });
 
         ++index;
     }
@@ -277,224 +106,90 @@ static bool extract_pay_witness_taproot_outputs(
     return !out.empty();
 }
 
-static bool label_tweak(ec_secret& out, const ec_secret& scan_secret,
-    uint32_t label) NOEXCEPT
-{
-    stream::out::fast stream{ out };
-    hash::sha256t::fast<"BIP0352/Label"> sink{ stream };
-    sink.write_bytes(scan_secret);
-    sink.write_4_bytes_big_endian(label);
-    sink.flush();
-    return verify(out);
-}
+// Construction.
+// ----------------------------------------------------------------------------
 
-static bool is_excluded_segwit_future(const input& in) NOEXCEPT
-{
-    return in.prevout
-        && in.prevout->script().version() == script_version::reserved;
-}
-
-static bool extract_shared_secret_key(ec_compressed& out,
-    const input& in) NOEXCEPT
-{
-    if (!in.prevout)
-        return false;
-
-    switch (in.prevout->script().output_pattern())
-    {
-        case script_pattern::pay_witness_v1_taproot:
-            return extract_taproot_key(out, in);
-        case script_pattern::pay_witness_key_hash:
-            return extract_last_witness_key(out, in);
-        case script_pattern::pay_script_hash:
-            return script::is_sign_witness_key_hash_pattern(in.script().ops())
-                && extract_last_witness_key(out, in);
-        case script_pattern::pay_key_hash:
-            return extract_p2pkh_key(out, in);
-        default:
-            return false;
-    }
-}
-
-static bool compute_input_hash(ec_secret& out, const transaction& tx,
-    const ec_compressed& sum) NOEXCEPT
-{
-    const auto& inputs = *tx.inputs_ptr();
-    if (inputs.empty())
-        return false;
-
-    // BIP352 orders by serialized outpoints, not point's uniqueness ordering.
-    auto minimum = to_outpoint_data(inputs.front()->point());
-    for (auto it = std::next(inputs.begin()); it != inputs.end(); ++it)
-    {
-        const auto outpoint = to_outpoint_data((*it)->point());
-        if (outpoint_data_less(outpoint, minimum))
-            minimum = outpoint;
-    }
-
-    stream::out::fast stream{ out };
-    hash::sha256t::fast<"BIP0352/Inputs"> sink{ stream };
-    sink.write_bytes(minimum);
-    sink.write_bytes(sum);
-    sink.flush();
-
-    return verify(out);
-}
-
-bool compute_scan_record(scan_record& out, const transaction& tx) NOEXCEPT
-{
-    scan_record record{};
-    if (tx.is_coinbase() ||
-        !extract_pay_witness_taproot_outputs(record.outputs, tx))
-        return false;
-
-    const auto& inputs = *tx.inputs_ptr();
-    compressed_list keys{};
-    keys.reserve(inputs.size());
-
-    for (const auto& in: inputs)
-    {
-        if (!in->prevout || is_excluded_segwit_future(*in))
-            return false;
-
-        ec_compressed key{};
-        if (extract_shared_secret_key(key, *in))
-            keys.push_back(key);
-    }
-
-    if (keys.empty())
-        return false;
-
-    ec_compressed sum{};
-    ec_secret input_hash{};
-    if (!ec_sum(sum, keys) || !compute_input_hash(input_hash, tx, sum))
-        return false;
-
-    record.prevouts_summary = sum;
-    if (!ec_multiply(record.prevouts_summary, input_hash))
-        return false;
-
-    out = std::move(record);
-    return true;
-}
-
-bool scan_match::operator<(const scan_match& other) const NOEXCEPT
-{
-    return index < other.index;
-}
-
-scanner::scanner(const ec_secret& scan_secret,
-    const ec_compressed& spend_public, const std_vector<uint32_t>& labels)
-    NOEXCEPT
+silent_payment::silent_payment(const ec_secret& scan_secret,
+    const ec_compressed& spend_key,
+    const std_vector<uint32_t>& labels) NOEXCEPT
   : scan_secret_(scan_secret), labels_(labels)
 {
-    if (!verify(scan_secret_) || !decompress(spend_point_, spend_public))
+    if (!verify_secret(scan_secret_) || !decompress(spend_key_, spend_key))
         return;
 
+    ec_secret tweak{};
+    ec_uncompressed key{};
     label_tweaks_.reserve(labels_.size());
-    label_points_uncompressed_.reserve(labels_.size());
-
+    label_keys_.reserve(labels_.size());
     for (const auto label: labels_)
     {
-        ec_secret tweak{};
-        ec_uncompressed point{};
         if (!label_tweak(tweak, scan_secret_, label) ||
-            !secret_to_public(point, tweak))
-        {
+            !secret_to_public(key, tweak))
             return;
-        }
 
         label_tweaks_.push_back(tweak);
-        label_points_uncompressed_.push_back(point);
+        label_keys_.push_back(key);
     }
 
     valid_ = true;
 }
 
-scanner::operator bool() const NOEXCEPT
+silent_payment::operator bool() const NOEXCEPT
 {
-    return valid();
+    return valid_;
 }
 
-bool scanner::valid() const NOEXCEPT
-{
-    return valid_
-        && labels_.size() == label_tweaks_.size()
-        && labels_.size() == label_points_uncompressed_.size();
-}
+// Scanning.
+// ----------------------------------------------------------------------------
 
-bool scanner::to_shared_secret(ec_compressed& out,
-    const ec_compressed& prevouts_summary) const NOEXCEPT
-{
-    out = prevouts_summary;
-    return ec_multiply(out, scan_secret_);
-}
-
-bool scanner::to_shared_secret(ec_compressed& out,
-    const ec_uncompressed& prevouts_summary) const NOEXCEPT
-{
-    ec_uncompressed point{ prevouts_summary };
-    return ec_multiply(point, scan_secret_) && compress(out, point);
-}
-
-bool scanner::scan_shared(scan_matches& out,
-    const ec_compressed& shared_secret,
-    const std_vector<pay_witness_taproot_output>& outputs) const NOEXCEPT
+// Each k is satisfied by an unmatched output keyed by B_spend + t_k * G, or by
+// that sum plus one label key, and scanning stops at the first k with neither.
+bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
+    const scan_outputs& outputs) const NOEXCEPT
 {
     out.clear();
-    out.reserve(outputs.size());
+    ec_compressed shared{};
+    if (!valid_ || !shared_secret(shared, summary))
+        return false;
 
-    if (outputs.empty())
-        return true;
-
-    uint32_t index{};
-    while (out.size() < outputs.size() && index < maximum_outputs)
+    ec_secret tweak{};
+    ec_uncompressed key{};
+    ec_uncompressed labeled{};
+    for (uint32_t k{}; out.size() < outputs.size() && k < maximum_outputs;
+        ++k)
     {
-        ec_secret tweak{};
-        if (!shared_secret_tweak(tweak, shared_secret, index))
+        key = spend_key_;
+        if (!shared_tweak(tweak, shared, k) || !ec_add(key, tweak))
             return false;
 
-        ec_uncompressed point{ spend_point_ };
-        if (!ec_add(point, tweak))
-            return false;
-
-        uint32_t output_index{};
-        scan_match found{};
-        found.tweak = tweak;
-        if (find_unmatched_output(output_index, outputs, to_xonly(point), out))
+        uint32_t index{};
+        if (find_output(index, outputs, array_cast<uint8_t, ec_xonly_size,
+            one>(key), out))
         {
-            found.index = output_index;
-            out.push_back(found);
-            ++index;
+            out.push_back({ index, tweak, unlabeled });
             continue;
         }
 
-        bool matched{};
-        const auto label_points = label_points_uncompressed_.size();
-        for (size_t label_index{}; label_index < label_points; ++label_index)
+        auto found = false;
+        for (size_t label{}; !found && label < labels_.size(); ++label)
         {
-            ec_uncompressed labelled{ point };
-            if (!ec_add(labelled, label_points_uncompressed_[label_index]))
+            labeled = key;
+            if (!ec_add(labeled, label_keys_.at(label)))
                 return false;
 
-            if (find_unmatched_output(output_index, outputs, to_xonly(labelled),
-                out))
+            if (find_output(index, outputs, array_cast<uint8_t,
+                ec_xonly_size, one>(labeled), out))
             {
                 auto combined = tweak;
-                if (!ec_add(combined, label_tweaks_[label_index]))
+                if (!ec_add(combined, label_tweaks_.at(label)))
                     return false;
 
-                found.index = output_index;
-                found.tweak = combined;
-                found.label = labels_[label_index];
-                out.push_back(found);
-                ++index;
-                matched = true;
-                break;
+                out.push_back({ index, combined, labels_.at(label) });
+                found = true;
             }
         }
 
-        if (!matched)
+        if (!found)
             break;
     }
 
@@ -502,87 +197,212 @@ bool scanner::scan_shared(scan_matches& out,
     return true;
 }
 
-bool scanner::match_shared(bool& out,
-    const ec_compressed& shared_secret,
-    const std_vector<pay_witness_taproot_output>& outputs) const NOEXCEPT
+// A receiver's first output (k = 0) is sufficient to discover a transaction.
+bool silent_payment::match(bool& out, const ec_compressed& summary,
+    const scan_outputs& outputs) const NOEXCEPT
 {
-    if (outputs.empty())
-    {
-        out = false;
-        return true;
-    }
-
+    out = false;
+    ec_compressed shared{};
     ec_secret tweak{};
-    if (!shared_secret_tweak(tweak, shared_secret, zero))
+    auto key = spend_key_;
+    if (!valid_ || !shared_secret(shared, summary) ||
+        !shared_tweak(tweak, shared, zero) || !ec_add(key, tweak))
         return false;
 
-    // Transaction discovery is satisfied by the receiver's initial output.
-    ec_uncompressed point{ spend_point_ };
-    if (!ec_add(point, tweak))
-        return false;
+    const auto contains = [&](const ec_uncompressed& point) NOEXCEPT
+    {
+        const auto& xonly = array_cast<uint8_t, ec_xonly_size, one>(point);
+        return std::any_of(outputs.begin(), outputs.end(),
+            [&](const scan_output& output) NOEXCEPT
+            {
+                return output.key == xonly;
+            });
+    };
 
-    if (contains_output(outputs, to_xonly(point)))
+    if (contains(key))
     {
         out = true;
         return true;
     }
 
-    for (const auto& label_point: label_points_uncompressed_)
+    ec_uncompressed labeled{};
+    for (const auto& label_key: label_keys_)
     {
-        ec_uncompressed labelled{ point };
-        if (!ec_add(labelled, label_point))
+        labeled = key;
+        if (!ec_add(labeled, label_key))
             return false;
 
-        if (contains_output(outputs, to_xonly(labelled)))
+        if (contains(labeled))
         {
             out = true;
             return true;
         }
     }
 
-    out = false;
     return true;
 }
 
-bool scanner::scan(scan_matches& out, const ec_compressed& prevouts_summary,
-    const std_vector<pay_witness_taproot_output>& outputs) const NOEXCEPT
+// protected
+// ----------------------------------------------------------------------------
+
+// Outpoints order by serialization: hash bytes, then little-endian index.
+bool silent_payment::is_lesser(const chain::point& left,
+    const chain::point& right) NOEXCEPT
 {
-    ec_compressed shared_secret{};
-    return valid()
-        && to_shared_secret(shared_secret, prevouts_summary)
-        && scan_shared(out, shared_secret, outputs);
+    if (left.hash() != right.hash())
+        return left.hash() < right.hash();
+
+    return to_little_endian(left.index()) < to_little_endian(right.index());
 }
 
-bool scanner::scan(scan_matches& out, const ec_uncompressed& prevouts_summary,
-    const std_vector<pay_witness_taproot_output>& outputs) const NOEXCEPT
+bool silent_payment::input_hash(ec_secret& out, const chain::point& smallest,
+    const ec_compressed& sum) NOEXCEPT
 {
-    ec_compressed shared_secret{};
-    return valid()
-        && to_shared_secret(shared_secret, prevouts_summary)
-        && scan_shared(out, shared_secret, outputs);
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"BIP0352/Inputs"> sink{ stream };
+    smallest.to_data(sink);
+    sink.write_bytes(sum);
+    sink.flush();
+    return verify_secret(out);
 }
 
-bool scanner::match(bool& out, const ec_compressed& prevouts_summary,
-    const std_vector<pay_witness_taproot_output>& outputs) const NOEXCEPT
+bool silent_payment::shared_tweak(ec_secret& out, const ec_compressed& shared,
+    uint32_t k) NOEXCEPT
 {
-    ec_compressed shared_secret{};
-    return valid()
-        && to_shared_secret(shared_secret, prevouts_summary)
-        && match_shared(out, shared_secret, outputs);
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"BIP0352/SharedSecret"> sink{ stream };
+    sink.write_bytes(shared);
+    sink.write_4_bytes_big_endian(k);
+    sink.flush();
+    return verify_secret(out);
 }
 
-bool scanner::match(bool& out, const ec_uncompressed& prevouts_summary,
-    const std_vector<pay_witness_taproot_output>& outputs) const NOEXCEPT
+bool silent_payment::label_tweak(ec_secret& out, const ec_secret& scan_secret,
+    uint32_t label) NOEXCEPT
 {
-    ec_compressed shared_secret{};
-    return valid()
-        && to_shared_secret(shared_secret, prevouts_summary)
-        && match_shared(out, shared_secret, outputs);
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"BIP0352/Label"> sink{ stream };
+    sink.write_bytes(scan_secret);
+    sink.write_4_bytes_big_endian(label);
+    sink.flush();
+    return verify_secret(out);
+}
+
+bool silent_payment::get_input_key(ec_compressed& out,
+    const chain::input& input) NOEXCEPT
+{
+    switch (input.prevout->script().output_pattern())
+    {
+        case chain::script_pattern::pay_witness_v1_taproot:
+            return get_taproot_key(out, input);
+        case chain::script_pattern::pay_witness_key_hash:
+            return get_witness_key(out, input);
+        case chain::script_pattern::pay_script_hash:
+            return chain::script::is_sign_witness_key_hash_pattern(
+                input.script().ops()) && get_witness_key(out, input);
+        case chain::script_pattern::pay_key_hash:
+            return get_key_hash_key(out, input);
+        default:
+            return false;
+    }
+}
+
+// The key is the last witness element, and only compressed keys contribute.
+bool silent_payment::get_witness_key(ec_compressed& out,
+    const chain::input& input) NOEXCEPT
+{
+    const auto& stack = input.witness().stack();
+    if (stack.empty() || !stack.back() || !is_compressed_key(*stack.back()))
+        return false;
+
+    out = unsafe_array_cast<uint8_t, ec_compressed_size>(
+        stack.back()->data());
+    return true;
+}
+
+// Input scripts are malleable, so the last compressed key that hashes to the
+// prevout's key hash is taken from the serialized input script [bip352].
+bool silent_payment::get_key_hash_key(ec_compressed& out,
+    const chain::input& input) NOEXCEPT
+{
+    const auto& hash = input.prevout->script().ops().at(2).data();
+    const auto bytes = input.script().to_data(false);
+    if (bytes.size() < ec_compressed_size)
+        return false;
+
+    for (auto end = bytes.size(); end >= ec_compressed_size; --end)
+    {
+        const auto start = std::next(bytes.begin(), end - ec_compressed_size);
+        const auto sign = *start;
+        if (sign != ec_even_sign && sign != ec_odd_sign)
+            continue;
+
+        std::copy_n(start, ec_compressed_size, out.begin());
+        if (bitcoin_short_hash(out) ==
+            unsafe_array_cast<uint8_t, short_hash_size>(hash.data()))
+            return true;
+    }
+
+    return false;
+}
+
+// The key is the output program, with even y, unless the input is a script
+// path spend with the NUMS internal key [bip352].
+bool silent_payment::get_taproot_key(ec_compressed& out,
+    const chain::input& input) NOEXCEPT
+{
+    const auto& program = input.prevout->script().witness_program();
+    if (is_nums_spend(input) || !program || program->size() != ec_xonly_size)
+        return false;
+
+    out.front() = ec_even_sign;
+    std::copy(program->begin(), program->end(), std::next(out.begin()));
+    return verify_point(out);
+}
+
+bool silent_payment::is_nums_spend(const chain::input& input) NOEXCEPT
+{
+    const auto& witness = input.witness();
+    const auto& stack = witness.stack();
+    const auto items = witness.annex() ? sub1(stack.size()) : stack.size();
+    if (items < two)
+        return false;
+
+    const chain::tapscript control{ stack.at(sub1(items)) };
+    return control.is_valid() && control.key() == nums_key;
+}
+
+bool silent_payment::find_output(uint32_t& out, const scan_outputs& outputs,
+    const ec_xonly& key, const scan_matches& matches) NOEXCEPT
+{
+    for (const auto& output: outputs)
+    {
+        if (output.key != key || std::any_of(matches.begin(), matches.end(),
+            [&](const scan_match& match) NOEXCEPT
+            {
+                return match.index == output.index;
+            }))
+            continue;
+
+        out = output.index;
+        return true;
+    }
+
+    return false;
+}
+
+// private
+// ----------------------------------------------------------------------------
+
+bool silent_payment::shared_secret(ec_compressed& out,
+    const ec_compressed& summary) const NOEXCEPT
+{
+    out = summary;
+    return ec_multiply(out, scan_secret_);
 }
 
 BC_POP_WARNING()
 
-} // namespace silent_payment
 } // namespace wallet
 } // namespace system
 } // namespace libbitcoin

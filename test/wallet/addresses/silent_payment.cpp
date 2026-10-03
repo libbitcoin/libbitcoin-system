@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2026 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
  *
@@ -23,7 +23,18 @@ BOOST_AUTO_TEST_SUITE(silent_payment_tests)
 
 namespace json = boost::json;
 using namespace system::chain;
-namespace silent_payment = system::wallet::silent_payment;
+using silent_payment = system::wallet::silent_payment;
+
+class accessor
+  : public silent_payment
+{
+public:
+    using silent_payment::is_lesser;
+    using silent_payment::input_hash;
+    using silent_payment::shared_tweak;
+    using silent_payment::label_tweak;
+    using silent_payment::find_output;
+};
 
 struct vector_input
 {
@@ -189,10 +200,10 @@ static std_vector<uint32_t> to_labels(const json::array& values)
     return out;
 }
 
-static std_vector<silent_payment::pay_witness_taproot_output>
-to_pay_witness_taproot_outputs(const json::array& values)
+static silent_payment::scan_outputs to_scan_outputs(
+    const json::array& values)
 {
-    std_vector<silent_payment::pay_witness_taproot_output> out{};
+    silent_payment::scan_outputs out{};
     out.reserve(values.size());
 
     uint32_t index{};
@@ -221,13 +232,14 @@ static uint32_t output_index(const json::array& outputs,
     return zero;
 }
 
-static void require_bip352_matches(const silent_payment::scan_matches& matches,
-    const json::object& given, const json::object& expected)
+static void require_bip352_matches(
+    const silent_payment::scan_matches& matches, const json::object& given,
+    const json::object& expected)
 {
     if (!value_is_null(expected, "n_outputs"))
     {
-        const auto count = static_cast<size_t>(expected.at("n_outputs").as_int64());
-        BOOST_REQUIRE_EQUAL(matches.size(), count);
+        const auto count = expected.at("n_outputs").as_int64();
+        BOOST_REQUIRE_EQUAL(matches.size(), static_cast<size_t>(count));
         return;
     }
 
@@ -238,16 +250,17 @@ static void require_bip352_matches(const silent_payment::scan_matches& matches,
     {
         const auto& object = output.as_object();
         const auto key = text_at(object, "pub_key");
-        const auto index = output_index(given.at("outputs").as_array(), key);
-        const auto is_index = [index](const auto& match) NOEXCEPT
-        {
-            return match.index == index;
-        };
-        const auto found = std::find_if(matches.begin(), matches.end(), is_index);
+        const auto& keys = given.at("outputs").as_array();
+        const auto index = output_index(keys, key);
+        const auto found = std::find_if(matches.begin(), matches.end(),
+            [index](const auto& match) NOEXCEPT
+            {
+                return match.index == index;
+            });
 
         BOOST_REQUIRE(found != matches.end());
-        const auto tweak = bytes<ec_secret_size>(text_at(object, "priv_key_tweak"));
-        BOOST_REQUIRE_EQUAL(found->tweak, tweak);
+        const auto tweak = text_at(object, "priv_key_tweak");
+        BOOST_REQUIRE_EQUAL(found->tweak, bytes<ec_secret_size>(tweak));
     }
 }
 
@@ -263,54 +276,36 @@ static void require_bip352_receiving_vector(const json::object& given,
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend_secret));
 
-    silent_payment::scan_record record{};
+    ec_compressed summary{};
     const auto tx = to_transaction(given);
-    const auto has_record = silent_payment::compute_scan_record(record, tx);
-
+    const auto summarized = silent_payment::summarize(summary, tx);
     if (value_is_null(expected, "tweak"))
     {
-        BOOST_REQUIRE(!has_record);
+        BOOST_REQUIRE(!summarized);
         return;
     }
 
-    BOOST_REQUIRE(has_record);
-    const auto prevouts_summary = bytes<ec_compressed_size>(
-        text_at(expected, "tweak"));
-    BOOST_REQUIRE_EQUAL(record.prevouts_summary, prevouts_summary);
+    BOOST_REQUIRE(summarized);
+    const auto tweak = text_at(expected, "tweak");
+    BOOST_REQUIRE_EQUAL(summary, bytes<ec_compressed_size>(tweak));
 
-    ec_compressed shared_secret{ record.prevouts_summary };
-    BOOST_REQUIRE(ec_multiply(shared_secret, scan_secret));
-    const auto expected_shared = bytes<ec_compressed_size>(
-        text_at(expected, "shared_secret"));
-    BOOST_REQUIRE_EQUAL(shared_secret, expected_shared);
+    ec_compressed shared{ summary };
+    BOOST_REQUIRE(ec_multiply(shared, scan_secret));
+    const auto secret = text_at(expected, "shared_secret");
+    BOOST_REQUIRE_EQUAL(shared, bytes<ec_compressed_size>(secret));
 
     const auto labels = to_labels(given.at("labels").as_array());
-    const auto outputs = to_pay_witness_taproot_outputs(
-        given.at("outputs").as_array());
-
-    silent_payment::scanner scanner{ scan_secret, spend_public, labels };
+    const auto outputs = to_scan_outputs(given.at("outputs").as_array());
+    const silent_payment scanner{ scan_secret, spend_public, labels };
     BOOST_REQUIRE(scanner);
 
     silent_payment::scan_matches matches{};
-    BOOST_REQUIRE(scanner.scan(matches, record.prevouts_summary, outputs));
+    BOOST_REQUIRE(scanner.scan(matches, summary, outputs));
     require_bip352_matches(matches, given, expected);
 
-    ec_uncompressed uncompressed_prevouts_summary{};
-    BOOST_REQUIRE(decompress(uncompressed_prevouts_summary,
-        record.prevouts_summary));
-    silent_payment::scan_matches uncompressed_matches{};
-    BOOST_REQUIRE(scanner.scan(uncompressed_matches,
-        uncompressed_prevouts_summary, outputs));
-    require_bip352_matches(uncompressed_matches, given, expected);
-
     bool matched{};
-    BOOST_REQUIRE(scanner.match(matched, record.prevouts_summary, outputs));
+    BOOST_REQUIRE(scanner.match(matched, summary, outputs));
     BOOST_REQUIRE_EQUAL(matched, !matches.empty());
-
-    bool uncompressed_matched{};
-    BOOST_REQUIRE(scanner.match(uncompressed_matched,
-        uncompressed_prevouts_summary, outputs));
-    BOOST_REQUIRE_EQUAL(uncompressed_matched, !matches.empty());
 }
 
 static void require_record(std::initializer_list<vector_input> inputs,
@@ -326,21 +321,24 @@ static void require_record(std::initializer_list<vector_input> inputs,
     for (const auto& key: outputs)
         tx_outputs.push_back(to_pay_witness_taproot_output(key));
 
-    silent_payment::scan_record record{};
-    const transaction tx{ 2u, std::move(tx_inputs), std::move(tx_outputs), 0u };
+    const transaction tx{ 2u, std::move(tx_inputs), std::move(tx_outputs),
+        0u };
     BOOST_REQUIRE(!tx.is_coinbase());
-    BOOST_REQUIRE(tx.outputs_ptr()->front()->script().output_pattern() ==
-        script_pattern::pay_witness_v1_taproot);
-    BOOST_REQUIRE(silent_payment::compute_scan_record(record, tx));
-    BOOST_REQUIRE_EQUAL(record.prevouts_summary,
-        bytes<ec_compressed_size>(summary));
-    BOOST_REQUIRE_EQUAL(record.outputs.size(), outputs.size());
 
-    size_t index{};
+    ec_compressed out{};
+    BOOST_REQUIRE(silent_payment::summarize(out, tx));
+    BOOST_REQUIRE_EQUAL(out, bytes<ec_compressed_size>(summary));
+
+    silent_payment::scan_outputs scan_outputs{};
+    BOOST_REQUIRE(silent_payment::get_outputs(scan_outputs, tx));
+    BOOST_REQUIRE_EQUAL(scan_outputs.size(), outputs.size());
+
+    uint32_t index{};
     for (const auto& key: outputs)
     {
-        BOOST_REQUIRE_EQUAL(record.outputs[index].index, index);
-        BOOST_REQUIRE_EQUAL(record.outputs[index].key, bytes<ec_xonly_size>(key));
+        const auto& output = scan_outputs.at(index);
+        BOOST_REQUIRE_EQUAL(output.index, index);
+        BOOST_REQUIRE_EQUAL(output.key, bytes<ec_xonly_size>(key));
         ++index;
     }
 }
@@ -358,9 +356,10 @@ static void require_no_record(std::initializer_list<vector_input> inputs)
             "3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1")
     };
 
-    silent_payment::scan_record record{};
-    const transaction tx{ 2u, std::move(tx_inputs), std::move(tx_outputs), 0u };
-    BOOST_REQUIRE(!silent_payment::compute_scan_record(record, tx));
+    ec_compressed out{};
+    const transaction tx{ 2u, std::move(tx_inputs), std::move(tx_outputs),
+        0u };
+    BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
 static transaction transaction_with_inputs(chain::inputs&& tx_inputs,
@@ -377,7 +376,7 @@ static transaction transaction_with_inputs(chain::inputs&& tx_inputs,
 
 // BIP352 send_and_receive_test_vectors.json:
 // "Simple send: two inputs"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__p2pkh_inputs__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__p2pkh_inputs__expected)
 {
     require_record(
     {
@@ -403,7 +402,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__p2pkh_inputs__expected
 }
 
 // "Outpoint ordering byte-lexicographically vs. vout-integer"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__lexicographic_outpoint__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__lexicographic_outpoint__expected)
 {
     require_record(
     {
@@ -429,7 +428,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__lexicographic_outpoint
 }
 
 // "Single recipient: taproot only inputs with even y-values"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__taproot_inputs__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__taproot_inputs__expected)
 {
     require_record(
     {
@@ -455,7 +454,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__taproot_inputs__expect
 }
 
 // "Single recipient: taproot only with mixed even/odd y-values"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__taproot_odd_key__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__taproot_odd_key__expected)
 {
     require_record(
     {
@@ -481,7 +480,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__taproot_odd_key__expec
 }
 
 // "Single recipient: taproot input with NUMS point"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__taproot_nums_input__skipped)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__taproot_nums_input__skipped)
 {
     require_record(
     {
@@ -514,7 +513,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__taproot_nums_input__sk
 }
 
 // "Public key extraction from malleated p2pkh"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__malleated_p2pkh__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__malleated_p2pkh__expected)
 {
     require_record(
     {
@@ -547,7 +546,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__malleated_p2pkh__expec
 }
 
 // "P2PKH and P2WPKH Uncompressed Keys are skipped"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__uncompressed_keys__skipped)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__uncompressed_keys__skipped)
 {
     require_record(
     {
@@ -580,7 +579,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__uncompressed_keys__ski
 }
 
 // "No valid inputs, sender generates no outputs"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__no_valid_inputs__false)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__no_valid_inputs__false)
 {
     require_no_record(
     {
@@ -602,7 +601,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__no_valid_inputs__false
 }
 
 // "Input keys sum up to zero / point at infinity: sending fails, receiver skips tx"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__input_sum_zero__false)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__input_sum_zero__false)
 {
     require_no_record(
     {
@@ -624,7 +623,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__input_sum_zero__false)
 }
 
 // "Input keys intermediate sum is zero but final sum is non-zero"
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__intermediate_sum_zero__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__intermediate_sum_zero__expected)
 {
     require_record(
     {
@@ -656,9 +655,9 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__intermediate_sum_zero_
     "039c68bacb7efbf2175d781822f460afc4839a5798fabb055b50d939231bf57bb6");
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__coinbase__false)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__coinbase__false)
 {
-    silent_payment::scan_record record{};
+    ec_compressed out{};
     const transaction tx
     {
         2u,
@@ -671,12 +670,12 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__coinbase__false)
     };
 
     BOOST_REQUIRE(tx.is_coinbase());
-    BOOST_REQUIRE(!silent_payment::compute_scan_record(record, tx));
+    BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__no_pay_witness_taproot_outputs__false)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__no_pay_witness_taproot_outputs__false)
 {
-    silent_payment::scan_record record{};
+    ec_compressed out{};
     const auto tx = transaction_with_inputs(
         {
             to_input(
@@ -690,18 +689,15 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__no_pay_witness_taproot
         },
         "76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac");
 
-    BOOST_REQUIRE(!silent_payment::compute_scan_record(record, tx));
+    BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__missing_prevout__false)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__missing_prevout__false)
 {
-    silent_payment::scan_record record{};
+    ec_compressed out{};
     input in
     {
-        { digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"), 0u },
-        script{},
-        witness{},
-        max_uint32
+        { digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"), 0u }, script{}, witness{}, max_uint32
     };
     const transaction tx
     {
@@ -715,12 +711,12 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__missing_prevout__false
     };
 
     BOOST_REQUIRE(!tx.inputs_ptr()->front()->prevout);
-    BOOST_REQUIRE(!silent_payment::compute_scan_record(record, tx));
+    BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__future_segwit_prevout__false)
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__future_segwit_prevout__false)
 {
-    silent_payment::scan_record record{};
+    ec_compressed out{};
     const auto tx = transaction_with_inputs(
         {
             to_input(
@@ -734,123 +730,90 @@ BOOST_AUTO_TEST_CASE(silent_payment__compute_scan_record__future_segwit_prevout_
         },
         "51203e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1");
 
-    BOOST_REQUIRE(tx.inputs_ptr()->front()->prevout->script().version() ==
-        script_version::reserved);
-    BOOST_REQUIRE(!silent_payment::compute_scan_record(record, tx));
+    BOOST_REQUIRE(tx.inputs_ptr()->front()->prevout->script().version() == script_version::reserved);
+    BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__unlabeled_match__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__scan__unlabeled_match__expected)
 {
-    const auto scan = base16_array(
-        "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
-    const auto spend = base16_array(
-        "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
-    const auto prevouts_summary = base16_array(
-        "024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    const auto spend = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+    const auto prevouts_summary = base16_array("024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend));
 
     silent_payment::scan_matches matches{};
-    std_vector<silent_payment::pay_witness_taproot_output> outputs
+    silent_payment::scan_outputs outputs
     {
-        { 0, base16_array(
-            "3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1") }
+        { 0, base16_array("3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1") }
     };
 
-    silent_payment::scanner scanner{ scan, spend_public, { 0 } };
+    const silent_payment scanner{ scan, spend_public, { 0 } };
     BOOST_REQUIRE(scanner);
     BOOST_REQUIRE(scanner.scan(matches, prevouts_summary, outputs));
     BOOST_REQUIRE_EQUAL(matches.size(), one);
     BOOST_REQUIRE_EQUAL(matches.front().index, 0u);
-    BOOST_REQUIRE(!matches.front().label.has_value());
+    BOOST_REQUIRE_EQUAL(matches.front().label, silent_payment::unlabeled);
 
     bool matched{};
     BOOST_REQUIRE(scanner.match(matched, prevouts_summary, outputs));
     BOOST_REQUIRE(matched);
-
-    ec_uncompressed uncompressed_prevouts_summary{};
-    BOOST_REQUIRE(decompress(uncompressed_prevouts_summary,
-        prevouts_summary));
-    bool uncompressed_matched{};
-    BOOST_REQUIRE(scanner.match(uncompressed_matched,
-        uncompressed_prevouts_summary, outputs));
-    BOOST_REQUIRE(uncompressed_matched);
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__labeled_match__expected)
+BOOST_AUTO_TEST_CASE(silent_payment__scan__labeled_match__expected)
 {
-    const auto scan = base16_array(
-        "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
-    const auto spend = base16_array(
-        "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
-    const auto prevouts_summary = base16_array(
-        "0314bec14463d6c0181083d607fecfba67bb83f95915f6f247975ec566d5642ee8");
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    const auto spend = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+    const auto prevouts_summary = base16_array("0314bec14463d6c0181083d607fecfba67bb83f95915f6f247975ec566d5642ee8");
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend));
 
     silent_payment::scan_matches matches{};
-    std_vector<silent_payment::pay_witness_taproot_output> outputs
+    silent_payment::scan_outputs outputs
     {
-        { 0, base16_array(
-            "67626aebb3c4307cf0f6c39ca23247598fabf675ab783292eb2f81ae75ad1f8c") }
+        { 0, base16_array("67626aebb3c4307cf0f6c39ca23247598fabf675ab783292eb2f81ae75ad1f8c") }
     };
 
-    silent_payment::scanner scanner{ scan, spend_public, { 2, 3, 1001337 } };
+    const silent_payment scanner{ scan, spend_public, { 2, 3, 1001337 } };
     BOOST_REQUIRE(scanner);
     BOOST_REQUIRE(scanner.scan(matches, prevouts_summary, outputs));
     BOOST_REQUIRE_EQUAL(matches.size(), one);
     BOOST_REQUIRE_EQUAL(matches.front().index, 0u);
-    BOOST_REQUIRE_EQUAL(matches.front().tweak, base16_array(
-        "6024ae214876356b8d917716e7707d267ae16a0fdb07de2a786b74a7bbcddead"));
-    BOOST_REQUIRE(matches.front().label.has_value());
-    BOOST_REQUIRE_EQUAL(matches.front().label.value(), 3u);
-
-    ec_uncompressed uncompressed_prevouts_summary{};
-    BOOST_REQUIRE(decompress(uncompressed_prevouts_summary,
-        prevouts_summary));
-    silent_payment::scan_matches uncompressed_matches{};
-    BOOST_REQUIRE(scanner.scan(uncompressed_matches,
-        uncompressed_prevouts_summary, outputs));
-    BOOST_REQUIRE_EQUAL(uncompressed_matches.size(), one);
-    BOOST_REQUIRE_EQUAL(uncompressed_matches.front().label.value(), 3u);
+    BOOST_REQUIRE_EQUAL(matches.front().tweak, base16_array("6024ae214876356b8d917716e7707d267ae16a0fdb07de2a786b74a7bbcddead"));
+    BOOST_REQUIRE_EQUAL(matches.front().label, 3u);
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner__invalid_scan_secret__false)
+BOOST_AUTO_TEST_CASE(silent_payment__construct__invalid_scan_secret__false)
 {
-    const auto spend = base16_array(
-        "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+    const auto spend = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend));
 
-    const silent_payment::scanner scanner{ ec_secret{}, spend_public, { 0 } };
+    const silent_payment scanner{ ec_secret{}, spend_public, { 0 } };
     BOOST_REQUIRE(!scanner);
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner__invalid_spend_key__false)
+BOOST_AUTO_TEST_CASE(silent_payment__construct__invalid_spend_key__false)
 {
-    const auto scan = base16_array(
-        "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
 
-    const silent_payment::scanner scanner{ scan, null_ec_compressed, { 0 } };
+    const silent_payment scanner{ scan, null_ec_compressed, { 0 } };
     BOOST_REQUIRE(!scanner);
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__empty_outputs__empty)
+BOOST_AUTO_TEST_CASE(silent_payment__scan__empty_outputs__empty)
 {
-    const auto scan = base16_array(
-        "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
-    const auto spend = base16_array(
-        "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
-    const auto prevouts_summary = base16_array(
-        "024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    const auto spend = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+    const auto prevouts_summary = base16_array("024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend));
 
-    silent_payment::scanner scanner{ scan, spend_public, { 0 } };
+    const silent_payment scanner{ scan, spend_public, { 0 } };
     BOOST_REQUIRE(scanner);
 
     silent_payment::scan_matches matches{};
@@ -862,26 +825,22 @@ BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__empty_outputs__empty)
     BOOST_REQUIRE(!matched);
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__no_matching_output__empty)
+BOOST_AUTO_TEST_CASE(silent_payment__scan__no_matching_output__empty)
 {
-    const auto scan = base16_array(
-        "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
-    const auto spend = base16_array(
-        "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
-    const auto prevouts_summary = base16_array(
-        "024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    const auto spend = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+    const auto prevouts_summary = base16_array("024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend));
 
     silent_payment::scan_matches matches{};
-    std_vector<silent_payment::pay_witness_taproot_output> outputs
+    silent_payment::scan_outputs outputs
     {
-        { 0, base16_array(
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff") }
+        { 0, base16_array("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff") }
     };
 
-    silent_payment::scanner scanner{ scan, spend_public, { 0 } };
+    const silent_payment scanner{ scan, spend_public, { 0 } };
     BOOST_REQUIRE(scanner);
     BOOST_REQUIRE(scanner.scan(matches, prevouts_summary, outputs));
     BOOST_REQUIRE(matches.empty());
@@ -891,17 +850,15 @@ BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__no_matching_output__empty)
     BOOST_REQUIRE(!matched);
 }
 
-BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__invalid_prevouts_summary__false)
+BOOST_AUTO_TEST_CASE(silent_payment__scan__invalid_prevouts_summary__false)
 {
-    const auto scan = base16_array(
-        "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
-    const auto spend = base16_array(
-        "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    const auto spend = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend));
 
-    silent_payment::scanner scanner{ scan, spend_public, { 0 } };
+    const silent_payment scanner{ scan, spend_public, { 0 } };
     BOOST_REQUIRE(scanner);
 
     silent_payment::scan_matches matches{};
@@ -909,6 +866,60 @@ BOOST_AUTO_TEST_CASE(silent_payment__scanner_scan__invalid_prevouts_summary__fal
 
     bool matched{};
     BOOST_REQUIRE(!scanner.match(matched, null_ec_compressed, {}));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__is_lesser__serialized_index__expected)
+{
+    const auto hash = digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16");
+    BOOST_REQUIRE(accessor::is_lesser({ hash, 256u }, { hash, 1u }));
+    BOOST_REQUIRE(!accessor::is_lesser({ hash, 1u }, { hash, 256u }));
+    BOOST_REQUIRE(!accessor::is_lesser({ hash, 1u }, { hash, 1u }));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__is_lesser__serialized_hash__expected)
+{
+    const auto low = digest("0100000000000000000000000000000000000000000000000000000000000000");
+    const auto high = digest("0000000000000000000000000000000000000000000000000000000000000001");
+    BOOST_REQUIRE(accessor::is_lesser({ high, 0u }, { low, 0u }));
+    BOOST_REQUIRE(!accessor::is_lesser({ low, 0u }, { high, 0u }));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__label_tweak__zero_label__nonzero)
+{
+    const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+    ec_secret tweak{};
+    BOOST_REQUIRE(accessor::label_tweak(tweak, scan, 0u));
+    BOOST_REQUIRE(tweak != ec_secret{});
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__shared_tweak__distinct_k__distinct)
+{
+    const auto shared = base16_array("024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
+    ec_secret first{};
+    ec_secret second{};
+    BOOST_REQUIRE(accessor::shared_tweak(first, shared, 0u));
+    BOOST_REQUIRE(accessor::shared_tweak(second, shared, 1u));
+    BOOST_REQUIRE(first != second);
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__find_output__matched_index__skipped)
+{
+    const auto key = base16_array("3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1");
+    const silent_payment::scan_outputs outputs{ { 0u, key }, { 1u, key } };
+    const silent_payment::scan_matches matches{ { 0u, {}, silent_payment::unlabeled } };
+
+    uint32_t index{};
+    BOOST_REQUIRE(accessor::find_output(index, outputs, key, matches));
+    BOOST_REQUIRE_EQUAL(index, 1u);
+    BOOST_REQUIRE(!accessor::find_output(index, outputs, ec_xonly{}, {}));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__get_outputs__no_taproot__false)
+{
+    const transaction tx{ 2u, {}, { { 0u, to_script("76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac") } }, 0u };
+    silent_payment::scan_outputs outputs{};
+    BOOST_REQUIRE(!silent_payment::get_outputs(outputs, tx));
+    BOOST_REQUIRE(outputs.empty());
 }
 
 BOOST_AUTO_TEST_CASE(silent_payment__bip352_receiving_vectors__all__expected)
@@ -925,9 +936,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__bip352_receiving_vectors__all__expected)
             BOOST_TEST_CONTEXT("case: " << comment << ", receiving: " << index)
             {
                 const auto& vector = receiving.as_object();
-                require_bip352_receiving_vector(
-                    vector.at("given").as_object(),
-                    vector.at("expected").as_object());
+                require_bip352_receiving_vector(vector.at("given").as_object(), vector.at("expected").as_object());
             }
 
             ++index;

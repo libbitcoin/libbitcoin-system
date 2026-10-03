@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2026 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2026 libbitcoin developers
  *
  * This file is part of libbitcoin.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_TEST_CHAIN_SILENT_PAYMENT_VECTORS_HPP
-#define LIBBITCOIN_SYSTEM_TEST_CHAIN_SILENT_PAYMENT_VECTORS_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_WALLET_ADDRESSES_SILENT_PAYMENT_VECTORS_HPP
+#define LIBBITCOIN_SYSTEM_TEST_WALLET_ADDRESSES_SILENT_PAYMENT_VECTORS_HPP
 
 namespace bip352 {
 
