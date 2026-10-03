@@ -148,12 +148,13 @@ constexpr bool is_generator(const ec_uncompressed& key) NOEXCEPT
         out.x == accessor::generator.x && out.y == accessor::generator.y;
 }
 
+template <size_t Bits = zero>
 static bool ecdsa_verify(const ec_compressed& key, const hash_digest& hash,
     const bytes& r, const bytes& s) NOEXCEPT
 {
     affine point{};
     return accessor::from_bytes(point, key) &&
-        accessor::verify_ecdsa(point, hash, r, s);
+        accessor::verify_ecdsa<Bits>(point, hash, r, s);
 }
 
 // Local verification of a signature by the linked implementation.
@@ -189,12 +190,13 @@ static hash_digest challenge(const ec_signature& signature, const bytes& key,
     return context.flush();
 }
 
+template <size_t Bits = zero>
 static bool schnorr_verify(const bytes& key, const data_slice& message,
     const ec_signature& signature) NOEXCEPT
 {
     const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
     const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
-    return accessor::verify_schnorr(key, challenge(signature, key, message), r, s);
+    return accessor::verify_schnorr<Bits>(key, challenge(signature, key, message), r, s);
 }
 
 // Local verification of a signature by the linked implementation.
@@ -277,6 +279,21 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__overflow__expecte
     BOOST_CHECK(ecdsa_verify(overflow_key, overflow_hash, overflow_r, overflow_s));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__windows__expected)
+{
+    BOOST_CHECK(ecdsa_verify<4>(key2, sighash2, r2, s2));
+    BOOST_CHECK(ecdsa_verify<4>(key2, sighash2, r2, s2_negated));
+    BOOST_CHECK(!ecdsa_verify<4>(key2, overflow_hash, r2, s2));
+    BOOST_CHECK(!ecdsa_verify<4>(overflow_key, sighash2, r2, s2));
+    BOOST_CHECK(ecdsa_verify<4>(ec_compressed_generator, doubled, doubled, doubled));
+    BOOST_CHECK(!ecdsa_verify<4>(ec_compressed_generator, sighash2, doubled, doubled));
+    BOOST_CHECK(!ecdsa_verify<4>(key2, sighash2, zero_value, s2));
+    BOOST_CHECK(!ecdsa_verify<4>(key2, sighash2, r2, order_value));
+    BOOST_CHECK(ecdsa_verify<4>(overflow_key, overflow_hash, overflow_r, overflow_s));
+    BOOST_CHECK(ecdsa_verify<5>(key2, sighash2, r2, s2));
+    BOOST_CHECK(ecdsa_verify<5>(ec_compressed_generator, doubled, doubled, doubled));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__signed__agrees)
 {
     BOOST_CHECK(ecdsa_signed(secret1, message1, false));
@@ -317,6 +334,20 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__bip340_invalid_
     BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature12));
     BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature13));
     BOOST_CHECK(!schnorr_verify(bip340_key14, bip340_message1, bip340_signature14));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__windows__expected)
+{
+    BOOST_CHECK(schnorr_verify<4>(bip340_key0, bip340_message0, bip340_signature0));
+    BOOST_CHECK(schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature1));
+    BOOST_CHECK(schnorr_verify<4>(bip340_key4, bip340_message4, bip340_signature4));
+    BOOST_CHECK(schnorr_verify<4>(bip340_key15, bip340_message18, bip340_signature18));
+    BOOST_CHECK(!schnorr_verify<4>(bip340_key5, bip340_message1, bip340_signature5));
+    BOOST_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature6));
+    BOOST_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature7));
+    BOOST_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature13));
+    BOOST_CHECK(!schnorr_verify<4>(bip340_key14, bip340_message1, bip340_signature14));
+    BOOST_CHECK(schnorr_verify<5>(bip340_key0, bip340_message0, bip340_signature0));
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__signed__agrees)

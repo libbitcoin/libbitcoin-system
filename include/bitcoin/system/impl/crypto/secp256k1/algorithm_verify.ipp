@@ -69,6 +69,7 @@ constexpr bool algorithm::from_bytes(affine_t<uint64_t>& r,
     return f::any(is_on_curve(r));
 }
 
+template <size_t Bits>
 constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     const bytes_t& hash, const bytes_t& r, const bytes_t& s) NOEXCEPT
 {
@@ -77,11 +78,12 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
         return false;
 
     /* bool */ from_bytes(scalar_z, hash);
-    return verify_ecdsa(point, scalar_z, scalar_r, scalar_s);
+    return verify_ecdsa<Bits>(point, scalar_z, scalar_r, scalar_s);
 }
 
 // R = (z / s)G + (r / s)Q, valid if x(R) mod n is r. Since n < p, x(R) mod n
 // is r if x(R) is r, or is r + n where r + n < p, compared as X = x * Z^2.
+template <size_t Bits>
 constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     const scalar_t& z, const scalar_t& r, const scalar_t& s) NOEXCEPT
 {
@@ -94,8 +96,14 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     multiply(u2, r, w);
 
     jacobian_t<uint64_t> sum{};
-    if (f::any(multiply(sum, scalars_t<uint64_t>{ u1 }, point,
-        scalars_t<uint64_t>{ u2 })))
+    const scalars_t<uint64_t> g{ u1 }, k{ u2 };
+    uint64_t faults{};
+    if constexpr (is_zero(Bits))
+        faults = multiply(sum, g, point, k);
+    else
+        faults = multiply_windows<Bits>(sum, g, point, k);
+
+    if (f::any(faults))
         multiply_complete(sum, u1, point, u2);
 
     if (f::any(sum.infinity))
@@ -120,6 +128,7 @@ constexpr bool algorithm::verify_ecdsa(const affine_t<uint64_t>& point,
     return f::any(equal(expected, sum.x));
 }
 
+template <size_t Bits>
 constexpr bool algorithm::verify_schnorr(const bytes_t& key,
     const hash_digest& digest, const bytes_t& r, const bytes_t& s) NOEXCEPT
 {
@@ -134,10 +143,11 @@ constexpr bool algorithm::verify_schnorr(const bytes_t& key,
         return false;
 
     /* bool */ from_bytes(scalar_e, digest);
-    return verify_schnorr(point, scalar_e, r_x, scalar_s);
+    return verify_schnorr<Bits>(point, scalar_e, r_x, scalar_s);
 }
 
 // R = sG - eP, valid if R is finite with even y and x(R) is r.
+template <size_t Bits>
 constexpr bool algorithm::verify_schnorr(const affine_t<uint64_t>& point,
     const scalar_t& e, const field_t<uint64_t>& r_x,
     const scalar_t& s) NOEXCEPT
@@ -146,8 +156,14 @@ constexpr bool algorithm::verify_schnorr(const affine_t<uint64_t>& point,
     negate(minus_e, e);
 
     jacobian_t<uint64_t> sum{};
-    if (f::any(multiply(sum, scalars_t<uint64_t>{ s }, point,
-        scalars_t<uint64_t>{ minus_e })))
+    const scalars_t<uint64_t> g{ s }, k{ minus_e };
+    uint64_t faults{};
+    if constexpr (is_zero(Bits))
+        faults = multiply(sum, g, point, k);
+    else
+        faults = multiply_windows<Bits>(sum, g, point, k);
+
+    if (f::any(faults))
         multiply_complete(sum, s, point, minus_e);
 
     if (f::any(sum.infinity))

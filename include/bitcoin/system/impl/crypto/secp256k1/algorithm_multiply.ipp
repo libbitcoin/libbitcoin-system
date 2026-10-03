@@ -32,10 +32,7 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 // protected
 
-// Each scalar splits into two halves, each window of each half adds a table
-// point, and halves made odd are corrected at the end. Lanes in which an
-// addition was exceptional are reported, not computed. A single word adds
-// sparse digits in place of windows.
+// A single word adds sparse digits in place of windows.
 template <typename Word>
 constexpr Word algorithm::multiply(jacobian_t<Word>& r,
     const scalars_t<Word>& g, const affine_t<Word>& a,
@@ -47,80 +44,91 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
     }
     else
     {
-        constexpr auto generator_top = sub1(digit_count<generator_bits>) *
-            generator_bits;
-        constexpr auto point_top = sub1(digit_count<point_bits>) * point_bits;
-        constexpr auto top = greater(generator_top, point_top);
-
-        recodes_t<generator_bits, Word> g_first{}, g_second{};
-        recodes_t<point_bits, Word> k_first{}, k_second{};
-        for (size_t lane{}; lane < lanes<Word>; ++lane)
-        {
-            scalar_t first{}, second{};
-            split(first, second, g[lane]);
-            recode(g_first[lane], first);
-            recode(g_second[lane], second);
-            split(first, second, k[lane]);
-            recode(k_first[lane], first);
-            recode(k_second[lane], second);
-        }
-
-        // Point multiples are affine on the curve isomorphic by scale, where
-        // the sum is computed, so generator multiples are added by that scale.
-        points_t<Word> a_first{}, a_second{};
-        field_t<Word> scale{};
-        multiples(a_first, scale, a);
-        for (size_t point{}; point < a_first.size(); ++point)
-            endomorphism(a_second[point], a_first[point]);
-
-        auto faults = f::broadcast<Word>(uint64_t{});
-        Word index{}, negative{};
-        affine_t<Word> addend{};
-        jacobian_t<Word> sum{};
-        sum.infinity = f::broadcast<Word>(max_uint64);
-
-        for (auto bit = add1(top); is_nonzero(bit--);)
-        {
-            if (bit != top)
-                double_(sum, sum);
-
-            if (bit <= generator_top && is_zero(bit % generator_bits))
-            {
-                const auto position = bit / generator_bits;
-                digit(index, negative, g_first, position, false);
-                lookup(addend, index, false, negative);
-                add_point(sum, addend, scale, faults);
-                digit(index, negative, g_second, position, false);
-                lookup(addend, index, true, negative);
-                add_point(sum, addend, scale, faults);
-            }
-
-            if (bit <= point_top && is_zero(bit % point_bits))
-            {
-                const auto position = bit / point_bits;
-                digit(index, negative, k_first, position, true);
-                lookup(addend, a_first, index, negative);
-                add_point(sum, addend, faults);
-                digit(index, negative, k_second, position, true);
-                lookup(addend, a_second, index, negative);
-                add_point(sum, addend, faults);
-            }
-        }
-
-        affine_t<Word> base{ broadcast<Word>(generator.x),
-            broadcast<Word>(generator.y) };
-
-        const auto unit = broadcast<Word>({ 1 });
-        correct(sum, base, scale, g_first, faults);
-        endomorphism(base, base);
-        correct(sum, base, scale, g_second, faults);
-        correct(sum, a_first.front(), unit, k_first, faults);
-        correct(sum, a_second.front(), unit, k_second, faults);
-
-        multiply(sum.z, sum.z, scale);
-        r = sum;
-        return faults;
+        return multiply_windows<point_bits>(r, g, a, k);
     }
+}
+
+// Each scalar splits into two halves, each window of each half adds a table
+// point, and halves made odd are corrected at the end. Lanes in which an
+// addition was exceptional are reported, not computed.
+template <size_t Bits, typename Word>
+constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
+    const scalars_t<Word>& g, const affine_t<Word>& a,
+    const scalars_t<Word>& k) NOEXCEPT
+{
+    constexpr auto generator_top = sub1(digit_count<generator_bits>) *
+        generator_bits;
+    constexpr auto point_top = sub1(digit_count<Bits>) * Bits;
+    constexpr auto top = greater(generator_top, point_top);
+
+    recodes_t<generator_bits, Word> g_first{}, g_second{};
+    recodes_t<Bits, Word> k_first{}, k_second{};
+    for (size_t lane{}; lane < lanes<Word>; ++lane)
+    {
+        scalar_t first{}, second{};
+        split(first, second, g[lane]);
+        recode(g_first[lane], first);
+        recode(g_second[lane], second);
+        split(first, second, k[lane]);
+        recode(k_first[lane], first);
+        recode(k_second[lane], second);
+    }
+
+    // Point multiples are affine on the curve isomorphic by scale, where
+    // the sum is computed, so generator multiples are added by that scale.
+    points_t<Word, Bits> a_first{}, a_second{};
+    field_t<Word> scale{};
+    multiples(a_first, scale, a);
+    for (size_t point{}; point < a_first.size(); ++point)
+        endomorphism(a_second[point], a_first[point]);
+
+    auto faults = f::broadcast<Word>(uint64_t{});
+    Word index{}, negative{};
+    affine_t<Word> addend{};
+    jacobian_t<Word> sum{};
+    sum.infinity = f::broadcast<Word>(max_uint64);
+
+    for (auto bit = add1(top); is_nonzero(bit--);)
+    {
+        if (bit != top)
+            double_(sum, sum);
+
+        if (bit <= generator_top && is_zero(bit % generator_bits))
+        {
+            const auto position = bit / generator_bits;
+            digit(index, negative, g_first, position, false);
+            lookup(addend, index, false, negative);
+            add_point(sum, addend, scale, faults);
+            digit(index, negative, g_second, position, false);
+            lookup(addend, index, true, negative);
+            add_point(sum, addend, scale, faults);
+        }
+
+        if (bit <= point_top && is_zero(bit % Bits))
+        {
+            const auto position = bit / Bits;
+            digit(index, negative, k_first, position, true);
+            lookup(addend, a_first, index, negative);
+            add_point(sum, addend, faults);
+            digit(index, negative, k_second, position, true);
+            lookup(addend, a_second, index, negative);
+            add_point(sum, addend, faults);
+        }
+    }
+
+    affine_t<Word> base{ broadcast<Word>(generator.x),
+        broadcast<Word>(generator.y) };
+
+    const auto unit = broadcast<Word>({ 1 });
+    correct(sum, base, scale, g_first, faults);
+    endomorphism(base, base);
+    correct(sum, base, scale, g_second, faults);
+    correct(sum, a_first.front(), unit, k_first, faults);
+    correct(sum, a_second.front(), unit, k_second, faults);
+
+    multiply(sum.z, sum.z, scale);
+    r = sum;
+    return faults;
 }
 
 // Double and add of each bit, without tables or exceptions.
@@ -425,9 +433,10 @@ constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
 
 // Limb i of lane l of point table entry e is at (10e + i) * lanes + l, where
 // offset is 10e * lanes + l.
-template <typename Word>
-constexpr void algorithm::lookup(affine_t<Word>& r, const points_t<Word>& table,
-    Word offset, Word negative) NOEXCEPT
+template <size_t Size, typename Word>
+constexpr void algorithm::lookup(affine_t<Word>& r,
+    const std_array<affine_t<Word>, Size>& table, Word offset,
+    Word negative) NOEXCEPT
 {
     constexpr auto size = array_count<field_t<Word>>;
 

@@ -30,6 +30,9 @@ public:
     using algorithm::slice_count;
     using algorithm::table_words;
 
+    /// Point window bits, uniform across the threads of a warp.
+    static constexpr size_t window_bits = 4;
+
     static __device__ uint32_t row() NOEXCEPT
     {
         return __nvvm_read_ptx_sreg_ctaid_x() * __nvvm_read_ptx_sreg_ntid_x() +
@@ -57,7 +60,7 @@ public:
 
         scalar_t z{};
         /* bool */ from_bytes(z, digest);
-        return verify_ecdsa(point, z,
+        return verify_ecdsa<window_bits>(point, z,
             array_cast<uint64_t, array_count<scalar_t>>(signature),
             array_cast<uint64_t, array_count<scalar_t>, sizeof(scalar_t)>(
                 signature)) ? 1 : 0;
@@ -72,7 +75,7 @@ public:
         const auto challenge = sha256::hash(
             tagged_midstate<"BIP0340/challenge">, r, key, message);
 
-        return verify_schnorr(key, challenge, r, s) ? 1 : 0;
+        return verify_schnorr<window_bits>(key, challenge, r, s) ? 1 : 0;
     }
 };
 
