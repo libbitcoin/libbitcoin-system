@@ -15,6 +15,7 @@ on:
       - 'builds/gnu/**'
       - 'builds/msvc/**'
       - 'examples/**'
+      - 'include/**'
       - 'src/**'
       - 'test/**'
   push:
@@ -23,6 +24,7 @@ on:
       - 'builds/gnu/**'
       - 'builds/msvc/**'
       - 'examples/**'
+      - 'include/**'
       - 'src/**'
       - 'test/**'
   workflow_dispatch:
