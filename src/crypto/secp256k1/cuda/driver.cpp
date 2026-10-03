@@ -92,6 +92,7 @@ constexpr int compute_major = 75;
 constexpr int compute_minor = 76;
 constexpr int execution_timeout = 17;
 constexpr int stack_limit = 0;
+constexpr unsigned non_blocking = 1;
 constexpr size_t stack_bytes = 8192;
 
 struct functions
@@ -104,7 +105,6 @@ struct functions
     result_t (*context_release)(device_t);
     result_t (*context_current)(handle_t);
     result_t (*context_limit)(int, size_t);
-    result_t (*context_synchronize)();
     result_t (*module_load)(handle_t*, const void*);
     result_t (*module_unload)(handle_t);
     result_t (*module_function)(handle_t*, handle_t, const char*);
@@ -113,7 +113,11 @@ struct functions
     result_t (*allocate)(pointer_t*, size_t);
     result_t (*free)(pointer_t);
     result_t (*copy_to)(pointer_t, const void*, size_t);
-    result_t (*copy_from)(void*, pointer_t, size_t);
+    result_t (*copy_to_async)(pointer_t, const void*, size_t, handle_t);
+    result_t (*copy_from_async)(void*, pointer_t, size_t, handle_t);
+    result_t (*stream_create)(handle_t*, unsigned);
+    result_t (*stream_destroy)(handle_t);
+    result_t (*stream_synchronize)(handle_t);
     result_t (*launch)(handle_t, unsigned, unsigned, unsigned, unsigned,
         unsigned, unsigned, unsigned, handle_t, void**, void**);
 };
@@ -138,7 +142,6 @@ static bool resolve(functions& out, void* library) NOEXCEPT
             "cuDevicePrimaryCtxRelease_v2") &&
         resolve(out.context_current, library, "cuCtxSetCurrent") &&
         resolve(out.context_limit, library, "cuCtxSetLimit") &&
-        resolve(out.context_synchronize, library, "cuCtxSynchronize") &&
         resolve(out.module_load, library, "cuModuleLoadData") &&
         resolve(out.module_unload, library, "cuModuleUnload") &&
         resolve(out.module_function, library, "cuModuleGetFunction") &&
@@ -147,7 +150,11 @@ static bool resolve(functions& out, void* library) NOEXCEPT
         resolve(out.allocate, library, "cuMemAlloc_v2") &&
         resolve(out.free, library, "cuMemFree_v2") &&
         resolve(out.copy_to, library, "cuMemcpyHtoD_v2") &&
-        resolve(out.copy_from, library, "cuMemcpyDtoH_v2") &&
+        resolve(out.copy_to_async, library, "cuMemcpyHtoDAsync_v2") &&
+        resolve(out.copy_from_async, library, "cuMemcpyDtoHAsync_v2") &&
+        resolve(out.stream_create, library, "cuStreamCreate") &&
+        resolve(out.stream_destroy, library, "cuStreamDestroy_v2") &&
+        resolve(out.stream_synchronize, library, "cuStreamSynchronize") &&
         resolve(out.launch, library, "cuLaunchKernel");
 }
 
@@ -254,8 +261,15 @@ public:
         ready_.notify_all();
     }
 
+    /// A caller is waiting that would be served ahead of the holder.
+    bool contended(bool urgent) const NOEXCEPT
+    {
+        std::lock_guard lock(mutex_);
+        return !is_zero(urgent_) || (!urgent && next_ != serving_);
+    }
+
 private:
-    std::mutex mutex_{};
+    mutable std::mutex mutex_{};
     std::condition_variable ready_{};
     size_t urgent_{};
     uint64_t next_{};
@@ -269,9 +283,9 @@ public:
     DELETE_COPY_MOVE(turn);
 
     turn(turns& turns, bool urgent) NOEXCEPT
-      : turns_(turns)
+      : turns_(turns), urgent_(urgent)
     {
-        turns_.acquire(urgent);
+        turns_.acquire(urgent_);
     }
 
     ~turn() NOEXCEPT
@@ -279,8 +293,20 @@ public:
         turns_.release();
     }
 
+    bool contended() const NOEXCEPT
+    {
+        return turns_.contended(urgent_);
+    }
+
+    void yield() NOEXCEPT
+    {
+        turns_.release();
+        turns_.acquire(urgent_);
+    }
+
 private:
     turns& turns_;
+    const bool urgent_;
 };
 
 // Context.
@@ -302,6 +328,9 @@ public:
     /// Rows timed to measure a kernel's rate.
     static constexpr size_t calibration_rows = power2(16_size);
 
+    /// A chunk is at most this many rows, staged while the prior computes.
+    static constexpr size_t chunk_rows = power2(16_size);
+
     /// A launch is sized to run about this long where the device has a limit.
     static constexpr auto launch_time = std::chrono::milliseconds{ 50 };
 
@@ -315,6 +344,10 @@ public:
 
     ~context() NOEXCEPT
     {
+        for (const auto stream: streams_)
+            if (!is_null(stream))
+                call_.stream_destroy(stream);
+
         if (!is_zero(staging_))
             call_.free(staging_);
 
@@ -337,34 +370,69 @@ public:
         std::span<const ec_signature> signatures, bool urgent) NOEXCEPT
     {
         const auto count = keys.size();
-        const auto rows = launch_rows<Key>();
+        const auto rows = std::min(launch_rows<Key>(), chunk_rows);
         out.resize(count);
 
-        for (size_t offset{}; offset < count; offset += rows)
+        turn turn{ turns_, urgent };
+        if (failed_.load())
+            return false;
+
+        auto result = call_.context_current(context_);
+        size_t prior{}, prior_size{}, prior_half{}, chunk{};
+        for (size_t offset{}; result == success && offset < count;
+            offset += rows, ++chunk)
         {
             if (cancel)
+                break;
+
+            if (turn.contended())
             {
-                out.clear();
-                return true;
+                if (!is_zero(prior_size))
+                    result = collect<Key>(prior_half,
+                        std::span{ &out[prior], prior_size });
+
+                prior_size = zero;
+                if (result != success)
+                    break;
+
+                turn.yield();
+                if (failed_.load())
+                    return false;
+
+                result = call_.context_current(context_);
+                if (result != success)
+                    break;
             }
 
             const auto size = std::min(rows, count - offset);
-            const turn turn{ turns_, urgent };
-            if (failed_.load())
-                return false;
+            const auto half = chunk % two;
+            result = stage(half, digests.subspan(offset, size),
+                keys.subspan(offset, size), signatures.subspan(offset, size));
 
-            const auto result = launch(std::span{ &out[offset], size },
-                digests.subspan(offset, size), keys.subspan(offset, size),
-                signatures.subspan(offset, size));
+            if (result == success && !is_zero(prior_size))
+                result = collect<Key>(prior_half,
+                    std::span{ &out[prior], prior_size });
 
-            if (result != success)
-            {
-                failed_.store(true);
-                return false;
-            }
+            prior = offset;
+            prior_size = size;
+            prior_half = half;
         }
 
-        if (std::ranges::all_of(out, [](uint8_t value) NOEXCEPT
+        if (result == success && !cancel && !is_zero(prior_size))
+            result = collect<Key>(prior_half,
+                std::span{ &out[prior], prior_size });
+        if (result == success)
+            result = call_.stream_synchronize(streams_.front());
+        if (result == success)
+            result = call_.stream_synchronize(streams_.back());
+
+        if (result != success)
+        {
+            failed_.store(true);
+            return false;
+        }
+
+        if (cancel || std::ranges::all_of(out, [](uint8_t value) NOEXCEPT
             {
                 return is_one(value);
             }))
@@ -397,21 +465,22 @@ private:
             return schnorr_;
     }
 
-    // Stage the rows, run the kernel over them, and return their results.
+    // Stage the rows in a half and queue the kernel over them on its stream.
     template <typename Key>
-    result_t launch(std::span<uint8_t> results,
-        std::span<const hash_digest> digests, std::span<const Key> keys,
+    result_t stage(size_t half, std::span<const hash_digest> digests,
+        std::span<const Key> keys,
         std::span<const ec_signature> signatures) NOEXCEPT
     {
         const auto size = keys.size();
+        const auto base = staging_ + half * half_bytes_;
+        const auto stream = streams_[half];
         const layout<Key> columns{ size };
         typename layout<Key>::arguments arguments
         {
-            reinterpret_cast<const hash_digest*>(staging_),
-            reinterpret_cast<const Key*>(staging_ + columns.keys),
-            reinterpret_cast<const ec_signature*>(staging_ +
-                columns.signatures),
-            reinterpret_cast<uint8_t*>(staging_ + columns.results),
+            reinterpret_cast<const hash_digest*>(base),
+            reinterpret_cast<const Key*>(base + columns.keys),
+            reinterpret_cast<const ec_signature*>(base + columns.signatures),
+            reinterpret_cast<uint8_t*>(base + columns.results),
             possible_narrow_cast<uint32_t>(size)
         };
 
@@ -419,25 +488,47 @@ private:
         const auto blocks = possible_narrow_cast<unsigned>(
             ceilinged_divide(size, threads));
 
-        auto result = call_.context_current(context_);
+        auto result = call_.copy_to_async(base, digests.data(),
+            digests.size_bytes(), stream);
         if (result == success)
-            result = call_.copy_to(staging_, digests.data(),
-                digests.size_bytes());
+            result = call_.copy_to_async(base + columns.keys, keys.data(),
+                keys.size_bytes(), stream);
         if (result == success)
-            result = call_.copy_to(staging_ + columns.keys, keys.data(),
-                keys.size_bytes());
-        if (result == success)
-            result = call_.copy_to(staging_ + columns.signatures,
-                signatures.data(), signatures.size_bytes());
+            result = call_.copy_to_async(base + columns.signatures,
+                signatures.data(), signatures.size_bytes(), stream);
         if (result == success)
             result = call_.launch(kernel<Key>(), blocks, 1, 1,
-                possible_narrow_cast<unsigned>(threads), 1, 1, 0, nullptr,
+                possible_narrow_cast<unsigned>(threads), 1, 1, 0, stream,
                 parameters, nullptr);
+
+        return result;
+    }
+
+    // Return the results of the rows staged in a half, once computed.
+    template <typename Key>
+    result_t collect(size_t half, std::span<uint8_t> results) NOEXCEPT
+    {
+        const auto base = staging_ + half * half_bytes_;
+        const layout<Key> columns{ results.size() };
+        auto result = call_.copy_from_async(results.data(),
+            base + columns.results, results.size(), streams_[half]);
         if (result == success)
-            result = call_.context_synchronize();
+            result = call_.stream_synchronize(streams_[half]);
+
+        return result;
+    }
+
+    // Stage the rows, run the kernel over them, and return their results.
+    template <typename Key>
+    result_t launch(std::span<uint8_t> results,
+        std::span<const hash_digest> digests, std::span<const Key> keys,
+        std::span<const ec_signature> signatures) NOEXCEPT
+    {
+        auto result = call_.context_current(context_);
         if (result == success)
-            result = call_.copy_from(results.data(),
-                staging_ + columns.results, size);
+            result = stage(zero, digests, keys, signatures);
+        if (result == success)
+            result = collect<Key>(zero, results);
 
         return result;
     }
@@ -499,8 +590,11 @@ private:
             return false;
 
         const auto bytes = std::min(maximum_bytes, free / memory_share);
-        if (layout<ec_compressed>::rows(bytes) < calibration_rows ||
-            call_.allocate(&staging_, bytes) != success)
+        half_bytes_ = bytes / two;
+        if (layout<ec_compressed>::rows(half_bytes_) < calibration_rows ||
+            call_.allocate(&staging_, bytes) != success ||
+            call_.stream_create(&streams_.front(), non_blocking) != success ||
+            call_.stream_create(&streams_.back(), non_blocking) != success)
             return false;
 
         int limited{};
@@ -509,8 +603,8 @@ private:
             return false;
 
         return
-            calibrate_ecdsa(bytes, is_nonzero(limited)) &&
-            calibrate_schnorr(bytes, is_nonzero(limited));
+            calibrate_ecdsa(half_bytes_, is_nonzero(limited)) &&
+            calibrate_schnorr(half_bytes_, is_nonzero(limited));
     }
 
     // Launch rows from capacity, bounded by launch time where limited.
@@ -598,6 +692,8 @@ private:
     handle_t ecdsa_{};
     handle_t schnorr_{};
     pointer_t staging_{};
+    size_t half_bytes_{};
+    std_array<handle_t, two> streams_{};
     size_t ecdsa_rows_{};
     size_t schnorr_rows_{};
     bool retained_{};
