@@ -23,6 +23,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/execution.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -33,13 +34,51 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// get_match
+// protected
 // ----------------------------------------------------------------------------
 
-bool silent::batch::get_match(tx_link_t& , const batch& , size_t ,
-    const ec_secret& ) NOEXCEPT
+size_t silent::batch::next(const batch& batch, size_t row) NOEXCEPT
 {
-    // TODO: implement.
+    const auto& correlate = batch.correlates[row];
+    const auto count = batch.correlates.size();
+    do { ++row; } while (row < count && batch.correlates[row] == correlate);
+    return row;
+}
+
+bool silent::batch::is_match(const batch& batch, size_t first, size_t last,
+    const receiver& keys) NOEXCEPT
+{
+    auto shared = batch.points[first];
+    if (!ec_multiply(shared, keys.scan))
+        return false;
+
+    accumulator<sha256> hasher{ tagged_midstate<"BIP0352/SharedSecret">, one };
+    hasher.write(shared);
+    hasher.write(to_big_endian(0_u32));
+    const auto tweak = hasher.flush();
+
+    auto key = keys.spend;
+    if (!ec_add(key, tweak))
+        return false;
+
+    constexpr auto size = array_count<prefix>;
+    const auto prefixes = batch.prefixes.subspan(first, last - first);
+    const auto paid = [&](const ec_uncompressed& point) NOEXCEPT
+    {
+        return contains(prefixes, array_cast<uint8_t, size, one>(point));
+    };
+
+    if (paid(key))
+        return true;
+
+    ec_uncompressed labeled{};
+    for (const auto& label: keys.labels)
+    {
+        labeled = key;
+        if (ec_add(labeled, label) && paid(labeled))
+            return true;
+    }
+
     return false;
 }
 
@@ -49,7 +88,7 @@ bool silent::batch::get_match(tx_link_t& , const batch& , size_t ,
 // which is consistent with the push notification public interface.
 
 void silent::batch::scan(const stopper& cancel, const batch& batch,
-    const ec_secret& scan_key, const handler& callback, bool turbo) NOEXCEPT
+    const receiver& keys, const handler& callback, bool turbo) NOEXCEPT
 {
     const auto policy = poolstl::execution::par_if(turbo);
 
@@ -58,19 +97,30 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
     BC_ASSERT(batch.prefixes.size() == count);
     BC_ASSERT(batch.points.size() == count);
 
-    std::vector<size_t> it(count);
-    std::iota(it.begin(), it.end(), zero);
+    std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
+    std::iota(chunks.begin(), chunks.end(), zero);
 
+    // A chunk owns the transactions that begin within it.
     // Return from scan with !cancel implies complete.
-    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
-    {
-        if (cancel)
-            return;
+    std::for_each(policy, chunks.cbegin(), chunks.cend(),
+        [&](size_t chunk) NOEXCEPT
+        {
+            auto row = chunk * chunk_rows;
+            const auto end = std::min(row + chunk_rows, count);
+            if (is_nonzero(row) &&
+                batch.correlates[row] == batch.correlates[sub1(row)])
+                row = next(batch, row);
 
-        tx_link_t tx{};
-        if (get_match(tx, batch, row, scan_key))
-            callback({}, tx);
-    });
+            for (auto last = row; row < end && !cancel; row = last)
+            {
+                last = next(batch, row);
+                if (is_match(batch, row, last, keys))
+                {
+                    const auto link = from_little_endian(batch.correlates[row]);
+                    callback({}, link, batch.points[row]);
+                }
+            }
+        });
 }
 
 BC_POP_WARNING()

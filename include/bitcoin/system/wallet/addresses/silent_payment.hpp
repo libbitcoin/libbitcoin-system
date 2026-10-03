@@ -86,6 +86,9 @@ public:
     /// False if the scan secret, spend key or a label is invalid.
     operator bool() const NOEXCEPT;
 
+    /// The receiver keys for batch scanning.
+    const silent::batch::receiver& keys() const NOEXCEPT;
+
     /// Find all outputs paying the receiver (one transaction, all k).
     bool scan(scan_matches& out, const ec_compressed& summary,
         const scan_outputs& outputs) const NOEXCEPT;
@@ -136,11 +139,9 @@ private:
     bool shared_secret(ec_compressed& out,
         const ec_compressed& summary) const NOEXCEPT;
 
-    ec_secret scan_secret_{};
-    ec_uncompressed spend_key_{};
+    silent::batch::receiver keys_{};
     std_vector<uint32_t> labels_{};
     ec_secrets label_tweaks_{};
-    ec_uncompresseds label_keys_{};
     bool valid_{};
 };
 

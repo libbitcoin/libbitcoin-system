@@ -183,23 +183,23 @@ std::string silent_payment::to_address(const ec_compressed& scan_key,
 silent_payment::silent_payment(const ec_secret& scan_secret,
     const ec_compressed& spend_key,
     const std_vector<uint32_t>& labels) NOEXCEPT
-  : scan_secret_(scan_secret), labels_(labels)
+  : keys_{ .scan = scan_secret }, labels_(labels)
 {
-    if (!verify_secret(scan_secret_) || !decompress(spend_key_, spend_key))
+    if (!verify_secret(keys_.scan) || !decompress(keys_.spend, spend_key))
         return;
 
     ec_secret tweak{};
     ec_uncompressed key{};
     label_tweaks_.reserve(labels_.size());
-    label_keys_.reserve(labels_.size());
+    keys_.labels.reserve(labels_.size());
     for (const auto label: labels_)
     {
-        if (!label_tweak(tweak, scan_secret_, label) ||
+        if (!label_tweak(tweak, keys_.scan, label) ||
             !secret_to_public(key, tweak))
             return;
 
         label_tweaks_.push_back(tweak);
-        label_keys_.push_back(key);
+        keys_.labels.push_back(key);
     }
 
     valid_ = true;
@@ -208,6 +208,11 @@ silent_payment::silent_payment(const ec_secret& scan_secret,
 silent_payment::operator bool() const NOEXCEPT
 {
     return valid_;
+}
+
+const silent::batch::receiver& silent_payment::keys() const NOEXCEPT
+{
+    return keys_;
 }
 
 // Scanning.
@@ -229,7 +234,7 @@ bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
     const auto limit = std::min(outputs.size(), maximum_outputs);
     for (uint32_t k{}; out.size() < limit; ++k)
     {
-        key = spend_key_;
+        key = keys_.spend;
         if (!shared_tweak(tweak, shared, k) || !ec_add(key, tweak))
             return false;
 
@@ -244,7 +249,7 @@ bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
         for (size_t label{}; !found && label < labels_.size(); ++label)
         {
             labeled = key;
-            if (!ec_add(labeled, label_keys_.at(label)))
+            if (!ec_add(labeled, keys_.labels.at(label)))
                 return false;
 
             if (find_output(index, outputs, to_xonly(labeled), out))
@@ -272,8 +277,8 @@ bool silent_payment::match(bool& out, const ec_compressed& summary,
 {
     out = false;
     ec_secret tweak{};
-    auto key = spend_key_;
     ec_compressed shared{};
+    auto key = keys_.spend;
     if (!valid_ || !shared_secret(shared, summary) ||
         !shared_tweak(tweak, shared, zero) || !ec_add(key, tweak))
         return false;
@@ -295,7 +300,7 @@ bool silent_payment::match(bool& out, const ec_compressed& summary,
     }
 
     ec_uncompressed labeled{};
-    for (const auto& label_key: label_keys_)
+    for (const auto& label_key: keys_.labels)
     {
         labeled = key;
         if (!ec_add(labeled, label_key))
@@ -501,7 +506,7 @@ bool silent_payment::shared_secret(ec_compressed& out,
     const ec_compressed& summary) const NOEXCEPT
 {
     out = summary;
-    return ec_multiply(out, scan_secret_);
+    return ec_multiply(out, keys_.scan);
 }
 
 BC_POP_WARNING()
