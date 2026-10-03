@@ -264,9 +264,66 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx512__faked_throttled__false)
     BOOST_CHECK((try_avx512ifma<throttled_cpu, all_xcr>()));
 }
 
-// try_neon
-// try_neon_sha
-// try_neon_aes
-// try_neon_sha3
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon__always__match)
+{
+    BOOST_CHECK_EQUAL(get_arm(arm_feature::neon), try_neon());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon_sha__always__match)
+{
+    BOOST_CHECK_EQUAL(get_arm(arm_feature::sha1) && get_arm(arm_feature::sha256), try_neon_sha());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon_aes__always__match)
+{
+    BOOST_CHECK_EQUAL(get_arm(arm_feature::aes) && get_arm(arm_feature::pmull), try_neon_aes());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon_sha3__always__match)
+{
+    BOOST_CHECK_EQUAL(get_arm(arm_feature::sha3) && get_arm(arm_feature::sha512), try_neon_sha3());
+}
+
+static bool none_arm(arm_feature) NOEXCEPT
+{
+    return false;
+}
+
+static bool all_arm(arm_feature) NOEXCEPT
+{
+    return true;
+}
+
+// Each pair lacks its second feature.
+static bool half_arm(arm_feature feature) NOEXCEPT
+{
+    return feature == arm_feature::sha1
+        || feature == arm_feature::aes
+        || feature == arm_feature::sha3;
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_none__false)
+{
+    BOOST_CHECK(!try_neon<none_arm>());
+    BOOST_CHECK(!try_neon_sha<none_arm>());
+    BOOST_CHECK(!try_neon_aes<none_arm>());
+    BOOST_CHECK(!try_neon_sha3<none_arm>());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_all__true)
+{
+    BOOST_CHECK(try_neon<all_arm>());
+    BOOST_CHECK(try_neon_sha<all_arm>());
+    BOOST_CHECK(try_neon_aes<all_arm>());
+    BOOST_CHECK(try_neon_sha3<all_arm>());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_half__false)
+{
+    BOOST_CHECK(!try_neon<half_arm>());
+    BOOST_CHECK(!try_neon_sha<half_arm>());
+    BOOST_CHECK(!try_neon_aes<half_arm>());
+    BOOST_CHECK(!try_neon_sha3<half_arm>());
+}
 
 BOOST_AUTO_TEST_SUITE_END()
