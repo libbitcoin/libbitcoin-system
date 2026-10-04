@@ -728,12 +728,12 @@ size_t block::segregated() const NOEXCEPT
 bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
     return !txs_->empty() && is_invalid_witness_commitment(*txs_->front(),
-        transaction_hashes(true), is_segregated());
+        generate_merkle_root(true), is_segregated());
 }
 
 // static
 bool block::is_invalid_witness_commitment(const transaction& first,
-    const hashes& wtxids, bool segregated) NOEXCEPT
+    const hash_digest& witness_root, bool segregated) NOEXCEPT
 {
     // Witness data (segregated) disallowed if no commitment [bip141].
     // If no block tx has witness data the commitment is optional [bip141].
@@ -747,8 +747,7 @@ bool block::is_invalid_witness_commitment(const transaction& first,
         return true;
 
     // If there is a valid commitment, return false (valid).
-    const auto root = sha256::merkle_root(hashes{ wtxids });
-    return commit != sha256::double_hash(root, reserve);
+    return commit != sha256::double_hash(witness_root, reserve);
 }
 
 //*****************************************************************************
@@ -950,7 +949,7 @@ code block::identify(const context& ctx) const NOEXCEPT
     if (txs_->empty())
         return error::block_success;
 
-    return identify(ctx, *txs_->front(), transaction_hashes(true),
+    return identify(ctx, *txs_->front(), generate_merkle_root(true),
         is_segregated());
 }
 
@@ -968,10 +967,11 @@ code block::identify(const hash_digest& merkle_root, const hashes& txids,
 // static
 // bip141 should be disabled when the node is not accepting witness data.
 code block::identify(const context& ctx, const transaction& first,
-    const hashes& wtxids, bool segregated) NOEXCEPT
+    const hash_digest& witness_root, bool segregated) NOEXCEPT
 {
     const auto invalid = ctx.is_enabled(bip141_rule) ?
-        is_invalid_witness_commitment(first, wtxids, segregated) : segregated;
+        is_invalid_witness_commitment(first, witness_root, segregated) :
+        segregated;
 
     return invalid ? error::invalid_witness_commitment : error::block_success;
 }
