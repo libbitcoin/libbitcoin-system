@@ -99,6 +99,14 @@ BOOST_AUTO_TEST_CASE(context__regtest__ltc__testnet_versions_with_regtest_p2w)
     BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.p2sh, ctx::ltc::test.p2sh);
 }
 
+BOOST_AUTO_TEST_CASE(context__sp__btc_networks__bip352)
+{
+    BOOST_REQUIRE_EQUAL(ctx::btc::main.sp, "sp");
+    BOOST_REQUIRE_EQUAL(ctx::btc::test.sp, "tsp");
+    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.sp, "tsp");
+    BOOST_REQUIRE(ctx::ltc::main.sp.empty());
+}
+
 BOOST_AUTO_TEST_CASE(context__construct__regtest_wif__round_trips)
 {
     const ec_private secret(base16_array(SECRET), ctx::btc::regtest.versions());

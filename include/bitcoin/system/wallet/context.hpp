@@ -68,6 +68,9 @@ namespace prefix
     /// Silent payment address prefixes.
     namespace sp
     {
+        // Can be compared during execution to validate a parameter.
+        constexpr auto undefined = "";
+
         // github.com/bitcoin/bips/blob/master/bip-0352.mediawiki
         namespace main
         {
@@ -76,6 +79,10 @@ namespace prefix
         namespace test
         {
             constexpr auto btc = "tsp";
+        }
+        namespace regtest
+        {
+            constexpr auto btc = test::btc;
         }
     }
 
@@ -200,6 +207,9 @@ struct BC_API context
     /// WIF (legacy private key) version byte.
     uint8_t wif;
 
+    /// Silent payment address prefix.
+    std::string sp;
+
     uint64_t hd_prefixes() const NOEXCEPT
     {
         return hd_private::to_prefixes(hd.prv, hd.pub);
@@ -223,7 +233,8 @@ namespace ctx
             prefix::p2w::main::btc,
             prefix::p2kh::main::btc,
             prefix::p2sh::main::btc,
-            prefix::wif::main::btc
+            prefix::wif::main::btc,
+            prefix::sp::main::btc
         };
         const context test
         {
@@ -231,7 +242,8 @@ namespace ctx
             prefix::p2w::test::btc,
             prefix::p2kh::test::btc,
             prefix::p2sh::test::btc,
-            prefix::wif::test::btc
+            prefix::wif::test::btc,
+            prefix::sp::test::btc
         };
         const context regtest
         {
@@ -239,7 +251,8 @@ namespace ctx
             prefix::p2w::regtest::btc,
             prefix::p2kh::regtest::btc,
             prefix::p2sh::regtest::btc,
-            prefix::wif::regtest::btc
+            prefix::wif::regtest::btc,
+            prefix::sp::regtest::btc
         };
     }
     namespace ltc
@@ -250,7 +263,8 @@ namespace ctx
             prefix::p2w::main::ltc,
             prefix::p2kh::main::ltc,
             prefix::p2sh::main::ltc,
-            prefix::wif::main::ltc
+            prefix::wif::main::ltc,
+            prefix::sp::undefined
         };
         const context test
         {
@@ -258,7 +272,8 @@ namespace ctx
             prefix::p2w::test::ltc,
             prefix::p2kh::test::ltc,
             prefix::p2sh::test::ltc,
-            prefix::wif::test::ltc
+            prefix::wif::test::ltc,
+            prefix::sp::undefined
         };
         const context regtest
         {
@@ -266,7 +281,8 @@ namespace ctx
             prefix::p2w::regtest::ltc,
             prefix::p2kh::regtest::ltc,
             prefix::p2sh::regtest::ltc,
-            prefix::wif::regtest::ltc
+            prefix::wif::regtest::ltc,
+            prefix::sp::undefined
         };
     }
 }
