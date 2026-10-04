@@ -100,8 +100,9 @@ public:
     /// Results of the rows, empty if all valid or canceled, false on failure.
     template <typename Key>
     bool verify(data_chunk& out, const stopper& cancel,
-        std::span<const hash_digest> digests, std::span<const Key> keys,
-        std::span<const ec_signature> signatures, bool urgent) NOEXCEPT
+        const std::span<const hash_digest>& digests,
+        const std::span<const Key>& keys,
+        const std::span<const ec_signature>& signatures, bool urgent) NOEXCEPT
     {
         const auto count = keys.size();
         const auto rows = std::min(launch_rows<Key>(), chunk_rows);
@@ -179,9 +180,9 @@ private:
 
     // Stage the rows in a half and queue the kernel over them on its stream.
     template <typename Key>
-    result_t stage(size_t half, std::span<const hash_digest> digests,
-        std::span<const Key> keys,
-        std::span<const ec_signature> signatures) NOEXCEPT
+    result_t stage(size_t half, const std::span<const hash_digest>& digests,
+        const std::span<const Key>& keys,
+        const std::span<const ec_signature>& signatures) NOEXCEPT
     {
         const auto size = keys.size();
         const auto base = staging_ + half * half_bytes_;
@@ -218,7 +219,7 @@ private:
 
     // Return the results of the rows staged in a half, once computed.
     template <typename Key>
-    result_t collect(size_t half, std::span<uint8_t> results) NOEXCEPT
+    result_t collect(size_t half, const std::span<uint8_t>& results) NOEXCEPT
     {
         const auto base = staging_ + half * half_bytes_;
         const layout<Key> columns{ results.size() };
@@ -232,9 +233,10 @@ private:
 
     // Stage the rows, run the kernel over them, and return their results.
     template <typename Key>
-    result_t launch(std::span<uint8_t> results,
-        std::span<const hash_digest> digests, std::span<const Key> keys,
-        std::span<const ec_signature> signatures) NOEXCEPT
+    result_t launch(const std::span<uint8_t>& results,
+        const std::span<const hash_digest>& digests,
+        const std::span<const Key>& keys,
+        const std::span<const ec_signature>& signatures) NOEXCEPT
     {
         auto result = call_.context_current(context_);
         if (result == success)
