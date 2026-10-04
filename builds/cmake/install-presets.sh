@@ -34,8 +34,8 @@
 #                                Default: OFF
 # -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
 #                                Default: OFF
-# -Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification.
-#                                Default: OFF
+# -Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification (inert on macOS).
+#                                Default: ON
 # --build-boost                Build Boost libraries
 # --build-secp256k1            Build libsecp256k1 libraries
 # --build-preset=<preset>      Specifies preset configuration to build.
@@ -1043,8 +1043,8 @@ help()
     msg "                               Default: OFF"
     msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
     msg "                               Default: OFF"
-    msg "-Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification."
-    msg "                               Default: OFF"
+    msg "-Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification (inert on macOS)."
+    msg "                               Default: ON"
     msg "--build-boost                Build Boost libraries"
     msg "--build-secp256k1            Build libsecp256k1 libraries"
     msg "--build-preset=<preset>      Specifies preset configuration to build."

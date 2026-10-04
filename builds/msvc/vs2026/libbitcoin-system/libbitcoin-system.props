@@ -67,7 +67,7 @@
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
-    <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
+    <Option-cuda Condition="'$(Option-cuda)' == ''">true</Option-cuda>
   </PropertyGroup>
 
   <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->
