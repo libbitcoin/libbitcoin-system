@@ -112,14 +112,17 @@ schedule_1(buffer_t& buffer) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-template <size_t Bytes>
+template <size_t Bytes, size_t Prior>
 constexpr void CLASS::
 simple_pad(block_t& block) NOEXCEPT
 {
     static_assert(Bytes <= space);
-    constexpr auto count = to_big_endian_size<SHA::word_bytes>(to_bits(Bytes));
-    const auto lo_word = std::prev(block.end(), SHA::word_bytes);
-    std::copy_n(count.begin(), SHA::word_bytes, lo_word);
+    constexpr auto bits = to_bits(Prior + Bytes);
+    constexpr auto count = to_big_endian_size<SHA::word_bytes>(bits);
+    constexpr auto offset = array_count<block_t> - SHA::word_bytes;
+    for (size_t byte{}; byte < SHA::word_bytes; ++byte)
+        block[offset + byte] = count[byte];
+
     block[Bytes] = bit_hi<byte_t>;
 }
 

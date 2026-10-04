@@ -247,6 +247,29 @@ BOOST_AUTO_TEST_CASE(sha256__hash__tagged_midstate_halves__tagged_hash)
     BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0340/challenge">, first, second, third), expected);
 }
 
+// sha256::hash(midstate, bytes)
+BOOST_AUTO_TEST_CASE(sha256__hash__midstate_bytes_minimal__tagged_hash)
+{
+    const auto expected = tagged_hash("BIP0352/SharedSecret", data_chunk{});
+    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, data_array<zero>{}), expected);
+}
+
+BOOST_AUTO_TEST_CASE(sha256__hash__midstate_bytes_shared_secret__tagged_hash)
+{
+    data_array<37> bytes{};
+    bytes.fill(0x2a);
+    const auto expected = tagged_hash("BIP0352/SharedSecret", bytes);
+    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, bytes), expected);
+}
+
+BOOST_AUTO_TEST_CASE(sha256__hash__midstate_bytes_maximal__tagged_hash)
+{
+    data_array<55> bytes{};
+    bytes.fill(0x2a);
+    const auto expected = tagged_hash("BIP0352/SharedSecret", bytes);
+    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, bytes), expected);
+}
+
 // sha256::simple_hash
 BOOST_AUTO_TEST_CASE(sha256__simple_hash__minimal__expected)
 {
