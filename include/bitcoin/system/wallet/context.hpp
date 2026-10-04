@@ -65,6 +65,20 @@ namespace prefix
         }
     }
 
+    /// Silent payment address prefixes.
+    namespace sp
+    {
+        // github.com/bitcoin/bips/blob/master/bip-0352.mediawiki
+        namespace main
+        {
+            constexpr auto btc = "sp";
+        }
+        namespace test
+        {
+            constexpr auto btc = "tsp";
+        }
+    }
+
     /// WIF key prefix bytes.
     namespace wif
     {

@@ -916,6 +916,15 @@ BOOST_AUTO_TEST_CASE(silent_payment__get_outputs__no_taproot__false)
     BOOST_REQUIRE(outputs.empty());
 }
 
+// "Simple send: two inputs"
+BOOST_AUTO_TEST_CASE(silent_payment__to_address__mainnet__expected)
+{
+    const auto scan = base16_array("0220bcfac5b99e04ad1a06ddfb016ee13582609d60b6291e98d01a9bc9a16c96d4");
+    const auto spend = base16_array("025cc9856d6f8375350e123978daac200c260cb5b5ae83106cab90484dcd8fcf36");
+    const auto address = silent_payment::to_address(scan, spend, system::wallet::prefix::sp::main::btc);
+    BOOST_REQUIRE_EQUAL(address, "sp1qqgste7k9hx0qftg6qmwlkqtwuy6cycyavzmzj85c6qdfhjdpdjtdgqjuexzk6murw56suy3e0rd2cgqvycxttddwsvgxe2usfpxumr70xc9pkqwv");
+}
+
 BOOST_AUTO_TEST_CASE(silent_payment__bip352_receiving_vectors__all__expected)
 {
     const auto& suites = bip352_vectors();
