@@ -372,65 +372,18 @@ public:
         const auto count = keys.size();
         const auto rows = std::min(launch_rows<Key>(), chunk_rows);
         out.resize(count);
-
-        turn turn{ turns_, urgent };
-        if (failed_.load())
-            return false;
-
-        auto result = call_.context_current(context_);
-        size_t prior{}, prior_size{}, prior_half{}, chunk{};
-        for (size_t offset{}; result == success && offset < count;
-            offset += rows, ++chunk)
-        {
-            if (cancel)
-                break;
-
-            if (turn.contended())
+        if (!pipeline(count, rows, urgent, cancel,
+            [&](size_t half, size_t offset, size_t size) NOEXCEPT
             {
-                if (!is_zero(prior_size))
-                    result = collect<Key>(prior_half,
-                        std::span{ &out[prior], prior_size });
-
-                prior_size = zero;
-                if (result != success)
-                    break;
-
-                turn.yield();
-                if (failed_.load())
-                    return false;
-
-                result = call_.context_current(context_);
-                if (result != success)
-                    break;
-            }
-
-            const auto size = std::min(rows, count - offset);
-            const auto half = chunk % two;
-            result = stage(half, digests.subspan(offset, size),
-                keys.subspan(offset, size), signatures.subspan(offset, size));
-
-            if (result == success && !is_zero(prior_size))
-                result = collect<Key>(prior_half,
-                    std::span{ &out[prior], prior_size });
-
-            prior = offset;
-            prior_size = size;
-            prior_half = half;
-        }
-
-        if (result == success && !cancel && !is_zero(prior_size))
-            result = collect<Key>(prior_half,
-                std::span{ &out[prior], prior_size });
-        if (result == success)
-            result = call_.stream_synchronize(streams_.front());
-        if (result == success)
-            result = call_.stream_synchronize(streams_.back());
-
-        if (result != success)
-        {
-            failed_.store(true);
+                return stage(half, digests.subspan(offset, size),
+                    keys.subspan(offset, size),
+                    signatures.subspan(offset, size));
+            },
+            [&](size_t half, size_t offset, size_t size) NOEXCEPT
+            {
+                return collect<Key>(half, std::span{ &out[offset], size });
+            }))
             return false;
-        }
 
         if (cancel || std::ranges::all_of(out, [](uint8_t value) NOEXCEPT
             {
@@ -531,6 +484,70 @@ private:
             result = collect<Key>(zero, results);
 
         return result;
+    }
+
+    // Stage each chunk in a half while the prior computes in the other,
+    // collecting the prior before staging the next, and yielding the device
+    // between chunks to a caller that would be served ahead.
+    template <typename Stage, typename Collect>
+    bool pipeline(size_t count, size_t rows, bool urgent,
+        const stopper& cancel, Stage&& stage, Collect&& collect) NOEXCEPT
+    {
+        turn turn{ turns_, urgent };
+        if (failed_.load() || is_zero(rows))
+            return false;
+
+        auto result = call_.context_current(context_);
+        size_t prior{}, prior_size{}, prior_half{}, chunk{};
+        for (size_t offset{}; result == success && offset < count;
+            offset += rows, ++chunk)
+        {
+            if (cancel)
+                break;
+
+            if (turn.contended())
+            {
+                if (!is_zero(prior_size))
+                    result = collect(prior_half, prior, prior_size);
+
+                prior_size = zero;
+                if (result != success)
+                    break;
+
+                turn.yield();
+                if (failed_.load())
+                    return false;
+
+                result = call_.context_current(context_);
+                if (result != success)
+                    break;
+            }
+
+            const auto size = std::min(rows, count - offset);
+            const auto half = chunk % two;
+            result = stage(half, offset, size);
+            if (result == success && !is_zero(prior_size))
+                result = collect(prior_half, prior, prior_size);
+
+            prior = offset;
+            prior_size = size;
+            prior_half = half;
+        }
+
+        if (result == success && !cancel && !is_zero(prior_size))
+            result = collect(prior_half, prior, prior_size);
+        if (result == success)
+            result = call_.stream_synchronize(streams_.front());
+        if (result == success)
+            result = call_.stream_synchronize(streams_.back());
+
+        if (result != success)
+        {
+            failed_.store(true);
+            return false;
+        }
+
+        return true;
     }
 
     bool load() NOEXCEPT
