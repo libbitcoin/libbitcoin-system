@@ -25,6 +25,8 @@ namespace json = boost::json;
 using namespace system::chain;
 using silent_payment = system::wallet::silent_payment;
 
+constexpr auto taproot_key = "3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1";
+
 class accessor
   : public silent_payment
 {
@@ -48,6 +50,7 @@ static data_chunk chunk(const std::string_view& text)
 {
     data_chunk out{};
     BOOST_REQUIRE(decode_base16(out, text));
+
     return out;
 }
 
@@ -55,6 +58,7 @@ static hash_digest digest(const std::string_view& text)
 {
     hash_digest out{};
     BOOST_REQUIRE(decode_hash(out, text));
+
     return out;
 }
 
@@ -63,6 +67,7 @@ static data_array<Size> bytes(const std::string_view& text)
 {
     data_array<Size> out{};
     BOOST_REQUIRE(decode_base16(out, text));
+
     return out;
 }
 
@@ -92,6 +97,16 @@ static input to_input(const vector_input& value)
     return in;
 }
 
+static inputs to_inputs(std::initializer_list<vector_input> values)
+{
+    inputs out{};
+    out.reserve(values.size());
+    for (const auto& value: values)
+        out.push_back(to_input(value));
+
+    return out;
+}
+
 static output to_pay_witness_taproot_output(const char* key)
 {
     const auto text = std::string{ "5120" }.append(key);
@@ -108,24 +123,28 @@ static std::string text_at(const json::object& object, const char* key)
     return text(object.at(key).as_string());
 }
 
+static uint32_t to_uint32(const json::value& value)
+{
+    const auto number = value.as_int64();
+    BOOST_REQUIRE(!is_limited<uint32_t>(number));
+
+    return limit<uint32_t>(number);
+}
+
 static uint32_t uint32_at(const json::object& object, const char* key)
 {
-    const auto value = object.at(key).as_int64();
-    BOOST_REQUIRE(value >= 0);
-    BOOST_REQUIRE(value <= max_uint32);
-    return static_cast<uint32_t>(value);
+    return to_uint32(object.at(key));
 }
 
 static bool value_is_null(const json::object& object, const char* key)
 {
     const auto* value = object.if_contains(key);
-    return value == nullptr || value->is_null();
+    return is_null(value) || value->is_null();
 }
 
 static const json::array& bip352_vectors()
 {
-    static const auto vectors =
-        json::parse(bip352::bip352_send_and_receive_vectors);
+    static const auto vectors = json::parse(bip352::send_and_receive_vectors);
     return vectors.as_array();
 }
 
@@ -153,7 +172,6 @@ static inputs to_inputs(const json::array& values)
 {
     inputs out{};
     out.reserve(values.size());
-
     for (const auto& value: values)
         out.push_back(to_input(value.as_object()));
 
@@ -164,10 +182,11 @@ static outputs to_outputs(const json::array& values)
 {
     outputs out{};
     out.reserve(values.size());
-
     for (const auto& value: values)
-        out.push_back(to_pay_witness_taproot_output(
-            text(value.as_string()).c_str()));
+    {
+        const auto key = text(value.as_string());
+        out.push_back(to_pay_witness_taproot_output(key.c_str()));
+    }
 
     return out;
 }
@@ -187,20 +206,13 @@ static std_vector<uint32_t> to_labels(const json::array& values)
 {
     std_vector<uint32_t> out{};
     out.reserve(values.size());
-
     for (const auto& value: values)
-    {
-        const auto label = value.as_int64();
-        BOOST_REQUIRE(label >= 0);
-        BOOST_REQUIRE(label <= max_uint32);
-        out.push_back(static_cast<uint32_t>(label));
-    }
+        out.push_back(to_uint32(value));
 
     return out;
 }
 
-static silent_payment::scan_outputs to_scan_outputs(
-    const json::array& values)
+static silent_payment::scan_outputs to_scan_outputs(const json::array& values)
 {
     silent_payment::scan_outputs out{};
     out.reserve(values.size());
@@ -237,28 +249,28 @@ static void require_bip352_matches(
 {
     if (!value_is_null(expected, "n_outputs"))
     {
-        const auto count = expected.at("n_outputs").as_int64();
-        BOOST_REQUIRE_EQUAL(matches.size(), static_cast<size_t>(count));
+        const auto count = to_uint32(expected.at("n_outputs"));
+        BOOST_REQUIRE_EQUAL(matches.size(), count);
+
         return;
     }
 
+    const auto& keys = given.at("outputs").as_array();
     const auto& outputs = expected.at("outputs").as_array();
     BOOST_REQUIRE_EQUAL(matches.size(), outputs.size());
 
     for (const auto& output: outputs)
     {
         const auto& object = output.as_object();
-        const auto key = text_at(object, "pub_key");
-        const auto& keys = given.at("outputs").as_array();
-        const auto index = output_index(keys, key);
-        const auto found = std::find_if(matches.begin(), matches.end(),
+        const auto tweak = text_at(object, "priv_key_tweak");
+        const auto index = output_index(keys, text_at(object, "pub_key"));
+        const auto found = std::find_if(matches.cbegin(), matches.cend(),
             [index](const auto& match) NOEXCEPT
             {
                 return match.index == index;
             });
 
-        BOOST_REQUIRE(found != matches.end());
-        const auto tweak = text_at(object, "priv_key_tweak");
+        BOOST_REQUIRE(found != matches.cend());
         BOOST_REQUIRE_EQUAL(found->tweak, bytes<ec_secret_size>(tweak));
     }
 }
@@ -267,10 +279,10 @@ static void require_bip352_receiving_vector(const json::object& given,
     const json::object& expected)
 {
     const auto& material = given.at("key_material").as_object();
-    const auto scan_secret = bytes<ec_secret_size>(
-        text_at(material, "scan_priv_key"));
-    const auto spend_secret = bytes<ec_secret_size>(
-        text_at(material, "spend_priv_key"));
+    const auto scan_text = text_at(material, "scan_priv_key");
+    const auto spend_text = text_at(material, "spend_priv_key");
+    const auto scan_secret = bytes<ec_secret_size>(scan_text);
+    const auto spend_secret = bytes<ec_secret_size>(spend_text);
 
     ec_compressed spend_public{};
     BOOST_REQUIRE(secret_to_public(spend_public, spend_secret));
@@ -284,13 +296,13 @@ static void require_bip352_receiving_vector(const json::object& given,
         return;
     }
 
-    BOOST_REQUIRE(summarized);
     const auto tweak = text_at(expected, "tweak");
+    const auto secret = text_at(expected, "shared_secret");
+    BOOST_REQUIRE(summarized);
     BOOST_REQUIRE_EQUAL(summary, bytes<ec_compressed_size>(tweak));
 
     ec_compressed shared{ summary };
     BOOST_REQUIRE(ec_multiply(shared, scan_secret));
-    const auto secret = text_at(expected, "shared_secret");
     BOOST_REQUIRE_EQUAL(shared, bytes<ec_compressed_size>(secret));
 
     const auto labels = to_labels(given.at("labels").as_array());
@@ -300,6 +312,7 @@ static void require_bip352_receiving_vector(const json::object& given,
 
     silent_payment::scan_matches matches{};
     BOOST_REQUIRE(scanner.scan(matches, summary, outputs));
+
     require_bip352_matches(matches, given, expected);
 
     bool matched{};
@@ -307,21 +320,36 @@ static void require_bip352_receiving_vector(const json::object& given,
     BOOST_REQUIRE_EQUAL(matched, !matches.empty());
 }
 
-static void require_record(std::initializer_list<vector_input> inputs,
-    std::initializer_list<const char*> outputs, const char* summary)
+static void require_bip352_suite(const json::value& value)
 {
-    chain::inputs tx_inputs{};
-    tx_inputs.reserve(inputs.size());
-    for (const auto& in: inputs)
-        tx_inputs.push_back(to_input(in));
+    const auto& suite = value.as_object();
+    const auto comment = text_at(suite, "comment");
+    const auto& vectors = suite.at("receiving").as_array();
 
-    chain::outputs tx_outputs{};
-    tx_outputs.reserve(outputs.size());
-    for (const auto& key: outputs)
-        tx_outputs.push_back(to_pay_witness_taproot_output(key));
+    size_t index{};
+    for (const auto& receiving: vectors)
+    {
+        const auto& vector = receiving.as_object();
+        const auto& given = vector.at("given").as_object();
+        const auto& expected = vector.at("expected").as_object();
+        BOOST_TEST_CONTEXT("case: " << comment << ", receiving: " << index)
+        {
+            require_bip352_receiving_vector(given, expected);
+        }
 
-    const transaction tx{ 2u, std::move(tx_inputs), std::move(tx_outputs),
-        0u };
+        ++index;
+    }
+}
+
+static void require_record(std::initializer_list<vector_input> values,
+    std::initializer_list<const char*> keys, const char* summary)
+{
+    outputs outs{};
+    outs.reserve(keys.size());
+    for (const auto& key: keys)
+        outs.push_back(to_pay_witness_taproot_output(key));
+
+    const transaction tx{ 2u, to_inputs(values), std::move(outs), 0u };
     BOOST_REQUIRE(!tx.is_coinbase());
 
     ec_compressed out{};
@@ -330,44 +358,35 @@ static void require_record(std::initializer_list<vector_input> inputs,
 
     silent_payment::scan_outputs scan_outputs{};
     BOOST_REQUIRE(silent_payment::get_outputs(scan_outputs, tx));
-    BOOST_REQUIRE_EQUAL(scan_outputs.size(), outputs.size());
+    BOOST_REQUIRE_EQUAL(scan_outputs.size(), keys.size());
 
     uint32_t index{};
-    for (const auto& key: outputs)
+    for (const auto& key: keys)
     {
         const auto& output = scan_outputs.at(index);
         BOOST_REQUIRE_EQUAL(output.index, index);
         BOOST_REQUIRE_EQUAL(output.key, bytes<ec_xonly_size>(key));
+
         ++index;
     }
 }
 
-static void require_no_record(std::initializer_list<vector_input> inputs)
+static void require_no_record(std::initializer_list<vector_input> values)
 {
-    chain::inputs tx_inputs{};
-    tx_inputs.reserve(inputs.size());
-    for (const auto& in: inputs)
-        tx_inputs.push_back(to_input(in));
-
-    chain::outputs tx_outputs
-    {
-        to_pay_witness_taproot_output(
-            "3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1")
-    };
+    outputs outs{ to_pay_witness_taproot_output(taproot_key) };
+    const transaction tx{ 2u, to_inputs(values), std::move(outs), 0u };
 
     ec_compressed out{};
-    const transaction tx{ 2u, std::move(tx_inputs), std::move(tx_outputs),
-        0u };
     BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
-static transaction transaction_with_inputs(chain::inputs&& tx_inputs,
+static transaction transaction_with_inputs(inputs&& ins,
     const char* output_script)
 {
     return
     {
         2u,
-        std::move(tx_inputs),
+        std::move(ins),
         { { 0u, to_script(output_script) } },
         0u
     };
@@ -661,10 +680,7 @@ BOOST_AUTO_TEST_CASE(silent_payment__summarize__coinbase__false)
     {
         2u,
         { input{} },
-        {
-            to_pay_witness_taproot_output(
-                "3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1")
-        },
+        { to_pay_witness_taproot_output(taproot_key) },
         0u
     };
 
@@ -674,38 +690,36 @@ BOOST_AUTO_TEST_CASE(silent_payment__summarize__coinbase__false)
 
 BOOST_AUTO_TEST_CASE(silent_payment__summarize__no_pay_witness_taproot_outputs__false)
 {
-    ec_compressed out{};
-    const auto tx = transaction_with_inputs(
-        {
-            to_input(
-            {
-                "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
-                0u,
-                "483046022100ad79e6801dd9a8727f342f31c71c4912866f59dc6e7981878e92c5844a0ce929022100fb0d2393e813968648b9753b7e9871d90ab3d815ebf91820d704b19f4ed224d621025a1e61f898173040e20616d43e9f496fba90338a39faa1ed98fcbaeee4dd9be5",
-                "",
-                "76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac"
-            })
-        },
-        "76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac");
+    const vector_input value
+    {
+        "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
+        0u,
+        "483046022100ad79e6801dd9a8727f342f31c71c4912866f59dc6e7981878e92c5844a0ce929022100fb0d2393e813968648b9753b7e9871d90ab3d815ebf91820d704b19f4ed224d621025a1e61f898173040e20616d43e9f496fba90338a39faa1ed98fcbaeee4dd9be5",
+        "",
+        "76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac"
+    };
 
+    ec_compressed out{};
+    const auto tx = transaction_with_inputs({ to_input(value) }, "76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac");
     BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
 BOOST_AUTO_TEST_CASE(silent_payment__summarize__missing_prevout__false)
 {
     ec_compressed out{};
-    input in
+    const input in
     {
-        { digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"), 0u }, script{}, witness{}, max_uint32
+        { digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"), 0u },
+        script{},
+        witness{},
+        max_uint32
     };
+
     const transaction tx
     {
         2u,
         { in },
-        {
-            to_pay_witness_taproot_output(
-                "3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1")
-        },
+        { to_pay_witness_taproot_output(taproot_key) },
         0u
     };
 
@@ -715,20 +729,17 @@ BOOST_AUTO_TEST_CASE(silent_payment__summarize__missing_prevout__false)
 
 BOOST_AUTO_TEST_CASE(silent_payment__summarize__future_segwit_prevout__false)
 {
-    ec_compressed out{};
-    const auto tx = transaction_with_inputs(
-        {
-            to_input(
-            {
-                "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
-                0u,
-                "",
-                "",
-                "52203e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1"
-            })
-        },
-        "51203e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1");
+    const vector_input value
+    {
+        "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
+        0u,
+        "",
+        "",
+        "52203e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1"
+    };
 
+    ec_compressed out{};
+    const auto tx = transaction_with_inputs({ to_input(value) }, "51203e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1");
     BOOST_REQUIRE(tx.inputs_ptr()->front()->prevout->script().version() == script_version::reserved);
     BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
@@ -907,24 +918,8 @@ BOOST_AUTO_TEST_CASE(silent_payment__get_outputs__no_taproot__false)
 
 BOOST_AUTO_TEST_CASE(silent_payment__bip352_receiving_vectors__all__expected)
 {
-    for (const auto& value: bip352_vectors())
-    {
-        const auto& suite = value.as_object();
-        const auto comment = text_at(suite, "comment");
-        const auto& vectors = suite.at("receiving").as_array();
-
-        size_t index{};
-        for (const auto& receiving: vectors)
-        {
-            BOOST_TEST_CONTEXT("case: " << comment << ", receiving: " << index)
-            {
-                const auto& vector = receiving.as_object();
-                require_bip352_receiving_vector(vector.at("given").as_object(), vector.at("expected").as_object());
-            }
-
-            ++index;
-        }
-    }
+    const auto& suites = bip352_vectors();
+    std::for_each(suites.cbegin(), suites.cend(), require_bip352_suite);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

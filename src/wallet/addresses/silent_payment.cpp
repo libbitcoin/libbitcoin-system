@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/addresses/silent_payment.hpp>
 
-#include <algorithm>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -30,6 +29,8 @@
 namespace libbitcoin {
 namespace system {
 namespace wallet {
+
+using namespace system::chain;
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
@@ -47,21 +48,20 @@ bool silent_payment::scan_match::operator<(
 
 using outpoint = silent_payment::outpoint;
 constexpr auto taproot_size = add1(add1(ec_xonly_size));
-constexpr auto op_32 = static_cast<uint8_t>(chain::opcode::push_size_32);
-constexpr auto op_81 = static_cast<uint8_t>(chain::opcode::push_positive_1);
+constexpr auto op_32 = static_cast<uint8_t>(opcode::push_size_32);
+constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
 
-static const chain::input& get_input(const chain::input::cptr& input) NOEXCEPT
+static const input& get_input(const input::cptr& input) NOEXCEPT
 {
     return *input;
 }
 
-static const chain::view::input& get_input(
-    const chain::view::input& input) NOEXCEPT
+static const view::input& get_input(const view::input& input) NOEXCEPT
 {
     return input;
 }
 
-static outpoint get_outpoint(const chain::input& input) NOEXCEPT
+static outpoint get_outpoint(const input& input) NOEXCEPT
 {
     outpoint out{};
     stream::out::fast stream{ out };
@@ -70,11 +70,10 @@ static outpoint get_outpoint(const chain::input& input) NOEXCEPT
     return out;
 }
 
-static const outpoint& get_outpoint(
-    const chain::view::input& input) NOEXCEPT
+static const outpoint& get_outpoint(const view::input& input) NOEXCEPT
 {
-    return unsafe_array_cast<uint8_t, chain::point::serialized_size()>(
-        input.point_data());
+    constexpr auto size = point::serialized_size();
+    return unsafe_array_cast<uint8_t, size>(input.point_data());
 }
 
 static bool is_taproot(const data_array<taproot_size>& script) NOEXCEPT
@@ -82,38 +81,54 @@ static bool is_taproot(const data_array<taproot_size>& script) NOEXCEPT
     return script.front() == op_81 && script.at(one) == op_32;
 }
 
-bool silent_payment::summarize(ec_compressed& out,
-    const chain::transaction& tx) NOEXCEPT
+static const ec_xonly& to_xonly(const ec_uncompressed& point) NOEXCEPT
 {
-    const auto& outputs = *tx.outputs_ptr();
-    return !tx.is_coinbase() && std::any_of(outputs.begin(), outputs.end(),
-        [](const auto& output) NOEXCEPT
-        {
-            return chain::script::is_pay_witness_taproot_pattern(
-                output->script().ops());
-        }) && summarize(out, tx.inputs_ptr()->begin(),
-            tx.inputs_ptr()->end());
+    return array_cast<uint8_t, ec_xonly_size, one>(point);
 }
 
 bool silent_payment::summarize(ec_compressed& out,
-    const chain::view::transaction& tx) NOEXCEPT
+    const transaction& tx) NOEXCEPT
 {
+    if (tx.is_coinbase())
+        return false;
+
+    const auto& inputs = *tx.inputs_ptr();
+    const auto& outputs = *tx.outputs_ptr();
+    const auto taproot = std::any_of(outputs.cbegin(), outputs.cend(),
+        [](const auto& output) NOEXCEPT
+        {
+            return script::is_pay_witness_taproot_pattern(
+                output->script().ops());
+        });
+
+    return taproot && summarize(out, inputs.cbegin(), inputs.cend());
+}
+
+bool silent_payment::summarize(ec_compressed& out,
+    const view::transaction& tx) NOEXCEPT
+{
+    if (tx.is_coinbase())
+        return false;
+
     scan_outputs outputs{};
-    return !tx.is_coinbase() && get_outputs(outputs, tx) &&
-        summarize(out, tx.inputs_begin(), tx.inputs_end());
+    const auto taproot = get_outputs(outputs, tx);
+    return taproot && summarize(out, tx.inputs_begin(), tx.inputs_end());
 }
 
 bool silent_payment::get_outputs(scan_outputs& out,
-    const chain::transaction& tx) NOEXCEPT
+    const transaction& tx) NOEXCEPT
 {
     out.clear();
     uint32_t index{};
     for (const auto& output: *tx.outputs_ptr())
     {
-        const auto& script = output->script();
-        if (chain::script::is_pay_witness_taproot_pattern(script.ops()))
-            out.push_back({ index, unsafe_array_cast<uint8_t, ec_xonly_size>(
-                script.witness_program()->data()) });
+        const auto& ops = output->script().ops();
+        if (script::is_pay_witness_taproot_pattern(ops))
+        {
+            const auto data = ops.back().data().data();
+            const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(data);
+            out.push_back({ index, key });
+        }
 
         ++index;
     }
@@ -122,7 +137,7 @@ bool silent_payment::get_outputs(scan_outputs& out,
 }
 
 bool silent_payment::get_outputs(scan_outputs& out,
-    const chain::view::transaction& tx) NOEXCEPT
+    const view::transaction& tx) NOEXCEPT
 {
     out.clear();
     auto stream = tx.get_outputs_stream();
@@ -131,16 +146,17 @@ bool silent_payment::get_outputs(scan_outputs& out,
     {
         source.skip_bytes(sizeof(uint64_t));
         const auto size = source.read_size();
-        if (size == taproot_size)
-        {
-            const auto script = source.read_forward<taproot_size>();
-            if (is_taproot(script))
-                out.push_back({ index, array_cast<uint8_t, ec_xonly_size,
-                    two>(script) });
-        }
-        else
+        if (size != taproot_size)
         {
             source.skip_bytes(size);
+            continue;
+        }
+
+        const auto script = source.read_forward<taproot_size>();
+        if (is_taproot(script))
+        {
+            const auto& key = array_cast<uint8_t, ec_xonly_size, two>(script);
+            out.push_back({ index, key });
         }
     }
 
@@ -196,16 +212,15 @@ bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
     ec_secret tweak{};
     ec_uncompressed key{};
     ec_uncompressed labeled{};
-    for (uint32_t k{}; out.size() < outputs.size() && k < maximum_outputs;
-        ++k)
+    const auto limit = std::min(outputs.size(), maximum_outputs);
+    for (uint32_t k{}; out.size() < limit; ++k)
     {
         key = spend_key_;
         if (!shared_tweak(tweak, shared, k) || !ec_add(key, tweak))
             return false;
 
         uint32_t index{};
-        if (find_output(index, outputs, array_cast<uint8_t, ec_xonly_size,
-            one>(key), out))
+        if (find_output(index, outputs, to_xonly(key), out))
         {
             out.push_back({ index, tweak, unlabeled });
             continue;
@@ -218,8 +233,7 @@ bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
             if (!ec_add(labeled, label_keys_.at(label)))
                 return false;
 
-            if (find_output(index, outputs, array_cast<uint8_t,
-                ec_xonly_size, one>(labeled), out))
+            if (find_output(index, outputs, to_xonly(labeled), out))
             {
                 auto combined = tweak;
                 if (!ec_add(combined, label_tweaks_.at(label)))
@@ -234,7 +248,7 @@ bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
             break;
     }
 
-    std::sort(out.begin(), out.end());
+    sort(out);
     return true;
 }
 
@@ -243,17 +257,17 @@ bool silent_payment::match(bool& out, const ec_compressed& summary,
     const scan_outputs& outputs) const NOEXCEPT
 {
     out = false;
-    ec_compressed shared{};
     ec_secret tweak{};
     auto key = spend_key_;
+    ec_compressed shared{};
     if (!valid_ || !shared_secret(shared, summary) ||
         !shared_tweak(tweak, shared, zero) || !ec_add(key, tweak))
         return false;
 
     const auto contains = [&](const ec_uncompressed& point) NOEXCEPT
     {
-        const auto& xonly = array_cast<uint8_t, ec_xonly_size, one>(point);
-        return std::any_of(outputs.begin(), outputs.end(),
+        const auto& xonly = to_xonly(point);
+        return std::any_of(outputs.cbegin(), outputs.cend(),
             [&](const scan_output& output) NOEXCEPT
             {
                 return output.key == xonly;
@@ -296,8 +310,11 @@ bool silent_payment::summarize(ec_compressed& out, const Iterator& begin,
     for (auto it = begin; it != end; ++it)
     {
         const auto& input = get_input(*it);
-        if (!input.prevout || input.prevout->script().version() ==
-            chain::script_version::reserved)
+        if (!input.prevout)
+            return false;
+
+        const auto version = input.prevout->script().version();
+        if (version == script_version::reserved)
             return false;
 
         ec_compressed key{};
@@ -357,16 +374,18 @@ template <typename Input>
 bool silent_payment::get_input_key(ec_compressed& out,
     const Input& input) NOEXCEPT
 {
+    const auto& ops = input.script().ops();
+    const auto& witness = input.witness();
     switch (input.prevout->script().output_pattern())
     {
-        case chain::script_pattern::pay_witness_v1_taproot:
+        case script_pattern::pay_witness_v1_taproot:
             return get_taproot_key(out, input);
-        case chain::script_pattern::pay_witness_key_hash:
-            return get_witness_key(out, input.witness());
-        case chain::script_pattern::pay_script_hash:
-            return chain::script::is_sign_witness_key_hash_pattern(
-                input.script().ops()) && get_witness_key(out, input.witness());
-        case chain::script_pattern::pay_key_hash:
+        case script_pattern::pay_witness_key_hash:
+            return get_witness_key(out, witness);
+        case script_pattern::pay_script_hash:
+            return script::is_sign_witness_key_hash_pattern(ops) &&
+                get_witness_key(out, witness);
+        case script_pattern::pay_key_hash:
             return get_key_hash_key(out, input);
         default:
             return false;
@@ -375,14 +394,14 @@ bool silent_payment::get_input_key(ec_compressed& out,
 
 // The key is the last witness element, and only compressed keys contribute.
 bool silent_payment::get_witness_key(ec_compressed& out,
-    const chain::witness& witness) NOEXCEPT
+    const witness& witness) NOEXCEPT
 {
     const auto& stack = witness.stack();
     if (stack.empty() || !stack.back() || !is_compressed_key(*stack.back()))
         return false;
 
-    out = unsafe_array_cast<uint8_t, ec_compressed_size>(
-        stack.back()->data());
+    const auto data = stack.back()->data();
+    out = unsafe_array_cast<uint8_t, ec_compressed_size>(data);
     return true;
 }
 
@@ -392,21 +411,21 @@ template <typename Input>
 bool silent_payment::get_key_hash_key(ec_compressed& out,
     const Input& input) NOEXCEPT
 {
-    const auto& hash = input.prevout->script().ops().at(2).data();
+    const auto data = input.prevout->script().ops().at(two).data().data();
+    const auto& hash = unsafe_array_cast<uint8_t, short_hash_size>(data);
     const auto bytes = input.script().to_data(false);
     if (bytes.size() < ec_compressed_size)
         return false;
 
     for (auto end = bytes.size(); end >= ec_compressed_size; --end)
     {
-        const auto start = std::next(bytes.begin(), end - ec_compressed_size);
+        const auto start = std::next(bytes.cbegin(), end - ec_compressed_size);
         const auto sign = *start;
         if (sign != ec_even_sign && sign != ec_odd_sign)
             continue;
 
         std::copy_n(start, ec_compressed_size, out.begin());
-        if (bitcoin_short_hash(out) ==
-            unsafe_array_cast<uint8_t, short_hash_size>(hash.data()))
+        if (bitcoin_short_hash(out) == hash)
             return true;
     }
 
@@ -425,18 +444,18 @@ bool silent_payment::get_taproot_key(ec_compressed& out,
         return false;
 
     out.front() = ec_even_sign;
-    std::copy(program->begin(), program->end(), std::next(out.begin()));
+    std::copy(program->cbegin(), program->cend(), std::next(out.begin()));
     return verify_point(out);
 }
 
-bool silent_payment::is_nums_spend(const chain::witness& witness) NOEXCEPT
+bool silent_payment::is_nums_spend(const witness& witness) NOEXCEPT
 {
     const auto& stack = witness.stack();
     const auto items = witness.annex() ? sub1(stack.size()) : stack.size();
     if (items < two)
         return false;
 
-    const chain::tapscript control{ stack.at(sub1(items)) };
+    const tapscript control{ stack.at(sub1(items)) };
     return control.is_valid() && control.key() == nums_key;
 }
 
@@ -445,11 +464,13 @@ bool silent_payment::find_output(uint32_t& out, const scan_outputs& outputs,
 {
     for (const auto& output: outputs)
     {
-        if (output.key != key || std::any_of(matches.begin(), matches.end(),
-            [&](const scan_match& match) NOEXCEPT
-            {
-                return match.index == output.index;
-            }))
+        const auto matched = [&](const scan_match& match) NOEXCEPT
+        {
+            return match.index == output.index;
+        };
+
+        if (output.key != key ||
+            std::any_of(matches.cbegin(), matches.cend(), matched))
             continue;
 
         out = output.index;

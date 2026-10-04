@@ -72,6 +72,7 @@ BC_API void append_checksum(data_chunk& data) NOEXCEPT;
 /// The implementation does not support unversioned bech32 payloads as there
 /// is no use case and support requires exposure of bech32 internals.
 
+/// Checksum constant of a bech32 encoding.
 enum class checksum_constant
 {
     bech32,

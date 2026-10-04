@@ -22,7 +22,7 @@
 namespace bip352 {
 
 // bitcoin/bips bip-0352/send_and_receive_test_vectors.json
-static constexpr auto bip352_send_and_receive_vectors = R"BIP352([
+static constexpr auto send_and_receive_vectors = R"BIP352([
     {
         "comment": "Simple send: two inputs",
         "sending": [

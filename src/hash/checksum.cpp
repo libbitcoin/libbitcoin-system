@@ -69,6 +69,7 @@ bool verify_checksum(const data_chunk& data) NOEXCEPT
 
 static const size_t bech32_version_size = 1;
 static const size_t bech32_checksum_size = 6;
+
 // BIP173: All versions use 0x00000001 (bech32).
 // BIP350: Nonzero versions use 0x2bc830a3 (bech32m).
 static constexpr uint32_t bech32_checksum_constant = 0x00000001;
