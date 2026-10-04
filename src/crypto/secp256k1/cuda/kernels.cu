@@ -80,7 +80,7 @@ public:
         scalar_t secret{};
         affine_t<uint64_t> point{}, spend{};
         if (!decode(point, summary) || !from_bytes(secret, arguments.scan) ||
-            is_zero_scalar(secret) || !from_bytes(spend, arguments.spend))
+            is_zero_scalar(secret) || !decode(spend, arguments.spend))
             return 0;
 
         jacobian_t<uint64_t> sum{};
@@ -122,7 +122,7 @@ public:
         {
             affine_t<uint64_t> label{};
             jacobian_t<uint64_t> labeled{};
-            if (!from_bytes(label, arguments.labels[index]))
+            if (!decode(label, arguments.labels[index]))
                 return 0;
 
             add_complete(labeled, sum, label);
@@ -151,6 +151,36 @@ private:
         field_t<uint64_t> x{};
         const auto odd = sign == ec_odd_sign ? max_uint64 : 0_u64;
         return from_bytes(x, x_bytes) && is_nonzero(lift(out, x, odd));
+    }
+
+    // Key arguments are unaligned (65 bytes), so x and y are decoded from
+    // copies.
+    static __device__ bool decode(affine_t<uint64_t>& out,
+        const ec_uncompressed& key) NOEXCEPT
+    {
+        const auto sign = key.front();
+        const auto hybrid = sign == ec_hybrid_even_sign ||
+            sign == ec_hybrid_odd_sign;
+
+        if (sign != ec_uncompressed_sign && !hybrid)
+            return false;
+
+        alignas(sizeof(uint64_t)) bytes_t x_bytes{}, y_bytes{};
+        for (size_t byte{}; byte < x_bytes.size(); ++byte)
+        {
+            x_bytes[byte] = key[add1(byte)];
+            y_bytes[byte] = key[add1(byte + x_bytes.size())];
+        }
+
+        field_t<uint64_t> x{}, y{};
+        if (!from_bytes(x, x_bytes) || !from_bytes(y, y_bytes))
+            return false;
+
+        if (hybrid && (f::any(is_odd_element(y)) != (sign == ec_hybrid_odd_sign)))
+            return false;
+
+        out = { x, y };
+        return f::any(is_on_curve(out));
     }
 
     static __device__ void write(cuda::prefix& out,
