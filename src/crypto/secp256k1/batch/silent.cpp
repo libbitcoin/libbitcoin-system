@@ -98,6 +98,9 @@ static void scan_rows(const silent::batch& batch,
         return true;
     });
 
+    // The tagged hash of each shared point and k = 0 [bip352].
+    constexpr auto k = to_big_endian(0_u32);
+    constexpr auto& midstate = tagged_midstate<"BIP0352/SharedSecret">;
     silent_dispatcher::scalars tweaks{};
     std_vector<size_t> groups{};
     tweaks.reserve(count);
@@ -107,13 +110,11 @@ static void scan_rows(const silent::batch& batch,
         if (is_zero(computed[group]))
             continue;
 
-        accumulator<sha256> hasher{ tagged_midstate<"BIP0352/SharedSecret">,
-            one };
-        hasher.write(shared[group]);
-        hasher.write(to_big_endian(0_u32));
+        const auto data = splice(shared[group], k);
+        const auto hash = sha256::hash(midstate, data);
 
         silent_dispatcher::scalar tweak{};
-        if (silent_dispatcher::from_bytes(tweak, hasher.flush()) &&
+        if (silent_dispatcher::from_bytes(tweak, hash) &&
             !silent_dispatcher::is_zero_scalar(tweak))
         {
             tweaks.push_back(tweak);
