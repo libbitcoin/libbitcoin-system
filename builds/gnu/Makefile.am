@@ -228,6 +228,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/wallet/addresses/qr_code.cpp \
     ${srcdir}/../../src/wallet/addresses/qr_encoder.cpp \
     ${srcdir}/../../src/wallet/addresses/qr_matrix.cpp \
+    ${srcdir}/../../src/wallet/addresses/silent_payment.cpp \
     ${srcdir}/../../src/wallet/addresses/tiff.cpp \
     ${srcdir}/../../src/wallet/addresses/uri.cpp \
     ${srcdir}/../../src/wallet/addresses/witness_address.cpp \
@@ -1013,6 +1014,7 @@ include_bitcoin_system_wallet_addresses_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_code.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_encoder.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_matrix.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/addresses/silent_payment.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/tiff.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/uri.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/uri_reader.hpp \
@@ -1368,6 +1370,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/wallet/addresses/qr_code.cpp \
     ${srcdir}/../../test/wallet/addresses/qr_encoder.cpp \
     ${srcdir}/../../test/wallet/addresses/qr_matrix.cpp \
+    ${srcdir}/../../test/wallet/addresses/silent_payment.cpp \
     ${srcdir}/../../test/wallet/addresses/tiff.cpp \
     ${srcdir}/../../test/wallet/addresses/uri.cpp \
     ${srcdir}/../../test/wallet/addresses/uri_reader.cpp \

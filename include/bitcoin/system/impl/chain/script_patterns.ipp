@@ -373,6 +373,18 @@ constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
         && is_public_key(ops[1].data());
 }
 
+constexpr bool script::is_sign_witness_key_hash_pattern(
+    const operations& ops) NOEXCEPT
+{
+    constexpr auto op_0 = static_cast<uint8_t>(opcode::push_size_0);
+    constexpr auto op_20 = static_cast<uint8_t>(opcode::push_size_20);
+    return ops.size() == 1u
+        && ops[0].code() == opcode::push_size_22
+        && ops[0].data().size() == short_hash_size + 2u
+        && ops[0].data()[0] == op_0
+        && ops[0].data()[1] == op_20;
+}
+
 // Ambiguous with is_sign_key_hash when second/last op is a public key.
 // Ambiguous with is_sign_public_key_pattern when only op is endorsement.
 constexpr bool script::is_sign_script_hash_pattern(

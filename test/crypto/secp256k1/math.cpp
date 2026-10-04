@@ -147,6 +147,25 @@ BOOST_AUTO_TEST_CASE(secp256k1__ec_add__compressed_and_uncompressed_points__matc
     BOOST_REQUIRE_EQUAL(left, expected);
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__ec_add__uncompressed_points__expected)
+{
+    const ec_secret one{ { 1, 2, 3 } };
+    const ec_secret two{ { 3, 2, 1 } };
+
+    ec_secret sum{ one };
+    BOOST_REQUIRE(ec_add(sum, two));
+
+    ec_uncompressed expected;
+    BOOST_REQUIRE(secret_to_public(expected, sum));
+
+    ec_uncompressed left;
+    ec_uncompressed right;
+    BOOST_REQUIRE(secret_to_public(left, one));
+    BOOST_REQUIRE(secret_to_public(right, two));
+    BOOST_REQUIRE(ec_add(left, right));
+    BOOST_REQUIRE_EQUAL(left, expected);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__ec_sum__empty__false)
 {
     ec_compressed out;

@@ -122,6 +122,27 @@ bool ec_add(ec_compressed& left, const ec_uncompressed& right) NOEXCEPT
     return compress(out, right) && ec_add(left, out);
 }
 
+bool ec_add(ec_uncompressed& left, const ec_uncompressed& right) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+
+    std::array<secp256k1_pubkey, two> keys{};
+    if (!ec_public_key_parse(context, keys.front(), left) ||
+        !ec_public_key_parse(context, keys.back(), right))
+        return false;
+
+    secp256k1_pubkey out;
+    const std::array<const secp256k1_pubkey*, two> pointers
+    {
+        &keys.front(),
+        &keys.back()
+    };
+
+    return secp256k1_ec_pubkey_combine(context, &out, pointers.data(),
+        pointers.size()) == ec_success &&
+        ec_public_key_serialize(context, left, out);
+}
+
 bool ec_sum(ec_compressed& out, const ec_compresseds& points) NOEXCEPT
 {
     if (points.empty())
