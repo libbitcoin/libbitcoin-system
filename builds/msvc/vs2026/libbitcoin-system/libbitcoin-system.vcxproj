@@ -756,9 +756,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\turns.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\interface.hpp" />
