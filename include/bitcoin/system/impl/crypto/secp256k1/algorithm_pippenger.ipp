@@ -36,9 +36,9 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // All rows are valid if sum(a R) + sum(a e P) - sum(a s)G is infinity, for
 // weights a of one (first) and 128 random bits (others), derived by hashing
 // the batch.
-inline bool algorithm::verify_schnorr(std::span<const ec_xonly> keys,
-    std::span<const hash_digest> challenges,
-    std::span<const ec_signature> signatures) NOEXCEPT
+inline bool algorithm::verify_schnorr(const std::span<const ec_xonly>& keys,
+    const std::span<const hash_digest>& challenges,
+    const std::span<const ec_signature>& signatures) NOEXCEPT
 {
     constexpr auto size = array_count<bytes_t>;
     const auto count = keys.size();
@@ -107,7 +107,7 @@ inline bool algorithm::verify_schnorr(std::span<const ec_xonly> keys,
 // for digits above half the window, and each point adds into the bucket of
 // its digit. Buckets sum by running sums from the top, and windows by Horner.
 inline void algorithm::multiply(jacobian_t<uint64_t>& r,
-    std::span<const term_t> terms) NOEXCEPT
+    const std::span<const term_t>& terms) NOEXCEPT
 {
     const auto width = bucket_bits(terms.size());
     const auto windows = add1(ceilinged_divide(half_bits, width));

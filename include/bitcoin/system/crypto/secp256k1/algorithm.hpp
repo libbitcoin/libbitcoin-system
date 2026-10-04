@@ -931,21 +931,21 @@ protected:
 
     template <typename Word>
     static bool verify_ecdsa(data_chunk& results,
-        std::span<const ec_compressed> keys,
-        std::span<const hash_digest> hashes,
-        std::span<const ec_signature> signatures) NOEXCEPT;
+        const std::span<const ec_compressed>& keys,
+        const std::span<const hash_digest>& hashes,
+        const std::span<const ec_signature>& signatures) NOEXCEPT;
 
     template <typename Word>
     static bool verify_schnorr(data_chunk& results,
-        std::span<const ec_xonly> keys,
-        std::span<const hash_digest> challenges,
-        std::span<const ec_signature> signatures) NOEXCEPT;
+        const std::span<const ec_xonly>& keys,
+        const std::span<const hash_digest>& challenges,
+        const std::span<const ec_signature>& signatures) NOEXCEPT;
 
     /// BIP340 verification of all rows by random linear combination, true if
     /// all rows are valid (false does not identify invalid rows).
-    static bool verify_schnorr(std::span<const ec_xonly> keys,
-        std::span<const hash_digest> challenges,
-        std::span<const ec_signature> signatures) NOEXCEPT;
+    static bool verify_schnorr(const std::span<const ec_xonly>& keys,
+        const std::span<const hash_digest>& challenges,
+        const std::span<const ec_signature>& signatures) NOEXCEPT;
 
     /// Multiscalar multiplication.
     /// -----------------------------------------------------------------------
@@ -959,7 +959,7 @@ protected:
 
     /// r = sum of scalar * point over terms, all cases (Pippenger buckets).
     static void multiply(jacobian_t<uint64_t>& r,
-        std::span<const term_t> terms) NOEXCEPT;
+        const std::span<const term_t>& terms) NOEXCEPT;
 
     /// Bucket window bits minimizing additions for a count of terms.
     static constexpr size_t bucket_bits(size_t count) NOEXCEPT;
