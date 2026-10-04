@@ -62,10 +62,6 @@ protected:
 
     /// The row that follows the transaction of the given row.
     static size_t next(const batch& batch, size_t row) NOEXCEPT;
-
-    /// True if a k = 0 output of the transaction at [first, last) pays keys.
-    static bool is_match(const batch& batch, size_t first, size_t last,
-        const receiver& keys) NOEXCEPT;
 };
 
 } // namespace silent

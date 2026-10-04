@@ -947,6 +947,24 @@ protected:
         const std::span<const hash_digest>& challenges,
         const std::span<const ec_signature>& signatures) NOEXCEPT;
 
+    /// Batch multiplication.
+    /// -----------------------------------------------------------------------
+    /// Rows share one inversion to affine, and valid is set for each row.
+
+    /// Each out = k * point (compressed) in lanes of Word, k nonzero.
+    template <typename Word>
+    static void multiply(data_chunk& valid, std_vector<ec_compressed>& out,
+        const std::span<const ec_compressed>& points,
+        const scalar_t& k) NOEXCEPT;
+
+    /// Each row of out is x of t * G + point, then x of that plus each addend,
+    /// in lanes of Word.
+    template <typename Word>
+    static void tweak(data_chunk& valid, std_vector<ec_xonly>& out,
+        const std::span<const scalar_t>& tweaks,
+        const affine_t<uint64_t>& point,
+        const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT;
+
     /// Multiscalar multiplication.
     /// -----------------------------------------------------------------------
 
@@ -985,6 +1003,39 @@ protected:
     template <typename Word>
     static void unpack(std_array<jacobian_t<uint64_t>, lanes<Word>>& rows,
         const jacobian_t<Word>& a) NOEXCEPT;
+
+    /// The compressed key of a (normal).
+    static constexpr void to_bytes(ec_compressed& out,
+        const affine_t<uint64_t>& a) NOEXCEPT;
+
+    /// a in each lane.
+    template <typename Word>
+    static constexpr affine_t<Word> to_lanes(
+        const affine_t<uint64_t>& a) NOEXCEPT;
+
+    /// The key of each sum at its pending position of out, by one inversion.
+    template <typename Key>
+    static void to_keys(std_vector<Key>& out,
+        const std_vector<size_t>& pending,
+        const std_vector<jacobian_t<uint64_t>>& sums) NOEXCEPT;
+
+    /// The batch tweak in lanes of Word.
+    template <typename Word>
+    static void tweak_lanes(data_chunk& valid, std_vector<ec_xonly>& out,
+        const std::span<const scalar_t>& tweaks,
+        const affine_t<uint64_t>& point,
+        const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT;
+
+    /// The batch tweak by comb (one addition per digit, without doubling).
+    static void tweak_comb(data_chunk& valid, std_vector<ec_xonly>& out,
+        const std::span<const scalar_t>& tweaks,
+        const affine_t<uint64_t>& point,
+        const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT;
+
+    /// x of t * G + point, then of that plus each addend, false on infinity.
+    static bool tweak(const std::span<ec_xonly>& out, const scalar_t& t,
+        const affine_t<uint64_t>& point,
+        const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT;
 };
 
 } // namespace secp256k1

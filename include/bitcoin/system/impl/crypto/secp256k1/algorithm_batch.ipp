@@ -254,9 +254,321 @@ bool algorithm::verify_schnorr(data_chunk& results,
         [](uint8_t result) NOEXCEPT { return is_nonzero(result); });
 }
 
+// Batch multiplication.
+// ----------------------------------------------------------------------------
+// protected
+
+// Rows without a valid point fill their lanes with the generator and are not
+// read. Lanes with an exceptional addition compute alone.
+template <typename Word>
+void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
+    const std::span<const ec_compressed>& points, const scalar_t& k) NOEXCEPT
+{
+    constexpr auto width = lanes<Word>;
+    const auto count = points.size();
+    valid.assign(count, uint8_t{});
+    out.assign(count, ec_compressed{});
+
+    std_vector<size_t> pending{};
+    std_vector<jacobian_t<uint64_t>> sums{};
+    pending.reserve(count);
+    sums.reserve(count);
+
+    const scalars_t<Word> zeros{};
+    scalars_t<Word> ks{};
+    ks.fill(k);
+
+    for (size_t base{}; base < count; base += width)
+    {
+        std_array<field_t<uint64_t>, width> xs{};
+        std_array<uint64_t, width> odds{};
+        std_array<bool, width> used{};
+        for (size_t lane{}; lane < width; ++lane)
+        {
+            const auto row = base + lane;
+            xs[lane] = generator.x;
+            if (row >= count)
+                continue;
+
+            const auto& key = points[row];
+            const auto sign = key.front();
+            if ((sign != ec_even_sign && sign != ec_odd_sign) ||
+                !from_bytes<one>(xs[lane], key))
+            {
+                xs[lane] = generator.x;
+                continue;
+            }
+
+            odds[lane] = sign == ec_odd_sign ? max_uint64 : 0_u64;
+            used[lane] = true;
+        }
+
+        field_t<Word> x{};
+        pack(x, xs);
+        affine_t<Word> point{};
+        const auto on = unpack(lift(point, x, pack<Word>(odds)));
+
+        jacobian_t<Word> sum{};
+        const auto faults = unpack(multiply(sum, zeros, point, ks));
+
+        std_array<jacobian_t<uint64_t>, width> rows{};
+        unpack(rows, sum);
+        for (size_t lane{}; lane < width; ++lane)
+        {
+            const auto row = base + lane;
+            if (!used[lane] || is_zero(on[lane]))
+                continue;
+
+            if (is_nonzero(faults[lane]))
+            {
+                affine_t<uint64_t> alone{}, product{};
+                if (from_bytes(alone, points[row]) &&
+                    linear(product, {}, alone, k))
+                {
+                    to_bytes(out[row], product);
+                    valid[row] = 1;
+                }
+            }
+            else if (is_zero(rows[lane].infinity))
+            {
+                pending.push_back(row);
+                sums.push_back(rows[lane]);
+                valid[row] = 1;
+            }
+        }
+    }
+
+    to_keys(out, pending, sums);
+}
+
+// Each row is t * G by comb (one addition per digit, no doubling) plus the
+// point and each addend, and a row with an exceptional addition computes alone.
+inline void algorithm::tweak_comb(data_chunk& valid,
+    std_vector<ec_xonly>& out, const std::span<const scalar_t>& tweaks,
+    const affine_t<uint64_t>& point,
+    const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT
+{
+    const auto count = tweaks.size();
+    const auto stride = add1(addends.size());
+    valid.assign(count, uint8_t{});
+    out.assign(count * stride, ec_xonly{});
+
+    std_vector<size_t> pending{};
+    std_vector<jacobian_t<uint64_t>> sums{};
+    pending.reserve(count * stride);
+    sums.reserve(count * stride);
+
+    std_vector<jacobian_t<uint64_t>> row(stride);
+    for (size_t index{}; index < count; ++index)
+    {
+        uint64_t faults{};
+        auto& sum = row.front();
+        sum = {};
+        sum.infinity = max_uint64;
+        add_comb(sum, tweaks[index], faults);
+        add_point(sum, point, faults);
+        for (size_t addend{}; addend < addends.size(); ++addend)
+        {
+            row[add1(addend)] = sum;
+            add_point(row[add1(addend)], addends[addend], faults);
+        }
+
+        if (is_nonzero(faults))
+        {
+            const std::span<ec_xonly> keys{ &out[index * stride], stride };
+            const auto& t = tweaks[index];
+            valid[index] = to_int<uint8_t>(tweak(keys, t, point, addends));
+            continue;
+        }
+
+        const auto infinity = std::any_of(row.cbegin(), row.cend(),
+            [](const auto& value) NOEXCEPT
+            {
+                return is_nonzero(value.infinity);
+            });
+
+        if (infinity)
+            continue;
+
+        for (size_t position{}; position < stride; ++position)
+        {
+            pending.push_back(index * stride + position);
+            sums.push_back(row[position]);
+        }
+
+        valid[index] = 1;
+    }
+
+    to_keys(out, pending, sums);
+}
+
+// Integral rows are faster by comb, and lanes by multiplication.
+template <typename Word>
+void algorithm::tweak(data_chunk& valid, std_vector<ec_xonly>& out,
+    const std::span<const scalar_t>& tweaks,
+    const affine_t<uint64_t>& point,
+    const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT
+{
+    if constexpr (is_same_type<Word, uint64_t>)
+        tweak_comb(valid, out, tweaks, point, addends);
+    else
+        tweak_lanes<Word>(valid, out, tweaks, point, addends);
+}
+
+// Each addend is one lane addition to the sum of a row, and a row with an
+// exceptional addition computes alone.
+template <typename Word>
+void algorithm::tweak_lanes(data_chunk& valid, std_vector<ec_xonly>& out,
+    const std::span<const scalar_t>& tweaks,
+    const affine_t<uint64_t>& point,
+    const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT
+{
+    constexpr auto width = lanes<Word>;
+    const auto count = tweaks.size();
+    const auto stride = add1(addends.size());
+    valid.assign(count, uint8_t{});
+    out.assign(count * stride, ec_xonly{});
+
+    std_vector<size_t> pending{};
+    std_vector<jacobian_t<uint64_t>> sums{};
+    pending.reserve(count * stride);
+    sums.reserve(count * stride);
+
+    const auto lane_point = to_lanes<Word>(point);
+    std_vector<affine_t<Word>> lane_addends{};
+    lane_addends.reserve(addends.size());
+    for (const auto& addend: addends)
+        lane_addends.push_back(to_lanes<Word>(addend));
+
+    scalars_t<Word> ones{};
+    ones.fill({ 1 });
+
+    std_vector<std_array<jacobian_t<uint64_t>, width>> rows(stride);
+    for (size_t base{}; base < count; base += width)
+    {
+        scalars_t<Word> ts{};
+        for (size_t lane{}; lane < width; ++lane)
+        {
+            const auto row = base + lane;
+            ts[lane] = row < count ? tweaks[row] : scalar_t{ 1 };
+        }
+
+        jacobian_t<Word> sum{};
+        auto faults = multiply(sum, ts, lane_point, ones);
+        unpack(rows.front(), sum);
+        for (size_t index{}; index < addends.size(); ++index)
+        {
+            auto added = sum;
+            add_point(added, lane_addends[index], faults);
+            unpack(rows[add1(index)], added);
+        }
+
+        const auto exceptional = unpack(faults);
+        for (size_t lane{}; lane < width; ++lane)
+        {
+            const auto row = base + lane;
+            if (row >= count)
+                continue;
+
+            const std::span<ec_xonly> keys{ &out[row * stride], stride };
+            if (is_nonzero(exceptional[lane]))
+            {
+                const auto& t = tweaks[row];
+                valid[row] = to_int<uint8_t>(tweak(keys, t, point, addends));
+                continue;
+            }
+
+            const auto infinity = std::any_of(rows.cbegin(), rows.cend(),
+                [lane](const auto& lane_sums) NOEXCEPT
+                {
+                    return is_nonzero(lane_sums[lane].infinity);
+                });
+
+            if (infinity)
+                continue;
+
+            for (size_t index{}; index < stride; ++index)
+            {
+                pending.push_back(row * stride + index);
+                sums.push_back(rows[index][lane]);
+            }
+
+            valid[row] = 1;
+        }
+    }
+
+    to_keys(out, pending, sums);
+}
+
 // Batch internals.
 // ----------------------------------------------------------------------------
 // protected
+
+constexpr void algorithm::to_bytes(ec_compressed& out,
+    const affine_t<uint64_t>& a) NOEXCEPT
+{
+    bytes_t x{};
+    to_bytes(x, a.x);
+    out.front() = f::any(is_odd_element(a.y)) ? ec_odd_sign : ec_even_sign;
+    for (size_t byte{}; byte < x.size(); ++byte)
+        out[add1(byte)] = x[byte];
+}
+
+template <typename Word>
+constexpr algorithm::affine_t<Word> algorithm::to_lanes(
+    const affine_t<uint64_t>& a) NOEXCEPT
+{
+    return { broadcast<Word>(a.x), broadcast<Word>(a.y) };
+}
+
+// Sums convert to affine by prefix products that share one inversion.
+template <typename Key>
+void algorithm::to_keys(std_vector<Key>& out,
+    const std_vector<size_t>& pending,
+    const std_vector<jacobian_t<uint64_t>>& sums) NOEXCEPT
+{
+    std_vector<field_t<uint64_t>> inverses(sums.size());
+    for (size_t index{}; index < sums.size(); ++index)
+        inverses[index] = sums[index].z;
+
+    inverse(inverses);
+
+    for (size_t index{}; index < sums.size(); ++index)
+    {
+        affine_t<uint64_t> point{};
+        to_affine(point, sums[index], inverses[index]);
+        if constexpr (is_same_type<Key, ec_compressed>)
+            to_bytes(out[pending[index]], point);
+        else
+            to_bytes(out[pending[index]], point.x);
+    }
+}
+
+inline bool algorithm::tweak(const std::span<ec_xonly>& out, const scalar_t& t,
+    const affine_t<uint64_t>& point,
+    const std::span<const affine_t<uint64_t>>& addends) NOEXCEPT
+{
+    affine_t<uint64_t> sum{};
+    if (!linear(sum, t, point))
+        return false;
+
+    jacobian_t<uint64_t> base{};
+    to_jacobian(base, sum);
+    to_bytes(out.front(), sum.x);
+    for (size_t index{}; index < addends.size(); ++index)
+    {
+        jacobian_t<uint64_t> added{};
+        add_complete(added, base, addends[index]);
+        if (f::any(added.infinity))
+            return false;
+
+        affine_t<uint64_t> result{};
+        to_affine(result, added);
+        to_bytes(out[add1(index)], result.x);
+    }
+
+    return true;
+}
 
 // Prefix products share one inversion, unwound from the last value.
 template <typename Element>
