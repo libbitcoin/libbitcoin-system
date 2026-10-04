@@ -60,7 +60,7 @@ public:
     static code identify(const hash_digest& merkle_root, const hashes& txids,
         bool malleated64) NOEXCEPT;
     static code identify(const context& ctx, const transaction& first,
-        const hashes& wtxids, bool segregated) NOEXCEPT;
+        const hash_digest& witness_root, bool segregated) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -162,7 +162,7 @@ public:
 
 protected:
     static bool is_invalid_witness_commitment(const transaction& first,
-        const hashes& wtxids, bool segregated) NOEXCEPT;
+        const hash_digest& witness_root, bool segregated) NOEXCEPT;
 
     block(stream::in::fast&& stream, bool witness) NOEXCEPT;
     block(reader&& source, bool witness) NOEXCEPT;
