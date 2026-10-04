@@ -61,9 +61,10 @@ public:
 
 // Integral rows verify by one random linear combination, which identifies no
 // failing row, so rows verify alone where it fails.
-inline bool verify_rows(data_chunk& results, std::span<const ec_xonly> keys,
-    std::span<const hash_digest> digests,
-    std::span<const ec_signature> signatures) NOEXCEPT
+inline bool verify_rows(data_chunk& results,
+    const std::span<const ec_xonly>& keys,
+    const std::span<const hash_digest>& digests,
+    const std::span<const ec_signature>& signatures) NOEXCEPT
 {
     hashes challenges(keys.size());
     for (size_t row{}; row < keys.size(); ++row)

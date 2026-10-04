@@ -140,8 +140,8 @@ public:
     /// Append one multisig group record (m of n band, including 1 of 1),
     /// false implies group capacity (decline).
     inline bool append(const hash_digest& digest,
-        std::span<const ec_compressed> keys,
-        std::span<const ec_signature> sigs) NOEXCEPT
+        const std::span<const ec_compressed>& keys,
+        const std::span<const ec_signature>& sigs) NOEXCEPT
     {
         if (!put(digest, keys, sigs))
             return false;
@@ -221,8 +221,8 @@ public:
     {
         auto success = true;
         for_each([&](const hash_digest& digest,
-            std::span<const ec_compressed> keys,
-            std::span<const ec_signature> sigs) NOEXCEPT
+            const std::span<const ec_compressed>& keys,
+            const std::span<const ec_signature>& sigs) NOEXCEPT
         {
             success = verify_group(digest, keys, sigs) && success;
         });
@@ -249,8 +249,8 @@ public:
 
 protected:
     inline bool put(const hash_digest& digest,
-        std::span<const ec_compressed> keys,
-        std::span<const ec_signature> sigs) NOEXCEPT
+        const std::span<const ec_compressed>& keys,
+        const std::span<const ec_signature>& sigs) NOEXCEPT
     {
         const auto sigs_count = sigs.size();
         const auto keys_count = keys.size();
@@ -277,8 +277,8 @@ protected:
     }
 
     static bool verify_group(const hash_digest& digest,
-        std::span<const ec_compressed> keys,
-        std::span<const ec_signature> sigs) NOEXCEPT
+        const std::span<const ec_compressed>& keys,
+        const std::span<const ec_signature>& sigs) NOEXCEPT
     {
         auto key = keys.begin();
         auto sig = sigs.begin();
@@ -336,8 +336,8 @@ struct BC_API signatures
     /// Multisig capture: one group record, keys.size() = n, sigs.size() = m;
     /// the store expands the band upon commit.
     bool multisig(const hash_digest& digest,
-        std::span<const ec_compressed> keys,
-        std::span<const ec_signature> sigs) const NOEXCEPT;
+        const std::span<const ec_compressed>& keys,
+        const std::span<const ec_signature>& sigs) const NOEXCEPT;
 
     /// Threshold capture: open a cursor streaming rows to this thread's
     /// schnorr accumulator (cannot decline).

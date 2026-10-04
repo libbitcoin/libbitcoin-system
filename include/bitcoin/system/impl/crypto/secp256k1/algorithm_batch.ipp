@@ -34,8 +34,9 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // read. Lanes with an exceptional addition verify alone.
 template <typename Word>
 bool algorithm::verify_ecdsa(data_chunk& results,
-    std::span<const ec_compressed> keys, std::span<const hash_digest> hashes,
-    std::span<const ec_signature> signatures) NOEXCEPT
+    const std::span<const ec_compressed>& keys,
+    const std::span<const hash_digest>& hashes,
+    const std::span<const ec_signature>& signatures) NOEXCEPT
 {
     constexpr auto width = lanes<Word>;
     constexpr auto size = array_count<bytes_t>;
@@ -155,8 +156,9 @@ bool algorithm::verify_ecdsa(data_chunk& results,
 // lanes with an exceptional addition verify alone.
 template <typename Word>
 bool algorithm::verify_schnorr(data_chunk& results,
-    std::span<const ec_xonly> keys, std::span<const hash_digest> challenges,
-    std::span<const ec_signature> signatures) NOEXCEPT
+    const std::span<const ec_xonly>& keys,
+    const std::span<const hash_digest>& challenges,
+    const std::span<const ec_signature>& signatures) NOEXCEPT
 {
     constexpr auto width = lanes<Word>;
     constexpr auto size = array_count<bytes_t>;

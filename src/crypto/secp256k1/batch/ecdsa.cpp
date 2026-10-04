@@ -61,8 +61,9 @@ public:
 };
 
 inline bool verify_rows(data_chunk& results,
-    std::span<const ec_compressed> keys, std::span<const hash_digest> digests,
-    std::span<const ec_signature> parsed) NOEXCEPT
+    const std::span<const ec_compressed>& keys,
+    const std::span<const hash_digest>& digests,
+    const std::span<const ec_signature>& parsed) NOEXCEPT
 {
     ec_signatures signatures(parsed.size());
     std::transform(parsed.begin(), parsed.end(), signatures.begin(),
