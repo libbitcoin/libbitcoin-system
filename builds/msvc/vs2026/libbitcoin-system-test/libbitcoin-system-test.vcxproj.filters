@@ -234,6 +234,9 @@
     <ClCompile Include="..\..\..\..\test\chain\script_serialize.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\short_id.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\stripper.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
