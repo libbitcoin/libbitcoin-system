@@ -24,6 +24,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -161,6 +162,19 @@ bool silent_payment::get_outputs(scan_outputs& out,
     }
 
     return !out.empty();
+}
+
+// The address is bech32m of version zero, scan key then spend key [bip352].
+std::string silent_payment::to_address(const ec_compressed& scan_key,
+    const ec_compressed& spend_key, const std::string& prefix) NOEXCEPT
+{
+    constexpr uint8_t version = 0;
+    constexpr auto separator = "1";
+    const auto program = to_chunk(splice(scan_key, spend_key));
+    const auto checked = bech32_build_checked(version, program, prefix,
+        checksum_constant::bech32m);
+
+    return prefix + separator + encode_base32b(checked);
 }
 
 // Construction.

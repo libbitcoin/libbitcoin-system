@@ -74,6 +74,10 @@ public:
     static bool get_outputs(scan_outputs& out,
         const chain::view::transaction& tx) NOEXCEPT;
 
+    /// The address of the scan and spend keys under the prefix.
+    static std::string to_address(const ec_compressed& scan_key,
+        const ec_compressed& spend_key, const std::string& prefix) NOEXCEPT;
+
     /// Scanner for the given scan secret, spend key and labels.
     silent_payment(const ec_secret& scan_secret,
         const ec_compressed& spend_key,
