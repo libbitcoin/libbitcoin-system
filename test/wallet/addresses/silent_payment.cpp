@@ -107,7 +107,7 @@ static inputs to_inputs(std::initializer_list<vector_input> values)
     return out;
 }
 
-static output to_pay_witness_taproot_output(const char* key)
+static output to_pay_witness_taproot_output(const std::string& key)
 {
     const auto text = std::string{ "5120" }.append(key);
     return { 0u, to_script(text.c_str()) };
@@ -118,7 +118,7 @@ static std::string text(const json::string& value)
     return { value.data(), value.size() };
 }
 
-static std::string text_at(const json::object& object, const char* key)
+static std::string text_at(const json::object& object, const std::string& key)
 {
     return text(object.at(key).as_string());
 }
@@ -131,12 +131,12 @@ static uint32_t to_uint32(const json::value& value)
     return limit<uint32_t>(number);
 }
 
-static uint32_t uint32_at(const json::object& object, const char* key)
+static uint32_t uint32_at(const json::object& object, const std::string& key)
 {
     return to_uint32(object.at(key));
 }
 
-static bool value_is_null(const json::object& object, const char* key)
+static bool value_is_null(const json::object& object, const std::string& key)
 {
     const auto* value = object.if_contains(key);
     return is_null(value) || value->is_null();
@@ -185,7 +185,7 @@ static outputs to_outputs(const json::array& values)
     for (const auto& value: values)
     {
         const auto key = text(value.as_string());
-        out.push_back(to_pay_witness_taproot_output(key.c_str()));
+        out.push_back(to_pay_witness_taproot_output(key));
     }
 
     return out;
