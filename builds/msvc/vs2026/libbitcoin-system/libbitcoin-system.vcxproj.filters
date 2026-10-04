@@ -1970,13 +1970,25 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp">
+      <Filter>src\crypto\secp256k1\cuda</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp">
       <Filter>src\crypto\secp256k1\cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp">
       <Filter>src\crypto\secp256k1\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp">
+      <Filter>src\crypto\secp256k1\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp">
+      <Filter>src\crypto\secp256k1\cuda</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp">
+      <Filter>src\crypto\secp256k1\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\turns.hpp">
       <Filter>src\crypto\secp256k1\cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp">
