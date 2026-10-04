@@ -184,6 +184,9 @@ struct shape
 {
     static constexpr auto slice_bytes = table_words * sizeof(uint64_t);
     static constexpr auto table_bytes = slice_count * slice_bytes;
+    static constexpr auto part_size = comb_part_windows * comb_size;
+    static constexpr auto part_bytes = part_size * comb_words * sizeof(uint64_t);
+    static constexpr auto comb_bytes = comb_part_count * part_bytes;
 };
 
 /// Columns of a kernel's rows within the staging buffer.
@@ -219,6 +222,38 @@ struct layout
     const size_t keys;
     const size_t signatures;
     const size_t results;
+};
+
+/// Columns of scan rows within the staging buffer, stride prefixes per row.
+struct silent_layout
+{
+    static constexpr size_t align = 256;
+
+    static constexpr size_t row_bytes(size_t stride) NOEXCEPT
+    {
+        return sizeof(ec_compressed) + stride * sizeof(prefix) + one;
+    }
+
+    static constexpr size_t round(size_t bytes) NOEXCEPT
+    {
+        return ceilinged_divide(bytes, align) * align;
+    }
+
+    /// Rows that fit in the given bytes.
+    static constexpr size_t rows(size_t bytes, size_t stride) NOEXCEPT
+    {
+        constexpr auto slack = 2 * align;
+        return bytes < slack ? zero : (bytes - slack) / row_bytes(stride);
+    }
+
+    constexpr silent_layout(size_t rows, size_t stride) NOEXCEPT
+      : prefixes(round(rows * sizeof(ec_compressed))),
+        valid(round(prefixes + rows * stride * sizeof(prefix)))
+    {
+    }
+
+    const size_t prefixes;
+    const size_t valid;
 };
 
 // Turns.
@@ -394,6 +429,31 @@ public:
         return true;
     }
 
+    /// Output key prefixes of the receiver for each summary, false on failure.
+    bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
+        const stopper& cancel, const std::span<const ec_compressed>& summaries,
+        const silent_arguments& keys) NOEXCEPT
+    {
+        const auto count = summaries.size();
+        const auto stride = add1(size_t{ keys.label_count });
+        const auto fit = silent_layout::rows(half_bytes_, stride);
+        const auto rows = std::min({ silent_rows_, chunk_rows, fit });
+
+        prefixes.resize(count * stride);
+        valid.resize(count);
+        return pipeline(count, rows, false, cancel,
+            [&](size_t half, size_t offset, size_t size) NOEXCEPT
+            {
+                return stage(half, summaries.subspan(offset, size), keys);
+            },
+            [&](size_t half, size_t offset, size_t size) NOEXCEPT
+            {
+                const auto first = offset * stride;
+                const std::span out{ &prefixes[first], size * stride };
+                return collect(half, out, std::span{ &valid[offset], size });
+            });
+    }
+
 private:
     context() NOEXCEPT
       : loaded_(load())
@@ -550,6 +610,53 @@ private:
         return true;
     }
 
+    // Stage the summaries in a half and queue the scan over them.
+    result_t stage(size_t half,
+        const std::span<const ec_compressed>& summaries,
+        silent_arguments arguments) NOEXCEPT
+    {
+        const auto size = summaries.size();
+        const auto stride = add1(size_t{ arguments.label_count });
+        const auto base = staging_ + half * half_bytes_;
+        const auto stream = streams_[half];
+        const silent_layout columns{ size, stride };
+        arguments.summaries = reinterpret_cast<const ec_compressed*>(base);
+        arguments.prefixes = reinterpret_cast<prefix*>(base + columns.prefixes);
+        arguments.valid = reinterpret_cast<uint8_t*>(base + columns.valid);
+        arguments.count = possible_narrow_cast<uint32_t>(size);
+
+        void* parameters[]{ &arguments };
+        const auto blocks = possible_narrow_cast<unsigned>(
+            ceilinged_divide(size, threads));
+
+        auto result = call_.copy_to_async(base, summaries.data(),
+            summaries.size_bytes(), stream);
+        if (result == success)
+            result = call_.launch(silent_, blocks, 1, 1,
+                possible_narrow_cast<unsigned>(threads), 1, 1, 0, stream,
+                parameters, nullptr);
+
+        return result;
+    }
+
+    // Return the prefixes and validity of the summaries staged in a half.
+    result_t collect(size_t half, const std::span<prefix>& prefixes,
+        const std::span<uint8_t>& valid) NOEXCEPT
+    {
+        const auto stride = prefixes.size() / valid.size();
+        const auto base = staging_ + half * half_bytes_;
+        const silent_layout columns{ valid.size(), stride };
+        auto result = call_.copy_from_async(prefixes.data(),
+            base + columns.prefixes, prefixes.size_bytes(), streams_[half]);
+        if (result == success)
+            result = call_.copy_from_async(valid.data(), base + columns.valid,
+                valid.size(), streams_[half]);
+        if (result == success)
+            result = call_.stream_synchronize(streams_[half]);
+
+        return result;
+    }
+
     bool load() NOEXCEPT
     {
         const auto library = load_library();
@@ -564,12 +671,10 @@ private:
         for (int ordinal{}; ordinal < count; ++ordinal)
         {
             int major{}, minor{};
-            if (call_.device_get(&device_, ordinal) == success &&
-                call_.device_attribute(&major, compute_major, device_) ==
-                    success &&
-                call_.device_attribute(&minor, compute_minor, device_) ==
-                    success &&
-                (major > 7 || (major == 7 && minor >= 5)))
+            if (call_.device_get(&device_, ordinal) == success
+                && call_.device_attribute(&major, compute_major, device_) == success
+                && call_.device_attribute(&minor, compute_minor, device_) == success
+                && (major > 7 || (major == 7 && minor >= 5)))
                 return open();
         }
 
@@ -583,23 +688,29 @@ private:
 
         retained_ = true;
         std::string ptx{};
-        pointer_t table{};
-        size_t size{};
-        if (!inflate(ptx) ||
-            call_.context_current(context_) != success ||
-            call_.context_limit(stack_limit, stack_bytes) != success ||
-            call_.module_load(&module_, ptx.c_str()) != success ||
-            call_.module_function(&ecdsa_, module_, "verify_ecdsa") !=
-                success ||
-            call_.module_function(&schnorr_, module_, "verify_schnorr") !=
-                success ||
-            call_.module_global(&table, &size, module_, "generator_table") !=
-                success || size != shape::table_bytes)
+        pointer_t table{}, comb{};
+        size_t size{}, comb_bytes{};
+        if (!inflate(ptx)
+            || call_.context_current(context_) != success
+            || call_.context_limit(stack_limit, stack_bytes) != success
+            || call_.module_load(&module_, ptx.c_str()) != success
+            || call_.module_function(&ecdsa_, module_, "verify_ecdsa") != success
+            || call_.module_function(&schnorr_, module_, "verify_schnorr") != success
+            || call_.module_function(&silent_, module_, "scan_silent") != success
+            || call_.module_global(&table, &size, module_, "generator_table") != success
+            || size != shape::table_bytes
+            || call_.module_global(&comb, &comb_bytes, module_, "comb_table") != success
+            || comb_bytes != shape::comb_bytes)
             return false;
 
         for (size_t slice{}; slice < generator_slices.size(); ++slice)
             if (call_.copy_to(table + slice * shape::slice_bytes,
                 generator_slices[slice], shape::slice_bytes) != success)
+                return false;
+
+        for (size_t part{}; part < comb_parts.size(); ++part)
+            if (call_.copy_to(comb + part * shape::part_bytes,
+                comb_parts[part], shape::part_bytes) != success)
                 return false;
 
         size_t free{}, total{};
@@ -621,7 +732,8 @@ private:
 
         return
             calibrate_ecdsa(half_bytes_, is_nonzero(limited)) &&
-            calibrate_schnorr(half_bytes_, is_nonzero(limited));
+            calibrate_schnorr(half_bytes_, is_nonzero(limited)) &&
+            calibrate_silent(half_bytes_, is_nonzero(limited));
     }
 
     // Launch rows from capacity, bounded by launch time where limited.
@@ -655,7 +767,14 @@ private:
             !is_zero(result))
             return zero;
 
-        const auto capacity = layout<Key>::rows(bytes);
+        return limit_rows(layout<Key>::rows(bytes), limited, elapsed);
+    }
+
+    // Rows of capacity, bounded by calibrated launch time where limited.
+    static size_t limit_rows(size_t capacity, bool limited,
+        const std::chrono::steady_clock::duration& elapsed) NOEXCEPT
+    {
+        using namespace std::chrono;
         if (!limited)
             return capacity;
 
@@ -702,17 +821,61 @@ private:
         return !is_zero(schnorr_rows_);
     }
 
+    // BIP352 receiving vector "Simple send: two inputs", whose summary pays
+    // the receiver's unlabeled output key 3e9fce73d4e77a48...
+    bool calibrate_silent(size_t bytes, bool limited) NOEXCEPT
+    {
+        constexpr ec_compressed summary = base16_array(
+            "024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
+        constexpr ec_secret secret = base16_array(
+            "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+        constexpr prefix expected = base16_array("3e9fce73d4e77a48");
+
+        silent_arguments keys{};
+        keys.scan = base16_array(
+            "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
+        if (!secret_to_public(keys.spend, secret))
+            return false;
+
+        using namespace std::chrono;
+        const std::vector<ec_compressed> summaries(calibration_rows, summary);
+        std::vector<prefix> prefixes(calibration_rows);
+        data_chunk valid(calibration_rows);
+        const auto start = steady_clock::now();
+        if (call_.context_current(context_) != success ||
+            stage(zero, summaries, keys) != success ||
+            collect(zero, prefixes, valid) != success)
+            return false;
+
+        const auto elapsed = steady_clock::now() - start;
+        if (!std::ranges::all_of(valid, [](uint8_t value) NOEXCEPT
+            {
+                return is_one(value);
+            }) ||
+            !std::ranges::all_of(prefixes, [&](const prefix& value) NOEXCEPT
+            {
+                return value == expected;
+            }))
+            return false;
+
+        const auto capacity = silent_layout::rows(bytes, one);
+        silent_rows_ = limit_rows(capacity, limited, elapsed);
+        return true;
+    }
+
     functions call_{};
     device_t device_{};
     handle_t context_{};
     handle_t module_{};
     handle_t ecdsa_{};
     handle_t schnorr_{};
+    handle_t silent_{};
     pointer_t staging_{};
     size_t half_bytes_{};
     std_array<handle_t, two> streams_{};
     size_t ecdsa_rows_{};
     size_t schnorr_rows_{};
+    size_t silent_rows_{};
     bool retained_{};
     turns turns_{};
     std::atomic_bool failed_{};
@@ -751,6 +914,24 @@ bool verify(data_chunk& out, const stopper& cancel,
         batch.points, batch.signatures, true);
 }
 
+bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
+    const stopper& cancel, const std::span<const ec_compressed>& summaries,
+    const silent::batch::receiver& keys) NOEXCEPT
+{
+    if (keys.labels.size() > maximum_labels)
+        return false;
+
+    silent_arguments arguments{};
+    arguments.scan = keys.scan;
+    arguments.label_count = possible_narrow_cast<uint32_t>(keys.labels.size());
+    arguments.spend = keys.spend;
+    std::copy(keys.labels.cbegin(), keys.labels.cend(),
+        arguments.labels.begin());
+
+    return context::instance().scan(prefixes, valid, cancel, summaries,
+        arguments);
+}
+
 #else
 
 bool compiled() NOEXCEPT
@@ -770,6 +951,13 @@ bool verify(data_chunk&, const stopper&, const ecdsa::batch&) NOEXCEPT
 }
 
 bool verify(data_chunk&, const stopper&, const schnorr::batch&) NOEXCEPT
+{
+    return false;
+}
+
+bool scan(std::vector<prefix>&, data_chunk&, const stopper&,
+    const std::span<const ec_compressed>&,
+    const silent::batch::receiver&) NOEXCEPT
 {
     return false;
 }

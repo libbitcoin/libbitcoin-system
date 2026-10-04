@@ -130,6 +130,18 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__chunk_straddle__once)
     BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), true), (tx_links{ 7, 8 }));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__device_rows__expected)
+{
+    rows rows{};
+    rows.add(100, 70000, unlabeled_summary, labeled_key);
+    rows.add(7, unlabeled_summary, labeled_key);
+    rows.add(7, unlabeled_summary, unlabeled_key);
+    rows.add(8, labeled_summary, labeled_key);
+    rows.add(9, labeled_summary, unlabeled_key);
+    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), true), (tx_links{ 7 }));
+    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({ 2, 3, 1001337 }), true), (tx_links{ 7, 8 }));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

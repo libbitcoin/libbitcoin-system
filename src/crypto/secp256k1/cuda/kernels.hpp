@@ -48,6 +48,27 @@ struct schnorr_arguments
     uint32_t count;
 };
 
+/// Maximum label keys of a scan_silent launch.
+constexpr size_t maximum_labels = 8;
+
+/// Output key prefix (first eight bytes of x).
+using prefix = data_array<8>;
+
+/// Arguments of the scan_silent kernel, columns in device memory. Each
+/// summary has one prefix of the receiver output key, then one of that key
+/// plus each label key, and is valid if its keys are computed.
+struct silent_arguments
+{
+    const ec_compressed* summaries;
+    prefix* prefixes;
+    uint8_t* valid;
+    ec_secret scan;
+    ec_uncompressed spend;
+    std_array<ec_uncompressed, maximum_labels> labels;
+    uint32_t label_count;
+    uint32_t count;
+};
+
 } // namespace cuda
 } // namespace secp256k1
 } // namespace system

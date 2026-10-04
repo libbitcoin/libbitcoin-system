@@ -170,6 +170,96 @@ size_t silent::batch::next(const batch& batch, size_t row) NOEXCEPT
     return row;
 }
 
+static_assert(is_same_type<secp256k1::cuda::prefix, silent::batch::prefix>);
+
+// Transactions go to the device in blocks, and the output key prefixes of
+// each block are matched to the transaction rows in parallel. A chunk of rows
+// owns the transactions that begin within it, and a transaction ends where
+// the next begins.
+bool silent::batch::scan_device(size_t& resume, const stopper& cancel,
+    const batch& batch, const receiver& keys, const handler& callback,
+    bool turbo) NOEXCEPT
+{
+    const auto policy = poolstl::execution::par_if(turbo);
+    const auto count = batch.correlates.size();
+    const auto stride = add1(keys.labels.size());
+
+    std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
+    std::iota(chunks.begin(), chunks.end(), zero);
+    std_vector<std_vector<size_t>> owned(chunks.size());
+    std::for_each(policy, chunks.cbegin(), chunks.cend(),
+        [&](size_t chunk) NOEXCEPT
+        {
+            auto row = chunk * chunk_rows;
+            const auto end = std::min(row + chunk_rows, count);
+            if (is_nonzero(row) &&
+                batch.correlates[row] == batch.correlates[sub1(row)])
+                row = next(batch, row);
+
+            for (; row < end; row = next(batch, row))
+                owned[chunk].push_back(row);
+        });
+
+    std_vector<size_t> firsts{};
+    firsts.reserve(add1(count));
+    for (const auto& rows: owned)
+        firsts.insert(firsts.end(), rows.cbegin(), rows.cend());
+
+    const auto total = firsts.size();
+    firsts.push_back(count);
+
+    std_vector<size_t> groups(std::min(device_groups, total));
+    std::iota(groups.begin(), groups.end(), zero);
+    std_vector<ec_compressed> summaries{};
+    std::vector<secp256k1::cuda::prefix> keys_out{};
+    data_chunk valid{};
+    for (size_t base{}; base < total && !cancel; base += device_groups)
+    {
+        const auto size = std::min(device_groups, total - base);
+        const auto block = std::span{ groups }.first(size);
+        resume = firsts[base];
+        summaries.resize(size);
+        std::for_each(policy, block.begin(), block.end(),
+            [&](size_t group) NOEXCEPT
+            {
+                summaries[group] = batch.points[firsts[base + group]];
+            });
+
+        if (!secp256k1::cuda::scan(keys_out, valid, cancel, summaries, keys))
+            return false;
+
+        if (cancel)
+            break;
+
+        const std::span<const prefix> keyed{ keys_out };
+        std::for_each(policy, block.begin(), block.end(),
+            [&](size_t group) NOEXCEPT
+            {
+                if (is_zero(valid[group]))
+                    return;
+
+                const auto first = firsts[base + group];
+                const auto last = firsts[add1(base + group)];
+                const auto rows = batch.prefixes.subspan(first, last - first);
+                const auto candidates = keyed.subspan(group * stride, stride);
+                const auto paid = std::ranges::any_of(candidates,
+                    [&](const prefix& key) NOEXCEPT
+                    {
+                        return contains(rows, key);
+                    });
+
+                if (paid)
+                {
+                    const auto& correlate = batch.correlates[first];
+                    const auto link = from_little_endian(correlate);
+                    callback({}, link, batch.points[first]);
+                }
+            });
+    }
+
+    return true;
+}
+
 // scan
 // ----------------------------------------------------------------------------
 // The callback provides granular response when the query is very long-running,
@@ -189,7 +279,14 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
     if (!parse(parsed_keys, keys))
         return;
 
-    std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
+    size_t resume{};
+    if (count >= device_rows &&
+        keys.labels.size() <= secp256k1::cuda::maximum_labels &&
+        secp256k1::cuda::available() &&
+        scan_device(resume, cancel, batch, keys, callback, turbo))
+        return;
+
+    std_vector<size_t> chunks(ceilinged_divide(count - resume, chunk_rows));
     std::iota(chunks.begin(), chunks.end(), zero);
 
     // A chunk owns the transactions that begin within it.
@@ -200,7 +297,7 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
             if (cancel)
                 return;
 
-            auto row = chunk * chunk_rows;
+            auto row = resume + chunk * chunk_rows;
             const auto end = std::min(row + chunk_rows, count);
             if (is_nonzero(row) &&
                 batch.correlates[row] == batch.correlates[sub1(row)])

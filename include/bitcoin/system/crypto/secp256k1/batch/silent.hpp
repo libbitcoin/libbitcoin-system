@@ -60,8 +60,19 @@ protected:
     /// Rows scanned by one task.
     static constexpr size_t chunk_rows = power2(10_size);
 
+    /// Scans of at least this many rows run on the device where available.
+    static constexpr size_t device_rows = power2(16_size);
+
+    /// Transactions sent to the device at once.
+    static constexpr size_t device_groups = power2(22_size);
+
     /// The row that follows the transaction of the given row.
     static size_t next(const batch& batch, size_t row) NOEXCEPT;
+
+    /// Scan on the device, false if failed with resume the first unscanned row.
+    static bool scan_device(size_t& resume, const stopper& cancel,
+        const batch& batch, const receiver& keys, const handler& callback,
+        bool turbo) NOEXCEPT;
 };
 
 } // namespace silent
