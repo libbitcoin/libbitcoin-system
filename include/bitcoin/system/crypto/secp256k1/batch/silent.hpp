@@ -31,25 +31,37 @@ namespace system {
 namespace silent {
 
 /// Span matches serialized buffer.
+/// Rows of one transaction are contiguous and share one prevouts summary.
 struct BC_API batch
 {
     using prefix = data_array<8>;
     using tx_link = data_array<4>;
     using tx_link_t = unsigned_type<sizeof(tx_link)>;
-    ////using tx_links_t = std::vector<tx_link_t>;
-    using handler = std::function<void(const code&, tx_link_t)>;
+    using handler = std::function<void(const code&, tx_link_t,
+        const ec_compressed&)>;
+
+    /// Scan secret, spend key and label keys of a receiver.
+    struct receiver
+    {
+        ec_secret scan{};
+        ec_uncompressed spend{};
+        ec_uncompresseds labels{};
+    };
 
     std::span<const tx_link> correlates;
     std::span<const prefix> prefixes;
     std::span<const ec_compressed> points;
 
+    /// Invoke callback for each transaction with an output paying receiver.
     static void scan(const stopper& cancel, const batch& batch,
-        const ec_secret& scan_key, const handler& callback,
-        bool turbo) NOEXCEPT;
+        const receiver& keys, const handler& callback, bool turbo) NOEXCEPT;
 
 protected:
-    static bool get_match(tx_link_t& out, const batch& batch,
-        size_t row, const ec_secret& scan_key) NOEXCEPT;
+    /// Rows scanned by one task.
+    static constexpr size_t chunk_rows = power2(10_size);
+
+    /// The row that follows the transaction of the given row.
+    static size_t next(const batch& batch, size_t row) NOEXCEPT;
 };
 
 } // namespace silent

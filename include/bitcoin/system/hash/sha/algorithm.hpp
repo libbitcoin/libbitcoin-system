@@ -138,6 +138,11 @@ public:
     static constexpr digest_t hash(const state_t& midstate,
         const half_t& first, const half_t& second, const half_t& third) NOEXCEPT;
 
+    /// Hash of up to one block of bytes, following a one block midstate.
+    template <size_t Size, if_not_greater<Size, CLASSIF::space> = true>
+    static constexpr digest_t hash(const state_t& midstate,
+        const bytes_t<Size>& bytes) NOEXCEPT;
+
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
 
@@ -301,7 +306,7 @@ protected:
     static constexpr void schedule_1(buffer_t& buffer) NOEXCEPT;
 
     /// Unscheduled padding (new objects).
-    template <size_t Bytes>
+    template <size_t Bytes, size_t Prior = zero>
     static constexpr void simple_pad(block_t& block) NOEXCEPT;
     template <size_t Blocks = zero>
     static consteval chunk_t chunk_pad() NOEXCEPT;

@@ -20,9 +20,12 @@
 
 #include <numeric>
 #include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/execution.hpp>
+#include <bitcoin/system/hash/hash.hpp>
+#include "batch.hpp"
 
 namespace libbitcoin {
 namespace system {
@@ -33,14 +36,138 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// get_match
+// scan_rows
 // ----------------------------------------------------------------------------
 
-bool silent::batch::get_match(tx_link_t& , const batch& , size_t ,
-    const ec_secret& ) NOEXCEPT
+class silent_dispatcher
+  : public secp256k1::algorithm
 {
-    // TODO: implement.
-    return false;
+public:
+    using affine = affine_t<uint64_t>;
+    using affines = std_vector<affine>;
+    using scalar = scalar_t;
+    using scalars = std_vector<scalar_t>;
+    using algorithm::from_bytes;
+    using algorithm::is_zero_scalar;
+    using algorithm::multiply;
+    using algorithm::tweak;
+};
+
+// Receiver keys parsed once for all chunks of a scan.
+struct parsed
+{
+    silent_dispatcher::scalar scan{};
+    silent_dispatcher::affine spend{};
+    silent_dispatcher::affines labels{};
+};
+
+static bool parse(parsed& out, const silent::batch::receiver& keys) NOEXCEPT
+{
+    if (!silent_dispatcher::from_bytes(out.scan, keys.scan) ||
+        !silent_dispatcher::from_bytes(out.spend, keys.spend))
+        return false;
+
+    out.labels.resize(keys.labels.size());
+    for (size_t index{}; index < keys.labels.size(); ++index)
+    {
+        auto& label = out.labels[index];
+        if (!silent_dispatcher::from_bytes(label, keys.labels[index]))
+            return false;
+    }
+
+    return true;
+}
+
+// The shared secret of each transaction (k = 0) tweaks the spend key, and each
+// output key (and labeled key) is matched by prefix to the transaction rows.
+static void scan_rows(const silent::batch& batch,
+    const std::span<const size_t>& firsts,
+    const std::span<const size_t>& lasts, const parsed& keys,
+    const silent::batch::handler& callback) NOEXCEPT
+{
+    const auto count = firsts.size();
+    std_vector<ec_compressed> points(count);
+    for (size_t group{}; group < count; ++group)
+        points[group] = batch.points[firsts[group]];
+
+    data_chunk computed{};
+    std_vector<ec_compressed> shared{};
+    with_lanes([&]<typename Word>() NOEXCEPT
+    {
+        silent_dispatcher::multiply<Word>(computed, shared, points, keys.scan);
+        return true;
+    });
+
+    // The tagged hash of each shared point and k = 0 [bip352].
+    constexpr auto k = to_big_endian(0_u32);
+    constexpr auto& midstate = tagged_midstate<"BIP0352/SharedSecret">;
+    silent_dispatcher::scalars tweaks{};
+    std_vector<size_t> groups{};
+    tweaks.reserve(count);
+    groups.reserve(count);
+    for (size_t group{}; group < count; ++group)
+    {
+        if (is_zero(computed[group]))
+            continue;
+
+        const auto data = splice(shared[group], k);
+        const auto hash = sha256::hash(midstate, data);
+
+        silent_dispatcher::scalar tweak{};
+        if (silent_dispatcher::from_bytes(tweak, hash) &&
+            !silent_dispatcher::is_zero_scalar(tweak))
+        {
+            tweaks.push_back(tweak);
+            groups.push_back(group);
+        }
+    }
+
+    data_chunk tweaked{};
+    std_vector<ec_xonly> outputs{};
+    const auto& spend = keys.spend;
+    const auto& labels = keys.labels;
+    with_lanes([&]<typename Word>() NOEXCEPT
+    {
+        silent_dispatcher::tweak<Word>(tweaked, outputs, tweaks, spend, labels);
+        return true;
+    });
+
+    constexpr auto size = array_count<silent::batch::prefix>;
+    const auto stride = add1(keys.labels.size());
+    const std::span<const ec_xonly> keyed{ outputs };
+    for (size_t index{}; index < groups.size(); ++index)
+    {
+        if (is_zero(tweaked[index]))
+            continue;
+
+        const auto group = groups[index];
+        const auto first = firsts[group];
+        const auto rows = lasts[group] - first;
+        const auto prefixes = batch.prefixes.subspan(first, rows);
+        const auto candidates = keyed.subspan(index * stride, stride);
+        const auto paid = std::ranges::any_of(candidates,
+            [&](const ec_xonly& key) NOEXCEPT
+            {
+                return contains(prefixes, array_cast<uint8_t, size>(key));
+            });
+
+        if (paid)
+        {
+            const auto link = from_little_endian(batch.correlates[first]);
+            callback({}, link, batch.points[first]);
+        }
+    }
+}
+
+// protected
+// ----------------------------------------------------------------------------
+
+size_t silent::batch::next(const batch& batch, size_t row) NOEXCEPT
+{
+    const auto& correlate = batch.correlates[row];
+    const auto count = batch.correlates.size();
+    do { ++row; } while (row < count && batch.correlates[row] == correlate);
+    return row;
 }
 
 // scan
@@ -49,7 +176,7 @@ bool silent::batch::get_match(tx_link_t& , const batch& , size_t ,
 // which is consistent with the push notification public interface.
 
 void silent::batch::scan(const stopper& cancel, const batch& batch,
-    const ec_secret& scan_key, const handler& callback, bool turbo) NOEXCEPT
+    const receiver& keys, const handler& callback, bool turbo) NOEXCEPT
 {
     const auto policy = poolstl::execution::par_if(turbo);
 
@@ -58,19 +185,37 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
     BC_ASSERT(batch.prefixes.size() == count);
     BC_ASSERT(batch.points.size() == count);
 
-    std::vector<size_t> it(count);
-    std::iota(it.begin(), it.end(), zero);
+    parsed parsed_keys{};
+    if (!parse(parsed_keys, keys))
+        return;
 
+    std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
+    std::iota(chunks.begin(), chunks.end(), zero);
+
+    // A chunk owns the transactions that begin within it.
     // Return from scan with !cancel implies complete.
-    std::for_each(policy, it.cbegin(), it.cend(), [&](size_t row) NOEXCEPT
-    {
-        if (cancel)
-            return;
+    std::for_each(policy, chunks.cbegin(), chunks.cend(),
+        [&](size_t chunk) NOEXCEPT
+        {
+            if (cancel)
+                return;
 
-        tx_link_t tx{};
-        if (get_match(tx, batch, row, scan_key))
-            callback({}, tx);
-    });
+            auto row = chunk * chunk_rows;
+            const auto end = std::min(row + chunk_rows, count);
+            if (is_nonzero(row) &&
+                batch.correlates[row] == batch.correlates[sub1(row)])
+                row = next(batch, row);
+
+            std_vector<size_t> firsts{}, lasts{};
+            for (auto last = row; row < end; row = last)
+            {
+                last = next(batch, row);
+                firsts.push_back(row);
+                lasts.push_back(last);
+            }
+
+            scan_rows(batch, firsts, lasts, parsed_keys, callback);
+        });
 }
 
 BC_POP_WARNING()

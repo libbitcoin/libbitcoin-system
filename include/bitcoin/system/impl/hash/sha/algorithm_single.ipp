@@ -159,6 +159,24 @@ hash(const state_t& midstate, const half_t& first, const half_t& second,
 }
 
 TEMPLATE
+template <size_t Size, if_not_greater<Size, CLASSIF::space>>
+constexpr typename CLASS::digest_t CLASS::
+hash(const state_t& midstate, const bytes_t<Size>& bytes) NOEXCEPT
+{
+    block_t block{};
+    for (size_t byte{}; byte < Size; ++byte)
+        block[byte] = bytes[byte];
+
+    simple_pad<Size, array_count<block_t>>(block);
+
+    auto state = midstate;
+    buffer_t buffer{};
+    input(buffer, block);
+    schedule_compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const quart_t& left, const quart_t& right) NOEXCEPT
 {
