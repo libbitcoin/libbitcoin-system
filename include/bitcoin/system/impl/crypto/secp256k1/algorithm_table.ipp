@@ -96,7 +96,7 @@ constexpr void algorithm::lookup_comb(affine_t<uint64_t>& r, size_t window,
     auto at = comb_parts[window / comb_part_windows] + offset;
     for (size_t index{}; index < comb_size; ++index)
     {
-        const auto mask = 0_u64 - to_int<uint64_t>(index == entry);
+        const auto mask = to_mask(index == entry);
         for (size_t limb{}; limb < size; ++limb)
         {
             point.x[limb] |= at[limb] & mask;

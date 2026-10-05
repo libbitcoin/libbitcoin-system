@@ -47,6 +47,11 @@
     #define HAVE_POSIX
 #endif
 
+/// Valgrind client requests (headers present).
+#if __has_include(<valgrind/memcheck.h>)
+    #define HAVE_VALGRIND
+#endif
+
 /// stackoverflow.com/questions/38499462/how-to-tell-clang-to-stop-pretending-
 /// to-be-other-compilers
 #if defined(__clang__)

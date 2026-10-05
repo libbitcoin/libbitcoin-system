@@ -27,6 +27,10 @@
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+#if defined(HAVE_VALGRIND)
+    #include <valgrind/memcheck.h>
+#endif
+
 // Based on:
 // secg.org/sec2-v2.pdf
 // github.com/bitcoin-core/secp256k1 (5x52 field representation)
@@ -243,8 +247,10 @@ protected:
     static constexpr Word equal(const field_t<Word>& a,
         const field_t<Word>& b) NOEXCEPT;
 
-    /// a = 0 mod p (loose, limbs below 2^56), in variable time.
+    /// a = 0 mod p (loose, limbs below 2^56), and as a mask.
     static constexpr bool normalizes_to_zero(
+        const field_t<uint64_t>& a) NOEXCEPT;
+    static constexpr uint64_t normalized_zero(
         const field_t<uint64_t>& a) NOEXCEPT;
 
     /// Field encoding.
@@ -368,6 +374,10 @@ protected:
     /// r = -a mod n.
     static constexpr void negate(scalar_t& r, const scalar_t& a) NOEXCEPT;
 
+    /// r = mask ? a : b.
+    static constexpr void select(scalar_t& r, uint64_t mask,
+        const scalar_t& a, const scalar_t& b) NOEXCEPT;
+
     /// r = a * b mod n.
     static constexpr void multiply(scalar_t& r, const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
@@ -423,8 +433,14 @@ protected:
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
     static constexpr bool is_less(const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
-    static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
+    static constexpr void reduce(scalar_t& r, uint64_t overflow) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, const wide_t& l) NOEXCEPT;
+
+    /// All bits set where true.
+    static constexpr uint64_t to_mask(bool value) NOEXCEPT;
+
+    /// All bits set where zero.
+    static constexpr uint64_t zero_mask(uint64_t value) NOEXCEPT;
 
     /// Three word column accumulator.
     using column_t = std_array<uint64_t, 3>;
@@ -885,6 +901,13 @@ protected:
     /// secret = 0, by stores that are not elided.
     template <typename Container>
     static constexpr void wipe(Container& secret) NOEXCEPT;
+
+    /// Release a value from constant time analysis, as public by definition
+    /// or of negligible dependence on secrets.
+    template <typename Value>
+    static constexpr void declassify(const Value& value) NOEXCEPT;
+    static constexpr void declassify(const uint8_t* data,
+        size_t size) NOEXCEPT;
 
     /// ECDSA (r, s) of z by secret d and nonce k, low s, with recovery id,
     /// blinded by m and b (d, k, m, b nonzero), false if r or s is zero.

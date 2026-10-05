@@ -53,6 +53,7 @@ constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
     jacobian_t<uint64_t> sum{};
     sum.infinity = max_uint64;
     add_comb(sum, g, faults);
+    declassify(faults);
     if (is_nonzero(faults))
     {
         LCOV_EXCL_START("A comb from infinity by a scalar below n is regular.")
@@ -80,6 +81,7 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     sum.infinity = max_uint64;
     add_comb(sum, masked, faults);
     add_comb(sum, m, faults);
+    declassify(faults);
     if (is_nonzero(faults))
     {
         jacobian_t<uint64_t> blind{};
@@ -103,7 +105,9 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
 
     const scalars_t<uint64_t> blinds{ m };
     jacobian_t<uint64_t> blinded{};
-    if (f::any(multiply_windows<point_bits>(blinded, a, blinds)))
+    auto faults = multiply_windows<point_bits>(blinded, a, blinds);
+    declassify(faults);
+    if (f::any(faults))
         multiply_complete(blinded, {}, a, m);
 
     affine_t<uint64_t> point{};
@@ -111,7 +115,9 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
 
     const scalars_t<uint64_t> quotients{ quotient };
     jacobian_t<uint64_t> product{};
-    if (f::any(multiply_windows<point_bits>(product, point, quotients)))
+    faults = multiply_windows<point_bits>(product, point, quotients);
+    declassify(faults);
+    if (f::any(faults))
         multiply_complete(product, {}, point, quotient);
 
     to_affine_power(r, product);
@@ -156,6 +162,24 @@ constexpr void algorithm::wipe(Container& secret) NOEXCEPT
     }
 }
 
+template <typename Value>
+constexpr void algorithm::declassify(
+    [[maybe_unused]] const Value& value) NOEXCEPT
+{
+    declassify(pointer_cast<const uint8_t>(&value), sizeof(value));
+}
+
+constexpr void algorithm::declassify([[maybe_unused]] const uint8_t* data,
+    [[maybe_unused]] size_t size) NOEXCEPT
+{
+    if (!std::is_constant_evaluated())
+    {
+#if defined(HAVE_VALGRIND)
+        VALGRIND_MAKE_MEM_DEFINED(data, size);
+#endif
+    }
+}
+
 // R = kG, r = x(R) mod n, s = (z + r d) / k, with s made low. The recovery id
 // is the parity of y(R), and 2 where x(R) is not below n.
 constexpr bool algorithm::sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,
@@ -178,14 +202,18 @@ constexpr bool algorithm::sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,
     wipe(numerator);
     wipe(inverse_k);
 
-    if (is_high(s))
-    {
-        negate(s, s);
-        odd = !odd;
-    }
+    const auto high = is_high(s);
+    scalar_t low{};
+    negate(low, s);
+    select(s, to_mask(high), low, s);
+    odd = odd != high;
 
-    id = narrow_cast<uint8_t>((overflow ? 2u : 0u) | (odd ? 1u : 0u));
-    return !is_zero_scalar(r) && !is_zero_scalar(s);
+    const auto parity = to_int<uint8_t>(odd);
+    const auto excess = to_int<uint8_t>(overflow);
+    id = narrow_cast<uint8_t>(two * excess + parity);
+    const auto zero = to_mask(is_zero_scalar(r)) | to_mask(is_zero_scalar(s));
+    declassify(zero);
+    return !to_bool(zero);
 }
 
 constexpr void algorithm::nonce_schnorr(bytes_t& r_x, scalar_t& k,
@@ -193,9 +221,10 @@ constexpr void algorithm::nonce_schnorr(bytes_t& r_x, scalar_t& k,
 {
     affine_t<uint64_t> point{};
     secret_multiply(point, k, m);
-    if (f::any(is_odd_element(point.y)))
-        negate(k, k);
 
+    scalar_t negated{};
+    negate(negated, k);
+    select(k, is_odd_element(point.y), negated, k);
     to_bytes(r_x, point.x);
 }
 

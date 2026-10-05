@@ -158,7 +158,7 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     r = { x3, y3, z3, f::broadcast<Word>(uint64_t{}) };
     if constexpr (is_same_type<Word, uint64_t>)
     {
-        return normalizes_to_zero(h) ? max_uint64 : infinity;
+        return normalized_zero(h) | infinity;
     }
     else
     {
@@ -174,7 +174,9 @@ constexpr void algorithm::add_complete(jacobian_t<uint64_t>& r,
     const jacobian_t<uint64_t>& a, const affine_t<uint64_t>& b) NOEXCEPT
 {
     jacobian_t<uint64_t> sum{};
-    if (!f::any(add(sum, a, b)))
+    const auto uncomputed = add(sum, a, b);
+    declassify(uncomputed);
+    if (!f::any(uncomputed))
     {
         r = sum;
         return;
@@ -189,7 +191,9 @@ constexpr void algorithm::add_complete(jacobian_t<uint64_t>& r,
     const jacobian_t<uint64_t>& a, const jacobian_t<uint64_t>& b) NOEXCEPT
 {
     jacobian_t<uint64_t> sum{};
-    if (!f::any(add(sum, a, b)))
+    const auto uncomputed = add(sum, a, b);
+    declassify(uncomputed);
+    if (!f::any(uncomputed))
     {
         r = sum;
         return;
@@ -401,7 +405,7 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, field_t<Word>& h,
         multiply(hhh, hhh, a.y);
         add(y3, y3, hhh);
 
-        const auto uncomputed = normalizes_to_zero(h) ? max_uint64 : a.infinity;
+        const auto uncomputed = normalized_zero(h) | a.infinity;
         r = { x3, y3, z3, 0_u64 };
         return uncomputed;
     }

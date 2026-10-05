@@ -74,8 +74,8 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     constexpr auto generator_top = sub1(digit_count<generator_bits>) *
         generator_bits;
     constexpr auto point_top = sub1(digit_count<Bits>) * Bits;
-    constexpr auto top = Generator ? greater(generator_top, point_top) :
-        point_top;
+    constexpr auto either = greater(generator_top, point_top);
+    constexpr auto top = Generator ? either : point_top;
 
     recodes_t<generator_bits, Word> g_first{}, g_second{};
     recodes_t<Bits, Word> k_first{}, k_second{};
@@ -283,14 +283,13 @@ constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
         }
 
         digit = (digit & mask) + carry;
-        const auto negative = 0_u64 - to_int<uint64_t>(digit > comb_size);
+        const auto negative = to_mask(digit > comb_size);
         digit = f::select(negative, span - digit, digit);
         carry = negative & 1_u64;
 
-        const auto zero = 0_u64 - to_int<uint64_t>(is_zero(digit));
-        const auto entry = sub1(digit | (zero & 1_u64));
-        lookup_comb(addend, window, possible_narrow_cast<size_t>(entry),
-            negative);
+        const auto zero = to_mask(is_zero(digit));
+        const auto entry = possible_narrow_cast<size_t>(digit | (zero & 1_u64));
+        lookup_comb(addend, window, sub1(entry), negative);
 
         uint64_t fault{};
         auto sum = r;
@@ -312,9 +311,7 @@ constexpr void algorithm::recode(recoded_t<Bits>& r,
     scalar_t negated{}, magnitude{};
     negate(negated, half);
     r.negative = is_high(half);
-    const auto negative = 0_u64 - to_int<uint64_t>(r.negative);
-    for (size_t limb{}; limb < magnitude.size(); ++limb)
-        magnitude[limb] = f::select(negative, negated[limb], half[limb]);
+    select(magnitude, to_mask(r.negative), negated, half);
 
     r.even = !get_right(magnitude[0]);
     magnitude[0] |= to_int<uint64_t>(r.even);
@@ -402,8 +399,7 @@ constexpr void algorithm::digit(Word& index, Word& negative,
         const size_t magnitude = absolute(value);
         const auto entry = to_half(sub1(magnitude));
         indexes[lane] = interleaved ? entry * stride + lane : entry;
-        negatives[lane] = is_negative(value) != half.negative ? max_uint64 :
-            0_u64;
+        negatives[lane] = to_mask(is_negative(value) != half.negative);
     }
 
     index = pack<Word>(indexes);
@@ -486,12 +482,12 @@ constexpr void algorithm::lookup(affine_t<Word>& r,
         {
             const auto first = f::broadcast<Word>(uint64_t{ at * stride });
             const auto mask = f::eq<64>(offset, f::add<64>(first, ids));
+            const auto& x = table[at].x;
+            const auto& y = table[at].y;
             for (size_t limb{}; limb < size; ++limb)
             {
-                entry.x[limb] = f::or_(entry.x[limb],
-                    f::and_(table[at].x[limb], mask));
-                entry.y[limb] = f::or_(entry.y[limb],
-                    f::and_(table[at].y[limb], mask));
+                entry.x[limb] = f::or_(entry.x[limb], f::and_(x[limb], mask));
+                entry.y[limb] = f::or_(entry.y[limb], f::and_(y[limb], mask));
             }
         }
     }
@@ -608,8 +604,8 @@ constexpr void algorithm::correct(jacobian_t<Word>& r, const affine_t<Word>& a,
     words_t<Word> evens{}, positives{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
-        evens[lane] = halves[lane].even ? max_uint64 : 0_u64;
-        positives[lane] = halves[lane].negative ? 0_u64 : max_uint64;
+        evens[lane] = to_mask(halves[lane].even);
+        positives[lane] = to_mask(!halves[lane].negative);
     }
 
     const auto even = pack<Word>(evens);

@@ -598,9 +598,14 @@ constexpr Word algorithm::equal(const field_t<Word>& a,
     return f::eq<64>(merged, f::broadcast<Word>(uint64_t{}));
 }
 
-// Carried once, a loose value is zero mod p only as zero or p, which the low
-// limb alone excludes for nearly all values.
 constexpr bool algorithm::normalizes_to_zero(
+    const field_t<uint64_t>& a) NOEXCEPT
+{
+    return to_bool(normalized_zero(a));
+}
+
+// Carried once, a loose value is zero mod p only as zero or p.
+constexpr uint64_t algorithm::normalized_zero(
     const field_t<uint64_t>& a) NOEXCEPT
 {
     constexpr auto low_prime = prime[0] ^ limb_mask;
@@ -611,9 +616,6 @@ constexpr bool algorithm::normalizes_to_zero(
     t0 += (t4 >> top_bits) * fold_256;
     auto z0 = t0 & limb_mask;
     auto z1 = z0 ^ low_prime;
-    if (is_nonzero(z0) && z1 != limb_mask)
-        return false;
-
     auto t1 = a[1];
     auto t2 = a[2];
     auto t3 = a[3];
@@ -627,7 +629,7 @@ constexpr bool algorithm::normalizes_to_zero(
     t3 &= limb_mask;
     z0 |= t1 | t2 | t3 | t4;
     z1 &= t1 & t2 & t3 & (t4 ^ top_prime);
-    return is_zero(z0) || z1 == limb_mask;
+    return zero_mask(z0) | zero_mask(z1 ^ limb_mask);
 }
 
 // Field encoding.
