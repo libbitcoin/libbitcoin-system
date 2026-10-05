@@ -706,18 +706,21 @@ protected:
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
 
-    /// r = k * a, mask of lanes not computed (exceptional).
+    /// r = k * a (constant time in k), mask of lanes not computed.
     template <typename Word>
     static constexpr Word multiply(jacobian_t<Word>& r,
         const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT;
 
-    /// r = g * G + k * a by point windows of Bits, mask of lanes not computed.
-    template <size_t Bits, bool Generator = true, typename Word>
+    /// r = g * G + k * a by point windows of Bits, mask of lanes not computed,
+    /// with point table reads independent of k where Secret.
+    template <size_t Bits, bool Generator = true, bool Secret = false,
+        typename Word>
     static constexpr Word multiply_windows(jacobian_t<Word>& r,
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
 
-    /// r = k * a by point windows of Bits, mask of lanes not computed.
+    /// r = k * a by point windows of Bits (constant time in k), mask of lanes
+    /// not computed.
     template <size_t Bits, typename Word>
     static constexpr Word multiply_windows(jacobian_t<Word>& r,
         const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT;
@@ -761,21 +764,21 @@ protected:
         const recodes_t<Bits, Word>& halves, size_t position,
         bool interleaved) NOEXCEPT;
 
-    template <size_t Size, typename Word>
+    template <bool Secret, size_t Size, typename Word>
     static constexpr void lookup(affine_t<Word>& r,
         const std_array<affine_t<Word>, Size>& table, Word offset,
         Word negative) NOEXCEPT;
 
-    template <typename Word>
+    template <bool Secret, typename Word>
     static constexpr void add_point(jacobian_t<Word>& r,
         const affine_t<Word>& b, Word& faults) NOEXCEPT;
 
-    template <typename Word>
+    template <bool Secret, typename Word>
     static constexpr void add_point(jacobian_t<Word>& r,
         const affine_t<Word>& b, const field_t<Word>& scale,
         Word& faults) NOEXCEPT;
 
-    template <size_t Bits, typename Word>
+    template <bool Secret, size_t Bits, typename Word>
     static constexpr void correct(jacobian_t<Word>& r, const affine_t<Word>& a,
         const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
         Word& faults) NOEXCEPT;
@@ -845,13 +848,14 @@ protected:
         const scalar_t& e, const field_t<uint64_t>& r_x,
         const scalar_t& s) NOEXCEPT;
 
-    /// Keys and signing (variable time, secrets blinded).
+    /// Keys and signing (constant time, secrets blinded).
     /// -----------------------------------------------------------------------
     /// A secret multiple k * G is computed as (k - m) * G + m * G, and k * a
     /// as (k / m) * (m * a), for a random blind m, so that each multiplication
-    /// is of a value independent of k. Comb lookups read every entry of a
-    /// window, so memory access does not depend on the digit, and additions
-    /// are skipped only for zero digits.
+    /// is of a value independent of k. Table lookups read every entry, each
+    /// addition and correction is computed and taken by mask, and inversions
+    /// are by fixed exponent, so that time and memory access do not depend on
+    /// the secrets (excepting negligible fallbacks for exceptional sums).
 
     /// r = g * G + k * a (normal), false if infinity.
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,

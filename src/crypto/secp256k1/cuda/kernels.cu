@@ -81,9 +81,13 @@ public:
         if (!decode(point, summary))
             return 0;
 
+        // The device computes in variable time, a server-side optimization
+        // that is opted out of by not compiling CUDA.
         jacobian_t<uint64_t> sum{};
         const scalars_t<uint64_t> ks{ arguments.scan };
-        if (f::any(multiply_windows<window_bits>(sum, point, ks)))
+        const auto uncomputed = multiply_windows<window_bits, false, false>(sum, {},
+            point, ks);
+        if (f::any(uncomputed))
             multiply_complete(sum, {}, point, arguments.scan);
 
         if (f::any(sum.infinity))
@@ -108,7 +112,7 @@ public:
         sum = {};
         sum.infinity = max_uint64;
         add_comb(sum, tweak, faults);
-        add_point(sum, arguments.spend, faults);
+        add_point<false>(sum, arguments.spend, faults);
         if (is_nonzero(faults))
             multiply_complete(sum, tweak, arguments.spend, { 1 });
 

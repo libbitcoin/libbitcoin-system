@@ -365,11 +365,11 @@ inline void algorithm::tweak_comb(data_chunk& valid,
         sum = {};
         sum.infinity = max_uint64;
         add_comb(sum, tweaks[index], faults);
-        add_point(sum, point, faults);
+        add_point<false>(sum, point, faults);
         for (size_t addend{}; addend < addends.size(); ++addend)
         {
             row[add1(addend)] = sum;
-            add_point(row[add1(addend)], addends[addend], faults);
+            add_point<false>(row[add1(addend)], addends[addend], faults);
         }
 
         if (is_nonzero(faults))
@@ -458,7 +458,7 @@ void algorithm::tweak_lanes(data_chunk& valid, std_vector<ec_xonly>& out,
         for (size_t index{}; index < addends.size(); ++index)
         {
             auto added = sum;
-            add_point(added, lane_addends[index], faults);
+            add_point<false>(added, lane_addends[index], faults);
             unpack(rows[add1(index)], added);
         }
 

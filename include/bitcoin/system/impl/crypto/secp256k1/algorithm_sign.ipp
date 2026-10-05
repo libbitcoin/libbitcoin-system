@@ -92,16 +92,29 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     wipe(masked);
 }
 
+// k * a = (k / m) * (m * a).
 constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
     const scalar_t& k, const affine_t<uint64_t>& a,
     const scalar_t& m) NOEXCEPT
 {
-    affine_t<uint64_t> blinded{};
     scalar_t quotient{};
-    /* bool */ linear(blinded, {}, a, m);
-    inverse(quotient, m);
+    inverse_power(quotient, m);
     multiply(quotient, quotient, k);
-    /* bool */ linear(r, {}, blinded, quotient);
+
+    const scalars_t<uint64_t> blinds{ m };
+    jacobian_t<uint64_t> blinded{};
+    if (f::any(multiply_windows<point_bits>(blinded, a, blinds)))
+        multiply_complete(blinded, {}, a, m);
+
+    affine_t<uint64_t> point{};
+    to_affine_power(point, blinded);
+
+    const scalars_t<uint64_t> quotients{ quotient };
+    jacobian_t<uint64_t> product{};
+    if (f::any(multiply_windows<point_bits>(product, point, quotients)))
+        multiply_complete(product, {}, point, quotient);
+
+    to_affine_power(r, product);
     wipe(quotient);
 }
 
