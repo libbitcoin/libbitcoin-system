@@ -367,8 +367,8 @@ static bool is_comb(size_t window, size_t entry) NOEXCEPT
     k[bit / 64] = uint64_t{ add1(entry) } << (bit % 64);
 
     affine positive{}, negative{};
-    accessor::lookup_comb(positive, window, entry, false);
-    accessor::lookup_comb(negative, window, entry, true);
+    accessor::lookup_comb(positive, window, entry, 0_u64);
+    accessor::lookup_comb(negative, window, entry, max_uint64);
     const auto expected = multiple(k);
     return is_same(positive, expected) &&
         encode(negative.x) == encode(expected.x) &&
@@ -412,7 +412,7 @@ static bool is_comb_table() NOEXCEPT
         auto sum = base;
         for (size_t index{}; index < accessor::comb_size; ++index)
         {
-            accessor::lookup_comb(point, window, index, false);
+            accessor::lookup_comb(point, window, index, 0_u64);
             accessor::to_affine(expected, sum);
             if (!is_same(point, expected))
                 return false;

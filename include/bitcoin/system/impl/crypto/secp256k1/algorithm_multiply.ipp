@@ -263,7 +263,8 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 }
 
 // Each window adds the entry of its signed digit, where a digit above half the
-// window span is taken negative with a carry into the next window.
+// window span is taken negative with a carry into the next window. A zero
+// digit adds the first entry and keeps the prior sum.
 constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
     uint64_t& faults) NOEXCEPT
 {
@@ -272,7 +273,7 @@ constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
     constexpr auto mask = sub1(span);
 
     affine_t<uint64_t> addend{};
-    auto carry = false;
+    uint64_t carry{};
     for (size_t window{}; window < comb_windows; ++window)
     {
         const auto bit = window * comb_bits;
@@ -288,17 +289,21 @@ constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
                 digit |= k[add1(limb)] << (limb_size - shift);
         }
 
-        digit = (digit & mask) + to_int(carry);
-        carry = digit > comb_size;
-        if (carry)
-            digit = span - digit;
+        digit = (digit & mask) + carry;
+        const auto negative = 0_u64 - to_int<uint64_t>(digit > comb_size);
+        digit = f::select(negative, span - digit, digit);
+        carry = negative & 1_u64;
 
-        if (is_zero(digit))
-            continue;
+        const auto zero = 0_u64 - to_int<uint64_t>(is_zero(digit));
+        const auto entry = sub1(digit | (zero & 1_u64));
+        lookup_comb(addend, window, possible_narrow_cast<size_t>(entry),
+            negative);
 
-        lookup_comb(addend, window, possible_narrow_cast<size_t>(sub1(digit)),
-            carry);
-        add_point(r, addend, faults);
+        uint64_t fault{};
+        auto sum = r;
+        add_point(sum, addend, fault);
+        select(r, zero, r, sum);
+        faults |= f::andnot(zero, fault);
     }
 }
 
@@ -503,10 +508,11 @@ constexpr void algorithm::add_point(jacobian_t<Word>& r,
 {
     if constexpr (is_same_type<Word, uint64_t>)
     {
-        if (is_nonzero(r.infinity))
-            to_jacobian(r, b);
-        else
-            faults |= add(r, r, b);
+        jacobian_t<Word> sum{}, lifted{};
+        const auto uncomputed = add(sum, r, b);
+        to_jacobian(lifted, b);
+        faults |= f::andnot(r.infinity, uncomputed);
+        select(r, r.infinity, lifted, sum);
     }
     else
     {
@@ -536,10 +542,11 @@ constexpr void algorithm::add_point(jacobian_t<Word>& r,
 {
     if constexpr (is_same_type<Word, uint64_t>)
     {
-        if (is_nonzero(r.infinity))
-            to_jacobian(r, b, scale);
-        else
-            faults |= add(r, r, b, scale);
+        jacobian_t<Word> sum{}, lifted{};
+        const auto uncomputed = add(sum, r, b, scale);
+        to_jacobian(lifted, b, scale);
+        faults |= f::andnot(r.infinity, uncomputed);
+        select(r, r.infinity, lifted, sum);
     }
     else
     {

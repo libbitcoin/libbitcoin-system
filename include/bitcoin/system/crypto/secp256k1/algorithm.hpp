@@ -676,10 +676,10 @@ protected:
 
     static_assert(array_count<decltype(comb_parts)> == comb_part_count);
 
-    /// r = entry of a comb window (1 + entry times its base), negated, read by
-    /// scanning the window.
+    /// r = entry of a comb window (1 + entry times its base), negated by mask,
+    /// read by scanning the window.
     static constexpr void lookup_comb(affine_t<uint64_t>& r, size_t window,
-        size_t entry, bool negative) NOEXCEPT;
+        size_t entry, uint64_t negative) NOEXCEPT;
 
     /// r += k * G, by one addition per signed digit, without doubling.
     static constexpr void add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
