@@ -268,14 +268,19 @@ INLINE void chacha20::sequence(state_t<xWord>& keystream,
     constexpr auto part = parts<xWord>;
     constexpr auto lane = lanes<xWord>;
 
+    const auto little = [](xWord word) NOEXCEPT
+    {
+        return native_to_little_end<uint32_t>(word);
+    };
+
     if constexpr (part > 0)
-        keystream[part * Lane + 0] = x[lane * 0 + Lane];
+        keystream[part * Lane + 0] = little(x[lane * 0 + Lane]);
     if constexpr (part > 1)
-        keystream[part * Lane + 1] = x[lane * 1 + Lane];
+        keystream[part * Lane + 1] = little(x[lane * 1 + Lane]);
     if constexpr (part > 2)
-        keystream[part * Lane + 2] = x[lane * 2 + Lane];
+        keystream[part * Lane + 2] = little(x[lane * 2 + Lane]);
     if constexpr (part > 3)
-        keystream[part * Lane + 3] = x[lane * 3 + Lane];
+        keystream[part * Lane + 3] = little(x[lane * 3 + Lane]);
 }
 
 // Generates lanes sequential keystream blocks.

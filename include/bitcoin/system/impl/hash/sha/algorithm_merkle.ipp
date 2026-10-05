@@ -378,14 +378,14 @@ unpack(const xstate_t<xWord>& xstate) NOEXCEPT
     // TODO: byteswap state in full one time before unpacking (vs. 8 times).
     return array_cast<byte_t>(state_t
     {
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[0])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[1])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[2])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[3])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[4])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[5])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[6])),
-        f::get<word_t, Lane>(f::byteswap<word_t>(xstate[7]))
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[0])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[1])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[2])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[3])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[4])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[5])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[6])),
+        f::get<word_t, Lane>(native_to_big_end<word_t>(xstate[7]))
     });
 }
 

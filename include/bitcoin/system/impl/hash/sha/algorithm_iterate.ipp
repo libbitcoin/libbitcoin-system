@@ -41,13 +41,13 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
 
     if constexpr (Lanes == 2)
     {
-        return f::byteswap<word_t>(f::set<xword_t>(
+        return native_from_big_end<word_t>(f::set<xword_t>(
             xblock[0][Word],
             xblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
-        return f::byteswap<word_t>(f::set<xword_t>(
+        return native_from_big_end<word_t>(f::set<xword_t>(
             xblock[0][Word],
             xblock[1][Word],
             xblock[2][Word],
@@ -55,7 +55,7 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
     }
     else if constexpr (Lanes == 8)
     {
-        return f::byteswap<word_t>(f::set<xword_t>(
+        return native_from_big_end<word_t>(f::set<xword_t>(
             xblock[0][Word],
             xblock[1][Word],
             xblock[2][Word],
@@ -67,7 +67,7 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
     }
     else if constexpr (Lanes == 16)
     {
-        return f::byteswap<word_t>(f::set<xword_t>(
+        return native_from_big_end<word_t>(f::set<xword_t>(
             xblock[ 0][Word],
             xblock[ 1][Word],
             xblock[ 2][Word],

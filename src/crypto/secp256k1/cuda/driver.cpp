@@ -66,18 +66,8 @@ bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
     const stopper& cancel, const std::span<const ec_compressed>& summaries,
     const silent::batch::receiver& keys) NOEXCEPT
 {
-    if (keys.labels.size() > maximum_labels)
-        return false;
-
-    silent_arguments arguments{};
-    arguments.scan = keys.scan;
-    arguments.label_count = possible_narrow_cast<uint32_t>(keys.labels.size());
-    arguments.spend = keys.spend;
-    std::copy(keys.labels.cbegin(), keys.labels.cend(),
-        arguments.labels.begin());
-
     return context::instance().scan(prefixes, valid, cancel, summaries,
-        arguments);
+        keys);
 }
 
 #else

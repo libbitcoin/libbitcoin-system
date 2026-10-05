@@ -45,15 +45,25 @@ constexpr bool algorithm::is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT
     return !carry;
 }
 
-// Adds 2^256 - n (modulo 2^256) where overflow, which subtracts n from a value
-// not below n.
-constexpr void algorithm::reduce(scalar_t& r, bool overflow) NOEXCEPT
+// Adds 2^256 - n (modulo 2^256) by mask, which subtracts n from a value not
+// below n.
+constexpr void algorithm::reduce(scalar_t& r, uint64_t overflow) NOEXCEPT
 {
-    const auto mask = overflow ? max_uint64 : 0_u64;
     auto carry = false;
     for (size_t limb{}; limb < r.size(); ++limb)
-        carry = add_carry(r[limb], r[limb], order_complement[limb] & mask,
+        carry = add_carry(r[limb], r[limb], order_complement[limb] & overflow,
             carry);
+}
+
+constexpr uint64_t algorithm::to_mask(bool value) NOEXCEPT
+{
+    return 0_u64 - to_int<uint64_t>(value);
+}
+
+// The high bit of value or its negation is set for any nonzero value.
+constexpr uint64_t algorithm::zero_mask(uint64_t value) NOEXCEPT
+{
+    return sub1((value | (0_u64 - value)) >> sub1(bits<uint64_t>));
 }
 
 // Folds limbs above 2^256 by 2^256 = 2^256 - n (mod n), from 512 to 385 to
@@ -118,7 +128,7 @@ constexpr void algorithm::reduce(scalar_t& r, const wide_t& l) NOEXCEPT
     r[2] = take(c);
     add(c, p3);
     r[3] = take(c);
-    reduce(r, is_nonzero(c[0]) || is_overflow(r));
+    reduce(r, ~zero_mask(c[0]) | to_mask(is_overflow(r)));
 }
 
 INLINE constexpr void algorithm::multiply_add(column_t& r, uint64_t a,
@@ -198,19 +208,28 @@ constexpr void algorithm::add(scalar_t& r, const scalar_t& a,
     for (size_t limb{}; limb < r.size(); ++limb)
         carry = add_carry(r[limb], a[limb], b[limb], carry);
 
-    reduce(r, carry || is_overflow(r));
+    reduce(r, to_mask(carry) | to_mask(is_overflow(r)));
 }
 
 // n - a as n + ~a + 1, masked to zero for zero a.
 constexpr void algorithm::negate(scalar_t& r, const scalar_t& a) NOEXCEPT
 {
-    const auto mask = is_zero_scalar(a) ? 0_u64 : max_uint64;
+    const auto mask = ~zero_mask(a[0] | a[1] | a[2] | a[3]);
     auto carry = true;
     for (size_t limb{}; limb < r.size(); ++limb)
     {
         carry = add_carry(r[limb], order[limb], ~a[limb], carry);
         r[limb] &= mask;
     }
+}
+
+constexpr void algorithm::select(scalar_t& r, uint64_t mask,
+    const scalar_t& a, const scalar_t& b) NOEXCEPT
+{
+    r[0] = f::select(mask, a[0], b[0]);
+    r[1] = f::select(mask, a[1], b[1]);
+    r[2] = f::select(mask, a[2], b[2]);
+    r[3] = f::select(mask, a[3], b[3]);
 }
 
 constexpr void algorithm::multiply(scalar_t& r, const scalar_t& a,
@@ -227,6 +246,37 @@ constexpr void algorithm::inverse(scalar_t& r, const scalar_t& a) NOEXCEPT
     to_signed62(x, a);
     invert(x, order_modulus);
     from_signed62(r, x);
+}
+
+// Exponent n - 2 by windows of four bits, from a table of the powers of a
+// below sixteen, where only the exponent selects the entry.
+constexpr void algorithm::inverse_power(scalar_t& r,
+    const scalar_t& a) NOEXCEPT
+{
+    constexpr size_t window_bits = 4;
+    constexpr auto limb_windows = bits<uint64_t> / window_bits;
+    constexpr auto windows = array_count<scalar_t> * limb_windows;
+    constexpr auto mask = unmask_right<uint64_t>(window_bits);
+
+    std_array<scalar_t, power2(window_bits)> table{};
+    table.front() = { 1 };
+    for (auto entry = one; entry < table.size(); ++entry)
+        multiply(table[entry], table[sub1(entry)], a);
+
+    scalar_t out{ 1 };
+    for (auto window = windows; is_nonzero(window--);)
+    {
+        const auto limb = order_minus_two[window / limb_windows];
+        const auto shift = (window % limb_windows) * window_bits;
+        const auto entry = (limb >> shift) & mask;
+
+        for (size_t count{}; count < window_bits; ++count)
+            multiply(out, out, out);
+
+        multiply(out, out, table[entry]);
+    }
+
+    r = out;
 }
 
 constexpr void algorithm::split(scalar_t& k1, scalar_t& k2,
@@ -296,7 +346,7 @@ constexpr bool algorithm::from_bytes(scalar_t& r,
 {
     decode(r, bytes);
     const auto overflow = is_overflow(r);
-    reduce(r, overflow);
+    reduce(r, to_mask(overflow));
     return !overflow;
 }
 

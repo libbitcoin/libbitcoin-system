@@ -62,7 +62,8 @@ prepare_8(buffer_t& buffer) NOEXCEPT
     constexpr auto r15 = Round - 15;
     std_array<word_t, 8> sigmas{};
     const auto& xwords = array_cast<xword, one, r15>(buffer);
-    f::store(array_cast<xword>(sigmas).front(), sigma0(f::load(xwords.front())));
+    auto& xsigmas = array_cast<xword>(sigmas).front();
+    f::store<word_t>(xsigmas, sigma0(f::load<word_t>(xwords.front())));
 
     prepare_1<Round, 0>(buffer, sigmas);
     prepare_1<Round, 1>(buffer, sigmas);
@@ -124,11 +125,12 @@ konstant_8(buffer_t& wk, const buffer_t& buffer) NOEXCEPT
     using xword = to_extended<word_t, 8>;
     const auto& xwords = array_cast<xword, one, Round>(buffer);
     auto& xwk = array_cast<xword, one, Round>(wk);
-    f::store(xwk.front(), f::add<word_t>(f::load(xwords.front()),
-        f::set<xword>(
-            K::get[Round + 0], K::get[Round + 1], K::get[Round + 2],
-            K::get[Round + 3], K::get[Round + 4], K::get[Round + 5],
-            K::get[Round + 6], K::get[Round + 7])));
+    const auto words = f::load<word_t>(xwords.front());
+    const auto constants = f::set<xword>(
+        K::get[Round + 0], K::get[Round + 1], K::get[Round + 2],
+        K::get[Round + 3], K::get[Round + 4], K::get[Round + 5],
+        K::get[Round + 6], K::get[Round + 7]);
+    f::store<word_t>(xwk.front(), f::add<word_t>(words, constants));
 }
 
 TEMPLATE

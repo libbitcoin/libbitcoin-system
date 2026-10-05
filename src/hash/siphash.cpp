@@ -128,7 +128,11 @@ template <typename xWord>
 INLINE xWord load(const std::span<const uint64_t>& column,
     size_t row) NOEXCEPT
 {
-    return f::load(*pointer_cast<const xWord>(std::next(column.data(), row)));
+    constexpr auto lanes = capacity<xWord, uint64_t>;
+    const auto group = column.subspan(row, lanes);
+    const auto& words = unsafe_array_cast<uint64_t, lanes>(group.data());
+    const auto little = f::load<uint64_t>(array_cast<xWord>(words).front());
+    return native_from_little_end<uint64_t>(little);
 }
 
 // local
@@ -136,7 +140,10 @@ template <typename xWord>
 INLINE void store(const std::span<uint64_t>& out, size_t row,
     xWord value) NOEXCEPT
 {
-    f::store(*pointer_cast<xWord>(std::next(out.data(), row)), value);
+    constexpr auto lanes = capacity<xWord, uint64_t>;
+    const auto group = out.subspan(row, lanes);
+    auto& words = unsafe_array_cast<uint64_t, lanes>(group.data());
+    f::store<uint64_t>(array_cast<xWord>(words).front(), value);
 }
 
 // Hashes whole groups of rows, advancing row past them.
@@ -219,7 +226,10 @@ void siphash(const std::span<uint64_t>& out, const siphash_key& key,
     for (; row < out.size(); ++row)
         out[row] = siphash(key, siphash_words
         {
-            columns[0][row], columns[1][row], columns[2][row], columns[3][row]
+            native_from_little_end(columns[0][row]),
+            native_from_little_end(columns[1][row]),
+            native_from_little_end(columns[2][row]),
+            native_from_little_end(columns[3][row])
         });
 }
 

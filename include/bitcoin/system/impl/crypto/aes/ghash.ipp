@@ -248,7 +248,7 @@ TEMPLATE
 INLINE xint128_t CLASS::
 load(const block_t& block) NOEXCEPT
 {
-    return aes::reflect(f::load(array_cast<xint128_t>(block).front()));
+    return aes::reflect(f::load<uint8_t>(array_cast<xint128_t>(block).front()));
 }
 
 TEMPLATE
@@ -256,7 +256,8 @@ INLINE typename CLASS::block_t CLASS::
 store(xint128_t value) NOEXCEPT
 {
     block_t block{};
-    f::store(array_cast<xint128_t>(block).front(), aes::reflect(value));
+    auto& bytes = array_cast<xint128_t>(block).front();
+    f::store<uint8_t>(bytes, aes::reflect(value));
     return block;
 }
 

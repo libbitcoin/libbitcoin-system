@@ -152,11 +152,6 @@ INLINE xquad_t add_512(xquad_t a, xquad_t b) NOEXCEPT
     return _mm256_add_epi64(a, b);
 }
 
-INLINE xquad_t swap_512(xquad_t a) NOEXCEPT
-{
-    return f::byteswap<uint64_t>(a);
-}
-
 INLINE void schedule_512(xquad_t& message0, xquad_t message1) NOEXCEPT
 {
     message0 = _mm256_sha512msg1_epi64(message0,

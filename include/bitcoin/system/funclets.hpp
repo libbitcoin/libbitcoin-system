@@ -153,7 +153,7 @@ constexpr Type to_int(bool value) noexcept
 {
     static_assert(static_cast<bool>(1) == true);
     static_assert(static_cast<Type>(0) == false);
-    return static_cast<Type>(value ? 1 : 0);
+    return static_cast<Type>(value);
 }
 
 template <typename Type>

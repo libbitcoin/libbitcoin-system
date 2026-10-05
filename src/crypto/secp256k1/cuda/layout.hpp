@@ -107,6 +107,27 @@ struct silent_layout
     const size_t valid;
 };
 
+/// Receiver keys decoded into scan arguments, false if invalid.
+struct silent_receiver
+  : algorithm
+{
+    static bool decode(silent_arguments& out,
+        const silent::batch::receiver& keys) NOEXCEPT
+    {
+        if (keys.labels.size() > maximum_labels ||
+            !from_bytes(out.scan, keys.scan) || is_zero_scalar(out.scan) ||
+            !from_bytes(out.spend, keys.spend))
+            return false;
+
+        for (size_t index{}; index < keys.labels.size(); ++index)
+            if (!from_bytes(out.labels[index], keys.labels[index]))
+                return false;
+
+        out.label_count = possible_narrow_cast<uint32_t>(keys.labels.size());
+        return true;
+    }
+};
+
 } // namespace cuda
 } // namespace secp256k1
 } // namespace system

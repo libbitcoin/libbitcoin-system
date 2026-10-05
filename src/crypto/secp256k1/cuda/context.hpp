@@ -132,10 +132,14 @@ public:
     /// Output key prefixes of the receiver for each summary, false on failure.
     bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
         const stopper& cancel, const std::span<const ec_compressed>& summaries,
-        const silent_arguments& keys) NOEXCEPT
+        const silent::batch::receiver& keys) NOEXCEPT
     {
+        silent_arguments arguments{};
+        if (!silent_receiver::decode(arguments, keys))
+            return false;
+
         const auto count = summaries.size();
-        const auto stride = add1(size_t{ keys.label_count });
+        const auto stride = add1(size_t{ arguments.label_count });
         const auto fit = silent_layout::rows(half_bytes_, stride);
         const auto rows = std::min({ silent_rows_, chunk_rows, fit });
 
@@ -144,7 +148,8 @@ public:
         return pipeline(count, rows, false, cancel,
             [&](size_t half, size_t offset, size_t size) NOEXCEPT
             {
-                return stage(half, summaries.subspan(offset, size), keys);
+                return stage(half, summaries.subspan(offset, size),
+                    arguments);
             },
             [&](size_t half, size_t offset, size_t size) NOEXCEPT
             {
@@ -532,10 +537,12 @@ private:
             "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
         constexpr prefix expected = base16_array("3e9fce73d4e77a48");
 
-        silent_arguments keys{};
+        silent_arguments arguments{};
+        silent::batch::receiver keys{};
         keys.scan = base16_array(
             "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
-        if (!secret_to_public(keys.spend, secret))
+        if (!secret_to_public(keys.spend, secret) ||
+            !silent_receiver::decode(arguments, keys))
             return false;
 
         using namespace std::chrono;
@@ -544,7 +551,7 @@ private:
         data_chunk valid(calibration_rows);
         const auto start = steady_clock::now();
         if (call_.context_current(context_) != success ||
-            stage(zero, summaries, keys) != success ||
+            stage(zero, summaries, arguments) != success ||
             collect(zero, prefixes, valid) != success)
             return false;
 

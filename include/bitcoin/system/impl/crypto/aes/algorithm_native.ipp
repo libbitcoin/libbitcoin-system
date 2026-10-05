@@ -41,7 +41,7 @@ native_encrypt_keys(const schedule_t& schedule) NOEXCEPT
     for (size_t round{}; round < K::round_keys; ++round)
     {
         const auto& key = array_cast<xint128_t>(schedule[round]).front();
-        keys[round] = aes::replicate<xWord>(f::load(key));
+        keys[round] = aes::replicate<xWord>(f::load<uint8_t>(key));
     }
 
     return keys;
@@ -55,14 +55,14 @@ native_decrypt_keys(const schedule_t& schedule) NOEXCEPT
     native_keys_t<xWord> keys{};
     const auto& first = array_cast<xint128_t>(schedule.front()).front();
     const auto& last = array_cast<xint128_t>(schedule.back()).front();
-    keys.front() = f::load(last);
+    keys.front() = f::load<uint8_t>(last);
     for (auto round = one; round < K::rounds; ++round)
     {
         const auto& key = array_cast<xint128_t>(schedule[K::rounds - round]);
-        keys[round] = aes::inverse(f::load(key.front()));
+        keys[round] = aes::inverse(f::load<uint8_t>(key.front()));
     }
 
-    keys.back() = f::load(first);
+    keys.back() = f::load<uint8_t>(first);
     return keys;
 }
 
@@ -80,9 +80,9 @@ void CLASS::
 encrypt_native(block_t& block, const schedule_t& schedule) NOEXCEPT
 {
     auto& word = array_cast<xint128_t>(block).front();
-    std_array<xint128_t, one> state{ f::load(word) };
+    std_array<xint128_t, one> state{ f::load<uint8_t>(word) };
     aes::encrypt<K::rounds>(state, native_encrypt_keys<xint128_t>(schedule));
-    f::store(word, state.front());
+    f::store<uint8_t>(word, state.front());
 }
 
 TEMPLATE
@@ -90,9 +90,9 @@ void CLASS::
 decrypt_native(block_t& block, const schedule_t& schedule) NOEXCEPT
 {
     auto& word = array_cast<xint128_t>(block).front();
-    std_array<xint128_t, one> state{ f::load(word) };
+    std_array<xint128_t, one> state{ f::load<uint8_t>(word) };
     aes::decrypt<K::rounds>(state, native_decrypt_keys<xint128_t>(schedule));
-    f::store(word, state.front());
+    f::store<uint8_t>(word, state.front());
 }
 
 } // namespace aes

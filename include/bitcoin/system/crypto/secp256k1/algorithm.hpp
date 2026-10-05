@@ -27,6 +27,10 @@
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+#if defined(HAVE_VALGRIND)
+    #include <valgrind/memcheck.h>
+#endif
+
 // Based on:
 // secg.org/sec2-v2.pdf
 // github.com/bitcoin-core/secp256k1 (5x52 field representation)
@@ -220,6 +224,11 @@ protected:
     static constexpr void inverse(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;
 
+    /// r = a^-1 by fixed exponent (constant time), zero for zero.
+    template <typename Word>
+    static constexpr void inverse_power(field_t<Word>& r,
+        const field_t<Word>& a) NOEXCEPT;
+
     /// r = sqrt(a), mask of a being square (weak from weak).
     template <typename Word>
     static constexpr Word square_root(field_t<Word>& r,
@@ -238,8 +247,10 @@ protected:
     static constexpr Word equal(const field_t<Word>& a,
         const field_t<Word>& b) NOEXCEPT;
 
-    /// a = 0 mod p (loose, limbs below 2^56), in variable time.
+    /// a = 0 mod p (loose, limbs below 2^56), and as a mask.
     static constexpr bool normalizes_to_zero(
+        const field_t<uint64_t>& a) NOEXCEPT;
+    static constexpr uint64_t normalized_zero(
         const field_t<uint64_t>& a) NOEXCEPT;
 
     /// Field encoding.
@@ -307,6 +318,13 @@ protected:
         0x0000000000000001, 0x0000000000000000
     };
 
+    /// n - 2, the inversion exponent.
+    static constexpr scalar_t order_minus_two
+    {
+        0xbfd25e8cd036413f, 0xbaaedce6af48a03b,
+        0xfffffffffffffffe, 0xffffffffffffffff
+    };
+
     static constexpr scalar_t half_order
     {
         0xdfe92f46681b20a0, 0x5d576e7357a4501d,
@@ -356,12 +374,20 @@ protected:
     /// r = -a mod n.
     static constexpr void negate(scalar_t& r, const scalar_t& a) NOEXCEPT;
 
+    /// r = mask ? a : b.
+    static constexpr void select(scalar_t& r, uint64_t mask,
+        const scalar_t& a, const scalar_t& b) NOEXCEPT;
+
     /// r = a * b mod n.
     static constexpr void multiply(scalar_t& r, const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
 
     /// r = a^-1 mod n, zero for zero.
     static constexpr void inverse(scalar_t& r, const scalar_t& a) NOEXCEPT;
+
+    /// r = a^-1 mod n by fixed exponent (constant time), zero for zero.
+    static constexpr void inverse_power(scalar_t& r,
+        const scalar_t& a) NOEXCEPT;
 
     /// k = k1 + k2 * lambda mod n, with k1 and k2 of magnitude below 2^128.
     static constexpr void split(scalar_t& k1, scalar_t& k2,
@@ -407,8 +433,14 @@ protected:
     static constexpr bool is_overflow(const scalar_t& a) NOEXCEPT;
     static constexpr bool is_less(const scalar_t& a,
         const scalar_t& b) NOEXCEPT;
-    static constexpr void reduce(scalar_t& r, bool overflow) NOEXCEPT;
+    static constexpr void reduce(scalar_t& r, uint64_t overflow) NOEXCEPT;
     static constexpr void reduce(scalar_t& r, const wide_t& l) NOEXCEPT;
+
+    /// All bits set where true.
+    static constexpr uint64_t to_mask(bool value) NOEXCEPT;
+
+    /// All bits set where zero.
+    static constexpr uint64_t zero_mask(uint64_t value) NOEXCEPT;
 
     /// Three word column accumulator.
     using column_t = std_array<uint64_t, 3>;
@@ -660,10 +692,10 @@ protected:
 
     static_assert(array_count<decltype(comb_parts)> == comb_part_count);
 
-    /// r = entry of a comb window (1 + entry times its base), negated, read by
-    /// scanning the window.
+    /// r = entry of a comb window (1 + entry times its base), negated by mask,
+    /// read by scanning the window.
     static constexpr void lookup_comb(affine_t<uint64_t>& r, size_t window,
-        size_t entry, bool negative) NOEXCEPT;
+        size_t entry, uint64_t negative) NOEXCEPT;
 
     /// r += k * G, by one addition per signed digit, without doubling.
     static constexpr void add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
@@ -690,11 +722,24 @@ protected:
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
 
-    /// r = g * G + k * a by point windows of Bits, mask of lanes not computed.
-    template <size_t Bits, typename Word>
+    /// r = k * a (constant time in k), mask of lanes not computed.
+    template <typename Word>
+    static constexpr Word multiply(jacobian_t<Word>& r,
+        const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT;
+
+    /// r = g * G + k * a by point windows of Bits, mask of lanes not computed,
+    /// with point table reads independent of k where Secret.
+    template <size_t Bits, bool Generator = true, bool Secret = false,
+        typename Word>
     static constexpr Word multiply_windows(jacobian_t<Word>& r,
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
+
+    /// r = k * a by point windows of Bits (constant time in k), mask of lanes
+    /// not computed.
+    template <size_t Bits, typename Word>
+    static constexpr Word multiply_windows(jacobian_t<Word>& r,
+        const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT;
 
     /// r = g * G + k * a, all cases.
     static constexpr void multiply_complete(jacobian_t<uint64_t>& r,
@@ -735,21 +780,21 @@ protected:
         const recodes_t<Bits, Word>& halves, size_t position,
         bool interleaved) NOEXCEPT;
 
-    template <size_t Size, typename Word>
+    template <bool Secret, size_t Size, typename Word>
     static constexpr void lookup(affine_t<Word>& r,
         const std_array<affine_t<Word>, Size>& table, Word offset,
         Word negative) NOEXCEPT;
 
-    template <typename Word>
+    template <bool Secret, typename Word>
     static constexpr void add_point(jacobian_t<Word>& r,
         const affine_t<Word>& b, Word& faults) NOEXCEPT;
 
-    template <typename Word>
+    template <bool Secret, typename Word>
     static constexpr void add_point(jacobian_t<Word>& r,
         const affine_t<Word>& b, const field_t<Word>& scale,
         Word& faults) NOEXCEPT;
 
-    template <size_t Bits, typename Word>
+    template <bool Secret, size_t Bits, typename Word>
     static constexpr void correct(jacobian_t<Word>& r, const affine_t<Word>& a,
         const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
         Word& faults) NOEXCEPT;
@@ -819,13 +864,14 @@ protected:
         const scalar_t& e, const field_t<uint64_t>& r_x,
         const scalar_t& s) NOEXCEPT;
 
-    /// Keys and signing (variable time, secrets blinded).
+    /// Keys and signing (constant time, secrets blinded).
     /// -----------------------------------------------------------------------
     /// A secret multiple k * G is computed as (k - m) * G + m * G, and k * a
     /// as (k / m) * (m * a), for a random blind m, so that each multiplication
-    /// is of a value independent of k. Comb lookups read every entry of a
-    /// window, so memory access does not depend on the digit, and additions
-    /// are skipped only for zero digits.
+    /// is of a value independent of k. Table lookups read every entry, each
+    /// addition and correction is computed and taken by mask, and inversions
+    /// are by fixed exponent, so that time and memory access do not depend on
+    /// the secrets (excepting negligible fallbacks for exceptional sums).
 
     /// r = g * G + k * a (normal), false if infinity.
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,
@@ -848,9 +894,20 @@ protected:
     static constexpr void secret_inverse(scalar_t& r, const scalar_t& a,
         const scalar_t& m) NOEXCEPT;
 
+    /// r = a (normal) by fixed exponent inversion, a not infinite.
+    static constexpr void to_affine_power(affine_t<uint64_t>& r,
+        const jacobian_t<uint64_t>& a) NOEXCEPT;
+
     /// secret = 0, by stores that are not elided.
     template <typename Container>
     static constexpr void wipe(Container& secret) NOEXCEPT;
+
+    /// Release a value from constant time analysis, as public by definition
+    /// or of negligible dependence on secrets.
+    template <typename Value>
+    static constexpr void declassify(const Value& value) NOEXCEPT;
+    static constexpr void declassify(const uint8_t* data,
+        size_t size) NOEXCEPT;
 
     /// ECDSA (r, s) of z by secret d and nonce k, low s, with recovery id,
     /// blinded by m and b (d, k, m, b nonzero), false if r or s is zero.

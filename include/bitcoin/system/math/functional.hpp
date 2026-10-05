@@ -142,7 +142,7 @@ INLINE constexpr auto andnot(Word a, Word b) NOEXCEPT
 template <auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto eq(Word a, Word b) NOEXCEPT
 {
-    return a == b ? bit_all<Word> : Word{};
+    return depromote<Word>(Word{} - to_int<Word>(a == b));
 }
 
 template <typename Word, if_integral_integer<Word> = true>

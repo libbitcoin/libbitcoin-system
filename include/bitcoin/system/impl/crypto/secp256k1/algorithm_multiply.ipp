@@ -48,10 +48,25 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
     }
 }
 
+template <typename Word>
+constexpr Word algorithm::multiply(jacobian_t<Word>& r,
+    const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT
+{
+    return multiply_windows<point_bits>(r, a, k);
+}
+
+template <size_t Bits, typename Word>
+constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
+    const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT
+{
+    return multiply_windows<Bits, false, true>(r, {}, a, k);
+}
+
 // Each scalar splits into two halves, each window of each half adds a table
 // point, and halves made odd are corrected at the end. Lanes in which an
-// addition was exceptional are reported, not computed.
-template <size_t Bits, typename Word>
+// addition was exceptional are reported, not computed. Without the generator
+// its windows, recoding and corrections are omitted.
+template <size_t Bits, bool Generator, bool Secret, typename Word>
 constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     const scalars_t<Word>& g, const affine_t<Word>& a,
     const scalars_t<Word>& k) NOEXCEPT
@@ -59,16 +74,21 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     constexpr auto generator_top = sub1(digit_count<generator_bits>) *
         generator_bits;
     constexpr auto point_top = sub1(digit_count<Bits>) * Bits;
-    constexpr auto top = greater(generator_top, point_top);
+    constexpr auto either = greater(generator_top, point_top);
+    constexpr auto top = Generator ? either : point_top;
 
     recodes_t<generator_bits, Word> g_first{}, g_second{};
     recodes_t<Bits, Word> k_first{}, k_second{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
         scalar_t first{}, second{};
-        split(first, second, g[lane]);
-        recode(g_first[lane], first);
-        recode(g_second[lane], second);
+        if constexpr (Generator)
+        {
+            split(first, second, g[lane]);
+            recode(g_first[lane], first);
+            recode(g_second[lane], second);
+        }
+
         split(first, second, k[lane]);
         recode(k_first[lane], first);
         recode(k_second[lane], second);
@@ -93,38 +113,45 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
         if (bit != top)
             double_(sum, sum);
 
-        if (bit <= generator_top && is_zero(bit % generator_bits))
+        if constexpr (Generator)
         {
-            const auto position = bit / generator_bits;
-            digit(index, negative, g_first, position, false);
-            lookup(addend, index, false, negative);
-            add_point(sum, addend, scale, faults);
-            digit(index, negative, g_second, position, false);
-            lookup(addend, index, true, negative);
-            add_point(sum, addend, scale, faults);
+            if (bit <= generator_top && is_zero(bit % generator_bits))
+            {
+                const auto position = bit / generator_bits;
+                digit(index, negative, g_first, position, false);
+                lookup(addend, index, false, negative);
+                add_point<Secret>(sum, addend, scale, faults);
+                digit(index, negative, g_second, position, false);
+                lookup(addend, index, true, negative);
+                add_point<Secret>(sum, addend, scale, faults);
+            }
         }
 
         if (bit <= point_top && is_zero(bit % Bits))
         {
             const auto position = bit / Bits;
             digit(index, negative, k_first, position, true);
-            lookup(addend, a_first, index, negative);
-            add_point(sum, addend, faults);
+            lookup<Secret>(addend, a_first, index, negative);
+            add_point<Secret>(sum, addend, faults);
             digit(index, negative, k_second, position, true);
-            lookup(addend, a_second, index, negative);
-            add_point(sum, addend, faults);
+            lookup<Secret>(addend, a_second, index, negative);
+            add_point<Secret>(sum, addend, faults);
         }
     }
 
-    affine_t<Word> base{ broadcast<Word>(generator.x),
-        broadcast<Word>(generator.y) };
+    if constexpr (Generator)
+    {
+        affine_t<Word> base{ broadcast<Word>(generator.x),
+            broadcast<Word>(generator.y) };
+
+        correct<Secret>(sum, base, scale, g_first, faults);
+        endomorphism(base, base);
+        correct<Secret>(sum, base, scale, g_second, faults);
+    }
 
     const auto unit = broadcast<Word>({ 1 });
-    correct(sum, base, scale, g_first, faults);
-    endomorphism(base, base);
-    correct(sum, base, scale, g_second, faults);
-    correct(sum, a_first.front(), unit, k_first, faults);
-    correct(sum, a_second.front(), unit, k_second, faults);
+    correct<Secret>(sum, a_first.front(), unit, k_first, faults);
+    correct<Secret>(sum, a_second.front(), unit, k_second, faults);
 
     multiply(sum.z, sum.z, scale);
     r = sum;
@@ -213,13 +240,13 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
             {
                 lookup(addend, uint64_t{ entry }, is_nonzero(half),
                     negative);
-                add_point(r, addend, scale, faults);
+                add_point<false>(r, addend, scale, faults);
             }
             else
             {
                 negate(addend, half == two ? a_first[entry] :
                     a_second[entry], negative);
-                add_point(r, addend, faults);
+                add_point<false>(r, addend, faults);
             }
         }
     }
@@ -229,7 +256,8 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 }
 
 // Each window adds the entry of its signed digit, where a digit above half the
-// window span is taken negative with a carry into the next window.
+// window span is taken negative with a carry into the next window. A zero
+// digit adds the first entry and keeps the prior sum.
 constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
     uint64_t& faults) NOEXCEPT
 {
@@ -238,7 +266,7 @@ constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
     constexpr auto mask = sub1(span);
 
     affine_t<uint64_t> addend{};
-    auto carry = false;
+    uint64_t carry{};
     for (size_t window{}; window < comb_windows; ++window)
     {
         const auto bit = window * comb_bits;
@@ -254,17 +282,20 @@ constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
                 digit |= k[add1(limb)] << (limb_size - shift);
         }
 
-        digit = (digit & mask) + to_int(carry);
-        carry = digit > comb_size;
-        if (carry)
-            digit = span - digit;
+        digit = (digit & mask) + carry;
+        const auto negative = to_mask(digit > comb_size);
+        digit = f::select(negative, span - digit, digit);
+        carry = negative & 1_u64;
 
-        if (is_zero(digit))
-            continue;
+        const auto zero = to_mask(is_zero(digit));
+        const auto entry = possible_narrow_cast<size_t>(digit | (zero & 1_u64));
+        lookup_comb(addend, window, sub1(entry), negative);
 
-        lookup_comb(addend, window, possible_narrow_cast<size_t>(sub1(digit)),
-            carry);
-        add_point(r, addend, faults);
+        uint64_t fault{};
+        auto sum = r;
+        add_point<true>(sum, addend, fault);
+        select(r, zero, r, sum);
+        faults |= f::andnot(zero, fault);
     }
 }
 
@@ -277,15 +308,13 @@ template <size_t Bits>
 constexpr void algorithm::recode(recoded_t<Bits>& r,
     const scalar_t& half) NOEXCEPT
 {
-    auto magnitude = half;
+    scalar_t negated{}, magnitude{};
+    negate(negated, half);
     r.negative = is_high(half);
-    if (r.negative)
-        negate(magnitude, half);
+    select(magnitude, to_mask(r.negative), negated, half);
 
     r.even = !get_right(magnitude[0]);
-    if (r.even)
-        set_right_into(magnitude[0]);
-
+    magnitude[0] |= to_int<uint64_t>(r.even);
     recode<Bits, digit_count<Bits>>(r.digits, magnitude);
 }
 
@@ -370,8 +399,7 @@ constexpr void algorithm::digit(Word& index, Word& negative,
         const size_t magnitude = absolute(value);
         const auto entry = to_half(sub1(magnitude));
         indexes[lane] = interleaved ? entry * stride + lane : entry;
-        negatives[lane] = is_negative(value) != half.negative ? max_uint64 :
-            0_u64;
+        negatives[lane] = to_mask(is_negative(value) != half.negative);
     }
 
     index = pack<Word>(indexes);
@@ -432,18 +460,40 @@ constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
 }
 
 // Limb i of lane l of point table entry e is at (10e + i) * lanes + l, where
-// offset is 10e * lanes + l.
-template <size_t Size, typename Word>
+// offset is 10e * lanes + l. Where Secret every entry is read and the entry
+// is taken by mask.
+template <bool Secret, size_t Size, typename Word>
 constexpr void algorithm::lookup(affine_t<Word>& r,
     const std_array<affine_t<Word>, Size>& table, Word offset,
     Word negative) NOEXCEPT
 {
     constexpr auto size = array_count<field_t<Word>>;
+    constexpr auto stride = two * size * lanes<Word>;
 
     affine_t<Word> entry{};
-    if constexpr (is_same_type<Word, uint64_t>)
+    if constexpr (Secret)
     {
-        entry = table[possible_narrow_cast<size_t>(offset) / (two * size)];
+        words_t<Word> lane_ids{};
+        for (size_t lane{}; lane < lanes<Word>; ++lane)
+            lane_ids[lane] = lane;
+
+        const auto ids = pack<Word>(lane_ids);
+        for (size_t at{}; at < Size; ++at)
+        {
+            const auto first = f::broadcast<Word>(uint64_t{ at * stride });
+            const auto mask = f::eq<64>(offset, f::add<64>(first, ids));
+            const auto& x = table[at].x;
+            const auto& y = table[at].y;
+            for (size_t limb{}; limb < size; ++limb)
+            {
+                entry.x[limb] = f::or_(entry.x[limb], f::and_(x[limb], mask));
+                entry.y[limb] = f::or_(entry.y[limb], f::and_(y[limb], mask));
+            }
+        }
+    }
+    else if constexpr (is_same_type<Word, uint64_t>)
+    {
+        entry = table[possible_narrow_cast<size_t>(offset) / stride];
     }
     else
     {
@@ -463,11 +513,21 @@ constexpr void algorithm::lookup(affine_t<Word>& r,
 }
 
 // Lanes at infinity take b, and other exceptional lanes are faults.
-template <typename Word>
+// An integral sum from infinity is lifted by branch, or where Secret is
+// computed and taken by mask.
+template <bool Secret, typename Word>
 constexpr void algorithm::add_point(jacobian_t<Word>& r,
     const affine_t<Word>& b, Word& faults) NOEXCEPT
 {
-    if constexpr (is_same_type<Word, uint64_t>)
+    if constexpr (is_same_type<Word, uint64_t> && Secret)
+    {
+        jacobian_t<Word> sum{}, lifted{};
+        const auto uncomputed = add(sum, r, b);
+        to_jacobian(lifted, b);
+        faults |= f::andnot(r.infinity, uncomputed);
+        select(r, r.infinity, lifted, sum);
+    }
+    else if constexpr (is_same_type<Word, uint64_t>)
     {
         if (is_nonzero(r.infinity))
             to_jacobian(r, b);
@@ -496,11 +556,19 @@ constexpr void algorithm::add_point(jacobian_t<Word>& r,
 
 // Lanes at infinity take b mapped by scale, and other exceptional lanes are
 // faults.
-template <typename Word>
+template <bool Secret, typename Word>
 constexpr void algorithm::add_point(jacobian_t<Word>& r,
     const affine_t<Word>& b, const field_t<Word>& scale, Word& faults) NOEXCEPT
 {
-    if constexpr (is_same_type<Word, uint64_t>)
+    if constexpr (is_same_type<Word, uint64_t> && Secret)
+    {
+        jacobian_t<Word> sum{}, lifted{};
+        const auto uncomputed = add(sum, r, b, scale);
+        to_jacobian(lifted, b, scale);
+        faults |= f::andnot(r.infinity, uncomputed);
+        select(r, r.infinity, lifted, sum);
+    }
+    else if constexpr (is_same_type<Word, uint64_t>)
     {
         if (is_nonzero(r.infinity))
             to_jacobian(r, b, scale);
@@ -528,7 +596,7 @@ constexpr void algorithm::add_point(jacobian_t<Word>& r,
 }
 
 // A half made odd added its signed base once more, so subtract it where even.
-template <size_t Bits, typename Word>
+template <bool Secret, size_t Bits, typename Word>
 constexpr void algorithm::correct(jacobian_t<Word>& r, const affine_t<Word>& a,
     const field_t<Word>& scale, const recodes_t<Bits, Word>& halves,
     Word& faults) NOEXCEPT
@@ -536,20 +604,17 @@ constexpr void algorithm::correct(jacobian_t<Word>& r, const affine_t<Word>& a,
     words_t<Word> evens{}, positives{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
-        evens[lane] = halves[lane].even ? max_uint64 : 0_u64;
-        positives[lane] = halves[lane].negative ? 0_u64 : max_uint64;
+        evens[lane] = to_mask(halves[lane].even);
+        positives[lane] = to_mask(!halves[lane].negative);
     }
 
     const auto even = pack<Word>(evens);
-    if (!f::any(even))
-        return;
-
     affine_t<Word> addend{};
     negate(addend, a, pack<Word>(positives));
 
     auto sum = r;
     auto fault = f::broadcast<Word>(uint64_t{});
-    add_point(sum, addend, scale, fault);
+    add_point<Secret>(sum, addend, scale, fault);
     select(r, even, sum, r);
     faults = f::or_(faults, f::and_(fault, even));
 }

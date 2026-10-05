@@ -405,6 +405,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip341.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ctime.cpp">
+      <Filter>src\crypto\secp256k1</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ecdsa.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>

@@ -77,16 +77,18 @@ public:
         const ec_compressed& summary,
         const cuda::silent_arguments& arguments) NOEXCEPT
     {
-        scalar_t secret{};
-        affine_t<uint64_t> point{}, spend{};
-        if (!decode(point, summary) || !from_bytes(secret, arguments.scan) ||
-            is_zero_scalar(secret) || !decode(spend, arguments.spend))
+        affine_t<uint64_t> point{};
+        if (!decode(point, summary))
             return 0;
 
+        // The device computes in variable time, a server-side optimization
+        // that is opted out of by not compiling CUDA.
         jacobian_t<uint64_t> sum{};
-        const scalars_t<uint64_t> none{}, ks{ secret };
-        if (f::any(multiply_windows<window_bits>(sum, none, point, ks)))
-            multiply_complete(sum, {}, point, secret);
+        const scalars_t<uint64_t> ks{ arguments.scan };
+        const auto uncomputed = multiply_windows<window_bits, false, false>(sum, {},
+            point, ks);
+        if (f::any(uncomputed))
+            multiply_complete(sum, {}, point, arguments.scan);
 
         if (f::any(sum.infinity))
             return 0;
@@ -110,9 +112,9 @@ public:
         sum = {};
         sum.infinity = max_uint64;
         add_comb(sum, tweak, faults);
-        add_point(sum, spend, faults);
+        add_point<false>(sum, arguments.spend, faults);
         if (is_nonzero(faults))
-            multiply_complete(sum, tweak, spend, { 1 });
+            multiply_complete(sum, tweak, arguments.spend, { 1 });
 
         if (f::any(sum.infinity))
             return 0;
@@ -120,12 +122,8 @@ public:
         write(prefixes[0], sum);
         for (size_t index{}; index < arguments.label_count; ++index)
         {
-            affine_t<uint64_t> label{};
             jacobian_t<uint64_t> labeled{};
-            if (!decode(label, arguments.labels[index]))
-                return 0;
-
-            add_complete(labeled, sum, label);
+            add_complete(labeled, sum, arguments.labels[index]);
             if (f::any(labeled.infinity))
                 return 0;
 
@@ -151,36 +149,6 @@ private:
         field_t<uint64_t> x{};
         const auto odd = sign == ec_odd_sign ? max_uint64 : 0_u64;
         return from_bytes(x, x_bytes) && is_nonzero(lift(out, x, odd));
-    }
-
-    // Key arguments are unaligned (65 bytes), so x and y are decoded from
-    // copies.
-    static __device__ bool decode(affine_t<uint64_t>& out,
-        const ec_uncompressed& key) NOEXCEPT
-    {
-        const auto sign = key.front();
-        const auto hybrid = sign == ec_hybrid_even_sign ||
-            sign == ec_hybrid_odd_sign;
-
-        if (sign != ec_uncompressed_sign && !hybrid)
-            return false;
-
-        alignas(sizeof(uint64_t)) bytes_t x_bytes{}, y_bytes{};
-        for (size_t byte{}; byte < x_bytes.size(); ++byte)
-        {
-            x_bytes[byte] = key[add1(byte)];
-            y_bytes[byte] = key[add1(byte + x_bytes.size())];
-        }
-
-        field_t<uint64_t> x{}, y{};
-        if (!from_bytes(x, x_bytes) || !from_bytes(y, y_bytes))
-            return false;
-
-        if (hybrid && (f::any(is_odd_element(y)) != (sign == ec_hybrid_odd_sign)))
-            return false;
-
-        out = { x, y };
-        return f::any(is_on_curve(out));
     }
 
     static __device__ void write(cuda::prefix& out,

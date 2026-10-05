@@ -60,6 +60,7 @@ public:
 
     using algorithm::add;
     using algorithm::add_complete;
+    using algorithm::declassify;
     using algorithm::from_bytes;
     using algorithm::inverse;
     using algorithm::is_high;
@@ -75,9 +76,11 @@ public:
     using algorithm::normalizes_to_zero;
     using algorithm::recover;
     using algorithm::secret_multiply;
+    using algorithm::select;
     using algorithm::swift_decode;
     using algorithm::swift_fraction;
     using algorithm::to_affine;
+    using algorithm::to_mask;
     using algorithm::verify_ecdsa;
     using algorithm::verify_schnorr;
     using algorithm::wipe;
@@ -157,10 +160,45 @@ public:
         return from_bytes(out, to_array(data));
     }
 
-    // Value of bytes if nonzero and below n.
+    // Value of bytes if nonzero and below n, otherwise one.
     static bool to_secret(scalar& out, const uint8_t* data) NOEXCEPT
     {
-        return from_bytes(out, to_array(data)) && !is_zero_scalar(out);
+        auto valid = from_bytes(out, to_array(data));
+        valid &= !is_zero_scalar(out);
+        declassify(valid);
+        out = keep(out, valid, { 1 });
+        return valid;
+    }
+
+    // Validity as a result, and values retained where valid.
+    // ------------------------------------------------------------------------
+
+    static int to_result(bool valid) NOEXCEPT
+    {
+        static_assert(success == 1 && failure == 0);
+        declassify(valid);
+        return to_int<int>(valid);
+    }
+
+    static scalar keep(const scalar& value, bool valid,
+        const scalar& otherwise) NOEXCEPT
+    {
+        scalar out{};
+        select(out, to_mask(valid), value, otherwise);
+        return out;
+    }
+
+    static void keep(uint8_t* out, size_t size, bool valid) NOEXCEPT
+    {
+        const auto mask = narrow_cast<uint8_t>(to_mask(valid));
+        for (size_t index{}; index < size; ++index)
+            out[index] &= mask;
+    }
+
+    template <size_t Size>
+    static void keep(data_array<Size>& out, bool valid) NOEXCEPT
+    {
+        keep(out.data(), out.size(), valid);
     }
 
     // Value of bytes mod p (weak).
@@ -209,7 +247,10 @@ public:
             mac.write(context);
             mac.write(call);
             mac.write(data_array<2>{ tag, counter });
-            if (from_bytes(out, mac.flush()) && !is_zero_scalar(out))
+            auto found = from_bytes(out, mac.flush());
+            found &= !is_zero_scalar(out);
+            declassify(found);
+            if (found)
                 break;
         }
         LCOV_EXCL_STOP()
@@ -223,6 +264,7 @@ public:
     {
         affine point{};
         secret_multiply(point, secret, blind(secret, {}, 0));
+        declassify(point);
         return point;
     }
 
@@ -348,10 +390,7 @@ public:
         const void* ndata) NOEXCEPT
     {
         scalar d{};
-        const auto valid = to_secret(d, seckey);
-        if (!valid)
-            d = { 1 };
-
+        auto valid = to_secret(d, seckey);
         const auto nonce = is_null(noncefp) ? &rfc6979 : noncefp;
         const auto z = to_scalar(msg32);
         auto done = false;
@@ -366,7 +405,9 @@ public:
                 const_cast<void*>(ndata), attempt)))
                 break;
 
-            if (!to_secret(k, nonce32.data()))
+            const auto usable = to_secret(k, nonce32.data());
+            declassify(usable);
+            if (!usable)
                 continue;
 
             m = blind(d, message, 0);
@@ -384,15 +425,14 @@ public:
         wipe(m);
         wipe(b);
         wipe(nonce32);
-        if (!done || !valid)
-        {
-            r = {};
-            s = {};
-            id = 0;
-            return false;
-        }
-
-        return true;
+        valid &= done;
+        r = keep(r, valid, {});
+        s = keep(s, valid, {});
+        id &= narrow_cast<uint8_t>(to_mask(valid));
+        declassify(r);
+        declassify(s);
+        declassify(id);
+        return valid;
     }
 
     // Schnorr.
@@ -403,15 +443,12 @@ public:
     static bool load(scalar& secret, affine& point,
         const secp256k1_keypair& keypair) NOEXCEPT
     {
-        if (load<array_count<bytes>>(point, keypair.data) &&
-            to_secret(secret, keypair.data.data()))
-            return true;
-
-        LCOV_EXCL_START("Wrappers create keypairs from valid secrets.")
-        secret = { 1 };
-        point = generator;
-        return false;
-        LCOV_EXCL_STOP()
+        auto valid = load<array_count<bytes>>(point, keypair.data);
+        valid &= to_secret(secret, keypair.data.data());
+        const auto mask = to_mask(valid);
+        select(point.x, mask, point.x, generator.x);
+        select(point.y, mask, point.y, generator.y);
+        return valid;
     }
 
     // Elligator swift.
@@ -423,6 +460,7 @@ public:
         auto copy = hasher;
         copy.write(to_little_endian(counter));
         copy.flush(out.data());
+        declassify(out);
     }
 
     // Draws branches and nonzero u below p from hasher until the branch
@@ -573,20 +611,18 @@ int secp256k1_ec_seckey_verify(const secp256k1_context*,
     const uint8_t* seckey) NOEXCEPT
 {
     local::scalar secret{};
-    return local::to_secret(secret, seckey) ? success : failure;
+    return local::to_result(local::to_secret(secret, seckey));
 }
 
 int secp256k1_ec_pubkey_create(const secp256k1_context*,
     secp256k1_pubkey* pubkey, const uint8_t* seckey) NOEXCEPT
 {
-    pubkey->data = {};
     local::scalar secret{};
     const auto valid = local::to_secret(secret, seckey);
-    if (valid)
-        local::save<zero>(pubkey->data, local::public_point(secret));
-
+    local::save<zero>(pubkey->data, local::public_point(secret));
+    local::keep(pubkey->data, valid);
     local::wipe(secret);
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 int secp256k1_ec_seckey_negate(const secp256k1_context*,
@@ -594,13 +630,11 @@ int secp256k1_ec_seckey_negate(const secp256k1_context*,
 {
     local::scalar secret{};
     const auto valid = local::to_secret(secret, seckey);
-    if (!valid)
-        secret = {};
-
     local::negate(secret, secret);
+    secret = local::keep(secret, valid, {});
     local::to_bytes(seckey, secret);
     local::wipe(secret);
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 int secp256k1_ec_pubkey_negate(const secp256k1_context*,
@@ -625,13 +659,11 @@ int secp256k1_ec_seckey_tweak_add(const secp256k1_context*, uint8_t* seckey,
     valid &= local::to_scalar(tweak, tweak32);
     local::add(secret, secret, tweak);
     valid &= !local::is_zero_scalar(secret);
-    if (!valid)
-        secret = {};
-
+    secret = local::keep(secret, valid, {});
     local::to_bytes(seckey, secret);
     local::wipe(secret);
     local::wipe(tweak);
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 int secp256k1_ec_pubkey_tweak_add(const secp256k1_context*,
@@ -639,14 +671,14 @@ int secp256k1_ec_pubkey_tweak_add(const secp256k1_context*,
 {
     local::affine point{}, sum{};
     local::scalar tweak{};
-    const auto valid = local::load<zero>(point, pubkey->data);
-    pubkey->data = {};
-    if (!valid || !local::to_scalar(tweak, tweak32) ||
-        !local::linear(sum, tweak, point))
-        return failure;
-
+    auto valid = local::load<zero>(point, pubkey->data);
+    valid &= local::to_scalar(tweak, tweak32);
+    valid &= local::linear(sum, tweak, point);
+    local::declassify(valid);
+    local::declassify(sum);
     local::save<zero>(pubkey->data, sum);
-    return success;
+    local::keep(pubkey->data, valid);
+    return local::to_result(valid);
 }
 
 int secp256k1_ec_seckey_tweak_mul(const secp256k1_context*, uint8_t* seckey,
@@ -657,13 +689,11 @@ int secp256k1_ec_seckey_tweak_mul(const secp256k1_context*, uint8_t* seckey,
     valid &= local::to_scalar(tweak, tweak32);
     valid &= !local::is_zero_scalar(tweak);
     local::multiply(secret, secret, tweak);
-    if (!valid)
-        secret = {};
-
+    secret = local::keep(secret, valid, {});
     local::to_bytes(seckey, secret);
     local::wipe(secret);
     local::wipe(tweak);
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 int secp256k1_ec_pubkey_tweak_mul(const secp256k1_context*,
@@ -671,16 +701,13 @@ int secp256k1_ec_pubkey_tweak_mul(const secp256k1_context*,
 {
     local::affine point{}, product{};
     local::scalar tweak{};
-    const auto valid = local::to_scalar(tweak, tweak32) &&
-        local::load<zero>(point, pubkey->data);
-
-    pubkey->data = {};
-    if (!valid || local::is_zero_scalar(tweak) ||
-        !local::linear(product, {}, point, tweak))
-        return failure;
-
+    auto valid = local::to_secret(tweak, tweak32);
+    valid &= local::load<zero>(point, pubkey->data);
+    local::secret_multiply(product, tweak, point, local::blind(tweak, {}, 0));
+    local::declassify(product);
     local::save<zero>(pubkey->data, product);
-    return success;
+    local::keep(pubkey->data, valid);
+    return local::to_result(valid);
 }
 
 int secp256k1_ec_pubkey_combine(const secp256k1_context*,
@@ -836,7 +863,7 @@ int secp256k1_ecdsa_sign(const secp256k1_context*,
         ndata);
 
     local::save(sig->data, r, s);
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 // ECDSA recovery.
@@ -883,7 +910,7 @@ int secp256k1_ecdsa_sign_recoverable(const secp256k1_context*,
 
     local::save(sig->data, r, s);
     sig->data.back() = id;
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 int secp256k1_ecdsa_recover(const secp256k1_context*,
@@ -943,18 +970,14 @@ int secp256k1_xonly_pubkey_tweak_add_check(const secp256k1_context*,
 int secp256k1_keypair_create(const secp256k1_context*,
     secp256k1_keypair* keypair, const uint8_t* seckey) NOEXCEPT
 {
-    keypair->data = {};
     local::scalar secret{};
     const auto valid = local::to_secret(secret, seckey);
-    if (valid)
-    {
-        local::to_bytes(keypair->data.data(), secret);
-        local::save<array_count<local::bytes>>(keypair->data,
-            local::public_point(secret));
-    }
-
+    local::to_bytes(keypair->data.data(), secret);
+    local::save<array_count<local::bytes>>(keypair->data,
+        local::public_point(secret));
+    local::keep(keypair->data, valid);
     local::wipe(secret);
-    return valid ? success : failure;
+    return local::to_result(valid);
 }
 
 // Schnorr.
@@ -968,8 +991,9 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
     local::scalar secret{};
     local::affine point{};
     auto valid = local::load(secret, point, *keypair);
-    if (f::any(local::is_odd_element(point.y)))
-        local::negate(secret, secret);
+    local::scalar negated{};
+    local::negate(negated, secret);
+    local::select(secret, local::is_odd_element(point.y), negated, secret);
 
     local::bytes secret_bytes{}, key{}, r_x{};
     local::to_bytes(secret_bytes.data(), secret);
@@ -980,12 +1004,7 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
         aux_rand32));
 
     valid &= !local::is_zero_scalar(nonce);
-    if (!valid)
-    {
-        LCOV_EXCL_START("Requires an invalid keypair or a zero nonce.")
-        nonce = { 1 };
-        LCOV_EXCL_STOP()
-    }
+    nonce = local::keep(nonce, valid, { 1 });
 
     const auto message = data_slice{ local::to_array(msg32) };
     auto blinding = local::blind(secret, message, 0);
@@ -1002,14 +1021,9 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
     constexpr auto size = array_count<local::bytes>;
     std::copy(r_x.begin(), r_x.end(), sig64);
     local::to_bytes(std::next(sig64, size), s);
-    if (!valid)
-    {
-        LCOV_EXCL_START("Requires an invalid keypair or a zero nonce.")
-        std::fill_n(sig64, two * size, uint8_t{});
-        LCOV_EXCL_STOP()
-    }
-
-    return valid ? success : failure;
+    local::keep(sig64, two * size, valid);
+    local::declassify(sig64, two * size);
+    return local::to_result(valid);
 }
 
 int secp256k1_schnorrsig_verify(const secp256k1_context*,
@@ -1056,9 +1070,6 @@ int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
     constexpr local::bytes zeros{};
     local::scalar secret{};
     const auto valid = local::to_secret(secret, seckey32);
-    if (!valid)
-        secret = { 1 };
-
     const auto point = local::public_point(secret);
     accumulator<sha256> hasher{ tagged_midstate<"secp256k1_ellswift_create">,
         one };
@@ -1069,10 +1080,8 @@ int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
 
     local::encode(ell64, point, hasher);
     local::wipe(secret);
-    if (!valid)
-        std::fill_n(ell64, ec_ellswift_size, uint8_t{});
-
-    return valid ? success : failure;
+    local::keep(ell64, ec_ellswift_size, valid);
+    return local::to_result(valid);
 }
 
 // The shared x is that of secret times their point, whose x is decoded as a
@@ -1096,10 +1105,7 @@ int secp256k1_ellswift_xdh(const secp256k1_context*, uint8_t* output,
     /* bool */ local::lift(point, x, 0_u64);
 
     local::scalar secret{};
-    const auto valid = local::to_secret(secret, seckey32);
-    if (!valid)
-        secret = { 1 };
-
+    auto valid = local::to_secret(secret, seckey32);
     const auto context = unsafe_array_cast<uint8_t, ec_ellswift_size>(theirs);
     local::secret_multiply(shared, secret, point,
         local::blind(secret, context, 0));
@@ -1113,7 +1119,8 @@ int secp256k1_ellswift_xdh(const secp256k1_context*, uint8_t* output,
     local::wipe(shared.x);
     local::wipe(shared.y);
     local::wipe(shared_x);
-    return is_nonzero(hashed) && valid ? success : failure;
+    valid &= is_nonzero(hashed);
+    return local::to_result(valid);
 }
 
 BC_POP_WARNING()

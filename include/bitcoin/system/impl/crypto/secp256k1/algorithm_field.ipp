@@ -505,8 +505,7 @@ constexpr void algorithm::square(field_t<Word>& r,
         square(r, r);
 }
 
-// Integral words invert by safegcd, and lanes by exponent p - 2, which is 1s
-// blocks of { 223, 22, 1, 2, 1 } separated by 0s.
+// Integral words invert by safegcd, and lanes by fixed exponent.
 template <typename Word>
 constexpr void algorithm::inverse(field_t<Word>& r,
     const field_t<Word>& a) NOEXCEPT
@@ -523,18 +522,26 @@ constexpr void algorithm::inverse(field_t<Word>& r,
     }
     else
     {
-        field_t<Word> x2{}, x22{}, x223{}, t{};
-        powers(x2, x22, x223, a);
-
-        square<23>(t, x223);
-        multiply(t, t, x22);
-        square<5>(t, t);
-        multiply(t, t, a);
-        square<3>(t, t);
-        multiply(t, t, x2);
-        square<2>(t, t);
-        multiply(r, t, a);
+        inverse_power(r, a);
     }
+}
+
+// Exponent p - 2 is 1s blocks of { 223, 22, 1, 2, 1 } separated by 0s.
+template <typename Word>
+constexpr void algorithm::inverse_power(field_t<Word>& r,
+    const field_t<Word>& a) NOEXCEPT
+{
+    field_t<Word> x2{}, x22{}, x223{}, t{};
+    powers(x2, x22, x223, a);
+
+    square<23>(t, x223);
+    multiply(t, t, x22);
+    square<5>(t, t);
+    multiply(t, t, a);
+    square<3>(t, t);
+    multiply(t, t, x2);
+    square<2>(t, t);
+    multiply(r, t, a);
 }
 
 // Exponent (p + 1) / 4 is 1s blocks of { 223, 22, 2 } separated by 0s.
@@ -591,9 +598,14 @@ constexpr Word algorithm::equal(const field_t<Word>& a,
     return f::eq<64>(merged, f::broadcast<Word>(uint64_t{}));
 }
 
-// Carried once, a loose value is zero mod p only as zero or p, which the low
-// limb alone excludes for nearly all values.
 constexpr bool algorithm::normalizes_to_zero(
+    const field_t<uint64_t>& a) NOEXCEPT
+{
+    return to_bool(normalized_zero(a));
+}
+
+// Carried once, a loose value is zero mod p only as zero or p.
+constexpr uint64_t algorithm::normalized_zero(
     const field_t<uint64_t>& a) NOEXCEPT
 {
     constexpr auto low_prime = prime[0] ^ limb_mask;
@@ -604,9 +616,6 @@ constexpr bool algorithm::normalizes_to_zero(
     t0 += (t4 >> top_bits) * fold_256;
     auto z0 = t0 & limb_mask;
     auto z1 = z0 ^ low_prime;
-    if (is_nonzero(z0) && z1 != limb_mask)
-        return false;
-
     auto t1 = a[1];
     auto t2 = a[2];
     auto t3 = a[3];
@@ -620,7 +629,7 @@ constexpr bool algorithm::normalizes_to_zero(
     t3 &= limb_mask;
     z0 |= t1 | t2 | t3 | t4;
     z1 &= t1 & t2 & t3 & (t4 ^ top_prime);
-    return is_zero(z0) || z1 == limb_mask;
+    return zero_mask(z0) | zero_mask(z1 ^ limb_mask);
 }
 
 // Field encoding.

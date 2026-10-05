@@ -124,11 +124,6 @@ INLINE xquad_t add_512(xquad_t a, xquad_t) NOEXCEPT
     return a;
 }
 
-INLINE xquad_t swap_512(xquad_t a) NOEXCEPT
-{
-    return a;
-}
-
 INLINE void schedule_512(xquad_t&, xquad_t) NOEXCEPT
 {
 }
@@ -150,6 +145,16 @@ INLINE void unshuffle_512(xquad_t&, xquad_t&) NOEXCEPT
 }
 
 } // namespace sha
+
+namespace f {
+
+template <typename Word, if_same<Word, uint64_t> = true>
+INLINE sha::xquad_t byteswap(sha::xquad_t a) NOEXCEPT
+{
+    return a;
+}
+
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
 
