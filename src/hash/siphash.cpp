@@ -128,7 +128,9 @@ template <typename xWord>
 INLINE xWord load(const std::span<const uint64_t>& column,
     size_t row) NOEXCEPT
 {
-    return f::load(*pointer_cast<const xWord>(std::next(column.data(), row)));
+    const auto data = std::next(column.data(), row);
+    const auto& words = *pointer_cast<const xWord>(data);
+    return native_from_little_end<uint64_t>(f::load(words));
 }
 
 // local
@@ -219,7 +221,10 @@ void siphash(const std::span<uint64_t>& out, const siphash_key& key,
     for (; row < out.size(); ++row)
         out[row] = siphash(key, siphash_words
         {
-            columns[0][row], columns[1][row], columns[2][row], columns[3][row]
+            native_from_little_end(columns[0][row]),
+            native_from_little_end(columns[1][row]),
+            native_from_little_end(columns[2][row]),
+            native_from_little_end(columns[3][row])
         });
 }
 

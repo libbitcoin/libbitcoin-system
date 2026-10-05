@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_ENDIAN_SWAPS_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -43,6 +44,30 @@ INLINE constexpr Integral native_from_big_end(Integral big) NOEXCEPT;
 /// Convert a little-endian integral integer to native.
 template <typename Integral, if_integral_integer<Integral> = true>
 INLINE constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
+
+/// Native endianness lanes to/from big/little endianness lanes (byteswap).
+/// ---------------------------------------------------------------------------
+/// Each lane is an Integral of a type with a lane byteswap (f::byteswap).
+
+/// Convert native lanes of Integral to big-endian.
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+INLINE xWord native_to_big_end(xWord native) NOEXCEPT;
+
+/// Convert native lanes of Integral to little-endian.
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+INLINE xWord native_to_little_end(xWord native) NOEXCEPT;
+
+/// Convert big-endian lanes of Integral to native.
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+INLINE xWord native_from_big_end(xWord big) NOEXCEPT;
+
+/// Convert little-endian lanes of Integral to native.
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+INLINE xWord native_from_little_end(xWord little) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

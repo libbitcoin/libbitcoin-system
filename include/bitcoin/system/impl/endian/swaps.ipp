@@ -59,6 +59,43 @@ INLINE constexpr Integral native_from_little_end(Integral little) NOEXCEPT
     return native_to_little_end(little);
 }
 
+// Extended integer lanes.
+// ----------------------------------------------------------------------------
+
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral>, if_non_integral<xWord>>
+INLINE xWord native_to_big_end(xWord native) NOEXCEPT
+{
+    if constexpr (is_little_endian)
+        return f::byteswap<Integral>(native);
+    else
+        return native;
+}
+
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral>, if_non_integral<xWord>>
+INLINE xWord native_to_little_end(xWord native) NOEXCEPT
+{
+    if constexpr (is_big_endian)
+        return f::byteswap<Integral>(native);
+    else
+        return native;
+}
+
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral>, if_non_integral<xWord>>
+INLINE xWord native_from_big_end(xWord big) NOEXCEPT
+{
+    return native_to_big_end<Integral>(big);
+}
+
+template <typename Integral, typename xWord,
+    if_integral_integer<Integral>, if_non_integral<xWord>>
+INLINE xWord native_from_little_end(xWord little) NOEXCEPT
+{
+    return native_to_little_end<Integral>(little);
+}
+
 } // namespace system
 } // namespace libbitcoin
 

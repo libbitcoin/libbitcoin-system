@@ -54,17 +54,28 @@ BOOST_AUTO_TEST_CASE(siphash__columns__rows__expected_by_row)
     const auto key = to_siphash_key(hash);
 
     constexpr size_t rows = 29;
-    std_array<std_array<uint64_t, rows>, 4> words{};
-    for (size_t row{}; row < rows; ++row)
-        for (size_t column{}; column < words.size(); ++column)
+    constexpr std_array<size_t, 4> column_indexes{ 0, 1, 2, 3 };
+    std_array<size_t, rows> row_indexes{};
+    std::iota(row_indexes.begin(), row_indexes.end(), zero);
+
+    std_array<std_array<uint64_t, rows>, 4> words{}, little{};
+    std::for_each(row_indexes.cbegin(), row_indexes.cend(), [&](size_t row)
+    {
+        std::for_each(column_indexes.cbegin(), column_indexes.cend(), [&](size_t column)
+        {
             words[column][row] = (row << 8) + column;
+            little[column][row] = native_to_little_end(words[column][row]);
+        });
+    });
 
     std_array<uint64_t, rows> out{};
-    const siphash_columns columns{ words[0], words[1], words[2], words[3] };
+    const siphash_columns columns{ little[0], little[1], little[2], little[3] };
     siphash(out, key, columns);
 
-    for (size_t row{}; row < rows; ++row)
+    std::for_each(row_indexes.cbegin(), row_indexes.cend(), [&](size_t row)
+    {
         BOOST_REQUIRE_EQUAL(out[row], siphash(key, siphash_words{ words[0][row], words[1][row], words[2][row], words[3][row] }));
+    });
 }
 
 BOOST_AUTO_TEST_CASE(siphash__columns__empty__unchanged)

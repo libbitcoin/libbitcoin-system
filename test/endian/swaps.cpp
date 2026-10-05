@@ -143,4 +143,50 @@ BOOST_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_unsi
     BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102030405060708_u64)), 0x0102030405060708_u64);
 }
 
+// extended lanes
+
+BOOST_AUTO_TEST_CASE(endian__native_to_big_end__extended__expected)
+{
+    if constexpr (have_128)
+    {
+        const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
+        const auto swapped = native_to_big_end<uint64_t>(xword);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0807060504030201_u64);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1817161514131211_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(endian__native_to_little_end__extended__expected)
+{
+    if constexpr (have_128)
+    {
+        const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
+        const auto swapped = native_to_little_end<uint64_t>(xword);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0102030405060708_u64);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1112131415161718_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(endian__native_from_big_end__extended__expected)
+{
+    if constexpr (have_128)
+    {
+        const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
+        const auto swapped = native_from_big_end<uint64_t>(xword);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0807060504030201_u64);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1817161514131211_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(endian__native_from_little_end__extended__expected)
+{
+    if constexpr (have_128)
+    {
+        const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
+        const auto swapped = native_from_little_end<uint64_t>(xword);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0102030405060708_u64);
+        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1112131415161718_u64);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

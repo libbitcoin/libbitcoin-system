@@ -38,8 +38,8 @@ template <bool Swap>
 INLINE xint128_t CLASS::
 endian(xint128_t message) NOEXCEPT
 {
-    if constexpr (Swap && !is_big_endian)
-        return f::byteswap<uint32_t>(message);
+    if constexpr (Swap)
+        return native_from_big_end<uint32_t>(message);
     else
         return message;
 }
@@ -414,8 +414,8 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 
     // digest is copied so that state remains valid (LE).
     std::array<xint128_t, 2> wdigest{};
-    f::store(wdigest[0], f::byteswap<uint32_t>(lo));
-    f::store(wdigest[1], f::byteswap<uint32_t>(hi));
+    f::store(wdigest[0], native_to_big_end<uint32_t>(lo));
+    f::store(wdigest[1], native_to_big_end<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);
 }
 
@@ -525,13 +525,11 @@ native_hash(uint8_t byte) NOEXCEPT
     constexpr auto pad = bit_hi<uint8_t>;
 
     auto state = H::get;
-    block_t block{};
-
-    // Order is based on array of little-endian uint32_t.
-    block.at(3) = byte;
-    block.at(2) = pad;
-    block.at(60) = byte_bits;
-    return native_finalize(state, array_cast<word_t>(block));
+    words_t block{};
+    block.front() = bit_or(shift_left<word_t>(byte, 24),
+        shift_left<word_t>(pad, 16));
+    block.back() = byte_bits;
+    return native_finalize(state, block);
 }
 
 // Double hash functions start with BE data and end with BE digest_t.
@@ -567,8 +565,8 @@ native_finalize_second(xint128_t lo, xint128_t hi) NOEXCEPT
     unshuffle(lo, hi);
 
     std::array<xint128_t, 2> wdigest{};
-    f::store(wdigest[0], f::byteswap<uint32_t>(lo));
-    f::store(wdigest[1], f::byteswap<uint32_t>(hi));
+    f::store(wdigest[0], native_to_big_end<uint32_t>(lo));
+    f::store(wdigest[1], native_to_big_end<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);
 }
 
@@ -835,10 +833,10 @@ native_finalize_second(digest_t& digest0, digest_t& digest1, xint128_t lo0,
 
     auto& wdigest0 = array_cast<xint128_t>(digest0);
     auto& wdigest1 = array_cast<xint128_t>(digest1);
-    f::store(wdigest0[0], f::byteswap<uint32_t>(lo0));
-    f::store(wdigest0[1], f::byteswap<uint32_t>(hi0));
-    f::store(wdigest1[0], f::byteswap<uint32_t>(lo1));
-    f::store(wdigest1[1], f::byteswap<uint32_t>(hi1));
+    f::store(wdigest0[0], native_to_big_end<uint32_t>(lo0));
+    f::store(wdigest0[1], native_to_big_end<uint32_t>(hi0));
+    f::store(wdigest1[0], native_to_big_end<uint32_t>(lo1));
+    f::store(wdigest1[1], native_to_big_end<uint32_t>(hi1));
 }
 
 TEMPLATE
@@ -868,8 +866,8 @@ template <bool Swap>
 INLINE sha::xquad_t CLASS::
 endian(xquad_t message) NOEXCEPT
 {
-    if constexpr (Swap && !is_big_endian)
-        return sha::swap_512(message);
+    if constexpr (Swap)
+        return native_from_big_end<uint64_t>(message);
     else
         return message;
 }

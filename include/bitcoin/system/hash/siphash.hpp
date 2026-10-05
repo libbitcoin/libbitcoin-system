@@ -45,8 +45,8 @@ BC_API uint64_t siphash(const half_hash& hash,
 BC_API uint64_t siphash(const siphash_key& key,
     const siphash_words& message) NOEXCEPT;
 
-/// Each row of four word columns as a 32 byte message, one hash per row of
-/// out (columns at least as long as out), computed across vector lanes.
+/// Each row of four little-endian word columns as a 32 byte message, one hash
+/// per row of out (columns at least as long as out), across vector lanes.
 BC_API void siphash(const std::span<uint64_t>& out, const siphash_key& key,
     const siphash_columns& columns) NOEXCEPT;
 

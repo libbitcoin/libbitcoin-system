@@ -165,15 +165,6 @@ INLINE xquad_t add_512(xquad_t a, xquad_t b) NOEXCEPT
     return { vaddq_u64(a.lo, b.lo), vaddq_u64(a.hi, b.hi) };
 }
 
-INLINE xquad_t swap_512(xquad_t a) NOEXCEPT
-{
-    return
-    {
-        (uint64x2_t)vrev64q_u8((uint8x16_t)a.lo),
-        (uint64x2_t)vrev64q_u8((uint8x16_t)a.hi)
-    };
-}
-
 INLINE void schedule_512(xquad_t& message0, xquad_t message1) NOEXCEPT
 {
     message0.lo = vsha512su0q_u64(message0.lo, message0.hi);
@@ -219,6 +210,20 @@ INLINE void unshuffle_512(xquad_t&, xquad_t&) NOEXCEPT
 }
 
 } // namespace sha
+
+namespace f {
+
+template <typename Word, if_same<Word, uint64_t> = true>
+INLINE sha::xquad_t byteswap(sha::xquad_t a) NOEXCEPT
+{
+    return
+    {
+        (uint64x2_t)vrev64q_u8((uint8x16_t)a.lo),
+        (uint64x2_t)vrev64q_u8((uint8x16_t)a.hi)
+    };
+}
+
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
 
