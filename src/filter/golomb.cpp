@@ -46,8 +46,8 @@ std::vector<uint64_t> golomb::hash_distinct(const data_stack& items,
     // Items of equal hash are retained unless also equal in value.
     std::vector<uint64_t> out{};
     out.reserve(hashes.size());
-    auto run = hashes.begin();
-    for (auto it = hashes.begin(); it != hashes.end(); ++it)
+    auto run = hashes.cbegin();
+    for (auto it = hashes.cbegin(); it != hashes.cend(); ++it)
     {
         if (it->first != run->first)
             run = it;
