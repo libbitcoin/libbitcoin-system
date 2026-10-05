@@ -231,8 +231,8 @@ xinput(xplanes_t<Word>& q, const xblocks_t<Lanes>& in) NOEXCEPT
 
         for (size_t plane{}; plane < planes; ++plane)
         {
-            const auto& words = array_cast<Word>(scalar[plane]).front();
-            q[plane] = f::load<uint64_t>(words);
+            const auto& xwords = array_cast<Word>(scalar[plane]).front();
+            q[plane] = f::load<uint64_t>(xwords);
         }
     }
 
@@ -264,8 +264,8 @@ xoutput(xblocks_t<Lanes>& out, const xplanes_t<Word>& q) NOEXCEPT
         std_array<std_array<uint64_t, words>, planes> scalar{};
         for (size_t plane{}; plane < planes; ++plane)
         {
-            auto& words = array_cast<Word>(scalar[plane]).front();
-            f::store<uint64_t>(words, copy[plane]);
+            auto& xwords = array_cast<Word>(scalar[plane]).front();
+            f::store<uint64_t>(xwords, copy[plane]);
         }
 
         for (size_t lane{}; lane < words; ++lane)
