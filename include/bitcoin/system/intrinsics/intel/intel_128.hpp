@@ -309,14 +309,16 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
         7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8));
 }
 
-/// load/store (from casted to loaded/stored)
+/// load/store (lanes of Integral from casted, bytes from pointer)
 /// ---------------------------------------------------------------------------
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
 {
     return _mm_loadu_si128(&bytes);
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
     _mm_storeu_si128(&bytes, a);
@@ -333,11 +335,13 @@ INLINE void store(uint8_t* bytes, xint128_t a) NOEXCEPT
     _mm_storeu_si128(pointer_cast<xint128_t>(bytes), a);
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
 {
     return _mm_load_si128(&bytes);
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
     _mm_store_si128(&bytes, a);

@@ -304,17 +304,55 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
     return (xint128_t)vrev64q_u8((uint8x16_t)a);
 }
 
-/// load/store
+/// load/store (lanes of Integral from casted, bytes from pointer)
 /// ---------------------------------------------------------------------------
 
+template <typename Integral = uint32_t, if_same<Integral, uint8_t> = true>
 INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
 {
-    return vld1q_u32((uint32_t*)&bytes);
+    return (xint128_t)vld1q_u8((const uint8_t*)&bytes);
 }
 
+template <typename Integral = uint32_t, if_same<Integral, uint16_t> = true>
+INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
+{
+    return (xint128_t)vld1q_u16((const uint16_t*)&bytes);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint32_t> = true>
+INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
+{
+    return vld1q_u32((const uint32_t*)&bytes);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint64_t> = true>
+INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
+{
+    return (xint128_t)vld1q_u64((const uint64_t*)&bytes);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint8_t> = true>
+INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u8((uint8_t*)&bytes, (uint8x16_t)a);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint16_t> = true>
+INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u16((uint16_t*)&bytes, (uint16x8_t)a);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint32_t> = true>
 INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
     vst1q_u32((uint32_t*)&bytes, a);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint64_t> = true>
+INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u64((uint64_t*)&bytes, (uint64x2_t)a);
 }
 
 template <typename xWord, if_same<xWord, xint128_t> = true>
@@ -328,14 +366,52 @@ INLINE void store(uint8_t* bytes, xint128_t a) NOEXCEPT
     vst1q_u8(bytes, (uint8x16_t)a);
 }
 
+template <typename Integral = uint32_t, if_same<Integral, uint8_t> = true>
 INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
 {
-    return vld1q_u32((uint32_t*)&bytes);
+    return (xint128_t)vld1q_u8((const uint8_t*)&bytes);
 }
 
+template <typename Integral = uint32_t, if_same<Integral, uint16_t> = true>
+INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
+{
+    return (xint128_t)vld1q_u16((const uint16_t*)&bytes);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint32_t> = true>
+INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
+{
+    return vld1q_u32((const uint32_t*)&bytes);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint64_t> = true>
+INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
+{
+    return (xint128_t)vld1q_u64((const uint64_t*)&bytes);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint8_t> = true>
+INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u8((uint8_t*)&bytes, (uint8x16_t)a);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint16_t> = true>
+INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u16((uint16_t*)&bytes, (uint16x8_t)a);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint32_t> = true>
 INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
     vst1q_u32((uint32_t*)&bytes, a);
+}
+
+template <typename Integral = uint32_t, if_same<Integral, uint64_t> = true>
+INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    vst1q_u64((uint64_t*)&bytes, (uint64x2_t)a);
 }
 
 /// compare/select

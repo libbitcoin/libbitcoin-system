@@ -101,11 +101,13 @@ INLINE xint128_t byteswap(xint128_t) NOEXCEPT
     return {};
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE xint128_t load(const xint128_t&) NOEXCEPT
 {
     return {};
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE void store(xint128_t&, xint128_t) NOEXCEPT
 {
 }
@@ -120,11 +122,13 @@ INLINE void store(uint8_t*, xint128_t) NOEXCEPT
 {
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE xint128_t load_aligned(const xint128_t&) NOEXCEPT
 {
     return {};
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE void store_aligned(xint128_t&, xint128_t) NOEXCEPT
 {
 }

@@ -350,14 +350,16 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
         55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60, 59, 58, 57, 56));
 }
 
-/// load/store (from casted to loaded/stored)
+/// load/store (lanes of Integral from casted, bytes from pointer)
 /// ---------------------------------------------------------------------------
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE xint512_t load(const xint512_t& bytes) NOEXCEPT
 {
     return _mm512_loadu_si512(&bytes);
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE void store(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
     _mm512_storeu_si512(&bytes, a);
@@ -374,11 +376,13 @@ INLINE void store(uint8_t* bytes, xint512_t a) NOEXCEPT
     _mm512_storeu_si512(bytes, a);
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
 {
     return _mm512_load_si512(&bytes);
 }
 
+template <typename Integral = uint32_t, if_integral_integer<Integral> = true>
 INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
     _mm512_store_si512(&bytes, a);

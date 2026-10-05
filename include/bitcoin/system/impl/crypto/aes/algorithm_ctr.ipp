@@ -74,9 +74,9 @@ cbc_decrypt(byte_span out, const_byte_span in, block_t& iv,
 
             auto plain = cipher;
             auto& word = array_cast<xint128_t>(plain).front();
-            std_array<xint128_t, one> state{ f::load(word) };
+            std_array<xint128_t, one> state{ f::load<uint8_t>(word) };
             aes::decrypt<K::rounds>(state, keys);
-            f::store(word, state.front());
+            f::store<uint8_t>(word, state.front());
 
             for (size_t byte{}; byte < block_bytes; ++byte)
                 out[at + byte] = bit_xor(plain[byte], iv[byte]);
@@ -176,7 +176,7 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
             auto& words = array_cast<xWord>(xstream);
             native_state_t<xWord> state{};
             for (size_t word{}; word < native_words; ++word)
-                state[word] = f::load(words[word]);
+                state[word] = f::load<uint8_t>(words[word]);
 
             native_encrypt(state, keys);
 
@@ -209,7 +209,7 @@ native_ctr(byte_span out, const_byte_span in, size_t start,
             }
 
             for (size_t word{}; word < native_words; ++word)
-                f::store(words[word], state[word]);
+                f::store<uint8_t>(words[word], state[word]);
 
             for (size_t block{}; (block < xstream.size()) &&
                 (byte < out.size()); ++block)
