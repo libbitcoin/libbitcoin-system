@@ -675,10 +675,10 @@ int secp256k1_ec_pubkey_tweak_mul(const secp256k1_context*,
         local::load<zero>(point, pubkey->data);
 
     pubkey->data = {};
-    if (!valid || local::is_zero_scalar(tweak) ||
-        !local::linear(product, {}, point, tweak))
+    if (!valid || local::is_zero_scalar(tweak))
         return failure;
 
+    local::secret_multiply(product, tweak, point, local::blind(tweak, {}, 0));
     local::save<zero>(pubkey->data, product);
     return success;
 }
