@@ -48,10 +48,32 @@ constexpr Word algorithm::multiply(jacobian_t<Word>& r,
     }
 }
 
+template <typename Word>
+constexpr Word algorithm::multiply(jacobian_t<Word>& r,
+    const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT
+{
+    if constexpr (is_same_type<Word, uint64_t>)
+    {
+        return multiply_naf(r, {}, a, k.front());
+    }
+    else
+    {
+        return multiply_windows<point_bits>(r, a, k);
+    }
+}
+
+template <size_t Bits, typename Word>
+constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
+    const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT
+{
+    return multiply_windows<Bits, false>(r, {}, a, k);
+}
+
 // Each scalar splits into two halves, each window of each half adds a table
 // point, and halves made odd are corrected at the end. Lanes in which an
-// addition was exceptional are reported, not computed.
-template <size_t Bits, typename Word>
+// addition was exceptional are reported, not computed. Without the generator
+// its windows, recoding and corrections are omitted.
+template <size_t Bits, bool Generator, typename Word>
 constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     const scalars_t<Word>& g, const affine_t<Word>& a,
     const scalars_t<Word>& k) NOEXCEPT
@@ -59,16 +81,21 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     constexpr auto generator_top = sub1(digit_count<generator_bits>) *
         generator_bits;
     constexpr auto point_top = sub1(digit_count<Bits>) * Bits;
-    constexpr auto top = greater(generator_top, point_top);
+    constexpr auto top = Generator ? greater(generator_top, point_top) :
+        point_top;
 
     recodes_t<generator_bits, Word> g_first{}, g_second{};
     recodes_t<Bits, Word> k_first{}, k_second{};
     for (size_t lane{}; lane < lanes<Word>; ++lane)
     {
         scalar_t first{}, second{};
-        split(first, second, g[lane]);
-        recode(g_first[lane], first);
-        recode(g_second[lane], second);
+        if constexpr (Generator)
+        {
+            split(first, second, g[lane]);
+            recode(g_first[lane], first);
+            recode(g_second[lane], second);
+        }
+
         split(first, second, k[lane]);
         recode(k_first[lane], first);
         recode(k_second[lane], second);
@@ -93,15 +120,18 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
         if (bit != top)
             double_(sum, sum);
 
-        if (bit <= generator_top && is_zero(bit % generator_bits))
+        if constexpr (Generator)
         {
-            const auto position = bit / generator_bits;
-            digit(index, negative, g_first, position, false);
-            lookup(addend, index, false, negative);
-            add_point(sum, addend, scale, faults);
-            digit(index, negative, g_second, position, false);
-            lookup(addend, index, true, negative);
-            add_point(sum, addend, scale, faults);
+            if (bit <= generator_top && is_zero(bit % generator_bits))
+            {
+                const auto position = bit / generator_bits;
+                digit(index, negative, g_first, position, false);
+                lookup(addend, index, false, negative);
+                add_point(sum, addend, scale, faults);
+                digit(index, negative, g_second, position, false);
+                lookup(addend, index, true, negative);
+                add_point(sum, addend, scale, faults);
+            }
         }
 
         if (bit <= point_top && is_zero(bit % Bits))
@@ -116,13 +146,17 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
         }
     }
 
-    affine_t<Word> base{ broadcast<Word>(generator.x),
-        broadcast<Word>(generator.y) };
+    if constexpr (Generator)
+    {
+        affine_t<Word> base{ broadcast<Word>(generator.x),
+            broadcast<Word>(generator.y) };
+
+        correct(sum, base, scale, g_first, faults);
+        endomorphism(base, base);
+        correct(sum, base, scale, g_second, faults);
+    }
 
     const auto unit = broadcast<Word>({ 1 });
-    correct(sum, base, scale, g_first, faults);
-    endomorphism(base, base);
-    correct(sum, base, scale, g_second, faults);
     correct(sum, a_first.front(), unit, k_first, faults);
     correct(sum, a_second.front(), unit, k_second, faults);
 

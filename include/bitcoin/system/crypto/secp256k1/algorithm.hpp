@@ -690,11 +690,21 @@ protected:
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
 
+    /// r = k * a, mask of lanes not computed (exceptional).
+    template <typename Word>
+    static constexpr Word multiply(jacobian_t<Word>& r,
+        const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT;
+
     /// r = g * G + k * a by point windows of Bits, mask of lanes not computed.
-    template <size_t Bits, typename Word>
+    template <size_t Bits, bool Generator = true, typename Word>
     static constexpr Word multiply_windows(jacobian_t<Word>& r,
         const scalars_t<Word>& g, const affine_t<Word>& a,
         const scalars_t<Word>& k) NOEXCEPT;
+
+    /// r = k * a by point windows of Bits, mask of lanes not computed.
+    template <size_t Bits, typename Word>
+    static constexpr Word multiply_windows(jacobian_t<Word>& r,
+        const affine_t<Word>& a, const scalars_t<Word>& k) NOEXCEPT;
 
     /// r = g * G + k * a, all cases.
     static constexpr void multiply_complete(jacobian_t<uint64_t>& r,

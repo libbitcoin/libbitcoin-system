@@ -274,7 +274,6 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
     pending.reserve(count);
     sums.reserve(count);
 
-    const scalars_t<Word> zeros{};
     scalars_t<Word> ks{};
     ks.fill(k);
 
@@ -309,7 +308,7 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
         const auto on = unpack(lift(point, x, pack<Word>(odds)));
 
         jacobian_t<Word> sum{};
-        const auto faults = unpack(multiply(sum, zeros, point, ks));
+        const auto faults = unpack(multiply(sum, point, ks));
 
         std_array<jacobian_t<uint64_t>, width> rows{};
         unpack(rows, sum);

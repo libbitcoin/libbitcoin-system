@@ -84,8 +84,8 @@ public:
             return 0;
 
         jacobian_t<uint64_t> sum{};
-        const scalars_t<uint64_t> none{}, ks{ secret };
-        if (f::any(multiply_windows<window_bits>(sum, none, point, ks)))
+        const scalars_t<uint64_t> ks{ secret };
+        if (f::any(multiply_windows<window_bits>(sum, point, ks)))
             multiply_complete(sum, {}, point, secret);
 
         if (f::any(sum.infinity))
