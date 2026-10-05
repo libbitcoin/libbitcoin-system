@@ -172,11 +172,16 @@ bool golomb::match_stack(const data_chunk& compressed_set,
 void golomb::encode(bitwriter& writer, uint64_t value,
     uint8_t modulo_exponent) NOEXCEPT
 {
-    const auto quotient = shift_right(value, modulo_exponent);
-    for (uint64_t index = 0; index < quotient; ++index)
-        writer.write_bit(true);
+    // The quotient is unary (ones terminated by a zero), the remainder binary.
+    auto quotient = shift_right(value, modulo_exponent);
+    while (quotient >= bits<uint64_t>)
+    {
+        writer.write_bits(max_uint64, bits<uint64_t>);
+        quotient -= bits<uint64_t>;
+    }
 
-    writer.write_bit(false);
+    const auto ones = unmask_right<uint64_t>(possible_narrow_cast<size_t>(quotient));
+    writer.write_bits(shift_left(ones, one), add1(quotient));
     writer.write_bits(value, modulo_exponent);
 }
 
