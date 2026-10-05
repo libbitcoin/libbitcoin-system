@@ -38,6 +38,7 @@ public:
     using algorithm::multiply;
     using algorithm::square;
     using algorithm::inverse;
+    using algorithm::inverse_power;
     using algorithm::square_root;
     using algorithm::is_zero_element;
     using algorithm::is_odd_element;
@@ -185,6 +186,13 @@ constexpr field field_inverse(const field& a) NOEXCEPT
 {
     field out{};
     accessor::inverse(out, a);
+    return out;
+}
+
+constexpr field field_inverse_power(const field& a) NOEXCEPT
+{
+    field out{};
+    accessor::inverse_power(out, a);
     return out;
 }
 
@@ -351,6 +359,27 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse__values__expected)
     BOOST_CHECK_EQUAL(encode(field_inverse(decode(zero_value))), zero_value);
     BOOST_CHECK_EQUAL(encode(field_multiply(decode(sample), field_inverse(decode(sample)))), one_value);
     BOOST_CHECK_EQUAL(encode(field_multiply(weak_limbs, field_inverse(weak_limbs))), one_value);
+}
+
+// inverse_power
+// ----------------------------------------------------------------------------
+
+static_assert(encode(field_inverse_power(decode(gx))) == gx_inverse);
+static_assert(encode(field_inverse_power(decode(zero_value))) == zero_value);
+static_assert(encode(field_inverse_power(decode(two_value))) == two_inverse);
+static_assert(encode(field_inverse_power(decode(prime_minus_one))) == prime_minus_one);
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse_power__values__expected)
+{
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(two_value))), two_inverse);
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(prime_minus_one))), prime_minus_one);
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(gx))), gx_inverse);
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(gy))), gy_inverse);
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(sample))), sample_inverse);
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(one_value))), one_value);
+    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(zero_value))), zero_value);
+    BOOST_CHECK_EQUAL(encode(field_multiply(decode(sample), field_inverse_power(decode(sample)))), one_value);
+    BOOST_CHECK_EQUAL(encode(field_multiply(weak_limbs, field_inverse_power(weak_limbs))), one_value);
 }
 
 // square_root

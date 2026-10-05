@@ -64,7 +64,7 @@ constexpr bool algorithm::linear(affine_t<uint64_t>& r, const scalar_t& g,
     if (f::any(sum.infinity))
         return false;
 
-    to_affine(r, sum);
+    to_affine_power(r, sum);
     return true;
 }
 
@@ -88,7 +88,7 @@ constexpr void algorithm::secret_multiply(affine_t<uint64_t>& r,
         add_complete(sum, sum, blind);
     }
 
-    to_affine(r, sum);
+    to_affine_power(r, sum);
     wipe(masked);
 }
 
@@ -111,9 +111,17 @@ constexpr void algorithm::secret_inverse(scalar_t& r, const scalar_t& a,
 {
     scalar_t product{};
     multiply(product, a, m);
-    inverse(product, product);
+    inverse_power(product, product);
     multiply(r, product, m);
     wipe(product);
+}
+
+constexpr void algorithm::to_affine_power(affine_t<uint64_t>& r,
+    const jacobian_t<uint64_t>& a) NOEXCEPT
+{
+    field_t<uint64_t> inverse_z{};
+    inverse_power(inverse_z, a.z);
+    to_affine(r, a, inverse_z);
 }
 
 template <typename Container>

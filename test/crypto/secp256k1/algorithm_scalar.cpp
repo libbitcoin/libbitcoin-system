@@ -35,6 +35,7 @@ public:
     using algorithm::negate;
     using algorithm::multiply;
     using algorithm::inverse;
+    using algorithm::inverse_power;
     using algorithm::split;
     using algorithm::recode;
     using algorithm::is_zero_scalar;
@@ -132,6 +133,13 @@ constexpr scalar scalar_inverse(const scalar& a) NOEXCEPT
 {
     scalar out{};
     accessor::inverse(out, a);
+    return out;
+}
+
+constexpr scalar scalar_inverse_power(const scalar& a) NOEXCEPT
+{
+    scalar out{};
+    accessor::inverse_power(out, a);
     return out;
 }
 
@@ -245,6 +253,21 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse__values__expected)
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(one_value))), one_value);
     BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(order_minus_one))), order_minus_one);
     BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(sample), scalar_inverse(decode(sample)))), one_value);
+}
+
+// inverse_power
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse_power__values__expected)
+{
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(two_value))), two_inverse);
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(zero_value))), zero_value);
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(first))), first_inverse);
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(second))), second_inverse);
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(sample))), sample_inverse);
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(one_value))), one_value);
+    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(order_minus_one))), order_minus_one);
+    BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(sample), scalar_inverse_power(decode(sample)))), one_value);
 }
 
 // split

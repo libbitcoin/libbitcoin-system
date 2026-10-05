@@ -220,6 +220,11 @@ protected:
     static constexpr void inverse(field_t<Word>& r,
         const field_t<Word>& a) NOEXCEPT;
 
+    /// r = a^-1 by fixed exponent (constant time), zero for zero.
+    template <typename Word>
+    static constexpr void inverse_power(field_t<Word>& r,
+        const field_t<Word>& a) NOEXCEPT;
+
     /// r = sqrt(a), mask of a being square (weak from weak).
     template <typename Word>
     static constexpr Word square_root(field_t<Word>& r,
@@ -307,6 +312,13 @@ protected:
         0x0000000000000001, 0x0000000000000000
     };
 
+    /// n - 2, the inversion exponent.
+    static constexpr scalar_t order_minus_two
+    {
+        0xbfd25e8cd036413f, 0xbaaedce6af48a03b,
+        0xfffffffffffffffe, 0xffffffffffffffff
+    };
+
     static constexpr scalar_t half_order
     {
         0xdfe92f46681b20a0, 0x5d576e7357a4501d,
@@ -362,6 +374,10 @@ protected:
 
     /// r = a^-1 mod n, zero for zero.
     static constexpr void inverse(scalar_t& r, const scalar_t& a) NOEXCEPT;
+
+    /// r = a^-1 mod n by fixed exponent (constant time), zero for zero.
+    static constexpr void inverse_power(scalar_t& r,
+        const scalar_t& a) NOEXCEPT;
 
     /// k = k1 + k2 * lambda mod n, with k1 and k2 of magnitude below 2^128.
     static constexpr void split(scalar_t& k1, scalar_t& k2,
@@ -857,6 +873,10 @@ protected:
     /// r = a^-1 by blind m, a and m nonzero.
     static constexpr void secret_inverse(scalar_t& r, const scalar_t& a,
         const scalar_t& m) NOEXCEPT;
+
+    /// r = a (normal) by fixed exponent inversion, a not infinite.
+    static constexpr void to_affine_power(affine_t<uint64_t>& r,
+        const jacobian_t<uint64_t>& a) NOEXCEPT;
 
     /// secret = 0, by stores that are not elided.
     template <typename Container>

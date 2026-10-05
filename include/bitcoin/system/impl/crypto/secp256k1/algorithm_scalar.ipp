@@ -229,6 +229,37 @@ constexpr void algorithm::inverse(scalar_t& r, const scalar_t& a) NOEXCEPT
     from_signed62(r, x);
 }
 
+// Exponent n - 2 by windows of four bits, from a table of the powers of a
+// below sixteen, where only the exponent selects the entry.
+constexpr void algorithm::inverse_power(scalar_t& r,
+    const scalar_t& a) NOEXCEPT
+{
+    constexpr size_t window_bits = 4;
+    constexpr auto limb_windows = bits<uint64_t> / window_bits;
+    constexpr auto windows = array_count<scalar_t> * limb_windows;
+    constexpr auto mask = unmask_right<uint64_t>(window_bits);
+
+    std_array<scalar_t, power2(window_bits)> table{};
+    table.front() = { 1 };
+    for (auto entry = one; entry < table.size(); ++entry)
+        multiply(table[entry], table[sub1(entry)], a);
+
+    scalar_t out{ 1 };
+    for (auto window = windows; is_nonzero(window--);)
+    {
+        const auto shift = (window % limb_windows) * window_bits;
+        const auto entry = (order_minus_two[window / limb_windows] >> shift) &
+            mask;
+
+        for (size_t count{}; count < window_bits; ++count)
+            multiply(out, out, out);
+
+        multiply(out, out, table[entry]);
+    }
+
+    r = out;
+}
+
 constexpr void algorithm::split(scalar_t& k1, scalar_t& k2,
     const scalar_t& k) NOEXCEPT
 {
