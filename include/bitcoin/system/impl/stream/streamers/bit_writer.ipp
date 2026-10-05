@@ -74,13 +74,23 @@ void bit_writer<OStream>::write_bit(bool value) NOEXCEPT
 template <typename OStream>
 void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) NOEXCEPT
 {
-    bits = lesser(bc::bits<size_t>, bits);
+    bits = lesser(bc::bits<uint64_t>, bits);
 
     // 'bits' refers to the count of the rightmost bits in 'value'.
-    // Those bits are read from left to right using a right-relative offset.
-    // Subtract one for size-to-index translation, avoiding iterator underflow.
-    for (auto bit = bits; !is_zero(bit); --bit)
-        write_bit(get_right(value, sub1(bit)));
+    // Those bits are written from left to right, completing the partial byte,
+    // then whole bytes directly, then starting the next partial byte.
+    while (!is_zero(bits) && !is_zero(offset_))
+        write_bit(get_right(value, --bits));
+
+    for (; bits >= byte_bits; bits -= byte_bits)
+    {
+        const auto byte = possible_narrow_cast<uint8_t>(
+            shift_right(value, bits - byte_bits));
+        base::do_write_bytes(&byte, one);
+    }
+
+    while (!is_zero(bits))
+        write_bit(get_right(value, --bits));
 }
 
 // protected overrides
