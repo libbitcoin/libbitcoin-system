@@ -248,6 +248,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip324.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\bip341.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ctime.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\ecdsa.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_ecdsa.obj</ObjectFileName>
     </ClCompile>
