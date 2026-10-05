@@ -158,7 +158,11 @@ inline bool inflate(std::string& out) NOEXCEPT
     zlib::inflate_stream stream{};
     boost::system::error_code ec{};
     stream.write(params, zlib::Flush::finish, ec);
-    return ec == zlib::error::end_of_stream && params.total_out == out.size();
+
+    // The stream may report need_buffers in place of end_of_stream when the
+    // final block ends in the last input byte, so completion is by sizes.
+    return is_zero(params.avail_in) && params.total_out == out.size() &&
+        (ec == zlib::error::end_of_stream || ec == zlib::error::need_buffers);
 }
 
 BC_POP_WARNING()
