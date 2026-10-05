@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_KERNELS_HPP
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 
@@ -54,6 +55,14 @@ constexpr size_t maximum_labels = 8;
 /// Output key prefix (first eight bytes of x).
 using prefix = data_array<8>;
 
+/// Decoded forms of the receiver keys.
+struct silent_keys
+  : algorithm
+{
+    using algorithm::scalar_t;
+    using affine = affine_t<uint64_t>;
+};
+
 /// Arguments of the scan_silent kernel, columns in device memory. Each
 /// summary has one prefix of the receiver output key, then one of that key
 /// plus each label key, and is valid if its keys are computed.
@@ -62,9 +71,9 @@ struct silent_arguments
     const ec_compressed* summaries;
     prefix* prefixes;
     uint8_t* valid;
-    ec_secret scan;
-    ec_uncompressed spend;
-    std_array<ec_uncompressed, maximum_labels> labels;
+    silent_keys::scalar_t scan;
+    silent_keys::affine spend;
+    std_array<silent_keys::affine, maximum_labels> labels;
     uint32_t label_count;
     uint32_t count;
 };
