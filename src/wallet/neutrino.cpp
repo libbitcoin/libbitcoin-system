@@ -37,16 +37,16 @@ constexpr uint64_t golomb_target_false_positive_rate = 784931;
 constexpr auto rate = golomb_target_false_positive_rate;
 
 static bool construct_filter(data_chunk& out, const siphash_key& key,
-    data_stack& scripts) NOEXCEPT
+    const data_stack& scripts) NOEXCEPT
 {
-    distinct(scripts);
+    const auto hashes = golomb::hash_distinct(scripts, key);
 
     // A vector (push) stream is used because the size is not known a-priori.
     stream::out::data stream(out);
     write::bits::ostream writer(stream);
 
-    writer.write_variable(scripts.size());
-    golomb::construct(writer, scripts, golomb_bits, key, rate);
+    writer.write_variable(hashes.size());
+    golomb::construct(writer, hashes, golomb_bits, rate);
     writer.flush();
     return !!writer;
 }

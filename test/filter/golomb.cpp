@@ -60,6 +60,25 @@ BOOST_AUTO_TEST_CASE(golomb__construct__half_hash_entropy__same_as_siphash_key)
     BOOST_REQUIRE_EQUAL(set, expected);
 }
 
+BOOST_AUTO_TEST_CASE(golomb__hash_distinct__duplicate_item__sorted_distinct)
+{
+    auto items = golomb_items();
+    items.push_back(items.front());
+    const auto hashes = golomb::hash_distinct(items, golomb_key);
+    BOOST_REQUIRE_EQUAL(hashes.size(), golomb_items().size());
+    BOOST_REQUIRE(std::is_sorted(hashes.begin(), hashes.end()));
+}
+
+BOOST_AUTO_TEST_CASE(golomb__construct__distinct_hashes__same_as_items)
+{
+    data_chunk set{};
+    stream::out::data stream(set);
+    write::bits::ostream writer(stream);
+    golomb::construct(writer, golomb::hash_distinct(golomb_items(), golomb_key), golomb_bits, golomb_rate);
+    writer.flush();
+    BOOST_REQUIRE_EQUAL(set, golomb_set());
+}
+
 BOOST_AUTO_TEST_CASE(golomb__construct__no_items__empty)
 {
     const data_stack items{};
