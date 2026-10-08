@@ -165,6 +165,29 @@ inline void wipe(Type& value) NOEXCEPT
     wipe(&value, sizeof(Type));
 }
 
+/// classify
+/// ---------------------------------------------------------------------------
+
+/// Mark memory secret (undefined) to valgrind memcheck, otherwise no-op.
+BC_API void classify(const void* data, size_t size) NOEXCEPT;
+
+/// Mark memory public (defined) to valgrind memcheck, otherwise no-op.
+BC_API void declassify(const void* data, size_t size) NOEXCEPT;
+
+/// Mark a trivially copyable object secret to valgrind memcheck.
+template <typename Type, if_trivially_copyable<Type> = true>
+inline void classify(const Type& value) NOEXCEPT
+{
+    classify(&value, sizeof(Type));
+}
+
+/// Mark a trivially copyable object public to valgrind memcheck.
+template <typename Type, if_trivially_copyable<Type> = true>
+inline void declassify(const Type& value) NOEXCEPT
+{
+    declassify(&value, sizeof(Type));
+}
+
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
