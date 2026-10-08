@@ -332,7 +332,7 @@ main()
             STDLIB="stdc++"
         fi
     else
-        define_message_verbose "STDLIB using defined value '${STDLIB}'"
+        msg_verbose "STDLIB using defined value '${STDLIB}'"
     fi
 
     if [[ -z "${CC}" ]]; then
@@ -991,6 +991,8 @@ display_toolchain_variables()
     msg "CFLAGS                          : ${CFLAGS}"
     msg "CXX                             : ${CXX}"
     msg "CXXFLAGS                        : ${CXXFLAGS}"
+    msg "LDFLAGS                         : ${LDFLAGS}"
+    msg "LDADD                           : ${LDADD}"
     msg "LD_RUN_PATH                     : ${LD_RUN_PATH}"
     msg "LD_LIBRARY_PATH                 : ${LD_LIBRARY_PATH}"
     msg "PKG_CONFIG_PATH                 : ${PKG_CONFIG_PATH}"
