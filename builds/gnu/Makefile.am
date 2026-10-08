@@ -179,6 +179,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_14.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_15.cpp \
     ${srcdir}/../../src/data/data_chunk.cpp \
+    ${srcdir}/../../src/data/memory.cpp \
     ${srcdir}/../../src/data/string.cpp \
     ${srcdir}/../../src/endian/endian.cpp \
     ${srcdir}/../../src/error/block_error_t.cpp \

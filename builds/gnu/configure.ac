@@ -281,6 +281,15 @@ AC_ARG_WITH([secp256k1],
 AC_MSG_RESULT([$with_secp256k1])
 AM_CONDITIONAL([WITH_SECP256K1], [test "x${with_secp256k1}" != "xno"])
 
+AC_MSG_CHECKING([--with-valgrind option])
+AC_ARG_WITH([valgrind],
+    AS_HELP_STRING([--with-valgrind],
+        [Use valgrind memcheck client requests. @<:@default=no@:>@]),
+    [with_valgrind=$withval],
+    [with_valgrind=no])
+AC_MSG_RESULT([$with_valgrind])
+AM_CONDITIONAL([WITH_VALGRIND], [test "x${with_valgrind}" != "xno"])
+
 AC_MSG_CHECKING([--enable-cuda option])
 AC_ARG_ENABLE([cuda],
     AS_HELP_STRING([--enable-cuda],
@@ -746,6 +755,10 @@ AS_IF([test "x${with_secp256k1}" != "xno"], [
 
 AS_IF([test "x${with_secp256k1}" != "xno"], [
         AC_DEFINE_UNQUOTED([SECP256K1_VERSION], [${secp256k1_VERSION}])
+    ])
+
+AS_IF([test "x${with_valgrind}" != "xno"], [
+        AC_DEFINE([WITH_VALGRIND])
     ])
 
 AS_IF([test "x${enable_cuda}" != "xno"], [

@@ -224,6 +224,18 @@ jobs:
 
           - image: ubuntu-24.04
             config: "debug"
+            link: "static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            package: "valgrind"
+            boost: "--build-boost"
+            secp256k1: ""
+            options: "--enable-isystem --with-valgrind --build-valgrind=secp256k1_ctime_tests"
+
+          - image: ubuntu-24.04
+            config: "debug"
             link: "dynamic"
             cc: "gcc-14"
             cxx: "g++-14"

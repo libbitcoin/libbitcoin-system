@@ -159,6 +159,9 @@ constexpr void algorithm::wipe(Container& secret) NOEXCEPT
             data[index] = 0;
         BC_POP_WARNING()
         BC_POP_WARNING()
+
+        classify(secret.data(), secret.size() *
+            sizeof(typename Container::value_type));
     }
 }
 
@@ -169,15 +172,11 @@ constexpr void algorithm::declassify(
     declassify(pointer_cast<const uint8_t>(&value), sizeof(value));
 }
 
-constexpr void algorithm::declassify([[maybe_unused]] const uint8_t* data,
-    [[maybe_unused]] size_t size) NOEXCEPT
+constexpr void algorithm::declassify(const uint8_t* data,
+    size_t size) NOEXCEPT
 {
     if (!std::is_constant_evaluated())
-    {
-#if defined(HAVE_VALGRIND)
-        VALGRIND_MAKE_MEM_DEFINED(data, size);
-#endif
-    }
+        system::declassify(data, size);
 }
 
 // R = kG, r = x(R) mod n, s = (z + r d) / k, with s made low. The recovery id

@@ -27,10 +27,6 @@
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-#if defined(HAVE_VALGRIND)
-    #include <valgrind/memcheck.h>
-#endif
-
 // Based on:
 // secg.org/sec2-v2.pdf
 // github.com/bitcoin-core/secp256k1 (5x52 field representation)
@@ -898,7 +894,7 @@ protected:
     static constexpr void to_affine_power(affine_t<uint64_t>& r,
         const jacobian_t<uint64_t>& a) NOEXCEPT;
 
-    /// secret = 0, by stores that are not elided.
+    /// secret = 0, by stores that are not elided, then classified.
     template <typename Container>
     static constexpr void wipe(Container& secret) NOEXCEPT;
 

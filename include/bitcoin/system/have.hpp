@@ -47,11 +47,6 @@
     #define HAVE_POSIX
 #endif
 
-/// Valgrind client requests (headers present).
-#if __has_include(<valgrind/memcheck.h>)
-    #define HAVE_VALGRIND
-#endif
-
 /// stackoverflow.com/questions/38499462/how-to-tell-clang-to-stop-pretending-
 /// to-be-other-compilers
 #if defined(__clang__)
@@ -144,6 +139,11 @@
 // bitcoin-core/secp256k1 (otherwise local secp256k1)
 #if defined(WITH_SECP256K1)
     #define HAVE_SECP256K1
+#endif
+
+// Valgrind memcheck client requests.
+#if defined(WITH_VALGRIND)
+    #define HAVE_VALGRIND
 #endif
 
 /// ENABLE_ build symbols.

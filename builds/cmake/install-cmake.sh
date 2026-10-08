@@ -34,6 +34,8 @@
 #                                Default: OFF
 # -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
 #                                Default: OFF
+# -Dwith-valgrind=<ON/OFF>     Use valgrind memcheck client requests.
+#                                Default: OFF
 # -Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification (inert on macOS).
 #                                Default: ON
 # --build-boost                Build Boost libraries
@@ -964,6 +966,8 @@ help()
     msg "-Denable-aes=<ON/OFF>        Use ARM AES and PMULL Extensions."
     msg "                               Default: OFF"
     msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
+    msg "                               Default: OFF"
+    msg "-Dwith-valgrind=<ON/OFF>     Use valgrind memcheck client requests."
     msg "                               Default: OFF"
     msg "-Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification (inert on macOS)."
     msg "                               Default: ON"
