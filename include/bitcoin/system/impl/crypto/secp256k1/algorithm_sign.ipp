@@ -159,6 +159,11 @@ constexpr void algorithm::wipe(Container& secret) NOEXCEPT
             data[index] = 0;
         BC_POP_WARNING()
         BC_POP_WARNING()
+
+#if defined(HAVE_VALGRIND)
+        VALGRIND_MAKE_MEM_UNDEFINED(secret.data(), secret.size() *
+            sizeof(typename Container::value_type));
+#endif
     }
 }
 

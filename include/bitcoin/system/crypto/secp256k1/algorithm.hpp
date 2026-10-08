@@ -898,7 +898,7 @@ protected:
     static constexpr void to_affine_power(affine_t<uint64_t>& r,
         const jacobian_t<uint64_t>& a) NOEXCEPT;
 
-    /// secret = 0, by stores that are not elided.
+    /// secret = 0, by stores that are not elided, then undefined to valgrind.
     template <typename Container>
     static constexpr void wipe(Container& secret) NOEXCEPT;
 
