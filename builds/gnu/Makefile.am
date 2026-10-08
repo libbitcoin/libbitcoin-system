@@ -1418,7 +1418,6 @@ examples_libbitcoin_system_examples_CPPFLAGS = \
     ${src_libbitcoin_system_la_CPPFLAGS}
 
 examples_libbitcoin_system_examples_LDFLAGS = \
-    ${LIBTOOL_ALL_STATIC} \
     ${src_libbitcoin_system_la_LDFLAGS}
 
 examples_libbitcoin_system_examples_LDADD = \

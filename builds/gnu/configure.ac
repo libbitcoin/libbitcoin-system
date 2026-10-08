@@ -125,16 +125,6 @@ AC_ARG_ENABLE([isystem],
 AC_MSG_RESULT([$enable_isystem])
 AM_CONDITIONAL([ENABLE_ISYSTEM], [test "x${enable_isystem}" != "xno"])
 
-AC_MSG_CHECKING([--enable-force_static option])
-AC_ARG_ENABLE([force_static],
-    AS_HELP_STRING([--enable-force_static],
-        [Use -all-static on binary libtool linking. @<:@default=no@:>@]),
-    [enable_force_static=$enableval],
-    [enable_force_static=no])
-AC_MSG_RESULT([$enable_force_static])
-AM_CONDITIONAL([ENABLE_FORCE_STATIC], [test "x${enable_force_static}" != "xno"])
-AS_IF([test "x${enable_force_static}" != "xno"], [AC_SUBST([LIBTOOL_ALL_STATIC],[-all-static])])
-
 AC_MSG_CHECKING([--with-pkgconfigdir option])
 AC_ARG_WITH([pkgconfigdir],
     AS_HELP_STRING([--with-pkgconfigdir=DIR],
