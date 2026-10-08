@@ -293,6 +293,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
+    <ClCompile Include="..\..\..\..\src\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\define.cpp" />
     <ClCompile Include="..\..\..\..\src\endian\endian.cpp" />
