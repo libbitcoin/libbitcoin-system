@@ -36,6 +36,8 @@ struct rows
 {
     std_vector<ecdsa::batch::correlate_t> ecdsa_correlates{};
     std_vector<schnorr::batch::correlate_t> schnorr_correlates{};
+    std_vector<ecdsa::batch::row_t> ecdsa_rows{};
+    std_vector<schnorr::batch::row_t> schnorr_rows{};
     hashes digests{};
     ec_compresseds keys{};
     ec_xonlys xonlys{};
@@ -84,11 +86,18 @@ static rows signed_rows(size_t count) NOEXCEPT
         const auto index = row % signers;
         out.ecdsa_correlates.push_back({ link_of(row), 0, 0 });
         out.schnorr_correlates.push_back({ link_of(row) });
-        out.digests.push_back(signed_.digests[index]);
-        out.keys.push_back(signed_.keys[index]);
-        out.xonlys.push_back(signed_.xonlys[index]);
-        out.ecdsas.push_back(signed_.ecdsas[index]);
-        out.schnorrs.push_back(signed_.schnorrs[index]);
+        out.ecdsa_rows.push_back(
+        {
+            signed_.digests[index],
+            signed_.keys[index],
+            signed_.ecdsas[index]
+        });
+        out.schnorr_rows.push_back(
+        {
+            signed_.digests[index],
+            signed_.xonlys[index],
+            signed_.schnorrs[index]
+        });
     }
 
     return out;
@@ -124,17 +133,13 @@ static void report_batches(size_t count) NOEXCEPT
     const ecdsa::batch ecdsa_rows
     {
         { in.ecdsa_correlates.data(), count },
-        { in.digests.data(), count },
-        { in.keys.data(), count },
-        { in.ecdsas.data(), count }
+        { in.ecdsa_rows.data(), count }
     };
 
     const schnorr::batch schnorr_rows
     {
         { in.schnorr_correlates.data(), count },
-        { in.digests.data(), count },
-        { in.xonlys.data(), count },
-        { in.schnorrs.data(), count }
+        { in.schnorr_rows.data(), count }
     };
 
     const stopper cancel{};

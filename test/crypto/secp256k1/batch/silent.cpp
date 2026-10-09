@@ -39,8 +39,7 @@ struct rows
     {
         constexpr auto size = array_count<batch::prefix>;
         correlates.push_back(to_little_endian(link));
-        prefixes.push_back(array_cast<uint8_t, size>(key));
-        points.push_back(summary);
+        values.push_back({ array_cast<uint8_t, size>(key), summary });
     }
 
     void add(batch::tx_link_t first, batch::tx_link_t count,
@@ -52,12 +51,11 @@ struct rows
 
     batch to_batch() const NOEXCEPT
     {
-        return { correlates, prefixes, points };
+        return { correlates, values };
     }
 
     std::vector<batch::tx_link> correlates{};
-    std::vector<batch::prefix> prefixes{};
-    std::vector<ec_compressed> points{};
+    std::vector<batch::row_t> values{};
 };
 
 static batch::receiver get_keys(const std_vector<uint32_t>& labels) NOEXCEPT
@@ -125,7 +123,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__chunk_straddle__once)
     rows.add(7, unlabeled_summary, labeled_key);
     rows.add(7, unlabeled_summary, unlabeled_key);
     rows.add(8, unlabeled_summary, unlabeled_key);
-    BOOST_REQUIRE_EQUAL(rows.points.size(), 1026u);
+    BOOST_REQUIRE_EQUAL(rows.values.size(), 1026u);
     BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), false), (tx_links{ 7, 8 }));
     BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), true), (tx_links{ 7, 8 }));
 }

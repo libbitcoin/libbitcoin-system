@@ -97,9 +97,7 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
         const auto first = chunk * rows;
         const auto size = std::min(rows, count - first);
         data_chunk out{};
-        if (!verify(out, batch.points.subspan(first, size),
-            batch.digests.subspan(first, size),
-            batch.signatures.subspan(first, size)))
+        if (!verify(out, batch.rows.subspan(first, size)))
             failed.store(true);
 
         std::copy(out.begin(), out.end(),

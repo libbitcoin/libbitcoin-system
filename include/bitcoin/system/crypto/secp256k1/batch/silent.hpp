@@ -30,13 +30,21 @@ namespace system {
 
 namespace silent {
 
-/// Span matches serialized buffer.
+/// Spans match serialized buffers, a row for each correlate.
 /// Rows of one transaction are contiguous and share one prevouts summary.
 struct BC_API batch
 {
     using prefix = data_array<8>;
     using tx_link = data_array<4>;
     using tx_link_t = unsigned_type<sizeof(tx_link)>;
+
+#pragma pack(push, 1)
+    struct row_t
+    {
+        batch::prefix prefix;
+        ec_compressed point;
+    };
+#pragma pack(pop)
     using handler = std::function<void(const code&, tx_link_t,
         const ec_compressed&)>;
 
@@ -49,8 +57,7 @@ struct BC_API batch
     };
 
     std::span<const tx_link> correlates;
-    std::span<const prefix> prefixes;
-    std::span<const ec_compressed> points;
+    std::span<const row_t> rows;
 
     /// Invoke callback for each transaction with an output paying receiver.
     static void scan(const stopper& cancel, const batch& batch,
