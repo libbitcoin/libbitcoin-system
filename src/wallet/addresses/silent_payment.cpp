@@ -90,6 +90,20 @@ static const ec_xonly& to_xonly(const ec_uncompressed& point) NOEXCEPT
 bool silent_payment::summarize(ec_compressed& out,
     const transaction& tx) NOEXCEPT
 {
+    ec_secret hash{};
+    return prepare(out, hash, tx) && ec_multiply(out, hash);
+}
+
+bool silent_payment::summarize(ec_compressed& out,
+    const view::transaction& tx) NOEXCEPT
+{
+    ec_secret hash{};
+    return prepare(out, hash, tx) && ec_multiply(out, hash);
+}
+
+bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
+    const transaction& tx) NOEXCEPT
+{
     if (tx.is_coinbase())
         return false;
 
@@ -102,10 +116,10 @@ bool silent_payment::summarize(ec_compressed& out,
                 output->script().ops());
         });
 
-    return taproot && summarize(out, inputs.cbegin(), inputs.cend());
+    return taproot && prepare(sum, hash, inputs.cbegin(), inputs.cend());
 }
 
-bool silent_payment::summarize(ec_compressed& out,
+bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
     const view::transaction& tx) NOEXCEPT
 {
     if (tx.is_coinbase())
@@ -113,7 +127,7 @@ bool silent_payment::summarize(ec_compressed& out,
 
     scan_outputs outputs{};
     const auto taproot = get_outputs(outputs, tx);
-    return taproot && summarize(out, tx.inputs_begin(), tx.inputs_end());
+    return taproot && prepare(sum, hash, tx.inputs_begin(), tx.inputs_end());
 }
 
 bool silent_payment::get_outputs(scan_outputs& out,
@@ -322,8 +336,8 @@ bool silent_payment::match(bool& out, const ec_compressed& summary,
 // The prevouts summary is input_hash * A, where A is the sum of the eligible
 // input keys and input_hash commits to the least serialized outpoint and A.
 template <typename Iterator>
-bool silent_payment::summarize(ec_compressed& out, const Iterator& begin,
-    const Iterator& end) NOEXCEPT
+bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
+    const Iterator& begin, const Iterator& end) NOEXCEPT
 {
     ec_compresseds keys{};
     for (auto it = begin; it != end; ++it)
@@ -341,7 +355,7 @@ bool silent_payment::summarize(ec_compressed& out, const Iterator& begin,
             keys.push_back(key);
     }
 
-    if (keys.empty() || !ec_sum(out, keys))
+    if (keys.empty() || !ec_sum(sum, keys))
         return false;
 
     outpoint smallest{ get_outpoint(get_input(*begin)) };
@@ -352,8 +366,7 @@ bool silent_payment::summarize(ec_compressed& out, const Iterator& begin,
             smallest = point;
     }
 
-    ec_secret hash{};
-    return input_hash(hash, smallest, out) && ec_multiply(out, hash);
+    return input_hash(hash, smallest, sum);
 }
 
 bool silent_payment::input_hash(ec_secret& out, const outpoint& smallest,
