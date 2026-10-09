@@ -48,18 +48,36 @@ bool available() NOEXCEPT
     return context::instance().available();
 }
 
+// Rows are gathered into the columns that the device stages.
+template <typename Batch, typename Key>
+static bool verify_rows(data_chunk& out, const stopper& cancel,
+    const Batch& batch) NOEXCEPT
+{
+    const auto count = batch.rows.size();
+    hashes digests(count);
+    std_vector<Key> points(count);
+    ec_signatures signatures(count);
+    for (size_t row{}; row < count; ++row)
+    {
+        digests[row] = batch.rows[row].digest;
+        points[row] = batch.rows[row].point;
+        signatures[row] = batch.rows[row].signature;
+    }
+
+    return context::instance().verify<Key>(out, cancel, digests, points,
+        signatures, true);
+}
+
 bool verify(data_chunk& out, const stopper& cancel,
     const ecdsa::batch& batch) NOEXCEPT
 {
-    return context::instance().verify(out, cancel, batch.digests,
-        batch.points, batch.signatures, true);
+    return verify_rows<ecdsa::batch, ec_compressed>(out, cancel, batch);
 }
 
 bool verify(data_chunk& out, const stopper& cancel,
     const schnorr::batch& batch) NOEXCEPT
 {
-    return context::instance().verify(out, cancel, batch.digests,
-        batch.points, batch.signatures, true);
+    return verify_rows<schnorr::batch, ec_xonly>(out, cancel, batch);
 }
 
 bool scan(std::vector<prefix>& prefixes, data_chunk& valid,

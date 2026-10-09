@@ -37,8 +37,8 @@ const ec_secret secret1 = base16_array
 
 // batch ecdsa
 // ----------------------------------------------------------------------------
-// SoA batch: four corresponding columns (correlates, digests, points,
-// signatures). correlate_t is id-first: { id, pair, group }.
+// Batch: corresponding correlate and row columns.
+// correlate_t is id-first: { id, pair, group }.
 
 BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
 {
@@ -63,16 +63,17 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
         correlate{ { 1, 0, 0 }, 0, 0 },
         correlate{ { 2, 0, 0 }, 0, 0 }
     };
-    const std::array<hash_digest, 3> digests{ hash, hash, hash };
-    const std::array<ec_compressed, 3> points{ point0, point1, point2 };
-    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+    const std::array<batch::row_t, 3> rows
+    {
+        batch::row_t{ hash, point0, sig0 },
+        batch::row_t{ hash, point1, sig1 },
+        batch::row_t{ hash, point2, sig2 }
+    };
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -106,16 +107,17 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expecte
         correlate{ { 1, 0, 0 }, 0, 0 },
         correlate{ { 2, 0, 0 }, 0, 0 }
     };
-    const std::array<hash_digest, 3> digests{ hash, hash, hash };
-    const std::array<ec_compressed, 3> points{ point0, point1, point2 };
-    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+    const std::array<batch::row_t, 3> rows
+    {
+        batch::row_t{ hash, point0, sig0 },
+        batch::row_t{ hash, point1, sig1 },
+        batch::row_t{ hash, point2, sig2 }
+    };
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -150,16 +152,18 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected
         correlate{ { 0, 0, 0 }, 0b0001'0001, 5 }, // invalid
         correlate{ { 0, 0, 0 }, 0b0001'0010, 5 }  // valid
     };
-    const std::array<hash_digest, 4> digests{ hash, hash, hash, hash };
-    const std::array<ec_compressed, 4> points{ point0, point1, point1, point2 };
-    const std::array<ec_signature, 4> signatures{ sig0, sig0, sig1, sig1 };
+    const std::array<batch::row_t, 4> rows
+    {
+        batch::row_t{ hash, point0, sig0 },
+        batch::row_t{ hash, point1, sig0 },
+        batch::row_t{ hash, point1, sig1 },
+        batch::row_t{ hash, point2, sig1 }
+    };
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -194,16 +198,17 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expect
         correlate{ { 0, 0, 0 }, 0b0000'0001, 7 }, // invalid
         correlate{ { 0, 0, 0 }, 0b0001'0000, 7 }  // valid
     };
-    const std::array<hash_digest, 3> digests{ hash, hash, hash };
-    const std::array<ec_compressed, 3> points{ point0, point1, point2 };
-    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+    const std::array<batch::row_t, 3> rows
+    {
+        batch::row_t{ hash, point0, sig0 },
+        batch::row_t{ hash, point1, sig1 },
+        batch::row_t{ hash, point2, sig2 }
+    };
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -317,21 +322,17 @@ static batched::links_t chunked_ecdsa_failures() NOEXCEPT
     corrupt[10] ^= 0xff;
 
     std::vector<correlate> correlates(chunked_rows);
-    std::vector<hash_digest> digests(chunked_rows, hash);
-    std::vector<ec_compressed> points(chunked_rows, point);
-    std::vector<ec_signature> signatures(chunked_rows, signature);
+    std::vector<batch::row_t> rows(chunked_rows, batch::row_t{ hash, point, signature });
     for (size_t row{}; row < chunked_rows; ++row)
         correlates[row] = correlate{ chunked_id(row), 0, 0 };
 
-    signatures[chunked_fail1] = corrupt;
-    signatures[chunked_fail2] = corrupt;
+    rows[chunked_fail1].signature = corrupt;
+    rows[chunked_fail2].signature = corrupt;
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -380,28 +381,24 @@ static batched::links_t distinct_ecdsa_failures(bool fail,
     using correlate = batch::correlate_t;
 
     std::vector<correlate> correlates(distinct_rows);
-    std::vector<hash_digest> digests(distinct_rows);
-    std::vector<ec_compressed> points(distinct_rows);
-    std::vector<ec_signature> signatures(distinct_rows);
+    std::vector<batch::row_t> rows(distinct_rows);
     for (size_t row{}; row < distinct_rows; ++row)
     {
         const auto secret = distinct_secret(row);
-        digests[row] = distinct_digest(row);
+        rows[row].digest = distinct_digest(row);
         correlates[row] = correlate{ chunked_id(row), 0, 0 };
-        if (!secret_to_public(points[row], secret) ||
-            !sign(signatures[row], secret, digests[row]))
+        if (!secret_to_public(rows[row].point, secret) ||
+            !sign(rows[row].signature, secret, rows[row].digest))
             return { max_uint32 };
 
         if (fail && distinct_failed(row))
-            digests[row] = distinct_digest(add1(row));
+            rows[row].digest = distinct_digest(add1(row));
     }
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{ canceled };

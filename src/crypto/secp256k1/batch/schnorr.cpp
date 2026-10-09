@@ -62,14 +62,19 @@ public:
 // Integral rows verify by one random linear combination, which identifies no
 // failing row, so rows verify alone where it fails.
 inline bool verify_rows(data_chunk& results,
-    const std::span<const ec_xonly>& keys,
-    const std::span<const hash_digest>& digests,
-    const std::span<const ec_signature>& signatures) NOEXCEPT
+    const std::span<const schnorr::batch::row_t>& rows) NOEXCEPT
 {
-    hashes challenges(keys.size());
-    for (size_t row{}; row < keys.size(); ++row)
-        challenges[row] = schnorr_dispatcher::challenge(signatures[row], keys[row],
-            digests[row]);
+    const auto count = rows.size();
+    ec_xonlys keys(count);
+    hashes challenges(count);
+    ec_signatures signatures(count);
+    for (size_t row{}; row < count; ++row)
+    {
+        keys[row] = rows[row].point;
+        signatures[row] = rows[row].signature;
+        challenges[row] = schnorr_dispatcher::challenge(signatures[row],
+            keys[row], rows[row].digest);
+    }
 
     return with_lanes([&]<typename Word>() NOEXCEPT
     {

@@ -78,6 +78,16 @@ static bool parse(parsed& out, const silent::batch::receiver& keys) NOEXCEPT
     return true;
 }
 
+// True if any row of the transaction carries the key prefix.
+static bool paid(const std::span<const silent::batch::row_t>& rows,
+    const silent::batch::prefix& key) NOEXCEPT
+{
+    return std::ranges::any_of(rows, [&](const auto& row) NOEXCEPT
+    {
+        return row.prefix == key;
+    });
+}
+
 // The shared secret of each transaction (k = 0) tweaks the spend key, and each
 // output key (and labeled key) is matched by prefix to the transaction rows.
 static void scan_rows(const silent::batch& batch,
@@ -88,7 +98,7 @@ static void scan_rows(const silent::batch& batch,
     const auto count = firsts.size();
     std_vector<ec_compressed> points(count);
     for (size_t group{}; group < count; ++group)
-        points[group] = batch.points[firsts[group]];
+        points[group] = batch.rows[firsts[group]].point;
 
     data_chunk computed{};
     std_vector<ec_compressed> shared{};
@@ -142,19 +152,18 @@ static void scan_rows(const silent::batch& batch,
 
         const auto group = groups[index];
         const auto first = firsts[group];
-        const auto rows = lasts[group] - first;
-        const auto prefixes = batch.prefixes.subspan(first, rows);
+        const auto rows = batch.rows.subspan(first, lasts[group] - first);
         const auto candidates = keyed.subspan(index * stride, stride);
-        const auto paid = std::ranges::any_of(candidates,
+        const auto matched = std::ranges::any_of(candidates,
             [&](const ec_xonly& key) NOEXCEPT
             {
-                return contains(prefixes, array_cast<uint8_t, size>(key));
+                return paid(rows, array_cast<uint8_t, size>(key));
             });
 
-        if (paid)
+        if (matched)
         {
             const auto link = from_little_endian(batch.correlates[first]);
-            callback({}, link, batch.points[first]);
+            callback({}, link, rows.front().point);
         }
     }
 }
@@ -222,7 +231,7 @@ bool silent::batch::scan_device(size_t& resume, const stopper& cancel,
         std::for_each(policy, block.begin(), block.end(),
             [&](size_t group) NOEXCEPT
             {
-                summaries[group] = batch.points[firsts[base + group]];
+                summaries[group] = batch.rows[firsts[base + group]].point;
             });
 
         if (!secp256k1::cuda::scan(keys_out, valid, cancel, summaries, keys))
@@ -240,19 +249,19 @@ bool silent::batch::scan_device(size_t& resume, const stopper& cancel,
 
                 const auto first = firsts[base + group];
                 const auto last = firsts[add1(base + group)];
-                const auto rows = batch.prefixes.subspan(first, last - first);
+                const auto rows = batch.rows.subspan(first, last - first);
                 const auto candidates = keyed.subspan(group * stride, stride);
-                const auto paid = std::ranges::any_of(candidates,
+                const auto matched = std::ranges::any_of(candidates,
                     [&](const prefix& key) NOEXCEPT
                     {
-                        return contains(rows, key);
+                        return paid(rows, key);
                     });
 
-                if (paid)
+                if (matched)
                 {
                     const auto& correlate = batch.correlates[first];
                     const auto link = from_little_endian(correlate);
-                    callback({}, link, batch.points[first]);
+                    callback({}, link, rows.front().point);
                 }
             });
     }
@@ -270,10 +279,9 @@ void silent::batch::scan(const stopper& cancel, const batch& batch,
 {
     const auto policy = poolstl::execution::par_if(turbo);
 
-    // Three spans are corresponding arrays of equal length.
+    // The spans are corresponding arrays of equal length.
     const auto count = batch.correlates.size();
-    BC_ASSERT(batch.prefixes.size() == count);
-    BC_ASSERT(batch.points.size() == count);
+    BC_ASSERT(batch.rows.size() == count);
 
     parsed parsed_keys{};
     if (!parse(parsed_keys, keys))

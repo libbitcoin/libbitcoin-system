@@ -67,16 +67,17 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
         correlate{ { 1, 0, 0 } },
         correlate{ { 2, 0, 0 } }
     };
-    const std::array<hash_digest, 3> digests{ hash, hash, hash };
-    const std::array<ec_xonly, 3> points{ point0, point1, point2 };
-    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+    const std::array<batch::row_t, 3> rows
+    {
+        batch::row_t{ hash, point0, sig0 },
+        batch::row_t{ hash, point1, sig1 },
+        batch::row_t{ hash, point2, sig2 }
+    };
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -115,16 +116,17 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
         correlate{ { 1, 0, 0 } },
         correlate{ { 2, 0, 0 } }
     };
-    const std::array<hash_digest, 3> digests{ hash, hash, hash };
-    const std::array<ec_xonly, 3> points{ point0, point1, point2 };
-    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+    const std::array<batch::row_t, 3> rows
+    {
+        batch::row_t{ hash, point0, sig0 },
+        batch::row_t{ hash, point1, sig1 },
+        batch::row_t{ hash, point2, sig2 }
+    };
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -163,21 +165,17 @@ static batched::links_t chunked_schnorr_failures() NOEXCEPT
     corrupt[10] ^= 0xff;
 
     std::vector<correlate> correlates(chunked_rows);
-    std::vector<hash_digest> digests(chunked_rows, hash);
-    std::vector<ec_xonly> points(chunked_rows, point);
-    std::vector<ec_signature> signatures(chunked_rows, signature);
+    std::vector<batch::row_t> rows(chunked_rows, batch::row_t{ hash, point, signature });
     for (size_t row{}; row < chunked_rows; ++row)
         correlates[row] = correlate{ chunked_id(row) };
 
-    signatures[chunked_fail1] = corrupt;
-    signatures[chunked_fail2] = corrupt;
+    rows[chunked_fail1].signature = corrupt;
+    rows[chunked_fail2].signature = corrupt;
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{};
@@ -226,30 +224,26 @@ static batched::links_t distinct_schnorr_failures(bool fail,
     using correlate = batch::correlate_t;
 
     std::vector<correlate> correlates(distinct_rows);
-    std::vector<hash_digest> digests(distinct_rows);
-    std::vector<ec_xonly> points(distinct_rows);
-    std::vector<ec_signature> signatures(distinct_rows);
+    std::vector<batch::row_t> rows(distinct_rows);
     for (size_t row{}; row < distinct_rows; ++row)
     {
         ec_compressed compressed{};
         const auto secret = distinct_secret(row);
-        digests[row] = distinct_digest(row);
+        rows[row].digest = distinct_digest(row);
         correlates[row] = correlate{ chunked_id(row) };
         if (!secret_to_public(compressed, secret) ||
-            !sign(signatures[row], secret, digests[row], {}))
+            !sign(rows[row].signature, secret, rows[row].digest, {}))
             return { max_uint32 };
 
-        points[row] = array_cast<uint8_t, ec_xonly_size, 1>(compressed);
+        rows[row].point = array_cast<uint8_t, ec_xonly_size, 1>(compressed);
         if (fail && distinct_failed(row))
-            digests[row] = distinct_digest(add1(row));
+            rows[row].digest = distinct_digest(add1(row));
     }
 
     const batch in
     {
         { correlates.data(), correlates.size() },
-        { digests.data(), digests.size() },
-        { points.data(), points.size() },
-        { signatures.data(), signatures.size() }
+        { rows.data(), rows.size() }
     };
 
     const stopper cancel{ canceled };

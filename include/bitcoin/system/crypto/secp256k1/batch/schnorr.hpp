@@ -31,7 +31,7 @@ namespace system {
 
 namespace schnorr {
 
-/// Span matches serialized buffer.
+/// Spans match serialized buffers, a row for each correlate.
 struct BC_API batch
 {
 #pragma pack(push, 1)
@@ -39,15 +39,20 @@ struct BC_API batch
     {
         batched::link id;
     };
+
+    struct row_t
+    {
+        hash_digest digest;
+        ec_xonly point;
+        ec_signature signature;
+    };
 #pragma pack(pop)
 
     static batched::links_t verify(const stopper& cancel,
         const batch& batch) NOEXCEPT;
 
     std::span<const correlate_t> correlates;
-    std::span<const hash_digest> digests;
-    std::span<const ec_xonly> points;
-    std::span<const ec_signature> signatures;
+    std::span<const row_t> rows;
 
 protected:
     static batched::links_t get_failures(const stopper& cancel,
