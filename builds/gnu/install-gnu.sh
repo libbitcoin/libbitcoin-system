@@ -45,6 +45,9 @@
 # --build-obj-dir=<path>        Location for intermediate objects.
 #                                 Default: obj
 # --build-obj-dir-relative      Interpret build-obj-dir as relative to project sources.
+# --build-limit=<limit>         Limitation at which the process will terminate.
+#                                 Values: { none, target, dependencies, external }
+#                                 Default: none
 # --build-config=<mode>         Specifies the build configuration.
 #                                 Values: { debug, release }
 #                                 Toolchain default behavior will occur if no value specified.
@@ -108,6 +111,7 @@ main()
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
             (--build-obj-dir=*)             BUILD_OBJ_DIR="${OPTION#*=}";;
             (--build-obj-dir-relative)      BUILD_OBJ_DIR_RELATIVE="yes";;
+            (--build-limit=*)               BUILD_LIMIT="${OPTION#*=}";;
             (--build-config=*)              BUILD_CONFIG="${OPTION#*=}";;
             (--build-link=*)                BUILD_LINK="${OPTION#*=}";;
             (--build-full-repositories)     BUILD_FULL_REPOSITORIES="yes";;
@@ -130,6 +134,7 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-obj-dir-relative/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-limit=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-config=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-link=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-full-repositories/}")
@@ -202,6 +207,21 @@ main()
         BUILD_OBJ_DIR="$(pwd)"
         pop_directory
         msg_verbose "Determined absolute path for --build-obj-dir '${BUILD_OBJ_DIR}'."
+    fi
+
+    # --build-limit
+    if [[ -z "${BUILD_LIMIT}" ]]; then
+        BUILD_LIMIT="none"
+        msg_verbose "No --build-limit specified."
+    elif [[ "${BUILD_LIMIT}" != "none" ]] &&
+        [[ "${BUILD_LIMIT}" != "target" ]] &&
+        [[ "${BUILD_LIMIT}" != "dependencies" ]] &&
+        [[ "${BUILD_LIMIT}" != "external" ]]; then
+        msg_error "Provided --build-limit '${BUILD_LIMIT}' not a valid value."
+        help
+        exit 1
+    else
+        msg_verbose "Using provided --build-limit '${BUILD_LIMIT}'"
     fi
 
     # --build-config
@@ -478,38 +498,49 @@ main()
         "${with_boost}"
         "${with_pkgconfigdir}")
 
-    if [[ ${BUILD_boost} == "yes" ]]; then
-        source_archive "boost" "${boost_FILENAME}" "${boost_URLBASE}" "bzip2"
-        local SAVE_CPPFLAGS="${CPPFLAGS}"
-        export CPPFLAGS="${CPPFLAGS} ${boost_FLAGS[@]}"
-        build_boost "boost" "${boost_OPTIONS[@]}"
-        export CPPFLAGS="${SAVE_CPPFLAGS}"
+    if [[ ${BUILD_LIMIT} == "external" ]] ||
+       [[ ${BUILD_LIMIT} == "dependencies" ]] ||
+       [[ ${BUILD_LIMIT} == "none" ]]; then
+        if [[ ${BUILD_boost} == "yes" ]]; then
+            source_archive "boost" "${boost_FILENAME}" "${boost_URLBASE}" "bzip2"
+            local SAVE_CPPFLAGS="${CPPFLAGS}"
+            export CPPFLAGS="${CPPFLAGS} ${boost_FLAGS[@]}"
+            build_boost "boost" "${boost_OPTIONS[@]}"
+            export CPPFLAGS="${SAVE_CPPFLAGS}"
+        fi
     fi
 
-    if [[ ${BUILD_secp256k1} == "yes" ]]; then
-        source_github "${secp256k1_OWNER}" "secp256k1" "${secp256k1_TAG}"
+    if [[ ${BUILD_LIMIT} == "external" ]] ||
+       [[ ${BUILD_LIMIT} == "dependencies" ]] ||
+       [[ ${BUILD_LIMIT} == "none" ]]; then
+        if [[ ${BUILD_secp256k1} == "yes" ]]; then
+            source_github "${secp256k1_OWNER}" "secp256k1" "${secp256k1_TAG}"
+            local SAVE_CPPFLAGS="${CPPFLAGS}"
+            export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
+            build_gnu "secp256k1" "." "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
+            install_gnu "secp256k1" "."
+            if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+                clean_gnu "secp256k1" "."
+            fi
+            export CPPFLAGS="${SAVE_CPPFLAGS}"
+        fi
+    fi
+
+    if [[ ${BUILD_LIMIT} == "target" ]] ||
+       [[ ${BUILD_LIMIT} == "none" ]]; then
+        source_github "${libbitcoin_system_OWNER}" "libbitcoin-system" "${libbitcoin_system_TAG}"
         local SAVE_CPPFLAGS="${CPPFLAGS}"
-        export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
-        build_gnu "secp256k1" "." "." "${PARALLEL}" "${secp256k1_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
-        install_gnu "secp256k1" "."
+        export CPPFLAGS="${CPPFLAGS} ${libbitcoin_system_FLAGS[@]}"
+        build_gnu "libbitcoin-system" "builds/gnu" "builds/gnu" "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
+        if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+            test_gnu "libbitcoin-system" "builds/gnu" "${PARALLEL}"
+        fi
+        install_gnu "libbitcoin-system" "builds/gnu"
         if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-            clean_gnu "secp256k1" "."
+            clean_gnu "libbitcoin-system" "builds/gnu"
         fi
         export CPPFLAGS="${SAVE_CPPFLAGS}"
     fi
-
-    source_github "${libbitcoin_system_OWNER}" "libbitcoin-system" "${libbitcoin_system_TAG}"
-    local SAVE_CPPFLAGS="${CPPFLAGS}"
-    export CPPFLAGS="${CPPFLAGS} ${libbitcoin_system_FLAGS[@]}"
-    build_gnu "libbitcoin-system" "builds/gnu" "builds/gnu" "${PARALLEL}" "${libbitcoin_system_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
-    if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-        test_gnu "libbitcoin-system" "builds/gnu" "${PARALLEL}"
-    fi
-    install_gnu "libbitcoin-system" "builds/gnu"
-    if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-        clean_gnu "libbitcoin-system" "builds/gnu"
-    fi
-    export CPPFLAGS="${SAVE_CPPFLAGS}"
 
     msg_success "Completed successfully."
 }
@@ -1034,6 +1065,9 @@ help()
     msg "--build-obj-dir=<path>        Location for intermediate objects."
     msg "                                Default: obj"
     msg "--build-obj-dir-relative      Interpret build-obj-dir as relative to project sources."
+    msg "--build-limit=<limit>         Limitation at which the process will terminate."
+    msg "                                Values: { none, target, dependencies, external }"
+    msg "                                Default: none"
     msg "--build-config=<mode>         Specifies the build configuration."
     msg "                                Values: { debug, release }"
     msg "                                Toolchain default behavior will occur if no value specified."
