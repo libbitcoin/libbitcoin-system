@@ -239,6 +239,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\performance.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_performance.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\scan.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\schnorr.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_schnorr.obj</ObjectFileName>
     </ClCompile>

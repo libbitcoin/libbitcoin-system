@@ -95,7 +95,7 @@ public:
     operator bool() const NOEXCEPT;
 
     /// The receiver keys for batch scanning.
-    const silent::batch::receiver& keys() const NOEXCEPT;
+    const scan::batch::receiver& keys() const NOEXCEPT;
 
     /// Find all outputs paying the receiver (one transaction, all k).
     bool scan(scan_matches& out, const ec_compressed& summary,
@@ -147,7 +147,7 @@ private:
     bool shared_secret(ec_compressed& out,
         const ec_compressed& summary) const NOEXCEPT;
 
-    silent::batch::receiver keys_{};
+    scan::batch::receiver keys_{};
     std_vector<uint32_t> labels_{};
     ec_secrets label_tweaks_{};
     bool valid_{};

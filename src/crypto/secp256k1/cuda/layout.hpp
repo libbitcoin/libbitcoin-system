@@ -76,7 +76,7 @@ struct layout
 };
 
 /// Columns of scan rows within the staging buffer, stride prefixes per row.
-struct silent_layout
+struct scan_layout
 {
     static constexpr size_t align = 256;
 
@@ -97,7 +97,7 @@ struct silent_layout
         return bytes < slack ? zero : (bytes - slack) / row_bytes(stride);
     }
 
-    constexpr silent_layout(size_t rows, size_t stride) NOEXCEPT
+    constexpr scan_layout(size_t rows, size_t stride) NOEXCEPT
       : prefixes(round(rows * sizeof(ec_compressed))),
         valid(round(prefixes + rows * stride * sizeof(prefix)))
     {
@@ -107,12 +107,43 @@ struct silent_layout
     const size_t valid;
 };
 
+/// Columns of silent rows within the staging buffer.
+struct silent_layout
+{
+    static constexpr size_t align = 256;
+    static constexpr size_t row_bytes = sizeof(ec_compressed) +
+        sizeof(ec_secret) + sizeof(ec_compressed) + one;
+
+    static constexpr size_t round(size_t bytes) NOEXCEPT
+    {
+        return ceilinged_divide(bytes, align) * align;
+    }
+
+    /// Rows that fit in the given bytes.
+    static constexpr size_t rows(size_t bytes) NOEXCEPT
+    {
+        constexpr auto slack = 3 * align;
+        return bytes < slack ? zero : (bytes - slack) / row_bytes;
+    }
+
+    explicit constexpr silent_layout(size_t rows) NOEXCEPT
+      : hashes(round(rows * sizeof(ec_compressed))),
+        points(round(hashes + rows * sizeof(ec_secret))),
+        valid(round(points + rows * sizeof(ec_compressed)))
+    {
+    }
+
+    const size_t hashes;
+    const size_t points;
+    const size_t valid;
+};
+
 /// Receiver keys decoded into scan arguments, false if invalid.
-struct silent_receiver
+struct scan_receiver
   : algorithm
 {
-    static bool decode(silent_arguments& out,
-        const silent::batch::receiver& keys) NOEXCEPT
+    static bool decode(scan_arguments& out,
+        const scan::batch::receiver& keys) NOEXCEPT
     {
         if (keys.labels.size() > maximum_labels ||
             !from_bytes(out.scan, keys.scan) || is_zero_scalar(out.scan) ||

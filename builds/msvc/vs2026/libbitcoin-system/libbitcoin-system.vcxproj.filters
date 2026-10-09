@@ -588,6 +588,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\ecdsa.cpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\scan.cpp">
+      <Filter>src\crypto\secp256k1\batch</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\schnorr.cpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClCompile>
@@ -1284,6 +1287,9 @@
       <Filter>include\bitcoin\system\crypto\secp256k1\batch</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\ecdsa.hpp">
+      <Filter>include\bitcoin\system\crypto\secp256k1\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\scan.hpp">
       <Filter>include\bitcoin\system\crypto\secp256k1\batch</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\schnorr.hpp">

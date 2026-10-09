@@ -224,7 +224,7 @@ silent_payment::operator bool() const NOEXCEPT
     return valid_;
 }
 
-const silent::batch::receiver& silent_payment::keys() const NOEXCEPT
+const scan::batch::receiver& silent_payment::keys() const NOEXCEPT
 {
     return keys_;
 }

@@ -390,6 +390,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\performance.cpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\scan.cpp">
+      <Filter>src\crypto\secp256k1\batch</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\schnorr.cpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClCompile>

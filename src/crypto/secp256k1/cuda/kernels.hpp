@@ -49,6 +49,17 @@ struct schnorr_arguments
     uint32_t count;
 };
 
+/// Arguments of the compute_silent kernel, columns in device memory. Each
+/// point is the hash times the sum of its row, valid if computed.
+struct silent_arguments
+{
+    const ec_compressed* sums;
+    const ec_secret* hashes;
+    ec_compressed* points;
+    uint8_t* valid;
+    uint32_t count;
+};
+
 /// Maximum label keys of a scan_silent launch.
 constexpr size_t maximum_labels = 8;
 
@@ -56,7 +67,7 @@ constexpr size_t maximum_labels = 8;
 using prefix = data_array<8>;
 
 /// Decoded forms of the receiver keys.
-struct silent_keys
+struct scan_keys
   : algorithm
 {
     using algorithm::scalar_t;
@@ -64,16 +75,16 @@ struct silent_keys
 };
 
 /// Arguments of the scan_silent kernel, columns in device memory. Each
-/// summary has one prefix of the receiver output key, then one of that key
+/// point has one prefix of the receiver output key, then one of that key
 /// plus each label key, and is valid if its keys are computed.
-struct silent_arguments
+struct scan_arguments
 {
-    const ec_compressed* summaries;
+    const ec_compressed* points;
     prefix* prefixes;
     uint8_t* valid;
-    silent_keys::scalar_t scan;
-    silent_keys::affine spend;
-    std_array<silent_keys::affine, maximum_labels> labels;
+    scan_keys::scalar_t scan;
+    scan_keys::affine spend;
+    std_array<scan_keys::affine, maximum_labels> labels;
     uint32_t label_count;
     uint32_t count;
 };

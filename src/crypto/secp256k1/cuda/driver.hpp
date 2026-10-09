@@ -21,7 +21,7 @@
 
 #include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
-#include <bitcoin/system/crypto/secp256k1/batch/silent.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/scan.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include "kernels.hpp"
@@ -44,13 +44,19 @@ bool verify(data_chunk& out, const stopper& cancel,
 bool verify(data_chunk& out, const stopper& cancel,
     const schnorr::batch& batch) NOEXCEPT;
 
-/// Output key prefixes of the receiver for each summary on the device, one
+/// Output key prefixes of the receiver for each point on the device, one
 /// then one per label key (at most maximum_labels), with valid for each
-/// summary computed. False if the device failed, which disables it, or if
+/// point computed. False if the device failed, which disables it, or if
 /// there are too many labels.
 bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
-    const stopper& cancel, const std::span<const ec_compressed>& summaries,
-    const silent::batch::receiver& keys) NOEXCEPT;
+    const stopper& cancel, const std::span<const ec_compressed>& points,
+    const scan::batch::receiver& keys) NOEXCEPT;
+
+/// Point (hash * sum) of each row on the device, with valid for
+/// each row computed. False if the device failed, which disables it.
+bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
+    const stopper& cancel, const std::span<const ec_compressed>& sums,
+    const std::span<const ec_secret>& hashes) NOEXCEPT;
 
 } // namespace cuda
 } // namespace secp256k1

@@ -129,26 +129,26 @@ public:
         return true;
     }
 
-    /// Output key prefixes of the receiver for each summary, false on failure.
+    /// Output key prefixes of the receiver for each point, false on failure.
     bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
-        const stopper& cancel, const std::span<const ec_compressed>& summaries,
-        const silent::batch::receiver& keys) NOEXCEPT
+        const stopper& cancel, const std::span<const ec_compressed>& points,
+        const scan::batch::receiver& keys) NOEXCEPT
     {
-        silent_arguments arguments{};
-        if (!silent_receiver::decode(arguments, keys))
+        scan_arguments arguments{};
+        if (!scan_receiver::decode(arguments, keys))
             return false;
 
-        const auto count = summaries.size();
+        const auto count = points.size();
         const auto stride = add1(size_t{ arguments.label_count });
-        const auto fit = silent_layout::rows(half_bytes_, stride);
-        const auto rows = std::min({ silent_rows_, chunk_rows, fit });
+        const auto fit = scan_layout::rows(half_bytes_, stride);
+        const auto rows = std::min({ scan_rows_, chunk_rows, fit });
 
         prefixes.resize(count * stride);
         valid.resize(count);
         return pipeline(count, rows, false, cancel,
             [&](size_t half, size_t offset, size_t size) NOEXCEPT
             {
-                return stage(half, summaries.subspan(offset, size),
+                return stage(half, points.subspan(offset, size),
                     arguments);
             },
             [&](size_t half, size_t offset, size_t size) NOEXCEPT
@@ -156,6 +156,30 @@ public:
                 const auto first = offset * stride;
                 const std::span out{ &prefixes[first], size * stride };
                 return collect(half, out, std::span{ &valid[offset], size });
+            });
+    }
+
+    /// Point (hash * sum) of each row, false on failure.
+    bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
+        const stopper& cancel, const std::span<const ec_compressed>& sums,
+        const std::span<const ec_secret>& hashes) NOEXCEPT
+    {
+        const auto count = sums.size();
+        const auto fit = silent_layout::rows(half_bytes_);
+        const auto rows = std::min({ silent_rows_, chunk_rows, fit });
+
+        out.resize(count);
+        valid.resize(count);
+        return pipeline(count, rows, false, cancel,
+            [&](size_t half, size_t offset, size_t size) NOEXCEPT
+            {
+                return stage(half, sums.subspan(offset, size),
+                    hashes.subspan(offset, size));
+            },
+            [&](size_t half, size_t offset, size_t size) NOEXCEPT
+            {
+                return collect(half, std::span{ &out[offset], size },
+                    std::span{ &valid[offset], size });
             });
     }
 
@@ -316,17 +340,17 @@ private:
         return true;
     }
 
-    // Stage the summaries in a half and queue the scan over them.
+    // Stage the points in a half and queue the scan over them.
     result_t stage(size_t half,
-        const std::span<const ec_compressed>& summaries,
-        silent_arguments arguments) NOEXCEPT
+        const std::span<const ec_compressed>& points,
+        scan_arguments arguments) NOEXCEPT
     {
-        const auto size = summaries.size();
+        const auto size = points.size();
         const auto stride = add1(size_t{ arguments.label_count });
         const auto base = staging_ + half * half_bytes_;
         const auto stream = streams_[half];
-        const silent_layout columns{ size, stride };
-        arguments.summaries = reinterpret_cast<const ec_compressed*>(base);
+        const scan_layout columns{ size, stride };
+        arguments.points = reinterpret_cast<const ec_compressed*>(base);
         arguments.prefixes = reinterpret_cast<prefix*>(base + columns.prefixes);
         arguments.valid = reinterpret_cast<uint8_t*>(base + columns.valid);
         arguments.count = possible_narrow_cast<uint32_t>(size);
@@ -335,8 +359,42 @@ private:
         const auto blocks = possible_narrow_cast<unsigned>(
             ceilinged_divide(size, threads));
 
-        auto result = call_.copy_to_async(base, summaries.data(),
-            summaries.size_bytes(), stream);
+        auto result = call_.copy_to_async(base, points.data(),
+            points.size_bytes(), stream);
+        if (result == success)
+            result = call_.launch(scan_, blocks, 1, 1,
+                possible_narrow_cast<unsigned>(threads), 1, 1, 0, stream,
+                parameters, nullptr);
+
+        return result;
+    }
+
+    // Stage the sums and hashes in a half and queue the points over them.
+    result_t stage(size_t half, const std::span<const ec_compressed>& sums,
+        const std::span<const ec_secret>& hashes) NOEXCEPT
+    {
+        const auto size = sums.size();
+        const auto base = staging_ + half * half_bytes_;
+        const auto stream = streams_[half];
+        const silent_layout columns{ size };
+        silent_arguments arguments
+        {
+            reinterpret_cast<const ec_compressed*>(base),
+            reinterpret_cast<const ec_secret*>(base + columns.hashes),
+            reinterpret_cast<ec_compressed*>(base + columns.points),
+            reinterpret_cast<uint8_t*>(base + columns.valid),
+            possible_narrow_cast<uint32_t>(size)
+        };
+
+        void* parameters[]{ &arguments };
+        const auto blocks = possible_narrow_cast<unsigned>(
+            ceilinged_divide(size, threads));
+
+        auto result = call_.copy_to_async(base, sums.data(),
+            sums.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.hashes,
+                hashes.data(), hashes.size_bytes(), stream);
         if (result == success)
             result = call_.launch(silent_, blocks, 1, 1,
                 possible_narrow_cast<unsigned>(threads), 1, 1, 0, stream,
@@ -345,13 +403,30 @@ private:
         return result;
     }
 
-    // Return the prefixes and validity of the summaries staged in a half.
+    // Return the points and validity of the rows staged in a half.
+    result_t collect(size_t half, const std::span<ec_compressed>& points,
+        const std::span<uint8_t>& valid) NOEXCEPT
+    {
+        const auto base = staging_ + half * half_bytes_;
+        const silent_layout columns{ valid.size() };
+        auto result = call_.copy_from_async(points.data(),
+            base + columns.points, points.size_bytes(), streams_[half]);
+        if (result == success)
+            result = call_.copy_from_async(valid.data(), base + columns.valid,
+                valid.size(), streams_[half]);
+        if (result == success)
+            result = call_.stream_synchronize(streams_[half]);
+
+        return result;
+    }
+
+    // Return the prefixes and validity of the points staged in a half.
     result_t collect(size_t half, const std::span<prefix>& prefixes,
         const std::span<uint8_t>& valid) NOEXCEPT
     {
         const auto stride = prefixes.size() / valid.size();
         const auto base = staging_ + half * half_bytes_;
-        const silent_layout columns{ valid.size(), stride };
+        const scan_layout columns{ valid.size(), stride };
         auto result = call_.copy_from_async(prefixes.data(),
             base + columns.prefixes, prefixes.size_bytes(), streams_[half]);
         if (result == success)
@@ -402,7 +477,8 @@ private:
             || call_.module_load(&module_, ptx.c_str()) != success
             || call_.module_function(&ecdsa_, module_, "verify_ecdsa") != success
             || call_.module_function(&schnorr_, module_, "verify_schnorr") != success
-            || call_.module_function(&silent_, module_, "scan_silent") != success
+            || call_.module_function(&scan_, module_, "scan_silent") != success
+            || call_.module_function(&silent_, module_, "compute_silent") != success
             || call_.module_global(&table, &size, module_, "generator_table") != success
             || size != shape::table_bytes
             || call_.module_global(&comb, &comb_bytes, module_, "comb_table") != success
@@ -439,6 +515,7 @@ private:
         return
             calibrate_ecdsa(half_bytes_, is_nonzero(limited)) &&
             calibrate_schnorr(half_bytes_, is_nonzero(limited)) &&
+            calibrate_scan(half_bytes_, is_nonzero(limited)) &&
             calibrate_silent(half_bytes_, is_nonzero(limited));
     }
 
@@ -527,31 +604,31 @@ private:
         return !is_zero(schnorr_rows_);
     }
 
-    // BIP352 receiving vector "Simple send: two inputs", whose summary pays
+    // BIP352 receiving vector "Simple send: two inputs", whose point pays
     // the receiver's unlabeled output key 3e9fce73d4e77a48...
-    bool calibrate_silent(size_t bytes, bool limited) NOEXCEPT
+    bool calibrate_scan(size_t bytes, bool limited) NOEXCEPT
     {
-        constexpr ec_compressed summary = base16_array(
+        constexpr ec_compressed point = base16_array(
             "024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
         constexpr ec_secret secret = base16_array(
             "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
         constexpr prefix expected = base16_array("3e9fce73d4e77a48");
 
-        silent_arguments arguments{};
-        silent::batch::receiver keys{};
+        scan_arguments arguments{};
+        scan::batch::receiver keys{};
         keys.scan = base16_array(
             "0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
         if (!secret_to_public(keys.spend, secret) ||
-            !silent_receiver::decode(arguments, keys))
+            !scan_receiver::decode(arguments, keys))
             return false;
 
         using namespace std::chrono;
-        const std::vector<ec_compressed> summaries(calibration_rows, summary);
+        const std::vector<ec_compressed> points(calibration_rows, point);
         std::vector<prefix> prefixes(calibration_rows);
         data_chunk valid(calibration_rows);
         const auto start = steady_clock::now();
         if (call_.context_current(context_) != success ||
-            stage(zero, summaries, arguments) != success ||
+            stage(zero, points, arguments) != success ||
             collect(zero, prefixes, valid) != success)
             return false;
 
@@ -566,7 +643,42 @@ private:
             }))
             return false;
 
-        const auto capacity = silent_layout::rows(bytes, one);
+        const auto capacity = scan_layout::rows(bytes, one);
+        scan_rows_ = limit_rows(capacity, limited, elapsed);
+        return true;
+    }
+
+    bool calibrate_silent(size_t bytes, bool limited) NOEXCEPT
+    {
+        constexpr ec_secret secret{ 0x01 };
+        constexpr ec_secret hash = base16_array(
+            "9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
+        ec_compressed sum{};
+        if (!secret_to_public(sum, secret))
+            return false;
+
+        auto expected = sum;
+        if (!ec_multiply(expected, hash))
+            return false;
+
+        using namespace std::chrono;
+        const std::vector<ec_compressed> sums(calibration_rows, sum);
+        const std::vector<ec_secret> hashes(calibration_rows, hash);
+        std::vector<ec_compressed> points(calibration_rows);
+        data_chunk valid(calibration_rows);
+        const auto start = steady_clock::now();
+        if (call_.context_current(context_) != success ||
+            stage(zero, sums, hashes) != success ||
+            collect(zero, points, valid) != success)
+            return false;
+
+        const auto elapsed = steady_clock::now() - start;
+        constexpr auto rows = to_signed(calibration_rows);
+        if (std::ranges::count(valid, one) != rows ||
+            std::ranges::count(points, expected) != rows)
+            return false;
+
+        const auto capacity = silent_layout::rows(bytes);
         silent_rows_ = limit_rows(capacity, limited, elapsed);
         return true;
     }
@@ -577,12 +689,14 @@ private:
     handle_t module_{};
     handle_t ecdsa_{};
     handle_t schnorr_{};
+    handle_t scan_{};
     handle_t silent_{};
     pointer_t staging_{};
     size_t half_bytes_{};
     std_array<handle_t, two> streams_{};
     size_t ecdsa_rows_{};
     size_t schnorr_rows_{};
+    size_t scan_rows_{};
     size_t silent_rows_{};
     bool retained_{};
     turns turns_{};
