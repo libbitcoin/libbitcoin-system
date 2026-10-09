@@ -169,7 +169,8 @@ template <typename Value>
 constexpr void algorithm::declassify(
     [[maybe_unused]] const Value& value) NOEXCEPT
 {
-    declassify(pointer_cast<const uint8_t>(&value), sizeof(value));
+    if constexpr (!have_ptx)
+        declassify(pointer_cast<const uint8_t>(&value), sizeof(value));
 }
 
 constexpr void algorithm::declassify(const uint8_t* data,
