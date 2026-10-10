@@ -610,6 +610,44 @@ BOOST_AUTO_TEST_CASE(block_view__populate__external_and_internal_spends__prevout
     BOOST_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::block_success);
 }
 
+BOOST_AUTO_TEST_CASE(block_view__populate__selected__selected_prevouts_assigned)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    const auto tx2 = view_spend({ one_hash, 1 }, 40);
+    chain::view::block view{ view_block_data({ view_coinbase(), tx1, tx2 }), true };
+    BOOST_REQUIRE(view.populate(view_prevouts_data({ { 50, script{} } }), { false, false, true }));
+    BOOST_REQUIRE(view.is_populated());
+    BOOST_REQUIRE_EQUAL(view.inputs().size(), 3u);
+    BOOST_REQUIRE_EQUAL(view.prevouts().size(), 1u);
+    BOOST_REQUIRE(is_null(view.views().at(1).inputs_begin()->prevout));
+    BOOST_REQUIRE(!is_null(view.views().back().inputs_begin()->prevout));
+    BOOST_REQUIRE_EQUAL(view.views().back().inputs_begin()->prevout->value(), 50u);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__none_selected__no_prevouts)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    chain::view::block view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE(view.populate(data_chunk{}, { false, false }));
+    BOOST_REQUIRE(view.is_populated());
+    BOOST_REQUIRE(view.prevouts().empty());
+    BOOST_REQUIRE(is_null(view.views().back().inputs_begin()->prevout));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__selected_short_prevouts__false)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    chain::view::block view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE(!view.populate(data_chunk{}, { false, true }));
+}
+
+BOOST_AUTO_TEST_CASE(block_view__populate__selection_size_mismatch__false)
+{
+    const auto tx1 = view_spend({ one_hash, 0 }, 42);
+    chain::view::block view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BOOST_REQUIRE(!view.populate(view_prevouts_data({ { 50, script{} } }), { true }));
+}
+
 BOOST_AUTO_TEST_CASE(block_view__populate__short_prevouts__missing_previous_output)
 {
     const auto tx1 = view_spend({ one_hash, 0 }, 42);
