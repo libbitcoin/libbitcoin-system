@@ -74,8 +74,15 @@ public:
     void encode_query(const query_map& map) NOEXCEPT;
 
 private:
-    // Mutable URL object to store the parsed URI.
-    boost::urls::url url_;
+    // Components are stored in encoded form.
+    std::string scheme_{};
+    std::string authority_{};
+    std::string path_{};
+    std::string query_{};
+    std::string fragment_{};
+    bool has_authority_{};
+    bool has_query_{};
+    bool has_fragment_{};
 };
 
 } // namespace wallet
