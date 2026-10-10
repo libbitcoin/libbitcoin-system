@@ -115,15 +115,14 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
 // on the processor.
 LCOV_EXCL_START("Requires a device.")
 template <typename Batch, typename Verify>
-data_chunk batch_verify(const stopper& cancel, const Batch& batch,
-    Verify&& verify) NOEXCEPT
+data_chunk batch_verify(bool& device, const stopper& cancel,
+    const Batch& batch, Verify&& verify) NOEXCEPT
 {
     data_chunk results{};
-    if (secp256k1::cuda::available() &&
-        secp256k1::cuda::verify(results, cancel, batch))
-        return results;
+    device = secp256k1::cuda::available() &&
+        secp256k1::cuda::verify(results, cancel, batch);
 
-    return batch_verify_(cancel, batch, verify);
+    return device ? results : batch_verify_(cancel, batch, verify);
 }
 LCOV_EXCL_STOP()
 

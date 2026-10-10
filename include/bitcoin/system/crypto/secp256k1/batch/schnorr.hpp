@@ -51,13 +51,17 @@ struct BC_API batch
     static batched::links_t verify(const stopper& cancel,
         const batch& batch) NOEXCEPT;
 
+    /// Device is set if the batch was verified on the device.
+    static batched::links_t verify(bool& device, const stopper& cancel,
+        const batch& batch) NOEXCEPT;
+
     std::span<const correlate_t> correlates;
     std::span<const row_t> rows;
 
 protected:
     static batched::links_t get_failures(const stopper& cancel,
         const data_chunk& out, const batch& in) NOEXCEPT;
-    static data_chunk evaluate(const stopper& cancel,
+    static data_chunk evaluate(bool& device, const stopper& cancel,
         const batch& batch) NOEXCEPT;
     static batched::links_t correlate(const stopper& cancel,
         const data_chunk& out, const batch& batch) NOEXCEPT;

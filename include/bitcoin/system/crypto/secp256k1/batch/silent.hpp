@@ -51,6 +51,10 @@ struct BC_API batch
     static bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
         const stopper& cancel, const batch& batch) NOEXCEPT;
 
+    /// Device is set if the batch was computed on the device.
+    static bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
+        bool& device, const stopper& cancel, const batch& batch) NOEXCEPT;
+
 protected:
     /// Transactions computed by one task.
     static constexpr size_t chunk_rows = power2(10_size);

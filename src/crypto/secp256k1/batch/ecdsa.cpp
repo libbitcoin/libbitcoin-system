@@ -171,10 +171,10 @@ links_t ecdsa::batch::get_failures(const stopper& cancel,
 // ----------------------------------------------------------------------------
 // static/protected
 
-data_chunk ecdsa::batch::evaluate(const stopper& cancel,
+data_chunk ecdsa::batch::evaluate(bool& device, const stopper& cancel,
     const batch& batch) NOEXCEPT
 {
-    return batch_verify(cancel, batch, verify_rows);
+    return batch_verify(device, cancel, batch, verify_rows);
 }
 
 // correlate
@@ -194,7 +194,14 @@ links_t ecdsa::batch::correlate(const stopper& cancel,
 links_t ecdsa::batch::verify(const stopper& cancel,
     const batch& batch) NOEXCEPT
 {
-    return correlate(cancel, evaluate(cancel, batch), batch);
+    bool device{};
+    return verify(device, cancel, batch);
+}
+
+links_t ecdsa::batch::verify(bool& device, const stopper& cancel,
+    const batch& batch) NOEXCEPT
+{
+    return correlate(cancel, evaluate(device, cancel, batch), batch);
 }
 
 BC_POP_WARNING()
