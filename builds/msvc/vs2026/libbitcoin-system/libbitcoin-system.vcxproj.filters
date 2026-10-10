@@ -980,7 +980,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\cursor.hpp">
       <Filter>include\bitcoin\system\chain\batch</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\ecdsa_signatures.hpp">
+      <Filter>include\bitcoin\system\chain\batch</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\multisig.hpp">
+      <Filter>include\bitcoin\system\chain\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\schnorr_signatures.hpp">
       <Filter>include\bitcoin\system\chain\batch</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\signatures.hpp">

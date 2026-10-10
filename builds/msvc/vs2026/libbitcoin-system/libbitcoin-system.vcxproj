@@ -425,7 +425,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\annex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\cursor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\ecdsa_signatures.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\multisig.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\schnorr_signatures.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\signatures.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\threshold.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />

@@ -326,7 +326,9 @@ include_bitcoin_system_chain_batchdir = \
 include_bitcoin_system_chain_batch_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/chain/batch/batch.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/cursor.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/ecdsa_signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/multisig.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/schnorr_signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/threshold.hpp
 
@@ -1146,6 +1148,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/tapscript.cpp \
     ${srcdir}/../../test/chain/transaction.cpp \
     ${srcdir}/../../test/chain/witness.cpp \
+    ${srcdir}/../../test/chain/batch/ecdsa_signatures.cpp \
+    ${srcdir}/../../test/chain/batch/schnorr_signatures.cpp \
     ${srcdir}/../../test/chain/batch/signatures.cpp \
     ${srcdir}/../../test/chain/batch/threshold.cpp \
     ${srcdir}/../../test/chain/enums/opcode.cpp \

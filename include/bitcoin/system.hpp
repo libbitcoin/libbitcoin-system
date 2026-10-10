@@ -55,7 +55,9 @@
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/chain/batch/batch.hpp>
 #include <bitcoin/system/chain/batch/cursor.hpp>
+#include <bitcoin/system/chain/batch/ecdsa_signatures.hpp>
 #include <bitcoin/system/chain/batch/multisig.hpp>
+#include <bitcoin/system/chain/batch/schnorr_signatures.hpp>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/batch/threshold.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
