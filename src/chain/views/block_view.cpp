@@ -331,10 +331,21 @@ code block::populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT
         return error::empty_block;
 
     populate_inputs();
-    if (!populate_prevouts(std::move(prevouts)))
+    const std::vector<bool> selected(txs_.size(), true);
+    if (!populate_prevouts(std::move(prevouts), selected))
         return error::missing_previous_output;
 
     return populate_internal(ctx);
+}
+
+bool block::populate(data_chunk&& prevouts,
+    const std::vector<bool>& selected) NOEXCEPT
+{
+    if (txs_.empty() || selected.size() != txs_.size())
+        return false;
+
+    populate_inputs();
+    return populate_prevouts(std::move(prevouts), selected);
 }
 
 // private
@@ -391,7 +402,8 @@ void block::populate_inputs() NOEXCEPT
 }
 
 // private
-bool block::populate_prevouts(data_chunk&& prevouts) NOEXCEPT
+bool block::populate_prevouts(data_chunk&& prevouts,
+    const std::vector<bool>& selected) NOEXCEPT
 {
     prevout_buffer_ = to_shared(std::move(prevouts));
     prevouts_ = to_shared<view::outputs>();
@@ -400,8 +412,12 @@ bool block::populate_prevouts(data_chunk&& prevouts) NOEXCEPT
     // The vector is not reallocated, so its element addresses are stable.
     const auto* position = prevout_buffer_->data();
     const auto* end = std::next(position, prevout_buffer_->size());
-    for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
+    auto select = std::next(selected.cbegin());
+    for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx, ++select)
     {
+        if (!*select)
+            continue;
+
         for (auto in = tx->inputs_begin(); in != tx->inputs_end(); ++in)
         {
             if (position >= end)

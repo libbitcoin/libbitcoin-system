@@ -81,11 +81,18 @@ bool verify(data_chunk& out, const stopper& cancel,
 }
 
 bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
-    const stopper& cancel, const std::span<const ec_compressed>& summaries,
-    const silent::batch::receiver& keys) NOEXCEPT
+    const stopper& cancel, const std::span<const ec_compressed>& points,
+    const scan::batch::receiver& keys) NOEXCEPT
 {
-    return context::instance().scan(prefixes, valid, cancel, summaries,
+    return context::instance().scan(prefixes, valid, cancel, points,
         keys);
+}
+
+bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
+    const stopper& cancel, const std::span<const ec_compressed>& sums,
+    const std::span<const ec_secret>& hashes) NOEXCEPT
+{
+    return context::instance().compute(out, valid, cancel, sums, hashes);
 }
 
 #else
@@ -113,7 +120,14 @@ bool verify(data_chunk&, const stopper&, const schnorr::batch&) NOEXCEPT
 
 bool scan(std::vector<prefix>&, data_chunk&, const stopper&,
     const std::span<const ec_compressed>&,
-    const silent::batch::receiver&) NOEXCEPT
+    const scan::batch::receiver&) NOEXCEPT
+{
+    return false;
+}
+
+bool compute(std_vector<ec_compressed>&, data_chunk&, const stopper&,
+    const std::span<const ec_compressed>&,
+    const std::span<const ec_secret>&) NOEXCEPT
 {
     return false;
 }

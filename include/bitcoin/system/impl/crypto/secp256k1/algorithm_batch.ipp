@@ -258,11 +258,30 @@ bool algorithm::verify_schnorr(data_chunk& results,
 // ----------------------------------------------------------------------------
 // protected
 
-// Rows without a valid point fill their lanes with the generator and are not
-// read. Lanes with an exceptional addition compute alone.
 template <typename Word>
 void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
     const std::span<const ec_compressed>& points, const scalar_t& k) NOEXCEPT
+{
+    multiply_rows<true, Word>(valid, out, points,
+        [&](size_t) NOEXCEPT -> const scalar_t& { return k; });
+}
+
+template <typename Word>
+void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
+    const std::span<const ec_compressed>& points,
+    const std::span<const scalar_t>& ks) NOEXCEPT
+{
+    multiply_rows<false, Word>(valid, out, points,
+        [&](size_t row) NOEXCEPT -> const scalar_t& { return ks[row]; });
+}
+
+// Rows without a valid point fill their lanes with the generator and are not
+// read. Lanes with an exceptional addition compute alone.
+template <bool Secret, typename Word, typename Scalar>
+void algorithm::multiply_rows(data_chunk& valid,
+    std_vector<ec_compressed>& out,
+    const std::span<const ec_compressed>& points,
+    const Scalar& scalar) NOEXCEPT
 {
     constexpr auto width = lanes<Word>;
     const auto count = points.size();
@@ -274,11 +293,9 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
     pending.reserve(count);
     sums.reserve(count);
 
-    scalars_t<Word> ks{};
-    ks.fill(k);
-
     for (size_t base{}; base < count; base += width)
     {
+        scalars_t<Word> ks{};
         std_array<field_t<uint64_t>, width> xs{};
         std_array<uint64_t, width> odds{};
         std_array<bool, width> used{};
@@ -286,6 +303,7 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
         {
             const auto row = base + lane;
             xs[lane] = generator.x;
+            ks[lane] = scalar(std::min(row, sub1(count)));
             if (row >= count)
                 continue;
 
@@ -308,8 +326,14 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
         const auto on = unpack(lift(point, x, pack<Word>(odds)));
 
         jacobian_t<Word> sum{};
-        const auto faults = unpack(multiply(sum, point, ks));
+        Word uncomputed{};
+        if constexpr (Secret)
+            uncomputed = multiply(sum, point, ks);
+        else
+            uncomputed = multiply_windows<point_bits, false, false>(sum, {},
+                point, ks);
 
+        const auto faults = unpack(uncomputed);
         std_array<jacobian_t<uint64_t>, width> rows{};
         unpack(rows, sum);
         for (size_t lane{}; lane < width; ++lane)
@@ -322,7 +346,7 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
             {
                 affine_t<uint64_t> alone{}, product{};
                 if (from_bytes(alone, points[row]) &&
-                    linear(product, {}, alone, k))
+                    linear(product, {}, alone, scalar(row)))
                 {
                     to_bytes(out[row], product);
                     valid[row] = 1;

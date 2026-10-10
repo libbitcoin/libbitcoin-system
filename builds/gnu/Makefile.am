@@ -153,6 +153,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/schnorr.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/compact.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/ecdsa.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/batch/scan.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/schnorr.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/silent.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/verify.cpp \
@@ -325,7 +326,9 @@ include_bitcoin_system_chain_batchdir = \
 include_bitcoin_system_chain_batch_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/chain/batch/batch.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/cursor.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/ecdsa_signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/multisig.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/batch/schnorr_signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/signatures.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/batch/threshold.hpp
 
@@ -454,6 +457,7 @@ include_bitcoin_system_crypto_secp256k1_batch_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/batch.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/compact.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/scan.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/schnorr.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/silent.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/verify.hpp
@@ -1144,6 +1148,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/tapscript.cpp \
     ${srcdir}/../../test/chain/transaction.cpp \
     ${srcdir}/../../test/chain/witness.cpp \
+    ${srcdir}/../../test/chain/batch/ecdsa_signatures.cpp \
+    ${srcdir}/../../test/chain/batch/schnorr_signatures.cpp \
     ${srcdir}/../../test/chain/batch/signatures.cpp \
     ${srcdir}/../../test/chain/batch/threshold.cpp \
     ${srcdir}/../../test/chain/enums/opcode.cpp \
@@ -1214,6 +1220,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/secp256k1/batch/compact.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/ecdsa.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/performance.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/batch/scan.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/schnorr.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/silent.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/verify.cpp \

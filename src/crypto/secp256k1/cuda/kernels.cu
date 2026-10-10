@@ -71,14 +71,14 @@ public:
         return verify_schnorr<window_bits>(key, challenge, r, s) ? 1 : 0;
     }
 
-    /// The output key prefix of the receiver for the summary (k = 0), then of
+    /// The output key prefix of the receiver for the point (k = 0), then of
     /// that key plus each label key [bip352].
     static __device__ uint8_t scan(cuda::prefix* prefixes,
-        const ec_compressed& summary,
-        const cuda::silent_arguments& arguments) NOEXCEPT
+        const ec_compressed& encoded,
+        const cuda::scan_arguments& arguments) NOEXCEPT
     {
         affine_t<uint64_t> point{};
-        if (!decode(point, summary))
+        if (!decode(point, encoded))
             return 0;
 
         // The device computes in variable time, a server-side optimization
@@ -129,6 +129,38 @@ public:
 
             write(prefixes[add1(index)], labeled);
         }
+
+        return 1;
+    }
+
+    /// The point, hash * sum [bip352].
+    static __device__ uint8_t compute(ec_compressed& out,
+        const ec_compressed& sum, const ec_secret& hash) NOEXCEPT
+    {
+        affine_t<uint64_t> point{};
+        if (!decode(point, sum))
+            return 0;
+
+        scalar_t k{};
+        if (!from_bytes(k, hash) || is_zero_scalar(k))
+            return 0;
+
+        jacobian_t<uint64_t> product{};
+        const scalars_t<uint64_t> ks{ k };
+        const auto uncomputed = multiply_windows<window_bits, false, false>(
+            product, {}, point, ks);
+        if (f::any(uncomputed))
+            multiply_complete(product, {}, point, k);
+
+        if (f::any(product.infinity))
+            return 0;
+
+        affine_t<uint64_t> normal{};
+        ec_compressed key{};
+        to_affine(normal, product);
+        to_bytes(key, normal);
+        for (size_t byte{}; byte < key.size(); ++byte)
+            out[byte] = key[byte];
 
         return 1;
     }
@@ -209,11 +241,21 @@ extern "C" __global__ void verify_schnorr(cuda::schnorr_arguments arguments)
             arguments.keys[row], arguments.signatures[row]);
 }
 
-extern "C" __global__ void scan_silent(cuda::silent_arguments arguments)
+extern "C" __global__ void scan_silent(cuda::scan_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
         arguments.valid[row] = verifier::scan(
             &arguments.prefixes[row * (arguments.label_count + 1u)],
-            arguments.summaries[row], arguments);
+            arguments.points[row], arguments);
+}
+
+extern "C" __global__ void compute_silent(
+    cuda::silent_arguments arguments)
+{
+    const auto row = verifier::row();
+    if (row < arguments.count)
+        arguments.valid[row] = verifier::compute(
+            arguments.points[row], arguments.sums[row],
+            arguments.hashes[row]);
 }

@@ -23,121 +23,117 @@ BC_PUSH_WARNING(NO_USE_OF_SPAN)
 BOOST_AUTO_TEST_SUITE(secp256k1_batch_silent_tests)
 
 using namespace system::silent;
-using tx_links = std::vector<batch::tx_link_t>;
 
 constexpr ec_secret scan_secret = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
 constexpr ec_secret spend_secret = base16_array("9d6ad855ce3417ef84e836892e5a56392bfba05fa5d97ccea30e266f540e08b3");
-constexpr ec_compressed unlabeled_summary = base16_array("024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
-constexpr ec_compressed labeled_summary = base16_array("0314bec14463d6c0181083d607fecfba67bb83f95915f6f247975ec566d5642ee8");
-constexpr ec_xonly unlabeled_key = base16_array("3e9fce73d4e77a4809908e3c3a2e54ee147b9312dc5044a193d1fc85de46e3c1");
-constexpr ec_xonly labeled_key = base16_array("67626aebb3c4307cf0f6c39ca23247598fabf675ab783292eb2f81ae75ad1f8c");
+constexpr ec_compressed unlabeled_point = base16_array("024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004");
+constexpr ec_compressed labeled_point = base16_array("0314bec14463d6c0181083d607fecfba67bb83f95915f6f247975ec566d5642ee8");
 
-struct rows
+// compute
+// ----------------------------------------------------------------------------
+
+struct computed
 {
-    void add(batch::tx_link_t link, const ec_compressed& summary,
-        const ec_xonly& key) NOEXCEPT
-    {
-        constexpr auto size = array_count<batch::prefix>;
-        correlates.push_back(to_little_endian(link));
-        values.push_back({ array_cast<uint8_t, size>(key), summary });
-    }
-
-    void add(batch::tx_link_t first, batch::tx_link_t count,
-        const ec_compressed& summary, const ec_xonly& key) NOEXCEPT
-    {
-        for (auto link = first; link < first + count; ++link)
-            add(link, summary, key);
-    }
-
-    batch to_batch() const NOEXCEPT
-    {
-        return { correlates, values };
-    }
-
-    std::vector<batch::tx_link> correlates{};
-    std::vector<batch::row_t> values{};
+    bool success{};
+    std_vector<ec_compressed> out{};
+    data_chunk valid{};
 };
 
-static batch::receiver get_keys(const std_vector<uint32_t>& labels) NOEXCEPT
+static batch::row_t to_row(const ec_compressed& sum,
+    const ec_secret& hash) NOEXCEPT
 {
-    ec_compressed spend{};
-    if (!secret_to_public(spend, spend_secret))
-        return {};
-
-    return wallet::silent_payment{ scan_secret, spend, labels }.keys();
+    return { {}, sum, hash };
 }
 
-static tx_links scan(const rows& rows, const batch::receiver& keys,
-    bool turbo) NOEXCEPT
+static ec_compressed product(const ec_compressed& sum,
+    const ec_secret& hash) NOEXCEPT
 {
-    std::mutex mutex{};
-    tx_links out{};
-    const auto handler = [&](const code&, auto link, const auto&) NOEXCEPT
-    {
-        std::unique_lock lock{ mutex };
-        out.push_back(link);
-    };
+    auto out = sum;
+    return ec_multiply(out, hash) ? out : ec_compressed{};
+}
 
+static computed compute(const std_vector<batch::row_t>& rows) NOEXCEPT
+{
+    computed out{};
     const stopper cancel{};
-    batch::scan(cancel, rows.to_batch(), keys, handler, turbo);
-    sort(out);
+    out.success = batch::compute(out.out, out.valid, cancel, { rows });
     return out;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__empty__empty)
+static std_vector<batch::row_t> alternating(size_t count) NOEXCEPT
 {
-    BOOST_REQUIRE(scan({}, get_keys({}), false).empty());
+    std_vector<batch::row_t> rows(count);
+    for (size_t row{}; row < count; ++row)
+        rows[row] = is_even(row) ?
+            to_row(unlabeled_point, spend_secret) :
+            to_row(labeled_point, scan_secret);
+
+    return rows;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__unlabeled__expected)
+static bool is_alternating(const computed& result) NOEXCEPT
 {
-    rows rows{};
-    rows.add(1, unlabeled_summary, labeled_key);
-    rows.add(1, unlabeled_summary, unlabeled_key);
-    rows.add(2, unlabeled_summary, labeled_key);
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), false), tx_links{ 1 });
+    const auto even = product(unlabeled_point, spend_secret);
+    const auto odd = product(labeled_point, scan_secret);
+    for (size_t row{}; row < result.out.size(); ++row)
+        if (is_zero(result.valid[row]) ||
+            result.out[row] != (is_even(row) ? even : odd))
+            return false;
+
+    return true;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__labeled__expected)
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__empty__empty)
 {
-    rows rows{};
-    rows.add(1, unlabeled_summary, labeled_key);
-    rows.add(2, labeled_summary, labeled_key);
-    rows.add(3, labeled_summary, unlabeled_key);
-    BOOST_REQUIRE(scan(rows, get_keys({}), false).empty());
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({ 2, 3, 1001337 }), false), tx_links{ 2 });
+    const auto result = compute({});
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE(result.out.empty());
+    BOOST_REQUIRE(result.valid.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__invalid_summary__skipped)
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__runs__expected)
 {
-    rows rows{};
-    rows.add(1, null_ec_compressed, unlabeled_key);
-    rows.add(2, unlabeled_summary, unlabeled_key);
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), false), tx_links{ 2 });
+    const auto first = to_row(unlabeled_point, spend_secret);
+    const auto second = to_row(labeled_point, scan_secret);
+    const auto result = compute({ first, first, second, first });
+    const auto expected_first = product(unlabeled_point, spend_secret);
+    const auto expected_second = product(labeled_point, scan_secret);
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 1, 1, 1, 1 }));
+    BOOST_REQUIRE_EQUAL(result.out.at(0), expected_first);
+    BOOST_REQUIRE_EQUAL(result.out.at(1), expected_first);
+    BOOST_REQUIRE_EQUAL(result.out.at(2), expected_second);
+    BOOST_REQUIRE_EQUAL(result.out.at(3), expected_first);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__chunk_straddle__once)
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__zero_hash__invalid)
 {
-    rows rows{};
-    rows.add(100, 1023, unlabeled_summary, labeled_key);
-    rows.add(7, unlabeled_summary, labeled_key);
-    rows.add(7, unlabeled_summary, unlabeled_key);
-    rows.add(8, unlabeled_summary, unlabeled_key);
-    BOOST_REQUIRE_EQUAL(rows.values.size(), 1026u);
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), false), (tx_links{ 7, 8 }));
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), true), (tx_links{ 7, 8 }));
+    const auto result = compute({ to_row(unlabeled_point, ec_secret{}), to_row(labeled_point, scan_secret) });
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
+    BOOST_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__scan__device_rows__expected)
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__invalid_sum__invalid)
 {
-    rows rows{};
-    rows.add(100, 70000, unlabeled_summary, labeled_key);
-    rows.add(7, unlabeled_summary, labeled_key);
-    rows.add(7, unlabeled_summary, unlabeled_key);
-    rows.add(8, labeled_summary, labeled_key);
-    rows.add(9, labeled_summary, unlabeled_key);
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({}), true), (tx_links{ 7 }));
-    BOOST_REQUIRE_EQUAL(scan(rows, get_keys({ 2, 3, 1001337 }), true), (tx_links{ 7, 8 }));
+    const auto result = compute({ to_row(null_ec_compressed, spend_secret), to_row(labeled_point, scan_secret) });
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
+    BOOST_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__chunks__expected)
+{
+    const auto result = compute(alternating(3000));
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE(is_alternating(result));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__device_rows__expected)
+{
+    const auto result = compute(alternating(70000));
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE(is_alternating(result));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

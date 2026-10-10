@@ -69,6 +69,11 @@ public:
     /// Fails if any populated prevout is internally immature or locked.
     code populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT;
 
+    /// Prevouts are the wire-encoded prevouts of each spend of the selected
+    /// txs in block order, others are null (internal checks are skipped).
+    bool populate(data_chunk&& prevouts,
+        const std::vector<bool>& selected) NOEXCEPT;
+
     /// Validation (population required).
     code check() const NOEXCEPT;
     code check(const context& ctx) const NOEXCEPT;
@@ -131,7 +136,8 @@ private:
 
     // Population.
     void populate_inputs() NOEXCEPT;
-    bool populate_prevouts(data_chunk&& prevouts) NOEXCEPT;
+    bool populate_prevouts(data_chunk&& prevouts,
+        const std::vector<bool>& selected) NOEXCEPT;
     code populate_internal(const context& ctx) const NOEXCEPT;
 
     bool witness_;

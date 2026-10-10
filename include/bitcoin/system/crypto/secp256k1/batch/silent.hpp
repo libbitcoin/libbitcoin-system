@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_SILENT_HPP
 
 #include <span>
+#include <bitcoin/system/crypto/secp256k1/batch/scan.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -30,56 +31,33 @@ namespace system {
 
 namespace silent {
 
-/// Spans match serialized buffers, a row for each correlate.
-/// Rows of one transaction are contiguous and share one prevouts summary.
+/// Span matches serialized buffer, a row for each output of a transaction.
+/// Rows of one transaction are contiguous and share one sum and input hash.
 struct BC_API batch
 {
-    using prefix = data_array<8>;
-    using tx_link = data_array<4>;
-    using tx_link_t = unsigned_type<sizeof(tx_link)>;
-
 #pragma pack(push, 1)
     struct row_t
     {
-        batch::prefix prefix;
-        ec_compressed point;
+        scan::batch::prefix prefix;
+        ec_compressed sum;
+        ec_secret hash;
     };
 #pragma pack(pop)
-    using handler = std::function<void(const code&, tx_link_t,
-        const ec_compressed&)>;
 
-    /// Scan secret, spend key and label keys of a receiver.
-    struct receiver
-    {
-        ec_secret scan{};
-        ec_uncompressed spend{};
-        ec_uncompresseds labels{};
-    };
-
-    std::span<const tx_link> correlates;
     std::span<const row_t> rows;
 
-    /// Invoke callback for each transaction with an output paying receiver.
-    static void scan(const stopper& cancel, const batch& batch,
-        const receiver& keys, const handler& callback, bool turbo) NOEXCEPT;
+    /// Each out = hash * sum of the row, valid set for each row, computed
+    /// once for each run of rows of equal sum and hash. False if canceled.
+    static bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
+        const stopper& cancel, const batch& batch) NOEXCEPT;
 
 protected:
-    /// Rows scanned by one task.
+    /// Transactions computed by one task.
     static constexpr size_t chunk_rows = power2(10_size);
 
-    /// Scans of at least this many rows run on the device where available.
+    /// Computations of at least this many transactions run on the device
+    /// where available.
     static constexpr size_t device_rows = power2(16_size);
-
-    /// Transactions sent to the device at once.
-    static constexpr size_t device_groups = power2(22_size);
-
-    /// The row that follows the transaction of the given row.
-    static size_t next(const batch& batch, size_t row) NOEXCEPT;
-
-    /// Scan on the device, false if failed with resume the first unscanned row.
-    static bool scan_device(size_t& resume, const stopper& cancel,
-        const batch& batch, const receiver& keys, const handler& callback,
-        bool turbo) NOEXCEPT;
 };
 
 } // namespace silent

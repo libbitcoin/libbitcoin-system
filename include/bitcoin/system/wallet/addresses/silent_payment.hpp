@@ -68,6 +68,14 @@ public:
     static bool summarize(ec_compressed& out,
         const chain::view::transaction& tx) NOEXCEPT;
 
+    /// The sum of the transaction's eligible input keys and its input hash,
+    /// whose product is the prevouts summary, false if the transaction is not
+    /// eligible. Requires populated prevouts.
+    static bool prepare(ec_compressed& sum, ec_secret& hash,
+        const chain::transaction& tx) NOEXCEPT;
+    static bool prepare(ec_compressed& sum, ec_secret& hash,
+        const chain::view::transaction& tx) NOEXCEPT;
+
     /// The transaction's pay-to-taproot outputs, false if there are none.
     static bool get_outputs(scan_outputs& out,
         const chain::transaction& tx) NOEXCEPT;
@@ -87,7 +95,7 @@ public:
     operator bool() const NOEXCEPT;
 
     /// The receiver keys for batch scanning.
-    const silent::batch::receiver& keys() const NOEXCEPT;
+    const scan::batch::receiver& keys() const NOEXCEPT;
 
     /// Find all outputs paying the receiver (one transaction, all k).
     bool scan(scan_matches& out, const ec_compressed& summary,
@@ -105,10 +113,10 @@ protected:
     static constexpr ec_xonly nums_key = base16_array(
         "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0");
 
-    /// The prevouts summary of a non-coinbase transaction's inputs.
+    /// The input key sum and input hash of a non-coinbase transaction.
     template <typename Iterator>
-    static bool summarize(ec_compressed& out, const Iterator& begin,
-        const Iterator& end) NOEXCEPT;
+    static bool prepare(ec_compressed& sum, ec_secret& hash,
+        const Iterator& begin, const Iterator& end) NOEXCEPT;
 
     /// BIP352 tagged hashes.
     static bool input_hash(ec_secret& out, const outpoint& smallest,
@@ -139,7 +147,7 @@ private:
     bool shared_secret(ec_compressed& out,
         const ec_compressed& summary) const NOEXCEPT;
 
-    silent::batch::receiver keys_{};
+    scan::batch::receiver keys_{};
     std_vector<uint32_t> labels_{};
     ec_secrets label_tweaks_{};
     bool valid_{};

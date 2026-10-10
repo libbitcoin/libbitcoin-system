@@ -20,7 +20,9 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BATCH_BATCH_HPP
 
 #include <bitcoin/system/chain/batch/cursor.hpp>
+#include <bitcoin/system/chain/batch/ecdsa_signatures.hpp>
 #include <bitcoin/system/chain/batch/multisig.hpp>
+#include <bitcoin/system/chain/batch/schnorr_signatures.hpp>
 #include <bitcoin/system/chain/batch/signatures.hpp>
 #include <bitcoin/system/chain/batch/threshold.hpp>
 

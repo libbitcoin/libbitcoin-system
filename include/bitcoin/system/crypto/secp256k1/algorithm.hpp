@@ -1010,6 +1010,13 @@ protected:
         const std::span<const ec_compressed>& points,
         const scalar_t& k) NOEXCEPT;
 
+    /// Each out = k of the row * point (compressed) in lanes of Word, each k
+    /// nonzero and public (variable time).
+    template <typename Word>
+    static void multiply(data_chunk& valid, std_vector<ec_compressed>& out,
+        const std::span<const ec_compressed>& points,
+        const std::span<const scalar_t>& ks) NOEXCEPT;
+
     /// Each row of out is x of t * G + point, then x of that plus each addend,
     /// in lanes of Word.
     template <typename Word>
@@ -1065,6 +1072,13 @@ protected:
     template <typename Word>
     static constexpr affine_t<Word> to_lanes(
         const affine_t<uint64_t>& a) NOEXCEPT;
+
+    /// Each out = scalar(row) * point (compressed) in lanes of Word, constant
+    /// time in the scalars where Secret.
+    template <bool Secret, typename Word, typename Scalar>
+    static void multiply_rows(data_chunk& valid, std_vector<ec_compressed>& out,
+        const std::span<const ec_compressed>& points,
+        const Scalar& scalar) NOEXCEPT;
 
     /// The key of each sum at its pending position of out, by one inversion.
     template <typename Key>

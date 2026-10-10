@@ -301,6 +301,12 @@ static void require_bip352_receiving_vector(const json::object& given,
     BOOST_REQUIRE(summarized);
     BOOST_REQUIRE_EQUAL(summary, bytes<ec_compressed_size>(tweak));
 
+    ec_compressed sum{};
+    ec_secret hash{};
+    BOOST_REQUIRE(silent_payment::prepare(sum, hash, tx));
+    BOOST_REQUIRE(ec_multiply(sum, hash));
+    BOOST_REQUIRE_EQUAL(sum, summary);
+
     ec_compressed shared{ summary };
     BOOST_REQUIRE(ec_multiply(shared, scan_secret));
     BOOST_REQUIRE_EQUAL(shared, bytes<ec_compressed_size>(secret));
@@ -356,6 +362,12 @@ static void require_record(std::initializer_list<vector_input> values,
     BOOST_REQUIRE(silent_payment::summarize(out, tx));
     BOOST_REQUIRE_EQUAL(out, bytes<ec_compressed_size>(summary));
 
+    ec_compressed sum{};
+    ec_secret hash{};
+    BOOST_REQUIRE(silent_payment::prepare(sum, hash, tx));
+    BOOST_REQUIRE(ec_multiply(sum, hash));
+    BOOST_REQUIRE_EQUAL(sum, out);
+
     silent_payment::scan_outputs scan_outputs{};
     BOOST_REQUIRE(silent_payment::get_outputs(scan_outputs, tx));
     BOOST_REQUIRE_EQUAL(scan_outputs.size(), keys.size());
@@ -378,6 +390,9 @@ static void require_no_record(std::initializer_list<vector_input> values)
 
     ec_compressed out{};
     BOOST_REQUIRE(!silent_payment::summarize(out, tx));
+
+    ec_secret hash{};
+    BOOST_REQUIRE(!silent_payment::prepare(out, hash, tx));
 }
 
 static transaction transaction_with_inputs(inputs&& ins,
