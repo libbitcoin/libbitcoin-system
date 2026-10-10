@@ -30,7 +30,7 @@
 #include <bitcoin/system/warnings.hpp>
 
 // Headers only containers.
-// #define BOOST_CONTAINER_NO_LIB
+#define BOOST_CONTAINER_NO_LIB
 
 // Avoid namespace conflict between boost::placeholders and std::placeholders.
 // This arises when including <functional>, which declares std::placeholders.
@@ -42,11 +42,13 @@
 #include <boost/asio.hpp>
 
 // Headers only json.
-// #define BOOST_JSON_NO_LIB
+#define BOOST_JSON_NO_LIB
 #include <boost/json.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+
+// Headers only program_options (sources compiled into /system).
+#define BOOST_PROGRAM_OPTIONS_NO_LIB
 #include <boost/program_options.hpp>
-#include <boost/url.hpp>
 #include <boost/version.hpp>
 
 /// boost aliases

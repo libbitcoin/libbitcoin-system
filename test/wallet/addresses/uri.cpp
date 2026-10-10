@@ -367,4 +367,66 @@ BOOST_AUTO_TEST_CASE(uri__decode__empty__false)
     BOOST_REQUIRE(!instance.decode(""));
 }
 
+BOOST_AUTO_TEST_CASE(uri__decode__ip_literal_authority__expected)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("http://[::1]:8080/path"));
+    BOOST_REQUIRE_EQUAL(instance.authority(), "[::1]:8080");
+    BOOST_REQUIRE(instance.decode("http://[1:2:3:4:5:6:7:8]"));
+    BOOST_REQUIRE(instance.decode("http://[1:2:3:4:5:6:7::]"));
+    BOOST_REQUIRE(instance.decode("http://[::ffff:192.168.0.1]"));
+    BOOST_REQUIRE(instance.decode("http://[v1.x:y]"));
+    BOOST_REQUIRE(!instance.decode("http://[1:2:3:4:5:6:7:8:9]"));
+    BOOST_REQUIRE(!instance.decode("http://[1::2::3]"));
+    BOOST_REQUIRE(!instance.decode("http://[::ffff:256.1.1.1]"));
+    BOOST_REQUIRE(!instance.decode("http://[::ffff:01.1.1.1]"));
+    BOOST_REQUIRE(!instance.decode("http://[::1]x"));
+    BOOST_REQUIRE(!instance.decode("http://[v.x]"));
+}
+
+BOOST_AUTO_TEST_CASE(uri__decode__port__expected)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("http://host:"));
+    BOOST_REQUIRE(instance.decode("http://user:pass@host:42"));
+    BOOST_REQUIRE(!instance.decode("http://host:4x"));
+    BOOST_REQUIRE(!instance.decode("http://a@b@host"));
+}
+
+BOOST_AUTO_TEST_CASE(uri__decode_query__plus__space)
+{
+    uri instance;
+    BOOST_REQUIRE(instance.decode("bitcoin:?message=hello+bitcoin&a%2Bb=c%2Bd"));
+    BOOST_REQUIRE_EQUAL(instance.query(), "message=hello+bitcoin&a+b=c+d");
+
+    const auto map = instance.decode_query();
+    BOOST_REQUIRE_EQUAL(map.at("message"), "hello bitcoin");
+    BOOST_REQUIRE_EQUAL(map.at("a+b"), "c+d");
+}
+
+BOOST_AUTO_TEST_CASE(uri__encode_query__reserved__escaped)
+{
+    uri instance;
+    instance.encode_query({ { "a+b", "c d" }, { "e&f", "g=h" } });
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "?a%2Bb=c%20d&e%26f=g%3Dh");
+
+    instance.encode_query({});
+    BOOST_REQUIRE(!instance.has_query());
+}
+
+BOOST_AUTO_TEST_CASE(uri__encoded__ambiguous_path__disambiguated)
+{
+    uri instance;
+    instance.set_path("a:b/c:d");
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "a%3Ab/c:d");
+    BOOST_REQUIRE(instance.set_scheme("x"));
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "x:a:b/c:d");
+    BOOST_REQUIRE(instance.set_authority("host"));
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "x://host/a:b/c:d");
+
+    instance.remove_authority();
+    instance.set_path("//p");
+    BOOST_REQUIRE_EQUAL(instance.encoded(), "x:/.//p");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

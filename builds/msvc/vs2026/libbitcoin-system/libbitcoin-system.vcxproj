@@ -224,6 +224,17 @@
       <ObjectFileName>$(IntDir)src_config_point.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\cmdline.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\config_file.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\convert.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\options_description.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\parsers.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\positional_options.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\split.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\utf8_codecvt_facet.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\value_semantic.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\variables_map.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\program_options\winmain.cpp" />
     <ClCompile Include="..\..\..\..\src\config\script.cpp">
       <ObjectFileName>$(IntDir)src_config_script.obj</ObjectFileName>
     </ClCompile>
@@ -915,10 +926,6 @@
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets')" />
-    <Import Project="$(NuGetPackageRoot)libbitcoin-boost_container-vc145.1.91.0.1\build\libbitcoin-boost_container-vc145.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost_container-vc145.1.91.0.1\build\libbitcoin-boost_container-vc145.targets')" />
-    <Import Project="$(NuGetPackageRoot)libbitcoin-boost_json-vc145.1.91.0.1\build\libbitcoin-boost_json-vc145.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost_json-vc145.1.91.0.1\build\libbitcoin-boost_json-vc145.targets')" />
-    <Import Project="$(NuGetPackageRoot)libbitcoin-boost_program_options-vc145.1.91.0.1\build\libbitcoin-boost_program_options-vc145.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost_program_options-vc145.1.91.0.1\build\libbitcoin-boost_program_options-vc145.targets')" />
-    <Import Project="$(NuGetPackageRoot)libbitcoin-boost_url-vc145.1.91.0.1\build\libbitcoin-boost_url-vc145.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost_url-vc145.1.91.0.1\build\libbitcoin-boost_url-vc145.targets')" />
     <Import Project="$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -926,10 +933,6 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The Missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost_container-vc145.1.91.0.1\build\libbitcoin-boost_container-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost_container-vc145.1.91.0.1\build\libbitcoin-boost_container-vc145.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost_json-vc145.1.91.0.1\build\libbitcoin-boost_json-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost_json-vc145.1.91.0.1\build\libbitcoin-boost_json-vc145.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost_program_options-vc145.1.91.0.1\build\libbitcoin-boost_program_options-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost_program_options-vc145.1.91.0.1\build\libbitcoin-boost_program_options-vc145.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost_url-vc145.1.91.0.1\build\libbitcoin-boost_url-vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost_url-vc145.1.91.0.1\build\libbitcoin-boost_url-vc145.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets'))" />
   </Target>
   <ItemGroup>

@@ -461,11 +461,7 @@ main()
         "-Wno-enum-constexpr-conversion")
 
     boost_OPTIONS=(
-        "--with-container"
-        "--with-json"
-        "--with-program_options"
-        "--with-url"
-        "--with-test")
+        "--with-headers")
 
     secp256k1_FLAGS=(
         "-w")
