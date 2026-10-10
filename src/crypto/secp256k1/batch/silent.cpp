@@ -103,6 +103,14 @@ static void compute_rows(std_vector<ec_compressed>& products,
 bool silent::batch::compute(std_vector<ec_compressed>& out,
     data_chunk& valid, const stopper& cancel, const batch& batch) NOEXCEPT
 {
+    bool device{};
+    return compute(out, valid, device, cancel, batch);
+}
+
+bool silent::batch::compute(std_vector<ec_compressed>& out,
+    data_chunk& valid, bool& device, const stopper& cancel,
+    const batch& batch) NOEXCEPT
+{
     const auto& rows = batch.rows;
     const auto count = rows.size();
     out.assign(count, ec_compressed{});
@@ -126,8 +134,10 @@ bool silent::batch::compute(std_vector<ec_compressed>& out,
 
     std_vector<ec_compressed> products{};
     data_chunk computed{};
-    if (runs < device_rows || !secp256k1::cuda::available() ||
-        !secp256k1::cuda::compute(products, computed, cancel, sums, hashes))
+    device = runs >= device_rows && secp256k1::cuda::available() &&
+        secp256k1::cuda::compute(products, computed, cancel, sums, hashes);
+
+    if (!device)
         compute_rows(products, computed, cancel, sums, hashes, chunk_rows);
 
     if (cancel)
