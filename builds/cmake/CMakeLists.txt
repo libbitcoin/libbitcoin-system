@@ -108,14 +108,7 @@ else()
   set( libsecp256k1_USE_STATIC_LIBS "ON" )
 endif()
 
-find_package( Boost 1.86.0 REQUIRED
-  COMPONENTS
-    container
-    json
-    program_options
-    url
-    unit_test_framework
-)
+find_package( Boost 1.86.0 REQUIRED )
 
 if ( with-secp256k1 )
   find_package( libsecp256k1 0.8.0 REQUIRED )
@@ -504,10 +497,7 @@ target_include_directories( libbitcoin-system
 
 target_link_libraries( libbitcoin-system
   PUBLIC
-    Boost::container
-    Boost::json
-    Boost::program_options
-    Boost::url
+    Boost::headers
     $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
 )
 
@@ -570,7 +560,7 @@ if ( with-tests )
 
   target_link_libraries( libbitcoin-system-test
     PRIVATE
-      Boost::unit_test_framework
+      Boost::headers
       bitcoin::system
   )
 

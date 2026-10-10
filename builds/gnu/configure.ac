@@ -699,29 +699,6 @@ AS_IF([test "x${enable_isystem}" != "xno"],
 
 AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 
-AX_BOOST_CONTAINER
-AC_SUBST([boost_container_LIBS], [${BOOST_CONTAINER_LIB}])
-AC_MSG_NOTICE([boost_container_LIBS : ${boost_container_LIBS}])
-
-AX_BOOST_JSON
-AC_SUBST([boost_json_LIBS], [${BOOST_JSON_LIB}])
-AC_MSG_NOTICE([boost_json_LIBS : ${boost_json_LIBS}])
-
-AX_BOOST_PROGRAM_OPTIONS
-AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
-AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
-
-AX_BOOST_URL
-AC_SUBST([boost_url_LIBS], [${BOOST_URL_LIB}])
-AC_MSG_NOTICE([boost_url_LIBS : ${boost_url_LIBS}])
-
-AS_IF([(test "x${with_tests}" != "xno")],
-  [
-    AX_BOOST_UNIT_TEST_FRAMEWORK
-    AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])
-    AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])
-  ])
-
 AS_IF([test "x${with_secp256k1}" != "xno"],
   [
     PKG_CHECK_MODULES(

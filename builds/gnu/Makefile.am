@@ -40,26 +40,14 @@ src_libbitcoin_system_la_CPPFLAGS = \
     -I${top_builddir}/include \
     -I${srcdir}/../../include \
     ${boost_BUILD_CPPFLAGS} \
-    ${boost_container_BUILD_CPPFLAGS} \
-    ${boost_json_BUILD_CPPFLAGS} \
-    ${boost_program_options_BUILD_CPPFLAGS} \
-    ${boost_url_BUILD_CPPFLAGS} \
     ${secp256k1_BUILD_CPPFLAGS}
 
 src_libbitcoin_system_la_LDFLAGS = \
     ${boost_LDFLAGS} \
-    ${boost_container_LDFLAGS} \
-    ${boost_json_LDFLAGS} \
-    ${boost_program_options_LDFLAGS} \
-    ${boost_url_LDFLAGS} \
     ${secp256k1_LDFLAGS}
 
 src_libbitcoin_system_la_LIBADD = \
     ${boost_LIBS} \
-    ${boost_container_LIBS} \
-    ${boost_json_LIBS} \
-    ${boost_program_options_LIBS} \
-    ${boost_url_LIBS} \
     ${secp256k1_LIBS}
 
 src_libbitcoin_system_la_SOURCES = \
@@ -132,6 +120,17 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
+    ${srcdir}/../../src/config/program_options/cmdline.cpp \
+    ${srcdir}/../../src/config/program_options/config_file.cpp \
+    ${srcdir}/../../src/config/program_options/convert.cpp \
+    ${srcdir}/../../src/config/program_options/options_description.cpp \
+    ${srcdir}/../../src/config/program_options/parsers.cpp \
+    ${srcdir}/../../src/config/program_options/positional_options.cpp \
+    ${srcdir}/../../src/config/program_options/split.cpp \
+    ${srcdir}/../../src/config/program_options/utf8_codecvt_facet.cpp \
+    ${srcdir}/../../src/config/program_options/value_semantic.cpp \
+    ${srcdir}/../../src/config/program_options/variables_map.cpp \
+    ${srcdir}/../../src/config/program_options/winmain.cpp \
     ${srcdir}/../../src/crypto/aes_gcm.cpp \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
@@ -1095,17 +1094,14 @@ check_PROGRAMS = test/libbitcoin-system-test
 
 test_libbitcoin_system_test_CPPFLAGS = \
     ${boost_BUILD_CPPFLAGS} \
-    ${boost_unit_test_framework_BUILD_CPPFLAGS} \
     ${src_libbitcoin_system_la_CPPFLAGS}
 
 test_libbitcoin_system_test_LDFLAGS = \
     ${boost_LDFLAGS} \
-    ${boost_unit_test_framework_LDFLAGS} \
     ${src_libbitcoin_system_la_LDFLAGS}
 
 test_libbitcoin_system_test_LDADD = \
     ${boost_LIBS} \
-    ${boost_unit_test_framework_LIBS} \
     ${src_libbitcoin_system_la_LIBS} \
     ${src_libbitcoin_system_la_LIBADD}
 
