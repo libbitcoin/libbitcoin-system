@@ -45,6 +45,9 @@
 #define BOOST_JSON_NO_LIB
 #include <boost/json.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+
+// Headers only program_options (sources compiled into /system).
+#define BOOST_PROGRAM_OPTIONS_NO_LIB
 #include <boost/program_options.hpp>
 #include <boost/version.hpp>
 
