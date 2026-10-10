@@ -48,36 +48,18 @@ bool available() NOEXCEPT
     return context::instance().available();
 }
 
-// Rows are gathered into the columns that the device stages.
-template <typename Batch, typename Key>
-static bool verify_rows(data_chunk& out, const stopper& cancel,
-    const Batch& batch) NOEXCEPT
-{
-    const auto count = batch.rows.size();
-    hashes digests(count);
-    std_vector<Key> points(count);
-    ec_signatures signatures(count);
-    for (size_t row{}; row < count; ++row)
-    {
-        digests[row] = batch.rows[row].digest;
-        points[row] = batch.rows[row].point;
-        signatures[row] = batch.rows[row].signature;
-    }
-
-    return context::instance().verify<Key>(out, cancel, digests, points,
-        signatures, true);
-}
-
 bool verify(data_chunk& out, const stopper& cancel,
     const ecdsa::batch& batch) NOEXCEPT
 {
-    return verify_rows<ecdsa::batch, ec_compressed>(out, cancel, batch);
+    return context::instance().verify(out, cancel, batch.digests,
+        batch.points, batch.signatures, true);
 }
 
 bool verify(data_chunk& out, const stopper& cancel,
     const schnorr::batch& batch) NOEXCEPT
 {
-    return verify_rows<schnorr::batch, ec_xonly>(out, cancel, batch);
+    return context::instance().verify(out, cancel, batch.digests,
+        batch.points, batch.signatures, true);
 }
 
 bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
@@ -88,8 +70,9 @@ bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
         keys);
 }
 
-bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
-    const stopper& cancel, const std::span<const ec_compressed>& sums,
+bool compute(const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid, const stopper& cancel,
+    const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT
 {
     return context::instance().compute(out, valid, cancel, sums, hashes);
@@ -125,8 +108,8 @@ bool scan(std::vector<prefix>&, data_chunk&, const stopper&,
     return false;
 }
 
-bool compute(std_vector<ec_compressed>&, data_chunk&, const stopper&,
-    const std::span<const ec_compressed>&,
+bool compute(const std::span<ec_compressed>&, const std::span<uint8_t>&,
+    const stopper&, const std::span<const ec_compressed>&,
     const std::span<const ec_secret>&) NOEXCEPT
 {
     return false;

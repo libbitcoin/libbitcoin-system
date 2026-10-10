@@ -61,18 +61,13 @@ public:
 };
 
 inline bool verify_rows(data_chunk& results,
-    const std::span<const ecdsa::batch::row_t>& rows) NOEXCEPT
+    const std::span<const ec_compressed>& keys,
+    const std::span<const hash_digest>& digests,
+    const std::span<const ec_signature>& parsed) NOEXCEPT
 {
-    const auto count = rows.size();
-    ec_compresseds keys(count);
-    hashes digests(count);
-    ec_signatures signatures(count);
-    for (size_t row{}; row < count; ++row)
-    {
-        keys[row] = rows[row].point;
-        digests[row] = rows[row].digest;
-        signatures[row] = ecdsa_dispatcher::canonical(rows[row].signature);
-    }
+    ec_signatures signatures(parsed.size());
+    std::transform(parsed.begin(), parsed.end(), signatures.begin(),
+        &ecdsa_dispatcher::canonical);
 
     return with_lanes([&]<typename Word>() NOEXCEPT
     {
