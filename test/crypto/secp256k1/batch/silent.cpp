@@ -39,11 +39,17 @@ struct computed
     data_chunk valid{};
 };
 
-static batch::row_t to_row(const ec_compressed& sum,
-    const ec_secret& hash) NOEXCEPT
+struct columns
 {
-    return { {}, sum, hash };
-}
+    void add(const ec_compressed& sum, const ec_secret& hash) NOEXCEPT
+    {
+        sums.push_back(sum);
+        hashes.push_back(hash);
+    }
+
+    std_vector<ec_compressed> sums{};
+    std_vector<ec_secret> hashes{};
+};
 
 static ec_compressed product(const ec_compressed& sum,
     const ec_secret& hash) NOEXCEPT
@@ -52,23 +58,26 @@ static ec_compressed product(const ec_compressed& sum,
     return ec_multiply(out, hash) ? out : ec_compressed{};
 }
 
-static computed compute(const std_vector<batch::row_t>& rows) NOEXCEPT
+static computed compute(const columns& columns) NOEXCEPT
 {
     computed out{};
+    out.out.resize(columns.sums.size());
+    out.valid.resize(columns.sums.size());
     const stopper cancel{};
-    out.success = batch::compute(out.out, out.valid, cancel, { rows });
+    out.success = batch::compute(out.out, out.valid, cancel, { columns.sums, columns.hashes });
     return out;
 }
 
-static std_vector<batch::row_t> alternating(size_t count) NOEXCEPT
+static columns alternating(size_t count) NOEXCEPT
 {
-    std_vector<batch::row_t> rows(count);
+    columns out{};
     for (size_t row{}; row < count; ++row)
-        rows[row] = is_even(row) ?
-            to_row(unlabeled_point, spend_secret) :
-            to_row(labeled_point, scan_secret);
+        if (is_even(row))
+            out.add(unlabeled_point, spend_secret);
+        else
+            out.add(labeled_point, scan_secret);
 
-    return rows;
+    return out;
 }
 
 static bool is_alternating(const computed& result) NOEXCEPT
@@ -76,8 +85,7 @@ static bool is_alternating(const computed& result) NOEXCEPT
     const auto even = product(unlabeled_point, spend_secret);
     const auto odd = product(labeled_point, scan_secret);
     for (size_t row{}; row < result.out.size(); ++row)
-        if (is_zero(result.valid[row]) ||
-            result.out[row] != (is_even(row) ? even : odd))
+        if (is_zero(result.valid[row]) || result.out[row] != (is_even(row) ? even : odd))
             return false;
 
     return true;
@@ -91,11 +99,14 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__empty__empty)
     BOOST_REQUIRE(result.valid.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__runs__expected)
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__transactions__expected)
 {
-    const auto first = to_row(unlabeled_point, spend_secret);
-    const auto second = to_row(labeled_point, scan_secret);
-    const auto result = compute({ first, first, second, first });
+    columns columns{};
+    columns.add(unlabeled_point, spend_secret);
+    columns.add(unlabeled_point, spend_secret);
+    columns.add(labeled_point, scan_secret);
+    columns.add(unlabeled_point, spend_secret);
+    const auto result = compute(columns);
     const auto expected_first = product(unlabeled_point, spend_secret);
     const auto expected_second = product(labeled_point, scan_secret);
     BOOST_REQUIRE(result.success);
@@ -108,7 +119,10 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__runs__expected)
 
 BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__zero_hash__invalid)
 {
-    const auto result = compute({ to_row(unlabeled_point, ec_secret{}), to_row(labeled_point, scan_secret) });
+    columns columns{};
+    columns.add(unlabeled_point, ec_secret{});
+    columns.add(labeled_point, scan_secret);
+    const auto result = compute(columns);
     BOOST_REQUIRE(result.success);
     BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
     BOOST_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
@@ -116,7 +130,10 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__zero_hash__invalid)
 
 BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__invalid_sum__invalid)
 {
-    const auto result = compute({ to_row(null_ec_compressed, spend_secret), to_row(labeled_point, scan_secret) });
+    columns columns{};
+    columns.add(null_ec_compressed, spend_secret);
+    columns.add(labeled_point, scan_secret);
+    const auto result = compute(columns);
     BOOST_REQUIRE(result.success);
     BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
     BOOST_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));

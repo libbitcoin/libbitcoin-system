@@ -30,19 +30,22 @@ namespace system {
 
 namespace scan {
 
-/// Spans match serialized buffers, a row for each correlate.
-/// Rows of one transaction are contiguous and share one point.
+/// Spans match serialized columns, one element for each transaction, with
+/// the output key prefixes of all transactions in one column, which each
+/// transaction's outputs index.
 struct BC_API batch
 {
     using prefix = data_array<8>;
     using tx_link = data_array<4>;
     using tx_link_t = unsigned_type<sizeof(tx_link)>;
+    using prefix_link = data_array<4>;
+    using prefix_count = data_array<3>;
 
 #pragma pack(push, 1)
-    struct row_t
+    struct outputs_t
     {
-        batch::prefix prefix;
-        ec_compressed point;
+        prefix_link first;
+        prefix_count count;
     };
 #pragma pack(pop)
     using handler = std::function<void(const code&, tx_link_t,
@@ -57,26 +60,27 @@ struct BC_API batch
     };
 
     std::span<const tx_link> correlates;
-    std::span<const row_t> rows;
+    std::span<const ec_compressed> points;
+    std::span<const outputs_t> outputs;
+    std::span<const prefix> prefixes;
 
     /// Invoke callback for each transaction with an output paying receiver.
     static void scan(const stopper& cancel, const batch& batch,
         const receiver& keys, const handler& callback, bool turbo) NOEXCEPT;
 
 protected:
-    /// Rows scanned by one task.
-    static constexpr size_t chunk_rows = power2(10_size);
+    /// Transactions scanned by one task.
+    static constexpr size_t chunk_txs = power2(10_size);
 
-    /// Scans of at least this many rows run on the device where available.
-    static constexpr size_t device_rows = power2(16_size);
+    /// Scans of at least this many transactions run on the device where
+    /// available.
+    static constexpr size_t device_txs = power2(16_size);
 
     /// Transactions sent to the device at once.
     static constexpr size_t device_groups = power2(22_size);
 
-    /// The row that follows the transaction of the given row.
-    static size_t next(const batch& batch, size_t row) NOEXCEPT;
-
-    /// Scan on the device, false if failed with resume the first unscanned row.
+    /// Scan on the device, false if failed with resume the first unscanned
+    /// transaction.
     static bool scan_device(size_t& resume, const stopper& cancel,
         const batch& batch, const receiver& keys, const handler& callback,
         bool turbo) NOEXCEPT;

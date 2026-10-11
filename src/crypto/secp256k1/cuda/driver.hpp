@@ -52,10 +52,12 @@ bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
     const stopper& cancel, const std::span<const ec_compressed>& points,
     const scan::batch::receiver& keys) NOEXCEPT;
 
-/// Point (hash * sum) of each row on the device, with valid for
-/// each row computed. False if the device failed, which disables it.
-bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
-    const stopper& cancel, const std::span<const ec_compressed>& sums,
+/// Point (hash * sum) of each row on the device, with valid for each row
+/// computed, into spans sized to the rows. False if the device failed,
+/// which disables it.
+bool compute(const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid, const stopper& cancel,
+    const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT;
 
 } // namespace cuda

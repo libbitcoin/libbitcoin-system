@@ -31,29 +31,22 @@ namespace system {
 
 namespace silent {
 
-/// Span matches serialized buffer, a row for each output of a transaction.
-/// Rows of one transaction are contiguous and share one sum and input hash.
+/// Spans match serialized columns, one element for each transaction.
 struct BC_API batch
 {
-#pragma pack(push, 1)
-    struct row_t
-    {
-        scan::batch::prefix prefix;
-        ec_compressed sum;
-        ec_secret hash;
-    };
-#pragma pack(pop)
+    std::span<const ec_compressed> sums;
+    std::span<const ec_secret> hashes;
 
-    std::span<const row_t> rows;
-
-    /// Each out = hash * sum of the row, valid set for each row, computed
-    /// once for each run of rows of equal sum and hash. False if canceled.
-    static bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
-        const stopper& cancel, const batch& batch) NOEXCEPT;
+    /// Each out = hash * sum of the transaction, with valid set for each.
+    /// The out and valid spans are sized to the batch. False if canceled.
+    static bool compute(const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid, const stopper& cancel,
+        const batch& batch) NOEXCEPT;
 
     /// Device is set if the batch was computed on the device.
-    static bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
-        bool& device, const stopper& cancel, const batch& batch) NOEXCEPT;
+    static bool compute(const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid, bool& device, const stopper& cancel,
+        const batch& batch) NOEXCEPT;
 
 protected:
     /// Transactions computed by one task.

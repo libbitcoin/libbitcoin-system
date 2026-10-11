@@ -160,16 +160,15 @@ public:
     }
 
     /// Point (hash * sum) of each row, false on failure.
-    bool compute(std_vector<ec_compressed>& out, data_chunk& valid,
-        const stopper& cancel, const std::span<const ec_compressed>& sums,
+    bool compute(const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid, const stopper& cancel,
+        const std::span<const ec_compressed>& sums,
         const std::span<const ec_secret>& hashes) NOEXCEPT
     {
         const auto count = sums.size();
         const auto fit = silent_layout::rows(half_bytes_);
         const auto rows = std::min({ silent_rows_, chunk_rows, fit });
 
-        out.resize(count);
-        valid.resize(count);
         return pipeline(count, rows, false, cancel,
             [&](size_t half, size_t offset, size_t size) NOEXCEPT
             {
@@ -178,8 +177,8 @@ public:
             },
             [&](size_t half, size_t offset, size_t size) NOEXCEPT
             {
-                return collect(half, std::span{ &out[offset], size },
-                    std::span{ &valid[offset], size });
+                return collect(half, out.subspan(offset, size),
+                    valid.subspan(offset, size));
             });
     }
 

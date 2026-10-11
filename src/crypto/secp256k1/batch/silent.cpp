@@ -48,16 +48,14 @@ public:
 // compute
 // ----------------------------------------------------------------------------
 
-// Each product = hash * sum, in chunks of lanes on the processor.
-static void compute_rows(std_vector<ec_compressed>& products,
-    data_chunk& computed, const stopper& cancel,
+// Each out = hash * sum, in chunks of lanes on the processor.
+static void compute_rows(const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid, const stopper& cancel,
     const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes, size_t chunk_rows) NOEXCEPT
 {
     constexpr auto policy = poolstl::execution::par;
     const auto count = sums.size();
-    products.assign(count, ec_compressed{});
-    computed.assign(count, uint8_t{});
 
     std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
     std::iota(chunks.begin(), chunks.end(), zero);
@@ -82,78 +80,47 @@ static void compute_rows(std_vector<ec_compressed>& products,
                     k = { 1 };
             }
 
-            data_chunk valid{};
-            std_vector<ec_compressed> out{};
+            data_chunk computed{};
+            std_vector<ec_compressed> products{};
             with_lanes([&]<typename Word>() NOEXCEPT
             {
-                silent_dispatcher::multiply<Word>(valid, out,
+                silent_dispatcher::multiply<Word>(computed, products,
                     sums.subspan(first, size), ks);
                 return true;
             });
 
             for (size_t row{}; row < size; ++row)
             {
-                products[first + row] = out[row];
-                computed[first + row] = to_int<uint8_t>(
-                    is_nonzero(valid[row]) && is_nonzero(parsed[row]));
+                out[first + row] = products[row];
+                valid[first + row] = to_int<uint8_t>(
+                    is_nonzero(computed[row]) && is_nonzero(parsed[row]));
             }
         });
 }
 
-bool silent::batch::compute(std_vector<ec_compressed>& out,
-    data_chunk& valid, const stopper& cancel, const batch& batch) NOEXCEPT
+bool silent::batch::compute(const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid, const stopper& cancel,
+    const batch& batch) NOEXCEPT
 {
     bool device{};
     return compute(out, valid, device, cancel, batch);
 }
 
-bool silent::batch::compute(std_vector<ec_compressed>& out,
-    data_chunk& valid, bool& device, const stopper& cancel,
+bool silent::batch::compute(const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid, bool& device, const stopper& cancel,
     const batch& batch) NOEXCEPT
 {
-    const auto& rows = batch.rows;
-    const auto count = rows.size();
-    out.assign(count, ec_compressed{});
-    valid.assign(count, uint8_t{});
+    BC_ASSERT(batch.hashes.size() == batch.sums.size());
+    BC_ASSERT(out.size() == batch.sums.size());
+    BC_ASSERT(valid.size() == batch.sums.size());
 
-    // The first row of each run of rows of equal sum and hash.
-    std_vector<size_t> firsts{};
-    for (size_t row{}; row < count; ++row)
-        if (is_zero(row) || rows[row].sum != rows[sub1(row)].sum ||
-            rows[row].hash != rows[sub1(row)].hash)
-            firsts.push_back(row);
-
-    const auto runs = firsts.size();
-    std_vector<ec_compressed> sums(runs);
-    std_vector<ec_secret> hashes(runs);
-    for (size_t run{}; run < runs; ++run)
-    {
-        sums[run] = rows[firsts[run]].sum;
-        hashes[run] = rows[firsts[run]].hash;
-    }
-
-    std_vector<ec_compressed> products{};
-    data_chunk computed{};
     device = secp256k1::cuda::available() &&
-        secp256k1::cuda::compute(products, computed, cancel, sums, hashes);
+        secp256k1::cuda::compute(out, valid, cancel, batch.sums, batch.hashes);
 
     if (!device)
-        compute_rows(products, computed, cancel, sums, hashes, chunk_rows);
+        compute_rows(out, valid, cancel, batch.sums, batch.hashes, chunk_rows);
 
-    if (cancel)
-        return false;
-
-    firsts.push_back(count);
-    for (size_t run{}; run < runs; ++run)
-    {
-        for (auto row = firsts[run]; row < firsts[add1(run)]; ++row)
-        {
-            out[row] = products[run];
-            valid[row] = computed[run];
-        }
-    }
-
-    return true;
+    return !cancel;
 }
 
 BC_POP_WARNING()
