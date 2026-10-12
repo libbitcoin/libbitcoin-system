@@ -25,6 +25,9 @@
 // instructions rely on register locality to achieve performance benefits.
 // Implementation of native sha using buffer expansion is horribly slow.
 // This split creates bifurcations (additional complexities) in this template.
+// SHA-NI instructions are legacy SSE encoded, so each native (non-sha512)
+// block sequence begins with sha::zeroupper(), avoiding the SSE/AVX transition
+// penalty when inlined into code that leaves dirty upper ymm/zmm state.
 
 // protected
 // ----------------------------------------------------------------------------
@@ -291,6 +294,8 @@ template <size_t Strength, bool_if<Strength == 256>>
 void CLASS::
 native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
+    sha::zeroupper();
+
     // Individual state vars are used vs. array to ensure register
     // persistence.
     auto& wstate = array_cast<xint128_t>(state);
@@ -312,6 +317,8 @@ template <size_t Strength, bool_if<Strength == 160>>
 void CLASS::
 native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
+    sha::zeroupper();
+
     auto& wstate = array_cast<xint128_t, one>(state);
     auto lo = f::load(wstate[0]);
     auto hi = sha::set_160(state[4]);
@@ -331,6 +338,8 @@ template <bool Swap, size_t Strength, bool_if<Strength == 256>>
 void CLASS::
 native_transform(state_t& state, const auto& block) NOEXCEPT
 {
+    sha::zeroupper();
+
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = f::load(wstate[0]);
     auto hi = f::load(wstate[1]);
@@ -349,6 +358,8 @@ template <bool Swap, size_t Strength, bool_if<Strength == 160>>
 void CLASS::
 native_transform(state_t& state, const auto& block) NOEXCEPT
 {
+    sha::zeroupper();
+
     auto& wstate = array_cast<xint128_t, one>(state);
     auto lo = f::load(wstate[0]);
     auto hi = sha::set_160(state[4]);
@@ -403,6 +414,8 @@ template <size_t Strength, bool_if<Strength == 256>>
 typename CLASS::digest_t CLASS::
 native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 {
+    sha::zeroupper();
+
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = f::load(wstate[0]);
     auto hi = f::load(wstate[1]);
@@ -424,6 +437,8 @@ template <size_t Strength, bool_if<Strength == 160>>
 typename CLASS::digest_t CLASS::
 native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 {
+    sha::zeroupper();
+
     auto& wstate = array_cast<xint128_t, one>(state);
     auto lo = f::load(wstate[0]);
     auto hi = sha::set_160(state[4]);
@@ -574,6 +589,8 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const block_t& block) NOEXCEPT
 {
+    sha::zeroupper();
+
     static constexpr auto pad = scheduled_pad<one>();
 
     xint128_t lo{};
@@ -588,6 +605,8 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const half_t& half) NOEXCEPT
 {
+    sha::zeroupper();
+
     static constexpr auto pad = chunk_pad();
     const auto& wpad = array_cast<xint128_t>(pad);
     const auto& whalf = array_cast<xint128_t>(half);
@@ -607,6 +626,8 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
+    sha::zeroupper();
+
     static constexpr auto pad = scheduled_pad<one>();
     const auto& wleft = array_cast<xint128_t>(left);
     const auto& wright = array_cast<xint128_t>(right);
@@ -844,6 +865,8 @@ void CLASS::
 native_double_hash(digest_t& digest0, digest_t& digest1,
     const block_t& block0, const block_t& block1) NOEXCEPT
 {
+    sha::zeroupper();
+
     static constexpr auto pad = scheduled_pad<one>();
 
     xint128_t lo0{};
