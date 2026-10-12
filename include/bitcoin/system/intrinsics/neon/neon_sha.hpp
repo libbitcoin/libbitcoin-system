@@ -117,6 +117,10 @@ INLINE uint32_t get_160(xint128_t e) NOEXCEPT
     return vgetq_lane_u32(e, 0);
 }
 
+INLINE void zeroupper() NOEXCEPT
+{
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin

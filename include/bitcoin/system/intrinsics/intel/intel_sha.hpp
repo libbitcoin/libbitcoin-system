@@ -117,6 +117,19 @@ INLINE uint32_t get_160(xint128_t e) NOEXCEPT
     return _mm_extract_epi32(e, 3);
 }
 
+/// SHA-NI (sha1/sha256) instructions have only legacy SSE encodings. When they
+/// execute with dirty upper ymm/zmm state each incurs an SSE/AVX transition
+/// penalty, which can slow native hashing by two orders of magnitude.
+/// Compilers emit vzeroupper only at call/return boundaries, so when native
+/// sha code is inlined after a 256/512 bit write nothing else clears it.
+/// Call once at the start of each native block sequence (not per round).
+INLINE void zeroupper() NOEXCEPT
+{
+#if defined(HAVE_AVX)
+    _mm256_zeroupper();
+#endif
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
