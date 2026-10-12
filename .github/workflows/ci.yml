@@ -45,9 +45,6 @@ jobs:
     env:
       CONCURRENCY_GROUP: ${{ github.workflow }}-${{ github.repository_owner == 'libbitcoin' && (github.event.pull_request.number || github.run_id) || github.ref }}
 
-    permissions:
-      actions: write
-
     steps:
         - name: state
           run: |
@@ -59,14 +56,6 @@ jobs:
             echo "ref      : ${{ github.ref }}"
             echo "base_ref : ${{ github.base_ref }}"
             echo "head_ref : ${{ github.head_ref }}"
-
-        - name: cancel on pull_request closed
-          if: github.event_name == 'pull_request' && github.event.action == 'closed'
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            gh api --method POST \
-              -H "Accept: application/vnd.github+json"   "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
 
 
   gnu:
