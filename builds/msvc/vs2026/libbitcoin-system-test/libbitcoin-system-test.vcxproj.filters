@@ -585,6 +585,9 @@
     <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp">
       <Filter>src\hash\performance</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\performance\transition.cpp">
+      <Filter>src\hash\performance</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <Filter>src\hash\rmd</Filter>
     </ClCompile>

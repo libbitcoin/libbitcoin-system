@@ -1270,6 +1270,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/scrypt.cpp \
     ${srcdir}/../../test/hash/siphash.cpp \
     ${srcdir}/../../test/hash/performance/performance.cpp \
+    ${srcdir}/../../test/hash/performance/transition.cpp \
     ${srcdir}/../../test/hash/rmd/algorithm.cpp \
     ${srcdir}/../../test/hash/rmd/analysis.cpp \
     ${srcdir}/../../test/hash/sha/algorithm.cpp \
