@@ -37,5 +37,10 @@ bool batched::accelerated() NOEXCEPT
     return secp256k1::cuda::available();
 }
 
+void batched::enable(bool enabled) NOEXCEPT
+{
+    secp256k1::cuda::enable(enabled);
+}
+
 } // namespace system
 } // namespace libbitcoin

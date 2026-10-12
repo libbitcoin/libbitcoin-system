@@ -92,7 +92,8 @@ static tx_links scan_links(const transactions& txs,
     };
 
     const stopper cancel{};
-    batch::scan(cancel, txs.to_batch(), keys, handler, turbo);
+    constexpr auto minimum = batch::device_txs;
+    batch::scan(cancel, txs.to_batch(), keys, minimum, handler, turbo);
     sort(out);
     return out;
 }

@@ -18,6 +18,7 @@
  */
 #include "driver.hpp"
 
+#include <atomic>
 #include <span>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -38,6 +39,8 @@ namespace cuda {
 // Interface.
 // ----------------------------------------------------------------------------
 
+static std::atomic_bool enabled_{ true };
+
 bool compiled() NOEXCEPT
 {
     return true;
@@ -45,7 +48,12 @@ bool compiled() NOEXCEPT
 
 bool available() NOEXCEPT
 {
-    return context::instance().available();
+    return enabled_.load() && context::instance().available();
+}
+
+void enable(bool enabled) NOEXCEPT
+{
+    enabled_.store(enabled);
 }
 
 bool verify(data_chunk& out, const stopper& cancel,
@@ -88,6 +96,10 @@ bool compiled() NOEXCEPT
 bool available() NOEXCEPT
 {
     return false;
+}
+
+void enable(bool) NOEXCEPT
+{
 }
 
 LCOV_EXCL_START("Not called where the device is not available.")
