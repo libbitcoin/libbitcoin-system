@@ -135,6 +135,19 @@ script::script(const std::string_view& mnemonic) NOEXCEPT
 }
 
 // protected
+script::script(operations&& ops, bool valid, bool easier, bool failer,
+    bool roller, size_t size) NOEXCEPT
+  : ops_(std::move(ops)),
+    valid_(valid),
+    easier_(easier),
+    failer_(failer),
+    roller_(roller),
+    size_(size),
+    offset(ops_.cbegin())
+{
+}
+
+// protected
 script::script(const operations& ops, bool valid, bool easier, bool failer,
     bool roller, size_t size) NOEXCEPT
   : ops_(ops),

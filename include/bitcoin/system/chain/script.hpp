@@ -190,6 +190,8 @@ public:
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
     script(reader&& source, bool prefix) NOEXCEPT;
+    script(operations&& ops, bool valid, bool easier, bool failer,
+        bool roller, size_t size) NOEXCEPT;
     script(const operations& ops, bool valid, bool easier, bool failer,
         bool roller, size_t size) NOEXCEPT;
 
