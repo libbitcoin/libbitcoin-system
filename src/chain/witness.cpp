@@ -115,6 +115,15 @@ witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
 }
 
 // protected
+witness::witness(chunk_cptrs&& stack, bool valid, size_t size) NOEXCEPT
+  : stack_(std::move(stack)),
+    valid_(valid),
+    size_(size),
+    annex_(annex::is_annex_pattern(stack_) ? stack_.back() : nullptr)
+{
+}
+
+// protected
 witness::witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT
   : stack_(stack),
     valid_(valid),
@@ -179,7 +188,7 @@ witness witness::from_data(reader& source, bool prefix) NOEXCEPT
         }
     }
 
-    return { stack, source, size };
+    return { std::move(stack), source, size };
 }
 
 // static
