@@ -142,6 +142,15 @@ private:
         hash_digest amounts;
         hash_digest scripts;
     } only_cache;
+    typedef struct
+    {
+        /// Version, input count, inputs with empty scripts, and output count
+        /// (preimage). Outputs and locktime are written from the tx buffer.
+        data_chunk inputs;
+
+        /// The sha256 context at each whole block of inputs, from zero blocks.
+        std_vector<accumulator<sha256>> contexts;
+    } x0_base_cache;
 
     // witness commitment
     static constexpr size_t reserved_pattern_size = 2;
@@ -165,6 +174,7 @@ private:
     // Signature hash caching.
     // ------------------------------------------------------------------------
 
+    void set_x0_base_cache() const NOEXCEPT;
     void set_x1_base_hash() const NOEXCEPT;
     void set_x2_base_hash() const NOEXCEPT;
     void set_v1_only_hash() const NOEXCEPT;
@@ -198,6 +208,8 @@ private:
     void signature_hash_none(writer& sink, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
     void signature_hash_all(writer& sink, const input_iterator& input,
+        const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
+    void signature_hash_all(hash_digest& out, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
 
     void unversioned_sighash(hash_digest& out, const input_iterator& input,
@@ -249,7 +261,8 @@ private:
     input_iterator inputs_begin_{};
     input_iterator inputs_end_{};
 
-    // Signature hash caching (witness and taproot).
+    // Signature hash caching (unversioned, witness and taproot).
+    mutable std::shared_ptr<x0_base_cache> x0_base_cache_{};
     mutable std::shared_ptr<base_cache> x1_base_cache_{};
     mutable std::shared_ptr<base_cache> x2_base_cache_{};
     mutable std::shared_ptr<only_cache> v1_only_cache_{};

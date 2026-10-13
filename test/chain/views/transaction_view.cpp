@@ -455,4 +455,226 @@ BOOST_AUTO_TEST_CASE(transaction_view__read_witness_size__empty_stack__prefix_on
     BOOST_CHECK_EQUAL(data.size(), 1u);
 }
 
+// signature_hash (unversioned)
+
+// Uncached legacy sighash, written directly from the tx (reference).
+static hash_digest reference_sighash(const chain::transaction& tx,
+    uint32_t index, const chain::script& subscript, uint8_t flags) NOEXCEPT
+{
+    const auto flag = bit_and<uint8_t>(flags, 0x1f);
+    const auto anyone = !is_zero(bit_and<uint8_t>(flags, 0x80));
+    const auto single = (flag == 0x03);
+    const auto none = (flag == 0x02);
+    const auto& ins = *tx.inputs_ptr();
+    const auto& outs = *tx.outputs_ptr();
+
+    if (single && index >= outs.size())
+        return one_hash;
+
+    data_chunk preimage{};
+    write::bytes::data sink{ preimage };
+    sink.write_4_bytes_little_endian(tx.version());
+    sink.write_variable(anyone ? one : ins.size());
+    for (uint32_t in{}; in < ins.size(); ++in)
+    {
+        if (anyone && in != index)
+            continue;
+
+        ins.at(in)->point().to_data(sink);
+        if (in == index)
+        {
+            subscript.to_data(sink, true);
+            sink.write_4_bytes_little_endian(ins.at(in)->sequence());
+        }
+        else
+        {
+            sink.write_byte(0x00);
+            sink.write_4_bytes_little_endian((single || none) ? 0u :
+                ins.at(in)->sequence());
+        }
+    }
+
+    if (none)
+    {
+        sink.write_variable(zero);
+    }
+    else if (single)
+    {
+        sink.write_variable(add1(index));
+        for (uint32_t out{}; out < index; ++out)
+        {
+            sink.write_8_bytes_little_endian(max_uint64);
+            sink.write_byte(0x00);
+        }
+
+        outs.at(index)->to_data(sink);
+    }
+    else
+    {
+        sink.write_variable(outs.size());
+        for (const auto& out: outs)
+            out->to_data(sink);
+    }
+
+    sink.write_4_bytes_little_endian(tx.locktime());
+    sink.write_4_bytes_little_endian(flags);
+    sink.flush();
+    return bitcoin_hash(preimage);
+}
+
+static uint32_t random_number(std::mt19937& random) NOEXCEPT
+{
+    return std::uniform_int_distribution<uint32_t>{}(random);
+}
+
+static data_chunk random_chunk(std::mt19937& random, size_t limit) NOEXCEPT
+{
+    data_chunk out(std::uniform_int_distribution<size_t>{ 0, limit }(random));
+    for (auto& byte: out)
+        byte = narrow_cast<uint8_t>(random_number(random));
+
+    return out;
+}
+
+static chain::script random_script(std::mt19937& random,
+    size_t limit) NOEXCEPT
+{
+    return chain::script
+    {
+        chain::operations
+        {
+            chain::operation{ random_chunk(random, limit), false }
+        }
+    };
+}
+
+// Witnessed (when witness) inputs ensure that witnesses are serialized between
+// outputs and locktime in the block buffer.
+static chain::transaction random_transaction(std::mt19937& random,
+    size_t inputs, bool witness) NOEXCEPT
+{
+    chain::inputs ins{};
+    for (size_t in{}; in < inputs; ++in)
+    {
+        hash_digest hash{};
+        for (auto& byte: hash)
+            byte = narrow_cast<uint8_t>(random_number(random));
+
+        const auto witnessed = witness &&
+            (is_zero(in) || is_odd(random_number(random)));
+
+        ins.push_back(chain::input
+        {
+            chain::point{ hash, random_number(random) },
+            random_script(random, 120),
+            chain::witness
+            {
+                witnessed ?
+                    chunk_cptrs{ to_shared(random_chunk(random, 80)) } :
+                    chunk_cptrs{}
+            },
+            random_number(random)
+        });
+    }
+
+    chain::outputs outs{};
+    const auto outputs = std::uniform_int_distribution<size_t>{ 1, 5 }(random);
+    for (size_t out{}; out < outputs; ++out)
+    {
+        const auto value = random_number(random);
+        outs.push_back(chain::output{ value, random_script(random, 60) });
+    }
+
+    return chain::transaction
+    {
+        random_number(random),
+        std::move(ins),
+        std::move(outs),
+        random_number(random)
+    };
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__signature_hash__unversioned_random__expected)
+{
+    using namespace system::chain;
+    constexpr auto unversioned = script_version::unversioned;
+    const chain::script coinbase_script
+    {
+        chain::operations{ chain::operation{ data_chunk{ 0x01, 0x02 }, false } }
+    };
+
+    const chain::transaction coinbase
+    {
+        1,
+        chain::inputs{ { chain::point{}, coinbase_script, max_input_sequence } },
+        chain::outputs{ { 42, chain::script{} } },
+        0
+    };
+
+    // All, none, single, unknown (default all), with and without
+    // anyone_can_pay, and with unused bits set.
+    constexpr std::array<uint8_t, 18> types
+    {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x1f, 0x21, 0x41, 0x43,
+        0x80, 0x81, 0x82, 0x83, 0x84, 0x9f, 0xc1, 0xc2, 0xff
+    };
+
+    // Small, input count varint boundary (253), and random up to 400 inputs.
+    std::mt19937 random{ 42 };
+    std::vector<size_t> sizes{ 1, 2, 3, 4, 5, 6, 7, 252, 253, 400 };
+    std::uniform_int_distribution<size_t> size{ 1, 400 };
+    for (size_t count{}; count < 5u; ++count)
+        sizes.push_back(size(random));
+
+    for (size_t index{}; index < sizes.size(); ++index)
+    {
+        const auto witness = is_odd(index);
+        const auto tx = random_transaction(random, sizes.at(index), witness);
+        BOOST_REQUIRE_EQUAL(tx.is_segregated(), witness);
+
+        const auto ins = tx.inputs_ptr()->size();
+        data_chunk prevouts{};
+        for (size_t in{}; in < ins; ++in)
+        {
+            const auto prevout = chain::output{ in, chain::script{} }.to_data();
+            prevouts.insert(prevouts.end(), prevout.begin(), prevout.end());
+        }
+
+        const chain::block block{ chain::header{}, { coinbase, tx } };
+        chain::view::block blocks{ block.to_data(true), true };
+        BOOST_REQUIRE(blocks.is_valid());
+        BOOST_REQUIRE(blocks.populate(std::move(prevouts), { false, true }));
+
+        const auto& view = blocks.views().at(1);
+        BOOST_REQUIRE(view.is_populated());
+        BOOST_REQUIRE_EQUAL(view.inputs(), ins);
+        BOOST_REQUIRE_EQUAL(view.hash(false), tx.hash(false));
+
+        for (uint32_t in{}; in < ins; ++in)
+        {
+            const auto subscript = random_script(random, 100);
+            const auto view_input = view.input_at(in);
+            const auto chain_input = tx.input_at(in);
+
+            std::vector<uint8_t> hash_types(types.begin(), types.end());
+            hash_types.push_back(narrow_cast<uint8_t>(random_number(random)));
+
+            for (const auto flag: hash_types)
+            {
+                hash_digest view_hash{};
+                hash_digest chain_hash{};
+                const auto expected = reference_sighash(tx, in, subscript, flag);
+                BOOST_REQUIRE(view.signature_hash(view_hash, view_input,
+                    subscript, {}, {}, unversioned, flag, flags::no_rules));
+                BOOST_REQUIRE(tx.signature_hash(chain_hash, chain_input,
+                    subscript, {}, {}, unversioned, flag, flags::no_rules));
+                BOOST_REQUIRE_MESSAGE(view_hash == expected, "view inputs "
+                    << ins << " input " << in << " flag " << unsigned{ flag });
+                BOOST_REQUIRE_MESSAGE(chain_hash == expected, "chain inputs "
+                    << ins << " input " << in << " flag " << unsigned{ flag });
+            }
+        }
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
