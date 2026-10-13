@@ -38,37 +38,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        - name: Checkout
-          uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-          with:
-            fetch-depth: 0
-            ref: ${{ github.event.inputs.branch || 'master' }}
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch || 'master' }}
 
-        - name: Configure git identity
-          run: |
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-        - name: Compute version
-          id: version
-          run: |
-            MAJOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MAJOR\s+\K[0-9]+' builds/cmake/CMakeLists.txt)
-            MINOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MINOR\s+\K[0-9]+' builds/cmake/CMakeLists.txt)
-            PATCH=$(git rev-list --count HEAD)
-            TAG="v${MAJOR}.${MINOR}.${PATCH}${{ github.event.inputs.suffix || '' }}"
-            echo "major=$MAJOR" >> $GITHUB_OUTPUT
-            echo "minor=$MINOR" >> $GITHUB_OUTPUT
-            echo "patch=$PATCH" >> $GITHUB_OUTPUT
-            echo "tag=$TAG"     >> $GITHUB_OUTPUT
-            echo "Computed tag: $TAG"
+      - name: Compute version
+        id: version
+        run: |
+          MAJOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MAJOR\s+\K[0-9]+' builds/cmake/CMakeLists.txt)
+          MINOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MINOR\s+\K[0-9]+' builds/cmake/CMakeLists.txt)
+          PATCH=$(git rev-list --count HEAD)
+          TAG="v${MAJOR}.${MINOR}.${PATCH}${{ github.event.inputs.suffix || '' }}"
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+          echo "tag=$TAG"     >> $GITHUB_OUTPUT
+          echo "Computed tag: $TAG"
 
-        - name: Create tag
-          run: |
-            if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
-              echo "::error::Tag ${{ steps.version.outputs.tag }} already exists."
-              exit 1
-            fi
-            git tag -a "${{ steps.version.outputs.tag }}" -m "${{ github.event.inputs.description || '' }}"
-            git push origin "${{ steps.version.outputs.tag }}"
-            echo "Created tag '${{ steps.version.outputs.tag }}'."
+      - name: Create tag
+        run: |
+          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "::error::Tag ${{ steps.version.outputs.tag }} already exists."
+            exit 1
+          fi
+          git tag -a "${{ steps.version.outputs.tag }}" -m "${{ github.event.inputs.description || '' }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+          echo "Created tag '${{ steps.version.outputs.tag }}'."
 
