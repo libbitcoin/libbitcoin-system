@@ -44,7 +44,7 @@ public:
     bool has_scheme() const NOEXCEPT;
     bool set_scheme(const std::string& scheme) NOEXCEPT;
 
-    /// Obtains the unescaped authority part, if any (user@server:port).
+    /// Obtains the encoded authority part, if any (user@server:port).
     std::string authority() const NOEXCEPT;
     bool has_authority() const NOEXCEPT;
     bool set_authority(const std::string& authority) NOEXCEPT;
