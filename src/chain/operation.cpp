@@ -216,8 +216,12 @@ operation operation::from_data(reader& source) NOEXCEPT
     if (size > max_bytes)
         source.invalidate();
 
-    // An invalid source.read_bytes_raw returns nullptr.
-    auto push = to_shared(source ? source.read_bytes(size) : data_chunk{});
+    // Zero-length data (including all non-push opcodes) is not allocated, as
+    // null data_ is equivalent to empty data (shares no_data_cptr()).
+    chunk_cptr push{};
+    if (source && !is_zero(size))
+        push = to_shared(source.read_bytes(size));
+
     const auto underflow = !source;
 
     // This requires that provided stream terminates at the end of the script.
