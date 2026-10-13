@@ -21,7 +21,6 @@
 
 #include <functional>
 #include <span>
-#include <bitcoin/system/crypto/secp256k1/batch/scan.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
