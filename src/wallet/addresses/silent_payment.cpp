@@ -551,8 +551,8 @@ bool silent_payment::get_witness_key(ec_compressed& out,
     return true;
 }
 
-// Input scripts are malleable, so the last compressed key that hashes to the
-// prevout's key hash is taken from the serialized input script [bip352].
+// The last compressed key in the input script that hashes to the prevout's
+// key hash [bip352].
 template <typename Input>
 bool silent_payment::get_key_hash_key(ec_compressed& out,
     const Input& input) NOEXCEPT

@@ -81,8 +81,6 @@ public:
         if (!decode(point, encoded))
             return 0;
 
-        // The device computes in variable time, a server-side optimization
-        // that is opted out of by not compiling CUDA.
         jacobian_t<uint64_t> sum{};
         const scalars_t<uint64_t> ks{ arguments.scan };
         const auto uncomputed = multiply_windows<window_bits, false, false>(sum, {},
