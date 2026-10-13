@@ -80,6 +80,48 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
     BOOST_REQUIRE(tokens.empty());
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid_without_gpu__cpu)
+{
+    using namespace system;
+    using namespace system::ecdsa;
+    using correlate = batch::correlate_t;
+    const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
+
+    ec_compressed point0{}, point1{}, point2{};
+    BOOST_REQUIRE(secret_to_public(point0, secret0));
+    BOOST_REQUIRE(secret_to_public(point1, secret1));
+    BOOST_REQUIRE(secret_to_public(point2, one));
+
+    ec_signature sig0{}, sig1{}, sig2{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash));
+    BOOST_REQUIRE(sign(sig1, secret1, hash));
+    BOOST_REQUIRE(sign(sig2, one, hash));
+
+    const std::array<correlate, 3> correlates
+    {
+        correlate{ { 0, 0, 0 }, 0, 0 },
+        correlate{ { 1, 0, 0 }, 0, 0 },
+        correlate{ { 2, 0, 0 }, 0, 0 }
+    };
+    const std::array<hash_digest, 3> digests{ hash, hash, hash };
+    const std::array<ec_compressed, 3> points{ point0, point1, point2 };
+    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+
+    const batch in
+    {
+        { correlates.data(), correlates.size() },
+        { digests.data(), digests.size() },
+        { points.data(), points.size() },
+        { signatures.data(), signatures.size() }
+    };
+
+    const stopper cancel{};
+    bool device{};
+    const auto tokens = batch::verify(device, cancel, in, false);
+    BOOST_REQUIRE(tokens.empty());
+    BOOST_REQUIRE(!device);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expected)
 {
     using namespace system;

@@ -84,6 +84,53 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
     BOOST_REQUIRE(tokens.empty());
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_gpu__cpu)
+{
+    using namespace system;
+    using namespace system::schnorr;
+    using correlate = batch::correlate_t;
+    const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
+
+    ec_compressed pub0{}, pub1{}, pub2{};
+    BOOST_REQUIRE(secret_to_public(pub0, secret0));
+    BOOST_REQUIRE(secret_to_public(pub1, secret1));
+    BOOST_REQUIRE(secret_to_public(pub2, one));
+
+    const auto& point0 = array_cast<uint8_t, ec_xonly_size, 1>(pub0);
+    const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
+    const auto& point2 = array_cast<uint8_t, ec_xonly_size, 1>(pub2);
+
+    ec_signature sig0{}, sig1{}, sig2{};
+    constexpr hash_digest auxiliary{};
+    BOOST_REQUIRE(sign(sig0, secret0, hash, auxiliary));
+    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
+    BOOST_REQUIRE(sign(sig2, one, hash, auxiliary));
+
+    const std::array<correlate, 3> correlates
+    {
+        correlate{ { 0, 0, 0 } },
+        correlate{ { 1, 0, 0 } },
+        correlate{ { 2, 0, 0 } }
+    };
+    const std::array<hash_digest, 3> digests{ hash, hash, hash };
+    const std::array<ec_xonly, 3> points{ point0, point1, point2 };
+    const std::array<ec_signature, 3> signatures{ sig0, sig1, sig2 };
+
+    const batch in
+    {
+        { correlates.data(), correlates.size() },
+        { digests.data(), digests.size() },
+        { points.data(), points.size() },
+        { signatures.data(), signatures.size() }
+    };
+
+    const stopper cancel{};
+    bool device{};
+    const auto tokens = batch::verify(device, cancel, in, false);
+    BOOST_REQUIRE(tokens.empty());
+    BOOST_REQUIRE(!device);
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)
 {
     using namespace system;

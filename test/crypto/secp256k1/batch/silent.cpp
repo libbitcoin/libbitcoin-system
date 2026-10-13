@@ -146,6 +146,21 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__chunks__expected)
     BOOST_REQUIRE(is_alternating(result));
 }
 
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__without_gpu__cpu)
+{
+    const auto columns = alternating(4);
+    computed result{};
+    result.out.resize(columns.sums.size());
+    result.valid.resize(columns.sums.size());
+
+    bool device{};
+    const stopper cancel{};
+    result.success = batch::compute(result.out, result.valid, device, cancel, { columns.sums, columns.hashes }, false);
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE(!device);
+    BOOST_REQUIRE(is_alternating(result));
+}
+
 BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__many_rows__expected)
 {
     const auto result = compute(alternating(70000));
