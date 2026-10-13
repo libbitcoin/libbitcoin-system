@@ -20,9 +20,9 @@ on:
       - 'test/**'
   push:
     branches:
-      - "**"
+      - '**'
     tags-ignore:
-      - "**"
+      - '**'
     paths:
       - 'builds/cmake/**'
       - 'builds/gnu/**'
