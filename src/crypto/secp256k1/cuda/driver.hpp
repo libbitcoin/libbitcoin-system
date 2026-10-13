@@ -34,11 +34,8 @@ namespace cuda {
 /// True if device verification is compiled in.
 bool compiled() NOEXCEPT;
 
-/// True if the device is enabled, loaded and has not failed.
+/// True if the device is loaded and has not failed.
 bool available() NOEXCEPT;
-
-/// Enable or disable the device (enabled by default).
-void enable(bool enabled) NOEXCEPT;
 
 /// Verify rows on the device, one result byte per row, empty if all rows are
 /// valid or if canceled. False if the device failed, which disables it.

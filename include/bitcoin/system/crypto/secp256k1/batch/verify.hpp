@@ -38,9 +38,6 @@ BC_API bool compiled() NOEXCEPT;
 /// True iff batch verification is hardware (GPU) accelerated.
 BC_API bool accelerated() NOEXCEPT;
 
-/// Enable or disable hardware (GPU) acceleration (enabled by default).
-BC_API void enable(bool enabled) NOEXCEPT;
-
 } // namespace batched
 } // namespace system
 } // namespace libbitcoin

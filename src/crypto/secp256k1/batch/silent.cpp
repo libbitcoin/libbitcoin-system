@@ -103,18 +103,18 @@ bool silent::batch::compute(const std::span<ec_compressed>& out,
     const batch& batch) NOEXCEPT
 {
     bool device{};
-    return compute(out, valid, device, cancel, batch);
+    return compute(out, valid, device, cancel, batch, true);
 }
 
 bool silent::batch::compute(const std::span<ec_compressed>& out,
     const std::span<uint8_t>& valid, bool& device, const stopper& cancel,
-    const batch& batch) NOEXCEPT
+    const batch& batch, bool gpu) NOEXCEPT
 {
     BC_ASSERT(batch.hashes.size() == batch.sums.size());
     BC_ASSERT(out.size() == batch.sums.size());
     BC_ASSERT(valid.size() == batch.sums.size());
 
-    device = secp256k1::cuda::available() &&
+    device = gpu && secp256k1::cuda::available() &&
         secp256k1::cuda::compute(out, valid, cancel, batch.sums, batch.hashes);
 
     if (!device)
