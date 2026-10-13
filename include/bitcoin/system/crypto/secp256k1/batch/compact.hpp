@@ -26,6 +26,7 @@ namespace system {
 
 namespace compact {
 
+/// Compact blocks batch scan stub.
 struct BC_API batch
 {
 };

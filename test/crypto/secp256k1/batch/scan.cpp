@@ -92,7 +92,7 @@ static tx_links scan_links(const transactions& txs,
     };
 
     const stopper cancel{};
-    constexpr auto minimum = batch::device_txs;
+    constexpr auto minimum = batch::gpu_txs;
     batch::scan(cancel, txs.to_batch(), keys, minimum, handler, turbo);
     sort(out);
     return out;
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__chunk_straddle__once)
     BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), true), (tx_links{ 7, 8 }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__device_transactions__expected)
+BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__gpu_transactions__expected)
 {
     transactions txs{};
     txs.add(100, 70000, unlabeled_point, { labeled_key });

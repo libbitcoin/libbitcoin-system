@@ -104,49 +104,30 @@ bool silent_payment::summarize(ec_compressed& out,
 bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
     const transaction& tx) NOEXCEPT
 {
-    if (tx.is_coinbase())
+    if (tx.is_coinbase() || !has_outputs(tx))
         return false;
 
     const auto& inputs = *tx.inputs_ptr();
-    const auto& outputs = *tx.outputs_ptr();
-    const auto taproot = std::any_of(outputs.cbegin(), outputs.cend(),
-        [](const auto& output) NOEXCEPT
-        {
-            return script::is_pay_witness_taproot_pattern(
-                output->script().ops());
-        });
-
-    return taproot && prepare(sum, hash, inputs.cbegin(), inputs.cend());
+    return prepare(sum, hash, inputs.cbegin(), inputs.cend());
 }
 
 bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
     const view::transaction& tx) NOEXCEPT
 {
-    if (tx.is_coinbase())
+    if (tx.is_coinbase() || !has_outputs(tx))
         return false;
 
-    scan_outputs outputs{};
-    const auto taproot = get_outputs(outputs, tx);
-    return taproot && prepare(sum, hash, tx.inputs_begin(), tx.inputs_end());
+    return prepare(sum, hash, tx.inputs_begin(), tx.inputs_end());
 }
 
 bool silent_payment::get_outputs(scan_outputs& out,
     const transaction& tx) NOEXCEPT
 {
     out.clear();
-    uint32_t index{};
-    for (const auto& output: *tx.outputs_ptr())
+    for_each_output(tx, [&](uint32_t index, const ec_xonly& key) NOEXCEPT
     {
-        const auto& ops = output->script().ops();
-        if (script::is_pay_witness_taproot_pattern(ops))
-        {
-            const auto data = ops.back().data().data();
-            const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(data);
-            out.push_back({ index, key });
-        }
-
-        ++index;
-    }
+        out.push_back({ index, key });
+    });
 
     return !out.empty();
 }
@@ -155,34 +136,98 @@ bool silent_payment::get_outputs(scan_outputs& out,
     const view::transaction& tx) NOEXCEPT
 {
     out.clear();
-    auto stream = tx.get_outputs_stream();
-    read::bytes::fast source{ stream };
-    for (uint32_t index{}; index < tx.outputs(); ++index)
+    for_each_output(tx, [&](uint32_t index, const ec_xonly& key) NOEXCEPT
     {
-        source.skip_bytes(sizeof(uint64_t));
-        const auto size = source.read_size();
-        if (size != taproot_size)
-        {
-            source.skip_bytes(size);
-            continue;
-        }
-
-        const auto script = source.read_forward<taproot_size>();
-        if (is_taproot(script))
-        {
-            const auto& key = array_cast<uint8_t, ec_xonly_size, two>(script);
-            out.push_back({ index, key });
-        }
-    }
+        out.push_back({ index, key });
+    });
 
     return !out.empty();
+}
+
+bool silent_payment::has_outputs(const transaction& tx) NOEXCEPT
+{
+    const auto& outputs = *tx.outputs_ptr();
+    return std::ranges::any_of(outputs, [](const auto& output) NOEXCEPT
+    {
+        return script::is_pay_witness_taproot_pattern(output->script().ops());
+    });
+}
+
+bool silent_payment::has_outputs(const view::transaction& tx) NOEXCEPT
+{
+    auto found = false;
+    for_each_output(tx, [&](uint32_t, const ec_xonly&) NOEXCEPT
+    {
+        found = true;
+    });
+
+    return found;
+}
+
+// Collection.
+// ----------------------------------------------------------------------------
+
+silent_payment::rows& silent_payment::rows::local() NOEXCEPT
+{
+    thread_local rows instance{};
+    return instance;
+}
+
+void silent_payment::rows::clear() NOEXCEPT
+{
+    positions.clear();
+    points.clear();
+    hashes.clear();
+    outputs.clear();
+    prefixes.clear();
+}
+
+bool silent_payment::rows::empty() const NOEXCEPT
+{
+    return positions.empty();
+}
+
+void silent_payment::collect(rows& out, const block& block,
+    const selector& selected, bool summarize) NOEXCEPT
+{
+    out.clear();
+    const auto& txs = *block.transactions_ptr();
+    for (auto position = one; position < txs.size(); ++position)
+        if (selected(position))
+            append(out, *txs.at(position),
+                possible_narrow_cast<uint32_t>(position), summarize);
+}
+
+void silent_payment::collect(rows& out, const view::block& block,
+    const selector& selected, bool summarize) NOEXCEPT
+{
+    out.clear();
+    const auto& txs = block.views();
+    for (auto position = one; position < txs.size(); ++position)
+        if (selected(position))
+            append(out, txs.at(position),
+                possible_narrow_cast<uint32_t>(position), summarize);
+}
+
+bool silent_payment::collect(rows& out, const transaction& tx,
+    bool summarize) NOEXCEPT
+{
+    out.clear();
+    return append(out, tx, uint32_t{}, summarize);
+}
+
+bool silent_payment::collect(rows& out, const view::transaction& tx,
+    bool summarize) NOEXCEPT
+{
+    out.clear();
+    return append(out, tx, uint32_t{}, summarize);
 }
 
 // The address is bech32m of version zero, scan key then spend key [bip352].
 std::string silent_payment::to_address(const ec_compressed& scan_key,
     const ec_compressed& spend_key, const std::string& prefix) NOEXCEPT
 {
-    constexpr uint8_t version = 0;
+    constexpr uint8_t version{};
     constexpr auto separator = "1";
     const auto program = to_chunk(splice(scan_key, spend_key));
     const auto checked = bech32_build_checked(version, program, prefix,
@@ -300,7 +345,7 @@ bool silent_payment::match(bool& out, const ec_compressed& summary,
     const auto contains = [&](const ec_uncompressed& point) NOEXCEPT
     {
         const auto& xonly = to_xonly(point);
-        return std::any_of(outputs.cbegin(), outputs.cend(),
+        return std::ranges::any_of(outputs,
             [&](const scan_output& output) NOEXCEPT
             {
                 return output.key == xonly;
@@ -339,7 +384,8 @@ template <typename Iterator>
 bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
     const Iterator& begin, const Iterator& end) NOEXCEPT
 {
-    ec_compresseds keys{};
+    thread_local ec_compresseds keys{};
+    keys.clear();
     for (auto it = begin; it != end; ++it)
     {
         const auto& input = get_input(*it);
@@ -367,6 +413,74 @@ bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
     }
 
     return input_hash(hash, smallest, sum);
+}
+
+// The record is appended only if eligible, with prefixes in output order.
+template <typename Transaction>
+bool silent_payment::append(rows& out, const Transaction& tx,
+    uint32_t position, bool summarize) NOEXCEPT
+{
+    ec_secret hash{};
+    ec_compressed point{};
+    if (!prepare(point, hash, tx) || (summarize && !ec_multiply(point, hash)))
+        return false;
+
+    const auto first = out.prefixes.size();
+    constexpr auto prefix_size = scan::batch::prefix_size;
+    for_each_output(tx, [&](uint32_t, const ec_xonly& key) NOEXCEPT
+    {
+        out.prefixes.push_back(array_cast<uint8_t, prefix_size>(key));
+    });
+
+    const auto outs = out.prefixes.size() - first;
+    out.outputs.push_back(possible_narrow_cast<uint32_t>(outs));
+    out.positions.push_back(position);
+    out.points.push_back(point);
+
+    if (!summarize)
+        out.hashes.push_back(hash);
+
+    return true;
+}
+
+template <typename Handler>
+void silent_payment::for_each_output(const transaction& tx,
+    Handler&& handler) NOEXCEPT
+{
+    uint32_t index{};
+    for (const auto& output: *tx.outputs_ptr())
+    {
+        const auto& ops = output->script().ops();
+        if (script::is_pay_witness_taproot_pattern(ops))
+        {
+            const auto data = ops.back().data().data();
+            handler(index, unsafe_array_cast<uint8_t, ec_xonly_size>(data));
+        }
+
+        ++index;
+    }
+}
+
+template <typename Handler>
+void silent_payment::for_each_output(const view::transaction& tx,
+    Handler&& handler) NOEXCEPT
+{
+    auto stream = tx.get_outputs_stream();
+    read::bytes::fast source{ stream };
+    for (uint32_t index{}; index < tx.outputs(); ++index)
+    {
+        source.skip_bytes(sizeof(uint64_t));
+        const auto size = source.read_size();
+        if (size != taproot_size)
+        {
+            source.skip_bytes(size);
+            continue;
+        }
+
+        const auto script = source.read_forward<taproot_size>();
+        if (is_taproot(script))
+            handler(index, array_cast<uint8_t, ec_xonly_size, two>(script));
+    }
 }
 
 bool silent_payment::input_hash(ec_secret& out, const outpoint& smallest,

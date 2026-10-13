@@ -64,7 +64,7 @@ static computed compute(const columns& columns) NOEXCEPT
     out.out.resize(columns.sums.size());
     out.valid.resize(columns.sums.size());
     const stopper cancel{};
-    out.success = batch::compute(out.out, out.valid, cancel, { columns.sums, columns.hashes });
+    out.success = batch::compute(cancel, out.out, out.valid, { columns.sums, columns.hashes });
     return out;
 }
 
@@ -153,12 +153,46 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__without_gpu__cpu)
     result.out.resize(columns.sums.size());
     result.valid.resize(columns.sums.size());
 
-    bool device{};
+    bool use_gpu{ false };
     const stopper cancel{};
-    result.success = batch::compute(result.out, result.valid, device, cancel, { columns.sums, columns.hashes }, false);
+    result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes });
     BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE(!device);
+    BOOST_REQUIRE(!use_gpu);
     BOOST_REQUIRE(is_alternating(result));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write__written_once_expected)
+{
+    const auto columns = alternating(4);
+    computed result{};
+    result.out.resize(columns.sums.size());
+    result.valid.resize(columns.sums.size());
+
+    size_t writes{};
+    bool use_gpu{ true };
+    const stopper cancel{};
+    const auto write = [&]() NOEXCEPT { ++writes; };
+    result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE_EQUAL(writes, 1u);
+    BOOST_REQUIRE(is_alternating(result));
+}
+
+BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write_without_gpu__written_after_compute)
+{
+    const auto columns = alternating(4);
+    computed result{};
+    result.out.resize(columns.sums.size());
+    result.valid.resize(columns.sums.size());
+
+    bool computed_first{};
+    bool use_gpu{ false };
+    const stopper cancel{};
+    const auto write = [&]() NOEXCEPT { computed_first = is_alternating(result); };
+    result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
+    BOOST_REQUIRE(result.success);
+    BOOST_REQUIRE(!use_gpu);
+    BOOST_REQUIRE(computed_first);
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__many_rows__expected)
