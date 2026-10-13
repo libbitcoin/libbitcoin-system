@@ -98,7 +98,7 @@ script::script(const operations& ops) NOEXCEPT
 }
     
 script::script(const data_slice& data, bool prefix) NOEXCEPT
-  : script(stream::in::fast(data), prefix)
+  : script(prefix ? script(stream::in::fast(data), prefix) : from_data(data))
 {
 }
 
@@ -258,8 +258,45 @@ script script::from_operations(const operations& ops) NOEXCEPT
 }
 
 // static/private
+// Equivalent to from_data(reader, false) over a stream of the data, without
+// stream overhead (the script is parsed in place, in two passes).
+script script::from_data(const data_slice& data) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    const auto begin = data.data();
+    const auto end = begin + data.size();
+    BC_POP_WARNING()
+
+    size_t count{};
+    for (auto it = begin; it != end; ++count)
+        operation::count_op(it, end);
+
+    bool easier{};
+    bool failer{};
+    bool roller{};
+    operations ops{};
+    ops.reserve(count);
+
+    for (auto it = begin; it != end;)
+    {
+        ops.push_back(operation::from_data(it, end));
+        const auto& op = ops.back();
+        easier |= op.is_success();
+        failer |= op.is_invalid();
+        roller |= op.is_roller();
+    }
+
+    return { std::move(ops), true, easier, failer, roller, data.size() };
+}
+
+// static/private
 script script::from_data(reader& source, bool prefix) NOEXCEPT
 {
+    // Scripts are read from the stream at once and then parsed in place.
+    // This avoids multiple virtual stream calls per op, in each of two passes.
+    // Larger scripts are rare (non-standard), these parse from the stream.
+    constexpr size_t buffered = 1024;
+
     bool easier{};
     bool failer{};
     bool roller{};
@@ -267,8 +304,25 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
 
     if (prefix)
     {
-        // `expected` is not allocated and limit does not change stream end.
+        // `expected` is not allocated unless buffered (bounded).
         expected = source.read_size();
+        if (!source)
+            return {};
+
+        if (expected <= buffered)
+        {
+            const auto start = source.get_read_position();
+            std_array<uint8_t, buffered> buffer;
+            source.read_bytes(buffer.data(), expected);
+            if (source)
+                return from_data({ buffer.data(), std::next(buffer.data(),
+                    expected) });
+
+            // Stream is short of expected, parse the remainder (invalid).
+            source.set_position(start);
+        }
+
+        // `expected` is not allocated and limit does not change stream end.
         source.set_limit(expected);
     }
 
