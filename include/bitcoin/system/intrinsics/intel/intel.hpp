@@ -114,6 +114,21 @@ inline auto mm512_slli_epi8(auto a) NOEXCEPT
 
 #endif // HAVE_512
 
+/// Clear upper ymm/zmm state to avoid SSE/AVX transition penalties.
+/// ---------------------------------------------------------------------------
+
+#if defined(HAVE_AVX)
+// AVX
+inline void mm256_zeroupper() NOEXCEPT
+{
+    _mm256_zeroupper();
+}
+#else
+inline void mm256_zeroupper() NOEXCEPT
+{
+}
+#endif // HAVE_AVX
+
 /// Provide 64 bit extractors in 32 bit builds to complete matrix.
 /// ---------------------------------------------------------------------------
 /// There are no 32 bit build versions of these.

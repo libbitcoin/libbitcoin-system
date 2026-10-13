@@ -27,14 +27,6 @@ BOOST_AUTO_TEST_SUITE(hash_performance_tests)
 
 using namespace performance;
 
-// SHA-NI instructions are legacy SSE encoded. If a native transform executes
-// while the upper ymm/zmm state is dirty, each SHA-NI instruction incurs an
-// SSE/AVX transition penalty. Compilers emit vzeroupper only at call/return
-// boundaries, so a native transform inlined into a loop that writes a 256 bit
-// register is exposed (unless the transform clears the state itself).
-// This translation unit holds a single call site for each native transform,
-// which allows the compiler to inline it into the dirtying loop.
-
 // External linkage and a signal fence retain each 256 bit store in the loop.
 xint256_t dirty_sink{};
 

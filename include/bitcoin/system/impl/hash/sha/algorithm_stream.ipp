@@ -46,7 +46,6 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
     }
     else if constexpr (native)
     {
-        // Transform in place, as the ablocks_t copy may be vectorized.
         native_transform<true>(state, block);
     }
     else

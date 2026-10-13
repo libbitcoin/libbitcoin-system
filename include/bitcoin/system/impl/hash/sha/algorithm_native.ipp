@@ -25,9 +25,6 @@
 // instructions rely on register locality to achieve performance benefits.
 // Implementation of native sha using buffer expansion is horribly slow.
 // This split creates bifurcations (additional complexities) in this template.
-// SHA-NI instructions are legacy SSE encoded, so each native (non-sha512)
-// block sequence begins with sha::zeroupper(), avoiding the SSE/AVX transition
-// penalty when inlined into code that leaves dirty upper ymm/zmm state.
 
 // protected
 // ----------------------------------------------------------------------------
