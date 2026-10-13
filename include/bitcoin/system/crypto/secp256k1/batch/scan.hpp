@@ -64,17 +64,18 @@ struct BC_API batch
     std::span<const outputs_t> outputs;
     std::span<const prefix> prefixes;
 
-    /// Invoke callback for each transaction with an output paying receiver.
+    /// Default minimum transactions of a scan that runs on the device.
+    static constexpr size_t device_txs = power2(16_size);
+
+    /// Invoke callback for each transaction with an output paying receiver,
+    /// on the device where available for scans of at least gpu_minimum.
     static void scan(const stopper& cancel, const batch& batch,
-        const receiver& keys, const handler& callback, bool turbo) NOEXCEPT;
+        const receiver& keys, size_t gpu_minimum, const handler& callback,
+        bool turbo) NOEXCEPT;
 
 protected:
     /// Transactions scanned by one task.
     static constexpr size_t chunk_txs = power2(10_size);
-
-    /// Scans of at least this many transactions run on the device where
-    /// available.
-    static constexpr size_t device_txs = power2(16_size);
 
     /// Transactions sent to the device at once.
     static constexpr size_t device_groups = power2(22_size);

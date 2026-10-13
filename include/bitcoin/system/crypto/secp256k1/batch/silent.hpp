@@ -43,10 +43,11 @@ struct BC_API batch
         const std::span<uint8_t>& valid, const stopper& cancel,
         const batch& batch) NOEXCEPT;
 
-    /// Device is set if the batch was computed on the device.
+    /// Device is set if the batch was computed on the device, which is used
+    /// only if gpu and available.
     static bool compute(const std::span<ec_compressed>& out,
         const std::span<uint8_t>& valid, bool& device, const stopper& cancel,
-        const batch& batch) NOEXCEPT;
+        const batch& batch, bool gpu) NOEXCEPT;
 
 protected:
     /// Transactions computed by one task.

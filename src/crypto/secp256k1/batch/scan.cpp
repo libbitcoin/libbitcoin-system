@@ -226,7 +226,8 @@ bool scan::batch::scan_device(size_t& resume, const stopper& cancel,
 // which is consistent with the push notification public interface.
 
 void scan::batch::scan(const stopper& cancel, const batch& batch,
-    const receiver& keys, const handler& callback, bool turbo) NOEXCEPT
+    const receiver& keys, size_t gpu_minimum, const handler& callback,
+    bool turbo) NOEXCEPT
 {
     const auto policy = poolstl::execution::par_if(turbo);
 
@@ -240,7 +241,7 @@ void scan::batch::scan(const stopper& cancel, const batch& batch,
         return;
 
     size_t resume{};
-    if (count >= device_txs &&
+    if (count >= gpu_minimum &&
         keys.labels.size() <= secp256k1::cuda::maximum_labels &&
         secp256k1::cuda::available() &&
         scan_device(resume, cancel, batch, keys, callback, turbo))

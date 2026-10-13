@@ -120,9 +120,9 @@ links_t schnorr::batch::get_failures(const stopper& cancel,
 // static/protected
 
 data_chunk schnorr::batch::evaluate(bool& device, const stopper& cancel,
-    const batch& batch) NOEXCEPT
+    const batch& batch, bool gpu) NOEXCEPT
 {
-    return batch_verify(device, cancel, batch, verify_rows);
+    return batch_verify(device, cancel, batch, gpu, verify_rows);
 }
 
 // correlate
@@ -143,13 +143,13 @@ links_t schnorr::batch::verify(const stopper& cancel,
     const batch& batch) NOEXCEPT
 {
     bool device{};
-    return verify(device, cancel, batch);
+    return verify(device, cancel, batch, true);
 }
 
 links_t schnorr::batch::verify(bool& device, const stopper& cancel,
-    const batch& batch) NOEXCEPT
+    const batch& batch, bool gpu) NOEXCEPT
 {
-    return correlate(cancel, evaluate(device, cancel, batch), batch);
+    return correlate(cancel, evaluate(device, cancel, batch, gpu), batch);
 }
 
 BC_POP_WARNING()

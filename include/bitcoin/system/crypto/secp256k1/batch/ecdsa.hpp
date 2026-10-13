@@ -46,9 +46,10 @@ struct BC_API batch
     static batched::links_t verify(const stopper& cancel,
         const batch& batch) NOEXCEPT;
 
-    /// Device is set if the batch was verified on the device.
+    /// Device is set if the batch was verified on the device, which is used
+    /// only if gpu and available.
     static batched::links_t verify(bool& device, const stopper& cancel,
-        const batch& batch) NOEXCEPT;
+        const batch& batch, bool gpu) NOEXCEPT;
 
     std::span<const correlate_t> correlates;
     std::span<const hash_digest> digests;
@@ -62,7 +63,7 @@ protected:
     static batched::links_t get_failures(const stopper& cancel,
         const data_chunk& out, const batch& in) NOEXCEPT;
     static data_chunk evaluate(bool& device, const stopper& cancel,
-        const batch& batch) NOEXCEPT;
+        const batch& batch, bool gpu) NOEXCEPT;
     static batched::links_t correlate(const stopper& cancel,
         const data_chunk& out, const batch& batch) NOEXCEPT;
 };
