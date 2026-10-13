@@ -50,7 +50,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // Each out = hash * sum, in chunks of lanes on the processor.
-template <size_t chunk_rows>
+template <size_t Rows>
 static void cpu_compute(const stopper& cancel,
     const std::span<ec_compressed>& out,
     const std::span<uint8_t>& valid,
@@ -61,15 +61,15 @@ static void cpu_compute(const stopper& cancel,
     using dispatcher = silent_dispatcher;
     const auto count = sums.size();
 
-    std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
+    std_vector<size_t> chunks(ceilinged_divide(count, Rows));
     std::iota(chunks.begin(), chunks.end(), zero);
     const auto compute = [&](size_t chunk) NOEXCEPT
     {
         if (cancel)
             return;
 
-        const auto first = chunk * chunk_rows;
-        const auto size = std::min(chunk_rows, count - first);
+        const auto first = chunk * Rows;
+        const auto size = std::min(Rows, count - first);
 
         data_chunk parsed(size);
         dispatcher::scalars ks(size);
@@ -142,12 +142,11 @@ bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
     BC_ASSERT(out.size() == batch.sums.size());
 
     namespace cuda = secp256k1::cuda;
-    constexpr auto rows = chunk_rows;
 
     if (!use_gpu || !cuda::available())
     {
         use_gpu = false;
-        cpu_compute<rows>(cancel, out, valid, batch.sums, batch.hashes);
+        cpu_compute<chunk_rows>(cancel, out, valid, batch.sums, batch.hashes);
         write();
         return !cancel;
     }
@@ -161,7 +160,7 @@ bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
     use_gpu = computed.get();
 
     if (!use_gpu)
-        cpu_compute<rows>(cancel, out, valid, batch.sums, batch.hashes);
+        cpu_compute<chunk_rows>(cancel, out, valid, batch.sums, batch.hashes);
 
     return !cancel;
 }
