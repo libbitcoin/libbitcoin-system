@@ -65,13 +65,14 @@ inline bool verify_rows(data_chunk& results,
     const std::span<const hash_digest>& digests,
     const std::span<const ec_signature>& parsed) NOEXCEPT
 {
+    using dispatcher = ecdsa_dispatcher;
     ec_signatures signatures(parsed.size());
     std::transform(parsed.begin(), parsed.end(), signatures.begin(),
-        &ecdsa_dispatcher::canonical);
+        &dispatcher::canonical);
 
     return with_lanes([&]<typename Word>() NOEXCEPT
     {
-        return ecdsa_dispatcher::verify_ecdsa<Word>(results, keys, digests,
+        return dispatcher::verify_ecdsa<Word>(results, keys, digests,
             signatures);
     });
 }
@@ -111,8 +112,8 @@ links_t ecdsa::batch::get_failures(const stopper& cancel,
     const auto& correlates = in.correlates;
     BC_ASSERT(out.empty() || out.size() == correlates.size());
 
-    // Empty implies fully-verified batch (or canceled, which the caller
-    // gates on the stopper, discarding the links).
+    // Empty implies fully-verified batch (or canceled, which caller gates on
+    // stopper, discarding links).
     links_t fails{};
     if (out.empty())
         return fails;
@@ -120,7 +121,7 @@ links_t ecdsa::batch::get_failures(const stopper& cancel,
     size_t group{};
     for (auto index = one; index <= correlates.size() && !cancel; ++index)
     {
-        // Find the start of the next group (or end).
+        // Find start of next group (or end).
         if ((index != correlates.size()) &&
             (correlates[index].id == correlates[group].id) &&
             (correlates[index].group == correlates[group].group))
@@ -166,10 +167,10 @@ links_t ecdsa::batch::get_failures(const stopper& cancel,
 // ----------------------------------------------------------------------------
 // static/protected
 
-data_chunk ecdsa::batch::evaluate(bool& device, const stopper& cancel,
-    const batch& batch, bool gpu) NOEXCEPT
+data_chunk ecdsa::batch::evaluate(const stopper& cancel, bool& use_gpu,
+    const batch& batch) NOEXCEPT
 {
-    return batch_verify(device, cancel, batch, gpu, verify_rows);
+    return batch_verify(cancel, use_gpu, batch, verify_rows);
 }
 
 // correlate
@@ -189,14 +190,14 @@ links_t ecdsa::batch::correlate(const stopper& cancel,
 links_t ecdsa::batch::verify(const stopper& cancel,
     const batch& batch) NOEXCEPT
 {
-    bool device{};
-    return verify(device, cancel, batch, true);
+    bool use_gpu{ true };
+    return verify(cancel, use_gpu, batch);
 }
 
-links_t ecdsa::batch::verify(bool& device, const stopper& cancel,
-    const batch& batch, bool gpu) NOEXCEPT
+links_t ecdsa::batch::verify(const stopper& cancel, bool& use_gpu,
+    const batch& batch) NOEXCEPT
 {
-    return correlate(cancel, evaluate(device, cancel, batch, gpu), batch);
+    return correlate(cancel, evaluate(cancel, use_gpu, batch), batch);
 }
 
 BC_POP_WARNING()

@@ -99,7 +99,7 @@ public:
 
     /// Results of the rows, empty if all valid or canceled, false on failure.
     template <typename Key>
-    bool verify(data_chunk& out, const stopper& cancel,
+    bool verify(const stopper& cancel, data_chunk& out,
         const std::span<const hash_digest>& digests,
         const std::span<const Key>& keys,
         const std::span<const ec_signature>& signatures, bool urgent) NOEXCEPT
@@ -130,8 +130,8 @@ public:
     }
 
     /// Output key prefixes of the receiver for each point, false on failure.
-    bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
-        const stopper& cancel, const std::span<const ec_compressed>& points,
+    bool scan(const stopper& cancel, std::vector<prefix>& prefixes,
+        data_chunk& valid, const std::span<const ec_compressed>& points,
         const scan::batch::receiver& keys) NOEXCEPT
     {
         scan_arguments arguments{};
@@ -160,8 +160,8 @@ public:
     }
 
     /// Point (hash * sum) of each row, false on failure.
-    bool compute(const std::span<ec_compressed>& out,
-        const std::span<uint8_t>& valid, const stopper& cancel,
+    bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid,
         const std::span<const ec_compressed>& sums,
         const std::span<const ec_secret>& hashes) NOEXCEPT
     {

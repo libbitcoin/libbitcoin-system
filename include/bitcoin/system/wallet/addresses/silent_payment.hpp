@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_SILENT_PAYMENT_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_SILENT_PAYMENT_HPP
 
+#include <functional>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
@@ -57,6 +58,30 @@ public:
 
     using scan_matches = std_vector<scan_match>;
 
+    /// Records of transactions in block order, as corresponding columns
+    /// (prefixes flattened in transaction order). Point is the prevouts
+    /// summary if summarized, otherwise the input key sum with its hash.
+    struct BC_API rows
+    {
+        /// This thread's rows (capacity retained across use).
+        static rows& local() NOEXCEPT;
+
+        /// Clear all columns, retaining capacity.
+        void clear() NOEXCEPT;
+
+        /// True if there are no records.
+        bool empty() const NOEXCEPT;
+
+        std_vector<uint32_t> positions{};
+        std_vector<ec_compressed> points{};
+        std_vector<ec_secret> hashes{};
+        std_vector<uint32_t> outputs{};
+        std_vector<scan::batch::prefix> prefixes{};
+    };
+
+    /// Selects transactions of a block by position.
+    using selector = std::function<bool(size_t position)>;
+
     /// Serialized outpoint.
     using outpoint = data_array<chain::point::serialized_size()>;
 
@@ -81,6 +106,25 @@ public:
         const chain::transaction& tx) NOEXCEPT;
     static bool get_outputs(scan_outputs& out,
         const chain::view::transaction& tx) NOEXCEPT;
+
+    /// True if the transaction has a pay-to-taproot output.
+    static bool has_outputs(const chain::transaction& tx) NOEXCEPT;
+    static bool has_outputs(const chain::view::transaction& tx) NOEXCEPT;
+
+    /// Set out to the records of the selected eligible non-coinbase
+    /// transactions of the block, each summarized or prepared. Requires
+    /// populated prevouts.
+    static void collect(rows& out, const chain::block& block,
+        const selector& selected, bool summarize) NOEXCEPT;
+    static void collect(rows& out, const chain::view::block& block,
+        const selector& selected, bool summarize) NOEXCEPT;
+
+    /// Set out to the record of the transaction, summarized or prepared, false
+    /// if not eligible. Requires populated prevouts.
+    static bool collect(rows& out, const chain::transaction& tx,
+        bool summarize) NOEXCEPT;
+    static bool collect(rows& out, const chain::view::transaction& tx,
+        bool summarize) NOEXCEPT;
 
     /// The address of the scan and spend keys under the prefix.
     static std::string to_address(const ec_compressed& scan_key,
@@ -117,6 +161,20 @@ protected:
     template <typename Iterator>
     static bool prepare(ec_compressed& sum, ec_secret& hash,
         const Iterator& begin, const Iterator& end) NOEXCEPT;
+
+    /// Append the record of the transaction at position, false if not
+    /// eligible (rows unchanged).
+    template <typename Transaction>
+    static bool append(rows& out, const Transaction& tx, uint32_t position,
+        bool summarize) NOEXCEPT;
+
+    /// Invoke handler(index, key) for each pay-to-taproot output.
+    template <typename Handler>
+    static void for_each_output(const chain::transaction& tx,
+        Handler&& handler) NOEXCEPT;
+    template <typename Handler>
+    static void for_each_output(const chain::view::transaction& tx,
+        Handler&& handler) NOEXCEPT;
 
     /// BIP352 tagged hashes.
     static bool input_hash(ec_secret& out, const outpoint& smallest,

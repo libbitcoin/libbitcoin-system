@@ -125,10 +125,10 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_g
     };
 
     const stopper cancel{};
-    bool device{};
-    const auto tokens = batch::verify(device, cancel, in, false);
+    bool use_gpu{ false };
+    const auto tokens = batch::verify(cancel, use_gpu, in);
     BOOST_REQUIRE(tokens.empty());
-    BOOST_REQUIRE(!device);
+    BOOST_REQUIRE(!use_gpu);
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__chunked_two_invalid__expec
 
 // distinct rows
 // ----------------------------------------------------------------------------
-// Rows of distinct keys and digests, verified on the device where available,
+// Rows of distinct keys and digests, verified on gpu where available,
 // with failures at the first, a middle and the last row.
 
 constexpr size_t distinct_rows = 512;

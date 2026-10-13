@@ -31,32 +31,32 @@ namespace system {
 namespace secp256k1 {
 namespace cuda {
 
-/// True if device verification is compiled in.
+/// True if gpu verification is compiled in.
 bool compiled() NOEXCEPT;
 
-/// True if the device is loaded and has not failed.
+/// True if gpu is loaded and has not failed.
 bool available() NOEXCEPT;
 
-/// Verify rows on the device, one result byte per row, empty if all rows are
-/// valid or if canceled. False if the device failed, which disables it.
-bool verify(data_chunk& out, const stopper& cancel,
+/// Verify rows on gpu, one result byte per row, empty if all rows are valid
+/// or if canceled. False if gpu failed, which disables it.
+bool verify(const stopper& cancel, data_chunk& out,
     const ecdsa::batch& batch) NOEXCEPT;
-bool verify(data_chunk& out, const stopper& cancel,
+bool verify(const stopper& cancel, data_chunk& out,
     const schnorr::batch& batch) NOEXCEPT;
 
-/// Output key prefixes of the receiver for each point on the device, one
+/// Output key prefixes of receiver for each point on gpu, one
 /// then one per label key (at most maximum_labels), with valid for each
-/// point computed. False if the device failed, which disables it, or if
+/// point computed. False if gpu failed, which disables it, or if
 /// there are too many labels.
-bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
-    const stopper& cancel, const std::span<const ec_compressed>& points,
+bool scan(const stopper& cancel, std::vector<prefix>& prefixes,
+    data_chunk& valid, const std::span<const ec_compressed>& points,
     const scan::batch::receiver& keys) NOEXCEPT;
 
-/// Point (hash * sum) of each row on the device, with valid for each row
-/// computed, into spans sized to the rows. False if the device failed,
+/// Point (hash * sum) of each row on gpu, with valid for each row
+/// computed, into spans sized to rows. False if gpu failed,
 /// which disables it.
-bool compute(const std::span<ec_compressed>& out,
-    const std::span<uint8_t>& valid, const stopper& cancel,
+bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid,
     const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT;
 

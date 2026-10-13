@@ -940,6 +940,125 @@ BOOST_AUTO_TEST_CASE(silent_payment__to_address__mainnet__expected)
     BOOST_REQUIRE_EQUAL(address, "sp1qqgste7k9hx0qftg6qmwlkqtwuy6cycyavzmzj85c6qdfhjdpdjtdgqjuexzk6murw56suy3e0rd2cgqvycxttddwsvgxe2usfpxumr70xc9pkqwv");
 }
 
+// collect
+// ----------------------------------------------------------------------------
+
+constexpr auto simple_send_summary = "024ac253c216532e961988e2a8ce266a447c894c781e52ef6cee902361db960004";
+
+// BIP352 send_and_receive_test_vectors.json: "Simple send: two inputs".
+static inputs simple_send_inputs()
+{
+    return to_inputs(
+    {
+        {
+            "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
+            0u,
+            "483046022100ad79e6801dd9a8727f342f31c71c4912866f59dc6e7981878e92c5844a0ce929022100fb0d2393e813968648b9753b7e9871d90ab3d815ebf91820d704b19f4ed224d621025a1e61f898173040e20616d43e9f496fba90338a39faa1ed98fcbaeee4dd9be5",
+            "",
+            "76a91419c2f3ae0ca3b642bd3e49598b8da89f50c1416188ac"
+        },
+        {
+            "a1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d",
+            0u,
+            "48304602210086783ded73e961037e77d49d9deee4edc2b23136e9728d56e4491c80015c3a63022100fda4c0f21ea18de29edbce57f7134d613e044ee150a89e2e64700de2d4e83d4e2103bd85685d03d111699b15d046319febe77f8de5286e9e512703cdee1bf3be3792",
+            "",
+            "76a914d9317c66f54ff0a152ec50b1d19c25be50c8e15988ac"
+        }
+    });
+}
+
+static transaction simple_send()
+{
+    return { 2u, simple_send_inputs(), { to_pay_witness_taproot_output(taproot_key) }, 0u };
+}
+
+static block block_of(const transaction& tx)
+{
+    const input null{ point{ null_hash, point::null_index }, script{}, max_uint32 };
+    const transaction coinbase{ 1u, { null }, { { 42u, script{} } }, 0u };
+    return { header{}, { coinbase, tx } };
+}
+
+static scan::batch::prefix prefix_of(const char* key)
+{
+    return array_cast<uint8_t, scan::batch::prefix_size>(bytes<ec_xonly_size>(key));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__collect__summarized_tx__summary_record)
+{
+    silent_payment::rows rows{};
+    BOOST_REQUIRE(silent_payment::collect(rows, simple_send(), true));
+    BOOST_REQUIRE_EQUAL(rows.positions.size(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.positions.front(), 0u);
+    BOOST_REQUIRE_EQUAL(rows.points.size(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.points.front(), bytes<ec_compressed_size>(simple_send_summary));
+    BOOST_REQUIRE(rows.hashes.empty());
+    BOOST_REQUIRE_EQUAL(rows.outputs.size(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.outputs.front(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.prefixes.size(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.prefixes.front(), prefix_of(taproot_key));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__collect__prepared_tx__sum_and_hash)
+{
+    silent_payment::rows rows{};
+    BOOST_REQUIRE(silent_payment::collect(rows, simple_send(), false));
+    BOOST_REQUIRE_EQUAL(rows.points.size(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.hashes.size(), 1u);
+
+    auto product = rows.points.front();
+    BOOST_REQUIRE(ec_multiply(product, rows.hashes.front()));
+    BOOST_REQUIRE_EQUAL(product, bytes<ec_compressed_size>(simple_send_summary));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__collect__ineligible_tx__false_empty)
+{
+    const transaction ineligible{ 2u, simple_send_inputs(), { { 0u, script{} } }, 0u };
+
+    silent_payment::rows rows{};
+    BOOST_REQUIRE(!silent_payment::collect(rows, ineligible, true));
+    BOOST_REQUIRE(rows.empty());
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__collect__block_selected__positioned_record)
+{
+    const auto block = block_of(simple_send());
+
+    silent_payment::rows rows{};
+    silent_payment::collect(rows, block, [](size_t) NOEXCEPT { return true; }, true);
+    BOOST_REQUIRE_EQUAL(rows.positions.size(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.positions.front(), 1u);
+    BOOST_REQUIRE_EQUAL(rows.points.front(), bytes<ec_compressed_size>(simple_send_summary));
+    BOOST_REQUIRE_EQUAL(rows.outputs.front(), 1u);
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__collect__block_unselected__empty)
+{
+    const auto block = block_of(simple_send());
+
+    silent_payment::rows rows{};
+    BOOST_REQUIRE(silent_payment::collect(rows, simple_send(), true));
+    silent_payment::collect(rows, block, [](size_t) NOEXCEPT { return false; }, true);
+    BOOST_REQUIRE(rows.empty());
+    BOOST_REQUIRE(rows.prefixes.empty());
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__has_outputs__taproot_output__true)
+{
+    BOOST_REQUIRE(silent_payment::has_outputs(simple_send()));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__has_outputs__no_taproot_output__false)
+{
+    const transaction tx{ 2u, inputs{}, { { 0u, script{} } }, 0u };
+    BOOST_REQUIRE(!silent_payment::has_outputs(tx));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__rows_local__same_thread__same_instance)
+{
+    BOOST_REQUIRE_EQUAL(&silent_payment::rows::local(), &silent_payment::rows::local());
+}
+
 BOOST_AUTO_TEST_CASE(silent_payment__bip352_receiving_vectors__all__expected)
 {
     const auto& suites = bip352_vectors();

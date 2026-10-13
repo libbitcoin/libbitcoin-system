@@ -48,34 +48,33 @@ bool available() NOEXCEPT
     return context::instance().available();
 }
 
-bool verify(data_chunk& out, const stopper& cancel,
+bool verify(const stopper& cancel, data_chunk& out,
     const ecdsa::batch& batch) NOEXCEPT
 {
-    return context::instance().verify(out, cancel, batch.digests,
+    return context::instance().verify(cancel, out, batch.digests,
         batch.points, batch.signatures, true);
 }
 
-bool verify(data_chunk& out, const stopper& cancel,
+bool verify(const stopper& cancel, data_chunk& out,
     const schnorr::batch& batch) NOEXCEPT
 {
-    return context::instance().verify(out, cancel, batch.digests,
+    return context::instance().verify(cancel, out, batch.digests,
         batch.points, batch.signatures, true);
 }
 
-bool scan(std::vector<prefix>& prefixes, data_chunk& valid,
-    const stopper& cancel, const std::span<const ec_compressed>& points,
+bool scan(const stopper& cancel, std::vector<prefix>& prefixes,
+    data_chunk& valid, const std::span<const ec_compressed>& points,
     const scan::batch::receiver& keys) NOEXCEPT
 {
-    return context::instance().scan(prefixes, valid, cancel, points,
-        keys);
+    return context::instance().scan(cancel, prefixes, valid, points, keys);
 }
 
-bool compute(const std::span<ec_compressed>& out,
-    const std::span<uint8_t>& valid, const stopper& cancel,
+bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid,
     const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT
 {
-    return context::instance().compute(out, valid, cancel, sums, hashes);
+    return context::instance().compute(cancel, out, valid, sums, hashes);
 }
 
 #else
@@ -90,26 +89,26 @@ bool available() NOEXCEPT
     return false;
 }
 
-LCOV_EXCL_START("Not called where the device is not available.")
-bool verify(data_chunk&, const stopper&, const ecdsa::batch&) NOEXCEPT
+LCOV_EXCL_START("Not called where gpu is not available.")
+bool verify(const stopper&, data_chunk&, const ecdsa::batch&) NOEXCEPT
 {
     return false;
 }
 
-bool verify(data_chunk&, const stopper&, const schnorr::batch&) NOEXCEPT
+bool verify(const stopper&, data_chunk&, const schnorr::batch&) NOEXCEPT
 {
     return false;
 }
 
-bool scan(std::vector<prefix>&, data_chunk&, const stopper&,
+bool scan(const stopper&, std::vector<prefix>&, data_chunk&,
     const std::span<const ec_compressed>&,
     const scan::batch::receiver&) NOEXCEPT
 {
     return false;
 }
 
-bool compute(const std::span<ec_compressed>&, const std::span<uint8_t>&,
-    const stopper&, const std::span<const ec_compressed>&,
+bool compute(const stopper&, const std::span<ec_compressed>&,
+    const std::span<uint8_t>&, const std::span<const ec_compressed>&,
     const std::span<const ec_secret>&) NOEXCEPT
 {
     return false;

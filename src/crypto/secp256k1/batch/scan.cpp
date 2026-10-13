@@ -172,9 +172,9 @@ static void scan_transactions(const scan::batch& batch, size_t first,
 
 static_assert(is_same_type<secp256k1::cuda::prefix, scan::batch::prefix>);
 
-// Transactions go to the device in blocks, and the output key prefixes of
-// each block are matched to the transaction outputs in parallel.
-bool scan::batch::scan_device(size_t& resume, const stopper& cancel,
+// Transactions go to gpu in blocks, and output key prefixes of each block
+// are matched to tx outputs in parallel.
+bool scan::batch::scan_gpu(const stopper& cancel, size_t& resume,
     const batch& batch, const receiver& keys, const handler& callback,
     bool turbo) NOEXCEPT
 {
@@ -182,17 +182,17 @@ bool scan::batch::scan_device(size_t& resume, const stopper& cancel,
     const auto count = batch.points.size();
     const auto stride = add1(keys.labels.size());
 
-    std_vector<size_t> groups(std::min(device_groups, count));
+    std_vector<size_t> groups(std::min(gpu_groups, count));
     std::iota(groups.begin(), groups.end(), zero);
     std::vector<secp256k1::cuda::prefix> keys_out{};
     data_chunk valid{};
-    for (size_t base{}; base < count && !cancel; base += device_groups)
+    for (size_t base{}; base < count && !cancel; base += gpu_groups)
     {
-        const auto size = std::min(device_groups, count - base);
+        const auto size = std::min(gpu_groups, count - base);
         const auto block = std::span{ groups }.first(size);
         resume = base;
 
-        if (!secp256k1::cuda::scan(keys_out, valid, cancel,
+        if (!secp256k1::cuda::scan(cancel, keys_out, valid,
             batch.points.subspan(base, size), keys))
             return false;
 
@@ -244,7 +244,7 @@ void scan::batch::scan(const stopper& cancel, const batch& batch,
     if (count >= gpu_minimum &&
         keys.labels.size() <= secp256k1::cuda::maximum_labels &&
         secp256k1::cuda::available() &&
-        scan_device(resume, cancel, batch, keys, callback, turbo))
+        scan_gpu(cancel, resume, batch, keys, callback, turbo))
         return;
 
     std_vector<size_t> chunks(ceilinged_divide(count - resume, chunk_txs));

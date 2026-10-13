@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/crypto/secp256k1/batch/silent.hpp>
 
+#include <future>
 #include <numeric>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
@@ -49,76 +50,118 @@ public:
 // ----------------------------------------------------------------------------
 
 // Each out = hash * sum, in chunks of lanes on the processor.
-static void compute_rows(const std::span<ec_compressed>& out,
-    const std::span<uint8_t>& valid, const stopper& cancel,
+template <size_t chunk_rows>
+static void cpu_compute(const stopper& cancel,
+    const std::span<ec_compressed>& out,
+    const std::span<uint8_t>& valid,
     const std::span<const ec_compressed>& sums,
-    const std::span<const ec_secret>& hashes, size_t chunk_rows) NOEXCEPT
+    const std::span<const ec_secret>& hashes) NOEXCEPT
 {
     constexpr auto policy = poolstl::execution::par;
+    using dispatcher = silent_dispatcher;
     const auto count = sums.size();
 
     std_vector<size_t> chunks(ceilinged_divide(count, chunk_rows));
     std::iota(chunks.begin(), chunks.end(), zero);
-    std::for_each(policy, chunks.cbegin(), chunks.cend(),
-        [&](size_t chunk) NOEXCEPT
+    const auto compute = [&](size_t chunk) NOEXCEPT
+    {
+        if (cancel)
+            return;
+
+        const auto first = chunk * chunk_rows;
+        const auto size = std::min(chunk_rows, count - first);
+
+        data_chunk parsed(size);
+        dispatcher::scalars ks(size);
+        for (size_t row{}; row < size; ++row)
         {
-            if (cancel)
-                return;
+            auto& k = ks[row];
+            const auto ok = dispatcher::from_bytes(k, hashes[first + row]);
+            const auto nonzero = !dispatcher::is_zero_scalar(k);
+            parsed[row] = to_int<uint8_t>(ok && nonzero);
 
-            const auto first = chunk * chunk_rows;
-            const auto size = std::min(chunk_rows, count - first);
-            data_chunk parsed(size);
-            silent_dispatcher::scalars ks(size);
-            for (size_t row{}; row < size; ++row)
-            {
-                auto& k = ks[row];
-                parsed[row] = to_int<uint8_t>(
-                    silent_dispatcher::from_bytes(k, hashes[first + row]) &&
-                    !silent_dispatcher::is_zero_scalar(k));
+            if (is_zero(parsed[row]))
+                k = { 1 };
+        }
 
-                if (is_zero(parsed[row]))
-                    k = { 1 };
-            }
-
-            data_chunk computed{};
-            std_vector<ec_compressed> products{};
-            with_lanes([&]<typename Word>() NOEXCEPT
-            {
-                silent_dispatcher::multiply<Word>(computed, products,
-                    sums.subspan(first, size), ks);
-                return true;
-            });
-
-            for (size_t row{}; row < size; ++row)
-            {
-                out[first + row] = products[row];
-                valid[first + row] = to_int<uint8_t>(
-                    is_nonzero(computed[row]) && is_nonzero(parsed[row]));
-            }
+        data_chunk computed{};
+        std_vector<ec_compressed> products{};
+        with_lanes([&]<typename Word>() NOEXCEPT
+        {
+            const auto part = sums.subspan(first, size);
+            dispatcher::multiply<Word>(computed, products, part, ks);
+            return true;
         });
+
+        for (size_t row{}; row < size; ++row)
+        {
+            const auto ok = to_bool(computed[row]) && to_bool(parsed[row]);
+            valid[first + row] = to_int<uint8_t>(ok);
+            out[first + row] = products[row];
+        }
+    };
+
+    std::for_each(policy, chunks.cbegin(), chunks.cend(), compute);
 }
 
-bool silent::batch::compute(const std::span<ec_compressed>& out,
-    const std::span<uint8_t>& valid, const stopper& cancel,
+bool silent::batch::compute(const stopper& cancel,
+    const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
     const batch& batch) NOEXCEPT
 {
-    bool device{};
-    return compute(out, valid, device, cancel, batch, true);
+    bool use_gpu{ true };
+    return compute(cancel, use_gpu, out, valid, batch);
 }
 
-bool silent::batch::compute(const std::span<ec_compressed>& out,
-    const std::span<uint8_t>& valid, bool& device, const stopper& cancel,
-    const batch& batch, bool gpu) NOEXCEPT
+bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
+    const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
+    const batch& batch) NOEXCEPT
 {
     BC_ASSERT(batch.hashes.size() == batch.sums.size());
-    BC_ASSERT(out.size() == batch.sums.size());
     BC_ASSERT(valid.size() == batch.sums.size());
+    BC_ASSERT(out.size() == batch.sums.size());
 
-    device = gpu && secp256k1::cuda::available() &&
-        secp256k1::cuda::compute(out, valid, cancel, batch.sums, batch.hashes);
+    namespace cuda = secp256k1::cuda;
 
-    if (!device)
-        compute_rows(out, valid, cancel, batch.sums, batch.hashes, chunk_rows);
+    use_gpu = use_gpu
+        && cuda::available()
+        && cuda::compute(cancel, out, valid, batch.sums, batch.hashes);
+
+    if (!use_gpu)
+        cpu_compute<chunk_rows>(cancel, out, valid, batch.sums, batch.hashes);
+
+    return !cancel;
+}
+
+// Gpu computes while caller writes, cpu computes before.
+bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
+    const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
+    const batch& batch, const std::function<void()>& write) NOEXCEPT
+{
+    BC_ASSERT(batch.hashes.size() == batch.sums.size());
+    BC_ASSERT(valid.size() == batch.sums.size());
+    BC_ASSERT(out.size() == batch.sums.size());
+
+    namespace cuda = secp256k1::cuda;
+    constexpr auto rows = chunk_rows;
+
+    if (!use_gpu || !cuda::available())
+    {
+        use_gpu = false;
+        cpu_compute<rows>(cancel, out, valid, batch.sums, batch.hashes);
+        write();
+        return !cancel;
+    }
+
+    auto computed = std::async(std::launch::async, [&]() NOEXCEPT
+    {
+        return cuda::compute(cancel, out, valid, batch.sums, batch.hashes);
+    });
+
+    write();
+    use_gpu = computed.get();
+
+    if (!use_gpu)
+        cpu_compute<rows>(cancel, out, valid, batch.sums, batch.hashes);
 
     return !cancel;
 }

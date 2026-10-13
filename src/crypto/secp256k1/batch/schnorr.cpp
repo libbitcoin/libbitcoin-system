@@ -50,8 +50,7 @@ public:
     static hash_digest challenge(const ec_signature& signature,
         const ec_xonly& key, const hash_digest& digest) NOEXCEPT
     {
-        accumulator<sha256> hasher{ tagged_midstate<"BIP0340/challenge">,
-            one };
+        accumulator<sha256> hasher{ tagged_midstate<"BIP0340/challenge">, one };
         hasher.write(array_cast<uint8_t, array_count<bytes_t>>(signature));
         hasher.write(key);
         hasher.write(digest);
@@ -66,23 +65,25 @@ inline bool verify_rows(data_chunk& results,
     const std::span<const hash_digest>& digests,
     const std::span<const ec_signature>& signatures) NOEXCEPT
 {
+    using dispatcher = schnorr_dispatcher;
+
     hashes challenges(keys.size());
     for (size_t row{}; row < keys.size(); ++row)
-        challenges[row] = schnorr_dispatcher::challenge(signatures[row], keys[row],
+        challenges[row] = dispatcher::challenge(signatures[row], keys[row],
             digests[row]);
 
     return with_lanes([&]<typename Word>() NOEXCEPT
     {
         if constexpr (is_same_type<Word, uint64_t>)
         {
-            if (schnorr_dispatcher::verify_schnorr(keys, challenges, signatures))
+            if (dispatcher::verify_schnorr(keys, challenges, signatures))
             {
                 results.assign(keys.size(), uint8_t{ 1 });
                 return true;
             }
         }
 
-        return schnorr_dispatcher::verify_schnorr<Word>(results, keys, challenges,
+        return dispatcher::verify_schnorr<Word>(results, keys, challenges,
             signatures);
     });
 }
@@ -119,10 +120,10 @@ links_t schnorr::batch::get_failures(const stopper& cancel,
 // ----------------------------------------------------------------------------
 // static/protected
 
-data_chunk schnorr::batch::evaluate(bool& device, const stopper& cancel,
-    const batch& batch, bool gpu) NOEXCEPT
+data_chunk schnorr::batch::evaluate(const stopper& cancel, bool& use_gpu,
+    const batch& batch) NOEXCEPT
 {
-    return batch_verify(device, cancel, batch, gpu, verify_rows);
+    return batch_verify(cancel, use_gpu, batch, verify_rows);
 }
 
 // correlate
@@ -142,14 +143,14 @@ links_t schnorr::batch::correlate(const stopper& cancel,
 links_t schnorr::batch::verify(const stopper& cancel,
     const batch& batch) NOEXCEPT
 {
-    bool device{};
-    return verify(device, cancel, batch, true);
+    bool use_gpu{ true };
+    return verify(cancel, use_gpu, batch);
 }
 
-links_t schnorr::batch::verify(bool& device, const stopper& cancel,
-    const batch& batch, bool gpu) NOEXCEPT
+links_t schnorr::batch::verify(const stopper& cancel, bool& use_gpu,
+    const batch& batch) NOEXCEPT
 {
-    return correlate(cancel, evaluate(device, cancel, batch, gpu), batch);
+    return correlate(cancel, evaluate(cancel, use_gpu, batch), batch);
 }
 
 BC_POP_WARNING()

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_SILENT_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_SILENT_HPP
 
+#include <functional>
 #include <span>
 #include <bitcoin/system/crypto/secp256k1/batch/scan.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -31,23 +32,24 @@ namespace system {
 
 namespace silent {
 
-/// Spans match serialized columns, one element for each transaction.
+/// Spans match serialized columns, one element for each tx.
 struct BC_API batch
 {
     std::span<const ec_compressed> sums;
     std::span<const ec_secret> hashes;
 
-    /// Each out = hash * sum of the transaction, with valid set for each.
+    /// Each out = hash * sum of the tx, with valid set for each.
     /// The out and valid spans are sized to the batch. False if canceled.
-    static bool compute(const std::span<ec_compressed>& out,
-        const std::span<uint8_t>& valid, const stopper& cancel,
-        const batch& batch) NOEXCEPT;
-
-    /// Device is set if the batch was computed on the device, which is used
-    /// only if gpu and available.
-    static bool compute(const std::span<ec_compressed>& out,
-        const std::span<uint8_t>& valid, bool& device, const stopper& cancel,
-        const batch& batch, bool gpu) NOEXCEPT;
+    static bool compute(const stopper& cancel,
+        const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid, const batch& batch) NOEXCEPT;
+    static bool compute(const stopper& cancel, bool& use_gpu,
+        const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid, const batch& batch) NOEXCEPT;
+    static bool compute(const stopper& cancel, bool& use_gpu,
+        const std::span<ec_compressed>& out,
+        const std::span<uint8_t>& valid, const batch& batch,
+        const std::function<void()>& write) NOEXCEPT;
 
 protected:
     /// Transactions computed by one task.

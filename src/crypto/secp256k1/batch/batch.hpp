@@ -74,6 +74,13 @@ inline bool with_lanes(Verify&& verify) NOEXCEPT
     return verify.template operator()<uint64_t>();
 }
 
+static size_t count_to_rows(size_t count) NOEXCEPT
+{
+    constexpr size_t minimum = 32;
+    const auto threads = std::max(std::thread::hardware_concurrency(), 1u);
+    return greater(minimum, ceilinged_divide(count, two * threads));
+}
+
 // Chunks of rows verify in parallel, each into its own results, sized to
 // occupy the processors twice over but not below a few lane groups.
 template <typename Batch, typename Verify>
@@ -81,11 +88,8 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
     Verify&& verify) NOEXCEPT
 {
     constexpr auto policy = poolstl::execution::par;
-    constexpr size_t minimum = 32;
-
     const auto count = batch.correlates.size();
-    const auto threads = std::max(std::thread::hardware_concurrency(), 1u);
-    const auto rows = std::max(minimum, ceilinged_divide(count, two * threads));
+    const auto rows = count_to_rows(count);
     std::vector<size_t> it(ceilinged_divide(count, rows));
     std::iota(it.begin(), it.end(), zero);
     stopper failed{};
@@ -93,17 +97,19 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
     data_chunk results(count);
     std::for_each(policy, it.cbegin(), it.cend(), [&](size_t chunk) NOEXCEPT
     {
-        if (cancel) return;
+        if (cancel)
+            return;
+
+        data_chunk out{};
         const auto first = chunk * rows;
         const auto size = std::min(rows, count - first);
-        data_chunk out{};
         if (!verify(out, batch.points.subspan(first, size),
             batch.digests.subspan(first, size),
             batch.signatures.subspan(first, size)))
             failed.store(true);
 
-        std::copy(out.begin(), out.end(),
-            std::next(results.begin(), to_signed(first)));
+        const auto in = std::next(results.begin(), to_signed(first));
+        std::copy(out.begin(), out.end(), in);
     });
 
     // Empty implies fully-verified batch (or canceled, which caller gates).
@@ -113,19 +119,21 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
     return results;
 }
 
-// Rows verify on the device where permitted and available, otherwise or upon
-// its failure on the processor.
-LCOV_EXCL_START("Requires a device.")
-template <typename Batch, typename Verify>
-data_chunk batch_verify(bool& device, const stopper& cancel,
-    const Batch& batch, bool gpu, Verify&& verify) NOEXCEPT
-{
-    data_chunk results{};
-    device = gpu && secp256k1::cuda::available() &&
-        secp256k1::cuda::verify(results, cancel, batch);
+LCOV_EXCL_START("Requires a gpu.")
 
-    return device ? results : batch_verify_(cancel, batch, verify);
+template <typename Batch, typename Verify>
+data_chunk batch_verify(const stopper& cancel, bool& use_gpu, Batch& batch,
+    Verify&& verify) NOEXCEPT
+{
+    namespace cuda = secp256k1::cuda;
+
+    data_chunk results{};
+    use_gpu = use_gpu && cuda::available() &&
+        cuda::verify(cancel, results, batch);
+
+    return use_gpu ? results : batch_verify_(cancel, batch, verify);
 }
+
 LCOV_EXCL_STOP()
 
 inline void push_fail(batched::links_t& fails,
