@@ -917,6 +917,7 @@ display_build_variables()
 {
     msg "BUILD_boost                     : ${BUILD_boost}"
     msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
+    msg "BUILD_LIMIT                     : ${BUILD_LIMIT}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
     msg "BUILD_OBJ_DIR                   : ${BUILD_OBJ_DIR}"
     msg "BUILD_OBJ_DIR_RELATIVE          : ${BUILD_OBJ_DIR_RELATIVE}"
