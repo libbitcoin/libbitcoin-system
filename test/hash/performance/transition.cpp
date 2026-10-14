@@ -41,8 +41,7 @@ struct dirty_64
         typename Algorithm::block_t block{};
         report(name, nanoseconds(calls, [&]() NOEXCEPT
         {
-            const auto value = sign_cast<int32_t>(state.front());
-            _mm256_storeu_si256(&dirty_sink, _mm256_set1_epi32(value));
+            f::store(dirty_sink, f::broadcast<xint256_t>(state.front()));
             std::atomic_signal_fence(std::memory_order_seq_cst);
             block.front() ^= narrow_cast<uint8_t>(state.front());
             Algorithm::accumulate(state, block);
