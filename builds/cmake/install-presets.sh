@@ -271,16 +271,18 @@ main()
         msg_verbose "No --prefix specified, defaulting to '${PREFIX}'."
     else
         # Incorporate the custom libdir into each object, for link time resolution
-        if [[ -z "${LD_RUN_PATH}" ]]; then
-            export LD_RUN_PATH="${PREFIX}/lib"
-        else
-            export LD_RUN_PATH="${LD_RUN_PATH}:${PREFIX}/lib"
-        fi
+        if [[ "${BUILD_LINK}" == "dynamic" ]]; then
+            if [[ -z "${LD_RUN_PATH}" ]]; then
+                export LD_RUN_PATH="${PREFIX}/lib"
+            else
+                export LD_RUN_PATH="${LD_RUN_PATH}:${PREFIX}/lib"
+            fi
 
-        if [[ -z "${LD_LIBRARY_PATH}" ]]; then
-            export LD_LIBRARY_PATH="${PREFIX}/lib"
-        else
-            export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${PREFIX}/lib"
+            if [[ -z "${LD_LIBRARY_PATH}" ]]; then
+                export LD_LIBRARY_PATH="${PREFIX}/lib"
+            else
+                export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${PREFIX}/lib"
+            fi
         fi
     fi
 
