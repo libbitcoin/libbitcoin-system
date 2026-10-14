@@ -262,6 +262,11 @@
         #define HAVE_AVX2
         #define HAVE_256
     #endif
+    // -mavx
+    // vc++: Advanced Vector Extensions (X86/X64) (/arch:AVX)
+    #if defined(__AVX__)
+        #define HAVE_AVX
+    #endif
     // -msse4.1
     // vc++: Use Advanced Vector Extensions (X86/X64) (/arch:AVX).
     #if defined(__SSE4_1__)

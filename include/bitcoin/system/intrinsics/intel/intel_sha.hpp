@@ -117,6 +117,12 @@ INLINE uint32_t get_160(xint128_t e) NOEXCEPT
     return _mm_extract_epi32(e, 3);
 }
 
+/// Clear dirty upper ymm/zmm state, as SHA-NI has only SSE encodings.
+INLINE void zeroupper() NOEXCEPT
+{
+    mm256_zeroupper();
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin

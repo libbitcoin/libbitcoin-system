@@ -318,6 +318,7 @@
     <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp">
       <ObjectFileName>$(IntDir)test_hash_performance_performance.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\performance\transition.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
     </ClCompile>
