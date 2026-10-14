@@ -1388,6 +1388,12 @@ jobs:
           persist-credentials: false
           repository: ${{ github.repository }}
 
+      - name: Force clean nuget package repository
+        shell: cmd
+        working-directory: 'libbitcoin-system'
+        run: |
+          nuget locals all -clear
+
       - name: Execute build
         shell: cmd
         working-directory: 'libbitcoin-system'
