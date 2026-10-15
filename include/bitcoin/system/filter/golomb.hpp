@@ -25,6 +25,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -40,6 +41,21 @@ public:
     /// Sorted hashes of the distinct items.
     static std::vector<uint64_t> hash_distinct(const data_stack& items,
         const siphash_key& entropy) NOEXCEPT;
+    static std::vector<uint64_t> hash_distinct(
+        const std::vector<data_slice>& items,
+        const siphash_key& entropy) NOEXCEPT;
+
+    /// Upper bound of the construct size in bytes for the hash count.
+    static constexpr size_t construct_bound(size_t count, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT
+    {
+        // Quotients are unary (value plus one) and sum to at most the bound.
+        const auto remainders = count * add1<uint64_t>(bits);
+        const auto quotients = shift_right(target_false_positive_rate * count,
+            bits);
+        return possible_narrow_cast<size_t>(
+            ceilinged_divide(remainders + quotients, byte_bits));
+    }
 
     /// Construct from sorted hashes (as from hash_distinct).
     static void construct(bitwriter& writer,

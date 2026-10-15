@@ -190,6 +190,12 @@ uint32_t transaction::locktime() const NOEXCEPT
     return unsafe_from_little_endian<uint32_t>(offset);
 }
 
+data_slice transaction::outputs_data() const NOEXCEPT
+{
+    const auto begin = at_outputs();
+    return { begin, std::next(begin, outputs_size()) };
+}
+
 data_slice transaction::witnesses() const NOEXCEPT
 {
     const auto begin = at_witnesses();

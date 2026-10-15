@@ -21,10 +21,12 @@
 
 #include <bitcoin/system/wallet/neutrino.hpp>
 
+#include <numeric>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/filter/filter.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -36,19 +38,25 @@ constexpr uint8_t golomb_bits = 19;
 constexpr uint64_t golomb_target_false_positive_rate = 784931;
 constexpr auto rate = golomb_target_false_positive_rate;
 
+template <typename Scripts>
 static bool construct_filter(data_chunk& out, const siphash_key& key,
-    const data_stack& scripts) NOEXCEPT
+    const Scripts& scripts) NOEXCEPT
 {
     const auto hashes = golomb::hash_distinct(scripts, key);
+    const auto count = hashes.size();
+    out.resize(variable_size(count) + golomb::construct_bound(count,
+        golomb_bits, rate));
 
-    // A vector (push) stream is used because the size is not known a-priori.
-    stream::out::data stream(out);
-    write::bits::ostream writer(stream);
-
-    writer.write_variable(hashes.size());
+    stream::out::fast stream(out);
+    write::bits::fast writer(stream);
+    writer.write_variable(count);
     golomb::construct(writer, hashes, golomb_bits, rate);
     writer.flush();
-    return !!writer;
+    if (!writer)
+        return false;
+
+    out.resize(writer.get_write_position());
+    return true;
 }
 
 bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
@@ -86,11 +94,24 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
     return construct_filter(out, key, scripts);
 }
 
+static size_t script_count(const chain::view::block& block) NOEXCEPT
+{
+    const auto sum = [](size_t total, const auto& tx) NOEXCEPT
+    {
+        return ceilinged_add(total, tx.outputs());
+    };
+
+    const auto& txs = block.views();
+    return ceilinged_add(block.spends(),
+        std::accumulate(txs.begin(), txs.end(), zero, sum));
+}
+
 bool compute_filter(data_chunk& out, const chain::view::block& block) NOEXCEPT
 {
     const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
-    data_stack scripts{};
+    std::vector<data_slice> scripts{};
+    scripts.reserve(script_count(block));
 
     for (const auto& tx: block.views())
     {
@@ -102,11 +123,12 @@ bool compute_filter(data_chunk& out, const chain::view::block& block) NOEXCEPT
                     return false;
 
                 if (!is_zero(in->prevout->script_size()))
-                    scripts.push_back(in->prevout->script_data().to_chunk());
+                    scripts.push_back(in->prevout->script_data());
             }
         }
 
-        auto stream = tx.get_outputs_stream();
+        const auto outputs = tx.outputs_data();
+        stream::in::fast stream{ outputs };
         read::bytes::fast source{ stream };
         for (size_t output{}; output < tx.outputs(); ++output)
         {
@@ -117,11 +139,15 @@ bool compute_filter(data_chunk& out, const chain::view::block& block) NOEXCEPT
             const auto op_return = !is_zero(size) &&
                 (source.peek_byte() == to_value(chain::opcode::op_return));
 
-            if (is_zero(size) || op_return)
-                source.skip_bytes(size);
-            else
-                scripts.push_back(source.read_bytes(size));
+            const auto* script = std::next(outputs.data(),
+                source.get_read_position());
+            source.skip_bytes(size);
+            if (!is_zero(size) && !op_return && source)
+                scripts.emplace_back(script, std::next(script, size));
         }
+
+        if (!source)
+            return false;
     }
 
     return construct_filter(out, key, scripts);

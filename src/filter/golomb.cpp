@@ -33,7 +33,8 @@ namespace system {
 // Golomb-coded set construction
 // ----------------------------------------------------------------------------
 
-std::vector<uint64_t> golomb::hash_distinct(const data_stack& items,
+template <typename Items>
+static std::vector<uint64_t> hash_distinct_(const Items& items,
     const siphash_key& entropy) NOEXCEPT
 {
     using indexed = std::pair<uint64_t, size_t>;
@@ -62,6 +63,18 @@ std::vector<uint64_t> golomb::hash_distinct(const data_stack& items,
     }
 
     return out;
+}
+
+std::vector<uint64_t> golomb::hash_distinct(const data_stack& items,
+    const siphash_key& entropy) NOEXCEPT
+{
+    return hash_distinct_(items, entropy);
+}
+
+std::vector<uint64_t> golomb::hash_distinct(
+    const std::vector<data_slice>& items, const siphash_key& entropy) NOEXCEPT
+{
+    return hash_distinct_(items, entropy);
 }
 
 void golomb::construct(bitwriter& writer, const std::vector<uint64_t>& hashes,
