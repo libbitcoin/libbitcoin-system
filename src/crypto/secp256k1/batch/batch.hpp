@@ -74,7 +74,7 @@ inline bool with_lanes(Verify&& verify) NOEXCEPT
     return verify.template operator()<uint64_t>();
 }
 
-static size_t count_to_rows(size_t count) NOEXCEPT
+inline size_t count_to_rows(size_t count) NOEXCEPT
 {
     constexpr size_t minimum = 32;
     const auto threads = std::max(std::thread::hardware_concurrency(), 1u);
