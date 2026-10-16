@@ -69,6 +69,37 @@ BOOST_AUTO_TEST_CASE(golomb__hash_distinct__duplicate_item__sorted_distinct)
     BOOST_REQUIRE(std::is_sorted(hashes.begin(), hashes.end()));
 }
 
+BOOST_AUTO_TEST_CASE(golomb__hash_distinct__slices__same_as_stack)
+{
+    auto items = golomb_items();
+    items.push_back(items.front());
+    const std::vector<data_slice> slices(items.begin(), items.end());
+    BOOST_REQUIRE(golomb::hash_distinct(slices, golomb_key) == golomb::hash_distinct(items, golomb_key));
+}
+
+BOOST_AUTO_TEST_CASE(golomb__construct_bound__items__not_below_construct_size)
+{
+    const auto hashes = golomb::hash_distinct(golomb_items(), golomb_key);
+    const auto bound = golomb::construct_bound(hashes.size(), golomb_bits, golomb_rate);
+    BOOST_REQUIRE_GE(bound, golomb_set().size());
+}
+
+BOOST_AUTO_TEST_CASE(golomb__construct_bound__zero__zero)
+{
+    BOOST_REQUIRE_EQUAL(golomb::construct_bound(0, golomb_bits, golomb_rate), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(golomb__construct_bound__maximum_values__not_below_construct_size)
+{
+    data_chunk set{};
+    stream::out::data stream(set);
+    write::bits::ostream writer(stream);
+    const std::vector<uint64_t> hashes{ sub1(sub1(max_uint64)), sub1(max_uint64), max_uint64 };
+    golomb::construct(writer, hashes, golomb_bits, golomb_rate);
+    writer.flush();
+    BOOST_REQUIRE_GE(golomb::construct_bound(hashes.size(), golomb_bits, golomb_rate), set.size());
+}
+
 BOOST_AUTO_TEST_CASE(golomb__construct__distinct_hashes__same_as_items)
 {
     data_chunk set{};
