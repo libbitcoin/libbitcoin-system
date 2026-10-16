@@ -82,6 +82,30 @@ bool add_metadata(const prevout_data::list& metadata, const chain::block& block)
     return result;
 }
 
+bool compute_view_filter(data_chunk& out, const chain::block& block)
+{
+    const auto& txs = *block.transactions_ptr();
+    std::vector<bool> selected(txs.size(), true);
+    selected.front() = false;
+
+    data_chunk prevouts{};
+    for (auto tx = std::next(txs.begin()); tx != txs.end(); ++tx)
+    {
+        for (const auto& input: *(*tx)->inputs_ptr())
+        {
+            if (!input->prevout)
+                return false;
+
+            const auto prevout = input->prevout->to_data();
+            prevouts.insert(prevouts.end(), prevout.begin(), prevout.end());
+        }
+    }
+
+    chain::view::block view{ block.to_data(true), true };
+    return view.populate(std::move(prevouts), selected) &&
+        neutrino::compute_filter(out, view);
+}
+
 BOOST_AUTO_TEST_CASE(neutrino__compute__first_11_blocks__success)
 {
 
@@ -1429,6 +1453,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
 
     const auto expected_filter = base16_chunk("06294070f18c8b0ff84b92738259ca89b4");
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
@@ -2851,6 +2879,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
 
     const auto expected_filter = base16_chunk("1c275e3182d7d12a3bde9c34441fddffd314e1600dc25e30bfdcecdc40a35594e1561678bd8cac799f9fd001c2f8dfd2d4c909755e5a6bdc7731c39e00b8f73326e1508039cff3bc39d000");
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 #endif
 
@@ -2881,6 +2913,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
@@ -2907,6 +2943,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
@@ -2933,6 +2973,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
@@ -2959,6 +3003,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__false)
 {
@@ -3016,6 +3064,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__fal
 
     data_chunk result;
     BOOST_REQUIRE(!neutrino::compute_filter(result, validated_block));
+
+    chain::view::block view{ validated_block.to_data(true), true };
+    BOOST_REQUIRE(view.populate({}, std::vector<bool>(view.transactions(), false)));
+    BOOST_REQUIRE(!neutrino::compute_filter(result, view));
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
@@ -3150,6 +3202,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
@@ -3276,6 +3332,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
@@ -3421,6 +3481,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
@@ -3446,6 +3510,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
@@ -3492,6 +3560,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
@@ -3516,6 +3588,10 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
     data_chunk result;
     BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
+
+    data_chunk view_result;
+    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
+    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
