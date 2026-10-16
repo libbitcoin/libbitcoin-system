@@ -461,7 +461,7 @@ jobs:
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --extract coverage.info "${{ github.workspace }}/libbitcoin-system/include/*" "${{ github.workspace }}/libbitcoin-system/src/*" --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" "${{ github.workspace }}/libbitcoin-system/src/config/program_options/*" "${{ github.workspace }}/libbitcoin-system/src/crypto/secp256k1/cuda/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -912,7 +912,7 @@ jobs:
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --extract coverage.info "${{ github.workspace }}/libbitcoin-system/include/*" "${{ github.workspace }}/libbitcoin-system/src/*" --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" "${{ github.workspace }}/libbitcoin-system/src/config/program_options/*" "${{ github.workspace }}/libbitcoin-system/src/crypto/secp256k1/cuda/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
@@ -1290,7 +1290,7 @@ jobs:
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
           lcov --ignore-errors unused --extract coverage.info "${{ github.workspace }}/libbitcoin-system/include/*" "${{ github.workspace }}/libbitcoin-system/src/*" --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" "${{ github.workspace }}/libbitcoin-system/src/config/program_options/*" "${{ github.workspace }}/libbitcoin-system/src/crypto/secp256k1/cuda/*" --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
