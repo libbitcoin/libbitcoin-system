@@ -38,6 +38,10 @@ namespace view {
 
 constexpr auto point_size = chain::point::serialized_size();
 
+// Point, empty script, and sequence of a non-signed input in hash_all.
+constexpr auto blank_input_size = point_size + sizeof(uint8_t) +
+    sizeof(uint32_t);
+
 static const auto& null_output() NOEXCEPT
 {
     static const auto null = chain::output{}.to_data();
@@ -232,6 +236,41 @@ void transaction::signature_hash_all(writer& sink,
     sink.write_4_bytes_little_endian(sighash_flags);
 }
 
+// Equivalent to signature_hash_all(writer&) when !anyone_can_pay, but hashes
+// only preimage bytes following the last whole block preceding signed input.
+void transaction::signature_hash_all(hash_digest& out,
+    const input_iterator& input, const script& subscript,
+    uint8_t sighash_flags) const NOEXCEPT
+{
+    BC_ASSERT(!chain::transaction::is_anyone_can_pay(sighash_flags));
+    constexpr auto block_size = array_count<sha256::block_t>;
+    constexpr auto sequence_offset = point_size + sizeof(uint8_t);
+
+    set_x0_base_cache();
+    const auto& inputs = x0_base_cache_->inputs;
+    const auto preamble = sizeof(uint32_t) + variable_size(in_count_);
+    const auto signed_input = preamble + input_index(input) * blank_input_size;
+    const auto blocks = signed_input / block_size;
+    const auto data = inputs.data();
+
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    auto context = x0_base_cache_->contexts[blocks];
+    context.write(signed_input - blocks * block_size,
+        data + blocks * block_size);
+    context.write(point_size, data + signed_input);
+    context.write(subscript.to_data(true));
+    context.write(sizeof(uint32_t), data + signed_input + sequence_offset);
+    context.write(inputs.size() - (signed_input + blank_input_size),
+        data + signed_input + blank_input_size);
+    context.write(outputs_size(), at_outputs());
+    context.write(to_little_endian<uint32_t>(locktime()));
+    context.write(to_little_endian<uint32_t>(sighash_flags));
+    context.double_flush(out);
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+}
+
 void transaction::unversioned_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
@@ -241,6 +280,18 @@ void transaction::unversioned_sighash(hash_digest& out,
     if (flag == coverage::hash_single && output_overflow(input_index(input)))
     {
         out = one_hash;
+        return;
+    }
+
+    // Default (hash_all) without anyone_can_pay is cached (sink not created).
+    // The cache is not reused by a single input tx (excluding multisig).
+    const auto all = flag != coverage::hash_single &&
+        flag != coverage::hash_none;
+
+    if (all && !chain::transaction::is_anyone_can_pay(sighash_flags) &&
+        !is_one(in_count_))
+    {
+        signature_hash_all(out, input, subscript, sighash_flags);
         return;
     }
 
@@ -390,6 +441,59 @@ bool transaction::version1_sighash(hash_digest& out,
 
 // Signature hash caching (not thread safe).
 // ----------------------------------------------------------------------------
+
+// Cached hash_all preimage, independent of signed input and its subscript.
+// For each input of an n input tx the uncached preimage serializes and hashes
+// all n inputs and all outputs, which is quadratic in inputs. This caches the
+// serialized preimage of inputs once per tx, and the sha256 context at each
+// whole block of it, from which the hash of the preimage up to the signed
+// input continues. Outputs are contiguous in the tx buffer so are not copied.
+void transaction::set_x0_base_cache() const NOEXCEPT
+{
+    if (x0_base_cache_)
+        return;
+
+    constexpr auto block_size = array_count<sha256::block_t>;
+    const auto cache = std::make_shared<x0_base_cache>();
+
+    // Size of inputs part is guarded by is_oversized (as is the tx).
+    const auto preamble = sizeof(uint32_t) + variable_size(in_count_);
+    const auto blanks = ceilinged_multiply(in_count_, blank_input_size);
+    const auto inputs = ceilinged_add(preamble, blanks);
+    cache->inputs.resize(ceilinged_add(inputs, variable_size(out_count_)));
+
+    stream::out::fast stream{ cache->inputs };
+    write::bytes::fast sink{ stream };
+    sink.write_4_bytes_little_endian(version());
+    sink.write_variable(in_count_);
+    for (auto in = inputs_begin_; in != inputs_end_; ++in)
+    {
+        sink.write_bytes(in->point_data(), point_size);
+        sink.write_bytes(empty_script());
+        sink.write_4_bytes_little_endian(in->sequence());
+    }
+
+    sink.write_variable(out_count_);
+
+    // Context at each whole block of inputs part, including the initial.
+    // Hashing is not inlined here (accumulator), as an inline vector copy of
+    // state (dirty upper state) preceding legacy sse sha-ni is very costly.
+    const auto blocks = inputs / block_size;
+    accumulator<sha256> context{};
+    cache->contexts.reserve(add1(blocks));
+    cache->contexts.push_back(context);
+    auto block = cache->inputs.data();
+
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    for (size_t index{}; index < blocks; ++index, block += block_size)
+    {
+        context.write(block_size, block);
+        cache->contexts.push_back(context);
+    }
+    BC_POP_WARNING()
+
+    x0_base_cache_ = cache;
+}
 
 hash_digest transaction::x1_base_hash_points() const NOEXCEPT
 {
