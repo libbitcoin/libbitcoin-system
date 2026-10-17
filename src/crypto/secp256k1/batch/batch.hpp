@@ -39,39 +39,16 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// Lanes of Word are available where compiled and the processor executes them.
-template <typename Word>
-inline bool have_lanes() NOEXCEPT
-{
-    if constexpr (!have_ifma<Word>)
-    {
-        return false;
-    }
-    else if constexpr (is_same_type<Word, xint512_t>)
-    {
-        static const auto available = try_avx512ifma();
-        return available;
-    }
-    else
-    {
-        static const auto available = try_avx512ifma() || try_avxifma();
-        return available;
-    }
-}
-
 // Rows verify in the widest available lanes, or integrally.
 template <typename Verify>
 inline bool with_lanes(Verify&& verify) NOEXCEPT
 {
     if constexpr (have_ifma<xint512_t>)
-        if (have_lanes<xint512_t>())
-            return verify.template operator()<xint512_t>();
-
-    if constexpr (have_ifma<xint256_t>)
-        if (have_lanes<xint256_t>())
-            return verify.template operator()<xint256_t>();
-
-    return verify.template operator()<uint64_t>();
+        return verify.template operator()<xint512_t>();
+    else if constexpr (have_ifma<xint256_t>)
+        return verify.template operator()<xint256_t>();
+    else
+        return verify.template operator()<uint64_t>();
 }
 
 inline size_t count_to_rows(size_t count) NOEXCEPT
