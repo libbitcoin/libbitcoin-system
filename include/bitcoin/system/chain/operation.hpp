@@ -161,9 +161,12 @@ protected:
         bool underflow) NOEXCEPT;
 
 private:
-    // So script may call count_op.
+    // So script may call count_op and from_data (contiguous bytes).
     friend class script;
     static bool count_op(reader& source) NOEXCEPT;
+    static void count_op(const uint8_t*& it, const uint8_t* end) NOEXCEPT;
+    static operation from_data(const uint8_t*& it,
+        const uint8_t* end) NOEXCEPT;
 
     static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,

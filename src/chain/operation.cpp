@@ -216,8 +216,12 @@ operation operation::from_data(reader& source) NOEXCEPT
     if (size > max_bytes)
         source.invalidate();
 
-    // An invalid source.read_bytes_raw returns nullptr.
-    auto push = to_shared(source ? source.read_bytes(size) : data_chunk{});
+    // Zero-length data (including all non-push opcodes) is not allocated, as
+    // null data_ is equivalent to empty data (shares no_data_cptr()).
+    chunk_cptr push{};
+    if (source && !is_zero(size))
+        push = to_shared(source.read_bytes(size));
+
     const auto underflow = !source;
 
     // This requires that provided stream terminates at the end of the script.
@@ -235,6 +239,79 @@ operation operation::from_data(reader& source) NOEXCEPT
 
     // All byte vectors are deserializable, stream indicates own failure.
     return { code, push, underflow };
+}
+
+// Advances 'it' past the opcode and any data size bytes and sets 'size',
+// unless the size bytes are truncated or size exceeds max_bytes or the bytes
+// remaining (underflow), in which case 'it' is unchanged and returns false.
+static bool advance_data_size(size_t& size, const uint8_t*& it,
+    const uint8_t* end) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
+    const auto code = *it;
+    auto next = std::next(it);
+    const auto left = static_cast<size_t>(std::distance(next, end));
+
+    switch (static_cast<opcode>(code))
+    {
+        case opcode::push_one_size:
+            if (left < sizeof(uint8_t)) return false;
+            size = *next;
+            next += sizeof(uint8_t);
+            break;
+        case opcode::push_two_size:
+            if (left < sizeof(uint16_t)) return false;
+            size = unsafe_from_little_endian<uint16_t>(next);
+            next += sizeof(uint16_t);
+            break;
+        case opcode::push_four_size:
+            if (left < sizeof(uint32_t)) return false;
+            size = unsafe_from_little_endian<uint32_t>(next);
+            next += sizeof(uint32_t);
+            break;
+        default:
+            size = code <= op_75 ? code : zero;
+            break;
+    }
+
+    if (size > max_bytes ||
+        size > static_cast<size_t>(std::distance(next, end)))
+        return false;
+
+    it = next;
+    return true;
+    BC_POP_WARNING()
+}
+
+// static/private
+// Equivalent to from_data(reader&) over a stream that terminates at 'end',
+// without stream overhead. Requires it < end. Advances 'it' past the op, an
+// underflow op consumes (and retains) all bytes from its opcode to 'end'.
+operation operation::from_data(const uint8_t*& it,
+    const uint8_t* end) NOEXCEPT
+{
+    BC_ASSERT(it < end);
+    const auto start = it;
+    const auto code = static_cast<opcode>(*it);
+
+    size_t size{};
+    if (!advance_data_size(size, it, end))
+    {
+        it = end;
+        return { any_invalid, to_shared<data_chunk>(start, end), true };
+    }
+
+    // Zero-length data (including all non-push opcodes) is not allocated.
+    chunk_cptr push{};
+    if (!is_zero(size))
+    {
+        const auto data = it;
+        std::advance(it, size);
+        push = to_shared<data_chunk>(data, it);
+    }
+
+    return { code, push, false };
 }
 
 // static/private
@@ -677,6 +754,18 @@ bool operation::count_op(reader& source) NOEXCEPT
     const auto code = static_cast<opcode>(source.read_byte());
     source.skip_bytes(read_data_size(code, source));
     return true;
+}
+
+// static/private
+// Advances 'it' past the op, an underflow op advances 'it' to 'end'.
+void operation::count_op(const uint8_t*& it, const uint8_t* end) NOEXCEPT
+{
+    BC_ASSERT(it < end);
+    size_t size{};
+    if (advance_data_size(size, it, end))
+        std::advance(it, size);
+    else
+        it = end;
 }
 
 // static/private

@@ -190,6 +190,8 @@ public:
 protected:
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
     script(reader&& source, bool prefix) NOEXCEPT;
+    script(operations&& ops, bool valid, bool easier, bool failer,
+        bool roller, size_t size) NOEXCEPT;
     script(const operations& ops, bool valid, bool easier, bool failer,
         bool roller, size_t size) NOEXCEPT;
 
@@ -198,6 +200,7 @@ private:
     static script from_operations(operations&& ops) NOEXCEPT;
     static script from_operations(const operations& ops) NOEXCEPT;
     static script from_data(reader& source, bool prefix) NOEXCEPT;
+    static script from_data(const data_slice& data) NOEXCEPT;
     static script from_string(const std::string_view& mnemonic) NOEXCEPT;
     static size_t op_count(reader& source) NOEXCEPT;
     static size_t serialized_size(const operations& ops) NOEXCEPT;
