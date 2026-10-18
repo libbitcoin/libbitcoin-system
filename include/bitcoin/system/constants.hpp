@@ -158,6 +158,18 @@ namespace libbitcoin {
     constexpr auto have_avxifma = false;
 #endif
 
+#if defined(HAVE_BMI2)
+    constexpr auto have_bmi2 = true;
+#else
+    constexpr auto have_bmi2 = false;
+#endif
+
+#if defined(HAVE_ADX)
+    constexpr auto have_adx = true;
+#else
+    constexpr auto have_adx = false;
+#endif
+
 #if defined(HAVE_AESNI)
     constexpr auto have_aesni = true;
 #else
