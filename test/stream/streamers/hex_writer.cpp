@@ -97,4 +97,36 @@ BOOST_AUTO_TEST_CASE(hex_writer__data__genesis_bheader__expected)
     BOOST_REQUIRE_EQUAL(to_string(hex), expected_base16());
 }
 
+BOOST_AUTO_TEST_CASE(hex_writer__fast__multiple_batches__expected)
+{
+    const data_chunk data(1001, 0xa5);
+    data_chunk hex(data.size() * two);
+    stream::out::fast stream{ hex };
+    write::base16::fast hexer{ stream };
+    hexer.write_bytes(data);
+    BOOST_REQUIRE(hexer);
+    BOOST_REQUIRE_EQUAL(to_string(hex), encode_base16(data));
+}
+
+BOOST_AUTO_TEST_CASE(hex_writer__text__batch_boundary__expected)
+{
+    const data_chunk data(256, 0x5a);
+    std::string hex{};
+    write::base16::text hexer{ hex };
+    hexer.write_bytes(data);
+    hexer.flush();
+    BOOST_REQUIRE(hexer);
+    BOOST_REQUIRE_EQUAL(hex, encode_base16(data));
+}
+
+BOOST_AUTO_TEST_CASE(hex_writer__fast__insufficient_target__invalid)
+{
+    const data_chunk data(300, 0x42);
+    data_chunk hex(data.size());
+    stream::out::fast stream{ hex };
+    write::base16::fast hexer{ stream };
+    hexer.write_bytes(data);
+    BOOST_REQUIRE(!hexer);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
