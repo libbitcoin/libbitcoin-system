@@ -647,21 +647,32 @@ namespace poolstl {
             POOLSTL_NO_DISCARD bool par_allowed() const {
                 return false;
             }
+
+            // libbitcoin: chunk floor (poolstl has none), always one here.
+            POOLSTL_NO_DISCARD std::size_t chunk_floor() const {
+                return 1;
+            }
         };
 
         /**
          * A parallel policy that can use a user-specified thread pool or a default one.
+         * A chunk floor is the minimum number of elements per task; a range of no
+         * more than the floor runs sequentially on the calling thread.
          */
         struct parallel_policy : public poolstl_policy {
             parallel_policy() = default;
-            explicit parallel_policy(ttp::task_thread_pool* on_pool, bool par_ok): on_pool(on_pool), par_ok(par_ok) {}
+            // libbitcoin: floor parameter added to the poolstl constructor.
+            explicit parallel_policy(ttp::task_thread_pool* on_pool, bool par_ok, std::size_t floor = 1):
+                on_pool(on_pool), par_ok(par_ok), floor(floor) {}
 
+            // libbitcoin: carries the floor (poolstl passes par_ok only).
             parallel_policy on(ttp::task_thread_pool& pool) const {
-                return parallel_policy{&pool, par_ok};
+                return parallel_policy{&pool, par_ok, floor};
             }
 
-            parallel_policy par_if(bool call_par) const {
-                return parallel_policy{on_pool, call_par};
+            // libbitcoin: chunk_floor parameter added to poolstl par_if.
+            parallel_policy par_if(bool call_par, std::size_t chunk_floor = 1) const {
+                return parallel_policy{on_pool, call_par, chunk_floor};
             }
 
             POOLSTL_NO_DISCARD ttp::task_thread_pool* pool() const {
@@ -676,9 +687,16 @@ namespace poolstl {
                 return par_ok;
             }
 
+            // libbitcoin: chunk floor (poolstl has none).
+            POOLSTL_NO_DISCARD std::size_t chunk_floor() const {
+                return floor;
+            }
+
         protected:
             ttp::task_thread_pool *on_pool = nullptr;
             bool par_ok = true;
+            // libbitcoin: minimum elements per task, one is poolstl behavior.
+            std::size_t floor = 1;
         };
 
         constexpr sequenced_policy seq{};
@@ -712,6 +730,11 @@ namespace poolstl {
                 return par_ok;
             }
 
+            // libbitcoin: chunk floor (poolstl has none), always one here.
+            POOLSTL_NO_DISCARD std::size_t chunk_floor() const {
+                return 1;
+            }
+
         protected:
             unsigned int num_threads = 1;
             bool par_ok = true;
@@ -721,10 +744,12 @@ namespace poolstl {
          * Choose parallel or sequential at runtime.
          *
          * @param call_par Whether to use a parallel policy.
+         * @param chunk_floor Minimum elements per task; a range within it runs sequentially.
          * @return `par` if call_par is true, else a sequential policy (like `seq`).
          */
-        inline parallel_policy par_if(bool call_par) {
-            return parallel_policy{nullptr, call_par};
+        // libbitcoin: chunk_floor parameter added to poolstl par_if.
+        inline parallel_policy par_if(bool call_par, std::size_t chunk_floor = 1) {
+            return parallel_policy{nullptr, call_par, chunk_floor};
         }
 
         /**
@@ -787,6 +812,13 @@ namespace poolstl {
         template <class ExecPolicy>
         bool is_seq(const ExecPolicy& policy) {
             return !policy.par_allowed();
+        }
+
+        // libbitcoin: overload added to poolstl, sequential within the floor.
+        template <class ExecPolicy, class RandIt>
+        bool is_seq(const ExecPolicy& policy, RandIt first, RandIt last) {
+            return !policy.par_allowed() ||
+                (std::size_t)std::distance(first, last) <= policy.chunk_floor();
         }
 
         template <class ExecPolicy>
@@ -1429,21 +1461,32 @@ namespace poolstl {
             POOLSTL_NO_DISCARD bool par_allowed() const {
                 return false;
             }
+
+            // libbitcoin: chunk floor (poolstl has none), always one here.
+            POOLSTL_NO_DISCARD std::size_t chunk_floor() const {
+                return 1;
+            }
         };
 
         /**
          * A parallel policy that can use a user-specified thread pool or a default one.
+         * A chunk floor is the minimum number of elements per task; a range of no
+         * more than the floor runs sequentially on the calling thread.
          */
         struct parallel_policy : public poolstl_policy {
             parallel_policy() = default;
-            explicit parallel_policy(ttp::task_thread_pool* on_pool, bool par_ok): on_pool(on_pool), par_ok(par_ok) {}
+            // libbitcoin: floor parameter added to the poolstl constructor.
+            explicit parallel_policy(ttp::task_thread_pool* on_pool, bool par_ok, std::size_t floor = 1):
+                on_pool(on_pool), par_ok(par_ok), floor(floor) {}
 
+            // libbitcoin: carries the floor (poolstl passes par_ok only).
             parallel_policy on(ttp::task_thread_pool& pool) const {
-                return parallel_policy{&pool, par_ok};
+                return parallel_policy{&pool, par_ok, floor};
             }
 
-            parallel_policy par_if(bool call_par) const {
-                return parallel_policy{on_pool, call_par};
+            // libbitcoin: chunk_floor parameter added to poolstl par_if.
+            parallel_policy par_if(bool call_par, std::size_t chunk_floor = 1) const {
+                return parallel_policy{on_pool, call_par, chunk_floor};
             }
 
             POOLSTL_NO_DISCARD ttp::task_thread_pool* pool() const {
@@ -1458,9 +1501,16 @@ namespace poolstl {
                 return par_ok;
             }
 
+            // libbitcoin: chunk floor (poolstl has none).
+            POOLSTL_NO_DISCARD std::size_t chunk_floor() const {
+                return floor;
+            }
+
         protected:
             ttp::task_thread_pool *on_pool = nullptr;
             bool par_ok = true;
+            // libbitcoin: minimum elements per task, one is poolstl behavior.
+            std::size_t floor = 1;
         };
 
         constexpr sequenced_policy seq{};
@@ -1494,6 +1544,11 @@ namespace poolstl {
                 return par_ok;
             }
 
+            // libbitcoin: chunk floor (poolstl has none), always one here.
+            POOLSTL_NO_DISCARD std::size_t chunk_floor() const {
+                return 1;
+            }
+
         protected:
             unsigned int num_threads = 1;
             bool par_ok = true;
@@ -1503,10 +1558,12 @@ namespace poolstl {
          * Choose parallel or sequential at runtime.
          *
          * @param call_par Whether to use a parallel policy.
+         * @param chunk_floor Minimum elements per task; a range within it runs sequentially.
          * @return `par` if call_par is true, else a sequential policy (like `seq`).
          */
-        inline parallel_policy par_if(bool call_par) {
-            return parallel_policy{nullptr, call_par};
+        // libbitcoin: chunk_floor parameter added to poolstl par_if.
+        inline parallel_policy par_if(bool call_par, std::size_t chunk_floor = 1) {
+            return parallel_policy{nullptr, call_par, chunk_floor};
         }
 
         /**
@@ -1571,6 +1628,13 @@ namespace poolstl {
             return !policy.par_allowed();
         }
 
+        // libbitcoin: overload added to poolstl, sequential within the floor.
+        template <class ExecPolicy, class RandIt>
+        bool is_seq(const ExecPolicy& policy, RandIt first, RandIt last) {
+            return !policy.par_allowed() ||
+                (std::size_t)std::distance(first, last) <= policy.chunk_floor();
+        }
+
         template <class ExecPolicy>
         using is_pure_threads_policy = std::is_same<poolstl::execution::pure_threads_policy,
             typename std::remove_cv<typename std::remove_reference<ExecPolicy>::type>::type>;
@@ -1614,7 +1678,9 @@ namespace poolstl {
                                int extra_split_factor = 1) {
             std::vector<std::future<ChunkRet>> futures;
             auto& task_pool = *policy.pool();
-            auto chunk_size = get_chunk_size(first, last, extra_split_factor * task_pool.get_num_threads());
+            // libbitcoin: chunk size floored (poolstl splits one chunk per thread).
+            auto chunk_size = std::max(get_chunk_size(first, last, extra_split_factor * task_pool.get_num_threads()),
+                                       (typename std::iterator_traits<RandIt>::difference_type)policy.chunk_floor());
 
             while (first < last) {
                 auto iter_chunk_size = get_iter_chunk_size(first, last, chunk_size);
@@ -1637,7 +1703,9 @@ namespace poolstl {
                              Chunk chunk, ChunkRet*, int extra_split_factor, A&&... chunk_args) {
             std::vector<std::future<ChunkRet>> futures;
             auto& task_pool = *policy.pool();
-            auto chunk_size = get_chunk_size(first, last, extra_split_factor * task_pool.get_num_threads());
+            // libbitcoin: chunk size floored (poolstl splits one chunk per thread).
+            auto chunk_size = std::max(get_chunk_size(first, last, extra_split_factor * task_pool.get_num_threads()),
+                                       (typename std::iterator_traits<RandIt>::difference_type)policy.chunk_floor());
 
             while (first < last) {
                 auto iter_chunk_size = get_iter_chunk_size(first, last, chunk_size);
@@ -1672,7 +1740,9 @@ namespace poolstl {
                              Chunk chunk, ChunkRet*, A&&... chunk_args) {
             std::vector<std::future<ChunkRet>> futures;
             auto& task_pool = *policy.pool();
-            auto chunk_size = get_chunk_size(first1, last1, task_pool.get_num_threads());
+            // libbitcoin: chunk size floored (poolstl splits one chunk per thread).
+            auto chunk_size = std::max(get_chunk_size(first1, last1, task_pool.get_num_threads()),
+                                       (typename std::iterator_traits<RandIt1>::difference_type)policy.chunk_floor());
 
             while (first1 < last1) {
                 auto iter_chunk_size = get_iter_chunk_size(first1, last1, chunk_size);
@@ -1697,7 +1767,9 @@ namespace poolstl {
                            Chunk chunk, ChunkRet*, A&&... chunk_args) {
             std::vector<std::future<ChunkRet>> futures;
             auto& task_pool = *policy.pool();
-            auto chunk_size = get_chunk_size(first1, last1, task_pool.get_num_threads());
+            // libbitcoin: chunk size floored (poolstl splits one chunk per thread).
+            auto chunk_size = std::max(get_chunk_size(first1, last1, task_pool.get_num_threads()),
+                                       (typename std::iterator_traits<RandIt1>::difference_type)policy.chunk_floor());
 
             while (first1 < last1) {
                 auto iter_chunk_size = get_iter_chunk_size(first1, last1, chunk_size);
@@ -2192,7 +2264,8 @@ namespace std {
             }
         };
 
-        if (poolstl::internal::is_seq<ExecPolicy>(policy)) {
+        // libbitcoin: range-aware is_seq (poolstl tests the policy only).
+        if (poolstl::internal::is_seq<ExecPolicy>(policy, first, last)) {
             chunk_func(first, last);
             return;
         }
@@ -2293,7 +2366,8 @@ namespace std {
     poolstl::internal::enable_if_poolstl_policy<ExecPolicy, RandIt2>
     transform(ExecPolicy&& policy, RandIt1 first1, RandIt1 last1,
               RandIt2 dest, UnaryOperation unary_op) {
-        if (poolstl::internal::is_seq<ExecPolicy>(policy)) {
+        // libbitcoin: range-aware is_seq (poolstl tests the policy only).
+        if (poolstl::internal::is_seq<ExecPolicy>(policy, first1, last1)) {
             return poolstl::internal::cpp17::transform(first1, last1, dest, unary_op);
         }
 
@@ -2313,7 +2387,8 @@ namespace std {
     poolstl::internal::enable_if_poolstl_policy<ExecPolicy, RandIt3>
     transform(ExecPolicy&& policy, RandIt1 first1, RandIt1 last1,
               RandIt2 first2, RandIt3 dest, BinaryOperation binary_op) {
-        if (poolstl::internal::is_seq<ExecPolicy>(policy)) {
+        // libbitcoin: range-aware is_seq (poolstl tests the policy only).
+        if (poolstl::internal::is_seq<ExecPolicy>(policy, first1, last1)) {
             return poolstl::internal::cpp17::transform(first1, last1, first2, dest, binary_op);
         }
 
