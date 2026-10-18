@@ -53,16 +53,26 @@ void hex_writer<OStream>::do_write_bytes(const uint8_t* data,
 {
     BC_ASSERT(!is_multiply_overflow(size, octet_width));
 
-    char chars[octet_width]{};
-    const auto bytes = pointer_cast<uint8_t>(&chars[zero]);
+    // Batching avoids writing to dynamically-allocated buffer of size.
+    constexpr size_t batch = 128;
+    std::array<char, batch * octet_width> chars{};
+    const auto bytes = pointer_cast<uint8_t>(chars.data());
 
-    // Iteration avoids writing to dynamically-allocated buffer of size.
-    std::for_each_n(data, size, [&](uint8_t octet) NOEXCEPT
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    for (const auto end = std::next(data, size); data != end;)
     {
-        chars[0] = to_base16_hi_character(octet);
-        chars[1] = to_base16_lo_character(octet);
-        base::do_write_bytes(bytes, octet_width);
-    });
+        const auto count = std::min(to_unsigned(std::distance(data, end)), batch);
+        auto digit = chars.begin();
+        std::for_each_n(data, count, [&](uint8_t octet) NOEXCEPT
+        {
+            *digit++ = to_base16_hi_character(octet);
+            *digit++ = to_base16_lo_character(octet);
+        });
+
+        base::do_write_bytes(bytes, count * octet_width);
+        std::advance(data, count);
+    }
+    BC_POP_WARNING()
 }
 
 } // namespace system

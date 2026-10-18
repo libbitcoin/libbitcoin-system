@@ -477,6 +477,57 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_bytes2__value__expected)
     BOOST_REQUIRE(writer);
 }
 
+// write_bytes3
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_bytes3__zero__empty)
+{
+    std::istringstream in{ "abcdefghijklmnopqrstuvwxyz" };
+    read::bytes::istream reader(in);
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_bytes(reader, zero);
+    BOOST_REQUIRE(stream.str().empty());
+    BOOST_REQUIRE(writer);
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_bytes3__value__expected)
+{
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    std::istringstream in{ expected + "*" };
+    read::bytes::istream reader(in);
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_bytes(reader, expected.size());
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    BOOST_REQUIRE(writer);
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_bytes3__multiple_buffers__expected)
+{
+    const std::string expected(1000, '*');
+    std::istringstream in{ expected };
+    read::bytes::istream reader(in);
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_bytes(reader, expected.size());
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_bytes3__exhausted_reader__invalid_reader)
+{
+    std::istringstream in{ "abc" };
+    read::bytes::istream reader(in);
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_bytes(reader, 4);
+    BOOST_REQUIRE(!reader);
+}
+
 #endif // BYTE_WRITER_BYTES
 
 #ifdef BYTE_WRITER_STRINGS

@@ -39,13 +39,18 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_VIEW_REFERENCING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// Rows verify in the widest available lanes, or integrally.
+// Rows verify in the widest available ifma lanes, then the widest available
+// lanes (madd52 emulated), or integrally.
 template <typename Verify>
 inline bool with_lanes(Verify&& verify) NOEXCEPT
 {
     if constexpr (have_ifma<xint512_t>)
         return verify.template operator()<xint512_t>();
     else if constexpr (have_ifma<xint256_t>)
+        return verify.template operator()<xint256_t>();
+    else if constexpr (have<xint512_t>)
+        return verify.template operator()<xint512_t>();
+    else if constexpr (have<xint256_t>)
         return verify.template operator()<xint256_t>();
     else
         return verify.template operator()<uint64_t>();

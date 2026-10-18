@@ -93,6 +93,9 @@ public:
     /// Write size bytes.
     void write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
 
+    /// Write size bytes read from the reader.
+    void write_bytes(bytereader& in, size_t size) NOEXCEPT override;
+
     /// Strings.
     /// -----------------------------------------------------------------------
 
