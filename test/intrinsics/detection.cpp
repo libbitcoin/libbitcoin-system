@@ -118,18 +118,6 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try_avx2__always__match)
     BOOST_CHECK_EQUAL(get_avx(cpu1) && get_xcr_avx() && avx2, try_avx2());
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_detection__try_bmi2__always__match)
-{
-    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
-    BOOST_CHECK_EQUAL(cpu7.valid && get_right(cpu7.ebx, cpu7_0::bmi2_ebx_bit), try_bmi2());
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_detection__try_adx__always__match)
-{
-    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
-    BOOST_CHECK_EQUAL(cpu7.valid && get_right(cpu7.ebx, cpu7_0::adx_ebx_bit), try_adx());
-}
-
 BOOST_AUTO_TEST_CASE(intrinsics_detection__try_sse41__always__match)
 {
     const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
@@ -250,8 +238,6 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try__faked_none__false)
     BOOST_CHECK((!try_avx512ifma<none_cpu, all_xcr>()));
     BOOST_CHECK((!try_avxifma<none_cpu, all_xcr>()));
     BOOST_CHECK((!try_avx2<none_cpu, all_xcr>()));
-    BOOST_CHECK(!try_bmi2<none_cpu>());
-    BOOST_CHECK(!try_adx<none_cpu>());
     BOOST_CHECK(!try_sse41<none_cpu>());
     BOOST_CHECK(!try_aesni<none_cpu>());
     BOOST_CHECK((!try_vaes<none_cpu, all_xcr>()));
@@ -266,8 +252,6 @@ BOOST_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
     BOOST_CHECK((try_avx512ifma<all_cpu, all_xcr>()));
     BOOST_CHECK((try_avxifma<all_cpu, all_xcr>()));
     BOOST_CHECK((try_avx2<all_cpu, all_xcr>()));
-    BOOST_CHECK(try_bmi2<all_cpu>());
-    BOOST_CHECK(try_adx<all_cpu>());
     BOOST_CHECK(try_sse41<all_cpu>());
     BOOST_CHECK(try_aesni<all_cpu>());
     BOOST_CHECK((try_vaes<all_cpu, all_xcr>()));

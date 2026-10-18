@@ -107,9 +107,8 @@
     #endif
 #endif
 
-/// vc++: There are no flags for AVX512IFMA, AVXIFMA, AES-NI, VAES, BMI2 and ADX,
-/// so use custom WITH_AVX512IFMA, WITH_AVXIFMA, WITH_AESNI, WITH_VAES, WITH_BMI2
-/// and WITH_ADX options.
+/// vc++: There are no flags for AVX512IFMA, AVXIFMA, AES-NI and VAES, so use
+/// custom WITH_AVX512IFMA, WITH_AVXIFMA, WITH_AESNI and WITH_VAES options.
 #if defined(HAVE_MSC) && defined(HAVE_XCPU)
     #if defined(WITH_AVX512IFMA)
         #define __AVX512IFMA__
@@ -124,12 +123,6 @@
     #if defined(WITH_VAES)
         #define __VAES__
         #define __VPCLMULQDQ__
-    #endif
-    #if defined(WITH_BMI2)
-        #define __BMI2__
-    #endif
-    #if defined(WITH_ADX)
-        #define __ADX__
     #endif
 #endif
 
@@ -289,16 +282,6 @@
     // vc++: AVXIFMA not independently configurable (requires custom option).
     #if defined(__AVXIFMA__)
         #define HAVE_AVXIFMA
-    #endif
-    // -mbmi2
-    // vc++: BMI2 not independently configurable (requires custom option).
-    #if defined(__BMI2__)
-        #define HAVE_BMI2
-    #endif
-    // -madx
-    // vc++: ADX not independently configurable (requires custom option).
-    #if defined(__ADX__)
-        #define HAVE_ADX
     #endif
     // -maes -mpclmul
     // vc++: AES-NI not independently configurable (requires custom option).

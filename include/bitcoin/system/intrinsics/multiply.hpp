@@ -57,13 +57,7 @@ INLINE constexpr void mul_wide64_nominal(uint64_t& hi, uint64_t& lo,
 HOST_DEVICE INLINE void mul_wide64(uint64_t& hi, uint64_t& lo,
     uint64_t left, uint64_t right) NOEXCEPT
 {
-#if defined(HAVE_MSC) && defined(HAVE_X64) && defined(HAVE_BMI2)
-    BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
-    unsigned long long high;
-    BC_POP_WARNING()
-    lo = _mulx_u64(left, right, &high);
-    hi = high;
-#elif defined(HAVE_MSC) && defined(HAVE_X64)
+#if defined(HAVE_MSC) && defined(HAVE_X64)
     BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
     unsigned long long high;
     BC_POP_WARNING()
