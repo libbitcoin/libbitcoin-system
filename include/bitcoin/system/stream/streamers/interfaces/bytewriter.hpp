@@ -22,6 +22,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -68,6 +69,9 @@ public:
 
     /// Write size bytes.
     virtual void write_bytes(const uint8_t* data, size_t size) NOEXCEPT = 0;
+
+    /// Write size bytes read from the reader.
+    virtual void write_bytes(bytereader& in, size_t size) NOEXCEPT = 0;
 
     /// Strings.
     /// -----------------------------------------------------------------------

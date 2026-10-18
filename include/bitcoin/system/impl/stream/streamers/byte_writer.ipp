@@ -241,6 +241,19 @@ void byte_writer<OStream>::write_bytes(const uint8_t* data,
     do_write_bytes(data, size);
 }
 
+template <typename OStream>
+void byte_writer<OStream>::write_bytes(bytereader& in, size_t size) NOEXCEPT
+{
+    data_array<256> buffer{};
+    while (!is_zero(size) && in)
+    {
+        const auto part = std::min(size, buffer.size());
+        in.read_bytes(buffer.data(), part);
+        do_write_bytes(buffer.data(), part);
+        size -= part;
+    }
+}
+
 // strings
 // ----------------------------------------------------------------------------
 // Normal p2p form (consensus hash no strings).
