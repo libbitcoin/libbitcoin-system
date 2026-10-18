@@ -57,8 +57,6 @@ namespace cpu7_0
     constexpr auto leaf = 7;
     constexpr auto subleaf = 0;
     constexpr auto avx2_ebx_bit = 5;
-    constexpr auto bmi2_ebx_bit = 8;
-    constexpr auto adx_ebx_bit = 19;
     constexpr auto avx512f_ebx_bit = 16;
     constexpr auto avx512bw_ebx_bit = 30;
     constexpr auto shani_ebx_bit = 29;
@@ -222,22 +220,6 @@ inline bool try_avx2() NOEXCEPT
         && get_bit<xcr0::avx_bit>(extended)
         && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx);      // AVX2
-}
-
-template <auto Cpu = get_cpu>
-inline bool try_bmi2() NOEXCEPT
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-        && get_bit<cpu7_0::bmi2_ebx_bit>(ebx);      // BMI2
-}
-
-template <auto Cpu = get_cpu>
-inline bool try_adx() NOEXCEPT
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    return Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-        && get_bit<cpu7_0::adx_ebx_bit>(ebx);       // ADX
 }
 
 template <auto Cpu = get_cpu>
