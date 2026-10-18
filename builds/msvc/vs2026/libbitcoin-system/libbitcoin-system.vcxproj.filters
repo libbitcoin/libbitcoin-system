@@ -729,6 +729,9 @@
     <ClCompile Include="..\..\..\..\src\error\x509_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\execution.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\filter\golomb.cpp">
       <Filter>src\filter</Filter>
     </ClCompile>

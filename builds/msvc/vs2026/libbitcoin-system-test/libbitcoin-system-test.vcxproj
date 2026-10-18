@@ -303,6 +303,7 @@
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\x509_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\execution.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\bloom.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\sieve.cpp" />

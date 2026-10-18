@@ -67,7 +67,7 @@ template <typename Batch, typename Verify>
 data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
     Verify&& verify) NOEXCEPT
 {
-    constexpr auto policy = poolstl::execution::par;
+    constexpr auto policy = execution::par;
     const auto count = batch.correlates.size();
     const auto rows = count_to_rows(count);
     std::vector<size_t> it(ceilinged_divide(count, rows));

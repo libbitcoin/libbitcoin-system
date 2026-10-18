@@ -23,6 +23,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/math/math.hpp>

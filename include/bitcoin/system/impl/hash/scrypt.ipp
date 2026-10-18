@@ -43,9 +43,9 @@ consteval auto& CLASS::
 concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
-        return poolstl::execution::par;
+        return execution::par;
     else
-        return poolstl::execution::seq;
+        return execution::seq;
 }
 
 // protected
