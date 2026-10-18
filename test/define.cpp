@@ -138,6 +138,18 @@
     static_assert(!have_avxifma);
 #endif
 
+#if defined(HAVE_BMI2)
+    static_assert(have_bmi2);
+#else
+    static_assert(!have_bmi2);
+#endif
+
+#if defined(HAVE_ADX)
+    static_assert(have_adx);
+#else
+    static_assert(!have_adx);
+#endif
+
 #if defined(HAVE_AESNI)
     static_assert(have_aesni);
 #else

@@ -25,6 +25,8 @@
 #if defined(HAVE_MSC) && defined(HAVE_X64)
     // docs.microsoft.com/en-us/cpp/intrinsics/x64-amd64-intrinsics-list
     #include <intrin.h>
+#elif defined(HAVE_X64) && defined(HAVE_ADX)
+    #include <immintrin.h>
 #endif
 
 namespace libbitcoin {
@@ -46,7 +48,15 @@ INLINE constexpr bool add_carry64_nominal(uint64_t& sum, uint64_t left,
 HOST_DEVICE INLINE bool add_carry64(uint64_t& sum, uint64_t left,
     uint64_t right, bool carry) NOEXCEPT
 {
-#if defined(HAVE_MSC) && defined(HAVE_X64)
+#if defined(HAVE_X64) && defined(HAVE_ADX)
+    BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
+    unsigned long long out;
+    BC_POP_WARNING()
+    const auto overflow = _addcarryx_u64(static_cast<unsigned char>(carry),
+        left, right, &out);
+    sum = out;
+    return !is_zero(overflow);
+#elif defined(HAVE_MSC) && defined(HAVE_X64)
     BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
     unsigned long long out;
     BC_POP_WARNING()
