@@ -15,6 +15,8 @@ REM --enable-shani              Use Intel SHA Extensions.
 REM --enable-sha512             Use Intel SHA512 Extensions (implies AVX2).
 REM --enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics.
 REM --enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
+REM --enable-bmi2               Use Intel BMI2 intrinsics.
+REM --enable-adx                Use Intel ADX intrinsics.
 REM --enable-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
 REM --enable-avx512             Use Intel AVX512 intrinsics.
 REM --enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2).
@@ -216,6 +218,18 @@ if "!libbitcoin_system_TAG!" == "" (
             set "libbitcoin-system_PARAMS=/p:Option-vaes=true"
         ) else (
             set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-vaes=true"
+        )
+    ) else if "%~1" == "--enable-bmi2" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-bmi2=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-bmi2=true"
+        )
+    ) else if "%~1" == "--enable-adx" (
+        if "!libbitcoin-system_PARAMS!" == "" (
+            set "libbitcoin-system_PARAMS=/p:Option-adx=true"
+        ) else (
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-adx=true"
         )
     ) else if "%~1" == "--enable-avx512ifma" (
         if "!libbitcoin-system_PARAMS!" == "" (
@@ -512,6 +526,8 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "--enable-sha512             Use Intel SHA512 Extensions (implies AVX2)."
     call :msg "--enable-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics."
     call :msg "--enable-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+    call :msg "--enable-bmi2               Use Intel BMI2 intrinsics."
+    call :msg "--enable-adx                Use Intel ADX intrinsics."
     call :msg "--enable-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
     call :msg "--enable-avx512             Use Intel AVX512 intrinsics."
     call :msg "--enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2)."

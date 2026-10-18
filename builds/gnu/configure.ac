@@ -200,6 +200,24 @@ AC_ARG_ENABLE([vaes],
 AC_MSG_RESULT([$enable_vaes])
 AM_CONDITIONAL([ENABLE_VAES], [test "x${enable_vaes}" != "xno"])
 
+AC_MSG_CHECKING([--enable-bmi2 option])
+AC_ARG_ENABLE([bmi2],
+    AS_HELP_STRING([--enable-bmi2],
+        [Use Intel BMI2 intrinsics. @<:@default=no@:>@]),
+    [enable_bmi2=$enableval],
+    [enable_bmi2=no])
+AC_MSG_RESULT([$enable_bmi2])
+AM_CONDITIONAL([ENABLE_BMI2], [test "x${enable_bmi2}" != "xno"])
+
+AC_MSG_CHECKING([--enable-adx option])
+AC_ARG_ENABLE([adx],
+    AS_HELP_STRING([--enable-adx],
+        [Use Intel ADX intrinsics. @<:@default=no@:>@]),
+    [enable_adx=$enableval],
+    [enable_adx=no])
+AC_MSG_RESULT([$enable_adx])
+AM_CONDITIONAL([ENABLE_ADX], [test "x${enable_adx}" != "xno"])
+
 AC_MSG_CHECKING([--enable-avx512ifma option])
 AC_ARG_ENABLE([avx512ifma],
     AS_HELP_STRING([--enable-avx512ifma],
@@ -522,6 +540,54 @@ AS_IF([test "x${enable_vaes}" != "xno"],
             __m256i a = _mm256_set1_epi32(1);
             __m256i b = _mm256_set1_epi32(3);
             return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_bmi2}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-mbmi2],
+      [
+        CFLAGS="${CFLAGS} -mbmi2";
+        CXXFLAGS="${CXXFLAGS} -mbmi2";
+        AC_SUBST([bmi2], ["-mbmi2"])
+      ],[
+        AC_MSG_ERROR([-mbmi2 not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            unsigned long long high = 0;
+            return (int)_mulx_u64(3, 5, &high);
+          ]])
+      ])
+  ])
+
+AS_IF([test "x${enable_adx}" != "xno"],
+  [
+    AX_CHECK_COMPILE_FLAG([-madx],
+      [
+        CFLAGS="${CFLAGS} -madx";
+        CXXFLAGS="${CXXFLAGS} -madx";
+        AC_SUBST([adx], ["-madx"])
+      ],[
+        AC_MSG_ERROR([-madx not supported.])
+      ],
+      [],
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            unsigned long long sum = 0;
+            return _addcarryx_u64(0, 3, 5, &sum);
           ]])
       ])
   ])

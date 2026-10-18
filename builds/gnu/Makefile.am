@@ -53,6 +53,7 @@ src_libbitcoin_system_la_LIBADD = \
 src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/arena.cpp \
     ${srcdir}/../../src/define.cpp \
+    ${srcdir}/../../src/execution.cpp \
     ${srcdir}/../../src/settings.cpp \
     ${srcdir}/../../src/chain/block.cpp \
     ${srcdir}/../../src/chain/chain_state.cpp \
@@ -1115,6 +1116,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/constants.cpp \
     ${srcdir}/../../test/constraints.cpp \
     ${srcdir}/../../test/define.cpp \
+    ${srcdir}/../../test/execution.cpp \
     ${srcdir}/../../test/funclets.cpp \
     ${srcdir}/../../test/hacks.cpp \
     ${srcdir}/../../test/literals.cpp \
