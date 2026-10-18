@@ -178,7 +178,7 @@ bool scan::batch::scan_gpu(const stopper& cancel, size_t& resume,
     const batch& batch, const receiver& keys, const handler& callback,
     bool turbo) NOEXCEPT
 {
-    const auto policy = poolstl::execution::par_if(turbo);
+    const auto policy = execution::par_if(turbo);
     const auto count = batch.points.size();
     const auto stride = add1(keys.labels.size());
 
@@ -229,7 +229,7 @@ void scan::batch::scan(const stopper& cancel, const batch& batch,
     const receiver& keys, size_t gpu_minimum, const handler& callback,
     bool turbo) NOEXCEPT
 {
-    const auto policy = poolstl::execution::par_if(turbo);
+    const auto policy = execution::par_if(turbo);
 
     // The spans are corresponding arrays of equal length.
     const auto count = batch.points.size();

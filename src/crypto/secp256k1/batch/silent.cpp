@@ -57,7 +57,7 @@ static void cpu_compute(const stopper& cancel,
     const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT
 {
-    constexpr auto policy = poolstl::execution::par;
+    constexpr auto policy = execution::par;
     using dispatcher = silent_dispatcher;
     const auto count = sums.size();
 

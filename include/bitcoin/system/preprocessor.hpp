@@ -228,14 +228,4 @@
 /// C++17 (full)
 #define FALLTHROUGH [[fallthrough]]
 
-/// C++17 (partial)
-/// None on xcode.
-/// Requires link with -ltbb on gcc (v9).
-/// Experimental on clang (libcxx.llvm.org/Status/PSTL.html), requires:
-/// -fexperimental-library
-/// using poolstl, do not include <execution>.
-#include <bitcoin/system/execution.hpp>
-
-/// C++20 (full)
-
 #endif

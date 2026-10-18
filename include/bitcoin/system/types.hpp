@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPES_HPP
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
+#include <atomic>
 #include <tuple>
 #include <utility>
 #include <variant>
