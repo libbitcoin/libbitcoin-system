@@ -64,10 +64,7 @@ struct BC_API signatures
     static ecdsa_signatures& ecdsa_rows() NOEXCEPT;
     static schnorr_signatures& schnorr_rows() NOEXCEPT;
 
-    /// Release the capacity of all threads' accumulators (batching
-    /// subsided). Caller must exclude capture (e.g. post to the validation
-    /// strand with zero validation backlog), as threads append without
-    /// locking.
+    /// Release the capacity of all threads' accumulators (not thread safe).
     static void purge() NOEXCEPT;
 
     /// Single-sig captures, false implies decline (ecdsa group id domain).
