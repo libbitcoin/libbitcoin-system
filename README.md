@@ -27,7 +27,7 @@ The master branch is current, pending the v4 release.
   - [macOS](#macos)
   - [Windows](#windows)
 - [secp256k1](#secp256k1)
-- [Hardware](#hardware)
+- [CPU extensions](#cpu-extensions)
 
 ---
 
@@ -200,7 +200,7 @@ The secp256k1 elliptic curve implementation is internal, and can be replaced by 
 
 ---
 
-## Hardware
+## CPU extensions
 
 libbitcoin can be compiled with optional CPU acceleration for hashing and cryptography. All are disabled by default.
 
