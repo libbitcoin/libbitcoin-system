@@ -79,7 +79,6 @@ schnorr_signatures& signatures::schnorr_rows() NOEXCEPT
 void signatures::purge() NOEXCEPT
 {
     auto& self = registry();
-    const std::unique_lock lock{ self.mutex };
     for (const auto rows: self.ecdsa)
         rows->purge();
 
