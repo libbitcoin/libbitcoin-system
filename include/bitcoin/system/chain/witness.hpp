@@ -122,6 +122,7 @@ protected:
     witness(reader&& source, bool prefix) NOEXCEPT;
     witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;
     witness(const chunk_cptrs& stack, bool valid) NOEXCEPT;
+    witness(chunk_cptrs&& stack, bool valid, size_t size) NOEXCEPT;
     witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT;
 
 private:
