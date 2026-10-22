@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_IPP
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_IPP
 
+#include <charconv>
 #include <cmath>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
@@ -44,6 +45,11 @@ inline std::string serialize(uint8_t value,
     const std::string& fallback) NOEXCEPT
 {
     return serialize(static_cast<uint16_t>(value), fallback);
+}
+
+inline std::string serialize(char value, const std::string&) NOEXCEPT
+{
+    return { value };
 }
 
 template <size_t Size>
@@ -87,7 +93,13 @@ std::string serialize(const std_vector<Value>& values,
     return join(tokens);
 }
 
-template <typename Value>
+template <typename Integer, if_integral<Integer>>
+std::string serialize(Integer value, const std::string&) NOEXCEPT
+{
+    return std::to_string(value);
+}
+
+template <typename Value, if_non_integral<Value>>
 std::string serialize(const Value& value, const std::string& fallback) NOEXCEPT
 {
     try
@@ -109,31 +121,23 @@ std::string serialize_fixed(Float value) NOEXCEPT
     if (!std::isfinite(value))
         return serialize(value);
 
-    try
-    {
-        std::string token{};
-        for (size_t precision{}; precision <= fixed_decimals<Float>;
-            ++precision)
-        {
-            std::ostringstream ostream{};
-            ostream.precision(to_signed(precision));
-            ostream << std::fixed << value;
-            token = ostream.str();
-
-            Float parsed{};
-            if (deserialize(parsed, token) && parsed == value)
-                break;
-        }
-
-        if (token.find('.') == std::string::npos)
-            token += ".0";
-
-        return token;
-    }
-    catch (const std::exception&)
-    {
+    // Unspecified precision is the shortest text that converts to the value.
+    using limits = std::numeric_limits<Float>;
+    constexpr auto size = to_unsigned(add1(limits::max_exponent10)) +
+        fixed_decimals<Float> + two;
+    std_array<char, size> buffer{};
+    const auto first = buffer.data();
+    const auto last = std::next(first, size);
+    const auto [end, ec] = std::to_chars(first, last, value,
+        std::chars_format::fixed);
+    if (ec != std::errc{})
         return {};
-    }
+
+    std::string token{ first, end };
+    if (token.find('.') == std::string::npos)
+        token += ".0";
+
+    return token;
 }
 
 } // namespace system

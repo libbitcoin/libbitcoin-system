@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/config/endpoint.hpp>
 
-#include <sstream>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
@@ -41,7 +40,8 @@ endpoint::endpoint() NOEXCEPT
 endpoint::endpoint(const std::string& uri) THROWS
   : endpoint()
 {
-    std::stringstream(uri) >> *this;
+    if (!parse_endpoint(host_, port_, uri))
+        throw istream_exception(uri);
 }
 
 endpoint::endpoint(const std::string& host, uint16_t port) NOEXCEPT
