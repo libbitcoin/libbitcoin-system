@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/config/utilities.hpp>
 
+#include <charconv>
 #include <regex>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/serial/serial.hpp>
@@ -29,7 +30,7 @@ namespace config {
 static_assert(array_count<boost::asio::ip::address_v4::bytes_type> == ipv4_size);
 static_assert(array_count<boost::asio::ip::address_v6::bytes_type> == ipv6_size);
 
-// Because deserialize doesn't convert empty to zero.
+// Empty converts to zero.
 template <typename Integer>
 inline bool to_integer(Integer& out, const std::string& in) NOEXCEPT
 {
@@ -39,7 +40,9 @@ inline bool to_integer(Integer& out, const std::string& in) NOEXCEPT
         return true;
     }
 
-    return deserialize(out, in);
+    const auto last = std::next(in.data(), in.size());
+    const auto [end, ec] = std::from_chars(in.data(), last, out);
+    return ec == std::errc{} && end == last;
 }
 
 // For calling consistency.

@@ -43,6 +43,10 @@ void serialize(std::ostream& output, const Value& value,
 inline std::string serialize(uint8_t value,
     const std::string& fallback="") NOEXCEPT;
 
+/// Specialize char as its character.
+inline std::string serialize(char value,
+    const std::string& fallback="") NOEXCEPT;
+
 /// Specialize data_array to base16 (avoids join and fallback).
 template <size_t Size>
 std::string serialize(const data_array<Size>& value,
@@ -62,8 +66,13 @@ template <typename Value>
 std::string serialize(const std_vector<Value>& values,
     const std::string& fallback="?") NOEXCEPT;
 
+/// Specialize integrals as decimal text.
+template <typename Integer, if_integral<Integer> = true>
+std::string serialize(Integer value,
+    const std::string& fallback="") NOEXCEPT;
+
 /// General serializer.
-template <typename Value>
+template <typename Value, if_non_integral<Value> = true>
 std::string serialize(const Value& value,
     const std::string& fallback="") NOEXCEPT;
 
