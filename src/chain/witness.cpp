@@ -157,7 +157,6 @@ static inline size_t element_size(const chunk_cptr& element) NOEXCEPT
 
 static inline chunk_cptr read_element(reader& source) NOEXCEPT
 {
-    // Empty elements share an instance (elements are never mutated).
     static const auto empty = to_shared<const data_chunk>();
 
     // Each witness encoded as variable integer prefixed byte array (bip144).

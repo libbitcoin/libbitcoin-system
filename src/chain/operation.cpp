@@ -216,8 +216,6 @@ operation operation::from_data(reader& source) NOEXCEPT
     if (size > max_bytes)
         source.invalidate();
 
-    // Zero-length data (including all non-push opcodes) is not allocated, as
-    // null data_ is equivalent to empty data (shares no_data_cptr()).
     chunk_cptr push{};
     if (source && !is_zero(size))
         push = to_shared(source.read_bytes(size));
