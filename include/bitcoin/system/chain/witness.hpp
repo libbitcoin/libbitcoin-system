@@ -72,6 +72,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Skip a witness (as if deserialized) true if not superfluous.
+    /// Superfluous means an empty stack, not a stack of empty elements.
     static bool skip(reader& source, bool prefix) NOEXCEPT;
 
     data_chunk to_data(bool prefix) const NOEXCEPT;

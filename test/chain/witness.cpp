@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__two_hashes__false)
 
 // skip
 // ----------------------------------------------------------------------------
-// The return is superfluity, meaning the stack carries no non-empty element.
+// The return is presence (not superfluous).
 
 BOOST_AUTO_TEST_CASE(witness__skip__prefixed_non_empty__true)
 {
@@ -421,13 +421,35 @@ BOOST_AUTO_TEST_CASE(witness__skip__prefixed_non_empty__true)
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_element__false)
+BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_element__true)
 {
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>() } };
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(!chain::witness::skip(reader, true));
+    BOOST_REQUIRE(chain::witness::skip(reader, true));
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_elements__true)
+{
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>(), to_shared<data_chunk>() } };
+    const auto data = instance.to_data(true);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_REQUIRE(chain::witness::skip(reader, true));
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(witness__skip__unprefixed_empty_element__true)
+{
+    const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>() } };
+    const auto data = instance.to_data(false);
+    stream::in::copy source{ data };
+    read::bytes::istream reader{ source };
+    BOOST_REQUIRE(chain::witness::skip(reader, false));
     BOOST_REQUIRE(reader);
     BOOST_REQUIRE(reader.is_exhausted());
 }
