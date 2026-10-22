@@ -529,6 +529,13 @@ BOOST_AUTO_TEST_CASE(block_view__construct__superfluous_witness__invalid)
     BOOST_CHECK(!view.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(block_view__construct__empty_element_witness__valid)
+{
+    auto data = base16_chunk("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010100000000010100000000000000000000000000000000000000000000000000000000000000000000000000ffffffff01000000000000000000010000000000");
+    const chain::view::block view{ std::move(data), true };
+    BOOST_CHECK(view.is_valid());
+}
+
 // populate/check/accept/connect
 // ----------------------------------------------------------------------------
 

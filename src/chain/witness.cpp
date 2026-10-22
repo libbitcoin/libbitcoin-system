@@ -185,28 +185,21 @@ witness witness::from_data(reader& source, bool prefix) NOEXCEPT
 // static
 bool witness::skip(reader& source, bool prefix) NOEXCEPT
 {
-    bool superfluous{ true };
     if (prefix)
     {
         const auto count = source.read_size(max_bytes);
 
         for (size_t element{}; element < count; ++element)
-        {
-            const auto size = source.read_size(max_bytes);
-            source.read_bytes(size);
-            if (!is_zero(size))
-                superfluous = false;
-        }
+            source.read_bytes(source.read_size(max_bytes));
+
+        return !is_zero(count);
     }
-    else
+
+    auto superfluous{ true };
+    while (!source.is_exhausted())
     {
-        while (!source.is_exhausted())
-        {
-            const auto size = source.read_size(max_bytes);
-            source.read_bytes(size);
-            if (!is_zero(size))
-                superfluous = false;
-        }
+        source.read_bytes(source.read_size(max_bytes));
+        superfluous = false;
     }
 
     return !superfluous;

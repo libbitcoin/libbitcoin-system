@@ -191,6 +191,29 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
+BOOST_AUTO_TEST_CASE(transaction__constructor__superfluous_witness__invalid)
+{
+    const auto data = base16_chunk(
+        "01000000000101000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000ffffffff010000000000000000000000000000");
+    BOOST_REQUIRE(!transaction(data, true).is_valid());
+    BOOST_REQUIRE(!transaction(data, false).is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__constructor__empty_element_witness__valid)
+{
+    const auto data = base16_chunk(
+        "01000000000101000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000ffffffff01000000000000000000010000000000");
+    const transaction witnessed(data, true);
+    BOOST_REQUIRE(witnessed.is_valid());
+    BOOST_REQUIRE(witnessed.is_segregated());
+    BOOST_REQUIRE_EQUAL(witnessed.to_data(true), data);
+    const transaction stripped(data, false);
+    BOOST_REQUIRE(stripped.is_valid());
+    BOOST_REQUIRE(!stripped.is_segregated());
+}
+
 BOOST_AUTO_TEST_CASE(transaction__constructor__data_2__expected)
 {
     const transaction tx(tx2_data, true);
