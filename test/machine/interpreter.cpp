@@ -2220,6 +2220,33 @@ BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__s
     BOOST_REQUIRE_EQUAL(run_tapscript(leaf, elements), error::script_success);
 }
 
+BOOST_AUTO_TEST_CASE(interpreter__run__tapscript_checksig_after_codeseparator__success)
+{
+    const auto secret = base16_hash("b7e151628aed2a6abf7158809cf4f3c762e7160f38b4da56a784d9045190cfef");
+    ec_compressed compressed{};
+    BOOST_REQUIRE(secret_to_public(compressed, secret));
+
+    const auto x_only = std::next(compressed.data());
+    const auto key = unsafe_array_cast<uint8_t, ec_xonly_size>(x_only);
+    const data_chunk point{ key.begin(), key.end() };
+    const script leaf{ operations{ { opcode::codeseparator }, { point, false }, { opcode::checksig } } };
+    const auto tapleaf = to_shared(taproot::leaf_hash(tapscript_version, leaf));
+    const auto tx = to_spending_transaction({});
+    const auto in = tx.inputs_ptr()->begin();
+
+    // The checksig executes after the codeseparator at position zero.
+    hash_digest sighash{};
+    leaf.offset = std::next(leaf.ops().begin());
+    BOOST_REQUIRE(tx.signature_hash(sighash, in, leaf, prevout_value, tapleaf, script_version::taproot, coverage::hash_default, taproot_rules));
+
+    leaf.clear_offset();
+    ec_signature signature{};
+    BOOST_REQUIRE(schnorr::sign(signature, secret, sighash, one_hash));
+
+    const data_chunk signature_chunk{ signature.cbegin(), signature.cend() };
+    BOOST_REQUIRE_EQUAL(run_tapscript(leaf, { to_shared<data_chunk>(signature_chunk) }), error::script_success);
+}
+
 // Tapscript program state (via accessor).
 // ----------------------------------------------------------------------------
 

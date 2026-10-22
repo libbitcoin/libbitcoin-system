@@ -759,6 +759,55 @@ BOOST_AUTO_TEST_CASE(silent_payment__summarize__future_segwit_prevout__false)
     BOOST_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
+// Summary from the bip352 reference (key and outpoint of the first
+// "Simple send: two inputs" input, without the second).
+constexpr auto key_hash_summary = "02b04034f00da0678507d1345b7d56fecef825a1151f9dc7d8ca6946452a9e1f43";
+constexpr auto key_hash_secret = base16_array("eadc78165ff1f8ea94ad7cfdc54990738a4c53f6e0507b42154201b8e5dff3b1");
+constexpr auto key_hash_key = base16_array("025a1e61f898173040e20616d43e9f496fba90338a39faa1ed98fcbaeee4dd9be5");
+static const point key_hash_previous{ digest("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"), 0u };
+static const auto key_hash_prevout = script::to_pay_key_hash_pattern(
+    bitcoin_short_hash(key_hash_key));
+
+static transaction key_hash_spend(const script& input_script)
+{
+    const inputs ins{ input{ key_hash_previous, input_script, max_uint32 } };
+    const outputs outs{ to_pay_witness_taproot_output(taproot_key) };
+    const transaction out{ 2u, ins, outs, 0u };
+    const auto& in = out.inputs_ptr()->front();
+    in->prevout = to_shared<output>(0u, key_hash_prevout);
+    return out;
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__connected_key_hash_codeseparator__expected)
+{
+    endorsement endorsed{};
+    BOOST_REQUIRE(key_hash_spend({}).create_endorsement(endorsed, key_hash_secret, key_hash_prevout, 0u, 0u, coverage::hash_all, script_version::unversioned, flags::bip16_rule));
+
+    const data_chunk key{ key_hash_key.begin(), key_hash_key.end() };
+    const auto tx = key_hash_spend({ operations{ { endorsed, false }, { key, false }, { opcode::codeseparator } } });
+    const context ctx{ flags::bip16_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(tx.connect(ctx), error::transaction_success);
+
+    ec_compressed out{};
+    BOOST_REQUIRE(silent_payment::summarize(out, tx));
+    BOOST_REQUIRE_EQUAL(out, bytes<ec_compressed_size>(key_hash_summary));
+}
+
+BOOST_AUTO_TEST_CASE(silent_payment__summarize__connected_key_hash__expected)
+{
+    endorsement endorsed{};
+    BOOST_REQUIRE(key_hash_spend({}).create_endorsement(endorsed, key_hash_secret, key_hash_prevout, 0u, 0u, coverage::hash_all, script_version::unversioned, flags::bip16_rule));
+
+    const data_chunk key{ key_hash_key.begin(), key_hash_key.end() };
+    const auto tx = key_hash_spend({ operations{ { endorsed, false }, { key, false } } });
+    const context ctx{ flags::bip16_rule, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(tx.connect(ctx), error::transaction_success);
+
+    ec_compressed out{};
+    BOOST_REQUIRE(silent_payment::summarize(out, tx));
+    BOOST_REQUIRE_EQUAL(out, bytes<ec_compressed_size>(key_hash_summary));
+}
+
 BOOST_AUTO_TEST_CASE(silent_payment__scan__unlabeled_match__expected)
 {
     const auto scan = base16_array("0f694e068028a717f8af6b9411f9a133dd3565258714cc226594b34db90c1f2c");
