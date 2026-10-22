@@ -349,6 +349,108 @@ BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_overflow__zero_signature)
     BOOST_REQUIRE_EQUAL(out, ec_signature{});
 }
 
+// Strict DER parsing [bip66].
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__minimal__true)
+{
+    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3006020101020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__signature2__true)
+{
+    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__maximum_size__true)
+{
+    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3046022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__r_padded_for_sign__true)
+{
+    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("300702020080020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__s_padded_for_sign__true)
+{
+    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("300702010102020080")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__below_minimum_size__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("30050201010200")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__above_maximum_size__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("304702220000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_sequence_tag__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3106020101020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__sequence_length_mismatch__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3005020101020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__r_length_exceeds_size__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020601020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__lengths_mismatch__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101020201")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_r_tag__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006030101020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__empty_r__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020002020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__negative_r__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020180020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__padded_r__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("300702020001020101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_s_tag__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101030101")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__empty_s__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020201010200")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__negative_s__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101020180")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__padded_s__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("300702010102020001")));
+}
+
+BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__long_form_lengths__false)
+{
+    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3081060281010102810102")));
+}
+
 // recovery
 // ----------------------------------------------------------------------------
 
