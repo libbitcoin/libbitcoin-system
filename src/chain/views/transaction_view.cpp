@@ -138,6 +138,16 @@ transaction::transaction(reader& source,
     }
 }
 
+transaction::transaction(data_chunk&& buffer, bool coinbase,
+    bool witness) NOEXCEPT
+{
+    const auto owned = to_shared(std::move(buffer));
+    stream::in::fast istream(*owned);
+    read::bytes::fast source(istream);
+    *this = transaction{ source, *owned, coinbase, witness };
+    buffer_ = owned;
+}
+
 // public
 // ----------------------------------------------------------------------------
 // properties

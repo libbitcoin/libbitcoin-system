@@ -41,12 +41,16 @@ class BC_API transaction final
 public:
     DEFAULT_COPY_MOVE(transaction);
 
+    typedef std::shared_ptr<const transaction> cptr;
     using input_iterator = view::inputs::const_iterator;
 
     /// Source must be set to a tx position within the block buffer.
     /// Source position zero must be at the first byte of the block buffer.
     transaction(reader& source, const data_chunk& block_buffer,
         bool coinbase, bool witness) NOEXCEPT;
+
+    /// The buffer is one serialized tx, owned by the view.
+    transaction(data_chunk&& buffer, bool coinbase, bool witness) NOEXCEPT;
 
     /// Serialization.
     data_chunk to_data(bool witness) const NOEXCEPT;
@@ -211,6 +215,9 @@ private:
         uint8_t sighash_flags) const NOEXCEPT;
 
     // ------------------------------------------------------------------------
+
+    // Owned buffer (null when within a block buffer).
+    chunk_cptr buffer_{};
 
     // Pointer to tx in buffer.
     const uint8_t* tx_ptr_{};

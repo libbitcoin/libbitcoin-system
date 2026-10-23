@@ -38,6 +38,8 @@ class BC_API block
 public:
     DEFAULT_COPY_MOVE(block);
 
+    typedef std::shared_ptr<const block> cptr;
+
     /// Segregation is managed and suppressed when witness is false.
     block(data_chunk&& block_buffer, bool witness) NOEXCEPT;
 

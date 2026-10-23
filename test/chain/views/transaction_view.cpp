@@ -70,6 +70,35 @@ BOOST_AUTO_TEST_CASE(transaction_view__construct__genesis__valid)
     BOOST_CHECK(!view.get_witness_reservation(reservation));
 }
 
+BOOST_AUTO_TEST_CASE(transaction_view__construct__owned_empty__invalid)
+{
+    const chain::view::transaction view{ data_chunk{}, false, true };
+    BOOST_CHECK(!view.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__construct__owned_tx4_witness__valid)
+{
+    const auto& tx = test::tx4;
+    const chain::view::transaction view{ tx.to_data(true), false, true };
+    BOOST_CHECK(view.is_valid());
+    BOOST_CHECK(!view.is_coinbase());
+    BOOST_CHECK(view.is_segregated());
+    BOOST_CHECK_EQUAL(view.hash(true), tx.hash(true));
+    BOOST_CHECK_EQUAL(view.hash(false), tx.hash(false));
+    BOOST_CHECK_EQUAL(view.to_data(true), tx.to_data(true));
+    BOOST_CHECK_EQUAL(view.to_data(false), tx.to_data(false));
+}
+
+BOOST_AUTO_TEST_CASE(transaction_view__construct__owned_copy__shared_buffer)
+{
+    const auto& tx = test::tx4;
+    chain::view::transaction view{ tx.to_data(true), false, true };
+    const auto copy = view;
+    view = chain::view::transaction{ data_chunk{}, false, true };
+    BOOST_CHECK(copy.is_valid());
+    BOOST_CHECK_EQUAL(copy.to_data(true), tx.to_data(true));
+}
+
 BOOST_AUTO_TEST_CASE(transaction_view__construct__tx4_witness__valid)
 {
     // Serialized to buffer WITH witness data.
