@@ -29,9 +29,6 @@
 // Apply any warning suppressions to boost.
 #include <bitcoin/system/warnings.hpp>
 
-// Headers only containers.
-#define BOOST_CONTAINER_NO_LIB
-
 // Avoid namespace conflict between boost::placeholders and std::placeholders.
 // This arises when including <functional>, which declares std::placeholders.
 // www.boost.org/doc/libs/1_78_0/boost/bind.hpp
@@ -41,9 +38,6 @@
 ////#define BOOST_ASIO_NO_DEPRECATED
 #include <boost/asio.hpp>
 
-// Headers only json.
-#define BOOST_JSON_NO_LIB
-#include <boost/json.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 // Headers only program_options (sources compiled into /system).

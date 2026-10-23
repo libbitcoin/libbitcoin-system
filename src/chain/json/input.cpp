@@ -107,7 +107,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input)
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, input_cptrs)
 {
     const auto& ins = instance.value;
-    value = boost::json::array(ins.size());
+    value = json::array(ins.size());
     std::ranges::transform(ins, value.as_array().begin(),
         [flags = instance.flags](const chain::input::cptr& in) NOEXCEPT
         {

@@ -175,6 +175,7 @@
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/error/error_t.hpp>
 #include <bitcoin/system/error/errorno_t.hpp>
+#include <bitcoin/system/error/json_error_t.hpp>
 #include <bitcoin/system/error/macros.hpp>
 #include <bitcoin/system/error/op_error_t.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>
@@ -267,6 +268,11 @@
 #include <bitcoin/system/serial/props.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/serial/serialize.hpp>
+#include <bitcoin/system/serial/json/conversion.hpp>
+#include <bitcoin/system/serial/json/json.hpp>
+#include <bitcoin/system/serial/json/parser.hpp>
+#include <bitcoin/system/serial/json/serializer.hpp>
+#include <bitcoin/system/serial/json/value.hpp>
 #include <bitcoin/system/stream/binary.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>

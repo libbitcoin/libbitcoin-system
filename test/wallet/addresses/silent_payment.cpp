@@ -21,7 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(silent_payment_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 using silent_payment = system::wallet::silent_payment;
 

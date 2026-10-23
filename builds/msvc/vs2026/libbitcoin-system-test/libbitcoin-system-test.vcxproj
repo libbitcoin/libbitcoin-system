@@ -204,7 +204,9 @@
     <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\parser.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\parser.cpp">
+      <ObjectFileName>$(IntDir)test_config_parser.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\path.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\config\setting.cpp" />
@@ -299,6 +301,7 @@
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\errorno_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\json_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
@@ -399,6 +402,17 @@
     <ClCompile Include="..\..\..\..\test\radix\base_64.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_85.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\deserialize.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\array.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\conversion.cpp">
+      <ObjectFileName>$(IntDir)test_serial_json_conversion.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serial\json\object.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\parser.cpp">
+      <ObjectFileName>$(IntDir)test_serial_json_parser.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serial\json\serializer.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\value.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\value_ref.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\props.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\serialize.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
@@ -433,7 +447,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp">
+      <ObjectFileName>$(IntDir)test_unicode_conversion.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\normalization.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\environment.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\ifstream.cpp" />

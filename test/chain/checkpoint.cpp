@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(checkpoint_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 
 BOOST_AUTO_TEST_CASE(checkpoint__constructor_default__always__null_hash_zero)

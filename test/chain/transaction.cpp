@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(transaction_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 
 static const auto tx0_inputs = base16_chunk(

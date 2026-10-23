@@ -147,7 +147,7 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, transaction_cptrs)
 {
     const auto& txs = instance.value;
-    value = boost::json::array(txs.size());
+    value = json::array(txs.size());
     std::ranges::transform(txs, value.as_array().begin(),
         [flags = instance.flags](const chain::transaction::cptr& tx) NOEXCEPT
         {
@@ -158,7 +158,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, transaction_cptrs)
 DEFINE_JSON_FROM_TAGGED(bitcoind_hashed_tag, transaction_cptrs)
 {
     const auto& txs = instance.value;
-    value = boost::json::array(txs.size());
+    value = json::array(txs.size());
     std::ranges::transform(txs, value.as_array().begin(),
         [](const chain::transaction::cptr& tx) NOEXCEPT
         {
@@ -169,7 +169,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_hashed_tag, transaction_cptrs)
 DEFINE_JSON_FROM_TAGGED(bitcoind_embedded_tag, transaction_cptrs)
 {
     const auto& txs = instance.value;
-    value = boost::json::array(txs.size());
+    value = json::array(txs.size());
     std::ranges::transform(txs, value.as_array().begin(),
         [](const chain::transaction::cptr& tx) NOEXCEPT
         {
@@ -180,7 +180,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_embedded_tag, transaction_cptrs)
 DEFINE_JSON_FROM_TAGGED(bitcoind_verbose_tag, transaction_cptrs)
 {
     const auto& txs = instance.value;
-    value = boost::json::array(txs.size());
+    value = json::array(txs.size());
     std::ranges::transform(txs, value.as_array().begin(),
         [](const chain::transaction::cptr& tx) NOEXCEPT
         {

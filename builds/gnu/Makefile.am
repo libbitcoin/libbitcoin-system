@@ -186,6 +186,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/error/block_error_t.cpp \
     ${srcdir}/../../src/error/error_t.cpp \
     ${srcdir}/../../src/error/errorno_t.cpp \
+    ${srcdir}/../../src/error/json_error_t.cpp \
     ${srcdir}/../../src/error/op_error_t.cpp \
     ${srcdir}/../../src/error/script_error_t.cpp \
     ${srcdir}/../../src/error/transaction_error_t.cpp \
@@ -204,6 +205,12 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/radix/base_64.cpp \
     ${srcdir}/../../src/radix/base_85.cpp \
     ${srcdir}/../../src/serial/props.cpp \
+    ${srcdir}/../../src/serial/json/array.cpp \
+    ${srcdir}/../../src/serial/json/object.cpp \
+    ${srcdir}/../../src/serial/json/parser.cpp \
+    ${srcdir}/../../src/serial/json/serializer.cpp \
+    ${srcdir}/../../src/serial/json/value.cpp \
+    ${srcdir}/../../src/serial/json/value_ref.cpp \
     ${srcdir}/../../src/stream/binary.cpp \
     ${srcdir}/../../src/unicode/ascii.cpp \
     ${srcdir}/../../src/unicode/code_points.cpp \
@@ -507,6 +514,7 @@ include_bitcoin_system_error_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/error/error.hpp \
     ${srcdir}/../../include/bitcoin/system/error/error_t.hpp \
     ${srcdir}/../../include/bitcoin/system/error/errorno_t.hpp \
+    ${srcdir}/../../include/bitcoin/system/error/json_error_t.hpp \
     ${srcdir}/../../include/bitcoin/system/error/macros.hpp \
     ${srcdir}/../../include/bitcoin/system/error/op_error_t.hpp \
     ${srcdir}/../../include/bitcoin/system/error/script_error_t.hpp \
@@ -762,6 +770,13 @@ include_bitcoin_system_impl_serial_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/serial/deserialize.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/serial/serialize.ipp
 
+include_bitcoin_system_impl_serial_jsondir = \
+    ${includedir}/bitcoin/system/impl/serial/json
+
+include_bitcoin_system_impl_serial_json_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/serial/json/conversion.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/serial/json/value.ipp
+
 include_bitcoin_system_impl_streamdir = \
     ${includedir}/bitcoin/system/impl/stream
 
@@ -913,6 +928,16 @@ include_bitcoin_system_serial_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/serial/props.hpp \
     ${srcdir}/../../include/bitcoin/system/serial/serial.hpp \
     ${srcdir}/../../include/bitcoin/system/serial/serialize.hpp
+
+include_bitcoin_system_serial_jsondir = \
+    ${includedir}/bitcoin/system/serial/json
+
+include_bitcoin_system_serial_json_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/serial/json/conversion.hpp \
+    ${srcdir}/../../include/bitcoin/system/serial/json/json.hpp \
+    ${srcdir}/../../include/bitcoin/system/serial/json/parser.hpp \
+    ${srcdir}/../../include/bitcoin/system/serial/json/serializer.hpp \
+    ${srcdir}/../../include/bitcoin/system/serial/json/value.hpp
 
 include_bitcoin_system_streamdir = \
     ${includedir}/bitcoin/system/stream
@@ -1255,6 +1280,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/error/error.cpp \
     ${srcdir}/../../test/error/error_t.cpp \
     ${srcdir}/../../test/error/errorno_t.cpp \
+    ${srcdir}/../../test/error/json_error_t.cpp \
     ${srcdir}/../../test/error/op_error_t.cpp \
     ${srcdir}/../../test/error/script_error_t.cpp \
     ${srcdir}/../../test/error/transaction_error_t.cpp \
@@ -1334,6 +1360,13 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/serial/deserialize.cpp \
     ${srcdir}/../../test/serial/props.cpp \
     ${srcdir}/../../test/serial/serialize.cpp \
+    ${srcdir}/../../test/serial/json/array.cpp \
+    ${srcdir}/../../test/serial/json/conversion.cpp \
+    ${srcdir}/../../test/serial/json/object.cpp \
+    ${srcdir}/../../test/serial/json/parser.cpp \
+    ${srcdir}/../../test/serial/json/serializer.cpp \
+    ${srcdir}/../../test/serial/json/value.cpp \
+    ${srcdir}/../../test/serial/json/value_ref.cpp \
     ${srcdir}/../../test/stream/binary.cpp \
     ${srcdir}/../../test/stream/device.cpp \
     ${srcdir}/../../test/stream/stream.cpp \

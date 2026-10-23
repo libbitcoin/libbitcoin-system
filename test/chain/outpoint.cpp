@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(outpoint_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 
 static const auto outpoint_hash = base16_hash(

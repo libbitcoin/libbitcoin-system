@@ -218,7 +218,9 @@
       <ObjectFileName>$(IntDir)src_config_output.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\parser.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\parser.cpp">
+      <ObjectFileName>$(IntDir)src_config_parser.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\path.cpp" />
     <ClCompile Include="..\..\..\..\src\config\point.cpp">
       <ObjectFileName>$(IntDir)src_config_point.obj</ObjectFileName>
@@ -312,6 +314,7 @@
     <ClCompile Include="..\..\..\..\src\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\errorno_t.cpp" />
+    <ClCompile Include="..\..\..\..\src\error\json_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
@@ -332,6 +335,14 @@
     <ClCompile Include="..\..\..\..\src\radix\base_58.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_64.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_85.cpp" />
+    <ClCompile Include="..\..\..\..\src\serial\json\array.cpp" />
+    <ClCompile Include="..\..\..\..\src\serial\json\object.cpp" />
+    <ClCompile Include="..\..\..\..\src\serial\json\parser.cpp">
+      <ObjectFileName>$(IntDir)src_serial_json_parser.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\serial\json\serializer.cpp" />
+    <ClCompile Include="..\..\..\..\src\serial\json\value.cpp" />
+    <ClCompile Include="..\..\..\..\src\serial\json\value_ref.cpp" />
     <ClCompile Include="..\..\..\..\src\serial\props.cpp" />
     <ClCompile Include="..\..\..\..\src\settings.cpp" />
     <ClCompile Include="..\..\..\..\src\stream\binary.cpp" />
@@ -569,6 +580,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\errorno_t.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\json_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\macros.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\op_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />
@@ -665,6 +677,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\radix.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\deserialize.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\json\conversion.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\json\json.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\json\parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\json\serializer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\json\value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\props.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serial.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serialize.hpp" />
@@ -902,6 +919,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\deserialize.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\serial\json\conversion.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\serial\json\value.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\serialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\device.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\iostream\iostream.ipp" />
