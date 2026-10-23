@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/serial/json/json.hpp>
 
 namespace libbitcoin {
 
@@ -93,45 +94,46 @@ inline auto electrumx(const Type& value,
 template <typename Value, typename ...Args>
 inline auto value_to(Args&&... args) THROWS
 {
-    return boost::json::value_to<Value>(std::forward<Args>(args)...);
+    return system::json::value_to<Value>(std::forward<Args>(args)...);
 }
 template <typename ...Args>
 inline auto value_from(Args&&... args) THROWS
 {
-    return boost::json::value_from(std::forward<Args>(args)...);
+    return system::json::value_from(std::forward<Args>(args)...);
 }
 template <typename Type>
-using to_tag = boost::json::value_to_tag<Type>;
-typedef boost::json::value_from_tag from_tag;
+using to_tag = system::json::value_to_tag<Type>;
+typedef system::json::value_from_tag from_tag;
 
 } // namespace libbitcoin
 
-// Declares ADL free functions for use with boost-json (native/tagged).
+// Declares ADL free functions for use with json (native/tagged).
 #define DECLARE_JSON_TAG_INVOKE(type) \
     BC_API type tag_invoke(to_tag<type>, \
-        const boost::json::value& value) THROWS; \
-    BC_API void tag_invoke(from_tag, boost::json::value& value, \
+        const libbitcoin::system::json::value& value) THROWS; \
+    BC_API void tag_invoke(from_tag, libbitcoin::system::json::value& value, \
         const type& instance) THROWS
 
 #define DECLARE_JSON_TAGGED_INVOKE(tag, type) \
-    BC_API void tag_invoke(from_tag, boost::json::value& value, \
+    BC_API void tag_invoke(from_tag, libbitcoin::system::json::value& value, \
         const libbitcoin::wrapped<tag, type>& instance) THROWS
 
-// Defines ADL free from functions for use with boost-json (native/tagged).
+// Defines ADL free from functions for use with json (native/tagged).
 #define DEFINE_JSON_FROM_TAG(type) \
-    void tag_invoke(from_tag, boost::json::value& value, \
+    void tag_invoke(from_tag, libbitcoin::system::json::value& value, \
         const type& instance) THROWS
 
 #define DEFINE_JSON_FROM_TAGGED(tag, type) \
-    void tag_invoke(from_tag, boost::json::value& value, \
+    void tag_invoke(from_tag, libbitcoin::system::json::value& value, \
         const libbitcoin::wrapped<tag, type>& instance) THROWS
 
-// Defines ADL free to functions for use with boost-json (native/tagged).
+// Defines ADL free to functions for use with json (native/tagged).
 #define DEFINE_JSON_TO_TAG(type) \
-    type tag_invoke(to_tag<type>, const boost::json::value& value) THROWS
+    type tag_invoke(to_tag<type>, \
+        const libbitcoin::system::json::value& value) THROWS
 
 #define DEFINE_JSON_TO_TAGGED(tag, type) \
     type tag_invoke(to_tag<libbitcoin::wrapped<tag, type>>, \
-        const boost::json::value& value) THROWS
+        const libbitcoin::system::json::value& value) THROWS
 
 #endif

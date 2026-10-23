@@ -21,7 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(witness_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 
 BOOST_AUTO_TEST_CASE(witness__block__with_witness__parse_round_trips)

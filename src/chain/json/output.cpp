@@ -79,7 +79,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output)
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output_cptrs)
 {
     const auto& outs = instance.value;
-    value = boost::json::array(outs.size());
+    value = json::array(outs.size());
     auto& values = value.as_array();
     for (size_t n{}; n < outs.size(); ++n)
     {

@@ -53,7 +53,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_tag, witness)
 {
     const auto& witness = instance.value;
     const auto& stack = witness.stack();
-    value = boost::json::array(stack.size());
+    value = json::array(stack.size());
     std::ranges::transform(stack, value.as_array().begin(),
         [](const chunk_cptr& element) NOEXCEPT
         {

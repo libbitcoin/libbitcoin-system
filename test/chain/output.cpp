@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(output_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 
 static const auto output_data = base16_chunk(

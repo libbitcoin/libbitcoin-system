@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(operation_tests)
 
-namespace json = boost::json;
+namespace json = system::json;
 using namespace system::chain;
 
 static const auto op_data = base16_chunk("0900ff11ee22bb33aa44");
