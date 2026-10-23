@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIAL_HPP
 
 #include <bitcoin/system/serial/deserialize.hpp>
+#include <bitcoin/system/serial/json/json.hpp>
 #include <bitcoin/system/serial/props.hpp>
 #include <bitcoin/system/serial/serialize.hpp>
 
