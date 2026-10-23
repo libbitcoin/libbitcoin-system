@@ -20,238 +20,164 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include "secp256k1/ec_context.hpp"
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
-// Based on example code in bip66, but without signature hash byte.
-// Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
-// * total-length: 1-byte length descriptor of everything that follows.
-// * R-length: 1-byte length descriptor of the R value that follows.
-// * R: arbitrary-length big-endian encoded R value. Must use shortest.
-// * S-length: 1-byte length descriptor of the S value that follows.
-// * S: arbitrary-length big-endian encoded S value. Must use shortest.
-bool is_valid_bip66_signature_encoding(
-    const bc::system::data_slice& sig) NOEXCEPT
+using namespace bc;
+using namespace bc::system;
+
+static constexpr auto sequence_tag = 0x30_u8;
+static constexpr auto integer_tag = 0x02_u8;
+static constexpr auto long_form = 0x80_u8;
+static constexpr auto scalar_size = to_half(ec_signature_size);
+
+// Strict
+// ----------------------------------------------------------------------------
+
+// A positive integer in its shortest encoding.
+static bool is_minimal_positive(const uint8_t* value, size_t size) NOEXCEPT
 {
-    // Minimum and maximum size constraints (strict DER, no sighash byte).
-    if (sig.size() < 8u) return false; // Minimum DER size.
-    if (sig.size() > 72u) return false; // Maximum DER size.
-
-    // A signature is of type 0x30 (compound).
-    if (sig[0] != 0x30u) return false;
-
-    // Make sure the length covers the entire signature (no extra bytes).
-    if (sig[1] != sig.size() - 2u) return false;
-
-    // Extract the length of the R element.
-    size_t lenR = sig[3];
-
-    // Make sure the length of the S element is still inside the signature.
-    if (5u + lenR >= sig.size()) return false;
-
-    // Extract the length of the S element.
-    size_t lenS = sig[5u + lenR];
-
-    // Verify that the entire length is the sum of the sub-lengths.
-    if (lenR + lenS + 6u != sig.size()) return false;
-
-    // Check whether the R element is an integer.
-    if (sig[2] != 0x02u) return false;
-
-    // Zero-length integers are not allowed for R.
-    if (lenR == 0u) return false;
-
-    // Negative numbers are not allowed for R.
-    if (sig[4u] & 0x80u) return false;
-
-    // Null bytes at the start of R are not allowed, unless R would be negative.
-    if (lenR > 1u && sig[4u] == 0x00u && !(sig[5u] & 0x80u)) return false;
-
-    // Check whether the S element is an integer.
-    if (sig[4u + lenR] != 0x02u) return false;
-
-    // Zero-length integers are not allowed for S.
-    if (lenS == 0u) return false;
-
-    // Negative numbers are not allowed for S.
-    if (sig[6u + lenR] & 0x80u) return false;
-
-    // Null bytes at the start of S are not allowed, unless S would be negative.
-    if (lenS > 1u && sig[6u + lenR] == 0x00u && !(sig[7u + lenR] & 0x80u))
+    if (is_zero(size) || is_nonzero(value[0] & long_form))
         return false;
 
+    return !(size > one && is_zero(value[0]) &&
+        is_zero(value[1] & long_form));
+}
+
+// 0x30 [size] 0x02 [r size] [r] 0x02 [s size] [s], without sighash type.
+bool is_valid_bip66_signature_encoding(const data_slice& sig) NOEXCEPT
+{
+    constexpr size_t minimum = 8;
+    constexpr size_t maximum = 72;
+
+    const auto size = sig.size();
+    if (size < minimum || size > maximum)
+        return false;
+
+    if (sig[0] != sequence_tag || sig[1] != size - 2u)
+        return false;
+
+    const size_t r_size = sig[3];
+    if (5u + r_size >= size)
+        return false;
+
+    const size_t s_size = sig[5u + r_size];
+    if (r_size + s_size + 6u != size)
+        return false;
+
+    const auto data = sig.data();
+    return sig[2] == integer_tag
+        && is_minimal_positive(&data[4], r_size)
+        && sig[4u + r_size] == integer_tag
+        && is_minimal_positive(&data[6u + r_size], s_size);
+}
+
+// Lax
+// ----------------------------------------------------------------------------
+
+// Locates a tagged integer and advances past it. Leading zeros of a long form
+// length are ignored and the length is bounded by the remaining input.
+static bool read_integer(size_t& start, size_t& size, size_t& position,
+    const uint8_t* input, size_t length) NOEXCEPT
+{
+    if (position == length || input[position++] != integer_tag)
+        return false;
+
+    if (position == length)
+        return false;
+
+    size_t bytes = input[position++];
+    if (is_zero(bytes & long_form))
+    {
+        size = bytes;
+    }
+    else
+    {
+        bytes -= long_form;
+        if (bytes > length - position)
+            return false;
+
+        for (; is_nonzero(bytes) && is_zero(input[position]); --bytes)
+            ++position;
+
+        if (bytes >= sizeof(size_t))
+            return false;
+
+        for (size = zero; is_nonzero(bytes); --bytes)
+            size = (size << byte_bits) + input[position++];
+    }
+
+    if (size > length - position)
+        return false;
+
+    start = position;
+    position += size;
     return true;
 }
 
-/***********************************************************************
- * Copyright (c) 2015 Pieter Wuille                                    *
- * Distributed under the MIT software license, see the accompanying    *
- * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
- ***********************************************************************/
-
-bool ecdsa_signature_parse_der_lax(bc::system::ec_signature& out,
-    const uint8_t* input, size_t inputlen) NOEXCEPT
+// Right-aligns the integer, without leading zeros, into a scalar.
+static bool copy_scalar(uint8_t* scalar, const uint8_t* input, size_t start,
+    size_t size) NOEXCEPT
 {
-    const auto ctx = bc::system::ec_context_verify::context();
-    const auto sig = bc::system::pointer_cast<secp256k1_ecdsa_signature>(
+    for (; is_nonzero(size) && is_zero(input[start]); --size)
+        ++start;
+
+    if (size > scalar_size)
+        return false;
+
+    std::copy_n(&input[start], size, &scalar[scalar_size - size]);
+    return true;
+}
+
+// The signature is set to a valid encoding of an invalid signature whenever
+// parsing fails or a scalar is out of range.
+bool ecdsa_signature_parse_der_lax(ec_signature& out, const uint8_t* input,
+    size_t inputlen) NOEXCEPT
+{
+    const auto context = ec_context_verify::context();
+    const auto signature = pointer_cast<secp256k1_ecdsa_signature>(
         out.data());
 
-    unsigned char tmpsig[64]{};
-    size_t rpos, rlen, spos, slen;
-    size_t pos = 0;
-    size_t lenbyte;
+    ec_signature compact{};
+    secp256k1_ecdsa_signature_parse_compact(context, signature,
+        compact.data());
 
-    // Hack to initialize sig with a correctly-parsed but invalid signature.
-    secp256k1_ecdsa_signature_parse_compact(ctx, sig, tmpsig);
-
-    // Sequence tag byte
-    if (pos == inputlen || input[pos] != 0x30)
+    size_t position{};
+    if (position == inputlen || input[position++] != sequence_tag)
         return false;
 
-    // Sequence length bytes.
-    if (++pos == inputlen)
+    if (position == inputlen)
         return false;
 
-    lenbyte = input[pos++];
-
-    if (lenbyte & 0x80)
+    // The sequence length is skipped, not validated.
+    size_t bytes = input[position++];
+    if (is_nonzero(bytes & long_form))
     {
-        lenbyte -= 0x80;
-
-        if (lenbyte > inputlen - pos)
+        bytes -= long_form;
+        if (bytes > inputlen - position)
             return false;
 
-        pos += lenbyte;
+        position += bytes;
     }
 
-    // Integer tag byte for R.
-    if (pos == inputlen || input[pos] != 0x02)
+    size_t r_start{}, r_size{}, s_start{}, s_size{};
+    if (!read_integer(r_start, r_size, position, input, inputlen) ||
+        !read_integer(s_start, s_size, position, input, inputlen))
         return false;
 
-    pos++;
+    const auto r = copy_scalar(&compact[0], input, r_start, r_size);
+    const auto s = copy_scalar(&compact[scalar_size], input, s_start, s_size);
 
-    // Integer length for R.
-    if (pos == inputlen)
-        return false;
-
-    lenbyte = input[pos++];
-
-    if (lenbyte & 0x80)
+    if (!r || !s || is_zero(secp256k1_ecdsa_signature_parse_compact(context,
+        signature, compact.data())))
     {
-        lenbyte -= 0x80;
-        if (lenbyte > inputlen - pos)
-            return false;
-
-        while (lenbyte > 0 && input[pos] == 0)
-        {
-            pos++;
-            lenbyte--;
-        }
-
-        if (lenbyte >= sizeof(size_t)) 
-            return false;
-
-        rlen = 0;
-        while (lenbyte > 0)
-        {
-            rlen = (rlen << 8) + input[pos];
-            pos++;
-            lenbyte--;
-        }
-    }
-    else
-    {
-        rlen = lenbyte;
-    }
-
-    if (rlen > inputlen - pos)
-        return false;
-
-    rpos = pos;
-    pos += rlen;
-
-    // Integer tag byte for S.
-    if (pos == inputlen || input[pos] != 0x02)
-        return false;
-
-    pos++;
-
-    // Integer length for S.
-    if (pos == inputlen)
-        return false;
-
-    lenbyte = input[pos++];
-
-    if (lenbyte & 0x80)
-    {
-        lenbyte -= 0x80;
-        if (lenbyte > inputlen - pos)
-            return false;
-
-        while (lenbyte > 0 && input[pos] == 0)
-        {
-            pos++;
-            lenbyte--;
-        }
-
-        if (lenbyte >= sizeof(size_t))
-            return false;
-
-        slen = 0;
-        while (lenbyte > 0)
-        {
-            slen = (slen << 8) + input[pos];
-            pos++;
-            lenbyte--;
-        }
-    }
-    else
-    {
-        slen = lenbyte;
-    }
-
-    if (slen > (inputlen - pos))
-        return false;
-
-    spos = pos;
-
-    // Ignore leading zeroes in R.
-    while (rlen > 0 && input[rpos] == 0)
-    {
-        rlen--;
-        rpos++;
-    }
-
-    auto overflow = false;
-
-    // Copy R value.
-    if (rlen > 32)
-        overflow = true;
-    else
-        std::memcpy(tmpsig + 32 - rlen, input + rpos, rlen);
-
-    // Ignore leading zeroes in S.
-    while (slen > 0 && input[spos] == 0)
-    {
-        slen--;
-        spos++;
-    }
-
-    // Copy S value.
-    if (slen > 32)
-        overflow = true;
-    else
-        std::memcpy(tmpsig + 64 - slen, input + spos, slen);
-
-    overflow |= (secp256k1_ecdsa_signature_parse_compact(ctx, sig, tmpsig) == 0);
-
-    if (overflow)
-    {
-        std::memset(tmpsig, 0, 64);
-        secp256k1_ecdsa_signature_parse_compact(ctx, sig, tmpsig);
+        compact.fill(0);
+        secp256k1_ecdsa_signature_parse_compact(context, signature,
+            compact.data());
     }
 
     return true;
