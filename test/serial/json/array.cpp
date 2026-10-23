@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(json_array__construct__initializer_key_value_pair__nested_a
 BOOST_AUTO_TEST_CASE(json_array__copy_move__expected)
 {
     array original{ 1, 2 };
-    const array copy{ original };
-    const array moved{ std::move(original) };
+    const array copy(original);
+    const array moved(std::move(original));
     BOOST_REQUIRE(copy == moved);
     BOOST_REQUIRE_EQUAL(copy.size(), 2u);
 }
