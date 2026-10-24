@@ -133,6 +133,15 @@ CLASS::program(const transaction& tx, const input_iterator& input,
     script_->clear_offset();
 }
 
+// Destructor.
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+CLASS::~program() NOEXCEPT
+{
+    script_->clear_offset();
+}
+
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin

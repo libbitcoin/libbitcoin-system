@@ -68,7 +68,7 @@ template <typename Stack, typename Tx = chain::transaction>
 class program
 {
 public:
-    DELETE_COPY_MOVE_DESTRUCT(program);
+    DELETE_COPY_MOVE(program);
 
     using script = chain::script;
     using transaction = Tx;
@@ -98,6 +98,9 @@ public:
         const script::cptr& script, uint32_t active_flags,
         script_version version, const chunk_cptrs_ptr& stack,
         const hash_cptr& tapleaf, const chain::signatures& capture) NOEXCEPT;
+
+    /// Clears the subscript offset set by evaluation.
+    virtual ~program() NOEXCEPT;
 
     /// Program result.
     virtual bool is_true(bool clean) const NOEXCEPT;

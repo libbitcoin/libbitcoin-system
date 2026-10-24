@@ -136,6 +136,39 @@ BOOST_AUTO_TEST_CASE(program__construct__taproot_stale_offset__cleared)
     BOOST_REQUIRE(separated->offset == separated->ops().cbegin());
 }
 
+// destruction
+
+static const script separator_script{ operations{ { opcode::codeseparator } } };
+
+BOOST_AUTO_TEST_CASE(program__destruct__input_script_offset__cleared)
+{
+    const auto tx = accessor_transaction(separator_script, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const auto& input_script = (*it)->script();
+    {
+        const chain::signatures capture{};
+        interpreter_accessor<contiguous_stack> machine{ tx, it, flags::no_rules, capture };
+        BOOST_REQUIRE_EQUAL(machine.run(), error::script_success);
+    }
+
+    BOOST_REQUIRE(input_script.offset == input_script.ops().begin());
+}
+
+BOOST_AUTO_TEST_CASE(program__destruct__copied_program_offset__cleared)
+{
+    const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
+    const auto it = tx.inputs_ptr()->begin();
+    const chain::signatures capture{};
+    const interpreter_accessor<contiguous_stack> in{ tx, it, flags::no_rules, capture };
+    const auto separated = to_shared<script>(separator_script);
+    {
+        interpreter_accessor<contiguous_stack> out{ in, separated };
+        BOOST_REQUIRE_EQUAL(out.run(), error::script_success);
+    }
+
+    BOOST_REQUIRE(separated->offset == separated->ops().begin());
+}
+
 // primary stack typing
 
 BOOST_AUTO_TEST_CASE(program__push_signed64__pop_signed32__expected)

@@ -3720,4 +3720,103 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_header__filter_hash_out__matches)
     BOOST_REQUIRE_EQUAL(header, neutrino::compute_header(null_hash, filter));
 }
 
+// connected block
+// Expected filters are from the bip158 reference over the unmodified scripts.
+
+static const chain::header separator_header{ 1, null_hash, null_hash, 0, 0, 0 };
+
+static chain::transaction separator_coinbase() NOEXCEPT
+{
+    const chain::inputs ins
+    {
+        chain::input
+        {
+            chain::point{},
+            chain::script{},
+            chain::max_input_sequence
+        }
+    };
+
+    const chain::outputs outs
+    {
+        chain::output{ 0, chain::script{ base16_chunk("52"), false } }
+    };
+
+    return { 1, ins, outs, 0 };
+}
+
+static chain::transaction separator_spend(const chain::point& previous,
+    const chain::script& output_script) NOEXCEPT
+{
+    const chain::inputs ins
+    {
+        chain::input{ previous, chain::script{}, chain::max_input_sequence }
+    };
+
+    const chain::outputs outs{ chain::output{ 0, output_script } };
+    return { 1, ins, outs, 0 };
+}
+
+static void require_connected_filter(const chain::block& block,
+    const data_chunk& expected)
+{
+    const chain::context ctx{ chain::flags::no_rules, 0, 0, 0, 0, 0, 0 };
+
+    data_chunk before{};
+    BOOST_REQUIRE(neutrino::compute_filter(before, block));
+    BOOST_REQUIRE_EQUAL(before, expected);
+    BOOST_REQUIRE_EQUAL(block.connect(ctx), error::block_success);
+
+    data_chunk after{};
+    BOOST_REQUIRE(neutrino::compute_filter(after, block));
+    BOOST_REQUIRE_EQUAL(after, expected);
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_prevout__expected)
+{
+    const chain::block instance
+    {
+        separator_header,
+        {
+            separator_coinbase(),
+            separator_spend(chain::point{ one_hash, 0 }, chain::script{ base16_chunk("53"), false })
+        }
+    };
+
+    const auto& txs = *instance.transactions_ptr();
+    txs.at(1)->inputs_ptr()->front()->prevout = to_shared<chain::output>(0, chain::script{ base16_chunk("51ab"), false });
+    require_connected_filter(instance, base16_chunk("03c13ba0138462b87c"));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_internal_prevout__expected)
+{
+    const auto fund = separator_spend(chain::point{ one_hash, 0 }, chain::script{ base16_chunk("ab51"), false });
+    const auto spend = separator_spend(chain::point{ fund.hash(false), 0 }, chain::script{ base16_chunk("54"), false });
+    const chain::block instance{ separator_header, { separator_coinbase(), fund, spend } };
+
+    const auto& txs = *instance.transactions_ptr();
+    txs.at(1)->inputs_ptr()->front()->prevout = to_shared<chain::output>(0, chain::script{ base16_chunk("53"), false });
+    const chain::context ctx{ chain::flags::no_rules, 0, 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BOOST_REQUIRE(txs.at(2)->inputs_ptr()->front()->prevout == txs.at(1)->outputs_ptr()->front());
+
+    require_connected_filter(instance, base16_chunk("04d4cc803ce05d4da149e540"));
+}
+
+BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_unexecuted_codeseparator_prevout__expected)
+{
+    const chain::block instance
+    {
+        separator_header,
+        {
+            separator_coinbase(),
+            separator_spend(chain::point{ one_hash, 0 }, chain::script{ base16_chunk("53"), false })
+        }
+    };
+
+    const auto& txs = *instance.transactions_ptr();
+    txs.at(1)->inputs_ptr()->front()->prevout = to_shared<chain::output>(0, chain::script{ base16_chunk("0063ab6851"), false });
+    require_connected_filter(instance, base16_chunk("03c273e62b87d0f8d9"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
