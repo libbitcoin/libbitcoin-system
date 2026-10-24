@@ -85,10 +85,10 @@
 #include <bitcoin/system/chain/json/script.hpp>
 #include <bitcoin/system/chain/json/transaction.hpp>
 #include <bitcoin/system/chain/json/witness.hpp>
-#include <bitcoin/system/chain/views/block_view.hpp>
-#include <bitcoin/system/chain/views/input_view.hpp>
-#include <bitcoin/system/chain/views/output_view.hpp>
-#include <bitcoin/system/chain/views/transaction_view.hpp>
+#include <bitcoin/system/chain/view/block.hpp>
+#include <bitcoin/system/chain/view/input.hpp>
+#include <bitcoin/system/chain/view/output.hpp>
+#include <bitcoin/system/chain/view/transaction.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>

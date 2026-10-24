@@ -9,8 +9,6 @@
       <Category Name="avxifma" DisplayName="avxifma" />
       <Category Name="aesni" DisplayName="aesni" />
       <Category Name="vaes" DisplayName="vaes" />
-      <Category Name="bmi2" DisplayName="bmi2" />
-      <Category Name="adx" DisplayName="adx" />
       <Category Name="cuda" DisplayName="cuda" />
     </Rule.Categories>
     <Rule.DataSource>
@@ -43,14 +41,6 @@
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
     <EnumProperty Name="Option-vaes" DisplayName="Enable VAES Encryption" Description="Requires VAES, VPCLMULQDQ and AVX2 (xcpu) CPU." Category="vaes">
-      <EnumValue Name="false" DisplayName="No" />
-      <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
-    <EnumProperty Name="Option-bmi2" DisplayName="Enable BMI2 Multiplication" Description="Requires BMI2 (xcpu) CPU." Category="bmi2">
-      <EnumValue Name="false" DisplayName="No" />
-      <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
-    <EnumProperty Name="Option-adx" DisplayName="Enable ADX Carry Addition" Description="Requires ADX (xcpu) CPU." Category="adx">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>

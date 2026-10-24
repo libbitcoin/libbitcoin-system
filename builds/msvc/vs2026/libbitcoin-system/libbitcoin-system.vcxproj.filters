@@ -28,7 +28,7 @@
     <Filter Include="include\bitcoin\system\chain\json">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\chain\views">
+    <Filter Include="include\bitcoin\system\chain\view">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\config">
@@ -238,7 +238,7 @@
     <Filter Include="src\chain\json">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\views">
+    <Filter Include="src\chain\view">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\config">
@@ -426,20 +426,20 @@
     <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v1.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\views\block_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\src\chain\view\block.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\views\input_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\src\chain\view\input.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\views\output_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\src\chain\view\output.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\views\transaction_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\src\chain\view\transaction.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\views\transaction_view_sighash.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\src\chain\view\transaction_sighash.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
       <Filter>src\chain</Filter>
@@ -1160,17 +1160,17 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\block_view.hpp">
-      <Filter>include\bitcoin\system\chain\views</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\view\block.hpp">
+      <Filter>include\bitcoin\system\chain\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\input_view.hpp">
-      <Filter>include\bitcoin\system\chain\views</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\view\input.hpp">
+      <Filter>include\bitcoin\system\chain\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\output_view.hpp">
-      <Filter>include\bitcoin\system\chain\views</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\view\output.hpp">
+      <Filter>include\bitcoin\system\chain\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\views\transaction_view.hpp">
-      <Filter>include\bitcoin\system\chain\views</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\view\transaction.hpp">
+      <Filter>include\bitcoin\system\chain\view</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
