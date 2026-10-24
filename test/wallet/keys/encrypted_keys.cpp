@@ -28,7 +28,7 @@ using namespace bc::system::wallet;
 BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
 {
     const auto encoded_password = base16_array("cf92cc8100f0909080f09f92a9");
-    std::string passphrase(encoded_password.begin(), encoded_password.end());
+    std::string passphrase(encoded_password.cbegin(), encoded_password.cend());
 
     // This confirms that the passphrase decodes as expected in BIP38.
     std::string normal{ passphrase };
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_unicode__expected)
     constexpr auto compression = false;
     constexpr const uint8_t version = 0x00;
     constexpr const auto encoded_password = base16_array("cf92cc8100f0909080f09f92a9");
-    const std::string passphrase(encoded_password.begin(), encoded_password.end());
+    const std::string passphrase(encoded_password.cbegin(), encoded_password.cend());
     constexpr const auto expected = "6PRW5o9FLp4gJDDVqJQKJFTpMvdsSGJxMYHtHaQBF3ooa8mwD69bapcDQn";
     constexpr const auto secret = base16_array("64eeab5f9be2a01a8365a579511eb3373c87c40da6d2a25f05bda68fe077b66e");
     BC_REQUIRE_ENCRYPT(secret, passphrase, version, compression, expected);

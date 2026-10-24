@@ -39,7 +39,7 @@ std::string join(const string_list& tokens,
     sentence << tokens.front();
 
     // Add remaining tokens preceded by delimiters.
-    for (auto token = std::next(tokens.begin()); token != tokens.end(); ++token)
+    for (auto token = std::next(tokens.cbegin()); token != tokens.cend(); ++token)
         sentence << delimiter << *token;
 
     return sentence.str();
@@ -134,7 +134,7 @@ string_list split(const std::string_view& text, const string_list& delimiters,
         return { trimmed };
 
     // Replace all other delimiters with the first delimiter.
-    for (auto it = std::next(delimiters.begin()); it != delimiters.end(); ++it)
+    for (auto it = std::next(delimiters.cbegin()); it != delimiters.cend(); ++it)
         replace(trimmed, *it, delimiters.front());
 
     // Split on the first delimiter and conditionally compress empty tokens.

@@ -43,7 +43,7 @@ data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve) NOEXCEPT
     out.reserve(size + extra_reserve);
 
     for (const auto& slice: slices)
-        out.insert(out.end(), slice.begin(), slice.end());
+        out.insert(out.cend(), slice.begin(), slice.end());
 
     return out;
 }

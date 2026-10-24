@@ -104,7 +104,7 @@ ecdsa_split(uint8_t& sighash_flags,
     sighash_flags = endorsement.back();
 
     // data_slice is returned since the size of the DER encoding is not fixed.
-    return { endorsement.begin(), std::prev(endorsement.end()) };
+    return { endorsement.cbegin(), std::prev(endorsement.cend()) };
 }
 
 TEMPLATE
@@ -126,7 +126,7 @@ INLINE void CLASS::
 set_subscript(const op_iterator& op) NOEXCEPT
 {
     // Not possible unless op is not an element of script_.
-    BC_ASSERT(!script_->ops().empty() && op != script_->ops().end());
+    BC_ASSERT(!script_->ops().empty() && op != script_->ops().cend());
 
     // Advance the offset to the op following the found code separator.
     // This is non-const because changes script state (despite being mutable).
@@ -176,7 +176,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 
     // Transform into a set of endorsement push ops and one op_codeseparator.
     const auto strip = create_strip_ops(endorsements);
-    const auto stop = script_->ops().end();
+    const auto stop = script_->ops().cend();
     const op_iterator start{ script_->offset };
 
     // If none of the strip ops are found, return the subscript.
@@ -198,7 +198,7 @@ subscript(const chunk_xptr& endorsement) const NOEXCEPT
 
     // Transform into a set with one endorsement push op and op_codeseparator.
     const auto strip = create_strip_ops(endorsement);
-    const auto stop = script_->ops().end();
+    const auto stop = script_->ops().cend();
     const op_iterator start{ script_->offset };
 
     // If none of the strip ops are found, return the subscript.

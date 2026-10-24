@@ -53,7 +53,7 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
     const auto out = std::make_shared<std_vector<std::shared_ptr<
         const Type>>>(values.size());
 
-    std::transform(values.begin(), values.end(), out->begin(),
+    std::transform(values.cbegin(), values.cend(), out->begin(),
         [](const Type& value) NOEXCEPT
         {
             return to_shared(value);

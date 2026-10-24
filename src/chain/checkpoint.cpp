@@ -30,7 +30,7 @@ namespace chain {
 
 bool checkpoint::is_at(const list& checkpoints, size_t height) NOEXCEPT
 {
-    return std::any_of(checkpoints.begin(), checkpoints.end(),
+    return std::any_of(checkpoints.cbegin(), checkpoints.cend(),
         [&](const auto& item) NOEXCEPT
         {
             return height == item.height();
@@ -40,7 +40,7 @@ bool checkpoint::is_at(const list& checkpoints, size_t height) NOEXCEPT
 bool checkpoint::is_under(const list& checkpoints, size_t height) NOEXCEPT
 {
     // False if empty, optimal if checkpoints sorted by increasing height.
-    return std::any_of(checkpoints.rbegin(), checkpoints.rend(),
+    return std::any_of(checkpoints.crbegin(), checkpoints.crend(),
         [&](const auto& item) NOEXCEPT
         {
             return height <= item.height();
@@ -51,13 +51,13 @@ bool checkpoint::is_conflict(const list& checkpoints, const hash_digest& hash,
     size_t height) NOEXCEPT
 {
     //  Conflict if height matches and hash does not.
-    const auto it = std::find_if(checkpoints.begin(), checkpoints.end(),
+    const auto it = std::find_if(checkpoints.cbegin(), checkpoints.cend(),
         [&](const auto& item) NOEXCEPT
         {
             return height == item.height();
         });
 
-    return it != checkpoints.end() && it->hash() != hash;
+    return it != checkpoints.cend() && it->hash() != hash;
 }
 
 // Constructors.

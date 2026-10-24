@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(json_object__construct__default__empty)
     const object instance{};
     BOOST_REQUIRE(instance.empty());
     BOOST_REQUIRE_EQUAL(instance.size(), 0u);
-    BOOST_REQUIRE(instance.begin() == instance.end());
+    BOOST_REQUIRE(instance.cbegin() == instance.cend());
 }
 
 BOOST_AUTO_TEST_CASE(json_object__construct__initializer__insertion_order)
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(json_object__lookup__absent__expected)
     const object instance{ { "a", 1 } };
     BOOST_REQUIRE(!instance.contains("b"));
     BOOST_REQUIRE_EQUAL(instance.count("b"), 0u);
-    BOOST_REQUIRE(instance.find("b") == instance.end());
+    BOOST_REQUIRE(instance.find("b") == instance.cend());
     BOOST_REQUIRE(is_null(instance.if_contains("b")));
     BOOST_REQUIRE_THROW(instance.at("b"), std::system_error);
 }
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(json_object__erase__last__removed)
 {
     object instance{ { "a", 1 }, { "b", 2 } };
     const auto it = instance.erase(std::next(instance.cbegin()));
-    BOOST_REQUIRE(it == instance.end());
+    BOOST_REQUIRE(it == instance.cend());
     BOOST_REQUIRE_EQUAL(keys(instance), "a,");
 }
 
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(json_object__indexed__erase_then_lookup__expected)
     BOOST_REQUIRE(!instance.contains("k05"));
     BOOST_REQUIRE(!instance.contains("k10"));
     BOOST_REQUIRE_EQUAL(instance.at("k39").as_string(), "k39");
-    BOOST_REQUIRE_EQUAL(std::next(instance.begin(), 5)->key(), "k39");
+    BOOST_REQUIRE_EQUAL(std::next(instance.cbegin(), 5)->key(), "k39");
     BOOST_REQUIRE_EQUAL(instance.size(), sub1(sub1(many_keys.size())));
 }
 
@@ -229,13 +229,13 @@ BOOST_AUTO_TEST_CASE(json_object__reverse_iteration__expected)
 {
     const object instance{ { "a", 1 }, { "b", 2 } };
     BOOST_REQUIRE_EQUAL(instance.crbegin()->key(), "b");
-    BOOST_REQUIRE_EQUAL(std::prev(instance.rend())->key(), "a");
+    BOOST_REQUIRE_EQUAL(std::prev(instance.crend())->key(), "a");
 }
 
 BOOST_AUTO_TEST_CASE(json_object__key_c_str__expected)
 {
     const object instance{ { "abc", 1 } };
-    BOOST_REQUIRE_EQUAL(std::string{ instance.begin()->key_c_str() }, "abc");
+    BOOST_REQUIRE_EQUAL(std::string{ instance.cbegin()->key_c_str() }, "abc");
 }
 
 BOOST_AUTO_TEST_CASE(json_object__swap__swapped)

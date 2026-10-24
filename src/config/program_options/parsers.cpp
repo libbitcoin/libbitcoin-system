@@ -76,12 +76,12 @@ namespace boost { namespace program_options {
             result.position_key = opt.position_key;
             result.unregistered = opt.unregistered;
             
-            std::transform(opt.value.begin(), opt.value.end(),
+            std::transform(opt.value.cbegin(), opt.value.cend(),
                            back_inserter(result.value),
                            boost::bind(from_utf8, _1));
 
-            std::transform(opt.original_tokens.begin(), 
-                           opt.original_tokens.end(),
+            std::transform(opt.original_tokens.cbegin(), 
+                           opt.original_tokens.cend(),
                            back_inserter(result.original_tokens),
                            boost::bind(from_utf8, _1));
             return result;

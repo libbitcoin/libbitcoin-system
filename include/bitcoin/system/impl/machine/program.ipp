@@ -95,14 +95,14 @@ TEMPLATE
 INLINE typename CLASS::op_iterator CLASS::
 begin() const NOEXCEPT
 {
-    return script_->ops().begin();
+    return script_->ops().cbegin();
 }
 
 TEMPLATE
 INLINE typename CLASS::op_iterator CLASS::
 end() const NOEXCEPT
 {
-    return script_->ops().end();
+    return script_->ops().cend();
 }
 
 TEMPLATE

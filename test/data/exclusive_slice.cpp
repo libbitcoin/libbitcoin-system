@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(exclusive_slice__construct__pointers_reversed__empty)
 BOOST_AUTO_TEST_CASE(exclusive_slice__construct__iterators_empty__empty)
 {
     const data_chunk value{};
-    BOOST_REQUIRE(exclusive_slice(value.begin(), value.end()).empty());
+    BOOST_REQUIRE(exclusive_slice(value.cbegin(), value.cend()).empty());
 }
 
 BOOST_AUTO_TEST_CASE(exclusive_slice__construct__string_empty__empty)

@@ -70,7 +70,7 @@ string_list dictionary<Size>::at(const search& indexes) const NOEXCEPT
     string_list out(indexes.size());
 
     // std::transform can be parallel but maintains order.
-    std::transform(indexes.begin(), indexes.end(), out.begin(),
+    std::transform(indexes.cbegin(), indexes.cend(), out.begin(),
         [&](size_t index)
         {
             // index is signed because we reuse indexes data type. 
@@ -89,9 +89,9 @@ int32_t dictionary<Size>::index(const std::string& word) const NOEXCEPT
         return possible_narrow_cast<int32_t>(binary_search(words_.word, word));
 
     // std::find returns first match, though words should be unique.
-    const auto it = std::find(words_.word.begin(), words_.word.end(), word);
-    return it == words_.word.end() ? -1 : 
-        possible_narrow_cast<int32_t>(std::distance(words_.word.begin(), it));
+    const auto it = std::find(words_.word.cbegin(), words_.word.cend(), word);
+    return it == words_.word.cend() ? -1 : 
+        possible_narrow_cast<int32_t>(std::distance(words_.word.cbegin(), it));
 }
 
 template <size_t Size>
@@ -101,7 +101,7 @@ dictionary<Size>::index(const string_list& words) const NOEXCEPT
     dictionary<Size>::result out(words.size());
 
     // std::transform can be parallel but maintains order.
-    std::transform(words.begin(), words.end(), out.begin(),
+    std::transform(words.cbegin(), words.cend(), out.begin(),
         [&](const std::string& word)
         {
             return index(word);
@@ -120,7 +120,7 @@ template <size_t Size>
 bool dictionary<Size>::contains(const string_list& words) const NOEXCEPT
 {
     // std::all_of can be parallel and order doesn't matter.
-    return std::all_of(words.begin(), words.end(),
+    return std::all_of(words.cbegin(), words.cend(),
         [&](const std::string& word)
         {
             return contains(word);

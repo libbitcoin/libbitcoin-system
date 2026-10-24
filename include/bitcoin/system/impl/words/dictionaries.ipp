@@ -42,7 +42,7 @@ dictionaries<Count, Size>::dictionaries(const list& dictionaries) NOEXCEPT
 template<size_t Count, size_t Size>
 bool dictionaries<Count, Size>::exists(language identifier) const NOEXCEPT
 {
-    return to_dictionary(identifier) != dictionaries_.end();
+    return to_dictionary(identifier) != dictionaries_.cend();
 }
 
 template<size_t Count, size_t Size>
@@ -50,7 +50,7 @@ language dictionaries<Count, Size>::to_identifier(
     const std::string& name) const NOEXCEPT
 {
     const auto it = to_dictionary(name);
-    return it != dictionaries_.end() ? it->identifier() : language::none;
+    return it != dictionaries_.cend() ? it->identifier() : language::none;
 }
 
 template<size_t Count, size_t Size>
@@ -58,7 +58,7 @@ std::string dictionaries<Count, Size>::to_name(
     language identifier) const NOEXCEPT
 {
     const auto it = to_dictionary(identifier);
-    return it != dictionaries_.end() ? it->name() : "";
+    return it != dictionaries_.cend() ? it->name() : "";
 }
 
 // Search.
@@ -69,7 +69,7 @@ std::string dictionaries<Count, Size>::at(size_t index,
     language identifier) const NOEXCEPT
 {
     const auto it = to_dictionary(identifier);
-    return it != dictionaries_.end() ? it->at(index) : "";
+    return it != dictionaries_.cend() ? it->at(index) : "";
 }
 
 template<size_t Count, size_t Size>
@@ -77,7 +77,7 @@ string_list dictionaries<Count, Size>::at(const search& indexes,
     language identifier) const NOEXCEPT
 {
     const auto it = to_dictionary(identifier);
-    return it != dictionaries_.end() ? it->at(indexes) : string_list{};
+    return it != dictionaries_.cend() ? it->at(indexes) : string_list{};
 }
 
 template<size_t Count, size_t Size>
@@ -85,7 +85,7 @@ int32_t dictionaries<Count, Size>::index(const std::string& word,
     language identifier) const NOEXCEPT
 {
     const auto it = to_dictionary(identifier);
-    return it != dictionaries_.end() ? it->index(word) : missing;
+    return it != dictionaries_.cend() ? it->index(word) : missing;
 }
 
 template<size_t Count, size_t Size>
@@ -94,7 +94,7 @@ dictionaries<Count, Size>::index(const string_list& words,
     language identifier) const NOEXCEPT
 {
     const auto it = to_dictionary(identifier);
-    return it != dictionaries_.end() ? it->index(words) : result{};
+    return it != dictionaries_.cend() ? it->index(words) : result{};
 }
 
 template<size_t Count, size_t Size>
@@ -104,18 +104,18 @@ language dictionaries<Count, Size>::contains(const std::string& word,
     if (identifier != language::none)
     {
         const auto it = to_dictionary(identifier);
-        return it != dictionaries_.end() && it->contains(word) ?
+        return it != dictionaries_.cend() && it->contains(word) ?
             identifier : language::none;
     }
 
     // std::find_if returns first match, order is guaranteed.
-    const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
+    const auto it = std::find_if(dictionaries_.cbegin(), dictionaries_.cend(),
         [&](const dictionary<Size>& dictionary) NOEXCEPT
         {
             return dictionary.contains(word);
         });
 
-    return it != dictionaries_.end() ? it->identifier() : language::none;
+    return it != dictionaries_.cend() ? it->identifier() : language::none;
 }
 
 template<size_t Count, size_t Size>
@@ -125,18 +125,18 @@ language dictionaries<Count, Size>::contains(const string_list& words,
     if (identifier != language::none)
     {
         const auto it = to_dictionary(identifier);
-        return it != dictionaries_.end() && it->contains(words) ?
+        return it != dictionaries_.cend() && it->contains(words) ?
             identifier : language::none;
     }
 
     // std::find_if returns first match, order is guaranteed.
-    const auto it = std::find_if(dictionaries_.begin(), dictionaries_.end(),
+    const auto it = std::find_if(dictionaries_.cbegin(), dictionaries_.cend(),
         [&](const dictionary<Size>& dictionary) NOEXCEPT
         {
             return dictionary.contains(words);
         });
 
-    return it != dictionaries_.end() ? it->identifier() : language::none;
+    return it != dictionaries_.cend() ? it->identifier() : language::none;
 }
 
 // private
@@ -147,7 +147,7 @@ typename dictionaries<Count, Size>::list::const_iterator
 dictionaries<Count, Size>::to_dictionary(language identifier) const NOEXCEPT
 {
     // std::find_if returns first match, order is guaranteed.
-    return std::find_if(dictionaries_.begin(), dictionaries_.end(),
+    return std::find_if(dictionaries_.cbegin(), dictionaries_.cend(),
         [&](const dictionary<Size>& dictionary) NOEXCEPT
         {
             return dictionary.identifier() == identifier;
@@ -159,7 +159,7 @@ typename dictionaries<Count, Size>::list::const_iterator
 dictionaries<Count, Size>::to_dictionary(const std::string& name) const NOEXCEPT
 {
     // std::find_if returns first match, order is guaranteed.
-    return std::find_if(dictionaries_.begin(), dictionaries_.end(),
+    return std::find_if(dictionaries_.cbegin(), dictionaries_.cend(),
         [&](const dictionary<Size>& dictionary) NOEXCEPT
         {
             return dictionary.name() == name;

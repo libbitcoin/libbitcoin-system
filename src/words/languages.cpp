@@ -54,24 +54,24 @@ static const language_map map
 
 language languages::from_name(const std::string& name) NOEXCEPT
 {
-    const auto it = std::find_if(map.begin(), map.end(),
+    const auto it = std::find_if(map.cbegin(), map.cend(),
         [&](const language_map::value_type& pair) NOEXCEPT
         {
             return pair.second == name;
         });
 
-    return it != map.end() ? it->first : language::none;
+    return it != map.cend() ? it->first : language::none;
 }
 
 std::string languages::to_name(language identifier) NOEXCEPT
 {
-    const auto it = std::find_if(map.begin(), map.end(),
+    const auto it = std::find_if(map.cbegin(), map.cend(),
         [&](const language_map::value_type& pair) NOEXCEPT
         {
             return pair.first == identifier;
         });
 
-    return it != map.end() ? it->second : "";
+    return it != map.cend() ? it->second : "";
 }
 
 std::string languages::to_delimiter(language identifier) NOEXCEPT
@@ -99,7 +99,7 @@ string_list languages::try_normalize(const string_list& words) NOEXCEPT
 
     // This is only used for dictionary matching.
     // All dictionaries are confirmed via test cases to be lower/nfkd.
-    std::transform(words.begin(), words.end(), normal.begin(),
+    std::transform(words.cbegin(), words.cend(), normal.begin(),
         [](const std::string& word) NOEXCEPT
         {
             auto token = ascii_to_lower(trim_copy(word, unicode_whitespace));

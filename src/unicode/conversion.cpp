@@ -189,7 +189,7 @@ static std::vector<std::basic_string<CharOut>> to_utf(
     const std::vector<std::basic_string<CharIn>>& in) NOEXCEPT
 {
     std::vector<std::basic_string<CharOut>> out(in.size());
-    std::transform(in.begin(), in.end(), out.begin(),
+    std::transform(in.cbegin(), in.cend(), out.begin(),
         [](const std::basic_string<CharIn>& word) NOEXCEPT
         {
             return to_utf<CharOut>(word);

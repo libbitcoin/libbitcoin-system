@@ -138,7 +138,7 @@ constexpr bool is_valid_version(uint8_t version) NOEXCEPT
 // local
 static bool has_invalid_prefix_character(const std::string& prefix) NOEXCEPT
 {
-    return std::any_of(prefix.begin(), prefix.end(),
+    return std::any_of(prefix.cbegin(), prefix.cend(),
         [](const char character) NOEXCEPT
         {
             return character < witness_address::prefix_minimum_character ||

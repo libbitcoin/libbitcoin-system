@@ -244,9 +244,9 @@ chain_state::activations chain_state::activation(const data& values,
         { return ge(value, settings.bip65_version); };
 
     // Compute bip34-based activation version summaries (empty if disabled).
-    const auto count_2 = std::count_if(history.begin(), history.end(), ge_2);
-    const auto count_3 = std::count_if(history.begin(), history.end(), ge_3);
-    const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
+    const auto count_2 = std::count_if(history.cbegin(), history.cend(), ge_2);
+    const auto count_3 = std::count_if(history.cbegin(), history.cend(), ge_3);
+    const auto count_4 = std::count_if(history.cbegin(), history.cend(), ge_4);
 
     // Frozen activations (require version and enforce above freeze height).
     const auto bip90_bip34 = forks.bip90 && height >= settings.bip90_bip34_height;

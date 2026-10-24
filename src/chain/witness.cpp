@@ -260,7 +260,7 @@ static inline bool is_push_token(const std::string& token) NOEXCEPT
 inline std::string remove_token_delimiters(const std::string& token) NOEXCEPT
 {
     BC_ASSERT(token.size() > one);
-    return std::string(std::next(token.begin()), std::prev(token.end()));
+    return std::string(std::next(token.cbegin()), std::prev(token.cend()));
 }
 
 // static/private
@@ -327,7 +327,7 @@ const chain::annex& witness::annex() const NOEXCEPT
 // static
 size_t witness::serialized_size(const chunk_cptrs& stack, bool prefix) NOEXCEPT
 {
-    const auto size = std::accumulate(stack.begin(), stack.end(), zero,
+    const auto size = std::accumulate(stack.cbegin(), stack.cend(), zero,
         [](size_t total, const chunk_cptr& element) NOEXCEPT
         {
             return ceilinged_add(total, element_size(element));

@@ -692,7 +692,7 @@ bool opcode_from_hexadecimal(opcode& out_code,
         return false;
 
     data_chunk out;
-    if (!decode_base16(out, { std::next(value.begin(), prefix), value.end() }))
+    if (!decode_base16(out, { std::next(value.cbegin(), prefix), value.cend() }))
         return false;
 
     out_code = static_cast<opcode>(out.front());

@@ -324,7 +324,7 @@ inline bool is_underflow_token(const std::string_view& token) NOEXCEPT
 inline std::string remove_token_delimiters(const std::string_view& token) NOEXCEPT
 {
     BC_ASSERT(token.size() > one);
-    return std::string{ std::next(token.begin()), std::prev(token.end()) };
+    return std::string{ std::next(token.cbegin()), std::prev(token.cend()) };
 }
 
 inline string_list split_push_token(const std::string_view& token) NOEXCEPT
@@ -499,7 +499,7 @@ static std::string bitcoind_data(const data_chunk& data,
     if (signature)
     {
         const auto suffix = sighash_suffix(data.back());
-        const data_slice der{ data.begin(), std::prev(data.end()) };
+        const data_slice der{ data.cbegin(), std::prev(data.cend()) };
         if (!suffix.empty() && ::is_valid_bip66_signature_encoding(der))
             return encode_base16(der) + suffix;
     }

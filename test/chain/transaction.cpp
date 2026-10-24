@@ -1720,7 +1720,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
 
     constexpr auto value = 0u;
     constexpr auto flags = flags::no_rules;
-    const auto& input = test_tx.inputs_ptr()->begin();
+    const auto& input = test_tx.inputs_ptr()->cbegin();
 
     hash_digest sighash{};
     const hash_cptr tapleaf{};
@@ -1756,7 +1756,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_all__expected)
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_all, flags::no_rules));
@@ -1767,7 +1767,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_none__expected)
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_none, flags::no_rules));
@@ -1778,7 +1778,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single__expected)
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_single, flags::no_rules));
@@ -1789,7 +1789,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_all_anyone_can_pay
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::all_anyone_can_pay, flags::no_rules));
@@ -1800,7 +1800,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_none_anyone_can_pa
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::none_anyone_can_pay, flags::no_rules));
@@ -1811,7 +1811,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single_anyone_can_
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::single_anyone_can_pay, flags::no_rules));
@@ -1822,7 +1822,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_all_first_input__e
 {
     const auto tx = unversioned_sighash_transaction();
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_all, flags::no_rules));
@@ -1841,7 +1841,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__unversioned_single_output_over
     const outputs outs{ output{ 1000, script(base16_chunk("51"), false) } };
     const transaction tx{ 1, ins, outs, 0 };
     const script subscript(base16_chunk(sighash_subscript), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 0, tapleaf, script_version::unversioned, coverage::hash_single, flags::no_rules));
@@ -1859,7 +1859,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wpkh__expected)
     BOOST_REQUIRE(tx.is_valid());
 
     const script subscript(base16_chunk("76a9141d0f172a0ecb48aee1be1f2687d2963ae33f71a188ac"), false);
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 600000000, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
@@ -1872,7 +1872,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2sh_p2wpkh__expected)
     BOOST_REQUIRE(tx.is_valid());
 
     const script subscript(base16_chunk("76a91479091972186c449eb1ded22b78e40d009bdf008988ac"), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, 1000000000, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
@@ -1887,7 +1887,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_all__expected)
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_all, bip143_flags));
@@ -1898,7 +1898,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_none__expected)
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_none, bip143_flags));
@@ -1909,7 +1909,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_single__expected)
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::hash_single, bip143_flags));
@@ -1920,7 +1920,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_all_anyone_can_pa
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::all_anyone_can_pay, bip143_flags));
@@ -1931,7 +1931,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_none_anyone_can_p
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::none_anyone_can_pay, bip143_flags));
@@ -1942,7 +1942,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_p2wsh_single_anyone_can
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, subscript, bip143_p2wsh_value, tapleaf, script_version::segwit, coverage::single_anyone_can_pay, bip143_flags));
@@ -1974,7 +1974,7 @@ static transaction bip341_spending_transaction() NOEXCEPT
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_single__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 0);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 0);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 420000000, tapleaf, script_version::taproot, coverage::hash_single, bip341_flags));
@@ -1984,7 +1984,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_single__expect
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_single_anyone_can_pay__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 1);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 1);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 462000000, tapleaf, script_version::taproot, coverage::single_anyone_can_pay, bip341_flags));
@@ -1994,7 +1994,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_single_anyone_
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 3);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 3);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 504000000, tapleaf, script_version::taproot, coverage::hash_all, bip341_flags));
@@ -2004,7 +2004,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all__expected)
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_default__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 4);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 4);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 630000000, tapleaf, script_version::taproot, coverage::hash_default, bip341_flags));
@@ -2014,7 +2014,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_default__expec
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_none__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 6);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 6);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 672000000, tapleaf, script_version::taproot, coverage::hash_none, bip341_flags));
@@ -2024,7 +2024,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_none__expected
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_none_anyone_can_pay__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 7);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 7);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 546000000, tapleaf, script_version::taproot, coverage::none_anyone_can_pay, bip341_flags));
@@ -2034,7 +2034,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_none_anyone_ca
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_key_path_all_anyone_can_pay__expected)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 8);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 8);
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(tx.signature_hash(sighash, input, {}, 588000000, tapleaf, script_version::taproot, coverage::all_anyone_can_pay, bip341_flags));
@@ -2046,7 +2046,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_anyone_can_pay_no_prevo
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
     const outputs outs{ output{ 42, script{} } };
     const transaction tx{ 1, ins, outs, 0 };
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(!tx.signature_hash(sighash, input, {}, 42, tapleaf, script_version::taproot, coverage::all_anyone_can_pay, bip341_flags));
@@ -2062,7 +2062,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_single_output_overflow_
 
     const outputs outs{ output{ 42, script{} } };
     const transaction tx{ 1, ins, outs, 0 };
-    const auto input = std::next(tx.inputs_ptr()->begin());
+    const auto input = std::next(tx.inputs_ptr()->cbegin());
     const hash_cptr tapleaf{};
     hash_digest sighash{};
     BOOST_REQUIRE(!tx.signature_hash(sighash, input, {}, 42, tapleaf, script_version::taproot, coverage::hash_single, bip341_flags));
@@ -2075,7 +2075,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_interleaved_modes__cach
 {
     const transaction tx(base16_chunk(bip143_p2wsh_tx), true);
     const script subscript(base16_chunk(bip143_p2wsh_script), false);
-    const auto input = tx.inputs_ptr()->begin();
+    const auto input = tx.inputs_ptr()->cbegin();
     const hash_cptr tapleaf{};
 
     hash_digest all1{};
@@ -2106,14 +2106,14 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip143_interleaved_modes__cach
 BOOST_AUTO_TEST_CASE(transaction__signature_hash__bip341_interleaved_modes__cache_invariant)
 {
     const auto tx = bip341_spending_transaction();
-    const auto input = std::next(tx.inputs_ptr()->begin(), 4);
+    const auto input = std::next(tx.inputs_ptr()->cbegin(), 4);
     const hash_cptr tapleaf{};
 
     hash_digest default1{};
     BOOST_REQUIRE(tx.signature_hash(default1, input, {}, 630000000, tapleaf, script_version::taproot, coverage::hash_default, bip341_flags));
     BOOST_REQUIRE_EQUAL(default1, base16_array("4f900a0bae3f1446fd48490c2958b5a023228f01661cda3496a11da502a7f7ef"));
 
-    const auto single_input = std::next(tx.inputs_ptr()->begin(), 0);
+    const auto single_input = std::next(tx.inputs_ptr()->cbegin(), 0);
     hash_digest single1{};
     BOOST_REQUIRE(tx.signature_hash(single1, single_input, {}, 420000000, tapleaf, script_version::taproot, coverage::hash_single, bip341_flags));
     BOOST_REQUIRE_EQUAL(single1, base16_array("2514a6272f85cfa0f45eb907fcb0d121b808ed37c6ea160a5a9046ed5526d555"));
@@ -2895,7 +2895,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__expected)
     const auto instance = taproot_tx(annexed);
 
     hash_digest sighash{};
-    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->cbegin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
     BOOST_REQUIRE_EQUAL(sighash, base16_array("43f5e669234797e57bbcd5d3dbce8dabba005c1e282e3ec06875311d9961900e"));
 }
 
@@ -2905,7 +2905,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex_single__expected
     const auto instance = taproot_tx(annexed);
 
     hash_digest sighash{};
-    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_single, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->cbegin(), {}, 0, {}, script_version::taproot, coverage::hash_single, flags::bip342_rule));
     BOOST_REQUIRE_EQUAL(sighash, base16_array("27849d2ce26971ac0058fd81468d5998d0ed3cc4109d32b2625b06eccd0acdec"));
 }
 
@@ -2915,7 +2915,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex_all_anyone_can_p
     const auto instance = taproot_tx(annexed);
 
     hash_digest sighash{};
-    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::all_anyone_can_pay, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->cbegin(), {}, 0, {}, script_version::taproot, coverage::all_anyone_can_pay, flags::bip342_rule));
     BOOST_REQUIRE_EQUAL(sighash, base16_array("e8ce62f56bab0627d317648011197c55c5d84fe931cfb1be7c13915a4fb2259c"));
 }
 
@@ -2927,7 +2927,7 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__tapscript_annex__expected)
     const auto tapleaf = to_shared<hash_digest>(one_hash);
 
     hash_digest sighash{};
-    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->begin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(sighash, instance.inputs_ptr()->cbegin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
     BOOST_REQUIRE_EQUAL(sighash, base16_array("04b4b4559279d6696b2dbaca5dee86a2e36d0bde098f66d40336e205923a49a4"));
 }
 
@@ -2942,8 +2942,8 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__taproot_annex__differs)
     BOOST_REQUIRE(with.inputs_ptr()->front()->witness().annex());
 
     hash_digest out1{}, out2{};
-    BOOST_REQUIRE(without.signature_hash(out1, without.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
-    BOOST_REQUIRE(with.signature_hash(out2, with.inputs_ptr()->begin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(without.signature_hash(out1, without.inputs_ptr()->cbegin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(with.signature_hash(out2, with.inputs_ptr()->cbegin(), {}, 0, {}, script_version::taproot, coverage::hash_all, flags::bip342_rule));
     BOOST_REQUIRE_NE(out1, out2);
 }
 
@@ -2956,8 +2956,8 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__tapscript_subscript__separator
     const script ops{ operations{ { opcode::pick }, { opcode::roll } } };
 
     hash_digest out1{}, out2{};
-    BOOST_REQUIRE(instance.signature_hash(out1, instance.inputs_ptr()->begin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
-    BOOST_REQUIRE(instance.signature_hash(out2, instance.inputs_ptr()->begin(), ops, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(out1, instance.inputs_ptr()->cbegin(), {}, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
+    BOOST_REQUIRE(instance.signature_hash(out2, instance.inputs_ptr()->cbegin(), ops, 0, tapleaf, script_version::taproot, coverage::hash_all, flags::bip342_rule));
     BOOST_REQUIRE_EQUAL(out1, out2);
 }
 

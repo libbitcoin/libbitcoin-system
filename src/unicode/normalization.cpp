@@ -264,7 +264,7 @@ static void compose(std::u32string& sequence) NOEXCEPT
                     if (is_nonzero(point))
                     {
                         sequence[index] = point;
-                        sequence.erase(std::next(sequence.begin(), inner));
+                        sequence.erase(std::next(sequence.cbegin(), inner));
                         last = {};
                         continue;
                     }
@@ -282,7 +282,7 @@ static void compose(std::u32string& sequence) NOEXCEPT
                 if (is_nonzero(point))
                 {
                     sequence[index] = point;
-                    sequence.erase(std::next(sequence.begin(), inner));
+                    sequence.erase(std::next(sequence.cbegin(), inner));
                     last = {};
                     continue;
                 }
@@ -514,7 +514,7 @@ bool has_whitespace(const std::string& value) NOEXCEPT
         return false;
 
     const auto points = to_utf32(value);
-    return std::any_of(points.begin(), points.end(),
+    return std::any_of(points.cbegin(), points.cend(),
         [](char32_t character) NOEXCEPT
         {
             return is_whitespace(character);

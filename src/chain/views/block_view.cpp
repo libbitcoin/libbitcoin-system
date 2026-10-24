@@ -108,7 +108,7 @@ bool block::is_valid() const NOEXCEPT
 
 bool block::is_segregated() const NOEXCEPT
 {
-    return witness_ && std::any_of(txs_.begin(), txs_.end(),
+    return witness_ && std::any_of(txs_.cbegin(), txs_.cend(),
         [](const auto& tx) NOEXCEPT
         {
             return tx.is_segregated();
@@ -134,7 +134,7 @@ size_t block::spends() const NOEXCEPT
     };
 
     return txs_.empty() ? zero :
-        std::accumulate(std::next(txs_.begin()), txs_.end(), zero, sum);
+        std::accumulate(std::next(txs_.cbegin()), txs_.cend(), zero, sum);
 }
 
 bool block::is_populated() const NOEXCEPT
@@ -226,7 +226,7 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
 // static
 bool block::is_malleable64(const view::transactions& txs) NOEXCEPT
 {
-    return !txs.empty() && std::all_of(txs.begin(), txs.end(),
+    return !txs.empty() && std::all_of(txs.cbegin(), txs.cend(),
         [](const auto& tx) NOEXCEPT
         {
             return tx.serialized_size(false) == two * hash_size;
@@ -361,7 +361,7 @@ void block::populate_inputs() NOEXCEPT
     };
 
     inputs_ = to_shared<view::inputs>();
-    inputs_->reserve(std::accumulate(txs_.begin(), txs_.end(), zero, sum));
+    inputs_->reserve(std::accumulate(txs_.cbegin(), txs_.cend(), zero, sum));
 
     for (const auto& tx: txs_)
     {
@@ -413,7 +413,7 @@ bool block::populate_prevouts(data_chunk&& prevouts,
     const auto* position = prevout_buffer_->data();
     const auto* end = std::next(position, prevout_buffer_->size());
     auto select = std::next(selected.cbegin());
-    for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx, ++select)
+    for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx, ++select)
     {
         if (!*select)
             continue;
@@ -439,7 +439,7 @@ code block::populate_internal(const context& ctx) const NOEXCEPT
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
     unordered_set_of_hash_cref hashes{};
 
-    for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
+    for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx)
     {
         const auto relative = bip68 &&
             tx->version() >= relative_locktime_min_version;
@@ -547,7 +547,7 @@ bool block::is_extra_coinbases() const NOEXCEPT
     if (txs_.empty())
         return false;
 
-    return std::any_of(std::next(txs_.begin()), txs_.end(),
+    return std::any_of(std::next(txs_.cbegin()), txs_.cend(),
         [](const auto& tx) NOEXCEPT
         {
             return is_coinbase(tx);
@@ -560,8 +560,8 @@ bool block::is_forward_reference() const NOEXCEPT
         return false;
 
     unordered_set_of_hash_cref hashes(sub1(txs_.size()));
-    const auto end = std::prev(txs_.rend());
-    for (auto tx = txs_.rbegin(); tx != end; ++tx)
+    const auto end = std::prev(txs_.crend());
+    for (auto tx = txs_.crbegin(); tx != end; ++tx)
     {
         for (auto in = tx->inputs_begin(); in != tx->inputs_end(); ++in)
             if (hashes.contains(in->point_hash()))
@@ -579,7 +579,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
         return false;
 
     std::unordered_set<cref_point> points(spends());
-    for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
+    for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx)
         for (auto in = tx->inputs_begin(); in != tx->inputs_end(); ++in)
             if (!points.emplace(in->point_hash(), in->point_index()).second)
                 return true;
@@ -612,7 +612,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.emplace(txs_.front().hash(false));
 
-    for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
+    for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx)
     {
         hashes.emplace(tx->hash(false));
         for (auto in = tx->inputs_begin(); in != tx->inputs_end(); ++in)
@@ -652,7 +652,7 @@ uint64_t block::fees() const NOEXCEPT
         return ceilinged_add(total, tx.fee());
     };
 
-    return std::accumulate(txs_.begin(), txs_.end(), 0_u64, value);
+    return std::accumulate(txs_.cbegin(), txs_.cend(), 0_u64, value);
 }
 
 uint64_t block::claim() const NOEXCEPT
@@ -676,7 +676,7 @@ size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
         return ceilinged_add(total, tx.signature_operations(bip16, bip141));
     };
 
-    return std::accumulate(txs_.begin(), txs_.end(), zero, value);
+    return std::accumulate(txs_.cbegin(), txs_.cend(), zero, value);
 }
 
 code block::check_transactions() const NOEXCEPT
@@ -700,7 +700,7 @@ code block::check_transactions(const context& ctx) const NOEXCEPT
 code block::accept_transactions(const context& ctx) const NOEXCEPT
 {
     if (!txs_.empty())
-        for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
+        for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx)
             if (const auto ec = tx->accept(ctx))
                 return ec;
 
@@ -711,7 +711,7 @@ code block::connect_transactions(const context& ctx,
     const signatures& capture) const NOEXCEPT
 {
     if (!txs_.empty())
-        for (auto tx = std::next(txs_.begin()); tx != txs_.end(); ++tx)
+        for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx)
             if (const auto ec = tx->connect(ctx, capture))
                 return ec;
 

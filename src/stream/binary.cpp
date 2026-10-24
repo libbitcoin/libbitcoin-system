@@ -35,7 +35,7 @@ constexpr bool is_binary(char character) NOEXCEPT
 
 bool binary::is_base2(const std::string& text) NOEXCEPT
 {
-    return std::all_of(text.begin(), text.end(), is_binary);
+    return std::all_of(text.cbegin(), text.cend(), is_binary);
 }
 
 // constructors

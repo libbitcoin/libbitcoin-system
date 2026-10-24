@@ -242,7 +242,7 @@ Value reduce(const bc::system::execution::policy& policy, Iterator first,
                 operation);
         });
 
-    return std::reduce(partials.begin(), partials.end(), init, operation);
+    return std::reduce(partials.cbegin(), partials.cend(), init, operation);
 }
 
 template <typename Iterator, typename Value, typename Reduction,
@@ -265,7 +265,7 @@ Value transform_reduce(const bc::system::execution::policy& policy,
                 partial, reduction, transformation);
         });
 
-    return std::reduce(partials.begin(), partials.end(), init, reduction);
+    return std::reduce(partials.cbegin(), partials.cend(), init, reduction);
 }
 
 template <typename Iterator, typename Predicate>

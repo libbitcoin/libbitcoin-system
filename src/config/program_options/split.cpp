@@ -27,7 +27,7 @@ namespace boost { namespace program_options { namespace detail {
             typename std::basic_string<charT>::const_iterator, 
             std::basic_string<charT> >  tokenizerT;
          
-      tokenizerT tok(cmdline.begin(), cmdline.end(), 
+      tokenizerT tok(cmdline.cbegin(), cmdline.cend(), 
                 boost::escaped_list_separator< charT >(escape, seperator, quote));
          
       std::vector< std::basic_string<charT> > result;

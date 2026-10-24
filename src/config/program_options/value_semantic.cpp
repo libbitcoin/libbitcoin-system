@@ -334,8 +334,8 @@ namespace boost { namespace program_options {
         //
         //  replace placeholder with defaults if values are missing 
         // 
-        for (map<string, string_pair>::const_iterator iter = m_substitution_defaults.begin();
-              iter != m_substitution_defaults.end(); ++iter)
+        for (map<string, string_pair>::const_iterator iter = m_substitution_defaults.cbegin();
+              iter != m_substitution_defaults.cend(); ++iter)
         {
             // missing parameter: use default
             if (substitutions.count(iter->first) == 0 ||
@@ -369,8 +369,8 @@ namespace boost { namespace program_options {
 
         string error_template  = original_error_template;
         // remove duplicates using std::set
-        std::set<std::string>   alternatives_set (m_alternatives.begin(), m_alternatives.end());
-        std::vector<std::string> alternatives_vec (alternatives_set.begin(), alternatives_set.end());
+        std::set<std::string>   alternatives_set (m_alternatives.cbegin(), m_alternatives.cend());
+        std::vector<std::string> alternatives_vec (alternatives_set.cbegin(), alternatives_set.cend());
 
         error_template += " and matches ";
         // Being very cautious: should be > 1 alternative!

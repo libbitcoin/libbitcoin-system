@@ -382,8 +382,8 @@ static chain::script commitment_script(const hash_digest& commitment) NOEXCEPT
     constexpr auto head = to_big_endian(chain::witness_head);
     data_chunk data(head.size() + hash_size);
     const auto start = std::next(data.begin(), head.size());
-    std::copy(head.begin(), head.end(), data.begin());
-    std::copy(commitment.begin(), commitment.end(), start);
+    std::copy(head.cbegin(), head.cend(), data.begin());
+    std::copy(commitment.cbegin(), commitment.cend(), start);
 
     return chain::script
     {
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(block_view__to_data__ostream__round_trips)
     std::ostringstream stream{};
     view.to_data(stream, true);
     const auto text = stream.str();
-    const data_chunk data(text.begin(), text.end());
+    const data_chunk data(text.cbegin(), text.cend());
     BOOST_CHECK_EQUAL(data, block.to_data(true));
 }
 
@@ -572,7 +572,7 @@ static data_chunk view_prevouts_data(const outputs& prevouts) NOEXCEPT
     for (const auto& prevout: prevouts)
     {
         const auto data = prevout.to_data();
-        out.insert(out.end(), data.begin(), data.end());
+        out.insert(out.cend(), data.cbegin(), data.cend());
     }
 
     return out;

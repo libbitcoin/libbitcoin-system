@@ -265,8 +265,8 @@ std::ostream& props::write(std::ostream& stream,
 
                     if (!children_.empty())
                     {
-                        for (auto child = children_.begin();
-                            child != std::prev(children_.end()); ++child)
+                        for (auto child = children_.cbegin();
+                            child != std::prev(children_.cend()); ++child)
                             child->second.write(stream, format, add1(depth),
                                 flat) << ",";
 
@@ -285,8 +285,8 @@ std::ostream& props::write(std::ostream& stream,
                     if (!children_.empty())
                     {
                         // Info uses space or line feed array element sep.
-                        for (auto child = children_.begin();
-                            child != std::prev(children_.end()); ++child)
+                        for (auto child = children_.cbegin();
+                            child != std::prev(children_.cend()); ++child)
                             child->second.write(stream, format, add1(depth),
                                 flat) << (flat ? " " : "");
 
@@ -321,8 +321,8 @@ std::ostream& props::write(std::ostream& stream,
 
                     if (!children_.empty())
                     {
-                        for (auto child = children_.begin();
-                            child != std::prev(children_.end()); ++child)
+                        for (auto child = children_.cbegin();
+                            child != std::prev(children_.cend()); ++child)
                             child->second.write(stream, format, add1(depth),
                                 flat, child->first) << ",";
 
@@ -340,8 +340,8 @@ std::ostream& props::write(std::ostream& stream,
                     if (!children_.empty())
                     {
                         // Info uses comma or line feed for named prop sep.
-                        for (auto child = children_.begin();
-                            child != std::prev(children_.end()); ++child)
+                        for (auto child = children_.cbegin();
+                            child != std::prev(children_.cend()); ++child)
                             child->second.write(stream, format, add1(depth),
                                 flat, child->first) << (flat ? "," : "");
 

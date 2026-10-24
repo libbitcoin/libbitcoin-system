@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(program__subscript__segwit_bip143__unstripped)
     const operations ops{ operation{ opcode::codeseparator } };
     const auto separator = to_shared<script>(script{ ops });
     const auto tx = funded_tx();
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const auto stack = std::make_shared<chunk_cptrs>();
     const chain::signatures capture{};
     const verify_accessor out{ tx, it, separator, flags::bip143_rule, script_version::segwit, stack, capture };
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(program__subscript__codeseparator__stripped)
 {
     const operations ops{ operation{ opcode::codeseparator }, operation{ opcode::dup } };
     const auto tx = accessor_transaction(script{ ops }, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const chain::signatures capture{};
     const verify_accessor in{ tx, it, flags::no_rules, capture };
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(program__subscript__unversioned_bip143__stripped)
 {
     const operations ops{ operation{ opcode::codeseparator }, operation{ opcode::dup } };
     const auto tx = accessor_transaction(script{ ops }, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const chain::signatures capture{};
     const verify_accessor in{ tx, it, flags::bip143_rule, capture };
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(program__set_hash__subscript__cached)
 {
     const chain::signatures capture{};
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const verify_accessor in{ tx, it, flags::no_rules, capture };
     const script subscript{ operations{ operation{ opcode::checksig } } };
     BOOST_REQUIRE(!in.cached(coverage::hash_all));

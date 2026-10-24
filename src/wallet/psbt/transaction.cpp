@@ -143,7 +143,7 @@ transaction transaction::from_transaction(const chain::transaction& tx,
     const auto& inputs = *tx.inputs_ptr();
     const auto& outputs = *tx.outputs_ptr();
     if (!tx.is_valid() || (version != version_0 && version != version_2) ||
-        !std::all_of(inputs.begin(), inputs.end(), unsigned_input))
+        !std::all_of(inputs.cbegin(), inputs.cend(), unsigned_input))
         return {};
 
     transaction out{};
@@ -250,7 +250,7 @@ bool transaction::parse_global(reader& source) NOEXCEPT
                 tx_ = chain::transaction{ tx, false };
                 const auto& inputs = *tx_.inputs_ptr();
                 if (!typed || !tx_.is_valid() || !tx.is_exhausted() ||
-                    !std::all_of(inputs.begin(), inputs.end(),
+                    !std::all_of(inputs.cbegin(), inputs.cend(),
                         unsigned_input))
                     return false;
 
@@ -527,7 +527,7 @@ bool transaction::is_final() const NOEXCEPT
     };
 
     return valid_ && !inputs_.empty() &&
-        std::all_of(inputs_.begin(), inputs_.end(), finalized);
+        std::all_of(inputs_.cbegin(), inputs_.cend(), finalized);
 }
 
 chain::output::cptr transaction::prevout(size_t input) const NOEXCEPT
@@ -712,8 +712,8 @@ bool transaction::join(const transaction& other) NOEXCEPT
         auto outputs = *tx_.outputs_ptr();
         const auto& more_ins = *other.tx_.inputs_ptr();
         const auto& more_outs = *other.tx_.outputs_ptr();
-        inputs.insert(inputs.end(), more_ins.begin(), more_ins.end());
-        outputs.insert(outputs.end(), more_outs.begin(), more_outs.end());
+        inputs.insert(inputs.cend(), more_ins.cbegin(), more_ins.cend());
+        outputs.insert(outputs.cend(), more_outs.cbegin(), more_outs.cend());
         tx_ =
         {
             tx_.version(),
@@ -723,8 +723,8 @@ bool transaction::join(const transaction& other) NOEXCEPT
         };
     }
 
-    inputs_.insert(inputs_.end(), other.inputs_.begin(), other.inputs_.end());
-    outputs_.insert(outputs_.end(), other.outputs_.begin(), other.outputs_.end());
+    inputs_.insert(inputs_.cend(), other.inputs_.cbegin(), other.inputs_.cend());
+    outputs_.insert(outputs_.cend(), other.outputs_.cbegin(), other.outputs_.cend());
     return true;
 }
 
@@ -735,7 +735,7 @@ bool transaction::join(const transaction& other) NOEXCEPT
 static entry::list::const_iterator find_entry_by_hash(
     const entry::list& signatures, const short_hash& hash) NOEXCEPT
 {
-    return std::find_if(signatures.begin(), signatures.end(),
+    return std::find_if(signatures.cbegin(), signatures.cend(),
         [&](const auto& item) NOEXCEPT
         {
             return bitcoin_short_hash(item.keydata()) == hash;
@@ -746,7 +746,7 @@ static entry::list::const_iterator find_entry_by_hash(
 static entry::list::const_iterator find_entry_by_key(
     const entry::list& signatures, const data_chunk& key) NOEXCEPT
 {
-    return std::find_if(signatures.begin(), signatures.end(),
+    return std::find_if(signatures.cbegin(), signatures.cend(),
         [&](const auto& item) NOEXCEPT
         {
             return item.keydata() == key;
@@ -761,7 +761,7 @@ static bool satisfy(data_stack& stack, const script& spend,
     if (script::is_pay_public_key_pattern(ops))
     {
         const auto found = find_entry_by_key(signatures, ops.front().data());
-        if (found == signatures.end())
+        if (found == signatures.cend())
             return false;
 
         stack.push_back(found->value);
@@ -773,7 +773,7 @@ static bool satisfy(data_stack& stack, const script& spend,
         const auto hash = unsafe_array_cast<uint8_t, short_hash_size>(
             ops.at(two).data().data());
         const auto found = find_entry_by_hash(signatures, hash);
-        if (found == signatures.end())
+        if (found == signatures.cend())
             return false;
 
         stack.push_back(found->value);
@@ -790,11 +790,11 @@ static bool satisfy(data_stack& stack, const script& spend,
         stack.push_back(data_chunk{});
 
         // Signatures are ordered by public key position in the script.
-        for (auto op = std::next(ops.begin());
-            op != std::prev(ops.end(), two); ++op)
+        for (auto op = std::next(ops.cbegin());
+            op != std::prev(ops.cend(), two); ++op)
         {
             const auto found = find_entry_by_key(signatures, op->data());
-            if (found != signatures.end())
+            if (found != signatures.cend())
                 stack.push_back(found->value);
         }
 
@@ -954,7 +954,7 @@ chain::transaction transaction::extract() const NOEXCEPT
     if (version_ == version_0)
     {
         const auto& puts = *tx_.outputs_ptr();
-        outputs.assign(puts.begin(), puts.end());
+        outputs.assign(puts.cbegin(), puts.cend());
     }
     else
     {

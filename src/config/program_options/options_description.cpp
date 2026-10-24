@@ -80,14 +80,14 @@ namespace boost { namespace program_options {
         match_result result = no_match;        
         std::string local_option = (long_ignore_case ? tolower_(option) : option);
         
-        for(std::vector<std::string>::const_iterator it(m_long_names.begin()); it != m_long_names.end(); it++)
+        for(std::vector<std::string>::const_iterator it(m_long_names.cbegin()); it != m_long_names.cend(); it++)
         {
             std::string local_long_name((long_ignore_case ? tolower_(*it) : *it));
 
             if (!local_long_name.empty()) {
 
 
-                if ((result == no_match) && (*local_long_name.rbegin() == '*'))
+                if ((result == no_match) && (*local_long_name.crbegin() == '*'))
                 {
                     // The name ends with '*'. Any specified name with the given
                     // prefix is OK.
@@ -131,7 +131,7 @@ namespace boost { namespace program_options {
         // We make the arbitrary choise of using the first long
         // name as the key, regardless of anything else
         if (!m_long_names.empty()) {
-            const std::string& first_long_name = *m_long_names.begin();
+            const std::string& first_long_name = *m_long_names.cbegin();
             if (first_long_name.find('*') != string::npos)
                 // The '*' character means we're long_name
                 // matches only part of the input. So, returning
@@ -153,9 +153,9 @@ namespace boost { namespace program_options {
         if (!m_long_names.empty())
         {
             if (prefix_style == command_line_style::allow_long)
-                return "--" + *m_long_names.begin();
+                return "--" + *m_long_names.cbegin();
             if (prefix_style == command_line_style::allow_long_disguise)
-                return "-" + *m_long_names.begin();
+                return "-" + *m_long_names.cbegin();
         }
         // sanity check: m_short_name[0] should be '-' or '/'
         if (m_short_name.length() == 2)
@@ -166,7 +166,7 @@ namespace boost { namespace program_options {
                 return string("-") + m_short_name[1];
         }
         if (!m_long_names.empty())
-            return *m_long_names.begin();
+            return *m_long_names.cbegin();
         else
             return m_short_name;
     }
@@ -176,7 +176,7 @@ namespace boost { namespace program_options {
     option_description::long_name() const
     {
         static std::string empty_string("");
-        return m_long_names.empty() ? empty_string : *m_long_names.begin();
+        return m_long_names.empty() ? empty_string : *m_long_names.cbegin();
     }
 
     const std::pair<const std::string*, std::size_t>
@@ -185,7 +185,7 @@ namespace boost { namespace program_options {
         // reinterpret_cast is to please msvc 10.
         return (m_long_names.empty())
             ? std::pair<const std::string*, size_t>(reinterpret_cast<const std::string*>(0), 0 )
-            : std::pair<const std::string*, size_t>( &(*m_long_names.begin()), m_long_names.size());
+            : std::pair<const std::string*, size_t>( &(*m_long_names.cbegin()), m_long_names.size());
     }
 
     option_description&
@@ -202,14 +202,14 @@ namespace boost { namespace program_options {
 
         bool try_interpreting_last_name_as_a_switch = m_long_names.size() > 1;
         if (try_interpreting_last_name_as_a_switch) {
-            const std::string& last_name = *m_long_names.rbegin();
+            const std::string& last_name = *m_long_names.crbegin();
             if (last_name.length() == 1) {
                 m_short_name = '-' + last_name;
                 m_long_names.pop_back();
                 // The following caters to the (valid) input of ",c" for some
                 // character c, where the caller only wants this option to have
                 // a short name.
-                if (m_long_names.size() == 1 && (*m_long_names.begin()).empty()) {
+                if (m_long_names.size() == 1 && (*m_long_names.cbegin()).empty()) {
                     m_long_names.clear();
                 }
             }
@@ -239,9 +239,9 @@ namespace boost { namespace program_options {
             return m_long_names.empty()
                 ? m_short_name 
                 : string(m_short_name).append(" [ --").
-                  append(*m_long_names.begin()).append(" ]");
+                  append(*m_long_names.cbegin()).append(" ]");
         }
-        return string("--").append(*m_long_names.begin());
+        return string("--").append(*m_long_names.cbegin());
     }
 
     std::string 
@@ -455,7 +455,7 @@ namespace boost { namespace program_options {
             else
             {
                 // only one tab per paragraph allowed
-                if (count(par.begin(), par.end(), '\t') > 1)
+                if (count(par.cbegin(), par.cend(), '\t') > 1)
                 {
                     boost::throw_exception(program_options::error(
                         "Only one tab per paragraph is allowed in the options description"));
@@ -481,8 +481,8 @@ namespace boost { namespace program_options {
             }
             else
             {
-                string::const_iterator       line_begin = par.begin();
-                const string::const_iterator par_end = par.end();
+                string::const_iterator       line_begin = par.cbegin();
+                const string::const_iterator par_end = par.cend();
 
                 bool first_line = true; // of current paragraph!        
             

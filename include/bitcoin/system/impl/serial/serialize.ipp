@@ -75,7 +75,7 @@ std::string serialize(const std_array<Value, Size>& values,
         return serialize(value, fallback);
     };
 
-    std::transform(values.begin(), values.end(), tokens.begin(), serializer);
+    std::transform(values.cbegin(), values.cend(), tokens.begin(), serializer);
     return join(tokens);
 }
 
@@ -89,7 +89,7 @@ std::string serialize(const std_vector<Value>& values,
         return serialize(value, fallback);
     };
 
-    std::transform(values.begin(), values.end(), tokens.begin(), serializer);
+    std::transform(values.cbegin(), values.cend(), tokens.begin(), serializer);
     return join(tokens);
 }
 

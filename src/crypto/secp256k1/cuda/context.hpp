@@ -597,7 +597,7 @@ private:
             !schnorr::sign(signature, secret, message, null_hash))
             return false;
 
-        std::copy_n(std::next(point.begin()), key.size(), key.begin());
+        std::copy_n(std::next(point.cbegin()), key.size(), key.begin());
         schnorr_rows_ = calibrate(message, wrong, key, signature, bytes,
             limited);
         return !is_zero(schnorr_rows_);

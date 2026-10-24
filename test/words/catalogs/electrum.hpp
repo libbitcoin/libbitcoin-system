@@ -30,7 +30,7 @@ namespace catalogs_electrum {
 
 static bool compressed(const electrum::catalog::words& words)
 {
-    return std::any_of(words.word.begin(), words.word.end(),
+    return std::any_of(words.word.cbegin(), words.word.cend(),
         [&](const char test[])
         {
             return test != to_compressed_form(test);
@@ -39,7 +39,7 @@ static bool compressed(const electrum::catalog::words& words)
 
 static ptrdiff_t combinings(const electrum::catalog::words& words)
 {
-    return std::count_if(words.word.begin(), words.word.end(),
+    return std::count_if(words.word.cbegin(), words.word.cend(),
         [&](const char test[])
         {
             return test != to_non_combining_form(test);
@@ -48,7 +48,7 @@ static ptrdiff_t combinings(const electrum::catalog::words& words)
 
 static bool combined(const electrum::catalog::words& words)
 {
-    return std::any_of(words.word.begin(), words.word.end(),
+    return std::any_of(words.word.cbegin(), words.word.cend(),
         [&](const char test[])
         {
             return test != to_non_combining_form(test);
@@ -59,8 +59,8 @@ static ptrdiff_t divergences(const mnemonic::catalog::words& normal,
     const electrum::catalog::words& test)
 {
     ptrdiff_t count = 0;
-    auto it = test.word.begin();
-    std::for_each(normal.word.begin(), normal.word.end(),
+    auto it = test.word.cbegin();
+    std::for_each(normal.word.cbegin(), normal.word.cend(),
         [&](const char test[])
         {
             std::string copy = test;
@@ -74,7 +74,7 @@ static ptrdiff_t divergences(const mnemonic::catalog::words& normal,
 
 static ptrdiff_t abnormals(const electrum::catalog::words& words)
 {
-    return std::count_if(words.word.begin(), words.word.end(),
+    return std::count_if(words.word.cbegin(), words.word.cend(),
         [&](const char test[])
         {
             std::string copy = test;

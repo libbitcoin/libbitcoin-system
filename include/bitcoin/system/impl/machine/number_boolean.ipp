@@ -50,7 +50,7 @@ from_chunk(const data_chunk& vary) NOEXCEPT
         return true;
 
     // A logical zero is any +/- sequence of zero bytes (sign excluded above).
-    return std::any_of(vary.begin(), std::prev(vary.end()), is_nonzero<uint8_t>);
+    return std::any_of(vary.cbegin(), std::prev(vary.cend()), is_nonzero<uint8_t>);
 
     // Size constraint guards from_little_endian.
     // any_of optimizes by eliminating this conversion, allocation, and copy.

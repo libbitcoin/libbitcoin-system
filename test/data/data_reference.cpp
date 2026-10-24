@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE(data_reference__construct__pointers_reversed__empty)
 BOOST_AUTO_TEST_CASE(data_reference__construct__iterators_empty__empty)
 {
     const data_chunk value{};
-    BOOST_REQUIRE(data_reference(value.begin(), value.end()).empty());
+    BOOST_REQUIRE(data_reference(value.cbegin(), value.cend()).empty());
 }
 
 BOOST_AUTO_TEST_CASE(data_reference__construct__iterators_reversed__empty)
 {
     const data_chunk value{ 'f', 'o', 'o', 'b', 'a', 'r' };
-    BOOST_REQUIRE(data_reference(value.end(), value.begin()).empty());
+    BOOST_REQUIRE(data_reference(value.cend(), value.cbegin()).empty());
 }
 
 // copy construct
@@ -251,13 +251,13 @@ BOOST_AUTO_TEST_CASE(data_reference__construct__pointers__expected)
 BOOST_AUTO_TEST_CASE(data_reference__construct__iterators__expected)
 {
     // construct(iterators)
-    const data_reference reference1(string.begin(), string.end());
+    const data_reference reference1(string.cbegin(), string.cend());
     BOOST_REQUIRE(!reference1.empty());
     BOOST_REQUIRE_EQUAL(reference1.size(), size);
     ////BOOST_REQUIRE_EQUAL(reference1.encoded(), encoded);
 
     // construct(iterators)
-    const data_reference reference2 = { string.begin(), string.end() };
+    const data_reference reference2 = { string.cbegin(), string.cend() };
     BOOST_REQUIRE(!reference2.empty());
     BOOST_REQUIRE_EQUAL(reference2.size(), size);
     ////BOOST_REQUIRE_EQUAL(reference2.encoded(), encoded);

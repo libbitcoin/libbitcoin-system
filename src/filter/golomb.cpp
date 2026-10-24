@@ -190,13 +190,13 @@ bool golomb::match_stack(bitreader& source, const data_stack& targets,
         target_false_positive_rate, entropy);
 
     uint64_t range = 0;
-    auto it = set.begin();
+    auto it = set.cbegin();
 
-    for (uint64_t index = 0; index < set_size && it != set.end(); ++index)
+    for (uint64_t index = 0; index < set_size && it != set.cend(); ++index)
     {
         range += decode(source, bits);
 
-        for (auto value = *it; it != set.end(); value = *(it++))
+        for (auto value = *it; it != set.cend(); value = *(it++))
         {
             if (value == range)
                 return true;
@@ -278,7 +278,7 @@ std::vector<uint64_t> golomb::hashed_set_construct(const data_stack& items,
 
     std::vector<uint64_t> hashes(items.size());
     const auto bound = target_false_positive_rate * set_size;
-    std::transform(items.begin(), items.end(), hashes.begin(),
+    std::transform(items.cbegin(), items.cend(), hashes.begin(),
         [&](const data_chunk& item) NOEXCEPT
         {
             return hash_to_range(item, bound, key);

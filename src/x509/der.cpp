@@ -448,7 +448,7 @@ void writer::write(uint8_t tag, const_byte_span content) NOEXCEPT
         }
     }
 
-    data_.insert(data_.end(), content.begin(), content.end());
+    data_.insert(data_.cend(), content.begin(), content.end());
 }
 
 void writer::write_nested(uint8_t tag, const writer& content) NOEXCEPT
@@ -473,7 +473,7 @@ void writer::write_integer(const_byte_span magnitude) NOEXCEPT
     if (digits.empty() || get_left(digits.front()))
         content.push_back(0x00);
 
-    content.insert(content.end(), digits.begin(), digits.end());
+    content.insert(content.cend(), digits.begin(), digits.end());
     write(integer_tag, content);
 }
 
@@ -490,7 +490,7 @@ void writer::write_oid(const_byte_span oid) NOEXCEPT
 void writer::write_bit_string(const_byte_span bits, uint8_t unused) NOEXCEPT
 {
     data_chunk content{ unused };
-    content.insert(content.end(), bits.begin(), bits.end());
+    content.insert(content.cend(), bits.begin(), bits.end());
     write(bit_string_tag, content);
 }
 

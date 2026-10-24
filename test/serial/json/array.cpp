@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(json_array__construct__default__empty)
     const array instance{};
     BOOST_REQUIRE(instance.empty());
     BOOST_REQUIRE_EQUAL(instance.size(), 0u);
-    BOOST_REQUIRE(instance.begin() == instance.end());
+    BOOST_REQUIRE(instance.cbegin() == instance.cend());
 }
 
 BOOST_AUTO_TEST_CASE(json_array__construct__count__nulls)
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(json_array__reverse_iteration__expected)
     const array instance{ 1, 2, 3 };
     BOOST_REQUIRE_EQUAL(instance.crbegin()->as_int64(), 3);
     BOOST_REQUIRE_EQUAL(std::prev(instance.crend())->as_int64(), 1);
-    BOOST_REQUIRE_EQUAL(std::distance(instance.rbegin(), instance.rend()), 3);
+    BOOST_REQUIRE_EQUAL(std::distance(instance.crbegin(), instance.crend()), 3);
 }
 
 BOOST_AUTO_TEST_CASE(json_array__equality__expected)

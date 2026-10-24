@@ -52,7 +52,7 @@ constexpr bool script::is_push_only_pattern(const operations& ops) NOEXCEPT
         return operation::is_push(op.code());
     };
 
-    return std::all_of(ops.begin(), ops.end(), push);
+    return std::all_of(ops.cbegin(), ops.cend(), push);
 }
 
 // ****************************************************************************
@@ -65,7 +65,7 @@ constexpr bool script::is_relaxed_push_pattern(const operations& ops) NOEXCEPT
         return operation::is_relaxed_push(op.code());
     };
 
-    return std::all_of(ops.begin(), ops.end(), push);
+    return std::all_of(ops.cbegin(), ops.cend(), push);
 }
 
 // A single push has exactly one nominal encoding [bip141].
@@ -88,7 +88,7 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
         && ops[0].code() == opcode::op_return
         && ops[1].code() == opcode::push_size_36
         && ops[1].data().size() >= header.size()
-        && std::equal(header.begin(), header.end(), ops[1].data().begin());
+        && std::equal(header.cbegin(), header.cend(), ops[1].data().cbegin());
 }
 
 // ****************************************************************************
@@ -246,14 +246,14 @@ constexpr bool script::is_pay_tapscript_threshold_pattern(
         (size < (4u + to_int<uint8_t>(within))))
         return false;
 
-    auto op = ops.begin();
+    auto op = ops.cbegin();
     if ((op++)->data().size() != ec_xonly_size)
         return false;
 
     if ((op++)->code() != opcode::checksig)
         return false;
 
-    while (op != std::prev(ops.end(), 2 + to_int(within)))
+    while (op != std::prev(ops.cend(), 2 + to_int(within)))
     {
         if (((op++)->data().size() != ec_xonly_size) ||
             ((op++)->code() != opcode::checksigadd))
@@ -273,8 +273,8 @@ constexpr bool script::is_pay_tapscript_multisig_pattern(
     if (ops.size() < 2u || !is_even(ops.size()))
         return false;
 
-    auto op = ops.begin();
-    while (op != std::prev(ops.end(), 2))
+    auto op = ops.cbegin();
+    while (op != std::prev(ops.cend(), 2))
     {
         if (((op++)->data().size() != ec_xonly_size) ||
             ((op++)->code() != opcode::checksigverify))
@@ -310,7 +310,7 @@ constexpr bool script::is_pay_multisig_standard_pattern(
         return false;
 
     // Standard multisig requires valid public key forms.
-    for (auto op = std::next(ops.begin()); op != std::prev(ops.end(), 2); ++op)
+    for (auto op = std::next(ops.cbegin()); op != std::prev(ops.cend(), 2); ++op)
         if (!is_public_key(op->data()))
             return false;
 
@@ -353,7 +353,7 @@ constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
 
     return ops.size() >= 2u
         && ops[0].code() == opcode::push_size_0
-        && std::all_of(std::next(ops.begin()), ops.end(), endorsement);
+        && std::all_of(std::next(ops.cbegin()), ops.cend(), endorsement);
 }
 
 constexpr bool script::is_sign_public_key_pattern(

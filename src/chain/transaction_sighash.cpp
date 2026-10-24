@@ -69,7 +69,7 @@ void transaction::signature_hash_single(writer& sink,
         const auto anyone = is_anyone_can_pay(sighash_flags);
         sink.write_variable(anyone ? one : inputs_->size());
 
-        for (in = inputs_->begin(); !anyone && in != input; ++in)
+        for (in = inputs_->cbegin(); !anyone && in != input; ++in)
         {
             (*in)->point().to_data(sink);
             sink.write_bytes(empty_script());
@@ -80,7 +80,7 @@ void transaction::signature_hash_single(writer& sink,
         subscript.to_data(sink, true);
         sink.write_4_bytes_little_endian((*input)->sequence());
 
-        for (++in; !anyone && in != inputs_->end(); ++in)
+        for (++in; !anyone && in != inputs_->cend(); ++in)
         {
             (*in)->point().to_data(sink);
             sink.write_bytes(empty_script());
@@ -118,7 +118,7 @@ void transaction::signature_hash_none(writer& sink,
         const auto anyone = is_anyone_can_pay(sighash_flags);
         sink.write_variable(anyone ? one : inputs_->size());
 
-        for (in = inputs_->begin(); !anyone && in != input; ++in)
+        for (in = inputs_->cbegin(); !anyone && in != input; ++in)
         {
             (*in)->point().to_data(sink);
             sink.write_bytes(empty_script());
@@ -129,7 +129,7 @@ void transaction::signature_hash_none(writer& sink,
         subscript.to_data(sink, true);
         sink.write_4_bytes_little_endian((*input)->sequence());
 
-        for (++in; !anyone && in != inputs_->end(); ++in)
+        for (++in; !anyone && in != inputs_->cend(); ++in)
         {
             (*in)->point().to_data(sink);
             sink.write_bytes(empty_script());
@@ -155,7 +155,7 @@ void transaction::signature_hash_all(writer& sink,
         const auto anyone = is_anyone_can_pay(sighash_flags);
         sink.write_variable(anyone ? one : inputs_->size());
 
-        for (in = inputs_->begin(); !anyone && in != input; ++in)
+        for (in = inputs_->cbegin(); !anyone && in != input; ++in)
         {
             (*in)->point().to_data(sink);
             sink.write_bytes(empty_script());
@@ -166,7 +166,7 @@ void transaction::signature_hash_all(writer& sink,
         subscript.to_data(sink, true);
         sink.write_4_bytes_little_endian((*input)->sequence());
 
-        for (++in; !anyone && in != inputs_->end(); ++in)
+        for (++in; !anyone && in != inputs_->cend(); ++in)
         {
             (*in)->point().to_data(sink);
             sink.write_bytes(empty_script());

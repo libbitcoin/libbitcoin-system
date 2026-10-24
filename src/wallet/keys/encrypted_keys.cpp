@@ -76,7 +76,7 @@ static bool address_validate(const ek_salt& salt,
     const payment_address& address) NOEXCEPT
 {
     const auto hash = address_hash(address);
-    return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
+    return std::equal(hash.cbegin(), hash.cbegin() + salt.size(), salt.cbegin());
 }
 
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,

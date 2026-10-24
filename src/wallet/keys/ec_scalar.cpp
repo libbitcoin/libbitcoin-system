@@ -170,8 +170,8 @@ bool operator==(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
     // Compare arrays from left and right in reverse order since scalars are
     // encoded in big endian format, with leading bytes zero for small scalars.
-    return std::equal(left.secret().rbegin(), left.secret().rend(),
-        right.secret().rbegin());
+    return std::equal(left.secret().crbegin(), left.secret().crend(),
+        right.secret().crbegin());
 }
 
 bool operator!=(const ec_scalar& left, const ec_scalar& right) NOEXCEPT

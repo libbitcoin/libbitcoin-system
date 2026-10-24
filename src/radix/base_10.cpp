@@ -62,7 +62,7 @@ bool decode_base10(uint64_t& out, const std::string& amount,
     std::string value(amount);
 
     // Remove the decimal point.
-    auto point = std::find(value.begin(), value.end(), '.');
+    auto point = std::find(value.cbegin(), value.cend(), '.');
     if (point != value.cend())
         point = value.erase(point);
 
@@ -71,7 +71,7 @@ bool decode_base10(uint64_t& out, const std::string& amount,
         return false;
 
     // Add digits to the end if there are too few.
-    auto actual_places = std::distance(point, value.end());
+    auto actual_places = std::distance(point, value.cend());
     value.append(floored_subtract<size_t>(decimal_places, actual_places), '0');
 
     // Remove digits from the end if there are too many.
@@ -80,8 +80,8 @@ bool decode_base10(uint64_t& out, const std::string& amount,
     if (actual_places > decimal_places)
     {
         auto end = std::next(point, decimal_places);
-        truncated = !std::all_of(end, value.end(), is_character<'0'>);
-        value.erase(end, value.end());
+        truncated = !std::all_of(end, value.cend(), is_character<'0'>);
+        value.erase(end, value.cend());
     }
 
     if (strict && truncated)

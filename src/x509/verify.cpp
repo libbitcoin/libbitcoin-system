@@ -85,7 +85,7 @@ code verify(const certificates& chain, const certificates& anchors,
             return anchor.encoding == current.encoding;
         };
 
-        if (std::any_of(anchors.begin(), anchors.end(), pinned))
+        if (std::any_of(anchors.cbegin(), anchors.cend(), pinned))
             return error::x509_success;
 
         const auto issues = [&](const certificate& anchor) NOEXCEPT
@@ -94,9 +94,9 @@ code verify(const certificates& chain, const certificates& anchors,
                 is_signed_by(current, anchor);
         };
 
-        const auto anchor = std::find_if(anchors.begin(), anchors.end(),
+        const auto anchor = std::find_if(anchors.cbegin(), anchors.cend(),
             issues);
-        if (anchor != anchors.end())
+        if (anchor != anchors.cend())
         {
             if (const auto ec = check_issuer(*anchor, index))
                 return ec;

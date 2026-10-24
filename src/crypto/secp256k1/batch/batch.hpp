@@ -89,7 +89,7 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
             failed.store(true);
 
         const auto in = std::next(results.begin(), to_signed(first));
-        std::copy(out.begin(), out.end(), in);
+        std::copy(out.cbegin(), out.cend(), in);
     });
 
     // Empty implies fully-verified batch (or canceled, which caller gates).

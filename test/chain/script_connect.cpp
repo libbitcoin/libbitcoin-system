@@ -45,7 +45,7 @@ public:
     code connect(const context& ctx, uint32_t index,
         const signatures& capture) const NOEXCEPT
     {
-        const auto it = std::next(inputs_ptr()->begin(), index);
+        const auto it = std::next(inputs_ptr()->cbegin(), index);
         return interpreter<contiguous_stack>::connect(ctx, *this, it, capture);
     }
 };
@@ -753,7 +753,7 @@ static transaction_accessor batch_tx(bool valid) NOEXCEPT
     const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
 
     hash_digest sighash{};
-    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto it = unsigned_tx.inputs_ptr()->cbegin();
     const auto version = script_version::unversioned;
     unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {},
         version, coverage::hash_all, flags::no_rules);
@@ -853,7 +853,7 @@ static transaction_accessor batch_multisig_tx(bool valid) NOEXCEPT
     const transaction_accessor unsigned_tx{ 1, ins, outs, 0 };
 
     hash_digest sighash{};
-    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto it = unsigned_tx.inputs_ptr()->cbegin();
     const auto version = script_version::unversioned;
     unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {},
         version, coverage::hash_all, flags::no_rules);
@@ -930,7 +930,7 @@ static data_chunk multisig_endorsement(const transaction& tx,
     const script& subscript) NOEXCEPT
 {
     hash_digest sighash{};
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const auto version = script_version::unversioned;
     tx.signature_hash(sighash, it, subscript, batch_value, {}, version,
         coverage::hash_all, flags::no_rules);
@@ -979,7 +979,7 @@ BOOST_AUTO_TEST_CASE(script__verify__multisig_distinct_stripped_subscripts__succ
 
     // Second endorsement commits to the full script (it is not embedded).
     auto ops = tail;
-    ops.insert(ops.begin(), operation{ first, false });
+    ops.insert(ops.cbegin(), operation{ first, false });
     const script prevout_script{ ops };
     const auto second = multisig_endorsement(unsigned_tx, prevout_script);
 
@@ -1023,7 +1023,7 @@ static transaction_accessor batch_taproot_tx(bool valid) NOEXCEPT
     (*unsigned_tx.inputs_ptr())[0]->prevout = to_shared(prevout);
 
     hash_digest sighash{};
-    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto it = unsigned_tx.inputs_ptr()->cbegin();
     const auto version = script_version::taproot;
     unsigned_tx.signature_hash(sighash, it, prevout_script, batch_value, {},
         version, coverage::hash_default, taproot_rules);
@@ -1134,7 +1134,7 @@ static data_chunk threshold_control(ec_xonly& out_key) NOEXCEPT
     // The internal key lifts to even parity [bip341].
     ec_compressed point{};
     point.front() = 0x02_u8;
-    std::copy(internal.begin(), internal.end(), std::next(point.begin()));
+    std::copy(internal.cbegin(), internal.cend(), std::next(point.begin()));
     /* bool */ ec_add(point, tweak);
 
     const auto tweaked = std::next(point.data());
@@ -1142,7 +1142,7 @@ static data_chunk threshold_control(ec_xonly& out_key) NOEXCEPT
     const auto parity = to_int<uint8_t>(point.front() == 0x03_u8);
 
     data_chunk control{ bit_or<uint8_t>(tapscript_version, parity) };
-    control.insert(control.cend(), internal.begin(), internal.end());
+    control.insert(control.cend(), internal.cbegin(), internal.cend());
     return control;
 }
 
@@ -1164,7 +1164,7 @@ static transaction_accessor threshold_tx(bool valid) NOEXCEPT
     (*unsigned_tx.inputs_ptr())[0]->prevout = to_shared(prevout);
 
     hash_digest sighash{};
-    const auto it = unsigned_tx.inputs_ptr()->begin();
+    const auto it = unsigned_tx.inputs_ptr()->cbegin();
     const auto leaf = to_shared(taproot::leaf_hash(tapscript_version,
         leaf_script));
     unsigned_tx.signature_hash(sighash, it, leaf_script, batch_value, leaf,

@@ -31,7 +31,7 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 // static
 constexpr bool witness::is_push_size(const chunk_cptrs& stack) NOEXCEPT
 {
-    return std::all_of(stack.begin(), stack.end(),
+    return std::all_of(stack.cbegin(), stack.cend(),
         [](const auto& element) NOEXCEPT
         {
             return element->size() <= max_push_data_size;

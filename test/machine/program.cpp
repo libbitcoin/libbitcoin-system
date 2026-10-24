@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(program__initialize__prefail_input_script__prefail_script)
 BOOST_AUTO_TEST_CASE(program__initialize__oversized_witness_element_bip141__invalid_witness_stack)
 {
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     (*it)->prevout = to_shared(output{ 42, script{} });
     const auto witness = std::make_shared<chunk_cptrs>(chunk_cptrs{ to_shared(data_chunk(add1(max_push_data_size), 0x00)) });
     const chain::signatures capture{};
@@ -77,63 +77,63 @@ static const script separated_script{ operations{ { opcode::codeseparator }, { o
 BOOST_AUTO_TEST_CASE(program__construct__input_script_stale_offset__cleared)
 {
     const auto tx = accessor_transaction(separated_script, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const auto& input_script = (*it)->script();
-    input_script.offset = std::next(input_script.ops().begin());
+    input_script.offset = std::next(input_script.ops().cbegin());
     const chain::signatures capture{};
     const interpreter_accessor<contiguous_stack> machine{ tx, it, flags::no_rules, capture };
-    BOOST_REQUIRE(input_script.offset == input_script.ops().begin());
+    BOOST_REQUIRE(input_script.offset == input_script.ops().cbegin());
 }
 
 BOOST_AUTO_TEST_CASE(program__construct__copied_program_stale_offset__cleared)
 {
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const chain::signatures capture{};
     const interpreter_accessor<contiguous_stack> in{ tx, it, flags::no_rules, capture };
     const auto separated = to_shared<script>(separated_script);
-    separated->offset = std::next(separated->ops().begin());
+    separated->offset = std::next(separated->ops().cbegin());
     const interpreter_accessor<contiguous_stack> out{ in, separated };
-    BOOST_REQUIRE(separated->offset == separated->ops().begin());
+    BOOST_REQUIRE(separated->offset == separated->ops().cbegin());
 }
 
 BOOST_AUTO_TEST_CASE(program__construct__moved_program_stale_offset__cleared)
 {
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const chain::signatures capture{};
     interpreter_accessor<contiguous_stack> in{ tx, it, flags::no_rules, capture };
     const auto separated = to_shared<script>(separated_script);
-    separated->offset = std::next(separated->ops().begin());
+    separated->offset = std::next(separated->ops().cbegin());
     const interpreter_accessor<contiguous_stack> out{ std::move(in), separated };
-    BOOST_REQUIRE(separated->offset == separated->ops().begin());
+    BOOST_REQUIRE(separated->offset == separated->ops().cbegin());
 }
 
 BOOST_AUTO_TEST_CASE(program__construct__segwit_stale_offset__cleared)
 {
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     (*it)->prevout = to_shared(output{ 42, script{} });
     const auto separated = to_shared<script>(separated_script);
-    separated->offset = std::next(separated->ops().begin());
+    separated->offset = std::next(separated->ops().cbegin());
     const auto witness = std::make_shared<chunk_cptrs>();
     const chain::signatures capture{};
     const interpreter_accessor<contiguous_stack> machine{ tx, it, separated, flags::no_rules, script_version::segwit, witness, capture };
-    BOOST_REQUIRE(separated->offset == separated->ops().begin());
+    BOOST_REQUIRE(separated->offset == separated->ops().cbegin());
 }
 
 BOOST_AUTO_TEST_CASE(program__construct__taproot_stale_offset__cleared)
 {
     const auto tx = accessor_transaction(script{}, max_input_sequence, 0, 1);
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     (*it)->prevout = to_shared(output{ 42, script{} });
     const auto separated = to_shared<script>(separated_script);
-    separated->offset = std::next(separated->ops().begin());
+    separated->offset = std::next(separated->ops().cbegin());
     const auto witness = std::make_shared<chunk_cptrs>();
     const auto tapleaf = to_shared(null_hash);
     const chain::signatures capture{};
     const interpreter_accessor<contiguous_stack> machine{ tx, it, separated, flags::no_rules, script_version::taproot, witness, tapleaf, capture };
-    BOOST_REQUIRE(separated->offset == separated->ops().begin());
+    BOOST_REQUIRE(separated->offset == separated->ops().cbegin());
 }
 
 // primary stack typing

@@ -218,7 +218,7 @@ constexpr typename CLASS::digest_t CLASS::
 simple_hash(const bytes_t<Size>& bytes) NOEXCEPT
 {
     block_t block{};
-    std::copy_n(bytes.begin(), Size, block.begin());
+    std::copy_n(bytes.cbegin(), Size, block.begin());
     simple_pad<Size>(block);
 
     const auto hasher = [](const block_t& block) NOEXCEPT

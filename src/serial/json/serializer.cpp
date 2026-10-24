@@ -284,7 +284,7 @@ void serializer::next() THROWS
     }
 
     // A member is visited twice, first for its key and then its value.
-    const auto& member = *std::next(object.begin(), top.index);
+    const auto& member = *std::next(object.cbegin(), top.index);
     if (!top.keyed)
     {
         top.keyed = true;

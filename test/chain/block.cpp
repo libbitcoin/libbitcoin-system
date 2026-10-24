@@ -841,8 +841,8 @@ static script commitment_script(const hash_digest& commitment) NOEXCEPT
 {
     constexpr auto head = to_big_endian(witness_head);
     data_chunk data(head.size() + hash_size);
-    std::copy(head.begin(), head.end(), data.begin());
-    std::copy(commitment.begin(), commitment.end(),
+    std::copy(head.cbegin(), head.cend(), data.begin());
+    std::copy(commitment.cbegin(), commitment.cend(),
         std::next(data.begin(), head.size()));
 
     return script{ operations{ operation{ opcode::op_return },
@@ -1716,7 +1716,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__null_pointers__default_instances)
 BOOST_AUTO_TEST_CASE(block__constructor__istream__round_trips)
 {
     const auto& data = expected_block::data();
-    const std::string text(data.begin(), data.end());
+    const std::string text(data.cbegin(), data.cend());
     std::istringstream source{ text };
     const block instance{ source, true };
     BOOST_REQUIRE(instance == expected_block::get());

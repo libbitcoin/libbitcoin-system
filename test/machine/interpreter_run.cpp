@@ -33,7 +33,7 @@ using runner = mock_runner<contiguous_stack>;
 BOOST_AUTO_TEST_CASE(interpreter__run__empty_script__script_success)
 {
     const auto tx = accessor_transaction(script{});
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     BOOST_REQUIRE_EQUAL(machine.run(), error::script_success);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(interpreter__run__operations__dispatched_in_order)
     };
 
     const auto tx = accessor_transaction(script{ ops });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     BOOST_REQUIRE_EQUAL(machine.run(), error::script_success);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(interpreter__run__dispatch_error__returned_and_terminal)
 {
     const operations ops{ operation{ opcode::dup }, operation{ opcode::drop } };
     const auto tx = accessor_transaction(script{ ops });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     machine.op_result = error::op_dup;
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(interpreter__run__oversized_push__invalid_push_data_size)
     const data_chunk data(add1(max_push_data_size), 0x00_u8);
     const operations ops{ operation{ data, false } };
     const auto tx = accessor_transaction(script{ ops });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     BOOST_REQUIRE_EQUAL(machine.run(), error::invalid_push_data_size);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(interpreter__run__above_op_count__invalid_operation_count)
 {
     const operations ops(add1(max_counted_ops), operation{ opcode::nop });
     const auto tx = accessor_transaction(script{ ops });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     BOOST_REQUIRE_EQUAL(machine.run(), error::invalid_operation_count);
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(interpreter__run__negative_condition__unconditional_ops_ski
     };
 
     const auto tx = accessor_transaction(script{ ops });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     BOOST_REQUIRE_EQUAL(machine.run(), error::script_success);
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(interpreter__run__unbalanced_condition__invalid_stack_scope
 {
     const operations ops{ operation{ opcode::if_ } };
     const auto tx = accessor_transaction(script{ ops });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     runner machine{ tx, it, flags::all_rules, capture };
     BOOST_REQUIRE_EQUAL(machine.run(), error::invalid_stack_scope);
@@ -135,7 +135,7 @@ static std::string_view dispatch(const operation& op, int8_t& number,
     opcode& code) NOEXCEPT
 {
     const auto tx = accessor_transaction(script{ operations{ op } });
-    const auto it = tx.inputs_ptr()->begin();
+    const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     dispatcher machine{ tx, it, flags::all_rules, capture };
     /* op_error_t */ machine.run_op(machine.begin());

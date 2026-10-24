@@ -159,30 +159,30 @@ BOOST_AUTO_TEST_CASE(execution__chunks__large_count__never_exceeds_workers)
 BOOST_AUTO_TEST_CASE(execution__serial__seq__always)
 {
     const auto values = sequence(count);
-    BOOST_REQUIRE(serial(seq, values.begin(), values.end()));
-    BOOST_REQUIRE(serial(seq, values.begin(), values.begin()));
+    BOOST_REQUIRE(serial(seq, values.cbegin(), values.cend()));
+    BOOST_REQUIRE(serial(seq, values.cbegin(), values.cbegin()));
 }
 
 BOOST_AUTO_TEST_CASE(execution__serial__par_empty_or_one__true)
 {
     const auto values = sequence(2);
-    BOOST_REQUIRE(serial(par, values.begin(), values.begin()));
-    BOOST_REQUIRE(serial(par, values.begin(), std::next(values.begin())));
+    BOOST_REQUIRE(serial(par, values.cbegin(), values.cbegin()));
+    BOOST_REQUIRE(serial(par, values.cbegin(), std::next(values.cbegin())));
 }
 
 BOOST_AUTO_TEST_CASE(execution__serial__par_two__only_when_one_worker)
 {
     const auto values = sequence(2);
-    BOOST_REQUIRE_EQUAL(serial(par, values.begin(), values.end()), workers < two);
+    BOOST_REQUIRE_EQUAL(serial(par, values.cbegin(), values.cend()), workers < two);
 }
 
 BOOST_AUTO_TEST_CASE(execution__serial__floor__below_two_tasks)
 {
     const auto values = sequence(64);
     const auto policy = par_if(true, 32);
-    BOOST_REQUIRE(serial(policy, values.begin(), std::next(values.begin(), 32)));
-    BOOST_REQUIRE(serial(policy, values.begin(), std::next(values.begin(), 63)));
-    BOOST_REQUIRE_EQUAL(serial(policy, values.begin(), values.end()), workers < two);
+    BOOST_REQUIRE(serial(policy, values.cbegin(), std::next(values.cbegin(), 32)));
+    BOOST_REQUIRE(serial(policy, values.cbegin(), std::next(values.cbegin(), 63)));
+    BOOST_REQUIRE_EQUAL(serial(policy, values.cbegin(), values.cend()), workers < two);
 }
 
 // bounds
@@ -190,10 +190,10 @@ BOOST_AUTO_TEST_CASE(execution__serial__floor__below_two_tasks)
 BOOST_AUTO_TEST_CASE(execution__bounds__empty__first_twice)
 {
     const std::vector<size_t> values{};
-    const auto edges = bounds(par, values.begin(), values.end());
+    const auto edges = bounds(par, values.cbegin(), values.cend());
     BOOST_REQUIRE_EQUAL(edges.size(), two);
-    BOOST_REQUIRE(edges.front() == values.begin());
-    BOOST_REQUIRE(edges.back() == values.end());
+    BOOST_REQUIRE(edges.front() == values.cbegin());
+    BOOST_REQUIRE(edges.back() == values.cend());
 }
 
 BOOST_AUTO_TEST_CASE(execution__bounds__floor__contiguous_balanced_not_below_floor)
@@ -201,10 +201,10 @@ BOOST_AUTO_TEST_CASE(execution__bounds__floor__contiguous_balanced_not_below_flo
     constexpr size_t floor = 7;
     const auto values = sequence(count);
     const auto policy = par_if(true, floor);
-    const auto edges = bounds(policy, values.begin(), values.end());
+    const auto edges = bounds(policy, values.cbegin(), values.cend());
     BOOST_REQUIRE_EQUAL(edges.size(), add1(chunks(policy, count)));
-    BOOST_REQUIRE(edges.front() == values.begin());
-    BOOST_REQUIRE(edges.back() == values.end());
+    BOOST_REQUIRE(edges.front() == values.cbegin());
+    BOOST_REQUIRE(edges.back() == values.cend());
 
     size_t smallest = max_size_t;
     size_t largest = zero;
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(execution__bounds__remainder__goes_to_leading_tasks)
 {
     const auto values = sequence(5);
     const auto policy = par_if(true, 2);
-    const auto edges = bounds(policy, values.begin(), values.end());
+    const auto edges = bounds(policy, values.cbegin(), values.cend());
     const auto tasks = std::min(2_size, workers);
     BOOST_REQUIRE_EQUAL(edges.size(), add1(tasks));
     BOOST_REQUIRE_EQUAL(std::distance(edges.at(0), edges.at(1)), tasks == 2u ? 3 : 5);
@@ -235,10 +235,10 @@ BOOST_AUTO_TEST_CASE(execution__chunked__floor__each_element_once_with_task_inde
 {
     const auto values = sequence(count);
     const auto policy = par_if(true, 3);
-    const auto edges = bounds(policy, values.begin(), values.end());
+    const auto edges = bounds(policy, values.cbegin(), values.cend());
     std::vector<size_t> seen(count);
     std::vector<size_t> indexes(count);
-    chunked(policy, values.begin(), values.end(), [&](auto from, auto to, size_t index) NOEXCEPT
+    chunked(policy, values.cbegin(), values.cend(), [&](auto from, auto to, size_t index) NOEXCEPT
     {
         for (auto it = from; it != to; ++it)
         {
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(execution__chunked__floor__each_element_once_with_task_inde
         }
     });
 
-    BOOST_REQUIRE(std::all_of(seen.begin(), seen.end(), [](size_t once) NOEXCEPT { return once == one; }));
+    BOOST_REQUIRE(std::all_of(seen.cbegin(), seen.cend(), [](size_t once) NOEXCEPT { return once == one; }));
     for (size_t index{}; index < sub1(edges.size()); ++index)
         for (auto it = edges.at(index); it != edges.at(add1(index)); ++it)
             BOOST_REQUIRE_EQUAL(indexes.at(*it - one), index);
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(execution__chunked__floor__each_element_once_with_task_inde
 BOOST_AUTO_TEST_CASE(execution__chunked__throwing_task__rethrows)
 {
     const auto values = sequence(count);
-    BOOST_REQUIRE_THROW(chunked(par, values.begin(), values.end(), [](auto, auto, size_t) { throw std::runtime_error{ "chunk" }; }), std::runtime_error);
+    BOOST_REQUIRE_THROW(chunked(par, values.cbegin(), values.cend(), [](auto, auto, size_t) { throw std::runtime_error{ "chunk" }; }), std::runtime_error);
 }
 
 // for_each
@@ -265,12 +265,12 @@ BOOST_AUTO_TEST_CASE(execution__for_each__policies__same_as_serial)
 {
     const auto values = sequence(count);
     size_t expected{};
-    std::for_each(values.begin(), values.end(), [&](size_t value) NOEXCEPT { expected += value; });
+    std::for_each(values.cbegin(), values.cend(), [&](size_t value) NOEXCEPT { expected += value; });
 
     for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
     {
         std::atomic_size_t sum{};
-        std::for_each(policy, values.begin(), values.end(), [&](size_t value) NOEXCEPT { sum += value; });
+        std::for_each(policy, values.cbegin(), values.cend(), [&](size_t value) NOEXCEPT { sum += value; });
         BOOST_REQUIRE_EQUAL(sum.load(), expected);
     }
 }
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(execution__for_each__empty__no_calls)
 {
     const std::vector<size_t> values{};
     std::atomic_size_t calls{};
-    std::for_each(par, values.begin(), values.end(), [&](size_t) NOEXCEPT { ++calls; });
+    std::for_each(par, values.cbegin(), values.cend(), [&](size_t) NOEXCEPT { ++calls; });
     BOOST_REQUIRE_EQUAL(calls.load(), zero);
 }
 
@@ -290,13 +290,13 @@ BOOST_AUTO_TEST_CASE(execution__transform__unary_policies__same_as_serial)
     const auto values = sequence(count);
     const auto square = [](size_t value) NOEXCEPT { return value * value; };
     std::vector<size_t> expected(count);
-    std::transform(values.begin(), values.end(), expected.begin(), square);
+    std::transform(values.cbegin(), values.cend(), expected.begin(), square);
 
     for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
     {
         std::vector<size_t> out(count);
-        const auto end = std::transform(policy, values.begin(), values.end(), out.begin(), square);
-        BOOST_REQUIRE(end == out.end());
+        const auto end = std::transform(policy, values.cbegin(), values.cend(), out.begin(), square);
+        BOOST_REQUIRE(end == out.cend());
         BOOST_REQUIRE(out == expected);
     }
 }
@@ -307,13 +307,13 @@ BOOST_AUTO_TEST_CASE(execution__transform__binary_policies__same_as_serial)
     const auto right = scrambled(count);
     const auto add = [](size_t one, size_t two) NOEXCEPT { return one + two; };
     std::vector<size_t> expected(count);
-    std::transform(left.begin(), left.end(), right.begin(), expected.begin(), add);
+    std::transform(left.cbegin(), left.cend(), right.cbegin(), expected.begin(), add);
 
     for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
     {
         std::vector<size_t> out(count);
-        const auto end = std::transform(policy, left.begin(), left.end(), right.begin(), out.begin(), add);
-        BOOST_REQUIRE(end == out.end());
+        const auto end = std::transform(policy, left.cbegin(), left.cend(), right.cbegin(), out.begin(), add);
+        BOOST_REQUIRE(end == out.cend());
         BOOST_REQUIRE(out == expected);
     }
 }
@@ -323,24 +323,24 @@ BOOST_AUTO_TEST_CASE(execution__transform__binary_policies__same_as_serial)
 BOOST_AUTO_TEST_CASE(execution__reduce__policies__same_as_serial)
 {
     const auto values = sequence(count);
-    const auto expected = std::reduce(values.begin(), values.end(), 42_size, std::plus<size_t>{});
+    const auto expected = std::reduce(values.cbegin(), values.cend(), 42_size, std::plus<size_t>{});
 
     for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-        BOOST_REQUIRE_EQUAL(std::reduce(policy, values.begin(), values.end(), 42_size, std::plus<size_t>{}), expected);
+        BOOST_REQUIRE_EQUAL(std::reduce(policy, values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}), expected);
 }
 
 BOOST_AUTO_TEST_CASE(execution__reduce__init_applied_once)
 {
     const auto values = sequence(count);
-    const auto expected = std::reduce(values.begin(), values.end(), 1_size, std::multiplies<size_t>{});
-    BOOST_REQUIRE_EQUAL(std::reduce(par_if(true, 7), values.begin(), values.end(), 2_size, [](size_t left, size_t right) NOEXCEPT { return left + right; }), count * add1(count) / two + two);
-    BOOST_REQUIRE_EQUAL(std::reduce(par_if(true, 7), values.begin(), values.end(), 1_size, std::multiplies<size_t>{}), expected);
+    const auto expected = std::reduce(values.cbegin(), values.cend(), 1_size, std::multiplies<size_t>{});
+    BOOST_REQUIRE_EQUAL(std::reduce(par_if(true, 7), values.cbegin(), values.cend(), 2_size, [](size_t left, size_t right) NOEXCEPT { return left + right; }), count * add1(count) / two + two);
+    BOOST_REQUIRE_EQUAL(std::reduce(par_if(true, 7), values.cbegin(), values.cend(), 1_size, std::multiplies<size_t>{}), expected);
 }
 
 BOOST_AUTO_TEST_CASE(execution__reduce__empty__init)
 {
     const std::vector<size_t> values{};
-    BOOST_REQUIRE_EQUAL(std::reduce(par, values.begin(), values.end(), 42_size, std::plus<size_t>{}), 42u);
+    BOOST_REQUIRE_EQUAL(std::reduce(par, values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}), 42u);
 }
 
 // transform_reduce
@@ -349,16 +349,16 @@ BOOST_AUTO_TEST_CASE(execution__transform_reduce__policies__same_as_serial)
 {
     const auto values = sequence(count);
     const auto square = [](size_t value) NOEXCEPT { return value * value; };
-    const auto expected = std::transform_reduce(values.begin(), values.end(), 42_size, std::plus<size_t>{}, square);
+    const auto expected = std::transform_reduce(values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}, square);
 
     for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-        BOOST_REQUIRE_EQUAL(std::transform_reduce(policy, values.begin(), values.end(), 42_size, std::plus<size_t>{}, square), expected);
+        BOOST_REQUIRE_EQUAL(std::transform_reduce(policy, values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}, square), expected);
 }
 
 BOOST_AUTO_TEST_CASE(execution__transform_reduce__empty__init)
 {
     const std::vector<size_t> values{};
-    BOOST_REQUIRE_EQUAL(std::transform_reduce(par, values.begin(), values.end(), 42_size, std::plus<size_t>{}, [](size_t value) NOEXCEPT { return value; }), 42u);
+    BOOST_REQUIRE_EQUAL(std::transform_reduce(par, values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}, [](size_t value) NOEXCEPT { return value; }), 42u);
 }
 
 // all_of
@@ -372,16 +372,16 @@ BOOST_AUTO_TEST_CASE(execution__all_of__policies__same_as_serial)
 
     for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
     {
-        BOOST_REQUIRE_EQUAL(std::all_of(policy, values.begin(), values.end(), positive), std::all_of(values.begin(), values.end(), positive));
-        BOOST_REQUIRE_EQUAL(std::all_of(policy, values.begin(), values.end(), small), std::all_of(values.begin(), values.end(), small));
-        BOOST_REQUIRE_EQUAL(std::all_of(policy, values.begin(), values.end(), tiny), std::all_of(values.begin(), values.end(), tiny));
+        BOOST_REQUIRE_EQUAL(std::all_of(policy, values.cbegin(), values.cend(), positive), std::all_of(values.cbegin(), values.cend(), positive));
+        BOOST_REQUIRE_EQUAL(std::all_of(policy, values.cbegin(), values.cend(), small), std::all_of(values.cbegin(), values.cend(), small));
+        BOOST_REQUIRE_EQUAL(std::all_of(policy, values.cbegin(), values.cend(), tiny), std::all_of(values.cbegin(), values.cend(), tiny));
     }
 }
 
 BOOST_AUTO_TEST_CASE(execution__all_of__empty__true)
 {
     const std::vector<size_t> values{};
-    BOOST_REQUIRE(std::all_of(par, values.begin(), values.end(), [](size_t) NOEXCEPT { return false; }));
+    BOOST_REQUIRE(std::all_of(par, values.cbegin(), values.cend(), [](size_t) NOEXCEPT { return false; }));
 }
 
 // sort

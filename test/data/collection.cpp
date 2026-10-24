@@ -586,28 +586,28 @@ BOOST_AUTO_TEST_CASE(collection__starts_with__empty_empty__true)
 {
     static const data_chunk buffer;
     static const data_chunk sequence;
-    BOOST_REQUIRE(starts_with(buffer.begin(), buffer.end(), sequence));
+    BOOST_REQUIRE(starts_with(buffer.cbegin(), buffer.cend(), sequence));
 }
 
 BOOST_AUTO_TEST_CASE(collection__starts_with__not_empty_empty__false)
 {
     static const data_chunk buffer;
     static const data_chunk sequence{ 42 };
-    BOOST_REQUIRE(!starts_with(buffer.begin(), buffer.end(), sequence));
+    BOOST_REQUIRE(!starts_with(buffer.cbegin(), buffer.cend(), sequence));
 }
 
 BOOST_AUTO_TEST_CASE(collection__starts_with__same_vectors__true)
 {
     static const data_chunk buffer{ 42 };
     static const data_chunk sequence{ 42 };
-    BOOST_REQUIRE(starts_with(buffer.begin(), buffer.end(), sequence));
+    BOOST_REQUIRE(starts_with(buffer.cbegin(), buffer.cend(), sequence));
 }
 
 BOOST_AUTO_TEST_CASE(collection__starts_with__matched_vectors__true)
 {
     static const data_chunk buffer{ 42, 24, 15 };
     static const data_chunk sequence{ 42 };
-    BOOST_REQUIRE(starts_with(buffer.begin(), buffer.end(), sequence));
+    BOOST_REQUIRE(starts_with(buffer.cbegin(), buffer.cend(), sequence));
 }
 
 BOOST_AUTO_TEST_CASE(collection__starts_with__mismatched_arrays__false)
@@ -615,7 +615,7 @@ BOOST_AUTO_TEST_CASE(collection__starts_with__mismatched_arrays__false)
     // Must be the same length when using arrays.
     static const data_array<2> buffer{ { 24, 0 } };
     static const data_array<2> sequence{ { 24, 42 } };
-    const auto result = starts_with(buffer.begin(), buffer.end(), sequence);
+    const auto result = starts_with(buffer.cbegin(), buffer.cend(), sequence);
     BOOST_REQUIRE(!result);
 }
 
@@ -624,7 +624,7 @@ BOOST_AUTO_TEST_CASE(collection__starts_with__matched_arrays__true)
     // Must be the same length when using arrays.
     static const data_array<2> buffer{ { 24, 42 } };
     static const data_array<2> sequence{ { 24, 42 } };
-    const auto result = starts_with(buffer.begin(), buffer.end(), sequence);
+    const auto result = starts_with(buffer.cbegin(), buffer.cend(), sequence);
     BOOST_REQUIRE(result);
 }
 
