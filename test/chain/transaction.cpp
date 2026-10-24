@@ -2938,8 +2938,13 @@ static transaction separated_then_key_path(const chunk_cptrs& stack) NOEXCEPT
     const chain::inputs ins
     {
         input{ point{ one_hash, 0 }, script{}, max_input_sequence },
-        input{ point{ one_hash, 1 }, script{}, witness{ stack },
-            max_input_sequence }
+        input
+        {
+            point{ one_hash, 1 },
+            script{},
+            witness{ stack },
+            max_input_sequence
+        }
     };
 
     const chain::outputs outs{ output{ 0, script{} } };
@@ -2955,8 +2960,13 @@ static transaction key_path_then_separated(const chunk_cptrs& stack) NOEXCEPT
 {
     const chain::inputs ins
     {
-        input{ point{ one_hash, 1 }, script{}, witness{ stack },
-            max_input_sequence },
+        input
+        {
+            point{ one_hash, 1 },
+            script{},
+            witness{ stack },
+            max_input_sequence
+        },
         input{ point{ one_hash, 0 }, script{}, max_input_sequence }
     };
 

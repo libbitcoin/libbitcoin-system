@@ -3729,8 +3729,12 @@ static chain::transaction separator_coinbase() NOEXCEPT
 {
     const chain::inputs ins
     {
-        chain::input{ chain::point{}, chain::script{},
-            chain::max_input_sequence }
+        chain::input
+        {
+            chain::point{},
+            chain::script{},
+            chain::max_input_sequence
+        }
     };
 
     const chain::outputs outs
