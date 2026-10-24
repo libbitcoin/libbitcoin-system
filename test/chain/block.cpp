@@ -1933,4 +1933,45 @@ BOOST_AUTO_TEST_CASE(block__is_overweight__at_limit__false)
     BOOST_REQUIRE(!instance.is_overweight());
 }
 
+// check(context) [bip325]
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(block__check_context__signet_disabled__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false, test::signet_challenge), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__signet_empty_block__invalid_signet_solution)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(block{}.check(ctx, false, test::signet_challenge), error::invalid_signet_solution);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__signet_no_witness_commitment__invalid_signet_solution)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false, test::signet_challenge), error::invalid_signet_solution);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__signet1__block_success)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(test::signet1.check(ctx, true, test::signet_challenge), error::block_success);
+}
+
+// An empty challenge is satisfied by a solution that leaves a true stack top.
+BOOST_AUTO_TEST_CASE(block__check_context__signet1_default_challenge__block_success)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(test::signet1.check(ctx), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__signet1_other_challenge__invalid_signet_solution)
+{
+    const script challenge{ operations{ { opcode::push_size_0 } } };
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(test::signet1.check(ctx, true, challenge), error::invalid_signet_solution);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

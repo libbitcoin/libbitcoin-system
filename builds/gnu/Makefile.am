@@ -69,6 +69,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/chain/script_extract.cpp \
     ${srcdir}/../../src/chain/short_id.cpp \
     ${srcdir}/../../src/chain/signatures.cpp \
+    ${srcdir}/../../src/chain/signet.cpp \
     ${srcdir}/../../src/chain/taproot.cpp \
     ${srcdir}/../../src/chain/transaction.cpp \
     ${srcdir}/../../src/chain/transaction_cache.cpp \
@@ -322,6 +323,7 @@ include_bitcoin_system_chain_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/chain/prevout.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/script.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/short_id.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/signet.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/stripper.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/taproot.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/tapscript.hpp \
@@ -1170,6 +1172,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/script_patterns.cpp \
     ${srcdir}/../../test/chain/script_serialize.cpp \
     ${srcdir}/../../test/chain/short_id.cpp \
+    ${srcdir}/../../test/chain/signet.cpp \
     ${srcdir}/../../test/chain/stripper.cpp \
     ${srcdir}/../../test/chain/taproot.cpp \
     ${srcdir}/../../test/chain/tapscript.cpp \

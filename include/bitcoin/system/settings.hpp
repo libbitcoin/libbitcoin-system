@@ -72,6 +72,7 @@ public:
     uint32_t timestamp_limit_seconds;
     chain::checkpoints checkpoints{};
     config::block genesis_block{};
+    config::script signet_challenge{};
 
     /// These are used by chain_state (only).
     uint32_t retargeting_factor;
