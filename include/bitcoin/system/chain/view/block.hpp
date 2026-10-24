@@ -78,7 +78,7 @@ public:
 
     /// Validation (population required).
     code check() const NOEXCEPT;
-    code check(const context& ctx) const NOEXCEPT;
+    code check(const context& ctx, const script& challenge={}) const NOEXCEPT;
     code accept(const context& ctx, size_t subsidy_interval,
         uint64_t initial_subsidy) const NOEXCEPT;
     code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
@@ -98,6 +98,7 @@ protected:
     bool is_overweight() const NOEXCEPT;
     bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;
     bool is_hash_limit_exceeded() const NOEXCEPT;
+    bool is_invalid_signet_solution(const script& challenge) const NOEXCEPT;
     bool is_overspent(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
     bool is_signature_operations_limited(bool bip16,

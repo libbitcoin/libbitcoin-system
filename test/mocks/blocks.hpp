@@ -98,6 +98,10 @@ extern const system::chain::block mock_block_b;
 extern const system::chain::block mock_block_c;
 extern const system::chain::block mock_block_json;
 
+extern const system::chain::script signet_challenge;
+extern const system::chain::block signet1;
+extern const system::chain::block signet100003;
+
 } // namespace test
 
 #endif

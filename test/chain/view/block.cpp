@@ -925,4 +925,51 @@ BOOST_AUTO_TEST_CASE(block_view__signature_hash__bip143_p2wpkh__matches_transact
     }
 }
 
+// check(context) [bip325]
+// ----------------------------------------------------------------------------
+
+static data_chunk signet100003_prevouts() NOEXCEPT
+{
+    return view_prevouts_data({ { 6952273174103, script{ base16_chunk("00145901a61b5c1e2e135f5118c3f3a40db33dc6217a"), false } } });
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__signet_disabled__block_success)
+{
+    view::block instance{ test::signet1.to_data(true), true };
+    BOOST_REQUIRE_EQUAL(instance.populate(no_rules_context, {}), error::block_success);
+    BOOST_REQUIRE_EQUAL(instance.check(no_rules_context), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__signet1__block_success)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    view::block instance{ test::signet1.to_data(true), true };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx, {}), error::block_success);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, test::signet_challenge), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__signet100003__block_success)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 100003, 0, 0, 0 };
+    view::block instance{ test::signet100003.to_data(true), true };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx, signet100003_prevouts()), error::block_success);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, test::signet_challenge), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__signet100003_non_witness__block_success)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 100003, 0, 0, 0 };
+    view::block instance{ test::signet100003.to_data(true), false };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx, signet100003_prevouts()), error::block_success);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, test::signet_challenge), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block_view__check_context__signet1_other_challenge__invalid_signet_solution)
+{
+    const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
+    view::block instance{ test::signet1.to_data(true), true };
+    BOOST_REQUIRE_EQUAL(instance.populate(ctx, {}), error::block_success);
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, script{ operations{ { opcode::push_size_0 } } }), error::invalid_signet_solution);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

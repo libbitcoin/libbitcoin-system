@@ -920,6 +920,14 @@ BOOST_AUTO_TEST_CASE(chain_state__configured__block_storm_patch__flagged)
     BOOST_REQUIRE(to_bool(configured & flags::block_storm_patch));
 }
 
+BOOST_AUTO_TEST_CASE(chain_state__configured__signet__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.signet = true;
+    const auto configured = chain_state::configured_flags(settings.forks);
+    BOOST_REQUIRE(to_bool(configured & flags::signet_rule));
+}
+
 // activation (configuration-only forks)
 // ----------------------------------------------------------------------------
 
@@ -966,6 +974,25 @@ BOOST_AUTO_TEST_CASE(chain_state__activation__block_storm_patch__flagged)
     chain_state::data values{};
     const auto state = test_chain_state::activation(values, settings.forks, settings);
     BOOST_REQUIRE(to_bool(state.flags & flags::block_storm_patch));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__signet__flagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.signet = true;
+    chain_state::data values{};
+    values.height = 1;
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(to_bool(state.flags & flags::signet_rule));
+}
+
+BOOST_AUTO_TEST_CASE(chain_state__activation__signet_genesis__unflagged)
+{
+    settings settings(selection::mainnet);
+    settings.forks.signet = true;
+    chain_state::data values{};
+    const auto state = test_chain_state::activation(values, settings.forks, settings);
+    BOOST_REQUIRE(!to_bool(state.flags & flags::signet_rule));
 }
 
 // signal_version

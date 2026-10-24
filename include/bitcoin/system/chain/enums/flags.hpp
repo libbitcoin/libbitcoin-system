@@ -125,6 +125,9 @@ enum flags : uint32_t
     /// Reduces threshold segregated witness signaling (soft fork, feature).
     bip91_rule = bit_right<uint32_t>(25),
 
+    /// Signet only
+    signet_rule = bit_right<uint32_t>(26),
+
     /// Testnet4 only
     time_warp_patch = bit_right<uint32_t>(27),
 

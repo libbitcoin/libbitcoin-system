@@ -248,6 +248,15 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__temporary_hash_limit__true_expected_me
     BOOST_REQUIRE_EQUAL(ec.message(), "block contains too many hashes");
 }
 
+BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_signet_solution__true_expected_message)
+{
+    constexpr auto value = error::invalid_signet_solution;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "invalid signet block solution");
+}
+
 BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_signature__true_expected_message)
 {
     constexpr auto value = error::invalid_signature;

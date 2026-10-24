@@ -95,6 +95,11 @@ constexpr uint8_t taproot_annex_prefix = 0x50;
 constexpr uint8_t tapscript_mask = 0b1111'1110; // 0xfe
 constexpr uint8_t tapscript_version = 0b1100'0000; // 0xc0
 
+/// Signet consensus constants [bip325].
+/// ---------------------------------------------------------------------------
+
+constexpr uint32_t signet_head = 0xecc7daa2;
+
 /// Policy constants.
 /// ---------------------------------------------------------------------------
 

@@ -27,6 +27,7 @@
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/signet.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -753,6 +754,12 @@ bool block::is_invalid_witness_commitment(const transaction& first,
     return commit != sha256::double_hash(witness_root, reserve);
 }
 
+bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT
+{
+    return txs_->empty() || !signet::verify(*header_, *txs_->front(),
+        transaction_hashes(false), challenge);
+}
+
 //*****************************************************************************
 // CONSENSUS:
 // bip42 compensates for C++ undefined behavior of a right shift of a number of
@@ -1014,11 +1021,13 @@ code block::check(bool identity) const NOEXCEPT
 
 // Use of get_hash() in is_hash_limit_exceeded makes this thread-unsafe.
 // bip141 should be disabled when the node is not accepting witness data.
-code block::check(const context& ctx, bool identity) const NOEXCEPT
+code block::check(const context& ctx, bool identity,
+    const script& challenge) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip50 = ctx.is_enabled(bip50_rule);
+    const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
@@ -1028,6 +1037,8 @@ code block::check(const context& ctx, bool identity) const NOEXCEPT
         return error::temporary_hash_limit;
     if (bip141 && identity && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
+    if (signet && is_invalid_signet_solution(challenge))
+        return error::invalid_signet_solution;
 
     return check_transactions(ctx);
 }

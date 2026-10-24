@@ -119,6 +119,8 @@ uint32_t chain_state::configured_flags(const forks& forks) NOEXCEPT
         result |= flags::time_warp_patch;
     if (forks.block_storm_patch)
         result |= flags::block_storm_patch;
+    if (forks.signet)
+        result |= flags::signet_rule;
     if (forks.bip16)
         result |= flags::bip16_rule;
     if (forks.bip30)
@@ -213,6 +215,12 @@ chain_state::activations chain_state::activation(const data& values,
     if (forks.block_storm_patch)
     {
         result.flags |= flags::block_storm_patch;
+    }
+
+    // signet is activated based on configuration above genesis (soft fork).
+    if (forks.signet && !is_zero(values.height))
+    {
+        result.flags |= flags::signet_rule;
     }
 
     // bip16 was activated by manual inspection of signal history (soft fork).

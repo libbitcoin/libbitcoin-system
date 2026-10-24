@@ -243,6 +243,61 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.milestone, genesis);
 }
 
+BOOST_AUTO_TEST_CASE(settings__construct__signet_context__expected)
+{
+    const chain::checkpoint::list checkpoints
+    {
+        { "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6", 0 }
+    };
+
+    settings configuration(chain::selection::signet);
+    BOOST_REQUIRE(configuration.forks.signet);
+    BOOST_REQUIRE(configuration.forks.difficult);
+    BOOST_REQUIRE(configuration.forks.retarget);
+    BOOST_REQUIRE(!configuration.forks.time_warp_patch);
+    BOOST_REQUIRE(!configuration.forks.block_storm_patch);
+    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1e0377aeu);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    const chain::block genesis_block = configuration.genesis_block;
+    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a008f4d5fae77031e8ad222030101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
+    BOOST_REQUIRE_EQUAL(encode_hash(genesis_block.hash()), "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6");
+    BOOST_REQUIRE_EQUAL(encode_base16(configuration.signet_challenge.to_data(false)), "512103ad5e0edad18cb1f0fc0d28a3d4f1f3e445640337489abb10404f2d1e086be430210359ef5021964fe22d6f8e05b2463c9540ce96883fe3b278760f048f5189f2e6c452ae");
+    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
+    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
+    const chain::checkpoint block1("00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1u);
+    BOOST_REQUIRE_EQUAL(configuration.bip30_deactivate_checkpoint, block1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, block1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, block1);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, block1);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("00000000000000000000000000000000000000000000000000001090e9dc1520")));
+    const chain::checkpoint milestone("00000002a5e0ba0498f1e9f4591af0b66b63c654665efe65206fd0ae7bbaf923", 321295u);
+    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
+}
+
 // methods
 // ----------------------------------------------------------------------------
 

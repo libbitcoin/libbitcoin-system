@@ -176,6 +176,7 @@
     <ClCompile Include="..\..\..\..\src\chain\script_extract.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\short_id.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\signatures.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\signet.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\taproot.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)src_chain_transaction.obj</ObjectFileName>
@@ -494,6 +495,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\prevout.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\short_id.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\signet.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stripper.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\taproot.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\tapscript.hpp" />

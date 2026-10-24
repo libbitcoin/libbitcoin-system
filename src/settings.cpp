@@ -66,6 +66,7 @@ settings::settings() NOEXCEPT
     forks.difficult = true;                    // !testnet
     forks.time_warp_patch = false;             // testnet4
     forks.block_storm_patch = false;           // testnet4
+    forks.signet = false;                      // signet
     forks.ltc_time_warp_patch = false;         // litecoin
     forks.ltc_retarget_overflow_patch = false; // litecoin
     forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -142,6 +143,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.difficult = true;                    // !testnet
             forks.time_warp_patch = false;             // testnet4
             forks.block_storm_patch = false;           // testnet4
+            forks.signet = false;                      // signet
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -245,6 +247,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.difficult = false;                   // !testnet
             forks.time_warp_patch = false;             // testnet4
             forks.block_storm_patch = false;           // testnet4
+            forks.signet = false;                      // signet
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -336,6 +339,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.difficult = false;                   // !testnet
             forks.time_warp_patch = true;              // testnet4
             forks.block_storm_patch = true;            // testnet4
+            forks.signet = false;                      // signet
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -432,6 +436,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.difficult = true;                    // !testnet
             forks.time_warp_patch = false;             // testnet4
             forks.block_storm_patch = false;           // testnet4
+            forks.signet = false;                      // signet
             forks.ltc_time_warp_patch = false;         // litecoin
             forks.ltc_retarget_overflow_patch = false; // litecoin
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
@@ -454,6 +459,103 @@ settings::settings(chain::selection context) NOEXCEPT
             checkpoints = {};
             milestone = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             minimum_work = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
+            break;
+        }
+
+        case chain::selection::signet:
+        {
+            proof_of_work_limit = 0x1e0377ae;
+            genesis_block = chain::block
+            {
+                data_chunk
+                {
+                    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x3b, 0xa3, 0xed, 0xfd,
+                    0x7a, 0x7b, 0x12, 0xb2, 0x7a, 0xc7, 0x2c, 0x3e,
+                    0x67, 0x76, 0x8f, 0x61, 0x7f, 0xc8, 0x1b, 0xc3,
+                    0x88, 0x8a, 0x51, 0x32, 0x3a, 0x9f, 0xb8, 0xaa,
+                    0x4b, 0x1e, 0x5e, 0x4a, 0x00, 0x8f, 0x4d, 0x5f,
+                    0xae, 0x77, 0x03, 0x1e, 0x8a, 0xd2, 0x22, 0x03,
+                    0x01, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+                    0xff, 0xff, 0x4d, 0x04, 0xff, 0xff, 0x00, 0x1d,
+                    0x01, 0x04, 0x45, 0x54, 0x68, 0x65, 0x20, 0x54,
+                    0x69, 0x6d, 0x65, 0x73, 0x20, 0x30, 0x33, 0x2f,
+                    0x4a, 0x61, 0x6e, 0x2f, 0x32, 0x30, 0x30, 0x39,
+                    0x20, 0x43, 0x68, 0x61, 0x6e, 0x63, 0x65, 0x6c,
+                    0x6c, 0x6f, 0x72, 0x20, 0x6f, 0x6e, 0x20, 0x62,
+                    0x72, 0x69, 0x6e, 0x6b, 0x20, 0x6f, 0x66, 0x20,
+                    0x73, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x20, 0x62,
+                    0x61, 0x69, 0x6c, 0x6f, 0x75, 0x74, 0x20, 0x66,
+                    0x6f, 0x72, 0x20, 0x62, 0x61, 0x6e, 0x6b, 0x73,
+                    0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0xf2, 0x05,
+                    0x2a, 0x01, 0x00, 0x00, 0x00, 0x43, 0x41, 0x04,
+                    0x67, 0x8a, 0xfd, 0xb0, 0xfe, 0x55, 0x48, 0x27,
+                    0x19, 0x67, 0xf1, 0xa6, 0x71, 0x30, 0xb7, 0x10,
+                    0x5c, 0xd6, 0xa8, 0x28, 0xe0, 0x39, 0x09, 0xa6,
+                    0x79, 0x62, 0xe0, 0xea, 0x1f, 0x61, 0xde, 0xb6,
+                    0x49, 0xf6, 0xbc, 0x3f, 0x4c, 0xef, 0x38, 0xc4,
+                    0xf3, 0x55, 0x04, 0xe5, 0x1e, 0xc1, 0x12, 0xde,
+                    0x5c, 0x38, 0x4d, 0xf7, 0xba, 0x0b, 0x8d, 0x57,
+                    0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
+                    0xac, 0x00, 0x00, 0x00, 0x00
+                }, false
+            };
+
+            forks.bip16 = true;
+            forks.bip30 = true;
+            forks.bip30_deactivate = true;
+            forks.bip30_reactivate = true;
+            forks.bip34 = true;
+            forks.bip42 = true;
+            forks.bip65 = true;
+            forks.bip66 = true;
+            forks.bip68 = true;
+            forks.bip90 = true;
+            forks.bip112 = true;
+            forks.bip113 = true;
+            forks.bip141 = true;
+            forks.bip143 = true;
+            forks.bip147 = true;
+            forks.bip341 = true;
+            forks.bip342 = true;
+            forks.retarget = true;                     // !regtest
+            forks.difficult = true;                    // !testnet
+            forks.time_warp_patch = false;             // testnet4
+            forks.block_storm_patch = false;           // testnet4
+            forks.signet = true;                       // signet
+            forks.ltc_time_warp_patch = false;         // litecoin
+            forks.ltc_retarget_overflow_patch = false; // litecoin
+            forks.ltc_scrypt_proof_of_work = false;    // litecoin
+
+            bip16_activation_time = 1329264000;
+            bip34_activation_threshold = 51;
+            bip34_enforcement_threshold = 75;
+            bip34_activation_sample = 100;
+            bip90_bip34_height = 1;
+            bip90_bip65_height = 1;
+            bip90_bip66_height = 1;
+
+            // Approximation, see satoshi PR#12204.
+            bip30_reactivate_height = 486'000'000_size;
+
+            bip30_deactivate_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
+            bip9_bit0_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
+            bip9_bit1_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
+            bip9_bit2_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
+            checkpoints =
+            {
+                { "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6", 0 }
+            };
+            milestone = { "00000002a5e0ba0498f1e9f4591af0b66b63c654665efe65206fd0ae7bbaf923", 321295 };
+            minimum_work = base16_hash("00000000000000000000000000000000000000000000000000001090e9dc1520");
+            signet_challenge = base16_chunk("512103ad5e0edad18cb1f0fc0d28a3d4f1f3e445640337489abb10404f2d1e086be430210359ef5021964fe22d6f8e05b2463c9540ce96883fe3b278760f048f5189f2e6c452ae");
             break;
         }
 

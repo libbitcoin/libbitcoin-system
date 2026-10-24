@@ -76,6 +76,9 @@ struct forks
     bool time_warp_patch;
     bool block_storm_patch;
 
+    // github.com/bitcoin/bitcoin/pull/18267 ("signet")
+    bool signet;
+
     /// Litecoin deviations from Bitcoin.
     bool ltc_time_warp_patch;
     bool ltc_retarget_overflow_patch;

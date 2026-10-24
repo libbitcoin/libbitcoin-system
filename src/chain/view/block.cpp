@@ -26,6 +26,7 @@
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/signet.hpp>
 #include <bitcoin/system/chain/view/input.hpp>
 #include <bitcoin/system/chain/view/output.hpp>
 #include <bitcoin/system/chain/view/transaction.hpp>
@@ -493,12 +494,13 @@ code block::check() const NOEXCEPT
     return check_transactions();
 }
 
-code block::check(const context& ctx) const NOEXCEPT
+code block::check(const context& ctx, const script& challenge) const NOEXCEPT
 {
     BC_ASSERT(is_populated());
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip50 = ctx.is_enabled(bip50_rule);
+    const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
@@ -506,6 +508,8 @@ code block::check(const context& ctx) const NOEXCEPT
         return error::coinbase_height_mismatch;
     if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
+    if (signet && is_invalid_signet_solution(challenge))
+        return error::invalid_signet_solution;
 
     return check_transactions(ctx);
 }
@@ -624,6 +628,19 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     }
 
     return hashes.size() > hash_limit;
+}
+
+bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT
+{
+    if (txs_.empty())
+        return true;
+
+    const auto begin = buffer_->data();
+    const auto end = std::next(begin, header::serialized_size());
+    const chain::header head{ data_slice{ begin, end } };
+    const chain::transaction coinbase{ txs_.front().to_data(false), false };
+    return !signet::verify(head, coinbase, transaction_hashes(false),
+        challenge);
 }
 
 bool block::is_overspent(size_t height, uint64_t subsidy_interval,
