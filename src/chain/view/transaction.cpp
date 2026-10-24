@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/chain/views/transaction_view.hpp>
+#include <bitcoin/system/chain/view/transaction.hpp>
 
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/chain/views/input_view.hpp>
-#include <bitcoin/system/chain/views/output_view.hpp>
+#include <bitcoin/system/chain/view/input.hpp>
+#include <bitcoin/system/chain/view/output.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

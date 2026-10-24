@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/chain/views/transaction_view.hpp>
+#include <bitcoin/system/chain/view/transaction.hpp>
 
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/key_version.hpp>
@@ -25,8 +25,8 @@
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/chain/views/input_view.hpp>
-#include <bitcoin/system/chain/views/output_view.hpp>
+#include <bitcoin/system/chain/view/input.hpp>
+#include <bitcoin/system/chain/view/output.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>

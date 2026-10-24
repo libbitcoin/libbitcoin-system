@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_VIEW_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_VIEW_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_VIEW_TRANSACTION_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_VIEW_TRANSACTION_HPP
 
 #include <bitcoin/system/chain/batch/batch.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/views/input_view.hpp>
-#include <bitcoin/system/chain/views/output_view.hpp>
+#include <bitcoin/system/chain/view/input.hpp>
+#include <bitcoin/system/chain/view/output.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

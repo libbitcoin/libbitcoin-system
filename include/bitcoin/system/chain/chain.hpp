@@ -42,10 +42,10 @@
 #include <bitcoin/system/chain/taproot.hpp>
 #include <bitcoin/system/chain/tapscript.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/chain/views/block_view.hpp>
-#include <bitcoin/system/chain/views/input_view.hpp>
-#include <bitcoin/system/chain/views/output_view.hpp>
-#include <bitcoin/system/chain/views/transaction_view.hpp>
+#include <bitcoin/system/chain/view/block.hpp>
+#include <bitcoin/system/chain/view/input.hpp>
+#include <bitcoin/system/chain/view/output.hpp>
+#include <bitcoin/system/chain/view/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 
 // Byte copy cost is computed as ceilinged divide of total member bits by 8 (128 bits per shared_ptr).

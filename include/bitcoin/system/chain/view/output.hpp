@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_VIEW_HPP
-#define LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_VIEW_HPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_VIEW_OUTPUT_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_VIEW_OUTPUT_HPP
 
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
