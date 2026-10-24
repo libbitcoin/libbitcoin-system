@@ -663,8 +663,11 @@ bool block::is_malleated32(const hashes& txids, size_t width) NOEXCEPT
     const auto prior = last - width;
     const auto leaves = malleated - last;
     for (size_t at{}; at < width; ++at)
-        if (txids[last + merkle_index(at, leaves, width)] != txids[prior + at])
+    {
+        const auto in = merkle_index(at, leaves, width);
+        if (txids.at(last + in) != txids.at(prior + at))
             return false;
+    }
 
     return true;
 }

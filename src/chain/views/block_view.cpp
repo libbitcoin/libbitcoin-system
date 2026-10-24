@@ -38,6 +38,8 @@ namespace system {
 namespace chain {
 namespace view {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 using namespace system;
 
 // constructor
@@ -273,9 +275,11 @@ bool block::is_malleated32(size_t width) const NOEXCEPT
     const auto prior = last - width;
     const auto leaves = malleated - last;
     for (size_t at{}; at < width; ++at)
-        if (txs_[last + chain::block::merkle_index(at, leaves, width)].hash(false) !=
-            txs_[prior + at].hash(false))
+    {
+        const auto in = chain::block::merkle_index(at, leaves, width);
+        if (txs_.at(last + in).hash(false) != txs_.at(prior + at).hash(false))
             return false;
+    }
 
     return true;
 }
@@ -731,6 +735,8 @@ code block::malleated_or(const code& ec) const NOEXCEPT
 {
     return is_malleated() ? error::invalid_transaction_commitment : ec;
 }
+
+BC_POP_WARNING()
 
 } // namespace view
 } // namespace chain
