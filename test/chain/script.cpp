@@ -496,7 +496,7 @@ BOOST_AUTO_TEST_CASE(script__to_data__ostream__matches_chunk)
     std::ostringstream stream{};
     instance.to_data(stream, true);
     const auto text = stream.str();
-    const data_chunk data(text.begin(), text.end());
+    const data_chunk data(text.cbegin(), text.cend());
     BOOST_REQUIRE_EQUAL(data, instance.to_data(true));
 }
 

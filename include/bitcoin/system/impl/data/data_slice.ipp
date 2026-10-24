@@ -38,14 +38,14 @@ constexpr data_slice::data_slice(const char(&bytes)[Size]) NOEXCEPT
 
 template <data_slice::size_type Size, typename Byte, if_one_byte<Byte>>
 constexpr data_slice::data_slice(const std_array<Byte, Size>& data) NOEXCEPT
-  : data_slice(from_size(data.begin(), Size))
+  : data_slice(from_size(data.cbegin(), Size))
 {
 }
 
 // std_vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_slice::data_slice(const std_vector<Byte>& data) NOEXCEPT
-  : data_slice(from_size_(data.begin(), data.size()))
+  : data_slice(from_size_(data.cbegin(), data.size()))
 {
 }
 
@@ -69,7 +69,7 @@ constexpr data_slice::data_slice() NOEXCEPT
 
 // std::string.begin not constexpr (need full C++20).
 constexpr data_slice::data_slice(const std::string& text) NOEXCEPT
-  : data_slice(from_size_(text.begin(), text.size()))
+  : data_slice(from_size_(text.cbegin(), text.size()))
 {
 }
 

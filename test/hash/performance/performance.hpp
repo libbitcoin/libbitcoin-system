@@ -123,7 +123,7 @@ struct stream_1m
         report(name, nanoseconds(calls, [&]() NOEXCEPT
         {
             const auto digest = accumulator<Algorithm>::hash(data);
-            std::copy(digest.begin(), digest.end(), data.begin());
+            std::copy(digest.cbegin(), digest.cend(), data.begin());
         }) / stream_bytes, "byte");
 
         return data;
@@ -173,7 +173,7 @@ struct root_9001
         {
             hashes copy{};
             copy.reserve(add1(leaves.size()));
-            copy.assign(leaves.begin(), leaves.end());
+            copy.assign(leaves.cbegin(), leaves.cend());
             leaves.front() = Algorithm::merkle_root(std::move(copy));
         }) / merkle_leaves, "leaf");
 
@@ -276,7 +276,7 @@ inline void run_rmd160(const std::string& name, size_t calls) NOEXCEPT
     {
         rmd160::iblocks_t blocks{ expected.size(), expected.data() };
         const auto digest = rmd160::hash(std::move(blocks));
-        std::copy(digest.begin(), digest.end(), expected.begin());
+        std::copy(digest.cbegin(), digest.cend(), expected.begin());
     }
 
     BOOST_CHECK_EQUAL(stream_1m<rmd160>::run(name, calls), expected);

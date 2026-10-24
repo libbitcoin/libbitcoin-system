@@ -78,7 +78,7 @@ typedef std_vector<mnemonic_vector> mnemonic_vectors;
 static ptrdiff_t abnormals(const mnemonic_vectors& vectors,
     const std::string& delimiter)
 {
-    return std::count_if(vectors.begin(), vectors.end(),
+    return std::count_if(vectors.cbegin(), vectors.cend(),
         [&](const mnemonic_vector& test)
         {
             // Must remove the ideographic_space before nfkd normalization.

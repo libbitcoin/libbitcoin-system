@@ -357,7 +357,7 @@ void script::to_data(writer& sink, bool prefix) const NOEXCEPT
         sink.write_variable(serialized_size(false));
 
     // Data serialization is affected by offset metadata.
-    for (iterator op{ offset }; op != ops().end(); ++op)
+    for (iterator op{ offset }; op != ops().cend(); ++op)
         op->to_data(sink);
 }
 
@@ -384,7 +384,7 @@ std::string script::to_string(uint32_t active_flags, bool bitcoind,
 
 void script::clear_offset() const NOEXCEPT
 {
-    offset = ops_.begin();
+    offset = ops_.cbegin();
 }
 
 // Properties.
@@ -464,14 +464,14 @@ hash_digest script::hash() const NOEXCEPT
 // static/private
 size_t script::serialized_size(const operations& ops) NOEXCEPT
 {
-    return std::accumulate(ops.begin(), ops.end(), zero, op_size);
+    return std::accumulate(ops.cbegin(), ops.cend(), zero, op_size);
 }
 
 size_t script::serialized_size(bool prefix) const NOEXCEPT
 {
     // Recompute it serialization has been affected by offset metadata.
-    const auto size = (offset == ops_.begin()) ? size_ :
-        std::accumulate(offset, ops_.end(), zero, op_size);
+    const auto size = (offset == ops_.cbegin()) ? size_ :
+        std::accumulate(offset, ops_.cend(), zero, op_size);
 
     return prefix ? ceilinged_add(size, variable_size(size)) : size;
 }

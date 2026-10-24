@@ -96,7 +96,7 @@ const char* cat##_category::name() const noexcept \
 std::string cat##_category::message(int condition) const noexcept \
 { \
     const auto message = messages.find(static_cast<cat##_t>(condition)); \
-    return message == messages.end() ? unmapped : message->second; \
+    return message == messages.cend() ? unmapped : message->second; \
 } \
 std::error_condition cat##_category::default_error_condition(int code) const noexcept \
 { \

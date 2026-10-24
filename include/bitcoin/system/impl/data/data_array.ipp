@@ -85,8 +85,8 @@ constexpr data_array<Size> build_array(const data_loaf& slices) NOEXCEPT
 template <class Target>
 constexpr Target& extend(Target& target, const data_slice& extension) NOEXCEPT
 {
-    target.insert(std::end(target), std::begin(extension),
-        std::end(extension));
+    target.insert(std::cend(target), std::cbegin(extension),
+        std::cend(extension));
 
     return target;
 }
@@ -95,7 +95,7 @@ constexpr Target& extend(Target& target, const data_slice& extension) NOEXCEPT
 template <class Target, class Extension>
 constexpr Target& extend(Target& target, Extension&& extension) NOEXCEPT
 {
-    target.insert(std::end(target),
+    target.insert(std::cend(target),
         std::make_move_iterator(std::begin(extension)),
         std::make_move_iterator(std::end(extension)));
 
@@ -110,7 +110,7 @@ constexpr data_array<End - Start> slice(const data_array<Size>& bytes) NOEXCEPT
     // bogus gcc 13.2.0 warning.
     // github.com/libbitcoin/libbitcoin-system/issues/1538
     data_array<End - Start> out{};
-    std::copy(std::next(bytes.begin(), Start), std::next(bytes.begin(), End),
+    std::copy(std::next(bytes.cbegin(), Start), std::next(bytes.cbegin(), End),
         out.begin());
     return out;
 }
@@ -120,8 +120,8 @@ constexpr data_array<Left + Right> splice(const data_array<Left>& left,
     const data_array<Right>& right) NOEXCEPT
 {
     data_array<Left + Right> out{};
-    std::copy(right.begin(), right.end(),
-        std::copy(left.begin(), left.end(), out.begin()));
+    std::copy(right.cbegin(), right.cend(),
+        std::copy(left.cbegin(), left.cend(), out.begin()));
 
     return out;
 }
@@ -131,9 +131,9 @@ constexpr data_array<Left + Middle + Right> splice(const data_array<Left>& left,
     const data_array<Middle>& middle, const data_array<Right>& right) NOEXCEPT
 {
     data_array<Left + Middle + Right> out{};
-    std::copy(right.begin(), right.end(),
-        std::copy(middle.begin(), middle.end(),
-            std::copy(left.begin(), left.end(), out.begin())));
+    std::copy(right.cbegin(), right.cend(),
+        std::copy(middle.cbegin(), middle.cend(),
+            std::copy(left.cbegin(), left.cend(), out.begin())));
 
     return out;
 }
@@ -143,8 +143,8 @@ constexpr split_parts<to_half(Size)> split(const data_array<Size>& bytes) NOEXCE
 {
     constexpr auto half = to_half(Size);
     split_parts<half> out{};
-    std::copy_n(bytes.begin(), half, out.first.begin());
-    std::copy_n(std::next(bytes.begin(), half), half, out.second.begin());
+    std::copy_n(bytes.cbegin(), half, out.first.begin());
+    std::copy_n(std::next(bytes.cbegin(), half), half, out.second.begin());
     return out;
 }
 

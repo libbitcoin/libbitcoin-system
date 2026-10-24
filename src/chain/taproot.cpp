@@ -47,8 +47,8 @@ hash_digest taproot::merkle_root(const tapscript::keys_t& keys, size_t count,
 hash_digest taproot::sorted_branch_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
 {
-    return std::lexicographical_compare(left.begin(), left.end(),
-        right.begin(), right.end()) ? branch_hash(left, right) :
+    return std::lexicographical_compare(left.cbegin(), left.cend(),
+        right.cbegin(), right.cend()) ? branch_hash(left, right) :
         branch_hash(right, left);
 }
 

@@ -89,11 +89,11 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/chain/json/script.cpp \
     ${srcdir}/../../src/chain/json/transaction.cpp \
     ${srcdir}/../../src/chain/json/witness.cpp \
-    ${srcdir}/../../src/chain/views/block_view.cpp \
-    ${srcdir}/../../src/chain/views/input_view.cpp \
-    ${srcdir}/../../src/chain/views/output_view.cpp \
-    ${srcdir}/../../src/chain/views/transaction_view.cpp \
-    ${srcdir}/../../src/chain/views/transaction_view_sighash.cpp \
+    ${srcdir}/../../src/chain/view/block.cpp \
+    ${srcdir}/../../src/chain/view/input.cpp \
+    ${srcdir}/../../src/chain/view/output.cpp \
+    ${srcdir}/../../src/chain/view/transaction.cpp \
+    ${srcdir}/../../src/chain/view/transaction_sighash.cpp \
     ${srcdir}/../../src/config/authority.cpp \
     ${srcdir}/../../src/config/base16.cpp \
     ${srcdir}/../../src/config/base2.cpp \
@@ -375,14 +375,14 @@ include_bitcoin_system_chain_json_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/chain/json/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/json/witness.hpp
 
-include_bitcoin_system_chain_viewsdir = \
-    ${includedir}/bitcoin/system/chain/views
+include_bitcoin_system_chain_viewdir = \
+    ${includedir}/bitcoin/system/chain/view
 
-include_bitcoin_system_chain_views_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/chain/views/block_view.hpp \
-    ${srcdir}/../../include/bitcoin/system/chain/views/input_view.hpp \
-    ${srcdir}/../../include/bitcoin/system/chain/views/output_view.hpp \
-    ${srcdir}/../../include/bitcoin/system/chain/views/transaction_view.hpp
+include_bitcoin_system_chain_view_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/chain/view/block.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/view/input.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/view/output.hpp \
+    ${srcdir}/../../include/bitcoin/system/chain/view/transaction.hpp
 
 include_bitcoin_system_configdir = \
     ${includedir}/bitcoin/system/config
@@ -1191,10 +1191,10 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/json/script.cpp \
     ${srcdir}/../../test/chain/json/transaction.cpp \
     ${srcdir}/../../test/chain/json/witness.cpp \
-    ${srcdir}/../../test/chain/views/block_view.cpp \
-    ${srcdir}/../../test/chain/views/input_view.cpp \
-    ${srcdir}/../../test/chain/views/output_view.cpp \
-    ${srcdir}/../../test/chain/views/transaction_view.cpp \
+    ${srcdir}/../../test/chain/view/block.cpp \
+    ${srcdir}/../../test/chain/view/input.cpp \
+    ${srcdir}/../../test/chain/view/output.cpp \
+    ${srcdir}/../../test/chain/view/transaction.cpp \
     ${srcdir}/../../test/config/authority.cpp \
     ${srcdir}/../../test/config/base16.cpp \
     ${srcdir}/../../test/config/base2.cpp \

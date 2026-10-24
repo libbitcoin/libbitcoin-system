@@ -145,7 +145,7 @@ INLINE void CLASS::
 erase(size_t index) NOEXCEPT
 {
     BC_ASSERT(index < size());
-    container_.erase(std::prev(container_.end(), add1(index)));
+    container_.erase(std::prev(container_.cend(), add1(index)));
 }
 
 TEMPLATE
@@ -181,7 +181,7 @@ peek(size_t index) const NOEXCEPT
         return container_[sub1(size()) - index];
 
     if constexpr (linked_)
-        return *std::prev(container_.end(), add1(index));
+        return *std::prev(container_.cend(), add1(index));
 }
 
 TEMPLATE

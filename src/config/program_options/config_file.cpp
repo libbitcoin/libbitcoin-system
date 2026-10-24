@@ -27,8 +27,8 @@ namespace boost { namespace program_options { namespace detail {
     : allowed_options(allowed_options),
       m_allow_unregistered(allow_unregistered)
     {
-        for(std::set<std::string>::const_iterator i = allowed_options.begin();
-            i != allowed_options.end(); 
+        for(std::set<std::string>::const_iterator i = allowed_options.cbegin();
+            i != allowed_options.cend(); 
             ++i)
         {
             add_option(i->c_str());
@@ -40,7 +40,7 @@ namespace boost { namespace program_options { namespace detail {
     {
         string s(name);
         assert(!s.empty());
-        if (*s.rbegin() == '*') {
+        if (*s.crbegin() == '*') {
             s.resize(s.size()-1);
             bool bad_prefixes(false);
             // If 's' is a prefix of one of allowed suffix, then
@@ -48,11 +48,11 @@ namespace boost { namespace program_options { namespace detail {
             // If some element is prefix of 's', then lower_bound will
             // return the next element.
             set<string>::iterator i = allowed_prefixes.lower_bound(s);
-            if (i != allowed_prefixes.end()) {
+            if (i != allowed_prefixes.cend()) {
                 if (i->find(s) == 0)
                     bad_prefixes = true;                    
             }
-            if (i != allowed_prefixes.begin()) {
+            if (i != allowed_prefixes.cbegin()) {
                 --i;
                 if (s.find(*i) == 0)
                     bad_prefixes = true;
@@ -95,9 +95,9 @@ namespace boost { namespace program_options { namespace detail {
 
             if (!s.empty()) {
                 // Handle section name
-                if (*s.begin() == '[' && *s.rbegin() == ']') {
+                if (*s.cbegin() == '[' && *s.crbegin() == ']') {
                     m_prefix = s.substr(1, s.size()-2);
-                    if (*m_prefix.rbegin() != '.')
+                    if (*m_prefix.crbegin() != '.')
                         m_prefix += '.';
                 }
                 else if ((n = s.find('=')) != string::npos) {
@@ -133,13 +133,13 @@ namespace boost { namespace program_options { namespace detail {
     common_config_file_iterator::allowed_option(const std::string& s) const
     {
         set<string>::const_iterator i = allowed_options.find(s);
-        if (i != allowed_options.end())
+        if (i != allowed_options.cend())
             return true;        
         // If s is "pa" where "p" is allowed prefix then
         // lower_bound should find the element after "p". 
         // This depends on 'allowed_prefixes' invariant.
         i = allowed_prefixes.lower_bound(s);
-        if (i != allowed_prefixes.begin() && s.find(*--i) == 0)
+        if (i != allowed_prefixes.cbegin() && s.find(*--i) == 0)
             return true;
         return false;
     }

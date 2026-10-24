@@ -213,7 +213,7 @@ public:
     {
         bytes data{};
         algorithm::to_bytes(data, value);
-        std::copy(data.begin(), data.end(), out);
+        std::copy(data.cbegin(), data.cend(), out);
     }
 
     static void to_bytes(uint8_t* out, field value) NOEXCEPT
@@ -221,7 +221,7 @@ public:
         bytes data{};
         normalize(value);
         algorithm::to_bytes(data, value);
-        std::copy(data.begin(), data.end(), out);
+        std::copy(data.cbegin(), data.cend(), out);
     }
 
     // Blinds.
@@ -284,20 +284,20 @@ public:
         seed.reserve(112);
         const auto& key = to_array(key32);
         const auto& message = to_array(msg32);
-        seed.insert(seed.end(), key.begin(), key.end());
-        seed.insert(seed.end(), message.begin(), message.end());
+        seed.insert(seed.cend(), key.cbegin(), key.cend());
+        seed.insert(seed.cend(), message.cbegin(), message.cend());
         if (!is_null(data))
         {
             LCOV_EXCL_START("Wrappers provide no extra data.")
             const auto& extra = to_array(static_cast<const uint8_t*>(data));
-            seed.insert(seed.end(), extra.begin(), extra.end());
+            seed.insert(seed.cend(), extra.cbegin(), extra.cend());
             LCOV_EXCL_STOP()
         }
 
         if (!is_null(algo16))
         {
             LCOV_EXCL_START("Wrappers provide no algorithm.")
-            seed.insert(seed.end(), algo16, std::next(algo16, 16));
+            seed.insert(seed.cend(), algo16, std::next(algo16, 16));
             LCOV_EXCL_STOP()
         }
 
@@ -330,7 +330,7 @@ public:
         }
         LCOV_EXCL_STOP()
 
-        std::copy(v.begin(), v.end(), nonce32);
+        std::copy(v.cbegin(), v.cend(), nonce32);
         wipe(seed);
         wipe(k);
         return success;
@@ -500,7 +500,7 @@ public:
             normalize(t);
         }
 
-        std::copy(u32.begin(), u32.end(), ell64);
+        std::copy(u32.cbegin(), u32.cend(), ell64);
         to_bytes(std::next(ell64, array_count<bytes>), t);
     }
 };
@@ -804,10 +804,10 @@ int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     *out++ = narrow_cast<uint8_t>(content);
     *out++ = integer;
     *out++ = narrow_cast<uint8_t>(r_size);
-    out = std::copy_n(std::next(r_bytes.begin(), r_start), r_size, out);
+    out = std::copy_n(std::next(r_bytes.cbegin(), r_start), r_size, out);
     *out++ = integer;
     *out++ = narrow_cast<uint8_t>(s_size);
-    std::copy_n(std::next(s_bytes.begin(), s_start), s_size, out);
+    std::copy_n(std::next(s_bytes.cbegin(), s_start), s_size, out);
     return success;
 }
 
@@ -1019,7 +1019,7 @@ int secp256k1_schnorrsig_sign32(const secp256k1_context*, uint8_t* sig64,
     local::wipe(blinding);
 
     constexpr auto size = array_count<local::bytes>;
-    std::copy(r_x.begin(), r_x.end(), sig64);
+    std::copy(r_x.cbegin(), r_x.cend(), sig64);
     local::to_bytes(std::next(sig64, size), s);
     local::keep(sig64, two * size, valid);
     local::declassify(sig64, two * size);

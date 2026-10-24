@@ -284,7 +284,7 @@ namespace boost { namespace program_options { namespace detail {
                 opt.value.push_back(args[0]);
                 opt.original_tokens.push_back(args[0]);
                 result.push_back(opt);
-                args.erase(args.begin());
+                args.erase(args.cbegin());
             }
         }
 
@@ -488,7 +488,7 @@ namespace boost { namespace program_options { namespace detail {
                     }
                     opt.value.push_back(other_tokens[0]);
                     opt.original_tokens.push_back(other_tokens[0]);
-                    other_tokens.erase(other_tokens.begin());
+                    other_tokens.erase(other_tokens.cbegin());
                 }
             }
             else
@@ -540,7 +540,7 @@ namespace boost { namespace program_options { namespace detail {
                 opt.value.push_back(adjacent);
             opt.original_tokens.push_back(tok);
             result.push_back(opt);
-            args.erase(args.begin());
+            args.erase(args.cbegin());
         }
         return result;
     }
@@ -589,12 +589,12 @@ namespace boost { namespace program_options { namespace detail {
 
                     if (adjacent.empty())
                     {
-                        args.erase(args.begin());
+                        args.erase(args.cbegin());
                         break;
                     }
 
                     name = string("-") + adjacent[0];
-                    adjacent.erase(adjacent.begin());
+                    adjacent.erase(adjacent.cbegin());
                 } else {
                     
                     option opt;
@@ -603,7 +603,7 @@ namespace boost { namespace program_options { namespace detail {
                     if (!adjacent.empty())
                         opt.value.push_back(adjacent);
                     result.push_back(opt);
-                    args.erase(args.begin());                    
+                    args.erase(args.cbegin());                    
                     break;
                 }
             }
@@ -628,7 +628,7 @@ namespace boost { namespace program_options { namespace detail {
                 opt.value.push_back(adjacent);
             opt.original_tokens.push_back(tok);
             result.push_back(opt);
-            args.erase(args.begin());
+            args.erase(args.cbegin());
         }
         return result;
     }
@@ -695,7 +695,7 @@ namespace boost { namespace program_options { namespace detail {
             if (!r.second.empty())
                 next.value.push_back(r.second);
             result.push_back(next);
-            args.erase(args.begin());
+            args.erase(args.cbegin());
         }
         return result;
     }

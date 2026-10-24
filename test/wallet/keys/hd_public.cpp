@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(hd_public__construct__off_curve_point__invalid)
 {
     auto key = hd_public(BIP32_M_0H).to_hd_key();
     const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    std::copy(off_curve.begin(), off_curve.end(), std::prev(key.end(), checksum_default_size + ec_compressed_size));
+    std::copy(off_curve.cbegin(), off_curve.cend(), std::prev(key.end(), checksum_default_size + ec_compressed_size));
     insert_checksum(key);
 
     BOOST_REQUIRE(!hd_public(key));

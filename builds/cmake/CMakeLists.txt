@@ -83,8 +83,6 @@ option( enable-shani "Use Intel SHA Extensions." OFF )
 option( enable-sha512 "Use Intel SHA512 Extensions (implies AVX2)." OFF )
 option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
 option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
-option( enable-bmi2 "Use Intel BMI2 intrinsics." OFF )
-option( enable-adx "Use Intel ADX intrinsics." OFF )
 option( enable-avx512ifma "Use Intel AVX512 IFMA intrinsics (implies AVX512VL)." OFF )
 option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
@@ -342,38 +340,6 @@ if ( enable-vaes )
   endif()
 endif()
 
-if ( enable-bmi2 )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mbmi2" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      unsigned long long high = 0;
-      return (int)_mulx_u64(3, 5, &high);
-      }" SUPPORTS_FLAG_BMI2 )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_BMI2 )
-    message( FATAL_ERROR "Compiler does not support '-mbmi2'." )
-  endif()
-endif()
-
-if ( enable-adx )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -madx" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      unsigned long long sum = 0;
-      return _addcarryx_u64(0, 3, 5, &sum);
-      }" SUPPORTS_FLAG_ADX )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_ADX )
-    message( FATAL_ERROR "Compiler does not support '-madx'." )
-  endif()
-endif()
-
 check_cxx_compiler_flag( "-Wall" HAS_FLAG_WALL )
 if ( !HAS_FLAG_WALL )
     message( FATAL_ERROR "Compiler does not support '-Wall'." )
@@ -475,8 +441,6 @@ target_compile_options( libbitcoin-system
     $<$<BOOL:${enable-sse41}>:-msse4.1>
     $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
     $<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>
-    $<$<BOOL:${enable-bmi2}>:-mbmi2>
-    $<$<BOOL:${enable-adx}>:-madx>
   PRIVATE
     -Wall
     -Wextra

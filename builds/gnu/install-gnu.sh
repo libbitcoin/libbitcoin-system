@@ -16,10 +16,6 @@
 #                                 Default: --disable-aesni
 # --<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #                                 Default: --disable-vaes
-# --<enable/disable>-bmi2       Use Intel BMI2 intrinsics.
-#                                 Default: --disable-bmi2
-# --<enable/disable>-adx        Use Intel ADX intrinsics.
-#                                 Default: --disable-adx
 # --<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
 #                                 Default: --disable-avx512ifma
 # --<enable/disable>-avx512     Use Intel AVX512 intrinsics.
@@ -1039,10 +1035,6 @@ help()
     msg "                                Default: --disable-aesni"
     msg "--<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg "                                Default: --disable-vaes"
-    msg "--<enable/disable>-bmi2       Use Intel BMI2 intrinsics."
-    msg "                                Default: --disable-bmi2"
-    msg "--<enable/disable>-adx        Use Intel ADX intrinsics."
-    msg "                                Default: --disable-adx"
     msg "--<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
     msg "                                Default: --disable-avx512ifma"
     msg "--<enable/disable>-avx512     Use Intel AVX512 intrinsics."

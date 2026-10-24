@@ -37,7 +37,7 @@ public:
 
     template<size_t Size>
     base16(const data_array<Size>& value) NOEXCEPT
-      : value_(value.begin(), value.end())
+      : value_(value.cbegin(), value.cend())
     {
     }
 

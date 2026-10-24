@@ -53,7 +53,7 @@ static hash_digest entropy(std::random_device& device) NOEXCEPT
     for (size_t count{}; count < words; ++count)
     {
         const auto value = to_little_endian(device());
-        it = std::copy(value.begin(), value.end(), it);
+        it = std::copy(value.cbegin(), value.cend(), it);
     }
 
     return sha256_hash(seed);
@@ -66,7 +66,7 @@ void maybe_random::fill(byte_span out) NOEXCEPT
     {
         const auto block = entropy(get_device());
         const auto size = std::min(hash_size, out.size() - offset);
-        std::copy_n(block.begin(), size, std::next(out.begin(), offset));
+        std::copy_n(block.cbegin(), size, std::next(out.begin(), offset));
     }
 }
 

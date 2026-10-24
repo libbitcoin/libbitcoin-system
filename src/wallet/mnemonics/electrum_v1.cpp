@@ -90,7 +90,7 @@ data_chunk v1_decoding::seed_entropy() const NOEXCEPT
         return {};
 
     read::bytes::copy in(entropy_);
-    auto it = overflows_.begin();
+    auto it = overflows_.cbegin();
     std::string hexadecimal;
 
     while (!in.is_exhausted())
@@ -182,7 +182,7 @@ v1_decoding electrum_v1::decoder(const string_list& words,
     auto overflow = overflows.begin();
 
     // Word count and dictionary membership must have been validated.
-    for (auto word = words.begin(); word != words.end();)
+    for (auto word = words.cbegin(); word != words.cend();)
     {
         // Electrum modulos dos and tri by size1, which is a nop.
         const int64_t uno = dictionaries_.index(*word++, identifier);
@@ -360,7 +360,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
 // public
 bool electrum_v1::overflow() const NOEXCEPT
 {
-    return std::any_of(overflows_.begin(), overflows_.end(), [](bool value)
+    return std::any_of(overflows_.cbegin(), overflows_.cend(), [](bool value)
     {
         return value;
     });

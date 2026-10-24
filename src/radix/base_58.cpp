@@ -33,7 +33,7 @@ const std::string base58_chars =
 bool is_base58(char character) NOEXCEPT
 {
     // The base58 character list is lexically sorted.
-    return std::binary_search(base58_chars.begin(), base58_chars.end(),
+    return std::binary_search(base58_chars.cbegin(), base58_chars.cend(),
         character);
 }
 
@@ -44,7 +44,7 @@ bool is_base58(const std::string& text) NOEXCEPT
         return is_base58(character);
     };
 
-    return std::all_of(text.begin(), text.end(), test);
+    return std::all_of(text.cbegin(), text.cend(), test);
 }
 
 template <typename Data>
@@ -52,7 +52,7 @@ static auto find_first_nonzero(const Data& data) NOEXCEPT ->
     decltype(data.cbegin())
 {
     auto first_nonzero = data.cbegin();
-    while (first_nonzero != data.end() && is_zero(*first_nonzero))
+    while (first_nonzero != data.cend() && is_zero(*first_nonzero))
         ++first_nonzero;
 
     return first_nonzero;
@@ -168,7 +168,7 @@ bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT
     data_chunk data(data_size, 0x00);
 
     // Process the characters.
-    for (auto it = in.begin() + leading_zeros; it != in.end(); ++it)
+    for (auto it = in.cbegin() + leading_zeros; it != in.cend(); ++it)
     {
         const auto carry = base58_chars.find(*it);
         if (carry == std::string::npos)
@@ -184,7 +184,7 @@ bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT
     const size_t estimated_size = leading_zeros + (data.cend() - first_nonzero);
     out.reserve(estimated_size);
     out.assign(leading_zeros, 0x00_u8);
-    out.insert(out.end(), first_nonzero, data.cend());
+    out.insert(out.cend(), first_nonzero, data.cend());
     return true;
 }
 

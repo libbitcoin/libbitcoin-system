@@ -82,8 +82,8 @@ chunk_cptrs script::multisig_keys() const NOEXCEPT
         return keys;
 
     keys.reserve(ops().size() - 3u);
-    for (auto op = std::next(ops().begin());
-        op != std::prev(ops().end(), 2); ++op)
+    for (auto op = std::next(ops().cbegin());
+        op != std::prev(ops().cend(), 2); ++op)
         keys.push_back(op->data_ptr());
 
     return keys;
@@ -96,7 +96,7 @@ chunk_cptrs script::endorsements() const NOEXCEPT
         return sigs;
 
     sigs.reserve(sub1(ops().size()));
-    for (auto op = std::next(ops().begin()); op != ops().end(); ++op)
+    for (auto op = std::next(ops().cbegin()); op != ops().cend(); ++op)
         sigs.push_back(op->data_ptr());
 
     return sigs;

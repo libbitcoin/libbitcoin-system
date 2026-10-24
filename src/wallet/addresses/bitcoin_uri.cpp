@@ -100,7 +100,7 @@ payment_address bitcoin_uri::payment() const NOEXCEPT
 std::string bitcoin_uri::parameter(const std::string& key) const NOEXCEPT
 {
     const auto value = query_.find(key);
-    return value == query_.end() ? std::string() : value->second;
+    return value == query_.cend() ? std::string() : value->second;
 }
 
 std::string bitcoin_uri::address() const NOEXCEPT

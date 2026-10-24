@@ -79,7 +79,7 @@ public:
     /// Verify all rows in place (store commit failure fallback).
     inline bool verify() const NOEXCEPT
     {
-        return std::all_of(rows_.begin(), rows_.end(),
+        return std::all_of(rows_.cbegin(), rows_.cend(),
             [](const row& record) NOEXCEPT
             {
                 return schnorr::verify_signature(record.point, record.digest,

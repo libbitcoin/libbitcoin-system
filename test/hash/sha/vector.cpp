@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(vector__sha256__merkle_hash__native__expected)
     // Block counts: single, pair, pair and single, 16 lanes, 16 lanes and pair, 16 lanes and pair and single.
     constexpr std_array<size_t, 6> counts{ 1, 2, 3, 16, 18, 19 };
 
-    std::for_each(counts.begin(), counts.end(), [](size_t blocks)
+    std::for_each(counts.cbegin(), counts.cend(), [](size_t blocks)
     {
         uint8_t byte{};
         sha_normal::digests_t expected(two * blocks);

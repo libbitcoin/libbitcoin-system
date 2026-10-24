@@ -31,28 +31,28 @@ namespace catalogs_mnemonic {
 static ptrdiff_t intersection(const mnemonic::catalog::words& left,
     const mnemonic::catalog::words& right)
 {
-    return std::count_if(left.word.begin(), left.word.end(),
+    return std::count_if(left.word.cbegin(), left.word.cend(),
         [&](const char test_left[])
         {
-            return std::find_if(right.word.begin(), right.word.end(),
+            return std::find_if(right.word.cbegin(), right.word.cend(),
                 [&](const char test_right[])
                 {
                     return (std::strcmp(test_left, test_right) == 0);
-                }) != right.word.end();
+                }) != right.word.cend();
         });
 }
 
 static bool intersects(const mnemonic::catalog::words& left,
     const mnemonic::catalog::words& right)
 {
-    return std::any_of(left.word.begin(), left.word.end(),
+    return std::any_of(left.word.cbegin(), left.word.cend(),
         [&](const char test_left[])
         {
-            return std::find_if(right.word.begin(), right.word.end(),
+            return std::find_if(right.word.cbegin(), right.word.cend(),
                 [&](const char test_right[])
                 {
                     return (std::strcmp(test_left, test_right) == 0);
-                }) != right.word.end();
+                }) != right.word.cend();
         });
 }
 
@@ -61,18 +61,18 @@ static ptrdiff_t deviation(const mnemonic::catalog::words& left,
 {
     ptrdiff_t count = 0;
 
-    for (auto outer = left.word.begin(); outer != left.word.end(); ++outer)
+    for (auto outer = left.word.cbegin(); outer != left.word.cend(); ++outer)
     {
-        const auto inner = std::find_if(right.word.begin(), right.word.end(),
+        const auto inner = std::find_if(right.word.cbegin(), right.word.cend(),
             [&](const char test[])
             {
                 return (std::strcmp(test, *outer) == 0);
             });
 
-        if (inner != right.word.end())
+        if (inner != right.word.cend())
         {
-            const auto inner_index = std::distance(right.word.begin(), inner);
-            const auto outer_index = std::distance(left.word.begin(), outer);
+            const auto inner_index = std::distance(right.word.cbegin(), inner);
+            const auto outer_index = std::distance(left.word.cbegin(), outer);
             count += (inner_index == outer_index ? 0 : 1);
         }
     }
@@ -82,7 +82,7 @@ static ptrdiff_t deviation(const mnemonic::catalog::words& left,
 
 static bool abnormal(const mnemonic::catalog::words& words)
 {
-    return std::all_of(words.word.begin(), words.word.end(),
+    return std::all_of(words.word.cbegin(), words.word.cend(),
         [&](const char test[])
         {
             std::string copy = test;
@@ -96,7 +96,7 @@ static string_list to_string_list(const mnemonic::catalog::words& words)
 {
     // Convert dictionary to string, otherwise pointers are compared.
     string_list tokens(mnemonic::catalog::size());
-    std::transform(words.word.begin(), words.word.end(), tokens.begin(),
+    std::transform(words.word.cbegin(), words.word.cend(), tokens.begin(),
         [](const char* token)
         {
             return token;

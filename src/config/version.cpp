@@ -91,8 +91,8 @@ bool operator!=(const version& left, const version& right) NOEXCEPT
 bool operator<(const version& left, const version& right) NOEXCEPT
 {
     return std::lexicographical_compare(
-        left.segments().begin(), left.segments().end(),
-        right.segments().begin(), right.segments().end());
+        left.segments().cbegin(), left.segments().cend(),
+        right.segments().cbegin(), right.segments().cend());
 }
 
 bool operator<=(const version& left, const version& right) NOEXCEPT

@@ -106,7 +106,7 @@ static const std::string empty_passphrase{};
 static ptrdiff_t abnormals(const electrum_vectors& vectors,
     const std::string& delimiter)
 {
-    return std::count_if(vectors.begin(), vectors.end(),
+    return std::count_if(vectors.cbegin(), vectors.cend(),
         [&](const electrum_vector& test)
     {
         // Must remove the ideographic_space before nfkd normalization.

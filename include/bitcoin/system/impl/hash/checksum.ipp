@@ -49,7 +49,7 @@ void insert_checksum(data_array<Size>& data) NOEXCEPT
     const auto payload_hash = bitcoin_hash(payload);
 
     // Obtain the hash checksum iterators.
-    const auto check_begin = payload_hash.begin();
+    const auto check_begin = payload_hash.cbegin();
     const auto check_end = std::next(check_begin, Checksum);
 
     // Append the checksum from the first hash bytes to after the payload. 
@@ -63,15 +63,15 @@ bool verify_checksum(const data_array<Size>& data) NOEXCEPT
     static_assert(Checksum <= hash_size, "excessive checksum");
 
     // Obtain the payload iterators.
-    const auto payload_begin = data.begin();
-    const auto payload_end = std::prev(data.end(), Checksum);
+    const auto payload_begin = data.cbegin();
+    const auto payload_end = std::prev(data.cend(), Checksum);
 
     // Compute the bitcoin hash.
     const auto payload = data_chunk{ payload_begin, payload_end };
     const auto payload_hash = bitcoin_hash(payload);
 
     // Obtain the hash checksum iterators.
-    const auto check_begin = payload_hash.begin();
+    const auto check_begin = payload_hash.cbegin();
     const auto check_end = std::next(check_begin, Checksum);
 
     // Compare the checksum from the first hash bytes to those in the payload.

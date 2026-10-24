@@ -107,7 +107,7 @@ bool decode_base64(data_chunk& out, const std::string& in) NOEXCEPT
     decoded.reserve(((length / 4) * 3) - padding);
 
     uint32_t value = 0;
-    for (auto cursor = in.begin(); cursor < in.end();)
+    for (auto cursor = in.cbegin(); cursor < in.cend();)
     {
         for (size_t position = 0; position < 4u; position++)
         {
@@ -125,7 +125,7 @@ bool decode_base64(data_chunk& out, const std::string& in) NOEXCEPT
             else if (*cursor == pad)
             {
                 // Handle 1 or 2 pad characters.
-                switch (in.end() - cursor)
+                switch (in.cend() - cursor)
                 {
                     case 1:
                         decoded.push_back((value >> 16) & mask);

@@ -66,14 +66,14 @@ BOOST_AUTO_TEST_CASE(golomb__hash_distinct__duplicate_item__sorted_distinct)
     items.push_back(items.front());
     const auto hashes = golomb::hash_distinct(items, golomb_key);
     BOOST_REQUIRE_EQUAL(hashes.size(), golomb_items().size());
-    BOOST_REQUIRE(std::is_sorted(hashes.begin(), hashes.end()));
+    BOOST_REQUIRE(std::is_sorted(hashes.cbegin(), hashes.cend()));
 }
 
 BOOST_AUTO_TEST_CASE(golomb__hash_distinct__slices__same_as_stack)
 {
     auto items = golomb_items();
     items.push_back(items.front());
-    const std::vector<data_slice> slices(items.begin(), items.end());
+    const std::vector<data_slice> slices(items.cbegin(), items.cend());
     BOOST_REQUIRE(golomb::hash_distinct(slices, golomb_key) == golomb::hash_distinct(items, golomb_key));
 }
 

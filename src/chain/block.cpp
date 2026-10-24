@@ -206,10 +206,10 @@ const inputs_cptr block::inputs_ptr() const NOEXCEPT
     const auto append_ins = [&inputs](const auto& tx) NOEXCEPT
     {
         const auto& tx_ins = tx->inputs_ptr();
-        inputs->insert(inputs->end(), tx_ins->begin(), tx_ins->end());
+        inputs->insert(inputs->cend(), tx_ins->cbegin(), tx_ins->cend());
     };
 
-    std::for_each(txs_->begin(), txs_->end(), append_ins);
+    std::for_each(txs_->cbegin(), txs_->cend(), append_ins);
     return inputs;
 }
 
@@ -234,7 +234,7 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
         return tx->hash(witness);
     };
 
-    std::transform(txs_->begin(), txs_->end(), out.begin(), hash);
+    std::transform(txs_->cbegin(), txs_->cend(), out.begin(), hash);
     return out;
 }
 
@@ -250,7 +250,7 @@ size_t block::outputs() const NOEXCEPT
          return ceilinged_add(total, tx->outputs());
     };
 
-    return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, outs);
+    return std::accumulate(std::next(txs_->cbegin()), txs_->cend(), zero, outs);
 }
 
 // computed
@@ -266,7 +266,7 @@ size_t block::spends() const NOEXCEPT
     };
 
     // inputs() is add1(spends()) if the block is valid (one coinbase input).
-    return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, ins);
+    return std::accumulate(std::next(txs_->cbegin()), txs_->cend(), zero, ins);
 }
 
 // computed
@@ -333,7 +333,7 @@ void block::set_state(const chain_state::cptr& state) const NOEXCEPT
 block::sizes block::serialized_size(const transaction_cptrs& txs) NOEXCEPT
 {
     sizes size{};
-    std::for_each(txs.begin(), txs.end(), [&](const auto& tx) NOEXCEPT
+    std::for_each(txs.cbegin(), txs.cend(), [&](const auto& tx) NOEXCEPT
     {
         size.nominal = ceilinged_add(size.nominal, tx->serialized_size(false));
         size.witnessed = ceilinged_add(size.witnessed,
@@ -387,7 +387,7 @@ bool block::is_extra_coinbases() const NOEXCEPT
         return tx->is_coinbase();
     };
 
-    return std::any_of(std::next(txs_->begin()), txs_->end(), value);
+    return std::any_of(std::next(txs_->cbegin()), txs_->cend(), value);
 }
 
 //*****************************************************************************
@@ -407,9 +407,9 @@ bool block::is_forward_reference(const transaction_cptrs& txs,
         return false;
 
     const auto count = coinbase ? sub1(txs.size()) : txs.size();
-    const auto end = coinbase ? std::prev(txs.rend()) : txs.rend();
+    const auto end = coinbase ? std::prev(txs.crend()) : txs.crend();
     unordered_set_of_hash_cref hashes(count);
-    for (auto tx = txs.rbegin(); tx != end; ++tx)
+    for (auto tx = txs.crbegin(); tx != end; ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
             if (hashes.contains(in->point().hash()))
@@ -442,10 +442,10 @@ bool block::is_internal_double_spend(const transaction_cptrs& txs,
     };
 
     unordered_set_of_point_cref points(
-        std::accumulate(txs.begin(), txs.end(), zero, sum));
+        std::accumulate(txs.cbegin(), txs.cend(), zero, sum));
 
-    for (auto tx = coinbase ? std::next(txs.begin()) : txs.begin();
-        tx != txs.end(); ++tx)
+    for (auto tx = coinbase ? std::next(txs.cbegin()) : txs.cbegin();
+        tx != txs.cend(); ++tx)
         for (const auto& in: *(*tx)->inputs_ptr())
             if (!points.emplace(in->point()).second)
                 return true;
@@ -533,7 +533,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.emplace(txs_->front()->get_hash(false));
 
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    for (auto tx = std::next(txs_->cbegin()); tx != txs_->cend(); ++tx)
     {
         // Insert the transaction hash.
         hashes.emplace((*tx)->get_hash(false));
@@ -663,8 +663,11 @@ bool block::is_malleated32(const hashes& txids, size_t width) NOEXCEPT
     const auto prior = last - width;
     const auto leaves = malleated - last;
     for (size_t at{}; at < width; ++at)
-        if (txids[last + merkle_index(at, leaves, width)] != txids[prior + at])
+    {
+        const auto in = merkle_index(at, leaves, width);
+        if (txids.at(last + in) != txids.at(prior + at))
             return false;
+    }
 
     return true;
 }
@@ -684,7 +687,7 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
         return tx->serialized_size(false) == two * hash_size;
     };
 
-    return !txs.empty() && std::all_of(txs.begin(), txs.end(), two_leaves);
+    return !txs.empty() && std::all_of(txs.cbegin(), txs.cend(), two_leaves);
 }
 
 // Malleated64 implies malleable64 and invalid due to non-null coinbase point.
@@ -708,7 +711,7 @@ bool block::is_segregated() const NOEXCEPT
         return tx->is_segregated();
     };
 
-    return std::any_of(txs_->begin(), txs_->end(), segregated);
+    return std::any_of(txs_->cbegin(), txs_->cend(), segregated);
 }
 
 size_t block::segregated() const NOEXCEPT
@@ -718,7 +721,7 @@ size_t block::segregated() const NOEXCEPT
         return tx->is_segregated();
     };
 
-    return std::count_if(txs_->begin(), txs_->end(), count_segregated);
+    return std::count_if(txs_->cbegin(), txs_->cend(), count_segregated);
 }
 
 // The witness merkle root is obtained from wtxids, subject to malleation just
@@ -777,7 +780,7 @@ uint64_t block::fees() const NOEXCEPT
         return ceilinged_add(total, tx->fee());
     };
 
-    return std::accumulate(txs_->begin(), txs_->end(), 0_u64, value);
+    return std::accumulate(txs_->cbegin(), txs_->cend(), 0_u64, value);
 }
 
 // The claim() is the spend of the coinbase transaction.
@@ -811,7 +814,7 @@ size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
         return ceilinged_add(total, add);
     };
 
-    return std::accumulate(txs_->begin(), txs_->end(), zero, value);
+    return std::accumulate(txs_->cbegin(), txs_->cend(), zero, value);
 }
 
 bool block::is_signature_operations_limited(bool bip16,
@@ -838,7 +841,7 @@ code block::populate(const transaction_cptrs& txs, const chain::context& ctx,
     {
         return ceilinged_add(total, tx->outputs());
     };
-    const auto count = std::accumulate(txs.begin(), txs.cend(), zero, sum);
+    const auto count = std::accumulate(txs.cbegin(), txs.cend(), zero, sum);
     unordered_map_of_cref_point_to_output_cptr_cref points(count);
     uint32_t index{};
 
@@ -905,7 +908,7 @@ code block::check_transactions(const context& ctx) const NOEXCEPT
 code block::accept_transactions(const context& ctx) const NOEXCEPT
 {
     if (!is_empty())
-        for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+        for (auto tx = std::next(txs_->cbegin()); tx != txs_->cend(); ++tx)
             if (const auto ec = (*tx)->accept(ctx))
                 return ec;
 
@@ -917,7 +920,7 @@ code block::connect_transactions(const context& ctx,
     const signatures& capture) const NOEXCEPT
 {
     if (!is_empty())
-        for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+        for (auto tx = std::next(txs_->cbegin()); tx != txs_->cend(); ++tx)
             if (const auto ec = (*tx)->connect(ctx, capture))
                 return ec;
 
@@ -928,7 +931,7 @@ code block::connect_transactions(const context& ctx,
 code block::confirm_transactions(const context& ctx) const NOEXCEPT
 {
     if (!is_empty())
-        for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+        for (auto tx = std::next(txs_->cbegin()); tx != txs_->cend(); ++tx)
             if (const auto ec = (*tx)->confirm(ctx))
                 return ec;
 

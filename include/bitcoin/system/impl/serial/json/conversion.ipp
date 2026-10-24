@@ -281,7 +281,7 @@ Type value_to(const value& from) THROWS
                 throw_error(error::json_size_mismatch);
 
             type out{};
-            std::transform(values.begin(), values.end(), out.begin(),
+            std::transform(values.cbegin(), values.cend(), out.begin(),
                 [](const value& item) THROWS
                 {
                     return value_to<element>(item);
@@ -296,7 +296,7 @@ Type value_to(const value& from) THROWS
                 out.reserve(values.size());
 
             for (const auto& item: values)
-                out.insert(out.end(), value_to<element>(item));
+                out.insert(out.cend(), value_to<element>(item));
 
             return out;
         }

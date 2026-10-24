@@ -141,13 +141,13 @@ constexpr bool decode_base16(data_chunk& out,
     if (!is_multiple(in.size(), octet_width))
         return false;
 
-    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
+    if (!std::all_of(in.cbegin(), in.cend(), is_base16<char>))
         return false;
 
     out.resize(in.size() / octet_width);
     auto data = out.begin();
 
-    for (auto digit = in.begin(); digit != in.end();)
+    for (auto digit = in.cbegin(); digit != in.cend();)
     {
         const auto hi = *digit++;
         const auto lo = *digit++;
@@ -164,12 +164,12 @@ constexpr bool decode_base16(data_array<Size>& out,
     if (!is_product(in.size(), octet_width, Size))
         return false;
 
-    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
+    if (!std::all_of(in.cbegin(), in.cend(), is_base16<char>))
         return false;
 
     auto data = out.begin();
 
-    for (auto digit = in.begin(); digit != in.end();)
+    for (auto digit = in.cbegin(); digit != in.cend();)
     {
         const auto hi = *digit++;
         const auto lo = *digit++;
@@ -186,12 +186,12 @@ constexpr bool decode_hash(data_array<Size>& out,
     if (in.size() != Size * octet_width)
         return false;
 
-    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
+    if (!std::all_of(in.cbegin(), in.cend(), is_base16<char>))
         return false;
 
     auto data = out.begin();
 
-    for (auto digit = in.rbegin(); digit != in.rend();)
+    for (auto digit = in.crbegin(); digit != in.crend();)
     {
         const auto lo = *digit++;
         const auto hi = *digit++;

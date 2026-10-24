@@ -103,7 +103,7 @@ static size_t script_count(const chain::view::block& block) NOEXCEPT
 
     const auto& txs = block.views();
     return ceilinged_add(block.spends(),
-        std::accumulate(txs.begin(), txs.end(), zero, sum));
+        std::accumulate(txs.cbegin(), txs.cend(), zero, sum));
 }
 
 bool compute_filter(data_chunk& out, const chain::view::block& block) NOEXCEPT
@@ -194,7 +194,7 @@ bool match_filter(const block_filter& filter,
 
     data_stack stack{};
     stack.reserve(scripts.size());
-    std::for_each(scripts.begin(), scripts.end(),
+    std::for_each(scripts.cbegin(), scripts.cend(),
         [&](const auto& script) NOEXCEPT
         {
             if (!script.ops().empty())
@@ -233,7 +233,7 @@ bool match_filter(const block_filter& filter,
         return false;
 
     chain::scripts stack(addresses.size());
-    std::transform(addresses.begin(), addresses.end(), stack.begin(),
+    std::transform(addresses.cbegin(), addresses.cend(), stack.begin(),
         [=](const wallet::payment_address& address) NOEXCEPT
         {
             return address.output_script(p2kh_prefixh, p2sh_prefix);

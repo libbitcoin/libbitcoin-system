@@ -144,7 +144,7 @@ uint64_t points_value::value() const NOEXCEPT
         return ceilinged_add(total, point.value());
     };
 
-    return std::accumulate(points.begin(), points.end(), min_uint64, sum);
+    return std::accumulate(points.cbegin(), points.cend(), min_uint64, sum);
 }
 
 } // namespace wallet

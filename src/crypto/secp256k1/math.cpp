@@ -36,7 +36,7 @@ static std::vector<const secp256k1_pubkey*> to_secp256k1_pubkey_pointers(
     const std::vector<secp256k1_pubkey>& keys) NOEXCEPT
 {
     std::vector<const secp256k1_pubkey*> pointers(keys.size());
-    std::transform(keys.begin(), keys.end(), pointers.begin(),
+    std::transform(keys.cbegin(), keys.cend(), pointers.begin(),
         [](const secp256k1_pubkey& point) NOEXCEPT
         {
             return &point;

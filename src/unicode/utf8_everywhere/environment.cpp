@@ -192,7 +192,7 @@ char** allocate_environment(int argc, wchar_t* argv[]) NOEXCEPT
             return nullptr;
         }
 
-        std::copy_n(utf8.begin(), size, arguments[arg]);
+        std::copy_n(utf8.cbegin(), size, arguments[arg]);
 
         // Row terminator (arguments[][] is assured).
         BC_PUSH_WARNING(NO_DEREFERENCE_NULL_POINTER)

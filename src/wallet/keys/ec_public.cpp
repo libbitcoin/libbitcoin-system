@@ -163,7 +163,7 @@ bool ec_public::to_data(data_chunk& out) const NOEXCEPT
     if (compressed())
     {
         out.resize(ec_compressed_size);
-        std::copy_n(point().begin(), ec_compressed_size, out.begin());
+        std::copy_n(point().cbegin(), ec_compressed_size, out.begin());
         return true;
     }
 
@@ -171,7 +171,7 @@ bool ec_public::to_data(data_chunk& out) const NOEXCEPT
     if (to_uncompressed(uncompressed))
     {
         out.resize(ec_uncompressed_size);
-        std::copy_n(uncompressed.begin(), ec_uncompressed_size, out.begin());
+        std::copy_n(uncompressed.cbegin(), ec_uncompressed_size, out.begin());
         return true;
     }
 

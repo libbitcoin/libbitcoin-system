@@ -167,7 +167,7 @@ static bool is_multiple(size_t index) NOEXCEPT
     const auto point = entry(index);
     const auto x = encode(point.x);
     return secret_to_public(key, secret) &&
-        std::equal(x.begin(), x.end(), std::next(key.begin())) &&
+        std::equal(x.cbegin(), x.cend(), std::next(key.cbegin())) &&
         (key.front() == ec_odd_sign) == get_right(point.y[0]);
 }
 
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__zero__empty)
 {
     accessor::naf_t digits{};
     BOOST_CHECK_EQUAL(accessor::naf<5>(digits, scalar{}), 0u);
-    BOOST_CHECK_EQUAL(std::count(digits.begin(), digits.end(), 0), 130);
+    BOOST_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 130);
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__ones__carried)
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__ones__carried)
     BOOST_CHECK_EQUAL(accessor::naf<5>(digits, scalar{ max_uint64, max_uint64, 0, 0 }), 129u);
     BOOST_CHECK_EQUAL(digits[0], -1);
     BOOST_CHECK_EQUAL(digits[128], 1);
-    BOOST_CHECK_EQUAL(std::count(digits.begin(), digits.end(), 0), 128);
+    BOOST_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 128);
 }
 
 BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__window__expected)
@@ -532,7 +532,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__window__expected)
     BOOST_CHECK_EQUAL(accessor::naf<10>(digits, scalar{ 0x1003ff, 0, 0, 0 }), 21u);
     BOOST_CHECK_EQUAL(digits[0], 1023);
     BOOST_CHECK_EQUAL(digits[20], 1);
-    BOOST_CHECK_EQUAL(std::count(digits.begin(), digits.end(), 0), 128);
+    BOOST_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 128);
 }
 
 // multiscalar

@@ -39,8 +39,6 @@ Cflags: \
     @sse41@ \
     @aesni@ \
     @vaes@ \
-    @bmi2@ \
-    @adx@ \
     @boost_CPPFLAGS@
 
 Libs: \

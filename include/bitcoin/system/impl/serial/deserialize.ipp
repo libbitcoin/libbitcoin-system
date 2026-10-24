@@ -76,7 +76,7 @@ bool deserialize(std_array<Value, Size>& out, const std::string_view& text) NOEX
     };
 
     const auto tokens = split(text);
-    std::transform(tokens.begin(), tokens.end(), out.begin(), deserializer);
+    std::transform(tokens.cbegin(), tokens.cend(), out.begin(), deserializer);
     return result;
 }
 
@@ -93,7 +93,7 @@ bool deserialize(std_vector<Value>& out, const std::string_view& text) NOEXCEPT
 
     const auto tokens = split(text);
     out.resize(tokens.size());
-    std::transform(tokens.begin(), tokens.end(), out.begin(), deserializer);
+    std::transform(tokens.cbegin(), tokens.cend(), out.begin(), deserializer);
     return result;
 }
 

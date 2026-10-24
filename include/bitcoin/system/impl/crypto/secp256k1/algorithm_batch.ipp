@@ -148,7 +148,7 @@ bool algorithm::verify_ecdsa(data_chunk& results,
         }
     }
 
-    return std::all_of(results.begin(), results.end(),
+    return std::all_of(results.cbegin(), results.cend(),
         [](uint8_t result) NOEXCEPT { return is_nonzero(result); });
 }
 
@@ -250,7 +250,7 @@ bool algorithm::verify_schnorr(data_chunk& results,
             f::any(equal(point.x, rx)));
     }
 
-    return std::all_of(results.begin(), results.end(),
+    return std::all_of(results.cbegin(), results.cend(),
         [](uint8_t result) NOEXCEPT { return is_nonzero(result); });
 }
 

@@ -188,7 +188,7 @@ protected:
     template <size_t Size>
     inline void append(const data_array<Size>& bytes) NOEXCEPT
     {
-        log_.insert(log_.end(), bytes.begin(), bytes.end());
+        log_.insert(log_.cend(), bytes.cbegin(), bytes.cend());
     }
 
     static bool verify_group(const hash_digest& digest,

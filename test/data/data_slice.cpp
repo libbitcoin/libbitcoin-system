@@ -103,13 +103,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__pointers_reversed__empty)
 BOOST_AUTO_TEST_CASE(data_slice__construct__iterators_empty__empty)
 {
     const data_chunk value{};
-    BOOST_REQUIRE(data_slice(value.begin(), value.end()).empty());
+    BOOST_REQUIRE(data_slice(value.cbegin(), value.cend()).empty());
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__iterators_reversed__empty)
 {
     const data_chunk value{ 'f', 'o', 'o', 'b', 'a', 'r' };
-    BOOST_REQUIRE(data_slice(value.end(), value.begin()).empty());
+    BOOST_REQUIRE(data_slice(value.cend(), value.cbegin()).empty());
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__to_array__past_end__zero_padded)
@@ -489,13 +489,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__pointers__expected)
 BOOST_AUTO_TEST_CASE(data_slice__construct__iterators__expected)
 {
     // construct(iterators)
-    const data_slice slice1(string.begin(), string.end());
+    const data_slice slice1(string.cbegin(), string.cend());
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
     ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // construct(iterators)
-    const data_slice slice2 = { string.begin(), string.end() };
+    const data_slice slice2 = { string.cbegin(), string.cend() };
     BOOST_REQUIRE(!slice2.empty());
     BOOST_REQUIRE_EQUAL(slice2.size(), size);
     ////BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);

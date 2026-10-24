@@ -373,7 +373,7 @@ static bool verify_signature(const data_chunk& key, const data_chunk& der,
     if (key.size() != point.size() || !Curve::decode(signature, der))
         return false;
 
-    std::copy(key.begin(), key.end(), point.begin());
+    std::copy(key.cbegin(), key.cend(), point.begin());
     return Curve::verify(signature, point, digest);
 }
 

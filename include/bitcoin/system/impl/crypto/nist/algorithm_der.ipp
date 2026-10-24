@@ -44,7 +44,7 @@ encode(const signature_t& signature) NOEXCEPT
     encode_integer(body, slice<size, two * size>(signature));
 
     data_chunk out{ sequence_tag, narrow_cast<uint8_t>(body.size()) };
-    out.insert(out.end(), body.cbegin(), body.cend());
+    out.insert(out.cend(), body.cbegin(), body.cend());
     return out;
 }
 
@@ -87,7 +87,7 @@ encode_integer(data_chunk& out, const_byte_span value) NOEXCEPT
     if (pad)
         out.push_back(0x00);
 
-    out.insert(out.end(), digits.begin(), digits.end());
+    out.insert(out.cend(), digits.begin(), digits.end());
 }
 
 // Minimal non-negative integer of at most size significant bytes.

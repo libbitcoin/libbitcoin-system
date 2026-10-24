@@ -89,7 +89,7 @@ bool compute_view_filter(data_chunk& out, const chain::block& block)
     selected.front() = false;
 
     data_chunk prevouts{};
-    for (auto tx = std::next(txs.begin()); tx != txs.end(); ++tx)
+    for (auto tx = std::next(txs.cbegin()); tx != txs.cend(); ++tx)
     {
         for (const auto& input: *(*tx)->inputs_ptr())
         {
@@ -97,7 +97,7 @@ bool compute_view_filter(data_chunk& out, const chain::block& block)
                 return false;
 
             const auto prevout = input->prevout->to_data();
-            prevouts.insert(prevouts.end(), prevout.begin(), prevout.end());
+            prevouts.insert(prevouts.cend(), prevout.cbegin(), prevout.cend());
         }
     }
 

@@ -213,8 +213,8 @@ static bool encrypted_pkcs8(typename Curve::secret_t& out,
     auto valid = !is_zero(pad) && (pad <= block);
     if (valid)
     {
-        const auto padding = std::next(text.begin(), text.size() - pad);
-        valid = std::all_of(padding, text.end(), is_pad) &&
+        const auto padding = std::next(text.cbegin(), text.size() - pad);
+        valid = std::all_of(padding, text.cend(), is_pad) &&
             pkcs8<Curve>(out, const_byte_span{ text }.first(text.size() - pad));
     }
 

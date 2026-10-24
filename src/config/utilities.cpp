@@ -92,7 +92,7 @@ bool parse_host(asio::address& ip, const std::string& value) NOEXCEPT
         "^(" IPV4 "|" IPV6 ")$"
     };
 
-    std::sregex_iterator token{ value.begin(), value.end(), regular };
+    std::sregex_iterator token{ value.cbegin(), value.cend(), regular };
     std::sregex_iterator end{};
     return token != end
         && make_address(ip, (*token)[1].str());
@@ -109,7 +109,7 @@ bool parse_authority(asio::address& ip, uint16_t& port, uint8_t& cidr,
         "^(" IPV4 "|" IPV6 ")(" PORT ")?(" CIDR ")?$"
     };
 
-    std::sregex_iterator token{ value.begin(), value.end(), regular };
+    std::sregex_iterator token{ value.cbegin(), value.cend(), regular };
     std::sregex_iterator end{};
     return token != end
         && make_address(ip, (*token)[1].str())
@@ -128,7 +128,7 @@ bool parse_url(std::string& scheme, std::string& host, uint16_t& port,
         "^(" SCHEME ")?(" IPV4 "|" IPV6 "|" HOST ")(" PORT ")?$"
     };
 
-    std::sregex_iterator token{ value.begin(), value.end(), regular };
+    std::sregex_iterator token{ value.cbegin(), value.cend(), regular };
     std::sregex_iterator end{};
     return token != end
         && to_string(scheme, (*token)[2].str())
@@ -145,7 +145,7 @@ bool parse_endpoint(std::string& host, uint16_t& port,
         "^(" IPV4 "|" IPV6 "|" HOST ")(" PORT ")?$"
     };
 
-    std::sregex_iterator token{ value.begin(), value.end(), regular };
+    std::sregex_iterator token{ value.cbegin(), value.cend(), regular };
     std::sregex_iterator end{};
     return token != end
         && to_string(host, (*token)[1].str())

@@ -28,7 +28,7 @@ namespace system {
 
 bool is_ascii(const std::string_view& text) NOEXCEPT
 {
-    return std::all_of(text.begin(), text.end(), is_ascii_character);
+    return std::all_of(text.cbegin(), text.cend(), is_ascii_character);
 }
 
 bool is_ascii_alphabet(const std::string_view& text) NOEXCEPT
@@ -36,7 +36,7 @@ bool is_ascii_alphabet(const std::string_view& text) NOEXCEPT
     if (text.empty())
         return true;
 
-    return std::all_of(text.begin(), text.end(), is_ascii_alpha);
+    return std::all_of(text.cbegin(), text.cend(), is_ascii_alpha);
 }
 
 bool is_ascii_numeric(const std::string_view& text) NOEXCEPT
@@ -45,14 +45,14 @@ bool is_ascii_numeric(const std::string_view& text) NOEXCEPT
         return true;
 
     const auto negative = (text.front() == '-');
-    const auto start = std::next(text.begin(), negative ? 1 : 0);
-    return std::all_of(start, text.end(), is_ascii_number);
+    const auto start = std::next(text.cbegin(), negative ? 1 : 0);
+    return std::all_of(start, text.cend(), is_ascii_number);
 }
 
 std::string ascii_to_lower(const std::string_view& text) NOEXCEPT
 {
     std::string copy{ text };
-    std::transform(text.begin(), text.end(), copy.begin(),
+    std::transform(text.cbegin(), text.cend(), copy.begin(),
         [](char value) NOEXCEPT
         {
             return narrow_sign_cast<uint8_t>(is_ascii_upper(value) ?
@@ -64,7 +64,7 @@ std::string ascii_to_lower(const std::string_view& text) NOEXCEPT
 std::string ascii_to_upper(const std::string_view& text) NOEXCEPT
 {
     std::string copy{ text };
-    std::transform(text.begin(), text.end(), copy.begin(),
+    std::transform(text.cbegin(), text.cend(), copy.begin(),
         [](char value) NOEXCEPT
         {
             return narrow_sign_cast<uint8_t>(is_ascii_lower(value) ?
@@ -76,7 +76,7 @@ std::string ascii_to_upper(const std::string_view& text) NOEXCEPT
 
 bool has_ascii_whitespace(const std::string_view& text) NOEXCEPT
 {
-    return std::any_of(text.begin(), text.end(),
+    return std::any_of(text.cbegin(), text.cend(),
         [](char character) NOEXCEPT
         {
             return is_ascii_whitespace(character);
@@ -88,7 +88,7 @@ bool has_mixed_ascii_case(const std::string_view& text) NOEXCEPT
     auto lower = false;
     auto upper = false;
 
-    std::for_each(text.begin(), text.end(),
+    std::for_each(text.cbegin(), text.cend(),
         [&](char character) NOEXCEPT
         {
             lower |= is_ascii_lower(character);

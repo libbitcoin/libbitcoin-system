@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(json_parser__parse__kinds__expected)
 BOOST_AUTO_TEST_CASE(json_parser__parse__duplicate_key__last_value_first_position)
 {
     const auto out = parse(R"({"a":1,"b":2,"a":3})");
-    BOOST_REQUIRE_EQUAL(out.as_object().begin()->key(), "a");
+    BOOST_REQUIRE_EQUAL(out.as_object().cbegin()->key(), "a");
     BOOST_REQUIRE_EQUAL(out.at("a").as_int64(), 3);
 }
 

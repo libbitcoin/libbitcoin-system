@@ -22,7 +22,7 @@
     <Filter Include="src\chain\json">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\chain\views">
+    <Filter Include="src\chain\view">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\config">
@@ -258,17 +258,17 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\views\block_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\view\block.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\views\input_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\view\input.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\views\output_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\view\output.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\views\transaction_view.cpp">
-      <Filter>src\chain\views</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\view\transaction.cpp">
+      <Filter>src\chain\view</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
       <Filter>src\chain</Filter>

@@ -520,7 +520,7 @@ BOOST_AUTO_TEST_CASE(witness__construct__istream__round_trips)
 {
     const chain::witness expected{ witness_stack() };
     const auto data = expected.to_data(true);
-    const std::string text(data.begin(), data.end());
+    const std::string text(data.cbegin(), data.cend());
     std::istringstream source{ text };
     const chain::witness instance{ source, true };
     BOOST_REQUIRE(instance == expected);
@@ -542,7 +542,7 @@ BOOST_AUTO_TEST_CASE(witness__to_data__ostream__expected)
     const auto expected = instance.to_data(true);
     std::ostringstream output{};
     instance.to_data(output, true);
-    const std::string text(expected.begin(), expected.end());
+    const std::string text(expected.cbegin(), expected.cend());
     BOOST_REQUIRE_EQUAL(output.str(), text);
 }
 

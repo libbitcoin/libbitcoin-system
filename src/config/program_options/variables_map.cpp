@@ -100,7 +100,7 @@ namespace boost { namespace program_options {
             throw;
         }
 #endif
-        xm.m_final.insert(new_final.begin(), new_final.end());
+        xm.m_final.insert(new_final.cbegin(), new_final.cend());
 
 
 
@@ -204,7 +204,7 @@ namespace boost { namespace program_options {
     {
         static variable_value empty;
         const_iterator i = this->find(name);
-        if (i == this->end())
+        if (i == this->cend())
             return empty;
         else
             return i->second;
@@ -214,8 +214,8 @@ namespace boost { namespace program_options {
     variables_map::notify()
     {
         // This checks if all required options occur
-        for (map<string, string>::const_iterator r = m_required.begin();
-             r != m_required.end();
+        for (map<string, string>::const_iterator r = m_required.cbegin();
+             r != m_required.cend();
              ++r)
         {
             const string& opt = r->first;

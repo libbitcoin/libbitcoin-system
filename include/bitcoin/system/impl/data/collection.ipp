@@ -67,7 +67,7 @@ inline To projection(const From& source) NOEXCEPT
 {
     To out(std::size(source));
 
-    std::transform(std::begin(source), std::end(source), std::begin(out),
+    std::transform(std::cbegin(source), std::cend(source), std::begin(out),
         [](const typename From::value_type& element) NOEXCEPT
         {
             return typename To::value_type{ element };
@@ -79,8 +79,8 @@ inline To projection(const From& source) NOEXCEPT
 template <typename Left, typename Right>
 constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT
 {
-    return std::equal(std::begin(left), std::end(left),
-        std::begin(right), std::end(right),
+    return std::equal(std::cbegin(left), std::cend(left),
+        std::cbegin(right), std::cend(right),
         [](const auto& first, const auto& second) NOEXCEPT
         {
             return 
@@ -97,8 +97,8 @@ constexpr bool constant_time_equal(const Left& left,
     if (std::size(left) != std::size(right))
         return false;
 
-    std::remove_cvref_t<decltype(*std::begin(left))> difference{};
-    auto other = std::begin(right);
+    std::remove_cvref_t<decltype(*std::cbegin(left))> difference{};
+    auto other = std::cbegin(right);
     for (const auto element: left)
         difference |= bit_xor(element, *other++);
 
@@ -109,8 +109,8 @@ template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
     const Element& element) NOEXCEPT
 {
-    return std::find(std::begin(list), std::end(list), element) !=
-        std::end(list);
+    return std::find(std::cbegin(list), std::cend(list), element) !=
+        std::cend(list);
 }
 
 template <typename Collection>
@@ -118,14 +118,14 @@ typename Collection::difference_type
 constexpr find_pair_position(const Collection& list,
     const typename Collection::value_type::first_type& key) NOEXCEPT
 {
-    const auto position = std::find_if(std::begin(list), std::end(list),
+    const auto position = std::find_if(std::cbegin(list), std::cend(list),
         [&key](const auto& pair) NOEXCEPT
         {
             return pair.first == key;
         });
 
-    return position == std::end(list) ? negative_one :
-        std::distance(std::begin(list), position);
+    return position == std::cend(list) ? negative_one :
+        std::distance(std::cbegin(list), position);
 }
 
 template <typename Collection>
@@ -133,9 +133,9 @@ typename Collection::difference_type
 constexpr find_position(const Collection& list,
     const typename Collection::value_type& element) NOEXCEPT
 {
-    const auto position = std::find(std::begin(list), std::end(list), element);
-    return position == std::end(list) ? negative_one :
-        std::distance(std::begin(list), position);
+    const auto position = std::find(std::cbegin(list), std::cend(list), element);
+    return position == std::cend(list) ? negative_one :
+        std::distance(std::cbegin(list), position);
 }
 
 // Collection requires insert method (vector).
@@ -144,8 +144,8 @@ typename Collection::iterator
 inline insert_sorted(Collection& list,
     typename Collection::value_type& element, Predicate predicate) NOEXCEPT
 {
-    return list.insert(std::upper_bound(std::begin(list),
-        std::end(list), element, predicate), element);
+    return list.insert(std::upper_bound(std::cbegin(list),
+        std::cend(list), element, predicate), element);
 }
 
 // Collection requires back and pop_back methods (vector).
@@ -191,7 +191,7 @@ constexpr bool is_distinct(const Collection& list) NOEXCEPT
 template <typename Collection>
 constexpr bool is_sorted(const Collection& list) NOEXCEPT
 {
-    return std::is_sorted(std::begin(list), std::end(list));
+    return std::is_sorted(std::cbegin(list), std::cend(list));
 }
 
 template <typename Collection>
@@ -218,7 +218,7 @@ inline Collection distinct_copy(const Collection& list) NOEXCEPT
 template <typename Left, typename Right>
 inline Left difference(const Left& left, const Right& right) NOEXCEPT
 {
-    return difference<Left>(std::begin(left), std::end(left), right);
+    return difference<Left>(std::cbegin(left), std::cend(left), right);
 }
 
 // ****************************************************************************
@@ -243,15 +243,15 @@ inline Left difference(const typename Left::const_iterator& begin,
 template <typename Left, typename Right>
 constexpr bool is_intersecting(const Left& left, const Right& right) NOEXCEPT
 {
-    return is_intersecting<Left>(std::begin(left), std::end(left), right);
+    return is_intersecting<Left>(std::cbegin(left), std::cend(left), right);
 }
 
 template <typename Left, typename Right>
 constexpr bool is_intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) NOEXCEPT
 {
-    return std::find_first_of(begin, end, std::begin(right),
-        std::end(right)) != end;
+    return std::find_first_of(begin, end, std::cbegin(right),
+        std::cend(right)) != end;
 }
 
 template <typename Collection>
@@ -268,7 +268,7 @@ bool part(Collection& from, Collection& to,
     if (it == from.end())
         return false;
 
-    to.insert(to.end(), std::make_move_iterator(it),
+    to.insert(to.cend(), std::make_move_iterator(it),
         std::make_move_iterator(from.end()));
     from.erase(it, from.end());
     return true;
@@ -312,7 +312,7 @@ constexpr bool starts_with(const typename Collection::const_iterator& begin,
     const Collection& value) NOEXCEPT
 {
     return !is_lesser(std::distance(begin, end), std::size(value)) &&
-        std::equal(std::begin(value), std::end(value), begin);
+        std::equal(std::cbegin(value), std::cend(value), begin);
 }
 
 } // namespace system

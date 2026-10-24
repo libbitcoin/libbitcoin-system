@@ -48,7 +48,7 @@ uint32_t transaction::subscript_v1(const script& script) NOEXCEPT
     if (script.ops().empty())
         return chain::default_separators;
 
-    const auto next = std::distance(script.ops().begin(), script.offset);
+    const auto next = std::distance(script.ops().cbegin(), script.offset);
     return is_zero(next) ? chain::default_separators :
         possible_narrow_and_sign_cast<uint32_t>(sub1(next));
 }

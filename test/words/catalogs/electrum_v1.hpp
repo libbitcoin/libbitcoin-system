@@ -30,7 +30,7 @@ namespace catalogs_electrum_v1 {
 
 bool abnormal(const electrum_v1::catalog::words& words)
 {
-    return std::all_of(words.word.begin(), words.word.end(),
+    return std::all_of(words.word.cbegin(), words.word.cend(),
         [&](const char test[])
         {
             std::string copy = test;
@@ -43,42 +43,42 @@ bool abnormal(const electrum_v1::catalog::words& words)
 static ptrdiff_t intersection(const electrum_v1::catalog::words& left,
     const electrum_v1::catalog::words& right)
 {
-    return std::count_if(left.word.begin(), left.word.end(),
+    return std::count_if(left.word.cbegin(), left.word.cend(),
         [&](const char test_left[])
         {
-            return std::find_if(right.word.begin(), right.word.end(),
+            return std::find_if(right.word.cbegin(), right.word.cend(),
                 [&](const char test_right[])
                 {
                     return (std::strcmp(test_left, test_right) == 0);
-                }) != right.word.end();
+                }) != right.word.cend();
         });
     }
 
 static bool intersects(const electrum_v1::catalog::words& left,
     const electrum::catalog::words& right)
 {
-    return std::any_of(left.word.begin(), left.word.end(),
+    return std::any_of(left.word.cbegin(), left.word.cend(),
         [&](const char test_left[])
         {
-            return std::find_if(right.word.begin(), right.word.end(),
+            return std::find_if(right.word.cbegin(), right.word.cend(),
                 [&](const char test_right[])
                 {
                     return (std::strcmp(test_left, test_right) == 0);
-                }) != right.word.end();
+                }) != right.word.cend();
         });
 }
 
 static ptrdiff_t intersection(const electrum_v1::catalog::words& left,
     const electrum::catalog::words& right)
 {
-    return std::count_if(left.word.begin(), left.word.end(),
+    return std::count_if(left.word.cbegin(), left.word.cend(),
         [&](const char test_left[])
         {
-            return std::find_if(right.word.begin(), right.word.end(),
+            return std::find_if(right.word.cbegin(), right.word.cend(),
                 [&](const char test_right[])
                 {
                     return (std::strcmp(test_left, test_right) == 0);
-                }) != right.word.end();
+                }) != right.word.cend();
         });
 }
 
@@ -86,7 +86,7 @@ static string_list to_string_list(const electrum_v1::catalog::words& words)
 {
     // Convert catalog to string, otherwise pointers are compared.
     string_list tokens(electrum_v1::catalog::size());
-    std::transform(words.word.begin(), words.word.end(), tokens.begin(),
+    std::transform(words.word.cbegin(), words.word.cend(), tokens.begin(),
         [](const char* token)
         {
             return token;

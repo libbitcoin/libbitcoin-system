@@ -60,12 +60,12 @@ static bool encode_base2048(base2048_chunk& out, const string_list& in,
     if (indexes.empty() && !in.empty())
         return false;
 
-    if (std::any_of(indexes.begin(), indexes.end(),
+    if (std::any_of(indexes.cbegin(), indexes.cend(),
         [](const int32_t& index) { return is_negative(index); }))
         return false;
 
     out.resize(indexes.size());
-    std::transform(indexes.begin(), indexes.end(), out.begin(),
+    std::transform(indexes.cbegin(), indexes.cend(), out.begin(),
         [](const int32_t& index) { return static_cast<uint11_t>(index); });
 
     return true;
@@ -97,7 +97,7 @@ static string_list decode_base2048(const base2048_chunk& data,
     language language) NOEXCEPT
 {
     words::mnemonic::catalogs::search indexes(data.size());
-    std::transform(data.begin(), data.end(), indexes.begin(),
+    std::transform(data.cbegin(), data.cend(), indexes.begin(),
         [](const uint11_t& index) { return index.convert_to<size_t>(); });
 
     // Empty if dictionary not found.
