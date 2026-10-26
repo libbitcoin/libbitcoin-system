@@ -156,6 +156,17 @@ if ( enable-avx2 )
   if ( !SUPPORTS_FLAG_AVX2 )
     message( FATAL_ERROR "Compiler does not support '-mavx -mavx2'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
+      return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
+      }" DETECTED_FLAG_AVX2 )
+  if ( DETECTED_FLAG_AVX2 )
+    message( WARNING "Environmental override enabling option 'avx2'." )
+  endif()
 endif()
 
 if ( enable-avx512 )
@@ -172,6 +183,18 @@ if ( enable-avx512 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_AVX512 )
     message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw -mavx512vl'." )
+  endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+      __m256i b = _mm256_set1_epi32(3);
+      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
+      }" DETECTED_FLAG_AVX512 )
+  if ( DETECTED_FLAG_AVX512 )
+    message( WARNING "Environmental override enabling option 'avx512'." )
   endif()
 endif()
 
@@ -190,6 +213,18 @@ if ( enable-avx512ifma )
   if ( !SUPPORTS_FLAG_AVX512IFMA )
     message( FATAL_ERROR "Compiler does not support '-mavx512ifma -mavx512vl'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m512i a = _mm512_set1_epi64(3);
+      __m256i b = _mm256_set1_epi64x(5);
+      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
+      }" DETECTED_FLAG_AVX512IFMA )
+  if ( DETECTED_FLAG_AVX512IFMA )
+    message( WARNING "Environmental override enabling option 'avx512ifma'." )
+  endif()
 endif()
 
 if ( enable-avxifma )
@@ -206,6 +241,18 @@ if ( enable-avxifma )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_AVXIFMA )
     message( FATAL_ERROR "Compiler does not support '-mavxifma'." )
+  endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set1_epi64x(3);
+      __m128i b = _mm_set1_epi64x(5);
+      return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
+      }" DETECTED_FLAG_AVXIFMA )
+  if ( DETECTED_FLAG_AVXIFMA )
+    message( WARNING "Environmental override enabling option 'avxifma'." )
   endif()
 endif()
 
@@ -225,6 +272,19 @@ if ( enable-shani )
   if ( !SUPPORTS_FLAG_SHANI )
     message( FATAL_ERROR "Compiler does not support '-msse4 -msha'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m128i a = _mm_set1_epi32(0);
+      __m128i b = _mm_set1_epi32(15);
+      __m128i k = _mm_set1_epi32(31);
+      return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
+      }" DETECTED_FLAG_SHANI )
+  if ( DETECTED_FLAG_SHANI )
+    message( WARNING "Environmental override enabling option 'shani'." )
+  endif()
 endif()
 
 if ( enable-sha )
@@ -240,6 +300,16 @@ if ( enable-sha )
   if ( !SUPPORTS_FLAG_SHA )
     message( FATAL_ERROR "Compiler does not support '${march}'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <arm_neon.h>
+      int main() {
+      uint32x4_t a = vdupq_n_u32(0);
+      return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
+      }" DETECTED_FLAG_SHA )
+  if ( DETECTED_FLAG_SHA )
+    message( WARNING "Environmental override enabling option 'sha'." )
+  endif()
 endif()
 
 if ( enable-aes )
@@ -254,6 +324,16 @@ if ( enable-aes )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_AES )
     message( FATAL_ERROR "Compiler does not support '${march}'." )
+  endif()
+else()
+  check_cxx_source_compiles( "
+    #include <arm_neon.h>
+      int main() {
+      uint8x16_t a = vdupq_n_u8(0);
+      return vgetq_lane_u8(vaeseq_u8(a, a), 0);
+      }" DETECTED_FLAG_AES )
+  if ( DETECTED_FLAG_AES )
+    message( WARNING "Environmental override enabling option 'aes'." )
   endif()
 endif()
 
@@ -272,6 +352,18 @@ if ( enable-sha512 )
   if ( !SUPPORTS_FLAG_SHA512 )
     message( FATAL_ERROR "Compiler does not support '-mavx2 -msha512'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set1_epi64x(0);
+      __m128i k = _mm_set1_epi64x(15);
+      return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
+      }" DETECTED_FLAG_SHA512 )
+  if ( DETECTED_FLAG_SHA512 )
+    message( WARNING "Environmental override enabling option 'sha512'." )
+  endif()
 endif()
 
 if ( enable-sha3 )
@@ -286,6 +378,16 @@ if ( enable-sha3 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_SHA3 )
     message( FATAL_ERROR "Compiler does not support '${march}'." )
+  endif()
+else()
+  check_cxx_source_compiles( "
+    #include <arm_neon.h>
+      int main() {
+      uint64x2_t a = vdupq_n_u64(0);
+      return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
+      }" DETECTED_FLAG_SHA3 )
+  if ( DETECTED_FLAG_SHA3 )
+    message( WARNING "Environmental override enabling option 'sha3'." )
   endif()
 endif()
 
@@ -304,6 +406,18 @@ if ( enable-sse41 )
   if ( !SUPPORTS_FLAG_SSE41 )
     message( FATAL_ERROR "Compiler does not support '-msse4.1'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m128i a = _mm_set1_epi32(0);
+      __m128i b = _mm_set1_epi32(15);
+      return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
+      }" DETECTED_FLAG_SSE41 )
+  if ( DETECTED_FLAG_SSE41 )
+    message( WARNING "Environmental override enabling option 'sse41'." )
+  endif()
 endif()
 
 if ( enable-aesni )
@@ -321,6 +435,18 @@ if ( enable-aesni )
   if ( !SUPPORTS_FLAG_AESNI )
     message( FATAL_ERROR "Compiler does not support '-msse4.1 -maes -mpclmul'." )
   endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m128i a = _mm_set1_epi32(1);
+      __m128i b = _mm_set1_epi32(3);
+      return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
+      }" DETECTED_FLAG_AESNI )
+  if ( DETECTED_FLAG_AESNI )
+    message( WARNING "Environmental override enabling option 'aesni'." )
+  endif()
 endif()
 
 if ( enable-vaes )
@@ -337,6 +463,18 @@ if ( enable-vaes )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
   if ( !SUPPORTS_FLAG_VAES )
     message( FATAL_ERROR "Compiler does not support '-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq'." )
+  endif()
+else()
+  check_cxx_source_compiles( "
+    #include <stdint.h>
+    #include <immintrin.h>
+      int main() {
+      __m256i a = _mm256_set1_epi32(1);
+      __m256i b = _mm256_set1_epi32(3);
+      return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
+      }" DETECTED_FLAG_VAES )
+  if ( DETECTED_FLAG_VAES )
+    message( WARNING "Environmental override enabling option 'vaes'." )
   endif()
 endif()
 

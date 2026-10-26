@@ -323,6 +323,21 @@ AS_IF([test "x${enable_avx2}" != "xno"],
             return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
+            return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'avx2'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_avx512}" != "xno"],
@@ -348,6 +363,22 @@ AS_IF([test "x${enable_avx512}" != "xno"],
             return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+            __m256i b = _mm256_set1_epi32(3);
+            return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'avx512'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_avx512ifma}" != "xno"],
@@ -373,6 +404,22 @@ AS_IF([test "x${enable_avx512ifma}" != "xno"],
             return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m512i a = _mm512_set1_epi64(3);
+            __m256i b = _mm256_set1_epi64x(5);
+            return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'avx512ifma'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_avxifma}" != "xno"],
@@ -398,6 +445,22 @@ AS_IF([test "x${enable_avxifma}" != "xno"],
             return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set1_epi64x(3);
+            __m128i b = _mm_set1_epi64x(5);
+            return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'avxifma'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_shani}" != "xno"],
@@ -424,6 +487,23 @@ AS_IF([test "x${enable_shani}" != "xno"],
             return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m128i a = _mm_set1_epi32(0);
+            __m128i b = _mm_set1_epi32(15);
+            __m128i k = _mm_set1_epi32(31);
+            return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'shani'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_sha512}" != "xno"],
@@ -449,6 +529,22 @@ AS_IF([test "x${enable_sha512}" != "xno"],
             return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set1_epi64x(0);
+            __m128i k = _mm_set1_epi64x(15);
+            return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'sha512'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_sse41}" != "xno"],
@@ -474,6 +570,22 @@ AS_IF([test "x${enable_sse41}" != "xno"],
             return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m128i a = _mm_set1_epi32(0);
+            __m128i b = _mm_set1_epi32(15);
+            return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'sse41'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_aesni}" != "xno"],
@@ -499,6 +611,22 @@ AS_IF([test "x${enable_aesni}" != "xno"],
             return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m128i a = _mm_set1_epi32(1);
+            __m128i b = _mm_set1_epi32(3);
+            return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'aesni'.)],
+      [])
   ])
 
 AS_IF([test "x${enable_vaes}" != "xno"],
@@ -524,6 +652,22 @@ AS_IF([test "x${enable_vaes}" != "xno"],
             return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
           ]])
       ])
+  ],[
+    AC_COMPILE_IFELSE(
+      [
+        AC_LANG_PROGRAM(
+          [[
+            #include <stdint.h>
+            #include <immintrin.h>
+          ]],
+          [[
+            __m256i a = _mm256_set1_epi32(1);
+            __m256i b = _mm256_set1_epi32(3);
+            return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
+          ]])
+      ],
+      [AC_MSG_WARN(Environmental override enabling option 'vaes'.)],
+      [])
   ])
 
 AX_CHECK_COMPILE_FLAG([-Wall],
