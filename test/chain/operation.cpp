@@ -1410,6 +1410,81 @@ BOOST_AUTO_TEST_CASE(operation__is_minimal_push__multiple_bytes__true)
     BOOST_REQUIRE(instance.is_minimal_push());
 }
 
+// as_unpadded32
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__nonnegative_opcode__expected)
+{
+    uint32_t value{ 42 };
+    BOOST_REQUIRE(operation(opcode::push_size_0).as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 0u);
+    BOOST_REQUIRE(operation(opcode::push_positive_1).as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 1u);
+    BOOST_REQUIRE(operation(opcode::push_positive_16).as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 16u);
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__negative_opcode__false)
+{
+    uint32_t value{};
+    BOOST_REQUIRE(!operation(opcode::push_negative_1).as_unpadded32(value));
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__non_push_opcode__false)
+{
+    uint32_t value{};
+    BOOST_REQUIRE(!operation(opcode::nop).as_unpadded32(value));
+    BOOST_REQUIRE(!operation(opcode::checksig).as_unpadded32(value));
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__minimal_payload__expected)
+{
+    uint32_t value{};
+    BOOST_REQUIRE(operation(data_chunk{ 0x11 }, true).as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 17u);
+    BOOST_REQUIRE(operation(data_chunk{ 0x80, 0x00 }, true).as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 128u);
+    BOOST_REQUIRE(operation(data_chunk{ 0xff, 0xff, 0xff, 0x7f }, true).as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 0x7fffffffu);
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__negative_payload__false)
+{
+    uint32_t value{};
+    BOOST_REQUIRE(!operation(data_chunk{ 0x80, 0x80 }, true).as_unpadded32(value));
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__padded_payload__false)
+{
+    uint32_t value{};
+    BOOST_REQUIRE(!operation(data_chunk{ 0x64, 0x00 }, true).as_unpadded32(value));
+    BOOST_REQUIRE(!operation(data_chunk{ 0x01, 0x00, 0x00 }, true).as_unpadded32(value));
+    BOOST_REQUIRE(!operation(data_chunk{ 0x80, 0x00, 0x00 }, true).as_unpadded32(value));
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__overflow_payload__false)
+{
+    uint32_t value{};
+    BOOST_REQUIRE(!operation(data_chunk{ 0x00, 0x00, 0x00, 0x80, 0x00 }, true).as_unpadded32(value));
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__sized_small_integer__expected)
+{
+    uint32_t value{};
+    const operation instance{ data_chunk{ 0x01 }, false };
+    BOOST_REQUIRE(instance.code() == opcode::push_size_1);
+    BOOST_REQUIRE(instance.as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 1u);
+}
+
+BOOST_AUTO_TEST_CASE(operation__as_unpadded32__push_one_size__expected)
+{
+    uint32_t value{};
+    const operation instance(base16_chunk("4c0164"));
+    BOOST_REQUIRE(instance.code() == opcode::push_one_size);
+    BOOST_REQUIRE(instance.as_unpadded32(value));
+    BOOST_REQUIRE_EQUAL(value, 100u);
+}
+
 BOOST_AUTO_TEST_CASE(operation__is_unsigned32__always__expected)
 {
     BOOST_CHECK(operation(opcode::push_size_0).is_unsigned32());

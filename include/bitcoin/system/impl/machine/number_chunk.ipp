@@ -69,6 +69,20 @@ from_integer(int64_t vary) NOEXCEPT
     return bytes;
 }
 
+constexpr bool chunk::
+is_minimal(const data_chunk& vary) NOEXCEPT
+{
+    if (vary.empty())
+        return true;
+
+    const auto last = vary.back();
+    if (last != positive_sign_byte && last != negative_sign_byte)
+        return true;
+
+    const auto length = sub1(vary.size());
+    return !is_zero(length) && is_negated(vary.at(sub1(length)));
+}
+
 } // namespace number
 } // namespace machine
 } // namespace system

@@ -147,6 +147,7 @@ public:
     const data_chunk& data() const NOEXCEPT;
     const chunk_cptr& data_ptr() const NOEXCEPT;
     bool as_unsigned32(uint32_t& value) const NOEXCEPT;
+    bool as_unpadded32(uint32_t& value) const NOEXCEPT;
     bool as_unsigned40(uint64_t& value) const NOEXCEPT;
     bool is_unsigned32() const NOEXCEPT;
     bool is_unsigned40() const NOEXCEPT;

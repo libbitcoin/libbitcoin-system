@@ -1160,6 +1160,60 @@ BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height_
     BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
+// A zero-padded height is a minimal push but not a minimal number.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_zero_padded_height_one__coinbase_height_mismatch)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x00, 0x00 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("03010000"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_zero_padded_height_hundred__coinbase_height_mismatch)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x64, 0x00 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("026400"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+}
+
+// A height with the high bit set requires exactly one sign byte.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_sign_byte_height__block_success)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x80, 0x00 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("028000"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 128, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_sign_padded_height__coinbase_height_mismatch)
+{
+    const script coinbase_script{ operations{ operation{ data_chunk{ 0x80, 0x00, 0x00 }, true } } };
+    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("03800000"));
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 128, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+}
+
+// A non-minimal push opcode of the minimal number is not the minimal encoding.
+BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_push_one_height__coinbase_height_mismatch)
+{
+    const script coinbase_script(base16_chunk("4c0164"), false);
+    BOOST_REQUIRE(coinbase_script.is_valid());
+    BOOST_REQUIRE_EQUAL(coinbase_script.ops().size(), 1u);
+
+    const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
+    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+}
+
 BOOST_AUTO_TEST_CASE(block__check_context__overweight_bip141_off__block_success)
 {
     const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };

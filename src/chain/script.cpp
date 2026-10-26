@@ -49,7 +49,7 @@ bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
     uint32_t value{};
     return !ops.empty()
         && ops[0].is_minimal_push()
-        && ops[0].as_unsigned32(value)
+        && ops[0].as_unpadded32(value)
         && value == height;
 }
 

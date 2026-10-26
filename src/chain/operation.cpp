@@ -611,6 +611,11 @@ bool operation::as_unsigned32(uint32_t& value) const NOEXCEPT
     return true;
 }
 
+bool operation::as_unpadded32(uint32_t& value) const NOEXCEPT
+{
+    return machine::number::chunk::is_minimal(data()) && as_unsigned32(value);
+}
+
 bool operation::as_unsigned40(uint64_t& value) const NOEXCEPT
 {
     if (is_nonnegative(code_))
