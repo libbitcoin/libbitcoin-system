@@ -64,6 +64,7 @@
 # --build-use-local-src         Use existing sources in relevant paths.
 # --prefix=<path>               Installation destination.
 #                                 Default: /usr/local
+# --hardware-optimized          Inform compiler to apply applicable optimizations for the host hardware.
 # --noninteractive              Disable any prompt using default.
 # --verbose                     Display verbose script output.
 # --help, -h                    Display usage, overriding script execution.
@@ -121,6 +122,7 @@ main()
             (--build-parallel=*)            PARALLEL="${OPTION#*=}";;
             (--build-use-local-src)         BUILD_USE_LOCAL_SRC="yes";;
             (--prefix=*)                    PREFIX="${OPTION#*=}";;
+            (--hardware-optimized)          HARDWARE_OPTIMIZED="yes";;
             (--noninteractive)              NONINTERACTIVE="yes";;
             (--verbose)                     DISPLAY_VERBOSE="yes";;
             (--help|-h)                     DISPLAY_HELP="yes";;
@@ -144,6 +146,7 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-parallel=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-use-local-src/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--hardware-optimized/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--noninteractive/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--help/}")
@@ -366,6 +369,11 @@ main()
         msg_verbose "CXX using defined value '${CXX}'"
     fi
 
+    # HARDWARE_OPTIMIZED
+    if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
+        ARCHTUNE="-march=native -mtune=native"
+    fi
+
     # translate BUILD_CONFIG to ZFLAGS
     if [[ -n "${BUILD_CONFIG}" ]]; then
         msg_verbose "*** Build config specified, calculating flags..."
@@ -377,20 +385,20 @@ main()
         fi
 
         if [[ -z "${CFLAGS}" ]]; then
-            export CFLAGS="${BUILD_FLAGS}"
+            export CFLAGS="${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "Exporting CFLAGS '${CFLAGS}'"
         else
             msg_verbose "CFLAGS initially '${CFLAGS}'"
-            export CFLAGS="${CFLAGS} ${BUILD_FLAGS}"
+            export CFLAGS="${CFLAGS} ${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "CFLAGS modified to '${CFLAGS}'"
         fi
 
         if [[ -z "${CXXFLAGS}" ]]; then
-            export CXXFLAGS="${BUILD_FLAGS}"
+            export CXXFLAGS="${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         else
             msg_verbose "CXXFLAGS initially '${CXXFLAGS}'"
-            export CXXFLAGS="${CXXFLAGS} ${BUILD_FLAGS}"
+            export CXXFLAGS="${CXXFLAGS} ${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
@@ -1083,6 +1091,7 @@ help()
     msg "--build-use-local-src         Use existing sources in relevant paths."
     msg "--prefix=<path>               Installation destination."
     msg "                                Default: /usr/local"
+    msg "--hardware-optimized          Inform compiler to apply applicable optimizations for the host hardware."
     msg "--noninteractive              Disable any prompt using default."
     msg "--verbose                     Display verbose script output."
     msg "--help, -h                    Display usage, overriding script execution."

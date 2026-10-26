@@ -80,6 +80,17 @@ jobs:
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
+            config: "release"
+            link: "dynamic"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: "--build-secp256k1"
+            options: "--enable-isystem --with-secp256k1"
+
+          - image: ubuntu-24.04
             config: "debug"
             link: "dynamic"
             cc: "clang-19"
@@ -90,17 +101,6 @@ jobs:
             boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
-
-          - image: ubuntu-24.04
-            config: "release"
-            link: "dynamic"
-            cc: "clang-18"
-            cxx: "clang++-18"
-            flags: ""
-            coverage: ""
-            boost: "--build-boost"
-            secp256k1: "--build-secp256k1"
-            options: "--enable-isystem --with-secp256k1"
 
           - image: ubuntu-24.04
             config: "debug"
