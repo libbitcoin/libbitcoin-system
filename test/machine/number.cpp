@@ -510,4 +510,50 @@ BOOST_AUTO_TEST_CASE(number__chunk_from_bool__false__empty)
     BOOST_CHECK_EQUAL(number::chunk::from_bool(false), data_chunk{});
 }
 
+// chunk::is_minimal
+
+BOOST_AUTO_TEST_CASE(number__chunk_is_minimal__empty__true)
+{
+    BOOST_REQUIRE(number::chunk::is_minimal({}));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_is_minimal__magnitude_byte__true)
+{
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("01")));
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("7f")));
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("81")));
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("ff")));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_is_minimal__zero__false)
+{
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("00")));
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("80")));
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("0000")));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_is_minimal__required_sign_byte__true)
+{
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("8000")));
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("8080")));
+    BOOST_REQUIRE(number::chunk::is_minimal(base16_chunk("ff7f00ff00")));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_is_minimal__padded__false)
+{
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("6400")));
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("6480")));
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("010000")));
+    BOOST_REQUIRE(!number::chunk::is_minimal(base16_chunk("800000")));
+}
+
+BOOST_AUTO_TEST_CASE(number__chunk_is_minimal__from_integer__true)
+{
+    BOOST_REQUIRE(number::chunk::is_minimal(number::chunk::from_integer(0)));
+    BOOST_REQUIRE(number::chunk::is_minimal(number::chunk::from_integer(128)));
+    BOOST_REQUIRE(number::chunk::is_minimal(number::chunk::from_integer(-128)));
+    BOOST_REQUIRE(number::chunk::is_minimal(number::chunk::from_integer(max_int32)));
+    BOOST_REQUIRE(number::chunk::is_minimal(number::chunk::from_integer(min_int32 + 1)));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

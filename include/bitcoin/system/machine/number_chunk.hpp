@@ -33,6 +33,7 @@ class BC_API chunk
 public:
     static inline data_chunk from_bool(bool vary) NOEXCEPT;
     static inline data_chunk from_integer(int64_t vary) NOEXCEPT;
+    static constexpr bool is_minimal(const data_chunk& vary) NOEXCEPT;
 };
 
 } // namespace number
