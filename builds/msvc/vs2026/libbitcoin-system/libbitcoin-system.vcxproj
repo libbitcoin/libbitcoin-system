@@ -376,6 +376,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\payment_address.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\png.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_code.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_encoder.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_matrix.cpp" />
@@ -763,6 +764,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\bitcoin_uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\checked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\payment_address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\png.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_code.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_encoder.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_matrix.hpp" />

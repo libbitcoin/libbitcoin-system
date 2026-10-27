@@ -873,6 +873,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\addresses\payment_address.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\addresses\png.cpp">
+      <Filter>src\wallet\addresses</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\addresses\qr_code.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
@@ -1950,6 +1953,9 @@
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\payment_address.hpp">
+      <Filter>include\bitcoin\system\wallet\addresses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\png.hpp">
       <Filter>include\bitcoin\system\wallet\addresses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\qr_code.hpp">
