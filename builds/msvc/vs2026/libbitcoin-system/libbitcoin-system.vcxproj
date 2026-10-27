@@ -317,6 +317,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\schnorr.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_schnorr.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\shamir\rs1024.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
@@ -410,6 +411,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\mnemonic.cpp">
       <ObjectFileName>$(IntDir)src_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\mnemonics\slip39.cpp">
+      <ObjectFileName>$(IntDir)src_wallet_mnemonics_slip39.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\neutrino.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\point_value.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\points_value.cpp" />
@@ -431,6 +435,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\catalogs\mnemonic.cpp">
       <ObjectFileName>$(IntDir)src_words_catalogs_mnemonic.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\words\catalogs\slip39.cpp">
+      <ObjectFileName>$(IntDir)src_words_catalogs_slip39.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\languages.cpp" />
     <ClCompile Include="..\..\..\..\src\x509\builder.cpp" />
@@ -561,6 +568,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\silent.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\tables.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\shamir\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\shamir\rs1024.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\shamir\shamir.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\x25519.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\xsalsa20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp" />
@@ -778,6 +788,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\slip39.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\neutrino.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\point_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\points_value.hpp" />
@@ -790,6 +801,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\words\catalogs\slip39.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\dictionaries.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\dictionary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\language.hpp" />
@@ -856,6 +868,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_sign.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_table.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\secp256k1\algorithm_verify.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\shamir\algorithm_cipher.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\shamir\algorithm_field.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\shamir\algorithm_shares.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

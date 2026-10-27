@@ -180,6 +180,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_13.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_14.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_15.cpp \
+    ${srcdir}/../../src/crypto/shamir/rs1024.cpp \
     ${srcdir}/../../src/data/data_chunk.cpp \
     ${srcdir}/../../src/data/memory.cpp \
     ${srcdir}/../../src/data/string.cpp \
@@ -259,6 +260,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/wallet/mnemonics/electrum.cpp \
     ${srcdir}/../../src/wallet/mnemonics/electrum_v1.cpp \
     ${srcdir}/../../src/wallet/mnemonics/mnemonic.cpp \
+    ${srcdir}/../../src/wallet/mnemonics/slip39.cpp \
     ${srcdir}/../../src/wallet/psbt/entry.cpp \
     ${srcdir}/../../src/wallet/psbt/input.cpp \
     ${srcdir}/../../src/wallet/psbt/output.cpp \
@@ -267,6 +269,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/words/catalogs/electrum.cpp \
     ${srcdir}/../../src/words/catalogs/electrum_v1.cpp \
     ${srcdir}/../../src/words/catalogs/mnemonic.cpp \
+    ${srcdir}/../../src/words/catalogs/slip39.cpp \
     ${srcdir}/../../src/x509/builder.cpp \
     ${srcdir}/../../src/x509/certificate.cpp \
     ${srcdir}/../../src/x509/der.cpp \
@@ -472,6 +475,14 @@ include_bitcoin_system_crypto_secp256k1_batch_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/silent.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/verify.hpp
 
+include_bitcoin_system_crypto_shamirdir = \
+    ${includedir}/bitcoin/system/crypto/shamir
+
+include_bitcoin_system_crypto_shamir_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/crypto/shamir/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/shamir/rs1024.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/shamir/shamir.hpp
+
 include_bitcoin_system_datadir = \
     ${includedir}/bitcoin/system/data
 
@@ -638,6 +649,14 @@ include_bitcoin_system_impl_crypto_secp256k1_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_sign.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_table.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/crypto/secp256k1/algorithm_verify.ipp
+
+include_bitcoin_system_impl_crypto_shamirdir = \
+    ${includedir}/bitcoin/system/impl/crypto/shamir
+
+include_bitcoin_system_impl_crypto_shamir_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/shamir/algorithm_cipher.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/shamir/algorithm_field.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/shamir/algorithm_shares.ipp
 
 include_bitcoin_system_impl_datadir = \
     ${includedir}/bitcoin/system/impl/data
@@ -1074,7 +1093,8 @@ include_bitcoin_system_wallet_mnemonicsdir = \
 include_bitcoin_system_wallet_mnemonics_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/electrum.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/electrum_v1.hpp \
-    ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/mnemonic.hpp
+    ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/mnemonic.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/mnemonics/slip39.hpp
 
 include_bitcoin_system_wallet_psbtdir = \
     ${includedir}/bitcoin/system/wallet/psbt
@@ -1101,7 +1121,8 @@ include_bitcoin_system_words_catalogsdir = \
 include_bitcoin_system_words_catalogs_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/words/catalogs/electrum.hpp \
     ${srcdir}/../../include/bitcoin/system/words/catalogs/electrum_v1.hpp \
-    ${srcdir}/../../include/bitcoin/system/words/catalogs/mnemonic.hpp
+    ${srcdir}/../../include/bitcoin/system/words/catalogs/mnemonic.hpp \
+    ${srcdir}/../../include/bitcoin/system/words/catalogs/slip39.hpp
 
 include_bitcoin_system_x509dir = \
     ${includedir}/bitcoin/system/x509
@@ -1230,6 +1251,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/performance.cpp \
     ${srcdir}/../../test/crypto/poly1305.cpp \
     ${srcdir}/../../test/crypto/salsa20.cpp \
+    ${srcdir}/../../test/crypto/shamir.cpp \
     ${srcdir}/../../test/crypto/x25519.cpp \
     ${srcdir}/../../test/crypto/xsalsa20_poly1305.cpp \
     ${srcdir}/../../test/crypto/secp256k1/algorithm_field.cpp \
@@ -1430,6 +1452,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/wallet/mnemonics/electrum.cpp \
     ${srcdir}/../../test/wallet/mnemonics/electrum_v1.cpp \
     ${srcdir}/../../test/wallet/mnemonics/mnemonic.cpp \
+    ${srcdir}/../../test/wallet/mnemonics/slip39.cpp \
     ${srcdir}/../../test/wallet/psbt/psbt.cpp \
     ${srcdir}/../../test/words/dictionaries.cpp \
     ${srcdir}/../../test/words/dictionary.cpp \

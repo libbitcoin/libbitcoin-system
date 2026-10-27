@@ -276,6 +276,7 @@
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_schnorr.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\wycheproof.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\shamir.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\xsalsa20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
@@ -499,6 +500,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
       <ObjectFileName>$(IntDir)test_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\slip39.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\neutrino.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\points_value.cpp" />
@@ -539,6 +541,7 @@
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\slip39.hpp" />
     <ClInclude Include="..\..\..\..\test\words\catalogs\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\words\catalogs\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\test\words\catalogs\mnemonic.hpp" />
