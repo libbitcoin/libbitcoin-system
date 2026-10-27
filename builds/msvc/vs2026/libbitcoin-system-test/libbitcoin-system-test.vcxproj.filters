@@ -444,6 +444,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\wycheproof.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\shamir.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\x25519.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -999,6 +1002,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\slip39.cpp">
+      <Filter>src\wallet\mnemonics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\neutrino.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -1089,6 +1095,9 @@
       <Filter>src\wallet\mnemonics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\mnemonic.hpp">
+      <Filter>src\wallet\mnemonics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\slip39.hpp">
       <Filter>src\wallet\mnemonics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\words\catalogs\electrum.hpp">

@@ -146,6 +146,9 @@
 #include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/silent.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/verify.hpp>
+#include <bitcoin/system/crypto/shamir/algorithm.hpp>
+#include <bitcoin/system/crypto/shamir/rs1024.hpp>
+#include <bitcoin/system/crypto/shamir/shamir.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>
@@ -354,6 +357,7 @@
 #include <bitcoin/system/wallet/mnemonics/electrum.hpp>
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
+#include <bitcoin/system/wallet/mnemonics/slip39.hpp>
 #include <bitcoin/system/wallet/psbt/entry.hpp>
 #include <bitcoin/system/wallet/psbt/input.hpp>
 #include <bitcoin/system/wallet/psbt/output.hpp>
@@ -366,6 +370,7 @@
 #include <bitcoin/system/words/catalogs/electrum.hpp>
 #include <bitcoin/system/words/catalogs/electrum_v1.hpp>
 #include <bitcoin/system/words/catalogs/mnemonic.hpp>
+#include <bitcoin/system/words/catalogs/slip39.hpp>
 #include <bitcoin/system/x509/builder.hpp>
 #include <bitcoin/system/x509/certificate.hpp>
 #include <bitcoin/system/x509/der.hpp>
