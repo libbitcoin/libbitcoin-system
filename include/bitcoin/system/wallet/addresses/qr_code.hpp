@@ -42,8 +42,8 @@ public:
         encode_mode mode=encode_mode::eight_bit,
         bool case_sensitive=true) NOEXCEPT;
 
-    /// False if version > maximum_version or size > tiff::max_image_bytes.
-    /// Create a TIFF formatter QR code representing the given string value.
+    /// False if version > maximum_version or size > png::max_image_bytes.
+    /// Create a PNG formatted QR code representing the given string value.
     static bool encode(std::ostream& out, const std::string& value,
         uint8_t version=0, uint16_t scale=8, uint16_t margin=2,
         recovery_level level=recovery_level::low,

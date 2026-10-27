@@ -24,7 +24,7 @@
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/addresses/qr_encoder.hpp>
 #include <bitcoin/system/wallet/addresses/qr_matrix.hpp>
-#include <bitcoin/system/wallet/addresses/tiff.hpp>
+#include <bitcoin/system/wallet/addresses/png.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -58,14 +58,14 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     const auto width = two * wide_cast<uint64_t>(margin) +
         wide_cast<uint64_t>(scale) * coded_width;
 
-    // Guard: TIFF parameter overflow.
+    // Guard: PNG parameter overflow.
     if (width > max_uint16)
         return false;
 
     const auto pixels = to_pixels(modules,
         narrow_cast<uint32_t>(coded_width), scale, margin);
 
-    return tiff::to_image(out, pixels, narrow_cast<uint16_t>(width));
+    return png::to_image(out, pixels, narrow_cast<uint16_t>(width));
 }
 
 // TODO: accept and return stream and split out scaling and margining.
