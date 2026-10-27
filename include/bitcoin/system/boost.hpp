@@ -40,6 +40,9 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+// Header-only floating point from_chars (boost::charconv is compiled).
+#include <boost/charconv/detail/fast_float/fast_float.hpp>
+
 // Headers only program_options (sources compiled into /system).
 #define BOOST_PROGRAM_OPTIONS_NO_LIB
 #include <boost/program_options.hpp>
