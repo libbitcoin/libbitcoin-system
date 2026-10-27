@@ -34,7 +34,6 @@ Cflags: \
     @avx512ifma@ \
     @avxifma@ \
     @shani@ \
-    @march@ \
     @sha512@ \
     @sse41@ \
     @aesni@ \

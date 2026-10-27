@@ -76,6 +76,10 @@ if ( MSVC )
   set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
 endif()
 
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
+
 #------------------------------------------------------------------------------
 # Project options.
 #------------------------------------------------------------------------------
@@ -116,31 +120,72 @@ if ( with-secp256k1 )
 endif()
 
 #------------------------------------------------------------------------------
+# Architecture options.
+#------------------------------------------------------------------------------
+check_cxx_source_compiles( "
+  #include <arm_neon.h>
+    int main() {
+    uint8x16_t a = vdupq_n_u8(0);
+    return vgetq_lane_u8(vaeseq_u8(a, a), 0);
+    }" TEST_COMPILES_AES )
+
+if ( enable-aes )
+  if ( TEST_COMPILES_AES )
+    message( WARNING "Detected 'aes'" )
+  else()
+    message( FATAL_ERROR "Expected feature not detected 'aes'" )
+  endif()
+else()
+  if ( TEST_COMPILES_AES )
+    message( WARNING "Environment enabling option 'aes'" )
+  else()
+    message( WARNING "Unexpected feature not detected 'aes'" )
+  endif()
+endif()
+check_cxx_source_compiles( "
+  #include <arm_neon.h>
+    int main() {
+    uint32x4_t a = vdupq_n_u32(0);
+    return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
+    }" TEST_COMPILES_SHA )
+
+if ( enable-sha )
+  if ( TEST_COMPILES_SHA )
+    message( WARNING "Detected 'sha'" )
+  else()
+    message( FATAL_ERROR "Expected feature not detected 'sha'" )
+  endif()
+else()
+  if ( TEST_COMPILES_SHA )
+    message( WARNING "Environment enabling option 'sha'" )
+  else()
+    message( WARNING "Unexpected feature not detected 'sha'" )
+  endif()
+endif()
+check_cxx_source_compiles( "
+  #include <arm_neon.h>
+    int main() {
+    uint64x2_t a = vdupq_n_u64(0);
+    return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
+    }" TEST_COMPILES_SHA3 )
+
+if ( enable-sha3 )
+  if ( TEST_COMPILES_SHA3 )
+    message( WARNING "Detected 'sha3'" )
+  else()
+    message( FATAL_ERROR "Expected feature not detected 'sha3'" )
+  endif()
+else()
+  if ( TEST_COMPILES_SHA3 )
+    message( WARNING "Environment enabling option 'sha3'" )
+  else()
+    message( WARNING "Unexpected feature not detected 'sha3'" )
+  endif()
+endif()
+
+#------------------------------------------------------------------------------
 # Compiler options.
 #------------------------------------------------------------------------------
-include(CheckCCompilerFlag)
-include(CheckCXXCompilerFlag)
-include(CheckCXXSourceCompiles)
-
-set( march-base "" )
-set( march-features "" )
-if ( enable-sha )
-  set( march-base "armv8-a" )
-  string( APPEND march-features "+sha2" )
-endif()
-if ( enable-aes )
-  set( march-base "armv8-a" )
-  string( APPEND march-features "+aes" )
-endif()
-if ( enable-sha3 )
-  set( march-base "armv8.2-a" )
-  string( APPEND march-features "+sha3" )
-endif()
-
-set( march "" )
-if ( NOT march-features STREQUAL "" )
-  set( march "-march=${march-base}${march-features}" )
-endif()
 
 if ( enable-avx2 )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
@@ -151,9 +196,9 @@ if ( enable-avx2 )
       int main() {
       __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
       return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
-      }" SUPPORTS_FLAG_AVX2 )
+      }" TEST_COMPILES_AVX2 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_AVX2 )
+  if ( !TEST_COMPILES_AVX2 )
     message( FATAL_ERROR "Compiler does not support '-mavx -mavx2'." )
   endif()
 else()
@@ -179,9 +224,9 @@ if ( enable-avx512 )
       __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
       __m256i b = _mm256_set1_epi32(3);
       return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
-      }" SUPPORTS_FLAG_AVX512 )
+      }" TEST_COMPILES_AVX512 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_AVX512 )
+  if ( !TEST_COMPILES_AVX512 )
     message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw -mavx512vl'." )
   endif()
 else()
@@ -208,9 +253,9 @@ if ( enable-avx512ifma )
       __m512i a = _mm512_set1_epi64(3);
       __m256i b = _mm256_set1_epi64x(5);
       return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
-      }" SUPPORTS_FLAG_AVX512IFMA )
+      }" TEST_COMPILES_AVX512IFMA )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_AVX512IFMA )
+  if ( !TEST_COMPILES_AVX512IFMA )
     message( FATAL_ERROR "Compiler does not support '-mavx512ifma -mavx512vl'." )
   endif()
 else()
@@ -237,9 +282,9 @@ if ( enable-avxifma )
       __m256i a = _mm256_set1_epi64x(3);
       __m128i b = _mm_set1_epi64x(5);
       return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
-      }" SUPPORTS_FLAG_AVXIFMA )
+      }" TEST_COMPILES_AVXIFMA )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_AVXIFMA )
+  if ( !TEST_COMPILES_AVXIFMA )
     message( FATAL_ERROR "Compiler does not support '-mavxifma'." )
   endif()
 else()
@@ -267,9 +312,9 @@ if ( enable-shani )
       __m128i b = _mm_set1_epi32(15);
       __m128i k = _mm_set1_epi32(31);
       return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
-      }" SUPPORTS_FLAG_SHANI )
+      }" TEST_COMPILES_SHANI )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_SHANI )
+  if ( !TEST_COMPILES_SHANI )
     message( FATAL_ERROR "Compiler does not support '-msse4 -msha'." )
   endif()
 else()
@@ -287,56 +332,6 @@ else()
   endif()
 endif()
 
-if ( enable-sha )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${march}" )
-  check_cxx_source_compiles( "
-    #include <arm_neon.h>
-      int main() {
-      uint32x4_t a = vdupq_n_u32(0);
-      return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-      }" SUPPORTS_FLAG_SHA )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_SHA )
-    message( FATAL_ERROR "Compiler does not support '${march}'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <arm_neon.h>
-      int main() {
-      uint32x4_t a = vdupq_n_u32(0);
-      return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-      }" DETECTED_FLAG_SHA )
-  if ( DETECTED_FLAG_SHA )
-    message( WARNING "Environmental override enabling option 'sha'." )
-  endif()
-endif()
-
-if ( enable-aes )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${march}" )
-  check_cxx_source_compiles( "
-    #include <arm_neon.h>
-      int main() {
-      uint8x16_t a = vdupq_n_u8(0);
-      return vgetq_lane_u8(vaeseq_u8(a, a), 0);
-      }" SUPPORTS_FLAG_AES )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_AES )
-    message( FATAL_ERROR "Compiler does not support '${march}'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <arm_neon.h>
-      int main() {
-      uint8x16_t a = vdupq_n_u8(0);
-      return vgetq_lane_u8(vaeseq_u8(a, a), 0);
-      }" DETECTED_FLAG_AES )
-  if ( DETECTED_FLAG_AES )
-    message( WARNING "Environmental override enabling option 'aes'." )
-  endif()
-endif()
-
 if ( enable-sha512 )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -msha512" )
@@ -347,9 +342,9 @@ if ( enable-sha512 )
       __m256i a = _mm256_set1_epi64x(0);
       __m128i k = _mm_set1_epi64x(15);
       return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
-      }" SUPPORTS_FLAG_SHA512 )
+      }" TEST_COMPILES_SHA512 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_SHA512 )
+  if ( !TEST_COMPILES_SHA512 )
     message( FATAL_ERROR "Compiler does not support '-mavx2 -msha512'." )
   endif()
 else()
@@ -366,31 +361,6 @@ else()
   endif()
 endif()
 
-if ( enable-sha3 )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${march}" )
-  check_cxx_source_compiles( "
-    #include <arm_neon.h>
-      int main() {
-      uint64x2_t a = vdupq_n_u64(0);
-      return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
-      }" SUPPORTS_FLAG_SHA3 )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_SHA3 )
-    message( FATAL_ERROR "Compiler does not support '${march}'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <arm_neon.h>
-      int main() {
-      uint64x2_t a = vdupq_n_u64(0);
-      return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
-      }" DETECTED_FLAG_SHA3 )
-  if ( DETECTED_FLAG_SHA3 )
-    message( WARNING "Environmental override enabling option 'sha3'." )
-  endif()
-endif()
-
 if ( enable-sse41 )
   set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1" )
@@ -401,9 +371,9 @@ if ( enable-sse41 )
       __m128i a = _mm_set1_epi32(0);
       __m128i b = _mm_set1_epi32(15);
       return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
-      }" SUPPORTS_FLAG_SSE41 )
+      }" TEST_COMPILES_SSE41 )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_SSE41 )
+  if ( !TEST_COMPILES_SSE41 )
     message( FATAL_ERROR "Compiler does not support '-msse4.1'." )
   endif()
 else()
@@ -430,9 +400,9 @@ if ( enable-aesni )
       __m128i a = _mm_set1_epi32(1);
       __m128i b = _mm_set1_epi32(3);
       return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
-      }" SUPPORTS_FLAG_AESNI )
+      }" TEST_COMPILES_AESNI )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_AESNI )
+  if ( !TEST_COMPILES_AESNI )
     message( FATAL_ERROR "Compiler does not support '-msse4.1 -maes -mpclmul'." )
   endif()
 else()
@@ -459,9 +429,9 @@ if ( enable-vaes )
       __m256i a = _mm256_set1_epi32(1);
       __m256i b = _mm256_set1_epi32(3);
       return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
-      }" SUPPORTS_FLAG_VAES )
+      }" TEST_COMPILES_VAES )
   set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !SUPPORTS_FLAG_VAES )
+  if ( !TEST_COMPILES_VAES )
     message( FATAL_ERROR "Compiler does not support '-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq'." )
   endif()
 else()
@@ -574,7 +544,6 @@ target_compile_options( libbitcoin-system
     $<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>
     $<$<BOOL:${enable-avxifma}>:-mavxifma>
     $<$<BOOL:${enable-shani}>:-msse4 -msha>
-    ${march}
     $<$<BOOL:${enable-sha512}>:-mavx2 -msha512>
     $<$<BOOL:${enable-sse41}>:-msse4.1>
     $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
