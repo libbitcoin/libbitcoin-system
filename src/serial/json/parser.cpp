@@ -21,6 +21,7 @@
 #include <charconv>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -854,7 +855,7 @@ code parser::to_number(json::value& out) NOEXCEPT
     }
 
     double number{};
-    const auto result = std::from_chars(first, last, number);
+    const auto result = from_chars(first, last, number);
     if (result.ec == std::errc::result_out_of_range)
     {
         if (!is_underflow(token_))

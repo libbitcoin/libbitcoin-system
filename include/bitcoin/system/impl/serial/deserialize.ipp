@@ -122,6 +122,15 @@ bool deserialize(Value& out, const std::string_view& text) NOEXCEPT
     }
 }
 
+template <typename Float, if_floating_point<Float>>
+std::from_chars_result from_chars(const char* first, const char* last,
+    Float& out) NOEXCEPT
+{
+    using namespace boost::charconv::detail;
+    const auto result = fast_float::from_chars(first, last, out);
+    return { result.ptr, result.ec };
+}
+
 } // namespace system
 } // namespace libbitcoin
 
