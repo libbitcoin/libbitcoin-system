@@ -38,6 +38,9 @@
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/batch.hpp>
 #include <bitcoin/system/crypto/secp256k1/tables.hpp>
+#include <bitcoin/system/crypto/shamir/algorithm.hpp>
+#include <bitcoin/system/crypto/shamir/rs1024.hpp>
+#include <bitcoin/system/crypto/shamir/shamir.hpp>
 #include <bitcoin/system/crypto/x25519.hpp>
 #include <bitcoin/system/crypto/xsalsa20_poly1305.hpp>
 

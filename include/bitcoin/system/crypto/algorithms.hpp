@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/crypto/aes/algorithm.hpp>
 #include <bitcoin/system/crypto/nist/algorithm.hpp>
+#include <bitcoin/system/crypto/shamir/algorithm.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -33,6 +34,10 @@ using aes256 = aes::algorithm<aes::k256>;
 /// bc::system nist curve algorithm aliases (ecdsa).
 using secp256r1 = nist::algorithm<nist::p256>;
 using secp384r1 = nist::algorithm<nist::p384>;
+
+/// bc::system shamir algorithm aliases (slip39 secret sharing).
+using shamir128 = shamir::algorithm<shamir::k128>;
+using shamir256 = shamir::algorithm<shamir::k256>;
 
 } // namespace system
 } // namespace libbitcoin
