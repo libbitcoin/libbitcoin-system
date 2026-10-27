@@ -645,28 +645,28 @@ code parser::append_code_point(uint32_t point) THROWS
     size_t size{};
     if (point < 0x80)
     {
-        bytes[0] = narrow_sign_cast<char>(point);
+        bytes[0] = possible_sign_narrow_cast<char>(point);
         size = 1;
     }
     else if (point < 0x800)
     {
-        bytes[0] = narrow_sign_cast<char>(0xc0 | (point >> 6));
-        bytes[1] = narrow_sign_cast<char>(0x80 | (point & 0x3f));
+        bytes[0] = possible_sign_narrow_cast<char>(0xc0 | (point >> 6));
+        bytes[1] = possible_sign_narrow_cast<char>(0x80 | (point & 0x3f));
         size = 2;
     }
     else if (point < surrogate_offset)
     {
-        bytes[0] = narrow_sign_cast<char>(0xe0 | (point >> 12));
-        bytes[1] = narrow_sign_cast<char>(0x80 | ((point >> 6) & 0x3f));
-        bytes[2] = narrow_sign_cast<char>(0x80 | (point & 0x3f));
+        bytes[0] = possible_sign_narrow_cast<char>(0xe0 | (point >> 12));
+        bytes[1] = possible_sign_narrow_cast<char>(0x80 | ((point >> 6) & 0x3f));
+        bytes[2] = possible_sign_narrow_cast<char>(0x80 | (point & 0x3f));
         size = 3;
     }
     else
     {
-        bytes[0] = narrow_sign_cast<char>(0xf0 | (point >> 18));
-        bytes[1] = narrow_sign_cast<char>(0x80 | ((point >> 12) & 0x3f));
-        bytes[2] = narrow_sign_cast<char>(0x80 | ((point >> 6) & 0x3f));
-        bytes[3] = narrow_sign_cast<char>(0x80 | (point & 0x3f));
+        bytes[0] = possible_sign_narrow_cast<char>(0xf0 | (point >> 18));
+        bytes[1] = possible_sign_narrow_cast<char>(0x80 | ((point >> 12) & 0x3f));
+        bytes[2] = possible_sign_narrow_cast<char>(0x80 | ((point >> 6) & 0x3f));
+        bytes[3] = possible_sign_narrow_cast<char>(0x80 | (point & 0x3f));
         size = 4;
     }
 
