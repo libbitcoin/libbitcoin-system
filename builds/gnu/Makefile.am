@@ -235,6 +235,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/wallet/points_value.cpp \
     ${srcdir}/../../src/wallet/addresses/bitcoin_uri.cpp \
     ${srcdir}/../../src/wallet/addresses/payment_address.cpp \
+    ${srcdir}/../../src/wallet/addresses/png.cpp \
     ${srcdir}/../../src/wallet/addresses/qr_code.cpp \
     ${srcdir}/../../src/wallet/addresses/qr_encoder.cpp \
     ${srcdir}/../../src/wallet/addresses/qr_matrix.cpp \
@@ -1043,6 +1044,7 @@ include_bitcoin_system_wallet_addresses_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/bitcoin_uri.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/checked.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/payment_address.hpp \
+    ${srcdir}/../../include/bitcoin/system/wallet/addresses/png.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_code.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_encoder.hpp \
     ${srcdir}/../../include/bitcoin/system/wallet/addresses/qr_matrix.hpp \
@@ -1411,6 +1413,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/wallet/addresses/bitcoin_uri.cpp \
     ${srcdir}/../../test/wallet/addresses/checked.cpp \
     ${srcdir}/../../test/wallet/addresses/payment_address.cpp \
+    ${srcdir}/../../test/wallet/addresses/png.cpp \
     ${srcdir}/../../test/wallet/addresses/qr_code.cpp \
     ${srcdir}/../../test/wallet/addresses/qr_encoder.cpp \
     ${srcdir}/../../test/wallet/addresses/qr_matrix.cpp \

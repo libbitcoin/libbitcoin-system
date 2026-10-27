@@ -933,6 +933,9 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\png.cpp">
+      <Filter>src\wallet\addresses</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>

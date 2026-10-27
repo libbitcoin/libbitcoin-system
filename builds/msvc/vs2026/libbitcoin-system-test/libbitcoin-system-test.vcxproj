@@ -469,6 +469,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\png.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_encoder.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_matrix.cpp" />
