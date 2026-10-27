@@ -22,6 +22,7 @@
 #include <bitcoin/system/wallet/addresses/bitcoin_uri.hpp>
 #include <bitcoin/system/wallet/addresses/checked.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
+#include <bitcoin/system/wallet/addresses/png.hpp>
 #include <bitcoin/system/wallet/addresses/qr_code.hpp>
 #include <bitcoin/system/wallet/addresses/qr_encoder.hpp>
 #include <bitcoin/system/wallet/addresses/qr_matrix.hpp>
