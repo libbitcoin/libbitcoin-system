@@ -49,108 +49,45 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__one_character_version_0_scale_1_margin_0__
 {
     static const data_chunk expected
     {
-        // TIFF metadata.
-        0x4d, 0x4d,             // "MM" - Motorola encoding (big endian).
-        0x00, 0x2a,             // Arbitrary delimeter (42).
-        0x00, 0x00, 0x00, 0x08, // Offset of IFD[0].
-
-        // [Each directory may be anywhere in the file]
-
-        // Number of IFD[0] entries, word boundary required.
-        0x00, 0x0a,
-
-        // IFD[0] entries.
-        0x01, 0x00,             // image_width
-        0x00, 0x04,             // 32 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x15, // 21 pixels wide (column count)
-        
-        0x01, 0x01,             // image_length
-        0x00, 0x04,             // 32 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x15, // 21 pixels high (row count)
-        
-        0x01, 0x03,             // compression
-        0x00, 0x03,             // 16 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x01,             // compression_mode::none
-        0x00, 0x00,             // padding
-        
-        0x01, 0x06,             // photometric_interpretation
-        0x00, 0x03,             // 16 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00,             // zero_color::white
-        0x00, 0x00,             // padding
-        
-        0x01, 0x11,             // strip_offsets
-        0x00, 0x04,             // 32 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x9c, // offset to value
-        
-        0x01, 0x16,             // rows_per_strip
-        0x00, 0x04,             // 32 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x15, // 21 rows per (1) strip
-        
-        0x01, 0x17,             // strip_byte_counts
-        0x00, 0x04,             // 32 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x3f, // 63 bytes per (1) strip
-        
-        0x01, 0x1a,             // x_resolution
-        0x00, 0x05,             // 64 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x88, // offset to value
-        
-        0x01, 0x1b,             // y_resolution
-        0x00, 0x05,             // 64 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x00, 0x00, 0x90, // offset to value
-        
-        0x01, 0x28,             // resolution_unit
-        0x00, 0x03,             // 16 bit value
-        0x00, 0x00, 0x00, 0x01, // 1 value
-        0x00, 0x01,             // resolution_units::pixels_per_inch
-        0x00, 0x00,             // padding
-
-        // Linked IFD list terminator.
+        // PNG signature, header, image data and trailer.
+        0x89, 0x50, 0x4e, 0x47,
+        0x0d, 0x0a, 0x1a, 0x0a,
+        0x00, 0x00, 0x00, 0x0d,
+        0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x15,
+        0x00, 0x00, 0x00, 0x15,
+        0x01, 0x00, 0x00, 0x00,
+        0x00, 0x81, 0x6c, 0x98,
+        0x3b, 0x00, 0x00, 0x00,
+        0x5f, 0x49, 0x44, 0x41,
+        0x54, 0x78, 0x01, 0x01,
+        0x54, 0x00, 0xab, 0xff,
+        0x00, 0x01, 0xa4, 0x07,
+        0x00, 0x7d, 0x8d, 0xf7,
+        0x00, 0x45, 0x25, 0x17,
+        0x00, 0x45, 0xad, 0x17,
+        0x00, 0x45, 0xd5, 0x17,
+        0x00, 0x7d, 0xf5, 0xf7,
+        0x00, 0x01, 0x54, 0x07,
+        0x00, 0xff, 0x27, 0xff,
+        0x00, 0x10, 0x09, 0xdf,
+        0x00, 0xce, 0xfd, 0xcf,
+        0x00, 0x40, 0x57, 0x77,
+        0x00, 0xdf, 0xfd, 0xc7,
+        0x00, 0xf1, 0x15, 0x57,
+        0x00, 0xff, 0x6a, 0xaf,
+        0x00, 0x01, 0x68, 0x8f,
+        0x00, 0x7d, 0x42, 0x2f,
+        0x00, 0x45, 0x48, 0x97,
+        0x00, 0x45, 0xfd, 0xcf,
+        0x00, 0x45, 0x77, 0x77,
+        0x00, 0x7d, 0x1d, 0xc7,
+        0x00, 0x01, 0x35, 0x57,
+        0xc6, 0x3f, 0x1d, 0x47,
+        0xcc, 0xe2, 0x9d, 0xf4,
         0x00, 0x00, 0x00, 0x00,
-
-        // Pad to get offsets onto word boundaries.
-        0x00, 0x00,
-        
-        // x_resolution data [numerator][denominator]
-        0x00, 0x00, 0x00, 0x48,
-        0x00, 0x00, 0x00, 0x01,
-
-        // y_resolution data [numerator][denominator]
-        0x00, 0x00, 0x00, 0x48,
-        0x00, 0x00, 0x00, 0x01,
-
-        // Libbitcoin data delimiter.
-        0xba, 0xad, 0xf0, 0x0d,
-
-        // [Image strips may be anywhere in the file.]
-
-        // Image data.
-        // 21 pixels per row = 3 bytes per padded row.
-        // 21 rows * 3 bytes per row = 63 bytes = 15 * 4 + 3.
-        0xfe, 0x5b, 0xf8, 0x82,
-        0x72, 0x08, 0xba, 0xda,
-        0xe8, 0xba, 0x52, 0xe8,
-        0xba, 0x2a, 0xe8, 0x82,
-        0x0a, 0x08, 0xfe, 0xab,
-        0xf8, 0x00, 0xd8, 0x00,
-        0xef, 0xf6, 0x20, 0x31,
-        0x02, 0x30, 0xbf, 0xa8,
-        0x88, 0x20, 0x02, 0x38,
-        0x0e, 0xea, 0xa8, 0x00,
-        0x95, 0x50, 0xfe, 0x97,
-        0x70, 0x82, 0xbd, 0xd0,
-        0xba, 0xb7, 0x68, 0xba,
-        0x02, 0x30, 0xba, 0x88,
-        0x88, 0x82, 0xe2, 0x38,
-        0xfe, 0xca, 0xa8
+        0x49, 0x45, 0x4e, 0x44,
+        0xae, 0x42, 0x60, 0x82
     };
 
     data_chunk out;
@@ -174,7 +111,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__maximum_version__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", qr_code::maximum_version));
-    BOOST_REQUIRE_EQUAL(out.size(), 252916u);
+    BOOST_REQUIRE_EQUAL(out.size(), 254263u);
 }
 
 BOOST_AUTO_TEST_CASE(qr_code__encode__excessive_margin__false)
@@ -202,7 +139,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_low__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::low));
-    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+    BOOST_REQUIRE_EQUAL(out.size(), 152u);
 }
 
 BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_medium__expected_size)
@@ -210,7 +147,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_medium__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::medium));
-    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+    BOOST_REQUIRE_EQUAL(out.size(), 152u);
 }
 
 BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_high__expected_size)
@@ -218,7 +155,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_high__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::high));
-    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+    BOOST_REQUIRE_EQUAL(out.size(), 152u);
 }
 
 BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_highest__expected_size)
@@ -226,7 +163,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__recovery_level_highest__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, qr_code::recovery_level::highest));
-    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+    BOOST_REQUIRE_EQUAL(out.size(), 152u);
 }
 
 // encode_mode
@@ -236,7 +173,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__encode_mode_eight_bit__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, low, qr_code::encode_mode::eight_bit));
-    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+    BOOST_REQUIRE_EQUAL(out.size(), 152u);
 }
 
 BOOST_AUTO_TEST_CASE(qr_code__encode__encode_mode_kanji__expected_size)
@@ -244,7 +181,7 @@ BOOST_AUTO_TEST_CASE(qr_code__encode__encode_mode_kanji__expected_size)
     data_chunk out;
     stream::out::data sink(out);
     BOOST_REQUIRE(qr_code::encode(sink, "X", default_version, 1, no_margin, low, qr_code::encode_mode::kanji));
-    BOOST_REQUIRE_EQUAL(out.size(), 219u);
+    BOOST_REQUIRE_EQUAL(out.size(), 152u);
 }
 
 // to_modules
