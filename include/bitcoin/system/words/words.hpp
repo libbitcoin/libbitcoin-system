@@ -22,6 +22,7 @@
 #include <bitcoin/system/words/catalogs/electrum.hpp>
 #include <bitcoin/system/words/catalogs/electrum_v1.hpp>
 #include <bitcoin/system/words/catalogs/mnemonic.hpp>
+#include <bitcoin/system/words/catalogs/slip39.hpp>
 #include <bitcoin/system/words/dictionaries.hpp>
 #include <bitcoin/system/words/dictionary.hpp>
 #include <bitcoin/system/words/language.hpp>
