@@ -49,7 +49,7 @@ public:
         size_t width) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static hashes merkle_branch(size_t position, hashes&& leaves) NOEXCEPT;
-    static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
+    static uint64_t subsidy(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
     static code populate(const transaction_cptrs& txs, const context& ctx,
         bool coinbase) NOEXCEPT;
@@ -57,10 +57,6 @@ public:
         bool coinbase) NOEXCEPT;
     static bool is_internal_double_spend(const transaction_cptrs& txs,
         bool coinbase) NOEXCEPT;
-    static code identify(const hash_digest& merkle_root, const hashes& txids,
-        bool malleated64) NOEXCEPT;
-    static code identify(const context& ctx, const transaction& first,
-        const hash_digest& witness_root, bool segregated) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -138,11 +134,16 @@ public:
     void set_state(const chain_state::cptr& state) const NOEXCEPT;
     const chain_state::cptr& get_state() const NOEXCEPT;
 
-    /// Identity.
+    /// Guards (block identity, prevents caching of malleated blocks).
     /// -----------------------------------------------------------------------
 
-    code identify() const NOEXCEPT;
-    code identify(const context& ctx) const NOEXCEPT;
+    static code check_guard(const hash_digest& merkle_root,
+        const hashes& txids, bool malleated64) NOEXCEPT;
+    static code check_guard(const context& ctx, const transaction& first,
+        const hash_digest& witness_root, bool segregated) NOEXCEPT;
+
+    code check_guard() const NOEXCEPT;
+    code check_guard(const context& ctx) const NOEXCEPT;
 
     /// Validation.
     /// -----------------------------------------------------------------------
@@ -194,7 +195,7 @@ protected:
     bool is_invalid_signet_solution(const script& challenge) const NOEXCEPT;
 
     /// Requires prevouts (value).
-    bool is_overspent(size_t height, uint64_t subsidy_interval,
+    bool is_overspent(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
@@ -211,7 +212,7 @@ private:
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
 
     // contextual
-    uint64_t reward(size_t height, uint64_t subsidy_interval,
+    uint64_t reward(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
 
     // delegated

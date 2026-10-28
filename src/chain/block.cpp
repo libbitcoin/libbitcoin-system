@@ -768,11 +768,10 @@ bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT
 // explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
 // default, and specified bip42 behavior (shift overflow to zero) with bip42.
 //*****************************************************************************
-uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
+uint64_t block::subsidy(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT
 {
-    // Guard: quotient domain cannot increase with positive integer divisor.
-    const auto halves = possible_narrow_cast<size_t>(height / subsidy_interval);
+    const auto halves = floored_divide(height, subsidy_interval);
     return shift_right(initial_block_subsidy_satoshi, halves, bip42);
 }
 
@@ -797,7 +796,7 @@ uint64_t block::claim() const NOEXCEPT
 }
 
 // The reward() is the sum of all transaction.fee() and the block subsidy.
-uint64_t block::reward(size_t height, uint64_t subsidy_interval,
+uint64_t block::reward(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     // Overflow returns max_uint64.
@@ -805,7 +804,7 @@ uint64_t block::reward(size_t height, uint64_t subsidy_interval,
         initial_block_subsidy_satoshi, bip42));
 }
 
-bool block::is_overspent(size_t height, uint64_t subsidy_interval,
+bool block::is_overspent(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     return claim() > reward(height, subsidy_interval,
@@ -945,33 +944,11 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
     return error::block_success;
 }
 
-// Identity.
+// Guards.
 // ----------------------------------------------------------------------------
 
-code block::identify() const NOEXCEPT
-{
-    if (is_malleated())
-        return error::invalid_transaction_commitment;
-    if (is_invalid_merkle_root())
-        return error::invalid_transaction_commitment;
-
-    return error::block_success;
-}
-
-code block::identify(const context& ctx) const NOEXCEPT
-{
-    const auto bip141 = ctx.is_enabled(bip141_rule);
-
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
-    if (!bip141 && is_segregated())
-        return error::invalid_witness_commitment;
-
-    return error::block_success;
-}
-
 // static
-code block::identify(const hash_digest& merkle_root, const hashes& txids,
+code block::check_guard(const hash_digest& merkle_root, const hashes& txids,
     bool malleated64) NOEXCEPT
 {
     if (malleated64 || is_malleated32(txids) ||
@@ -983,7 +960,7 @@ code block::identify(const hash_digest& merkle_root, const hashes& txids,
 
 // static
 // bip141 should be disabled when the node is not accepting witness data.
-code block::identify(const context& ctx, const transaction& first,
+code block::check_guard(const context& ctx, const transaction& first,
     const hash_digest& witness_root, bool segregated) NOEXCEPT
 {
     const auto invalid = ctx.is_enabled(bip141_rule) ?
@@ -991,6 +968,28 @@ code block::identify(const context& ctx, const transaction& first,
         segregated;
 
     return invalid ? error::invalid_witness_commitment : error::block_success;
+}
+
+code block::check_guard() const NOEXCEPT
+{
+    if (is_malleated())
+        return error::invalid_transaction_commitment;
+    if (is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
+
+    return error::block_success;
+}
+
+code block::check_guard(const context& ctx) const NOEXCEPT
+{
+    const auto bip141 = ctx.is_enabled(bip141_rule);
+
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
+    if (!bip141 && is_segregated())
+        return error::invalid_witness_commitment;
+
+    return error::block_success;
 }
 
 // Validation.

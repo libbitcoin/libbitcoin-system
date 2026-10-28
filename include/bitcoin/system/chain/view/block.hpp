@@ -62,9 +62,9 @@ public:
     const view::inputs& inputs() const NOEXCEPT;
     const view::outputs& prevouts() const NOEXCEPT;
 
-    /// Identity.
-    code identify() const NOEXCEPT;
-    code identify(const context& ctx) const NOEXCEPT;
+    /// Guards (block identity, prevents caching of malleated blocks).
+    code check_guard() const NOEXCEPT;
+    code check_guard(const context& ctx) const NOEXCEPT;
 
     /// Population.
     /// Prevouts are the wire-encoded prevouts of each spend in block order.
@@ -84,7 +84,7 @@ public:
     code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
 
 protected:
-    /// Identity helpers.
+    /// Guard helpers.
     bool is_malleated() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;
@@ -99,7 +99,7 @@ protected:
     bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;
     bool is_hash_limit_exceeded() const NOEXCEPT;
     bool is_invalid_signet_solution(const script& challenge) const NOEXCEPT;
-    bool is_overspent(size_t height, uint64_t subsidy_interval,
+    bool is_overspent(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
     bool is_signature_operations_limited(bool bip16,
         bool bip141) const NOEXCEPT;
@@ -107,7 +107,7 @@ protected:
     size_t weight() const NOEXCEPT;
     uint64_t fees() const NOEXCEPT;
     uint64_t claim() const NOEXCEPT;
-    uint64_t reward(size_t height, uint64_t subsidy_interval,
+    uint64_t reward(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 

@@ -174,7 +174,7 @@ size_t block::serialized_size(bool witness) const NOEXCEPT
     return total;
 }
 
-code block::identify() const NOEXCEPT
+code block::check_guard() const NOEXCEPT
 {
     if (txs_.empty())
         return error::empty_block;
@@ -187,7 +187,7 @@ code block::identify() const NOEXCEPT
     return error::block_success;
 }
 
-code block::identify(const context& ctx) const NOEXCEPT
+code block::check_guard(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
@@ -649,7 +649,7 @@ bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT
         challenge);
 }
 
-bool block::is_overspent(size_t height, uint64_t subsidy_interval,
+bool block::is_overspent(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     return claim() > reward(height, subsidy_interval,
@@ -687,7 +687,7 @@ uint64_t block::claim() const NOEXCEPT
     return txs_.empty() ? zero : txs_.front().spend();
 }
 
-uint64_t block::reward(size_t height, uint64_t subsidy_interval,
+uint64_t block::reward(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     // Overflow returns max_uint64.

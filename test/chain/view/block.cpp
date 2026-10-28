@@ -115,9 +115,9 @@ BOOST_AUTO_TEST_CASE(block_view__to_data__mixed_witness_and_legacy__matches_bloc
     BOOST_CHECK_EQUAL(view.to_data(false), block.to_data(false));
 }
 
-// identify1 and identify2
+// check_guard1 and check_guard2
 
-BOOST_AUTO_TEST_CASE(block_view__identify__genesis__expected)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__genesis__expected)
 {
     using namespace system;
     constexpr auto bip141 = chain::flags::bip141_rule;
@@ -126,17 +126,17 @@ BOOST_AUTO_TEST_CASE(block_view__identify__genesis__expected)
     const chain::view::block view{ block.to_data(true), true };
     BOOST_CHECK(view.is_valid());
 
-    auto ec = view.identify();
+    auto ec = view.check_guard();
     BOOST_CHECK_EQUAL(ec, error::block_success);
 
-    ec = view.identify({ bip141, 1, 0 });
+    ec = view.check_guard({ bip141, 1, 0 });
     BOOST_CHECK_EQUAL(ec, error::block_success);
 
-    ec = view.identify({ 0, 1, 0 });
+    ec = view.check_guard({ 0, 1, 0 });
     BOOST_CHECK_EQUAL(ec, error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__block1a_witness__expected)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__block1a_witness__expected)
 {
     using namespace system;
     constexpr auto bip141 = chain::flags::bip141_rule;
@@ -146,31 +146,31 @@ BOOST_AUTO_TEST_CASE(block_view__identify__block1a_witness__expected)
     BOOST_CHECK(view.is_valid());
 
     // block1a has a bogus merkle root.
-    auto ec = view.identify();
+    auto ec = view.check_guard();
     BOOST_CHECK_EQUAL(ec, error::invalid_transaction_commitment);
 
     // block1a has a bogus merkle root.
-    ec = view.identify({ bip141, 1, 0 });
+    ec = view.check_guard({ bip141, 1, 0 });
     BOOST_CHECK_EQUAL(ec, error::invalid_witness_commitment);
 
     // Witness is uncommitted before bip141.
-    ec = view.identify({ 0, 1, 0 });
+    ec = view.check_guard({ 0, 1, 0 });
     BOOST_CHECK_EQUAL(ec, error::invalid_witness_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__unwitnessed_bip141_off__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__unwitnessed_bip141_off__block_success)
 {
     using namespace system;
     const auto& block = test::genesis;
     const chain::view::block view{ block.to_data(true), true };
     BOOST_CHECK(!view.is_segregated());
-    BOOST_CHECK_EQUAL(view.identify({ 0, 1, 0 }), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard({ 0, 1, 0 }), error::block_success);
 }
 
 // malleation
 // ----------------------------------------------------------------------------
 
-// Malleation methods are private, so asserted through identify.
+// Malleation methods are private, so asserted through check_guard.
 // Each fixture carries its computed merkle root.
 
 // Sixty four byte transaction, the malleable64 unit.
@@ -230,7 +230,7 @@ static system::chain::block view_block(
     return chain::block{ head, txs };
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__all_sixty_four_byte__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__all_sixty_four_byte__invalid_transaction_commitment)
 {
     using namespace system;
     const chain::transactions txs{ view_tx64(0), view_tx64(1) };
@@ -238,20 +238,20 @@ BOOST_AUTO_TEST_CASE(block_view__identify__all_sixty_four_byte__invalid_transact
 
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
 // A null point in the first transaction precludes the malleated64 shape.
-BOOST_AUTO_TEST_CASE(block_view__identify__sixty_four_byte_coinbase_first__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__sixty_four_byte_coinbase_first__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_coinbase64(), view_tx64(1) };
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__mixed_transaction_sizes__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__mixed_transaction_sizes__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_tx64(0), view_tx(1) };
@@ -259,49 +259,49 @@ BOOST_AUTO_TEST_CASE(block_view__identify__mixed_transaction_sizes__block_succes
 
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__tail_clone_of_four__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__tail_clone_of_four__invalid_transaction_commitment)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(1), view_tx(2), view_tx(2) };
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__four_distinct__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__four_distinct__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(1), view_tx(2), view_tx(3) };
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
 // A duplicate that is not the merkle clone is not a malleation.
-BOOST_AUTO_TEST_CASE(block_view__identify__leading_duplicate_of_four__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__leading_duplicate_of_four__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(0), view_tx(2), view_tx(3) };
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
 // An even set at width depth is not cloned by merkle.
-BOOST_AUTO_TEST_CASE(block_view__identify__tail_clone_of_two__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__tail_clone_of_two__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(0) };
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
 // Prefixes of a padded set share its root.
-BOOST_AUTO_TEST_CASE(block_view__identify__two_trailing_clones_of_seven__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__two_trailing_clones_of_seven__invalid_transaction_commitment)
 {
     using namespace system;
     const auto txs = view_txs({ 0, 1, 2, 3, 4, 4, 4 });
@@ -309,10 +309,10 @@ BOOST_AUTO_TEST_CASE(block_view__identify__two_trailing_clones_of_seven__invalid
 
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__four_trailing_clones_of_thirteen__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__four_trailing_clones_of_thirteen__invalid_transaction_commitment)
 {
     using namespace system;
     const auto txs = view_txs({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8 });
@@ -320,10 +320,10 @@ BOOST_AUTO_TEST_CASE(block_view__identify__four_trailing_clones_of_thirteen__inv
 
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__two_trailing_pair_clones_of_fourteen__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__two_trailing_pair_clones_of_fourteen__invalid_transaction_commitment)
 {
     using namespace system;
     const auto txs = view_txs({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 9, 8, 9 });
@@ -331,48 +331,48 @@ BOOST_AUTO_TEST_CASE(block_view__identify__two_trailing_pair_clones_of_fourteen_
 
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
 // Not a prefix of any padded set.
-BOOST_AUTO_TEST_CASE(block_view__identify__two_distinct_trailing_clones_of_seven__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__two_distinct_trailing_clones_of_seven__block_success)
 {
     using namespace system;
     const auto txs = view_txs({ 0, 1, 2, 3, 3, 4, 4 });
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
 // Only the last node at a depth is cloned.
-BOOST_AUTO_TEST_CASE(block_view__identify__leading_pair_clone_of_eight__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__leading_pair_clone_of_eight__block_success)
 {
     using namespace system;
     const auto txs = view_txs({ 0, 1, 0, 1, 2, 3, 4, 5 });
     const chain::view::block view{ view_block(txs).to_data(true), true };
     BOOST_CHECK(view.is_valid());
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
 // merkle root
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block_view__identify__computed_root__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__computed_root__block_success)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(1) };
     const chain::view::block view{ view_block(txs).to_data(true), true };
-    BOOST_CHECK_EQUAL(view.identify(), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__wrong_root__invalid_transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__wrong_root__invalid_transaction_commitment)
 {
     using namespace system;
     const chain::transactions txs{ view_tx(0), view_tx(1) };
     const chain::header head{ 1, hash_digest{}, one_hash, 0, 0, 0 };
     const chain::block block{ head, txs };
     const chain::view::block view{ block.to_data(true), true };
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
 // Witness commitment [bip141].
@@ -459,24 +459,24 @@ BOOST_AUTO_TEST_CASE(block_view__to_data__ostream__round_trips)
     BOOST_CHECK_EQUAL(data, block.to_data(true));
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__empty__empty_block)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__empty__empty_block)
 {
     const chain::view::block view{ {}, true };
-    BOOST_CHECK_EQUAL(view.identify(), error::empty_block);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::empty_block);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__bad_merkle__transaction_commitment)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__bad_merkle__transaction_commitment)
 {
     const auto block = commitment_block(one_hash, chain::witness{});
     const chain::view::block view{ block.to_data(true), true };
-    BOOST_CHECK_EQUAL(view.identify(), error::invalid_transaction_commitment);
+    BOOST_CHECK_EQUAL(view.check_guard(), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block_view__identify__empty_context__block_success)
+BOOST_AUTO_TEST_CASE(block_view__check_guard__empty_context__block_success)
 {
     const chain::context ctx{ chain::flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
     const chain::view::block view{ {}, true };
-    BOOST_CHECK_EQUAL(view.identify(ctx), error::block_success);
+    BOOST_CHECK_EQUAL(view.check_guard(ctx), error::block_success);
 }
 
 // Witness commitment [bip141].
