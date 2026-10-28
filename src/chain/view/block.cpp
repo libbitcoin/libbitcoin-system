@@ -179,7 +179,9 @@ code block::identify() const NOEXCEPT
     if (txs_.empty())
         return error::empty_block;
 
-    if (is_malleated() || is_invalid_merkle_root())
+    if (is_malleated())
+        return error::invalid_transaction_commitment;
+    if (is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
     return error::block_success;
@@ -187,10 +189,14 @@ code block::identify() const NOEXCEPT
 
 code block::identify(const context& ctx) const NOEXCEPT
 {
-    const auto invalid = ctx.is_enabled(bip141_rule) ?
-        is_invalid_witness_commitment() : is_segregated();
+    const auto bip141 = ctx.is_enabled(bip141_rule);
 
-    return invalid ? error::invalid_witness_commitment : error::block_success;
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
+    if (!bip141 && is_segregated())
+        return error::invalid_witness_commitment;
+
+    return error::block_success;
 }
 
 // protected
