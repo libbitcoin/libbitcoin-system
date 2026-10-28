@@ -25,9 +25,8 @@
 // System inclusions are chained as follows.
 
 // version        : <generated>
-// execution      : 
 // have           : version
-// preprocessor   : have, execution
+// preprocessor   : have
 // warnings       : preprocessor
 // boost          : warnings
 // exceptions     : boost
@@ -40,29 +39,31 @@
 // typelets       : funclets
 // constraints    : typelets
 // define         : constraints
-// forks          :
 
 // Other directory common includes are not internally chained.
 // Each header includes only its required common headers.
 
-// /error         : define
-// /unicode       : define
 // /intrinsics    : define
 // /math          : /intrinsics
-// /data          : /math /unicode
+// execution      : /math
+// forks          : <nothing>
+// /unicode       : /math
+// /data          : /unicode
 // /endian        : /data
+// /error         : define
 // /words         : /data
 // /radix         : /words
-// /serial        : /radix
-// /hash          : /radix /endian
-// /crypto        : /hash
-// /stream        : /crypto /endian /error
-// /filter        : /stream
-// /chain         : /stream forks [forward: settings]
-// /machine       : /chain
+// /hash          : /endian /radix execution
+// /crypto        : /error /hash
+// /serial        : /error /radix
+// /stream        : /error /hash
+// /chain         : /crypto /serial /stream forks  [forward: settings]
 // /config        : /chain
-// /wallet        : /chain filter
-// settings       : /chain forks
+// settings       : /config
+// /filter        : /stream
+// /machine       : /chain
+// /wallet        : /chain
+// /x509          : /crypto
 
 // When a symbol is unexplainably undefined, its defining include is probably
 // creating the circularity.
