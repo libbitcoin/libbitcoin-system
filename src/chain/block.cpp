@@ -950,17 +950,24 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 
 code block::identify() const NOEXCEPT
 {
-    return identify(header_->merkle_root(), transaction_hashes(false),
-        is_malleated64());
+    if (is_malleated())
+        return error::invalid_transaction_commitment;
+    if (is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
+
+    return error::block_success;
 }
 
 code block::identify(const context& ctx) const NOEXCEPT
 {
-    if (txs_->empty())
-        return error::block_success;
+    const auto bip141 = ctx.is_enabled(bip141_rule);
 
-    return identify(ctx, *txs_->front(), generate_merkle_root(true),
-        is_segregated());
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
+    if (!bip141 && is_segregated())
+        return error::invalid_witness_commitment;
+
+    return error::block_success;
 }
 
 // static
