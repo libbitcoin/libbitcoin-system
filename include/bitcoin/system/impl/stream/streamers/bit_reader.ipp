@@ -22,8 +22,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_READER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_READER_IPP
 
-#include <bitcoin/system/stream/streamers/bit_reader.hpp>
-
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
