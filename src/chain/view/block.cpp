@@ -174,7 +174,7 @@ size_t block::serialized_size(bool witness) const NOEXCEPT
     return total;
 }
 
-code block::identify() const NOEXCEPT
+code block::check_guard() const NOEXCEPT
 {
     if (txs_.empty())
         return error::empty_block;
@@ -187,7 +187,7 @@ code block::identify() const NOEXCEPT
     return error::block_success;
 }
 
-code block::identify(const context& ctx) const NOEXCEPT
+code block::check_guard(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
 

@@ -62,9 +62,9 @@ public:
     const view::inputs& inputs() const NOEXCEPT;
     const view::outputs& prevouts() const NOEXCEPT;
 
-    /// Identity.
-    code identify() const NOEXCEPT;
-    code identify(const context& ctx) const NOEXCEPT;
+    /// Guards (block identity, prevents caching of malleated blocks).
+    code check_guard() const NOEXCEPT;
+    code check_guard(const context& ctx) const NOEXCEPT;
 
     /// Population.
     /// Prevouts are the wire-encoded prevouts of each spend in block order.
@@ -84,7 +84,7 @@ public:
     code connect(const context& ctx, const signatures& capture) const NOEXCEPT;
 
 protected:
-    /// Identity helpers.
+    /// Guard helpers.
     bool is_malleated() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;

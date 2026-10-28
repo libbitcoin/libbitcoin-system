@@ -57,10 +57,6 @@ public:
         bool coinbase) NOEXCEPT;
     static bool is_internal_double_spend(const transaction_cptrs& txs,
         bool coinbase) NOEXCEPT;
-    static code identify(const hash_digest& merkle_root, const hashes& txids,
-        bool malleated64) NOEXCEPT;
-    static code identify(const context& ctx, const transaction& first,
-        const hash_digest& witness_root, bool segregated) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -138,11 +134,16 @@ public:
     void set_state(const chain_state::cptr& state) const NOEXCEPT;
     const chain_state::cptr& get_state() const NOEXCEPT;
 
-    /// Identity.
+    /// Guards (block identity, prevents caching of malleated blocks).
     /// -----------------------------------------------------------------------
 
-    code identify() const NOEXCEPT;
-    code identify(const context& ctx) const NOEXCEPT;
+    static code check_guard(const hash_digest& merkle_root,
+        const hashes& txids, bool malleated64) NOEXCEPT;
+    static code check_guard(const context& ctx, const transaction& first,
+        const hash_digest& witness_root, bool segregated) NOEXCEPT;
+
+    code check_guard() const NOEXCEPT;
+    code check_guard(const context& ctx) const NOEXCEPT;
 
     /// Validation.
     /// -----------------------------------------------------------------------
