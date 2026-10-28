@@ -175,7 +175,8 @@ const string_list unicode_whitespace
 };
 
 // Based on Electrum source (not Unicode standard).
-// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L41-L69
+// github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L41-L71
+// Lines were L41-L69, shifted by other edits, the intervals are unchanged.
 const char32_interval char32_chinese_japanese_korean[]
 {
     { 0x00004e00, 0x00009fff }, // cjk unified ideographs
