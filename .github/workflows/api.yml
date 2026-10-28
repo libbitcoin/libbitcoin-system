@@ -1,0 +1,27 @@
+###############################################################################
+#  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+
+name: Notify API
+
+on:
+  push:
+    branches: [master]
+
+permissions: {}
+
+jobs:
+  notify-api:
+    if: github.repository_owner == 'libbitcoin'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch to libbitcoin/api
+        env:
+          GH_TOKEN: ${{ secrets.API_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/libbitcoin/api/dispatches   -f event_type=library-push   -f "client_payload[repository]=${{ github.repository }}"   -f "client_payload[sha]=${{ github.sha }}"
+
