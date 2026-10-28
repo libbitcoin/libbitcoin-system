@@ -768,11 +768,10 @@ bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT
 // explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
 // default, and specified bip42 behavior (shift overflow to zero) with bip42.
 //*****************************************************************************
-uint64_t block::subsidy(size_t height, uint64_t subsidy_interval,
+uint64_t block::subsidy(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT
 {
-    // Guard: quotient domain cannot increase with positive integer divisor.
-    const auto halves = possible_narrow_cast<size_t>(height / subsidy_interval);
+    const auto halves = floored_divide(height, subsidy_interval);
     return shift_right(initial_block_subsidy_satoshi, halves, bip42);
 }
 
@@ -797,7 +796,7 @@ uint64_t block::claim() const NOEXCEPT
 }
 
 // The reward() is the sum of all transaction.fee() and the block subsidy.
-uint64_t block::reward(size_t height, uint64_t subsidy_interval,
+uint64_t block::reward(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     // Overflow returns max_uint64.
@@ -805,7 +804,7 @@ uint64_t block::reward(size_t height, uint64_t subsidy_interval,
         initial_block_subsidy_satoshi, bip42));
 }
 
-bool block::is_overspent(size_t height, uint64_t subsidy_interval,
+bool block::is_overspent(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     return claim() > reward(height, subsidy_interval,

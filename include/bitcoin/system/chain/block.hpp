@@ -49,7 +49,7 @@ public:
         size_t width) NOEXCEPT;
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
     static hashes merkle_branch(size_t position, hashes&& leaves) NOEXCEPT;
-    static uint64_t subsidy(size_t height, uint64_t subsidy_interval,
+    static uint64_t subsidy(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT;
     static code populate(const transaction_cptrs& txs, const context& ctx,
         bool coinbase) NOEXCEPT;
@@ -194,7 +194,7 @@ protected:
     bool is_invalid_signet_solution(const script& challenge) const NOEXCEPT;
 
     /// Requires prevouts (value).
-    bool is_overspent(size_t height, uint64_t subsidy_interval,
+    bool is_overspent(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
@@ -211,7 +211,7 @@ private:
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
 
     // contextual
-    uint64_t reward(size_t height, uint64_t subsidy_interval,
+    uint64_t reward(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
 
     // delegated
