@@ -42,7 +42,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
     // accept transaction
     { unexpected_witness_transaction, "unexpected witness transaction" },
     { premature_validation, "transaction validation under checkpoint" },
-    { unspent_duplicate, "matching transaction with unspent outputs" },
     { missing_previous_output, "previous output not found" },
     { double_spend, "double spend of input" },
     { coinbase_maturity, "immature coinbase spent" },
