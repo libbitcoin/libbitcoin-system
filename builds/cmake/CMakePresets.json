@@ -123,8 +123,7 @@
             "hidden": true,
             "targets": [
                 "libbitcoin-system",
-                "libbitcoin-system-test",
-                "libbitcoin-system-examples"
+                "libbitcoin-system-test"
             ]
         },
         {

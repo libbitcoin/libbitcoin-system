@@ -1473,30 +1473,3 @@ test_libbitcoin_system_test_SOURCES = \
 TESTS = test_runner.sh
 
 endif WITH_TESTS
-
-# Binaries.
-#==============================================================================
-# Target binary 'examples/libbitcoin-system-examples'
-#------------------------------------------------------------------------------
-if WITH_EXAMPLES
-
-noinst_PROGRAMS = examples/libbitcoin-system-examples
-
-examples_libbitcoin_system_examples_CPPFLAGS = \
-    ${src_libbitcoin_system_la_CPPFLAGS}
-
-examples_libbitcoin_system_examples_LDFLAGS = \
-    ${src_libbitcoin_system_la_LDFLAGS}
-
-examples_libbitcoin_system_examples_LDADD = \
-    ${src_libbitcoin_system_la_LIBS} \
-    ${src_libbitcoin_system_la_LIBADD}
-
-examples_libbitcoin_system_examples_SOURCES = \
-    ${srcdir}/../../examples/main.cpp
-
-target_examples = examples/libbitcoin-system-examples
-
-examples: ${target_examples}
-
-endif WITH_EXAMPLES

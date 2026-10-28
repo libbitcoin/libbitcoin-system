@@ -7,7 +7,6 @@
 			"command": "build",
 			"targets": [
 				"bitcoin-system",
-				"libbitcoin-system-examples",
 				"libbitcoin-system-test"
 			],
 			"preset": "${command:cmake.activeBuildPresetName}",

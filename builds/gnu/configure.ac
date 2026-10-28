@@ -155,15 +155,6 @@ AC_ARG_WITH([tests],
 AC_MSG_RESULT([$with_tests])
 AM_CONDITIONAL([WITH_TESTS], [test "x${with_tests}" != "xno"])
 
-AC_MSG_CHECKING([--with-examples option])
-AC_ARG_WITH([examples],
-    AS_HELP_STRING([--with-examples],
-        [Compile with examples. @<:@default=yes@:>@]),
-    [with_examples=$withval],
-    [with_examples=yes])
-AC_MSG_RESULT([$with_examples])
-AM_CONDITIONAL([WITH_EXAMPLES], [test "x${with_examples}" != "xno"])
-
 AC_MSG_CHECKING([--enable-shani option])
 AC_ARG_ENABLE([shani],
     AS_HELP_STRING([--enable-shani],

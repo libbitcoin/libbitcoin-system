@@ -167,10 +167,6 @@ if "!libbitcoin_system_TAG!" == "" (
     if %ERRORLEVEL% neq 0 (
         exit /b %ERRORLEVEL%
     )
-    call :build_msbuild "libbitcoin-system" "builds\msvc\%proj_version%" "libbitcoin-system-examples" "!REMAPPED_PARAMS!"
-    if %ERRORLEVEL% neq 0 (
-        exit /b %ERRORLEVEL%
-    )
     if not "!BUILD_SKIP_TESTS!" == "yes" (
         call :build_msbuild "libbitcoin-system" "builds\msvc\%proj_version%" "libbitcoin-system-test" "!REMAPPED_PARAMS!"
         if %ERRORLEVEL% neq 0 (

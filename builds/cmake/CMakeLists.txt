@@ -95,7 +95,6 @@ option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
 option( enable-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
 option( with-tests "Compile with unit tests." ON )
-option( with-examples "Compile with examples." ON )
 
 #------------------------------------------------------------------------------
 # Dependencies.
@@ -703,55 +702,6 @@ if ( with-tests )
   )
 
   set_target_properties( libbitcoin-system-test
-    PROPERTIES
-      VERSION ${PROJECT_VERSION}
-      SOVERSION ${PROJECT_VERSION_MAJOR}
-  )
-endif()
-
-#------------------------------------------------------------------------------
-# libbitcoin-system-examples executable
-#------------------------------------------------------------------------------
-if ( with-examples )
-  add_executable( libbitcoin-system-examples )
-
-  target_compile_features( libbitcoin-system-examples
-    PUBLIC
-      cxx_std_20
-  )
-
-  target_compile_options( libbitcoin-system-examples
-    PRIVATE
-      -Wall
-      -Wextra
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
-      $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
-      $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
-  )
-
-  file( GLOB_RECURSE libbitcoin_system_examples_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/*.cpp"
-  )
-
-  target_sources( libbitcoin-system-examples
-    PRIVATE
-      ${libbitcoin_system_examples_SOURCES}
-  )
-
-  target_link_libraries( libbitcoin-system-examples
-    PRIVATE
-      bitcoin::system
-  )
-
-  set_target_properties( libbitcoin-system-examples
     PROPERTIES
       VERSION ${PROJECT_VERSION}
       SOVERSION ${PROJECT_VERSION_MAJOR}
