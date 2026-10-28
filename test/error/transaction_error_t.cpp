@@ -123,15 +123,6 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__premature_validation__true_expec
     BOOST_REQUIRE_EQUAL(ec.message(), "transaction validation under checkpoint");
 }
 
-BOOST_AUTO_TEST_CASE(transaction_error_t__code__unspent_duplicate__true_expected_message)
-{
-    constexpr auto value = error::unspent_duplicate;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "matching transaction with unspent outputs");
-}
-
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__missing_previous_output_true_expected_message)
 {
     constexpr auto value = error::missing_previous_output;

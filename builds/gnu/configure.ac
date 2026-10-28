@@ -738,82 +738,89 @@ AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
     CXXFLAGS="${CXXFLAGS} -fstack-protector-all";
   ])
 
-# Check architecture.
-#==============================================================================
-AC_COMPILE_IFELSE(
-  [
-    AC_LANG_PROGRAM(
-      [[
-        #include <arm_neon.h>
-      ]],
-      [[
-        uint8x16_t a = vdupq_n_u8(0);
-        return vgetq_lane_u8(vaeseq_u8(a, a), 0);
-      ]])
-  ],
-  [ TEST_COMPILES_AES="yes"; ],
-  [ TEST_COMPILES_AES="no"; ])
-
-AS_IF([test "x${enable_aes}" != "xno"],
-  [
-    AS_IF([test "x${TEST_COMPILES_AES}" != "xno"],
-      [ AC_MSG_WARN(Detected 'aes'.) ],
-      [ AC_MSG_ERROR(Expected feature not detected 'aes') ])
-  ],[
-    AS_IF([test "x${TEST_COMPILES_AES}" != "xno"],
-      [ AC_MSG_WARN(Environment enabling option 'aes'.) ],
-      [ AC_MSG_WARN(Unexpected feature not detected 'aes') ])
-])
-
-AC_COMPILE_IFELSE(
-  [
-    AC_LANG_PROGRAM(
-      [[
-        #include <arm_neon.h>
-      ]],
-      [[
-        uint32x4_t a = vdupq_n_u32(0);
-        return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-      ]])
-  ],
-  [ TEST_COMPILES_SHA="yes"; ],
-  [ TEST_COMPILES_SHA="no"; ])
-
+march_base=""
+march_features=""
 AS_IF([test "x${enable_sha}" != "xno"],
   [
-    AS_IF([test "x${TEST_COMPILES_SHA}" != "xno"],
-      [ AC_MSG_WARN(Detected 'sha'.) ],
-      [ AC_MSG_ERROR(Expected feature not detected 'sha') ])
-  ],[
-    AS_IF([test "x${TEST_COMPILES_SHA}" != "xno"],
-      [ AC_MSG_WARN(Environment enabling option 'sha'.) ],
-      [ AC_MSG_WARN(Unexpected feature not detected 'sha') ])
-])
-
-AC_COMPILE_IFELSE(
+    march_base="armv8-a"
+    march_features="${march_features}+sha2"
+  ])
+AS_IF([test "x${enable_aes}" != "xno"],
   [
-    AC_LANG_PROGRAM(
-      [[
-        #include <arm_neon.h>
-      ]],
-      [[
-        uint64x2_t a = vdupq_n_u64(0);
-        return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
-      ]])
-  ],
-  [ TEST_COMPILES_SHA3="yes"; ],
-  [ TEST_COMPILES_SHA3="no"; ])
-
+    march_base="armv8-a"
+    march_features="${march_features}+aes"
+  ])
 AS_IF([test "x${enable_sha3}" != "xno"],
   [
-    AS_IF([test "x${TEST_COMPILES_SHA3}" != "xno"],
-      [ AC_MSG_WARN(Detected 'sha3'.) ],
-      [ AC_MSG_ERROR(Expected feature not detected 'sha3') ])
-  ],[
-    AS_IF([test "x${TEST_COMPILES_SHA3}" != "xno"],
-      [ AC_MSG_WARN(Environment enabling option 'sha3'.) ],
-      [ AC_MSG_WARN(Unexpected feature not detected 'sha3') ])
-])
+    march_base="armv8.2-a"
+    march_features="${march_features}+sha3"
+  ])
+
+AS_IF([test "x${march_features}" != "x"],
+  [
+    march="-march=${march_base}${march_features}"
+    march_CXXFLAGS="${CXXFLAGS}"
+    CXXFLAGS="${CXXFLAGS} ${march}"
+
+    AS_IF([test "x${enable_sha}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports sha])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+                #include <arm_neon.h>
+              ]],
+              [[
+                uint32x4_t a = vdupq_n_u32(0);
+                return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support sha.])])
+      ])
+
+    AS_IF([test "x${enable_aes}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports aes])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+                #include <arm_neon.h>
+              ]],
+              [[
+                uint8x16_t a = vdupq_n_u8(0);
+                return vgetq_lane_u8(vaeseq_u8(a, a), 0);
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support aes.])])
+      ])
+
+    AS_IF([test "x${enable_sha3}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports sha3])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+                #include <arm_neon.h>
+              ]],
+              [[
+                uint64x2_t a = vdupq_n_u64(0);
+                return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support sha3.])])
+      ])
+
+    CXXFLAGS="${march_CXXFLAGS}"
+    CFLAGS="${CFLAGS} ${march}"
+    CXXFLAGS="${CXXFLAGS} ${march}"
+    AC_SUBST([march], ["${march}"])
+  ])
 
 # Check dependencies.
 #==============================================================================

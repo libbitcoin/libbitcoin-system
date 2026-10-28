@@ -48,7 +48,6 @@ enum transaction_error_t
     // accept transaction
     unexpected_witness_transaction,
     premature_validation,
-    unspent_duplicate,
     missing_previous_output,
     double_spend,
     coinbase_maturity,
