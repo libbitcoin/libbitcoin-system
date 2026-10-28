@@ -6,7 +6,7 @@
 
 *The Bitcoin Development Library*
 
-[Documentation](https://github.com/libbitcoin/libbitcoin/wiki) is available on the wiki.
+Documentation is available on [libbitcoin.info](https://libbitcoin.info).
 
 **License Overview**
 
