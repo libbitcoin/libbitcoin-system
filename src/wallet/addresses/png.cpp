@@ -155,7 +155,7 @@ bool png::to_image(std::ostream& out, const data_chunk& data,
     const auto size = data.size();
 
     // The width > 0 and therefore row_bytes > 0.
-    const auto row_bytes = ceilinged_divide(width, byte_bits);
+    const size_t row_bytes = ceilinged_divide(width, byte_bits);
 
     // Each row is the same width, so there must be no remainder.
     if (!is_zero(size % row_bytes))
