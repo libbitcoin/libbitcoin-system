@@ -32,10 +32,14 @@ namespace libbitcoin {
 
 #if defined(HAVE_X32) || defined(HAVE_ARM32)
     constexpr auto have_32b = true;
-    constexpr auto have_64b = false;
 #else
     constexpr auto have_32b = false;
+#endif
+
+#if defined(HAVE_X64) || defined(HAVE_ARM64) || defined(HAVE_S390X)
     constexpr auto have_64b = true;
+#else
+    constexpr auto have_64b = false;
 #endif
 
 #ifdef HAVE_PTX
