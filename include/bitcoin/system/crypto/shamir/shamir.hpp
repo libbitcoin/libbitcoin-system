@@ -29,7 +29,8 @@ struct shamirk_t{};
 
 /// Master secret of Strength bits, shared over GF(256).
 template <size_t Strength,
-    bool_if<Strength == 128 || Strength == 256> = true>
+    bool_if<(Strength >= 128) && (Strength <= 512) &&
+        is_zero(Strength % 16)> = true>
 struct k
 {
     using T = shamirk_t;

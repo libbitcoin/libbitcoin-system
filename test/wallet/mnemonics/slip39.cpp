@@ -34,32 +34,41 @@ constexpr auto extendable_single = 41_size;
 // public static
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(slip39__word_counts__always__twenty_and_thirty_three)
+BOOST_AUTO_TEST_CASE(slip39__word_counts__always__twenty_and_fifty_nine)
 {
     BOOST_REQUIRE_EQUAL(slip39::word_minimum, 20u);
-    BOOST_REQUIRE_EQUAL(slip39::word_maximum, 33u);
+    BOOST_REQUIRE_EQUAL(slip39::word_maximum, 59u);
 }
 
 BOOST_AUTO_TEST_CASE(slip39__is_valid_entropy_size__valid__true)
 {
     BOOST_REQUIRE(slip39::is_valid_entropy_size(16));
+    BOOST_REQUIRE(slip39::is_valid_entropy_size(18));
+    BOOST_REQUIRE(slip39::is_valid_entropy_size(24));
     BOOST_REQUIRE(slip39::is_valid_entropy_size(32));
+    BOOST_REQUIRE(slip39::is_valid_entropy_size(64));
 }
 
 BOOST_AUTO_TEST_CASE(slip39__is_valid_entropy_size__invalid__false)
 {
     BOOST_REQUIRE(!slip39::is_valid_entropy_size(0));
+    BOOST_REQUIRE(!slip39::is_valid_entropy_size(14));
     BOOST_REQUIRE(!slip39::is_valid_entropy_size(15));
     BOOST_REQUIRE(!slip39::is_valid_entropy_size(17));
-    BOOST_REQUIRE(!slip39::is_valid_entropy_size(24));
     BOOST_REQUIRE(!slip39::is_valid_entropy_size(31));
     BOOST_REQUIRE(!slip39::is_valid_entropy_size(33));
+    BOOST_REQUIRE(!slip39::is_valid_entropy_size(65));
+    BOOST_REQUIRE(!slip39::is_valid_entropy_size(66));
 }
 
 BOOST_AUTO_TEST_CASE(slip39__is_valid_word_count__valid__true)
 {
     BOOST_REQUIRE(slip39::is_valid_word_count(20));
+    BOOST_REQUIRE(slip39::is_valid_word_count(22));
+    BOOST_REQUIRE(slip39::is_valid_word_count(23));
+    BOOST_REQUIRE(slip39::is_valid_word_count(27));
     BOOST_REQUIRE(slip39::is_valid_word_count(33));
+    BOOST_REQUIRE(slip39::is_valid_word_count(59));
 }
 
 BOOST_AUTO_TEST_CASE(slip39__is_valid_word_count__invalid__false)
@@ -67,8 +76,10 @@ BOOST_AUTO_TEST_CASE(slip39__is_valid_word_count__invalid__false)
     BOOST_REQUIRE(!slip39::is_valid_word_count(0));
     BOOST_REQUIRE(!slip39::is_valid_word_count(19));
     BOOST_REQUIRE(!slip39::is_valid_word_count(21));
+    BOOST_REQUIRE(!slip39::is_valid_word_count(24));
     BOOST_REQUIRE(!slip39::is_valid_word_count(32));
     BOOST_REQUIRE(!slip39::is_valid_word_count(34));
+    BOOST_REQUIRE(!slip39::is_valid_word_count(60));
 }
 
 BOOST_AUTO_TEST_CASE(slip39__is_valid_dictionary__en__true)
@@ -78,10 +89,25 @@ BOOST_AUTO_TEST_CASE(slip39__is_valid_dictionary__en__true)
     BOOST_REQUIRE(!slip39::is_valid_dictionary(language::none));
 }
 
+BOOST_AUTO_TEST_CASE(slip39__is_valid_passphrase__printable_ascii__true)
+{
+    BOOST_REQUIRE(slip39::is_valid_passphrase(""));
+    BOOST_REQUIRE(slip39::is_valid_passphrase("TREZOR"));
+    BOOST_REQUIRE(slip39::is_valid_passphrase(" ~"));
+}
+
+BOOST_AUTO_TEST_CASE(slip39__is_valid_passphrase__not_printable_ascii__false)
+{
+    BOOST_REQUIRE(!slip39::is_valid_passphrase("\t"));
+    BOOST_REQUIRE(!slip39::is_valid_passphrase("\x7f"));
+    BOOST_REQUIRE(!slip39::is_valid_passphrase("caf\xc3\xa9"));
+}
+
 BOOST_AUTO_TEST_CASE(slip39__is_valid_grouping__valid__true)
 {
     BOOST_REQUIRE(slip39::is_valid_grouping(1, { { 1, 1 } }));
     BOOST_REQUIRE(slip39::is_valid_grouping(1, { { 2, 3 } }));
+    BOOST_REQUIRE(slip39::is_valid_grouping(1, { { 2, 3 }, { 3, 5 } }));
     BOOST_REQUIRE(slip39::is_valid_grouping(2, { { 2, 3 }, { 1, 1 }, { 16, 16 } }));
 }
 
@@ -107,11 +133,15 @@ BOOST_AUTO_TEST_CASE(slip39__entropy_size__shared__digest_random_per_sharing)
     BOOST_REQUIRE_EQUAL(slip39::entropy_size(16, 1, { { 2, 3 } }), 12u);
     BOOST_REQUIRE_EQUAL(slip39::entropy_size(32, 1, { { 2, 3 } }), 28u);
     BOOST_REQUIRE_EQUAL(slip39::entropy_size(16, 2, { { 2, 3 }, { 2, 3 }, { 1, 1 } }), 36u);
+    BOOST_REQUIRE_EQUAL(slip39::entropy_size(16, 1, { { 2, 3 }, { 3, 5 } }), 40u);
+    BOOST_REQUIRE_EQUAL(slip39::entropy_size(24, 1, { { 2, 3 } }), 20u);
+    BOOST_REQUIRE_EQUAL(slip39::entropy_size(64, 1, { { 2, 3 } }), 60u);
 }
 
 BOOST_AUTO_TEST_CASE(slip39__entropy_size__invalid_secret_size__zero)
 {
     BOOST_REQUIRE_EQUAL(slip39::entropy_size(17, 1, { { 2, 3 } }), 0u);
+    BOOST_REQUIRE_EQUAL(slip39::entropy_size(66, 1, { { 2, 3 } }), 0u);
 }
 
 // to_shares
@@ -146,6 +176,12 @@ BOOST_AUTO_TEST_CASE(slip39__to_shares__exponent_above_maximum__empty)
 {
     const data_chunk secret(16, 0x00_u8);
     BOOST_REQUIRE(slip39::to_shares(secret, { { 1, 1 } }, 1, {}, 0, false, 16).empty());
+}
+
+BOOST_AUTO_TEST_CASE(slip39__to_shares__invalid_passphrase__empty)
+{
+    const data_chunk secret(16, 0x00_u8);
+    BOOST_REQUIRE(slip39::to_shares(secret, { { 1, 1 } }, 1, {}, 0, false, 0, "caf\xc3\xa9").empty());
 }
 
 BOOST_AUTO_TEST_CASE(slip39__to_shares__single_share__expected_share)
@@ -199,6 +235,13 @@ BOOST_AUTO_TEST_CASE(slip39__to_secret__invalid_share__empty)
     BOOST_REQUIRE(slip39::to_secret(shares, passphrase).empty());
 }
 
+BOOST_AUTO_TEST_CASE(slip39__to_secret__invalid_passphrase__empty)
+{
+    const auto secret = base16_chunk("bb54aac4b89dc868ba37d9cc21b2cece");
+    const auto shares = slip39::to_shares(secret, { { 1, 1 } }, 1, {}, 7470, false, 0, passphrase);
+    BOOST_REQUIRE(slip39::to_secret(shares, "caf\xc3\xa9").empty());
+}
+
 BOOST_AUTO_TEST_CASE(slip39__to_secret__single_share__round_trips)
 {
     const auto secret = base16_chunk("bb54aac4b89dc868ba37d9cc21b2cece");
@@ -214,6 +257,32 @@ BOOST_AUTO_TEST_CASE(slip39__to_secret__threshold_of_groups__round_trips)
     const auto shares = slip39::to_shares(secret, groups, 2, entropy, 7470, false, 0, passphrase);
     const slip39::list subset{ shares.at(1), shares.at(2), shares.at(3), shares.at(5) };
     BOOST_REQUIRE_EQUAL(slip39::to_secret(subset, passphrase), secret);
+}
+
+BOOST_AUTO_TEST_CASE(slip39__to_secret__one_of_two_groups__round_trips)
+{
+    const auto secret = base16_chunk("bb54aac4b89dc868ba37d9cc21b2cece");
+    const slip39::groups groups{ { 2, 3 }, { 3, 5 } };
+    const data_chunk entropy(slip39::entropy_size(secret.size(), 1, groups), 0x42_u8);
+    const auto shares = slip39::to_shares(secret, groups, 1, entropy, 7470, false, 0, passphrase);
+    BOOST_REQUIRE_EQUAL(shares.size(), 8u);
+    BOOST_REQUIRE_EQUAL(shares.at(0).group_threshold(), 1u);
+    BOOST_REQUIRE_EQUAL(shares.at(0).group_count(), 2u);
+
+    const slip39::list first{ shares.at(0), shares.at(2) };
+    const slip39::list second{ shares.at(3), shares.at(5), shares.at(7) };
+    BOOST_REQUIRE_EQUAL(slip39::to_secret(first, passphrase), secret);
+    BOOST_REQUIRE_EQUAL(slip39::to_secret(second, passphrase), secret);
+}
+
+BOOST_AUTO_TEST_CASE(slip39__to_secret__one_of_two_groups_both_groups__empty)
+{
+    const auto secret = base16_chunk("bb54aac4b89dc868ba37d9cc21b2cece");
+    const slip39::groups groups{ { 2, 3 }, { 3, 5 } };
+    const data_chunk entropy(slip39::entropy_size(secret.size(), 1, groups), 0x42_u8);
+    const auto shares = slip39::to_shares(secret, groups, 1, entropy, 7470, false, 0, passphrase);
+    const slip39::list subset{ shares.at(0), shares.at(2), shares.at(3), shares.at(5), shares.at(7) };
+    BOOST_REQUIRE(slip39::to_secret(subset, passphrase).empty());
 }
 
 BOOST_AUTO_TEST_CASE(slip39__to_secret__one_group_short__empty)
@@ -262,11 +331,43 @@ BOOST_AUTO_TEST_CASE(slip39__to_secret__256_bit_extendable__round_trips)
     const data_chunk entropy(slip39::entropy_size(secret.size(), 1, groups), 0x17_u8);
     const auto shares = slip39::to_shares(secret, groups, 1, entropy, 1234, true, 1, passphrase);
     BOOST_REQUIRE_EQUAL(shares.size(), 5u);
-    BOOST_REQUIRE_EQUAL(shares.front().words().size(), slip39::word_maximum);
+    BOOST_REQUIRE_EQUAL(shares.front().words().size(), 33u);
     BOOST_REQUIRE(shares.front().extendable());
     BOOST_REQUIRE_EQUAL(shares.front().exponent(), 1u);
 
     const slip39::list subset{ shares.at(4), shares.at(0), shares.at(2) };
+    BOOST_REQUIRE_EQUAL(slip39::to_secret(subset, passphrase), secret);
+}
+
+BOOST_AUTO_TEST_CASE(slip39__to_secret__192_bit_sentences__round_trips)
+{
+    const auto secret = base16_chunk("c36d0cb0fe8ee3f0e5c00d9b11fa5a6e4bbd2d5aa2dc0a3e");
+    const slip39::groups groups{ { 2, 3 } };
+    const data_chunk entropy(slip39::entropy_size(secret.size(), 1, groups), 0x17_u8);
+    const auto shares = slip39::to_shares(secret, groups, 1, entropy, 1234, false, 0, passphrase);
+    BOOST_REQUIRE_EQUAL(shares.size(), 3u);
+    BOOST_REQUIRE_EQUAL(shares.front().words().size(), 27u);
+
+    const slip39::list subset{ slip39{ shares.at(2).sentence() }, slip39{ shares.at(0).sentence() } };
+    BOOST_REQUIRE(subset.at(0));
+    BOOST_REQUIRE(subset.at(1));
+    BOOST_REQUIRE_EQUAL(subset.at(0).entropy(), shares.at(2).entropy());
+    BOOST_REQUIRE_EQUAL(slip39::to_secret(subset, passphrase), secret);
+}
+
+BOOST_AUTO_TEST_CASE(slip39__to_secret__512_bit_sentences__round_trips)
+{
+    const auto secret = base16_chunk("c36d0cb0fe8ee3f0e5c00d9b11fa5a6e4bbd2d5aa2dc0a3e4e56c0b8a5c3e5d7bb54aac4b89dc868ba37d9cc21b2cece11bc609d21747c49ba78c0701293e417");
+    const slip39::groups groups{ { 2, 3 } };
+    const data_chunk entropy(slip39::entropy_size(secret.size(), 1, groups), 0x17_u8);
+    const auto shares = slip39::to_shares(secret, groups, 1, entropy, 1234, true, 0, passphrase);
+    BOOST_REQUIRE_EQUAL(shares.size(), 3u);
+    BOOST_REQUIRE_EQUAL(shares.front().words().size(), slip39::word_maximum);
+
+    const slip39::list subset{ slip39{ shares.at(1).sentence() }, slip39{ shares.at(2).sentence() } };
+    BOOST_REQUIRE(subset.at(0));
+    BOOST_REQUIRE(subset.at(1));
+    BOOST_REQUIRE_EQUAL(subset.at(1).entropy().size(), slip39::entropy_maximum);
     BOOST_REQUIRE_EQUAL(slip39::to_secret(subset, passphrase), secret);
 }
 
@@ -323,8 +424,8 @@ BOOST_AUTO_TEST_CASE(slip39__construct__long_sentence__expected)
 {
     const slip39 instance{ vectors.at(long_single).mnemonics.front() };
     BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.words().size(), slip39::word_maximum);
-    BOOST_REQUIRE_EQUAL(instance.entropy().size(), slip39::entropy_maximum);
+    BOOST_REQUIRE_EQUAL(instance.words().size(), 33u);
+    BOOST_REQUIRE_EQUAL(instance.entropy().size(), 32u);
     BOOST_REQUIRE_EQUAL(instance.identifier(), 29172u);
 }
 

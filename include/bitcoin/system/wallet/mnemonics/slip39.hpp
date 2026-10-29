@@ -55,9 +55,10 @@ public:
 
     typedef std_vector<group> groups;
 
-    /// Supports 128 and 256 bits of master secret.
+    /// Supports 128 to 512 bits of master secret, in multiples of 16 bits.
     static constexpr size_t entropy_minimum = bytes<128>;
-    static constexpr size_t entropy_maximum = bytes<256>;
+    static constexpr size_t entropy_maximum = bytes<512>;
+    static constexpr size_t entropy_multiple = bytes<16>;
 
     /// Share indexes, thresholds and counts are four bit values, so there
     /// are at most sixteen groups, of at most sixteen shares each.
@@ -71,20 +72,23 @@ public:
     static constexpr size_t word_bits = shamir::rs1024::word_bits;
     static constexpr size_t fixed_words = metadata_words + checksum_words;
 
-    /// Supports 20 and 33 word shares (128 and 256 bits).
+    /// Supports 20 to 59 word shares (128 to 512 bits).
     static constexpr size_t word_minimum = fixed_words +
         ceilinged_divide(to_bits(entropy_minimum), word_bits);
     static constexpr size_t word_maximum = fixed_words +
         ceilinged_divide(to_bits(entropy_maximum), word_bits);
 
-    /// Valid master secret sizes (16 or 32 bytes).
+    /// Valid master secret sizes (16 to 64 bytes, even).
     static bool is_valid_entropy_size(size_t size) NOEXCEPT;
 
-    /// Valid share word counts (20 or 33 words).
+    /// Valid share word counts (the word counts of valid secret sizes).
     static bool is_valid_word_count(size_t count) NOEXCEPT;
 
     /// Valid dictionary (en).
     static bool is_valid_dictionary(language identifier) NOEXCEPT;
+
+    /// Valid passphrase (printable ascii).
+    static bool is_valid_passphrase(const std::string& passphrase) NOEXCEPT;
 
     /// Valid group threshold and group member thresholds and counts.
     static bool is_valid_grouping(uint8_t group_threshold,
@@ -103,8 +107,8 @@ public:
         const std::string& passphrase="") NOEXCEPT;
 
     /// Recover the master secret from a threshold of groups of shares.
-    /// Returns empty if the shares are inconsistent or insufficient, or if
-    /// a share group fails its digest.
+    /// Returns empty if the shares are inconsistent or insufficient, if a
+    /// share group fails its digest, or if the passphrase is invalid.
     static data_chunk to_secret(const list& shares,
         const std::string& passphrase="") NOEXCEPT;
 

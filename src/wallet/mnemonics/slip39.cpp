@@ -39,6 +39,34 @@ constexpr auto exponent_bits = 4_size;
 constexpr auto identifier_maximum = unmask_right<uint16_t>(identifier_bits);
 constexpr auto exponent_maximum = unmask_right<uint8_t>(exponent_bits);
 
+constexpr size_t to_word_count(size_t size) NOEXCEPT
+{
+    return slip39::fixed_words +
+        ceilinged_divide(to_bits(size), slip39::word_bits);
+}
+
+constexpr size_t to_entropy_size(size_t count) NOEXCEPT
+{
+    const auto value_words = floored_subtract(count, slip39::fixed_words);
+    const auto size = to_floored_bytes(slip39::word_bits * value_words);
+    return size - (size % slip39::entropy_multiple);
+}
+
+// Invoke function with the sharing algorithm of the secret size, if valid.
+template <size_t Strength = to_bits(slip39::entropy_minimum),
+    typename Function>
+static bool with_algorithm(size_t size, Function&& function) NOEXCEPT
+{
+    if constexpr (Strength > to_bits(slip39::entropy_maximum))
+        return false;
+    else if (size == bytes<Strength>)
+        return function.template operator()<
+            shamir::algorithm<shamir::k<Strength>>>();
+    else
+        return with_algorithm<Strength + to_bits(slip39::entropy_multiple)>(
+            size, function);
+}
+
 // Only the en dictionary is defined for slip39.
 const slip39::dictionaries slip39::dictionaries_
 {
@@ -52,17 +80,28 @@ const slip39::dictionaries slip39::dictionaries_
 
 bool slip39::is_valid_entropy_size(size_t size) NOEXCEPT
 {
-    return size == entropy_minimum || size == entropy_maximum;
+    return size >= entropy_minimum && size <= entropy_maximum &&
+        is_multiple(size, entropy_multiple);
 }
 
 bool slip39::is_valid_word_count(size_t count) NOEXCEPT
 {
-    return count == word_minimum || count == word_maximum;
+    const auto size = to_entropy_size(count);
+    return is_valid_entropy_size(size) && to_word_count(size) == count;
 }
 
 bool slip39::is_valid_dictionary(language identifier) NOEXCEPT
 {
     return dictionaries_.exists(identifier);
+}
+
+bool slip39::is_valid_passphrase(const std::string& passphrase) NOEXCEPT
+{
+    return std::all_of(passphrase.cbegin(), passphrase.cend(),
+        [](char character) NOEXCEPT
+        {
+            return character >= ' ' && character <= '~';
+        });
 }
 
 bool slip39::is_valid_grouping(uint8_t group_threshold,
@@ -94,23 +133,18 @@ bool slip39::is_valid_grouping(uint8_t group_threshold,
 size_t slip39::entropy_size(size_t secret_size, size_t group_threshold,
     const groups& groups) NOEXCEPT
 {
-    const auto sum = [&](size_t (*size)(size_t)) NOEXCEPT
+    auto total = zero;
+    with_algorithm(secret_size, [&]<typename Algorithm>() NOEXCEPT
     {
-        auto total = size(group_threshold);
+        total = Algorithm::entropy_size(group_threshold);
 
         for (const auto& group: groups)
-            total += size(group.threshold);
+            total += Algorithm::entropy_size(group.threshold);
 
-        return total;
-    };
+        return true;
+    });
 
-    if (secret_size == shamir128::secret_bytes)
-        return sum(&shamir128::entropy_size);
-
-    if (secret_size == shamir256::secret_bytes)
-        return sum(&shamir256::entropy_size);
-
-    return zero;
+    return total;
 }
 
 slip39::list slip39::to_shares(const data_chunk& secret, const groups& groups,
@@ -127,25 +161,24 @@ slip39::list slip39::to_shares(const data_chunk& secret, const groups& groups,
     if (identifier > identifier_maximum || exponent > exponent_maximum)
         return {};
 
+    if (!is_valid_passphrase(passphrase))
+        return {};
+
     const auto required = entropy_size(secret.size(), group_threshold, groups);
 
     if (entropy.size() != required)
         return {};
 
     list out{};
+    const auto shared = with_algorithm(secret.size(),
+        [&]<typename Algorithm>() NOEXCEPT
+        {
+            return share<Algorithm>(out, secret, groups, group_threshold,
+                entropy, identifier, extendable, exponent, passphrase);
+        });
 
-    if (secret.size() == shamir128::secret_bytes)
-    {
-        if (!share<shamir128>(out, secret, groups, group_threshold, entropy,
-            identifier, extendable, exponent, passphrase))
-            return {};
-    }
-    else
-    {
-        if (!share<shamir256>(out, secret, groups, group_threshold, entropy,
-            identifier, extendable, exponent, passphrase))
-            return {};
-    }
+    if (!shared)
+        return {};
 
     return out;
 }
@@ -153,22 +186,19 @@ slip39::list slip39::to_shares(const data_chunk& secret, const groups& groups,
 data_chunk slip39::to_secret(const list& shares,
     const std::string& passphrase) NOEXCEPT
 {
-    if (shares.empty())
+    if (shares.empty() || !is_valid_passphrase(passphrase))
         return {};
 
     data_chunk out{};
     const auto size = shares.front().entropy().size();
+    const auto combined = with_algorithm(size,
+        [&]<typename Algorithm>() NOEXCEPT
+        {
+            return combine<Algorithm>(out, shares, passphrase);
+        });
 
-    if (size == shamir128::secret_bytes)
-    {
-        if (!combine<shamir128>(out, shares, passphrase))
-            return {};
-    }
-    else if (size == shamir256::secret_bytes)
-    {
-        if (!combine<shamir256>(out, shares, passphrase))
-            return {};
-    }
+    if (!combined)
+        return {};
 
     return out;
 }
@@ -354,8 +384,7 @@ slip39 slip39::from_words(const string_list& words) NOEXCEPT
 string_list slip39::encoder(const data_chunk& value,
     const fields& fields) NOEXCEPT
 {
-    const auto count = value.size() == entropy_minimum ? word_minimum :
-        word_maximum;
+    const auto count = to_word_count(value.size());
     const auto value_words = count - fixed_words;
     const auto padding = word_bits * value_words - to_bits(value.size());
 
@@ -448,8 +477,7 @@ bool slip39::decoder(data_chunk& value, fields& out,
     if (group_index >= group_count || group_threshold > group_count)
         return false;
 
-    const auto size = words.size() == word_minimum ? entropy_minimum :
-        entropy_maximum;
+    const auto size = to_entropy_size(words.size());
     const auto value_words = words.size() - fixed_words;
     const auto padding = word_bits * value_words - to_bits(size);
 
