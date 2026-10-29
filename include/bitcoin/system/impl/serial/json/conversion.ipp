@@ -193,8 +193,10 @@ Variant to_variant(const value& from) THROWS
 
         try
         {
-            return Variant{ std::in_place_index<Index>,
-                value_to<alternative>(from) };
+            return Variant
+            {
+                std::in_place_index<Index>, value_to<alternative>(from)
+            };
         }
         catch (const exception&)
         {

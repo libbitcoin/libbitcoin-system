@@ -171,9 +171,9 @@ std::filesystem::path module_path() NOEXCEPT
         if (length < size)
         {
             // The path may contain relative segments, so qualify it.
+            const auto end = std::next(buffer.cbegin(), length);
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            return qualified_path({ buffer.cbegin(),
-                std::next(buffer.cbegin(), length) });
+            return qualified_path({ buffer.cbegin(), end });
             BC_POP_WARNING()
         }
     }
@@ -212,8 +212,7 @@ std::filesystem::path module_path() NOEXCEPT
         // The link is not null terminated, and is truncated when it fills.
         const auto chars = possible_narrow_sign_cast<size_t>(length);
         if (chars < size)
-            return { std::string{ buffer.cbegin(),
-                std::next(buffer.cbegin(), length) } };
+            return { std::string{ buffer.data(), chars } };
     }
 
     return {};

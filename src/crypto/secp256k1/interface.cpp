@@ -378,8 +378,7 @@ public:
     static scalar challenge(const bytes& r_x, const bytes& key,
         const data_slice& message) NOEXCEPT
     {
-        accumulator<sha256> hasher{ tagged_midstate<"BIP0340/challenge">,
-            one };
+        accumulator<sha256> hasher{ tagged_midstate<"BIP0340/challenge">, one };
         hasher.write(r_x);
         hasher.write(key);
         hasher.write(message.size(), message.data());
@@ -1091,8 +1090,8 @@ int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
     local::scalar secret{};
     const auto valid = local::to_secret(secret, seckey32);
     const auto point = local::public_point(secret);
-    accumulator<sha256> hasher{ tagged_midstate<"secp256k1_ellswift_create">,
-        one };
+    const auto& midstate = tagged_midstate<"secp256k1_ellswift_create">;
+    accumulator<sha256> hasher{ midstate, one };
     hasher.write(local::to_array(seckey32));
     hasher.write(zeros);
     if (!is_null(auxrnd32))

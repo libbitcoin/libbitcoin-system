@@ -141,8 +141,10 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
 
     if constexpr (Generator)
     {
-        affine_t<Word> base{ broadcast<Word>(generator.x),
-            broadcast<Word>(generator.y) };
+        affine_t<Word> base
+        {
+            broadcast<Word>(generator.x), broadcast<Word>(generator.y)
+        };
 
         correct<Secret>(sum, base, scale, g_first, faults);
         endomorphism(base, base);

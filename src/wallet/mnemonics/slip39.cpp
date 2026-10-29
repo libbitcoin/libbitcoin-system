@@ -324,8 +324,8 @@ bool slip39::combine(data_chunk& out, const list& shares,
 
         if (group == groups.end())
         {
-            groups.push_back({ share.group_index(),
-                share.member_threshold(), {} });
+            const auto threshold = share.member_threshold();
+            groups.push_back({ share.group_index(), threshold, {} });
             group = std::prev(groups.end());
         }
         else if (group->threshold != share.member_threshold())

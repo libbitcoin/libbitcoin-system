@@ -937,8 +937,9 @@ chain::input::cptr transaction::extract_input(size_t index) const NOEXCEPT
             script_witness, original.sequence());
     }
 
-    const point prevout{ in.previous_txid.value_or(null_hash),
-        in.output_index.value_or(0) };
+    const auto txid = in.previous_txid.value_or(null_hash);
+    const auto output = in.output_index.value_or(0);
+    const point prevout{ txid, output };
     return to_shared<chain::input>(prevout, script_sig, script_witness,
         in.sequence.value_or(max_input_sequence));
 }
@@ -969,8 +970,13 @@ chain::transaction transaction::extract() const NOEXCEPT
                 put.script ? *put.script : script{}));
     }
 
-    return { tx_version(), to_shared(std::move(inputs)),
-        to_shared(std::move(outputs)), time.value() };
+    return
+    {
+        tx_version(),
+        to_shared(std::move(inputs)),
+        to_shared(std::move(outputs)),
+        time.value()
+    };
 }
 
 BC_POP_WARNING()

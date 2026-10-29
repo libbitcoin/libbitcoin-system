@@ -532,8 +532,10 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
             if (tree.type == function::sortedmulti)
                 std::sort(points.begin(), points.end());
 
-            item.script = { script::to_pay_multisig_pattern(tree.required,
-                points) };
+            item.script =
+            {
+                script::to_pay_multisig_pattern(tree.required, points)
+            };
             out.push_back(std::move(item));
             return true;
         }
