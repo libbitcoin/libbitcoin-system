@@ -268,7 +268,7 @@ constexpr void algorithm::inverse_power(scalar_t& r,
     {
         const auto limb = order_minus_two[window / limb_windows];
         const auto shift = (window % limb_windows) * window_bits;
-        const auto entry = (limb >> shift) & mask;
+        const auto entry = possible_narrow_cast<size_t>((limb >> shift) & mask);
 
         for (size_t count{}; count < window_bits; ++count)
             multiply(out, out, out);

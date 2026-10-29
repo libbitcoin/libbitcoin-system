@@ -402,11 +402,11 @@ BOOST_AUTO_TEST_CASE(functions__unique_hash__some_hash__expected)
 
     if constexpr (sizeof(size_t) == sizeof(uint32_t))
     {
-        BOOST_REQUIRE_EQUAL(hash, 0x60989953_u32);
+        BOOST_REQUIRE_EQUAL(hash, native_from_little_end(0x60989953_u32));
     }
     else
     {
-        BOOST_REQUIRE_EQUAL(hash, 0x6636626660989953_u64);
+        BOOST_REQUIRE_EQUAL(hash, native_from_little_end(0x6636626660989953_u64));
     }
 }
 

@@ -241,8 +241,9 @@ void golomb::encode(bitwriter& writer, uint64_t value,
         quotient -= bits<uint64_t>;
     }
 
-    const auto ones = unmask_right<uint64_t>(possible_narrow_cast<size_t>(quotient));
-    writer.write_bits(shift_left(ones, one), add1(quotient));
+    const auto count = possible_narrow_cast<size_t>(quotient);
+    const auto ones = unmask_right<uint64_t>(count);
+    writer.write_bits(shift_left(ones, one), add1(count));
     writer.write_bits(value, modulo_exponent);
 }
 

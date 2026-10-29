@@ -84,6 +84,10 @@
 #elif defined(__aarch64__) || defined(_M_ARM64)
     #define HAVE_ARM64
     #define HAVE_ARM
+#elif defined(__s390x__)
+    #define HAVE_S390X
+#elif !defined(ENABLE_PTX)
+    #error "Unsupported architecture."
 #endif
 
 /// WITH_ build symbols.
@@ -369,7 +373,7 @@
 #endif
 
 /// ARM architecture inline assembly.
-#if defined(HAVE_ARM) && !(defined(HAVE_MSC) && defined(HAVE_X32))
+#if defined(HAVE_ARM) && !defined(HAVE_MSC)
     #define HAVE_ARM_ASSEMBLY
 #endif
 

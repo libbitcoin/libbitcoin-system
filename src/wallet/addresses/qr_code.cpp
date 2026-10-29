@@ -62,9 +62,8 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
     if (width > max_uint16)
         return false;
 
-    const auto pixels = to_pixels(modules,
-        narrow_cast<uint32_t>(coded_width), scale, margin);
-
+    const auto coded = possible_narrow_cast<uint32_t>(coded_width);
+    const auto pixels = to_pixels(modules, coded, scale, margin);
     return png::to_image(out, pixels, narrow_cast<uint16_t>(width));
 }
 
