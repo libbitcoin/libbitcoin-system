@@ -55,14 +55,14 @@ expand(const key_t& key) NOEXCEPT
 
     for (auto word = nk; word < count; ++word)
     {
-        auto temp = words[sub1(word)];
+        auto prior = words[sub1(word)];
 
         if (is_zero(word % nk))
-            temp = bit_xor(sub_word(rotr<8>(temp)), rcon[sub1(word / nk)]);
+            prior = bit_xor(sub_word(rotr<8>(prior)), rcon[sub1(word / nk)]);
         else if ((nk > 6_size) && ((word % nk) == 4_size))
-            temp = sub_word(temp);
+            prior = sub_word(prior);
 
-        words[word] = bit_xor(words[word - nk], temp);
+        words[word] = bit_xor(words[word - nk], prior);
     }
 
     schedule_t schedule{};
