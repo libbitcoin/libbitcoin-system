@@ -124,7 +124,6 @@ The script options are those of the Autotools script. The configuration options 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `-Dwith-tests=<ON/OFF>` | `ON` | Compile with unit tests |
-| `-Dwith-examples=<ON/OFF>` | `ON` | Compile with examples |
 | `-Dwith-secp256k1=<ON/OFF>` | `OFF` | Use bitcoin-core/secp256k1 |
 | `-Denable-<extension>=<ON/OFF>` | `OFF` | See [CPU Extensions](#cpu-extensions) |
 
