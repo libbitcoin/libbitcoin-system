@@ -560,13 +560,12 @@ private:
         if (!limited)
             return capacity;
 
-        const auto measured = std::max<int64_t>(one,
-            duration_cast<nanoseconds>(elapsed).count());
+        const auto count = duration_cast<nanoseconds>(elapsed).count();
+        const auto measured = greater<uint64_t>(one, count);
         const auto target = duration_cast<nanoseconds>(launch_time).count();
-        const auto rows = calibration_rows *
-            possible_sign_cast<size_t>(target) /
-            possible_sign_cast<size_t>(measured);
-        return std::clamp(rows, threads, capacity);
+        const auto targeted = possible_sign_cast<uint64_t>(target);
+        const auto rows = calibration_rows * targeted / measured;
+        return limit<size_t>(rows, threads, capacity);
     }
 
     bool calibrate_ecdsa(size_t bytes, bool limited) NOEXCEPT
