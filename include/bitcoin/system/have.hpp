@@ -159,7 +159,8 @@
 #endif
 
 // Device (gpu) batch verification.
-#if defined(ENABLE_CUDA) && !defined(HAVE_APPLE)
+#if defined(ENABLE_CUDA) && !defined(HAVE_APPLE) && \
+    (defined(HAVE_X64) || defined(HAVE_ARM64))
     #define HAVE_CUDA
 #endif
 
