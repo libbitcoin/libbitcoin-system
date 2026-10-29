@@ -49,13 +49,13 @@ endpoint::endpoint(const std::string& host, uint16_t port) NOEXCEPT
 {
 }
 
-endpoint::endpoint(const asio::endpoint& uri) NOEXCEPT
+endpoint::endpoint(const ip::endpoint& uri) NOEXCEPT
   : endpoint(uri.address(), uri.port())
 {
 }
 
-endpoint::endpoint(const asio::address& ip, uint16_t port) NOEXCEPT
-  : endpoint(config::to_literal(ip), port)
+endpoint::endpoint(const ip::address& ip, uint16_t port) NOEXCEPT
+  : endpoint(ip::to_literal(ip), port)
 {
 }
 

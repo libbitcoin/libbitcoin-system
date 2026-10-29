@@ -27,9 +27,6 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-static_assert(array_count<boost::asio::ip::address_v4::bytes_type> == ipv4_size);
-static_assert(array_count<boost::asio::ip::address_v6::bytes_type> == ipv6_size);
-
 // Empty converts to zero.
 template <typename Integer>
 inline bool to_integer(Integer& out, const std::string& in) NOEXCEPT
@@ -52,20 +49,9 @@ inline bool to_string(std::string& to, std::string&& from) NOEXCEPT
     return true;
 }
 
-// ASIO make_address allows a port on win32 (which is then lost), so guard in
-// regex. ASIO addresses do not have ports, that's what endpoints are for.
-inline bool make_address(asio::address& ip, const std::string& host) NOEXCEPT
+inline bool make_address(ip::address& out, const std::string& host) NOEXCEPT
 {
-    try
-    {
-        // Regex extracts literal host, non-win32 boost make_address rejects.
-        ip = boost::asio::ip::make_address(trim_copy(host, { "[", "]" }));
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
+    return ip::address::from_string(out, trim_copy(host, { "[", "]" }));
 }
 
 // regex parsers.
@@ -84,8 +70,8 @@ inline bool make_address(asio::address& ip, const std::string& host) NOEXCEPT
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// Excludes ipv4 mapped/compat, unbracketed, and ports allowed by make_address.
-bool parse_host(asio::address& ip, const std::string& value) NOEXCEPT
+// Excludes ipv4 mapped/compat and unbracketed ipv6.
+static bool parse_host(ip::address& ip, const std::string& value) NOEXCEPT
 {
     static const std::regex regular
     {
@@ -99,7 +85,7 @@ bool parse_host(asio::address& ip, const std::string& value) NOEXCEPT
 }
 
 // Excludes ipv4 mapped/compat to ipv6.
-bool parse_authority(asio::address& ip, uint16_t& port, uint8_t& cidr,
+bool parse_authority(ip::address& ip, uint16_t& port, uint8_t& cidr,
     const std::string& value) NOEXCEPT
 {
     constexpr uint8_t maximum_cidr_ip4 = 32;
@@ -155,149 +141,17 @@ bool parse_endpoint(std::string& host, uint16_t& port,
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-// asio/asio conversions.
+// Host conversions.
 // ----------------------------------------------------------------------------
-
-// address_v6.to_v4 removed in boost 1.87, no replacement.
-inline asio::address to_v4(const boost::asio::ip::address_v6& ip6) THROWS
-{
-    // Required for equivalence with boost 1.86.
-    if (!ip6.is_v4_mapped())
-    {
-        using namespace boost::asio::detail;
-        throw_exception(boost::asio::ip::bad_address_cast{});
-    }
-
-    const auto bytes = ip6.to_bytes();
-    return
-    {
-        boost::asio::ip::address_v4
-        {
-            boost::asio::ip::address_v4::bytes_type
-            {
-                {
-                    bytes.at(12), bytes.at(13), bytes.at(14), bytes.at(15)
-                }
-            }
-        } 
-    };
-}
-
-// Convert IPv6-mapped to IPV4 (ensures consistent internal matching).
-// Reduce 4 encodings (IPv6, IPv6-mapped, IPv6-compat, IPv4) to 2 (IPv6, IPv4).
-asio::address denormalize(const asio::address& ip) NOEXCEPT
-{
-    if (ip.is_v6())
-    {
-        try
-        {
-            return { to_v4(ip.to_v6()) };
-        }
-        catch (...)
-        {
-            return ip;
-        }
-    }
-
-    return ip;
-}
-
-// asio/string host conversions.
-// ----------------------------------------------------------------------------
-
-inline std::string to_host(const boost::asio::ip::address_v6& ip6) NOEXCEPT
-{
-    try
-    {
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return ip6.is_v4_mapped() ? to_host(to_v4(ip6)) : ip6.to_string();
-        BC_POP_WARNING()
-    }
-    catch (...)
-    {
-        return { "::" };
-    }
-}
-
-inline std::string to_host(const boost::asio::ip::address_v4& ip4) NOEXCEPT
-{
-    try
-    {
-        return ip4.to_string();
-    }
-    catch (...)
-    {
-        return { "0.0.0.0" };
-    }
-}
-
-// Serialize to host denormal form (unmapped) without ipv6 backets.
-std::string to_host(const asio::address& ip) NOEXCEPT
-{
-    try
-    {
-        const auto host = denormalize(ip);
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return host.is_v4() ? to_host(host.to_v4()) : to_host(host.to_v6());
-        BC_POP_WARNING()
-    }
-    catch (...)
-    {
-        return { "0.0.0.0" };
-    }
-}
-
-// Serialize to host denormal form (unmapped) and with ipv6 backets.
-std::string to_literal(const asio::address& ip) NOEXCEPT
-{
-    const auto host = to_host(ip);
-    return (host.find(":") == std::string::npos) ? host : ("[" + host + "]");
-}
 
 // Rejects ipv6 mapped/compat to ipv4 and unbracketed ipv6.
-asio::address from_host(const std::string& host) THROWS
+ip::address from_host(const std::string& host) THROWS
 {
-    asio::address out{};
+    ip::address out{};
     if (!parse_host(out, host))
         throw istream_exception{ host };
 
     return out;
-}
-
-// Member if subnet addresses contain host.
-// ----------------------------------------------------------------------------
-
-inline bool is_member_v4(const boost::asio::ip::address_v4& ip4,
-    const boost::asio::ip::address_v4& net4, uint8_t cidr)  THROWS
-{
-    const auto hosts = boost::asio::ip::make_network_v4(net4, cidr).hosts();
-    return hosts.find(ip4) != hosts.end();
-}
-
-inline bool is_member_v6(const boost::asio::ip::address_v6& ip6,
-    const boost::asio::ip::address_v6& net6, uint8_t cidr) THROWS
-{
-    const auto hosts = boost::asio::ip::make_network_v6(net6, cidr).hosts();
-    return hosts.find(ip6) != hosts.end();
-}
-
-// This assumes host and/or subnet v4 address(s) unmapped.
-bool is_member(const asio::address& ip, const asio::address& subnet,
-    uint8_t cidr) NOEXCEPT
-{
-    try
-    {
-        if (ip.is_v4() && subnet.is_v4())
-            return is_member_v4(ip.to_v4(), subnet.to_v4(), cidr);
-
-        if (ip.is_v6() && subnet.is_v6())
-            return is_member_v6(ip.to_v6(), subnet.to_v6(), cidr);
-    }
-    catch (...)
-    {
-    }
-
-    return false;
 }
 
 } // namespace config

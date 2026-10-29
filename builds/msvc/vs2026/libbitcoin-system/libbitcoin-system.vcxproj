@@ -224,7 +224,9 @@
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\byte.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
+      <ObjectFileName>$(IntDir)src_config_endpoint.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\src\config\header.cpp">
@@ -345,6 +347,13 @@
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\muhash.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\address.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\endpoint.cpp">
+      <ObjectFileName>$(IntDir)src_ip_endpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\ip\functions.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\ipv4.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\ipv6.cpp" />
     <ClCompile Include="..\..\..\..\src\math\math.cpp">
       <ObjectFileName>$(IntDir)src_math_math.obj</ObjectFileName>
     </ClCompile>
@@ -673,6 +682,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\endpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\functions.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\ip.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\ipv4.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\ipv6.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\literals.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\machine.hpp" />

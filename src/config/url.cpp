@@ -53,13 +53,13 @@ url::url(const std::string& scheme, const std::string& host,
 {
 }
 
-url::url(const asio::endpoint& uri) NOEXCEPT
+url::url(const ip::endpoint& uri) NOEXCEPT
   : url(uri.address(), uri.port())
 {
 }
 
-url::url(const asio::address& ip, uint16_t port) NOEXCEPT
-  : url(config::to_host(ip), port)
+url::url(const ip::address& ip, uint16_t port) NOEXCEPT
+  : url(ip::to_host(ip), port)
 {
 }
 

@@ -198,6 +198,11 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/hash/checksum.cpp \
     ${srcdir}/../../src/hash/muhash.cpp \
     ${srcdir}/../../src/hash/siphash.cpp \
+    ${srcdir}/../../src/ip/address.cpp \
+    ${srcdir}/../../src/ip/endpoint.cpp \
+    ${srcdir}/../../src/ip/functions.cpp \
+    ${srcdir}/../../src/ip/ipv4.cpp \
+    ${srcdir}/../../src/ip/ipv6.cpp \
     ${srcdir}/../../src/math/math.cpp \
     ${srcdir}/../../src/radix/base_10.cpp \
     ${srcdir}/../../src/radix/base_2048.cpp \
@@ -911,6 +916,17 @@ include_bitcoin_system_intrinsics_none_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_sha.hpp
 
+include_bitcoin_system_ipdir = \
+    ${includedir}/bitcoin/system/ip
+
+include_bitcoin_system_ip_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/ip/address.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/endpoint.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/functions.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/ip.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/ipv4.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/ipv6.hpp
+
 include_bitcoin_system_machinedir = \
     ${includedir}/bitcoin/system/machine
 
@@ -1368,6 +1384,11 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/intrinsics/types.cpp \
     ${srcdir}/../../test/intrinsics/platforms/intel.cpp \
     ${srcdir}/../../test/intrinsics/platforms/neon.cpp \
+    ${srcdir}/../../test/ip/address.cpp \
+    ${srcdir}/../../test/ip/endpoint.cpp \
+    ${srcdir}/../../test/ip/functions.cpp \
+    ${srcdir}/../../test/ip/ipv4.cpp \
+    ${srcdir}/../../test/ip/ipv6.cpp \
     ${srcdir}/../../test/machine/interpreter.cpp \
     ${srcdir}/../../test/machine/interpreter_connect.cpp \
     ${srcdir}/../../test/machine/interpreter_run.cpp \

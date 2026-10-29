@@ -259,14 +259,14 @@ BOOST_AUTO_TEST_CASE(endpoint__construct__authority__expected)
     BOOST_REQUIRE_EQUAL(instance.port(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__construct__asio_endpoint__expected)
+BOOST_AUTO_TEST_CASE(endpoint__construct__ip_endpoint__expected)
 {
     const config::authority authority("42.42.42.42:42");
     const config::endpoint instance(authority.to_endpoint());
     BOOST_REQUIRE_EQUAL(instance.port(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__construct__asio_address__expected)
+BOOST_AUTO_TEST_CASE(endpoint__construct__ip_address__expected)
 {
     const config::authority authority("42.42.42.42:42");
     const config::endpoint instance(authority.ip(), 42);

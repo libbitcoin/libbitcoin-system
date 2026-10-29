@@ -210,7 +210,9 @@
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\byte.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp">
+      <ObjectFileName>$(IntDir)test_config_endpoint.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parser.cpp">
@@ -325,7 +327,9 @@
     <ClCompile Include="..\..\..\..\test\hacks.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
+      <ObjectFileName>$(IntDir)test_hash_functions.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\hkdf.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\muhash.cpp" />
@@ -373,6 +377,15 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\types.cpp">
       <ObjectFileName>$(IntDir)test_intrinsics_types.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ip\address.cpp" />
+    <ClCompile Include="..\..\..\..\test\ip\endpoint.cpp">
+      <ObjectFileName>$(IntDir)test_ip_endpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ip\functions.cpp">
+      <ObjectFileName>$(IntDir)test_ip_functions.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ip\ipv4.cpp" />
+    <ClCompile Include="..\..\..\..\test\ip\ipv6.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter_connect.cpp" />

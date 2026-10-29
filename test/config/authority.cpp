@@ -164,21 +164,21 @@ BOOST_AUTO_TEST_CASE(authority__ip_port_cidr__ipv6_authority__expected)
     BOOST_REQUIRE_EQUAL(host.cidr(), expected_cidr);
 }
 
-BOOST_AUTO_TEST_CASE(authority__ip_port_cidr__boost_address__expected)
+BOOST_AUTO_TEST_CASE(authority__ip_port_cidr__address__expected)
 {
     constexpr uint16_t expected_port = 42;
-    const auto address = boost::asio::ip::make_address(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const auto address = from_host("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
     const authority host(address, expected_port);
     BOOST_REQUIRE_EQUAL(host.port(), expected_port);
     BOOST_REQUIRE_EQUAL(host.ip(), address);
     BOOST_REQUIRE_EQUAL(host.cidr(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(authority__port__boost_endpoint__expected)
+BOOST_AUTO_TEST_CASE(authority__port__endpoint__expected)
 {
     constexpr uint16_t expected_port = 42;
-    const auto address = boost::asio::ip::make_address(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
-    const asio::endpoint tcp_endpoint(address, expected_port);
+    const auto address = from_host("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
+    const ip::endpoint tcp_endpoint(address, expected_port);
     const authority host(tcp_endpoint);
     BOOST_REQUIRE_EQUAL(host.port(), expected_port);
     BOOST_REQUIRE_EQUAL(host.ip(), address);

@@ -45,8 +45,8 @@ public:
     url(const std::string& host, uint16_t port) NOEXCEPT;
     url(const std::string& scheme, const std::string& host,
         uint16_t port) NOEXCEPT;
-    url(const asio::endpoint& uri) NOEXCEPT;
-    url(const asio::address& ip, uint16_t port) NOEXCEPT;
+    url(const ip::endpoint& uri) NOEXCEPT;
+    url(const ip::address& ip, uint16_t port) NOEXCEPT;
     url(const config::authority& authority) NOEXCEPT;
 
     /// Properties.

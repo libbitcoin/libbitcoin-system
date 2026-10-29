@@ -34,10 +34,6 @@
 // www.boost.org/doc/libs/1_78_0/boost/bind.hpp
 #define BOOST_BIND_NO_PLACEHOLDERS
 
-// address::from_string
-////#define BOOST_ASIO_NO_DEPRECATED
-#include <boost/asio.hpp>
-
 #include <boost/multiprecision/cpp_int.hpp>
 
 // Header-only floating point from_chars (boost::charconv is compiled).
@@ -53,15 +49,6 @@
 
 namespace libbitcoin
 {
-    namespace system
-    {
-        namespace asio
-        {
-            typedef boost::asio::ip::address address;
-            typedef boost::asio::ip::tcp::endpoint endpoint;
-        }
-    }
-
     typedef boost::program_options::variables_map variables_map;
     typedef boost::program_options::option_description option_metadata;
     typedef boost::program_options::options_description options_metadata;

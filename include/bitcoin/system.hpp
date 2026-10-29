@@ -236,6 +236,12 @@
 #include <bitcoin/system/intrinsics/none/none_128.hpp>
 #include <bitcoin/system/intrinsics/none/none_aes.hpp>
 #include <bitcoin/system/intrinsics/none/none_sha.hpp>
+#include <bitcoin/system/ip/address.hpp>
+#include <bitcoin/system/ip/endpoint.hpp>
+#include <bitcoin/system/ip/functions.hpp>
+#include <bitcoin/system/ip/ip.hpp>
+#include <bitcoin/system/ip/ipv4.hpp>
+#include <bitcoin/system/ip/ipv6.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/machine/number.hpp>
