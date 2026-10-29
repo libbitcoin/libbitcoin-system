@@ -195,6 +195,7 @@
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/checksum.hpp>
+#include <bitcoin/system/hash/crc32.hpp>
 #include <bitcoin/system/hash/functions.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/hash/hkdf.hpp>

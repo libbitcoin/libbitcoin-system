@@ -196,6 +196,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/filter/golomb.cpp \
     ${srcdir}/../../src/hash/accumulator.cpp \
     ${srcdir}/../../src/hash/checksum.cpp \
+    ${srcdir}/../../src/hash/crc32.cpp \
     ${srcdir}/../../src/hash/muhash.cpp \
     ${srcdir}/../../src/hash/siphash.cpp \
     ${srcdir}/../../src/ip/address.cpp \
@@ -579,6 +580,7 @@ include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/algorithm.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/algorithms.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/checksum.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/crc32.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/functions.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hash.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hkdf.hpp \
@@ -1352,6 +1354,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/filter/sieve.cpp \
     ${srcdir}/../../test/hash/accumulator.cpp \
     ${srcdir}/../../test/hash/checksum.cpp \
+    ${srcdir}/../../test/hash/crc32.cpp \
     ${srcdir}/../../test/hash/functions.cpp \
     ${srcdir}/../../test/hash/hkdf.cpp \
     ${srcdir}/../../test/hash/hmac.cpp \

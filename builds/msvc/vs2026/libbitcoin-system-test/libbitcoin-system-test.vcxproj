@@ -327,6 +327,7 @@
     <ClCompile Include="..\..\..\..\test\hacks.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\crc32.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
       <ObjectFileName>$(IntDir)test_hash_functions.obj</ObjectFileName>
     </ClCompile>

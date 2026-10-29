@@ -345,6 +345,7 @@
     <ClCompile Include="..\..\..\..\src\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\crc32.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\muhash.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\ip\address.cpp" />
@@ -640,6 +641,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithms.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\checksum.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\crc32.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\functions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hkdf.hpp" />

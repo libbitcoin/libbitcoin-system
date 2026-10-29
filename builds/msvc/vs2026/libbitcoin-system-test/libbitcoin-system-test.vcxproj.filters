@@ -588,6 +588,9 @@
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\crc32.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
