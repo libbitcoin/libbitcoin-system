@@ -244,7 +244,7 @@ jobs:
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
           ${{ matrix.options }}
-          ${{ matrix.host && format('--build-limit=target --host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
+          ${{ matrix.host && format('--host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
 
       - name: Execute tests [cross]
         if: ${{ matrix.host }}
