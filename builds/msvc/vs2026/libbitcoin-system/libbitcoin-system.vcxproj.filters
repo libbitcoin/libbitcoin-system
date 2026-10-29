@@ -2162,6 +2162,9 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp">
       <Filter>src\crypto\secp256k1\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\inflate.hpp">
+      <Filter>src\crypto\secp256k1\cuda</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp">
       <Filter>src\crypto\secp256k1\cuda</Filter>
     </ClInclude>

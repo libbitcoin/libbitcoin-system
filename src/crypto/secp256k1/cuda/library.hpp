@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LIBRARY_HPP
 #define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LIBRARY_HPP
 
-#include <boost/beast/zlib/inflate_stream.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include "inflate.hpp"
 #include "ptx.hpp"
 
 #if !defined(HAVE_WINDOWS)
@@ -145,24 +145,8 @@ inline bool resolve(functions& out, void* library) NOEXCEPT
 
 inline bool inflate(std::string& out) NOEXCEPT
 {
-    namespace zlib = boost::beast::zlib;
-    const auto deflated = deflated_ptx();
     out.assign(ptx_size(), '\0');
-
-    zlib::z_params params{};
-    params.next_in = deflated.data();
-    params.avail_in = deflated.size();
-    params.next_out = out.data();
-    params.avail_out = out.size();
-
-    zlib::inflate_stream stream{};
-    boost::system::error_code ec{};
-    stream.write(params, zlib::Flush::finish, ec);
-
-    // The stream may report need_buffers in place of end_of_stream when the
-    // final block ends in the last input byte, so completion is by sizes.
-    return is_zero(params.avail_in) && params.total_out == out.size() &&
-        (ec == zlib::error::end_of_stream || ec == zlib::error::need_buffers);
+    return inflater{ deflated_ptx(), out }.inflate();
 }
 
 BC_POP_WARNING()

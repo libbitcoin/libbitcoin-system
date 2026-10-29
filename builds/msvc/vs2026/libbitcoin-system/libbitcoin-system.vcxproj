@@ -842,6 +842,7 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\inflate.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp" />

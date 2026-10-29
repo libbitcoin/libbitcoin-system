@@ -94,7 +94,7 @@ def compile_ptx(clang, boost, ptx):
 # ── emit ────────────────────────────────────────────────────────────────────
 
 def deflate(data):
-    """Raw deflate (no zlib header), as inflated by beast::zlib."""
+    """Raw deflate (no zlib header)."""
     compressor = zlib.compressobj(level=9, method=zlib.DEFLATED, wbits=-15,
         memLevel=8, strategy=zlib.Z_DEFAULT_STRATEGY)
     return compressor.compress(data) + compressor.flush()
