@@ -101,8 +101,7 @@ constexpr Value power2(Exponent exponent) NOEXCEPT
     Value value{};
 
     // base2 uintx optimization over normal form.
-    return boost::multiprecision::bit_set(value,
-        possible_narrow_and_sign_cast<unsigned>(exponent));
+    return value.set(possible_narrow_and_sign_cast<size_t>(exponent));
 }
 
 template <typename Float, typename Exponent,

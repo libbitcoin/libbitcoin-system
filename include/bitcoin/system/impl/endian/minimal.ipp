@@ -76,19 +76,6 @@ data_chunk to_little_endian_size(Integer value, size_t excess) NOEXCEPT
     return to_little_data(std::move(chunk), value);
 }
 
-// From chunk to uintx.
-// ----------------------------------------------------------------------------
-
-inline uintx from_big_endian(const data_chunk& data) NOEXCEPT
-{
-    return from_big_chunk<uintx>(data.size(), data);
-}
-
-inline uintx from_little_endian(const data_chunk& data) NOEXCEPT
-{
-    return from_little_chunk<uintx>(data.size(), data);
-}
-
 } // namespace system
 } // namespace libbitcoin
 

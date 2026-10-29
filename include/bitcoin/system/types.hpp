@@ -24,6 +24,7 @@
 #include <utility>
 #include <variant>
 #include <bitcoin/system/allocator.hpp>
+#include <bitcoin/system/uintx/uintx.hpp>
 
 namespace libbitcoin {
 
@@ -151,26 +152,8 @@ using to_greater_type = iif<
 /// uintx_t
 /// ---------------------------------------------------------------------------
 
-/// Boost changed the Bits type from unsigned to size_t in v1.79.
-using uintx_size_t = decltype(
-    boost::multiprecision::cpp_int_backend<8u, 8u,
-    boost::multiprecision::unsigned_magnitude,
-    boost::multiprecision::unchecked, void>{}.size());
-
-/// Template for constructing uintx types.
-/// There is no dynamic memory allocation when minBits == maxBits.
-template <uintx_size_t Bits> // <== uintx_size_t
-using uintx_t = boost::multiprecision::number<
-    boost::multiprecision::cpp_int_backend<Bits, Bits,
-    boost::multiprecision::unsigned_magnitude,
-    boost::multiprecision::unchecked, void>>;
-
-/// Cannot generalize because no boost support for unsigned arbitrary precision.
-/// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
-/// but is not a base type. Use of signed types here would also not generalize
-/// as boost uses a different allocator for arbitrary precision. So we are stuck
-/// with this seam, requiring template specialization for uintx.
-typedef boost::multiprecision::cpp_int uintx;
+/// The template parameter type of uintx_t.
+using uintx_size_t = size_t;
 
 /// These are predefined due to use in the library, but any width is valid.
 typedef uintx_t<5u> uint5_t;

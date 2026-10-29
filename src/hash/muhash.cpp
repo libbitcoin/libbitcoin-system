@@ -59,9 +59,7 @@ muhash3072::element muhash3072::to_element(const hash_digest& hash) NOEXCEPT
     chacha20 cipher{ hash };
     cipher.stream(bytes);
 
-    element value{};
-    boost::multiprecision::import_bits(value, bytes.cbegin(), bytes.cend(),
-        byte_bits, false);
+    auto value = uintx_from_little_endian_array(bytes);
 
     if (value >= modulus())
         value -= modulus();
@@ -96,7 +94,7 @@ muhash3072::element muhash3072::inverse(const element& value) NOEXCEPT
 
     for (size_t bit{}; bit < bit_size; ++bit)
     {
-        if (boost::multiprecision::bit_test(exponent, bit))
+        if (exponent.bit(bit))
             result = multiply(result, base);
 
         base = multiply(base, base);

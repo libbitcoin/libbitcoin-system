@@ -167,7 +167,6 @@ static_assert(is_same_type<decltype(is_common_size<int>), const bool>);
 struct two_bytes { uint8_t foo; uint8_t bar; };
 union four_bytes { uint32_t foo; uint8_t bar; };
 
-static_assert(!is_integral_size<uintx>);
 static_assert(!is_integral_size<uint128_t>);
 static_assert(is_integral_size<uint8_t>);
 static_assert(is_integral_size<uint16_t>);
@@ -180,7 +179,7 @@ static_assert(!is_integral_size<uint256_t>);
 static_assert(!is_integral_size<uint512_t>);
 static_assert(is_same_type<decltype(is_integral_size<int>), const bool>);
 
-static_assert(!is_integral<uintx>);
+static_assert(!is_integral<uint256_t>);
 static_assert(!is_integral<uint128_t>);
 static_assert(is_integral<uint8_t>);
 static_assert(is_integral<uint16_t>);
@@ -197,7 +196,7 @@ static_assert(!is_integral<bool>);
 static_assert(!is_integral<std::string>);
 static_assert(is_same_type<decltype(is_integral<int32_t>), const bool>);
 
-static_assert(is_integer<uintx>);
+static_assert(is_integer<uint256_t>);
 static_assert(is_integer<uint128_t>);
 static_assert(is_integer<uint8_t>);
 static_assert(is_integer<uint16_t>);
@@ -214,7 +213,7 @@ static_assert(!is_integer<bool>);
 static_assert(!is_integer<std::string>);
 static_assert(is_same_type<decltype(is_integer<int32_t>), const bool>);
 
-static_assert(!is_integral_integer<uintx>);
+static_assert(!is_integral_integer<uint256_t>);
 static_assert(!is_integral_integer<uint128_t>);
 static_assert(is_integral_integer<uint8_t>);
 static_assert(is_integral_integer<uint16_t>);
@@ -231,7 +230,7 @@ static_assert(!is_integral_integer<bool>);
 static_assert(!is_integral_integer<std::string>);
 static_assert(is_same_type<decltype(is_integral_integer<int32_t>), const bool>);
 
-static_assert(!is_floating_point<uintx>);
+static_assert(!is_floating_point<uint256_t>);
 static_assert(!is_floating_point<uint128_t>);
 static_assert(!is_floating_point<uint8_t>);
 static_assert(!is_floating_point<uint16_t>);

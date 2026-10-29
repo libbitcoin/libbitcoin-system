@@ -857,6 +857,17 @@ include_bitcoin_system_impl_stream_streamers_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/stream/streamers/sha256t_writer.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/stream/streamers/sha256x2_writer.ipp
 
+include_bitcoin_system_impl_uintxdir = \
+    ${includedir}/bitcoin/system/impl/uintx
+
+include_bitcoin_system_impl_uintx_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/arithmetic.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/bitwise.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/compare.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/construct.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/division.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/text.ipp
+
 include_bitcoin_system_impl_unicodedir = \
     ${includedir}/bitcoin/system/impl/unicode
 
@@ -1052,6 +1063,13 @@ include_bitcoin_system_stream_streamers_interfaces_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/stream/streamers/interfaces/byteflipper.hpp \
     ${srcdir}/../../include/bitcoin/system/stream/streamers/interfaces/bytereader.hpp \
     ${srcdir}/../../include/bitcoin/system/stream/streamers/interfaces/bytewriter.hpp
+
+include_bitcoin_system_uintxdir = \
+    ${includedir}/bitcoin/system/uintx
+
+include_bitcoin_system_uintx_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/uintx/uintx.hpp \
+    ${srcdir}/../../include/bitcoin/system/uintx/uintx_t.hpp
 
 include_bitcoin_system_unicodedir = \
     ${includedir}/bitcoin/system/unicode
@@ -1458,6 +1476,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/stream/streamers/sha256_writer.cpp \
     ${srcdir}/../../test/stream/streamers/sha256t_writer.cpp \
     ${srcdir}/../../test/stream/streamers/sha256x2_writer.cpp \
+    ${srcdir}/../../test/uintx/uint256_t.cpp \
+    ${srcdir}/../../test/uintx/uintx_t.cpp \
     ${srcdir}/../../test/unicode/ascii.cpp \
     ${srcdir}/../../test/unicode/code_points.cpp \
     ${srcdir}/../../test/unicode/conversion.cpp \

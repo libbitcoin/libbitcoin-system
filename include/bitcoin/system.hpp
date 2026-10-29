@@ -317,6 +317,8 @@
 #include <bitcoin/system/stream/streamers/interfaces/byteflipper.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
+#include <bitcoin/system/uintx/uintx.hpp>
+#include <bitcoin/system/uintx/uintx_t.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>

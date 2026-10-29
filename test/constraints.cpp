@@ -366,7 +366,6 @@ static_assert(is_defined<if_integer<int>>);
 static_assert(is_defined<if_integer<uint8_t>>);
 static_assert(is_defined<if_integer<uint32_t>>);
 static_assert(is_defined<if_integer<int32_t>>);
-static_assert(is_defined<if_integer<uintx>>);
 static_assert(is_defined<if_integer<uint256_t>>);
 ////static_assert(!is_defined<if_integer<bool>>);
 ////static_assert(!is_defined<if_integer<float>>);
@@ -400,7 +399,7 @@ static_assert(is_defined<if_signed_integer<int64_t>>);
 
 static_assert(is_defined<if_unsigned_integer<uint16_t>>);
 static_assert(is_defined<if_unsigned_integer<size_t>>);
-static_assert(is_defined<if_unsigned_integer<uintx>>);
+static_assert(is_defined<if_unsigned_integer<uint256_t>>);
 ////static_assert(!is_defined<if_unsigned_integer<bool>>);
 ////static_assert(!is_defined<if_unsigned_integer<char>>);
 ////static_assert(!is_defined<if_unsigned_integer<int>>);
@@ -413,7 +412,7 @@ static_assert(is_defined<if_unsigned_integer<uintx>>);
 
 static_assert(is_defined<if_same_signed_integer<int, signed char>>);
 static_assert(is_defined<if_same_signed_integer<uint16_t, uint8_t>>);
-static_assert(is_defined<if_same_signed_integer<uintx, uint128_t>>);
+static_assert(is_defined<if_same_signed_integer<uint256_t, uint128_t>>);
 ////static_assert(!is_defined<if_same_signed_integer<uint16_t, bool>>);
 ////static_assert(!is_defined<if_same_signed_integer<size_t, bool>>);
 ////static_assert(!is_defined<if_same_signed_integer<bool, bool>>);
@@ -521,9 +520,7 @@ static_assert(is_defined<if_integral_integer<int32_t>>);
 ////static_assert(!is_defined<if_integral_integer<double>>);
 ////static_assert(!is_defined<if_integral_integer<base>>);
 
-static_assert(is_defined<if_non_integral<uintx>>);
 static_assert(is_defined<if_non_integral<uint256_t>>);
-static_assert(is_defined<if_non_integral<uintx>>);
 static_assert(is_defined<if_non_integral<base>>);
 static_assert(is_defined<if_non_integral<bool>>);
 static_assert(is_defined<if_non_integral<float>>);
@@ -534,7 +531,6 @@ static_assert(is_defined<if_non_integral<double>>);
 ////static_assert(!is_defined<if_non_integral<uint32_t>>);
 ////static_assert(!is_defined<if_non_integral<int32_t>>);
 
-static_assert(is_defined<if_non_integral_integer<uintx>>);
 static_assert(is_defined<if_non_integral_integer<uint256_t>>);
 ////static_assert(!is_defined<if_non_integral_integer<char>>);
 ////static_assert(!is_defined<if_non_integral_integer<int>>);

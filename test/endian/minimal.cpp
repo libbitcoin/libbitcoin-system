@@ -109,19 +109,6 @@ BOOST_AUTO_TEST_CASE(endian__to_little_endian_size__excess__expected_capacity)
     BOOST_REQUIRE_EQUAL(chunk.size() + excess, chunk.capacity());
 }
 
-// uintx from chunk, not constexpr
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(endian__from_big_endian__uintx_from_chunk__expected)
-{
-    BOOST_REQUIRE(from_big_endian(data_forward) == value32);
-}
-
-BOOST_AUTO_TEST_CASE(endian__from_little_endian__uintx_from_chunk___expected)
-{
-    BOOST_REQUIRE(from_little_endian(data_reverse) == value32);
-}
-
 // integer to chunk, not constexpr
 // ----------------------------------------------------------------------------
 

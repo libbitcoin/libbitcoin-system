@@ -769,6 +769,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streams.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\typelets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\types.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\uintx\uintx.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\uintx\uintx_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\code_points.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\conversion.hpp" />
@@ -992,6 +994,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256t_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256x2_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\arithmetic.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\bitwise.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\compare.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\construct.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\division.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\text.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\unicode\ascii.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionaries.ipp" />

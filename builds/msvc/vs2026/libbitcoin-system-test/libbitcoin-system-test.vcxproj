@@ -308,7 +308,9 @@
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\swaps.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp">
+      <ObjectFileName>$(IntDir)test_endian_uintx_t.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\unsafe.cpp" />
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />
@@ -468,6 +470,10 @@
     <ClCompile Include="..\..\..\..\test\typelets.cpp" />
     <ClCompile Include="..\..\..\..\test\types.cpp">
       <ObjectFileName>$(IntDir)test_types.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\uintx\uint256_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\uintx\uintx_t.cpp">
+      <ObjectFileName>$(IntDir)test_uintx_uintx_t.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />

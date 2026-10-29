@@ -360,9 +360,9 @@ BOOST_AUTO_TEST_CASE(integer__uint256_add256__1_to_negative_zero_hash__expected)
 // divide256
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(integer__uint256_divide256__unit_hash_by_null_hash__throws_overflow_error)
+BOOST_AUTO_TEST_CASE(integer__uint256_divide256__unit_hash_by_null_hash__null_hash)
 {
-    BOOST_REQUIRE_THROW(uint256_t(unit_hash) / uint256_t(0), overflow_exception);
+    BOOST_REQUIRE_EQUAL(uint256_t(unit_hash) / uint256_t(0), uint256_t());
 }
 
 BOOST_AUTO_TEST_CASE(integer__uint256_divide256__null_hash_by_unit_hash__null_hash)
@@ -601,10 +601,11 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_multiply32__max_hash_by_256__shifts
 // assign divide32
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide32__unit_hash_by_null_hash__throws_overflow_error)
+BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide32__unit_hash_by_null_hash__null_hash)
 {
     uint256_t value(unit_hash);
-    BOOST_REQUIRE_THROW(value /= 0, overflow_exception);
+    value /= 0;
+    BOOST_REQUIRE_EQUAL(value, uint256_t());
 }
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide32__null_hash_by_unit_hash__null_hash)
@@ -735,10 +736,11 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_subtract256__1_from_negative_zero_h
 // assign divide256
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide__unit_hash_by_null_hash__throws_overflow_error)
+BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide__unit_hash_by_null_hash__null_hash)
 {
     uint256_t value(unit_hash);
-    BOOST_REQUIRE_THROW(value /= uint256_t(0), overflow_exception);
+    value /= uint256_t(0);
+    BOOST_REQUIRE_EQUAL(value, uint256_t());
 }
 
 BOOST_AUTO_TEST_CASE(integer__uint256_assign_divide__null_hash_by_unit_hash__null_hash)

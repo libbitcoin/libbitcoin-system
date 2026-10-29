@@ -197,7 +197,6 @@ static_assert(is_same_type<to_promoted_type<uint16_t>, uint64_t>);
 static_assert(is_same_type<to_promoted_type<uint32_t>, uint64_t>);
 static_assert(is_same_type<to_promoted_type<uint64_t>, uint64_t>);
 static_assert(is_same_type<to_promoted_type<size_t>, uint64_t>);
-static_assert(is_same_type<to_promoted_type<uintx>, uintx>);
 static_assert(is_same_type<to_promoted_type<uint128_t>, uint128_t>);
 static_assert(is_same_type<to_promoted_type<uint256_t>, uint256_t>);
 
@@ -211,14 +210,6 @@ static_assert(is_same_type<uintx_t<128u>, uint128_t>);
 static_assert(is_same_type<uintx_t<160u>, uint160_t>);
 static_assert(is_same_type<uintx_t<256u>, uint256_t>);
 static_assert(is_same_type<uintx_t<512u>, uint512_t>);
-
-static_assert(is_same_type<uintx,
-    boost::multiprecision::cpp_int>);
-static_assert(is_same_type<uintx_t<1u>,
-    boost::multiprecision::number<
-    boost::multiprecision::cpp_int_backend<1u, 1u,
-    boost::multiprecision::unsigned_magnitude,
-    boost::multiprecision::unchecked, void>>>);
 
 static_assert(is_same_type<unsigned_exact_type<0>, size_t>);
 static_assert(is_same_type<unsigned_exact_type<1>, uint8_t>);

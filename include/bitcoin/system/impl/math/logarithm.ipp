@@ -29,8 +29,6 @@
 namespace libbitcoin {
 namespace system {
 
-namespace mp = boost::multiprecision;
-
 // unpublished (normal forms)
 // ----------------------------------------------------------------------------
 
@@ -139,7 +137,7 @@ constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
 
     // base2 uintx optimization over normal form.
     return possible_narrow_and_sign_cast<Exponent>(
-        add1(mp::msb(value - 1)));
+        add1((value - 1u).msb()));
 }
 
 // Called by bc::byte_width.
@@ -244,8 +242,7 @@ constexpr Exponent floored_log2(Value value) NOEXCEPT
         return 0;
 
     // base2 uintx optimization over normal form.
-    return possible_narrow_and_sign_cast<Exponent>(
-        mp::msb(value));
+    return possible_narrow_and_sign_cast<Exponent>(value.msb());
 }
 
 // Called by test only (for library consistency).
