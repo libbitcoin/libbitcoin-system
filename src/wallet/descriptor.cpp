@@ -105,8 +105,11 @@ std::string descriptor::to_checksum(const std::string& body) NOEXCEPT
 
     std::string out{};
     for (size_t index{}; index < checksum_length; ++index)
-        out += checksum_charset.at(bit_and<uint64_t>(
-            shift_right(check, 5 * (7 - index)), 31));
+    {
+        const auto shifted = shift_right(check, 5 * (7 - index));
+        const auto symbol = bit_and<uint64_t>(shifted, 31);
+        out += checksum_charset.at(possible_narrow_cast<size_t>(symbol));
+    }
 
     return out;
 }

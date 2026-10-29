@@ -400,12 +400,12 @@ constexpr size_t distinct_fail3 = sub1(distinct_rows);
 
 static ec_secret distinct_secret(size_t row) NOEXCEPT
 {
-    return sha256_hash(to_little_endian(narrow_cast<uint32_t>(row)));
+    return sha256_hash(to_little_endian(possible_narrow_cast<uint32_t>(row)));
 }
 
 static hash_digest distinct_digest(size_t row) NOEXCEPT
 {
-    return bitcoin_hash(to_little_endian(narrow_cast<uint32_t>(row)));
+    return bitcoin_hash(to_little_endian(possible_narrow_cast<uint32_t>(row)));
 }
 
 static bool distinct_failed(size_t row) NOEXCEPT

@@ -85,7 +85,8 @@ static bool paid(const scan::batch& batch, size_t tx,
     const auto& outputs = batch.outputs[tx];
     const auto first = from_little_endian<uint64_t>(outputs.first);
     const auto count = from_little_endian<uint32_t>(outputs.count);
-    const auto prefixes = batch.prefixes.subspan(first, count);
+    const auto offset = possible_narrow_cast<size_t>(first);
+    const auto prefixes = batch.prefixes.subspan(offset, count);
     return std::ranges::any_of(prefixes, [&](const auto& prefix) NOEXCEPT
     {
         return prefix == key;

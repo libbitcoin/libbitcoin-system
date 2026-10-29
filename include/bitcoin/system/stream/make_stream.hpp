@@ -73,7 +73,8 @@ public:
         }
         else
         {
-            buffer_.resize(device_.optimal_buffer_size());
+            const auto size = device_.optimal_buffer_size();
+            buffer_.resize(possible_narrow_sign_cast<size_t>(size));
             reset_put();
         }
     }
@@ -213,7 +214,8 @@ protected:
             if (is_negative(position) || position > end_ - begin_)
                 return failure;
 
-            const auto next = std::next(begin_, position);
+            const auto distance = possible_narrow_cast<ptrdiff_t>(position);
+            const auto next = std::next(begin_, distance);
             if constexpr (input && output)
                 next_ = next;
             else if constexpr (input)

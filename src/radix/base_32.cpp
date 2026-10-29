@@ -87,7 +87,7 @@ std::string encode_base32(const data_slice& unencoded) NOEXCEPT
         {
             count -= bits;
             const auto index = unmask_right(shift_right(value, count), bits);
-            encoded.push_back(table.at(index));
+            encoded.push_back(table.at(possible_narrow_cast<size_t>(index)));
         }
     }
 
@@ -95,7 +95,7 @@ std::string encode_base32(const data_slice& unencoded) NOEXCEPT
     if (!is_zero(count))
     {
         const auto index = unmask_right(shift_left(value, bits - count), bits);
-        encoded.push_back(table.at(index));
+        encoded.push_back(table.at(possible_narrow_cast<size_t>(index)));
     }
 
     // Pad to a multiple of eight characters.

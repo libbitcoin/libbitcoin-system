@@ -54,7 +54,8 @@ protected:
     void do_write(const typename device<Container>::value_type* from,
         typename device<Container>::size_type size) NOEXCEPT override
     {
-        container_.insert(container_.cend(), from, std::next(from, size));
+        const auto end = std::next(from, possible_narrow_cast<ptrdiff_t>(size));
+        container_.insert(container_.cend(), from, end);
     }
 
     typename device<Container>::size_type do_optimal_buffer_size()
