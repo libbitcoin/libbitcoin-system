@@ -141,11 +141,7 @@ TEMPLATE
 bool CLASS::
 is_valid_sharing(size_t threshold, size_t count) NOEXCEPT
 {
-    if (is_zero(threshold) || threshold > count || count > digest_index)
-        return false;
-
-    // A single share is the secret, so sharing it more than once exposes it.
-    return !(is_one(threshold) && count > one);
+    return !is_zero(threshold) && threshold <= count && count <= digest_index;
 }
 
 TEMPLATE

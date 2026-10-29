@@ -67,10 +67,15 @@ BOOST_AUTO_TEST_CASE(shamir__split__threshold_above_count__false)
     BOOST_REQUIRE(!shamir128::split(shares, secret128, 3, 2, entropy));
 }
 
-BOOST_AUTO_TEST_CASE(shamir__split__single_threshold_multiple_shares__false)
+BOOST_AUTO_TEST_CASE(shamir__split__single_threshold_multiple_shares__secrets)
 {
     shamir128::shares_t shares{};
-    BOOST_REQUIRE(!shamir128::split(shares, secret128, 1, 2, {}));
+    BOOST_REQUIRE(shamir128::split(shares, secret128, 1, 2, {}));
+    BOOST_REQUIRE_EQUAL(shares.size(), 2u);
+    BOOST_REQUIRE_EQUAL(shares.at(0).index, 0u);
+    BOOST_REQUIRE_EQUAL(shares.at(0).value, secret128);
+    BOOST_REQUIRE_EQUAL(shares.at(1).index, 1u);
+    BOOST_REQUIRE_EQUAL(shares.at(1).value, secret128);
 }
 
 BOOST_AUTO_TEST_CASE(shamir__split__wrong_entropy_size__false)
