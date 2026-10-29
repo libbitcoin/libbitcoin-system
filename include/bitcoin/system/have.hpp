@@ -369,7 +369,7 @@
 #endif
 
 /// ARM architecture inline assembly.
-#if defined(HAVE_ARM) && !(defined(HAVE_MSC) && defined(HAVE_X32))
+#if defined(HAVE_ARM) && !defined(HAVE_MSC)
     #define HAVE_ARM_ASSEMBLY
 #endif
 
