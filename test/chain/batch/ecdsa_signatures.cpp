@@ -34,11 +34,13 @@ const ec_compressed ecdsa_key = base16_array
 (
     "039cfcfe4a5d0efad27382e5d2b478eb398a8b691a66e01c878b600b5042b33166"
 );
-const ec_signature ecdsa_sig = base16_array
-(
-    "b434c7c720d63d71e1136d740df7ff636770ce59cb0389ae8cd24c0d4441f143"
-    "01f4e1dbc36f32b4683faeecc8e4b2c6810da69e98fd783f1aad105636c3da08"
-);
+const ec_signature ecdsa_sig = array_cast<uint8_t>(std_array<uint64_t, 8>
+{
+    0x713dd620c7c734b4_u64, 0x63fff70d746d13e1_u64,
+    0xae8903cb59ce7067_u64, 0x43f141440d4cd28c_u64,
+    0xb4326fc3dbe1f401_u64, 0xc6b2e4c8ecae3f68_u64,
+    0x3f78fd989ea60d81_u64, 0x08dac3365610ad1a_u64
+});
 
 BOOST_AUTO_TEST_CASE(ecdsa_signatures__default__empty)
 {

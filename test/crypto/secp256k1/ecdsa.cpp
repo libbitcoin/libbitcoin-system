@@ -49,9 +49,13 @@ const hash_digest sighash3 = base16_hash(
 const der_signature der_signature3 = base16_chunk(
     "3044022057d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8"
     "befe324802203750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92");
-const ec_signature signature3 = base16_array(
-    "4832febef8b31c7c922a15cb4063a43ab69b099bba765e24facef50dfbb4d057"
-    "928ed5c6b6886562c2fe6972fd7c7f462e557129067542cce6b37d72e5ea5037");
+const ec_signature signature3 = array_cast<uint8_t>(std_array<uint64_t, 8>
+{
+    0x7c1cb3f8befe3248_u64, 0x3aa46340cb152a92_u64,
+    0x245e76ba9b099bb6_u64, 0x57d0b4fb0df5cefa_u64,
+    0x626588b6c6d58e92_u64, 0x467f7cfd7269fec2_u64,
+    0xcc4275062971552e_u64, 0x3750eae5727db3e6_u64
+});
 
 BOOST_AUTO_TEST_CASE(secp256k1__sign__positive__expected)
 {
@@ -168,9 +172,13 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
     const der_signature der_signature = base16_chunk(
         "3044022043f141440d4cd28cae8903cb59ce706763fff70d746d13e1713dd620c7c734"
         "b4022008dac3365610ad1a3f78fd989ea60d81c6b2e4c8ecae3f68b4326fc3dbe1f401");
-    const ec_signature expected_signature = base16_array(
-        "b434c7c720d63d71e1136d740df7ff636770ce59cb0389ae8cd24c0d4441f143"
-        "01f4e1dbc36f32b4683faeecc8e4b2c6810da69e98fd783f1aad105636c3da08");
+    const ec_signature expected_signature = array_cast<uint8_t>(std_array<uint64_t, 8>
+    {
+        0x713dd620c7c734b4_u64, 0x63fff70d746d13e1_u64,
+        0xae8903cb59ce7067_u64, 0x43f141440d4cd28c_u64,
+        0xb4326fc3dbe1f401_u64, 0xc6b2e4c8ecae3f68_u64,
+        0x3f78fd989ea60d81_u64, 0x08dac3365610ad1a_u64
+    });
 
     ec_signature signature1{};
     BOOST_CHECK(decode_signature(signature1, der_signature, bip66));
