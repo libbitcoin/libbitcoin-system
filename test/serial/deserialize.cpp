@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(deserialize__from_chars__double__expected)
     const std::string_view text{ "-1.5e3" };
     const auto last = std::next(text.data(), text.size());
     double out{};
-    const auto result = from_chars(text.data(), last, out);
+    const auto result = std::from_chars(text.data(), last, out);
 
     BOOST_REQUIRE(result.ec == std::errc{});
     BOOST_REQUIRE(result.ptr == last);
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(deserialize__from_chars__float__expected)
     const std::string_view text{ "0.25" };
     const auto last = std::next(text.data(), text.size());
     float out{};
-    const auto result = from_chars(text.data(), last, out);
+    const auto result = std::from_chars(text.data(), last, out);
 
     BOOST_REQUIRE(result.ec == std::errc{});
     BOOST_REQUIRE(result.ptr == last);
@@ -381,7 +381,7 @@ BOOST_AUTO_TEST_CASE(deserialize__from_chars__trailing__stops)
     const std::string_view text{ "1.5x" };
     const auto last = std::next(text.data(), text.size());
     double out{};
-    const auto result = from_chars(text.data(), last, out);
+    const auto result = std::from_chars(text.data(), last, out);
 
     BOOST_REQUIRE(result.ec == std::errc{});
     BOOST_REQUIRE(result.ptr == std::prev(last));
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(deserialize__from_chars__invalid__invalid_argument)
     const std::string_view text{ "x" };
     const auto last = std::next(text.data(), text.size());
     double out{};
-    const auto result = from_chars(text.data(), last, out);
+    const auto result = std::from_chars(text.data(), last, out);
 
     BOOST_REQUIRE(result.ec == std::errc::invalid_argument);
     BOOST_REQUIRE(result.ptr == text.data());
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(deserialize__from_chars__overflow__result_out_of_range)
     const std::string_view text{ "1e400" };
     const auto last = std::next(text.data(), text.size());
     double out{};
-    const auto result = from_chars(text.data(), last, out);
+    const auto result = std::from_chars(text.data(), last, out);
 
     BOOST_REQUIRE(result.ec == std::errc::result_out_of_range);
     BOOST_REQUIRE(result.ptr == last);
@@ -415,7 +415,7 @@ BOOST_AUTO_TEST_CASE(deserialize__from_chars__underflow__result_out_of_range)
     const std::string_view text{ "1e-400" };
     const auto last = std::next(text.data(), text.size());
     double out{};
-    const auto result = from_chars(text.data(), last, out);
+    const auto result = std::from_chars(text.data(), last, out);
 
     BOOST_REQUIRE(result.ec == std::errc::result_out_of_range);
     BOOST_REQUIRE(result.ptr == last);
