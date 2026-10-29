@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(json_conversion__value_from__tuples__array)
     const std::pair<int, std::string> pair{ 1, "a" };
     const std::tuple<bool, double, std::nullptr_t> tuple{ true, 0.5, nullptr };
     BOOST_REQUIRE_EQUAL(serialize(value_from(pair)), R"([1,"a"])");
-    BOOST_REQUIRE_EQUAL(serialize(value_from(tuple)), "[true,5E-1,null]");
+    BOOST_REQUIRE_EQUAL(serialize(value_from(tuple)), "[true,0.5,null]");
 }
 
 // value_to

@@ -49,7 +49,7 @@ constexpr auto escapes = []() NOEXCEPT
     return table;
 }();
 
-static size_t format_double(char* data, double number) NOEXCEPT
+static size_t format_double(char* data, char* end, double number) NOEXCEPT
 {
     if (std::isnan(number))
     {
@@ -65,25 +65,14 @@ static size_t format_double(char* data, double number) NOEXCEPT
         return size;
     }
 
-    // Shortest round-trip scientific (d[.ddd]e[+-]XX) as d[.ddd]E[-]X.
-    char buffer[32]{};
-    const auto end = std::next(&buffer[0], sizeof(buffer));
-    const auto result = std::to_chars(&buffer[0], end, number,
-        std::chars_format::scientific);
+    // Shortest round-trip decimal, with a fraction so that it parses as double.
+    auto out = std::to_chars(data, end, number, std::chars_format::fixed).ptr;
+    if (std::find(data, out, '.') == out)
+    {
+        *out++ = '.';
+        *out++ = '0';
+    }
 
-    const auto exponent = std::find(&buffer[0], result.ptr, 'e');
-    auto out = std::copy(&buffer[0], exponent, data);
-    *out++ = 'E';
-
-    auto it = std::next(exponent);
-    if (*it == '-')
-        *out++ = '-';
-
-    ++it;
-    while (std::next(it) != result.ptr && *it == '0')
-        ++it;
-
-    out = std::copy(it, result.ptr, out);
     return possible_narrow_and_sign_cast<size_t>(std::distance(data, out));
 }
 
@@ -158,7 +147,7 @@ size_t serializer::format(char* data, const value& element) NOEXCEPT
         case kind::double_:
         default:
         {
-            return format_double(data, element.get_double());
+            return format_double(data, end, element.get_double());
         }
     }
 }
