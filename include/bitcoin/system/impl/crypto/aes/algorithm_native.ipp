@@ -80,7 +80,7 @@ void CLASS::
 encrypt_native(block_t& block, const schedule_t& schedule) NOEXCEPT
 {
     auto& word = array_cast<xint128_t>(block).front();
-    std_array<xint128_t, one> state{ f::load<uint8_t>(word) };
+    aligned_array<xint128_t, one> state{ f::load<uint8_t>(word) };
     aes::encrypt<K::rounds>(state, native_encrypt_keys<xint128_t>(schedule));
     f::store<uint8_t>(word, state.front());
 }
@@ -90,7 +90,7 @@ void CLASS::
 decrypt_native(block_t& block, const schedule_t& schedule) NOEXCEPT
 {
     auto& word = array_cast<xint128_t>(block).front();
-    std_array<xint128_t, one> state{ f::load<uint8_t>(word) };
+    aligned_array<xint128_t, one> state{ f::load<uint8_t>(word) };
     aes::decrypt<K::rounds>(state, native_decrypt_keys<xint128_t>(schedule));
     f::store<uint8_t>(word, state.front());
 }

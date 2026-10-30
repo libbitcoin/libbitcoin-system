@@ -35,6 +35,11 @@ namespace libbitcoin {
 template <typename Type, size_t Size>
 using std_array = std::array<Type, Size>;
 
+/// std_array aligned to its element, as clang-cl under-aligns a std::array of
+/// vectors (the MSVC STL declares std::array under pragma pack).
+template <typename Type, size_t Size>
+struct alignas(Type) aligned_array : std_array<Type, Size> {};
+
 /// std_vector aliased to allow seamless conditional allocator usage.
 /// The default area is applied by default, so remains globally relocatable.
 /// In some cases library code requires default allocator vectors, so these
@@ -317,5 +322,16 @@ struct place2 {};
 struct place3 {};
 
 } // namespace libbitcoin
+
+namespace std
+{
+template <typename Type, size_t Size>
+struct tuple_size<libbitcoin::aligned_array<Type, Size>>
+  : tuple_size<libbitcoin::std_array<Type, Size>> {};
+
+template <size_t Index, typename Type, size_t Size>
+struct tuple_element<Index, libbitcoin::aligned_array<Type, Size>>
+  : tuple_element<Index, libbitcoin::std_array<Type, Size>> {};
+} // namespace std
 
 #endif

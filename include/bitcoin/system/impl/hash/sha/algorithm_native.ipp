@@ -423,7 +423,7 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
     unshuffle(lo, hi);
 
     // digest is copied so that state remains valid (LE).
-    std::array<xint128_t, 2> wdigest{};
+    aligned_array<xint128_t, 2> wdigest{};
     f::store(wdigest[0], native_to_big_end<uint32_t>(lo));
     f::store(wdigest[1], native_to_big_end<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);
@@ -576,7 +576,7 @@ native_finalize_second(xint128_t lo, xint128_t hi) NOEXCEPT
     native_rounds(lo, hi, message0, message1, message2, message3);
     unshuffle(lo, hi);
 
-    std::array<xint128_t, 2> wdigest{};
+    aligned_array<xint128_t, 2> wdigest{};
     f::store(wdigest[0], native_to_big_end<uint32_t>(lo));
     f::store(wdigest[1], native_to_big_end<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);

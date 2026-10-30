@@ -198,21 +198,21 @@ protected:
     using xblock_t = std_array<words_t, Lanes>;
 
     template <typename xWord, if_extended<xWord> = true>
-    using xbuffer_t = std_array<xWord, SHA::rounds>;
+    using xbuffer_t = aligned_array<xWord, SHA::rounds>;
 
     template <typename xWord, if_extended<xWord> = true>
-    using xstate_t = std_array<xWord, SHA::state_words>;
+    using xstate_t = aligned_array<xWord, SHA::state_words>;
 
     template <typename xWord, if_extended<xWord> = true>
-    using xchunk_t = std_array<xWord, SHA::state_words>;
+    using xchunk_t = aligned_array<xWord, SHA::state_words>;
 
     /// Wide is casting of buffer_t to xWord for single block concurrency.
     /// This is not multi-block or block striping, just larger words.
     template <typename xWord, if_extended<xWord> = true>
-    using wbuffer_t = std_array<xWord, sizeof(buffer_t) / sizeof(xWord)>;
+    using wbuffer_t = aligned_array<xWord, sizeof(buffer_t) / sizeof(xWord)>;
 
     template <typename xWord, if_extended<xWord> = true>
-    using wstate_t = std_array<xWord, sizeof(state_t) / sizeof(xWord)>;
+    using wstate_t = aligned_array<xWord, sizeof(state_t) / sizeof(xWord)>;
 
     /// Other types.
     /// -----------------------------------------------------------------------

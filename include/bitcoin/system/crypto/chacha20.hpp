@@ -66,7 +66,7 @@ protected:
     typedef std_array<uint32_t, 3> nonce_t;
 
     template <typename Word>
-    using state_t = std_array<Word, state_words>;
+    using state_t = aligned_array<Word, state_words>;
 
     /// The number of concurrent blocks computed by an extended word.
     template <typename xWord>

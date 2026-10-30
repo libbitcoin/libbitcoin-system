@@ -45,7 +45,7 @@ protected:
 
     /// Field element, five 52 bit limbs.
     template <typename Word>
-    using field_t = std_array<Word, 5>;
+    using field_t = aligned_array<Word, 5>;
 
     /// Unsigned 128 bit accumulator, native where available.
 #if defined(__SIZEOF_INT128__)
@@ -60,7 +60,7 @@ protected:
 
     /// Field product, ten columns of 52 bit limb products.
     template <typename Word>
-    using product_t = std_array<Word, 10>;
+    using product_t = aligned_array<Word, 10>;
 
     /// Affine point, never infinity.
     template <typename Word>

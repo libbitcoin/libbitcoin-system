@@ -37,6 +37,7 @@ struct accessor
     using aes128::sbox;
     using aes128::inverse_sbox;
     using aes128::ortho;
+    using aes128::xplanes_t;
 };
 
 constexpr data_array<256> fips_sbox = base16_array(
@@ -138,7 +139,7 @@ constexpr data_array<64> quarter(const data_array<256>& table)
 // the transposed planes carry 64 independent bytes.
 static data_array<64> substitute(const data_array<64>& bytes)
 {
-    auto q = from_little_endians(array_cast<uint64_t>(bytes));
+    accessor::xplanes_t<uint64_t> q{ from_little_endians(array_cast<uint64_t>(bytes)) };
     accessor::ortho(q);
     accessor::sbox(q);
     accessor::ortho(q);
@@ -147,7 +148,7 @@ static data_array<64> substitute(const data_array<64>& bytes)
 
 static data_array<64> inverse_substitute(const data_array<64>& bytes)
 {
-    auto q = from_little_endians(array_cast<uint64_t>(bytes));
+    accessor::xplanes_t<uint64_t> q{ from_little_endians(array_cast<uint64_t>(bytes)) };
     accessor::ortho(q);
     accessor::inverse_sbox(q);
     accessor::ortho(q);

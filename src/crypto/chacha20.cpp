@@ -176,8 +176,8 @@ INLINE void chacha20::transpose(rows_t<xWord>& row) NOEXCEPT
     constexpr auto size = lanes<xWord>;
 
     // Interleave adjacent rows by 32 and then by 64 bit words.
-    rows_t<xWord> t{};
-    rows_t<xWord> u{};
+    aligned_array<xWord, lanes<xWord>> t{};
+    aligned_array<xWord, lanes<xWord>> u{};
 
     if constexpr (size == 4)
     {
@@ -216,7 +216,7 @@ INLINE void chacha20::transpose(rows_t<xWord>& row) NOEXCEPT
         interleave64<2>(u, t);
         interleave64<3>(u, t);
 
-        rows_t<xWord> v{};
+        aligned_array<xWord, lanes<xWord>> v{};
         exchange<0, 4>(v, u);
         exchange<1, 4>(v, u);
         exchange<2, 4>(v, u);
