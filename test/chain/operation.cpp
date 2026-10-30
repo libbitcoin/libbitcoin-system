@@ -960,9 +960,32 @@ BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify
 // ----------------------------------------------------------------------------
 
 ////size_t serialized_size() const
-////opcode opcode_from_size(size_t size)
-////opcode minimal_opcode_from_data(const data_chunk& data)
 ////opcode nominal_opcode_from_data(const data_chunk& data)
+
+// operation__opcode_from_size__boundaries__expected
+static_assert(operation::opcode_from_size(0) == opcode::push_size_0);
+static_assert(operation::opcode_from_size(74) == opcode::push_size_74);
+static_assert(operation::opcode_from_size(75) == opcode::push_size_75);
+static_assert(operation::opcode_from_size(76) == opcode::push_one_size);
+static_assert(operation::opcode_from_size(255) == opcode::push_one_size);
+static_assert(operation::opcode_from_size(256) == opcode::push_two_size);
+static_assert(operation::opcode_from_size(65535) == opcode::push_two_size);
+static_assert(operation::opcode_from_size(65536) == opcode::push_four_size);
+
+BOOST_AUTO_TEST_CASE(operation__minimal_opcode_from_data__positive_boundaries__expected)
+{
+    BOOST_REQUIRE(operation::minimal_opcode_from_data({ 0x0f }) == opcode::push_positive_15);
+    BOOST_REQUIRE(operation::minimal_opcode_from_data({ 0x10 }) == opcode::push_positive_16);
+    BOOST_REQUIRE(operation::minimal_opcode_from_data({ 0x11 }) == opcode::push_size_1);
+}
+
+BOOST_AUTO_TEST_CASE(operation__minimal_opcode_from_data__size_boundaries__expected)
+{
+    BOOST_REQUIRE(operation::minimal_opcode_from_data(data_chunk(75, 0x42)) == opcode::push_size_75);
+    BOOST_REQUIRE(operation::minimal_opcode_from_data(data_chunk(76, 0x42)) == opcode::push_one_size);
+    BOOST_REQUIRE(operation::minimal_opcode_from_data(data_chunk(255, 0x42)) == opcode::push_one_size);
+    BOOST_REQUIRE(operation::minimal_opcode_from_data(data_chunk(256, 0x42)) == opcode::push_two_size);
+}
 
 // operation__is_positive__always__expected
 static_assert(!operation::is_positive(opcode::push_size_1));
