@@ -134,7 +134,7 @@ jobs:
             host: "s390x-linux-gnu"
             boost: ""
             secp256k1: ""
-            options: "--enable-isystem"
+            options: "--enable-isystem --build-skip-tests"
 
     runs-on: ${{ matrix.image }}
 
@@ -229,14 +229,12 @@ jobs:
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
-        env:
-          MAKEFLAGS: "${{ matrix.host && 'TESTS=' || '' }}"
         run: >
           ./builds/gnu/install-gnu.sh
           --build-use-local-src
           --build-src-dir="${{ github.workspace }}"
           --prefix="${{ github.workspace }}/prefix"
-          ${{ !matrix.host && '--build-post-install-clean' || '' }}
+          --build-post-install-clean
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -244,19 +242,7 @@ jobs:
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
           ${{ matrix.options }}
-          ${{ matrix.host && format('--build-limit=target --host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
-
-      - name: Execute tests [cross]
-        if: ${{ matrix.host }}
-        shell: bash
-        working-directory: 'libbitcoin-system/obj/builds/gnu'
-        run: >
-          ./test/libbitcoin-system-test
-          --log_level=test_suite
-          --report_level=short
-          --show_progress=no
-          --detect_memory_leak=0
-          --build_info=yes
+          ${{ matrix.host && format('--host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
 
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}

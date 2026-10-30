@@ -77,6 +77,20 @@ static_assert(is_same_type<decltype(to_floating(1u)), double>);
 static_assert(is_same_type<decltype(to_floating<float>(1u)), float>);
 static_assert(is_same_type<decltype(to_floating<double>(2u)), double>);
 
+static_assert(to32(0_size) == 0_u32);
+static_assert(to32(42_size) == 42_u32);
+static_assert(to64(0_size) == 0_u64);
+static_assert(to64(42_size) == 42_u64);
+static_assert(is_same_type<decltype(to32(42_size)), uint32_t>);
+static_assert(is_same_type<decltype(to64(42_size)), uint64_t>);
+static_assert(to32(0_nsize) == 0_i32);
+static_assert(to32(42_nsize) == 42_ni32);
+static_assert(to64(0_nsize) == 0_i64);
+static_assert(to64(42_nsize) == 42_ni64);
+static_assert(to64(to_signed(max_size_t)) == -1);
+static_assert(is_same_type<decltype(to32(42_nsize)), int32_t>);
+static_assert(is_same_type<decltype(to64(42_nsize)), int64_t>);
+
 // TODO: below can move to static_assert under c++23.
 
 BOOST_AUTO_TEST_SUITE(cast_tests)

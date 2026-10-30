@@ -63,7 +63,7 @@ INLINE constexpr Integral native_from_little_end(Integral little) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral>, if_non_integral<xWord>>
+    if_integral_integer<Integral>, if_lane_swappable<Integral, xWord>>
 INLINE xWord native_to_big_end(xWord native) NOEXCEPT
 {
     if constexpr (is_little_endian)
@@ -73,7 +73,7 @@ INLINE xWord native_to_big_end(xWord native) NOEXCEPT
 }
 
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral>, if_non_integral<xWord>>
+    if_integral_integer<Integral>, if_lane_swappable<Integral, xWord>>
 INLINE xWord native_to_little_end(xWord native) NOEXCEPT
 {
     if constexpr (is_big_endian)
@@ -83,14 +83,14 @@ INLINE xWord native_to_little_end(xWord native) NOEXCEPT
 }
 
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral>, if_non_integral<xWord>>
+    if_integral_integer<Integral>, if_lane_swappable<Integral, xWord>>
 INLINE xWord native_from_big_end(xWord big) NOEXCEPT
 {
     return native_to_big_end<Integral>(big);
 }
 
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral>, if_non_integral<xWord>>
+    if_integral_integer<Integral>, if_lane_swappable<Integral, xWord>>
 INLINE xWord native_from_little_end(xWord little) NOEXCEPT
 {
     return native_to_little_end<Integral>(little);

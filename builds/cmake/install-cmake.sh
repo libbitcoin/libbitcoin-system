@@ -364,6 +364,14 @@ main()
         msg_verbose "CXX using defined value '${CXX}'"
     fi
 
+    if [[ -z "${MACOSX_DEPLOYMENT_TARGET}" ]]; then
+        if [[ ${OS} == Darwin ]]; then
+            export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)
+        fi
+    else
+        msg_verbose "MACOSX_DEPLOYMENT_TARGET using defined value '${MACOSX_DEPLOYMENT_TARGET}'"
+    fi
+
     # HARDWARE_OPTIMIZED
     if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
         ARCHTUNE="-march=native -mtune=native"

@@ -377,6 +377,19 @@ jobs:
             secp256k1: ""
             options: "--enable-isystem"
 
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "s390x-linux-gnu-gcc"
+            cxx: "s390x-linux-gnu-g++"
+            flags: ""
+            coverage: ""
+            package: "gcc-s390x-linux-gnu g++-s390x-linux-gnu qemu-user-static"
+            host: "s390x-linux-gnu"
+            boost: ""
+            secp256k1: ""
+            options: "--enable-isystem --build-skip-tests"
+
     runs-on: ${{ matrix.image }}
 
     env:
@@ -384,6 +397,7 @@ jobs:
       CXX: '${{ matrix.cxx }}'
       CFLAGS: '${{ matrix.flags }}'
       CXXFLAGS: '${{ matrix.flags }}'
+      QEMU_LD_PREFIX: "${{ matrix.host && format('/usr/{0}', matrix.host) || '' }}"
 
     steps:
       - name: Get branch name
@@ -437,6 +451,35 @@ jobs:
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Verify emulation [cross]
+        if: ${{ matrix.host }}
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo 'int main() { return 0; }' > emulation.c
+          ${{ matrix.cc }} emulation.c -o emulation
+          file emulation
+          ./emulation
+
+      - name: Install boost headers [cross]
+        if: ${{ matrix.host }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        env:
+          CC: 'gcc'
+          CXX: 'g++'
+        run: >
+          ./builds/gnu/install-gnu.sh
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+          --build-limit=external
+          --build-boost
+
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
@@ -453,6 +496,7 @@ jobs:
           ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
           ${{ matrix.options }}
+          ${{ matrix.host && format('--host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
 
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
