@@ -16,31 +16,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_IMPL_CONFIG_SETTING_IPP
-#define LIBBITCOIN_SYSTEM_IMPL_CONFIG_SETTING_IPP
+#ifndef LIBBITCOIN_SYSTEM_IMPL_OPTIONS_SETTING_IPP
+#define LIBBITCOIN_SYSTEM_IMPL_OPTIONS_SETTING_IPP
 
+#include <filesystem>
 #include <sstream>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace config {
+namespace options {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // Path insertion is quoted, and wide on win32.
-inline std::string serialize(const std::filesystem::path& value) NOEXCEPT
+inline std::string setting_text(const std::filesystem::path& value) NOEXCEPT
 {
     return from_path(value);
 }
 
 template <typename Type>
-std::string serialize(const Type& value) NOEXCEPT
+std::string setting_text(const Type& value) NOEXCEPT
 {
     if constexpr (is_floating_point<Type>)
     {
         return serialize_fixed(value);
+    }
+    else if constexpr (is_integral<Type> && is_one(sizeof(Type)))
+    {
+        // Single byte integers are numbers, not characters.
+        return std::to_string(value);
     }
     else
     {
@@ -58,11 +65,11 @@ std::string format_default(const Type& value) NOEXCEPT
     {
         items.reserve(value.size());
         for (const auto& element: value)
-            items.push_back(serialize(element));
+            items.push_back(setting_text(element));
     }
     else
     {
-        items.push_back(serialize(value));
+        items.push_back(setting_text(value));
     }
 
     if (items.empty() || (is_one(items.size()) && items.front().empty()))
@@ -76,7 +83,7 @@ std::string format_default(const Type& value) NOEXCEPT
 
 template <typename Type>
 setting_value<Type>::setting_value(Type* store, bool secret) THROWS
-  : boost::program_options::typed_value<Type>(store), store_(store),
+  : typed_value<Type>(store), store_(store),
     secret_(secret), default_text_(secret ? "" : format_default(*store))
 {
     this->default_value(*store, default_text_);
@@ -92,11 +99,11 @@ string_list setting_value<Type>::values() const NOEXCEPT
         out.reserve(store_->size());
 
         for (const auto& element: *store_)
-            out.push_back(serialize(element));
+            out.push_back(setting_text(element));
     }
     else
     {
-        out.push_back(serialize(*store_));
+        out.push_back(setting_text(*store_));
     }
 
     // A set secret reports one empty value, so that it displays as configured
@@ -114,24 +121,25 @@ std::string setting_value<Type>::default_text() const NOEXCEPT
 }
 
 template <typename Type>
-void setting_value<Type>::xparse(boost::any& value_store,
-    const string_list& new_tokens) const THROWS
+void setting_value<Type>::parse(std::any& value, const string_list& tokens,
+    const std::string& option) const THROWS
 {
-    using base = boost::program_options::typed_value<Type>;
     if constexpr (is_integral<Type>)
     {
-        string_list tokens{};
-        tokens.reserve(new_tokens.size());
-        for (const auto& token: new_tokens)
-            tokens.push_back(ungroup(token));
+        string_list ungrouped{};
+        ungrouped.reserve(tokens.size());
+        for (const auto& token: tokens)
+            ungrouped.push_back(ungroup(token));
 
-        base::xparse(value_store, tokens);
+        typed_value<Type>::parse(value, ungrouped, option);
     }
     else
     {
-        base::xparse(value_store, new_tokens);
+        typed_value<Type>::parse(value, tokens, option);
     }
 }
+
+BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 
 template <typename Type>
 setting_value<Type>* setting(Type* store) THROWS
@@ -147,7 +155,9 @@ setting_value<Type>* secret(Type* store) THROWS
 
 BC_POP_WARNING()
 
-} // namespace config
+BC_POP_WARNING()
+
+} // namespace options
 } // namespace system
 } // namespace libbitcoin
 

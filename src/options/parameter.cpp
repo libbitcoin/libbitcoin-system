@@ -16,11 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/parameter.hpp>
+#include <bitcoin/system/options/parameter.hpp>
 
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 
-using namespace libbitcoin::system::config;
+using namespace libbitcoin::system;
+using namespace libbitcoin::system::options;
 const int parameter::not_positional = -1;
 const char parameter::no_short_name = 0x00;
 const char parameter::option_prefix_char = '-';
@@ -74,7 +76,7 @@ unsigned parameter::arguments_limit(int position, const option_metadata& option,
     const argument_list& arguments) const NOEXCEPT
 {
     if (position == parameter::not_positional)
-        return option.semantic()->max_tokens();
+        return limit<unsigned>(option.semantic()->max_tokens());
 
     return arguments[position].second;
 }

@@ -29,8 +29,6 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost::program_options;
-
 const std::string point::delimiter = ":";
 
 // Point format is currently private to bx:

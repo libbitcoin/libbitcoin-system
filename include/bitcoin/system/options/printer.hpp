@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_PRINTER_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_PRINTER_HPP
+#ifndef LIBBITCOIN_SYSTEM_OPTIONS_PRINTER_HPP
+#define LIBBITCOIN_SYSTEM_OPTIONS_PRINTER_HPP
 
-#include <bitcoin/system/config/parameter.hpp>
+#include <bitcoin/system/options/parameter.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace config {
+namespace options {
 
 /// Shorthand for property declarations in printer class.
 #define BC_PROPERTY(type, name) \
@@ -118,7 +118,7 @@ public:
 #undef BC_PROPERTY
 #undef BC_PROPERTY_GET_REF
 
-} // namespace config
+} // namespace options
 } // namespace system
 } // namespace libbitcoin
 

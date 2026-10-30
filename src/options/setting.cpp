@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/setting.hpp>
+#include <bitcoin/system/options/setting.hpp>
 
 #include <locale>
 #include <sstream>
@@ -24,7 +24,7 @@
 
 namespace libbitcoin {
 namespace system {
-namespace config {
+namespace options {
 
 bool is_configured(const variables_map& variables,
     const std::string& name) NOEXCEPT
@@ -73,6 +73,6 @@ std::string ungroup(const std::string& text) NOEXCEPT
 }
 BC_POP_WARNING()
 
-} // namespace config
+} // namespace options
 } // namespace system
 } // namespace libbitcoin

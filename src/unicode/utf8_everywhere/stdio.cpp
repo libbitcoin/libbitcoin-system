@@ -24,6 +24,7 @@
     #include <windows.h>
 #else
     #include <termios.h>
+    #include <unistd.h>
 #endif
 #include <mutex>
 #include <bitcoin/system/define.hpp>

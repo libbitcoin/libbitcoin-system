@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_SETTING_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_SETTING_HPP
+#ifndef LIBBITCOIN_SYSTEM_OPTIONS_SETTING_HPP
+#define LIBBITCOIN_SYSTEM_OPTIONS_SETTING_HPP
 
-#include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/serial/serial.hpp>
-#include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/options/value.hpp>
+#include <bitcoin/system/options/variables.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace config {
+namespace options {
 
 /// True if set by command line, environment, or configuration file.
 /// False if unset or obtained from a declared option default value.
@@ -56,7 +56,7 @@ public:
 /// the value of its store at construction as its default.
 template <typename Type>
 class setting_value
-  : public boost::program_options::typed_value<Type>,
+  : public typed_value<Type>,
     public printable
 {
 public:
@@ -71,8 +71,8 @@ public:
     std::string default_text() const NOEXCEPT override;
 
     /// Parse the tokens, accepting comma digit grouping of an integer.
-    void xparse(boost::any& value_store,
-        const string_list& new_tokens) const THROWS override;
+    void parse(std::any& value, const string_list& tokens,
+        const std::string& option) const THROWS override;
 
 private:
     const Type* store_;
@@ -89,10 +89,10 @@ setting_value<Type>* setting(Type* store) THROWS;
 template <typename Type>
 setting_value<Type>* secret(Type* store) THROWS;
 
-} // namespace config
+} // namespace options
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/config/setting.ipp>
+#include <bitcoin/system/impl/options/setting.ipp>
 
 #endif

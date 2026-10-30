@@ -23,24 +23,19 @@ BOOST_AUTO_TEST_SUITE(base85_tests)
 
 using namespace bc::system::config;
 
-BOOST_AUTO_TEST_CASE(base85__validate__empty_token__empty)
+BOOST_AUTO_TEST_CASE(base85__option_value__empty_token__empty)
 {
-    boost::any value{};
-    validate(value, string_list{ "" }, static_cast<base85*>(nullptr), 0);
-    BOOST_REQUIRE(boost::any_cast<base85>(value).to_string().empty());
+    std::any value{};
+    const std::unique_ptr<const options::value_semantic> semantic{ options::value<base85>() };
+    semantic->parse(value, string_list{ "" }, "base85");
+    BOOST_REQUIRE(std::any_cast<base85>(value).to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(base85__validate__no_tokens__empty)
+BOOST_AUTO_TEST_CASE(base85__option_value__multiple_tokens__throws)
 {
-    boost::any value{};
-    validate(value, string_list{}, static_cast<base85*>(nullptr), 0);
-    BOOST_REQUIRE(boost::any_cast<base85>(value).to_string().empty());
-}
-
-BOOST_AUTO_TEST_CASE(base85__validate__multiple_tokens__throws)
-{
-    boost::any value{};
-    BOOST_REQUIRE_THROW(validate(value, string_list{ "foo", "bar" }, static_cast<base85*>(nullptr), 0), boost::program_options::validation_error);
+    std::any value{};
+    const std::unique_ptr<const options::value_semantic> semantic{ options::value<base85>() };
+    BOOST_REQUIRE_THROW(semantic->parse(value, string_list{ "foo", "bar" }, "base85"), validation_exception);
 }
 
 BOOST_AUTO_TEST_CASE(base85__construct__default__empty_and_aligned)

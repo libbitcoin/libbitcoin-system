@@ -35,14 +35,10 @@
 #include <bitcoin/system/config/header.hpp>
 #include <bitcoin/system/config/input.hpp>
 #include <bitcoin/system/config/output.hpp>
-#include <bitcoin/system/config/parameter.hpp>
-#include <bitcoin/system/config/parser.hpp>
 #include <bitcoin/system/config/path.hpp>
 #include <bitcoin/system/config/point.hpp>
-#include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/selection.hpp>
-#include <bitcoin/system/config/setting.hpp>
 #include <bitcoin/system/config/token.hpp>
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/config/url.hpp>

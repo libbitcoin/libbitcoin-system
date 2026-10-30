@@ -20,6 +20,7 @@
 
 #include <charconv>
 #include <cmath>
+#include <cstring>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

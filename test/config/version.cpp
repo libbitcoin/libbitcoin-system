@@ -22,8 +22,6 @@
 BOOST_AUTO_TEST_SUITE(version_tests)
 
 using namespace bc::system::config;
-using namespace boost::program_options;
-
 BOOST_AUTO_TEST_CASE(version__construct__default__zero_segments)
 {
     const version instance;

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_ERROR_MACROS_HPP
 #define LIBBITCOIN_SYSTEM_ERROR_MACROS_HPP
 
+#include <cstring>
 #include <system_error>
 #include <unordered_map>
 #include <bitcoin/system/define.hpp>

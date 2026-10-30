@@ -137,31 +137,27 @@ BOOST_AUTO_TEST_CASE(path__stream_in__empty__empty)
     BOOST_REQUIRE(instance.to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__validate__empty_token__empty)
+BOOST_AUTO_TEST_CASE(path__option_value__empty_token__empty)
 {
-    boost::any value{};
-    validate(value, string_list{ "" }, static_cast<path*>(nullptr), 0);
-    BOOST_REQUIRE(boost::any_cast<path>(value).to_string().empty());
+    std::any value{};
+    const std::unique_ptr<const options::value_semantic> semantic{ options::value<path>() };
+    semantic->parse(value, string_list{ "" }, "path");
+    BOOST_REQUIRE(std::any_cast<path>(value).to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__validate__no_tokens__empty)
+BOOST_AUTO_TEST_CASE(path__option_value__spaced_token__expected)
 {
-    boost::any value{};
-    validate(value, string_list{}, static_cast<path*>(nullptr), 0);
-    BOOST_REQUIRE(boost::any_cast<path>(value).to_string().empty());
+    std::any value{};
+    const std::unique_ptr<const options::value_semantic> semantic{ options::value<path>() };
+    semantic->parse(value, string_list{ "foo bar/baz" }, "path");
+    BOOST_REQUIRE_EQUAL(std::any_cast<path>(value).to_string(), "foo bar/baz");
 }
 
-BOOST_AUTO_TEST_CASE(path__validate__spaced_token__expected)
+BOOST_AUTO_TEST_CASE(path__option_value__multiple_tokens__throws)
 {
-    boost::any value{};
-    validate(value, string_list{ "foo bar/baz" }, static_cast<path*>(nullptr), 0);
-    BOOST_REQUIRE_EQUAL(boost::any_cast<path>(value).to_string(), "foo bar/baz");
-}
-
-BOOST_AUTO_TEST_CASE(path__validate__multiple_tokens__throws)
-{
-    boost::any value{};
-    BOOST_REQUIRE_THROW(validate(value, string_list{ "foo", "bar" }, static_cast<path*>(nullptr), 0), boost::program_options::validation_error);
+    std::any value{};
+    const std::unique_ptr<const options::value_semantic> semantic{ options::value<path>() };
+    BOOST_REQUIRE_THROW(semantic->parse(value, string_list{ "foo", "bar" }, "path"), validation_exception);
 }
 
 BOOST_AUTO_TEST_CASE(path__construct__type__expected)

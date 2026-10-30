@@ -19,50 +19,48 @@
 #include "../test.hpp"
 
 using namespace config;
-using namespace boost::program_options;
-
 BOOST_AUTO_TEST_SUITE(utilities_tests)
 
 // from_host
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__empty__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host({}), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host({}), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__v4_port__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("127.0.0.1:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("127.0.0.1:42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__v4_cidr__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("127.0.0.1/24"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("127.0.0.1/24"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__v6_port__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("[42:42::42:42]:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("[42:42::42:42]:42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__v6_cidr__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("[42:42::42:42]/24"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("[42:42::42:42]/24"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__unbracketed_default_v6__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("::"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("::"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__unbracketed_v6__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("4242::4242"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("4242::4242"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__mapped_v6__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(from_host("[::ffff:127.0.0.1]"), invalid_option_value);
+    BOOST_REQUIRE_THROW(from_host("[::ffff:127.0.0.1]"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(utilities__from_host__unspecified_v4__expected_v4)

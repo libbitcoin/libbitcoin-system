@@ -111,28 +111,13 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/header.cpp \
     ${srcdir}/../../src/config/input.cpp \
     ${srcdir}/../../src/config/output.cpp \
-    ${srcdir}/../../src/config/parameter.cpp \
-    ${srcdir}/../../src/config/parser.cpp \
     ${srcdir}/../../src/config/path.cpp \
     ${srcdir}/../../src/config/point.cpp \
-    ${srcdir}/../../src/config/printer.cpp \
     ${srcdir}/../../src/config/script.cpp \
-    ${srcdir}/../../src/config/setting.cpp \
     ${srcdir}/../../src/config/transaction.cpp \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
-    ${srcdir}/../../src/config/program_options/cmdline.cpp \
-    ${srcdir}/../../src/config/program_options/config_file.cpp \
-    ${srcdir}/../../src/config/program_options/convert.cpp \
-    ${srcdir}/../../src/config/program_options/options_description.cpp \
-    ${srcdir}/../../src/config/program_options/parsers.cpp \
-    ${srcdir}/../../src/config/program_options/positional_options.cpp \
-    ${srcdir}/../../src/config/program_options/split.cpp \
-    ${srcdir}/../../src/config/program_options/utf8_codecvt_facet.cpp \
-    ${srcdir}/../../src/config/program_options/value_semantic.cpp \
-    ${srcdir}/../../src/config/program_options/variables_map.cpp \
-    ${srcdir}/../../src/config/program_options/winmain.cpp \
     ${srcdir}/../../src/crypto/aes_gcm.cpp \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
@@ -205,6 +190,13 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/ip/ipv4.cpp \
     ${srcdir}/../../src/ip/ipv6.cpp \
     ${srcdir}/../../src/math/math.cpp \
+    ${srcdir}/../../src/options/description.cpp \
+    ${srcdir}/../../src/options/parameter.cpp \
+    ${srcdir}/../../src/options/parser.cpp \
+    ${srcdir}/../../src/options/parsers.cpp \
+    ${srcdir}/../../src/options/printer.cpp \
+    ${srcdir}/../../src/options/setting.cpp \
+    ${srcdir}/../../src/options/variables.cpp \
     ${srcdir}/../../src/radix/base_10.cpp \
     ${srcdir}/../../src/radix/base_2048.cpp \
     ${srcdir}/../../src/radix/base_32.cpp \
@@ -437,14 +429,10 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/header.hpp \
     ${srcdir}/../../include/bitcoin/system/config/input.hpp \
     ${srcdir}/../../include/bitcoin/system/config/output.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/parameter.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/parser.hpp \
     ${srcdir}/../../include/bitcoin/system/config/path.hpp \
     ${srcdir}/../../include/bitcoin/system/config/point.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/printer.hpp \
     ${srcdir}/../../include/bitcoin/system/config/script.hpp \
     ${srcdir}/../../include/bitcoin/system/config/selection.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/setting.hpp \
     ${srcdir}/../../include/bitcoin/system/config/token.hpp \
     ${srcdir}/../../include/bitcoin/system/config/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/config/url.hpp \
@@ -632,7 +620,6 @@ include_bitcoin_system_impl_configdir = \
     ${includedir}/bitcoin/system/impl/config
 
 include_bitcoin_system_impl_config_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/config/token.ipp
 
 include_bitcoin_system_impl_cryptodir = \
@@ -807,6 +794,13 @@ include_bitcoin_system_impl_math_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/math/rotate.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/math/sign.ipp
 
+include_bitcoin_system_impl_optionsdir = \
+    ${includedir}/bitcoin/system/impl/options
+
+include_bitcoin_system_impl_options_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/options/setting.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/options/value.ipp
+
 include_bitcoin_system_impl_radixdir = \
     ${includedir}/bitcoin/system/impl/radix
 
@@ -972,6 +966,20 @@ include_bitcoin_system_math_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/math/power.hpp \
     ${srcdir}/../../include/bitcoin/system/math/rotate.hpp \
     ${srcdir}/../../include/bitcoin/system/math/sign.hpp
+
+include_bitcoin_system_optionsdir = \
+    ${includedir}/bitcoin/system/options
+
+include_bitcoin_system_options_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/options/description.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/options.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/parameter.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/parser.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/parsers.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/printer.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/setting.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/value.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/variables.hpp
 
 include_bitcoin_system_radixdir = \
     ${includedir}/bitcoin/system/radix
@@ -1287,11 +1295,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/byte.cpp \
     ${srcdir}/../../test/config/endpoint.cpp \
     ${srcdir}/../../test/config/hash256.cpp \
-    ${srcdir}/../../test/config/parameter.cpp \
-    ${srcdir}/../../test/config/parser.cpp \
     ${srcdir}/../../test/config/path.cpp \
-    ${srcdir}/../../test/config/printer.cpp \
-    ${srcdir}/../../test/config/setting.cpp \
     ${srcdir}/../../test/config/token.cpp \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \
@@ -1435,6 +1439,14 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/math/rotate.cpp \
     ${srcdir}/../../test/math/sign.cpp \
     ${srcdir}/../../test/mocks/blocks.cpp \
+    ${srcdir}/../../test/options/description.cpp \
+    ${srcdir}/../../test/options/parameter.cpp \
+    ${srcdir}/../../test/options/parser.cpp \
+    ${srcdir}/../../test/options/parsers.cpp \
+    ${srcdir}/../../test/options/printer.cpp \
+    ${srcdir}/../../test/options/setting.cpp \
+    ${srcdir}/../../test/options/value.cpp \
+    ${srcdir}/../../test/options/variables.cpp \
     ${srcdir}/../../test/radix/base_10.cpp \
     ${srcdir}/../../test/radix/base_16.cpp \
     ${srcdir}/../../test/radix/base_2048.cpp \

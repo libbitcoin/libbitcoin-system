@@ -21,8 +21,6 @@
 
 BOOST_AUTO_TEST_SUITE(byte_tests)
 
-using namespace boost::program_options;
-
 BOOST_AUTO_TEST_CASE(byte__construct__default__zero)
 {
     BOOST_REQUIRE_EQUAL(config::byte(), 0x00_u8);

@@ -214,13 +214,7 @@
       <ObjectFileName>$(IntDir)test_config_endpoint.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\parser.cpp">
-      <ObjectFileName>$(IntDir)test_config_parser.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\path.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\setting.cpp" />
     <ClCompile Include="..\..\..\..\test\config\token.cpp" />
     <ClCompile Include="..\..\..\..\test\config\url.cpp" />
     <ClCompile Include="..\..\..\..\test\config\utilities.cpp" />
@@ -418,6 +412,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\mocks\blocks.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\description.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\parser.cpp">
+      <ObjectFileName>$(IntDir)test_options_parser.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\options\parsers.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\setting.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\value.cpp">
+      <ObjectFileName>$(IntDir)test_options_value.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\options\variables.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
@@ -437,7 +443,9 @@
       <ObjectFileName>$(IntDir)test_serial_json_parser.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\serial\json\serializer.cpp" />
-    <ClCompile Include="..\..\..\..\test\serial\json\value.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\value.cpp">
+      <ObjectFileName>$(IntDir)test_serial_json_value.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\serial\json\value_ref.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\props.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\serialize.cpp" />

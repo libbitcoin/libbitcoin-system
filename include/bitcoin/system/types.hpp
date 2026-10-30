@@ -23,6 +23,7 @@
 #include <tuple>
 #include <utility>
 #include <variant>
+#include <vector>
 #include <bitcoin/system/allocator.hpp>
 #include <bitcoin/system/uintx/uintx.hpp>
 

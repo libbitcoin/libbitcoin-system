@@ -16,15 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
-#define LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
+#ifndef LIBBITCOIN_SYSTEM_OPTIONS_PARSER_HPP
+#define LIBBITCOIN_SYSTEM_OPTIONS_PARSER_HPP
 
 #include <filesystem>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/options/description.hpp>
+#include <bitcoin/system/options/variables.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace config {
+namespace options {
 
 #define PROPERTY(type, property) \
     value<type>()->notifier([&](type value) { property(value); })
@@ -83,7 +85,7 @@ private:
     std::shared_ptr<options_metadata> settings_{};
 };
 
-} // namespace config
+} // namespace options
 } // namespace system
 } // namespace libbitcoin
 

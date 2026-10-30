@@ -22,48 +22,46 @@
 BOOST_AUTO_TEST_SUITE(url_tests)
 
 using namespace config;
-using namespace boost::program_options;
-
 // construct
 
 BOOST_AUTO_TEST_CASE(url__construct__empty__throws_invalid_option)
 {
-    BOOST_REQUIRE_THROW(url instance(""), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance(""), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__no_host__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance("tcp://"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance("tcp://"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__port_only__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance(":42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance(":42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__question_mark__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar?foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar?foobar:42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__forward_slash__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar/foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar/foobar:42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__backslash__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar\\foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar\\foobar:42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__host_colon__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar:foobar:42"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance("tcp://foo.bar:foobar:42"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__ipv6_non_literal__throws_invalid_option_value)
 {
-    BOOST_REQUIRE_THROW(url instance("tcp://a::bc:def::123:45:6"), invalid_option_value);
+    BOOST_REQUIRE_THROW(url instance("tcp://a::bc:def::123:45:6"), istream_exception);
 }
 
 BOOST_AUTO_TEST_CASE(url__construct__default__localhost)

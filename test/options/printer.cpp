@@ -21,8 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(printer_tests)
 
-namespace po = boost::program_options;
-using namespace bc::system::config;
+using namespace bc::system::options;
 
 #define CONFIG_APPLICATION "APP"
 #define CONFIG_DESCRIPTION "DESCRIPTION"
@@ -30,8 +29,8 @@ using namespace bc::system::config;
 //#define CONFIG_CATEGORY "CATEGORY"
 
 #define CONFIG_PRINTER_SETUP_ARGUMENTS(initializer) \
-    po::options_description options; \
-    po::positional_options_description arguments; \
+    options_description options; \
+    positional_options_description arguments; \
     initializer; \
     printer help(options, arguments, CONFIG_APPLICATION, CONFIG_DESCRIPTION, CONFIG_COMMAND)
 
@@ -359,13 +358,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_collection__line_each
 BOOST_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
 {
     uint32_t threads = 42;
-    po::options_description options;
+    options_description options;
     options.add_options()
         ("network.threads", setting(&threads), "Thread count.");
 
-    po::variables_map variables;
+    variables_map variables;
     const char* argv[]{ "test", "--network.threads", "42" };
-    po::store(po::command_line_parser(3, argv).options(options).run(), variables);
+    store(parse_command_line(3, argv, options, {}), variables);
 
     printer help(options, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
     help.initialize();
@@ -380,13 +379,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
 BOOST_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmarked)
 {
     uint32_t threads = 42;
-    po::options_description options;
+    options_description options;
     options.add_options()
         ("network.threads", setting(&threads), "Thread count.");
 
-    po::variables_map variables;
+    variables_map variables;
     const char* argv[]{ "test" };
-    po::store(po::command_line_parser(1, argv).options(options).run(), variables);
+    store(parse_command_line(1, argv, options, {}), variables);
 
     printer help(options, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
     help.initialize();
@@ -456,7 +455,6 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_
 
 BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_parameters__sorted_parameters)
 {
-    using namespace boost::program_options;
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("short_long,s", "Long and short name.")
         (",m", "Short name only.")
@@ -688,8 +686,8 @@ BOOST_AUTO_TEST_CASE(printer__commandline__no_parameters__no_table_headers)
 
 BOOST_AUTO_TEST_CASE(printer__settings__described__contains_description)
 {
-    po::options_description options;
-    po::positional_options_description arguments;
+    options_description options;
+    positional_options_description arguments;
     options.add_options()("section.name", "Setting.");
     printer help(options, arguments, CONFIG_APPLICATION, CONFIG_DESCRIPTION, CONFIG_COMMAND);
     help.initialize();
@@ -701,8 +699,8 @@ BOOST_AUTO_TEST_CASE(printer__settings__described__contains_description)
 
 BOOST_AUTO_TEST_CASE(printer__settings__undescribed__no_description)
 {
-    po::options_description options;
-    po::positional_options_description arguments;
+    options_description options;
+    positional_options_description arguments;
     options.add_options()("section.name", "Setting.");
     printer help(options, arguments, CONFIG_APPLICATION, "", CONFIG_COMMAND);
     help.initialize();
@@ -714,7 +712,7 @@ BOOST_AUTO_TEST_CASE(printer__settings__undescribed__no_description)
 
 BOOST_AUTO_TEST_CASE(printer__construct__settings_only__expected)
 {
-    po::options_description settings;
+    options_description settings;
     settings.add_options()("section.name", "Setting.");
     printer help(settings, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
     help.initialize();

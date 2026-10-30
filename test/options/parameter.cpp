@@ -21,9 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(parameter_tests)
 
-namespace po = boost::program_options;
-
-using namespace bc::system::config;
+using namespace bc::system::options;
 
 enum opt
 {
@@ -38,9 +36,8 @@ enum opt
     multitoken
 };
 
-static void load_test_options(po::options_description& options)
+static void load_test_options(options_description& options)
 {
-    using namespace boost::program_options;
     options.add_options()
         ("short_long,s", "Long and short name.")
         (",m", "Short name only.")
@@ -66,18 +63,18 @@ static void load_test_arguments(argument_list& arguments)
 }
 
 #define CONFIG_TEST_PARAMETER_SETUP(index) \
-    po::options_description options; \
+    options_description options; \
     load_test_options(options); \
     argument_list names; \
     load_test_arguments(names); \
     auto option = *(options.options()[index]); \
-    config::parameter parameter
+    options::parameter parameter
 
 #define CONFIG_TEST_PARAMETER_OPTIONS_SETUP(index) \
-    po::options_description options; \
+    options_description options; \
     load_test_options(options); \
     auto option = *(options.options()[index]); \
-    config::parameter parameter
+    options::parameter parameter
 
 // ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(parameter__position)
@@ -152,12 +149,12 @@ BOOST_AUTO_TEST_CASE(parameter__initialize__command_line_option__no_values_uncon
 BOOST_AUTO_TEST_CASE(parameter__initialize__bound__values_unconfigured)
 {
     uint32_t threads = 42;
-    po::options_description options;
+    options_description options;
     options.add_options()("bound", setting(&threads), "Bound setting.");
     const auto& option = *options.options().front();
 
     argument_list names;
-    config::parameter parameter;
+    options::parameter parameter;
     parameter.initialize(option, names);
     BOOST_REQUIRE_EQUAL(parameter.values(), (string_list{ "42" }));
     BOOST_REQUIRE_EQUAL(parameter.configured(), false);
@@ -166,24 +163,24 @@ BOOST_AUTO_TEST_CASE(parameter__initialize__bound__values_unconfigured)
 BOOST_AUTO_TEST_CASE(parameter__initialize__bound_placeholder__default_text_substituted)
 {
     uint32_t threads = 42;
-    po::options_description options;
+    options_description options;
     options.add_options()("bound", setting(&threads), "Threads, defaults to {} (0 disables).");
     const auto& option = *options.options().front();
 
     argument_list names;
-    config::parameter parameter;
+    options::parameter parameter;
     parameter.initialize(option, names);
     BOOST_REQUIRE_EQUAL(parameter.description(), "Threads, defaults to '42' (0 disables).");
 }
 
 BOOST_AUTO_TEST_CASE(parameter__initialize__unbound_placeholder__unchanged)
 {
-    po::options_description options;
-    options.add_options()("unbound", po::value<uint32_t>(), "Threads, defaults to {}.");
+    options_description options;
+    options.add_options()("unbound", value<uint32_t>(), "Threads, defaults to {}.");
     const auto& option = *options.options().front();
 
     argument_list names;
-    config::parameter parameter;
+    options::parameter parameter;
     parameter.initialize(option, names);
     BOOST_REQUIRE_EQUAL(parameter.description(), "Threads, defaults to {}.");
 }
@@ -191,16 +188,16 @@ BOOST_AUTO_TEST_CASE(parameter__initialize__unbound_placeholder__unchanged)
 BOOST_AUTO_TEST_CASE(parameter__initialize__bound_specified__values_configured)
 {
     uint32_t threads = 42;
-    po::options_description options;
+    options_description options;
     options.add_options()("bound", setting(&threads), "Bound setting.");
     const auto& option = *options.options().front();
 
-    po::variables_map variables;
+    variables_map variables;
     const char* argv[]{ "test", "--bound", "42" };
-    po::store(po::command_line_parser(3, argv).options(options).run(), variables);
+    store(parse_command_line(3, argv, options, {}), variables);
 
     argument_list names;
-    config::parameter parameter;
+    options::parameter parameter;
     parameter.initialize(option, names, variables);
     BOOST_REQUIRE_EQUAL(parameter.values(), (string_list{ "42" }));
     BOOST_REQUIRE_EQUAL(parameter.configured(), true);

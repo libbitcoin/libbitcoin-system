@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-using namespace bc::system::config;
+using namespace bc::system::options;
 
 BOOST_AUTO_TEST_SUITE(setting_tests)
 
@@ -139,44 +139,44 @@ BOOST_AUTO_TEST_CASE(setting__values__mutated_store__current_value)
 BOOST_AUTO_TEST_CASE(setting__apply_default__scalar__store_value)
 {
     uint32_t store = 42;
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
-    boost::any value{};
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
+    std::any value{};
     BOOST_REQUIRE(instance->apply_default(value));
-    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 42u);
+    BOOST_REQUIRE_EQUAL(std::any_cast<uint32_t>(value), 42u);
 }
 
 BOOST_AUTO_TEST_CASE(setting__apply_default__mutated_store__construction_value)
 {
     uint32_t store = 1;
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
     store = 2;
-    boost::any value{};
+    std::any value{};
     BOOST_REQUIRE(instance->apply_default(value));
-    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 1u);
+    BOOST_REQUIRE_EQUAL(std::any_cast<uint32_t>(value), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(setting__apply_default__vector__store_value)
 {
     string_list store{ "a", "b" };
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
-    boost::any value{};
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
+    std::any value{};
     BOOST_REQUIRE(instance->apply_default(value));
-    BOOST_REQUIRE_EQUAL(boost::any_cast<string_list>(value), store);
+    BOOST_REQUIRE_EQUAL(std::any_cast<string_list>(value), store);
 }
 
 BOOST_AUTO_TEST_CASE(secret__apply_default__scalar__store_value)
 {
     std::string store{ "password" };
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ secret(&store) };
-    boost::any value{};
+    const std::unique_ptr<const value_semantic> instance{ secret(&store) };
+    std::any value{};
     BOOST_REQUIRE(instance->apply_default(value));
-    BOOST_REQUIRE_EQUAL(boost::any_cast<std::string>(value), store);
+    BOOST_REQUIRE_EQUAL(std::any_cast<std::string>(value), store);
 }
 
 BOOST_AUTO_TEST_CASE(secret__format_name__scalar__value_withheld)
 {
     std::string store{ "password" };
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ secret(&store) };
+    const std::unique_ptr<const value_semantic> instance{ secret(&store) };
     BOOST_REQUIRE_EQUAL(instance->name().find("password"), std::string::npos);
 }
 
@@ -201,6 +201,13 @@ BOOST_AUTO_TEST_CASE(setting__default_text__integer__quoted_decimal)
     uint32_t store = 1048576;
     const std::unique_ptr<const printable> instance{ setting(&store) };
     BOOST_REQUIRE_EQUAL(instance->default_text(), "'1048576'");
+}
+
+BOOST_AUTO_TEST_CASE(setting__default_text__byte__quoted_decimal)
+{
+    uint8_t store = 255;
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BOOST_REQUIRE_EQUAL(instance->default_text(), "'255'");
 }
 
 BOOST_AUTO_TEST_CASE(setting__default_text__float__quoted_fixed)
@@ -284,7 +291,7 @@ BOOST_AUTO_TEST_CASE(setting__default_text__mutated_store__construction_value)
 BOOST_AUTO_TEST_CASE(setting__format_name__integer__default_text)
 {
     uint32_t store = 42;
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
     BOOST_REQUIRE_NE(instance->name().find("'42'"), std::string::npos);
 }
 
@@ -329,27 +336,27 @@ BOOST_AUTO_TEST_CASE(setting__ungroup__malformed__unchanged)
 BOOST_AUTO_TEST_CASE(setting__parse__grouped_integer__expected)
 {
     uint32_t store{};
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
-    boost::any value{};
-    instance->parse(value, { "950,000" }, true);
-    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 950000u);
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
+    std::any value{};
+    instance->parse(value, { "950,000" }, "value");
+    BOOST_REQUIRE_EQUAL(std::any_cast<uint32_t>(value), 950000u);
 }
 
 BOOST_AUTO_TEST_CASE(setting__parse__malformed_grouping__throws)
 {
     uint32_t store{};
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
-    boost::any value{};
-    BOOST_REQUIRE_THROW(instance->parse(value, { "95,0000" }, true), boost::program_options::error);
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
+    std::any value{};
+    BOOST_REQUIRE_THROW(instance->parse(value, { "95,0000" }, "value"), option_exception);
 }
 
 BOOST_AUTO_TEST_CASE(setting__parse__grouped_string__unchanged)
 {
     std::string store{};
-    const std::unique_ptr<const boost::program_options::value_semantic> instance{ setting(&store) };
-    boost::any value{};
-    instance->parse(value, { "1,000" }, true);
-    BOOST_REQUIRE_EQUAL(boost::any_cast<std::string>(value), "1,000");
+    const std::unique_ptr<const value_semantic> instance{ setting(&store) };
+    std::any value{};
+    instance->parse(value, { "1,000" }, "value");
+    BOOST_REQUIRE_EQUAL(std::any_cast<std::string>(value), "1,000");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

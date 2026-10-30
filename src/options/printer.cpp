@@ -16,20 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/printer.hpp>
+#include <bitcoin/system/options/printer.hpp>
 
 #include <format>
-#include <bitcoin/system/config/parameter.hpp>
+#include <sstream>
+#include <bitcoin/system/options/parameter.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 
-// We built this because po::options_description.print() sucks.
-
 namespace libbitcoin {
 namespace system {
-namespace config {
+namespace options {
 
 // TODO: parameterize these localized values.
 // Various shared localizable strings.
@@ -126,11 +125,8 @@ std::vector<std::string> printer::columnize(const std::string& paragraph,
 
 static std::string format_row_name(const parameter& value) NOEXCEPT
 {
-    // We hack in upper case for all positional args because of a bug in
-    // boost that requires environment variable options to be lower case
-    // in order to match any case environment variable, at least on Windows.
-    // This is a problem when composing with a command-line argument that
-    // wants to be upper case but must match in case with the env var option.
+    // Positional arguments display in upper case, as environment variables
+    // map to lower case option names, which must match in composition.
 
     if (value.position() != parameter::not_positional)
         return std::format(BC_PRINTER_TABLE_ARGUMENT_FORMAT,
@@ -340,7 +336,7 @@ std::string printer::format_usage_parameters() NOEXCEPT
         }
         else
         {
-            // to_upper_copy is a hack for boost bug, see format_row_name.
+            // Upper case for display, see format_row_name.
             if (required)
                 required_arguments.push_back(ascii_to_upper(long_name));
             else if (optional)
@@ -418,7 +414,7 @@ void printer::generate_argument_names() NOEXCEPT
     int max_previous_argument = 0;
 
     // We must enumerate all arguments to get the full set of names and counts.
-    for (unsigned int position = 0; position < max_total_arguments &&
+    for (size_t position = 0; position < max_total_arguments &&
         max_previous_argument <= max_arguments; ++position)
     {
         argument_name = args.name_for_position(position);
@@ -513,6 +509,6 @@ void printer::settings(std::ostream& output) NOEXCEPT
 
 BC_POP_WARNING()
 
-} // namespace config
+} // namespace options
 } // namespace system
 } // namespace libbitcoin

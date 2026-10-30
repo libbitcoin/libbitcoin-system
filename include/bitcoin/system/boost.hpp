@@ -34,21 +34,6 @@
 // www.boost.org/doc/libs/1_78_0/boost/bind.hpp
 #define BOOST_BIND_NO_PLACEHOLDERS
 
-// Headers only program_options (sources compiled into /system).
-#define BOOST_PROGRAM_OPTIONS_NO_LIB
-#include <boost/program_options.hpp>
 #include <boost/version.hpp>
-
-/// boost aliases
-/// ---------------------------------------------------------------------------
-
-namespace libbitcoin
-{
-    typedef boost::program_options::variables_map variables_map;
-    typedef boost::program_options::option_description option_metadata;
-    typedef boost::program_options::options_description options_metadata;
-    typedef boost::program_options::positional_options_description arguments_metadata;
-
-}
 
 #endif

@@ -24,6 +24,7 @@
 #include <chrono>
 #include <filesystem>
 #include <memory_resource>
+#include <sstream>
 #include <bitcoin/system.hpp>
 
 /// Have slow test execution (scrypt is slow by design).

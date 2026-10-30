@@ -16,26 +16,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/config/parser.hpp>
+#include <bitcoin/system/options/parser.hpp>
 
 #include <filesystem>
 #include <sstream>
-#include <bitcoin/system/config/path.hpp>
-#include <bitcoin/system/config/setting.hpp>
+#include <bitcoin/system/config/config.hpp>
+#include <bitcoin/system/options/parsers.hpp>
+#include <bitcoin/system/options/setting.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace config {
-
-using namespace boost::program_options;
+namespace options {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// The error is obtained from boost, which circumvents our localization.
-// English-only hack to patch missing arg name in boost exception message.
+// English-only patch of an exception message that does not name its option.
 std::string parser::format_invalid_parameter(
     const std::string& message) NOEXCEPT
 {
@@ -52,7 +50,7 @@ const variables_map& parser::variables() const NOEXCEPT
 // Defaulted implies the value was declared by an option, not specified.
 bool parser::is_configured(const std::string& name) const NOEXCEPT
 {
-    return config::is_configured(variables_, name);
+    return options::is_configured(variables_, name);
 }
 
 std::filesystem::path parser::get_config_option(
@@ -92,16 +90,13 @@ void parser::load_command_variables(int argc, const char* argv[]) THROWS
 {
     const auto options = load_options();
     const auto arguments = load_arguments();
-    auto command_parser = command_line_parser(argc, argv).options(options)
-        /*.allow_unregistered()*/.positional(arguments);
-    store(command_parser.run(), variables_);
+    store(parse_command_line(argc, argv, options, arguments), variables_);
 }
 
 void parser::load_environment_variables(const std::string& prefix) THROWS
 {
-    const auto& environment_variables = load_environment();
-    const auto environment = parse_environment(environment_variables, prefix);
-    store(environment, variables_);
+    const auto environment = load_environment();
+    store(parse_environment(environment, prefix), variables_);
 }
 
 bool parser::load_configuration_variables(
@@ -121,20 +116,18 @@ bool parser::load_configuration_variables(
         if (!file.good())
             throw ifstream_exception{ from_path(extended).c_str() };
 
-        const auto config = parse_config_file(file, metadata);
-        store(config, variables_);
+        store(parse_config_file(file, metadata), variables_);
         return true;
     }
 
     // Loading from an empty stream causes the defaults to populate.
     std::istringstream stream{};
-    const auto config = parse_config_file(stream, metadata);
-    store(config, variables_);
+    store(parse_config_file(stream, metadata), variables_);
     return false;
 }
 
 BC_POP_WARNING()
 
-} // namespace config
+} // namespace options
 } // namespace system
 } // namespace libbitcoin

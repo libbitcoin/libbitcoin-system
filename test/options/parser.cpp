@@ -18,8 +18,7 @@
  */
 #include "../test.hpp"
 
-namespace po = boost::program_options;
-using namespace bc::system::config;
+using namespace bc::system::options;
 
 BOOST_AUTO_TEST_SUITE(parser_tests)
 
@@ -34,9 +33,9 @@ public:
     {
         options_metadata description;
         description.add_options()
-            ("config,c", po::value<config::path>(&configured_), "")
-            ("with_default", po::value<bool>()->default_value(false), "")
-            ("without_default", po::value<bool>(), "");
+            ("config,c", options::value<config::path>(&configured_), "")
+            ("with_default", options::value<bool>()->default_value(false), "")
+            ("without_default", options::value<bool>(), "");
         return description;
     }
 
@@ -133,9 +132,9 @@ BOOST_AUTO_TEST_CASE(parser__settings__mutated_store__construction_default)
     mock_parser instance;
     const auto& settings = instance.settings();
     instance.value = 7;
-    boost::any value{};
+    std::any value{};
     BOOST_REQUIRE(settings.find("section.value", false).semantic()->apply_default(value));
-    BOOST_REQUIRE_EQUAL(boost::any_cast<uint32_t>(value), 42u);
+    BOOST_REQUIRE_EQUAL(std::any_cast<uint32_t>(value), 42u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

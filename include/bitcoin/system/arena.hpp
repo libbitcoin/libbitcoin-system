@@ -19,6 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_ARENA_HPP
 #define LIBBITCOIN_SYSTEM_ARENA_HPP
 
+#include <cstddef>
+#include <memory_resource>
+#include <utility>
 #include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
