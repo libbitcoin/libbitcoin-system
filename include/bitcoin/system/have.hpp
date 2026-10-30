@@ -318,11 +318,6 @@
 /// Map standard ARM defines for intrinsics usage. 
 /// SVE maximum width is not detectable (requires custom options).
 #if defined(HAVE_ARM64)
-    // -march=armv8-a+sha2
-    #if defined(__ARM_FEATURE_SHA2) || defined(__ARM_FEATURE_CRYPTO)
-        #define HAVE_NEON_SHA
-        #define HAVE_SHA
-    #endif
     // -march=armv8-a+aes
     #if defined(__ARM_FEATURE_AES) || defined(__ARM_FEATURE_CRYPTO)
         #define HAVE_NEON_AES
@@ -344,6 +339,12 @@
     #if defined(__ARM_NEON)
         #define HAVE_NEON
         #define HAVE_128
+    #endif
+    // -march=armv8-a+sha2 (64 bit)
+    // -march=armv8-a -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard (32 bit)
+    #if defined(__ARM_FEATURE_SHA2) || defined(__ARM_FEATURE_CRYPTO)
+        #define HAVE_NEON_SHA
+        #define HAVE_SHA
     #endif
 #endif
 
