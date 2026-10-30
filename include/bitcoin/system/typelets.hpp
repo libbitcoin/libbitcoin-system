@@ -104,6 +104,8 @@ template<typename>
 struct is_std_array_t : std::false_type {};
 template<typename Type, size_t Size>
 struct is_std_array_t<std_array<Type, Size>> : std::true_type {};
+template<typename Type, size_t Size, bool Aligned>
+struct is_std_array_t<aligned_array<Type, Size, Aligned>> : std::true_type {};
 template<typename Type>
 constexpr bool is_std_array = is_std_array_t<Type>::value;
 

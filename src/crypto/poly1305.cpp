@@ -515,8 +515,7 @@ void poly1305::flush(tag& out) NOEXCEPT
     h2 = narrow_cast<uint32_t>(f);
     f = wide_cast<uint64_t>(h3) + pad_[3] + shift_right(f, 32);
     h3 = narrow_cast<uint32_t>(f);
-    to_little_endians<uint32_t, 4>(array_cast<uint32_t>(out),
-        { h0, h1, h2, h3 });
+    to_little_endians<uint32_t, 4>(out, { h0, h1, h2, h3 });
 }
 
 BC_POP_WARNING()

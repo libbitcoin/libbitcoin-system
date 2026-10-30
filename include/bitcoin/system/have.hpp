@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_HAVE_HPP
 #define LIBBITCOIN_SYSTEM_HAVE_HPP
 
+#include <version>
 #include <bitcoin/system/version.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,6 +41,8 @@
     #define HAVE_NETBSD
 #elif defined(__CYGWIN__)
     #define HAVE_CYGWIN
+#elif defined(_WIN32)
+    #define HAVE_WINDOWS
 #endif
 
 // Others excluded presently due to lack of verified support.
@@ -61,11 +64,16 @@
 #if defined(_MSC_VER) && !defined(HAVE_CLANG)
     #define HAVE_MSC
 #endif
+#if defined(_MSVC_STL_VERSION)
+    #define HAVE_MSVC_STL
+#endif
 
 /// Determines linker defines (Windows vs. Unix/Linux).
-#if defined(HAVE_CLANG) || defined(HAVE_GNUC)
+#if defined(_MSC_VER) && !defined(WITH_PTX)
+    #define HAVE_WINDOWS_LIBS
+#elif defined(HAVE_CLANG) || defined(HAVE_GNUC)
     #define HAVE_NX_LIBS
-#elif defined(_MSC_VER) || defined(__CYGWIN__)
+#elif defined(__CYGWIN__)
     #define HAVE_WINDOWS_LIBS
 #endif
 
@@ -86,7 +94,7 @@
     #define HAVE_ARM
 #elif defined(__s390x__)
     #define HAVE_S390X
-#elif !defined(ENABLE_PTX)
+#elif !defined(WITH_PTX)
     #error "Unsupported architecture."
 #endif
 
@@ -150,16 +158,13 @@
     #define HAVE_VALGRIND
 #endif
 
-/// ENABLE_ build symbols.
-/// ---------------------------------------------------------------------------
-
 // Compilation of device kernels to ptx (developer).
-#if defined(ENABLE_PTX)
+#if defined(WITH_PTX)
     #define HAVE_PTX
 #endif
 
 // Device (gpu) batch verification.
-#if defined(ENABLE_CUDA) && !defined(HAVE_APPLE) && \
+#if defined(WITH_CUDA) && !defined(HAVE_APPLE) && \
     (defined(HAVE_X64) || defined(HAVE_ARM64))
     #define HAVE_CUDA
 #endif
@@ -312,35 +317,34 @@
 
 /// Map standard ARM defines for intrinsics usage. 
 /// SVE maximum width is not detectable (requires custom options).
-#if defined(HAVE_ARM)
-    // -march=armv8-a+sha2
-    // Requires 64 bit build.
-    #if defined(__ARM_FEATURE_SHA2) || defined(__ARM_FEATURE_CRYPTO)
-        #define HAVE_NEON_SHA
-        #define HAVE_SHA
-    #endif
+#if defined(HAVE_ARM64)
     // -march=armv8-a+aes
-    // Requires 64 bit build.
     #if defined(__ARM_FEATURE_AES) || defined(__ARM_FEATURE_CRYPTO)
         #define HAVE_NEON_AES
         #define HAVE_AES
     #endif
     // -march=armv8.2-a+sha3
-    // Requires 64 bit build.
     #if defined(__ARM_FEATURE_SHA512)
         #define HAVE_NEON_SHA3
         #define HAVE_SHA512
     #endif
     // -march=armv8-a+sve
-    // Requires 64 bit build.
     #if defined(__ARM_FEATURE_SVE)
         #define HAVE_SVE
     #endif
+#endif
+#if defined(HAVE_ARM)
     // -march=armv8-a (64 bit)
     // -march=armv7-a -mfpu=neon -mfloat-abi=hard (32 bit)
     #if defined(__ARM_NEON)
         #define HAVE_NEON
         #define HAVE_128
+    #endif
+    // -march=armv8-a+sha2 (64 bit)
+    // -march=armv8-a -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard (32 bit)
+    #if defined(__ARM_FEATURE_SHA2) || defined(__ARM_FEATURE_CRYPTO)
+        #define HAVE_NEON_SHA
+        #define HAVE_SHA
     #endif
 #endif
 

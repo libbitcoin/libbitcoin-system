@@ -34,7 +34,7 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer[0], block);
@@ -116,7 +116,7 @@ input_left(auto& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer[0], half);
@@ -171,7 +171,7 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer[8], half);
@@ -227,7 +227,7 @@ input_left(auto& buffer, const quart_t& quarter) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer[0], quarter);
@@ -256,7 +256,7 @@ input_right(auto& buffer, const quart_t& quarter) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer[4], quarter);

@@ -99,8 +99,8 @@ void salsa20::hsalsa20(secret& out, const secret& key, const input& in) NOEXCEPT
 {
     keys_t keys{};
     words_t words{};
-    from_little_endians(keys, array_cast<uint32_t>(key));
-    from_little_endians(words, array_cast<uint32_t>(in));
+    from_little_endians(keys, key);
+    from_little_endians(words, in);
 
     // The rounds are applied without the final summation.
     auto x = initial(keys, words);
@@ -112,7 +112,7 @@ void salsa20::hsalsa20(secret& out, const secret& key, const input& in) NOEXCEPT
         x[0], x[5], x[10], x[15], x[6], x[7], x[8], x[9]
     };
 
-    to_little_endians(array_cast<uint32_t>(out), result);
+    to_little_endians(out, result);
     keys = {};
 }
 
@@ -139,7 +139,7 @@ salsa20::salsa20(const secret& key, const extended_nonce& nonce) NOEXCEPT
 
 void salsa20::set_key(const secret& key) NOEXCEPT
 {
-    from_little_endians(key_, array_cast<uint32_t>(key));
+    from_little_endians(key_, key);
     nonce_ = {};
     counter_ = {};
     offset_ = block_size;
@@ -168,7 +168,7 @@ void salsa20::next(block& out) NOEXCEPT
     for (size_t index{}; index < state_words; ++index)
         x[index] += start[index];
 
-    to_little_endians(array_cast<uint32_t>(out), x);
+    to_little_endians(out, x);
     ++counter_;
 }
 

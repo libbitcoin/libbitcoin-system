@@ -471,26 +471,28 @@ template <auto S>
 INLINE xint128_t unpack_lo(xint128_t a, xint128_t b) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
-        return (xint128_t)vzip1q_u8((uint8x16_t)a, (uint8x16_t)b);
+        return (xint128_t)vzipq_u8((uint8x16_t)a, (uint8x16_t)b).val[0];
     if constexpr (S == bits<uint16_t>)
-        return (xint128_t)vzip1q_u16((uint16x8_t)a, (uint16x8_t)b);
+        return (xint128_t)vzipq_u16((uint16x8_t)a, (uint16x8_t)b).val[0];
     if constexpr (S == bits<uint32_t>)
-        return (xint128_t)vzip1q_u32((uint32x4_t)a, (uint32x4_t)b);
+        return (xint128_t)vzipq_u32((uint32x4_t)a, (uint32x4_t)b).val[0];
     if constexpr (S == bits<uint64_t>)
-        return (xint128_t)vzip1q_u64((uint64x2_t)a, (uint64x2_t)b);
+        return (xint128_t)vcombine_u64(vget_low_u64((uint64x2_t)a),
+            vget_low_u64((uint64x2_t)b));
 }
 
 template <auto S>
 INLINE xint128_t unpack_hi(xint128_t a, xint128_t b) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
-        return (xint128_t)vzip2q_u8((uint8x16_t)a, (uint8x16_t)b);
+        return (xint128_t)vzipq_u8((uint8x16_t)a, (uint8x16_t)b).val[1];
     if constexpr (S == bits<uint16_t>)
-        return (xint128_t)vzip2q_u16((uint16x8_t)a, (uint16x8_t)b);
+        return (xint128_t)vzipq_u16((uint16x8_t)a, (uint16x8_t)b).val[1];
     if constexpr (S == bits<uint32_t>)
-        return (xint128_t)vzip2q_u32((uint32x4_t)a, (uint32x4_t)b);
+        return (xint128_t)vzipq_u32((uint32x4_t)a, (uint32x4_t)b).val[1];
     if constexpr (S == bits<uint64_t>)
-        return (xint128_t)vzip2q_u64((uint64x2_t)a, (uint64x2_t)b);
+        return (xint128_t)vcombine_u64(vget_high_u64((uint64x2_t)a),
+            vget_high_u64((uint64x2_t)b));
 }
 
 INLINE xint128_t tile_lo(xint128_t a, xint128_t) NOEXCEPT

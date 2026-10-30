@@ -101,7 +101,7 @@ protected:
     using words_t = std_array<uint32_t, 4>;
 
     template <typename Word>
-    using xplanes_t = std_array<Word, planes>;
+    using xplanes_t = aligned_array<Word, planes>;
 
     template <typename Word>
     using xkeys_t = std_array<xplanes_t<Word>, K::round_keys>;
@@ -116,10 +116,10 @@ protected:
     static constexpr auto native_words = 4_size;
 
     template <typename xWord>
-    using native_keys_t = std_array<xWord, K::round_keys>;
+    using native_keys_t = aligned_array<xWord, K::round_keys>;
 
     template <typename xWord>
-    using native_state_t = std_array<xWord, native_words>;
+    using native_state_t = aligned_array<xWord, native_words>;
 
     /// Bitslicing.
     /// -----------------------------------------------------------------------

@@ -22,7 +22,7 @@
 // ----------------------------------------------------------------------------
 
 // stdlib object sizes are subjsct to implementation (including debug builds).
-#if defined(HAVE_MSC) && defined(NDEBUG)
+#if defined(HAVE_MSVC_STL) && defined(NDEBUG)
 
 // Must add1 when using pmr std_vector.
 constexpr auto pmr(auto value) NOEXCEPT
@@ -119,7 +119,7 @@ static_assert(a11 == 2 * sizeof(int64_t));
 constexpr auto a0 = sizeof(std::weak_ptr<data_chunk>);
 static_assert(a0 == 2 * sizeof(size_t));
 
-#endif // HAVE_MSC && NDEBUG
+#endif // HAVE_MSVC_STL && NDEBUG
 
 // copy/move restrictions of unique_ptr:
 ////auto foo()

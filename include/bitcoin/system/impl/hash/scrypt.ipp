@@ -200,7 +200,8 @@ salsa_8(block_t& block) NOEXCEPT
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (2 * 64)] bytes stack allocated.
     // rfc7914: #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
-    const auto save = from_little_endians(array_cast<word_t>(block));
+    words_t save{};
+    from_little_endians(save, block);
     words_t words{ save };
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -306,7 +307,7 @@ salsa_8(block_t& block) NOEXCEPT
 
     // rfc7914: for (i = 0;i < 16;++i) out[i] = x[i] + in[i];
     // Add saved words to copy and emit in original form (little-endian).
-    to_little_endians(array_cast<word_t>(block), add(words, save));
+    to_little_endians(block, add(words, save));
     return block;
 }
 

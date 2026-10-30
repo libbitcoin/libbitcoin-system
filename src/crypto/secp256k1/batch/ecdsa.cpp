@@ -52,10 +52,23 @@ public:
         constexpr auto size = array_count<bytes_t>;
         constexpr auto words = array_count<scalar_t>;
         ec_signature out{};
-        to_bytes(array_cast<uint8_t, size>(out),
-            array_cast<uint64_t, words>(parsed));
-        to_bytes(array_cast<uint8_t, size, size>(out),
-            array_cast<uint64_t, words, size>(parsed));
+
+        if constexpr (have_arm32)
+        {
+            std_array<scalar_t, two> scalars{};
+            std::copy(parsed.cbegin(), parsed.cend(),
+                array_cast<uint8_t>(scalars).begin());
+            to_bytes(array_cast<uint8_t, size>(out), scalars.front());
+            to_bytes(array_cast<uint8_t, size, size>(out), scalars.back());
+        }
+        else
+        {
+            to_bytes(array_cast<uint8_t, size>(out),
+                array_cast<uint64_t, words>(parsed));
+            to_bytes(array_cast<uint8_t, size, size>(out),
+                array_cast<uint64_t, words, size>(parsed));
+        }
+
         return out;
     }
 };

@@ -388,7 +388,54 @@ jobs:
             host: "s390x-linux-gnu"
             boost: ""
             secp256k1: ""
-            options: "--enable-isystem --build-skip-tests"
+            options: "--enable-isystem --build-skip-test-run"
+
+          - image: macos-26-intel
+            config: "release"
+            link: "static"
+            cc: "clang"
+            cxx: "clang++"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: ""
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04-arm
+            config: "release"
+            link: "static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: ""
+            coverage: ""
+            boost: "--build-boost"
+            secp256k1: ""
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc-13"
+            cxx: "g++-13"
+            flags: "-m32"
+            coverage: ""
+            package: "gcc-13-multilib g++-13-multilib"
+            boost: "--build-boost"
+            secp256k1: ""
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "debug"
+            link: "static"
+            cc: "arm-linux-gnueabihf-gcc"
+            cxx: "arm-linux-gnueabihf-g++"
+            flags: ""
+            coverage: ""
+            package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
+            host: "arm-linux-gnueabihf"
+            boost: ""
+            secp256k1: ""
+            options: "--enable-isystem --build-skip-test-run"
 
     runs-on: ${{ matrix.image }}
 
@@ -457,9 +504,11 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           echo 'int main() { return 0; }' > emulation.c
-          ${{ matrix.cc }} emulation.c -o emulation
+          ${{ matrix.cc }} ${{ matrix.flags }} emulation.c -o emulation
           file emulation
-          ./emulation
+          if [[ "${{ matrix.options }}" != *"--build-skip-tests"* &&   "${{ matrix.options }}" != *"--build-skip-test-run"* ]]; then
+            ./emulation
+          fi
 
       - name: Install boost headers [cross]
         if: ${{ matrix.host }}
@@ -1386,30 +1435,63 @@ jobs:
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-latest
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-2025-vs2026
             configuration: "StaticRelease"
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-2025-vs2026
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-latest
             configuration: "StaticRelease"
             platform: "Win32"
             version: "vs2026"
             tests: "*"
+            options: ""
+
+          - image: windows-latest
+            configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+            options: "--build-compiler clang"
+
+          - image: windows-11-vs2026-arm
+            configuration: "StaticRelease"
+            platform: "ARM64"
+            version: "vs2026"
+            tests: "*"
+            options: ""
+
+          - image: windows-latest
+            configuration: "StaticRelease"
+            platform: "Win32"
+            version: "vs2026"
+            tests: "*"
+            options: "--build-compiler clang"
+
+          - image: windows-11-vs2026-arm
+            configuration: "StaticRelease"
+            platform: "ARM64"
+            version: "vs2026"
+            tests: "*"
+            options: "--build-compiler clang"
 
     runs-on: ${{ matrix.image }}
 
@@ -1427,7 +1509,7 @@ jobs:
       - name: Set msbuild path
         uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3
         with:
-          msbuild-architecture: x64
+          msbuild-architecture: ${{ matrix.platform == 'ARM64' && 'arm64' || 'x64' }}
 
       - name: Checkout repository [libbitcoin-system]
         id: checkout-libbitcoin-system
@@ -1454,6 +1536,7 @@ jobs:
           --build-platform ${{ matrix.platform }}
           --build-version ${{ matrix.version }}
           --build-use-local-src
+          ${{ matrix.options }}
 
       - name: Execute tests
         shell: powershell

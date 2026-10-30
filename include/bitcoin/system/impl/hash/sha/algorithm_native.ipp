@@ -423,7 +423,7 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
     unshuffle(lo, hi);
 
     // digest is copied so that state remains valid (LE).
-    std::array<xint128_t, 2> wdigest{};
+    aligned_array<xint128_t, 2> wdigest{};
     f::store(wdigest[0], native_to_big_end<uint32_t>(lo));
     f::store(wdigest[1], native_to_big_end<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);
@@ -512,8 +512,23 @@ native_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    inject_left_half(block, array_cast<word_t>(left));
-    inject_right_half(block, array_cast<word_t>(right));
+
+    if constexpr (have_arm32)
+    {
+        std_array<word_t, SHA::chunk_words> words{};
+        std::copy(left.cbegin(), left.cend(),
+            array_cast<byte_t>(words).begin());
+        inject_left_half(block, words);
+        std::copy(right.cbegin(), right.cend(),
+            array_cast<byte_t>(words).begin());
+        inject_right_half(block, words);
+    }
+    else
+    {
+        inject_left_half(block, array_cast<word_t>(left));
+        inject_right_half(block, array_cast<word_t>(right));
+    }
+
     native_transform<true>(state, block);
     return native_finalize<one>(state);
 }
@@ -524,8 +539,23 @@ native_hash(const quart_t& left, const quart_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    inject_left_quarter(block, array_cast<word_t>(left));
-    inject_right_quarter(block, array_cast<word_t>(right));
+
+    if constexpr (have_arm32)
+    {
+        std_array<word_t, to_half(SHA::chunk_words)> words{};
+        std::copy(left.cbegin(), left.cend(),
+            array_cast<byte_t>(words).begin());
+        inject_left_quarter(block, words);
+        std::copy(right.cbegin(), right.cend(),
+            array_cast<byte_t>(words).begin());
+        inject_right_quarter(block, words);
+    }
+    else
+    {
+        inject_left_quarter(block, array_cast<word_t>(left));
+        inject_right_quarter(block, array_cast<word_t>(right));
+    }
+
     pad_half(block);
     return native_finalize(state, block);
 }
@@ -576,7 +606,7 @@ native_finalize_second(xint128_t lo, xint128_t hi) NOEXCEPT
     native_rounds(lo, hi, message0, message1, message2, message3);
     unshuffle(lo, hi);
 
-    std::array<xint128_t, 2> wdigest{};
+    aligned_array<xint128_t, 2> wdigest{};
     f::store(wdigest[0], native_to_big_end<uint32_t>(lo));
     f::store(wdigest[1], native_to_big_end<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);

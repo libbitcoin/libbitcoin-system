@@ -48,7 +48,7 @@ constexpr bool is_set(int state, int flag)
 // no error, standardized.
 static_assert(std::ios_base::goodbit == 0);
 
-#ifdef HAVE_MSC
+#ifdef HAVE_MSVC_STL
 
 // associated input sequence has reached eof, implementation-defined.
 static_assert(std::ios_base::eofbit == 1);
@@ -59,7 +59,7 @@ static_assert(std::ios_base::failbit == 2);
 // irrecoverable stream error, implementation-defined.
 static_assert(std::ios_base::badbit == 4);
 
-#endif // HAVE_MSC
+#endif // HAVE_MSVC_STL
 
 #ifdef STREAM_ISTREAM
 
@@ -684,7 +684,7 @@ BOOST_AUTO_TEST_CASE(ostream__put__failbit_empty__inconsistent)
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef HAVE_MSC
+#ifdef HAVE_MSVC_STL
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::badbit));
 #endif
 
@@ -709,7 +709,7 @@ BOOST_AUTO_TEST_CASE(ostream__put__failbit_empty__inconsistent)
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef HAVE_MSC
+#ifdef HAVE_MSVC_STL
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::badbit));
 #endif
 }
@@ -821,7 +821,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef HAVE_MSC
+#ifdef HAVE_MSVC_STL
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::badbit));
 #endif
     BOOST_REQUIRE(osstream.str().empty());
@@ -837,7 +837,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(is_set(ostream.rdstate(), std::ostream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef HAVE_MSC
+#ifdef HAVE_MSVC_STL
     BOOST_REQUIRE(is_set(ostream.rdstate(), std::ostream::badbit));
 #endif
     BOOST_REQUIRE_EQUAL(sink, expected);
@@ -853,7 +853,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef HAVE_MSC
+#ifdef HAVE_MSVC_STL
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::badbit));
 #endif
     BOOST_REQUIRE(text.empty());

@@ -71,7 +71,7 @@ static_assert(is_same_size<size_t, signed_size_t>);
 ////static_assert(
 ////    is_same_type<signed_size_t, int32_t> ||
 ////    is_same_type<signed_size_t, int64_t>);
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 static_assert(is_same_size<long, int>); // not assured on all platforms.
 #endif
 static_assert(!is_same_type<long, int>); // but always different types.

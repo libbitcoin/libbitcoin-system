@@ -279,14 +279,14 @@ void x25519::pack(key& out, const field& in) NOEXCEPT
     for (size_t index{}; index < limbs; ++index)
         words[index] = possible_narrow_and_sign_cast<uint16_t>(t[index]);
 
-    to_little_endians(array_cast<uint16_t>(out), words);
+    to_little_endians(out, words);
 }
 
 // Deserialize little-endian, masking the unused top bit.
 void x25519::unpack(field& out, const key& in) NOEXCEPT
 {
     std_array<uint16_t, limbs> words{};
-    from_little_endians(words, array_cast<uint16_t>(in));
+    from_little_endians(words, in);
 
     for (size_t index{}; index < limbs; ++index)
         out[index] = words[index];

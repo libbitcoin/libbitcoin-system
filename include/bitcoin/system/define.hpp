@@ -43,7 +43,7 @@
 // Pulls in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>
 
-#if defined(HAVE_MSC)
+#if defined(HAVE_WINDOWS)
     #include <windows.h>
 #endif
 

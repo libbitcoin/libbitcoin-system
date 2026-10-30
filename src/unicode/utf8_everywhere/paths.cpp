@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/paths.hpp>
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
     #include <shlobj.h>
     #include <windows.h>
 #endif
@@ -66,7 +66,7 @@ std::filesystem::path to_path(const std::string& value) NOEXCEPT
     BC_POP_WARNING()
 }
 
-#if defined(HAVE_MSC)
+#if defined(HAVE_WINDOWS)
 static std::wstring config_directory() NOEXCEPT
 {
     wchar_t directory[MAX_PATH];
@@ -89,7 +89,7 @@ std::filesystem::path default_config_path(
     BC_POP_WARNING()
 }
 
-#if defined(HAVE_MSC)
+#if defined(HAVE_WINDOWS)
 
 // Helper for qualified_path.
 inline auto replace_all(std::wstring text, wchar_t from, wchar_t to) NOEXCEPT
@@ -231,7 +231,7 @@ std::filesystem::path module_path() NOEXCEPT
     BC_POP_WARNING()
 }
 
-#endif // HAVE_MSC
+#endif // HAVE_WINDOWS
 
 } // namespace system
 } // namespace libbitcoin

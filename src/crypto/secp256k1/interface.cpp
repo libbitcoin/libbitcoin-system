@@ -92,13 +92,33 @@ public:
     template <size_t Offset, size_t Size>
     static scalar get_words(const data_array<Size>& in) NOEXCEPT
     {
-        return array_cast<uint64_t, array_count<scalar>, Offset>(in);
+        if constexpr (have_arm32)
+        {
+            scalar words{};
+            const auto& bytes = array_cast<uint8_t, sizeof(scalar), Offset>(in);
+            std::copy(bytes.cbegin(), bytes.cend(),
+                array_cast<uint8_t>(words).begin());
+            return words;
+        }
+        else
+        {
+            return array_cast<uint64_t, array_count<scalar>, Offset>(in);
+        }
     }
 
     template <size_t Offset, size_t Size>
     static void set_words(data_array<Size>& out, const scalar& words) NOEXCEPT
     {
-        array_cast<uint64_t, array_count<scalar>, Offset>(out) = words;
+        if constexpr (have_arm32)
+        {
+            const auto& bytes = array_cast<uint8_t>(words);
+            std::copy(bytes.cbegin(), bytes.cend(),
+                std::next(out.begin(), Offset));
+        }
+        else
+        {
+            array_cast<uint64_t, array_count<scalar>, Offset>(out) = words;
+        }
     }
 
     // A stored point has nonzero x.

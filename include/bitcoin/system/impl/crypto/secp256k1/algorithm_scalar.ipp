@@ -365,7 +365,7 @@ constexpr void algorithm::decode(scalar_t& r,
     const data_array<Size>& bytes) NOEXCEPT
 {
     constexpr auto size = sizeof(uint64_t);
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         from_big<Offset + 3 * size>(r[0], bytes);
         from_big<Offset + 2 * size>(r[1], bytes);
@@ -387,7 +387,7 @@ constexpr void algorithm::decode(scalar_t& r,
 constexpr void algorithm::encode(bytes_t& out, const scalar_t& a) NOEXCEPT
 {
     constexpr auto size = sizeof(uint64_t);
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         to_big<0 * size>(out, a[3]);
         to_big<1 * size>(out, a[2]);

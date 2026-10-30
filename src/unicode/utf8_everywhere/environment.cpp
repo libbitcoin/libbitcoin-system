@@ -141,7 +141,7 @@ size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
 // BC_USE_LIBBITCOIN_MAIN
 // ----------------------------------------------------------------------------
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 
 void free_environment(char* environment[]) NOEXCEPT
 {
@@ -255,7 +255,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
     return result;
 }
 
-#endif // HAVE_MSC
+#endif // HAVE_WINDOWS
 
 BC_POP_WARNING()
 BC_POP_WARNING()

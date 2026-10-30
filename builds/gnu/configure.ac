@@ -867,7 +867,7 @@ AS_IF([test "x${with_valgrind}" != "xno"], [
     ])
 
 AS_IF([test "x${enable_cuda}" != "xno"], [
-        AC_DEFINE([ENABLE_CUDA])
+        AC_DEFINE([WITH_CUDA])
     ])
 
 AC_CONFIG_FILES([

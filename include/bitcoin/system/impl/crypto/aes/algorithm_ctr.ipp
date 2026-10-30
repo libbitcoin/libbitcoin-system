@@ -74,7 +74,7 @@ cbc_decrypt(byte_span out, const_byte_span in, block_t& iv,
 
             auto plain = cipher;
             auto& word = array_cast<xint128_t>(plain).front();
-            std_array<xint128_t, one> state{ f::load<uint8_t>(word) };
+            aligned_array<xint128_t, one> state{ f::load<uint8_t>(word) };
             aes::decrypt<K::rounds>(state, keys);
             f::store<uint8_t>(word, state.front());
 
