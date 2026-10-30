@@ -36,9 +36,12 @@ template <typename Type, size_t Size>
 using std_array = std::array<Type, Size>;
 
 /// std_array aligned to its element, as clang-cl under-aligns a std::array of
-/// vectors (the MSVC STL declares std::array under pragma pack).
+/// vectors (the MSVC STL declares std::array under pragma pack). Alignment is
+/// requested only for over-aligned elements, as a requested alignment alters
+/// msvc x86 argument passing.
 template <typename Type, size_t Size>
-struct alignas(Type) aligned_array : std_array<Type, Size> {};
+struct alignas(alignof(Type) > alignof(std::max_align_t) ? alignof(Type) : 0)
+    aligned_array : std_array<Type, Size> {};
 
 /// std_vector aliased to allow seamless conditional allocator usage.
 /// The default area is applied by default, so remains globally relocatable.
