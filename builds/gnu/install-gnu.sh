@@ -58,6 +58,7 @@
 #                                 Default: git clone --depth 1 --single-branch
 # --build-post-install-clean    Clean dependencies after installation (saves space).
 # --build-skip-tests            Skip test compilation and execution.
+# --build-skip-test-run         Compile tests without executing them.
 # --build-valgrind=<filter>     Also run the tests matching the filter under valgrind.
 # --build-parallel=<int>        Number of jobs to run simultaneously.
 #                                 Default: supported platforms use nproc/sysctl
@@ -118,6 +119,7 @@ main()
             (--build-full-repositories)     BUILD_FULL_REPOSITORIES="yes";;
             (--build-post-install-clean)    BUILD_POST_INSTALL_CLEAN="yes";;
             (--build-skip-tests)            BUILD_SKIP_TESTS="yes";;
+            (--build-skip-test-run)         BUILD_SKIP_TEST_RUN="yes";;
             (--build-valgrind=*)            BUILD_VALGRIND="${OPTION#*=}";;
             (--build-parallel=*)            PARALLEL="${OPTION#*=}";;
             (--build-use-local-src)         BUILD_USE_LOCAL_SRC="yes";;
@@ -142,6 +144,7 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-full-repositories/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-post-install-clean/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-skip-tests/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-skip-test-run/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-valgrind=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-parallel=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-use-local-src/}")
@@ -933,12 +936,17 @@ test_gnu()
         push_directory "${RELATIVE_OBJ_PATH}"
     fi
 
+    local TEST_RUN=()
+    if [[ "${BUILD_SKIP_TEST_RUN}" == "yes" ]]; then
+        TEST_RUN=( "TESTS=" )
+    fi
+
     disable_exit_on_error
 
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} check VERBOSE=1
+        make -j${JOBS} check VERBOSE=1 "${TEST_RUN[@]}"
     else
-        make check VERBOSE=1
+        make check VERBOSE=1 "${TEST_RUN[@]}"
     fi
 
     local RESULT=$?
@@ -960,7 +968,7 @@ test_gnu()
         exit ${RESULT}
     fi
 
-    if [[ -n "${BUILD_VALGRIND}" && "${PROJECT}" == "libbitcoin-system" ]]; then
+    if [[ -n "${BUILD_VALGRIND}" && "${BUILD_SKIP_TEST_RUN}" != "yes" && "${PROJECT}" == "libbitcoin-system" ]]; then
         msg "Testing ${PROJECT} under valgrind: ${BUILD_VALGRIND}"
         valgrind --quiet --error-exitcode=1 "./test/${PROJECT}-test" --run_test="${BUILD_VALGRIND}"
 
@@ -996,6 +1004,7 @@ display_build_variables()
     msg "BUILD_POST_INSTALL_CLEAN        : ${BUILD_POST_INSTALL_CLEAN}"
     msg "BUILD_USE_LOCAL_SRC             : ${BUILD_USE_LOCAL_SRC}"
     msg "BUILD_SKIP_TESTS                : ${BUILD_SKIP_TESTS}"
+    msg "BUILD_SKIP_TEST_RUN             : ${BUILD_SKIP_TEST_RUN}"
     msg "BUILD_VALGRIND                  : ${BUILD_VALGRIND}"
     msg "PARALLEL                        : ${PARALLEL}"
     msg "PREFIX                          : ${PREFIX}"
@@ -1093,6 +1102,7 @@ help()
     msg "                                Default: git clone --depth 1 --single-branch"
     msg "--build-post-install-clean    Clean dependencies after installation (saves space)."
     msg "--build-skip-tests            Skip test compilation and execution."
+    msg "--build-skip-test-run         Compile tests without executing them."
     msg "--build-valgrind=<filter>     Also run the tests matching the filter under valgrind."
     msg "--build-parallel=<int>        Number of jobs to run simultaneously."
     msg "                                Default: supported platforms use nproc/sysctl"
