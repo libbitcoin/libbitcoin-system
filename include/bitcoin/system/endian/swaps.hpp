@@ -49,24 +49,38 @@ INLINE constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
 /// ---------------------------------------------------------------------------
 /// Each lane is an Integral of a type with a lane byteswap (f::byteswap).
 
+/// True if xWord has a lane byteswap of Integral.
+template <typename Integral, typename xWord>
+constexpr auto is_lane_swappable = requires(xWord word)
+{
+    f::byteswap<Integral>(word);
+};
+
+template <typename Integral, typename xWord>
+using if_lane_swappable = bool_if<is_lane_swappable<Integral, xWord>>;
+
 /// Convert native lanes of Integral to big-endian.
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+    if_integral_integer<Integral> = true,
+    if_lane_swappable<Integral, xWord> = true>
 INLINE xWord native_to_big_end(xWord native) NOEXCEPT;
 
 /// Convert native lanes of Integral to little-endian.
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+    if_integral_integer<Integral> = true,
+    if_lane_swappable<Integral, xWord> = true>
 INLINE xWord native_to_little_end(xWord native) NOEXCEPT;
 
 /// Convert big-endian lanes of Integral to native.
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+    if_integral_integer<Integral> = true,
+    if_lane_swappable<Integral, xWord> = true>
 INLINE xWord native_from_big_end(xWord big) NOEXCEPT;
 
 /// Convert little-endian lanes of Integral to native.
 template <typename Integral, typename xWord,
-    if_integral_integer<Integral> = true, if_non_integral<xWord> = true>
+    if_integral_integer<Integral> = true,
+    if_lane_swappable<Integral, xWord> = true>
 INLINE xWord native_from_little_end(xWord little) NOEXCEPT;
 
 } // namespace system

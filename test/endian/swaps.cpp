@@ -145,6 +145,10 @@ BOOST_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_unsi
 
 // extended lanes
 
+static_assert(is_lane_swappable<uint32_t, xint128_t>);
+static_assert(!is_lane_swappable<uint32_t, uint32_t>);
+static_assert(!is_lane_swappable<uint32_t, data_chunk>);
+
 BOOST_AUTO_TEST_CASE(endian__native_to_big_end__extended__expected)
 {
     if constexpr (have_128)
