@@ -94,23 +94,52 @@ xinput(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    const auto& xblock = array_cast<words_t>(blocks.template to_array<lanes>());
-    xbuffer[0] = pack<0>(xblock);
-    xbuffer[1] = pack<1>(xblock);
-    xbuffer[2] = pack<2>(xblock);
-    xbuffer[3] = pack<3>(xblock);
-    xbuffer[4] = pack<4>(xblock);
-    xbuffer[5] = pack<5>(xblock);
-    xbuffer[6] = pack<6>(xblock);
-    xbuffer[7] = pack<7>(xblock);
-    xbuffer[8] = pack<8>(xblock);
-    xbuffer[9] = pack<9>(xblock);
-    xbuffer[10] = pack<10>(xblock);
-    xbuffer[11] = pack<11>(xblock);
-    xbuffer[12] = pack<12>(xblock);
-    xbuffer[13] = pack<13>(xblock);
-    xbuffer[14] = pack<14>(xblock);
-    xbuffer[15] = pack<15>(xblock);
+    if constexpr (have_arm32)
+    {
+        std_array<words_t, lanes> xblock{};
+        const auto& bytes = array_cast<byte_t>(
+            blocks.template to_array<lanes>());
+        std::copy(bytes.cbegin(), bytes.cend(),
+            array_cast<byte_t>(xblock).begin());
+        xbuffer[0] = pack<0>(xblock);
+        xbuffer[1] = pack<1>(xblock);
+        xbuffer[2] = pack<2>(xblock);
+        xbuffer[3] = pack<3>(xblock);
+        xbuffer[4] = pack<4>(xblock);
+        xbuffer[5] = pack<5>(xblock);
+        xbuffer[6] = pack<6>(xblock);
+        xbuffer[7] = pack<7>(xblock);
+        xbuffer[8] = pack<8>(xblock);
+        xbuffer[9] = pack<9>(xblock);
+        xbuffer[10] = pack<10>(xblock);
+        xbuffer[11] = pack<11>(xblock);
+        xbuffer[12] = pack<12>(xblock);
+        xbuffer[13] = pack<13>(xblock);
+        xbuffer[14] = pack<14>(xblock);
+        xbuffer[15] = pack<15>(xblock);
+    }
+    else
+    {
+        const auto& xblock = array_cast<words_t>(
+            blocks.template to_array<lanes>());
+        xbuffer[0] = pack<0>(xblock);
+        xbuffer[1] = pack<1>(xblock);
+        xbuffer[2] = pack<2>(xblock);
+        xbuffer[3] = pack<3>(xblock);
+        xbuffer[4] = pack<4>(xblock);
+        xbuffer[5] = pack<5>(xblock);
+        xbuffer[6] = pack<6>(xblock);
+        xbuffer[7] = pack<7>(xblock);
+        xbuffer[8] = pack<8>(xblock);
+        xbuffer[9] = pack<9>(xblock);
+        xbuffer[10] = pack<10>(xblock);
+        xbuffer[11] = pack<11>(xblock);
+        xbuffer[12] = pack<12>(xblock);
+        xbuffer[13] = pack<13>(xblock);
+        xbuffer[14] = pack<14>(xblock);
+        xbuffer[15] = pack<15>(xblock);
+    }
+
     blocks.template advance<lanes>();
 }
 

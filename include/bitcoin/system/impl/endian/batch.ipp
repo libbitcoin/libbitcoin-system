@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_BATCH_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_BATCH_IPP
 
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
 
@@ -209,6 +210,81 @@ constexpr void to_little_endians(std_array<Integral, Count>& out,
     const std_array<Integral, Count>& in) NOEXCEPT
 {
     from_little_endians(out, in);
+}
+
+// Byte arrays.
+// ----------------------------------------------------------------------------
+
+template <typename Integral, size_t Count, if_not_one_byte<Integral>>
+inline void from_big_endians(std_array<Integral, Count>& out,
+    const std_array<uint8_t, Count * sizeof(Integral)>& in) NOEXCEPT
+{
+    if constexpr (have_arm32)
+    {
+        // copy/swap.
+        std_array<Integral, Count> words{};
+        std::copy(in.cbegin(), in.cend(), array_cast<uint8_t>(words).begin());
+        from_big_endians(out, words);
+    }
+    else
+    {
+        // cast/swap.
+        from_big_endians(out, array_cast<Integral>(in));
+    }
+}
+
+template <typename Integral, size_t Count, if_not_one_byte<Integral>>
+inline void from_little_endians(std_array<Integral, Count>& out,
+    const std_array<uint8_t, Count * sizeof(Integral)>& in) NOEXCEPT
+{
+    if constexpr (have_arm32)
+    {
+        // copy/swap.
+        std_array<Integral, Count> words{};
+        std::copy(in.cbegin(), in.cend(), array_cast<uint8_t>(words).begin());
+        from_little_endians(out, words);
+    }
+    else
+    {
+        // cast/swap.
+        from_little_endians(out, array_cast<Integral>(in));
+    }
+}
+
+template <typename Integral, size_t Count, if_not_one_byte<Integral>>
+inline void to_big_endians(std_array<uint8_t, Count * sizeof(Integral)>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT
+{
+    if constexpr (have_arm32)
+    {
+        // swap/copy.
+        const auto words = to_big_endians(in);
+        const auto& bytes = array_cast<uint8_t>(words);
+        std::copy(bytes.cbegin(), bytes.cend(), out.begin());
+    }
+    else
+    {
+        // cast/swap.
+        to_big_endians(array_cast<Integral>(out), in);
+    }
+}
+
+template <typename Integral, size_t Count, if_not_one_byte<Integral>>
+inline void to_little_endians(std_array<uint8_t, Count * sizeof(Integral)>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT
+{
+    if constexpr (have_arm32)
+    {
+        // swap/copy.
+        const auto words = to_little_endians(in);
+        const auto& bytes = array_cast<uint8_t>(words);
+        std::copy(bytes.cbegin(), bytes.cend(), out.begin());
+    }
+    else
+    {
+        // cast/swap.
+        to_little_endians(array_cast<Integral>(out), in);
+    }
 }
 
 } // namespace system

@@ -394,7 +394,7 @@ void chacha20::set_key(const secret& key) NOEXCEPT
 {
     // The next eight words (4-11) are taken from the 256-bit key by reading
     // the bytes in little-endian order, in 4-byte chunks.
-    from_little_endians(key_, array_cast<uint32_t>(key));
+    from_little_endians(key_, key);
     nonce_ = {};
     counter_ = {};
     offset_ = block_size;
@@ -425,7 +425,7 @@ void chacha20::next(block& out) NOEXCEPT
     rounds(x);
 
     // Serialize by sequencing the words one-by-one in little-endian order.
-    to_little_endians(array_cast<uint32_t>(out), x);
+    to_little_endians(out, x);
     ++counter_;
 }
 

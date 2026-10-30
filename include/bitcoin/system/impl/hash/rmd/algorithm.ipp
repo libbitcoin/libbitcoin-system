@@ -295,7 +295,7 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input(words_t& words, const block_t& block) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = RMD::word_bytes;
         from_little< 0 * size>(words.at( 0), block);
@@ -345,7 +345,7 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input(words_t& words, const half_t& half) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = RMD::word_bytes;
         from_little<0 * size>(words.at(0), half);
@@ -382,7 +382,7 @@ output(const state_t& state) NOEXCEPT
 {
     digest_t digest{};
 
-    if (std::is_constant_evaluated())
+    if (std::is_constant_evaluated() || have_arm32)
     {
         constexpr auto size = RMD::word_bytes;
         to_little<0 * size>(digest, state.at(0));

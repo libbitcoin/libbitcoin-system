@@ -70,6 +70,30 @@ template <typename Integral, size_t Count>
 constexpr void from_little_endians(std_array<Integral, Count>& out,
     const std_array<Integral, Count>& in) NOEXCEPT;
 
+/// Byte array endian conversion (return by reference).
+/// ---------------------------------------------------------------------------
+/// Bytes are not required to be aligned to the integral.
+
+/// Copy an array of native integral integers to big-endian bytes.
+template <typename Integral, size_t Count, if_not_one_byte<Integral> = true>
+inline void to_big_endians(std_array<uint8_t, Count * sizeof(Integral)>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT;
+
+/// Copy an array of native integral integers to little-endian bytes.
+template <typename Integral, size_t Count, if_not_one_byte<Integral> = true>
+inline void to_little_endians(std_array<uint8_t, Count * sizeof(Integral)>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT;
+
+/// Copy big-endian bytes to an array of native integral integers.
+template <typename Integral, size_t Count, if_not_one_byte<Integral> = true>
+inline void from_big_endians(std_array<Integral, Count>& out,
+    const std_array<uint8_t, Count * sizeof(Integral)>& in) NOEXCEPT;
+
+/// Copy little-endian bytes to an array of native integral integers.
+template <typename Integral, size_t Count, if_not_one_byte<Integral> = true>
+inline void from_little_endians(std_array<Integral, Count>& out,
+    const std_array<uint8_t, Count * sizeof(Integral)>& in) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 
