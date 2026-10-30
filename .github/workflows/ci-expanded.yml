@@ -1386,30 +1386,42 @@ jobs:
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-latest
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-2025-vs2026
             configuration: "StaticRelease"
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-2025-vs2026
             configuration: "StaticDebug"
             platform: "x64"
             version: "vs2026"
             tests: "*"
+            options: ""
 
           - image: windows-latest
             configuration: "StaticRelease"
             platform: "Win32"
             version: "vs2026"
             tests: "*"
+            options: ""
+
+          - image: windows-latest
+            configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+            options: "--build-compiler clang"
 
     runs-on: ${{ matrix.image }}
 
@@ -1454,6 +1466,7 @@ jobs:
           --build-platform ${{ matrix.platform }}
           --build-version ${{ matrix.version }}
           --build-use-local-src
+          ${{ matrix.options }}
 
       - name: Execute tests
         shell: powershell

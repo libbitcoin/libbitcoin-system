@@ -14,6 +14,21 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
 
+  <!-- Option-clang compiles with the Visual Studio clang-cl under the configured toolset. -->
+  <PropertyGroup>
+    <Option-clang Condition="'$(Option-clang)' == ''">false</Option-clang>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Option-clang)' == 'true'">
+    <CLToolExe>clang-cl.exe</CLToolExe>
+    <CLToolPath>$(VCInstallDir)Tools\Llvm\x64\bin</CLToolPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true'">
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Platform)' == 'Win32'">--target=i686-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Platform)' == 'ARM64'">--target=aarch64-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
