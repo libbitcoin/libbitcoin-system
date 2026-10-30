@@ -34,7 +34,7 @@
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-secp256k1)' == 'true'">WITH_SECP256K1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-cuda)' == 'true'">ENABLE_CUDA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-cuda)' == 'true'">WITH_CUDA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 

@@ -567,7 +567,7 @@ target_compile_definitions( libbitcoin-system
     $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
     $<$<BOOL:${with-secp256k1}>:SECP256K1_VERSION=${secp256k1_VERSION}>
     $<$<BOOL:${with-valgrind}>:WITH_VALGRIND>
-    $<$<BOOL:${enable-cuda}>:ENABLE_CUDA>
+    $<$<BOOL:${enable-cuda}>:WITH_CUDA>
 )
 
 file( GLOB_RECURSE libbitcoin_system_HEADERS CONFIGURE_DEPENDS

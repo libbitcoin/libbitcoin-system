@@ -69,7 +69,7 @@
 #endif
 
 /// Determines linker defines (Windows vs. Unix/Linux).
-#if defined(_MSC_VER) && !defined(ENABLE_PTX)
+#if defined(_MSC_VER) && !defined(WITH_PTX)
     #define HAVE_WINDOWS_LIBS
 #elif defined(HAVE_CLANG) || defined(HAVE_GNUC)
     #define HAVE_NX_LIBS
@@ -94,7 +94,7 @@
     #define HAVE_ARM
 #elif defined(__s390x__)
     #define HAVE_S390X
-#elif !defined(ENABLE_PTX)
+#elif !defined(WITH_PTX)
     #error "Unsupported architecture."
 #endif
 
@@ -158,16 +158,13 @@
     #define HAVE_VALGRIND
 #endif
 
-/// ENABLE_ build symbols.
-/// ---------------------------------------------------------------------------
-
 // Compilation of device kernels to ptx (developer).
-#if defined(ENABLE_PTX)
+#if defined(WITH_PTX)
     #define HAVE_PTX
 #endif
 
 // Device (gpu) batch verification.
-#if defined(ENABLE_CUDA) && !defined(HAVE_APPLE) && \
+#if defined(WITH_CUDA) && !defined(HAVE_APPLE) && \
     (defined(HAVE_X64) || defined(HAVE_ARM64))
     #define HAVE_CUDA
 #endif

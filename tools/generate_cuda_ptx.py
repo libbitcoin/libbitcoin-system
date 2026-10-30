@@ -67,7 +67,7 @@ def compile_ptx(clang, boost, ptx):
         "-D__host__=__attribute__((host))",
         "-D__device__=__attribute__((device))",
         "-D__global__=__attribute__((global))",
-        "-DENABLE_PTX", "-DNDEBUG", "-DBOOST_ALL_NO_LIB", "-DBOOST_URL_HPP",
+        "-DWITH_PTX", "-DNDEBUG", "-DBOOST_ALL_NO_LIB", "-DBOOST_URL_HPP",
         "-I", "include", "-I", os.path.join("build", "include"),
         "-I", boost, SOURCE, "-o", ptx]
 
