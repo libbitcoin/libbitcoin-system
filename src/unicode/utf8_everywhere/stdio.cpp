@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/stdio.hpp>
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
     #include <fcntl.h>
     #include <io.h>
     #include <windows.h>
@@ -37,7 +37,7 @@ namespace system {
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 
 // The width of utf16 stdio buffers.
 constexpr size_t utf16_buffer_size = 256;
@@ -109,7 +109,7 @@ void unset_console_echo() NOEXCEPT
     FlushConsoleInputBuffer(handle);
 }
 
-#else // HAVE_MSC
+#else // HAVE_WINDOWS
 
 std::istream& cin_stream() THROWS { return std::cin; }
 std::ostream& cout_stream() THROWS { return std::cout; }
@@ -133,7 +133,7 @@ void unset_console_echo() NOEXCEPT
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
 }
 
-#endif // HAVE_MSC
+#endif // HAVE_WINDOWS
 
 void set_utf8_stdio() THROWS
 {

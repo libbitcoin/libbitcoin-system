@@ -53,7 +53,7 @@ protected:
     /// Alternate console read.
     std::wstreambuf::int_type underflow() THROWS override;
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 private:
     // These are not thread safe.
 

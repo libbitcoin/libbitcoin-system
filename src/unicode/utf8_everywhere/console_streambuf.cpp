@@ -25,7 +25,7 @@
 namespace libbitcoin {
 namespace system {
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 
 // A process with no attached console (such as a service, or one started with
 // CREATE_NO_WINDOW) has no console code page or mode, and none to set.

@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(paths__to_path__always__expected)
 constexpr size_t long_path_size = 260;
 constexpr size_t maximum_path_size = 260;
 
-#if defined(HAVE_MSC)
+#if defined(HAVE_WINDOWS)
 static const auto test_absolute = std::filesystem::path{ L"C:\\path\\file.ext" };
 static const auto test_long = L"C:\\" + std::wstring(long_path_size, L'x');
 static const auto test_extended = std::filesystem::path{ L"\\\\?\\" + test_long };

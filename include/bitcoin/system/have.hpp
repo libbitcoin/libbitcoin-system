@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_HAVE_HPP
 #define LIBBITCOIN_SYSTEM_HAVE_HPP
 
+#include <version>
 #include <bitcoin/system/version.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,6 +41,8 @@
     #define HAVE_NETBSD
 #elif defined(__CYGWIN__)
     #define HAVE_CYGWIN
+#elif defined(_WIN32)
+    #define HAVE_WINDOWS
 #endif
 
 // Others excluded presently due to lack of verified support.
@@ -61,11 +64,16 @@
 #if defined(_MSC_VER) && !defined(HAVE_CLANG)
     #define HAVE_MSC
 #endif
+#if defined(_MSVC_STL_VERSION)
+    #define HAVE_MSVC_STL
+#endif
 
 /// Determines linker defines (Windows vs. Unix/Linux).
-#if defined(HAVE_CLANG) || defined(HAVE_GNUC)
+#if defined(_MSC_VER) && !defined(ENABLE_PTX)
+    #define HAVE_WINDOWS_LIBS
+#elif defined(HAVE_CLANG) || defined(HAVE_GNUC)
     #define HAVE_NX_LIBS
-#elif defined(_MSC_VER) || defined(__CYGWIN__)
+#elif defined(__CYGWIN__)
     #define HAVE_WINDOWS_LIBS
 #endif
 

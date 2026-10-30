@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation2__ex
 
 // BC_USE_LIBBITCOIN_MAIN
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 
 // allocate_environment (vars) / free_environment
 
@@ -383,6 +383,6 @@ BOOST_AUTO_TEST_CASE(utf8_environment__call_utf8_main__numbers__classic_format)
     BOOST_REQUIRE_EQUAL(result, 0);
 }
 
-#endif // HAVE_MSC
+#endif // HAVE_WINDOWS
 
 BOOST_AUTO_TEST_SUITE_END()

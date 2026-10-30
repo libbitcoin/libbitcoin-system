@@ -42,7 +42,7 @@
 /// learn.microsoft.com/en-us/cpp/c-runtime-library/
 /// find-memory-leaks-using-the-crt-library
 /// _CRTDBG_MAP_ALLOC must be prior to the includes, so defined in props.
-#if defined(HAVE_MSC) && defined(_DEBUG) && defined(_CRTDBG_MAP_ALLOC)
+#if defined(HAVE_WINDOWS) && defined(_DEBUG) && defined(_CRTDBG_MAP_ALLOC)
     #include <stdlib.h>
     #include <crtdbg.h>
     ////_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -208,7 +208,7 @@
     #define _ARM_USE_NEW_NEON_INTRINSICS
 #endif
 
-#if defined(HAVE_MSC) && (_WIN32_WINNT >= 0x0602)
+#if defined(HAVE_WINDOWS) && (_WIN32_WINNT >= 0x0602)
     #define HAVE_MEMORY_PRIORITY
 #endif
 

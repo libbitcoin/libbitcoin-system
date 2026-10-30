@@ -24,7 +24,7 @@
 #include <bitcoin/system/define.hpp>
 #include "ptx.hpp"
 
-#if !defined(HAVE_MSC)
+#if !defined(HAVE_WINDOWS)
     #include <dlfcn.h>
 #endif
 
@@ -38,7 +38,7 @@ BC_PUSH_WARNING(NO_REINTERPRET_CAST)
 // Driver library.
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_MSC)
+#if defined(HAVE_WINDOWS)
 inline void* load_library() NOEXCEPT
 {
     return reinterpret_cast<void*>(::LoadLibraryW(L"nvcuda.dll"));

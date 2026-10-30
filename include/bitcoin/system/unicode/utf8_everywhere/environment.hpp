@@ -33,7 +33,7 @@ BC_API size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
 BC_API size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes) NOEXCEPT;
 
-#ifdef HAVE_MSC
+#ifdef HAVE_WINDOWS
 
 /// This is for Win32 environment support, exposed for test.
 BC_API void free_environment(char* environment[]) NOEXCEPT;
