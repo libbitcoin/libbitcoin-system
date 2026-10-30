@@ -22,13 +22,6 @@
     <CLToolExe>clang-cl.exe</CLToolExe>
     <CLToolPath>$(VCInstallDir)Tools\Llvm\x64\bin</CLToolPath>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true'">
-    <ClCompile>
-      <AdditionalOptions Condition="'$(Platform)' == 'Win32'">--target=i686-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Platform)' == 'ARM64'">--target=aarch64-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-  </ItemDefinitionGroup>
-
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -62,6 +55,16 @@
       <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
       <!-- Language extensions are enabled by default (required for STL/Boost). -->
       <ExternalWarningLevel>Level4</ExternalWarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- clang-cl applies external warnings to system headers, and ignores some msvc options. -->
+  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true'">
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Platform)' == 'Win32'">--target=i686-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Platform)' == 'ARM64'">--target=aarch64-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
   </ItemDefinitionGroup>
 
