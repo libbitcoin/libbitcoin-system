@@ -1247,7 +1247,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/define.cpp \
     ${srcdir}/../../test/execution.cpp \
     ${srcdir}/../../test/funclets.cpp \
-    ${srcdir}/../../test/hacks.cpp \
     ${srcdir}/../../test/literals.cpp \
     ${srcdir}/../../test/main.cpp \
     ${srcdir}/../../test/settings.cpp \

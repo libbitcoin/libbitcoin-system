@@ -576,9 +576,6 @@
     <ClCompile Include="..\..\..\..\test\funclets.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hacks.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>

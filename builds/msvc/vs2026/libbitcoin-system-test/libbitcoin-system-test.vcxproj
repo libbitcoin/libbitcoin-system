@@ -320,7 +320,6 @@
     <ClCompile Include="..\..\..\..\test\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\sieve.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
-    <ClCompile Include="..\..\..\..\test\hacks.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\crc32.cpp" />
