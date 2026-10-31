@@ -46,9 +46,9 @@ struct electrum_v1_vector
 
     // Overflow bug testing.
 
-    data_chunk overflowed_seed_entropy_;
-    flags overflow_flags_;
-    std::string trimmed_mnemonic_;
+    data_chunk overflowed_seed_entropy_{};
+    flags overflow_flags_{};
+    std::string trimmed_mnemonic_{};
 
     bool overflow() const
     {

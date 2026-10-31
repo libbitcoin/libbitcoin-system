@@ -303,10 +303,10 @@ private:
     const uint32_t flags_;
     const uint64_t value_;
     const script_version version_;
+    const chain::signatures& capture_;
     const chunk_cptrs_ptr witness_{};
     const hash_cptr tapleaf_{};
     const bool spender_{};
-    const chain::signatures& capture_;
 
     // Caches.
     mutable multisig_cache multisig_{};

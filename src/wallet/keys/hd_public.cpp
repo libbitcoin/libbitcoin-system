@@ -77,7 +77,7 @@ hd_public::hd_public(const std::string& encoded, uint32_t prefix) NOEXCEPT
 
 hd_public::hd_public(const ec_compressed& point,
     const hd_chain_code& chain_code, const hd_lineage& lineage) NOEXCEPT
-  : valid_(true), point_(point), chain_(chain_code), lineage_(lineage)
+  : valid_(true), chain_(chain_code), lineage_(lineage), point_(point)
 {
 }
 

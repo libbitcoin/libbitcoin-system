@@ -76,9 +76,9 @@ void console_streambuf::set_output() THROWS
 
 console_streambuf::console_streambuf(const std::wstreambuf& buffer,
     size_t size) THROWS
-  : buffer_size_(size),
-    buffer_(new wchar_t[size]),
-    std::wstreambuf(buffer)
+  : std::wstreambuf(buffer),
+    buffer_size_(size),
+    buffer_(new wchar_t[size])
 {
 }
 

@@ -36,6 +36,8 @@ namespace system {
 namespace chain {
 namespace view {
 
+class block;
+
 class BC_API transaction final
 {
 public:

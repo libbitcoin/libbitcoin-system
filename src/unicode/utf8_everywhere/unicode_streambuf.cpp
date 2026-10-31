@@ -20,6 +20,7 @@
 
 #include <cstring>
 #include <streambuf>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
@@ -30,8 +31,8 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* buffer,
     size_t size) THROWS
   : wide_size_(size),
     narrow_size_(wide_size_ * utf8_max_character_size),
-    narrow_(new char[narrow_size_]),
     wide_(new wchar_t[narrow_size_]),
+    narrow_(new char[narrow_size_]),
     wide_buffer_(buffer)
 {
     if (is_zero(wide_size_) || is_null(wide_buffer_) ||
@@ -124,7 +125,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
         const auto written = wide_buffer_->sputn(wide_, chars);
 
         // Guard unsigned cast of 64 bit value.
-        if (chars > (max_uint64 >> 1))
+        if (is_limited<std::streamsize>(chars))
             return traits_type::eof();
 
         // Handle write failure as an EOF.

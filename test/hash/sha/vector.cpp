@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(vector__sha160__scheduling__expected)
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
     using sha160n = sha::algorithm<sha::h160, true, false, true>;
     using sha160v = sha::algorithm<sha::h160, true, true, true>;
-    constexpr auto blocks = std_array<sha160::block_t, coverall>{ 1 };
+    constexpr auto blocks = std_array<sha160::block_t, coverall>{ sha160::block_t{ 1 } };
     constexpr auto hashn = sha160n::hash(blocks);
     constexpr auto hashv = sha160v::hash(blocks);
     static_assert(hashn == hashv);
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(vector__sha256__scheduling__expected)
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
     using sha256n = sha::algorithm<sha::h256<>, true, false, true>;
     using sha256v = sha::algorithm<sha::h256<>, true, true, true>;
-    constexpr auto blocks = std_array<sha256::block_t, coverall>{ 1 };
+    constexpr auto blocks = std_array<sha256::block_t, coverall>{ sha256::block_t{ 1 } };
     constexpr auto hashn = sha256n::hash(blocks);
     constexpr auto hashv = sha256v::hash(blocks);
     static_assert(hashn == hashv);
