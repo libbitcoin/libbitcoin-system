@@ -18,7 +18,7 @@
  */
 #include "test.hpp"
 
-BOOST_AUTO_TEST_SUITE(settings_tests)
+BC_AUTO_TEST_SUITE(settings_tests)
 
 const chain::checkpoint::list mainnet_checkpoints
 {
@@ -40,74 +40,74 @@ const chain::checkpoint::list mainnet_checkpoints
 // constructors
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
+BC_AUTO_TEST_CASE(settings__construct__default_context__expected)
 {
     settings configuration;
-    BOOST_REQUIRE(configuration.network == chain::selection::none);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
-    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
-    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
-    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
-    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE(configuration.network == chain::selection::none);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
 }
 
-BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
+BC_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
 {
     settings configuration(chain::selection::mainnet);
-    BOOST_REQUIRE(configuration.network == chain::selection::mainnet);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
-    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE(configuration.network == chain::selection::mainnet);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
     const chain::block genesis_block = configuration.genesis_block;
-    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
-    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
-    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
-    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1333238400u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 750u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 950u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 1000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 227931u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 388381u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 363725u);
+    BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1333238400u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 750u);
+    BC_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 950u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_sample, 1000u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 227931u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 388381u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 363725u);
     const chain::checkpoint bit0_active("000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
     const chain::checkpoint bit2_active("0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
-    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
-    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
-    BOOST_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64")));
+    BC_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BC_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BC_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
+    BC_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64")));
     const chain::checkpoint milestone("000000000000000000010b93c9ea1c29fea277383f0f7d1f26de8b5802e885ff", 950000u);
-    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
+    BC_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
-BOOST_AUTO_TEST_CASE(settings__construct__testnet3_context__expected)
+BC_AUTO_TEST_CASE(settings__construct__testnet3_context__expected)
 {
     const chain::checkpoint::list checkpoints
     {
@@ -115,51 +115,51 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet3_context__expected)
     };
 
     settings configuration(chain::selection::testnet3);
-    BOOST_REQUIRE(configuration.network == chain::selection::testnet3);
-    BOOST_REQUIRE(!configuration.forks.time_warp_patch);
-    BOOST_REQUIRE(!configuration.forks.block_storm_patch);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
-    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE(configuration.network == chain::selection::testnet3);
+    BC_REQUIRE(!configuration.forks.time_warp_patch);
+    BC_REQUIRE(!configuration.forks.block_storm_patch);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
     const chain::block genesis_block = configuration.genesis_block;
-    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4adae5494dffff001d1aa4ae180101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
-    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
-    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
-    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 21111u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 581885u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 330776u);
+    BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4adae5494dffff001d1aa4ae180101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
+    BC_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 21111u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 581885u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 330776u);
     const chain::checkpoint bit0_active("00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
     ////const chain::checkpoint bit2_active("0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632);
-    ////BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
-    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
-    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
-    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
+    ////BC_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BC_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BC_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BC_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
     const chain::checkpoint milestone("0000000000000093bcb68c03a9a168ae252572d348a2eaeba2cdf9231d73206f", 2500000u);
-    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
+    BC_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
-BOOST_AUTO_TEST_CASE(settings__construct__testnet4_context__expected)
+BC_AUTO_TEST_CASE(settings__construct__testnet4_context__expected)
 {
     const chain::checkpoint::list checkpoints
     {
@@ -167,88 +167,88 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet4_context__expected)
     };
 
     settings configuration(chain::selection::testnet4);
-    BOOST_REQUIRE(configuration.network == chain::selection::testnet4);
-    BOOST_REQUIRE(configuration.forks.time_warp_patch);
-    BOOST_REQUIRE(configuration.forks.block_storm_patch);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
-    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE(configuration.network == chain::selection::testnet4);
+    BC_REQUIRE(configuration.forks.time_warp_patch);
+    BC_REQUIRE(configuration.forks.block_storm_patch);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 486604799u);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
     const chain::block genesis_block = configuration.genesis_block;
-    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000004e7b2b9128fe0291db0693af2ae418b767e657cd407e80cb1434221eaea7a07a046f3566ffff001dbb0c78170101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff5504ffff001d01044c4c30332f4d61792f323032342030303030303030303030303030303030303030303165626435386332343439373062336161396437383362623030313031316662653865613865393865303065ffffffff0100f2052a010000002321000000000000000000000000000000000000000000000000000000000000000000ac00000000");
-    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
-    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
-    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
+    BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000004e7b2b9128fe0291db0693af2ae418b767e657cd407e80cb1434221eaea7a07a046f3566ffff001dbb0c78170101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff5504ffff001d01044c4c30332f4d61792f323032342030303030303030303030303030303030303030303165626435386332343439373062336161396437383362623030313031316662653865613865393865303065ffffffff0100f2052a010000002321000000000000000000000000000000000000000000000000000000000000000000ac00000000");
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
+    BC_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
     const chain::checkpoint bit0_active("0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
-    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
-    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
-    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
+    BC_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BC_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BC_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BC_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
     const chain::checkpoint milestone("0000000002368b1e4ee27e2e85676ae6f9f9e69579b29093e9a82c170bf7cf8a", 123613u);
-    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
+    BC_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
-BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
+BC_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
 {
     settings configuration(chain::selection::regtest);
-    BOOST_REQUIRE(configuration.network == chain::selection::regtest);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
-    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 545259519u);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE(configuration.network == chain::selection::regtest);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 545259519u);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
     const chain::block genesis_block = configuration.genesis_block;
-    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4adae5494dffff7f20020000000101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
-    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
-    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
-    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 100000000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1351u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1251u);
+    BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4adae5494dffff7f20020000000101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 100000000u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1351u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1251u);
     const chain::checkpoint genesis(genesis_block.hash(), 0u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, genesis);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, genesis);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, genesis);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
-    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 150u);
-    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), 1499999998350u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
-    BOOST_REQUIRE(configuration.checkpoints.empty());
-    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000")));
-    BOOST_REQUIRE_EQUAL(configuration.milestone, genesis);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, genesis);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, genesis);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, genesis);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BC_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 150u);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE_EQUAL(configuration.max_money(), 1499999998350u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BC_REQUIRE(configuration.checkpoints.empty());
+    BC_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000")));
+    BC_REQUIRE_EQUAL(configuration.milestone, genesis);
 }
 
-BOOST_AUTO_TEST_CASE(settings__construct__signet_context__expected)
+BC_AUTO_TEST_CASE(settings__construct__signet_context__expected)
 {
     const chain::checkpoint::list checkpoints
     {
@@ -256,87 +256,87 @@ BOOST_AUTO_TEST_CASE(settings__construct__signet_context__expected)
     };
 
     settings configuration(chain::selection::signet);
-    BOOST_REQUIRE(configuration.network == chain::selection::signet);
-    BOOST_REQUIRE(configuration.forks.signet);
-    BOOST_REQUIRE(configuration.forks.difficult);
-    BOOST_REQUIRE(configuration.forks.retarget);
-    BOOST_REQUIRE(!configuration.forks.time_warp_patch);
-    BOOST_REQUIRE(!configuration.forks.block_storm_patch);
-    BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
-    BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
-    BOOST_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1e0377aeu);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE(configuration.network == chain::selection::signet);
+    BC_REQUIRE(configuration.forks.signet);
+    BC_REQUIRE(configuration.forks.difficult);
+    BC_REQUIRE(configuration.forks.retarget);
+    BC_REQUIRE(!configuration.forks.time_warp_patch);
+    BC_REQUIRE(!configuration.forks.block_storm_patch);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1e0377aeu);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
     const chain::block genesis_block = configuration.genesis_block;
-    BOOST_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a008f4d5fae77031e8ad222030101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
-    BOOST_REQUIRE_EQUAL(encode_hash(genesis_block.hash()), "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6");
-    BOOST_REQUIRE_EQUAL(encode_base16(configuration.signet_challenge.to_data(false)), "512103ad5e0edad18cb1f0fc0d28a3d4f1f3e445640337489abb10404f2d1e086be430210359ef5021964fe22d6f8e05b2463c9540ce96883fe3b278760f048f5189f2e6c452ae");
-    BOOST_REQUIRE_EQUAL(configuration.first_version, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
-    BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
-    BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
-    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
+    BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a008f4d5fae77031e8ad222030101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
+    BC_REQUIRE_EQUAL(encode_hash(genesis_block.hash()), "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6");
+    BC_REQUIRE_EQUAL(encode_base16(configuration.signet_challenge.to_data(false)), "512103ad5e0edad18cb1f0fc0d28a3d4f1f3e445640337489abb10404f2d1e086be430210359ef5021964fe22d6f8e05b2463c9540ce96883fe3b278760f048f5189f2e6c452ae");
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
+    BC_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
     const chain::checkpoint block1("00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip30_deactivate_checkpoint, block1);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, block1);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, block1);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, block1);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
-    BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
-    BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
-    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("00000000000000000000000000000000000000000000000000001090e9dc1520")));
+    BC_REQUIRE_EQUAL(configuration.bip30_deactivate_checkpoint, block1);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, block1);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, block1);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, block1);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BC_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    BC_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BC_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("00000000000000000000000000000000000000000000000000001090e9dc1520")));
     const chain::checkpoint milestone("00000002a5e0ba0498f1e9f4591af0b66b63c654665efe65206fd0ae7bbaf923", 321295u);
-    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
+    BC_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
 // methods
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(settings__initial_block_subsidy_bitcoin__set_double_value__max_money_doubled)
+BC_AUTO_TEST_CASE(settings__initial_block_subsidy_bitcoin__set_double_value__max_money_doubled)
 {
     settings configuration(chain::selection::mainnet);
     const auto double_subsidy = configuration.initial_subsidy_bitcoin * 2;
     const auto double_subsidy_satoshi = configuration.bitcoin_to_satoshi(double_subsidy);
     const auto double_max_money = configuration.max_money() + double_subsidy_satoshi * configuration.subsidy_interval_blocks;
     configuration.initial_subsidy_bitcoin = double_subsidy;
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), double_max_money);
+    BC_REQUIRE_EQUAL(configuration.max_money(), double_max_money);
 }
 
-BOOST_AUTO_TEST_CASE(settings__subsidy_interval__set_double_value__max_money_doubled)
+BC_AUTO_TEST_CASE(settings__subsidy_interval__set_double_value__max_money_doubled)
 {
     settings configuration(chain::selection::mainnet);
     const auto double_subsidy_interval = configuration.subsidy_interval_blocks * 2;
     const auto double_max_money = configuration.max_money() * 2;
     configuration.subsidy_interval_blocks = double_subsidy_interval;
-    BOOST_REQUIRE_EQUAL(configuration.max_money(), double_max_money);
+    BC_REQUIRE_EQUAL(configuration.max_money(), double_max_money);
 }
 
-BOOST_AUTO_TEST_CASE(settings__retargeting_factor__set_double_value__timespan_limits_scaled)
+BC_AUTO_TEST_CASE(settings__retargeting_factor__set_double_value__timespan_limits_scaled)
 {
     settings configuration(chain::selection::mainnet);
     const auto double_maximum_timespan = configuration.maximum_timespan() * 2;
     const auto half_minimum_timespan = configuration.minimum_timespan() / 2;
     configuration.retargeting_factor = 8;
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), double_maximum_timespan);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), half_minimum_timespan);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), double_maximum_timespan);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), half_minimum_timespan);
 }
 
-BOOST_AUTO_TEST_CASE(settings__retargeting_interval_seconds__set_double_value__timespan_limits_scaled)
+BC_AUTO_TEST_CASE(settings__retargeting_interval_seconds__set_double_value__timespan_limits_scaled)
 {
     settings configuration(chain::selection::mainnet);
     const auto double_interval_seconds = configuration.retargeting_interval_seconds * 2;
@@ -344,52 +344,52 @@ BOOST_AUTO_TEST_CASE(settings__retargeting_interval_seconds__set_double_value__t
     const auto double_minimum_timespan = configuration.minimum_timespan() * 2;
     const auto double_retargeting_interval = configuration.retargeting_interval() * 2;
     configuration.retargeting_interval_seconds = double_interval_seconds;
-    BOOST_REQUIRE_EQUAL(configuration.maximum_timespan(), double_maximum_timespan);
-    BOOST_REQUIRE_EQUAL(configuration.minimum_timespan(), double_minimum_timespan);
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), double_retargeting_interval);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), double_maximum_timespan);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), double_minimum_timespan);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), double_retargeting_interval);
 }
 
-BOOST_AUTO_TEST_CASE(settings__block_spacing_seconds__set_double_value__retargeting_interval_halved)
+BC_AUTO_TEST_CASE(settings__block_spacing_seconds__set_double_value__retargeting_interval_halved)
 {
     settings configuration(chain::selection::mainnet);
     const auto double_block_spacing_seconds = configuration.block_spacing_seconds * 2;
     const auto half_retargeting_interval = configuration.retargeting_interval() / 2;
     configuration.block_spacing_seconds = double_block_spacing_seconds;
-    BOOST_REQUIRE_EQUAL(configuration.retargeting_interval(), half_retargeting_interval);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), half_retargeting_interval);
 }
 
-BOOST_AUTO_TEST_CASE(settings__sorted_checkpoints__testnet3_empty__empty)
+BC_AUTO_TEST_CASE(settings__sorted_checkpoints__testnet3_empty__empty)
 {
     settings configuration(chain::selection::testnet3);
     configuration.checkpoints.clear();
-    BOOST_REQUIRE(configuration.sorted_checkpoints().empty());
+    BC_REQUIRE(configuration.sorted_checkpoints().empty());
 }
 
-BOOST_AUTO_TEST_CASE(settings__sorted_checkpoints__mainnet_default_expected)
+BC_AUTO_TEST_CASE(settings__sorted_checkpoints__mainnet_default_expected)
 {
     const settings configuration(chain::selection::mainnet);
-    BOOST_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
-    BOOST_REQUIRE_EQUAL(configuration.sorted_checkpoints().back(), mainnet_checkpoints.front());
-    BOOST_REQUIRE_EQUAL(configuration.sorted_checkpoints().back().height(), 295000_size);
-    BOOST_REQUIRE_EQUAL(configuration.sorted_checkpoints().front(), mainnet_checkpoints.back());
-    BOOST_REQUIRE_EQUAL(configuration.sorted_checkpoints().front().height(), 11111_size);
+    BC_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
+    BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().back(), mainnet_checkpoints.front());
+    BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().back().height(), 295000_size);
+    BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().front(), mainnet_checkpoints.back());
+    BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().front().height(), 11111_size);
 }
 
-BOOST_AUTO_TEST_CASE(settings__top_checkpoint__testnet3_empty__genesis)
+BC_AUTO_TEST_CASE(settings__top_checkpoint__testnet3_empty__genesis)
 {
     settings configuration(chain::selection::testnet3);
     configuration.checkpoints.clear();
     const chain::checkpoint genesis{ configuration.genesis_block.hash(), zero };
-    BOOST_REQUIRE_EQUAL(configuration.top_checkpoint(), genesis);
+    BC_REQUIRE_EQUAL(configuration.top_checkpoint(), genesis);
 }
 
-BOOST_AUTO_TEST_CASE(settings__sorted_checkpoint__mainnet_default_expected)
+BC_AUTO_TEST_CASE(settings__sorted_checkpoint__mainnet_default_expected)
 {
     const settings configuration(chain::selection::mainnet);
-    BOOST_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
-    BOOST_REQUIRE_EQUAL(configuration.sorted_checkpoints().back(), mainnet_checkpoints.front());
-    BOOST_REQUIRE_EQUAL(configuration.sorted_checkpoints().back().height(), 295000_size);
-    BOOST_REQUIRE_EQUAL(configuration.top_checkpoint(), mainnet_checkpoints.front());
+    BC_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
+    BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().back(), mainnet_checkpoints.front());
+    BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().back().height(), 295000_size);
+    BC_REQUIRE_EQUAL(configuration.top_checkpoint(), mainnet_checkpoints.front());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

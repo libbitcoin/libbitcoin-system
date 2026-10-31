@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_cpuid_tests)
+BC_AUTO_TEST_SUITE(intrinsics_cpuid_tests)
 
 // cpuid includes a local get_bit<> utility.
 static_assert(!get_bit<0>(0));
@@ -38,4 +38,4 @@ static_assert( get_bit< 7>(0x80_u8));
 
 // get_cpu/get_xcr tested in detection.cpp.
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

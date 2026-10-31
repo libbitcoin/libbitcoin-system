@@ -18,46 +18,46 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(base_58_tests)
+BC_AUTO_TEST_SUITE(base_58_tests)
 
 void encode_decode_test(const std::string& base16, const std::string& encoded)
 {
     data_chunk data, decoded;
-    BOOST_REQUIRE(decode_base16(data, base16));
-    BOOST_REQUIRE_EQUAL(encode_base58(data), encoded);
-    BOOST_REQUIRE(decode_base58(decoded, encoded));
-    BOOST_REQUIRE(decoded == data);
+    BC_REQUIRE(decode_base16(data, base16));
+    BC_REQUIRE_EQUAL(encode_base58(data), encoded);
+    BC_REQUIRE(decode_base58(decoded, encoded));
+    BC_REQUIRE(decoded == data);
 }
 
 // is_base58
 
-BOOST_AUTO_TEST_CASE(base58__is_base58__valid__true)
+BC_AUTO_TEST_CASE(base58__is_base58__valid__true)
 {
     const std::string base58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     for (char character: base58)
     {
-        BOOST_REQUIRE(is_base58(character));
+        BC_REQUIRE(is_base58(character));
     }
 }
 
-BOOST_AUTO_TEST_CASE(base58__is_base58__invalid__false)
+BC_AUTO_TEST_CASE(base58__is_base58__invalid__false)
 {
     const std::string non_base58 = "0OIl+- //#";
     for (char character: non_base58)
     {
-        BOOST_REQUIRE(!is_base58(character));
+        BC_REQUIRE(!is_base58(character));
     }
 }
 
-BOOST_AUTO_TEST_CASE(base58__is_base58__literals__expected)
+BC_AUTO_TEST_CASE(base58__is_base58__literals__expected)
 {
-    BOOST_REQUIRE(is_base58("abcdjkk11"));
-    BOOST_REQUIRE(!is_base58("abcdjkk011"));
+    BC_REQUIRE(is_base58("abcdjkk11"));
+    BC_REQUIRE(!is_base58("abcdjkk011"));
 }
 
 // encode_base58 / decode_base58
 
-BOOST_AUTO_TEST_CASE(base58__encode_base58__various_round_trip__expected)
+BC_AUTO_TEST_CASE(base58__encode_base58__various_round_trip__expected)
 {
     encode_decode_test("", "");
     encode_decode_test("61", "2g");
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(base58__encode_base58__various_round_trip__expected)
     encode_decode_test("00000000000000000000", "1111111111");
 }
 
-BOOST_AUTO_TEST_CASE(base58__decode_base58__address_round_trip__expected)
+BC_AUTO_TEST_CASE(base58__decode_base58__address_round_trip__expected)
 {
     const data_chunk checked
     {
@@ -85,14 +85,14 @@ BOOST_AUTO_TEST_CASE(base58__decode_base58__address_round_trip__expected)
         }
     };
     const auto address = "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT";
-    BOOST_REQUIRE_EQUAL(encode_base58(checked), address);
+    BC_REQUIRE_EQUAL(encode_base58(checked), address);
 
     data_chunk decoded;
-    BOOST_REQUIRE(decode_base58(decoded, address));
-    BOOST_REQUIRE_EQUAL(decoded, checked);
+    BC_REQUIRE(decode_base58(decoded, address));
+    BC_REQUIRE_EQUAL(decoded, checked);
 }
 
-BOOST_AUTO_TEST_CASE(base58__decode_base58__array__expected)
+BC_AUTO_TEST_CASE(base58__decode_base58__array__expected)
 {
     const data_array<25> expected
     {
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(base58__decode_base58__array__expected)
         }
     };
     data_array<25> converted;
-    BOOST_REQUIRE(decode_base58(converted, "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT"));
-    BOOST_REQUIRE_EQUAL(converted, expected);
+    BC_REQUIRE(decode_base58(converted, "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT"));
+    BC_REQUIRE_EQUAL(converted, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

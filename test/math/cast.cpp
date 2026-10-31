@@ -93,176 +93,176 @@ static_assert(is_same_type<decltype(to64(42_nsize)), int64_t>);
 
 // TODO: below can move to static_assert under c++23.
 
-BOOST_AUTO_TEST_SUITE(cast_tests)
+BC_AUTO_TEST_SUITE(cast_tests)
 
 template <typename Type>
 using limit = std::numeric_limits<Type>;
 
 // to_integer2/3
 
-BOOST_AUTO_TEST_CASE(cast__to_integer__non_finites__false)
+BC_AUTO_TEST_CASE(cast__to_integer__non_finites__false)
 {
     size_t value{};
-    BOOST_REQUIRE(!to_integer(value, limit<float>::quiet_NaN()));
-    BOOST_REQUIRE(!to_integer(value, limit<float>::infinity()));
-    BOOST_REQUIRE(!to_integer(value, -limit<float>::infinity()));
-    BOOST_REQUIRE(!to_integer(value, limit<float>::quiet_NaN(), false));
-    BOOST_REQUIRE(!to_integer(value, limit<float>::infinity(), false));
-    BOOST_REQUIRE(!to_integer(value, -limit<float>::infinity(), false));
+    BC_REQUIRE(!to_integer(value, limit<float>::quiet_NaN()));
+    BC_REQUIRE(!to_integer(value, limit<float>::infinity()));
+    BC_REQUIRE(!to_integer(value, -limit<float>::infinity()));
+    BC_REQUIRE(!to_integer(value, limit<float>::quiet_NaN(), false));
+    BC_REQUIRE(!to_integer(value, limit<float>::infinity(), false));
+    BC_REQUIRE(!to_integer(value, -limit<float>::infinity(), false));
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_integer__finites__expected)
+BC_AUTO_TEST_CASE(cast__to_integer__finites__expected)
 {
     size_t value{};
-    BOOST_REQUIRE(to_integer(value, 1.0, true));
-    BOOST_REQUIRE_EQUAL(value, 1u);
-    BOOST_REQUIRE(to_integer(value, 2.0, false));
-    BOOST_REQUIRE_EQUAL(value, 2u);
-    BOOST_REQUIRE(to_integer(value, 3.1, false));
-    BOOST_REQUIRE_EQUAL(value, 3u);
-    BOOST_REQUIRE(!to_integer(value, 3.1, true));
+    BC_REQUIRE(to_integer(value, 1.0, true));
+    BC_REQUIRE_EQUAL(value, 1u);
+    BC_REQUIRE(to_integer(value, 2.0, false));
+    BC_REQUIRE_EQUAL(value, 2u);
+    BC_REQUIRE(to_integer(value, 3.1, false));
+    BC_REQUIRE_EQUAL(value, 3u);
+    BC_REQUIRE(!to_integer(value, 3.1, true));
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_integer__representation_error__rounded)
+BC_AUTO_TEST_CASE(cast__to_integer__representation_error__rounded)
 {
     uint64_t value{};
-    BOOST_REQUIRE(to_integer(value, 83052.07783498 * 1.0e8, true));
-    BOOST_REQUIRE_EQUAL(value, 8305207783498u);
-    BOOST_REQUIRE(to_integer(value, 0.07783498 * 1.0e8, true));
-    BOOST_REQUIRE_EQUAL(value, 7783498u);
+    BC_REQUIRE(to_integer(value, 83052.07783498 * 1.0e8, true));
+    BC_REQUIRE_EQUAL(value, 8305207783498u);
+    BC_REQUIRE(to_integer(value, 0.07783498 * 1.0e8, true));
+    BC_REQUIRE_EQUAL(value, 7783498u);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_integer__fractional_whole__false)
+BC_AUTO_TEST_CASE(cast__to_integer__fractional_whole__false)
 {
     uint64_t value{};
-    BOOST_REQUIRE(!to_integer(value, 0.5, true));
-    BOOST_REQUIRE(!to_integer(value, 42.0001, true));
+    BC_REQUIRE(!to_integer(value, 0.5, true));
+    BC_REQUIRE(!to_integer(value, 42.0001, true));
 }
 
 // to_ceilinged_integer
 
-BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__non_finites__max)
+BC_AUTO_TEST_CASE(cast__to_ceilinged_integer__non_finites__max)
 {
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::infinity()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-limit<double>::infinity()), max_size_t);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__overflow_underflow__clamped)
+BC_AUTO_TEST_CASE(cast__to_ceilinged_integer__overflow_underflow__clamped)
 {
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::max()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-limit<double>::max()), min_size_t);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(limit<double>::max()), max_int64);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-limit<double>::max()), min_int64);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(limit<double>::max()), max_size_t);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-limit<double>::max()), min_size_t);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(limit<double>::max()), max_int64);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-limit<double>::max()), min_int64);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_ceilinged_integer__finites__expected)
+BC_AUTO_TEST_CASE(cast__to_ceilinged_integer__finites__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(0.0), 0u);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.0), 1u);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.1), 2u);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.9), 2u);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-0.1), 0u);  // Ceil to 0 for unsigned
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.0), -1);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.1), -1);
-    BOOST_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.9), -1);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(0.0), 0u);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.0), 1u);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.1), 2u);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(1.9), 2u);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-0.1), 0u);  // Ceil to 0 for unsigned
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.0), -1);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.1), -1);
+    BC_REQUIRE_EQUAL(to_ceilinged_integer<int64_t>(-1.9), -1);
 }
 
 // to_floored_integer
 
-BOOST_AUTO_TEST_CASE(cast__to_floored_integer__non_finites__max)
+BC_AUTO_TEST_CASE(cast__to_floored_integer__non_finites__max)
 {
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::infinity()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(-limit<double>::infinity()), max_size_t);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_floored_integer__overflow_underflow__clamped)
+BC_AUTO_TEST_CASE(cast__to_floored_integer__overflow_underflow__clamped)
 {
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::max()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-limit<double>::max()), min_size_t);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(limit<double>::max()), max_int64);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-limit<double>::max()), min_int64);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(limit<double>::max()), max_size_t);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(-limit<double>::max()), min_size_t);
+    BC_REQUIRE_EQUAL(to_floored_integer<int64_t>(limit<double>::max()), max_int64);
+    BC_REQUIRE_EQUAL(to_floored_integer<int64_t>(-limit<double>::max()), min_int64);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_floored_integer__finites__expected)
+BC_AUTO_TEST_CASE(cast__to_floored_integer__finites__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(0.0), 0u);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(1.0), 1u);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(1.1), 1u);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(1.9), 1u);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-0.1), 0u);  // Floor to -1, but clamped to 0
-    BOOST_REQUIRE_EQUAL(to_floored_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
-    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.0), -1);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.1), -2);
-    BOOST_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.9), -2);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(0.0), 0u);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(1.0), 1u);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(1.1), 1u);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(1.9), 1u);
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(-0.1), 0u);  // Floor to -1, but clamped to 0
+    BC_REQUIRE_EQUAL(to_floored_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BC_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.0), -1);
+    BC_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.1), -2);
+    BC_REQUIRE_EQUAL(to_floored_integer<int64_t>(-1.9), -2);
 }
 
 // to_rounded_integer
 
-BOOST_AUTO_TEST_CASE(cast__to_rounded_integer__non_finites__max)
+BC_AUTO_TEST_CASE(cast__to_rounded_integer__non_finites__max)
 {
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::infinity()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(-limit<double>::infinity()), max_size_t);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_rounded_integer__overflow_underflow__clamped)
+BC_AUTO_TEST_CASE(cast__to_rounded_integer__overflow_underflow__clamped)
 {
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::max()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-limit<double>::max()), min_size_t);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<int64_t>(limit<double>::max()), max_int64);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<int64_t>(-limit<double>::max()), min_int64);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(limit<double>::max()), max_size_t);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(-limit<double>::max()), min_size_t);
+    BC_REQUIRE_EQUAL(to_rounded_integer<int64_t>(limit<double>::max()), max_int64);
+    BC_REQUIRE_EQUAL(to_rounded_integer<int64_t>(-limit<double>::max()), min_int64);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_rounded_integer__finites__expected)
+BC_AUTO_TEST_CASE(cast__to_rounded_integer__finites__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(0.0), 0u);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.0), 1u);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.1), 1u);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.4), 1u);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.5), 2u);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.6), 2u);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-0.1), 0u);  // Round to 0
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-0.5), 0u);  // Round to -1, clamped to 0
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.0), -1);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.1), -1);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.4), -1);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.5), -2);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.6), -2);
-    BOOST_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-2.5), -3);  // Halfway away from min_size_t
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(0.0), 0u);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.0), 1u);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.1), 1u);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.4), 1u);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.5), 2u);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(1.6), 2u);
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(-0.1), 0u);  // Round to 0
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(-0.5), 0u);  // Round to -1, clamped to 0
+    BC_REQUIRE_EQUAL(to_rounded_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BC_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.0), -1);
+    BC_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.1), -1);
+    BC_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.4), -1);
+    BC_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.5), -2);
+    BC_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-1.6), -2);
+    BC_REQUIRE_EQUAL(to_rounded_integer<signed_size_t>(-2.5), -3);  // Halfway away from min_size_t
 }
 
 // to_truncated_integer
 
-BOOST_AUTO_TEST_CASE(cast__to_truncated_integer__non_finites__max)
+BC_AUTO_TEST_CASE(cast__to_truncated_integer__non_finites__max)
 {
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::infinity()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::quiet_NaN()), max_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::infinity()), max_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(-limit<double>::infinity()), max_size_t);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_truncated_integer__overflow_underflow__clamped)
+BC_AUTO_TEST_CASE(cast__to_truncated_integer__overflow_underflow__clamped)
 {
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::max()), max_size_t);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-limit<double>::max()), min_size_t);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(limit<double>::max()), max_signed_size_t);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-limit<double>::max()), min_signed_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(limit<double>::max()), max_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(-limit<double>::max()), min_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(limit<double>::max()), max_signed_size_t);
+    BC_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-limit<double>::max()), min_signed_size_t);
 }
 
-BOOST_AUTO_TEST_CASE(cast__to_truncated_integer__finites__expected)
+BC_AUTO_TEST_CASE(cast__to_truncated_integer__finites__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(0.0), 0u);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.0), 1u);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.1), 1u);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.9), 1u);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-0.1), 0u);  // Trunc to 0
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.0), -1);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.1), -1);
-    BOOST_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.9), -1);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(0.0), 0u);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.0), 1u);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.1), 1u);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(1.9), 1u);
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(-0.1), 0u);  // Trunc to 0
+    BC_REQUIRE_EQUAL(to_truncated_integer<size_t>(-1.1), 0u);  // Clamped to min (0)
+    BC_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.0), -1);
+    BC_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.1), -1);
+    BC_REQUIRE_EQUAL(to_truncated_integer<signed_size_t>(-1.9), -1);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

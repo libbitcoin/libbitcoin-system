@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include "fixtures.hpp"
 
-BOOST_AUTO_TEST_SUITE(private_key_tests)
+BC_AUTO_TEST_SUITE(private_key_tests)
 
 using namespace x509;
 using namespace x509::der;
@@ -168,101 +168,101 @@ static secp256r1::point_t fixture_point()
 
 // decode_private_key (openssl fixtures)
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__sec1__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__sec1__expected)
 {
     secret out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key_pem));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key_pem));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__pkcs8__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__pkcs8__expected)
 {
     secret out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key_pkcs8_pem));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key_pkcs8_pem));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__pbes2_aes256__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__pbes2_aes256__expected)
 {
     secret out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key_aes256_pem, password));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key_aes256_pem, password));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__pbes2_aes128__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__pbes2_aes128__expected)
 {
     secret out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key_aes128_pem, password));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key_aes128_pem, password));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__certificate_first__skipped)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__certificate_first__skipped)
 {
     secret out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::self_pem + fixture::key_pem));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::self_pem + fixture::key_pem));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__no_key__false)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__no_key__false)
 {
     secret out{};
-    BOOST_REQUIRE(!decode_private_key(out, fixture::self_pem));
+    BC_REQUIRE(!decode_private_key(out, fixture::self_pem));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__malformed_pem__false)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__malformed_pem__false)
 {
     secret out{};
-    BOOST_REQUIRE(!decode_private_key(out, "-----BEGIN PRIVATE KEY-----\n"));
+    BC_REQUIRE(!decode_private_key(out, "-----BEGIN PRIVATE KEY-----\n"));
 }
 
 // decode_sec1
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__minimal__expected)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__minimal__expected)
 {
     const auto der = sec1(1, fixture::key_secret, {}, {});
     secret out{};
-    BOOST_REQUIRE(decode_sec1(out, der));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_sec1(out, der));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__version_two__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__version_two__false)
 {
     const auto der = sec1(2, fixture::key_secret, {}, {});
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, der));
+    BC_REQUIRE(!decode_sec1(out, der));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__short_key__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__short_key__false)
 {
     const auto der = sec1(1, base16_chunk("01"), {}, {});
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, der));
+    BC_REQUIRE(!decode_sec1(out, der));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__secp384r1_parameters__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__secp384r1_parameters__false)
 {
     const auto der = sec1(1, fixture::key_secret, oid::secp384r1, {});
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, der));
+    BC_REQUIRE(!decode_sec1(out, der));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__zero_key__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__zero_key__false)
 {
     const auto der = sec1(1, secret{}, {}, {});
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, der));
+    BC_REQUIRE(!decode_sec1(out, der));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__mismatched_public_key__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__mismatched_public_key__false)
 {
     auto point = fixture_point();
     point.back() ^= 0x01;
     const auto der = sec1(1, fixture::key_secret, oid::secp256r1, point);
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, der));
+    BC_REQUIRE(!decode_sec1(out, der));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__malformed_public_key__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__malformed_public_key__false)
 {
     writer wrapper{};
     wrapper.write_null();
@@ -273,260 +273,260 @@ BOOST_AUTO_TEST_CASE(private_key__decode_sec1__malformed_public_key__false)
     body.write_nested(explicit_tag(1), wrapper);
 
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, wrapped(body)));
+    BC_REQUIRE(!decode_sec1(out, wrapped(body)));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_sec1__trailing_data__false)
+BC_AUTO_TEST_CASE(private_key__decode_sec1__trailing_data__false)
 {
     const auto der = splice(sec1(1, fixture::key_secret, {}, {}), base16_chunk("0500"));
     secret out{};
-    BOOST_REQUIRE(!decode_sec1(out, der));
+    BC_REQUIRE(!decode_sec1(out, der));
 }
 
 // decode_pkcs8
 
-BOOST_AUTO_TEST_CASE(private_key__decode_pkcs8__attributes__expected)
+BC_AUTO_TEST_CASE(private_key__decode_pkcs8__attributes__expected)
 {
     const auto key = sec1(1, fixture::key_secret, {}, {});
     const auto der = pkcs8(0, oid::secp256r1, key, true);
     secret out{};
-    BOOST_REQUIRE(decode_pkcs8(out, der));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_pkcs8(out, der));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_pkcs8__version_one__false)
+BC_AUTO_TEST_CASE(private_key__decode_pkcs8__version_one__false)
 {
     const auto key = sec1(1, fixture::key_secret, {}, {});
     const auto der = pkcs8(1, oid::secp256r1, key, false);
     secret out{};
-    BOOST_REQUIRE(!decode_pkcs8(out, der));
+    BC_REQUIRE(!decode_pkcs8(out, der));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_pkcs8__secp384r1__false)
+BC_AUTO_TEST_CASE(private_key__decode_pkcs8__secp384r1__false)
 {
     const auto key = sec1(1, fixture::key_secret, {}, {});
     const auto der = pkcs8(0, oid::secp384r1, key, false);
     secret out{};
-    BOOST_REQUIRE(!decode_pkcs8(out, der));
+    BC_REQUIRE(!decode_pkcs8(out, der));
 }
 
 // decode_encrypted_pkcs8
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__joined__expected)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__joined__expected)
 {
     const auto fields = split(first_block(fixture::key_aes256_pem));
     secret out{};
-    BOOST_REQUIRE(decode_encrypted_pkcs8(out, join(fields), password));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__matching_key_length__expected)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__matching_key_length__expected)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.key_length = 32;
     secret out{};
-    BOOST_REQUIRE(decode_encrypted_pkcs8(out, join(fields), password));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__mismatched_key_length__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__mismatched_key_length__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.key_length = 16;
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__default_prf__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__default_prf__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.prf.clear();
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__unsupported_prf__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__unsupported_prf__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.prf = to_chunk(oid::ecdsa_sha256);
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__unsupported_scheme__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__unsupported_scheme__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.scheme = to_chunk(oid::pbkdf2);
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__unsupported_cipher__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__unsupported_cipher__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.cipher = to_chunk(oid::hmac_sha256);
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__short_iv__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__short_iv__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.iv.pop_back();
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__partial_block__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__partial_block__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.encrypted.pop_back();
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__zero_iterations__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__zero_iterations__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.iterations = 0;
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__excessive_iterations__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__excessive_iterations__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.iterations = add1<uint64_t>(max_uint32);
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__zero_padding__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__zero_padding__false)
 {
     // The last pad byte (0x06) is changed through the preceding cipher block.
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.encrypted.at(fields.encrypted.size() - 17u) ^= 0x06;
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__inconsistent_padding__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__inconsistent_padding__false)
 {
     auto fields = split(first_block(fixture::key_aes256_pem));
     fields.encrypted.at(fields.encrypted.size() - 17u) ^= 0x04;
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, join(fields), password));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__wrong_password__false)
+BC_AUTO_TEST_CASE(private_key__decode_encrypted_pkcs8__wrong_password__false)
 {
     secret out{};
-    BOOST_REQUIRE(!decode_encrypted_pkcs8(out, first_block(fixture::key_aes128_pem), "wrong"));
+    BC_REQUIRE(!decode_encrypted_pkcs8(out, first_block(fixture::key_aes128_pem), "wrong"));
 }
 
 // encode
 
-BOOST_AUTO_TEST_CASE(private_key__encode_sec1__fixture__round_trip)
+BC_AUTO_TEST_CASE(private_key__encode_sec1__fixture__round_trip)
 {
     const auto der = encode_sec1(fixture::key_secret);
-    BOOST_REQUIRE_EQUAL(der, sec1(1, fixture::key_secret, oid::secp256r1, fixture_point()));
+    BC_REQUIRE_EQUAL(der, sec1(1, fixture::key_secret, oid::secp256r1, fixture_point()));
 
     secret out{};
-    BOOST_REQUIRE(decode_sec1(out, der));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_sec1(out, der));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_sec1__zero__empty)
+BC_AUTO_TEST_CASE(private_key__encode_sec1__zero__empty)
 {
-    BOOST_REQUIRE(encode_sec1(secret{}).empty());
+    BC_REQUIRE(encode_sec1(secret{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_pkcs8__fixture__round_trip)
+BC_AUTO_TEST_CASE(private_key__encode_pkcs8__fixture__round_trip)
 {
     const auto der = encode_pkcs8(fixture::key_secret);
     secret out{};
-    BOOST_REQUIRE(decode_pkcs8(out, der));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_pkcs8(out, der));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_pkcs8__zero__empty)
+BC_AUTO_TEST_CASE(private_key__encode_pkcs8__zero__empty)
 {
-    BOOST_REQUIRE(encode_pkcs8(secret{}).empty());
+    BC_REQUIRE(encode_pkcs8(secret{}).empty());
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_private_key__fixture__round_trip)
+BC_AUTO_TEST_CASE(private_key__encode_private_key__fixture__round_trip)
 {
     const auto text = encode_private_key(fixture::key_secret);
-    BOOST_REQUIRE(text.starts_with("-----BEGIN PRIVATE KEY-----\n"));
+    BC_REQUIRE(text.starts_with("-----BEGIN PRIVATE KEY-----\n"));
 
     secret out{};
-    BOOST_REQUIRE(decode_private_key(out, text));
-    BOOST_REQUIRE_EQUAL(out, fixture::key_secret);
+    BC_REQUIRE(decode_private_key(out, text));
+    BC_REQUIRE_EQUAL(out, fixture::key_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_private_key__zero__empty)
+BC_AUTO_TEST_CASE(private_key__encode_private_key__zero__empty)
 {
-    BOOST_REQUIRE(encode_private_key(secret{}).empty());
+    BC_REQUIRE(encode_private_key(secret{}).empty());
 }
 
 // p-384
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_sec1__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_sec1__expected)
 {
     secret384 out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key384_pem));
-    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key384_pem));
+    BC_REQUIRE_EQUAL(out, fixture::key384_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_pkcs8__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_pkcs8__expected)
 {
     secret384 out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key384_pkcs8_pem));
-    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key384_pkcs8_pem));
+    BC_REQUIRE_EQUAL(out, fixture::key384_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_pbes2_aes256__expected)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_pbes2_aes256__expected)
 {
     secret384 out{};
-    BOOST_REQUIRE(decode_private_key(out, fixture::key384_aes256_pem, password));
-    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+    BC_REQUIRE(decode_private_key(out, fixture::key384_aes256_pem, password));
+    BC_REQUIRE_EQUAL(out, fixture::key384_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_as_secp256r1__false)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__secp384r1_as_secp256r1__false)
 {
     secret out{};
-    BOOST_REQUIRE(!decode_private_key(out, fixture::key384_pem));
-    BOOST_REQUIRE(!decode_private_key(out, fixture::key384_pkcs8_pem));
+    BC_REQUIRE(!decode_private_key(out, fixture::key384_pem));
+    BC_REQUIRE(!decode_private_key(out, fixture::key384_pkcs8_pem));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__decode_private_key__secp256r1_as_secp384r1__false)
+BC_AUTO_TEST_CASE(private_key__decode_private_key__secp256r1_as_secp384r1__false)
 {
     secret384 out{};
-    BOOST_REQUIRE(!decode_private_key(out, fixture::key_pem));
-    BOOST_REQUIRE(!decode_private_key(out, fixture::key_pkcs8_pem));
+    BC_REQUIRE(!decode_private_key(out, fixture::key_pem));
+    BC_REQUIRE(!decode_private_key(out, fixture::key_pkcs8_pem));
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_private_key__secp384r1__round_trip)
+BC_AUTO_TEST_CASE(private_key__encode_private_key__secp384r1__round_trip)
 {
     const auto text = encode_private_key(fixture::key384_secret);
-    BOOST_REQUIRE(text.starts_with("-----BEGIN PRIVATE KEY-----\n"));
+    BC_REQUIRE(text.starts_with("-----BEGIN PRIVATE KEY-----\n"));
 
     secret384 out{};
-    BOOST_REQUIRE(decode_private_key(out, text));
-    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+    BC_REQUIRE(decode_private_key(out, text));
+    BC_REQUIRE_EQUAL(out, fixture::key384_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_sec1__secp384r1__round_trip)
+BC_AUTO_TEST_CASE(private_key__encode_sec1__secp384r1__round_trip)
 {
     const auto der = encode_sec1(fixture::key384_secret);
     secret384 out{};
-    BOOST_REQUIRE(decode_sec1(out, der));
-    BOOST_REQUIRE_EQUAL(out, fixture::key384_secret);
+    BC_REQUIRE(decode_sec1(out, der));
+    BC_REQUIRE_EQUAL(out, fixture::key384_secret);
 }
 
-BOOST_AUTO_TEST_CASE(private_key__encode_private_key__secp384r1_zero__empty)
+BC_AUTO_TEST_CASE(private_key__encode_private_key__secp384r1_zero__empty)
 {
-    BOOST_REQUIRE(encode_private_key(secret384{}).empty());
+    BC_REQUIRE(encode_private_key(secret384{}).empty());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

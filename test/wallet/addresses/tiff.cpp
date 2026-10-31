@@ -18,9 +18,9 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(tiff_tests)
+BC_AUTO_TEST_SUITE(tiff_tests)
 
-BOOST_AUTO_TEST_CASE(tiff__to_image__rectangular_image__true)
+BC_AUTO_TEST_CASE(tiff__to_image__rectangular_image__true)
 {
     // A rectangle of 5 pixel width has 1 byte rows, so any number of bytes is ok.
     static const auto size = 42u;
@@ -29,10 +29,10 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__rectangular_image__true)
     data_chunk bitmap(size, 'x');
     data_chunk tiff;
     stream::out::data stream(tiff);
-    BOOST_REQUIRE(tiff::to_image(stream, bitmap, width));
+    BC_REQUIRE(tiff::to_image(stream, bitmap, width));
 }
 
-BOOST_AUTO_TEST_CASE(tiff__to_image__mismatched_image_size__false)
+BC_AUTO_TEST_CASE(tiff__to_image__mismatched_image_size__false)
 {
     // A rectangle of 9 pixel width has 2 byte rows, so byte count must be even.
     static const auto size = 41u;
@@ -41,28 +41,28 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__mismatched_image_size__false)
     data_chunk bitmap(size, 'x');
     data_chunk tiff;
     stream::out::data stream(tiff);
-    BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
+    BC_REQUIRE(!tiff::to_image(stream, bitmap, width));
 }
 
-BOOST_AUTO_TEST_CASE(tiff__to_image__empty__false)
+BC_AUTO_TEST_CASE(tiff__to_image__empty__false)
 {
     static const auto width = 1u;
     static const data_chunk bitmap;
     data_chunk tiff;
     stream::out::data stream(tiff);
-    BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
+    BC_REQUIRE(!tiff::to_image(stream, bitmap, width));
 }
 
-BOOST_AUTO_TEST_CASE(tiff__to_image__width_0__false)
+BC_AUTO_TEST_CASE(tiff__to_image__width_0__false)
 {
     static const auto width = 0u;
     static const data_chunk bitmap{ 'x' };
     data_chunk tiff;
     stream::out::data stream(tiff);
-    BOOST_REQUIRE(!tiff::to_image(stream, bitmap, width));
+    BC_REQUIRE(!tiff::to_image(stream, bitmap, width));
 }
 
-BOOST_AUTO_TEST_CASE(tiff__to_image__perfect_square__expected_true)
+BC_AUTO_TEST_CASE(tiff__to_image__perfect_square__expected_true)
 {
     // A square with sides of 4 pixels is 4 rows of 1 byte.
     static const auto width = 4u;
@@ -172,13 +172,13 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__perfect_square__expected_true)
 
     data_chunk tiff;
     stream::out::data stream(tiff);
-    BOOST_REQUIRE(tiff::to_image(stream, bitmap, width));
+    BC_REQUIRE(tiff::to_image(stream, bitmap, width));
 
     // Encode as base16 so that failure message is intelligible.
-    BOOST_REQUIRE_EQUAL(encode_base16(tiff), encode_base16(expected));
+    BC_REQUIRE_EQUAL(encode_base16(tiff), encode_base16(expected));
 }
 
-BOOST_AUTO_TEST_CASE(tiff__to_image__excessive_image_size__false)
+BC_AUTO_TEST_CASE(tiff__to_image__excessive_image_size__false)
 {
     const auto maximum = tiff::max_image_bytes;
     tiff::max_image_bytes = 1;
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(tiff__to_image__excessive_image_size__false)
     stream::out::data stream(image);
     const auto result = tiff::to_image(stream, bitmap, 5);
     tiff::max_image_bytes = maximum;
-    BOOST_REQUIRE(!result);
+    BC_REQUIRE(!result);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

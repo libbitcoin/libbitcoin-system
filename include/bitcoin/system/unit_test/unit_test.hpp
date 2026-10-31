@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_UNIT_TEST_UNIT_TEST_HPP
 #define LIBBITCOIN_SYSTEM_UNIT_TEST_UNIT_TEST_HPP
 
-#include <bitcoin/system/unit_test/aliases.hpp>
 #include <bitcoin/system/unit_test/checks.hpp>
 #include <bitcoin/system/unit_test/filter.hpp>
 #include <bitcoin/system/unit_test/macros.hpp>

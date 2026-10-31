@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "electrum.hpp"
 
-BOOST_AUTO_TEST_SUITE(catalogs_electrum_tests)
+BC_AUTO_TEST_SUITE(catalogs_electrum_tests)
 
 using namespace test::catalogs_electrum;
 using namespace bc::system::words;
@@ -38,11 +38,11 @@ const auto divergences_ja = 644;
 
 // count
 
-BOOST_AUTO_TEST_CASE(catalogs_electrum__count__all__expected)
+BC_AUTO_TEST_CASE(catalogs_electrum__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
     // Failure to do so may lead to invalid seed generation, which is very bad.
-    BOOST_CHECK_MESSAGE(electrum::catalogs::count() == dictionary_count, "new dictionary");
+    BC_CHECK_MESSAGE(electrum::catalogs::count() == dictionary_count, "new dictionary");
 }
 
 // subset
@@ -50,59 +50,59 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__count__all__expected)
 // Identities are the same as the mnemonic dictionaries.
 // nfkd testing is performed on the mnemonic dictionaries.
 // This test ensures electrum dictionaries are a subset of mnemonic dictionaries.
-BOOST_AUTO_TEST_CASE(catalogs_electrum__mnemonic__subset__true)
+BC_AUTO_TEST_CASE(catalogs_electrum__mnemonic__subset__true)
 {
-    BOOST_CHECK_EQUAL(electrum::en.word, mnemonic::en.word);
-    BOOST_CHECK_EQUAL(electrum::es.word, mnemonic::es.word);
-    BOOST_CHECK_EQUAL(electrum::it.word, mnemonic::it.word);
-    BOOST_CHECK_EQUAL(electrum::fr.word, mnemonic::fr.word);
-    BOOST_CHECK_EQUAL(electrum::cs.word, mnemonic::cs.word);
-    BOOST_CHECK_EQUAL(electrum::pt.word, mnemonic::pt.word);
-    BOOST_CHECK_EQUAL(electrum::ja.word, mnemonic::ja.word);
-    BOOST_CHECK_EQUAL(electrum::ko.word, mnemonic::ko.word);
-    BOOST_CHECK_EQUAL(electrum::zh_Hans.word, mnemonic::zh_Hans.word);
-    BOOST_CHECK_EQUAL(electrum::zh_Hant.word, mnemonic::zh_Hant.word);
+    BC_CHECK_EQUAL(electrum::en.word, mnemonic::en.word);
+    BC_CHECK_EQUAL(electrum::es.word, mnemonic::es.word);
+    BC_CHECK_EQUAL(electrum::it.word, mnemonic::it.word);
+    BC_CHECK_EQUAL(electrum::fr.word, mnemonic::fr.word);
+    BC_CHECK_EQUAL(electrum::cs.word, mnemonic::cs.word);
+    BC_CHECK_EQUAL(electrum::pt.word, mnemonic::pt.word);
+    BC_CHECK_EQUAL(electrum::ja.word, mnemonic::ja.word);
+    BC_CHECK_EQUAL(electrum::ko.word, mnemonic::ko.word);
+    BC_CHECK_EQUAL(electrum::zh_Hans.word, mnemonic::zh_Hans.word);
+    BC_CHECK_EQUAL(electrum::zh_Hant.word, mnemonic::zh_Hant.word);
 }
 // combined
 
 // The spanish, french and japanese dictionaries contain combining characters.
 // This requires combinings removal in these (only) for wordlist-based seedings.
-BOOST_AUTO_TEST_CASE(catalogs_electrum__combinings__combininged_words__true)
+BC_AUTO_TEST_CASE(catalogs_electrum__combinings__combininged_words__true)
 {
-    BOOST_CHECK_EQUAL(combinings(electrum::es), combinings_es);
-    BOOST_CHECK_EQUAL(combinings(electrum::fr), combinings_fr);
-    BOOST_CHECK_EQUAL(combinings(electrum::ja), combinings_ja);
+    BC_CHECK_EQUAL(combinings(electrum::es), combinings_es);
+    BC_CHECK_EQUAL(combinings(electrum::fr), combinings_fr);
+    BC_CHECK_EQUAL(combinings(electrum::ja), combinings_ja);
 }
 
 // No words in these dictionaries contain combining characters.
 // So there is no need to normalize combinings these for wordlist-based seedings.
-BOOST_AUTO_TEST_CASE(catalogs_electrum__combined__not_combininged_words__false)
+BC_AUTO_TEST_CASE(catalogs_electrum__combined__not_combininged_words__false)
 {
-    BOOST_CHECK(!combined(electrum::en));
-    BOOST_CHECK(!combined(electrum::it));
-    BOOST_CHECK(!combined(electrum::cs));
-    BOOST_CHECK(!combined(electrum::pt));
-    BOOST_CHECK(!combined(electrum::ko));
-    BOOST_CHECK(!combined(electrum::zh_Hans));
-    BOOST_CHECK(!combined(electrum::zh_Hant));
+    BC_CHECK(!combined(electrum::en));
+    BC_CHECK(!combined(electrum::it));
+    BC_CHECK(!combined(electrum::cs));
+    BC_CHECK(!combined(electrum::pt));
+    BC_CHECK(!combined(electrum::ko));
+    BC_CHECK(!combined(electrum::zh_Hans));
+    BC_CHECK(!combined(electrum::zh_Hant));
 }
 
 // compressed_cjk
 
 // No words in any supported dictionaries are uncompressed.
 // So there is no need to normalize compression for wordlist-based seeding.
-BOOST_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
+BC_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 {
-    BOOST_CHECK(!compressed(electrum::en));
-    BOOST_CHECK(!compressed(electrum::es));
-    BOOST_CHECK(!compressed(electrum::it));
-    BOOST_CHECK(!compressed(electrum::fr));
-    BOOST_CHECK(!compressed(electrum::cs));
-    BOOST_CHECK(!compressed(electrum::pt));
-    BOOST_CHECK(!compressed(electrum::ja));
-    BOOST_CHECK(!compressed(electrum::ko));
-    BOOST_CHECK(!compressed(electrum::zh_Hans));
-    BOOST_CHECK(!compressed(electrum::zh_Hant));
+    BC_CHECK(!compressed(electrum::en));
+    BC_CHECK(!compressed(electrum::es));
+    BC_CHECK(!compressed(electrum::it));
+    BC_CHECK(!compressed(electrum::fr));
+    BC_CHECK(!compressed(electrum::cs));
+    BC_CHECK(!compressed(electrum::pt));
+    BC_CHECK(!compressed(electrum::ja));
+    BC_CHECK(!compressed(electrum::ko));
+    BC_CHECK(!compressed(electrum::zh_Hans));
+    BC_CHECK(!compressed(electrum::zh_Hant));
 }
 
 // abnormal
@@ -113,20 +113,20 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 // dictionaries are functionally identical.
 
 // This verifies the number of abnormals in the two divergent dictionaries.
-BOOST_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
+BC_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
 {
-    BOOST_CHECK_EQUAL(abnormals(electrum_es), abnormals_es);
-    BOOST_CHECK_EQUAL(abnormals(electrum_ja), abnormals_ja);
+    BC_CHECK_EQUAL(abnormals(electrum_es), abnormals_es);
+    BC_CHECK_EQUAL(abnormals(electrum_ja), abnormals_ja);
 }
 
 // divergence
 
 // This verifies that the differences are only in nfkd normalization.
 // Otherwise there could be differences in word value and/or position.
-BOOST_AUTO_TEST_CASE(catalogs_electrum__divergences__unused_words__false)
+BC_AUTO_TEST_CASE(catalogs_electrum__divergences__unused_words__false)
 {
-    BOOST_CHECK_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
-    BOOST_CHECK_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
+    BC_CHECK_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
+    BC_CHECK_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

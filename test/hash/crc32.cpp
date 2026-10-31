@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(crc32_tests)
+BC_AUTO_TEST_SUITE(crc32_tests)
 
 struct crc32_vector
 {
@@ -37,26 +37,26 @@ const std_vector<crc32_vector> crc32_vectors
     { "The quick brown fox jumps over the lazy dog", 0x414fa339 }
 };
 
-BOOST_AUTO_TEST_CASE(crc32__text__vectors__expected)
+BC_AUTO_TEST_CASE(crc32__text__vectors__expected)
 {
     for (const auto& vector: crc32_vectors)
     {
         const data_chunk data(vector.text.begin(), vector.text.end());
-        BOOST_REQUIRE_EQUAL(crc32(data), vector.crc);
+        BC_REQUIRE_EQUAL(crc32(data), vector.crc);
     }
 }
 
-BOOST_AUTO_TEST_CASE(crc32__zeros__thirty_two_bytes__expected)
+BC_AUTO_TEST_CASE(crc32__zeros__thirty_two_bytes__expected)
 {
     const data_array<32> zeros{};
-    BOOST_REQUIRE_EQUAL(crc32(zeros), 0x190a55ad_u32);
+    BC_REQUIRE_EQUAL(crc32(zeros), 0x190a55ad_u32);
 }
 
-BOOST_AUTO_TEST_CASE(crc32__ones__thirty_two_bytes__expected)
+BC_AUTO_TEST_CASE(crc32__ones__thirty_two_bytes__expected)
 {
     data_array<32> ones{};
     ones.fill(0xff);
-    BOOST_REQUIRE_EQUAL(crc32(ones), 0xff6cab0b_u32);
+    BC_REQUIRE_EQUAL(crc32(ones), 0xff6cab0b_u32);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

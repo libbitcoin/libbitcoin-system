@@ -18,245 +18,245 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(uri_tests)
+BC_AUTO_TEST_SUITE(uri_tests)
 
 using namespace bc::system::wallet;
 
-BOOST_AUTO_TEST_CASE(uri__parse__slash_foo_dot_bar__path)
+BC_AUTO_TEST_CASE(uri__parse__slash_foo_dot_bar__path)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("/foo.bar"));
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/foo.bar");
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(parsed.decode("/foo.bar"));
+    BC_REQUIRE_EQUAL(parsed.path(), "/foo.bar");
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(!parsed.has_query());
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_bar__scheme_and_bar)
+BC_AUTO_TEST_CASE(uri__parse__foo_colon_bar__scheme_and_bar)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("foo:bar?baz=boo"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "foo");
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "bar");
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE_EQUAL(parsed.query(), "baz=boo");
+    BC_REQUIRE(parsed.decode("foo:bar?baz=boo"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE_EQUAL(parsed.scheme(), "foo");
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.path(), "bar");
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE_EQUAL(parsed.query(), "baz=boo");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_slash_bar__scheme_and_path)
+BC_AUTO_TEST_CASE(uri__parse__foo_colon_slash_bar__scheme_and_path)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("foo:/bar?baz=boo"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "foo");
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/bar");
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE_EQUAL(parsed.query(), "baz=boo");
+    BC_REQUIRE(parsed.decode("foo:/bar?baz=boo"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE_EQUAL(parsed.scheme(), "foo");
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.path(), "/bar");
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE_EQUAL(parsed.query(), "baz=boo");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_double_slash_bar__scheme_and_authority)
+BC_AUTO_TEST_CASE(uri__parse__foo_colon_double_slash_bar__scheme_and_authority)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("foo://bar/bee?baz=boo"));
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "foo");
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "bar");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/bee");
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE_EQUAL(parsed.query(), "baz=boo");
+    BC_REQUIRE(parsed.decode("foo://bar/bee?baz=boo"));
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE_EQUAL(parsed.scheme(), "foo");
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "bar");
+    BC_REQUIRE_EQUAL(parsed.path(), "/bee");
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE_EQUAL(parsed.query(), "baz=boo");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__http_roundtrip__expected)
+BC_AUTO_TEST_CASE(uri__parse__http_roundtrip__expected)
 {
     const auto test = "http://github.com/libbitcoin?good=true#nice";
     uri parsed;
-    BOOST_REQUIRE(parsed.decode(test));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE(parsed.has_fragment());
+    BC_REQUIRE(parsed.decode(test));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE(parsed.has_fragment());
 
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "http");
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "github.com");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/libbitcoin");
-    BOOST_REQUIRE_EQUAL(parsed.query(), "good=true");
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "nice");
+    BC_REQUIRE_EQUAL(parsed.scheme(), "http");
+    BC_REQUIRE_EQUAL(parsed.authority(), "github.com");
+    BC_REQUIRE_EQUAL(parsed.path(), "/libbitcoin");
+    BC_REQUIRE_EQUAL(parsed.query(), "good=true");
+    BC_REQUIRE_EQUAL(parsed.fragment(), "nice");
 
-    BOOST_REQUIRE_EQUAL(parsed.encoded(), test);
+    BC_REQUIRE_EQUAL(parsed.encoded(), test);
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__messy_roundtrip__expected)
+BC_AUTO_TEST_CASE(uri__parse__messy_roundtrip__expected)
 {
     const auto test = "TEST:%78?%79#%7a";
     uri parsed;
-    BOOST_REQUIRE(parsed.decode(test));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE(parsed.has_fragment());
+    BC_REQUIRE(parsed.decode(test));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE(parsed.has_fragment());
 
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "test");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "x");
-    BOOST_REQUIRE_EQUAL(parsed.query(), "y");
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "z");
+    BC_REQUIRE_EQUAL(parsed.scheme(), "test");
+    BC_REQUIRE_EQUAL(parsed.path(), "x");
+    BC_REQUIRE_EQUAL(parsed.query(), "y");
+    BC_REQUIRE_EQUAL(parsed.fragment(), "z");
 
-    BOOST_REQUIRE_EQUAL(parsed.encoded(), test);
+    BC_REQUIRE_EQUAL(parsed.encoded(), test);
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__scheme__expected)
+BC_AUTO_TEST_CASE(uri__parse__scheme__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(!parsed.decode(""));
-    BOOST_REQUIRE(!parsed.decode("1:"));
+    BC_REQUIRE(!parsed.decode(""));
+    BC_REQUIRE(!parsed.decode("1:"));
 
     // Valid scheme cases
-    BOOST_REQUIRE(parsed.decode("x:"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "x");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "");
+    BC_REQUIRE(parsed.decode("x:"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE_EQUAL(parsed.scheme(), "x");
+    BC_REQUIRE_EQUAL(parsed.path(), "");
 
-    BOOST_REQUIRE(parsed.decode("x::"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "x");
-    BOOST_REQUIRE_EQUAL(parsed.path(), ":");
+    BC_REQUIRE(parsed.decode("x::"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE_EQUAL(parsed.scheme(), "x");
+    BC_REQUIRE_EQUAL(parsed.path(), ":");
 
     // Empty scheme
-    BOOST_REQUIRE(!parsed.decode(":"));
-    BOOST_REQUIRE(!parsed.decode("%78:"));
-    BOOST_REQUIRE(!parsed.decode(":/path"));
+    BC_REQUIRE(!parsed.decode(":"));
+    BC_REQUIRE(!parsed.decode("%78:"));
+    BC_REQUIRE(!parsed.decode(":/path"));
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__no_scheme__expected)
+BC_AUTO_TEST_CASE(uri__parse__no_scheme__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("/path"));
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(!parsed.has_query());
-    BOOST_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE(parsed.decode("/path"));
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(!parsed.has_fragment());
 
-    BOOST_REQUIRE(parsed.decode("/path?query=val"));
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE_EQUAL(parsed.query(), "query=val");
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE(parsed.decode("/path?query=val"));
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE_EQUAL(parsed.query(), "query=val");
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(!parsed.has_fragment());
 
-    BOOST_REQUIRE(parsed.decode("//host:42"));
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "host:42");
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_query());
-    BOOST_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE(parsed.decode("//host:42"));
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "host:42");
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(!parsed.has_fragment());
 
-    BOOST_REQUIRE(parsed.decode("//host#frag"));
-    BOOST_REQUIRE(!parsed.decode("/path%GG"));
+    BC_REQUIRE(parsed.decode("//host#frag"));
+    BC_REQUIRE(!parsed.decode("/path%GG"));
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__authority__expected)
+BC_AUTO_TEST_CASE(uri__parse__authority__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("test:/"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/");
+    BC_REQUIRE(parsed.decode("test:/"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.path(), "/");
 
-    BOOST_REQUIRE(parsed.decode("test://"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "");
+    BC_REQUIRE(parsed.decode("test://"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "");
+    BC_REQUIRE_EQUAL(parsed.path(), "");
 
-    BOOST_REQUIRE(parsed.decode("test:///"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/");
+    BC_REQUIRE(parsed.decode("test:///"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "");
+    BC_REQUIRE_EQUAL(parsed.path(), "/");
 
-    BOOST_REQUIRE(parsed.decode("test:/x//"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/x//");
+    BC_REQUIRE(parsed.decode("test:/x//"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.path(), "/x//");
 
-    BOOST_REQUIRE(parsed.decode("ssh://git@github.com:22/path/"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "git@github.com:22");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path/");
+    BC_REQUIRE(parsed.decode("ssh://git@github.com:22/path/"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "git@github.com:22");
+    BC_REQUIRE_EQUAL(parsed.path(), "/path/");
 
     // Invalid authority-form
-    BOOST_REQUIRE(parsed.decode("//host"));
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "host");
-    BOOST_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(parsed.decode("//host"));
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "host");
+    BC_REQUIRE(!parsed.has_scheme());
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__query__expected)
+BC_AUTO_TEST_CASE(uri__parse__query__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("test:#?"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_query());
-    BOOST_REQUIRE(parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "?");
+    BC_REQUIRE(parsed.decode("test:#?"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(parsed.has_fragment());
+    BC_REQUIRE_EQUAL(parsed.fragment(), "?");
 
-    BOOST_REQUIRE(parsed.decode("test:?&&x=y&z"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE_EQUAL(parsed.query(), "&&x=y&z");
+    BC_REQUIRE(parsed.decode("test:?&&x=y&z"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE_EQUAL(parsed.query(), "&&x=y&z");
 
     auto map = parsed.decode_query();
-    BOOST_REQUIRE(map.cend() != map.find(""));
-    BOOST_REQUIRE(map.cend() != map.find("x"));
-    BOOST_REQUIRE(map.cend() != map.find("z"));
-    BOOST_REQUIRE(map.cend() == map.find("y"));
+    BC_REQUIRE(map.cend() != map.find(""));
+    BC_REQUIRE(map.cend() != map.find("x"));
+    BC_REQUIRE(map.cend() != map.find("z"));
+    BC_REQUIRE(map.cend() == map.find("y"));
 
-    BOOST_REQUIRE_EQUAL(map[""], "");
-    BOOST_REQUIRE_EQUAL(map["x"], "y");
-    BOOST_REQUIRE_EQUAL(map["z"], "");
+    BC_REQUIRE_EQUAL(map[""], "");
+    BC_REQUIRE_EQUAL(map["x"], "y");
+    BC_REQUIRE_EQUAL(map["z"], "");
 
     // Scheme-less query
-    BOOST_REQUIRE(parsed.decode("/path?key=value"));
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE_EQUAL(parsed.query(), "key=value");
+    BC_REQUIRE(parsed.decode("/path?key=value"));
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE_EQUAL(parsed.query(), "key=value");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__fragment__expected)
+BC_AUTO_TEST_CASE(uri__parse__fragment__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("test:?"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE(parsed.decode("test:?"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_fragment());
 
-    BOOST_REQUIRE(parsed.decode("test:#"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "");
+    BC_REQUIRE(parsed.decode("test:#"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_fragment());
+    BC_REQUIRE_EQUAL(parsed.fragment(), "");
 
-    BOOST_REQUIRE(parsed.decode("test:#?"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "?");
+    BC_REQUIRE(parsed.decode("test:#?"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE(parsed.has_fragment());
+    BC_REQUIRE_EQUAL(parsed.fragment(), "?");
 
     // Scheme-less fragment
-    BOOST_REQUIRE(parsed.decode("/path#frag"));
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "frag");
+    BC_REQUIRE(parsed.decode("/path#frag"));
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(parsed.has_fragment());
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE_EQUAL(parsed.fragment(), "frag");
 }
 
-BOOST_AUTO_TEST_CASE(uri__encode__positive__expected)
+BC_AUTO_TEST_CASE(uri__encode__positive__expected)
 {
     uri parsed;
     parsed.set_scheme("test");
@@ -264,169 +264,169 @@ BOOST_AUTO_TEST_CASE(uri__encode__positive__expected)
     parsed.set_path("/some/path/?/#");
     parsed.set_query("tacos=yummy");
     parsed.set_fragment("good evening");
-    BOOST_REQUIRE_EQUAL(parsed.encoded(), "test://user@hostname/some/path/%3F/%23?tacos=yummy#good%20evening");
+    BC_REQUIRE_EQUAL(parsed.encoded(), "test://user@hostname/some/path/%3F/%23?tacos=yummy#good%20evening");
 
     parsed.remove_authority();
     parsed.remove_query();
     parsed.remove_fragment();
-    BOOST_REQUIRE_EQUAL(parsed.encoded(), "test:/some/path/%3F/%23");
+    BC_REQUIRE_EQUAL(parsed.encoded(), "test:/some/path/%3F/%23");
 }
 
-BOOST_AUTO_TEST_CASE(uri__encode__without_scheme__expected)
+BC_AUTO_TEST_CASE(uri__encode__without_scheme__expected)
 {
     uri parsed;
     parsed.set_path("/path");
     parsed.set_query("key=value");
-    BOOST_REQUIRE_EQUAL(parsed.encoded(), "/path?key=value");
+    BC_REQUIRE_EQUAL(parsed.encoded(), "/path?key=value");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__http1_1_targets__expected)
+BC_AUTO_TEST_CASE(uri__parse__http1_1_targets__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(!parsed.decode(""));
+    BC_REQUIRE(!parsed.decode(""));
 
     // Origin-form
-    BOOST_REQUIRE(parsed.decode("/path"));
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(!parsed.has_query());
-    BOOST_REQUIRE(!parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE(parsed.decode("/path"));
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
 
-    BOOST_REQUIRE(parsed.decode("/path?query=val"));
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE(parsed.has_query());
-    BOOST_REQUIRE(!parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE_EQUAL(parsed.query(), "query=val");
+    BC_REQUIRE(parsed.decode("/path?query=val"));
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_authority());
+    BC_REQUIRE(parsed.has_query());
+    BC_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE_EQUAL(parsed.query(), "query=val");
 
     // Absolute-form
-    BOOST_REQUIRE(parsed.decode("test://example.com/path"));
-    BOOST_REQUIRE(parsed.has_scheme());
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "test");
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "example.com");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE(!parsed.has_query());
-    BOOST_REQUIRE(!parsed.has_fragment());
-    BOOST_REQUIRE(parsed.decode("/path#frag"));
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
-    BOOST_REQUIRE_EQUAL(parsed.fragment(), "frag");
+    BC_REQUIRE(parsed.decode("test://example.com/path"));
+    BC_REQUIRE(parsed.has_scheme());
+    BC_REQUIRE_EQUAL(parsed.scheme(), "test");
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "example.com");
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE(parsed.decode("/path#frag"));
+    BC_REQUIRE_EQUAL(parsed.path(), "/path");
+    BC_REQUIRE_EQUAL(parsed.fragment(), "frag");
 
     // Authority-form
-    BOOST_REQUIRE(parsed.decode("//host:42"));
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), "host:42");
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(!parsed.has_query());
-    BOOST_REQUIRE(!parsed.has_fragment());
+    BC_REQUIRE(parsed.decode("//host:42"));
+    BC_REQUIRE(parsed.has_authority());
+    BC_REQUIRE_EQUAL(parsed.authority(), "host:42");
+    BC_REQUIRE(!parsed.has_scheme());
+    BC_REQUIRE(!parsed.has_query());
+    BC_REQUIRE(!parsed.has_fragment());
 
     // Invalid encoding
-    BOOST_REQUIRE(!parsed.decode(":/path"));
-    BOOST_REQUIRE(!parsed.decode("/path%GG"));
+    BC_REQUIRE(!parsed.decode(":/path"));
+    BC_REQUIRE(!parsed.decode("/path%GG"));
 }
 
 
 // setter validation
 
-BOOST_AUTO_TEST_CASE(uri__set_scheme__invalid__false)
+BC_AUTO_TEST_CASE(uri__set_scheme__invalid__false)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("bitcoin:test"));
-    BOOST_REQUIRE(!instance.set_scheme("1bitcoin"));
-    BOOST_REQUIRE_EQUAL(instance.scheme(), "bitcoin");
+    BC_REQUIRE(instance.decode("bitcoin:test"));
+    BC_REQUIRE(!instance.set_scheme("1bitcoin"));
+    BC_REQUIRE_EQUAL(instance.scheme(), "bitcoin");
 }
 
-BOOST_AUTO_TEST_CASE(uri__set_scheme__valid__expected)
+BC_AUTO_TEST_CASE(uri__set_scheme__valid__expected)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("bitcoin:test"));
-    BOOST_REQUIRE(instance.set_scheme("http"));
-    BOOST_REQUIRE_EQUAL(instance.scheme(), "http");
+    BC_REQUIRE(instance.decode("bitcoin:test"));
+    BC_REQUIRE(instance.set_scheme("http"));
+    BC_REQUIRE_EQUAL(instance.scheme(), "http");
 }
 
-BOOST_AUTO_TEST_CASE(uri__set_authority__invalid__false)
+BC_AUTO_TEST_CASE(uri__set_authority__invalid__false)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("bitcoin://host/test"));
-    BOOST_REQUIRE(!instance.set_authority("%zz"));
+    BC_REQUIRE(instance.decode("bitcoin://host/test"));
+    BC_REQUIRE(!instance.set_authority("%zz"));
 }
 
-BOOST_AUTO_TEST_CASE(uri__set_authority__valid__expected)
+BC_AUTO_TEST_CASE(uri__set_authority__valid__expected)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("bitcoin://host/test"));
-    BOOST_REQUIRE(instance.set_authority("other"));
-    BOOST_REQUIRE_EQUAL(instance.authority(), "other");
+    BC_REQUIRE(instance.decode("bitcoin://host/test"));
+    BC_REQUIRE(instance.set_authority("other"));
+    BC_REQUIRE_EQUAL(instance.authority(), "other");
 }
 
-BOOST_AUTO_TEST_CASE(uri__decode__empty__false)
+BC_AUTO_TEST_CASE(uri__decode__empty__false)
 {
     uri instance;
-    BOOST_REQUIRE(!instance.decode(""));
+    BC_REQUIRE(!instance.decode(""));
 }
 
-BOOST_AUTO_TEST_CASE(uri__decode__ip_literal_authority__expected)
+BC_AUTO_TEST_CASE(uri__decode__ip_literal_authority__expected)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("http://[::1]:8080/path"));
-    BOOST_REQUIRE_EQUAL(instance.authority(), "[::1]:8080");
-    BOOST_REQUIRE(instance.decode("http://[1:2:3:4:5:6:7:8]"));
-    BOOST_REQUIRE(instance.decode("http://[1:2:3:4:5:6:7::]"));
-    BOOST_REQUIRE(instance.decode("http://[::ffff:192.168.0.1]"));
-    BOOST_REQUIRE(instance.decode("http://[v1.x:y]"));
-    BOOST_REQUIRE(!instance.decode("http://[1:2:3:4:5:6:7:8:9]"));
-    BOOST_REQUIRE(!instance.decode("http://[1::2::3]"));
-    BOOST_REQUIRE(!instance.decode("http://[::ffff:256.1.1.1]"));
-    BOOST_REQUIRE(!instance.decode("http://[::ffff:01.1.1.1]"));
-    BOOST_REQUIRE(!instance.decode("http://[::1]x"));
-    BOOST_REQUIRE(!instance.decode("http://[v.x]"));
+    BC_REQUIRE(instance.decode("http://[::1]:8080/path"));
+    BC_REQUIRE_EQUAL(instance.authority(), "[::1]:8080");
+    BC_REQUIRE(instance.decode("http://[1:2:3:4:5:6:7:8]"));
+    BC_REQUIRE(instance.decode("http://[1:2:3:4:5:6:7::]"));
+    BC_REQUIRE(instance.decode("http://[::ffff:192.168.0.1]"));
+    BC_REQUIRE(instance.decode("http://[v1.x:y]"));
+    BC_REQUIRE(!instance.decode("http://[1:2:3:4:5:6:7:8:9]"));
+    BC_REQUIRE(!instance.decode("http://[1::2::3]"));
+    BC_REQUIRE(!instance.decode("http://[::ffff:256.1.1.1]"));
+    BC_REQUIRE(!instance.decode("http://[::ffff:01.1.1.1]"));
+    BC_REQUIRE(!instance.decode("http://[::1]x"));
+    BC_REQUIRE(!instance.decode("http://[v.x]"));
 }
 
-BOOST_AUTO_TEST_CASE(uri__decode__port__expected)
+BC_AUTO_TEST_CASE(uri__decode__port__expected)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("http://host:"));
-    BOOST_REQUIRE(instance.decode("http://user:pass@host:42"));
-    BOOST_REQUIRE(!instance.decode("http://host:4x"));
-    BOOST_REQUIRE(!instance.decode("http://a@b@host"));
+    BC_REQUIRE(instance.decode("http://host:"));
+    BC_REQUIRE(instance.decode("http://user:pass@host:42"));
+    BC_REQUIRE(!instance.decode("http://host:4x"));
+    BC_REQUIRE(!instance.decode("http://a@b@host"));
 }
 
-BOOST_AUTO_TEST_CASE(uri__decode_query__plus__space)
+BC_AUTO_TEST_CASE(uri__decode_query__plus__space)
 {
     uri instance;
-    BOOST_REQUIRE(instance.decode("bitcoin:?message=hello+bitcoin&a%2Bb=c%2Bd"));
-    BOOST_REQUIRE_EQUAL(instance.query(), "message=hello+bitcoin&a+b=c+d");
+    BC_REQUIRE(instance.decode("bitcoin:?message=hello+bitcoin&a%2Bb=c%2Bd"));
+    BC_REQUIRE_EQUAL(instance.query(), "message=hello+bitcoin&a+b=c+d");
 
     const auto map = instance.decode_query();
-    BOOST_REQUIRE_EQUAL(map.at("message"), "hello bitcoin");
-    BOOST_REQUIRE_EQUAL(map.at("a+b"), "c+d");
+    BC_REQUIRE_EQUAL(map.at("message"), "hello bitcoin");
+    BC_REQUIRE_EQUAL(map.at("a+b"), "c+d");
 }
 
-BOOST_AUTO_TEST_CASE(uri__encode_query__reserved__escaped)
+BC_AUTO_TEST_CASE(uri__encode_query__reserved__escaped)
 {
     uri instance;
     instance.encode_query({ { "a+b", "c d" }, { "e&f", "g=h" } });
-    BOOST_REQUIRE_EQUAL(instance.encoded(), "?a%2Bb=c%20d&e%26f=g%3Dh");
+    BC_REQUIRE_EQUAL(instance.encoded(), "?a%2Bb=c%20d&e%26f=g%3Dh");
 
     instance.encode_query({});
-    BOOST_REQUIRE(!instance.has_query());
+    BC_REQUIRE(!instance.has_query());
 }
 
-BOOST_AUTO_TEST_CASE(uri__encoded__ambiguous_path__disambiguated)
+BC_AUTO_TEST_CASE(uri__encoded__ambiguous_path__disambiguated)
 {
     uri instance;
     instance.set_path("a:b/c:d");
-    BOOST_REQUIRE_EQUAL(instance.encoded(), "a%3Ab/c:d");
-    BOOST_REQUIRE(instance.set_scheme("x"));
-    BOOST_REQUIRE_EQUAL(instance.encoded(), "x:a:b/c:d");
-    BOOST_REQUIRE(instance.set_authority("host"));
-    BOOST_REQUIRE_EQUAL(instance.encoded(), "x://host/a:b/c:d");
+    BC_REQUIRE_EQUAL(instance.encoded(), "a%3Ab/c:d");
+    BC_REQUIRE(instance.set_scheme("x"));
+    BC_REQUIRE_EQUAL(instance.encoded(), "x:a:b/c:d");
+    BC_REQUIRE(instance.set_authority("host"));
+    BC_REQUIRE_EQUAL(instance.encoded(), "x://host/a:b/c:d");
 
     instance.remove_authority();
     instance.set_path("//p");
-    BOOST_REQUIRE_EQUAL(instance.encoded(), "x:/.//p");
+    BC_REQUIRE_EQUAL(instance.encoded(), "x:/.//p");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

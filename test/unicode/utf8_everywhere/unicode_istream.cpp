@@ -19,10 +19,10 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(utf8_istream_tests)
+BC_AUTO_TEST_SUITE(utf8_istream_tests)
 
 // Use of L is not recommended as it will only work for ascii.
-BOOST_AUTO_TEST_CASE(unicode_istream__conditional__test)
+BC_AUTO_TEST_CASE(unicode_istream__conditional__test)
 {
     std::wstringstream wide_stream(L"windows ...");
     std::stringstream narrow_stream("linux ...");
@@ -32,13 +32,13 @@ BOOST_AUTO_TEST_CASE(unicode_istream__conditional__test)
     input >> result;
 
 #ifdef HAVE_WINDOWS
-    BOOST_REQUIRE_EQUAL(result, "windows");
+    BC_REQUIRE_EQUAL(result, "windows");
 #else
-    BOOST_REQUIRE_EQUAL(result, "linux");
+    BC_REQUIRE_EQUAL(result, "linux");
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(unicode_istream__non_ascii__test)
+BC_AUTO_TEST_CASE(unicode_istream__non_ascii__test)
 {
     const auto utf8 = "テスト";
     const auto utf16 = to_utf16(utf8);
@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE(unicode_istream__non_ascii__test)
     std::string result;
     input >> result;
 
-    BOOST_REQUIRE_EQUAL(result, utf8);
+    BC_REQUIRE_EQUAL(result, utf8);
 }
 
-BOOST_AUTO_TEST_CASE(unicode_istream__tokenization__test)
+BC_AUTO_TEST_CASE(unicode_istream__tokenization__test)
 {
     const auto utf8 = "テスト\rス\nト\tテス スト";
     const auto utf16 = to_utf16(utf8);
@@ -65,18 +65,18 @@ BOOST_AUTO_TEST_CASE(unicode_istream__tokenization__test)
     std::string result;
 
     input >> result;
-    BOOST_REQUIRE_EQUAL(result, "テスト");
+    BC_REQUIRE_EQUAL(result, "テスト");
     input >> result;
-    BOOST_REQUIRE_EQUAL(result, "ス");
+    BC_REQUIRE_EQUAL(result, "ス");
     input >> result;
-    BOOST_REQUIRE_EQUAL(result, "ト");
+    BC_REQUIRE_EQUAL(result, "ト");
     input >> result;
-    BOOST_REQUIRE_EQUAL(result, "テス");
+    BC_REQUIRE_EQUAL(result, "テス");
     input >> result;
-    BOOST_REQUIRE_EQUAL(result, "スト");
+    BC_REQUIRE_EQUAL(result, "スト");
 }
 
-BOOST_AUTO_TEST_CASE(unicode_istream__overflow__test)
+BC_AUTO_TEST_CASE(unicode_istream__overflow__test)
 {
     // This is a 20x10 matrix of 3 bytes per character triples (1800 bytes).
     // The buffer is 256 (wide) and 1024 (narrow), resulting in a potential
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(unicode_istream__overflow__test)
     std::string result;
     input >> result;
 
-    BOOST_REQUIRE_EQUAL(result, utf8_1800_bytes);
+    BC_REQUIRE_EQUAL(result, utf8_1800_bytes);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

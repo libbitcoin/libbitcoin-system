@@ -20,7 +20,7 @@
 
 using namespace bc::system::options;
 
-BOOST_AUTO_TEST_SUITE(parser_tests)
+BC_AUTO_TEST_SUITE(parser_tests)
 
 namespace {
 
@@ -79,173 +79,173 @@ void configure(mock_parser& instance, const std::filesystem::path& path)
 
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(parser__load_configuration_variables, test::directory_setup_fixture)
+BC_FIXTURE_TEST_SUITE(parser__load_configuration_variables, test::directory_setup_fixture)
 
-BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__directory__throws)
+BC_AUTO_TEST_CASE(parser__load_configuration_variables__directory__throws)
 {
     mock_parser instance;
     configure(instance, TEST_DIRECTORY);
-    BOOST_REQUIRE_THROW(instance.load_configuration_variables("config"), ifstream_exception);
+    BC_REQUIRE_THROW(instance.load_configuration_variables("config"), ifstream_exception);
 }
 
-BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__nonexistent_file__throws)
+BC_AUTO_TEST_CASE(parser__load_configuration_variables__nonexistent_file__throws)
 {
     mock_parser instance;
     configure(instance, TEST_PATH);
-    BOOST_REQUIRE_THROW(instance.load_configuration_variables("config"), ifstream_exception);
+    BC_REQUIRE_THROW(instance.load_configuration_variables("config"), ifstream_exception);
 }
 
-BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__regular_file__returns_true)
+BC_AUTO_TEST_CASE(parser__load_configuration_variables__regular_file__returns_true)
 {
     mock_parser instance;
-    BOOST_REQUIRE(test::create(TEST_PATH));
+    BC_REQUIRE(test::create(TEST_PATH));
     configure(instance, TEST_PATH);
-    BOOST_REQUIRE(instance.load_configuration_variables("config"));
+    BC_REQUIRE(instance.load_configuration_variables("config"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__no_file__default_unconfigured)
+BC_AUTO_TEST_CASE(parser__load_configuration_variables__no_file__default_unconfigured)
 {
     mock_parser instance;
     const char* argv[]{ "test" };
     instance.load_command_variables(1, argv);
-    BOOST_REQUIRE(!instance.load_configuration_variables("config"));
-    BOOST_REQUIRE(!instance.variables()["section.value"].empty());
-    BOOST_REQUIRE(instance.variables()["section.value"].defaulted());
-    BOOST_REQUIRE(!instance.is_configured("section.value"));
+    BC_REQUIRE(!instance.load_configuration_variables("config"));
+    BC_REQUIRE(!instance.variables()["section.value"].empty());
+    BC_REQUIRE(instance.variables()["section.value"].defaulted());
+    BC_REQUIRE(!instance.is_configured("section.value"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(parser__settings)
+BC_AUTO_TEST_SUITE(parser__settings)
 
-BOOST_AUTO_TEST_CASE(parser__settings__repeated__loaded_once)
+BC_AUTO_TEST_CASE(parser__settings__repeated__loaded_once)
 {
     mock_parser instance;
     const auto& first = instance.settings();
     const auto& second = instance.settings();
-    BOOST_REQUIRE_EQUAL(&first, &second);
-    BOOST_REQUIRE_EQUAL(instance.loads, 1u);
+    BC_REQUIRE_EQUAL(&first, &second);
+    BC_REQUIRE_EQUAL(instance.loads, 1u);
 }
 
-BOOST_AUTO_TEST_CASE(parser__settings__mutated_store__construction_default)
+BC_AUTO_TEST_CASE(parser__settings__mutated_store__construction_default)
 {
     mock_parser instance;
     const auto& settings = instance.settings();
     instance.value = 7;
     std::any value{};
-    BOOST_REQUIRE(settings.find("section.value", false).semantic()->apply_default(value));
-    BOOST_REQUIRE_EQUAL(std::any_cast<uint32_t>(value), 42u);
+    BC_REQUIRE(settings.find("section.value", false).semantic()->apply_default(value));
+    BC_REQUIRE_EQUAL(std::any_cast<uint32_t>(value), 42u);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(parser__is_configured)
+BC_AUTO_TEST_SUITE(parser__is_configured)
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__unparsed__false)
+BC_AUTO_TEST_CASE(parser__is_configured__unparsed__false)
 {
     const mock_parser instance;
-    BOOST_REQUIRE(!instance.is_configured("config"));
+    BC_REQUIRE(!instance.is_configured("config"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__unregistered__false)
+BC_AUTO_TEST_CASE(parser__is_configured__unregistered__false)
 {
     mock_parser instance;
     const char* argv[]{ "test" };
     instance.load_command_variables(1, argv);
-    BOOST_REQUIRE(!instance.is_configured("nonexistent"));
+    BC_REQUIRE(!instance.is_configured("nonexistent"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__unspecified_without_default__false)
+BC_AUTO_TEST_CASE(parser__is_configured__unspecified_without_default__false)
 {
     mock_parser instance;
     const char* argv[]{ "test" };
     instance.load_command_variables(1, argv);
-    BOOST_REQUIRE(!instance.is_configured("without_default"));
+    BC_REQUIRE(!instance.is_configured("without_default"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__unspecified_with_default__false)
+BC_AUTO_TEST_CASE(parser__is_configured__unspecified_with_default__false)
 {
     mock_parser instance;
     const char* argv[]{ "test" };
     instance.load_command_variables(1, argv);
-    BOOST_REQUIRE(!instance.is_configured("with_default"));
+    BC_REQUIRE(!instance.is_configured("with_default"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__specified_without_default__true)
+BC_AUTO_TEST_CASE(parser__is_configured__specified_without_default__true)
 {
     mock_parser instance;
     const char* argv[]{ "test", "--without_default", "true" };
     instance.load_command_variables(3, argv);
-    BOOST_REQUIRE(instance.is_configured("without_default"));
+    BC_REQUIRE(instance.is_configured("without_default"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__specified_with_default__true)
+BC_AUTO_TEST_CASE(parser__is_configured__specified_with_default__true)
 {
     mock_parser instance;
     const char* argv[]{ "test", "--with_default", "true" };
     instance.load_command_variables(3, argv);
-    BOOST_REQUIRE(instance.is_configured("with_default"));
+    BC_REQUIRE(instance.is_configured("with_default"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__is_configured__specified_as_default_value__true)
+BC_AUTO_TEST_CASE(parser__is_configured__specified_as_default_value__true)
 {
     mock_parser instance;
     const char* argv[]{ "test", "--with_default", "false" };
     instance.load_command_variables(3, argv);
-    BOOST_REQUIRE(instance.is_configured("with_default"));
+    BC_REQUIRE(instance.is_configured("with_default"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(parser__accessors)
+BC_AUTO_TEST_SUITE(parser__accessors)
 
-BOOST_AUTO_TEST_CASE(parser__format_invalid_parameter__option_message__cleaned)
+BC_AUTO_TEST_CASE(parser__format_invalid_parameter__option_message__cleaned)
 {
-    BOOST_REQUIRE_EQUAL(parser::format_invalid_parameter("the value for option is invalid"), "Error: the value is invalid");
+    BC_REQUIRE_EQUAL(parser::format_invalid_parameter("the value for option is invalid"), "Error: the value is invalid");
 }
 
-BOOST_AUTO_TEST_CASE(parser__format_invalid_parameter__other_message__prefixed)
+BC_AUTO_TEST_CASE(parser__format_invalid_parameter__other_message__prefixed)
 {
-    BOOST_REQUIRE_EQUAL(parser::format_invalid_parameter("bogus"), "Error: bogus");
+    BC_REQUIRE_EQUAL(parser::format_invalid_parameter("bogus"), "Error: bogus");
 }
 
-BOOST_AUTO_TEST_CASE(parser__variables__unparsed__empty)
-{
-    const mock_parser instance{};
-    BOOST_REQUIRE(instance.variables().empty());
-}
-
-BOOST_AUTO_TEST_CASE(parser__get_option__unset__false)
+BC_AUTO_TEST_CASE(parser__variables__unparsed__empty)
 {
     const mock_parser instance{};
-    BOOST_REQUIRE(!instance.get_option("without_default"));
+    BC_REQUIRE(instance.variables().empty());
 }
 
-BOOST_AUTO_TEST_CASE(parser__get_option__set__true)
+BC_AUTO_TEST_CASE(parser__get_option__unset__false)
+{
+    const mock_parser instance{};
+    BC_REQUIRE(!instance.get_option("without_default"));
+}
+
+BC_AUTO_TEST_CASE(parser__get_option__set__true)
 {
     mock_parser instance{};
     const char* argv[]{ "test", "--without_default", "1" };
     instance.load_command_variables(3, argv);
-    BOOST_REQUIRE(instance.get_option("without_default"));
+    BC_REQUIRE(instance.get_option("without_default"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__get_config_option__unset__empty)
+BC_AUTO_TEST_CASE(parser__get_config_option__unset__empty)
 {
     const mock_parser instance{};
-    BOOST_REQUIRE(instance.get_config_option("config").empty());
+    BC_REQUIRE(instance.get_config_option("config").empty());
 }
 
-BOOST_AUTO_TEST_CASE(parser__load_environment_variables__empty_prefix__does_not_throw)
+BC_AUTO_TEST_CASE(parser__load_environment_variables__empty_prefix__does_not_throw)
 {
     mock_parser instance{};
-    BOOST_REQUIRE_NO_THROW(instance.load_environment_variables("BC_TEST_UNUSED_"));
+    BC_REQUIRE_NO_THROW(instance.load_environment_variables("BC_TEST_UNUSED_"));
 }
 
-BOOST_AUTO_TEST_CASE(parser__load_configuration_variables__unspecified__false)
+BC_AUTO_TEST_CASE(parser__load_configuration_variables__unspecified__false)
 {
     mock_parser instance{};
-    BOOST_REQUIRE(!instance.load_configuration_variables("config"));
+    BC_REQUIRE(!instance.load_configuration_variables("config"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

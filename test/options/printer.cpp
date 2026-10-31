@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(printer_tests)
+BC_AUTO_TEST_SUITE(printer_tests)
 
 using namespace bc::system::options;
 
@@ -39,135 +39,135 @@ using namespace bc::system::options;
 
 #define CONFIG_PRINTER_INITIALIZE(number_of_parameters, number_of_names) \
     help.initialize(); \
-    BOOST_REQUIRE_EQUAL(help.get_parameters().size(), number_of_parameters); \
-    BOOST_REQUIRE_EQUAL(help.get_argument_names().size(), number_of_names)
+    BC_REQUIRE_EQUAL(help.get_parameters().size(), number_of_parameters); \
+    BC_REQUIRE_EQUAL(help.get_argument_names().size(), number_of_names)
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__columnize)
+BC_AUTO_TEST_SUITE(printer__columnize)
 
-BOOST_AUTO_TEST_CASE(printer__columnize__paragraph_empty_width_0__empty)
+BC_AUTO_TEST_CASE(printer__columnize__paragraph_empty_width_0__empty)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("", 0);
-    BOOST_REQUIRE_EQUAL(rows.size(), 0u);
+    BC_REQUIRE_EQUAL(rows.size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__paragraph_empty_width_1__empty)
+BC_AUTO_TEST_CASE(printer__columnize__paragraph_empty_width_1__empty)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("", 1);
-    BOOST_REQUIRE_EQUAL(rows.size(), 0u);
+    BC_REQUIRE_EQUAL(rows.size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__short_word_width_10__one_word_row)
+BC_AUTO_TEST_CASE(printer__columnize__short_word_width_10__one_word_row)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("foo", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 1u);
-    BOOST_REQUIRE_EQUAL(rows.front(), "foo");
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows.front(), "foo");
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__two_short_words_width_10__two_word_row)
+BC_AUTO_TEST_CASE(printer__columnize__two_short_words_width_10__two_word_row)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("foo bar", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 1u);
-    BOOST_REQUIRE_EQUAL(rows.front(), "foo bar");
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows.front(), "foo bar");
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__overflow_width_10__two_rows)
+BC_AUTO_TEST_CASE(printer__columnize__overflow_width_10__two_rows)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("foo bar overflow", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 2u);
-    BOOST_REQUIRE_EQUAL(rows[0], "foo bar");
-    BOOST_REQUIRE_EQUAL(rows[1], "overflow");
+    BC_REQUIRE_EQUAL(rows.size(), 2u);
+    BC_REQUIRE_EQUAL(rows[0], "foo bar");
+    BC_REQUIRE_EQUAL(rows[1], "overflow");
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__first_word_overflow_width_10__two_rows)
+BC_AUTO_TEST_CASE(printer__columnize__first_word_overflow_width_10__two_rows)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("morethantenchars foo bar", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 2u);
-    BOOST_REQUIRE_EQUAL(rows[0], "morethantenchars");
-    BOOST_REQUIRE_EQUAL(rows[1], "foo bar");
+    BC_REQUIRE_EQUAL(rows.size(), 2u);
+    BC_REQUIRE_EQUAL(rows[0], "morethantenchars");
+    BC_REQUIRE_EQUAL(rows[1], "foo bar");
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__middle_word_overflow_width_10__three_rows)
+BC_AUTO_TEST_CASE(printer__columnize__middle_word_overflow_width_10__three_rows)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("foo bar morethantenchars test", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 3u);
-    BOOST_REQUIRE_EQUAL(rows[0], "foo bar");
-    BOOST_REQUIRE_EQUAL(rows[1], "morethantenchars");
-    BOOST_REQUIRE_EQUAL(rows[2], "test");
+    BC_REQUIRE_EQUAL(rows.size(), 3u);
+    BC_REQUIRE_EQUAL(rows[0], "foo bar");
+    BC_REQUIRE_EQUAL(rows[1], "morethantenchars");
+    BC_REQUIRE_EQUAL(rows[2], "test");
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__last_word_overflow_width_10__two_rows)
+BC_AUTO_TEST_CASE(printer__columnize__last_word_overflow_width_10__two_rows)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("foo bar morethantenchars", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 2u);
-    BOOST_REQUIRE_EQUAL(rows[0], "foo bar");
-    BOOST_REQUIRE_EQUAL(rows[1], "morethantenchars");
+    BC_REQUIRE_EQUAL(rows.size(), 2u);
+    BC_REQUIRE_EQUAL(rows[0], "foo bar");
+    BC_REQUIRE_EQUAL(rows[1], "morethantenchars");
 }
 
-BOOST_AUTO_TEST_CASE(printer__columnize__excess_whitespace_width_10__space_removed)
+BC_AUTO_TEST_CASE(printer__columnize__excess_whitespace_width_10__space_removed)
 {
     CONFIG_PRINTER_SETUP();
     auto rows = help.columnize("  \tfoo   bar \n\n  morethantenchars\r\n  ", 10);
-    BOOST_REQUIRE_EQUAL(rows.size(), 3u);
-    BOOST_REQUIRE_EQUAL(rows[0], "\tfoo bar");
-    BOOST_REQUIRE_EQUAL(rows[1], "\n\n");
-    BOOST_REQUIRE_EQUAL(rows[2], "morethantenchars\r\n");
+    BC_REQUIRE_EQUAL(rows.size(), 3u);
+    BC_REQUIRE_EQUAL(rows[0], "\tfoo bar");
+    BC_REQUIRE_EQUAL(rows[1], "\n\n");
+    BC_REQUIRE_EQUAL(rows[2], "morethantenchars\r\n");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__format_parameters_table)
+BC_AUTO_TEST_SUITE(printer__format_parameters_table)
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_empty__empty)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__positional_empty__empty)
 {
     CONFIG_PRINTER_SETUP();
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(true), "");
+    BC_REQUIRE_EQUAL(help.format_parameters_table(true), "");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__named_empty__empty)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__named_empty__empty)
 {
     CONFIG_PRINTER_SETUP();
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(false), "");
+    BC_REQUIRE_EQUAL(help.format_parameters_table(false), "");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__named_three_options__three_options)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__named_three_options__three_options)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("long", "Long name only.")
         (",m", "Short name only.")
         ("short_long,s", "Long and short name."));
     CONFIG_PRINTER_INITIALIZE(3u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(false),
+    BC_REQUIRE_EQUAL(help.format_parameters_table(false),
         "--long               Long name only.                                     \n"
         "-m                   Short name only.                                    \n"
         "-s [--short_long]    Long and short name.                                \n"
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__reversed_named_three_options__three_sorted_options)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__reversed_named_three_options__three_sorted_options)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("short_long,s", "Long and short name.")
         (",m", "Short name only.")
         ("long", "Long name only."));
     CONFIG_PRINTER_INITIALIZE(3u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(false),
+    BC_REQUIRE_EQUAL(help.format_parameters_table(false),
         "--long               Long name only.                                     \n"
         "-m                   Short name only.                                    \n"
         "-s [--short_long]    Long and short name.                                \n"
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__unsorted_named_three_options_no_matching_arguments__three_sorted_options)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__unsorted_named_three_options_no_matching_arguments__three_sorted_options)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("first,f", "First option description.")
@@ -176,14 +176,14 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__unsorted_named_three_opti
         arguments.add("forty-two", 42);
         arguments.add("THIRD", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 2u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(false),
+    BC_REQUIRE_EQUAL(help.format_parameters_table(false),
         "--third              Third option description.                           \n"
         "-f [--first]         First option description.                           \n"
         "-x [--second]        Second option description.                          \n"
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__named_three_options_two_matching_arguments__one_option)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__named_three_options_two_matching_arguments__one_option)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("first,f", "First option description.")
@@ -193,22 +193,22 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__named_three_options_two_m
         arguments.add("second", 42);
         arguments.add("THIRD", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 3u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(false),
+    BC_REQUIRE_EQUAL(help.format_parameters_table(false),
         "-f [--first]         First option description.                           \n"
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options__empty)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options__empty)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("long", "Long name only.")
         ("short_long,s", "Long and short name.")
         (",m", "Short name only."));
     CONFIG_PRINTER_INITIALIZE(3u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(true), "");
+    BC_REQUIRE_EQUAL(help.format_parameters_table(true), "");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_one_matching_argument__one_argument)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_one_matching_argument__one_argument)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("first,f", "First option description.")
@@ -218,12 +218,12 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_
         arguments.add("SECOND", 42);
         arguments.add("THIRD", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 3u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(true),
+    BC_REQUIRE_EQUAL(help.format_parameters_table(true),
         "THIRD                Third option description.                           \n"
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__reverse_positional_three_options_three_matching_arguments__three_unsorted_arguments)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__reverse_positional_three_options_three_matching_arguments__three_unsorted_arguments)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("third", "Third option description.")
@@ -233,14 +233,14 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__reverse_positional_three_
         arguments.add("SECOND", 42);
         arguments.add("third", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 3u);
-    BOOST_REQUIRE_EQUAL(help.format_parameters_table(true),
+    BC_REQUIRE_EQUAL(help.format_parameters_table(true),
         "THIRD                Third option description.                           \n"
         "SECOND               Second option description.                          \n"
         "FIRST                First option description.                           \n"
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_two_matching_arguments_overflow__two_arguments_overflow)
+BC_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_two_matching_arguments_overflow__two_arguments_overflow)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("first,f", "First option description.")
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_
     arguments.add("THIRD", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 3u);
     auto table = help.format_parameters_table(true);
-    BOOST_REQUIRE_EQUAL(table,
+    BC_REQUIRE_EQUAL(table,
         "SECOND               Lorem ipsum dolor sit amet, consectetur adipiscing  \n"
         "                     elit, sed do eiusmod tempor incididunt ut labore et \n"
         "                     dolore magna aliqua. Ut enim ad minim veniam, quis  \n"
@@ -272,25 +272,25 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_
     );
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__format_settings_table)
+BC_AUTO_TEST_SUITE(printer__format_settings_table)
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__empty__empty)
+BC_AUTO_TEST_CASE(printer__format_settings_table__empty__empty)
 {
     CONFIG_PRINTER_SETUP();
     CONFIG_PRINTER_INITIALIZE(0u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(), "");
+    BC_REQUIRE_EQUAL(help.format_settings_table(), "");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__one_section__expected)
+BC_AUTO_TEST_CASE(printer__format_settings_table__one_section__expected)
 {
     std::string threads{ "1" };
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("network.threads", setting(&threads), "Thread count."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Thread count.\n"
@@ -298,13 +298,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__one_section__expected)
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_setting__value)
+BC_AUTO_TEST_CASE(printer__format_settings_table__bound_setting__value)
 {
     uint32_t threads = 42;
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("network.threads", setting(&threads), "Thread count."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Thread count.\n"
@@ -312,13 +312,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_setting__value)
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__commented)
+BC_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__commented)
 {
     string_list hosts{};
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("network.host", setting(&hosts), "Host name."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Host name.\n"
@@ -326,13 +326,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_collection__com
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_string__empty_value)
+BC_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_string__empty_value)
 {
     std::string host{};
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("network.host", setting(&host), "Host name."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Host name.\n"
@@ -340,13 +340,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_empty_string__empty_v
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_collection__line_each)
+BC_AUTO_TEST_CASE(printer__format_settings_table__bound_collection__line_each)
 {
     string_list hosts{ "alpha", "beta" };
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("network.host", setting(&hosts), "Host name."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Host name.\n"
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__bound_collection__line_each
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
+BC_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
 {
     uint32_t threads = 42;
     options_description options;
@@ -368,7 +368,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
 
     printer help(options, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
     help.initialize();
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Thread count.\n"
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__configured_setting__marked)
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmarked)
+BC_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmarked)
 {
     uint32_t threads = 42;
     options_description options;
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmar
 
     printer help(options, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
     help.initialize();
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[network]\n"
         "# Thread count.\n"
@@ -397,13 +397,13 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmar
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
+BC_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
 {
     std::string rate{ "5" };
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("table.header.rate", setting(&rate), "Growth rate."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[table.header]\n"
         "# Growth rate.\n"
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
     );
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_sections__grouped_by_section)
+BC_AUTO_TEST_CASE(printer__format_settings_table__nested_sections__grouped_by_section)
 {
     std::string txs_rate{ "1" };
     std::string buckets{ "2" };
@@ -421,7 +421,7 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_sections__grouped_by
         ("table.header.buckets", setting(&buckets), "Header buckets.")
         ("table.header.rate", setting(&header_rate), "Header growth rate."));
     CONFIG_PRINTER_INITIALIZE(3u, 0u);
-    BOOST_REQUIRE_EQUAL(help.format_settings_table(),
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
         "\n"
         "[table.header]\n"
         "# Header buckets.\n"
@@ -435,12 +435,12 @@ BOOST_AUTO_TEST_CASE(printer__format_settings_table__nested_sections__grouped_by
     );
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__format_usage_parameters)
+BC_AUTO_TEST_SUITE(printer__format_usage_parameters)
 
-BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_arg__sorted)
+BC_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_arg__sorted)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("second,x", "Second option description.")
@@ -450,10 +450,10 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_two_options_one_
         arguments.add("SECOND", 42);
         arguments.add("THIRD", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 3u);
-    BOOST_REQUIRE_EQUAL(help.format_usage_parameters(), "[-fx] [THIRD]...");
+    BC_REQUIRE_EQUAL(help.format_usage_parameters(), "[-fx] [THIRD]...");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_parameters__sorted_parameters)
+BC_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_parameters__sorted_parameters)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("short_long,s", "Long and short name.")
@@ -470,25 +470,25 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_paramet
         arguments.add("SIMPLE", 1);
         arguments.add("ARRAY", -1));
     CONFIG_PRINTER_INITIALIZE(10u, 3u);
-    BOOST_REQUIRE_EQUAL(help.format_usage_parameters(), "[-mst] --longy value [--untoggled] [--defaulty value] [--multy value]... REQUIRED [SIMPLE] [ARRAY]...");
+    BC_REQUIRE_EQUAL(help.format_usage_parameters(), "[-mst] --longy value [--untoggled] [--defaulty value] [--multy value]... REQUIRED [SIMPLE] [ARRAY]...");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__generate_argument_names)
+BC_AUTO_TEST_SUITE(printer__generate_argument_names)
 
 #define BX_PRINTER_GENERATE_ARGUMENT_NAMES(number_of_names) \
     help.generate_argument_names(); \
-    BOOST_REQUIRE_EQUAL(help.get_argument_names().size(), number_of_names)
+    BC_REQUIRE_EQUAL(help.get_argument_names().size(), number_of_names)
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__empty_arguments_empty_options__empty)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__empty_arguments_empty_options__empty)
 {
     CONFIG_PRINTER_SETUP();
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(0u);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__empty_arguments_multiple_options__empty)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__empty_arguments_multiple_options__empty)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("long", "Long name only.")
@@ -497,65 +497,65 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__empty_arguments_multiple_
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(0u);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_1__one_name_1)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_1__one_name_1)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("one", 1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "one");
-    BOOST_REQUIRE_EQUAL(names[0].second, 1);
+    BC_REQUIRE_EQUAL(names[0].first, "one");
+    BC_REQUIRE_EQUAL(names[0].second, 1);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_42__one_name_42)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_42__one_name_42)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("forty-two", 42));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
-    BOOST_REQUIRE_EQUAL(names[0].second, 42);
+    BC_REQUIRE_EQUAL(names[0].first, "forty-two");
+    BC_REQUIRE_EQUAL(names[0].second, 42);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_max_arguments__one_name_max_arguments)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_max_arguments__one_name_max_arguments)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("max_arguments", printer::max_arguments));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "max_arguments");
-    BOOST_REQUIRE_EQUAL(names[0].second, printer::max_arguments);
+    BC_REQUIRE_EQUAL(names[0].first, "max_arguments");
+    BC_REQUIRE_EQUAL(names[0].second, printer::max_arguments);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_max_arguments_plus_1__one_name_negative_1)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_max_arguments_plus_1__one_name_negative_1)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("max_arguments+1", printer::max_arguments + 1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "max_arguments+1");
-    BOOST_REQUIRE_EQUAL(names[0].second, -1);
+    BC_REQUIRE_EQUAL(names[0].first, "max_arguments+1");
+    BC_REQUIRE_EQUAL(names[0].second, -1);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_negative_1__one_name_negative_1)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__one_argument_negative_1__one_name_negative_1)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(arguments.add("negative-one", -1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(1u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "negative-one");
-    BOOST_REQUIRE_EQUAL(names[0].second, -1);
+    BC_REQUIRE_EQUAL(names[0].first, "negative-one");
+    BC_REQUIRE_EQUAL(names[0].second, -1);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments__expected_names)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments__expected_names)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(
         arguments.add("forty-two", 42);
         arguments.add("max_arguments", printer::max_arguments));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(2u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
-    BOOST_REQUIRE_EQUAL(names[0].second, 42);
-    BOOST_REQUIRE_EQUAL(names[1].first, "max_arguments");
-    BOOST_REQUIRE_EQUAL(names[1].second, printer::max_arguments);
+    BC_REQUIRE_EQUAL(names[0].first, "forty-two");
+    BC_REQUIRE_EQUAL(names[0].second, 42);
+    BC_REQUIRE_EQUAL(names[1].first, "max_arguments");
+    BC_REQUIRE_EQUAL(names[1].second, printer::max_arguments);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments_negative_1__expected_names)
+BC_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments_negative_1__expected_names)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(
         arguments.add("forty-two", 42);
@@ -563,39 +563,39 @@ BOOST_AUTO_TEST_CASE(printer__generate_argument_names__multiple_arguments_negati
         arguments.add("negative-one", -1));
     BX_PRINTER_GENERATE_ARGUMENT_NAMES(3u);
     const auto& names = help.get_argument_names();
-    BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
-    BOOST_REQUIRE_EQUAL(names[0].second, 42);
-    BOOST_REQUIRE_EQUAL(names[1].first, "max_arguments");
-    BOOST_REQUIRE_EQUAL(names[1].second, printer::max_arguments);
-    BOOST_REQUIRE_EQUAL(names[2].first, "negative-one");
-    BOOST_REQUIRE_EQUAL(names[2].second, -1);
+    BC_REQUIRE_EQUAL(names[0].first, "forty-two");
+    BC_REQUIRE_EQUAL(names[0].second, 42);
+    BC_REQUIRE_EQUAL(names[1].first, "max_arguments");
+    BC_REQUIRE_EQUAL(names[1].second, printer::max_arguments);
+    BC_REQUIRE_EQUAL(names[2].first, "negative-one");
+    BC_REQUIRE_EQUAL(names[2].second, -1);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__generate_parameters)
+BC_AUTO_TEST_SUITE(printer__generate_parameters)
 
 #define BX_PRINTER_GENERATE_PARAMETERS(number_of_parameters) \
     help.generate_parameters(); \
-    BOOST_REQUIRE_EQUAL(help.get_parameters().size(), number_of_parameters)
+    BC_REQUIRE_EQUAL(help.get_parameters().size(), number_of_parameters)
 
-BOOST_AUTO_TEST_CASE(printer__generate_parameters__empty__empty_parameters)
+BC_AUTO_TEST_CASE(printer__generate_parameters__empty__empty_parameters)
 {
     CONFIG_PRINTER_SETUP();
     BX_PRINTER_GENERATE_PARAMETERS(0u);
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_parameters__one_option__expected_parameter)
+BC_AUTO_TEST_CASE(printer__generate_parameters__one_option__expected_parameter)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("foo_bar,f", "Foobar option name."));
     BX_PRINTER_GENERATE_PARAMETERS(1u);
     const auto& parameters = help.get_parameters();
-    BOOST_REQUIRE_EQUAL(parameters[0].short_name(), 'f');
+    BC_REQUIRE_EQUAL(parameters[0].short_name(), 'f');
 }
 
-BOOST_AUTO_TEST_CASE(printer__generate_parameters__unsorted_three_options__expected_sorted_parameters)
+BC_AUTO_TEST_CASE(printer__generate_parameters__unsorted_three_options__expected_sorted_parameters)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("first,f", "First option description.")
@@ -603,17 +603,17 @@ BOOST_AUTO_TEST_CASE(printer__generate_parameters__unsorted_three_options__expec
         ("third", "Third option description."));
     BX_PRINTER_GENERATE_PARAMETERS(3u);
     const auto& parameters = help.get_parameters();
-    BOOST_REQUIRE_EQUAL(parameters[0].long_name(), "third");
-    BOOST_REQUIRE_EQUAL(parameters[1].short_name(), 'f');
-    BOOST_REQUIRE_EQUAL(parameters[2].description(), "Second option description.");
+    BC_REQUIRE_EQUAL(parameters[0].long_name(), "third");
+    BC_REQUIRE_EQUAL(parameters[1].short_name(), 'f');
+    BC_REQUIRE_EQUAL(parameters[2].description(), "Second option description.");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
-BOOST_AUTO_TEST_SUITE(printer__initialize)
+BC_AUTO_TEST_SUITE(printer__initialize)
 
-BOOST_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_sorted_parameters)
+BC_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_sorted_parameters)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
         ("first,f", "First option description.")
@@ -624,67 +624,67 @@ BOOST_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_s
     CONFIG_PRINTER_INITIALIZE(3u, 2u);
     const auto& names = help.get_argument_names();
     const auto& parameters = help.get_parameters();
-    BOOST_REQUIRE_EQUAL(names[0].first, "forty-two");
-    BOOST_REQUIRE_EQUAL(names[0].second, 42);
-    BOOST_REQUIRE_EQUAL(names[1].first, "negative-one");
-    BOOST_REQUIRE_EQUAL(names[1].second, -1);
-    BOOST_REQUIRE_EQUAL(parameters[0].long_name(), "third");
-    BOOST_REQUIRE_EQUAL(parameters[1].short_name(), 'f');
-    BOOST_REQUIRE_EQUAL(parameters[2].description(), "Second option description.");
+    BC_REQUIRE_EQUAL(names[0].first, "forty-two");
+    BC_REQUIRE_EQUAL(names[0].second, 42);
+    BC_REQUIRE_EQUAL(names[1].first, "negative-one");
+    BC_REQUIRE_EQUAL(names[1].second, -1);
+    BC_REQUIRE_EQUAL(parameters[0].long_name(), "third");
+    BC_REQUIRE_EQUAL(parameters[1].short_name(), 'f');
+    BC_REQUIRE_EQUAL(parameters[2].description(), "Second option description.");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // printers
 
-BOOST_AUTO_TEST_CASE(printer__format_paragraph__short__single_line)
+BC_AUTO_TEST_CASE(printer__format_paragraph__short__single_line)
 {
     CONFIG_PRINTER_SETUP();
-    BOOST_REQUIRE_EQUAL(help.format_paragraph("foo"), "foo                                                                      \n");
+    BC_REQUIRE_EQUAL(help.format_paragraph("foo"), "foo                                                                      \n");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_paragraph__empty__empty_line)
+BC_AUTO_TEST_CASE(printer__format_paragraph__empty__empty_line)
 {
     CONFIG_PRINTER_SETUP();
-    BOOST_REQUIRE_EQUAL(help.format_paragraph(""), "");
+    BC_REQUIRE_EQUAL(help.format_paragraph(""), "");
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_usage__named_option__contains_application)
+BC_AUTO_TEST_CASE(printer__format_usage__named_option__contains_application)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()("long", "Long name only."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
-    BOOST_REQUIRE(help.format_usage().find(CONFIG_APPLICATION) != std::string::npos);
+    BC_REQUIRE(help.format_usage().find(CONFIG_APPLICATION) != std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(printer__format_description__always__contains_description)
+BC_AUTO_TEST_CASE(printer__format_description__always__contains_description)
 {
     CONFIG_PRINTER_SETUP();
     CONFIG_PRINTER_INITIALIZE(0u, 0u);
-    BOOST_REQUIRE(help.format_description().find(CONFIG_DESCRIPTION) != std::string::npos);
+    BC_REQUIRE(help.format_description().find(CONFIG_DESCRIPTION) != std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(printer__commandline__named_option__contains_usage_and_table)
+BC_AUTO_TEST_CASE(printer__commandline__named_option__contains_usage_and_table)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()("long", "Long name only."));
     CONFIG_PRINTER_INITIALIZE(1u, 0u);
 
     std::ostringstream output{};
     help.commandline(output);
-    BOOST_REQUIRE(output.str().find(CONFIG_APPLICATION) != std::string::npos);
-    BOOST_REQUIRE(output.str().find("--long") != std::string::npos);
+    BC_REQUIRE(output.str().find(CONFIG_APPLICATION) != std::string::npos);
+    BC_REQUIRE(output.str().find("--long") != std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(printer__commandline__no_parameters__no_table_headers)
+BC_AUTO_TEST_CASE(printer__commandline__no_parameters__no_table_headers)
 {
     CONFIG_PRINTER_SETUP();
     CONFIG_PRINTER_INITIALIZE(0u, 0u);
 
     std::ostringstream output{};
     help.commandline(output);
-    BOOST_REQUIRE(output.str().find("--long") == std::string::npos);
+    BC_REQUIRE(output.str().find("--long") == std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(printer__settings__described__contains_description)
+BC_AUTO_TEST_CASE(printer__settings__described__contains_description)
 {
     options_description options;
     positional_options_description arguments;
@@ -694,10 +694,10 @@ BOOST_AUTO_TEST_CASE(printer__settings__described__contains_description)
 
     std::ostringstream output{};
     help.settings(output);
-    BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
+    BC_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(printer__settings__undescribed__no_description)
+BC_AUTO_TEST_CASE(printer__settings__undescribed__no_description)
 {
     options_description options;
     positional_options_description arguments;
@@ -707,10 +707,10 @@ BOOST_AUTO_TEST_CASE(printer__settings__undescribed__no_description)
 
     std::ostringstream output{};
     help.settings(output);
-    BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) == std::string::npos);
+    BC_REQUIRE(output.str().find(CONFIG_DESCRIPTION) == std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(printer__construct__settings_only__expected)
+BC_AUTO_TEST_CASE(printer__construct__settings_only__expected)
 {
     options_description settings;
     settings.add_options()("section.name", "Setting.");
@@ -719,7 +719,7 @@ BOOST_AUTO_TEST_CASE(printer__construct__settings_only__expected)
 
     std::ostringstream output{};
     help.settings(output);
-    BOOST_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
+    BC_REQUIRE(output.str().find(CONFIG_DESCRIPTION) != std::string::npos);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

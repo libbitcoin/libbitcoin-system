@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(checksum_tests)
+BC_AUTO_TEST_SUITE(checksum_tests)
 
 // BIP173: All examples use public key:
 constexpr uint8_t bip173_program_version { 0 };
@@ -50,251 +50,251 @@ auto bip173_p2wsh_program() NOEXCEPT
 
 // insert_checksum
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum__empty__expected)
+BC_AUTO_TEST_CASE(checksum__insert_checksum__empty__expected)
 {
     data_array<checksum_default_size> data;
     insert_checksum(data);
-    BOOST_REQUIRE_EQUAL(data[0], 0x5du);
-    BOOST_REQUIRE_EQUAL(data[1], 0xf6u);
-    BOOST_REQUIRE_EQUAL(data[2], 0xe0u);
-    BOOST_REQUIRE_EQUAL(data[3], 0xe2u);
+    BC_REQUIRE_EQUAL(data[0], 0x5du);
+    BC_REQUIRE_EQUAL(data[1], 0xf6u);
+    BC_REQUIRE_EQUAL(data[2], 0xe0u);
+    BC_REQUIRE_EQUAL(data[3], 0xe2u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__expected)
+BC_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__expected)
 {
     data_array<5 + checksum_default_size> data{ 0, 0, 0, 0, 0 };
     insert_checksum(data);
-    BOOST_REQUIRE_EQUAL(data[0], 0u);
-    BOOST_REQUIRE_EQUAL(data[1], 0u);
-    BOOST_REQUIRE_EQUAL(data[2], 0u);
-    BOOST_REQUIRE_EQUAL(data[3], 0u);
-    BOOST_REQUIRE_EQUAL(data[4], 0u);
-    BOOST_REQUIRE_EQUAL(data[5], 0x79u);
-    BOOST_REQUIRE_EQUAL(data[6], 0x01u);
-    BOOST_REQUIRE_EQUAL(data[7], 0xafu);
-    BOOST_REQUIRE_EQUAL(data[8], 0x93u);
+    BC_REQUIRE_EQUAL(data[0], 0u);
+    BC_REQUIRE_EQUAL(data[1], 0u);
+    BC_REQUIRE_EQUAL(data[2], 0u);
+    BC_REQUIRE_EQUAL(data[3], 0u);
+    BC_REQUIRE_EQUAL(data[4], 0u);
+    BC_REQUIRE_EQUAL(data[5], 0x79u);
+    BC_REQUIRE_EQUAL(data[6], 0x01u);
+    BC_REQUIRE_EQUAL(data[7], 0xafu);
+    BC_REQUIRE_EQUAL(data[8], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__empty__expected)
+BC_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__empty__expected)
 {
     data_array<0> data;
     const auto out = insert_checksum<checksum_default_size>({ { data } });
-    BOOST_REQUIRE_EQUAL(out[0], 0x5du);
-    BOOST_REQUIRE_EQUAL(out[1], 0xf6u);
-    BOOST_REQUIRE_EQUAL(out[2], 0xe0u);
-    BOOST_REQUIRE_EQUAL(out[3], 0xe2u);
+    BC_REQUIRE_EQUAL(out[0], 0x5du);
+    BC_REQUIRE_EQUAL(out[1], 0xf6u);
+    BC_REQUIRE_EQUAL(out[2], 0xe0u);
+    BC_REQUIRE_EQUAL(out[3], 0xe2u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__not_empty__expected)
+BC_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__not_empty__expected)
 {
     data_array<5 + checksum_default_size> data{ { 0, 0, 0, 0, 0 } };
     const auto out = insert_checksum<5 + checksum_default_size>({ { data } });
-    BOOST_REQUIRE_EQUAL(out[0], 0u);
-    BOOST_REQUIRE_EQUAL(out[1], 0u);
-    BOOST_REQUIRE_EQUAL(out[2], 0u);
-    BOOST_REQUIRE_EQUAL(out[3], 0u);
-    BOOST_REQUIRE_EQUAL(out[4], 0u);
-    BOOST_REQUIRE_EQUAL(out[5], 0x79u);
-    BOOST_REQUIRE_EQUAL(out[6], 0x01u);
-    BOOST_REQUIRE_EQUAL(out[7], 0xafu);
-    BOOST_REQUIRE_EQUAL(out[8], 0x93u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 0u);
+    BC_REQUIRE_EQUAL(out[2], 0u);
+    BC_REQUIRE_EQUAL(out[3], 0u);
+    BC_REQUIRE_EQUAL(out[4], 0u);
+    BC_REQUIRE_EQUAL(out[5], 0x79u);
+    BC_REQUIRE_EQUAL(out[6], 0x01u);
+    BC_REQUIRE_EQUAL(out[7], 0xafu);
+    BC_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__maximum_checksum__expected)
+BC_AUTO_TEST_CASE(checksum__insert_checksum_data_loaf__maximum_checksum__expected)
 {
     constexpr size_t checksum_maximum = 32;
     data_array<5 + checksum_maximum> data{ { 0, 0, 0, 0, 0 } };
     const auto out = insert_checksum<5 + checksum_maximum, checksum_maximum>({ { data } });
-    BOOST_REQUIRE_EQUAL(out[0], 0u);
-    BOOST_REQUIRE_EQUAL(out[1], 0u);
-    BOOST_REQUIRE_EQUAL(out[2], 0u);
-    BOOST_REQUIRE_EQUAL(out[3], 0u);
-    BOOST_REQUIRE_EQUAL(out[4], 0u);
-    BOOST_REQUIRE_EQUAL(out[5], 0x79u);
-    BOOST_REQUIRE_EQUAL(out[36], 0xf3);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 0u);
+    BC_REQUIRE_EQUAL(out[2], 0u);
+    BC_REQUIRE_EQUAL(out[3], 0u);
+    BC_REQUIRE_EQUAL(out[4], 0u);
+    BC_REQUIRE_EQUAL(out[5], 0x79u);
+    BC_REQUIRE_EQUAL(out[36], 0xf3);
 }
 
 // append_checksum
 
-BOOST_AUTO_TEST_CASE(checksum__append_checksum__empty__expected_size)
+BC_AUTO_TEST_CASE(checksum__append_checksum__empty__expected_size)
 {
     data_chunk data{};
     append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data.size(), sizeof(uint32_t));
+    BC_REQUIRE_EQUAL(data.size(), sizeof(uint32_t));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__append_checksum__not_empty__expected_size)
+BC_AUTO_TEST_CASE(checksum__append_checksum__not_empty__expected_size)
 {
     data_chunk data{ 0, 0, 0, 0, 0 };
     const auto size = data.size();
     append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data.size(), size + sizeof(uint32_t));
+    BC_REQUIRE_EQUAL(data.size(), size + sizeof(uint32_t));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__append_checksum__empty__expected)
+BC_AUTO_TEST_CASE(checksum__append_checksum__empty__expected)
 {
     data_chunk out;
     append_checksum(out);
-    BOOST_REQUIRE_EQUAL(out[0], 0x5du);
-    BOOST_REQUIRE_EQUAL(out[1], 0xf6u);
-    BOOST_REQUIRE_EQUAL(out[2], 0xe0u);
-    BOOST_REQUIRE_EQUAL(out[3], 0xe2u);
+    BC_REQUIRE_EQUAL(out[0], 0x5du);
+    BC_REQUIRE_EQUAL(out[1], 0xf6u);
+    BC_REQUIRE_EQUAL(out[2], 0xe0u);
+    BC_REQUIRE_EQUAL(out[3], 0xe2u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__append_checksum__zeros__expected)
+BC_AUTO_TEST_CASE(checksum__append_checksum__zeros__expected)
 {
     data_chunk out{ 0, 0, 0, 0, 0 };
     append_checksum(out);
-    BOOST_REQUIRE_EQUAL(out[0], 0u);
-    BOOST_REQUIRE_EQUAL(out[1], 0u);
-    BOOST_REQUIRE_EQUAL(out[2], 0u);
-    BOOST_REQUIRE_EQUAL(out[3], 0u);
-    BOOST_REQUIRE_EQUAL(out[4], 0u);
-    BOOST_REQUIRE_EQUAL(out[5], 0x79u);
-    BOOST_REQUIRE_EQUAL(out[6], 0x01u);
-    BOOST_REQUIRE_EQUAL(out[7], 0xafu);
-    BOOST_REQUIRE_EQUAL(out[8], 0x93u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 0u);
+    BC_REQUIRE_EQUAL(out[2], 0u);
+    BC_REQUIRE_EQUAL(out[3], 0u);
+    BC_REQUIRE_EQUAL(out[4], 0u);
+    BC_REQUIRE_EQUAL(out[5], 0x79u);
+    BC_REQUIRE_EQUAL(out[6], 0x01u);
+    BC_REQUIRE_EQUAL(out[7], 0xafu);
+    BC_REQUIRE_EQUAL(out[8], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__append_checksum_data_loaf__zeros__expected)
+BC_AUTO_TEST_CASE(checksum__append_checksum_data_loaf__zeros__expected)
 {
     data_chunk data1{ 0, 0 };
     data_chunk data2{ 0, 0, 0 };
     const auto value = append_checksum({ data1 , data2 });
-    BOOST_REQUIRE_EQUAL(value[0], 0u);
-    BOOST_REQUIRE_EQUAL(value[1], 0u);
-    BOOST_REQUIRE_EQUAL(value[2], 0u);
-    BOOST_REQUIRE_EQUAL(value[3], 0u);
-    BOOST_REQUIRE_EQUAL(value[4], 0u);
-    BOOST_REQUIRE_EQUAL(value[5], 0x79u);
-    BOOST_REQUIRE_EQUAL(value[6], 0x01u);
-    BOOST_REQUIRE_EQUAL(value[7], 0xafu);
-    BOOST_REQUIRE_EQUAL(value[8], 0x93u);
+    BC_REQUIRE_EQUAL(value[0], 0u);
+    BC_REQUIRE_EQUAL(value[1], 0u);
+    BC_REQUIRE_EQUAL(value[2], 0u);
+    BC_REQUIRE_EQUAL(value[3], 0u);
+    BC_REQUIRE_EQUAL(value[4], 0u);
+    BC_REQUIRE_EQUAL(value[5], 0x79u);
+    BC_REQUIRE_EQUAL(value[6], 0x01u);
+    BC_REQUIRE_EQUAL(value[7], 0xafu);
+    BC_REQUIRE_EQUAL(value[8], 0x93u);
 }
 
 // verify_checksum<>
 
-BOOST_AUTO_TEST_CASE(checksum__verify_checksum_array__round_trip__true)
+BC_AUTO_TEST_CASE(checksum__verify_checksum_array__round_trip__true)
 {
     data_array<3 + checksum_default_size> data{ 0, 0, 0 };
     insert_checksum(data);
-    BOOST_REQUIRE(verify_checksum(data));
+    BC_REQUIRE(verify_checksum(data));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__verify_checksum_array__invalidated__false)
+BC_AUTO_TEST_CASE(checksum__verify_checksum_array__invalidated__false)
 {
     data_array<5 + checksum_default_size> data{ 0, 0, 0, 0, 0 };
     insert_checksum(data);
     data[0] = 42;
-    BOOST_REQUIRE(!verify_checksum(data));
+    BC_REQUIRE(!verify_checksum(data));
 }
 
 // verify_checksum
 
-BOOST_AUTO_TEST_CASE(checksum__verify_checksum_slice__underflow__false)
+BC_AUTO_TEST_CASE(checksum__verify_checksum_slice__underflow__false)
 {
     static const data_chunk data{ 0, 0, 0 };
-    BOOST_REQUIRE(!verify_checksum(data));
+    BC_REQUIRE(!verify_checksum(data));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__verify_checksum_slice__not_set__false)
+BC_AUTO_TEST_CASE(checksum__verify_checksum_slice__not_set__false)
 {
     static const data_chunk data{ 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE(!verify_checksum(data));
+    BC_REQUIRE(!verify_checksum(data));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__verify_checksum_slice__round_trip__true)
+BC_AUTO_TEST_CASE(checksum__verify_checksum_slice__round_trip__true)
 {
     data_chunk data{ 0, 0, 0, 0, 0 };
     append_checksum(data);
-    BOOST_REQUIRE(verify_checksum(data));
+    BC_REQUIRE(verify_checksum(data));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__verify_checksum_slice__invalidated__false)
+BC_AUTO_TEST_CASE(checksum__verify_checksum_slice__invalidated__false)
 {
     data_chunk data{ 0, 0, 0, 0, 0 };
     append_checksum(data);
     data[0] = 42;
-    BOOST_REQUIRE(!verify_checksum(data));
+    BC_REQUIRE(!verify_checksum(data));
 }
 
 // bech32_build_checked
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_one_empty__expected_size)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__version_one_empty__expected_size)
 {
     const auto checked = bech32_build_checked(1, {}, "");
-    BOOST_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), "p2gdwpf");
+    BC_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), "p2gdwpf");
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_overflow__empty)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__version_overflow__empty)
 {
-    BOOST_REQUIRE(bech32_build_checked(32, {}, "").empty());
+    BC_REQUIRE(bech32_build_checked(32, {}, "").empty());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__prefix_empty_payload__size_same_as_empty_prefix)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__prefix_empty_payload__size_same_as_empty_prefix)
 {
     const auto checked = bech32_build_checked(0, {}, "abcdef");
-    BOOST_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), "qgfl9ah");
+    BC_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), "qgfl9ah");
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__five_program_bytes__expected_size)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__five_program_bytes__expected_size)
 {
     const data_chunk program{ 1, 2, 3, 4, 5 };
     const auto checked = bech32_build_checked(0, program, "");
-    BOOST_REQUIRE_EQUAL(checked.size(), 1u + (program.size() * 8u) / 5u + 6u);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), "qqypqxpq939vyak");
+    BC_REQUIRE_EQUAL(checked.size(), 1u + (program.size() * 8u) / 5u + 6u);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), "qqypqxpq939vyak");
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__version_zero_bech32m__expected)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__version_zero_bech32m__expected)
 {
     constexpr auto checksum = checksum_constant::bech32m;
     const auto checked = bech32_build_checked(0, {}, "abcdef", checksum);
-    BOOST_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), "qa40fc4");
+    BC_REQUIRE_EQUAL(checked.size(), 1u + 0u + 6u);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), "qa40fc4");
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__version_zero_bech32m__true)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__version_zero_bech32m__true)
 {
     constexpr auto checksum = checksum_constant::bech32m;
     base32b_chunk checked{};
-    BOOST_REQUIRE(decode_base32b(checked, "qa40fc4"));
+    BC_REQUIRE(decode_base32b(checked, "qa40fc4"));
 
     uint8_t version{};
     data_chunk program{};
     const auto hrp = "abcdef";
     const auto valid = bech32_verify_checked(version, program, hrp, checked, checksum);
-    BOOST_REQUIRE(valid);
-    BOOST_REQUIRE_EQUAL(version, 0u);
-    BOOST_REQUIRE(program.empty());
-    BOOST_REQUIRE(!bech32_verify_checked(version, program, hrp, checked));
+    BC_REQUIRE(valid);
+    BC_REQUIRE_EQUAL(version, 0u);
+    BC_REQUIRE(program.empty());
+    BC_REQUIRE(!bech32_verify_checked(version, program, hrp, checked));
 }
 
 // bech32_build_checked - BIP173
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wkh__expected)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wkh__expected)
 {
     const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program(), bip173_mainnet_prefix);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), bip173_mainnet_p2wkh);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), bip173_mainnet_p2wkh);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wkh__expected)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wkh__expected)
 {
     const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program(), bip173_testnet_prefix);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), bip173_testnet_p2wkh);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), bip173_testnet_p2wkh);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wsh__expected)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wsh__expected)
 {
     const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program(), bip173_mainnet_prefix);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), bip173_mainnet_p2wsh);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), bip173_mainnet_p2wsh);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wsh__expected)
+BC_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wsh__expected)
 {
     const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program(), bip173_testnet_prefix);
-    BOOST_REQUIRE_EQUAL(encode_base32b(checked), bip173_testnet_p2wsh);
+    BC_REQUIRE_EQUAL(encode_base32b(checked), bip173_testnet_p2wsh);
 }
 
 // bech32_verify_checked
@@ -302,85 +302,85 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wsh__expected)
 uint8_t out_version;
 data_chunk out_program;
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__version_one_empty__round_trips)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__version_one_empty__round_trips)
 {
     const auto checked = bech32_build_checked(1, {}, "");
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, "", checked));
-    BOOST_REQUIRE_EQUAL(out_version, 1u);
-    BOOST_REQUIRE(out_program.empty());
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, "", checked));
+    BC_REQUIRE_EQUAL(out_version, 1u);
+    BC_REQUIRE(out_program.empty());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__prefix_empty_payload__round_trips)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__prefix_empty_payload__round_trips)
 {
     const auto checked = bech32_build_checked(0, {}, "abcdef");
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, "abcdef", checked));
-    BOOST_REQUIRE_EQUAL(out_version, 0u);
-    BOOST_REQUIRE(out_program.empty());
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, "abcdef", checked));
+    BC_REQUIRE_EQUAL(out_version, 0u);
+    BC_REQUIRE(out_program.empty());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__five_program_bytes__round_trips)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__five_program_bytes__round_trips)
 {
     const data_chunk program{ 1, 2, 3, 4, 5 };
     const auto checked = bech32_build_checked(0, program, "");
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, "", checked));
-    BOOST_REQUIRE_EQUAL(out_version, 0u);
-    BOOST_REQUIRE_EQUAL(out_program, program);
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, "", checked));
+    BC_REQUIRE_EQUAL(out_version, 0u);
+    BC_REQUIRE_EQUAL(out_program, program);
 }
 
 // bech32_verify_checked - BIP173
 
 base32b_chunk checked;
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wkh__true_expected_version_and_program)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wkh__true_expected_version_and_program)
 {
-    BOOST_REQUIRE(decode_base32b(checked, bip173_mainnet_p2wkh));
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
-    BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wkh_program());
+    BC_REQUIRE(decode_base32b(checked, bip173_mainnet_p2wkh));
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
+    BC_REQUIRE_EQUAL(out_version, bip173_program_version);
+    BC_REQUIRE_EQUAL(out_program, bip173_p2wkh_program());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wkh__true_expected_version_and_program)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wkh__true_expected_version_and_program)
 {
-    BOOST_REQUIRE(decode_base32b(checked, bip173_testnet_p2wkh));
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
-    BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wkh_program());
+    BC_REQUIRE(decode_base32b(checked, bip173_testnet_p2wkh));
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
+    BC_REQUIRE_EQUAL(out_version, bip173_program_version);
+    BC_REQUIRE_EQUAL(out_program, bip173_p2wkh_program());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wsh__true_expected_version_and_program)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wsh__true_expected_version_and_program)
 {
-    BOOST_REQUIRE(decode_base32b(checked, bip173_mainnet_p2wsh));
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
-    BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wsh_program());
+    BC_REQUIRE(decode_base32b(checked, bip173_mainnet_p2wsh));
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
+    BC_REQUIRE_EQUAL(out_version, bip173_program_version);
+    BC_REQUIRE_EQUAL(out_program, bip173_p2wsh_program());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wsh__true_expected_version_and_program)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wsh__true_expected_version_and_program)
 {
-    BOOST_REQUIRE(decode_base32b(checked, bip173_testnet_p2wsh));
-    BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
-    BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wsh_program());
+    BC_REQUIRE(decode_base32b(checked, bip173_testnet_p2wsh));
+    BC_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
+    BC_REQUIRE_EQUAL(out_version, bip173_program_version);
+    BC_REQUIRE_EQUAL(out_program, bip173_p2wsh_program());
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__empty__false)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__empty__false)
 {
-    BOOST_REQUIRE(!bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, {}));
+    BC_REQUIRE(!bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, {}));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mismatched_prefix__false)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__mismatched_prefix__false)
 {
-    BOOST_REQUIRE(decode_base32b(checked, bip173_testnet_p2wsh));
-    BOOST_REQUIRE(!bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
+    BC_REQUIRE(decode_base32b(checked, bip173_testnet_p2wsh));
+    BC_REQUIRE(!bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
 }
 
-BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__invalid_checksum__false)
+BC_AUTO_TEST_CASE(checksum__bech32_verify_checked__invalid_checksum__false)
 {
-    BOOST_REQUIRE(decode_base32b(checked, bip173_testnet_p2wsh));
+    BC_REQUIRE(decode_base32b(checked, bip173_testnet_p2wsh));
 
     // Invalidate checksum.
     checked[checked.size() - 1] = 31;
-    BOOST_REQUIRE(!bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
+    BC_REQUIRE(!bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

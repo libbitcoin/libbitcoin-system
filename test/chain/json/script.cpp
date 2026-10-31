@@ -20,9 +20,9 @@
 
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(script_json_tests)
+BC_AUTO_TEST_SUITE(script_json_tests)
 
-BOOST_AUTO_TEST_CASE(script__json__conversions__expected)
+BC_AUTO_TEST_CASE(script__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -41,11 +41,11 @@ BOOST_AUTO_TEST_CASE(script__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<script>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<script>(value) == instance);
 }
 
 // bitcoind
@@ -60,7 +60,7 @@ static const std::string public_key =
 static const std::string p2pkh_sign = "47" + signature + "01" + "21" + public_key;
 static const std::string return_sign = "6a47" + signature + "01";
 
-BOOST_AUTO_TEST_CASE(script__json__bitcoind__expected)
+BC_AUTO_TEST_CASE(script__json__bitcoind__expected)
 {
     const std::string_view text
     {
@@ -78,62 +78,62 @@ BOOST_AUTO_TEST_CASE(script__json__bitcoind__expected)
     };
 
     const auto value = json::value_from(bitcoind(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_CASE(script__json__bitcoind_flags__fork_resolved)
+BC_AUTO_TEST_CASE(script__json__bitcoind_flags__fork_resolved)
 {
     const script instance{ operations{ { opcode::checklocktimeverify } } };
     const auto inactive = json::value_from(bitcoind(instance, flags::no_rules));
     const auto active = json::value_from(bitcoind(instance, flags::bip65_rule));
-    BOOST_REQUIRE_EQUAL(inactive.at("asm").as_string(), "OP_NOP2");
-    BOOST_REQUIRE_EQUAL(active.at("asm").as_string(), "OP_CHECKLOCKTIMEVERIFY");
+    BC_REQUIRE_EQUAL(inactive.at("asm").as_string(), "OP_NOP2");
+    BC_REQUIRE_EQUAL(active.at("asm").as_string(), "OP_CHECKLOCKTIMEVERIFY");
 }
 
-BOOST_AUTO_TEST_CASE(script__json__bitcoind_signature__sighash_decoded)
+BC_AUTO_TEST_CASE(script__json__bitcoind_signature__sighash_decoded)
 {
     data_chunk data{};
-    BOOST_REQUIRE(decode_base16(data, p2pkh_sign));
+    BC_REQUIRE(decode_base16(data, p2pkh_sign));
 
     const script instance(data, false);
     const auto value = json::value_from(bitcoind_signature(instance));
     const auto& object = value.as_object();
     const auto expected = signature + "[ALL] " + public_key;
-    BOOST_REQUIRE_EQUAL(object.at("asm").as_string(), expected);
-    BOOST_REQUIRE_EQUAL(object.at("hex").as_string(), p2pkh_sign);
-    BOOST_REQUIRE(!object.contains("type"));
+    BC_REQUIRE_EQUAL(object.at("asm").as_string(), expected);
+    BC_REQUIRE_EQUAL(object.at("hex").as_string(), p2pkh_sign);
+    BC_REQUIRE(!object.contains("type"));
 }
 
-BOOST_AUTO_TEST_CASE(script__json__bitcoind_signature_op_return__not_decoded)
+BC_AUTO_TEST_CASE(script__json__bitcoind_signature_op_return__not_decoded)
 {
     data_chunk data{};
-    BOOST_REQUIRE(decode_base16(data, return_sign));
+    BC_REQUIRE(decode_base16(data, return_sign));
 
     const script instance(data, false);
     const auto value = json::value_from(bitcoind_signature(instance));
     const auto expected = "OP_RETURN " + signature + "01";
-    BOOST_REQUIRE_EQUAL(value.at("asm").as_string(), expected);
+    BC_REQUIRE_EQUAL(value.at("asm").as_string(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(script__json__bitcoind_output__not_decoded)
+BC_AUTO_TEST_CASE(script__json__bitcoind_output__not_decoded)
 {
     data_chunk data{};
-    BOOST_REQUIRE(decode_base16(data, p2pkh_sign));
+    BC_REQUIRE(decode_base16(data, p2pkh_sign));
 
     const script instance(data, false);
     const auto value = json::value_from(bitcoind(instance));
     const auto expected = signature + "01 " + public_key;
-    BOOST_REQUIRE_EQUAL(value.at("asm").as_string(), expected);
-    BOOST_REQUIRE_EQUAL(value.at("type").as_string(), "nonstandard");
+    BC_REQUIRE_EQUAL(value.at("asm").as_string(), expected);
+    BC_REQUIRE_EQUAL(value.at("type").as_string(), "nonstandard");
 }
 
-BOOST_AUTO_TEST_CASE(script__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(script__json__pointer_conversions__expected)
 {
     const script expected{ operations{ { opcode::pick } } };
     const script::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<script::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<script::cptr>(value) == *instance);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_integers_tests)
+BC_AUTO_TEST_SUITE(endian_integers_tests)
 
 // These are fully covered as dependencies for other endian functions.
 // Data to_big_data(Data&&, Integer)
@@ -30,4 +30,4 @@ BOOST_AUTO_TEST_SUITE(endian_integers_tests)
 // Integer from_little_array<Integer>(length, data_array)
 // Integer from_little_chunk<Integer>(length, data_chunk)
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

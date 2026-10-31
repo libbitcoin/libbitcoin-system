@@ -18,9 +18,9 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(no_fill_allocator_tests)
+BC_AUTO_TEST_SUITE(no_fill_allocator_tests)
 
-BOOST_AUTO_TEST_CASE(no_fill_allocator__construct__default__unassigned)
+BC_AUTO_TEST_CASE(no_fill_allocator__construct__default__unassigned)
 {
     constexpr auto count = 3_u8;
     constexpr auto fill = 42_u8;
@@ -31,18 +31,18 @@ BOOST_AUTO_TEST_CASE(no_fill_allocator__construct__default__unassigned)
     // These tests depedent upon assumptions of default memory fill, so disabled.
 
     ////std_vector<uint8_t, no_fill_allocator<uint8_t>> bytes(size);
-    ////BOOST_CHECK_NE(bytes.front(), 0x00_u8);
+    ////BC_CHECK_NE(bytes.front(), 0x00_u8);
 
     ////std_vector<hash_digest, no_fill_allocator<hash_digest>> hashes(count);
-    ////BOOST_CHECK_NE(hashes.front(), hash_digest{});
+    ////BC_CHECK_NE(hashes.front(), hash_digest{});
 
     // no_fill_allocator forwards explicit fill to type copy constructor.
 
     std::vector<uint8_t, no_fill_allocator<uint8_t>> filled_bytes1(size, fill);
-    BOOST_CHECK_EQUAL(filled_bytes1.front(), fill);
+    BC_CHECK_EQUAL(filled_bytes1.front(), fill);
 
     std::vector<hash_digest, no_fill_allocator<hash_digest>> filled_hashes1(count, hash_fill);
-    BOOST_CHECK_EQUAL(filled_hashes1.front(), hash_fill);
+    BC_CHECK_EQUAL(filled_hashes1.front(), hash_fill);
 }
 
 // Some extra stuff
@@ -114,4 +114,4 @@ private:
 };
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

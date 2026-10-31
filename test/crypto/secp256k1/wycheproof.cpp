@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_wycheproof_tests)
+BC_AUTO_TEST_SUITE(secp256k1_wycheproof_tests)
 
 // C2SP/wycheproof testvectors_v1/ecdsa_secp256k1_sha256_bitcoin_test.json
 // Valid requires strict DER and low-s.
@@ -612,12 +612,12 @@ static bool verify(const wycheproof_vector& vector) NOEXCEPT
             sha256_hash(vector.message), signature);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_wycheproof__verify_signature__vectors__expected)
+BC_AUTO_TEST_CASE(secp256k1_wycheproof__verify_signature__vectors__expected)
 {
     for (const auto& vector: wycheproof_vectors)
     {
-        BOOST_REQUIRE_MESSAGE(verify(vector) == vector.valid, vector.id);
+        BC_REQUIRE_MESSAGE(verify(vector) == vector.valid, vector.id);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

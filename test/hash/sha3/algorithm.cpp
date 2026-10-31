@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(sha3_algorithm_tests)
+BC_AUTO_TEST_SUITE(sha3_algorithm_tests)
 
 using sha3_224 = sha3::algorithm<sha3::h224<>>;
 using sha3_384 = sha3::algorithm<sha3::h384<>>;
@@ -54,4 +54,4 @@ static_assert(sha3_224::H::capacity == 2 * 224);
 static_assert(sha3_256::K::rotation == keccak_256::K::rotation);
 static_assert(sha3_256::K::get == sha3_512::K::get);
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

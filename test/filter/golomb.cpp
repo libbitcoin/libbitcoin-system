@@ -19,7 +19,7 @@
 
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(golomb_tests)
+BC_AUTO_TEST_SUITE(golomb_tests)
 
 // BIP158 golomb-rice parameters.
 constexpr uint8_t golomb_bits = 19;
@@ -47,49 +47,49 @@ static data_chunk golomb_set() NOEXCEPT
 // construct
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(golomb__construct__populated__not_empty)
+BC_AUTO_TEST_CASE(golomb__construct__populated__not_empty)
 {
-    BOOST_REQUIRE(!golomb_set().empty());
+    BC_REQUIRE(!golomb_set().empty());
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct__half_hash_entropy__same_as_siphash_key)
+BC_AUTO_TEST_CASE(golomb__construct__half_hash_entropy__same_as_siphash_key)
 {
     const auto items = golomb_items();
     const auto expected = golomb_set();
     const auto set = golomb::construct(items, golomb_bits, golomb_entropy, golomb_rate);
-    BOOST_REQUIRE_EQUAL(set, expected);
+    BC_REQUIRE_EQUAL(set, expected);
 }
 
-BOOST_AUTO_TEST_CASE(golomb__hash_distinct__duplicate_item__sorted_distinct)
+BC_AUTO_TEST_CASE(golomb__hash_distinct__duplicate_item__sorted_distinct)
 {
     auto items = golomb_items();
     items.push_back(items.front());
     const auto hashes = golomb::hash_distinct(items, golomb_key);
-    BOOST_REQUIRE_EQUAL(hashes.size(), golomb_items().size());
-    BOOST_REQUIRE(std::is_sorted(hashes.cbegin(), hashes.cend()));
+    BC_REQUIRE_EQUAL(hashes.size(), golomb_items().size());
+    BC_REQUIRE(std::is_sorted(hashes.cbegin(), hashes.cend()));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__hash_distinct__slices__same_as_stack)
+BC_AUTO_TEST_CASE(golomb__hash_distinct__slices__same_as_stack)
 {
     auto items = golomb_items();
     items.push_back(items.front());
     const std::vector<data_slice> slices(items.cbegin(), items.cend());
-    BOOST_REQUIRE(golomb::hash_distinct(slices, golomb_key) == golomb::hash_distinct(items, golomb_key));
+    BC_REQUIRE(golomb::hash_distinct(slices, golomb_key) == golomb::hash_distinct(items, golomb_key));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct_bound__items__not_below_construct_size)
+BC_AUTO_TEST_CASE(golomb__construct_bound__items__not_below_construct_size)
 {
     const auto hashes = golomb::hash_distinct(golomb_items(), golomb_key);
     const auto bound = golomb::construct_bound(hashes.size(), golomb_bits, golomb_rate);
-    BOOST_REQUIRE_GE(bound, golomb_set().size());
+    BC_REQUIRE_GE(bound, golomb_set().size());
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct_bound__zero__zero)
+BC_AUTO_TEST_CASE(golomb__construct_bound__zero__zero)
 {
-    BOOST_REQUIRE_EQUAL(golomb::construct_bound(0, golomb_bits, golomb_rate), 0u);
+    BC_REQUIRE_EQUAL(golomb::construct_bound(0, golomb_bits, golomb_rate), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct_bound__maximum_values__not_below_construct_size)
+BC_AUTO_TEST_CASE(golomb__construct_bound__maximum_values__not_below_construct_size)
 {
     data_chunk set{};
     stream::out::data stream(set);
@@ -97,37 +97,37 @@ BOOST_AUTO_TEST_CASE(golomb__construct_bound__maximum_values__not_below_construc
     const std::vector<uint64_t> hashes{ sub1(sub1(max_uint64)), sub1(max_uint64), max_uint64 };
     golomb::construct(writer, hashes, golomb_bits, golomb_rate);
     writer.flush();
-    BOOST_REQUIRE_GE(golomb::construct_bound(hashes.size(), golomb_bits, golomb_rate), set.size());
+    BC_REQUIRE_GE(golomb::construct_bound(hashes.size(), golomb_bits, golomb_rate), set.size());
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct__distinct_hashes__same_as_items)
+BC_AUTO_TEST_CASE(golomb__construct__distinct_hashes__same_as_items)
 {
     data_chunk set{};
     stream::out::data stream(set);
     write::bits::ostream writer(stream);
     golomb::construct(writer, golomb::hash_distinct(golomb_items(), golomb_key), golomb_bits, golomb_rate);
     writer.flush();
-    BOOST_REQUIRE_EQUAL(set, golomb_set());
+    BC_REQUIRE_EQUAL(set, golomb_set());
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct__no_items__empty)
+BC_AUTO_TEST_CASE(golomb__construct__no_items__empty)
 {
     const data_stack items{};
     const auto set = golomb::construct(items, golomb_bits, golomb_key, golomb_rate);
-    BOOST_REQUIRE(set.empty());
+    BC_REQUIRE(set.empty());
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct__rate_overflow__empty)
+BC_AUTO_TEST_CASE(golomb__construct__rate_overflow__empty)
 {
     const auto items = golomb_items();
     const auto set = golomb::construct(items, golomb_bits, golomb_key, max_uint64);
-    BOOST_REQUIRE(set.empty());
+    BC_REQUIRE(set.empty());
 }
 
 // match_single
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(golomb__match_single__each_member__true)
+BC_AUTO_TEST_CASE(golomb__match_single__each_member__true)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
@@ -135,11 +135,11 @@ BOOST_AUTO_TEST_CASE(golomb__match_single__each_member__true)
 
     for (const auto& item: items)
     {
-        BOOST_REQUIRE(golomb::match_single(set, item, size, golomb_key, golomb_bits, golomb_rate));
+        BC_REQUIRE(golomb::match_single(set, item, size, golomb_key, golomb_bits, golomb_rate));
     }
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_single__non_members__false)
+BC_AUTO_TEST_CASE(golomb__match_single__non_members__false)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
@@ -155,58 +155,58 @@ BOOST_AUTO_TEST_CASE(golomb__match_single__non_members__false)
 
     for (const auto& item: absent)
     {
-        BOOST_REQUIRE(!golomb::match_single(set, item, size, golomb_key, golomb_bits, golomb_rate));
+        BC_REQUIRE(!golomb::match_single(set, item, size, golomb_key, golomb_bits, golomb_rate));
     }
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_single__half_hash_entropy__member_true)
+BC_AUTO_TEST_CASE(golomb__match_single__half_hash_entropy__member_true)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto& item = items.front();
     const auto size = items.size();
-    BOOST_REQUIRE(golomb::match_single(set, item, size, golomb_entropy, golomb_bits, golomb_rate));
+    BC_REQUIRE(golomb::match_single(set, item, size, golomb_entropy, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_single__half_hash_entropy__non_member_false)
+BC_AUTO_TEST_CASE(golomb__match_single__half_hash_entropy__non_member_false)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto absent = base16_chunk("2122232425");
     const auto size = items.size();
-    BOOST_REQUIRE(!golomb::match_single(set, absent, size, golomb_entropy, golomb_bits, golomb_rate));
+    BC_REQUIRE(!golomb::match_single(set, absent, size, golomb_entropy, golomb_bits, golomb_rate));
 }
 
 // match_stack
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__member__true)
+BC_AUTO_TEST_CASE(golomb__match_stack__member__true)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto size = items.size();
     const data_stack targets{ items.front() };
-    BOOST_REQUIRE(golomb::match_stack(set, targets, size, golomb_key, golomb_bits, golomb_rate));
+    BC_REQUIRE(golomb::match_stack(set, targets, size, golomb_key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__all_members__true)
+BC_AUTO_TEST_CASE(golomb__match_stack__all_members__true)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto size = items.size();
-    BOOST_REQUIRE(golomb::match_stack(set, items, size, golomb_key, golomb_bits, golomb_rate));
+    BC_REQUIRE(golomb::match_stack(set, items, size, golomb_key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__empty_targets__false)
+BC_AUTO_TEST_CASE(golomb__match_stack__empty_targets__false)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto size = items.size();
     const data_stack targets{};
-    BOOST_REQUIRE(!golomb::match_stack(set, targets, size, golomb_key, golomb_bits, golomb_rate));
+    BC_REQUIRE(!golomb::match_stack(set, targets, size, golomb_key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__non_members__false)
+BC_AUTO_TEST_CASE(golomb__match_stack__non_members__false)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
@@ -217,25 +217,25 @@ BOOST_AUTO_TEST_CASE(golomb__match_stack__non_members__false)
         base16_chunk("2627282930")
     };
 
-    BOOST_REQUIRE(!golomb::match_stack(set, targets, size, golomb_key, golomb_bits, golomb_rate));
+    BC_REQUIRE(!golomb::match_stack(set, targets, size, golomb_key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__half_hash_entropy__member_true)
+BC_AUTO_TEST_CASE(golomb__match_stack__half_hash_entropy__member_true)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto size = items.size();
     const data_stack targets{ items.back() };
-    BOOST_REQUIRE(golomb::match_stack(set, targets, size, golomb_entropy, golomb_bits, golomb_rate));
+    BC_REQUIRE(golomb::match_stack(set, targets, size, golomb_entropy, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__half_hash_entropy__empty_targets_false)
+BC_AUTO_TEST_CASE(golomb__match_stack__half_hash_entropy__empty_targets_false)
 {
     const auto items = golomb_items();
     const auto set = golomb_set();
     const auto size = items.size();
     const data_stack targets{};
-    BOOST_REQUIRE(!golomb::match_stack(set, targets, size, golomb_entropy, golomb_bits, golomb_rate));
+    BC_REQUIRE(!golomb::match_stack(set, targets, size, golomb_entropy, golomb_bits, golomb_rate));
 }
 
 // bip158
@@ -265,35 +265,35 @@ static data_chunk bip158_filter() NOEXCEPT
     return base16_chunk("9dfca8");
 }
 
-BOOST_AUTO_TEST_CASE(golomb__construct__bip158_testnet_genesis__expected_encoding)
+BC_AUTO_TEST_CASE(golomb__construct__bip158_testnet_genesis__expected_encoding)
 {
     const auto key = bip158_key();
     const data_stack elements{ bip158_element() };
     const auto set = golomb::construct(elements, golomb_bits, key, golomb_rate);
-    BOOST_REQUIRE_EQUAL(set, bip158_filter());
+    BC_REQUIRE_EQUAL(set, bip158_filter());
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_single__bip158_testnet_genesis__true)
+BC_AUTO_TEST_CASE(golomb__match_single__bip158_testnet_genesis__true)
 {
     const auto key = bip158_key();
     const auto published = bip158_filter();
     const auto element = bip158_element();
-    BOOST_REQUIRE(golomb::match_single(published, element, 1, key, golomb_bits, golomb_rate));
+    BC_REQUIRE(golomb::match_single(published, element, 1, key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_stack__bip158_testnet_genesis__true)
+BC_AUTO_TEST_CASE(golomb__match_stack__bip158_testnet_genesis__true)
 {
     const auto key = bip158_key();
     const auto published = bip158_filter();
     const data_stack targets{ bip158_element() };
-    BOOST_REQUIRE(golomb::match_stack(published, targets, 1, key, golomb_bits, golomb_rate));
+    BC_REQUIRE(golomb::match_stack(published, targets, 1, key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_CASE(golomb__match_single__bip158_wrong_key__false)
+BC_AUTO_TEST_CASE(golomb__match_single__bip158_wrong_key__false)
 {
     const auto published = bip158_filter();
     const auto element = bip158_element();
-    BOOST_REQUIRE(!golomb::match_single(published, element, 1, golomb_key, golomb_bits, golomb_rate));
+    BC_REQUIRE(!golomb::match_single(published, element, 1, golomb_key, golomb_bits, golomb_rate));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

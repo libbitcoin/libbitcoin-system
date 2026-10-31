@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(rotate_tests)
+BC_AUTO_TEST_SUITE(rotate_tests)
 
 // TODO: 16/32/64 bit tests.
 
@@ -59,11 +59,11 @@ static_assert(rotr<0>(0x1d_u8) == 0x1d_u8);
 static_assert(rotr<1>(0x1d_u8) == 0x8e_u8);
 static_assert(rotr<9>(0x1d_u8) == 0x8e_u8);
 
-BOOST_AUTO_TEST_CASE(rotate__rotr__always__expected)
+BC_AUTO_TEST_CASE(rotate__rotr__always__expected)
 {
-    BOOST_REQUIRE_EQUAL(rotr<0>(0x1d_u8), 0x1d_u8);
-    BOOST_REQUIRE_EQUAL(rotr<1>(0x1d_u8), 0x8e_u8);
-    BOOST_REQUIRE_EQUAL(rotr<9>(0x1d_u8), 0x8e_u8);
+    BC_REQUIRE_EQUAL(rotr<0>(0x1d_u8), 0x1d_u8);
+    BC_REQUIRE_EQUAL(rotr<1>(0x1d_u8), 0x8e_u8);
+    BC_REQUIRE_EQUAL(rotr<9>(0x1d_u8), 0x8e_u8);
 }
 
 // rotl
@@ -102,11 +102,11 @@ static_assert(rotl<0>(0x1d_u8) == 0x1d_u8);
 static_assert(rotl<1>(0x1d_u8) == 0x3a_u8);
 static_assert(rotl<9>(0x1d_u8) == 0x3a_u8);
 
-BOOST_AUTO_TEST_CASE(rotate__rotl__always__expected)
+BC_AUTO_TEST_CASE(rotate__rotl__always__expected)
 {
-    BOOST_REQUIRE_EQUAL(rotl<0>(0x1d_u8), 0x1d_u8);
-    BOOST_REQUIRE_EQUAL(rotl<1>(0x1d_u8), 0x3a_u8);
-    BOOST_REQUIRE_EQUAL(rotl<9>(0x1d_u8), 0x3a_u8);
+    BC_REQUIRE_EQUAL(rotl<0>(0x1d_u8), 0x1d_u8);
+    BC_REQUIRE_EQUAL(rotl<1>(0x1d_u8), 0x3a_u8);
+    BC_REQUIRE_EQUAL(rotl<9>(0x1d_u8), 0x3a_u8);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

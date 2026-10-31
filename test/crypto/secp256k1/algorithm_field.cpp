@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_algorithm_field_tests)
+BC_AUTO_TEST_SUITE(secp256k1_algorithm_field_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -224,11 +224,11 @@ static_assert(!is_decodable(all_value));
 static_assert(decode(prime_value) == prime_limbs);
 static_assert(decode(all_value) == all_limbs);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__encoding__round_trip__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__encoding__round_trip__expected)
 {
-    BOOST_CHECK_EQUAL(encode(decode(gx)), gx);
-    BOOST_CHECK_EQUAL(encode(decode(prime_minus_one)), prime_minus_one);
-    BOOST_CHECK(!is_decodable(prime_value));
+    BC_CHECK_EQUAL(encode(decode(gx)), gx);
+    BC_CHECK_EQUAL(encode(decode(prime_minus_one)), prime_minus_one);
+    BC_CHECK(!is_decodable(prime_value));
 }
 
 // carry/normalize
@@ -245,15 +245,15 @@ static_assert(encode(power_limbs) == power_reduced);
 static_assert(encode(weak_limbs) == weak_reduced);
 static_assert(encode(loose_limbs) == loose_reduced);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__normalize__edges__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__normalize__edges__expected)
 {
-    BOOST_CHECK(is_weak(field_carry(loose_limbs)));
-    BOOST_CHECK_EQUAL(encode(prime_limbs), zero_value);
-    BOOST_CHECK_EQUAL(encode(prime_plus_one), one_value);
-    BOOST_CHECK_EQUAL(encode(all_limbs), all_reduced);
-    BOOST_CHECK_EQUAL(encode(power_limbs), power_reduced);
-    BOOST_CHECK_EQUAL(encode(weak_limbs), weak_reduced);
-    BOOST_CHECK_EQUAL(encode(loose_limbs), loose_reduced);
+    BC_CHECK(is_weak(field_carry(loose_limbs)));
+    BC_CHECK_EQUAL(encode(prime_limbs), zero_value);
+    BC_CHECK_EQUAL(encode(prime_plus_one), one_value);
+    BC_CHECK_EQUAL(encode(all_limbs), all_reduced);
+    BC_CHECK_EQUAL(encode(power_limbs), power_reduced);
+    BC_CHECK_EQUAL(encode(weak_limbs), weak_reduced);
+    BC_CHECK_EQUAL(encode(loose_limbs), loose_reduced);
 }
 
 // add/negate
@@ -269,12 +269,12 @@ static_assert(encode(field_negate_four(decode(gx))) == gx_negated);
 static_assert(encode(field_add(field_add(field_add(field_add(decode(gx), decode(gx)), decode(gx)), decode(gx)), field_negate_four(field_add(field_add(field_add(decode(gx), decode(gx)), decode(gx)), decode(gx))))) == zero_value);
 static_assert(encode(field_add(field_add(field_add(field_add(weak_limbs, weak_limbs), weak_limbs), weak_limbs), field_negate_four(field_add(field_add(field_add(weak_limbs, weak_limbs), weak_limbs), weak_limbs)))) == zero_value);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__add_negate__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__add_negate__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_add(decode(gx), decode(gy))), gx_plus_gy);
-    BOOST_CHECK_EQUAL(encode(field_negate(decode(gx))), gx_negated);
-    BOOST_CHECK_EQUAL(encode(field_add(weak_limbs, field_negate(weak_limbs))), zero_value);
-    BOOST_CHECK_EQUAL(encode(field_negate_four(decode(gx))), gx_negated);
+    BC_CHECK_EQUAL(encode(field_add(decode(gx), decode(gy))), gx_plus_gy);
+    BC_CHECK_EQUAL(encode(field_negate(decode(gx))), gx_negated);
+    BC_CHECK_EQUAL(encode(field_add(weak_limbs, field_negate(weak_limbs))), zero_value);
+    BC_CHECK_EQUAL(encode(field_negate_four(decode(gx))), gx_negated);
 }
 
 // halve
@@ -289,11 +289,11 @@ static_assert(encode(field_add(field_halve(weak_limbs), field_halve(weak_limbs))
 static_assert(encode(field_add(field_halve(prime_plus_one), field_halve(prime_plus_one))) == one_value);
 static_assert(encode(field_halve(field_add(field_add(decode(gx), decode(gx)), decode(gx)))) == encode(field_add(field_add(decode(gx), decode(gx)), field_negate(field_halve(decode(gx))))));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__halve__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__halve__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_halve(decode(two_value))), one_value);
-    BOOST_CHECK_EQUAL(encode(field_halve(decode(one_value))), two_inverse);
-    BOOST_CHECK_EQUAL(encode(field_add(field_halve(decode(gx)), field_halve(decode(gx)))), gx);
+    BC_CHECK_EQUAL(encode(field_halve(decode(two_value))), one_value);
+    BC_CHECK_EQUAL(encode(field_halve(decode(one_value))), two_inverse);
+    BC_CHECK_EQUAL(encode(field_add(field_halve(decode(gx)), field_halve(decode(gx)))), gx);
 }
 
 // multiply/square
@@ -314,30 +314,30 @@ static_assert(encode(field_square_twice(decode(gx))) == encode(field_square(fiel
 static_assert(is_weak(field_multiply(weak_limbs, weak_limbs)));
 static_assert(is_weak(field_square(weak_limbs)));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__multiply__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__multiply__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_multiply(decode(gx), decode(gy))), gx_times_gy);
-    BOOST_CHECK_EQUAL(encode(field_multiply(decode(sample), decode(half_value))), sample_times_half);
-    BOOST_CHECK_EQUAL(encode(field_multiply(decode(prime_minus_one), decode(prime_minus_one))), one_value);
-    BOOST_CHECK_EQUAL(encode(field_multiply(weak_limbs, weak_limbs)), weak_squared);
-    BOOST_CHECK_EQUAL(encode(field_multiply(weak_limbs, decode(gx))), weak_times_gx);
-    BOOST_CHECK(is_weak(field_multiply(weak_limbs, weak_limbs)));
+    BC_CHECK_EQUAL(encode(field_multiply(decode(gx), decode(gy))), gx_times_gy);
+    BC_CHECK_EQUAL(encode(field_multiply(decode(sample), decode(half_value))), sample_times_half);
+    BC_CHECK_EQUAL(encode(field_multiply(decode(prime_minus_one), decode(prime_minus_one))), one_value);
+    BC_CHECK_EQUAL(encode(field_multiply(weak_limbs, weak_limbs)), weak_squared);
+    BC_CHECK_EQUAL(encode(field_multiply(weak_limbs, decode(gx))), weak_times_gx);
+    BC_CHECK(is_weak(field_multiply(weak_limbs, weak_limbs)));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__square__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__square__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_square(decode(gx))), gx_squared);
-    BOOST_CHECK_EQUAL(encode(field_square(decode(gy))), gy_squared);
-    BOOST_CHECK_EQUAL(encode(field_square(decode(sample))), sample_squared);
-    BOOST_CHECK_EQUAL(encode(field_square(weak_limbs)), weak_squared);
-    BOOST_CHECK(is_weak(field_square(weak_limbs)));
+    BC_CHECK_EQUAL(encode(field_square(decode(gx))), gx_squared);
+    BC_CHECK_EQUAL(encode(field_square(decode(gy))), gy_squared);
+    BC_CHECK_EQUAL(encode(field_square(decode(sample))), sample_squared);
+    BC_CHECK_EQUAL(encode(field_square(weak_limbs)), weak_squared);
+    BC_CHECK(is_weak(field_square(weak_limbs)));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__curve__generator__on_curve)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__curve__generator__on_curve)
 {
     const auto y2 = field_square(decode(gy));
     const auto x3 = field_multiply(field_square(decode(gx)), decode(gx));
-    BOOST_CHECK_EQUAL(encode(y2), encode(field_add(x3, decode(seven_value))));
+    BC_CHECK_EQUAL(encode(y2), encode(field_add(x3, decode(seven_value))));
 }
 
 // inverse
@@ -348,17 +348,17 @@ static_assert(encode(field_inverse(decode(zero_value))) == zero_value);
 static_assert(encode(field_inverse(decode(two_value))) == two_inverse);
 static_assert(encode(field_inverse(decode(prime_minus_one))) == prime_minus_one);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(two_value))), two_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(prime_minus_one))), prime_minus_one);
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(gx))), gx_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(gy))), gy_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(sample))), sample_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(one_value))), one_value);
-    BOOST_CHECK_EQUAL(encode(field_inverse(decode(zero_value))), zero_value);
-    BOOST_CHECK_EQUAL(encode(field_multiply(decode(sample), field_inverse(decode(sample)))), one_value);
-    BOOST_CHECK_EQUAL(encode(field_multiply(weak_limbs, field_inverse(weak_limbs))), one_value);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(two_value))), two_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(prime_minus_one))), prime_minus_one);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(gx))), gx_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(gy))), gy_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(sample))), sample_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(one_value))), one_value);
+    BC_CHECK_EQUAL(encode(field_inverse(decode(zero_value))), zero_value);
+    BC_CHECK_EQUAL(encode(field_multiply(decode(sample), field_inverse(decode(sample)))), one_value);
+    BC_CHECK_EQUAL(encode(field_multiply(weak_limbs, field_inverse(weak_limbs))), one_value);
 }
 
 // inverse_power
@@ -369,17 +369,17 @@ static_assert(encode(field_inverse_power(decode(zero_value))) == zero_value);
 static_assert(encode(field_inverse_power(decode(two_value))) == two_inverse);
 static_assert(encode(field_inverse_power(decode(prime_minus_one))) == prime_minus_one);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse_power__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse_power__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(two_value))), two_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(prime_minus_one))), prime_minus_one);
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(gx))), gx_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(gy))), gy_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(sample))), sample_inverse);
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(one_value))), one_value);
-    BOOST_CHECK_EQUAL(encode(field_inverse_power(decode(zero_value))), zero_value);
-    BOOST_CHECK_EQUAL(encode(field_multiply(decode(sample), field_inverse_power(decode(sample)))), one_value);
-    BOOST_CHECK_EQUAL(encode(field_multiply(weak_limbs, field_inverse_power(weak_limbs))), one_value);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(two_value))), two_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(prime_minus_one))), prime_minus_one);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(gx))), gx_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(gy))), gy_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(sample))), sample_inverse);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(one_value))), one_value);
+    BC_CHECK_EQUAL(encode(field_inverse_power(decode(zero_value))), zero_value);
+    BC_CHECK_EQUAL(encode(field_multiply(decode(sample), field_inverse_power(decode(sample)))), one_value);
+    BC_CHECK_EQUAL(encode(field_multiply(weak_limbs, field_inverse_power(weak_limbs))), one_value);
 }
 
 // square_root
@@ -389,22 +389,22 @@ static_assert(encode(field_root(decode(gy_squared))) == gy);
 static_assert(field_is_square(decode(gy_squared)));
 static_assert(!field_is_square(decode(seven_value)));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__squares__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__squares__expected)
 {
-    BOOST_CHECK_EQUAL(encode(field_root(decode(gy_squared))), gy);
-    BOOST_CHECK_EQUAL(encode(field_root(decode(gx))), gx_root);
-    BOOST_CHECK_EQUAL(encode(field_root(decode(sample))), sample_root);
-    BOOST_CHECK_EQUAL(encode(field_root(decode(zero_value))), zero_value);
-    BOOST_CHECK(field_is_square(decode(gy_squared)));
-    BOOST_CHECK(field_is_square(decode(gx)));
-    BOOST_CHECK(field_is_square(decode(sample)));
-    BOOST_CHECK(field_is_square(decode(zero_value)));
+    BC_CHECK_EQUAL(encode(field_root(decode(gy_squared))), gy);
+    BC_CHECK_EQUAL(encode(field_root(decode(gx))), gx_root);
+    BC_CHECK_EQUAL(encode(field_root(decode(sample))), sample_root);
+    BC_CHECK_EQUAL(encode(field_root(decode(zero_value))), zero_value);
+    BC_CHECK(field_is_square(decode(gy_squared)));
+    BC_CHECK(field_is_square(decode(gx)));
+    BC_CHECK(field_is_square(decode(sample)));
+    BC_CHECK(field_is_square(decode(zero_value)));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__non_squares__false)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__non_squares__false)
 {
-    BOOST_CHECK(!field_is_square(decode(seven_value)));
-    BOOST_CHECK(!field_is_square(decode(prime_minus_one)));
+    BC_CHECK(!field_is_square(decode(seven_value)));
+    BC_CHECK(!field_is_square(decode(prime_minus_one)));
 }
 
 // predicates
@@ -600,42 +600,42 @@ static field unpack(const xfield<xWord>& in) NOEXCEPT
 template <typename xWord>
 static void check_fields(const xfield<xWord>& out, const fields& expected)
 {
-    BOOST_CHECK_EQUAL(unpack<0>(out), expected[0]);
-    BOOST_CHECK_EQUAL(unpack<1>(out), expected[1]);
+    BC_CHECK_EQUAL(unpack<0>(out), expected[0]);
+    BC_CHECK_EQUAL(unpack<1>(out), expected[1]);
 
     if constexpr (lanes<xWord> >= 4)
     {
-        BOOST_CHECK_EQUAL(unpack<2>(out), expected[2]);
-        BOOST_CHECK_EQUAL(unpack<3>(out), expected[3]);
+        BC_CHECK_EQUAL(unpack<2>(out), expected[2]);
+        BC_CHECK_EQUAL(unpack<3>(out), expected[3]);
     }
 
     if constexpr (lanes<xWord> >= 8)
     {
-        BOOST_CHECK_EQUAL(unpack<4>(out), expected[4]);
-        BOOST_CHECK_EQUAL(unpack<5>(out), expected[5]);
-        BOOST_CHECK_EQUAL(unpack<6>(out), expected[6]);
-        BOOST_CHECK_EQUAL(unpack<7>(out), expected[7]);
+        BC_CHECK_EQUAL(unpack<4>(out), expected[4]);
+        BC_CHECK_EQUAL(unpack<5>(out), expected[5]);
+        BC_CHECK_EQUAL(unpack<6>(out), expected[6]);
+        BC_CHECK_EQUAL(unpack<7>(out), expected[7]);
     }
 }
 
 template <typename xWord>
 static void check_masks(xWord out, const masks& expected)
 {
-    BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(out)), expected[0]);
-    BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(out)), expected[1]);
+    BC_CHECK_EQUAL((f::get<uint64_t, 0>(out)), expected[0]);
+    BC_CHECK_EQUAL((f::get<uint64_t, 1>(out)), expected[1]);
 
     if constexpr (lanes<xWord> >= 4)
     {
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(out)), expected[2]);
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(out)), expected[3]);
+        BC_CHECK_EQUAL((f::get<uint64_t, 2>(out)), expected[2]);
+        BC_CHECK_EQUAL((f::get<uint64_t, 3>(out)), expected[3]);
     }
 
     if constexpr (lanes<xWord> >= 8)
     {
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 4>(out)), expected[4]);
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 5>(out)), expected[5]);
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 6>(out)), expected[6]);
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 7>(out)), expected[7]);
+        BC_CHECK_EQUAL((f::get<uint64_t, 4>(out)), expected[4]);
+        BC_CHECK_EQUAL((f::get<uint64_t, 5>(out)), expected[5]);
+        BC_CHECK_EQUAL((f::get<uint64_t, 6>(out)), expected[6]);
+        BC_CHECK_EQUAL((f::get<uint64_t, 7>(out)), expected[7]);
     }
 }
 
@@ -725,54 +725,54 @@ static void check_predicates()
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__add_negate__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__add_negate__lanes__match_integral)
 {
     check_add_negate<xint128_t>();
     check_add_negate<xint256_t>();
     check_add_negate<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__multiply__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__multiply__lanes__match_integral)
 {
     check_multiply<xint128_t>();
     check_multiply<xint256_t>();
     check_multiply<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__square__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__square__lanes__match_integral)
 {
     check_square<xint128_t>();
     check_square<xint256_t>();
     check_square<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__inverse__lanes__match_integral)
 {
     check_inverse<xint128_t>();
     check_inverse<xint256_t>();
     check_inverse<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__square_root__lanes__match_integral)
 {
     check_square_root<xint128_t>();
     check_square_root<xint256_t>();
     check_square_root<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__normalize__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__normalize__lanes__match_integral)
 {
     check_normalize<xint128_t>();
     check_normalize<xint256_t>();
     check_normalize<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_field__predicates__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_field__predicates__lanes__match_integral)
 {
     check_predicates<xint128_t>();
     check_predicates<xint256_t>();
     check_predicates<xint512_t>();
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 

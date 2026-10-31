@@ -19,7 +19,7 @@
 #include "../test.hpp"
 
 // creates overflow_tests namespace
-BOOST_AUTO_TEST_SUITE(overflow_tests)
+BC_AUTO_TEST_SUITE(overflow_tests)
 
 constexpr uint16_t unsigned_min = 0_u16;
 constexpr uint16_t unsigned_max = max_uint16;
@@ -240,36 +240,36 @@ static_assert(safe_multiply(2_size, half) == sub1(maximal));
 // TODO: boost test is not catching these thrown exceptions (related to disabled exceptions?).
 #if defined(ENABLED)
 
-BOOST_AUTO_TEST_CASE(overflow__safe_negate__int32_minimum__throws_overflow)
+BC_AUTO_TEST_CASE(overflow__safe_negate__int32_minimum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_negate(min_int32), overflow_exception);
+    BC_REQUIRE_THROW(safe_negate(min_int32), overflow_exception);
 }
 
-BOOST_AUTO_TEST_CASE(overflow__safe_add__size_t_maximum_plus_maximum__throws_overflow)
+BC_AUTO_TEST_CASE(overflow__safe_add__size_t_maximum_plus_maximum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_add(maximal, maximal), overflow_exception);
+    BC_REQUIRE_THROW(safe_add(maximal, maximal), overflow_exception);
 }
 
-BOOST_AUTO_TEST_CASE(overflow__safe_subtract__size_t_maximum_plus_maximum__throws_overflow)
+BC_AUTO_TEST_CASE(overflow__safe_subtract__size_t_maximum_plus_maximum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_subtract(minimal, maximal), overflow_exception);
+    BC_REQUIRE_THROW(safe_subtract(minimal, maximal), overflow_exception);
 }
 
-BOOST_AUTO_TEST_CASE(overflow__safe_multiply__size_t_maximum_times_maximum__throws_overflow)
+BC_AUTO_TEST_CASE(overflow__safe_multiply__size_t_maximum_times_maximum__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_multiply(maximal, maximal), overflow_exception);
+    BC_REQUIRE_THROW(safe_multiply(maximal, maximal), overflow_exception);
 }
 
-BOOST_AUTO_TEST_CASE(overflow__safe_divide__by_zero__throws_overflow)
+BC_AUTO_TEST_CASE(overflow__safe_divide__by_zero__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_divide(maximal, minimal), overflow_exception);
+    BC_REQUIRE_THROW(safe_divide(maximal, minimal), overflow_exception);
 }
 
-BOOST_AUTO_TEST_CASE(overflow__safe_modulo__by_zero__throws_overflow)
+BC_AUTO_TEST_CASE(overflow__safe_modulo__by_zero__throws_overflow)
 {
-    BOOST_REQUIRE_THROW(safe_modulo(maximal, minimal), overflow_exception);
+    BC_REQUIRE_THROW(safe_modulo(maximal, minimal), overflow_exception);
 }
 
 #endif
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

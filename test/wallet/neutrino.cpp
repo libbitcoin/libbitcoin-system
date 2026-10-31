@@ -21,7 +21,7 @@
 
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(neutrino_tests)
+BC_AUTO_TEST_SUITE(neutrino_tests)
 
 struct prevout_data
 {
@@ -106,7 +106,7 @@ bool compute_view_filter(data_chunk& out, const chain::block& block)
         neutrino::compute_filter(out, view);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute__first_11_blocks__success)
+BC_AUTO_TEST_CASE(neutrino__compute__first_11_blocks__success)
 {
 
     std_vector<data_chunk> block_data
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute__first_11_blocks__success)
     {
         const chain::block block(data, true);
         data_chunk filter;
-        BOOST_REQUIRE(neutrino::compute_filter(filter, block));
+        BC_REQUIRE(neutrino::compute_filter(filter, block));
         const auto header = neutrino::compute_header(previous_filter_header, filter);
         ////std::cout << "header: " << encode_base16(header) << std::endl;
         ////std::cout << "filter: " << encode_base16(filter) << std::endl;
@@ -138,101 +138,101 @@ BOOST_AUTO_TEST_CASE(neutrino__compute__first_11_blocks__success)
     }
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_0__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_0__success)
 {
     const auto expected = base16_hash("21584579b7eb08997773e5aeff3a7f932700042d0ed2a6129012b7d7ae81b750");
     const auto previous_header = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
     const auto filter = base16_chunk("019dfca8");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_2__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_2__success)
 {
     const auto expected = base16_hash("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
     const auto previous_header = base16_hash("d7bdac13a59d745b1add0d2ce852f1a0442e8945fc1bf3848d3cbffd88c24fe1");
     const auto filter = base16_chunk("0174a170");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_3__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_3__success)
 {
     const auto expected = base16_hash("8d63aadf5ab7257cb6d2316a57b16f517bff1c6388f124ec4c04af1212729d2a");
     const auto previous_header = base16_hash("186afd11ef2b5e7e3504f2e8cbf8df28a1fd251fe53d60dff8b1467d1b386cf0");
     const auto filter = base16_chunk("016cf7a0");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_15007__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_15007__success)
 {
     const auto expected = base16_hash("07384b01311867949e0c046607c66b7a766d338474bb67f66c8ae9dbd454b20e");
     const auto previous_header = base16_hash("18b5c2b0146d2d09d24fb00ff5b52bd0742f36c9e65527abdb9de30c027a4748");
     const auto filter = base16_chunk("013c3710");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_49291__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_49291__success)
 {
     const auto expected = base16_hash("b6d98692cec5145f67585f3434ec3c2b3030182e1cb3ec58b855c5c164dfaaa3");
     const auto previous_header = base16_hash("ed47705334f4643892ca46396eb3f4196a5e30880589e4009ef38eae895d4a13");
     const auto filter = base16_chunk("0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_180480__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_180480__success)
 {
     const auto expected = base16_hash("c582d51c0ca365e3fcf36c51cb646d7f83a67e867cb4743fd2128e3e022b700c");
     const auto previous_header = base16_hash("d34ef98386f413769502808d4bac5f20f8dfd5bffc9eedafaa71de0eb1f01489");
     const auto filter = base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_926485__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_926485__success)
 {
     const auto expected = base16_hash("546c574a0472144bcaf9b6aeabf26372ad87c7af7d1ee0dbfae5e099abeae49c");
     const auto previous_header = base16_hash("8f13b9a9c85611635b47906c3053ac53cfcec7211455d4cb0d63dc9acc13d472");
     const auto filter = base16_chunk("09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_987876__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_987876__success)
 {
     const auto expected = base16_hash("0965a544743bbfa36f254446e75630c09404b3d164a261892372977538928ed5");
     const auto previous_header = base16_hash("fe4d230dbb0f4fec9bed23a5283e08baf996e3f32b93f52c7de1f641ddfd04ad");
     const auto filter = base16_chunk("010c0b40");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_1263442__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_1263442__success)
 {
     const auto expected = base16_hash("4e6d564c2a2452065c205dd7eb2791124e0c4e0dbb064c410c24968572589dec");
     const auto previous_header = base16_hash("31d66d516a9eda7de865df29f6ef6cb8e4bf9309e5dac899968a9a62a5df61e3");
     const auto filter = base16_chunk("0385acb4f0fe889ef0");
     const auto result = neutrino::compute_header(previous_header, filter);
 
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__block_1414221__success)
+BC_AUTO_TEST_CASE(neutrino__compute_header__block_1414221__success)
 {
     const auto expected = base16_hash("021e8882ef5a0ed932edeebbecfeda1d7ce528ec7b3daa27641acf1189d7b5dc");
     const auto previous_header = base16_hash("5e5e12d90693c8e936f01847859404c67482439681928353ca1296982042864e");
     const auto filter = base16_chunk("00");
     const auto result = neutrino::compute_header(previous_header, filter);
-    BOOST_REQUIRE_EQUAL(result, expected);
+    BC_REQUIRE_EQUAL(result, expected);
 }
 
 // TODO: gcc/clang warnings on literal string length.
 // msvc errors on length of string containing hex encoded block, tests made conditional.
 #ifndef HAVE_MSC
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
 {
     auto raw_block = base16_chunk(
         "02000000b51eb76f7cfd89ef4be99b0c7ea3e009ffbf33643661a0fc29354e010000"
@@ -1437,7 +1437,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
         "00"));
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata
     {
@@ -1446,20 +1446,20 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
         { base16_hash("af3dd7d35132d3a4e6b283ae0ea42a1832187eb95f1974ba255a45f42962cb3b"), 0u, base16_hash("5e77c1356162019ffc51449078da99164eb765fc723c08bfb1a20080bda40053"), 0u, 0u, base16_chunk("76a91445e57901210a073630ab3c2b0f08cbb57c20d77788ac") }
     };
 
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
 
     const auto expected_filter = base16_chunk("06294070f18c8b0ff84b92738259ca89b4");
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
 {
     auto raw_block = base16_chunk(
         "02000000ebf8983ec7194db57e4c85daf96b8b12c11cdb421ed8329275da0e020000"
@@ -2834,7 +2834,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
         "f88ca1d8c588ac00000000"));
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata
     {
@@ -2872,21 +2872,21 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
         { base16_hash("0271d716bb72459c682d8cd1b8b65cff80891c8124cb508304f2f2f84e48a13a"), 0u, null_hash, 0u, 199600000u, base16_chunk("76a91434fb159d8365bcf1613f6cfd42b269b130edbe6e88ac") }
     };
 
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
 
     const auto expected_filter = base16_chunk("1c275e3182d7d12a3bde9c34441fddffd314e1600dc25e30bfdcecdc40a35594e1561678bd8cac799f9fd001c2f8dfd2d4c909755e5a6bdc7731c39e00b8f73326e1508039cff3bc39d000");
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
 {
     // const auto expected_block_hash = base16_hash("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
 
@@ -2904,22 +2904,22 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
         "8a4c702b6bf11d5fac00000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     // Block zero has no prevouts.
     ////prevout_data::list metadata;
-    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    ////BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
 {
     // const auto expected_block_hash = base16_hash("000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820");
 
@@ -2934,22 +2934,22 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
         "e6c11e6830f4d7ee4e763a56b7718fac00000000");
 
     const chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     // Block 2 has no prevouts.
     ////prevout_data::list metadata;
-    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    ////BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
 {
     // const auto expected_block_hash = base16_hash("000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10");
 
@@ -2964,22 +2964,22 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
         "8e637b222dd2e0311154c4c85cf423ac00000000");
 
     const chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     // Block 3 has no prevouts.
     ////prevout_data::list metadata;
-    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    ////BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
 {
     // const auto expected_block_hash = base16_hash("0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad");
 
@@ -2994,21 +2994,21 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
         "b97230c0365b021df8f467363cafb1ac00000000");
 
     const chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     // Block 15007 has no prevouts.
     ////prevout_data::list metadata;
-    ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    ////BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__false)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__false)
 {
     const auto raw_block = base16_chunk(
         "02000000abfaf47274223ca2fea22797e44498240e482cb4c2f2baea088962f80000"
@@ -3060,17 +3060,17 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__fal
         "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000");
 
     const chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     data_chunk result;
-    BOOST_REQUIRE(!neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE(!neutrino::compute_filter(result, validated_block));
 
     chain::view::block view{ validated_block.to_data(true), true };
-    BOOST_REQUIRE(view.populate({}, std::vector<bool>(view.transactions(), false)));
-    BOOST_REQUIRE(!neutrino::compute_filter(result, view));
+    BC_REQUIRE(view.populate({}, std::vector<bool>(view.transactions(), false)));
+    BC_REQUIRE(!neutrino::compute_filter(result, view));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
 {
     // const auto expected_block_hash = base16_hash("0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c");
 
@@ -3127,7 +3127,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
         "0b779c0b9fa207f12a8218c94fc77aff504588ac80f0fa02000000000000000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata
     {
@@ -3197,18 +3197,18 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
         }
     };
 
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
 {
     // const auto expected_block_hash = base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a");
 
@@ -3257,7 +3257,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
         "d10b106eda37c3ce793f7a8588ac00000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata
     {
@@ -3327,18 +3327,18 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
         }
     };
 
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
 {
     // const auto expected_block_hash = base16_hash("000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313");
 
@@ -3406,7 +3406,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
         "c317e7eb88ac00000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata
     {
@@ -3476,18 +3476,18 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
         }
     };
 
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
 {
     // const auto expected_block_hash = base16_hash("0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79");
 
@@ -3502,21 +3502,21 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
         "f22da7cd9681614681f92173d83d0aa68688ac00000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata;
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
 {
     // const auto expected_block_hash = base16_hash("000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33");
 
@@ -3541,7 +3541,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
         "1d3a68ac00000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata
     {
@@ -3555,18 +3555,18 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
         }
     };
 
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
 {
     // const auto expected_block_hash = base16_hash("0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1");
 
@@ -3580,21 +3580,21 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
         "3030310d000000f238f401ffffffff01c817a804000000000000000000");
 
     chain::block validated_block(raw_block, true);
-    BOOST_REQUIRE(validated_block.is_valid());
+    BC_REQUIRE(validated_block.is_valid());
 
     const prevout_data::list metadata;
-    BOOST_REQUIRE(add_metadata(metadata, validated_block));
+    BC_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
-    BOOST_REQUIRE_EQUAL(result, expected_filter);
+    BC_REQUIRE(neutrino::compute_filter(result, validated_block));
+    BC_REQUIRE_EQUAL(result, expected_filter);
 
     data_chunk view_result;
-    BOOST_REQUIRE(compute_view_filter(view_result, validated_block));
-    BOOST_REQUIRE_EQUAL(view_result, expected_filter);
+    BC_REQUIRE(compute_view_filter(view_result, validated_block));
+    BC_REQUIRE_EQUAL(view_result, expected_filter);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
+BC_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
 {
     const neutrino::block_filter filter
     {
@@ -3608,10 +3608,10 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
         wallet::payment_address::mainnet_p2kh
     };
 
-    BOOST_REQUIRE(neutrino::match_filter(filter, address));
+    BC_REQUIRE(neutrino::match_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
 {
     const neutrino::block_filter filter
     {
@@ -3625,10 +3625,10 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
         wallet::payment_address::mainnet_p2kh
     };
 
-    BOOST_REQUIRE(!neutrino::match_filter(filter, address));
+    BC_REQUIRE(!neutrino::match_filter(filter, address));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
+BC_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
 {
     const neutrino::block_filter filter
     {
@@ -3648,10 +3648,10 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
         }
     };
 
-    BOOST_REQUIRE(neutrino::match_filter(filter, addresses, testnet_p2kh, testnet_p2sh));
+    BC_REQUIRE(neutrino::match_filter(filter, addresses, testnet_p2kh, testnet_p2sh));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
 {
     const neutrino::block_filter filter
     {
@@ -3667,57 +3667,57 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
         }
     };
 
-    BOOST_REQUIRE(!neutrino::match_filter(filter, addresses));
+    BC_REQUIRE(!neutrino::match_filter(filter, addresses));
 }
 
 
 // empty inputs
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_script__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter__empty_script__false)
 {
-    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::script{}));
+    BC_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::script{}));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_scripts__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter__empty_scripts__false)
 {
-    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::scripts{}));
+    BC_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::scripts{}));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter__scripts_all_empty__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter__scripts_all_empty__false)
 {
-    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::scripts(2)));
+    BC_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, chain::scripts(2)));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_addresses__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter__empty_addresses__false)
 {
-    BOOST_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, wallet::payment_address::list{}));
+    BC_REQUIRE(!neutrino::match_filter(neutrino::block_filter{}, wallet::payment_address::list{}));
 }
 
 // exhausted filter
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_filter_script__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter__empty_filter_script__false)
 {
     const neutrino::block_filter filter{};
     const auto script = chain::script{ chain::script::to_pay_key_hash_pattern(null_short_hash) };
-    BOOST_REQUIRE(!neutrino::match_filter(filter, script));
+    BC_REQUIRE(!neutrino::match_filter(filter, script));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__match_filter__empty_filter_scripts__false)
+BC_AUTO_TEST_CASE(neutrino__match_filter__empty_filter_scripts__false)
 {
     const neutrino::block_filter filter{};
     const chain::scripts scripts{ chain::script{ chain::script::to_pay_key_hash_pattern(null_short_hash) } };
-    BOOST_REQUIRE(!neutrino::match_filter(filter, scripts));
+    BC_REQUIRE(!neutrino::match_filter(filter, scripts));
 }
 
 // header
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_header__filter_hash_out__matches)
+BC_AUTO_TEST_CASE(neutrino__compute_header__filter_hash_out__matches)
 {
     const auto filter = base16_chunk("0123456789");
     hash_digest filter_hash{};
     const auto header = neutrino::compute_header(filter_hash, null_hash, filter);
-    BOOST_REQUIRE_EQUAL(filter_hash, bitcoin_hash(filter));
-    BOOST_REQUIRE_EQUAL(header, neutrino::compute_header(null_hash, filter));
+    BC_REQUIRE_EQUAL(filter_hash, bitcoin_hash(filter));
+    BC_REQUIRE_EQUAL(header, neutrino::compute_header(null_hash, filter));
 }
 
 // connected block
@@ -3763,16 +3763,16 @@ static void require_connected_filter(const chain::block& block,
     const chain::context ctx{ chain::flags::no_rules, 0, 0, 0, 0, 0, 0 };
 
     data_chunk before{};
-    BOOST_REQUIRE(neutrino::compute_filter(before, block));
-    BOOST_REQUIRE_EQUAL(before, expected);
-    BOOST_REQUIRE_EQUAL(block.connect(ctx), error::block_success);
+    BC_REQUIRE(neutrino::compute_filter(before, block));
+    BC_REQUIRE_EQUAL(before, expected);
+    BC_REQUIRE_EQUAL(block.connect(ctx), error::block_success);
 
     data_chunk after{};
-    BOOST_REQUIRE(neutrino::compute_filter(after, block));
-    BOOST_REQUIRE_EQUAL(after, expected);
+    BC_REQUIRE(neutrino::compute_filter(after, block));
+    BC_REQUIRE_EQUAL(after, expected);
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_prevout__expected)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_prevout__expected)
 {
     const chain::block instance
     {
@@ -3788,7 +3788,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_
     require_connected_filter(instance, base16_chunk("03c13ba0138462b87c"));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_internal_prevout__expected)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_internal_prevout__expected)
 {
     const auto fund = separator_spend(chain::point{ one_hash, 0 }, chain::script{ base16_chunk("ab51"), false });
     const auto spend = separator_spend(chain::point{ fund.hash(false), 0 }, chain::script{ base16_chunk("54"), false });
@@ -3797,13 +3797,13 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_executed_codeseparator_
     const auto& txs = *instance.transactions_ptr();
     txs.at(1)->inputs_ptr()->front()->prevout = to_shared<chain::output>(0, chain::script{ base16_chunk("53"), false });
     const chain::context ctx{ chain::flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
-    BOOST_REQUIRE(txs.at(2)->inputs_ptr()->front()->prevout == txs.at(1)->outputs_ptr()->front());
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BC_REQUIRE(txs.at(2)->inputs_ptr()->front()->prevout == txs.at(1)->outputs_ptr()->front());
 
     require_connected_filter(instance, base16_chunk("04d4cc803ce05d4da149e540"));
 }
 
-BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_unexecuted_codeseparator_prevout__expected)
+BC_AUTO_TEST_CASE(neutrino__compute_filter__connected_unexecuted_codeseparator_prevout__expected)
 {
     const chain::block instance
     {
@@ -3819,4 +3819,4 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__connected_unexecuted_codeseparato
     require_connected_filter(instance, base16_chunk("03c273e62b87d0f8d9"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

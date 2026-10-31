@@ -18,10 +18,10 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(chacha20_poly1305_tests)
+BC_AUTO_TEST_SUITE(chacha20_poly1305_tests)
 
 // rfc8439 section 2.8.2 example.
-BOOST_AUTO_TEST_CASE(chacha20_poly1305__encrypt__rfc8439_example__expected)
+BC_AUTO_TEST_CASE(chacha20_poly1305__encrypt__rfc8439_example__expected)
 {
     const auto plain = base16_chunk(
         "4c616469657320616e642047656e746c656d656e206f662074686520636c6173"
@@ -43,16 +43,16 @@ BOOST_AUTO_TEST_CASE(chacha20_poly1305__encrypt__rfc8439_example__expected)
     chacha20_poly1305 aead{ key };
     data_chunk cipher(plain.size() + chacha20_poly1305::expansion);
     aead.encrypt(plain, aad, nonce32, nonce64, cipher);
-    BOOST_REQUIRE_EQUAL(cipher, expected);
+    BC_REQUIRE_EQUAL(cipher, expected);
 
     // Decrypt round trip.
     data_chunk decrypted(plain.size());
-    BOOST_REQUIRE(aead.decrypt(decrypted, aad, nonce32, nonce64, cipher));
-    BOOST_REQUIRE_EQUAL(decrypted, plain);
+    BC_REQUIRE(aead.decrypt(decrypted, aad, nonce32, nonce64, cipher));
+    BC_REQUIRE_EQUAL(decrypted, plain);
 }
 
 // rfc8439 appendix A.5.
-BOOST_AUTO_TEST_CASE(chacha20_poly1305__decrypt__rfc8439_a5__expected)
+BC_AUTO_TEST_CASE(chacha20_poly1305__decrypt__rfc8439_a5__expected)
 {
     const auto expected = base16_chunk(
         "496e7465726e65742d4472616674732061726520647261667420646f63756d65"
@@ -82,11 +82,11 @@ BOOST_AUTO_TEST_CASE(chacha20_poly1305__decrypt__rfc8439_a5__expected)
 
     chacha20_poly1305 aead{ key };
     data_chunk plain(cipher.size() - chacha20_poly1305::expansion);
-    BOOST_REQUIRE(aead.decrypt(plain, aad, nonce32, nonce64, cipher));
-    BOOST_REQUIRE_EQUAL(plain, expected);
+    BC_REQUIRE(aead.decrypt(plain, aad, nonce32, nonce64, cipher));
+    BC_REQUIRE_EQUAL(plain, expected);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20_poly1305__decrypt__tampered__false_and_cleared)
+BC_AUTO_TEST_CASE(chacha20_poly1305__decrypt__tampered__false_and_cleared)
 {
     const auto plain = base16_chunk("00112233445566778899aabbccddeeff");
     const auto aad = base16_chunk("f00d");
@@ -101,16 +101,16 @@ BOOST_AUTO_TEST_CASE(chacha20_poly1305__decrypt__tampered__false_and_cleared)
     cipher.front() ^= 0x01_u8;
 
     data_chunk decrypted(plain.size());
-    BOOST_REQUIRE(!aead.decrypt(decrypted, aad, 1, 2, cipher));
-    BOOST_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00_u8));
+    BC_REQUIRE(!aead.decrypt(decrypted, aad, 1, 2, cipher));
+    BC_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00_u8));
 
     // Restore and decrypt (fresh instance, same nonce).
     cipher.front() ^= 0x01_u8;
-    BOOST_REQUIRE(aead.decrypt(decrypted, aad, 1, 2, cipher));
-    BOOST_REQUIRE_EQUAL(decrypted, plain);
+    BC_REQUIRE(aead.decrypt(decrypted, aad, 1, 2, cipher));
+    BC_REQUIRE_EQUAL(decrypted, plain);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20_poly1305__encrypt__two_span__matches_single)
+BC_AUTO_TEST_CASE(chacha20_poly1305__encrypt__two_span__matches_single)
 {
     const auto plain = base16_chunk(
         "4c616469657320616e642047656e746c656d656e206f662074686520636c6173"
@@ -136,8 +136,8 @@ BOOST_AUTO_TEST_CASE(chacha20_poly1305__encrypt__two_span__matches_single)
     chacha20_poly1305 split{ key };
     data_chunk cipher(plain.size() + chacha20_poly1305::expansion);
     split.encrypt(plain1, plain2, aad, nonce32, nonce64, cipher);
-    BOOST_REQUIRE_EQUAL(cipher, expected);
+    BC_REQUIRE_EQUAL(cipher, expected);
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

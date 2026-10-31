@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_algorithm_scalar_tests)
+BC_AUTO_TEST_SUITE(secp256k1_algorithm_scalar_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -192,12 +192,12 @@ static_assert(!is_decodable(order_value));
 static_assert(!is_decodable(all_value));
 static_assert(decode(order_minus_one) == scalar{ 0xbfd25e8cd0364140, 0xbaaedce6af48a03b, 0xfffffffffffffffe, 0xffffffffffffffff });
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__encoding__round_trip__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__encoding__round_trip__expected)
 {
-    BOOST_CHECK_EQUAL(encode(decode(first)), first);
-    BOOST_CHECK_EQUAL(encode(decode(all_value)), all_reduced);
-    BOOST_CHECK(!is_decodable(order_value));
-    BOOST_CHECK(is_decodable(order_minus_one));
+    BC_CHECK_EQUAL(encode(decode(first)), first);
+    BC_CHECK_EQUAL(encode(decode(all_value)), all_reduced);
+    BC_CHECK(!is_decodable(order_value));
+    BC_CHECK(is_decodable(order_minus_one));
 }
 
 // add/negate
@@ -211,12 +211,12 @@ static_assert(encode(scalar_negate(decode(zero_value))) == zero_value);
 static_assert(encode(scalar_negate(decode(one_value))) == order_minus_one);
 static_assert(encode(scalar_add(decode(sample), scalar_negate(decode(sample)))) == zero_value);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__add_negate__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__add_negate__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(scalar_add(decode(first), decode(second))), first_plus_second);
-    BOOST_CHECK_EQUAL(encode(scalar_add(decode(order_minus_one), decode(order_minus_one))), order_minus_two);
-    BOOST_CHECK_EQUAL(encode(scalar_negate(decode(first))), first_negated);
-    BOOST_CHECK_EQUAL(encode(scalar_add(decode(sample), scalar_negate(decode(sample)))), zero_value);
+    BC_CHECK_EQUAL(encode(scalar_add(decode(first), decode(second))), first_plus_second);
+    BC_CHECK_EQUAL(encode(scalar_add(decode(order_minus_one), decode(order_minus_one))), order_minus_two);
+    BC_CHECK_EQUAL(encode(scalar_negate(decode(first))), first_negated);
+    BC_CHECK_EQUAL(encode(scalar_add(decode(sample), scalar_negate(decode(sample)))), zero_value);
 }
 
 // multiply
@@ -228,11 +228,11 @@ static_assert(encode(scalar_multiply(decode(order_minus_one), decode(order_minus
 static_assert(encode(scalar_multiply(decode(first), decode(one_value))) == first);
 static_assert(encode(scalar_multiply(decode(first), decode(zero_value))) == zero_value);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__multiply__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__multiply__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(first), decode(second))), first_times_second);
-    BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(sample), decode(sample))), sample_squared);
-    BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(order_minus_one), decode(order_minus_one))), one_value);
+    BC_CHECK_EQUAL(encode(scalar_multiply(decode(first), decode(second))), first_times_second);
+    BC_CHECK_EQUAL(encode(scalar_multiply(decode(sample), decode(sample))), sample_squared);
+    BC_CHECK_EQUAL(encode(scalar_multiply(decode(order_minus_one), decode(order_minus_one))), one_value);
 }
 
 // inverse
@@ -243,31 +243,31 @@ static_assert(encode(scalar_inverse(decode(first))) == first_inverse);
 static_assert(encode(scalar_inverse(decode(two_value))) == two_inverse);
 static_assert(encode(scalar_inverse(decode(order_minus_one))) == order_minus_one);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(two_value))), two_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(zero_value))), zero_value);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(first))), first_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(second))), second_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(sample))), sample_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(one_value))), one_value);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse(decode(order_minus_one))), order_minus_one);
-    BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(sample), scalar_inverse(decode(sample)))), one_value);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(two_value))), two_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(zero_value))), zero_value);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(first))), first_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(second))), second_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(sample))), sample_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(one_value))), one_value);
+    BC_CHECK_EQUAL(encode(scalar_inverse(decode(order_minus_one))), order_minus_one);
+    BC_CHECK_EQUAL(encode(scalar_multiply(decode(sample), scalar_inverse(decode(sample)))), one_value);
 }
 
 // inverse_power
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse_power__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__inverse_power__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(two_value))), two_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(zero_value))), zero_value);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(first))), first_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(second))), second_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(sample))), sample_inverse);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(one_value))), one_value);
-    BOOST_CHECK_EQUAL(encode(scalar_inverse_power(decode(order_minus_one))), order_minus_one);
-    BOOST_CHECK_EQUAL(encode(scalar_multiply(decode(sample), scalar_inverse_power(decode(sample)))), one_value);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(two_value))), two_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(zero_value))), zero_value);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(first))), first_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(second))), second_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(sample))), sample_inverse);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(one_value))), one_value);
+    BC_CHECK_EQUAL(encode(scalar_inverse_power(decode(order_minus_one))), order_minus_one);
+    BC_CHECK_EQUAL(encode(scalar_multiply(decode(sample), scalar_inverse_power(decode(sample)))), one_value);
 }
 
 // split
@@ -282,26 +282,26 @@ static_assert(encode(split_second(decode(lambda_value))) == one_value);
 static_assert(is_joined(decode(first)));
 static_assert(is_small(split_first(decode(first))) && is_small(split_second(decode(first))));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__split__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__split__values__expected)
 {
-    BOOST_CHECK_EQUAL(encode(split_first(decode(first))), first_k1);
-    BOOST_CHECK_EQUAL(encode(split_second(decode(first))), first_k2);
-    BOOST_CHECK_EQUAL(encode(split_first(decode(second))), second_k1);
-    BOOST_CHECK_EQUAL(encode(split_second(decode(second))), second_k2);
-    BOOST_CHECK_EQUAL(encode(split_first(decode(sample))), sample_k1);
-    BOOST_CHECK_EQUAL(encode(split_second(decode(sample))), sample_k2);
-    BOOST_CHECK_EQUAL(encode(split_first(decode(order_minus_one))), order_minus_one);
-    BOOST_CHECK_EQUAL(encode(split_second(decode(order_minus_one))), zero_value);
+    BC_CHECK_EQUAL(encode(split_first(decode(first))), first_k1);
+    BC_CHECK_EQUAL(encode(split_second(decode(first))), first_k2);
+    BC_CHECK_EQUAL(encode(split_first(decode(second))), second_k1);
+    BC_CHECK_EQUAL(encode(split_second(decode(second))), second_k2);
+    BC_CHECK_EQUAL(encode(split_first(decode(sample))), sample_k1);
+    BC_CHECK_EQUAL(encode(split_second(decode(sample))), sample_k2);
+    BC_CHECK_EQUAL(encode(split_first(decode(order_minus_one))), order_minus_one);
+    BC_CHECK_EQUAL(encode(split_second(decode(order_minus_one))), zero_value);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__split__values__joined_and_small)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__split__values__joined_and_small)
 {
-    BOOST_CHECK(is_joined(decode(first)));
-    BOOST_CHECK(is_joined(decode(second)));
-    BOOST_CHECK(is_joined(decode(sample)));
-    BOOST_CHECK(is_joined(decode(order_minus_one)));
-    BOOST_CHECK(is_small(split_first(decode(second))) && is_small(split_second(decode(second))));
-    BOOST_CHECK(is_small(split_first(decode(sample))) && is_small(split_second(decode(sample))));
+    BC_CHECK(is_joined(decode(first)));
+    BC_CHECK(is_joined(decode(second)));
+    BC_CHECK(is_joined(decode(sample)));
+    BC_CHECK(is_joined(decode(order_minus_one)));
+    BC_CHECK(is_small(split_first(decode(second))) && is_small(split_second(decode(second))));
+    BC_CHECK(is_small(split_first(decode(sample))) && is_small(split_second(decode(sample))));
 }
 
 // recode
@@ -347,10 +347,10 @@ static_assert(recoded<4, 33>(small_max) == max_digits);
 static_assert(recoded<4, 33>(small_sample) == sample_digits4);
 static_assert(recoded<5, 26>(small_sample) == sample_digits5);
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_scalar__recode__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_scalar__recode__values__expected)
 {
-    BOOST_CHECK((recoded<4, 33>(small_sample) == sample_digits4));
-    BOOST_CHECK((recoded<5, 26>(small_sample) == sample_digits5));
+    BC_CHECK((recoded<4, 33>(small_sample) == sample_digits4));
+    BC_CHECK((recoded<5, 26>(small_sample) == sample_digits5));
 }
 
 // predicates
@@ -369,4 +369,4 @@ static_assert(accessor::is_less(decode(order_minus_one), accessor::order));
 static_assert(!accessor::is_overflow(decode(order_minus_one)));
 static_assert(accessor::is_overflow(accessor::order));
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -20,7 +20,7 @@
 
 using namespace bc::system::options;
 
-BOOST_AUTO_TEST_SUITE(variables_tests)
+BC_AUTO_TEST_SUITE(variables_tests)
 
 static parsed_options make(const options_description& options, std::vector<parsed_option> parsed, bool dashed=true)
 {
@@ -29,46 +29,46 @@ static parsed_options make(const options_description& options, std::vector<parse
 
 // variable_value
 
-BOOST_AUTO_TEST_CASE(variable_value__default__empty)
+BC_AUTO_TEST_CASE(variable_value__default__empty)
 {
     const variable_value instance{};
-    BOOST_REQUIRE(instance.empty());
-    BOOST_REQUIRE(!instance.defaulted());
-    BOOST_REQUIRE(!instance.semantic());
+    BC_REQUIRE(instance.empty());
+    BC_REQUIRE(!instance.defaulted());
+    BC_REQUIRE(!instance.semantic());
 }
 
-BOOST_AUTO_TEST_CASE(variable_value__as__typed__expected)
+BC_AUTO_TEST_CASE(variable_value__as__typed__expected)
 {
     const variable_value instance{ std::any{ 42 }, true, {} };
-    BOOST_REQUIRE(!instance.empty());
-    BOOST_REQUIRE(instance.defaulted());
-    BOOST_REQUIRE_EQUAL(instance.as<int>(), 42);
-    BOOST_REQUIRE_THROW(instance.as<std::string>(), std::bad_any_cast);
+    BC_REQUIRE(!instance.empty());
+    BC_REQUIRE(instance.defaulted());
+    BC_REQUIRE_EQUAL(instance.as<int>(), 42);
+    BC_REQUIRE_THROW(instance.as<std::string>(), std::bad_any_cast);
 }
 
 // variables_map
 
-BOOST_AUTO_TEST_CASE(variables_map__subscript__absent__empty_not_inserted)
+BC_AUTO_TEST_CASE(variables_map__subscript__absent__empty_not_inserted)
 {
     const variables_map instance{};
-    BOOST_REQUIRE(instance["bogus"].empty());
-    BOOST_REQUIRE(instance.empty());
+    BC_REQUIRE(instance["bogus"].empty());
+    BC_REQUIRE(instance.empty());
 }
 
 // store
 
-BOOST_AUTO_TEST_CASE(store__explicit__value_not_defaulted)
+BC_AUTO_TEST_CASE(store__explicit__value_not_defaulted)
 {
     options_description options{};
     options.add_options()("name", value<int32_t>()->default_value(7), "");
 
     variables_map variables{};
     store(make(options, { { "name", { "42" } } }), variables);
-    BOOST_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 42);
-    BOOST_REQUIRE(!variables["name"].defaulted());
+    BC_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 42);
+    BC_REQUIRE(!variables["name"].defaulted());
 }
 
-BOOST_AUTO_TEST_CASE(store__unspecified__default_defaulted)
+BC_AUTO_TEST_CASE(store__unspecified__default_defaulted)
 {
     options_description options{};
     options.add_options()
@@ -77,12 +77,12 @@ BOOST_AUTO_TEST_CASE(store__unspecified__default_defaulted)
 
     variables_map variables{};
     store(make(options, {}), variables);
-    BOOST_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 7);
-    BOOST_REQUIRE(variables["name"].defaulted());
-    BOOST_REQUIRE(!variables.contains("other"));
+    BC_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 7);
+    BC_REQUIRE(variables["name"].defaulted());
+    BC_REQUIRE(!variables.contains("other"));
 }
 
-BOOST_AUTO_TEST_CASE(store__final__not_overridden_by_later_source)
+BC_AUTO_TEST_CASE(store__final__not_overridden_by_later_source)
 {
     options_description options{};
     options.add_options()("name", value<int32_t>(), "");
@@ -90,10 +90,10 @@ BOOST_AUTO_TEST_CASE(store__final__not_overridden_by_later_source)
     variables_map variables{};
     store(make(options, { { "name", { "1" } } }), variables);
     store(make(options, { { "name", { "2" } } }), variables);
-    BOOST_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 1);
+    BC_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(store__defaulted__overridden_by_later_source)
+BC_AUTO_TEST_CASE(store__defaulted__overridden_by_later_source)
 {
     options_description options{};
     options.add_options()("name", value<int32_t>()->default_value(7), "");
@@ -101,11 +101,11 @@ BOOST_AUTO_TEST_CASE(store__defaulted__overridden_by_later_source)
     variables_map variables{};
     store(make(options, {}), variables);
     store(make(options, { { "name", { "2" } } }), variables);
-    BOOST_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 2);
-    BOOST_REQUIRE(!variables["name"].defaulted());
+    BC_REQUIRE_EQUAL(variables["name"].as<int32_t>(), 2);
+    BC_REQUIRE(!variables["name"].defaulted());
 }
 
-BOOST_AUTO_TEST_CASE(store__composing__accumulates_across_sources)
+BC_AUTO_TEST_CASE(store__composing__accumulates_across_sources)
 {
     options_description options{};
     options.add_options()("name", value<string_list>()->composing(), "");
@@ -113,55 +113,55 @@ BOOST_AUTO_TEST_CASE(store__composing__accumulates_across_sources)
     variables_map variables{};
     store(make(options, { { "name", { "a" } } }), variables);
     store(make(options, { { "name", { "b" } } }), variables);
-    BOOST_REQUIRE_EQUAL(variables["name"].as<string_list>(), (string_list{ "a", "b" }));
+    BC_REQUIRE_EQUAL(variables["name"].as<string_list>(), (string_list{ "a", "b" }));
 }
 
-BOOST_AUTO_TEST_CASE(store__repeated_vector__accumulates_within_source)
+BC_AUTO_TEST_CASE(store__repeated_vector__accumulates_within_source)
 {
     options_description options{};
     options.add_options()("name", value<string_list>(), "");
 
     variables_map variables{};
     store(make(options, { { "name", { "a" } }, { "name", { "b" } } }), variables);
-    BOOST_REQUIRE_EQUAL(variables["name"].as<string_list>(), (string_list{ "a", "b" }));
+    BC_REQUIRE_EQUAL(variables["name"].as<string_list>(), (string_list{ "a", "b" }));
 }
 
-BOOST_AUTO_TEST_CASE(store__repeated_scalar__throws)
+BC_AUTO_TEST_CASE(store__repeated_scalar__throws)
 {
     options_description options{};
     options.add_options()("name", value<int32_t>(), "");
 
     variables_map variables{};
-    BOOST_REQUIRE_EXCEPTION(store(make(options, { { "name", { "1" } }, { "name", { "2" } } }), variables), validation_exception, [](const validation_exception& ex) { return std::string{ ex.what() } == "option '--name' cannot be specified more than once"; });
+    BC_REQUIRE_EXCEPTION(store(make(options, { { "name", { "1" } }, { "name", { "2" } } }), variables), validation_exception, [](const validation_exception& ex) { return std::string{ ex.what() } == "option '--name' cannot be specified more than once"; });
 }
 
-BOOST_AUTO_TEST_CASE(store__invalid_undashed__named_undashed)
+BC_AUTO_TEST_CASE(store__invalid_undashed__named_undashed)
 {
     options_description options{};
     options.add_options()("section.name", value<int32_t>(), "");
 
     variables_map variables{};
-    BOOST_REQUIRE_EXCEPTION(store(make(options, { { "section.name", { "x" } } }, false), variables), istream_exception, [](const istream_exception& ex) { return std::string{ ex.what() } == "the argument ('x') for option 'section.name' is invalid"; });
+    BC_REQUIRE_EXCEPTION(store(make(options, { { "section.name", { "x" } } }, false), variables), istream_exception, [](const istream_exception& ex) { return std::string{ ex.what() } == "the argument ('x') for option 'section.name' is invalid"; });
 }
 
-BOOST_AUTO_TEST_CASE(store__undeclared__throws)
+BC_AUTO_TEST_CASE(store__undeclared__throws)
 {
     const options_description options{};
     variables_map variables{};
-    BOOST_REQUIRE_THROW(store(make(options, { { "bogus", { "1" } } }), variables), validation_exception);
+    BC_REQUIRE_THROW(store(make(options, { { "bogus", { "1" } } }), variables), validation_exception);
 }
 
-BOOST_AUTO_TEST_CASE(store__unnamed_positional__skipped)
+BC_AUTO_TEST_CASE(store__unnamed_positional__skipped)
 {
     const options_description options{};
     variables_map variables{};
     store(make(options, { { "", { "1" } } }), variables);
-    BOOST_REQUIRE(variables.empty());
+    BC_REQUIRE(variables.empty());
 }
 
 // notify
 
-BOOST_AUTO_TEST_CASE(notify__bound__stored_and_notified)
+BC_AUTO_TEST_CASE(notify__bound__stored_and_notified)
 {
     int32_t stored{};
     int32_t notified{};
@@ -173,11 +173,11 @@ BOOST_AUTO_TEST_CASE(notify__bound__stored_and_notified)
     variables_map variables{};
     store(make(options, { { "stored", { "1" } }, { "notified", { "2" } } }), variables);
     notify(variables);
-    BOOST_REQUIRE_EQUAL(stored, 1);
-    BOOST_REQUIRE_EQUAL(notified, 2);
+    BC_REQUIRE_EQUAL(stored, 1);
+    BC_REQUIRE_EQUAL(notified, 2);
 }
 
-BOOST_AUTO_TEST_CASE(notify__default__stored)
+BC_AUTO_TEST_CASE(notify__default__stored)
 {
     int32_t stored{};
     options_description options{};
@@ -186,10 +186,10 @@ BOOST_AUTO_TEST_CASE(notify__default__stored)
     variables_map variables{};
     store(make(options, {}), variables);
     notify(variables);
-    BOOST_REQUIRE_EQUAL(stored, 7);
+    BC_REQUIRE_EQUAL(stored, 7);
 }
 
-BOOST_AUTO_TEST_CASE(notify__required_missing__throws_dashed)
+BC_AUTO_TEST_CASE(notify__required_missing__throws_dashed)
 {
     options_description options{};
     options.add_options()("name", value<int32_t>()->required(), "");
@@ -197,17 +197,17 @@ BOOST_AUTO_TEST_CASE(notify__required_missing__throws_dashed)
     variables_map variables{};
     store(make(options, {}, false), variables);
     store(make(options, {}, true), variables);
-    BOOST_REQUIRE_EXCEPTION(notify(variables), validation_exception, [](const validation_exception& ex) { return std::string{ ex.what() } == "the option '--name' is required but missing"; });
+    BC_REQUIRE_EXCEPTION(notify(variables), validation_exception, [](const validation_exception& ex) { return std::string{ ex.what() } == "the option '--name' is required but missing"; });
 }
 
-BOOST_AUTO_TEST_CASE(notify__required_present__does_not_throw)
+BC_AUTO_TEST_CASE(notify__required_present__does_not_throw)
 {
     options_description options{};
     options.add_options()("name", value<int32_t>()->required(), "");
 
     variables_map variables{};
     store(make(options, { { "name", { "1" } } }), variables);
-    BOOST_REQUIRE_NO_THROW(notify(variables));
+    BC_REQUIRE_NO_THROW(notify(variables));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

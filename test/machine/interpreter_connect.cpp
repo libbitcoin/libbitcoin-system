@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include "accessor.hpp"
 
-BOOST_AUTO_TEST_SUITE(interpreter_connect_tests)
+BC_AUTO_TEST_SUITE(interpreter_connect_tests)
 
 using namespace system::chain;
 using namespace system::machine;
@@ -63,122 +63,122 @@ static transaction unfunded_tx() NOEXCEPT
     return transaction{ 1, ins, outs, 0 };
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__index_above_inputs__inputs_overflow)
+BC_AUTO_TEST_CASE(interpreter__connect__index_above_inputs__inputs_overflow)
 {
     const auto tx = connect_tx(script{}, script{});
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 1), error::inputs_overflow);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 1), error::inputs_overflow);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__no_prevout__missing_previous_output)
+BC_AUTO_TEST_CASE(interpreter__connect__no_prevout__missing_previous_output)
 {
     const auto tx = unfunded_tx();
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::missing_previous_output);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::missing_previous_output);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__input_script_error__returned)
+BC_AUTO_TEST_CASE(interpreter__connect__input_script_error__returned)
 {
     const auto tx = connect_tx(unrunnable_script(), script{});
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::invalid_push_data_size);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::invalid_push_data_size);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__output_script_error__returned)
+BC_AUTO_TEST_CASE(interpreter__connect__output_script_error__returned)
 {
     const auto tx = connect_tx(script{}, unrunnable_script());
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::invalid_push_data_size);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::invalid_push_data_size);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__empty_stack__stack_false)
+BC_AUTO_TEST_CASE(interpreter__connect__empty_stack__stack_false)
 {
     const auto tx = connect_tx(script{}, script{});
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::stack_false);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__true_stack__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect__true_stack__script_success)
 {
     const script input_script{ operations{ operation{ opcode::push_positive_1 } } };
     const auto tx = connect_tx(input_script, script{});
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__non_witness_program_with_witness__unexpected_witness)
+BC_AUTO_TEST_CASE(interpreter__connect__non_witness_program_with_witness__unexpected_witness)
 {
     const script input_script{ operations{ operation{ opcode::push_positive_1 } } };
     const chunk_cptrs stack{ to_shared<data_chunk>(data_chunk{ 0x01_u8 }) };
     const chain::witness spender{ stack };
     const auto tx = connect_tx(input_script, script{}, spender);
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::unexpected_witness);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::unexpected_witness);
 }
 
 // The program remains on the stack, so it must be non-zero to reach the branch.
-BOOST_AUTO_TEST_CASE(interpreter__connect__witness_program_dirty_input_script__dirty_witness)
+BC_AUTO_TEST_CASE(interpreter__connect__witness_program_dirty_input_script__dirty_witness)
 {
     const data_chunk program(short_hash_size, 0x01_u8);
     const script prevout{ script::to_pay_witness_pattern(0, program) };
     const script input_script{ operations{ operation{ opcode::push_positive_1 } } };
     const auto tx = connect_tx(input_script, prevout);
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::dirty_witness);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::dirty_witness);
 }
 
 // connect_witness
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__unversioned__unversioned_script)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__unversioned__unversioned_script)
 {
     const auto tx = connect_tx(script{}, script{});
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     const script prevout{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::unversioned_script);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::unversioned_script);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__reserved_version__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__reserved_version__script_success)
 {
     const data_chunk program(hash_size, 0x00_u8);
     const script prevout{ script::to_pay_witness_pattern(2, program) };
     const auto tx = connect_tx(script{}, prevout);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_embedded__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__taproot_embedded__script_success)
 {
     const data_chunk program(hash_size, 0x00_u8);
     const script prevout{ script::to_pay_witness_pattern(1, program) };
     const auto tx = connect_tx(script{}, prevout);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, true, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, true, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_bip341_off__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__taproot_bip341_off__script_success)
 {
     const data_chunk program(hash_size, 0x00_u8);
     const script prevout{ script::to_pay_witness_pattern(1, program) };
     const auto tx = connect_tx(script{}, prevout);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::bip141_rule }, tx, it, prevout, false, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::bip141_rule }, tx, it, prevout, false, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_empty_witness__invalid_witness)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__taproot_empty_witness__invalid_witness)
 {
     const data_chunk program(hash_size, 0x00_u8);
     const script prevout{ script::to_pay_witness_pattern(1, program) };
     const auto tx = connect_tx(script{}, prevout);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_witness);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_witness);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_empty_witness__invalid_witness)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__segwit_empty_witness__invalid_witness)
 {
     const data_chunk program(short_hash_size, 0x00_u8);
     const script prevout{ script::to_pay_witness_pattern(0, program) };
     const auto tx = connect_tx(script{}, prevout);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_witness);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_witness);
 }
 
 static script witness_script() NOEXCEPT
@@ -196,7 +196,7 @@ static data_chunk witness_program(const script& script) NOEXCEPT
     return to_chunk(sha256_hash(script.to_data(false)));
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_true_script__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__segwit_true_script__script_success)
 {
     const script prevout{ script::to_pay_witness_pattern(0, witness_program(witness_script())) };
     const chunk_cptrs stack
@@ -208,10 +208,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_true_script__script_su
     const auto tx = connect_tx(script{}, prevout, spender);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_key_path__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__taproot_key_path__script_success)
 {
     const data_chunk program(hash_size, 0x02_u8);
     const script prevout{ script::to_pay_witness_pattern(1, program) };
@@ -224,20 +224,20 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_key_path__script_succ
     const auto tx = connect_tx(script{}, prevout, spender);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_script_hash__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect__pay_to_script_hash__script_success)
 {
     const script embedded{ operations{ operation{ opcode::push_positive_1 } } };
     const auto data = embedded.to_data(false);
     const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(data)) };
     const script input_script{ operations{ operation{ data, false } } };
     const auto tx = connect_tx(input_script, prevout);
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_witness__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect__pay_to_witness__script_success)
 {
     const script prevout{ script::to_pay_witness_pattern(0, witness_program(witness_script())) };
     const chunk_cptrs stack
@@ -247,20 +247,20 @@ BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_witness__script_success)
 
     const chain::witness spender{ stack };
     const auto tx = connect_tx(script{}, prevout, spender);
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_script_hash_false_embedded__stack_false)
+BC_AUTO_TEST_CASE(interpreter__connect__pay_to_script_hash_false_embedded__stack_false)
 {
     const script embedded{ operations{ operation{ opcode::push_size_0 } } };
     const auto data = embedded.to_data(false);
     const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(data)) };
     const script input_script{ operations{ operation{ data, false } } };
     const auto tx = connect_tx(input_script, prevout);
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::stack_false);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_witness_false_script__stack_false)
+BC_AUTO_TEST_CASE(interpreter__connect__pay_to_witness_false_script__stack_false)
 {
     const auto program = witness_program(false_witness_script());
     const script prevout{ script::to_pay_witness_pattern(0, program) };
@@ -271,10 +271,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect__pay_to_witness_false_script__stack_fa
 
     const chain::witness spender{ stack };
     const auto tx = connect_tx(script{}, prevout, spender);
-    BOOST_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::stack_false);
+    BC_REQUIRE_EQUAL(connector::connect({ flags::all_rules }, tx, 0), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_script_error__returned)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__segwit_script_error__returned)
 {
     const auto program = witness_program(unrunnable_script());
     const script prevout{ script::to_pay_witness_pattern(0, program) };
@@ -287,10 +287,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__segwit_script_error__returned
     const auto tx = connect_tx(script{}, prevout, spender);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_push_data_size);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::invalid_push_data_size);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_invalid_sighash__op_check_sig_schnorr1)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__taproot_invalid_sighash__op_check_sig_schnorr1)
 {
     const data_chunk program(hash_size, 0x02_u8);
     const script prevout{ script::to_pay_witness_pattern(1, program) };
@@ -301,24 +301,24 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__taproot_invalid_sighash__op_c
     const auto tx = connect_tx(script{}, prevout, spender);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::op_check_sig_schnorr1);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::op_check_sig_schnorr1);
 }
 
 // connect_embedded
 // ----------------------------------------------------------------------------
 // The embedded script is popped from the input script evaluation stack.
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__non_push_input_script__invalid_script_embed)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__non_push_input_script__invalid_script_embed)
 {
     const script input_script{ operations{ operation{ opcode::dup } } };
     const auto tx = connect_tx(input_script, script{});
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::invalid_script_embed);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::invalid_script_embed);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__empty_embedded__stack_false)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__empty_embedded__stack_false)
 {
     const script input_script{ operations{ operation{ opcode::push_size_0 } } };
     const auto tx = connect_tx(input_script, script{});
@@ -326,10 +326,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__empty_embedded__stack_false)
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{});
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::stack_false);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_script_error__returned)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_script_error__returned)
 {
     const script input_script{ operations{ operation{ opcode::push_size_0 } } };
     const auto tx = connect_tx(input_script, script{});
@@ -337,10 +337,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_script_error__retur
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(unrunnable_script().to_data(false));
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::invalid_push_data_size);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::invalid_push_data_size);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__true_embedded__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__true_embedded__script_success)
 {
     const script embedded{ operations{ operation{ opcode::push_positive_1 } } };
     const auto data = embedded.to_data(false);
@@ -350,10 +350,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__true_embedded__script_succes
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{ data });
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__non_witness_embedded_with_witness__unexpected_witness)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__non_witness_embedded_with_witness__unexpected_witness)
 {
     const script embedded{ operations{ operation{ opcode::push_positive_1 } } };
     const auto data = embedded.to_data(false);
@@ -365,10 +365,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__non_witness_embedded_with_wi
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{ data });
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::unexpected_witness);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::unexpected_witness);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness__script_success)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness__script_success)
 {
     const script embedded{ script::to_pay_witness_pattern(0, witness_program(witness_script())) };
     const auto data = embedded.to_data(false);
@@ -384,10 +384,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness__script_suc
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{ data });
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::script_success);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::script_success);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness_false_script__stack_false)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness_false_script__stack_false)
 {
     const auto program = witness_program(false_witness_script());
     const script embedded{ script::to_pay_witness_pattern(0, program) };
@@ -404,10 +404,10 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__embedded_witness_false_scrip
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{ data });
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::stack_false);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::stack_false);
 }
 
-BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__dirty_embedded_witness__dirty_embed)
+BC_AUTO_TEST_CASE(interpreter__connect_embedded__dirty_embedded_witness__dirty_embed)
 {
     const data_chunk program(short_hash_size, 0x01_u8);
     const script embedded{ script::to_pay_witness_pattern(0, program) };
@@ -423,7 +423,7 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_embedded__dirty_embedded_witness__dirt
     const signatures capture{};
     connector in{ tx, it, flags::all_rules, capture };
     in.push_chunk(data_chunk{ data });
-    BOOST_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::dirty_embed);
+    BC_REQUIRE_EQUAL(connector::connect_embedded({ flags::all_rules }, tx, it, in, capture), error::dirty_embed);
 }
 
 // bip341 reference commitment: op_1 leaf, tapscript version, even parity.
@@ -431,7 +431,7 @@ static const auto tapscript_program = base16_chunk("81d6ccecd0da56aafd816eb5548c
 static const auto tapscript_control = base16_chunk("c0d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d");
 
 // A residual stack element leaves the script unclean [bip342].
-BOOST_AUTO_TEST_CASE(interpreter__connect_witness__tapscript_dirty_stack__stack_false)
+BC_AUTO_TEST_CASE(interpreter__connect_witness__tapscript_dirty_stack__stack_false)
 {
     const script prevout{ script::to_pay_witness_pattern(1, tapscript_program) };
     const chunk_cptrs stack
@@ -445,7 +445,7 @@ BOOST_AUTO_TEST_CASE(interpreter__connect_witness__tapscript_dirty_stack__stack_
     const auto tx = connect_tx(script{}, prevout, spender);
     const auto it = tx.inputs_ptr()->cbegin();
     const signatures capture{};
-    BOOST_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::stack_false);
+    BC_REQUIRE_EQUAL(connector::connect_witness({ flags::all_rules }, tx, it, prevout, false, capture), error::stack_false);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

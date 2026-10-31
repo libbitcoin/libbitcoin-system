@@ -18,15 +18,15 @@
  */
 #include "../../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_verify_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_verify_tests)
 
 // accelerated
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1__batched__accelerated__implies_compiled)
+BC_AUTO_TEST_CASE(secp256k1__batched__accelerated__implies_compiled)
 {
     const auto compiled = batched::compiled();
-    BOOST_REQUIRE(!batched::accelerated() || compiled);
+    BC_REQUIRE(!batched::accelerated() || compiled);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include <tuple>
 
-BOOST_AUTO_TEST_SUITE(checked_tests)
+BC_AUTO_TEST_SUITE(checked_tests)
 
 using namespace bc::system::wallet;
 
@@ -58,144 +58,144 @@ auto long_valid_value() NOEXCEPT
     return value;
 }
 
-BOOST_AUTO_TEST_CASE(checked__default_construct__zero__valid)
+BC_AUTO_TEST_CASE(checked__default_construct__zero__valid)
 {
     // Empty checksum and empty value, so no state and always valid.
-    BOOST_REQUIRE(zero_checked());
+    BC_REQUIRE(zero_checked());
 }
 
-BOOST_AUTO_TEST_CASE(checked__default_construct__non_empty_always__invalid)
+BC_AUTO_TEST_CASE(checked__default_construct__non_empty_always__invalid)
 {
     // Zeroed value and checksum implies invalid checksum.
-    BOOST_REQUIRE(!mini_checked());
-    BOOST_REQUIRE(!short_checked());
-    BOOST_REQUIRE(!long_checked());
+    BC_REQUIRE(!mini_checked());
+    BC_REQUIRE(!short_checked());
+    BC_REQUIRE(!long_checked());
 }
 
-BOOST_AUTO_TEST_CASE(checked__values_construct__zero__valid)
+BC_AUTO_TEST_CASE(checked__values_construct__zero__valid)
 {
     // Empty checksum and empty value, so no state and always valid.
     const zero_checked zero_instance({}, {});
-    BOOST_REQUIRE(zero_instance);
+    BC_REQUIRE(zero_instance);
 
     const mini_checked mini_instance({ 0 }, null_mini_hash);
-    BOOST_REQUIRE(mini_instance);
+    BC_REQUIRE(mini_instance);
 
     const short_checked short_instance({ 0, 0, 0 }, null_short_hash);
-    BOOST_REQUIRE(short_instance);
+    BC_REQUIRE(short_instance);
 
     const long_checked long_instance({ 0, 0, 0, 0, 0 }, null_long_hash);
-    BOOST_REQUIRE(long_instance);
+    BC_REQUIRE(long_instance);
 }
 
-BOOST_AUTO_TEST_CASE(checked__value_copy_construct__mini__valid)
+BC_AUTO_TEST_CASE(checked__value_copy_construct__mini__valid)
 {
     const mini_checked instance(mini_valid_value());
-    BOOST_REQUIRE(instance);
+    BC_REQUIRE(instance);
 }
 
-BOOST_AUTO_TEST_CASE(checked__copy_construct__long__valid)
+BC_AUTO_TEST_CASE(checked__copy_construct__long__valid)
 {
     const long_checked instance(long_valid_value());
     const long_checked copy(instance);
-    BOOST_REQUIRE(copy);
+    BC_REQUIRE(copy);
 }
 
-BOOST_AUTO_TEST_CASE(checked__value_move_construct__short__valid)
+BC_AUTO_TEST_CASE(checked__value_move_construct__short__valid)
 {
     short_checked instance(short_valid_value());
     const short_checked copy(std::move(instance));
-    BOOST_REQUIRE(copy);
+    BC_REQUIRE(copy);
 }
 
-BOOST_AUTO_TEST_CASE(checked__move_construct__long__valid)
+BC_AUTO_TEST_CASE(checked__move_construct__long__valid)
 {
     long_checked instance(long_valid_value());
     const long_checked copy(std::move(instance));
-    BOOST_REQUIRE(copy);
+    BC_REQUIRE(copy);
 }
 
-BOOST_AUTO_TEST_CASE(checked__copy_assign__short__valid)
+BC_AUTO_TEST_CASE(checked__copy_assign__short__valid)
 {
     const short_checked instance(short_valid_value());
     short_checked copy;
     copy = instance;
-    BOOST_REQUIRE(copy);
+    BC_REQUIRE(copy);
 }
 
-BOOST_AUTO_TEST_CASE(checked__move_assign__short__valid)
+BC_AUTO_TEST_CASE(checked__move_assign__short__valid)
 {
     short_checked instance(short_valid_value());
     short_checked copy;
     copy = std::move(instance);
-    BOOST_REQUIRE(copy);
+    BC_REQUIRE(copy);
 }
 
-BOOST_AUTO_TEST_CASE(checked__properies__zero__expected)
+BC_AUTO_TEST_CASE(checked__properies__zero__expected)
 {
     const zero_checked zero_instance({}, {});
-    BOOST_REQUIRE(zero_instance);
-    BOOST_REQUIRE(zero_instance.prefix() == zero_checked::prefix_type{});
-    BOOST_REQUIRE(zero_instance.payload() == zero_checked::payload_type{});
-    BOOST_REQUIRE_EQUAL(encode_base16(zero_instance.checksum()), "");
+    BC_REQUIRE(zero_instance);
+    BC_REQUIRE(zero_instance.prefix() == zero_checked::prefix_type{});
+    BC_REQUIRE(zero_instance.payload() == zero_checked::payload_type{});
+    BC_REQUIRE_EQUAL(encode_base16(zero_instance.checksum()), "");
 }
 
-BOOST_AUTO_TEST_CASE(checked__properies__mini__expected)
+BC_AUTO_TEST_CASE(checked__properies__mini__expected)
 {
     const mini_checked mini_instance({ 42 }, test_mini_hash);
-    BOOST_REQUIRE(mini_instance);
+    BC_REQUIRE(mini_instance);
     const auto expected_prefix = mini_checked::prefix_type{ 42 };
-    BOOST_REQUIRE(mini_instance.prefix() == expected_prefix);
-    BOOST_REQUIRE(mini_instance.payload() == test_mini_hash);
-    BOOST_REQUIRE_EQUAL(encode_base16(mini_instance.checksum()), "6a7b");
+    BC_REQUIRE(mini_instance.prefix() == expected_prefix);
+    BC_REQUIRE(mini_instance.payload() == test_mini_hash);
+    BC_REQUIRE_EQUAL(encode_base16(mini_instance.checksum()), "6a7b");
 }
 
-BOOST_AUTO_TEST_CASE(checked__properies__short__expected)
+BC_AUTO_TEST_CASE(checked__properies__short__expected)
 {
     const short_checked short_instance({ 42, 24, 0 }, test_short_hash);
-    BOOST_REQUIRE(short_instance);
+    BC_REQUIRE(short_instance);
     const auto expected_prefix = short_checked::prefix_type{ 42, 24 };
-    BOOST_REQUIRE(short_instance.prefix() == expected_prefix);
-    BOOST_REQUIRE(short_instance.payload() == test_short_hash);
-    BOOST_REQUIRE_EQUAL(encode_base16(short_instance.checksum()), "77a9ccbb");
+    BC_REQUIRE(short_instance.prefix() == expected_prefix);
+    BC_REQUIRE(short_instance.payload() == test_short_hash);
+    BC_REQUIRE_EQUAL(encode_base16(short_instance.checksum()), "77a9ccbb");
 }
 
-BOOST_AUTO_TEST_CASE(checked__properies__long__expected)
+BC_AUTO_TEST_CASE(checked__properies__long__expected)
 {
     const long_checked long_instance({ 1, 24, 42, 2, 0 }, test_long_hash);
-    BOOST_REQUIRE(long_instance);
+    BC_REQUIRE(long_instance);
     const auto expected_prefix = long_checked::prefix_type{ 1, 24, 42, 2, 0 };
-    BOOST_REQUIRE(long_instance.prefix() == expected_prefix);
-    BOOST_REQUIRE(long_instance.payload() == test_long_hash);
-    BOOST_REQUIRE_EQUAL(encode_base16(long_instance.checksum()), "2aed29c75b84cdaf");
+    BC_REQUIRE(long_instance.prefix() == expected_prefix);
+    BC_REQUIRE(long_instance.payload() == test_long_hash);
+    BC_REQUIRE_EQUAL(encode_base16(long_instance.checksum()), "2aed29c75b84cdaf");
 }
 
-BOOST_AUTO_TEST_CASE(checked__equality__same__true)
+BC_AUTO_TEST_CASE(checked__equality__same__true)
 {
     const long_checked long_instance({ 1, 24, 42, 2, 0 }, test_long_hash);
-    BOOST_REQUIRE(long_instance);
+    BC_REQUIRE(long_instance);
     const auto expected_prefix = long_checked::prefix_type{ 1, 24, 42, 2, 0 };
-    BOOST_REQUIRE(long_instance.prefix() == expected_prefix);
-    BOOST_REQUIRE(long_instance.payload() == test_long_hash);
-    BOOST_REQUIRE_EQUAL(encode_base16(long_instance.checksum()), "2aed29c75b84cdaf");
+    BC_REQUIRE(long_instance.prefix() == expected_prefix);
+    BC_REQUIRE(long_instance.payload() == test_long_hash);
+    BC_REQUIRE_EQUAL(encode_base16(long_instance.checksum()), "2aed29c75b84cdaf");
 }
 
 
-BOOST_AUTO_TEST_CASE(checked__assign_copy__always__expected)
+BC_AUTO_TEST_CASE(checked__assign_copy__always__expected)
 {
     const short_checked instance1(short_prefix, test_short_hash);
     short_checked instance2{};
     instance2 = instance1;
-    BOOST_REQUIRE(instance2 == instance1);
+    BC_REQUIRE(instance2 == instance1);
 }
 
-BOOST_AUTO_TEST_CASE(checked__assign_move__always__expected)
+BC_AUTO_TEST_CASE(checked__assign_move__always__expected)
 {
     short_checked instance1(short_prefix, test_short_hash);
     const short_checked expected(instance1);
     short_checked instance2{};
     instance2 = std::move(instance1);
-    BOOST_REQUIRE(instance2 == expected);
+    BC_REQUIRE(instance2 == expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

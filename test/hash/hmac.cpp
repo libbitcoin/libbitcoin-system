@@ -19,54 +19,54 @@
 #include "../test.hpp"
 #include "hash.hpp"
 
-BOOST_AUTO_TEST_SUITE(hmac_tests)
+BC_AUTO_TEST_SUITE(hmac_tests)
 
 // test.expected size mismatch
-////BOOST_AUTO_TEST_CASE(hmac__rmd128__test_vectors__expected)
+////BC_AUTO_TEST_CASE(hmac__rmd128__test_vectors__expected)
 ////{
 ////    // No test vectors, just exercising.
 ////    for (const auto& test : hmac_sha160_tests)
 ////    {
 ////        const auto hash = hmac<rmd128>::code(test.data, test.key);
-////        BOOST_REQUIRE_NE(hash, test.expected);
+////        BC_REQUIRE_NE(hash, test.expected);
 ////    }
 ////}
 
-BOOST_AUTO_TEST_CASE(hmac__rmd160__test_vectors__expected)
+BC_AUTO_TEST_CASE(hmac__rmd160__test_vectors__expected)
 {
     // No test vectors, just exercising.
     for (const auto& test: hmac_sha160_tests)
     {
         const auto hash = hmac<rmd160>::code(test.data, test.key);
-        BOOST_REQUIRE_NE(hash, test.expected);
+        BC_REQUIRE_NE(hash, test.expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(hmac__sha160__test_vectors__expected)
+BC_AUTO_TEST_CASE(hmac__sha160__test_vectors__expected)
 {
     for (const auto& test: hmac_sha160_tests)
     {
         const auto hash = hmac<sha160>::code(test.data, test.key);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(hmac__sha256__test_vectors__expected)
+BC_AUTO_TEST_CASE(hmac__sha256__test_vectors__expected)
 {
     for (const auto& test: hmac_sha256_tests)
     {
         const auto hash = hmac<sha256>::code(test.data, test.key);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(hmac__sha512__test_vectors__expected)
+BC_AUTO_TEST_CASE(hmac__sha512__test_vectors__expected)
 {
     for (const auto& test: hmac_sha512_tests)
     {
         const auto hash = hmac<sha512>::code(test.data, test.key);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

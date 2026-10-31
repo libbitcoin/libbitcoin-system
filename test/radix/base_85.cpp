@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(base_85_tests)
+BC_AUTO_TEST_SUITE(base_85_tests)
 
 #define BASE85_ENCODED "HelloWorld"
 #define BASE85_DECODED \
@@ -33,64 +33,64 @@ BOOST_AUTO_TEST_SUITE(base_85_tests)
     0x86, 0x4F, 0xD2, 0x6F, 0xB5, 0x59, 0xF7, 0x5B, 0x42 \
 }
 
-BOOST_AUTO_TEST_CASE(encode_base85_empty_test)
+BC_AUTO_TEST_CASE(encode_base85_empty_test)
 {
     std::string encoded;
-    BOOST_REQUIRE(encode_base85(encoded, data_chunk{}));
-    BOOST_REQUIRE(encoded.empty());
+    BC_REQUIRE(encode_base85(encoded, data_chunk{}));
+    BC_REQUIRE(encoded.empty());
 }
 
-BOOST_AUTO_TEST_CASE(decode_base85_empty_test)
+BC_AUTO_TEST_CASE(decode_base85_empty_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(decode_base85(result, ""));
-    BOOST_REQUIRE(result.empty());
+    BC_REQUIRE(decode_base85(result, ""));
+    BC_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(encode_base85_valid_test)
+BC_AUTO_TEST_CASE(encode_base85_valid_test)
 {
     std::string encoded;
     data_chunk decoded(BASE85_DECODED);
-    BOOST_REQUIRE(encode_base85(encoded, decoded));
-    BOOST_REQUIRE_EQUAL(encoded, BASE85_ENCODED);
+    BC_REQUIRE(encode_base85(encoded, decoded));
+    BC_REQUIRE_EQUAL(encoded, BASE85_ENCODED);
 }
 
-BOOST_AUTO_TEST_CASE(encode_base85_invalid_test)
+BC_AUTO_TEST_CASE(encode_base85_invalid_test)
 {
     std::string encoded;
     data_chunk decoded(BASE85_DECODED_INVALID);
-    BOOST_REQUIRE(!encode_base85(encoded, decoded));
-    BOOST_REQUIRE(encoded.empty());
+    BC_REQUIRE(!encode_base85(encoded, decoded));
+    BC_REQUIRE(encoded.empty());
 }
 
-BOOST_AUTO_TEST_CASE(decode_base85_valid_test)
+BC_AUTO_TEST_CASE(decode_base85_valid_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(decode_base85(result, BASE85_ENCODED));
-    BOOST_REQUIRE(result == data_chunk(BASE85_DECODED));
+    BC_REQUIRE(decode_base85(result, BASE85_ENCODED));
+    BC_REQUIRE(result == data_chunk(BASE85_DECODED));
 }
 
-BOOST_AUTO_TEST_CASE(decode_base85_invalid_char_test)
+BC_AUTO_TEST_CASE(decode_base85_invalid_char_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(!decode_base85(result, BASE85_ENCODED_INVALID_CHAR));
-    BOOST_REQUIRE(result.empty());
+    BC_REQUIRE(!decode_base85(result, BASE85_ENCODED_INVALID_CHAR));
+    BC_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(decode_base85_invalid_length_test)
+BC_AUTO_TEST_CASE(decode_base85_invalid_length_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(!decode_base85(result, BASE85_ENCODED_INVALID_LENGTH));
-    BOOST_REQUIRE(result.empty());
+    BC_REQUIRE(!decode_base85(result, BASE85_ENCODED_INVALID_LENGTH));
+    BC_REQUIRE(result.empty());
 }
 
 // The semicolon is not in the Z85 alphabet, and such characters are treated as
 // valid but with zero value in the reference implementation.
-BOOST_AUTO_TEST_CASE(decode_base85_outside_alphabet_test)
+BC_AUTO_TEST_CASE(decode_base85_outside_alphabet_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(decode_base85(result, ";;;;;"));
-    BOOST_REQUIRE(result == data_chunk({ 0, 0, 0, 0 }));
+    BC_REQUIRE(decode_base85(result, ";;;;;"));
+    BC_REQUIRE(result == data_chunk({ 0, 0, 0, 0 }));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

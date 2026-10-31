@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include <bitset>
 
-BOOST_AUTO_TEST_SUITE(bloom_tests)
+BC_AUTO_TEST_SUITE(bloom_tests)
 
 ////#define HAVE_SLOW_TESTS
 
@@ -41,7 +41,7 @@ static_assert( accessor<0, 0>::is_screened(accessor<0, 0>::empty, 42));
 static_assert( accessor<1, 0>::is_screened(accessor<1, 0>::empty, 42));
 static_assert(!accessor<1, 1>::is_screened(accessor<1, 1>::empty, 42));
 
-BOOST_AUTO_TEST_CASE(bloom__screened__forward__expected)
+BC_AUTO_TEST_CASE(bloom__screened__forward__expected)
 {
     constexpr size_t m = 32;
     constexpr size_t k = 4;
@@ -86,382 +86,382 @@ BOOST_AUTO_TEST_CASE(bloom__screened__forward__expected)
 
     // none screened
     auto value = bloom_t::empty;
-    BOOST_CHECK( bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111111111u);
+    BC_CHECK( bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_screened(value, forward[0]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[1]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[2]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[3]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[4]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111111111u);
 
     // 0 screened
     value = bloom_t::screen(value, forward[0]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111111110u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[1]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[2]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[3]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[4]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111111110u);
 
     // 1 screened
     value = bloom_t::screen(value, forward[1]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111111100u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[2]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[3]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[4]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111111100u);
 
     // 2 screened
     value = bloom_t::screen(value, forward[2]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111111000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[3]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[4]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111111000u);
 
     // 3 screened
     value = bloom_t::screen(value, forward[3]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111110000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[4]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111110000u);
 
     // 4 screened
     value = bloom_t::screen(value, forward[4]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111100000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111100000u);
 
     // 5 screened
     value = bloom_t::screen(value, forward[5]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111000000u);
 
     // 6 screened
     value = bloom_t::screen(value, forward[6]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111110000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111110000000u);
 
     // 7 screened
     value = bloom_t::screen(value, forward[7]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111100000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111100000000u);
 
     // 8 screened
     value = bloom_t::screen(value, forward[8]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111000000000u);
 
     // 9 screened
     value = bloom_t::screen(value, forward[9]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111110000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111110000000000u);
 
     // 10 screened
     value = bloom_t::screen(value, forward[10]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111100000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK( bloom_t::is_screened(value, forward[10]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111100000000000u);
 
     // 11 screened
     value = bloom_t::screen(value, forward[11]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111000000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK( bloom_t::is_screened(value, forward[10]));
+    BC_CHECK( bloom_t::is_screened(value, forward[11]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111000000000000u);
 
     // 12 screened
     value = bloom_t::screen(value, forward[12]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111110000000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK( bloom_t::is_screened(value, forward[10]));
+    BC_CHECK( bloom_t::is_screened(value, forward[11]));
+    BC_CHECK( bloom_t::is_screened(value, forward[12]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111110000000000000u);
 
     // 13 screened
     value = bloom_t::screen(value, forward[13]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111100000000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK( bloom_t::is_screened(value, forward[10]));
+    BC_CHECK( bloom_t::is_screened(value, forward[11]));
+    BC_CHECK( bloom_t::is_screened(value, forward[12]));
+    BC_CHECK( bloom_t::is_screened(value, forward[13]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111100000000000000u);
 
     // 14 screened
     value = bloom_t::screen(value, forward[14]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111000000000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK( bloom_t::is_screened(value, forward[10]));
+    BC_CHECK( bloom_t::is_screened(value, forward[11]));
+    BC_CHECK( bloom_t::is_screened(value, forward[12]));
+    BC_CHECK( bloom_t::is_screened(value, forward[13]));
+    BC_CHECK( bloom_t::is_screened(value, forward[14]));
+    BC_CHECK(!bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111000000000000000u);
 
     // 15 screened
     value = bloom_t::screen(value, forward[15]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[12]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[13]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[14]));
-    BOOST_CHECK( bloom_t::is_screened(value, forward[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111110000000000000000u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_screened(value, forward[1]));
+    BC_CHECK( bloom_t::is_screened(value, forward[2]));
+    BC_CHECK( bloom_t::is_screened(value, forward[3]));
+    BC_CHECK( bloom_t::is_screened(value, forward[4]));
+    BC_CHECK( bloom_t::is_screened(value, forward[5]));
+    BC_CHECK( bloom_t::is_screened(value, forward[6]));
+    BC_CHECK( bloom_t::is_screened(value, forward[7]));
+    BC_CHECK( bloom_t::is_screened(value, forward[8]));
+    BC_CHECK( bloom_t::is_screened(value, forward[9]));
+    BC_CHECK( bloom_t::is_screened(value, forward[10]));
+    BC_CHECK( bloom_t::is_screened(value, forward[11]));
+    BC_CHECK( bloom_t::is_screened(value, forward[12]));
+    BC_CHECK( bloom_t::is_screened(value, forward[13]));
+    BC_CHECK( bloom_t::is_screened(value, forward[14]));
+    BC_CHECK( bloom_t::is_screened(value, forward[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111110000000000000000u);
 
     // Not saturated (already screened).
     value = bloom_t::screen(value, forward[15]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
 
     // Saturated (not already screened).
     value = bloom_t::screen(value, forward[16]);
@@ -480,11 +480,11 @@ BOOST_AUTO_TEST_CASE(bloom__screened__forward__expected)
     value = bloom_t::screen(value, forward[29]);
     value = bloom_t::screen(value, forward[30]);
     value = bloom_t::screen(value, forward[31]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK( bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK( bloom_t::is_saturated(value));
 }
 
-BOOST_AUTO_TEST_CASE(bloom__screened__reverse__expected)
+BC_AUTO_TEST_CASE(bloom__screened__reverse__expected)
 {
     constexpr size_t m = 32;
     constexpr size_t k = 4;
@@ -529,382 +529,382 @@ BOOST_AUTO_TEST_CASE(bloom__screened__reverse__expected)
 
     // none screened
     auto value = bloom_t::empty;
-    BOOST_CHECK( bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b11111111111111111111111111111111u);
+    BC_CHECK( bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b11111111111111111111111111111111u);
 
     // 0 screened
     value = bloom_t::screen(value, reverse[0]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b01111111111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b01111111111111111111111111111111u);
 
     // 1 screened
     value = bloom_t::screen(value, reverse[1]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00111111111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00111111111111111111111111111111u);
 
     // 2 screened
     value = bloom_t::screen(value, reverse[2]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00011111111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00011111111111111111111111111111u);
 
     // 3 screened
     value = bloom_t::screen(value, reverse[3]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00001111111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00001111111111111111111111111111u);
 
     // 4 screened
     value = bloom_t::screen(value, reverse[4]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000111111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000111111111111111111111111111u);
 
     // 5 screened
     value = bloom_t::screen(value, reverse[5]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000011111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000011111111111111111111111111u);
 
     // 6 screened
     value = bloom_t::screen(value, reverse[6]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000001111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000001111111111111111111111111u);
 
     // 7 screened
     value = bloom_t::screen(value, reverse[7]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000111111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000111111111111111111111111u);
 
     // 8 screened
     value = bloom_t::screen(value, reverse[8]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000011111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000011111111111111111111111u);
 
     // 9 screened
     value = bloom_t::screen(value, reverse[9]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000001111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000001111111111111111111111u);
 
     // 10 screened
     value = bloom_t::screen(value, reverse[10]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000000111111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000000111111111111111111111u);
 
     // 11 screened
     value = bloom_t::screen(value, reverse[11]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000000011111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000000011111111111111111111u);
 
     // 12 screened
     value = bloom_t::screen(value, reverse[12]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000000001111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000000001111111111111111111u);
 
     // 13 screened
     value = bloom_t::screen(value, reverse[13]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000000000111111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000000000111111111111111111u);
 
     // 14 screened
     value = bloom_t::screen(value, reverse[14]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000000000011111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK(!bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000000000011111111111111111u);
 
     // 15 screened
     value = bloom_t::screen(value, reverse[15]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[12]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[13]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[14]));
-    BOOST_CHECK( bloom_t::is_screened(value, reverse[15]));
-    BOOST_CHECK_EQUAL(value, 0b00000000000000001111111111111111u);
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK( bloom_t::is_screened(value, reverse[0]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[1]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[2]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[3]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[4]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[5]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[6]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[7]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[8]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[9]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[10]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[11]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[12]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[13]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[14]));
+    BC_CHECK( bloom_t::is_screened(value, reverse[15]));
+    BC_CHECK_EQUAL(value, 0b00000000000000001111111111111111u);
 
     // Not saturated (already screened).
     value = bloom_t::screen(value, reverse[15]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
 
     // Saturated (not already screened).
     value = bloom_t::screen(value, reverse[16]);
@@ -923,11 +923,11 @@ BOOST_AUTO_TEST_CASE(bloom__screened__reverse__expected)
     value = bloom_t::screen(value, reverse[29]);
     value = bloom_t::screen(value, reverse[30]);
     value = bloom_t::screen(value, reverse[31]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK( bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK( bloom_t::is_saturated(value));
 }
 
-BOOST_AUTO_TEST_CASE(bloom__screen__full__expected_saturation)
+BC_AUTO_TEST_CASE(bloom__screen__full__expected_saturation)
 {
     constexpr size_t m = 32;
     constexpr size_t k = 4;
@@ -972,65 +972,65 @@ BOOST_AUTO_TEST_CASE(bloom__screen__full__expected_saturation)
 
     bloom_t::type previous{};
     auto value = bloom_t::empty;
-    BOOST_CHECK( bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
-    BOOST_CHECK(!bloom_t::is_screened(value, forward[0]));
+    BC_CHECK( bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_screened(value, forward[0]));
 
     value = bloom_t::screen(previous = value, forward[0]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[1]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[2]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[3]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[4]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[5]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[6]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[7]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[8]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[9]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[10]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[11]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[12]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[13]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[14]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = bloom_t::screen(previous = value, forward[15]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     // Already screened, not bloom change.
     value = bloom_t::screen(previous = value, forward[15]);
-    BOOST_CHECK(value == previous);
+    BC_CHECK(value == previous);
 
     // Full but not saturated.
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK(!bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK(!bloom_t::is_saturated(value));
 
     // Saturate.
     value = bloom_t::screen(value, forward[16]);
@@ -1049,8 +1049,8 @@ BOOST_AUTO_TEST_CASE(bloom__screen__full__expected_saturation)
     value = bloom_t::screen(value, forward[29]);
     value = bloom_t::screen(value, forward[30]);
     value = bloom_t::screen(value, forward[31]);
-    BOOST_CHECK(!bloom_t::is_empty(value));
-    BOOST_CHECK( bloom_t::is_saturated(value));
+    BC_CHECK(!bloom_t::is_empty(value));
+    BC_CHECK( bloom_t::is_saturated(value));
 
 #if defined(HAVE_SLOW_TESTS)
     // All values must be screened once saturated (full and overflow).
@@ -1058,7 +1058,7 @@ BOOST_AUTO_TEST_CASE(bloom__screen__full__expected_saturation)
     {
         if (!bloom_t::is_screened(value, finger))
         {
-            BOOST_REQUIRE(false);
+            BC_REQUIRE(false);
         }
     }
 #endif
@@ -1066,7 +1066,7 @@ BOOST_AUTO_TEST_CASE(bloom__screen__full__expected_saturation)
 
 #if defined(HAVE_SLOW_TESTS)
 
-BOOST_AUTO_TEST_CASE(bloom__screen__4_bits_forward__16_screens)
+BC_AUTO_TEST_CASE(bloom__screen__4_bits_forward__16_screens)
 {
     constexpr size_t m = 32;
     constexpr size_t k = 4;
@@ -1089,10 +1089,10 @@ BOOST_AUTO_TEST_CASE(bloom__screen__4_bits_forward__16_screens)
         }
     }
 
-    BOOST_CHECK_EQUAL(count, limit);
+    BC_CHECK_EQUAL(count, limit);
 }
 
-BOOST_AUTO_TEST_CASE(bloom__screen__4_bits_reverse__16_screens)
+BC_AUTO_TEST_CASE(bloom__screen__4_bits_reverse__16_screens)
 {
     constexpr size_t m = 32;
     constexpr size_t k = 4;
@@ -1113,7 +1113,7 @@ BOOST_AUTO_TEST_CASE(bloom__screen__4_bits_reverse__16_screens)
         }
     }
 
-    BOOST_CHECK_EQUAL(count, limit);
+    BC_CHECK_EQUAL(count, limit);
 }
 
 #endif // HAVE_SLOW_TESTS
@@ -1125,7 +1125,7 @@ static_assert(mixed_fixed_last == mixed_dynamic_last);
 static_assert(bloom<0, 0>::is_screened(0, 42, 0));
 static_assert(bloom<1, 0>::is_screened(0, 42, 0));
 
-BOOST_AUTO_TEST_CASE(bloom__screen__runtime_k__matches_compile_time)
+BC_AUTO_TEST_CASE(bloom__screen__runtime_k__matches_compile_time)
 {
     constexpr size_t m = 32;
     constexpr size_t k = 4;
@@ -1134,36 +1134,36 @@ BOOST_AUTO_TEST_CASE(bloom__screen__runtime_k__matches_compile_time)
 
     auto fixed = bloom_t::screen(bloom_t::empty, 42);
     auto dynamic = wide_t::screen(wide_t::empty, 42, k);
-    BOOST_REQUIRE_EQUAL(fixed, dynamic);
-    BOOST_REQUIRE(bloom_t::is_screened(fixed, 42));
-    BOOST_REQUIRE(wide_t::is_screened(dynamic, 42, k));
+    BC_REQUIRE_EQUAL(fixed, dynamic);
+    BC_REQUIRE(bloom_t::is_screened(fixed, 42));
+    BC_REQUIRE(wide_t::is_screened(dynamic, 42, k));
 
     fixed = bloom_t::screen(fixed, 24);
     dynamic = wide_t::screen(dynamic, 24, k);
-    BOOST_REQUIRE_EQUAL(fixed, dynamic);
-    BOOST_REQUIRE(bloom_t::is_screened(fixed, 24));
-    BOOST_REQUIRE(wide_t::is_screened(dynamic, 24, k));
+    BC_REQUIRE_EQUAL(fixed, dynamic);
+    BC_REQUIRE(bloom_t::is_screened(fixed, 24));
+    BC_REQUIRE(wide_t::is_screened(dynamic, 24, k));
 
     fixed = bloom_t::screen(fixed, 0xdeadbeef);
     dynamic = wide_t::screen(dynamic, 0xdeadbeef, k);
-    BOOST_REQUIRE_EQUAL(fixed, dynamic);
-    BOOST_REQUIRE(bloom_t::is_screened(fixed, 0xdeadbeef));
-    BOOST_REQUIRE(wide_t::is_screened(dynamic, 0xdeadbeef, k));
+    BC_REQUIRE_EQUAL(fixed, dynamic);
+    BC_REQUIRE(bloom_t::is_screened(fixed, 0xdeadbeef));
+    BC_REQUIRE(wide_t::is_screened(dynamic, 0xdeadbeef, k));
 
     fixed = bloom_t::screen(fixed, max_uint64);
     dynamic = wide_t::screen(dynamic, max_uint64, k);
-    BOOST_REQUIRE_EQUAL(fixed, dynamic);
-    BOOST_REQUIRE(bloom_t::is_screened(fixed, max_uint64));
-    BOOST_REQUIRE(wide_t::is_screened(dynamic, max_uint64, k));
+    BC_REQUIRE_EQUAL(fixed, dynamic);
+    BC_REQUIRE(bloom_t::is_screened(fixed, max_uint64));
+    BC_REQUIRE(wide_t::is_screened(dynamic, max_uint64, k));
 }
 
-BOOST_AUTO_TEST_CASE(bloom__is_screened__runtime_k_empty__false)
+BC_AUTO_TEST_CASE(bloom__is_screened__runtime_k_empty__false)
 {
     using bloom_t = accessor<32, 12>;
-    BOOST_REQUIRE(!bloom_t::is_screened(bloom_t::empty, 42, 5));
+    BC_REQUIRE(!bloom_t::is_screened(bloom_t::empty, 42, 5));
 }
 
-BOOST_AUTO_TEST_CASE(bloom__is_screened__runtime_k_screened__true)
+BC_AUTO_TEST_CASE(bloom__is_screened__runtime_k_screened__true)
 {
     using bloom_t = accessor<32, 12>;
     const auto value1 = bloom_t::screen(bloom_t::empty, 42, 1);
@@ -1178,18 +1178,18 @@ BOOST_AUTO_TEST_CASE(bloom__is_screened__runtime_k_screened__true)
     const auto value10 = bloom_t::screen(bloom_t::empty, 42, 10);
     const auto value11 = bloom_t::screen(bloom_t::empty, 42, 11);
     const auto value12 = bloom_t::screen(bloom_t::empty, 42, 12);
-    BOOST_REQUIRE(bloom_t::is_screened(value1, 42, 1));
-    BOOST_REQUIRE(bloom_t::is_screened(value2, 42, 2));
-    BOOST_REQUIRE(bloom_t::is_screened(value3, 42, 3));
-    BOOST_REQUIRE(bloom_t::is_screened(value4, 42, 4));
-    BOOST_REQUIRE(bloom_t::is_screened(value5, 42, 5));
-    BOOST_REQUIRE(bloom_t::is_screened(value6, 42, 6));
-    BOOST_REQUIRE(bloom_t::is_screened(value7, 42, 7));
-    BOOST_REQUIRE(bloom_t::is_screened(value8, 42, 8));
-    BOOST_REQUIRE(bloom_t::is_screened(value9, 42, 9));
-    BOOST_REQUIRE(bloom_t::is_screened(value10, 42, 10));
-    BOOST_REQUIRE(bloom_t::is_screened(value11, 42, 11));
-    BOOST_REQUIRE(bloom_t::is_screened(value12, 42, 12));
+    BC_REQUIRE(bloom_t::is_screened(value1, 42, 1));
+    BC_REQUIRE(bloom_t::is_screened(value2, 42, 2));
+    BC_REQUIRE(bloom_t::is_screened(value3, 42, 3));
+    BC_REQUIRE(bloom_t::is_screened(value4, 42, 4));
+    BC_REQUIRE(bloom_t::is_screened(value5, 42, 5));
+    BC_REQUIRE(bloom_t::is_screened(value6, 42, 6));
+    BC_REQUIRE(bloom_t::is_screened(value7, 42, 7));
+    BC_REQUIRE(bloom_t::is_screened(value8, 42, 8));
+    BC_REQUIRE(bloom_t::is_screened(value9, 42, 9));
+    BC_REQUIRE(bloom_t::is_screened(value10, 42, 10));
+    BC_REQUIRE(bloom_t::is_screened(value11, 42, 11));
+    BC_REQUIRE(bloom_t::is_screened(value12, 42, 12));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

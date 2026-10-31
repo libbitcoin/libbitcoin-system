@@ -340,7 +340,6 @@
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
-#include <bitcoin/system/unit_test/aliases.hpp>
 #include <bitcoin/system/unit_test/checks.hpp>
 #include <bitcoin/system/unit_test/filter.hpp>
 #include <bitcoin/system/unit_test/macros.hpp>

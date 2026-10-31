@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(muhash_tests)
+BC_AUTO_TEST_SUITE(muhash_tests)
 
 constexpr auto muhash_element_0 = base16_array(
     "0000000000000000000000000000000000000000000000000000000000000000");
@@ -28,7 +28,7 @@ constexpr auto muhash_element_2 = base16_array(
     "0200000000000000000000000000000000000000000000000000000000000000");
 
 // bitcoind crypto_tests muhash_tests vector.
-BOOST_AUTO_TEST_CASE(muhash__flush__bitcoind_vector__expected)
+BC_AUTO_TEST_CASE(muhash__flush__bitcoind_vector__expected)
 {
     const auto expected = base16_hash(
         "10d312b100cbd32ada024a6646e40d3482fcff103668d2625f10002a607d5863");
@@ -37,19 +37,19 @@ BOOST_AUTO_TEST_CASE(muhash__flush__bitcoind_vector__expected)
     set.insert(muhash_element_0);
     set.insert(muhash_element_1);
     set.remove(muhash_element_2);
-    BOOST_REQUIRE_EQUAL(set.flush(), expected);
+    BC_REQUIRE_EQUAL(set.flush(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(muhash__flush__insert_remove__empty)
+BC_AUTO_TEST_CASE(muhash__flush__insert_remove__empty)
 {
     muhash3072 empty{};
     muhash3072 set{};
     set.insert(muhash_element_1);
     set.remove(muhash_element_1);
-    BOOST_REQUIRE_EQUAL(set.flush(), empty.flush());
+    BC_REQUIRE_EQUAL(set.flush(), empty.flush());
 }
 
-BOOST_AUTO_TEST_CASE(muhash__flush__insertion_order__invariant)
+BC_AUTO_TEST_CASE(muhash__flush__insertion_order__invariant)
 {
     muhash3072 forward{};
     forward.insert(muhash_element_1);
@@ -58,19 +58,19 @@ BOOST_AUTO_TEST_CASE(muhash__flush__insertion_order__invariant)
     muhash3072 reverse{};
     reverse.insert(muhash_element_2);
     reverse.insert(muhash_element_1);
-    BOOST_REQUIRE_EQUAL(forward.flush(), reverse.flush());
+    BC_REQUIRE_EQUAL(forward.flush(), reverse.flush());
 }
 
-BOOST_AUTO_TEST_CASE(muhash__construct__element__inserted)
+BC_AUTO_TEST_CASE(muhash__construct__element__inserted)
 {
     muhash3072 constructed{ muhash_element_1 };
 
     muhash3072 set{};
     set.insert(muhash_element_1);
-    BOOST_REQUIRE_EQUAL(constructed.flush(), set.flush());
+    BC_REQUIRE_EQUAL(constructed.flush(), set.flush());
 }
 
-BOOST_AUTO_TEST_CASE(muhash__insert__element_hash__same_as_element)
+BC_AUTO_TEST_CASE(muhash__insert__element_hash__same_as_element)
 {
     muhash3072 by_element{};
     by_element.insert(muhash_element_1);
@@ -78,10 +78,10 @@ BOOST_AUTO_TEST_CASE(muhash__insert__element_hash__same_as_element)
     muhash3072 by_hash{};
     by_hash.insert_hash(sha256_hash(muhash_element_1));
     by_hash.remove_hash(sha256_hash(muhash_element_2));
-    BOOST_REQUIRE_EQUAL(by_hash.flush(), by_element.flush());
+    BC_REQUIRE_EQUAL(by_hash.flush(), by_element.flush());
 }
 
-BOOST_AUTO_TEST_CASE(muhash__multiply__partial_sets__same_as_one_set)
+BC_AUTO_TEST_CASE(muhash__multiply__partial_sets__same_as_one_set)
 {
     muhash3072 whole{};
     whole.insert(muhash_element_0);
@@ -93,27 +93,27 @@ BOOST_AUTO_TEST_CASE(muhash__multiply__partial_sets__same_as_one_set)
     muhash3072 right{};
     right.insert(muhash_element_1);
     left *= right;
-    BOOST_REQUIRE_EQUAL(left.flush(), whole.flush());
+    BC_REQUIRE_EQUAL(left.flush(), whole.flush());
 }
 
-BOOST_AUTO_TEST_CASE(muhash__multiply__empty__unchanged)
+BC_AUTO_TEST_CASE(muhash__multiply__empty__unchanged)
 {
     muhash3072 set{};
     set.insert(muhash_element_1);
     const auto expected = set.flush();
     const muhash3072 empty{};
     set *= empty;
-    BOOST_REQUIRE_EQUAL(set.flush(), expected);
+    BC_REQUIRE_EQUAL(set.flush(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(muhash__flush__continued_mutation__valid)
+BC_AUTO_TEST_CASE(muhash__flush__continued_mutation__valid)
 {
     muhash3072 empty{};
     muhash3072 set{};
     set.insert(muhash_element_1);
     set.flush();
     set.remove(muhash_element_1);
-    BOOST_REQUIRE_EQUAL(set.flush(), empty.flush());
+    BC_REQUIRE_EQUAL(set.flush(), empty.flush());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

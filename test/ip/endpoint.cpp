@@ -18,39 +18,39 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(ip_endpoint_tests)
+BC_AUTO_TEST_SUITE(ip_endpoint_tests)
 
 using namespace ip;
 
-BOOST_AUTO_TEST_CASE(endpoint__construct__default__unspecified_v4_zero_port)
+BC_AUTO_TEST_CASE(endpoint__construct__default__unspecified_v4_zero_port)
 {
     const ip::endpoint instance{};
-    BOOST_REQUIRE_EQUAL(instance.address(), ip::address{});
-    BOOST_REQUIRE_EQUAL(instance.port(), 0u);
+    BC_REQUIRE_EQUAL(instance.address(), ip::address{});
+    BC_REQUIRE_EQUAL(instance.port(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__construct__address_port__expected)
+BC_AUTO_TEST_CASE(endpoint__construct__address_port__expected)
 {
     const ip::address address{ ipv6::loopback() };
     const ip::endpoint instance{ address, 42 };
-    BOOST_REQUIRE_EQUAL(instance.address(), address);
-    BOOST_REQUIRE_EQUAL(instance.port(), 42u);
+    BC_REQUIRE_EQUAL(instance.address(), address);
+    BC_REQUIRE_EQUAL(instance.port(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__equality__address_and_port__expected)
+BC_AUTO_TEST_CASE(endpoint__equality__address_and_port__expected)
 {
     const ip::address address{ ipv4::loopback() };
     const ip::endpoint instance{ address, 42 };
-    BOOST_REQUIRE(instance == ip::endpoint(address, 42));
-    BOOST_REQUIRE(instance != ip::endpoint(address, 43));
-    BOOST_REQUIRE(instance != ip::endpoint(ipv6::loopback(), 42));
+    BC_REQUIRE(instance == ip::endpoint(address, 42));
+    BC_REQUIRE(instance != ip::endpoint(address, 43));
+    BC_REQUIRE(instance != ip::endpoint(ipv6::loopback(), 42));
 }
 
-BOOST_AUTO_TEST_CASE(endpoint__ordering__address_then_port__expected)
+BC_AUTO_TEST_CASE(endpoint__ordering__address_then_port__expected)
 {
     const ip::address address{ ipv4::loopback() };
-    BOOST_REQUIRE(ip::endpoint(address, 42) < ip::endpoint(address, 43));
-    BOOST_REQUIRE(ip::endpoint(address, 43) < ip::endpoint(ipv6{}, 0));
+    BC_REQUIRE(ip::endpoint(address, 42) < ip::endpoint(address, 43));
+    BC_REQUIRE(ip::endpoint(address, 43) < ip::endpoint(ipv6{}, 0));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

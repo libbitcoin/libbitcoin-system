@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_add_tests)
+BC_AUTO_TEST_SUITE(intrinsics_add_tests)
 
 // add_carry
 // ----------------------------------------------------------------------------
@@ -69,26 +69,26 @@ static bool add_carry64_matches_nominal(uint64_t left, uint64_t right, bool carr
     return sum == nominal && out == nominal_out;
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__add_carry64__always__matches_nominal)
+BC_AUTO_TEST_CASE(intrinsics__add_carry64__always__matches_nominal)
 {
-    BOOST_CHECK(add_carry64_matches_nominal(0_u64, 0_u64, false));
-    BOOST_CHECK(add_carry64_matches_nominal(0_u64, 0_u64, true));
-    BOOST_CHECK(add_carry64_matches_nominal(max_uint64, 1_u64, false));
-    BOOST_CHECK(add_carry64_matches_nominal(max_uint64, 0_u64, true));
-    BOOST_CHECK(add_carry64_matches_nominal(max_uint64, max_uint64, false));
-    BOOST_CHECK(add_carry64_matches_nominal(max_uint64, max_uint64, true));
-    BOOST_CHECK(add_carry64_matches_nominal(0x8000000000000000_u64, 0x7fffffffffffffff_u64, false));
-    BOOST_CHECK(add_carry64_matches_nominal(0x8000000000000000_u64, 0x7fffffffffffffff_u64, true));
-    BOOST_CHECK(add_carry64_matches_nominal(0x123456789abcdef0_u64, 0xfedcba9876543210_u64, true));
+    BC_CHECK(add_carry64_matches_nominal(0_u64, 0_u64, false));
+    BC_CHECK(add_carry64_matches_nominal(0_u64, 0_u64, true));
+    BC_CHECK(add_carry64_matches_nominal(max_uint64, 1_u64, false));
+    BC_CHECK(add_carry64_matches_nominal(max_uint64, 0_u64, true));
+    BC_CHECK(add_carry64_matches_nominal(max_uint64, max_uint64, false));
+    BC_CHECK(add_carry64_matches_nominal(max_uint64, max_uint64, true));
+    BC_CHECK(add_carry64_matches_nominal(0x8000000000000000_u64, 0x7fffffffffffffff_u64, false));
+    BC_CHECK(add_carry64_matches_nominal(0x8000000000000000_u64, 0x7fffffffffffffff_u64, true));
+    BC_CHECK(add_carry64_matches_nominal(0x123456789abcdef0_u64, 0xfedcba9876543210_u64, true));
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__add_carry__runtime__expected)
+BC_AUTO_TEST_CASE(intrinsics__add_carry__runtime__expected)
 {
     uint64_t sum{};
-    BOOST_CHECK(add_carry(sum, max_uint64, max_uint64, true));
-    BOOST_CHECK_EQUAL(sum, max_uint64);
-    BOOST_CHECK(!add_carry(sum, 1_u64, 2_u64, true));
-    BOOST_CHECK_EQUAL(sum, 4_u64);
+    BC_CHECK(add_carry(sum, max_uint64, max_uint64, true));
+    BC_CHECK_EQUAL(sum, max_uint64);
+    BC_CHECK(!add_carry(sum, 1_u64, 2_u64, true));
+    BC_CHECK_EQUAL(sum, 4_u64);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

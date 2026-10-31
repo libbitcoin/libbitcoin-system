@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "mnemonic.hpp"
 
-BOOST_AUTO_TEST_SUITE(catalogs_mnemonic_tests)
+BC_AUTO_TEST_SUITE(catalogs_mnemonic_tests)
 
 using namespace test::catalogs_mnemonic;
 using namespace bc::system::words;
@@ -45,86 +45,86 @@ constexpr auto identity_zh_Hant = base16_array("11ef479f2f44b6d4f7fb6239dff06e3c
 
 // count
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__count__all__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
     // Failure to do so may lead to invalid seed generation, which is very bad.
-    BOOST_CHECK_MESSAGE(mnemonic::catalogs::count() == dictionary_count, "new dictionary");
+    BC_CHECK_MESSAGE(mnemonic::catalogs::count() == dictionary_count, "new dictionary");
 }
 
 // identity
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__all__identity__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__all__identity__expected)
 {
     // These sha256 checks fail under vectorization.
-    BOOST_CHECK_EQUAL(identity(mnemonic::en), identity_en);
-    BOOST_CHECK_EQUAL(identity(mnemonic::es), identity_es);
-    BOOST_CHECK_EQUAL(identity(mnemonic::it), identity_it);
-    BOOST_CHECK_EQUAL(identity(mnemonic::fr), identity_fr);
-    BOOST_CHECK_EQUAL(identity(mnemonic::cs), identity_cs);
-    BOOST_CHECK_EQUAL(identity(mnemonic::pt), identity_pt);
-    BOOST_CHECK_EQUAL(identity(mnemonic::ja), identity_ja);
-    BOOST_CHECK_EQUAL(identity(mnemonic::ko), identity_ko);
-    BOOST_CHECK_EQUAL(identity(mnemonic::zh_Hans), identity_zh_Hans);
-    BOOST_CHECK_EQUAL(identity(mnemonic::zh_Hant), identity_zh_Hant);
+    BC_CHECK_EQUAL(identity(mnemonic::en), identity_en);
+    BC_CHECK_EQUAL(identity(mnemonic::es), identity_es);
+    BC_CHECK_EQUAL(identity(mnemonic::it), identity_it);
+    BC_CHECK_EQUAL(identity(mnemonic::fr), identity_fr);
+    BC_CHECK_EQUAL(identity(mnemonic::cs), identity_cs);
+    BC_CHECK_EQUAL(identity(mnemonic::pt), identity_pt);
+    BC_CHECK_EQUAL(identity(mnemonic::ja), identity_ja);
+    BC_CHECK_EQUAL(identity(mnemonic::ko), identity_ko);
+    BC_CHECK_EQUAL(identity(mnemonic::zh_Hans), identity_zh_Hans);
+    BC_CHECK_EQUAL(identity(mnemonic::zh_Hant), identity_zh_Hant);
 }
 
 // distinct
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__all__distinct__true)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__all__distinct__true)
 {
-    BOOST_CHECK(distinct(mnemonic::en));
-    BOOST_CHECK(distinct(mnemonic::es));
-    BOOST_CHECK(distinct(mnemonic::it));
-    BOOST_CHECK(distinct(mnemonic::fr));
-    BOOST_CHECK(distinct(mnemonic::cs));
-    BOOST_CHECK(distinct(mnemonic::pt));
-    BOOST_CHECK(distinct(mnemonic::ja));
-    BOOST_CHECK(distinct(mnemonic::ko));
-    BOOST_CHECK(distinct(mnemonic::zh_Hans));
-    BOOST_CHECK(distinct(mnemonic::zh_Hant));
+    BC_CHECK(distinct(mnemonic::en));
+    BC_CHECK(distinct(mnemonic::es));
+    BC_CHECK(distinct(mnemonic::it));
+    BC_CHECK(distinct(mnemonic::fr));
+    BC_CHECK(distinct(mnemonic::cs));
+    BC_CHECK(distinct(mnemonic::pt));
+    BC_CHECK(distinct(mnemonic::ja));
+    BC_CHECK(distinct(mnemonic::ko));
+    BC_CHECK(distinct(mnemonic::zh_Hans));
+    BC_CHECK(distinct(mnemonic::zh_Hant));
 }
 
 // sorted
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__sorted__true)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__sorted__true)
 {
     // Compare is not locale-aware, but these are consistent across encodings.
-    BOOST_CHECK(sorted8(mnemonic::en) && mnemonic::en.sorted);
-    BOOST_CHECK(sorted8(mnemonic::it) && mnemonic::it.sorted);
-    BOOST_CHECK(sorted8(mnemonic::pt) && mnemonic::pt.sorted);
-    BOOST_CHECK(sorted8(mnemonic::ko) && mnemonic::ko.sorted);
-    BOOST_CHECK(sorted16(mnemonic::en) && mnemonic::en.sorted);
-    BOOST_CHECK(sorted16(mnemonic::it) && mnemonic::it.sorted);
-    BOOST_CHECK(sorted16(mnemonic::pt) && mnemonic::pt.sorted);
-    BOOST_CHECK(sorted16(mnemonic::ko) && mnemonic::ko.sorted);
-    BOOST_CHECK(sorted32(mnemonic::en) && mnemonic::en.sorted);
-    BOOST_CHECK(sorted32(mnemonic::it) && mnemonic::it.sorted);
-    BOOST_CHECK(sorted32(mnemonic::pt) && mnemonic::pt.sorted);
-    BOOST_CHECK(sorted32(mnemonic::ko) && mnemonic::ko.sorted);
+    BC_CHECK(sorted8(mnemonic::en) && mnemonic::en.sorted);
+    BC_CHECK(sorted8(mnemonic::it) && mnemonic::it.sorted);
+    BC_CHECK(sorted8(mnemonic::pt) && mnemonic::pt.sorted);
+    BC_CHECK(sorted8(mnemonic::ko) && mnemonic::ko.sorted);
+    BC_CHECK(sorted16(mnemonic::en) && mnemonic::en.sorted);
+    BC_CHECK(sorted16(mnemonic::it) && mnemonic::it.sorted);
+    BC_CHECK(sorted16(mnemonic::pt) && mnemonic::pt.sorted);
+    BC_CHECK(sorted16(mnemonic::ko) && mnemonic::ko.sorted);
+    BC_CHECK(sorted32(mnemonic::en) && mnemonic::en.sorted);
+    BC_CHECK(sorted32(mnemonic::it) && mnemonic::it.sorted);
+    BC_CHECK(sorted32(mnemonic::pt) && mnemonic::pt.sorted);
+    BC_CHECK(sorted32(mnemonic::ko) && mnemonic::ko.sorted);
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__unsorted__false)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__unsorted__false)
 {
     // Compare is not locale-aware, but these are consistent across encodings.
-    BOOST_CHECK(!sorted8(mnemonic::es) && !mnemonic::es.sorted);
-    BOOST_CHECK(!sorted8(mnemonic::fr) && !mnemonic::fr.sorted);
-    BOOST_CHECK(!sorted8(mnemonic::cs) && !mnemonic::cs.sorted);
-    BOOST_CHECK(!sorted8(mnemonic::ja) && !mnemonic::ja.sorted);
-    BOOST_CHECK(!sorted8(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
-    BOOST_CHECK(!sorted8(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
-    BOOST_CHECK(!sorted16(mnemonic::es) && !mnemonic::es.sorted);
-    BOOST_CHECK(!sorted16(mnemonic::fr) && !mnemonic::fr.sorted);
-    BOOST_CHECK(!sorted16(mnemonic::cs) && !mnemonic::cs.sorted);
-    BOOST_CHECK(!sorted16(mnemonic::ja) && !mnemonic::ja.sorted);
-    BOOST_CHECK(!sorted16(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
-    BOOST_CHECK(!sorted16(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
-    BOOST_CHECK(!sorted32(mnemonic::es) && !mnemonic::es.sorted);
-    BOOST_CHECK(!sorted32(mnemonic::fr) && !mnemonic::fr.sorted);
-    BOOST_CHECK(!sorted32(mnemonic::cs) && !mnemonic::cs.sorted);
-    BOOST_CHECK(!sorted32(mnemonic::ja) && !mnemonic::ja.sorted);
-    BOOST_CHECK(!sorted32(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
-    BOOST_CHECK(!sorted32(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+    BC_CHECK(!sorted8(mnemonic::es) && !mnemonic::es.sorted);
+    BC_CHECK(!sorted8(mnemonic::fr) && !mnemonic::fr.sorted);
+    BC_CHECK(!sorted8(mnemonic::cs) && !mnemonic::cs.sorted);
+    BC_CHECK(!sorted8(mnemonic::ja) && !mnemonic::ja.sorted);
+    BC_CHECK(!sorted8(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BC_CHECK(!sorted8(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+    BC_CHECK(!sorted16(mnemonic::es) && !mnemonic::es.sorted);
+    BC_CHECK(!sorted16(mnemonic::fr) && !mnemonic::fr.sorted);
+    BC_CHECK(!sorted16(mnemonic::cs) && !mnemonic::cs.sorted);
+    BC_CHECK(!sorted16(mnemonic::ja) && !mnemonic::ja.sorted);
+    BC_CHECK(!sorted16(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BC_CHECK(!sorted16(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
+    BC_CHECK(!sorted32(mnemonic::es) && !mnemonic::es.sorted);
+    BC_CHECK(!sorted32(mnemonic::fr) && !mnemonic::fr.sorted);
+    BC_CHECK(!sorted32(mnemonic::cs) && !mnemonic::cs.sorted);
+    BC_CHECK(!sorted32(mnemonic::ja) && !mnemonic::ja.sorted);
+    BC_CHECK(!sorted32(mnemonic::zh_Hans) && !mnemonic::zh_Hans.sorted);
+    BC_CHECK(!sorted32(mnemonic::zh_Hant) && !mnemonic::zh_Hant.sorted);
 }
 
 // abnormal
@@ -132,18 +132,18 @@ BOOST_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__unsorted__false)
 // These dictionaries are in normal form.
 // So there is no need to nfkd normalize these for wordlist-based seedings.
 // This also removes the ICU dependency for these languages.
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 {
-    BOOST_CHECK(!abnormal(mnemonic::en));
-    BOOST_CHECK(!abnormal(mnemonic::es));
-    BOOST_CHECK(!abnormal(mnemonic::it));
-    BOOST_CHECK(!abnormal(mnemonic::fr));
-    BOOST_CHECK(!abnormal(mnemonic::cs));
-    BOOST_CHECK(!abnormal(mnemonic::pt));
-    BOOST_CHECK(!abnormal(mnemonic::ja));
-    BOOST_CHECK(!abnormal(mnemonic::ko));
-    BOOST_CHECK(!abnormal(mnemonic::zh_Hans));
-    BOOST_CHECK(!abnormal(mnemonic::zh_Hant));
+    BC_CHECK(!abnormal(mnemonic::en));
+    BC_CHECK(!abnormal(mnemonic::es));
+    BC_CHECK(!abnormal(mnemonic::it));
+    BC_CHECK(!abnormal(mnemonic::fr));
+    BC_CHECK(!abnormal(mnemonic::cs));
+    BC_CHECK(!abnormal(mnemonic::pt));
+    BC_CHECK(!abnormal(mnemonic::ja));
+    BC_CHECK(!abnormal(mnemonic::ko));
+    BC_CHECK(!abnormal(mnemonic::zh_Hans));
+    BC_CHECK(!abnormal(mnemonic::zh_Hant));
 }
 
 // deviation
@@ -156,152 +156,152 @@ BOOST_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 // Always check both dictionaries in both zh_Hans/zh_Hant and en/fr.
 // If zh_Hans/zh_Hant collide, may pick either (but should be consistent).
 // If en/fr collide, must fail as decode requires explicit language identifier.
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__deviation__deviants__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__deviation__deviants__expected)
 {
-    BOOST_CHECK_EQUAL(deviation(mnemonic::en, mnemonic::fr), deviations_en_fr);
-    BOOST_CHECK_EQUAL(deviation(mnemonic::zh_Hans, mnemonic::zh_Hant), deviations_zh);
+    BC_CHECK_EQUAL(deviation(mnemonic::en, mnemonic::fr), deviations_en_fr);
+    BC_CHECK_EQUAL(deviation(mnemonic::zh_Hans, mnemonic::zh_Hant), deviations_zh);
 }
 
 // intersection
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__en__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__en__expected)
 {
-    BOOST_CHECK_EQUAL(intersection(mnemonic::en, mnemonic::en), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::es));
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::it));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::en, mnemonic::fr), intersecton_en_fr);
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::cs));
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::pt));
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::ja));
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::en, mnemonic::zh_Hant));
+    BC_CHECK_EQUAL(intersection(mnemonic::en, mnemonic::en), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::es));
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::it));
+    BC_CHECK_EQUAL(intersection(mnemonic::en, mnemonic::fr), intersecton_en_fr);
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::cs));
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::pt));
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::ja));
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::en, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__es__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__es__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::es, mnemonic::en));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::es, mnemonic::es), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::it));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::fr));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::cs));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::pt));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::ja));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::es, mnemonic::zh_Hant));
+    ////BC_CHECK(!intersects(mnemonic::es, mnemonic::en));
+    BC_CHECK_EQUAL(intersection(mnemonic::es, mnemonic::es), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::it));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::fr));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::cs));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::pt));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::ja));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::es, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__it__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__it__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::it, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::it, mnemonic::es));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::it, mnemonic::it), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::fr));
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::cs));
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::pt));
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::ja));
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::it, mnemonic::zh_Hant));
+    ////BC_CHECK(!intersects(mnemonic::it, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::it, mnemonic::es));
+    BC_CHECK_EQUAL(intersection(mnemonic::it, mnemonic::it), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::fr));
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::cs));
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::pt));
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::ja));
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::it, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__fr__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__fr__expected)
 {
-    ////BOOST_CHECK_EQUAL(intersection(mnemonic::fr, mnemonic::en), intersecton_en_fr);
-    ////BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::it));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::fr, mnemonic::fr), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::cs));
-    BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::pt));
-    BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::ja));
-    BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::fr, mnemonic::zh_Hant));
+    ////BC_CHECK_EQUAL(intersection(mnemonic::fr, mnemonic::en), intersecton_en_fr);
+    ////BC_CHECK(!intersects(mnemonic::fr, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::fr, mnemonic::it));
+    BC_CHECK_EQUAL(intersection(mnemonic::fr, mnemonic::fr), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::fr, mnemonic::cs));
+    BC_CHECK(!intersects(mnemonic::fr, mnemonic::pt));
+    BC_CHECK(!intersects(mnemonic::fr, mnemonic::ja));
+    BC_CHECK(!intersects(mnemonic::fr, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::fr, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::fr, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__cs__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__cs__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::it));
-    ////BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::fr));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::cs, mnemonic::cs), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::pt));
-    BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::ja));
-    BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::cs, mnemonic::zh_Hant));
+    ////BC_CHECK(!intersects(mnemonic::cs, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::cs, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::cs, mnemonic::it));
+    ////BC_CHECK(!intersects(mnemonic::cs, mnemonic::fr));
+    BC_CHECK_EQUAL(intersection(mnemonic::cs, mnemonic::cs), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::cs, mnemonic::pt));
+    BC_CHECK(!intersects(mnemonic::cs, mnemonic::ja));
+    BC_CHECK(!intersects(mnemonic::cs, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::cs, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::cs, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__pt__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__pt__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::it));
-    ////BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::fr));
-    ////BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::cs));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::pt, mnemonic::pt), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::ja));
-    BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::pt, mnemonic::zh_Hant));
+    ////BC_CHECK(!intersects(mnemonic::pt, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::pt, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::pt, mnemonic::it));
+    ////BC_CHECK(!intersects(mnemonic::pt, mnemonic::fr));
+    ////BC_CHECK(!intersects(mnemonic::pt, mnemonic::cs));
+    BC_CHECK_EQUAL(intersection(mnemonic::pt, mnemonic::pt), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::pt, mnemonic::ja));
+    BC_CHECK(!intersects(mnemonic::pt, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::pt, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::pt, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__ja__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__ja__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::it));
-    ////BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::fr));
-    ////BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::cs));
-    ////BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::pt));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::ja, mnemonic::ja), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::ko));
-    BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::ja, mnemonic::zh_Hant));
+    ////BC_CHECK(!intersects(mnemonic::ja, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::ja, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::ja, mnemonic::it));
+    ////BC_CHECK(!intersects(mnemonic::ja, mnemonic::fr));
+    ////BC_CHECK(!intersects(mnemonic::ja, mnemonic::cs));
+    ////BC_CHECK(!intersects(mnemonic::ja, mnemonic::pt));
+    BC_CHECK_EQUAL(intersection(mnemonic::ja, mnemonic::ja), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::ja, mnemonic::ko));
+    BC_CHECK(!intersects(mnemonic::ja, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::ja, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__ko__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__ko__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::it));
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::fr));
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::cs));
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::pt));
-    ////BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::ja));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::ko, mnemonic::ko), dictionary_size);
-    BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::zh_Hans));
-    BOOST_CHECK(!intersects(mnemonic::ko, mnemonic::zh_Hant));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::it));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::fr));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::cs));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::pt));
+    ////BC_CHECK(!intersects(mnemonic::ko, mnemonic::ja));
+    BC_CHECK_EQUAL(intersection(mnemonic::ko, mnemonic::ko), dictionary_size);
+    BC_CHECK(!intersects(mnemonic::ko, mnemonic::zh_Hans));
+    BC_CHECK(!intersects(mnemonic::ko, mnemonic::zh_Hant));
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__zh_Hans__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__zh_Hans__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::it));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::fr));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::cs));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::pt));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::ja));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::ko));
-    BOOST_CHECK_EQUAL(intersection(mnemonic::zh_Hans, mnemonic::zh_Hans), dictionary_size);
-    BOOST_CHECK_EQUAL(intersection(mnemonic::zh_Hans, mnemonic::zh_Hant), intersection_zh);
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::it));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::fr));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::cs));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::pt));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::ja));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hans, mnemonic::ko));
+    BC_CHECK_EQUAL(intersection(mnemonic::zh_Hans, mnemonic::zh_Hans), dictionary_size);
+    BC_CHECK_EQUAL(intersection(mnemonic::zh_Hans, mnemonic::zh_Hant), intersection_zh);
 }
 
-BOOST_AUTO_TEST_CASE(catalogs_mnemonic__intersections__zh_Hant__expected)
+BC_AUTO_TEST_CASE(catalogs_mnemonic__intersections__zh_Hant__expected)
 {
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::en));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::es));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::it));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::fr));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::cs));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::pt));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::ja));
-    ////BOOST_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::ko));
-    ////BOOST_CHECK(intersection(mnemonic::zh_Hant, mnemonic::zh_Hans), intersection_zh);
-    BOOST_CHECK_EQUAL(intersection(mnemonic::zh_Hant, mnemonic::zh_Hant), dictionary_size);
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::en));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::es));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::it));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::fr));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::cs));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::pt));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::ja));
+    ////BC_CHECK(!intersects(mnemonic::zh_Hant, mnemonic::ko));
+    ////BC_CHECK(intersection(mnemonic::zh_Hant, mnemonic::zh_Hans), intersection_zh);
+    BC_CHECK_EQUAL(intersection(mnemonic::zh_Hant, mnemonic::zh_Hant), dictionary_size);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

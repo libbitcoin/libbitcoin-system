@@ -20,7 +20,7 @@
 
 #if defined(DISABLED)
 
-BOOST_AUTO_TEST_SUITE(skip_parser_tests)
+BC_AUTO_TEST_SUITE(skip_parser_tests)
 
 // [skip + max(parse, hash)] vs. [parse + hash]
 //
@@ -186,32 +186,32 @@ size_t skip_parse(reader& source) NOEXCEPT
     return size;
 }
 
-BOOST_AUTO_TEST_CASE(skip_parser__parse__always__correct)
+BC_AUTO_TEST_CASE(skip_parser__parse__always__correct)
 {
     constexpr auto witness = false;
     transaction tx2(tx_2, witness);
     const auto expected0 = tx_2.size();
     const auto expected1 = tx2.to_data(witness).size();
     const auto expected2 = tx2.serialized_size(witness);
-    BOOST_REQUIRE_EQUAL(expected0, expected1);
-    BOOST_REQUIRE_EQUAL(expected1, expected2);
+    BC_REQUIRE_EQUAL(expected0, expected1);
+    BC_REQUIRE_EQUAL(expected1, expected2);
 
     stream::in::copy input(tx_2);
     read::bytes::istream source(input);
-    BOOST_REQUIRE_EQUAL(skip_parse(source), expected0);
+    BC_REQUIRE_EQUAL(skip_parse(source), expected0);
 }
 
-BOOST_AUTO_TEST_CASE(skip_parser__hash__always__correct)
+BC_AUTO_TEST_CASE(skip_parser__hash__always__correct)
 {
     constexpr auto witness = false;
     transaction tx2(tx_2, witness);
     const auto expected = tx2.hash(witness);
-    BOOST_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected);
+    BC_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected);
 }
 
 constexpr auto factor = 1'000'000_u64;
 
-BOOST_AUTO_TEST_CASE(skip_parser__parse_hash__factor__baseline)
+BC_AUTO_TEST_CASE(skip_parser__parse_hash__factor__baseline)
 {
     constexpr auto witness = true;
     const auto expected = bitcoin_hash(tx_2);
@@ -219,11 +219,11 @@ BOOST_AUTO_TEST_CASE(skip_parser__parse_hash__factor__baseline)
     for (size_t i = 0; i < factor; ++i)
     {
         transaction tx2(tx_2, witness);
-        BOOST_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected);
+        BC_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(skip_parser__parse_serialize_hash__factor__baseline)
+BC_AUTO_TEST_CASE(skip_parser__parse_serialize_hash__factor__baseline)
 {
     constexpr auto witness = true;
     const auto expected = bitcoin_hash(tx_2);
@@ -231,11 +231,11 @@ BOOST_AUTO_TEST_CASE(skip_parser__parse_serialize_hash__factor__baseline)
     for (size_t i = 0; i < factor; ++i)
     {
         transaction tx2(tx_2, witness);
-        BOOST_REQUIRE_EQUAL(tx2.hash(witness), expected);
+        BC_REQUIRE_EQUAL(tx2.hash(witness), expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(skip_parser__skip_parse__factor__baseline)
+BC_AUTO_TEST_CASE(skip_parser__skip_parse__factor__baseline)
 {
     const auto expected = tx_2.size();
 
@@ -243,11 +243,11 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse__factor__baseline)
     {
         stream::in::copy input(tx_2);
         read::bytes::istream source(input);
-        BOOST_REQUIRE_EQUAL(skip_parse(source), expected);
+        BC_REQUIRE_EQUAL(skip_parse(source), expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_hash__factor__expected)
+BC_AUTO_TEST_CASE(skip_parser__skip_parse_hash__factor__expected)
 {
     const auto expected0 = tx_2.size();
     const auto expected1 = bitcoin_hash(tx_2);
@@ -256,8 +256,8 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_hash__factor__expected)
     {
         stream::in::copy input(tx_2);
         read::bytes::istream source(input);
-        BOOST_REQUIRE_EQUAL(skip_parse(source), expected0);
-        BOOST_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected1);
+        BC_REQUIRE_EQUAL(skip_parse(source), expected0);
+        BC_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected1);
     }
 }
 
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_hash__factor__expected)
 #if defined (DISABLED)
 
 // This is a test of singleton tx concurrent parse/hash.
-BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_tx__factor__expected)
+BC_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_tx__factor__expected)
 {
     const auto expected0 = tx_2.size();
     const auto expected1 = bitcoin_hash(tx_2);
@@ -278,13 +278,13 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_tx__factor__expected)
             {
                 if (job)
                 {
-                    BOOST_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected1);
+                    BC_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected1);
                 }
                 else
                 {
                     stream::in::copy input(tx_2);
                     read::bytes::istream source(input);
-                    BOOST_REQUIRE_EQUAL(skip_parse(source), expected0);
+                    BC_REQUIRE_EQUAL(skip_parse(source), expected0);
                 }
             });
     }
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_tx__factor__expected)
 
 // This is a test of concurrent tx parse/hash across a block.
 // Approximates concurrency striped across txs (without vectorization).
-BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_block__factor_txs__expected)
+BC_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_block__factor_txs__expected)
 {
     const auto expected0 = tx_2.size();
     const auto expected1 = bitcoin_hash(tx_2);
@@ -303,13 +303,13 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_block__factor_txs__expec
         {
             stream::in::copy input(tx_2);
             read::bytes::istream source(input);
-            BOOST_REQUIRE_EQUAL(skip_parse(source), expected0);
-            BOOST_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected1);
+            BC_REQUIRE_EQUAL(skip_parse(source), expected0);
+            BC_REQUIRE_EQUAL(bitcoin_hash(tx_2), expected1);
         });
 }
 
 #endif // HAVE_PERFORMANCE_TESTS
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #endif

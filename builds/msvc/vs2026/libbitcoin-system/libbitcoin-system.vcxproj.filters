@@ -2006,9 +2006,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\aliases.hpp">
-      <Filter>include\bitcoin\system\unit_test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\checks.hpp">
       <Filter>include\bitcoin\system\unit_test</Filter>
     </ClInclude>

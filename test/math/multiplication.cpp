@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(multiplication_tests)
+BC_AUTO_TEST_SUITE(multiplication_tests)
 
 // is_multiple
 // ----------------------------------------------------------------------------
@@ -540,4 +540,4 @@ static_assert(ceilinged_multiply(2_u64, max_uint64) == max_uint64);
 static_assert(ceilinged_multiply(max_uint64, 2_u64) == max_uint64);
 static_assert(ceilinged_multiply(max_uint64, max_uint64) == max_uint64);
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

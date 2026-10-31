@@ -24,33 +24,33 @@
 
 // This is a lot of tests, not suprisingly very fast execution.
 
-BOOST_AUTO_TEST_SUITE(siphash_tests)
+BC_AUTO_TEST_SUITE(siphash_tests)
 
-BOOST_AUTO_TEST_CASE(siphash__hash__test_key__expected)
+BC_AUTO_TEST_CASE(siphash__hash__test_key__expected)
 {
     half_hash hash{};
-    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+    BC_REQUIRE(decode_base16(hash, hash_test_key));
 
     constexpr auto expected = 0xa129ca6149be45e5;
     constexpr auto message = base16_array("000102030405060708090a0b0c0d0e");
-    BOOST_REQUIRE_EQUAL(siphash(hash, message), expected);
+    BC_REQUIRE_EQUAL(siphash(hash, message), expected);
 }
 
-BOOST_AUTO_TEST_CASE(siphash__words__test_key__expected)
+BC_AUTO_TEST_CASE(siphash__words__test_key__expected)
 {
     half_hash hash{};
-    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+    BC_REQUIRE(decode_base16(hash, hash_test_key));
 
     constexpr auto message = base16_array("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
     const siphash_words words{ 0x0706050403020100, 0x0f0e0d0c0b0a0908, 0x1716151413121110, 0x1f1e1d1c1b1a1918 };
-    BOOST_REQUIRE_EQUAL(siphash(to_siphash_key(hash), words), siphash(hash, message));
+    BC_REQUIRE_EQUAL(siphash(to_siphash_key(hash), words), siphash(hash, message));
 }
 
 // 29 rows exercise 512, 256 and 128 bit lanes and the integral remainder.
-BOOST_AUTO_TEST_CASE(siphash__columns__rows__expected_by_row)
+BC_AUTO_TEST_CASE(siphash__columns__rows__expected_by_row)
 {
     half_hash hash{};
-    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+    BC_REQUIRE(decode_base16(hash, hash_test_key));
     const auto key = to_siphash_key(hash);
 
     constexpr size_t rows = 29;
@@ -74,54 +74,54 @@ BOOST_AUTO_TEST_CASE(siphash__columns__rows__expected_by_row)
 
     std::for_each(row_indexes.cbegin(), row_indexes.cend(), [&](size_t row)
     {
-        BOOST_REQUIRE_EQUAL(out[row], siphash(key, siphash_words{ words[0][row], words[1][row], words[2][row], words[3][row] }));
+        BC_REQUIRE_EQUAL(out[row], siphash(key, siphash_words{ words[0][row], words[1][row], words[2][row], words[3][row] }));
     });
 }
 
-BOOST_AUTO_TEST_CASE(siphash__columns__empty__unchanged)
+BC_AUTO_TEST_CASE(siphash__columns__empty__unchanged)
 {
     const siphash_columns columns{};
     std::span<uint64_t> out{};
     siphash(out, siphash_key{}, columns);
-    BOOST_REQUIRE(out.empty());
+    BC_REQUIRE(out.empty());
 }
 
-BOOST_AUTO_TEST_CASE(siphash__hash__vectors__expected)
+BC_AUTO_TEST_CASE(siphash__hash__vectors__expected)
 {
     half_hash hash{};
-    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+    BC_REQUIRE(decode_base16(hash, hash_test_key));
 
     for (const auto& result: siphash_hash_tests)
     {
         data_chunk data;
-        BOOST_REQUIRE(decode_base16(data, result.message));
+        BC_REQUIRE(decode_base16(data, result.message));
 
         data_chunk encoded_expected;
-        BOOST_REQUIRE(decode_base16(encoded_expected, result.result));
+        BC_REQUIRE(decode_base16(encoded_expected, result.result));
 
         const auto expected = from_little_endian<uint64_t>(encoded_expected);
-        BOOST_REQUIRE_EQUAL(siphash(hash, data), expected);
+        BC_REQUIRE_EQUAL(siphash(hash, data), expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(siphash__key__vectors__expected)
+BC_AUTO_TEST_CASE(siphash__key__vectors__expected)
 {
     half_hash hash{};
-    BOOST_REQUIRE(decode_base16(hash, hash_test_key));
+    BC_REQUIRE(decode_base16(hash, hash_test_key));
 
     const auto key = to_siphash_key(hash);
 
     for (const auto& result: siphash_hash_tests)
     {
         data_chunk data;
-        BOOST_REQUIRE(decode_base16(data, result.message));
+        BC_REQUIRE(decode_base16(data, result.message));
 
         data_chunk encoded_expected;
-        BOOST_REQUIRE(decode_base16(encoded_expected, result.result));
+        BC_REQUIRE(decode_base16(encoded_expected, result.result));
 
         const auto expected = from_little_endian<uint64_t>(encoded_expected);
-        BOOST_REQUIRE_EQUAL(siphash(key, data), expected);
+        BC_REQUIRE_EQUAL(siphash(key, data), expected);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include <chrono>
 
-BOOST_AUTO_TEST_SUITE(header_tests)
+BC_AUTO_TEST_SUITE(header_tests)
 
 namespace json = system::json;
 using namespace system::chain;
@@ -52,28 +52,28 @@ static_assert(header::serialized_size() == 80_size);
 // constructors
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__constructor__default__invalid)
+BC_AUTO_TEST_CASE(header__constructor__default__invalid)
 {
     const header instance;
-    BOOST_REQUIRE(!instance.is_valid());
+    BC_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__move__expected)
+BC_AUTO_TEST_CASE(header__constructor__move__expected)
 {
     header copy(expected_header);
     const header instance(std::move(copy));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__copy__expected)
+BC_AUTO_TEST_CASE(header__constructor__copy__expected)
 {
     const header instance(expected_header);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
+BC_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
 {
     const auto previous = hash1;
     const auto merkle = hash2;
@@ -85,16 +85,16 @@ BOOST_AUTO_TEST_CASE(header__constructor__move_parameters__expected)
     auto merkle_copy = merkle;
     auto previous_copy = previous;
     const header instance(version, std::move(previous_copy), std::move(merkle_copy), timestamp, bits, nonce);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.version(), version);
-    BOOST_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
-    BOOST_REQUIRE_EQUAL(instance.merkle_root(), merkle);
-    BOOST_REQUIRE_EQUAL(instance.timestamp(), timestamp);
-    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
-    BOOST_REQUIRE_EQUAL(instance.nonce(), nonce);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.version(), version);
+    BC_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
+    BC_REQUIRE_EQUAL(instance.merkle_root(), merkle);
+    BC_REQUIRE_EQUAL(instance.timestamp(), timestamp);
+    BC_REQUIRE_EQUAL(instance.bits(), bits);
+    BC_REQUIRE_EQUAL(instance.nonce(), nonce);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__copy_parameters__expected)
+BC_AUTO_TEST_CASE(header__constructor__copy_parameters__expected)
 {
     const auto previous = hash1;
     const auto merkle = hash2;
@@ -104,145 +104,145 @@ BOOST_AUTO_TEST_CASE(header__constructor__copy_parameters__expected)
     constexpr uint32_t nonce = 68644;
 
     const header instance(version, previous, merkle, timestamp, bits, nonce);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.version(), version);
-    BOOST_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
-    BOOST_REQUIRE_EQUAL(instance.merkle_root(), merkle);
-    BOOST_REQUIRE_EQUAL(instance.timestamp(), timestamp);
-    BOOST_REQUIRE_EQUAL(instance.bits(), bits);
-    BOOST_REQUIRE_EQUAL(instance.nonce(), nonce);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.version(), version);
+    BC_REQUIRE_EQUAL(instance.previous_block_hash(), previous);
+    BC_REQUIRE_EQUAL(instance.merkle_root(), merkle);
+    BC_REQUIRE_EQUAL(instance.timestamp(), timestamp);
+    BC_REQUIRE_EQUAL(instance.bits(), bits);
+    BC_REQUIRE_EQUAL(instance.nonce(), nonce);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__data__expected)
+BC_AUTO_TEST_CASE(header__constructor__data__expected)
 {
     const auto data = expected_header.to_data();
     const header instance(data);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__fast__expected)
+BC_AUTO_TEST_CASE(header__constructor__fast__expected)
 {
     const auto data = expected_header.to_data();
     stream::in::fast stream(data);
     const header instance(stream);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__stream__expected)
+BC_AUTO_TEST_CASE(header__constructor__stream__expected)
 {
     const auto data = expected_header.to_data();
     stream::in::copy stream(data);
     const header instance(stream);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__constructor__reader__expected)
+BC_AUTO_TEST_CASE(header__constructor__reader__expected)
 {
     const auto data = expected_header.to_data();
     read::bytes::copy source(data);
     const header instance(source);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_header);
 }
 
 // operators
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__assign__move__expected)
+BC_AUTO_TEST_CASE(header__assign__move__expected)
 {
     const auto& alpha = expected_header;
     const header gamma{ alpha };
     const header beta = std::move(gamma);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(header__assign__copy__expected)
+BC_AUTO_TEST_CASE(header__assign__copy__expected)
 {
     const auto& alpha = expected_header;
     const header beta{ alpha };
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(header__equality__same__true)
+BC_AUTO_TEST_CASE(header__equality__same__true)
 {
     const header instance(expected_header);
-    BOOST_REQUIRE(instance == expected_header);
+    BC_REQUIRE(instance == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__equality__different__false)
+BC_AUTO_TEST_CASE(header__equality__different__false)
 {
     const header instance;
-    BOOST_REQUIRE(!(instance == expected_header));
+    BC_REQUIRE(!(instance == expected_header));
 }
 
-BOOST_AUTO_TEST_CASE(header__inequality__same__false)
+BC_AUTO_TEST_CASE(header__inequality__same__false)
 {
     const header instance(expected_header);
-    BOOST_REQUIRE(!(instance != expected_header));
+    BC_REQUIRE(!(instance != expected_header));
 }
 
-BOOST_AUTO_TEST_CASE(header__inequality__different__true)
+BC_AUTO_TEST_CASE(header__inequality__different__true)
 {
     const header instance;
-    BOOST_REQUIRE(instance != expected_header);
+    BC_REQUIRE(instance != expected_header);
 }
 
 // to_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__to_data__data__expected)
+BC_AUTO_TEST_CASE(header__to_data__data__expected)
 {
     const auto data = expected_header.to_data();
-    BOOST_REQUIRE_EQUAL(expected_header.serialized_size(), data.size());
+    BC_REQUIRE_EQUAL(expected_header.serialized_size(), data.size());
 }
 
-BOOST_AUTO_TEST_CASE(header__to_data__stream__expected)
+BC_AUTO_TEST_CASE(header__to_data__stream__expected)
 {
     // Write header to stream.
     std::stringstream iostream;
     expected_header.to_data(iostream);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const header copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_header);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_header);
 }
 
-BOOST_AUTO_TEST_CASE(header__to_data__writer__expected)
+BC_AUTO_TEST_CASE(header__to_data__writer__expected)
 {
     // Write header to stream.
     std::stringstream iostream;
     write::bytes::ostream out(iostream);
     expected_header.to_data(out);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const header copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_header);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_header);
 }
 
 // properties
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__proof__genesis_block__expected)
+BC_AUTO_TEST_CASE(header__proof__genesis_block__expected)
 {
     const chain::block block{ settings(selection::mainnet).genesis_block };
-    BOOST_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
+    BC_REQUIRE_EQUAL(block.header().proof(), 0x0000000100010001);
 }
 
 // hash
 
-BOOST_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
+BC_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
 {
     const chain::block block{ settings(selection::mainnet).genesis_block };
-    BOOST_REQUIRE_EQUAL(block.header().difficulty(), 1.0);
+    BC_REQUIRE_EQUAL(block.header().difficulty(), 1.0);
 }
 
 // validation (public)
@@ -254,14 +254,14 @@ BOOST_AUTO_TEST_CASE(header__difficulty__genesis_block__expected)
 // validation (protected)
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__bits_exceeds_maximum__true)
+BC_AUTO_TEST_CASE(header__is_invalid_proof_of_work__bits_exceeds_maximum__true)
 {
     const settings settings(selection::mainnet);
     const accessor instance{ {}, hash_digest{}, {}, {}, add1(settings.proof_of_work_limit), {} };
-    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
+    BC_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_greater_bits__true)
+BC_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_greater_bits__true)
 {
     const settings settings(selection::mainnet);
     const accessor instance
@@ -274,10 +274,10 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_greater_bits__true)
         34564
     };
 
-    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
+    BC_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_less_than_bits_false)
+BC_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_less_than_bits_false)
 {
     const settings settings(selection::mainnet);
     const accessor instance
@@ -290,10 +290,10 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_less_than_bits_false
         2842832236
     };
 
-    BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
+    BC_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_greater_than_bits__true)
+BC_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_greater_than_bits__true)
 {
     const settings settings(selection::mainnet);
     const accessor instance
@@ -306,10 +306,10 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_greater_than_
         2135224651
     };
 
-    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
+    BC_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_less_than_bits__false)
+BC_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_less_than_bits__false)
 {
     const settings settings(selection::mainnet);
     const accessor instance
@@ -322,24 +322,24 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_less_than_bit
         2135224651
     };
 
-    BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
+    BC_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_less_than_2_hours_from_now__false)
+BC_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_less_than_2_hours_from_now__false)
 {
     const auto now = std::chrono::system_clock::now();
     const auto now_time = possible_narrow_and_sign_cast<uint32_t>(std::chrono::system_clock::to_time_t(now));
     const accessor instance{ {}, hash_digest{}, {}, now_time, {}, {} };
-    BOOST_REQUIRE(!instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
+    BC_REQUIRE(!instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_greater_than_2_hours_from_now__true)
+BC_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_greater_than_2_hours_from_now__true)
 {
     const auto now = std::chrono::system_clock::now();
     const auto duration = std::chrono::hours(3);
     const auto future = possible_narrow_and_sign_cast<uint32_t>(std::chrono::system_clock::to_time_t(now + duration));
     const accessor instance{ {}, hash_digest{}, {}, future, {}, {} };
-    BOOST_REQUIRE(instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
+    BC_REQUIRE(instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
 }
 
 // header__is_futuristic_timestamp__static__expected
@@ -347,152 +347,152 @@ static_assert(!accessor::is_futuristic_timestamp(1007200, 7200, 1000000));
 static_assert(accessor::is_futuristic_timestamp(1007201, 7200, 1000000));
 static_assert(!accessor::is_futuristic_timestamp(max_uint32, 7200, max_uint32));
 
-BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__at_limit__false)
+BC_AUTO_TEST_CASE(header__is_futuristic_timestamp__at_limit__false)
 {
-    BOOST_REQUIRE(!accessor::is_futuristic_timestamp(1007200, 7200, 1000000));
+    BC_REQUIRE(!accessor::is_futuristic_timestamp(1007200, 7200, 1000000));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__above_limit__true)
+BC_AUTO_TEST_CASE(header__is_futuristic_timestamp__above_limit__true)
 {
-    BOOST_REQUIRE(accessor::is_futuristic_timestamp(1007201, 7200, 1000000));
+    BC_REQUIRE(accessor::is_futuristic_timestamp(1007201, 7200, 1000000));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__maximum_timestamp_at_2106__false)
+BC_AUTO_TEST_CASE(header__is_futuristic_timestamp__maximum_timestamp_at_2106__false)
 {
-    BOOST_REQUIRE(!accessor::is_futuristic_timestamp(max_uint32, 7200, max_uint32));
+    BC_REQUIRE(!accessor::is_futuristic_timestamp(max_uint32, 7200, max_uint32));
 }
 
 // The same header evaluated against two limits in one call sequence.
-BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__per_call_limits__expected)
+BC_AUTO_TEST_CASE(header__is_invalid_proof_of_work__per_call_limits__expected)
 {
     const settings settings(selection::mainnet);
     const accessor instance{ 1, hash_digest{}, hash_digest{}, 1, 0x207fffff, 0 };
-    BOOST_REQUIRE(!instance.is_invalid_proof_of_work(0x207fffff, false));
-    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
+    BC_REQUIRE(!instance.is_invalid_proof_of_work(0x207fffff, false));
+    BC_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 // check
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__check__easy_bits__block_success)
+BC_AUTO_TEST_CASE(header__check__easy_bits__block_success)
 {
     const header instance{ 1, hash_digest{}, hash_digest{}, 1, 0x207fffff, 0 };
     const code ec = instance.check(7200, 0x207fffff, false);
-    BOOST_REQUIRE_EQUAL(ec, error::block_success);
+    BC_REQUIRE_EQUAL(ec, error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(header__check__futuristic_timestamp__futuristic_timestamp)
+BC_AUTO_TEST_CASE(header__check__futuristic_timestamp__futuristic_timestamp)
 {
     const header instance{ 1, hash_digest{}, hash_digest{}, max_uint32, 0x207fffff, 0 };
     const code ec = instance.check(7200, 0x207fffff, false);
-    BOOST_REQUIRE_EQUAL(ec, error::futuristic_timestamp);
+    BC_REQUIRE_EQUAL(ec, error::futuristic_timestamp);
 }
 
-BOOST_AUTO_TEST_CASE(header__check__genesis_header__block_success)
+BC_AUTO_TEST_CASE(header__check__genesis_header__block_success)
 {
     const settings settings(selection::mainnet);
     const auto& genesis = settings.genesis_block.header();
     const code ec = genesis.check(settings.timestamp_limit_seconds, settings.proof_of_work_limit, false);
-    BOOST_REQUIRE_EQUAL(ec, error::block_success);
+    BC_REQUIRE_EQUAL(ec, error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(header__accept__sufficient__block_success)
+BC_AUTO_TEST_CASE(header__accept__sufficient__block_success)
 {
     const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
     const context ctx{ flags::no_rules, 0, 99, 0, 4, 0x207fffff, 0 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(header__accept__insufficient_version__insufficient_block_version)
+BC_AUTO_TEST_CASE(header__accept__insufficient_version__insufficient_block_version)
 {
     const header instance{ 3, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
     const context ctx{ flags::no_rules, 0, 99, 0, 4, 0x207fffff, 0 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::insufficient_block_version);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::insufficient_block_version);
 }
 
-BOOST_AUTO_TEST_CASE(header__accept__timestamp_at_median_time_past__anachronistic_timestamp)
+BC_AUTO_TEST_CASE(header__accept__timestamp_at_median_time_past__anachronistic_timestamp)
 {
     const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
     const context ctx{ flags::no_rules, 0, 100, 0, 4, 0x207fffff, 0 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::anachronistic_timestamp);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::anachronistic_timestamp);
 }
 
-BOOST_AUTO_TEST_CASE(header__accept__mismatched_work__incorrect_proof_of_work)
+BC_AUTO_TEST_CASE(header__accept__mismatched_work__incorrect_proof_of_work)
 {
     const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
     const context ctx{ flags::no_rules, 0, 99, 0, 4, 0x207ffffe, 0 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::incorrect_proof_of_work);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::incorrect_proof_of_work);
 }
 
-BOOST_AUTO_TEST_CASE(header__accept__time_warp_patch_off__block_success)
+BC_AUTO_TEST_CASE(header__accept__time_warp_patch_off__block_success)
 {
     const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
     const context ctx{ flags::no_rules, 100, 99, 2016, 4, 0x207fffff, max_uint32 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(header__accept__time_warp_patch_on__early_timestamp)
+BC_AUTO_TEST_CASE(header__accept__time_warp_patch_on__early_timestamp)
 {
     const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
     const context ctx{ flags::time_warp_patch, 100, 99, 2016, 4, 0x207fffff, max_uint32 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::early_timestamp);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::early_timestamp);
 }
 
-BOOST_AUTO_TEST_CASE(header__check__zero_bits__invalid_proof_of_work)
+BC_AUTO_TEST_CASE(header__check__zero_bits__invalid_proof_of_work)
 {
     const settings settings(selection::mainnet);
     const header instance{ 1, hash_digest{}, hash_digest{}, 1, 0, 0 };
     const code ec = instance.check(settings.timestamp_limit_seconds, settings.proof_of_work_limit, false);
-    BOOST_REQUIRE_EQUAL(ec, error::invalid_proof_of_work);
+    BC_REQUIRE_EQUAL(ec, error::invalid_proof_of_work);
 }
 
 // set_state/get_state
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(header__get_state__default__nullptr)
+BC_AUTO_TEST_CASE(header__get_state__default__nullptr)
 {
     const header instance{};
-    BOOST_REQUIRE(!instance.get_state());
+    BC_REQUIRE(!instance.get_state());
 }
 
-BOOST_AUTO_TEST_CASE(header__set_state__assigned__same_state)
+BC_AUTO_TEST_CASE(header__set_state__assigned__same_state)
 {
     const settings settings(selection::mainnet);
     const auto state = std::make_shared<const chain_state>(chain_state::data{}, settings);
     const header instance{};
     instance.set_state(state);
-    BOOST_REQUIRE(instance.get_state() == state);
+    BC_REQUIRE(instance.get_state() == state);
 }
 
 // The cache is copied on copy construct.
-BOOST_AUTO_TEST_CASE(header__set_state__copied__same_state)
+BC_AUTO_TEST_CASE(header__set_state__copied__same_state)
 {
     const settings settings(selection::mainnet);
     const auto state = std::make_shared<const chain_state>(chain_state::data{}, settings);
     const header instance{};
     instance.set_state(state);
     const header copy{ instance };
-    BOOST_REQUIRE(copy.get_state() == state);
+    BC_REQUIRE(copy.get_state() == state);
 }
 
 // A target of zero is the overflow sentinel, so contributes no work.
-BOOST_AUTO_TEST_CASE(header__proof__zero_target__zero)
+BC_AUTO_TEST_CASE(header__proof__zero_target__zero)
 {
-    BOOST_REQUIRE_EQUAL(chain::header::proof(0), 0u);
+    BC_REQUIRE_EQUAL(chain::header::proof(0), 0u);
 }
 
 // An exponent above 29 scales the difficulty down by 256 per excess byte.
-BOOST_AUTO_TEST_CASE(header__difficulty__high_exponent__scaled_down)
+BC_AUTO_TEST_CASE(header__difficulty__high_exponent__scaled_down)
 {
     const chain::header instance{ 0, {}, {}, 0, 0x1e00ffff, 0 };
     const chain::header other{ 0, {}, {}, 0, 0x1d00ffff, 0 };
-    BOOST_REQUIRE_EQUAL(instance.difficulty(), other.difficulty() / 256.0);
+    BC_REQUIRE_EQUAL(instance.difficulty(), other.difficulty() / 256.0);
 }
 
 // A negated compact mantissa is invalid, expanding to the zero sentinel.
-BOOST_AUTO_TEST_CASE(header__proof__negated_bits__zero)
+BC_AUTO_TEST_CASE(header__proof__negated_bits__zero)
 {
-    BOOST_REQUIRE_EQUAL(chain::header::proof(0x01800000), 0u);
+    BC_REQUIRE_EQUAL(chain::header::proof(0x01800000), 0u);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

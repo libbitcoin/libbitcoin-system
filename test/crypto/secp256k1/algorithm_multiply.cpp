@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_algorithm_multiply_tests)
+BC_AUTO_TEST_SUITE(secp256k1_algorithm_multiply_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -228,29 +228,29 @@ constexpr affine p1{ decode(px), decode(py) };
 // tables
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__odd_multiples__expected)
 {
-    BOOST_CHECK(is_point(entry(0), gx, gy));
-    BOOST_CHECK(is_point(entry(1), g3x, g3y));
-    BOOST_CHECK(is_point(entry(3), g7x, g7y));
-    BOOST_CHECK(is_point(entry(63), g127x, g127y));
-    BOOST_CHECK(is_point(entry(511), g1023x, g1023y));
-    BOOST_CHECK(is_point(looked_up(0, true, false), gx_beta, gy));
-    BOOST_CHECK(is_point(looked_up(0, false, true), gx, gy_negated));
+    BC_CHECK(is_point(entry(0), gx, gy));
+    BC_CHECK(is_point(entry(1), g3x, g3y));
+    BC_CHECK(is_point(entry(3), g7x, g7y));
+    BC_CHECK(is_point(entry(63), g127x, g127y));
+    BC_CHECK(is_point(entry(511), g1023x, g1023y));
+    BC_CHECK(is_point(looked_up(0, true, false), gx_beta, gy));
+    BC_CHECK(is_point(looked_up(0, false, true), gx, gy_negated));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__computed_multiples__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__computed_multiples__expected)
 {
-    BOOST_CHECK(is_multiple(0));
-    BOOST_CHECK(is_multiple(511));
-    BOOST_CHECK(is_multiple(512));
-    BOOST_CHECK(is_multiple(4095));
-    BOOST_CHECK(is_multiple(7680));
-    BOOST_CHECK(is_multiple(8191));
-    BOOST_CHECK(is_mapped(0));
-    BOOST_CHECK(is_mapped(511));
-    BOOST_CHECK(is_mapped(512));
-    BOOST_CHECK(is_mapped(8191));
+    BC_CHECK(is_multiple(0));
+    BC_CHECK(is_multiple(511));
+    BC_CHECK(is_multiple(512));
+    BC_CHECK(is_multiple(4095));
+    BC_CHECK(is_multiple(7680));
+    BC_CHECK(is_multiple(8191));
+    BC_CHECK(is_mapped(0));
+    BC_CHECK(is_mapped(511));
+    BC_CHECK(is_mapped(512));
+    BC_CHECK(is_mapped(8191));
 }
 
 static bool is_same(const affine& left, const affine& right) NOEXCEPT
@@ -279,75 +279,75 @@ static bool is_generator_table() NOEXCEPT
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__all_entries__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__tables__all_entries__expected)
 {
-    BOOST_CHECK(is_generator_table());
+    BC_CHECK(is_generator_table());
 }
 
 // multiply
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__values__expected)
 {
-    BOOST_CHECK(is_point(product(number(sample), p1, number(first)), sum1x, sum1y));
-    BOOST_CHECK(is_point(product(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
-    BOOST_CHECK(is_point(product(number(one_value), p1, number(zero_value)), gx, gy));
-    BOOST_CHECK(is_point(product(number(zero_value), g1, number(one_value)), gx, gy));
-    BOOST_CHECK_EQUAL(faults(number(sample), p1, number(first)), 0_u64);
-    BOOST_CHECK_EQUAL(faults(number(order_minus_one), p1, number(order_minus_two)), 0_u64);
+    BC_CHECK(is_point(product(number(sample), p1, number(first)), sum1x, sum1y));
+    BC_CHECK(is_point(product(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
+    BC_CHECK(is_point(product(number(one_value), p1, number(zero_value)), gx, gy));
+    BC_CHECK(is_point(product(number(zero_value), g1, number(one_value)), gx, gy));
+    BC_CHECK_EQUAL(faults(number(sample), p1, number(first)), 0_u64);
+    BC_CHECK_EQUAL(faults(number(order_minus_one), p1, number(order_minus_two)), 0_u64);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply_complete__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply_complete__values__expected)
 {
-    BOOST_CHECK(is_point(complete(number(sample), p1, number(first)), sum1x, sum1y));
-    BOOST_CHECK(is_point(complete(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
-    BOOST_CHECK(is_point(complete(number(one_value), p1, number(zero_value)), gx, gy));
-    BOOST_CHECK(is_point(complete(number(one_value), g1, number(one_value)), g2x, g2y));
-    BOOST_CHECK(f::any(complete(number(zero_value), p1, number(zero_value)).infinity));
-    BOOST_CHECK(f::any(complete(number(one_value), g1, number(order_minus_one)).infinity));
+    BC_CHECK(is_point(complete(number(sample), p1, number(first)), sum1x, sum1y));
+    BC_CHECK(is_point(complete(number(order_minus_one), p1, number(order_minus_two)), sum2x, sum2y));
+    BC_CHECK(is_point(complete(number(one_value), p1, number(zero_value)), gx, gy));
+    BC_CHECK(is_point(complete(number(one_value), g1, number(one_value)), g2x, g2y));
+    BC_CHECK(f::any(complete(number(zero_value), p1, number(zero_value)).infinity));
+    BC_CHECK(f::any(complete(number(one_value), g1, number(order_minus_one)).infinity));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__zero__infinity)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__zero__infinity)
 {
-    BOOST_CHECK_EQUAL(faults(number(zero_value), p1, number(zero_value)), 0_u64);
-    BOOST_CHECK(f::any(product(number(zero_value), p1, number(zero_value)).infinity));
+    BC_CHECK_EQUAL(faults(number(zero_value), p1, number(zero_value)), 0_u64);
+    BC_CHECK(f::any(product(number(zero_value), p1, number(zero_value)).infinity));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__exceptional__faults)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__exceptional__faults)
 {
-    BOOST_CHECK(f::any(faults(number(one_value), g1, number(one_value))));
-    BOOST_CHECK(f::any(faults(number(one_value), g1, number(order_minus_one))));
+    BC_CHECK(f::any(faults(number(one_value), g1, number(one_value))));
+    BC_CHECK(f::any(faults(number(one_value), g1, number(order_minus_one))));
 }
 
 // linear
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point__matches_unit_scalar)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point__matches_unit_scalar)
 {
     affine sum{}, expected{};
-    BOOST_REQUIRE(accessor::linear(sum, number(sample), p1));
-    BOOST_REQUIRE(accessor::linear(expected, number(sample), p1, number(one_value)));
-    BOOST_CHECK(sum.x == expected.x && sum.y == expected.y);
+    BC_REQUIRE(accessor::linear(sum, number(sample), p1));
+    BC_REQUIRE(accessor::linear(expected, number(sample), p1, number(one_value)));
+    BC_CHECK(sum.x == expected.x && sum.y == expected.y);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_zero__point)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_zero__point)
 {
     affine sum{};
-    BOOST_REQUIRE(accessor::linear(sum, number(zero_value), p1));
-    BOOST_CHECK(is_point(sum, px, py));
+    BC_REQUIRE(accessor::linear(sum, number(zero_value), p1));
+    BC_CHECK(is_point(sum, px, py));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_generator__doubled)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_generator__doubled)
 {
     affine sum{};
-    BOOST_REQUIRE(accessor::linear(sum, number(one_value), g1));
-    BOOST_CHECK(is_point(sum, g2x, g2y));
+    BC_REQUIRE(accessor::linear(sum, number(one_value), g1));
+    BC_CHECK(is_point(sum, g2x, g2y));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_negated__infinity)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__linear__point_negated__infinity)
 {
     affine sum{};
-    BOOST_CHECK(!accessor::linear(sum, number(order_minus_one), g1));
+    BC_CHECK(!accessor::linear(sum, number(order_minus_one), g1));
 }
 
 // comb
@@ -427,60 +427,60 @@ static bool is_comb_table() NOEXCEPT
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__all_entries__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__all_entries__expected)
 {
-    BOOST_CHECK(is_comb_table());
+    BC_CHECK(is_comb_table());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__entries__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__comb__entries__expected)
 {
-    BOOST_CHECK(is_comb(0, 0));
-    BOOST_CHECK(is_comb(0, 1));
-    BOOST_CHECK(is_comb(0, 31));
-    BOOST_CHECK(is_comb(1, 0));
-    BOOST_CHECK(is_comb(14, 31));
-    BOOST_CHECK(is_comb(15, 0));
-    BOOST_CHECK(is_comb(29, 17));
-    BOOST_CHECK(is_comb(30, 5));
-    BOOST_CHECK(is_comb(42, 0));
-    BOOST_CHECK(is_comb(42, 7));
+    BC_CHECK(is_comb(0, 0));
+    BC_CHECK(is_comb(0, 1));
+    BC_CHECK(is_comb(0, 31));
+    BC_CHECK(is_comb(1, 0));
+    BC_CHECK(is_comb(14, 31));
+    BC_CHECK(is_comb(15, 0));
+    BC_CHECK(is_comb(29, 17));
+    BC_CHECK(is_comb(30, 5));
+    BC_CHECK(is_comb(42, 0));
+    BC_CHECK(is_comb(42, 7));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__values__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__values__expected)
 {
     constexpr scalar carried{ max_uint64, max_uint64, max_uint64, 0x0fffffffffffffff };
-    BOOST_CHECK(is_comb_product(number(zero_value)));
-    BOOST_CHECK(is_comb_product(number(one_value)));
-    BOOST_CHECK(is_comb_product(number(sample)));
-    BOOST_CHECK(is_comb_product(number(first)));
-    BOOST_CHECK(is_comb_product(number(order_minus_one)));
-    BOOST_CHECK(is_comb_product(number(order_minus_two)));
-    BOOST_CHECK(is_comb_product(carried));
+    BC_CHECK(is_comb_product(number(zero_value)));
+    BC_CHECK(is_comb_product(number(one_value)));
+    BC_CHECK(is_comb_product(number(sample)));
+    BC_CHECK(is_comb_product(number(first)));
+    BC_CHECK(is_comb_product(number(order_minus_one)));
+    BC_CHECK(is_comb_product(number(order_minus_two)));
+    BC_CHECK(is_comb_product(carried));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__generator__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__generator__expected)
 {
-    BOOST_CHECK(is_secret_product(number(sample), number(first)));
-    BOOST_CHECK(is_secret_product(number(one_value), number(order_minus_one)));
-    BOOST_CHECK(is_secret_product(number(order_minus_one), number(one_value)));
-    BOOST_CHECK(is_secret_product(number(sample), number(sample)));
+    BC_CHECK(is_secret_product(number(sample), number(first)));
+    BC_CHECK(is_secret_product(number(one_value), number(order_minus_one)));
+    BC_CHECK(is_secret_product(number(order_minus_one), number(one_value)));
+    BC_CHECK(is_secret_product(number(sample), number(sample)));
 }
 
 // A comb of 65 continuing a comb of 63 adds 64G to 64G.
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__continued_doubling__faults)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__add_comb__continued_doubling__faults)
 {
     uint64_t faults{};
     jacobian sum{};
     sum.infinity = max_uint64;
     accessor::add_comb(sum, scalar{ 63, 0, 0, 0 }, faults);
-    BOOST_CHECK_EQUAL(faults, 0_u64);
+    BC_CHECK_EQUAL(faults, 0_u64);
     accessor::add_comb(sum, scalar{ 65, 0, 0, 0 }, faults);
-    BOOST_CHECK(is_nonzero(faults));
+    BC_CHECK(is_nonzero(faults));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__exceptional__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__secret_multiply__exceptional__expected)
 {
-    BOOST_CHECK(is_secret_product(scalar{ 128, 0, 0, 0 }, scalar{ 65, 0, 0, 0 }));
+    BC_CHECK(is_secret_product(scalar{ 128, 0, 0, 0 }, scalar{ 65, 0, 0, 0 }));
 }
 
 // wipe
@@ -494,7 +494,7 @@ constexpr scalar wiped(scalar value) NOEXCEPT
 
 static_assert(wiped(number(sample)) == scalar{});
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__wipe__values__zero)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__wipe__values__zero)
 {
     auto value = number(sample);
     auto field_value = decode(gx);
@@ -502,37 +502,37 @@ BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__wipe__values__zero)
     accessor::wipe(value);
     accessor::wipe(field_value);
     accessor::wipe(chunk);
-    BOOST_CHECK_EQUAL(value, scalar{});
-    BOOST_CHECK_EQUAL(field_value, field{});
-    BOOST_CHECK_EQUAL(chunk, data_chunk(3, 0));
+    BC_CHECK_EQUAL(value, scalar{});
+    BC_CHECK_EQUAL(field_value, field{});
+    BC_CHECK_EQUAL(chunk, data_chunk(3, 0));
 }
 
 // naf
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__zero__empty)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__zero__empty)
 {
     accessor::naf_t digits{};
-    BOOST_CHECK_EQUAL(accessor::naf<5>(digits, scalar{}), 0u);
-    BOOST_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 130);
+    BC_CHECK_EQUAL(accessor::naf<5>(digits, scalar{}), 0u);
+    BC_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 130);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__ones__carried)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__ones__carried)
 {
     accessor::naf_t digits{};
-    BOOST_CHECK_EQUAL(accessor::naf<5>(digits, scalar{ max_uint64, max_uint64, 0, 0 }), 129u);
-    BOOST_CHECK_EQUAL(digits[0], -1);
-    BOOST_CHECK_EQUAL(digits[128], 1);
-    BOOST_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 128);
+    BC_CHECK_EQUAL(accessor::naf<5>(digits, scalar{ max_uint64, max_uint64, 0, 0 }), 129u);
+    BC_CHECK_EQUAL(digits[0], -1);
+    BC_CHECK_EQUAL(digits[128], 1);
+    BC_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 128);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__window__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__naf__window__expected)
 {
     accessor::naf_t digits{};
-    BOOST_CHECK_EQUAL(accessor::naf<10>(digits, scalar{ 0x1003ff, 0, 0, 0 }), 21u);
-    BOOST_CHECK_EQUAL(digits[0], 1023);
-    BOOST_CHECK_EQUAL(digits[20], 1);
-    BOOST_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 128);
+    BC_CHECK_EQUAL(accessor::naf<10>(digits, scalar{ 0x1003ff, 0, 0, 0 }), 21u);
+    BC_CHECK_EQUAL(digits[0], 1023);
+    BC_CHECK_EQUAL(digits[20], 1);
+    BC_CHECK_EQUAL(std::count(digits.cbegin(), digits.cend(), 0), 128);
 }
 
 // multiscalar
@@ -560,14 +560,14 @@ static bool is_equal(const jacobian& a, const jacobian& b) NOEXCEPT
         encode(left.y) == encode(right.y);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__terms__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__terms__expected)
 {
-    BOOST_CHECK(is_point(sum({ { g1, scalar{ 1 } } }), gx, gy));
-    BOOST_CHECK(is_point(sum({ { g1, scalar{ 1 } }, { g1, scalar{ 1 } } }), g2x, g2y));
-    BOOST_CHECK(is_point(sum({ { g1, scalar{ 3 } }, { g2, scalar{ 2 } } }), g7x, g7y));
-    BOOST_CHECK(is_equal(sum({ { g1, small1 }, { p1, small2 } }), complete(small1, p1, small2)));
-    BOOST_CHECK(f::any(sum({ { g1, scalar{ 1 } }, { g1_negated, scalar{ 1 } } }).infinity));
-    BOOST_CHECK(f::any(sum({}).infinity));
+    BC_CHECK(is_point(sum({ { g1, scalar{ 1 } } }), gx, gy));
+    BC_CHECK(is_point(sum({ { g1, scalar{ 1 } }, { g1, scalar{ 1 } } }), g2x, g2y));
+    BC_CHECK(is_point(sum({ { g1, scalar{ 3 } }, { g2, scalar{ 2 } } }), g7x, g7y));
+    BC_CHECK(is_equal(sum({ { g1, small1 }, { p1, small2 } }), complete(small1, p1, small2)));
+    BC_CHECK(f::any(sum({ { g1, scalar{ 1 } }, { g1_negated, scalar{ 1 } } }).infinity));
+    BC_CHECK(f::any(sum({}).infinity));
 }
 
 // pseudorandom
@@ -628,9 +628,9 @@ static bool is_consistent(size_t rounds) NOEXCEPT
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__pseudorandom__consistent)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__pseudorandom__consistent)
 {
-    BOOST_CHECK(is_consistent(64));
+    BC_CHECK(is_consistent(64));
 }
 
 // lanes
@@ -772,15 +772,15 @@ static void check_lane(const xjacobian<xWord>& out, xWord lane_faults)
     const auto sum = unpack<Lane>(out);
     const auto expected = complete(left_scalars[Lane], points[Lane],
         right_scalars[Lane]);
-    BOOST_CHECK_EQUAL(f::any(sum.infinity), f::any(expected.infinity));
+    BC_CHECK_EQUAL(f::any(sum.infinity), f::any(expected.infinity));
 
     if (!f::any(expected.infinity))
     {
         affine actual{}, reference{};
         accessor::to_affine(actual, sum);
         accessor::to_affine(reference, expected);
-        BOOST_CHECK_EQUAL(encode(actual.x), encode(reference.x));
-        BOOST_CHECK_EQUAL(encode(actual.y), encode(reference.y));
+        BC_CHECK_EQUAL(encode(actual.x), encode(reference.x));
+        BC_CHECK_EQUAL(encode(actual.y), encode(reference.y));
     }
 }
 
@@ -794,8 +794,8 @@ static void check_multiply()
             pack<xWord>(left_scalars), pack<xWord>(points),
             pack<xWord>(right_scalars));
 
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(lane_faults)), 0_u64);
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(lane_faults)), 0_u64);
+        BC_CHECK_EQUAL((f::get<uint64_t, 0>(lane_faults)), 0_u64);
+        BC_CHECK_EQUAL((f::get<uint64_t, 1>(lane_faults)), 0_u64);
         check_lane<0>(out, lane_faults);
         check_lane<1>(out, lane_faults);
 
@@ -815,7 +815,7 @@ static void check_multiply()
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__lanes__match_integral)
 {
     check_multiply<xint128_t>();
     check_multiply<xint256_t>();
@@ -885,11 +885,11 @@ static bool is_lanes_consistent(size_t rounds) NOEXCEPT
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__pseudorandom_lanes__consistent)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_multiply__multiply__pseudorandom_lanes__consistent)
 {
-    BOOST_CHECK(is_lanes_consistent<xint128_t>(8));
-    BOOST_CHECK(is_lanes_consistent<xint256_t>(8));
-    BOOST_CHECK(is_lanes_consistent<xint512_t>(8));
+    BC_CHECK(is_lanes_consistent<xint128_t>(8));
+    BC_CHECK(is_lanes_consistent<xint256_t>(8));
+    BC_CHECK(is_lanes_consistent<xint512_t>(8));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

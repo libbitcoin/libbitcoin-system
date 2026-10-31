@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_algorithm_verify_tests)
+BC_AUTO_TEST_SUITE(secp256k1_algorithm_verify_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -231,135 +231,135 @@ static_assert(!is_key(bad_sign));
 static_assert(!is_key(prime_x));
 static_assert(!is_key(zero_x));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__from_bytes__keys__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__from_bytes__keys__expected)
 {
-    BOOST_CHECK(is_generator(ec_compressed_generator));
-    BOOST_CHECK(is_generator(ec_uncompressed_generator));
-    BOOST_CHECK(is_generator(hybrid_even));
-    BOOST_CHECK(is_key(key2));
-    BOOST_CHECK(is_key(overflow_key));
-    BOOST_CHECK(!is_key(hybrid_odd));
-    BOOST_CHECK(!is_key(off_curve));
-    BOOST_CHECK(!is_key(bad_sign));
-    BOOST_CHECK(!is_key(prime_x));
-    BOOST_CHECK(!is_key(zero_x));
+    BC_CHECK(is_generator(ec_compressed_generator));
+    BC_CHECK(is_generator(ec_uncompressed_generator));
+    BC_CHECK(is_generator(hybrid_even));
+    BC_CHECK(is_key(key2));
+    BC_CHECK(is_key(overflow_key));
+    BC_CHECK(!is_key(hybrid_odd));
+    BC_CHECK(!is_key(off_curve));
+    BC_CHECK(!is_key(bad_sign));
+    BC_CHECK(!is_key(prime_x));
+    BC_CHECK(!is_key(zero_x));
 }
 
 // ecdsa
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__vector__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__vector__expected)
 {
-    BOOST_CHECK(ecdsa_verify(key2, sighash2, r2, s2));
-    BOOST_CHECK(ecdsa_verify(key2, sighash2, r2, s2_negated));
-    BOOST_CHECK(!ecdsa_verify(key2, overflow_hash, r2, s2));
-    BOOST_CHECK(!ecdsa_verify(overflow_key, sighash2, r2, s2));
+    BC_CHECK(ecdsa_verify(key2, sighash2, r2, s2));
+    BC_CHECK(ecdsa_verify(key2, sighash2, r2, s2_negated));
+    BC_CHECK(!ecdsa_verify(key2, overflow_hash, r2, s2));
+    BC_CHECK(!ecdsa_verify(overflow_key, sighash2, r2, s2));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__exceptional__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__exceptional__expected)
 {
-    BOOST_CHECK(ecdsa_verify(ec_compressed_generator, doubled, doubled, doubled));
-    BOOST_CHECK(!ecdsa_verify(ec_compressed_generator, sighash2, doubled, doubled));
+    BC_CHECK(ecdsa_verify(ec_compressed_generator, doubled, doubled, doubled));
+    BC_CHECK(!ecdsa_verify(ec_compressed_generator, sighash2, doubled, doubled));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__out_of_range__false)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__out_of_range__false)
 {
-    BOOST_CHECK(!ecdsa_verify(key2, sighash2, zero_value, s2));
-    BOOST_CHECK(!ecdsa_verify(key2, sighash2, r2, zero_value));
-    BOOST_CHECK(!ecdsa_verify(key2, sighash2, order_value, s2));
-    BOOST_CHECK(!ecdsa_verify(key2, sighash2, r2, order_value));
-    BOOST_CHECK(!ecdsa_verify(key2, sighash2, prime_minus_order, s2));
+    BC_CHECK(!ecdsa_verify(key2, sighash2, zero_value, s2));
+    BC_CHECK(!ecdsa_verify(key2, sighash2, r2, zero_value));
+    BC_CHECK(!ecdsa_verify(key2, sighash2, order_value, s2));
+    BC_CHECK(!ecdsa_verify(key2, sighash2, r2, order_value));
+    BC_CHECK(!ecdsa_verify(key2, sighash2, prime_minus_order, s2));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__overflow__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__overflow__expected)
 {
     ec_signature signature{};
-    BOOST_REQUIRE(ecdsa::decode_signature(signature, overflow_der, true));
-    BOOST_CHECK(ecdsa::verify_signature(overflow_key, overflow_hash, signature));
-    BOOST_CHECK(ecdsa_verify(overflow_key, overflow_hash, overflow_r, overflow_s));
+    BC_REQUIRE(ecdsa::decode_signature(signature, overflow_der, true));
+    BC_CHECK(ecdsa::verify_signature(overflow_key, overflow_hash, signature));
+    BC_CHECK(ecdsa_verify(overflow_key, overflow_hash, overflow_r, overflow_s));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__windows__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__windows__expected)
 {
-    BOOST_CHECK(ecdsa_verify<4>(key2, sighash2, r2, s2));
-    BOOST_CHECK(ecdsa_verify<4>(key2, sighash2, r2, s2_negated));
-    BOOST_CHECK(!ecdsa_verify<4>(key2, overflow_hash, r2, s2));
-    BOOST_CHECK(!ecdsa_verify<4>(overflow_key, sighash2, r2, s2));
-    BOOST_CHECK(ecdsa_verify<4>(ec_compressed_generator, doubled, doubled, doubled));
-    BOOST_CHECK(!ecdsa_verify<4>(ec_compressed_generator, sighash2, doubled, doubled));
-    BOOST_CHECK(!ecdsa_verify<4>(key2, sighash2, zero_value, s2));
-    BOOST_CHECK(!ecdsa_verify<4>(key2, sighash2, r2, order_value));
-    BOOST_CHECK(ecdsa_verify<4>(overflow_key, overflow_hash, overflow_r, overflow_s));
-    BOOST_CHECK(ecdsa_verify<5>(key2, sighash2, r2, s2));
-    BOOST_CHECK(ecdsa_verify<5>(ec_compressed_generator, doubled, doubled, doubled));
+    BC_CHECK(ecdsa_verify<4>(key2, sighash2, r2, s2));
+    BC_CHECK(ecdsa_verify<4>(key2, sighash2, r2, s2_negated));
+    BC_CHECK(!ecdsa_verify<4>(key2, overflow_hash, r2, s2));
+    BC_CHECK(!ecdsa_verify<4>(overflow_key, sighash2, r2, s2));
+    BC_CHECK(ecdsa_verify<4>(ec_compressed_generator, doubled, doubled, doubled));
+    BC_CHECK(!ecdsa_verify<4>(ec_compressed_generator, sighash2, doubled, doubled));
+    BC_CHECK(!ecdsa_verify<4>(key2, sighash2, zero_value, s2));
+    BC_CHECK(!ecdsa_verify<4>(key2, sighash2, r2, order_value));
+    BC_CHECK(ecdsa_verify<4>(overflow_key, overflow_hash, overflow_r, overflow_s));
+    BC_CHECK(ecdsa_verify<5>(key2, sighash2, r2, s2));
+    BC_CHECK(ecdsa_verify<5>(ec_compressed_generator, doubled, doubled, doubled));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__signed__agrees)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_ecdsa__signed__agrees)
 {
-    BOOST_CHECK(ecdsa_signed(secret1, message1, false));
-    BOOST_CHECK(ecdsa_signed(secret2, message2, false));
-    BOOST_CHECK(ecdsa_signed(secret3, message3, false));
-    BOOST_CHECK(ecdsa_signed(secret4, message4, false));
-    BOOST_CHECK(ecdsa_signed(secret1, message1, true));
-    BOOST_CHECK(ecdsa_signed(secret2, message2, true));
-    BOOST_CHECK(ecdsa_signed(secret3, message3, true));
-    BOOST_CHECK(ecdsa_signed(secret4, message4, true));
+    BC_CHECK(ecdsa_signed(secret1, message1, false));
+    BC_CHECK(ecdsa_signed(secret2, message2, false));
+    BC_CHECK(ecdsa_signed(secret3, message3, false));
+    BC_CHECK(ecdsa_signed(secret4, message4, false));
+    BC_CHECK(ecdsa_signed(secret1, message1, true));
+    BC_CHECK(ecdsa_signed(secret2, message2, true));
+    BC_CHECK(ecdsa_signed(secret3, message3, true));
+    BC_CHECK(ecdsa_signed(secret4, message4, true));
 }
 
 // schnorr
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__bip340_valid__true)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__bip340_valid__true)
 {
-    BOOST_CHECK(schnorr_verify(bip340_key0, bip340_message0, bip340_signature0));
-    BOOST_CHECK(schnorr_verify(bip340_key1, bip340_message1, bip340_signature1));
-    BOOST_CHECK(schnorr_verify(bip340_key2, bip340_message2, bip340_signature2));
-    BOOST_CHECK(schnorr_verify(bip340_key3, bip340_message3, bip340_signature3));
-    BOOST_CHECK(schnorr_verify(bip340_key4, bip340_message4, bip340_signature4));
-    BOOST_CHECK(schnorr_verify(bip340_key15, bip340_message15, bip340_signature15));
-    BOOST_CHECK(schnorr_verify(bip340_key15, bip340_message16, bip340_signature16));
-    BOOST_CHECK(schnorr_verify(bip340_key15, bip340_message17, bip340_signature17));
-    BOOST_CHECK(schnorr_verify(bip340_key15, bip340_message18, bip340_signature18));
+    BC_CHECK(schnorr_verify(bip340_key0, bip340_message0, bip340_signature0));
+    BC_CHECK(schnorr_verify(bip340_key1, bip340_message1, bip340_signature1));
+    BC_CHECK(schnorr_verify(bip340_key2, bip340_message2, bip340_signature2));
+    BC_CHECK(schnorr_verify(bip340_key3, bip340_message3, bip340_signature3));
+    BC_CHECK(schnorr_verify(bip340_key4, bip340_message4, bip340_signature4));
+    BC_CHECK(schnorr_verify(bip340_key15, bip340_message15, bip340_signature15));
+    BC_CHECK(schnorr_verify(bip340_key15, bip340_message16, bip340_signature16));
+    BC_CHECK(schnorr_verify(bip340_key15, bip340_message17, bip340_signature17));
+    BC_CHECK(schnorr_verify(bip340_key15, bip340_message18, bip340_signature18));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__bip340_invalid__false)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__bip340_invalid__false)
 {
-    BOOST_CHECK(!schnorr_verify(bip340_key5, bip340_message1, bip340_signature5));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature6));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature7));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature8));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature9));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature10));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature11));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature12));
-    BOOST_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature13));
-    BOOST_CHECK(!schnorr_verify(bip340_key14, bip340_message1, bip340_signature14));
+    BC_CHECK(!schnorr_verify(bip340_key5, bip340_message1, bip340_signature5));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature6));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature7));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature8));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature9));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature10));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature11));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature12));
+    BC_CHECK(!schnorr_verify(bip340_key1, bip340_message1, bip340_signature13));
+    BC_CHECK(!schnorr_verify(bip340_key14, bip340_message1, bip340_signature14));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__windows__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__windows__expected)
 {
-    BOOST_CHECK(schnorr_verify<4>(bip340_key0, bip340_message0, bip340_signature0));
-    BOOST_CHECK(schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature1));
-    BOOST_CHECK(schnorr_verify<4>(bip340_key4, bip340_message4, bip340_signature4));
-    BOOST_CHECK(schnorr_verify<4>(bip340_key15, bip340_message18, bip340_signature18));
-    BOOST_CHECK(!schnorr_verify<4>(bip340_key5, bip340_message1, bip340_signature5));
-    BOOST_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature6));
-    BOOST_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature7));
-    BOOST_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature13));
-    BOOST_CHECK(!schnorr_verify<4>(bip340_key14, bip340_message1, bip340_signature14));
-    BOOST_CHECK(schnorr_verify<5>(bip340_key0, bip340_message0, bip340_signature0));
+    BC_CHECK(schnorr_verify<4>(bip340_key0, bip340_message0, bip340_signature0));
+    BC_CHECK(schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature1));
+    BC_CHECK(schnorr_verify<4>(bip340_key4, bip340_message4, bip340_signature4));
+    BC_CHECK(schnorr_verify<4>(bip340_key15, bip340_message18, bip340_signature18));
+    BC_CHECK(!schnorr_verify<4>(bip340_key5, bip340_message1, bip340_signature5));
+    BC_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature6));
+    BC_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature7));
+    BC_CHECK(!schnorr_verify<4>(bip340_key1, bip340_message1, bip340_signature13));
+    BC_CHECK(!schnorr_verify<4>(bip340_key14, bip340_message1, bip340_signature14));
+    BC_CHECK(schnorr_verify<5>(bip340_key0, bip340_message0, bip340_signature0));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__signed__agrees)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__signed__agrees)
 {
-    BOOST_CHECK(schnorr_signed(secret1, message1, false));
-    BOOST_CHECK(schnorr_signed(secret2, message2, false));
-    BOOST_CHECK(schnorr_signed(secret3, message3, false));
-    BOOST_CHECK(schnorr_signed(secret4, message4, false));
-    BOOST_CHECK(schnorr_signed(secret1, message1, true));
-    BOOST_CHECK(schnorr_signed(secret2, message2, true));
-    BOOST_CHECK(schnorr_signed(secret3, message3, true));
-    BOOST_CHECK(schnorr_signed(secret4, message4, true));
+    BC_CHECK(schnorr_signed(secret1, message1, false));
+    BC_CHECK(schnorr_signed(secret2, message2, false));
+    BC_CHECK(schnorr_signed(secret3, message3, false));
+    BC_CHECK(schnorr_signed(secret4, message4, false));
+    BC_CHECK(schnorr_signed(secret1, message1, true));
+    BC_CHECK(schnorr_signed(secret2, message2, true));
+    BC_CHECK(schnorr_signed(secret3, message3, true));
+    BC_CHECK(schnorr_signed(secret4, message4, true));
 }
 
 // batch
@@ -481,8 +481,8 @@ static void check_ecdsa_batch()
 {
     const auto& rows = ecdsa_rows();
     data_chunk results{};
-    BOOST_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.digests, rows.signatures));
-    BOOST_CHECK_EQUAL(results, rows.expected);
+    BC_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.digests, rows.signatures));
+    BC_CHECK_EQUAL(results, rows.expected);
 }
 
 template <typename Word>
@@ -490,8 +490,8 @@ static void check_schnorr_batch()
 {
     const auto& rows = schnorr_rows();
     data_chunk results{};
-    BOOST_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.digests, rows.signatures));
-    BOOST_CHECK_EQUAL(results, rows.expected);
+    BC_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.digests, rows.signatures));
+    BC_CHECK_EQUAL(results, rows.expected);
 }
 
 template <typename Word>
@@ -509,12 +509,12 @@ static void check_batches()
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__integral__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__integral__expected)
 {
     check_batches<uint64_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__lanes__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__lanes__expected)
 {
     check_batches<xint128_t>();
     check_batches<xint256_t>();
@@ -545,39 +545,39 @@ static const rows_t<ec_xonly>& duplicate_rows() NOEXCEPT
     return rows;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__combined__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__verify_schnorr__combined__expected)
 {
     const auto& rows = schnorr_rows();
-    BOOST_CHECK(combined(rows, 0, 0));
-    BOOST_CHECK(combined(rows, 0, 5));
-    BOOST_CHECK(combined(rows, 15, 4));
-    BOOST_CHECK(combined(duplicate_rows(), 0, 3));
-    BOOST_CHECK(!combined(rows, 0, 6));
-    BOOST_CHECK(!combined(rows, 15, 5));
-    BOOST_CHECK(!combined(rows, 6, 1));
-    BOOST_CHECK(!combined(rows, 7, 1));
-    BOOST_CHECK(!combined(rows, 8, 1));
-    BOOST_CHECK(!combined(rows, 9, 1));
-    BOOST_CHECK(!combined(rows, 10, 1));
-    BOOST_CHECK(!combined(rows, 11, 1));
+    BC_CHECK(combined(rows, 0, 0));
+    BC_CHECK(combined(rows, 0, 5));
+    BC_CHECK(combined(rows, 15, 4));
+    BC_CHECK(combined(duplicate_rows(), 0, 3));
+    BC_CHECK(!combined(rows, 0, 6));
+    BC_CHECK(!combined(rows, 15, 5));
+    BC_CHECK(!combined(rows, 6, 1));
+    BC_CHECK(!combined(rows, 7, 1));
+    BC_CHECK(!combined(rows, 8, 1));
+    BC_CHECK(!combined(rows, 9, 1));
+    BC_CHECK(!combined(rows, 10, 1));
+    BC_CHECK(!combined(rows, 11, 1));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__valid_rows__true)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__valid_rows__true)
 {
     const auto& rows = ecdsa_rows();
     const std::span<const ec_compressed> keys{ rows.keys.data(), 3 };
     const std::span<const hash_digest> digests{ rows.digests.data(), 3 };
     const std::span<const ec_signature> signatures{ rows.signatures.data(), 3 };
     data_chunk results{};
-    BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, keys, digests, signatures));
-    BOOST_CHECK_EQUAL(results, data_chunk({ 1, 1, 1 }));
+    BC_CHECK(accessor::verify_ecdsa<uint64_t>(results, keys, digests, signatures));
+    BC_CHECK_EQUAL(results, data_chunk({ 1, 1, 1 }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__empty__true)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_verify__batch__empty__true)
 {
     data_chunk results{};
-    BOOST_CHECK(accessor::verify_ecdsa<uint64_t>(results, std::span<const ec_compressed>{}, std::span<const hash_digest>{}, std::span<const ec_signature>{}));
-    BOOST_CHECK(results.empty());
+    BC_CHECK(accessor::verify_ecdsa<uint64_t>(results, std::span<const ec_compressed>{}, std::span<const hash_digest>{}, std::span<const ec_signature>{}));
+    BC_CHECK(results.empty());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

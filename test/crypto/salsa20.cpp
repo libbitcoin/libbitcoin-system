@@ -18,10 +18,10 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(salsa20_tests)
+BC_AUTO_TEST_SUITE(salsa20_tests)
 
 // ecrypt salsa20 (256-bit key) set 1, vector 0, stream[0..63].
-BOOST_AUTO_TEST_CASE(salsa20__stream__ecrypt_set1_vector0__expected)
+BC_AUTO_TEST_CASE(salsa20__stream__ecrypt_set1_vector0__expected)
 {
     const auto key = base16_array("8000000000000000000000000000000000000000000000000000000000000000");
     const auto expected = base16_array(
@@ -31,11 +31,11 @@ BOOST_AUTO_TEST_CASE(salsa20__stream__ecrypt_set1_vector0__expected)
     salsa20 cipher{ key };
     salsa20::block out{};
     cipher.stream(out);
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
 // The keystream is continuous across calls of any size.
-BOOST_AUTO_TEST_CASE(salsa20__stream__segmented__continuous)
+BC_AUTO_TEST_CASE(salsa20__stream__segmented__continuous)
 {
     const auto key = base16_array("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
     data_array<200> whole{};
@@ -51,11 +51,11 @@ BOOST_AUTO_TEST_CASE(salsa20__stream__segmented__continuous)
     other.stream(std::span<uint8_t>(pieces).subspan(1, 63));
     other.stream(std::span<uint8_t>(pieces).subspan(64, 100));
     other.stream(std::span<uint8_t>(pieces).subspan(164));
-    BOOST_REQUIRE_EQUAL(whole, pieces);
+    BC_REQUIRE_EQUAL(whole, pieces);
 }
 
 // Encryption is its own inverse.
-BOOST_AUTO_TEST_CASE(salsa20__crypt__round_trip__expected)
+BC_AUTO_TEST_CASE(salsa20__crypt__round_trip__expected)
 {
     const auto key = base16_array("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
     const auto plain = to_chunk("The quick brown fox jumps over the lazy dog, twice, and then some more.");
@@ -64,16 +64,16 @@ BOOST_AUTO_TEST_CASE(salsa20__crypt__round_trip__expected)
     cipher.seek(1, 0);
     data_chunk encrypted(plain.size());
     cipher.crypt(plain, encrypted);
-    BOOST_REQUIRE_NE(encrypted, plain);
+    BC_REQUIRE_NE(encrypted, plain);
 
     cipher.seek(1, 0);
     data_chunk decrypted(plain.size());
     cipher.crypt(encrypted, decrypted);
-    BOOST_REQUIRE_EQUAL(decrypted, plain);
+    BC_REQUIRE_EQUAL(decrypted, plain);
 }
 
 // nacl core1 (crypto_core_hsalsa20 of the rfc7748 shared secret, zero input).
-BOOST_AUTO_TEST_CASE(salsa20__hsalsa20__nacl_core1__expected)
+BC_AUTO_TEST_CASE(salsa20__hsalsa20__nacl_core1__expected)
 {
     const auto shared = base16_array("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742");
     const auto expected = base16_array("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389");
@@ -81,11 +81,11 @@ BOOST_AUTO_TEST_CASE(salsa20__hsalsa20__nacl_core1__expected)
 
     salsa20::secret out{};
     salsa20::hsalsa20(out, shared, zero);
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
 // XSalsa20 is Salsa20 under the HSalsa20 subkey and the trailing nonce.
-BOOST_AUTO_TEST_CASE(salsa20__extended_nonce__matches_derivation__expected)
+BC_AUTO_TEST_CASE(salsa20__extended_nonce__matches_derivation__expected)
 {
     const auto key = base16_array("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389");
     const auto nonce = base16_array("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37");
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(salsa20__extended_nonce__matches_derivation__expected)
     salsa20 extended{ key, nonce };
     data_array<100> out{};
     extended.stream(out);
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

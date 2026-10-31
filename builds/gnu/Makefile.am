@@ -1120,7 +1120,6 @@ include_bitcoin_system_unit_testdir = \
     ${includedir}/bitcoin/system/unit_test
 
 include_bitcoin_system_unit_test_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/unit_test/aliases.hpp \
     ${srcdir}/../../include/bitcoin/system/unit_test/checks.hpp \
     ${srcdir}/../../include/bitcoin/system/unit_test/filter.hpp \
     ${srcdir}/../../include/bitcoin/system/unit_test/macros.hpp \

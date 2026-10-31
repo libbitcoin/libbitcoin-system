@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(json_object_tests)
+BC_AUTO_TEST_SUITE(json_object_tests)
 
 using namespace system::json;
 
@@ -49,203 +49,203 @@ static std::string keys(const object& instance)
     return out;
 }
 
-BOOST_AUTO_TEST_CASE(json_object__construct__default__empty)
+BC_AUTO_TEST_CASE(json_object__construct__default__empty)
 {
     const object instance{};
-    BOOST_REQUIRE(instance.empty());
-    BOOST_REQUIRE_EQUAL(instance.size(), 0u);
-    BOOST_REQUIRE(instance.cbegin() == instance.cend());
+    BC_REQUIRE(instance.empty());
+    BC_REQUIRE_EQUAL(instance.size(), 0u);
+    BC_REQUIRE(instance.cbegin() == instance.cend());
 }
 
-BOOST_AUTO_TEST_CASE(json_object__construct__initializer__insertion_order)
+BC_AUTO_TEST_CASE(json_object__construct__initializer__insertion_order)
 {
     const object instance{ { "b", 1 }, { "a", 2 }, { "c", 3 } };
-    BOOST_REQUIRE_EQUAL(keys(instance), "b,a,c,");
-    BOOST_REQUIRE_EQUAL(serialize(value{ instance }), R"({"b":1,"a":2,"c":3})");
+    BC_REQUIRE_EQUAL(keys(instance), "b,a,c,");
+    BC_REQUIRE_EQUAL(serialize(value{ instance }), R"({"b":1,"a":2,"c":3})");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__construct__initializer_duplicate__first_retained)
+BC_AUTO_TEST_CASE(json_object__construct__initializer_duplicate__first_retained)
 {
     const object instance{ { "a", 1 }, { "a", 2 } };
-    BOOST_REQUIRE_EQUAL(serialize(value{ instance }), R"({"a":1})");
+    BC_REQUIRE_EQUAL(serialize(value{ instance }), R"({"a":1})");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__lookup__present__expected)
+BC_AUTO_TEST_CASE(json_object__lookup__present__expected)
 {
     const object instance{ { "a", 1 }, { "b", "x" } };
-    BOOST_REQUIRE(instance.contains("a"));
-    BOOST_REQUIRE_EQUAL(instance.count("b"), 1u);
-    BOOST_REQUIRE_EQUAL(instance.at("b").as_string(), "x");
-    BOOST_REQUIRE_EQUAL(instance.find("a")->value().as_int64(), 1);
-    BOOST_REQUIRE_EQUAL(instance.find("a")->key(), "a");
-    BOOST_REQUIRE(!is_null(instance.if_contains("a")));
+    BC_REQUIRE(instance.contains("a"));
+    BC_REQUIRE_EQUAL(instance.count("b"), 1u);
+    BC_REQUIRE_EQUAL(instance.at("b").as_string(), "x");
+    BC_REQUIRE_EQUAL(instance.find("a")->value().as_int64(), 1);
+    BC_REQUIRE_EQUAL(instance.find("a")->key(), "a");
+    BC_REQUIRE(!is_null(instance.if_contains("a")));
 }
 
-BOOST_AUTO_TEST_CASE(json_object__lookup__absent__expected)
+BC_AUTO_TEST_CASE(json_object__lookup__absent__expected)
 {
     const object instance{ { "a", 1 } };
-    BOOST_REQUIRE(!instance.contains("b"));
-    BOOST_REQUIRE_EQUAL(instance.count("b"), 0u);
-    BOOST_REQUIRE(instance.find("b") == instance.cend());
-    BOOST_REQUIRE(is_null(instance.if_contains("b")));
-    BOOST_REQUIRE_THROW(instance.at("b"), std::system_error);
+    BC_REQUIRE(!instance.contains("b"));
+    BC_REQUIRE_EQUAL(instance.count("b"), 0u);
+    BC_REQUIRE(instance.find("b") == instance.cend());
+    BC_REQUIRE(is_null(instance.if_contains("b")));
+    BC_REQUIRE_THROW(instance.at("b"), std::system_error);
 }
 
-BOOST_AUTO_TEST_CASE(json_object__subscript__absent__inserts_null)
+BC_AUTO_TEST_CASE(json_object__subscript__absent__inserts_null)
 {
     object instance{};
     instance["a"];
-    BOOST_REQUIRE(instance.at("a").is_null());
+    BC_REQUIRE(instance.at("a").is_null());
 
     instance["a"] = 1;
-    BOOST_REQUIRE_EQUAL(instance.at("a").as_int64(), 1);
-    BOOST_REQUIRE_EQUAL(instance.size(), 1u);
+    BC_REQUIRE_EQUAL(instance.at("a").as_int64(), 1);
+    BC_REQUIRE_EQUAL(instance.size(), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(json_object__emplace__existing__not_replaced)
+BC_AUTO_TEST_CASE(json_object__emplace__existing__not_replaced)
 {
     object instance{ { "a", 1 } };
     const auto result = instance.emplace("a", 2);
-    BOOST_REQUIRE(!result.second);
-    BOOST_REQUIRE_EQUAL(result.first->value().as_int64(), 1);
+    BC_REQUIRE(!result.second);
+    BC_REQUIRE_EQUAL(result.first->value().as_int64(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(json_object__emplace__absent__appended)
+BC_AUTO_TEST_CASE(json_object__emplace__absent__appended)
 {
     object instance{ { "a", 1 } };
     const auto result = instance.emplace("b", "x");
-    BOOST_REQUIRE(result.second);
-    BOOST_REQUIRE_EQUAL(result.first->key(), "b");
-    BOOST_REQUIRE_EQUAL(keys(instance), "a,b,");
+    BC_REQUIRE(result.second);
+    BC_REQUIRE_EQUAL(result.first->key(), "b");
+    BC_REQUIRE_EQUAL(keys(instance), "a,b,");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__insert_or_assign__existing__replaced_in_place)
+BC_AUTO_TEST_CASE(json_object__insert_or_assign__existing__replaced_in_place)
 {
     object instance{ { "a", 1 }, { "b", 2 } };
     const auto result = instance.insert_or_assign("a", 3);
-    BOOST_REQUIRE(!result.second);
-    BOOST_REQUIRE_EQUAL(serialize(value{ instance }), R"({"a":3,"b":2})");
+    BC_REQUIRE(!result.second);
+    BC_REQUIRE_EQUAL(serialize(value{ instance }), R"({"a":3,"b":2})");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__insert__pair_and_list__not_replaced)
+BC_AUTO_TEST_CASE(json_object__insert__pair_and_list__not_replaced)
 {
     object instance{ { "a", 1 } };
     instance.insert(std::pair<std::string, value>{ "a", 2 });
     instance.insert(std::pair<std::string, value>{ "b", 3 });
     instance.insert({ { "c", 4 }, { "a", 5 } });
-    BOOST_REQUIRE_EQUAL(serialize(value{ instance }), R"({"a":1,"b":3,"c":4})");
+    BC_REQUIRE_EQUAL(serialize(value{ instance }), R"({"a":1,"b":3,"c":4})");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__erase__first__last_moved_into_position)
+BC_AUTO_TEST_CASE(json_object__erase__first__last_moved_into_position)
 {
     object instance{ { "a", 1 }, { "b", 2 }, { "c", 3 } };
-    BOOST_REQUIRE_EQUAL(instance.erase("a"), 1u);
-    BOOST_REQUIRE_EQUAL(keys(instance), "c,b,");
+    BC_REQUIRE_EQUAL(instance.erase("a"), 1u);
+    BC_REQUIRE_EQUAL(keys(instance), "c,b,");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__erase__last__removed)
+BC_AUTO_TEST_CASE(json_object__erase__last__removed)
 {
     object instance{ { "a", 1 }, { "b", 2 } };
     const auto it = instance.erase(std::next(instance.cbegin()));
-    BOOST_REQUIRE(it == instance.cend());
-    BOOST_REQUIRE_EQUAL(keys(instance), "a,");
+    BC_REQUIRE(it == instance.cend());
+    BC_REQUIRE_EQUAL(keys(instance), "a,");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__erase__absent__zero)
+BC_AUTO_TEST_CASE(json_object__erase__absent__zero)
 {
     object instance{ { "a", 1 } };
-    BOOST_REQUIRE_EQUAL(instance.erase("b"), 0u);
-    BOOST_REQUIRE_EQUAL(instance.stable_erase("b"), 0u);
-    BOOST_REQUIRE_EQUAL(instance.size(), 1u);
+    BC_REQUIRE_EQUAL(instance.erase("b"), 0u);
+    BC_REQUIRE_EQUAL(instance.stable_erase("b"), 0u);
+    BC_REQUIRE_EQUAL(instance.size(), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(json_object__stable_erase__first__order_retained)
+BC_AUTO_TEST_CASE(json_object__stable_erase__first__order_retained)
 {
     object instance{ { "a", 1 }, { "b", 2 }, { "c", 3 } };
-    BOOST_REQUIRE_EQUAL(instance.stable_erase("a"), 1u);
-    BOOST_REQUIRE_EQUAL(keys(instance), "b,c,");
+    BC_REQUIRE_EQUAL(instance.stable_erase("a"), 1u);
+    BC_REQUIRE_EQUAL(keys(instance), "b,c,");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__indexed__lookup_all__expected)
+BC_AUTO_TEST_CASE(json_object__indexed__lookup_all__expected)
 {
     const auto instance = make_many();
-    BOOST_REQUIRE_EQUAL(instance.size(), many_keys.size());
-    BOOST_REQUIRE_EQUAL(instance.at("k00").as_string(), "k00");
-    BOOST_REQUIRE_EQUAL(instance.at("k17").as_string(), "k17");
-    BOOST_REQUIRE_EQUAL(instance.at("k39").as_string(), "k39");
-    BOOST_REQUIRE(!instance.contains("k40"));
+    BC_REQUIRE_EQUAL(instance.size(), many_keys.size());
+    BC_REQUIRE_EQUAL(instance.at("k00").as_string(), "k00");
+    BC_REQUIRE_EQUAL(instance.at("k17").as_string(), "k17");
+    BC_REQUIRE_EQUAL(instance.at("k39").as_string(), "k39");
+    BC_REQUIRE(!instance.contains("k40"));
 }
 
-BOOST_AUTO_TEST_CASE(json_object__indexed__every_key__found)
+BC_AUTO_TEST_CASE(json_object__indexed__every_key__found)
 {
     const auto instance = make_many();
     for (const auto& key: many_keys)
-        BOOST_REQUIRE_EQUAL(instance.at(key).as_string(), key);
+        BC_REQUIRE_EQUAL(instance.at(key).as_string(), key);
 }
 
-BOOST_AUTO_TEST_CASE(json_object__indexed__erase_then_lookup__expected)
+BC_AUTO_TEST_CASE(json_object__indexed__erase_then_lookup__expected)
 {
     auto instance = make_many();
-    BOOST_REQUIRE_EQUAL(instance.erase("k05"), 1u);
-    BOOST_REQUIRE_EQUAL(instance.stable_erase("k10"), 1u);
-    BOOST_REQUIRE(!instance.contains("k05"));
-    BOOST_REQUIRE(!instance.contains("k10"));
-    BOOST_REQUIRE_EQUAL(instance.at("k39").as_string(), "k39");
-    BOOST_REQUIRE_EQUAL(std::next(instance.cbegin(), 5)->key(), "k39");
-    BOOST_REQUIRE_EQUAL(instance.size(), sub1(sub1(many_keys.size())));
+    BC_REQUIRE_EQUAL(instance.erase("k05"), 1u);
+    BC_REQUIRE_EQUAL(instance.stable_erase("k10"), 1u);
+    BC_REQUIRE(!instance.contains("k05"));
+    BC_REQUIRE(!instance.contains("k10"));
+    BC_REQUIRE_EQUAL(instance.at("k39").as_string(), "k39");
+    BC_REQUIRE_EQUAL(std::next(instance.cbegin(), 5)->key(), "k39");
+    BC_REQUIRE_EQUAL(instance.size(), sub1(sub1(many_keys.size())));
 }
 
-BOOST_AUTO_TEST_CASE(json_object__indexed__copy__lookup_expected)
+BC_AUTO_TEST_CASE(json_object__indexed__copy__lookup_expected)
 {
     const auto original = make_many();
     const object copy{ original };
-    BOOST_REQUIRE(copy == original);
-    BOOST_REQUIRE_EQUAL(copy.at("k33").as_string(), "k33");
+    BC_REQUIRE(copy == original);
+    BC_REQUIRE_EQUAL(copy.at("k33").as_string(), "k33");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__indexed__duplicate_emplace__not_inserted)
+BC_AUTO_TEST_CASE(json_object__indexed__duplicate_emplace__not_inserted)
 {
     auto instance = make_many();
-    BOOST_REQUIRE(!instance.emplace("k20", 1).second);
-    BOOST_REQUIRE_EQUAL(instance.size(), many_keys.size());
+    BC_REQUIRE(!instance.emplace("k20", 1).second);
+    BC_REQUIRE_EQUAL(instance.size(), many_keys.size());
 }
 
-BOOST_AUTO_TEST_CASE(json_object__clear__empty)
+BC_AUTO_TEST_CASE(json_object__clear__empty)
 {
     auto instance = make_many();
     instance.clear();
-    BOOST_REQUIRE(instance.empty());
-    BOOST_REQUIRE(!instance.contains("k00"));
+    BC_REQUIRE(instance.empty());
+    BC_REQUIRE(!instance.contains("k00"));
 }
 
-BOOST_AUTO_TEST_CASE(json_object__equality__order_independent)
+BC_AUTO_TEST_CASE(json_object__equality__order_independent)
 {
-    BOOST_REQUIRE((object{ { "a", 1 }, { "b", 2 } }) == (object{ { "b", 2 }, { "a", 1 } }));
-    BOOST_REQUIRE((object{ { "a", 1 } }) != (object{ { "a", 1 }, { "b", 2 } }));
-    BOOST_REQUIRE((object{ { "a", 1 } }) != (object{ { "b", 1 } }));
+    BC_REQUIRE((object{ { "a", 1 }, { "b", 2 } }) == (object{ { "b", 2 }, { "a", 1 } }));
+    BC_REQUIRE((object{ { "a", 1 } }) != (object{ { "a", 1 }, { "b", 2 } }));
+    BC_REQUIRE((object{ { "a", 1 } }) != (object{ { "b", 1 } }));
 }
 
-BOOST_AUTO_TEST_CASE(json_object__reverse_iteration__expected)
+BC_AUTO_TEST_CASE(json_object__reverse_iteration__expected)
 {
     const object instance{ { "a", 1 }, { "b", 2 } };
-    BOOST_REQUIRE_EQUAL(instance.crbegin()->key(), "b");
-    BOOST_REQUIRE_EQUAL(std::prev(instance.crend())->key(), "a");
+    BC_REQUIRE_EQUAL(instance.crbegin()->key(), "b");
+    BC_REQUIRE_EQUAL(std::prev(instance.crend())->key(), "a");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__key_c_str__expected)
+BC_AUTO_TEST_CASE(json_object__key_c_str__expected)
 {
     const object instance{ { "abc", 1 } };
-    BOOST_REQUIRE_EQUAL(std::string{ instance.cbegin()->key_c_str() }, "abc");
+    BC_REQUIRE_EQUAL(std::string{ instance.cbegin()->key_c_str() }, "abc");
 }
 
-BOOST_AUTO_TEST_CASE(json_object__swap__swapped)
+BC_AUTO_TEST_CASE(json_object__swap__swapped)
 {
     object left{ { "a", 1 } };
     auto right = make_many();
     swap(left, right);
-    BOOST_REQUIRE_EQUAL(left.size(), many_keys.size());
-    BOOST_REQUIRE_EQUAL(right.at("a").as_int64(), 1);
-    BOOST_REQUIRE_EQUAL(left.at("k01").as_string(), "k01");
+    BC_REQUIRE_EQUAL(left.size(), many_keys.size());
+    BC_REQUIRE_EQUAL(right.at("a").as_int64(), 1);
+    BC_REQUIRE_EQUAL(left.at("k01").as_string(), "k01");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

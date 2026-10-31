@@ -20,7 +20,7 @@
 
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_schnorr_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_schnorr_tests)
 
 const ec_secret one = base16_array
 (
@@ -39,7 +39,7 @@ const ec_secret secret1 = base16_array
 // ----------------------------------------------------------------------------
 // SoA batch: correlate_t is id-first: { id, category, pair, group }.
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected)
 {
     using namespace system;
     using namespace system::schnorr;
@@ -47,9 +47,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
     const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
 
     ec_compressed pub0{}, pub1{}, pub2{};
-    BOOST_REQUIRE(secret_to_public(pub0, secret0));
-    BOOST_REQUIRE(secret_to_public(pub1, secret1));
-    BOOST_REQUIRE(secret_to_public(pub2, one));
+    BC_REQUIRE(secret_to_public(pub0, secret0));
+    BC_REQUIRE(secret_to_public(pub1, secret1));
+    BC_REQUIRE(secret_to_public(pub2, one));
 
     const auto& point0 = array_cast<uint8_t, ec_xonly_size, 1>(pub0);
     const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
 
     ec_signature sig0{}, sig1{}, sig2{};
     constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, one, hash, auxiliary));
+    BC_REQUIRE(sign(sig0, secret0, hash, auxiliary));
+    BC_REQUIRE(sign(sig1, secret1, hash, auxiliary));
+    BC_REQUIRE(sign(sig2, one, hash, auxiliary));
 
     const std::array<correlate, 3> correlates
     {
@@ -81,10 +81,10 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid__expected
 
     const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
-    BOOST_REQUIRE(tokens.empty());
+    BC_REQUIRE(tokens.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_gpu__cpu)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_gpu__cpu)
 {
     using namespace system;
     using namespace system::schnorr;
@@ -92,9 +92,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_g
     const auto hash = bitcoin_hash(to_chunk("batch-schnorr"));
 
     ec_compressed pub0{}, pub1{}, pub2{};
-    BOOST_REQUIRE(secret_to_public(pub0, secret0));
-    BOOST_REQUIRE(secret_to_public(pub1, secret1));
-    BOOST_REQUIRE(secret_to_public(pub2, one));
+    BC_REQUIRE(secret_to_public(pub0, secret0));
+    BC_REQUIRE(secret_to_public(pub1, secret1));
+    BC_REQUIRE(secret_to_public(pub2, one));
 
     const auto& point0 = array_cast<uint8_t, ec_xonly_size, 1>(pub0);
     const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
@@ -102,9 +102,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_g
 
     ec_signature sig0{}, sig1{}, sig2{};
     constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, one, hash, auxiliary));
+    BC_REQUIRE(sign(sig0, secret0, hash, auxiliary));
+    BC_REQUIRE(sign(sig1, secret1, hash, auxiliary));
+    BC_REQUIRE(sign(sig2, one, hash, auxiliary));
 
     const std::array<correlate, 3> correlates
     {
@@ -127,11 +127,11 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_g
     const stopper cancel{};
     bool use_gpu{ false };
     const auto tokens = batch::verify(cancel, use_gpu, in);
-    BOOST_REQUIRE(tokens.empty());
-    BOOST_REQUIRE(!use_gpu);
+    BC_REQUIRE(tokens.empty());
+    BC_REQUIRE(!use_gpu);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)
 {
     using namespace system;
     using namespace system::schnorr;
@@ -139,9 +139,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
     const auto hash = bitcoin_hash(to_chunk("batch-schnorr-neg"));
 
     ec_compressed pub0{}, pub1{}, pub2{};
-    BOOST_REQUIRE(secret_to_public(pub0, secret0));
-    BOOST_REQUIRE(secret_to_public(pub1, secret1));
-    BOOST_REQUIRE(secret_to_public(pub2, one));
+    BC_REQUIRE(secret_to_public(pub0, secret0));
+    BC_REQUIRE(secret_to_public(pub1, secret1));
+    BC_REQUIRE(secret_to_public(pub2, one));
 
     const auto& point0 = array_cast<uint8_t, ec_xonly_size, 1>(pub0);
     const auto& point1 = array_cast<uint8_t, ec_xonly_size, 1>(pub1);
@@ -149,9 +149,9 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
 
     ec_signature sig0{}, sig1{}, sig2{};
     constexpr hash_digest auxiliary{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig1, secret1, hash, auxiliary));
-    BOOST_REQUIRE(sign(sig2, one, hash, auxiliary));
+    BC_REQUIRE(sign(sig0, secret0, hash, auxiliary));
+    BC_REQUIRE(sign(sig1, secret1, hash, auxiliary));
+    BC_REQUIRE(sign(sig2, one, hash, auxiliary));
 
     // corrupt second signature
     sig1[10] ^= 0xff;
@@ -176,8 +176,8 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expect
 
     const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
-    BOOST_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
+    BC_REQUIRE_EQUAL(tokens.size(), 1u);
+    BC_REQUIRE_EQUAL(tokens.front(), from_little_array<batched::link_t>(correlates.at(1).id));
 }
 
 // chunked
@@ -231,12 +231,12 @@ static batched::links_t chunked_schnorr_failures() NOEXCEPT
     return batch::verify(cancel, in);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__chunked_two_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__chunked_two_invalid__expected)
 {
     const auto tokens = chunked_schnorr_failures();
-    BOOST_REQUIRE_EQUAL(tokens.size(), 2u);
-    BOOST_REQUIRE_EQUAL(tokens.at(0), from_little_array<batched::link_t>(chunked_id(chunked_fail1)));
-    BOOST_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
+    BC_REQUIRE_EQUAL(tokens.size(), 2u);
+    BC_REQUIRE_EQUAL(tokens.at(0), from_little_array<batched::link_t>(chunked_id(chunked_fail1)));
+    BC_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
 }
 
 // distinct rows
@@ -308,34 +308,34 @@ static batched::link_t distinct_token(size_t row) NOEXCEPT
     return from_little_array<batched::link_t>(chunked_id(row));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_all_valid__empty)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_all_valid__empty)
 {
-    BOOST_REQUIRE(distinct_schnorr_failures(false, false).empty());
+    BC_REQUIRE(distinct_schnorr_failures(false, false).empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_three_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_three_invalid__expected)
 {
     const auto tokens = distinct_schnorr_failures(true, false);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 3u);
-    BOOST_REQUIRE_EQUAL(tokens.at(0), distinct_token(distinct_fail1));
-    BOOST_REQUIRE_EQUAL(tokens.at(1), distinct_token(distinct_fail2));
-    BOOST_REQUIRE_EQUAL(tokens.at(2), distinct_token(distinct_fail3));
+    BC_REQUIRE_EQUAL(tokens.size(), 3u);
+    BC_REQUIRE_EQUAL(tokens.at(0), distinct_token(distinct_fail1));
+    BC_REQUIRE_EQUAL(tokens.at(1), distinct_token(distinct_fail2));
+    BC_REQUIRE_EQUAL(tokens.at(2), distinct_token(distinct_fail3));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_canceled__empty)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__distinct_canceled__empty)
 {
-    BOOST_REQUIRE(distinct_schnorr_failures(true, true).empty());
+    BC_REQUIRE(distinct_schnorr_failures(true, true).empty());
 }
 
 // empty
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__empty__empty)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__empty__empty)
 {
     const stopper cancel{};
-    BOOST_REQUIRE(schnorr::batch::verify(cancel, schnorr::batch{}).empty());
+    BC_REQUIRE(schnorr::batch::verify(cancel, schnorr::batch{}).empty());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

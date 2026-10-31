@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "../hash.hpp"
     
-BOOST_AUTO_TEST_SUITE(sha512_tests_)
+BC_AUTO_TEST_SUITE(sha512_tests_)
 
 constexpr auto native = have_sha512;
 constexpr auto vector = have_128 || have_256 || have_512;
@@ -29,16 +29,16 @@ static_assert(sha512::hash(sha512::byte_t{}) == sha_byte512);
 static_assert(sha512::hash(sha512::half_t{}) == sha_half512);
 static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 
-BOOST_AUTO_TEST_CASE(sha512__hash__null_hash__expected)
+BC_AUTO_TEST_CASE(sha512__hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
-    BOOST_REQUIRE_EQUAL(sha512::hash(sha512::byte_t{}), sha_byte512);
-    BOOST_REQUIRE_EQUAL(sha512::hash(sha512::half_t{}), sha_half512);
-    BOOST_REQUIRE_EQUAL(sha512::hash(sha512::block_t{}), sha_full512);
+    BC_REQUIRE_EQUAL(sha512::hash(sha512::byte_t{}), sha_byte512);
+    BC_REQUIRE_EQUAL(sha512::hash(sha512::half_t{}), sha_half512);
+    BC_REQUIRE_EQUAL(sha512::hash(sha512::block_t{}), sha_full512);
 }
 
 // accumulator<sha512>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha512_512__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_512__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, false, false, false>;
     static_assert(!sha_512::native);
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(sha512_512__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512>::hash (true, false, false)
-BOOST_AUTO_TEST_CASE(sha512_512__tff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_512__tff_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, false, false>;
     static_assert(sha_512::native == native);
@@ -65,12 +65,12 @@ BOOST_AUTO_TEST_CASE(sha512_512__tff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512>::hash (true, false, true)
-BOOST_AUTO_TEST_CASE(sha512_512__tft_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_512__tft_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, false, true>;
     static_assert(sha_512::native == native);
@@ -81,12 +81,12 @@ BOOST_AUTO_TEST_CASE(sha512_512__tft_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512>::hash (true, true, false)
-BOOST_AUTO_TEST_CASE(sha512_512__ttf_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_512__ttf_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, false>;
     static_assert(sha_512::native == native);
@@ -97,12 +97,12 @@ BOOST_AUTO_TEST_CASE(sha512_512__ttf_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha512_512__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_512__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
     static_assert(sha_512::native == native);
@@ -113,12 +113,12 @@ BOOST_AUTO_TEST_CASE(sha512_512__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512>::hash (false, true, false)
-BOOST_AUTO_TEST_CASE(sha512_512__ftf_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_512__ftf_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<512>, false, true, false>;
     static_assert(!sha_512::native);
@@ -129,12 +129,12 @@ BOOST_AUTO_TEST_CASE(sha512_512__ftf_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512_384>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha512_384__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_384__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_512_384 = sha::algorithm<sha::h512<384>, true, true, true>;
     static_assert(sha_512_384::native == native);
@@ -145,12 +145,12 @@ BOOST_AUTO_TEST_CASE(sha512_384__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_384_tests)
     {
         const auto hash = accumulator<sha_512_384>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512_384>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha512_384__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_384__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_512_384 = sha::algorithm<sha::h512<384>, false, false, false>;
     static_assert(!sha_512_384::native);
@@ -161,12 +161,12 @@ BOOST_AUTO_TEST_CASE(sha512_384__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_384_tests)
     {
         const auto hash = accumulator<sha_512_384>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512_256>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha512_256__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_256__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_512_256 = sha::algorithm<sha::h512<256>, true, true, true>;
     static_assert(sha_512_256::native == native);
@@ -177,12 +177,12 @@ BOOST_AUTO_TEST_CASE(sha512_256__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_256_tests)
     {
         const auto hash = accumulator<sha_512_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512_256>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha512_256__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_256__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_512_256 = sha::algorithm<sha::h512<256>, false, false, false>;
     static_assert(!sha_512_256::native);
@@ -193,12 +193,12 @@ BOOST_AUTO_TEST_CASE(sha512_256__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_256_tests)
     {
         const auto hash = accumulator<sha_512_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512_224>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha512_224__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_224__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_512_224 = sha::algorithm<sha::h512<224>, true, true, true>;
     static_assert(sha_512_224::native == native);
@@ -209,12 +209,12 @@ BOOST_AUTO_TEST_CASE(sha512_224__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_224_tests)
     {
         const auto hash = accumulator<sha_512_224>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha512_224>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha512_224__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha512_224__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_512_224 = sha::algorithm<sha::h512<224>, false, false, false>;
     static_assert(!sha_512_224::native);
@@ -225,52 +225,52 @@ BOOST_AUTO_TEST_CASE(sha512_224__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha512_224_tests)
     {
         const auto hash = accumulator<sha_512_224>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // sha512::hash
-BOOST_AUTO_TEST_CASE(sha512__hash__one_block__expected)
+BC_AUTO_TEST_CASE(sha512__hash__one_block__expected)
 {
     static_assert(sha512::hash(std_array<sha512::block_t, 1>({ sha512::block_t{ 0 } })) == sha_full512);
-    BOOST_CHECK_EQUAL(sha512::hash(sha512::block_t{ 0 }), sha_full512);
+    BC_CHECK_EQUAL(sha512::hash(sha512::block_t{ 0 }), sha_full512);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__hash__full_block__expected)
+BC_AUTO_TEST_CASE(sha512__hash__full_block__expected)
 {
     static_assert(sha512::hash(sha512::block_t{ 0 }) == sha_full512);
-    BOOST_CHECK_EQUAL(sha512::hash(sha512::block_t{ 0 }), sha_full512);
+    BC_CHECK_EQUAL(sha512::hash(sha512::block_t{ 0 }), sha_full512);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__hash__state__equals_byteswapped_half)
+BC_AUTO_TEST_CASE(sha512__hash__state__equals_byteswapped_half)
 {
     constexpr auto expected = sha512::hash(sha512::half_t{ 42 });
     static_assert(sha512::finalize_second(sha512::state_t{ byteswap(42_u64) }) == expected);
-    BOOST_CHECK_EQUAL(sha512::finalize_second(sha512::state_t{ byteswap(42_u64) }), expected);
+    BC_CHECK_EQUAL(sha512::finalize_second(sha512::state_t{ byteswap(42_u64) }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__hash__half_block__expected)
+BC_AUTO_TEST_CASE(sha512__hash__half_block__expected)
 {
     static_assert(sha512::hash(sha512::half_t{ 0 }) == sha_half512);
-    BOOST_CHECK_EQUAL(sha512::hash(sha512::half_t{ 0 }), sha_half512);
+    BC_CHECK_EQUAL(sha512::hash(sha512::half_t{ 0 }), sha_half512);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__hash__half_blocks__expected)
+BC_AUTO_TEST_CASE(sha512__hash__half_blocks__expected)
 {
     constexpr auto expected = sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 });
     static_assert(sha512::hash(sha512::block_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
+    BC_CHECK_EQUAL(sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__hash__quart_blocks__expected)
+BC_AUTO_TEST_CASE(sha512__hash__quart_blocks__expected)
 {
     constexpr auto expected = sha512::hash(sha512::quart_t{ 0 }, sha512::quart_t{ 0 });
     static_assert(sha512::hash(sha512::half_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::hash(sha512::quart_t{ 0 }, sha512::quart_t{ 0 }), expected);
+    BC_CHECK_EQUAL(sha512::hash(sha512::quart_t{ 0 }, sha512::quart_t{ 0 }), expected);
 }
 
 // sha512::midstate
-BOOST_AUTO_TEST_CASE(sha512__midstate__half_blocks__expected)
+BC_AUTO_TEST_CASE(sha512__midstate__half_blocks__expected)
 {
     constexpr sha512::state_t expected
     {
@@ -287,132 +287,132 @@ BOOST_AUTO_TEST_CASE(sha512__midstate__half_blocks__expected)
     auto copy = expected;
 
     static_assert(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
-    BOOST_CHECK_EQUAL(sha512::finalize(copy, one), sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }));
+    BC_CHECK_EQUAL(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
+    BC_CHECK_EQUAL(sha512::finalize(copy, one), sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }));
 }
 
 // sha512::hash(midstate, half, half, half)
-BOOST_AUTO_TEST_CASE(sha512__hash__midstate_halves__expected)
+BC_AUTO_TEST_CASE(sha512__hash__midstate_halves__expected)
 {
     constexpr auto expected = base16_array("475b0f294b647cca866720d5de214e0da3ef7f4e10f942ada673f9dbfecea493baacb784abee250e0bd43c738323f0aac158e08bd2dbed70f2624ef669ce9b0c");
     constexpr auto midstate = sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 1 });
     static_assert(sha512::hash(midstate, sha512::half_t{ 2 }, sha512::half_t{ 3 }, sha512::half_t{ 4 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::hash(midstate, sha512::half_t{ 2 }, sha512::half_t{ 3 }, sha512::half_t{ 4 }), expected);
+    BC_CHECK_EQUAL(sha512::hash(midstate, sha512::half_t{ 2 }, sha512::half_t{ 3 }, sha512::half_t{ 4 }), expected);
 }
 
 // sha512::simple_hash
-BOOST_AUTO_TEST_CASE(sha512__simple_hash__minimal__expected)
+BC_AUTO_TEST_CASE(sha512__simple_hash__minimal__expected)
 {
-    BOOST_CHECK_EQUAL(sha512::simple_hash(data_array<zero>{}), accumulator<sha512>::hash(data_array<zero>{}));
+    BC_CHECK_EQUAL(sha512::simple_hash(data_array<zero>{}), accumulator<sha512>::hash(data_array<zero>{}));
 }
 
-BOOST_AUTO_TEST_CASE(sha512__simple_hash__byte__expected)
+BC_AUTO_TEST_CASE(sha512__simple_hash__byte__expected)
 {
     static_assert(sha512::simple_hash(data_array<one>{ 0 }) == sha_byte512);
-    BOOST_CHECK_EQUAL(sha512::simple_hash(data_array<one>{ 0 }), accumulator<sha512>::hash(data_array<one>{ 0 }));
+    BC_CHECK_EQUAL(sha512::simple_hash(data_array<one>{ 0 }), accumulator<sha512>::hash(data_array<one>{ 0 }));
 }
 
-BOOST_AUTO_TEST_CASE(sha512__simple_hash__maximal__expected)
+BC_AUTO_TEST_CASE(sha512__simple_hash__maximal__expected)
 {
-    BOOST_CHECK_EQUAL(sha512::simple_hash(data_array<sha512::space>{ 0 }), accumulator<sha512>::hash(data_array<sha512::space>{ 0 }));
+    BC_CHECK_EQUAL(sha512::simple_hash(data_array<sha512::space>{ 0 }), accumulator<sha512>::hash(data_array<sha512::space>{ 0 }));
 }
 
-BOOST_AUTO_TEST_CASE(sha512__simple_hash__quart_block__expected)
+BC_AUTO_TEST_CASE(sha512__simple_hash__quart_block__expected)
 {
-    BOOST_CHECK_EQUAL(sha512::simple_hash(sha512::quart_t{ 0 }), accumulator<sha512>::hash(sha512::quart_t{ 0 }));
+    BC_CHECK_EQUAL(sha512::simple_hash(sha512::quart_t{ 0 }), accumulator<sha512>::hash(sha512::quart_t{ 0 }));
 }
 
-BOOST_AUTO_TEST_CASE(sha512__simple_hash__half_block__expected)
+BC_AUTO_TEST_CASE(sha512__simple_hash__half_block__expected)
 {
     static_assert(sha512::simple_hash(sha512::half_t{ 0 }) == sha_half512);
-    BOOST_CHECK_EQUAL(sha512::simple_hash(sha512::half_t{ 0 }), accumulator<sha512>::hash(sha512::half_t{ 0 }));
+    BC_CHECK_EQUAL(sha512::simple_hash(sha512::half_t{ 0 }), accumulator<sha512>::hash(sha512::half_t{ 0 }));
 }
 
 // sha512::double_hash
-BOOST_AUTO_TEST_CASE(sha512__double_hash__full_block__expected)
+BC_AUTO_TEST_CASE(sha512__double_hash__full_block__expected)
 {
     constexpr auto expected = sha512::hash(sha512::hash(sha512::block_t{ 42 }));
     static_assert(sha512::double_hash(sha512::block_t{ 42 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::double_hash(sha512::block_t{ 42 }), expected);
+    BC_CHECK_EQUAL(sha512::double_hash(sha512::block_t{ 42 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__double_hash__half_block__expected)
+BC_AUTO_TEST_CASE(sha512__double_hash__half_block__expected)
 {
     constexpr auto expected = sha512::hash(sha512::hash(sha512::half_t{ 42 }));
     static_assert(sha512::double_hash(sha512::half_t{ 42 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::double_hash(sha512::half_t{ 42 }), expected);
+    BC_CHECK_EQUAL(sha512::double_hash(sha512::half_t{ 42 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__double_hash__half_blocks__expected)
+BC_AUTO_TEST_CASE(sha512__double_hash__half_blocks__expected)
 {
     constexpr auto expected = sha512::hash(sha512::hash(block<sha512>(0, 1)));
     static_assert(sha512::double_hash({ 0 }, { 1 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::double_hash({ 0 }, { 1 }), expected);
+    BC_CHECK_EQUAL(sha512::double_hash({ 0 }, { 1 }), expected);
 }
 
 // sha512::merkle_hash
-BOOST_AUTO_TEST_CASE(sha512__merkle_hash__two__expected)
+BC_AUTO_TEST_CASE(sha512__merkle_hash__two__expected)
 {
     constexpr auto expected = sha512::double_hash({ 0 }, { 1 });
     static_assert(merkle_hash<sha512, 0, 1>(expected));
     sha512::digests_t digests{ { 0 }, { 1 } };
     sha512::merkle_hash(digests);
-    BOOST_CHECK_EQUAL(digests.size(), one);
-    BOOST_CHECK_EQUAL(digests.front(), expected);
+    BC_CHECK_EQUAL(digests.size(), one);
+    BC_CHECK_EQUAL(digests.front(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__merkle_hash__four__expected)
+BC_AUTO_TEST_CASE(sha512__merkle_hash__four__expected)
 {
     constexpr auto expected1 = sha512::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 3 });
     static_assert(merkle_hash<sha512, 0, 1, 2, 3>(expected1, expected2));
     sha512::digests_t digests{ { 0 }, { 1 }, { 2 }, { 3 } };
     sha512::merkle_hash(digests);
-    BOOST_CHECK_EQUAL(digests.size(), two);
-    BOOST_CHECK_EQUAL(digests.front(), expected1);
-    BOOST_CHECK_EQUAL(digests.back(), expected2);
+    BC_CHECK_EQUAL(digests.size(), two);
+    BC_CHECK_EQUAL(digests.front(), expected1);
+    BC_CHECK_EQUAL(digests.back(), expected2);
 }
 
 // sha512::merkle_root
-BOOST_AUTO_TEST_CASE(sha512__merkle_root__empty__null_long_hash)
+BC_AUTO_TEST_CASE(sha512__merkle_root__empty__null_long_hash)
 {
     constexpr auto expected = null_long_hash;
     static_assert(sha512::merkle_root({}) == expected);
-    BOOST_CHECK_EQUAL(sha512::merkle_root({}), expected);
+    BC_CHECK_EQUAL(sha512::merkle_root({}), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__merkle_root__one__same)
+BC_AUTO_TEST_CASE(sha512__merkle_root__one__same)
 {
     constexpr auto expected = sha512::digest_t{ 42 };
     static_assert(sha512::merkle_root({ { 42 } }) == expected);
-    BOOST_CHECK_EQUAL(sha512::merkle_root({ { 42 } }), expected);
+    BC_CHECK_EQUAL(sha512::merkle_root({ { 42 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__merkle_root__two__expected)
+BC_AUTO_TEST_CASE(sha512__merkle_root__two__expected)
 {
     constexpr auto expected = sha512::double_hash({ 0 }, { 1 });
     // vc++ debug compiler failure.
     ////static_assert(sha512::merkle_root({ { 0 }, { 1 } }) == expected);
-    BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 } }), expected);
+    BC_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__merkle_root__three__expected)
+BC_AUTO_TEST_CASE(sha512__merkle_root__three__expected)
 {
     constexpr auto expected1 = sha512::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 2 });
     constexpr auto expected = sha512::double_hash(expected1, expected2);
     static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 } }) == expected);
-    BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 } }), expected);
+    BC_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha512__merkle_root__four__expected)
+BC_AUTO_TEST_CASE(sha512__merkle_root__four__expected)
 {
     constexpr auto expected1 = sha512::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 3 });
     constexpr auto expected = sha512::double_hash(expected1, expected2);
     // vc++ debug compiler failure.
     ////static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
-    BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
+    BC_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

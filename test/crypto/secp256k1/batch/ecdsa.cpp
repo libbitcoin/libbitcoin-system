@@ -20,7 +20,7 @@
 
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_ecdsa_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_ecdsa_tests)
 
 const ec_secret one = base16_array
 (
@@ -40,7 +40,7 @@ const ec_secret secret1 = base16_array
 // SoA batch: four corresponding columns (correlates, digests, points,
 // signatures). correlate_t is id-first: { id, pair, group }.
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
 {
     using namespace system;
     using namespace system::ecdsa;
@@ -48,14 +48,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
     const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
 
     ec_compressed point0{}, point1{}, point2{};
-    BOOST_REQUIRE(secret_to_public(point0, secret0));
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, one));
+    BC_REQUIRE(secret_to_public(point0, secret0));
+    BC_REQUIRE(secret_to_public(point1, secret1));
+    BC_REQUIRE(secret_to_public(point2, one));
 
     ec_signature sig0{}, sig1{}, sig2{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash));
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, one, hash));
+    BC_REQUIRE(sign(sig0, secret0, hash));
+    BC_REQUIRE(sign(sig1, secret1, hash));
+    BC_REQUIRE(sign(sig2, one, hash));
 
     const std::array<correlate, 3> correlates
     {
@@ -77,10 +77,10 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid__expected)
 
     const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
-    BOOST_REQUIRE(tokens.empty());
+    BC_REQUIRE(tokens.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid_without_gpu__cpu)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid_without_gpu__cpu)
 {
     using namespace system;
     using namespace system::ecdsa;
@@ -88,14 +88,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid_without_gp
     const auto hash = bitcoin_hash(to_chunk("batch-ecdsa"));
 
     ec_compressed point0{}, point1{}, point2{};
-    BOOST_REQUIRE(secret_to_public(point0, secret0));
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, one));
+    BC_REQUIRE(secret_to_public(point0, secret0));
+    BC_REQUIRE(secret_to_public(point1, secret1));
+    BC_REQUIRE(secret_to_public(point2, one));
 
     ec_signature sig0{}, sig1{}, sig2{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash));
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, one, hash));
+    BC_REQUIRE(sign(sig0, secret0, hash));
+    BC_REQUIRE(sign(sig1, secret1, hash));
+    BC_REQUIRE(sign(sig2, one, hash));
 
     const std::array<correlate, 3> correlates
     {
@@ -118,11 +118,11 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_all_valid_without_gp
     const stopper cancel{};
     bool use_gpu{ false };
     const auto tokens = batch::verify(cancel, use_gpu, in);
-    BOOST_REQUIRE(tokens.empty());
-    BOOST_REQUIRE(!use_gpu);
+    BC_REQUIRE(tokens.empty());
+    BC_REQUIRE(!use_gpu);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expected)
 {
     using namespace system;
     using namespace system::ecdsa;
@@ -130,14 +130,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expecte
     const auto hash = bitcoin_hash(to_chunk("batch-ecdsa-invalid"));
 
     ec_compressed point0{}, point1{}, point2{};
-    BOOST_REQUIRE(secret_to_public(point0, secret0));
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, one));
+    BC_REQUIRE(secret_to_public(point0, secret0));
+    BC_REQUIRE(secret_to_public(point1, secret1));
+    BC_REQUIRE(secret_to_public(point2, one));
 
     ec_signature sig0{}, sig1{}, sig2{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash));
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, one, hash));
+    BC_REQUIRE(sign(sig0, secret0, hash));
+    BC_REQUIRE(sign(sig1, secret1, hash));
+    BC_REQUIRE(sign(sig2, one, hash));
 
     // corrupt third signature
     sig2[10] ^= 0xff;
@@ -162,13 +162,13 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__singles_one_invalid__expecte
 
     const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
+    BC_REQUIRE_EQUAL(tokens.size(), 1u);
 
     const auto value = from_little_array<batched::link_t>(correlates.at(2).id);
-    BOOST_REQUIRE_EQUAL(tokens.front(), value);
+    BC_REQUIRE_EQUAL(tokens.front(), value);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected)
 {
     using namespace system;
     using namespace system::ecdsa;
@@ -176,13 +176,13 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected
     const auto hash = bitcoin_hash(to_chunk("batch-multisig"));
 
     ec_compressed point0{}, point1{}, point2{};
-    BOOST_REQUIRE(secret_to_public(point0, secret0));
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, one));
+    BC_REQUIRE(secret_to_public(point0, secret0));
+    BC_REQUIRE(secret_to_public(point1, secret1));
+    BC_REQUIRE(secret_to_public(point2, one));
 
     ec_signature sig0{}, sig1{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash));
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
+    BC_REQUIRE(sign(sig0, secret0, hash));
+    BC_REQUIRE(sign(sig1, secret1, hash));
 
     // 2-of-3 group (same id + group); pair packs (sig,key).
     const std::array<correlate, 4> correlates
@@ -206,10 +206,10 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_all_valid__expected
 
     const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
-    BOOST_REQUIRE(tokens.empty());
+    BC_REQUIRE(tokens.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expected)
 {
     using namespace system;
     using namespace system::ecdsa;
@@ -217,14 +217,14 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expect
     const auto hash = bitcoin_hash(to_chunk("batch-multisig-invalid"));
 
     ec_compressed point0{}, point1{}, point2{};
-    BOOST_REQUIRE(secret_to_public(point0, secret0));
-    BOOST_REQUIRE(secret_to_public(point1, secret1));
-    BOOST_REQUIRE(secret_to_public(point2, one));
+    BC_REQUIRE(secret_to_public(point0, secret0));
+    BC_REQUIRE(secret_to_public(point1, secret1));
+    BC_REQUIRE(secret_to_public(point2, one));
 
     ec_signature sig0{}, sig1{}, sig2{};
-    BOOST_REQUIRE(sign(sig0, secret0, hash));
-    BOOST_REQUIRE(sign(sig1, secret1, hash));
-    BOOST_REQUIRE(sign(sig2, one, hash));
+    BC_REQUIRE(sign(sig0, secret0, hash));
+    BC_REQUIRE(sign(sig1, secret1, hash));
+    BC_REQUIRE(sign(sig2, one, hash));
 
     // corrupt second signature
     sig1[10] ^= 0xff;
@@ -250,10 +250,10 @@ BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__multisig_one_invalid__expect
 
     const stopper cancel{};
     const auto tokens = batch::verify(cancel, in);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 1u);
+    BC_REQUIRE_EQUAL(tokens.size(), 1u);
 
     const auto value = from_little_array<batched::link_t>(correlates.at(0).id);
-    BOOST_REQUIRE_EQUAL(tokens.front(), value);
+    BC_REQUIRE_EQUAL(tokens.front(), value);
 }
 
 // meets_threshold
@@ -267,67 +267,67 @@ struct ecdsa_accessor
 
 using multisig_matrix = ecdsa_accessor::multisig_matrix;
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__1_of_1__success)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__1_of_1__success)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
-    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(1, 1, matrix));
+    BC_REQUIRE(ecdsa_accessor::meets_threshold(1, 1, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__1_of_1__failure)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__1_of_1__failure)
 {
     multisig_matrix matrix{};
-    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(1, 1, matrix));
+    BC_REQUIRE(!ecdsa_accessor::meets_threshold(1, 1, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_3__success)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_3__success)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
     set_right_into(matrix.at(1), 1);
-    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(2, 3, matrix));
+    BC_REQUIRE(ecdsa_accessor::meets_threshold(2, 3, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_3__failure)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_3__failure)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
     set_right_into(matrix.at(0), 1); // both successes on same key
-    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(2, 3, matrix));
+    BC_REQUIRE(!ecdsa_accessor::meets_threshold(2, 3, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__3_of_3__success)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__3_of_3__success)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
     set_right_into(matrix.at(1), 1);
     set_right_into(matrix.at(2), 2);
-    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(3, 3, matrix));
+    BC_REQUIRE(ecdsa_accessor::meets_threshold(3, 3, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__3_of_3__failure)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__3_of_3__failure)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
     set_right_into(matrix.at(1), 0);
     set_right_into(matrix.at(2), 0);
-    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(3, 3, matrix));
+    BC_REQUIRE(!ecdsa_accessor::meets_threshold(3, 3, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__success)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__success)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
     set_right_into(matrix.at(1), 1);
-    BOOST_REQUIRE(ecdsa_accessor::meets_threshold(2, 2, matrix));
+    BC_REQUIRE(ecdsa_accessor::meets_threshold(2, 2, matrix));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__failure)
+BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__failure)
 {
     multisig_matrix matrix{};
     set_right_into(matrix.at(0), 0);
     set_right_into(matrix.at(0), 1);
-    BOOST_REQUIRE(!ecdsa_accessor::meets_threshold(2, 2, matrix));
+    BC_REQUIRE(!ecdsa_accessor::meets_threshold(2, 2, matrix));
 }
 
 // chunked
@@ -380,12 +380,12 @@ static batched::links_t chunked_ecdsa_failures() NOEXCEPT
     return batch::verify(cancel, in);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__chunked_two_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__chunked_two_invalid__expected)
 {
     const auto tokens = chunked_ecdsa_failures();
-    BOOST_REQUIRE_EQUAL(tokens.size(), 2u);
-    BOOST_REQUIRE_EQUAL(tokens.at(0), from_little_array<batched::link_t>(chunked_id(chunked_fail1)));
-    BOOST_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
+    BC_REQUIRE_EQUAL(tokens.size(), 2u);
+    BC_REQUIRE_EQUAL(tokens.at(0), from_little_array<batched::link_t>(chunked_id(chunked_fail1)));
+    BC_REQUIRE_EQUAL(tokens.at(1), from_little_array<batched::link_t>(chunked_id(chunked_fail2)));
 }
 
 // distinct rows
@@ -455,34 +455,34 @@ static batched::link_t distinct_token(size_t row) NOEXCEPT
     return from_little_array<batched::link_t>(chunked_id(row));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_all_valid__empty)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_all_valid__empty)
 {
-    BOOST_REQUIRE(distinct_ecdsa_failures(false, false).empty());
+    BC_REQUIRE(distinct_ecdsa_failures(false, false).empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_three_invalid__expected)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_three_invalid__expected)
 {
     const auto tokens = distinct_ecdsa_failures(true, false);
-    BOOST_REQUIRE_EQUAL(tokens.size(), 3u);
-    BOOST_REQUIRE_EQUAL(tokens.at(0), distinct_token(distinct_fail1));
-    BOOST_REQUIRE_EQUAL(tokens.at(1), distinct_token(distinct_fail2));
-    BOOST_REQUIRE_EQUAL(tokens.at(2), distinct_token(distinct_fail3));
+    BC_REQUIRE_EQUAL(tokens.size(), 3u);
+    BC_REQUIRE_EQUAL(tokens.at(0), distinct_token(distinct_fail1));
+    BC_REQUIRE_EQUAL(tokens.at(1), distinct_token(distinct_fail2));
+    BC_REQUIRE_EQUAL(tokens.at(2), distinct_token(distinct_fail3));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_canceled__empty)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__distinct_canceled__empty)
 {
-    BOOST_REQUIRE(distinct_ecdsa_failures(true, true).empty());
+    BC_REQUIRE(distinct_ecdsa_failures(true, true).empty());
 }
 
 // empty
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__empty__empty)
+BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__empty__empty)
 {
     const stopper cancel{};
-    BOOST_REQUIRE(ecdsa::batch::verify(cancel, ecdsa::batch{}).empty());
+    BC_REQUIRE(ecdsa::batch::verify(cancel, ecdsa::batch{}).empty());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

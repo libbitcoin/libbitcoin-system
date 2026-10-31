@@ -18,12 +18,12 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(vector_tests)
+BC_AUTO_TEST_SUITE(vector_tests)
 
 // Merkle root
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
+BC_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
     // Fifth round
     constexpr auto expected = sha_256::double_hash(expected26, expected27);
 
-    BOOST_CHECK_EQUAL(sha_256::merkle_root(
+    BC_CHECK_EQUAL(sha_256::merkle_root(
     {
         { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
         { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
     }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(vector__sha512__merkle_root__expected)
+BC_AUTO_TEST_CASE(vector__sha512__merkle_root__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(vector__sha512__merkle_root__expected)
     // Fifth round
     constexpr auto expected = sha_512::double_hash(expected26, expected27);
 
-    BOOST_CHECK_EQUAL(sha_512::merkle_root(
+    BC_CHECK_EQUAL(sha_512::merkle_root(
     {
         { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
         { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(vector__sha512__merkle_root__expected)
 // Merkle hash
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vector__sha256__merkle_hash__native__expected)
+BC_AUTO_TEST_CASE(vector__sha256__merkle_hash__native__expected)
 {
     using sha_normal = sha::algorithm<sha::h256<>, false, false, true>;
     using sha_native = sha::algorithm<sha::h256<>, true, false, true>;
@@ -162,15 +162,15 @@ BOOST_AUTO_TEST_CASE(vector__sha256__merkle_hash__native__expected)
         sha_normal::merkle_hash(expected);
         sha_native::merkle_hash(native);
         sha_both::merkle_hash(both);
-        BOOST_CHECK_EQUAL(native, expected);
-        BOOST_CHECK_EQUAL(both, expected);
+        BC_CHECK_EQUAL(native, expected);
+        BC_CHECK_EQUAL(both, expected);
     });
 }
 
 // Message scheduling
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vector__sha160__scheduling__expected)
+BC_AUTO_TEST_CASE(vector__sha160__scheduling__expected)
 {
     // AVX512, AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
@@ -180,10 +180,10 @@ BOOST_AUTO_TEST_CASE(vector__sha160__scheduling__expected)
     constexpr auto hashn = sha160n::hash(blocks);
     constexpr auto hashv = sha160v::hash(blocks);
     static_assert(hashn == hashv);
-    BOOST_CHECK_EQUAL(hashn, sha160v::hash(blocks));
+    BC_CHECK_EQUAL(hashn, sha160v::hash(blocks));
 }
 
-BOOST_AUTO_TEST_CASE(vector__sha256__scheduling__expected)
+BC_AUTO_TEST_CASE(vector__sha256__scheduling__expected)
 {
     // AVX512, AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
@@ -193,13 +193,13 @@ BOOST_AUTO_TEST_CASE(vector__sha256__scheduling__expected)
     constexpr auto hashn = sha256n::hash(blocks);
     constexpr auto hashv = sha256v::hash(blocks);
     static_assert(hashn == hashv);
-    BOOST_CHECK_EQUAL(hashn, sha256v::hash(blocks));
+    BC_CHECK_EQUAL(hashn, sha256v::hash(blocks));
 }
 
 #if !defined(HAVE_CLANG)
 
 // sha512 vectorization is disabled in x32 builds.
-BOOST_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
+BC_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
 {
     // AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
@@ -209,9 +209,9 @@ BOOST_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
     constexpr auto hashn = sha512n::hash(blocks);
     constexpr auto hashv = sha512v::hash(blocks);
     static_assert(hashn == hashv);
-    BOOST_CHECK_EQUAL(hashn, sha512v::hash(blocks));
+    BC_CHECK_EQUAL(hashn, sha512v::hash(blocks));
 }
 
 #endif
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

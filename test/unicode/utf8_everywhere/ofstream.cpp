@@ -18,34 +18,34 @@
  */
 #include "../../test.hpp"
 
-BOOST_FIXTURE_TEST_SUITE(ofstream_tests, test::directory_setup_fixture)
+BC_FIXTURE_TEST_SUITE(ofstream_tests, test::directory_setup_fixture)
 
-BOOST_AUTO_TEST_CASE(ofstream__construct__valid_path__round_trip)
+BC_AUTO_TEST_CASE(ofstream__construct__valid_path__round_trip)
 {
     ofstream out(TEST_PATH, std::ofstream::out);
-    BOOST_REQUIRE(out.good());
-    BOOST_REQUIRE(!out.bad());
+    BC_REQUIRE(out.good());
+    BC_REQUIRE(!out.bad());
 
     const std::string expected{ "libbitcoin" };
     out << expected;
-    BOOST_REQUIRE(out.good());
+    BC_REQUIRE(out.good());
 
     out.close();
-    BOOST_REQUIRE(out.good());
+    BC_REQUIRE(out.good());
 
     ifstream in(TEST_PATH);
-    BOOST_REQUIRE(in.good());
+    BC_REQUIRE(in.good());
 
     std::string line;
-    BOOST_REQUIRE(std::getline(in, line));
+    BC_REQUIRE(std::getline(in, line));
 
     // Not good (no more to read) and not bad (did not fail).
-    BOOST_REQUIRE(!in.good());
-    BOOST_REQUIRE(!in.bad());
-    BOOST_REQUIRE_EQUAL(line, expected);
+    BC_REQUIRE(!in.good());
+    BC_REQUIRE(!in.bad());
+    BC_REQUIRE_EQUAL(line, expected);
 
     in.close();
-    BOOST_REQUIRE(!in.good());
+    BC_REQUIRE(!in.good());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

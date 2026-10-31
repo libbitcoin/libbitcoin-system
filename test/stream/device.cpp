@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(stream_tests)
+BC_AUTO_TEST_SUITE(stream_tests)
 
 // Access the protected constructor.
 class device_accessor
@@ -50,117 +50,117 @@ public:
 
 // optimal_buffer_size
 
-BOOST_AUTO_TEST_CASE(device__optimal_buffer_size__always__expected)
+BC_AUTO_TEST_CASE(device__optimal_buffer_size__always__expected)
 {
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), 4096);
+    BC_REQUIRE_EQUAL(instance.optimal_buffer_size(), 4096);
 }
 
 // input_sequence
 
-BOOST_AUTO_TEST_CASE(device__input_sequence__empty__nullptrs)
+BC_AUTO_TEST_CASE(device__input_sequence__empty__nullptrs)
 {
     device_accessor instance;
     const auto sequence = instance.input_sequence();
-    BOOST_REQUIRE_EQUAL(sequence.first, nullptr);
-    BOOST_REQUIRE_EQUAL(sequence.second, nullptr);
+    BC_REQUIRE_EQUAL(sequence.first, nullptr);
+    BC_REQUIRE_EQUAL(sequence.second, nullptr);
 }
 
 // output_sequence
 
-BOOST_AUTO_TEST_CASE(device__output_sequence__empty__nullptrs)
+BC_AUTO_TEST_CASE(device__output_sequence__empty__nullptrs)
 {
     device_accessor instance;
     const auto sequence = instance.output_sequence();
-    BOOST_REQUIRE_EQUAL(sequence.first, nullptr);
-    BOOST_REQUIRE_EQUAL(sequence.second, nullptr);
+    BC_REQUIRE_EQUAL(sequence.first, nullptr);
+    BC_REQUIRE_EQUAL(sequence.second, nullptr);
 }
 
 // write
 
-BOOST_AUTO_TEST_CASE(device__write__nullptr__false)
+BC_AUTO_TEST_CASE(device__write__nullptr__false)
 {
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), 0);
+    BC_REQUIRE_EQUAL(instance.write(nullptr, 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__write__empty__true)
+BC_AUTO_TEST_CASE(device__write__empty__true)
 {
     const std::string from;
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__write__negative__false)
+BC_AUTO_TEST_CASE(device__write__negative__false)
 {
     const std::string from{ "a" };
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), -1), 0);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), -1), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__write__past_end__zero)
+BC_AUTO_TEST_CASE(device__write__past_end__zero)
 {
     const std::string from{ "a" };
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 2), 0);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 2), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__write__zero__zero)
+BC_AUTO_TEST_CASE(device__write__zero__zero)
 {
     const std::string from{ "a" };
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__write__one__zero)
+BC_AUTO_TEST_CASE(device__write__one__zero)
 {
     const std::string from{ "a" };
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 1), 0);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 1), 0);
 }
 
 // read (reading from the sink)
 
-BOOST_AUTO_TEST_CASE(device__read__nullptr__false)
+BC_AUTO_TEST_CASE(device__read__nullptr__false)
 {
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(nullptr, 0), 0);
+    BC_REQUIRE_EQUAL(instance.read(nullptr, 0), 0);
 }
 
 // zero-size array .data is null pointer in msvc, but empty on other platforms.
-////BOOST_AUTO_TEST_CASE(device__read__empty__false)
+////BC_AUTO_TEST_CASE(device__read__empty__false)
 ////{
 ////    std_array<char, 0> to;
 ////    device_accessor instance;
-////    BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
+////    BC_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
 ////}
 
-BOOST_AUTO_TEST_CASE(device__read__negative__false)
+BC_AUTO_TEST_CASE(device__read__negative__false)
 {
     std_array<char, 1> to;
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(to.data(), -1), 0);
+    BC_REQUIRE_EQUAL(instance.read(to.data(), -1), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__read__past_end__zero)
+BC_AUTO_TEST_CASE(device__read__past_end__zero)
 {
     std_array<char, 2> to;
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(to.data(), 2), 0);
+    BC_REQUIRE_EQUAL(instance.read(to.data(), 2), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__read__zero__zero)
+BC_AUTO_TEST_CASE(device__read__zero__zero)
 {
     std_array<char, 1> to;
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), 0);
+    BC_REQUIRE_EQUAL(instance.read(to.data(), 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(device__read__one__zero)
+BC_AUTO_TEST_CASE(device__read__one__zero)
 {
     std_array<char, 1> to;
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(to.data(), 1), 0);
+    BC_REQUIRE_EQUAL(instance.read(to.data(), 1), 0);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -18,15 +18,15 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(external_ptr_tests)
+BC_AUTO_TEST_SUITE(external_ptr_tests)
 
-BOOST_AUTO_TEST_CASE(external_ptr__construct__default__unassigned)
+BC_AUTO_TEST_CASE(external_ptr__construct__default__unassigned)
 {
     const external_ptr<bool> empty{};
-    BOOST_REQUIRE(!empty);
+    BC_REQUIRE(!empty);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 
 // stdlib object sizes are subjsct to implementation (including debug builds).

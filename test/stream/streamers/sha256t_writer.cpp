@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(sha256t_writer_tests)
+BC_AUTO_TEST_SUITE(sha256t_writer_tests)
 
 static const auto& genesis() NOEXCEPT
 {
@@ -27,55 +27,55 @@ static const auto& genesis() NOEXCEPT
     return block;
 }
 
-BOOST_AUTO_TEST_CASE(sha256t_writer__stream__genesis_block__expected)
+BC_AUTO_TEST_CASE(sha256t_writer__stream__genesis_block__expected)
 {
     std::ostringstream stream{};
     hash::sha256t::ostream<"mytag"> hasher{ stream };
     genesis().header().to_data(hasher);
     hasher.flush();
-    BOOST_REQUIRE(hasher);
-    BOOST_REQUIRE_EQUAL(to_chunk(stream.str()), to_chunk(tagged_hash("mytag", genesis().header().to_data())));
+    BC_REQUIRE(hasher);
+    BC_REQUIRE_EQUAL(to_chunk(stream.str()), to_chunk(tagged_hash("mytag", genesis().header().to_data())));
 }
 
-BOOST_AUTO_TEST_CASE(sha256t_writer__fast__genesis_block__expected)
+BC_AUTO_TEST_CASE(sha256t_writer__fast__genesis_block__expected)
 {
     hash_digest hash{};
     stream::out::fast stream{ hash };
     hash::sha256t::fast<"mytag"> hasher{ stream };
     genesis().header().to_data(hasher);
     hasher.flush();
-    BOOST_REQUIRE(hasher);
-    BOOST_REQUIRE_EQUAL(hash, tagged_hash("mytag", genesis().header().to_data()));
+    BC_REQUIRE(hasher);
+    BC_REQUIRE_EQUAL(hash, tagged_hash("mytag", genesis().header().to_data()));
 }
 
-////BOOST_AUTO_TEST_CASE(sha256t_writer__copy__genesis_block__expected)
+////BC_AUTO_TEST_CASE(sha256t_writer__copy__genesis_block__expected)
 ////{
 ////    hash_digest hash{};
 ////    hash::sha256t::copy<"mytag"> hasher{ hash };
 ////    genesis().header().to_data(hasher);
 ////    hasher.flush();
-////    BOOST_REQUIRE(hasher);
-////    BOOST_REQUIRE_EQUAL(hash, tagged_hash("mytag", genesis().header().to_data()));
+////    BC_REQUIRE(hasher);
+////    BC_REQUIRE_EQUAL(hash, tagged_hash("mytag", genesis().header().to_data()));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(sha256t_writer__text__genesis_block__expected)
+////BC_AUTO_TEST_CASE(sha256t_writer__text__genesis_block__expected)
 ////{
 ////    std::string hash;
 ////    hash::sha256t::text<"mytag"> hasher(hash);
 ////    genesis().header().to_data(hasher);
 ////    hasher.flush();
-////    BOOST_REQUIRE(hasher);
-////    BOOST_REQUIRE_EQUAL(hash, to_string(genesis().header().hash()));
+////    BC_REQUIRE(hasher);
+////    BC_REQUIRE_EQUAL(hash, to_string(genesis().header().hash()));
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(sha256t_writer__data__genesis_block__expected)
+////BC_AUTO_TEST_CASE(sha256t_writer__data__genesis_block__expected)
 ////{
 ////    data_chunk hash;
 ////    hash::sha256t::data<"mytag"> hasher(hash);
 ////    genesis().header().to_data(hasher);
 ////    hasher.flush();
-////    BOOST_REQUIRE(hasher);
-////    BOOST_REQUIRE_EQUAL(hash, to_chunk(genesis().header().hash()));
+////    BC_REQUIRE(hasher);
+////    BC_REQUIRE_EQUAL(hash, to_chunk(genesis().header().hash()));
 ////}
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

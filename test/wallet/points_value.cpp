@@ -18,24 +18,24 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(points_value_tests)
+BC_AUTO_TEST_SUITE(points_value_tests)
 
 using namespace bc::system::wallet;
 
-BOOST_AUTO_TEST_CASE(points_value__value__default__zero)
+BC_AUTO_TEST_CASE(points_value__value__default__zero)
 {
     static const points_value instance{};
-    BOOST_REQUIRE_EQUAL(instance.value(), 0u);
+    BC_REQUIRE_EQUAL(instance.value(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(points_value__value__single_point_value__expected)
+BC_AUTO_TEST_CASE(points_value__value__single_point_value__expected)
 {
     static const auto expected = 42u;
     static const points_value instance{ { { { null_hash, 0u }, expected } } };
-    BOOST_REQUIRE_EQUAL(instance.value(), expected);
+    BC_REQUIRE_EQUAL(instance.value(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(points_value__value__multiple_point_values__expected)
+BC_AUTO_TEST_CASE(points_value__value__multiple_point_values__expected)
 {
     static const auto expected = 10u + 30u + 42u;
     static const points_value instance
@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(points_value__value__multiple_point_values__expected)
             { { null_hash, 0u }, 42u },
         }
     };
-    BOOST_REQUIRE_EQUAL(instance.value(), expected);
+    BC_REQUIRE_EQUAL(instance.value(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(points_value__value__multiple_point_values_remove_last__expected)
+BC_AUTO_TEST_CASE(points_value__value__multiple_point_values_remove_last__expected)
 {
     static const auto expected = 10u + 30u;
     points_value instance
@@ -61,10 +61,10 @@ BOOST_AUTO_TEST_CASE(points_value__value__multiple_point_values_remove_last__exp
         }
     };
     instance.points.pop_back();
-    BOOST_REQUIRE_EQUAL(instance.value(), expected);
+    BC_REQUIRE_EQUAL(instance.value(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(points_value__value__multiple_point_values_clear__zero)
+BC_AUTO_TEST_CASE(points_value__value__multiple_point_values_clear__zero)
 {
     points_value instance
     {
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(points_value__value__multiple_point_values_clear__zero)
         }
     };
     instance.points.clear();
-    BOOST_REQUIRE_EQUAL(instance.value(), 0u);
+    BC_REQUIRE_EQUAL(instance.value(), 0u);
 }
 
 // select (greedy)
@@ -94,77 +94,77 @@ static points_value unspent_points() NOEXCEPT
     };
 }
 
-BOOST_AUTO_TEST_CASE(points_value__select__insufficient_total__empty)
+BC_AUTO_TEST_CASE(points_value__select__insufficient_total__empty)
 {
     points_value out{};
     points_value::select(out, unspent_points(), 1000u);
-    BOOST_REQUIRE(out.points.empty());
+    BC_REQUIRE(out.points.empty());
 }
 
-BOOST_AUTO_TEST_CASE(points_value__select__single_sufficient_point__that_point)
+BC_AUTO_TEST_CASE(points_value__select__single_sufficient_point__that_point)
 {
     const points_value unspent{ { { { null_hash, 42u }, 42u } } };
     points_value out{};
     points_value::select(out, unspent, 40u);
-    BOOST_REQUIRE_EQUAL(out.points.size(), 1u);
-    BOOST_REQUIRE_EQUAL(out.points.front().value(), 42u);
+    BC_REQUIRE_EQUAL(out.points.size(), 1u);
+    BC_REQUIRE_EQUAL(out.points.front().value(), 42u);
 }
 
 // The smallest individually sufficient point is preferred.
-BOOST_AUTO_TEST_CASE(points_value__select__greedy_sufficient_point__smallest_sufficient)
+BC_AUTO_TEST_CASE(points_value__select__greedy_sufficient_point__smallest_sufficient)
 {
     points_value out{};
     points_value::select(out, unspent_points(), 40u);
-    BOOST_REQUIRE_EQUAL(out.points.size(), 1u);
-    BOOST_REQUIRE_EQUAL(out.points.front().value(), 42u);
+    BC_REQUIRE_EQUAL(out.points.size(), 1u);
+    BC_REQUIRE_EQUAL(out.points.front().value(), 42u);
 }
 
 // With no individually sufficient point the largest are accumulated.
-BOOST_AUTO_TEST_CASE(points_value__select__greedy_no_sufficient_point__descending_set)
+BC_AUTO_TEST_CASE(points_value__select__greedy_no_sufficient_point__descending_set)
 {
     points_value out{};
     points_value::select(out, unspent_points(), 80u);
-    BOOST_REQUIRE_EQUAL(out.points.size(), 2u);
-    BOOST_REQUIRE_EQUAL(out.points[0].value(), 50u);
-    BOOST_REQUIRE_EQUAL(out.points[1].value(), 42u);
+    BC_REQUIRE_EQUAL(out.points.size(), 2u);
+    BC_REQUIRE_EQUAL(out.points[0].value(), 50u);
+    BC_REQUIRE_EQUAL(out.points[1].value(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(points_value__select__greedy_exhausts_points__all_points)
+BC_AUTO_TEST_CASE(points_value__select__greedy_exhausts_points__all_points)
 {
     points_value out{};
     points_value::select(out, unspent_points(), 132u);
-    BOOST_REQUIRE_EQUAL(out.points.size(), 4u);
-    BOOST_REQUIRE_EQUAL(out.value(), 132u);
+    BC_REQUIRE_EQUAL(out.points.size(), 4u);
+    BC_REQUIRE_EQUAL(out.value(), 132u);
 }
 
 // select (individual)
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(points_value__select__individual_mixed__sufficient_ascending)
+BC_AUTO_TEST_CASE(points_value__select__individual_mixed__sufficient_ascending)
 {
     points_value out{};
     points_value::select(out, unspent_points(), 30u, points_value::selection::individual);
-    BOOST_REQUIRE_EQUAL(out.points.size(), 3u);
-    BOOST_REQUIRE_EQUAL(out.points[0].value(), 30u);
-    BOOST_REQUIRE_EQUAL(out.points[1].value(), 42u);
-    BOOST_REQUIRE_EQUAL(out.points[2].value(), 50u);
+    BC_REQUIRE_EQUAL(out.points.size(), 3u);
+    BC_REQUIRE_EQUAL(out.points[0].value(), 30u);
+    BC_REQUIRE_EQUAL(out.points[1].value(), 42u);
+    BC_REQUIRE_EQUAL(out.points[2].value(), 50u);
 }
 
-BOOST_AUTO_TEST_CASE(points_value__select__individual_none_sufficient__empty)
+BC_AUTO_TEST_CASE(points_value__select__individual_none_sufficient__empty)
 {
     points_value out{};
     points_value::select(out, unspent_points(), 1000u, points_value::selection::individual);
-    BOOST_REQUIRE(out.points.empty());
+    BC_REQUIRE(out.points.empty());
 }
 
 // The default option is greedy, which returns one sufficient point.
-BOOST_AUTO_TEST_CASE(points_value__select__default_option__greedy)
+BC_AUTO_TEST_CASE(points_value__select__default_option__greedy)
 {
     points_value greedy{}, defaulted{};
     points_value::select(greedy, unspent_points(), 40u, points_value::selection::greedy);
     points_value::select(defaulted, unspent_points(), 40u);
-    BOOST_REQUIRE_EQUAL(defaulted.points.size(), greedy.points.size());
-    BOOST_REQUIRE_EQUAL(defaulted.value(), greedy.value());
+    BC_REQUIRE_EQUAL(defaulted.points.size(), greedy.points.size());
+    BC_REQUIRE_EQUAL(defaulted.value(), greedy.value());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

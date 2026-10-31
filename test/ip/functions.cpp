@@ -20,108 +20,108 @@
 
 using namespace ip;
 
-BOOST_AUTO_TEST_SUITE(ip_functions_tests)
+BC_AUTO_TEST_SUITE(ip_functions_tests)
 
 static ip::address make_address(const std::string_view& text)
 {
     ip::address out{};
-    BOOST_REQUIRE(ip::address::from_string(out, text));
+    BC_REQUIRE(ip::address::from_string(out, text));
     return out;
 }
 
 // is_member
 
-BOOST_AUTO_TEST_CASE(functions__is_member__defaults_zero__false)
+BC_AUTO_TEST_CASE(functions__is_member__defaults_zero__false)
 {
-    BOOST_REQUIRE(!is_member(ip::address{}, ip::address{}, 0));
+    BC_REQUIRE(!is_member(ip::address{}, ip::address{}, 0));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__defaults_nonzero__false)
+BC_AUTO_TEST_CASE(functions__is_member__defaults_nonzero__false)
 {
-    BOOST_REQUIRE(!is_member(ip::address{}, ip::address{}, 1));
+    BC_REQUIRE(!is_member(ip::address{}, ip::address{}, 1));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__ipv4_defaults_nonzero__false)
+BC_AUTO_TEST_CASE(functions__is_member__ipv4_defaults_nonzero__false)
 {
-    BOOST_REQUIRE(!is_member(ip::ipv4{}, ip::ipv4{}, 24));
+    BC_REQUIRE(!is_member(ip::ipv4{}, ip::ipv4{}, 24));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__ipv6_defaults_nonzero__true)
+BC_AUTO_TEST_CASE(functions__is_member__ipv6_defaults_nonzero__true)
 {
-    BOOST_REQUIRE(is_member(ip::ipv6{}, ip::ipv6{}, 56));
+    BC_REQUIRE(is_member(ip::ipv6{}, ip::ipv6{}, 56));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__zero_cidr__expected)
+BC_AUTO_TEST_CASE(functions__is_member__zero_cidr__expected)
 {
     // zero CIDR valid for ipv4, invalid for ipv6
-    BOOST_REQUIRE(is_member(make_address("42.42.42.42"), make_address("99.99.99.99"), 0));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("9999:9999:9999:9999:9999:9999:9999:9999"), 0));
+    BC_REQUIRE(is_member(make_address("42.42.42.42"), make_address("99.99.99.99"), 0));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("9999:9999:9999:9999:9999:9999:9999:9999"), 0));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__ipv4_member__true)
+BC_AUTO_TEST_CASE(functions__is_member__ipv4_member__true)
 {
-    BOOST_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.99.99.99"), 8));
-    BOOST_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.42.99.99"), 16));
-    BOOST_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.42.42.99"), 24));
-    BOOST_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.42.42.42"), 32));
+    BC_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.99.99.99"), 8));
+    BC_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.42.99.99"), 16));
+    BC_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.42.42.99"), 24));
+    BC_REQUIRE(is_member(make_address("42.42.42.42"), make_address("42.42.42.42"), 32));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__not_ipv4_member__false)
+BC_AUTO_TEST_CASE(functions__is_member__not_ipv4_member__false)
 {
-    BOOST_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("99.99.99.99"), 8));
-    BOOST_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("42.99.99.99"), 16));
-    BOOST_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("42.42.99.99"), 24));
-    BOOST_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("42.42.42.99"), 32));
+    BC_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("99.99.99.99"), 8));
+    BC_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("42.99.99.99"), 16));
+    BC_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("42.42.99.99"), 24));
+    BC_REQUIRE(!is_member(make_address("42.42.42.42"), make_address("42.42.42.99"), 32));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__ipv6_non_member__true)
+BC_AUTO_TEST_CASE(functions__is_member__ipv6_non_member__true)
 {
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("ab99:9999:9999:9999:9999:9999:9999:9999"), 8));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:9999:9999:9999:9999:9999:9999:9999"), 16));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:ab99:9999:9999:9999:9999:9999:9999"), 24));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:9999:9999:9999:9999:9999:9999"), 32));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:ab99:9999:9999:9999:9999:9999"), 40));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:9999:9999:9999:9999:9999"), 48));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:ab99:9999:9999:9999:9999"), 56));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:9999:9999:9999:9999"), 64));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:ab99:9999:9999:9999"), 72));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:9999:9999:9999"), 80));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:ab99:9999:9999"), 88));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:9999:9999"), 96));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:ab99:9999"), 104));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:9999"), 112));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:ab99"), 120));
-    BOOST_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), 128));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("ab99:9999:9999:9999:9999:9999:9999:9999"), 8));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:9999:9999:9999:9999:9999:9999:9999"), 16));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:ab99:9999:9999:9999:9999:9999:9999"), 24));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:9999:9999:9999:9999:9999:9999"), 32));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:ab99:9999:9999:9999:9999:9999"), 40));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:9999:9999:9999:9999:9999"), 48));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:ab99:9999:9999:9999:9999"), 56));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:9999:9999:9999:9999"), 64));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:ab99:9999:9999:9999"), 72));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:9999:9999:9999"), 80));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:ab99:9999:9999"), 88));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:9999:9999"), 96));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:ab99:9999"), 104));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:9999"), 112));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:ab99"), 120));
+    BC_REQUIRE(is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), 128));
 }
 
-BOOST_AUTO_TEST_CASE(functions__is_member__ipv6_non_member__false)
+BC_AUTO_TEST_CASE(functions__is_member__ipv6_non_member__false)
 {
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("ab99:9999:9999:9999:9999:9999:9999:9999"), 16));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:9999:9999:9999:9999:9999:9999:9999"), 24));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:ab99:9999:9999:9999:9999:9999:9999"), 32));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:9999:9999:9999:9999:9999:9999"), 40));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:ab99:9999:9999:9999:9999:9999"), 48));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:9999:9999:9999:9999:9999"), 56));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:ab99:9999:9999:9999:9999"), 64));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:9999:9999:9999:9999"), 72));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:ab99:9999:9999:9999"), 80));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:9999:9999:9999"), 88));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:ab99:9999:9999"), 96));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:9999:9999"), 104));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:ab99:9999"), 112));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:9999"), 120));
-    BOOST_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:ab99"), 128));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("ab99:9999:9999:9999:9999:9999:9999:9999"), 16));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:9999:9999:9999:9999:9999:9999:9999"), 24));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:ab99:9999:9999:9999:9999:9999:9999"), 32));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:9999:9999:9999:9999:9999:9999"), 40));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:ab99:9999:9999:9999:9999:9999"), 48));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:9999:9999:9999:9999:9999"), 56));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:ab99:9999:9999:9999:9999"), 64));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:9999:9999:9999:9999"), 72));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:ab99:9999:9999:9999"), 80));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:9999:9999:9999"), 88));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:ab99:9999:9999"), 96));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:9999:9999"), 104));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:ab99:9999"), 112));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:9999"), 120));
+    BC_REQUIRE(!is_member(make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:abcd"), make_address("abcd:abcd:abcd:abcd:abcd:abcd:abcd:ab99"), 128));
 }
 
 // denormalize
 
-BOOST_AUTO_TEST_CASE(functions__denormalize__defaults__unchanged)
+BC_AUTO_TEST_CASE(functions__denormalize__defaults__unchanged)
 {
-    BOOST_REQUIRE(denormalize({ ip::ipv4{} }).is_v4());
-    BOOST_REQUIRE(denormalize({ ip::ipv6{} }).is_v6());
+    BC_REQUIRE(denormalize({ ip::ipv4{} }).is_v4());
+    BC_REQUIRE(denormalize({ ip::ipv6{} }).is_v6());
 }
 
-BOOST_AUTO_TEST_CASE(functions__denormalize__mapped__unmapped)
+BC_AUTO_TEST_CASE(functions__denormalize__mapped__unmapped)
 {
     constexpr ip::ipv6::bytes_type mapped
     {
@@ -130,10 +130,10 @@ BOOST_AUTO_TEST_CASE(functions__denormalize__mapped__unmapped)
     };
 
     const ip::address ip{ ip::ipv6{ mapped } };
-    BOOST_REQUIRE(denormalize(ip).is_v4());
+    BC_REQUIRE(denormalize(ip).is_v4());
 }
 
-BOOST_AUTO_TEST_CASE(functions__denormalize__unmapped__unchanged)
+BC_AUTO_TEST_CASE(functions__denormalize__unmapped__unchanged)
 {
     constexpr ip::ipv6::bytes_type unmapped
     {
@@ -142,73 +142,73 @@ BOOST_AUTO_TEST_CASE(functions__denormalize__unmapped__unchanged)
     };
 
     const ip::address ip{ ip::ipv6{ unmapped } };
-    BOOST_REQUIRE(denormalize(ip) == ip);
+    BC_REQUIRE(denormalize(ip) == ip);
 }
 
 // to_host
 
-BOOST_AUTO_TEST_CASE(functions__to_host__default__unspecified_v4)
+BC_AUTO_TEST_CASE(functions__to_host__default__unspecified_v4)
 {
     // Default address is ipv4.
     const auto host = to_host(ip::address{});
-    BOOST_REQUIRE_EQUAL(host, "0.0.0.0");
+    BC_REQUIRE_EQUAL(host, "0.0.0.0");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_host__default_v4__unspecified_v4)
+BC_AUTO_TEST_CASE(functions__to_host__default_v4__unspecified_v4)
 {
     const auto host = to_host(ip::ipv4{});
-    BOOST_REQUIRE_EQUAL(host, "0.0.0.0");
+    BC_REQUIRE_EQUAL(host, "0.0.0.0");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_host__default_v6__unspecified_v6)
+BC_AUTO_TEST_CASE(functions__to_host__default_v6__unspecified_v6)
 {
     const auto host = to_host(ip::ipv6{});
-    BOOST_REQUIRE_EQUAL(host, "::");
+    BC_REQUIRE_EQUAL(host, "::");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_host__v4__expected_v4)
+BC_AUTO_TEST_CASE(functions__to_host__v4__expected_v4)
 {
     const auto host = to_host(make_address("42.42.42.42"));
-    BOOST_REQUIRE_EQUAL(host, "42.42.42.42");
+    BC_REQUIRE_EQUAL(host, "42.42.42.42");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_host__v6__expected_v6)
+BC_AUTO_TEST_CASE(functions__to_host__v6__expected_v6)
 {
     const auto host = to_host(make_address("42:42::42:42"));
-    BOOST_REQUIRE_EQUAL(host, "42:42::42:42");
+    BC_REQUIRE_EQUAL(host, "42:42::42:42");
 }
 
 // to_literal
 
-BOOST_AUTO_TEST_CASE(functions__to_literal__default__unspecified_v4)
+BC_AUTO_TEST_CASE(functions__to_literal__default__unspecified_v4)
 {
     // Default address is ipv4.
     const auto host = to_literal(ip::address{});
-    BOOST_REQUIRE_EQUAL(host, "0.0.0.0");
+    BC_REQUIRE_EQUAL(host, "0.0.0.0");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_literal__default_v4__unspecified_v4)
+BC_AUTO_TEST_CASE(functions__to_literal__default_v4__unspecified_v4)
 {
     const auto host = to_literal(ip::ipv4{});
-    BOOST_REQUIRE_EQUAL(host, "0.0.0.0");
+    BC_REQUIRE_EQUAL(host, "0.0.0.0");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_literal__default_v6__unspecified_literal_v6)
+BC_AUTO_TEST_CASE(functions__to_literal__default_v6__unspecified_literal_v6)
 {
     const auto host = to_literal(ip::ipv6{});
-    BOOST_REQUIRE_EQUAL(host, "[::]");
+    BC_REQUIRE_EQUAL(host, "[::]");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_literal__v4__expected_v4)
+BC_AUTO_TEST_CASE(functions__to_literal__v4__expected_v4)
 {
     const auto host = to_literal(make_address("42.42.42.42"));
-    BOOST_REQUIRE_EQUAL(host, "42.42.42.42");
+    BC_REQUIRE_EQUAL(host, "42.42.42.42");
 }
 
-BOOST_AUTO_TEST_CASE(functions__to_literal__v6__expected_literal_v6)
+BC_AUTO_TEST_CASE(functions__to_literal__v6__expected_literal_v6)
 {
     const auto host = to_literal(make_address("42:42::42:42"));
-    BOOST_REQUIRE_EQUAL(host, "[42:42::42:42]");
+    BC_REQUIRE_EQUAL(host, "[42:42::42:42]");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

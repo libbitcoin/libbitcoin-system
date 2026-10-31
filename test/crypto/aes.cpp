@@ -21,7 +21,7 @@
 // nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf (Appendix A, C)
 // nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf (F)
 
-BOOST_AUTO_TEST_SUITE(aes_tests)
+BC_AUTO_TEST_SUITE(aes_tests)
 
 using aes128_native = aes::algorithm<aes::k128, true, false>;
 using aes128_vector = aes::algorithm<aes::k128, false, true>;
@@ -155,39 +155,39 @@ static data_array<64> inverse_substitute(const data_array<64>& bytes)
     return array_cast<uint8_t>(to_little_endians(q));
 }
 
-BOOST_AUTO_TEST_CASE(aes__sbox__all_bytes__fips197)
+BC_AUTO_TEST_CASE(aes__sbox__all_bytes__fips197)
 {
-    BOOST_REQUIRE_EQUAL(substitute(quarter<0>(identity)), quarter<0>(fips_sbox));
-    BOOST_REQUIRE_EQUAL(substitute(quarter<64>(identity)), quarter<64>(fips_sbox));
-    BOOST_REQUIRE_EQUAL(substitute(quarter<128>(identity)), quarter<128>(fips_sbox));
-    BOOST_REQUIRE_EQUAL(substitute(quarter<192>(identity)), quarter<192>(fips_sbox));
+    BC_REQUIRE_EQUAL(substitute(quarter<0>(identity)), quarter<0>(fips_sbox));
+    BC_REQUIRE_EQUAL(substitute(quarter<64>(identity)), quarter<64>(fips_sbox));
+    BC_REQUIRE_EQUAL(substitute(quarter<128>(identity)), quarter<128>(fips_sbox));
+    BC_REQUIRE_EQUAL(substitute(quarter<192>(identity)), quarter<192>(fips_sbox));
 }
 
-BOOST_AUTO_TEST_CASE(aes__inverse_sbox__all_bytes__fips197)
+BC_AUTO_TEST_CASE(aes__inverse_sbox__all_bytes__fips197)
 {
-    BOOST_REQUIRE_EQUAL(inverse_substitute(quarter<0>(fips_sbox)), quarter<0>(identity));
-    BOOST_REQUIRE_EQUAL(inverse_substitute(quarter<64>(fips_sbox)), quarter<64>(identity));
-    BOOST_REQUIRE_EQUAL(inverse_substitute(quarter<128>(fips_sbox)), quarter<128>(identity));
-    BOOST_REQUIRE_EQUAL(inverse_substitute(quarter<192>(fips_sbox)), quarter<192>(identity));
+    BC_REQUIRE_EQUAL(inverse_substitute(quarter<0>(fips_sbox)), quarter<0>(identity));
+    BC_REQUIRE_EQUAL(inverse_substitute(quarter<64>(fips_sbox)), quarter<64>(identity));
+    BC_REQUIRE_EQUAL(inverse_substitute(quarter<128>(fips_sbox)), quarter<128>(identity));
+    BC_REQUIRE_EQUAL(inverse_substitute(quarter<192>(fips_sbox)), quarter<192>(identity));
 }
 
 // expand
 
-BOOST_AUTO_TEST_CASE(aes__expand__aes128__fips197_a1)
+BC_AUTO_TEST_CASE(aes__expand__aes128__fips197_a1)
 {
     constexpr auto schedule = aes128::expand(key128);
     static_assert(schedule.front() == key128);
     static_assert(schedule.back() == base16_array("d014f9a8c9ee2589e13f0cc8b6630ca6"));
-    BOOST_REQUIRE_EQUAL(aes128::expand(key128), schedule);
+    BC_REQUIRE_EQUAL(aes128::expand(key128), schedule);
 }
 
-BOOST_AUTO_TEST_CASE(aes__expand__aes256__fips197_a3)
+BC_AUTO_TEST_CASE(aes__expand__aes256__fips197_a3)
 {
     constexpr auto schedule = aes256::expand(key256);
     static_assert(schedule[0] == base16_array("603deb1015ca71be2b73aef0857d7781"));
     static_assert(schedule[1] == base16_array("1f352c073b6108d72d9810a30914dff4"));
     static_assert(schedule.back() == base16_array("fe4890d1e6188d0b046df344706c631e"));
-    BOOST_REQUIRE_EQUAL(aes256::expand(key256), schedule);
+    BC_REQUIRE_EQUAL(aes256::expand(key256), schedule);
 }
 
 // encrypt/decrypt
@@ -197,20 +197,20 @@ static void test_cipher(const typename Algorithm::key_t& key, const data_array<1
 {
     auto block = in;
     Algorithm::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, out);
+    BC_REQUIRE_EQUAL(block, out);
 
     Algorithm::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, in);
+    BC_REQUIRE_EQUAL(block, in);
 
     const auto schedule = Algorithm::expand(key);
     Algorithm::encrypt(block, schedule);
-    BOOST_REQUIRE_EQUAL(block, out);
+    BC_REQUIRE_EQUAL(block, out);
 
     Algorithm::decrypt(block, schedule);
-    BOOST_REQUIRE_EQUAL(block, in);
+    BC_REQUIRE_EQUAL(block, in);
 }
 
-BOOST_AUTO_TEST_CASE(aes__encrypt_decrypt__aes128__vectors__expected)
+BC_AUTO_TEST_CASE(aes__encrypt_decrypt__aes128__vectors__expected)
 {
     for (const auto& vector: aes128_vectors)
     {
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(aes__encrypt_decrypt__aes128__vectors__expected)
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes__encrypt_decrypt__aes256__vectors__expected)
+BC_AUTO_TEST_CASE(aes__encrypt_decrypt__aes256__vectors__expected)
 {
     for (const auto& vector: aes256_vectors)
     {
@@ -230,19 +230,19 @@ BOOST_AUTO_TEST_CASE(aes__encrypt_decrypt__aes256__vectors__expected)
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes__encrypt_decrypt__constexpr__fips197_c1)
+BC_AUTO_TEST_CASE(aes__encrypt_decrypt__constexpr__fips197_c1)
 {
     constexpr auto key = base16_array("000102030405060708090a0b0c0d0e0f");
     constexpr auto in = base16_array("00112233445566778899aabbccddeeff");
     constexpr auto out = base16_array("69c4e0d86a7b0430d8cdb78070b4c55a");
     static_assert(encrypted<aes128>(key, in) == out);
     static_assert(decrypted<aes128>(key, out) == in);
-    BOOST_REQUIRE_EQUAL(encrypted<aes128>(key, in), out);
+    BC_REQUIRE_EQUAL(encrypted<aes128>(key, in), out);
 }
 
 // ctr
 
-BOOST_AUTO_TEST_CASE(aes__ctr__aes128__sp800_38a_f51)
+BC_AUTO_TEST_CASE(aes__ctr__aes128__sp800_38a_f51)
 {
     constexpr auto initial = base16_array("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
     constexpr auto next = base16_array("f0f1f2f3f4f5f6f7f8f9fafbfcfdff03");
@@ -251,15 +251,15 @@ BOOST_AUTO_TEST_CASE(aes__ctr__aes128__sp800_38a_f51)
     auto counter1 = initial;
     auto counter2 = initial;
     auto counter3 = initial;
-    BOOST_REQUIRE_EQUAL(crypt<aes128_native>(key128, counter1, plain), expected);
-    BOOST_REQUIRE_EQUAL(crypt<aes128_vector>(key128, counter2, plain), expected);
-    BOOST_REQUIRE_EQUAL(crypt<aes128_sliced>(key128, counter3, plain), expected);
-    BOOST_REQUIRE_EQUAL(counter1, next);
-    BOOST_REQUIRE_EQUAL(counter2, next);
-    BOOST_REQUIRE_EQUAL(counter3, next);
+    BC_REQUIRE_EQUAL(crypt<aes128_native>(key128, counter1, plain), expected);
+    BC_REQUIRE_EQUAL(crypt<aes128_vector>(key128, counter2, plain), expected);
+    BC_REQUIRE_EQUAL(crypt<aes128_sliced>(key128, counter3, plain), expected);
+    BC_REQUIRE_EQUAL(counter1, next);
+    BC_REQUIRE_EQUAL(counter2, next);
+    BC_REQUIRE_EQUAL(counter3, next);
 }
 
-BOOST_AUTO_TEST_CASE(aes__ctr__aes256__sp800_38a_f55)
+BC_AUTO_TEST_CASE(aes__ctr__aes256__sp800_38a_f55)
 {
     constexpr auto initial = base16_array("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
     const auto expected = base16_chunk("601ec313775789a5b7a7f504bbf3d228f443e3ca4d62b59aca84e990cacaf5c52b0930daa23de94ce87017ba2d84988ddfc9c58db67aada613c2dd08457941a6");
@@ -267,12 +267,12 @@ BOOST_AUTO_TEST_CASE(aes__ctr__aes256__sp800_38a_f55)
     auto counter1 = initial;
     auto counter2 = initial;
     auto counter3 = initial;
-    BOOST_REQUIRE_EQUAL(crypt<aes256_native>(key256, counter1, plain), expected);
-    BOOST_REQUIRE_EQUAL(crypt<aes256_vector>(key256, counter2, plain), expected);
-    BOOST_REQUIRE_EQUAL(crypt<aes256_sliced>(key256, counter3, plain), expected);
+    BC_REQUIRE_EQUAL(crypt<aes256_native>(key256, counter1, plain), expected);
+    BC_REQUIRE_EQUAL(crypt<aes256_vector>(key256, counter2, plain), expected);
+    BC_REQUIRE_EQUAL(crypt<aes256_sliced>(key256, counter3, plain), expected);
 }
 
-BOOST_AUTO_TEST_CASE(aes__ctr__sizes__variants_agree)
+BC_AUTO_TEST_CASE(aes__ctr__sizes__variants_agree)
 {
     constexpr auto initial = base16_array("000102030405060708090a0bfffffff0");
     data_chunk data(sizes.back());
@@ -285,14 +285,14 @@ BOOST_AUTO_TEST_CASE(aes__ctr__sizes__variants_agree)
         auto counter2 = initial;
         auto counter3 = initial;
         const auto expected = crypt<aes256_sliced>(key256, counter1, text);
-        BOOST_REQUIRE_EQUAL(crypt<aes256_native>(key256, counter2, text), expected);
-        BOOST_REQUIRE_EQUAL(crypt<aes256_vector>(key256, counter3, text), expected);
-        BOOST_REQUIRE_EQUAL(counter2, counter1);
-        BOOST_REQUIRE_EQUAL(counter3, counter1);
+        BC_REQUIRE_EQUAL(crypt<aes256_native>(key256, counter2, text), expected);
+        BC_REQUIRE_EQUAL(crypt<aes256_vector>(key256, counter3, text), expected);
+        BC_REQUIRE_EQUAL(counter2, counter1);
+        BC_REQUIRE_EQUAL(counter3, counter1);
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
+BC_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
 {
     constexpr auto initial = base16_array("000102030405060708090a0bfffffff0");
     constexpr std_array<size_t, 5> offsets{ 1, 5, 16, 32, 48 };
@@ -313,23 +313,23 @@ BOOST_AUTO_TEST_CASE(aes__ctr__unaligned__variants_agree)
             const auto expected = crypt<aes256_sliced>(key256, counter1, text);
 
             aes256_native::ctr(cipher, text, counter2, aes256_native::expand(key256));
-            BOOST_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
+            BC_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
 
             aes256_vector::ctr(cipher, text, counter3, aes256_vector::expand(key256));
-            BOOST_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
+            BC_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
 
             // In place.
             std::copy(text.begin(), text.end(), cipher.begin());
             aes256_native::ctr(cipher, cipher, counter4, aes256_native::expand(key256));
-            BOOST_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
-            BOOST_REQUIRE_EQUAL(counter2, counter1);
-            BOOST_REQUIRE_EQUAL(counter3, counter1);
-            BOOST_REQUIRE_EQUAL(counter4, counter1);
+            BC_REQUIRE_EQUAL(data_chunk(cipher.begin(), cipher.end()), expected);
+            BC_REQUIRE_EQUAL(counter2, counter1);
+            BC_REQUIRE_EQUAL(counter3, counter1);
+            BC_REQUIRE_EQUAL(counter4, counter1);
         });
     });
 }
 
-BOOST_AUTO_TEST_CASE(aes__ctr__keystream__encrypted_counters)
+BC_AUTO_TEST_CASE(aes__ctr__keystream__encrypted_counters)
 {
     constexpr auto initial = base16_array("000102030405060708090a0bfffffffe");
     const auto schedule = aes128::expand(key128);
@@ -344,13 +344,13 @@ BOOST_AUTO_TEST_CASE(aes__ctr__keystream__encrypted_counters)
     aes128::encrypt(block0, schedule);
     aes128::encrypt(block1, schedule);
     aes128::encrypt(block2, schedule);
-    BOOST_REQUIRE_EQUAL(block_at(stream, 0), block0);
-    BOOST_REQUIRE_EQUAL(block_at(stream, 1), block1);
-    BOOST_REQUIRE_EQUAL(block_at(stream, 2), block2);
-    BOOST_REQUIRE_EQUAL(counter, base16_array("000102030405060708090a0b00000001"));
+    BC_REQUIRE_EQUAL(block_at(stream, 0), block0);
+    BC_REQUIRE_EQUAL(block_at(stream, 1), block1);
+    BC_REQUIRE_EQUAL(block_at(stream, 2), block2);
+    BC_REQUIRE_EQUAL(counter, base16_array("000102030405060708090a0b00000001"));
 }
 
-BOOST_AUTO_TEST_CASE(aes__ctr__long_keystream__encrypted_zeros)
+BC_AUTO_TEST_CASE(aes__ctr__long_keystream__encrypted_zeros)
 {
     constexpr auto initial = base16_array("000102030405060708090a0bfffffffe");
     const auto schedule = aes128::expand(key128);
@@ -362,11 +362,11 @@ BOOST_AUTO_TEST_CASE(aes__ctr__long_keystream__encrypted_zeros)
     data_array<256> zeros{};
     auto counter2 = initial;
     aes128::ctr(zeros, zeros, counter2, schedule);
-    BOOST_REQUIRE_EQUAL(stream, zeros);
-    BOOST_REQUIRE_EQUAL(counter1, counter2);
+    BC_REQUIRE_EQUAL(stream, zeros);
+    BC_REQUIRE_EQUAL(counter1, counter2);
 }
 
-BOOST_AUTO_TEST_CASE(aes__ctr__in_place__expected)
+BC_AUTO_TEST_CASE(aes__ctr__in_place__expected)
 {
     constexpr auto initial = base16_array("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
     const auto expected = base16_chunk("874d6191b620e3261bef6864990db6ce9806f66b7970fdff8617187bb9fffdff5ae4df3edbd5d35e5b4f09020db03eab1e031dda2fbe03d1792170a0f3009cee");
@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE(aes__ctr__in_place__expected)
     auto text = plain;
     auto counter = initial;
     aes128::ctr(text, text, counter, aes128::expand(key128));
-    BOOST_REQUIRE_EQUAL(to_chunk(text), expected);
+    BC_REQUIRE_EQUAL(to_chunk(text), expected);
 }
 
 // cbc_decrypt
@@ -388,8 +388,8 @@ static void test_cbc(const typename Algorithm::key_t& key, const data_chunk& cip
     data_chunk out(cipher.size());
     auto iv = initial;
     Algorithm::cbc_decrypt(out, cipher, iv, schedule);
-    BOOST_REQUIRE_EQUAL(out, to_chunk(plain));
-    BOOST_REQUIRE_EQUAL(iv, block_at(cipher, 3));
+    BC_REQUIRE_EQUAL(out, to_chunk(plain));
+    BC_REQUIRE_EQUAL(iv, block_at(cipher, 3));
 
     // In place, as a continuation of two calls.
     auto text = cipher;
@@ -397,10 +397,10 @@ static void test_cbc(const typename Algorithm::key_t& key, const data_chunk& cip
     const std::span<uint8_t> all{ text };
     Algorithm::cbc_decrypt(all.first(16), all.first(16), chained, schedule);
     Algorithm::cbc_decrypt(all.subspan(16), all.subspan(16), chained, schedule);
-    BOOST_REQUIRE_EQUAL(text, to_chunk(plain));
+    BC_REQUIRE_EQUAL(text, to_chunk(plain));
 }
 
-BOOST_AUTO_TEST_CASE(aes__cbc_decrypt__aes128__sp800_38a_f22)
+BC_AUTO_TEST_CASE(aes__cbc_decrypt__aes128__sp800_38a_f22)
 {
     const auto cipher = base16_chunk("7649abac8119b246cee98e9b12e9197d5086cb9b507219ee95db113a917678b273bed6b8e3c1743b7116e69e222295163ff1caa1681fac09120eca307586e1a7");
     test_cbc<aes128_native>(key128, cipher);
@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(aes__cbc_decrypt__aes128__sp800_38a_f22)
     test_cbc<aes128_sliced>(key128, cipher);
 }
 
-BOOST_AUTO_TEST_CASE(aes__cbc_decrypt__aes256__sp800_38a_f26)
+BC_AUTO_TEST_CASE(aes__cbc_decrypt__aes256__sp800_38a_f26)
 {
     const auto cipher = base16_chunk("f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b");
     test_cbc<aes256_native>(key256, cipher);
@@ -416,12 +416,12 @@ BOOST_AUTO_TEST_CASE(aes__cbc_decrypt__aes256__sp800_38a_f26)
     test_cbc<aes256_sliced>(key256, cipher);
 }
 
-BOOST_AUTO_TEST_CASE(aes__cbc_decrypt__empty__unchanged)
+BC_AUTO_TEST_CASE(aes__cbc_decrypt__empty__unchanged)
 {
     constexpr auto expected = base16_array("000102030405060708090a0b0c0d0e0f");
     auto iv = expected;
     aes128::cbc_decrypt({}, {}, iv, aes128::expand(key128));
-    BOOST_REQUIRE_EQUAL(iv, expected);
+    BC_REQUIRE_EQUAL(iv, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

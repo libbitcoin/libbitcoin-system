@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_minimal_tests)
+BC_AUTO_TEST_SUITE(endian_minimal_tests)
 
 constexpr uint32_t value32 = 0x01020304;
 constexpr data_array<4> array_forward{ { 0x01, 0x02, 0x03, 0x04 } };
@@ -35,91 +35,91 @@ const auto reverse_chunk8 = base16_chunk("0807060504030201");
 
 // sized positive
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__uintx_to_data__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endian_size__uintx_to_data__expected)
 {
     static_assert(to_big_endian_size<4>(value32) == array_forward);
-    BOOST_REQUIRE_EQUAL(to_big_endian_size<4>(value32), array_forward);
+    BC_REQUIRE_EQUAL(to_big_endian_size<4>(value32), array_forward);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian_size__uintx_to_data__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endian_size__uintx_to_data__expected)
 {
     static_assert(to_little_endian_size<4>(value32) == array_reverse);
-    BOOST_REQUIRE_EQUAL(to_little_endian_size<4>(value32), array_reverse);
+    BC_REQUIRE_EQUAL(to_little_endian_size<4>(value32), array_reverse);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_endian_array_size__uint64_t__expected)
+BC_AUTO_TEST_CASE(endian__to_endian_array_size__uint64_t__expected)
 {
     static_assert(to_big_endian_size<8>(from_little_endian<uint64_t>(array8)) == reverse_array8);
     static_assert(to_little_endian_size<8>(from_big_endian<uint64_t>(array8)) == reverse_array8);
-    BOOST_REQUIRE_EQUAL(to_big_endian_size<8>(from_little_endian<uint64_t>(array8)), reverse_array8);
-    BOOST_REQUIRE_EQUAL(to_little_endian_size<8>(from_big_endian<uint64_t>(array8)), reverse_array8);
+    BC_REQUIRE_EQUAL(to_big_endian_size<8>(from_little_endian<uint64_t>(array8)), reverse_array8);
+    BC_REQUIRE_EQUAL(to_little_endian_size<8>(from_big_endian<uint64_t>(array8)), reverse_array8);
 }
 
 // sized negative
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__negative_full__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endian_size__negative_full__expected)
 {
     constexpr data_array<mini_hash_size> full_mini_hash{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
     static_assert(to_big_endian_size<mini_hash_size>(-1) == full_mini_hash);
-    BOOST_REQUIRE_EQUAL(to_big_endian_size<mini_hash_size>(-1), full_mini_hash);
+    BC_REQUIRE_EQUAL(to_big_endian_size<mini_hash_size>(-1), full_mini_hash);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__negative_partial__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endian_size__negative_partial__expected)
 {
     constexpr data_array<mini_hash_size> half_mini_big{ { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 } };
     static_assert(to_big_endian_size<mini_hash_size>(mask_right(-1, 24)) == half_mini_big);
-    BOOST_REQUIRE_EQUAL(to_big_endian_size<mini_hash_size>(mask_right(-1, 24)), half_mini_big);
+    BC_REQUIRE_EQUAL(to_big_endian_size<mini_hash_size>(mask_right(-1, 24)), half_mini_big);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian_size__negative_full__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endian_size__negative_full__expected)
 {
     constexpr data_array<mini_hash_size> full_mini_hash{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
     static_assert(to_little_endian_size<mini_hash_size>(-1) == full_mini_hash);
-    BOOST_REQUIRE_EQUAL(to_little_endian_size<mini_hash_size>(-1), full_mini_hash);
+    BC_REQUIRE_EQUAL(to_little_endian_size<mini_hash_size>(-1), full_mini_hash);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian_size__negative_partial__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endian_size__negative_partial__expected)
 {
     constexpr data_array<mini_hash_size> half_mini_little{ { 0x00, 0x00, 0x00, 0xff, 0xff, 0xff } };
     static_assert(to_little_endian_size<mini_hash_size>(mask_right(-1, 24)) == half_mini_little);
-    BOOST_REQUIRE_EQUAL(to_little_endian_size<mini_hash_size>(mask_right(-1, 24)), half_mini_little);
+    BC_REQUIRE_EQUAL(to_little_endian_size<mini_hash_size>(mask_right(-1, 24)), half_mini_little);
 }
 
 // variable size (chunk), not constexpr
 
-BOOST_AUTO_TEST_CASE(endian__to_endian_chunk_size__uint64_t__expected)
+BC_AUTO_TEST_CASE(endian__to_endian_chunk_size__uint64_t__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_endian_size(from_little_endian<uint64_t>(chunk8)), reverse_chunk8);
-    BOOST_REQUIRE_EQUAL(to_little_endian_size(from_big_endian<uint64_t>(chunk8)), reverse_chunk8);
+    BC_REQUIRE_EQUAL(to_big_endian_size(from_little_endian<uint64_t>(chunk8)), reverse_chunk8);
+    BC_REQUIRE_EQUAL(to_little_endian_size(from_big_endian<uint64_t>(chunk8)), reverse_chunk8);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__excess__expected_capacity)
+BC_AUTO_TEST_CASE(endian__to_big_endian_size__excess__expected_capacity)
 {
     constexpr auto excess = 42u;
     const auto chunk = to_big_endian_size(from_little_endian<uint64_t>(chunk8), excess);
-    BOOST_REQUIRE_EQUAL(chunk, reverse_copy(chunk8));
-    BOOST_REQUIRE_EQUAL(chunk.size() + excess, chunk.capacity());
+    BC_REQUIRE_EQUAL(chunk, reverse_copy(chunk8));
+    BC_REQUIRE_EQUAL(chunk.size() + excess, chunk.capacity());
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian_size__excess__expected_capacity)
+BC_AUTO_TEST_CASE(endian__to_little_endian_size__excess__expected_capacity)
 {
     constexpr auto excess = 42u;
     const auto chunk = to_little_endian_size(from_big_endian<uint64_t>(chunk8), excess);
-    BOOST_REQUIRE_EQUAL(chunk, reverse_copy(chunk8));
-    BOOST_REQUIRE_EQUAL(chunk.size() + excess, chunk.capacity());
+    BC_REQUIRE_EQUAL(chunk, reverse_copy(chunk8));
+    BC_REQUIRE_EQUAL(chunk.size() + excess, chunk.capacity());
 }
 
 // integer to chunk, not constexpr
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_chunk__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endian__integer_to_chunk__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_chunk(to_big_endian(value32)), data_forward);
+    BC_REQUIRE_EQUAL(to_chunk(to_big_endian(value32)), data_forward);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_chunk__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endian__integer_to_chunk__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_chunk(to_little_endian(value32)), data_reverse);
+    BC_REQUIRE_EQUAL(to_chunk(to_little_endian(value32)), data_reverse);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

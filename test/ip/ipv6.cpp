@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(ipv6_tests)
+BC_AUTO_TEST_SUITE(ipv6_tests)
 
 using namespace ip;
 
@@ -88,135 +88,135 @@ const std_vector<std::string> invalid_ipv6
 
 // from_string
 
-BOOST_AUTO_TEST_CASE(ipv6__from_string__valid__canonical_round_trip)
+BC_AUTO_TEST_CASE(ipv6__from_string__valid__canonical_round_trip)
 {
     for (const auto& vector: valid_ipv6)
     {
         ipv6 out{};
-        BOOST_REQUIRE_MESSAGE(ipv6::from_string(out, vector.text), vector.text);
-        BOOST_REQUIRE_EQUAL(out.to_string(), vector.canonical);
+        BC_REQUIRE_MESSAGE(ipv6::from_string(out, vector.text), vector.text);
+        BC_REQUIRE_EQUAL(out.to_string(), vector.canonical);
 
         ipv6 canonical{};
-        BOOST_REQUIRE(ipv6::from_string(canonical, vector.canonical));
-        BOOST_REQUIRE_EQUAL(canonical, out);
+        BC_REQUIRE(ipv6::from_string(canonical, vector.canonical));
+        BC_REQUIRE_EQUAL(canonical, out);
     }
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__from_string__invalid__false_unchanged)
+BC_AUTO_TEST_CASE(ipv6__from_string__invalid__false_unchanged)
 {
     for (const auto& text: invalid_ipv6)
     {
         ipv6 out{ ipv6::loopback() };
-        BOOST_REQUIRE_MESSAGE(!ipv6::from_string(out, text), text);
-        BOOST_REQUIRE_EQUAL(out, ipv6::loopback());
+        BC_REQUIRE_MESSAGE(!ipv6::from_string(out, text), text);
+        BC_REQUIRE_EQUAL(out, ipv6::loopback());
     }
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__from_string__full__expected_bytes)
+BC_AUTO_TEST_CASE(ipv6__from_string__full__expected_bytes)
 {
     ipv6 out{};
     const ipv6::bytes_type expected{ 0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0x08, 0x08, 0x00, 0x20, 0x0c, 0x41, 0x7a };
-    BOOST_REQUIRE(ipv6::from_string(out, "2001:DB8:0:0:8:800:200C:417A"));
-    BOOST_REQUIRE_EQUAL(out.to_bytes(), expected);
+    BC_REQUIRE(ipv6::from_string(out, "2001:DB8:0:0:8:800:200C:417A"));
+    BC_REQUIRE_EQUAL(out.to_bytes(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__from_string__embedded__expected_bytes)
+BC_AUTO_TEST_CASE(ipv6__from_string__embedded__expected_bytes)
 {
     ipv6 out{};
     const ipv6::bytes_type expected{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 129, 144, 52, 38 };
-    BOOST_REQUIRE(ipv6::from_string(out, "::ffff:129.144.52.38"));
-    BOOST_REQUIRE_EQUAL(out.to_bytes(), expected);
+    BC_REQUIRE(ipv6::from_string(out, "::ffff:129.144.52.38"));
+    BC_REQUIRE_EQUAL(out.to_bytes(), expected);
 }
 
 // statics
 
-BOOST_AUTO_TEST_CASE(ipv6__any__always__unspecified)
+BC_AUTO_TEST_CASE(ipv6__any__always__unspecified)
 {
-    BOOST_REQUIRE(ipv6::any().is_unspecified());
-    BOOST_REQUIRE_EQUAL(ipv6::any(), ipv6{});
+    BC_REQUIRE(ipv6::any().is_unspecified());
+    BC_REQUIRE_EQUAL(ipv6::any(), ipv6{});
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__loopback__always__expected)
+BC_AUTO_TEST_CASE(ipv6__loopback__always__expected)
 {
     const ipv6::bytes_type expected{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
-    BOOST_REQUIRE_EQUAL(ipv6::loopback().to_bytes(), expected);
+    BC_REQUIRE_EQUAL(ipv6::loopback().to_bytes(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__mapped__ipv4__expected)
+BC_AUTO_TEST_CASE(ipv6__mapped__ipv4__expected)
 {
     const ipv6::bytes_type expected{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 1, 2, 3, 4 };
     const ipv4 ip{ { 1, 2, 3, 4 } };
     const auto mapped = ipv6::mapped(ip);
-    BOOST_REQUIRE_EQUAL(mapped.to_bytes(), expected);
-    BOOST_REQUIRE(mapped.is_v4_mapped());
-    BOOST_REQUIRE_EQUAL(mapped.to_v4(), ip);
+    BC_REQUIRE_EQUAL(mapped.to_bytes(), expected);
+    BC_REQUIRE(mapped.is_v4_mapped());
+    BC_REQUIRE_EQUAL(mapped.to_v4(), ip);
 }
 
 // is_v4_mapped
 
-BOOST_AUTO_TEST_CASE(ipv6__is_v4_mapped__mapped__true)
+BC_AUTO_TEST_CASE(ipv6__is_v4_mapped__mapped__true)
 {
     const ipv6 ip{ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 0, 0, 0, 0 } };
-    BOOST_REQUIRE(ip.is_v4_mapped());
+    BC_REQUIRE(ip.is_v4_mapped());
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__is_v4_mapped__other__false)
+BC_AUTO_TEST_CASE(ipv6__is_v4_mapped__other__false)
 {
     const ipv6 compatible{ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4 } };
     const ipv6 other{ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0xff, 0xff, 1, 2, 3, 4 } };
-    BOOST_REQUIRE(!ipv6{}.is_v4_mapped());
-    BOOST_REQUIRE(!compatible.is_v4_mapped());
-    BOOST_REQUIRE(!other.is_v4_mapped());
+    BC_REQUIRE(!ipv6{}.is_v4_mapped());
+    BC_REQUIRE(!compatible.is_v4_mapped());
+    BC_REQUIRE(!other.is_v4_mapped());
 }
 
 // to_v4
 
-BOOST_AUTO_TEST_CASE(ipv6__to_v4__any__low_bytes)
+BC_AUTO_TEST_CASE(ipv6__to_v4__any__low_bytes)
 {
     const ipv6 ip{ { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 } };
     const ipv4 expected{ { 13, 14, 15, 16 } };
-    BOOST_REQUIRE_EQUAL(ip.to_v4(), expected);
+    BC_REQUIRE_EQUAL(ip.to_v4(), expected);
 }
 
 // is_loopback
 
-BOOST_AUTO_TEST_CASE(ipv6__is_loopback__loopback__true)
+BC_AUTO_TEST_CASE(ipv6__is_loopback__loopback__true)
 {
-    BOOST_REQUIRE(ipv6::loopback().is_loopback());
+    BC_REQUIRE(ipv6::loopback().is_loopback());
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__is_loopback__other__false)
+BC_AUTO_TEST_CASE(ipv6__is_loopback__other__false)
 {
-    BOOST_REQUIRE(!ipv6{}.is_loopback());
-    BOOST_REQUIRE(!ipv6::mapped(ipv4::loopback()).is_loopback());
+    BC_REQUIRE(!ipv6{}.is_loopback());
+    BC_REQUIRE(!ipv6::mapped(ipv4::loopback()).is_loopback());
 }
 
 // is_unspecified
 
-BOOST_AUTO_TEST_CASE(ipv6__is_unspecified__default__true)
+BC_AUTO_TEST_CASE(ipv6__is_unspecified__default__true)
 {
-    BOOST_REQUIRE(ipv6{}.is_unspecified());
+    BC_REQUIRE(ipv6{}.is_unspecified());
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__is_unspecified__nonzero__false)
+BC_AUTO_TEST_CASE(ipv6__is_unspecified__nonzero__false)
 {
-    BOOST_REQUIRE(!ipv6::loopback().is_unspecified());
+    BC_REQUIRE(!ipv6::loopback().is_unspecified());
 }
 
 // operators
 
-BOOST_AUTO_TEST_CASE(ipv6__ordering__by_bytes__expected)
+BC_AUTO_TEST_CASE(ipv6__ordering__by_bytes__expected)
 {
-    BOOST_REQUIRE(ipv6{} < ipv6::loopback());
-    BOOST_REQUIRE(ipv6::loopback() == ipv6::loopback());
-    BOOST_REQUIRE(ipv6::loopback() != ipv6{});
+    BC_REQUIRE(ipv6{} < ipv6::loopback());
+    BC_REQUIRE(ipv6::loopback() == ipv6::loopback());
+    BC_REQUIRE(ipv6::loopback() != ipv6{});
 }
 
-BOOST_AUTO_TEST_CASE(ipv6__ostream__loopback__expected)
+BC_AUTO_TEST_CASE(ipv6__ostream__loopback__expected)
 {
     std::stringstream stream{};
     stream << ipv6::loopback();
-    BOOST_REQUIRE_EQUAL(stream.str(), "::1");
+    BC_REQUIRE_EQUAL(stream.str(), "::1");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

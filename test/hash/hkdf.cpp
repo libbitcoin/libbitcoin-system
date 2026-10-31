@@ -18,10 +18,10 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(hkdf_tests)
+BC_AUTO_TEST_SUITE(hkdf_tests)
 
 // rfc5869 appendix A test case 1.
-BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_1__expected)
+BC_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_1__expected)
 {
     const auto ikm = base16_chunk("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
     const auto salt = base16_chunk("000102030405060708090a0b0c");
@@ -33,19 +33,19 @@ BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_1__expected)
         "34007208d5b887185865");
 
     const auto prk = hkdf<sha256>::extract(ikm, salt);
-    BOOST_REQUIRE_EQUAL(prk, prk_expected);
+    BC_REQUIRE_EQUAL(prk, prk_expected);
 
     data_array<42> okm{};
     hkdf<sha256>::expand(okm, prk, info);
-    BOOST_REQUIRE_EQUAL(okm, okm_expected);
+    BC_REQUIRE_EQUAL(okm, okm_expected);
 
     // Combined extract-and-expand.
     const auto combined = hkdf<sha256>::key<42>(ikm, salt, info);
-    BOOST_REQUIRE_EQUAL(combined, okm_expected);
+    BC_REQUIRE_EQUAL(combined, okm_expected);
 }
 
 // rfc5869 appendix A test case 2 (longer inputs/outputs).
-BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_2__expected)
+BC_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_2__expected)
 {
     const auto ikm = base16_chunk(
         "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
@@ -66,11 +66,11 @@ BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_2__expected)
 
     data_array<82> okm{};
     hkdf<sha256>::key(okm, ikm, salt, info);
-    BOOST_REQUIRE_EQUAL(okm, okm_expected);
+    BC_REQUIRE_EQUAL(okm, okm_expected);
 }
 
 // rfc5869 appendix A test case 3 (empty salt and info).
-BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_3__expected)
+BC_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_3__expected)
 {
     const auto ikm = base16_chunk("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
     const auto okm_expected = base16_array(
@@ -79,11 +79,11 @@ BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_3__expected)
 
     data_array<42> okm{};
     hkdf<sha256>::key(okm, ikm, {}, {});
-    BOOST_REQUIRE_EQUAL(okm, okm_expected);
+    BC_REQUIRE_EQUAL(okm, okm_expected);
 }
 
 // bip324 key derivation (from bips.dev/324 packet encoding test vector 1).
-BOOST_AUTO_TEST_CASE(hkdf__sha256__maximum_size__extends_shorter)
+BC_AUTO_TEST_CASE(hkdf__sha256__maximum_size__extends_shorter)
 {
     constexpr auto length = array_count<sha256::digest_t>;
     constexpr auto maximum = hkdf<sha256>::maximum_size;
@@ -92,10 +92,10 @@ BOOST_AUTO_TEST_CASE(hkdf__sha256__maximum_size__extends_shorter)
     data_array<maximum> longer{};
     hkdf<sha256>::expand(shorter, prk, {});
     hkdf<sha256>::expand(longer, prk, {});
-    BOOST_REQUIRE(std::equal(shorter.begin(), shorter.end(), longer.begin()));
+    BC_REQUIRE(std::equal(shorter.begin(), shorter.end(), longer.begin()));
 }
 
-BOOST_AUTO_TEST_CASE(hkdf__sha256__bip324_session_id__expected)
+BC_AUTO_TEST_CASE(hkdf__sha256__bip324_session_id__expected)
 {
     // v2_ecdh shared secret for vector 1 (see secp256k1 ellswift tests).
     const auto secret = base16_chunk(
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(hkdf__sha256__bip324_session_id__expected)
 
     data_array<32> okm{};
     hkdf<sha256>::expand(okm, prk, to_chunk("session_id"));
-    BOOST_REQUIRE_EQUAL(okm, session_id);
+    BC_REQUIRE_EQUAL(okm, session_id);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

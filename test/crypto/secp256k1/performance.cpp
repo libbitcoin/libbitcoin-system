@@ -22,7 +22,7 @@
 
 #include <chrono>
 
-BOOST_AUTO_TEST_SUITE(secp256k1_performance_tests)
+BC_AUTO_TEST_SUITE(secp256k1_performance_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -141,7 +141,7 @@ static double microseconds(size_t calls, Function&& function) NOEXCEPT
         valid += to_int<size_t>(function(call));
 
     const auto stop = std::chrono::steady_clock::now();
-    BOOST_CHECK_EQUAL(valid, calls);
+    BC_CHECK_EQUAL(valid, calls);
     return std::chrono::duration<double, std::micro>(stop - start).count() /
         calls;
 }
@@ -194,7 +194,7 @@ static void report_lanes(const std::string& name) NOEXCEPT
 
 constexpr size_t operations = 1'000'000;
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__field__integral)
+BC_AUTO_TEST_CASE(secp256k1_performance__field__integral)
 {
     const auto& in = signed_vectors();
     auto value = in.points[0].x;
@@ -211,10 +211,10 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__field__integral)
         return true;
     }));
 
-    BOOST_CHECK(!f::any(accessor::is_zero_element(value)));
+    BC_CHECK(!f::any(accessor::is_zero_element(value)));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__inverse__integral)
+BC_AUTO_TEST_CASE(secp256k1_performance__inverse__integral)
 {
     const auto& in = signed_vectors();
     accessor::field_t<uint64_t> element{}, squared{};
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__inverse__integral)
     }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__group__integral)
+BC_AUTO_TEST_CASE(secp256k1_performance__group__integral)
 {
     const auto& in = signed_vectors();
     accessor::jacobian_t<uint64_t> sum{};
@@ -263,13 +263,13 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__group__integral)
         return !f::any(faults);
     }));
 
-    BOOST_CHECK(!f::any(sum.infinity));
+    BC_CHECK(!f::any(sum.infinity));
 }
 
 // verify
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__libsecp256k1)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__libsecp256k1)
 {
     const auto& in = signed_vectors();
     report("ecdsa libsecp256k1", microseconds(count, [&](size_t index) NOEXCEPT
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__libsecp256k1)
     }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__local)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__local)
 {
     const auto& in = signed_vectors();
     report("ecdsa local", microseconds(count, [&](size_t index) NOEXCEPT
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_ecdsa__local)
     }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__libsecp256k1)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__libsecp256k1)
 {
     const auto& in = signed_vectors();
     report("schnorr libsecp256k1", microseconds(count, [&](size_t index) NOEXCEPT
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__libsecp256k1)
     }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
 {
     const auto& in = signed_vectors();
     report("schnorr local", microseconds(count, [&](size_t index) NOEXCEPT
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__local)
 // sign
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__sign__wrappers)
+BC_AUTO_TEST_CASE(secp256k1_performance__sign__wrappers)
 {
     const auto& in = signed_vectors();
     report("secret to public", microseconds(count, [&](size_t index) NOEXCEPT
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__sign__wrappers)
 // multiply
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__multiply__integral)
+BC_AUTO_TEST_CASE(secp256k1_performance__multiply__integral)
 {
     const auto& in = signed_vectors();
     report("multiply integral", microseconds(count, [&](size_t index) NOEXCEPT
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__multiply__integral)
     }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__multiply__lanes)
+BC_AUTO_TEST_CASE(secp256k1_performance__multiply__lanes)
 {
     report_lanes<xint128_t>("multiply 2 lanes per signature");
     report_lanes<xint256_t>("multiply 4 lanes per signature");
@@ -398,7 +398,7 @@ static void report_batches(const std::string& name) NOEXCEPT
         report_batch<Word>(name);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__combined)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__combined)
 {
     const auto& in = signed_vectors();
     const auto time = microseconds(one, [&](size_t) NOEXCEPT
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify_schnorr__combined)
     report("schnorr combined per signature", time / count);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify__batch)
 {
     report_batches<uint64_t>("integral");
     report_batches<xint128_t>("2 lanes");
@@ -422,7 +422,7 @@ static batched::link link_of(size_t row) NOEXCEPT
     return { narrow_cast<uint8_t>(row), narrow_cast<uint8_t>(row >> 8), 0 };
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch_wrappers)
+BC_AUTO_TEST_CASE(secp256k1_performance__verify__batch_wrappers)
 {
     const auto& in = signed_vectors();
     std_vector<ecdsa::batch::correlate_t> ecdsa_correlates(count);
@@ -464,6 +464,6 @@ BOOST_AUTO_TEST_CASE(secp256k1_performance__verify__batch_wrappers)
     report("schnorr batch wrapper per signature", schnorr / count);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #endif

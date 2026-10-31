@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include <bitset>
 
-BOOST_AUTO_TEST_SUITE(sieve_tests)
+BC_AUTO_TEST_SUITE(sieve_tests)
 
 ////#define HAVE_SLOW_TESTS
 
@@ -41,7 +41,7 @@ static_assert( accessor<0, 0>::is_screened(accessor<0, 0>::empty, 42));
 static_assert( accessor<1, 0>::is_screened(accessor<1, 0>::empty, 42));
 static_assert(!accessor<1, 1>::is_screened(accessor<1, 1>::empty, 42));
 
-BOOST_AUTO_TEST_CASE(sieve__screened__forward__expected)
+BC_AUTO_TEST_CASE(sieve__screened__forward__expected)
 {
     constexpr size_t sieve_bits = 32;
     constexpr size_t select_bits = 4;
@@ -71,373 +71,373 @@ BOOST_AUTO_TEST_CASE(sieve__screened__forward__expected)
 
     // none screened
     auto value = sieve_t::empty;
-    BOOST_CHECK( sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK( sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_screened(value, forward[0]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[1]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[2]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[3]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[4]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 0 screened
     value = sieve_t::screen(value, forward[0]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[1]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[2]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[3]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[4]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 1 screened
     value = sieve_t::screen(value, forward[1]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[2]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[3]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[4]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 2 screened
     value = sieve_t::screen(value, forward[2]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[3]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[4]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 3 screened
     value = sieve_t::screen(value, forward[3]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[4]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 4 screened
     value = sieve_t::screen(value, forward[4]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 5 screened
     value = sieve_t::screen(value, forward[5]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 6 screened
     value = sieve_t::screen(value, forward[6]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 7 screened
     value = sieve_t::screen(value, forward[7]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 8 screened
     value = sieve_t::screen(value, forward[8]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 9 screened
     value = sieve_t::screen(value, forward[9]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 10 screened
     value = sieve_t::screen(value, forward[10]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK( sieve_t::is_screened(value, forward[10]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 11 screened
     value = sieve_t::screen(value, forward[11]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK( sieve_t::is_screened(value, forward[10]));
+    BC_CHECK( sieve_t::is_screened(value, forward[11]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 12 screened
     value = sieve_t::screen(value, forward[12]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK( sieve_t::is_screened(value, forward[10]));
+    BC_CHECK( sieve_t::is_screened(value, forward[11]));
+    BC_CHECK( sieve_t::is_screened(value, forward[12]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 13 screened
     value = sieve_t::screen(value, forward[13]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK( sieve_t::is_screened(value, forward[10]));
+    BC_CHECK( sieve_t::is_screened(value, forward[11]));
+    BC_CHECK( sieve_t::is_screened(value, forward[12]));
+    BC_CHECK( sieve_t::is_screened(value, forward[13]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 14 screened
     value = sieve_t::screen(value, forward[14]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK( sieve_t::is_screened(value, forward[10]));
+    BC_CHECK( sieve_t::is_screened(value, forward[11]));
+    BC_CHECK( sieve_t::is_screened(value, forward[12]));
+    BC_CHECK( sieve_t::is_screened(value, forward[13]));
+    BC_CHECK( sieve_t::is_screened(value, forward[14]));
+    BC_CHECK(!sieve_t::is_screened(value, forward[15]));
 
     // 15 screened
     value = sieve_t::screen(value, forward[15]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[12]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[13]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[14]));
-    BOOST_CHECK( sieve_t::is_screened(value, forward[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_screened(value, forward[1]));
+    BC_CHECK( sieve_t::is_screened(value, forward[2]));
+    BC_CHECK( sieve_t::is_screened(value, forward[3]));
+    BC_CHECK( sieve_t::is_screened(value, forward[4]));
+    BC_CHECK( sieve_t::is_screened(value, forward[5]));
+    BC_CHECK( sieve_t::is_screened(value, forward[6]));
+    BC_CHECK( sieve_t::is_screened(value, forward[7]));
+    BC_CHECK( sieve_t::is_screened(value, forward[8]));
+    BC_CHECK( sieve_t::is_screened(value, forward[9]));
+    BC_CHECK( sieve_t::is_screened(value, forward[10]));
+    BC_CHECK( sieve_t::is_screened(value, forward[11]));
+    BC_CHECK( sieve_t::is_screened(value, forward[12]));
+    BC_CHECK( sieve_t::is_screened(value, forward[13]));
+    BC_CHECK( sieve_t::is_screened(value, forward[14]));
+    BC_CHECK( sieve_t::is_screened(value, forward[15]));
 
     // Not saturated (already screened).
     value = sieve_t::screen(value, forward[15]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
 
     // Saturated (not already screened).
     value = sieve_t::screen(value, 0b0000'0100000011011001100000000110);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK( sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK( sieve_t::is_saturated(value));
 }
 
-BOOST_AUTO_TEST_CASE(sieve__screened__reverse__expected)
+BC_AUTO_TEST_CASE(sieve__screened__reverse__expected)
 {
     constexpr size_t sieve_bits = 32;
     constexpr size_t select_bits = 4;
@@ -467,373 +467,373 @@ BOOST_AUTO_TEST_CASE(sieve__screened__reverse__expected)
 
     // none screened
     auto value = sieve_t::empty;
-    BOOST_CHECK( sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK( sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 0 screened
     value = sieve_t::screen(value, reverse[0]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 1 screened
     value = sieve_t::screen(value, reverse[1]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 2 screened
     value = sieve_t::screen(value, reverse[2]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 3 screened
     value = sieve_t::screen(value, reverse[3]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 4 screened
     value = sieve_t::screen(value, reverse[4]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 5 screened
     value = sieve_t::screen(value, reverse[5]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 6 screened
     value = sieve_t::screen(value, reverse[6]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 7 screened
     value = sieve_t::screen(value, reverse[7]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 8 screened
     value = sieve_t::screen(value, reverse[8]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 9 screened
     value = sieve_t::screen(value, reverse[9]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 10 screened
     value = sieve_t::screen(value, reverse[10]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 11 screened
     value = sieve_t::screen(value, reverse[11]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 12 screened
     value = sieve_t::screen(value, reverse[12]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 13 screened
     value = sieve_t::screen(value, reverse[13]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 14 screened
     value = sieve_t::screen(value, reverse[14]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK(!sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK(!sieve_t::is_screened(value, reverse[15]));
 
     // 15 screened
     value = sieve_t::screen(value, reverse[15]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[0]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[1]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[2]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[3]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[4]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[5]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[6]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[7]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[8]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[9]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[10]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[11]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[12]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[13]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[14]));
-    BOOST_CHECK( sieve_t::is_screened(value, reverse[15]));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK( sieve_t::is_screened(value, reverse[0]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[1]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[2]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[3]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[4]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[5]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[6]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[7]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[8]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[9]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[10]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[11]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[12]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[13]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[14]));
+    BC_CHECK( sieve_t::is_screened(value, reverse[15]));
 
     // Not saturated (already screened).
     value = sieve_t::screen(value, reverse[15]);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
 
     // Saturated (not already screened).
     value = sieve_t::screen(value, 0b0000'0010000000000000001110000000);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK( sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK( sieve_t::is_saturated(value));
 }
 
-BOOST_AUTO_TEST_CASE(sieve__screen__full__expected_saturation)
+BC_AUTO_TEST_CASE(sieve__screen__full__expected_saturation)
 {
     constexpr size_t sieve_bits = 32;
     constexpr size_t select_bits = 4;
@@ -863,70 +863,70 @@ BOOST_AUTO_TEST_CASE(sieve__screen__full__expected_saturation)
 
     sieve_t::type previous{};
     auto value = sieve_t::empty;
-    BOOST_CHECK( sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
-    BOOST_CHECK(!sieve_t::is_screened(value, forward[0]));
+    BC_CHECK( sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_screened(value, forward[0]));
 
     value = sieve_t::screen(previous = value, forward[0]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[1]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[2]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[3]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[4]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[5]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[6]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[7]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[8]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[9]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[10]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[11]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[12]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[13]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[14]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     value = sieve_t::screen(previous = value, forward[15]);
-    BOOST_CHECK(value != previous);
+    BC_CHECK(value != previous);
 
     // Already screened, not sieve change.
     value = sieve_t::screen(previous = value, forward[15]);
-    BOOST_CHECK(value == previous);
+    BC_CHECK(value == previous);
 
     // Full but not saturated.
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK(!sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK(!sieve_t::is_saturated(value));
 
     // Saturate.
     value = sieve_t::screen(value, 0b0000'0100000011011001100000000110);
-    BOOST_CHECK(!sieve_t::is_empty(value));
-    BOOST_CHECK( sieve_t::is_saturated(value));
+    BC_CHECK(!sieve_t::is_empty(value));
+    BC_CHECK( sieve_t::is_saturated(value));
 
 #if defined(HAVE_SLOW_TESTS)
     // All values must be screened once saturated (full and overflow).
@@ -934,7 +934,7 @@ BOOST_AUTO_TEST_CASE(sieve__screen__full__expected_saturation)
     {
         if (!sieve_t::is_screened(value, finger))
         {
-            BOOST_REQUIRE(false);
+            BC_REQUIRE(false);
         }
     }
 #endif
@@ -942,7 +942,7 @@ BOOST_AUTO_TEST_CASE(sieve__screen__full__expected_saturation)
 
 #if defined(HAVE_SLOW_TESTS)
 
-BOOST_AUTO_TEST_CASE(sieve__screen__4_bits_forward__16_screens)
+BC_AUTO_TEST_CASE(sieve__screen__4_bits_forward__16_screens)
 {
     constexpr size_t sieve_bits = 32;
     constexpr size_t select_bits = 4;
@@ -963,10 +963,10 @@ BOOST_AUTO_TEST_CASE(sieve__screen__4_bits_forward__16_screens)
         }
     }
 
-    BOOST_CHECK_EQUAL(count, limit);
+    BC_CHECK_EQUAL(count, limit);
 }
 
-BOOST_AUTO_TEST_CASE(sieve__screen__4_bits_reverse__16_screens)
+BC_AUTO_TEST_CASE(sieve__screen__4_bits_reverse__16_screens)
 {
     constexpr size_t sieve_bits = 32;
     constexpr size_t select_bits = 4;
@@ -990,12 +990,12 @@ BOOST_AUTO_TEST_CASE(sieve__screen__4_bits_reverse__16_screens)
             break;
     }
 
-    BOOST_CHECK_EQUAL(count, limit);
+    BC_CHECK_EQUAL(count, limit);
 }
 
 #endif // HAVE_SLOW_TESTS
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #if defined(DISABLED)
 

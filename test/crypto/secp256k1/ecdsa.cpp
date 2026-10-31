@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_tests)
+BC_AUTO_TEST_SUITE(secp256k1_tests)
 
 // These vectors use hash encoding for sighash values.
 
@@ -57,110 +57,110 @@ const ec_signature signature3 = array_cast<uint8_t>(std_array<uint64_t, 8>
     0xcc4275062971552e_u64, 0x3750eae5727db3e6_u64
 });
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign__positive__expected)
+BC_AUTO_TEST_CASE(secp256k1__sign__positive__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(sign(signature, secret3, sighash3));
-    BOOST_REQUIRE_EQUAL(signature, signature3);
+    BC_REQUIRE(sign(signature, secret3, sighash3));
+    BC_REQUIRE_EQUAL(signature, signature3);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__positive__expected)
+BC_AUTO_TEST_CASE(secp256k1__encode_signature__positive__expected)
 {
     using namespace system::ecdsa;
     der_signature signature;
-    BOOST_REQUIRE(encode_signature(signature, signature3));
-    BOOST_REQUIRE_EQUAL(signature, der_signature3);
+    BC_REQUIRE(encode_signature(signature, signature3));
+    BC_REQUIRE_EQUAL(signature, der_signature3);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__lax__expected)
+BC_AUTO_TEST_CASE(secp256k1__decode_signature__lax__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(decode_signature(signature, der_signature3, false));
-    BOOST_REQUIRE_EQUAL(signature, signature3);
+    BC_REQUIRE(decode_signature(signature, der_signature3, false));
+    BC_REQUIRE_EQUAL(signature, signature3);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__decode_signature__strict__expected)
+BC_AUTO_TEST_CASE(secp256k1__decode_signature__strict__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(decode_signature(signature, der_signature3, true));
-    BOOST_REQUIRE_EQUAL(signature, signature3);
+    BC_REQUIRE(decode_signature(signature, der_signature3, true));
+    BC_REQUIRE_EQUAL(signature, signature3);
 }
 
 // der_signature2 with s negated (high-s).
 const der_signature der_signature2_high = base16_chunk("3046022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a624378022100946c122950839a624bd3a8614cb5c5b204a2b431088c193e6d6b8a5d64aa8ac4");
 
-BOOST_AUTO_TEST_CASE(secp256k1__normalize_signature__high_s__normalized)
+BC_AUTO_TEST_CASE(secp256k1__normalize_signature__high_s__normalized)
 {
     using namespace system::ecdsa;
     ec_signature high{}, low{}, out{};
-    BOOST_REQUIRE(decode_signature(high, der_signature2_high, true));
-    BOOST_REQUIRE(decode_signature(low, der_signature2, true));
-    BOOST_REQUIRE(normalize_signature(out, high));
-    BOOST_REQUIRE_EQUAL(out, low);
+    BC_REQUIRE(decode_signature(high, der_signature2_high, true));
+    BC_REQUIRE(decode_signature(low, der_signature2, true));
+    BC_REQUIRE(normalize_signature(out, high));
+    BC_REQUIRE_EQUAL(out, low);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__normalize_signature__low_s__unchanged)
+BC_AUTO_TEST_CASE(secp256k1__normalize_signature__low_s__unchanged)
 {
     using namespace system::ecdsa;
     ec_signature low{}, out{};
-    BOOST_REQUIRE(decode_signature(low, der_signature2, true));
-    BOOST_REQUIRE(!normalize_signature(out, low));
-    BOOST_REQUIRE_EQUAL(out, low);
+    BC_REQUIRE(decode_signature(low, der_signature2, true));
+    BC_REQUIRE(!normalize_signature(out, low));
+    BC_REQUIRE_EQUAL(out, low);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_positive__expected)
+BC_AUTO_TEST_CASE(secp256k1__sign__round_trip_positive__expected)
 {
     using namespace system::ecdsa;
     ec_compressed point;
-    BOOST_REQUIRE(secret_to_public(point, secret1));
+    BC_REQUIRE(secret_to_public(point, secret1));
 
     const auto hash = bitcoin_hash(to_chunk("data"));
 
     ec_signature signature;
-    BOOST_REQUIRE(sign(signature, secret1, hash));
-    BOOST_REQUIRE(verify_signature(point, hash, signature));
+    BC_REQUIRE(sign(signature, secret1, hash));
+    BC_REQUIRE(verify_signature(point, hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign__round_trip_negative__expected)
+BC_AUTO_TEST_CASE(secp256k1__sign__round_trip_negative__expected)
 {
     using namespace system::ecdsa;
     ec_compressed point;
-    BOOST_REQUIRE(secret_to_public(point, secret1));
+    BC_REQUIRE(secret_to_public(point, secret1));
 
     auto hash = bitcoin_hash(to_chunk("data"));
 
     ec_signature signature;
-    BOOST_REQUIRE(sign(signature, secret1, hash));
+    BC_REQUIRE(sign(signature, secret1, hash));
 
     // Invalidate the positive test.
     hash[0] = 0;
 
-    BOOST_REQUIRE(!verify_signature(to_chunk(point), hash, signature));
+    BC_REQUIRE(!verify_signature(to_chunk(point), hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__positive__expected)
+BC_AUTO_TEST_CASE(secp256k1__verify_signature__positive__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(decode_signature(signature, der_signature2, false));
-    BOOST_REQUIRE(verify_signature(compressed2, sighash2, signature));
+    BC_REQUIRE(decode_signature(signature, der_signature2, false));
+    BC_REQUIRE(verify_signature(compressed2, sighash2, signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__negative__expected)
+BC_AUTO_TEST_CASE(secp256k1__verify_signature__negative__expected)
 {
     using namespace system::ecdsa;
     ec_signature signature;
-    BOOST_REQUIRE(decode_signature(signature, der_signature2, false));
+    BC_REQUIRE(decode_signature(signature, der_signature2, false));
 
     // Invalidate the positive test.
     signature[10] = 110;
-    BOOST_REQUIRE(!verify_signature(compressed2, sighash2, signature));
+    BC_REQUIRE(!verify_signature(compressed2, sighash2, signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
+BC_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
 {
     using namespace system::ecdsa;
     constexpr bool bip66 = true;
@@ -181,80 +181,80 @@ BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__block_704789__expected)
     });
 
     ec_signature signature1{};
-    BOOST_CHECK(decode_signature(signature1, der_signature, bip66));
-    BOOST_CHECK_EQUAL(signature1, expected_signature);
+    BC_CHECK(decode_signature(signature1, der_signature, bip66));
+    BC_CHECK_EQUAL(signature1, expected_signature);
 
     ec_signature signature2{};
-    BOOST_CHECK(decode_signature(signature2, der_signature, !bip66));
-    BOOST_CHECK_EQUAL(signature2, expected_signature);
+    BC_CHECK(decode_signature(signature2, der_signature, !bip66));
+    BC_CHECK_EQUAL(signature2, expected_signature);
 
-    BOOST_CHECK(verify_signature(compressed, sighash, expected_signature));
+    BC_CHECK(verify_signature(compressed, sighash, expected_signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__high_bit__padded)
+BC_AUTO_TEST_CASE(secp256k1__encode_signature__high_bit__padded)
 {
     using namespace system::ecdsa;
     ec_signature signature{};
     der_signature der{};
-    BOOST_REQUIRE(decode_signature(signature, der_signature2, true));
-    BOOST_REQUIRE(encode_signature(der, signature));
-    BOOST_REQUIRE_EQUAL(der, der_signature2);
+    BC_REQUIRE(decode_signature(signature, der_signature2, true));
+    BC_REQUIRE(encode_signature(der, signature));
+    BC_REQUIRE_EQUAL(der, der_signature2);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__encode_signature__zero_and_one__minimal)
+BC_AUTO_TEST_CASE(secp256k1__encode_signature__zero_and_one__minimal)
 {
     using namespace system::ecdsa;
     const auto minimal = base16_chunk("3006020100020101");
     ec_signature signature{};
     der_signature der{};
-    BOOST_REQUIRE(decode_signature(signature, minimal, false));
-    BOOST_REQUIRE(encode_signature(der, signature));
-    BOOST_REQUIRE_EQUAL(der, minimal);
+    BC_REQUIRE(decode_signature(signature, minimal, false));
+    BC_REQUIRE(encode_signature(der, signature));
+    BC_REQUIRE_EQUAL(der, minimal);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign__zero_secret__false)
+BC_AUTO_TEST_CASE(secp256k1__sign__zero_secret__false)
 {
     using namespace system::ecdsa;
     ec_signature signature{};
-    BOOST_REQUIRE(!sign(signature, {}, sighash3));
+    BC_REQUIRE(!sign(signature, {}, sighash3));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign__order_secret__false)
+BC_AUTO_TEST_CASE(secp256k1__sign__order_secret__false)
 {
     using namespace system::ecdsa;
     const ec_secret order = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
     ec_signature signature{};
-    BOOST_REQUIRE(!sign(signature, order, sighash3));
+    BC_REQUIRE(!sign(signature, order, sighash3));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign_recoverable__zero_secret__false)
+BC_AUTO_TEST_CASE(secp256k1__sign_recoverable__zero_secret__false)
 {
     using namespace system::ecdsa;
     recoverable_signature recoverable{};
-    BOOST_REQUIRE(!sign_recoverable(recoverable, {}, sighash3));
+    BC_REQUIRE(!sign_recoverable(recoverable, {}, sighash3));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign__hash_not_below_n__verifies)
+BC_AUTO_TEST_CASE(secp256k1__sign__hash_not_below_n__verifies)
 {
     using namespace system::ecdsa;
     const hash_digest hash = base16_array("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
     ec_compressed point;
-    BOOST_REQUIRE(secret_to_public(point, secret3));
+    BC_REQUIRE(secret_to_public(point, secret3));
 
     ec_signature signature;
-    BOOST_REQUIRE(sign(signature, secret3, hash));
-    BOOST_REQUIRE(verify_signature(point, hash, signature));
+    BC_REQUIRE(sign(signature, secret3, hash));
+    BC_REQUIRE(verify_signature(point, hash, signature));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__verify_signature__r_not_below_n__false)
+BC_AUTO_TEST_CASE(secp256k1__verify_signature__r_not_below_n__false)
 {
     using namespace system::ecdsa;
     ec_compressed point;
-    BOOST_REQUIRE(secret_to_public(point, secret3));
+    BC_REQUIRE(secret_to_public(point, secret3));
 
     auto signature = signature3;
     array_cast<uint64_t, 4>(signature) = { 0xbfd25e8cd0364141, 0xbaaedce6af48a03b, 0xfffffffffffffffe, 0xffffffffffffffff };
-    BOOST_REQUIRE(!verify_signature(point, sighash3, signature));
+    BC_REQUIRE(!verify_signature(point, sighash3, signature));
 }
 
 // Lax DER parsing [pre-bip66], malformed encodings.
@@ -266,253 +266,253 @@ static bool lax(const data_chunk& der) NOEXCEPT
     return decode_signature(out, der, false);
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_empty__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_empty__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("")));
+    BC_REQUIRE(!lax(base16_chunk("")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_wrong_sequence_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_wrong_sequence_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("31")));
+    BC_REQUIRE(!lax(base16_chunk("31")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_sequence_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_sequence_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("30")));
+    BC_REQUIRE(!lax(base16_chunk("30")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_sequence_length_overflow__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_sequence_length_overflow__false)
 {
     // 0x81 indicates one length byte follows, but none does.
-    BOOST_REQUIRE(!lax(base16_chunk("3082")));
+    BC_REQUIRE(!lax(base16_chunk("3082")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_missing_r_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_missing_r_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("3002")));
+    BC_REQUIRE(!lax(base16_chunk("3002")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_wrong_r_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_wrong_r_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("300203")));
+    BC_REQUIRE(!lax(base16_chunk("300203")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_r_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_r_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("300202")));
+    BC_REQUIRE(!lax(base16_chunk("300202")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_long_length_overflow__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_long_length_overflow__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("3003028f")));
+    BC_REQUIRE(!lax(base16_chunk("3003028f")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_length_exceeds_input__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_length_exceeds_input__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("300302207f")));
+    BC_REQUIRE(!lax(base16_chunk("300302207f")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_missing_s_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_missing_s_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("3003020101")));
+    BC_REQUIRE(!lax(base16_chunk("3003020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_s_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_truncated_after_s_tag__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("300402010102")));
+    BC_REQUIRE(!lax(base16_chunk("300402010102")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_s_long_length_overflow__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_s_long_length_overflow__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("3005020101028f")));
+    BC_REQUIRE(!lax(base16_chunk("3005020101028f")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_s_length_exceeds_input__false)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_s_length_exceeds_input__false)
 {
-    BOOST_REQUIRE(!lax(base16_chunk("300502010102207f")));
+    BC_REQUIRE(!lax(base16_chunk("300502010102207f")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_lengths__true)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_lengths__true)
 {
     // Long-form sequence, r and s lengths (one length byte each).
-    BOOST_REQUIRE(lax(base16_chunk("3081060281010102810102")));
+    BC_REQUIRE(lax(base16_chunk("3081060281010102810102")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_leading_zeros__true)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_long_form_leading_zeros__true)
 {
     // Two length bytes each, the first zero, exercising the skip loops.
-    BOOST_REQUIRE(lax(base16_chunk("3082000a02820001010282000102")));
+    BC_REQUIRE(lax(base16_chunk("3082000a02820001010282000102")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_minimal__true)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_minimal__true)
 {
-    BOOST_REQUIRE(lax(base16_chunk("3006020101020101")));
+    BC_REQUIRE(lax(base16_chunk("3006020101020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_overflow__zero_signature)
+BC_AUTO_TEST_CASE(ecdsa__decode_signature__lax_r_overflow__zero_signature)
 {
     using namespace system::ecdsa;
     ec_signature out{};
-    BOOST_REQUIRE(decode_signature(out, base16_chunk("3026022100fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141020101"), false));
-    BOOST_REQUIRE_EQUAL(out, ec_signature{});
+    BC_REQUIRE(decode_signature(out, base16_chunk("3026022100fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141020101"), false));
+    BC_REQUIRE_EQUAL(out, ec_signature{});
 }
 
 // Strict DER parsing [bip66].
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__minimal__true)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__minimal__true)
 {
-    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3006020101020101")));
+    BC_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3006020101020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__signature2__true)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__signature2__true)
 {
-    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d")));
+    BC_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__maximum_size__true)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__maximum_size__true)
 {
-    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3046022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
+    BC_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("3046022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__r_padded_for_sign__true)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__r_padded_for_sign__true)
 {
-    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("300702020080020101")));
+    BC_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("300702020080020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__s_padded_for_sign__true)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__s_padded_for_sign__true)
 {
-    BOOST_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("300702010102020080")));
+    BC_REQUIRE(is_valid_bip66_signature_encoding(base16_chunk("300702010102020080")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__below_minimum_size__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__below_minimum_size__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("30050201010200")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("30050201010200")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__above_maximum_size__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__above_maximum_size__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("304702220000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("304702220000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff022100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_sequence_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_sequence_tag__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3106020101020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3106020101020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__sequence_length_mismatch__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__sequence_length_mismatch__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3005020101020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3005020101020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__r_length_exceeds_size__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__r_length_exceeds_size__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020601020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020601020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__lengths_mismatch__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__lengths_mismatch__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101020201")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101020201")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_r_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_r_tag__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006030101020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006030101020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__empty_r__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__empty_r__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020002020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020002020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__negative_r__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__negative_r__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020180020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020180020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__padded_r__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__padded_r__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("300702020001020101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("300702020001020101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_s_tag__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__wrong_s_tag__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101030101")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101030101")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__empty_s__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__empty_s__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020201010200")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020201010200")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__negative_s__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__negative_s__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101020180")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3006020101020180")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__padded_s__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__padded_s__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("300702010102020001")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("300702010102020001")));
 }
 
-BOOST_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__long_form_lengths__false)
+BC_AUTO_TEST_CASE(ecdsa__is_valid_bip66_signature_encoding__long_form_lengths__false)
 {
-    BOOST_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3081060281010102810102")));
+    BC_REQUIRE(!is_valid_bip66_signature_encoding(base16_chunk("3081060281010102810102")));
 }
 
 // recovery
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1__sign_recoverable__positive__expected_signature)
+BC_AUTO_TEST_CASE(secp256k1__sign_recoverable__positive__expected_signature)
 {
     using namespace system::ecdsa;
     const ec_signature expected = base16_array("57d0b4fb0df5cefa245e76ba9b099bb63aa46340cb152a927c1cb3f8befe32483750eae5727db3e6cc4275062971552e467f7cfd7269fec2626588b6c6d58e92");
     recoverable_signature recoverable{};
-    BOOST_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
-    BOOST_REQUIRE_EQUAL(recoverable.signature, expected);
-    BOOST_REQUIRE_LT(recoverable.recovery_id, 4u);
+    BC_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
+    BC_REQUIRE_EQUAL(recoverable.signature, expected);
+    BC_REQUIRE_LT(recoverable.recovery_id, 4u);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__recover_public__signed__expected_keys)
+BC_AUTO_TEST_CASE(secp256k1__recover_public__signed__expected_keys)
 {
     using namespace system::ecdsa;
     for (const auto& secret: { secret1, secret3 })
     {
         recoverable_signature recoverable{};
-        BOOST_REQUIRE(sign_recoverable(recoverable, secret, sighash3));
+        BC_REQUIRE(sign_recoverable(recoverable, secret, sighash3));
 
         ec_compressed expected_compressed{}, compressed{};
-        BOOST_REQUIRE(secret_to_public(expected_compressed, secret));
-        BOOST_REQUIRE(recover_public(compressed, recoverable, sighash3));
-        BOOST_REQUIRE_EQUAL(compressed, expected_compressed);
+        BC_REQUIRE(secret_to_public(expected_compressed, secret));
+        BC_REQUIRE(recover_public(compressed, recoverable, sighash3));
+        BC_REQUIRE_EQUAL(compressed, expected_compressed);
 
         ec_uncompressed expected_uncompressed{}, uncompressed{};
-        BOOST_REQUIRE(secret_to_public(expected_uncompressed, secret));
-        BOOST_REQUIRE(recover_public(uncompressed, recoverable, sighash3));
-        BOOST_REQUIRE_EQUAL(uncompressed, expected_uncompressed);
+        BC_REQUIRE(secret_to_public(expected_uncompressed, secret));
+        BC_REQUIRE(recover_public(uncompressed, recoverable, sighash3));
+        BC_REQUIRE_EQUAL(uncompressed, expected_uncompressed);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__recover_public__other_hash__other_key)
+BC_AUTO_TEST_CASE(secp256k1__recover_public__other_hash__other_key)
 {
     using namespace system::ecdsa;
     recoverable_signature recoverable{};
-    BOOST_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
+    BC_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
 
     ec_compressed expected{}, compressed{};
-    BOOST_REQUIRE(secret_to_public(expected, secret3));
-    BOOST_REQUIRE(recover_public(compressed, recoverable, sighash2));
-    BOOST_REQUIRE_NE(compressed, expected);
+    BC_REQUIRE(secret_to_public(expected, secret3));
+    BC_REQUIRE(recover_public(compressed, recoverable, sighash2));
+    BC_REQUIRE_NE(compressed, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__recover_public__invalid_recovery_id__false)
+BC_AUTO_TEST_CASE(secp256k1__recover_public__invalid_recovery_id__false)
 {
     using namespace system::ecdsa;
     recoverable_signature recoverable{};
-    BOOST_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
+    BC_REQUIRE(sign_recoverable(recoverable, secret3, sighash3));
     recoverable.recovery_id = 4;
 
     ec_compressed compressed{};
-    BOOST_REQUIRE(!recover_public(compressed, recoverable, sighash3));
+    BC_REQUIRE(!recover_public(compressed, recoverable, sighash3));
 }
 
 // Recovery id 2 takes x(R) as r + n, where r is below p - n.
@@ -521,27 +521,27 @@ const ec_compressed recovery2_key = base16_array("0269420d775d4752dd9781d49d5868
 const recoverable_signature recovery2{ base16_array("00000000000000000000000000000000000000000000000000000000000000024b5a6978f0e1d2c3b4a5968778695a4b3c2d1e0f00112233445566778899aabb"), 2 };
 const recoverable_signature recovery2_overflow{ base16_array("000000000000000000000000000000014551231950b75fc4402da1722fc9baee4b5a6978f0e1d2c3b4a5968778695a4b3c2d1e0f00112233445566778899aabb"), 2 };
 
-BOOST_AUTO_TEST_CASE(secp256k1__recover_public__recovery_id_2__expected_key)
+BC_AUTO_TEST_CASE(secp256k1__recover_public__recovery_id_2__expected_key)
 {
     using namespace system::ecdsa;
     ec_compressed compressed{};
-    BOOST_REQUIRE(recover_public(compressed, recovery2, recovery2_hash));
-    BOOST_REQUIRE_EQUAL(compressed, recovery2_key);
+    BC_REQUIRE(recover_public(compressed, recovery2, recovery2_hash));
+    BC_REQUIRE_EQUAL(compressed, recovery2_key);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__recover_public__recovery_id_2_r_not_below_p_minus_n__false)
+BC_AUTO_TEST_CASE(secp256k1__recover_public__recovery_id_2_r_not_below_p_minus_n__false)
 {
     using namespace system::ecdsa;
     ec_compressed compressed{};
-    BOOST_REQUIRE(!recover_public(compressed, recovery2_overflow, recovery2_hash));
+    BC_REQUIRE(!recover_public(compressed, recovery2_overflow, recovery2_hash));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__recover_public__zero_signature__false)
+BC_AUTO_TEST_CASE(secp256k1__recover_public__zero_signature__false)
 {
     using namespace system::ecdsa;
     const recoverable_signature recoverable{};
     ec_compressed compressed{};
-    BOOST_REQUIRE(!recover_public(compressed, recoverable, sighash3));
+    BC_REQUIRE(!recover_public(compressed, recoverable, sighash3));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

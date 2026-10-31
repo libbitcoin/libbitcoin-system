@@ -19,335 +19,335 @@
 #include "../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(deserialize_tests)
+BC_AUTO_TEST_SUITE(deserialize_tests)
 
 // <string> is overloaded to avoid trimming (straight pass through).
 
-BOOST_AUTO_TEST_CASE(deserialize__string__empty__unchanged)
+BC_AUTO_TEST_CASE(deserialize__string__empty__unchanged)
 {
     std::string out;
     const auto value = "";
-    BOOST_REQUIRE(deserialize(out, value));
-    BOOST_REQUIRE_EQUAL(out, value);
+    BC_REQUIRE(deserialize(out, value));
+    BC_REQUIRE_EQUAL(out, value);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__string__text__unchanged)
+BC_AUTO_TEST_CASE(deserialize__string__text__unchanged)
 {
     std::string out;
     const auto value = "01234 567890";
-    BOOST_REQUIRE(deserialize(out, value));
-    BOOST_REQUIRE_EQUAL(out, value);
+    BC_REQUIRE(deserialize(out, value));
+    BC_REQUIRE_EQUAL(out, value);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__string__text_padded__untrimmed)
+BC_AUTO_TEST_CASE(deserialize__string__text_padded__untrimmed)
 {
     std::string out;
     const auto value = " \r\t\n\v01234 567890\r\t\n\v ";
-    BOOST_REQUIRE(deserialize(out, value));
-    BOOST_REQUIRE_EQUAL(out, value);
+    BC_REQUIRE(deserialize(out, value));
+    BC_REQUIRE_EQUAL(out, value);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__string__istream_padded__untrimmed)
+BC_AUTO_TEST_CASE(deserialize__string__istream_padded__untrimmed)
 {
     std::string out;
     const auto value = " \r\t\n\v01234 567890\r\t\n\v ";
     std::istringstream in{ value };
-    BOOST_REQUIRE(deserialize(out, in));
-    BOOST_REQUIRE_EQUAL(out, value);
+    BC_REQUIRE(deserialize(out, in));
+    BC_REQUIRE_EQUAL(out, value);
 }
 
 // <uint8_t>
 
 // The template specialization must be observed before the template
 // or the specialization will be lost and this will return char value.
-BOOST_AUTO_TEST_CASE(deserialize__uint8__empty__false)
+BC_AUTO_TEST_CASE(deserialize__uint8__empty__false)
 {
     uint8_t out;
-    BOOST_REQUIRE(!deserialize(out, ""));
+    BC_REQUIRE(!deserialize(out, ""));
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint8__uint8__base10)
+BC_AUTO_TEST_CASE(deserialize__uint8__uint8__base10)
 {
     uint8_t out;
-    BOOST_REQUIRE(deserialize(out, "0"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "255"));
-    BOOST_REQUIRE_EQUAL(out, 0xff);
-    BOOST_REQUIRE(!deserialize(out, "256"));
+    BC_REQUIRE(deserialize(out, "0"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "255"));
+    BC_REQUIRE_EQUAL(out, 0xff);
+    BC_REQUIRE(!deserialize(out, "256"));
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint8__uchar__base10)
+BC_AUTO_TEST_CASE(deserialize__uint8__uchar__base10)
 {
     unsigned char out;
-    BOOST_REQUIRE(deserialize(out, "0"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "255"));
-    BOOST_REQUIRE_EQUAL(out, 0xff);
+    BC_REQUIRE(deserialize(out, "0"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "255"));
+    BC_REQUIRE_EQUAL(out, 0xff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint8__istream__base10)
+BC_AUTO_TEST_CASE(deserialize__uint8__istream__base10)
 {
     uint8_t out;
     std::istringstream in{ "255" };
-    BOOST_REQUIRE(deserialize(out, in));
-    BOOST_REQUIRE_EQUAL(out, 0xff);
+    BC_REQUIRE(deserialize(out, in));
+    BC_REQUIRE_EQUAL(out, 0xff);
 }
 
 // <data_array<Size>>
 
-BOOST_AUTO_TEST_CASE(deserialize__data_array__empty__empty)
+BC_AUTO_TEST_CASE(deserialize__data_array__empty__empty)
 {
     std_array<uint8_t, 0> out;
     const std_array<uint8_t, 0> expected{};
-    BOOST_REQUIRE(deserialize(out, ""));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, ""));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__data_array__bytes__base16)
+BC_AUTO_TEST_CASE(deserialize__data_array__bytes__base16)
 {
     std_array<uint8_t, 3> out;
     const std_array<uint8_t, 3> expected{ { 7, 42, 11 } };
-    BOOST_REQUIRE(deserialize(out, "072a0b"));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, "072a0b"));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__data_array__istream__base16)
+BC_AUTO_TEST_CASE(deserialize__data_array__istream__base16)
 {
     std_array<uint8_t, 3> out;
     const std_array<uint8_t, 3> expected{ { 7, 42, 11 } };
     std::istringstream in{ "072a0b" };
-    BOOST_REQUIRE(deserialize(out, in));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, in));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
 // <data_chunk>
 
-BOOST_AUTO_TEST_CASE(deserialize__data_chunk__empty__empty)
+BC_AUTO_TEST_CASE(deserialize__data_chunk__empty__empty)
 {
     std_vector<uint8_t> out;
     const std_vector<uint8_t> expected{};
-    BOOST_REQUIRE(deserialize(out, ""));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, ""));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__data_chunk__bytes__base16)
+BC_AUTO_TEST_CASE(deserialize__data_chunk__bytes__base16)
 {
     std_vector<uint8_t> out;
     const std_vector<uint8_t> expected{ 7, 42, 11 };
-    BOOST_REQUIRE(deserialize(out, "072a0b"));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, "072a0b"));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__data_chunk__istream__base16)
+BC_AUTO_TEST_CASE(deserialize__data_chunk__istream__base16)
 {
     std_vector<uint8_t> out;
     const std_vector<uint8_t> expected{ 7, 42, 11 };
     std::istringstream in{ "072a0b" };
-    BOOST_REQUIRE(deserialize(out, in));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, in));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
 // <vector<Value>>
 
-BOOST_AUTO_TEST_CASE(serialize__vector__overflow_base10_delimited__false)
+BC_AUTO_TEST_CASE(serialize__vector__overflow_base10_delimited__false)
 {
     std_vector<uint16_t> out;
-    BOOST_REQUIRE(!deserialize(out, "42 9999999 42"));
+    BC_REQUIRE(!deserialize(out, "42 9999999 42"));
 }
 
-BOOST_AUTO_TEST_CASE(serialize__vector__untrimmed_base10_delimited__true)
+BC_AUTO_TEST_CASE(serialize__vector__untrimmed_base10_delimited__true)
 {
     std_vector<int> out;
     const std_vector<int> expected{ 7, -42, 11 };
-    BOOST_REQUIRE(deserialize(out, " 7  -42  11 "));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, " 7  -42  11 "));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(serialize__vector__int_base10_delimited__ints_true)
+BC_AUTO_TEST_CASE(serialize__vector__int_base10_delimited__ints_true)
 {
     std_vector<int> out;
     const std_vector<int> expected{ 7, 42, 11 };
-    BOOST_REQUIRE(deserialize(out, "7 42 11"));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, "7 42 11"));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(serialize__vector__int_negative_base10_delimited__ints_true)
+BC_AUTO_TEST_CASE(serialize__vector__int_negative_base10_delimited__ints_true)
 {
     std_vector<int> out;
     const std_vector<int> expected{ -7, 42, -11 };
-    BOOST_REQUIRE(deserialize(out, "-7 42 -11"));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, "-7 42 -11"));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(serialize__vector__char_delimited__chars_true)
+BC_AUTO_TEST_CASE(serialize__vector__char_delimited__chars_true)
 {
     std_vector<char> out;
     const std_vector<char> expected{ 'a', 'b', 'c' };
-    BOOST_REQUIRE(deserialize(out, "a b c"));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, "a b c"));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(serialize__vector__string_delimited__tokens_true)
+BC_AUTO_TEST_CASE(serialize__vector__string_delimited__tokens_true)
 {
     std_vector<std::string> out;
     const std_vector<std::string> expected{ "abc", "def", "ghi" };
-    BOOST_REQUIRE(deserialize(out, "abc def ghi"));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, "abc def ghi"));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
 // Splitting on whitespace trims string collections before string override.
-BOOST_AUTO_TEST_CASE(serialize__vector__string_delimited_padded__tokens_true)
+BC_AUTO_TEST_CASE(serialize__vector__string_delimited_padded__tokens_true)
 {
     std_vector<std::string> out;
     const std_vector<std::string> expected{ "abc", "def", "ghi" };
-    BOOST_REQUIRE(deserialize(out, " abc \n def \n ghi "));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, " abc \n def \n ghi "));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
-BOOST_AUTO_TEST_CASE(serialize__vector__istream__tokens_true)
+BC_AUTO_TEST_CASE(serialize__vector__istream__tokens_true)
 {
     std_vector<std::string> out;
     const std_vector<std::string> expected{ "abc", "def", "ghi" };
     std::istringstream in{ " abc \n def \n ghi " };
-    BOOST_REQUIRE(deserialize(out, in));
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE(deserialize(out, in));
+    BC_REQUIRE_EQUAL(out, expected);
 }
 
 // <Value>
 
-BOOST_AUTO_TEST_CASE(deserialize__integer__empty__false)
+BC_AUTO_TEST_CASE(deserialize__integer__empty__false)
 {
     uint16_t out;
-    BOOST_REQUIRE(!deserialize(out, ""));
+    BC_REQUIRE(!deserialize(out, ""));
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__char__empty__false)
+BC_AUTO_TEST_CASE(deserialize__char__empty__false)
 {
     char out;
-    BOOST_REQUIRE(!deserialize(out, ""));
+    BC_REQUIRE(!deserialize(out, ""));
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__integer__overflow_base10__false)
+BC_AUTO_TEST_CASE(deserialize__integer__overflow_base10__false)
 {
     uint16_t out;
-    BOOST_REQUIRE(!deserialize(out, "9999999"));
+    BC_REQUIRE(!deserialize(out, "9999999"));
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__integer__invalid_base10__false)
+BC_AUTO_TEST_CASE(deserialize__integer__invalid_base10__false)
 {
     uint16_t out;
-    BOOST_REQUIRE(!deserialize(out, "????"));
+    BC_REQUIRE(!deserialize(out, "????"));
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__int__untrimmed_base10__true)
+BC_AUTO_TEST_CASE(deserialize__int__untrimmed_base10__true)
 {
     int out;
-    BOOST_REQUIRE(deserialize(out, " 42 "));
-    BOOST_REQUIRE_EQUAL(out, 42);
+    BC_REQUIRE(deserialize(out, " 42 "));
+    BC_REQUIRE_EQUAL(out, 42);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__int__unsigned_base10__true)
+BC_AUTO_TEST_CASE(deserialize__int__unsigned_base10__true)
 {
     int out;
-    BOOST_REQUIRE(deserialize(out, "42"));
-    BOOST_REQUIRE_EQUAL(out, 42);
+    BC_REQUIRE(deserialize(out, "42"));
+    BC_REQUIRE_EQUAL(out, 42);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__int__negative_base10__true)
+BC_AUTO_TEST_CASE(deserialize__int__negative_base10__true)
 {
     int out;
-    BOOST_REQUIRE(deserialize(out, "-42"));
-    BOOST_REQUIRE_EQUAL(out, -42);
+    BC_REQUIRE(deserialize(out, "-42"));
+    BC_REQUIRE_EQUAL(out, -42);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__float__base10__true)
+BC_AUTO_TEST_CASE(deserialize__float__base10__true)
 {
     float out;
-    BOOST_REQUIRE(deserialize(out, ".42"));
-    BOOST_REQUIRE_EQUAL(out, 0.42f);
+    BC_REQUIRE(deserialize(out, ".42"));
+    BC_REQUIRE_EQUAL(out, 0.42f);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__double__zero_padded_base10__true)
+BC_AUTO_TEST_CASE(deserialize__double__zero_padded_base10__true)
 {
     double out;
-    BOOST_REQUIRE(deserialize(out, "00.4200"));
-    BOOST_REQUIRE_EQUAL(out, 0.42);
+    BC_REQUIRE(deserialize(out, "00.4200"));
+    BC_REQUIRE_EQUAL(out, 0.42);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__char__text__char)
+BC_AUTO_TEST_CASE(deserialize__char__text__char)
 {
     char out;
-    BOOST_REQUIRE(deserialize(out, "*"));
-    BOOST_REQUIRE_EQUAL(out, '*');
+    BC_REQUIRE(deserialize(out, "*"));
+    BC_REQUIRE_EQUAL(out, '*');
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__char__numeric_chars__first_char)
+BC_AUTO_TEST_CASE(deserialize__char__numeric_chars__first_char)
 {
     char out;
-    BOOST_REQUIRE(deserialize(out, "1234567890"));
-    BOOST_REQUIRE_EQUAL(out, '1');
+    BC_REQUIRE(deserialize(out, "1234567890"));
+    BC_REQUIRE_EQUAL(out, '1');
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint16__min_max__true)
+BC_AUTO_TEST_CASE(deserialize__uint16__min_max__true)
 {
     uint16_t out;
-    BOOST_REQUIRE(deserialize(out, "0"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "65535"));
-    BOOST_REQUIRE_EQUAL(out, 0xffff);
+    BC_REQUIRE(deserialize(out, "0"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "65535"));
+    BC_REQUIRE_EQUAL(out, 0xffff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint16__min_max_leading_zeros__true)
+BC_AUTO_TEST_CASE(deserialize__uint16__min_max_leading_zeros__true)
 {
     uint16_t out;
-    BOOST_REQUIRE(deserialize(out, "000"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "0065535"));
-    BOOST_REQUIRE_EQUAL(out, 0xffff);
+    BC_REQUIRE(deserialize(out, "000"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "0065535"));
+    BC_REQUIRE_EQUAL(out, 0xffff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint16__min_max_padded__true)
+BC_AUTO_TEST_CASE(deserialize__uint16__min_max_padded__true)
 {
     uint16_t out;
-    BOOST_REQUIRE(deserialize(out, " 0 "));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, " 65535 "));
-    BOOST_REQUIRE_EQUAL(out, 0xffff);
+    BC_REQUIRE(deserialize(out, " 0 "));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, " 65535 "));
+    BC_REQUIRE_EQUAL(out, 0xffff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint32__min_max__true)
+BC_AUTO_TEST_CASE(deserialize__uint32__min_max__true)
 {
     uint32_t out;
-    BOOST_REQUIRE(deserialize(out, "0"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "4294967295"));
-    BOOST_REQUIRE_EQUAL(out, 0xffffffff);
+    BC_REQUIRE(deserialize(out, "0"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "4294967295"));
+    BC_REQUIRE_EQUAL(out, 0xffffffff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__uint64__min_max__true)
+BC_AUTO_TEST_CASE(deserialize__uint64__min_max__true)
 {
     uint64_t out;
-    BOOST_REQUIRE(deserialize(out, "0"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "18446744073709551615"));
-    BOOST_REQUIRE_EQUAL(out, 0xffffffffffffffff);
+    BC_REQUIRE(deserialize(out, "0"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "18446744073709551615"));
+    BC_REQUIRE_EQUAL(out, 0xffffffffffffffff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__size_t__min_uint32_max__true)
+BC_AUTO_TEST_CASE(deserialize__size_t__min_uint32_max__true)
 {
     size_t out;
-    BOOST_REQUIRE(deserialize(out, "0"));
-    BOOST_REQUIRE_EQUAL(out, 0u);
-    BOOST_REQUIRE(deserialize(out, "4294967295"));
-    BOOST_REQUIRE_EQUAL(out, 0xffffffff);
+    BC_REQUIRE(deserialize(out, "0"));
+    BC_REQUIRE_EQUAL(out, 0u);
+    BC_REQUIRE(deserialize(out, "4294967295"));
+    BC_REQUIRE_EQUAL(out, 0xffffffff);
 }
 
-BOOST_AUTO_TEST_CASE(deserialize__size_t__stringstream__true)
+BC_AUTO_TEST_CASE(deserialize__size_t__stringstream__true)
 {
     size_t out;
     std::stringstream in{ "4294967295" };
-    BOOST_REQUIRE(deserialize(out, in));
-    BOOST_REQUIRE_EQUAL(out, 0xffffffff);
+    BC_REQUIRE(deserialize(out, in));
+    BC_REQUIRE_EQUAL(out, 0xffffffff);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -18,115 +18,115 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(stream_tests)
+BC_AUTO_TEST_SUITE(stream_tests)
 
 const auto default_buffer_size = 1024;
 
 // The compiler determines capacity, so this may be unreliable to test.
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__default__default)
+BC_AUTO_TEST_CASE(push_sink__optimal_buffer_size__default__default)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
+    BC_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
 }
 
 // The compiler determines capacity, so this may be unreliable to test.
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_empty__reserve)
+BC_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_empty__reserve)
 {
     const auto sink_capacity = 1500;
     data_chunk sink;
     sink.reserve(sink_capacity);
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity);
+    BC_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity);
 }
 
 // The compiler determines capacity, so this may be unreliable to test.
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_not_empty__expected)
+BC_AUTO_TEST_CASE(push_sink__optimal_buffer_size__reserve_not_empty__expected)
 {
     const auto sink_size = 42;
     const auto sink_capacity = 1500;
     data_chunk sink(sink_size, 0x00);
     sink.reserve(sink_capacity);
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity - sink_size);
+    BC_REQUIRE_EQUAL(instance.optimal_buffer_size(), sink_capacity - sink_size);
 }
 
 // The compiler determines capacity, so this may be unreliable to test.
-BOOST_AUTO_TEST_CASE(push_sink__optimal_buffer_size__no_reserve_not_empty__default)
+BC_AUTO_TEST_CASE(push_sink__optimal_buffer_size__no_reserve_not_empty__default)
 {
     const auto sink_size = 42;
     const auto sink_capacity = 42;
     data_chunk sink(sink_size, 0x00);
     sink.reserve(sink_capacity);
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
+    BC_REQUIRE_EQUAL(instance.optimal_buffer_size(), default_buffer_size);
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__write__nullptr__false)
+BC_AUTO_TEST_CASE(push_sink__write__nullptr__false)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), 0);
+    BC_REQUIRE_EQUAL(instance.write(nullptr, 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__write__empty__true)
+BC_AUTO_TEST_CASE(push_sink__write__empty__true)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write("", 0), 0);
+    BC_REQUIRE_EQUAL(instance.write("", 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__write__negative__false)
+BC_AUTO_TEST_CASE(push_sink__write__negative__false)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write("a", -1), 0);
-    BOOST_REQUIRE(sink.empty());
+    BC_REQUIRE_EQUAL(instance.write("a", -1), 0);
+    BC_REQUIRE(sink.empty());
 }
 
 // This was tested with a temporary manual hack of data.max_size() to 1.
-////BOOST_AUTO_TEST_CASE(push_sink__write__past_end__expected)
+////BC_AUTO_TEST_CASE(push_sink__write__past_end__expected)
 ////{
 ////    data_chunk sink;
 ////    push_sink<data_chunk> instance(sink);
-////    BOOST_REQUIRE_EQUAL(instance.write("ab", 2), 1);
-////    BOOST_REQUIRE_EQUAL(sink.size(), 1u);
-////    BOOST_REQUIRE_EQUAL(sink[0], 'a');
+////    BC_REQUIRE_EQUAL(instance.write("ab", 2), 1);
+////    BC_REQUIRE_EQUAL(sink.size(), 1u);
+////    BC_REQUIRE_EQUAL(sink[0], 'a');
 ////}
 
-BOOST_AUTO_TEST_CASE(push_sink__write__zero__zero)
+BC_AUTO_TEST_CASE(push_sink__write__zero__zero)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write("a", 0), 0);
-    BOOST_REQUIRE(sink.empty());
+    BC_REQUIRE_EQUAL(instance.write("a", 0), 0);
+    BC_REQUIRE(sink.empty());
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__write__one__expected)
+BC_AUTO_TEST_CASE(push_sink__write__one__expected)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write("a", 1), 1);
-    BOOST_REQUIRE_EQUAL(sink.size(), 1u);
-    BOOST_REQUIRE_EQUAL(sink[0], 'a');
+    BC_REQUIRE_EQUAL(instance.write("a", 1), 1);
+    BC_REQUIRE_EQUAL(sink.size(), 1u);
+    BC_REQUIRE_EQUAL(sink[0], 'a');
 }
 
-BOOST_AUTO_TEST_CASE(push_sink__write__multiple__correct_tracking)
+BC_AUTO_TEST_CASE(push_sink__write__multiple__correct_tracking)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write("a", 1), 1);
-    BOOST_REQUIRE_EQUAL(sink.size(), 1u);
-    BOOST_REQUIRE_EQUAL(sink[0], 'a');
-    BOOST_REQUIRE_EQUAL(instance.write("bc", 2), 2);
-    BOOST_REQUIRE_EQUAL(sink.size(), 3u);
-    BOOST_REQUIRE_EQUAL(sink[1], 'b');
-    BOOST_REQUIRE_EQUAL(sink[2], 'c');
-    BOOST_REQUIRE_EQUAL(instance.write("def", 3), 3);
-    BOOST_REQUIRE_EQUAL(sink.size(), 6u);
-    BOOST_REQUIRE_EQUAL(sink[3], 'd');
-    BOOST_REQUIRE_EQUAL(sink[4], 'e');
-    BOOST_REQUIRE_EQUAL(sink[5], 'f');
+    BC_REQUIRE_EQUAL(instance.write("a", 1), 1);
+    BC_REQUIRE_EQUAL(sink.size(), 1u);
+    BC_REQUIRE_EQUAL(sink[0], 'a');
+    BC_REQUIRE_EQUAL(instance.write("bc", 2), 2);
+    BC_REQUIRE_EQUAL(sink.size(), 3u);
+    BC_REQUIRE_EQUAL(sink[1], 'b');
+    BC_REQUIRE_EQUAL(sink[2], 'c');
+    BC_REQUIRE_EQUAL(instance.write("def", 3), 3);
+    BC_REQUIRE_EQUAL(sink.size(), 6u);
+    BC_REQUIRE_EQUAL(sink[3], 'd');
+    BC_REQUIRE_EQUAL(sink[4], 'e');
+    BC_REQUIRE_EQUAL(sink[5], 'f');
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

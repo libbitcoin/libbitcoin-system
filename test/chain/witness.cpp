@@ -19,26 +19,26 @@
 #include "../test.hpp"
 #include "../mocks/blocks.hpp"
 
-BOOST_AUTO_TEST_SUITE(witness_tests)
+BC_AUTO_TEST_SUITE(witness_tests)
 
 namespace json = system::json;
 using namespace system::chain;
 
-BOOST_AUTO_TEST_CASE(witness__block__with_witness__parse_round_trips)
+BC_AUTO_TEST_CASE(witness__block__with_witness__parse_round_trips)
 {
     constexpr auto witness = true;
     const auto& instance1 = test::mock_block_c;
     const auto data = test::mock_block_c.to_data(witness);
     const block instance2(data, witness);
-    BOOST_REQUIRE(instance1.is_valid());
-    BOOST_REQUIRE(instance2.is_valid());
-    BOOST_REQUIRE(instance1.hash() == instance2.hash());
-    BOOST_REQUIRE(instance1 == instance2);
-    BOOST_REQUIRE(instance1.is_segregated());
-    BOOST_REQUIRE(instance2.is_segregated());
+    BC_REQUIRE(instance1.is_valid());
+    BC_REQUIRE(instance2.is_valid());
+    BC_REQUIRE(instance1.hash() == instance2.hash());
+    BC_REQUIRE(instance1 == instance2);
+    BC_REQUIRE(instance1.is_segregated());
+    BC_REQUIRE(instance2.is_segregated());
 }
 
-BOOST_AUTO_TEST_CASE(witness__block__genesis_block__arena_parse_round_trips)
+BC_AUTO_TEST_CASE(witness__block__genesis_block__arena_parse_round_trips)
 {
     constexpr auto witness = true;
     const auto genesis = settings(selection::mainnet).genesis_block;
@@ -47,33 +47,33 @@ BOOST_AUTO_TEST_CASE(witness__block__genesis_block__arena_parse_round_trips)
     stream::in::fast stream(data);
     read::bytes::fast source(stream);
     const block instance(source, witness);
-    BOOST_REQUIRE(!instance.check());
+    BC_REQUIRE(!instance.check());
 }
 
-BOOST_AUTO_TEST_CASE(witness__block__with_witness__checks)
+BC_AUTO_TEST_CASE(witness__block__with_witness__checks)
 {
     constexpr auto witness = true;
     const auto data = test::mock_block_c.to_data(witness);
     stream::in::fast stream(data);
     read::bytes::fast source(stream);
     const block instance(source, witness);
-    BOOST_REQUIRE(!instance.check());
+    BC_REQUIRE(!instance.check());
 }
 
-BOOST_AUTO_TEST_CASE(witness__block__without_witness__checks)
+BC_AUTO_TEST_CASE(witness__block__without_witness__checks)
 {
     constexpr auto witness = false;
     const auto data = test::mock_block_c.to_data(witness);
     stream::in::fast stream(data);
     read::bytes::fast source(stream);
     const block instance(source, witness);
-    BOOST_REQUIRE(!instance.check());
+    BC_REQUIRE(!instance.check());
 }
 
 // annex
 
 // The moved-from stack is empty, so the annex must be taken from the member.
-BOOST_AUTO_TEST_CASE(witness__annex__moved_annex_pattern__expected)
+BC_AUTO_TEST_CASE(witness__annex__moved_annex_pattern__expected)
 {
     const data_chunk expected{ taproot_annex_prefix, 0x42_u8 };
     chunk_cptrs stack
@@ -83,11 +83,11 @@ BOOST_AUTO_TEST_CASE(witness__annex__moved_annex_pattern__expected)
     };
 
     const chain::witness instance{ std::move(stack) };
-    BOOST_REQUIRE(instance.annex());
-    BOOST_REQUIRE_EQUAL(instance.annex().data(), expected);
+    BC_REQUIRE(instance.annex());
+    BC_REQUIRE_EQUAL(instance.annex().data(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(witness__annex__copied_annex_pattern__expected)
+BC_AUTO_TEST_CASE(witness__annex__copied_annex_pattern__expected)
 {
     const data_chunk expected{ taproot_annex_prefix, 0x42_u8 };
     const chunk_cptrs stack
@@ -97,11 +97,11 @@ BOOST_AUTO_TEST_CASE(witness__annex__copied_annex_pattern__expected)
     };
 
     const chain::witness instance{ stack };
-    BOOST_REQUIRE(instance.annex());
-    BOOST_REQUIRE_EQUAL(instance.annex().data(), expected);
+    BC_REQUIRE(instance.annex());
+    BC_REQUIRE_EQUAL(instance.annex().data(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(witness__annex__moved_not_annex_pattern__empty)
+BC_AUTO_TEST_CASE(witness__annex__moved_not_annex_pattern__empty)
 {
     chunk_cptrs stack
     {
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(witness__annex__moved_not_annex_pattern__empty)
     };
 
     const chain::witness instance{ std::move(stack) };
-    BOOST_REQUIRE(!instance.annex());
+    BC_REQUIRE(!instance.annex());
 }
 
 // extract_taproot
@@ -146,7 +146,7 @@ static chain::witness script_path(const data_chunk& control) NOEXCEPT
     return chain::witness{ chunk_cptrs{ script_element, control_element } };
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__tapscript_committed__success_with_tapleaf)
+BC_AUTO_TEST_CASE(witness__extract_taproot__tapscript_committed__success_with_tapleaf)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -154,15 +154,15 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__tapscript_committed__success_with
     const auto prevout = taproot_prevout(c0_program);
     const auto instance = script_path(c0_control);
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(leaf);
-    BOOST_REQUIRE_EQUAL(*leaf, c0_tapleaf);
-    BOOST_REQUIRE(*out == script(tapleaf_script, false));
-    BOOST_REQUIRE(!out->is_prevalid());
-    BOOST_REQUIRE(stack->empty());
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
+    BC_REQUIRE(leaf);
+    BC_REQUIRE_EQUAL(*leaf, c0_tapleaf);
+    BC_REQUIRE(*out == script(tapleaf_script, false));
+    BC_REQUIRE(!out->is_prevalid());
+    BC_REQUIRE(stack->empty());
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__tapscript_uncommitted__invalid_commitment)
+BC_AUTO_TEST_CASE(witness__extract_taproot__tapscript_uncommitted__invalid_commitment)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -170,12 +170,12 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__tapscript_uncommitted__invalid_co
     const auto prevout = taproot_prevout(c2_program);
     const auto instance = script_path(c0_control);
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
 }
 
 // The commitment binds all leaf versions, so an undefined version is not
 // unencumbered until its control block commits to the output key [bip341].
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_committed__success_unencumbered)
+BC_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_committed__success_unencumbered)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -183,13 +183,13 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_committed_
     const auto prevout = taproot_prevout(c2_program);
     const auto instance = script_path(c2_control);
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(!leaf);
-    BOOST_REQUIRE(out->is_prevalid());
-    BOOST_REQUIRE(stack->empty());
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
+    BC_REQUIRE(!leaf);
+    BC_REQUIRE(out->is_prevalid());
+    BC_REQUIRE(stack->empty());
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_uncommitted__invalid_commitment)
+BC_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_uncommitted__invalid_commitment)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -197,10 +197,10 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_uncommitte
     const auto prevout = taproot_prevout(c0_program);
     const auto instance = script_path(c2_control);
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_merkle_path_committed__success_unencumbered)
+BC_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_merkle_path_committed__success_unencumbered)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -208,13 +208,13 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_merkle_pat
     const auto prevout = taproot_prevout(c2m_program);
     const auto instance = script_path(c2m_control);
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(!leaf);
-    BOOST_REQUIRE(out->is_prevalid());
-    BOOST_REQUIRE(stack->empty());
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
+    BC_REQUIRE(!leaf);
+    BC_REQUIRE(out->is_prevalid());
+    BC_REQUIRE(stack->empty());
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_merkle_path_uncommitted__invalid_commitment)
+BC_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_merkle_path_uncommitted__invalid_commitment)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -222,10 +222,10 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_merkle_pat
     const auto prevout = taproot_prevout(c2_program);
     const auto instance = script_path(c2m_control);
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__control_size_underflow__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_taproot__control_size_underflow__invalid_witness)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -233,10 +233,10 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__control_size_underflow__invalid_w
     const auto prevout = taproot_prevout(c2_program);
     const auto instance = script_path(data_chunk(ec_xonly_size, 0xc2_u8));
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__control_size_not_multiple__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_taproot__control_size_not_multiple__invalid_witness)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -244,10 +244,10 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__control_size_not_multiple__invali
     const auto prevout = taproot_prevout(c2_program);
     const auto instance = script_path(data_chunk(ec_xonly_size + 2_size, 0xc2_u8));
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__key_path__success_with_checksig)
+BC_AUTO_TEST_CASE(witness__extract_taproot__key_path__success_with_checksig)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -255,11 +255,11 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__key_path__success_with_checksig)
     const auto prevout = taproot_prevout(c0_program);
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x24_u8 }) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(!leaf);
-    BOOST_REQUIRE(*out == script{ { { opcode::checksig } } });
-    BOOST_REQUIRE_EQUAL(stack->size(), two);
-    BOOST_REQUIRE_EQUAL(*stack->back(), c0_program);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
+    BC_REQUIRE(!leaf);
+    BC_REQUIRE(*out == script{ { { opcode::checksig } } });
+    BC_REQUIRE_EQUAL(stack->size(), two);
+    BC_REQUIRE_EQUAL(*stack->back(), c0_program);
 }
 
 // extract_segwit
@@ -272,29 +272,29 @@ static script segwit_prevout(const data_chunk& program) NOEXCEPT
 static const data_chunk key_hash_program = base16_chunk("1d0f172a0ecb48aee1be1f2687d2963ae33f71a1");
 static const data_chunk embedded_script{ 0x51_u8 };
 
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_two_elements__success)
+BC_AUTO_TEST_CASE(witness__extract_segwit__key_hash_two_elements__success)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
     const auto prevout = segwit_prevout(key_hash_program);
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x01_u8 }), to_shared<data_chunk>({ 0x02_u8 }) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(*out == script{ script::to_pay_key_hash_pattern(to_shared(key_hash_program)) });
-    BOOST_REQUIRE_EQUAL(stack->size(), two);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::script_success);
+    BC_REQUIRE(*out == script{ script::to_pay_key_hash_pattern(to_shared(key_hash_program)) });
+    BC_REQUIRE_EQUAL(stack->size(), two);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_one_element__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_segwit__key_hash_one_element__invalid_witness)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
     const auto prevout = segwit_prevout(key_hash_program);
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x01_u8 }) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_three_elements__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_segwit__key_hash_three_elements__invalid_witness)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
@@ -302,10 +302,10 @@ BOOST_AUTO_TEST_CASE(witness__extract_segwit__key_hash_three_elements__invalid_w
     const chunk_cptrs elements{ to_shared<data_chunk>({ 0x01_u8 }), to_shared<data_chunk>({ 0x02_u8 }), to_shared<data_chunk>({ 0x03_u8 }) };
     const chain::witness instance{ elements };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_committed__success)
+BC_AUTO_TEST_CASE(witness__extract_segwit__script_hash_committed__success)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
@@ -313,12 +313,12 @@ BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_committed__success)
     const auto prevout = segwit_prevout(program);
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x02_u8 }), to_shared<data_chunk>(embedded_script) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(*out == script(embedded_script, false));
-    BOOST_REQUIRE_EQUAL(stack->size(), one);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::script_success);
+    BC_REQUIRE(*out == script(embedded_script, false));
+    BC_REQUIRE_EQUAL(stack->size(), one);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_uncommitted__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_segwit__script_hash_uncommitted__invalid_witness)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
@@ -326,10 +326,10 @@ BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_uncommitted__invalid_w
     const auto prevout = segwit_prevout(program);
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>(embedded_script) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
 }
 
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_empty_stack__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_segwit__script_hash_empty_stack__invalid_witness)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
@@ -337,142 +337,142 @@ BOOST_AUTO_TEST_CASE(witness__extract_segwit__script_hash_empty_stack__invalid_w
     const auto prevout = segwit_prevout(program);
     const chain::witness instance{ chunk_cptrs{} };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
 }
 
 // A version zero program of neither twenty nor thirty two bytes must fail.
-BOOST_AUTO_TEST_CASE(witness__extract_segwit__undefined_program_size__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_segwit__undefined_program_size__invalid_witness)
 {
     script::cptr out{};
     chunk_cptrs_ptr stack{};
     const auto prevout = segwit_prevout(data_chunk(21, 0x00));
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x01_u8 }), to_shared<data_chunk>({ 0x02_u8 }) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_segwit(out, stack, prevout), error::invalid_witness);
 }
 
 // is_push_size
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(witness__is_push_size__empty__true)
+BC_AUTO_TEST_CASE(witness__is_push_size__empty__true)
 {
-    BOOST_REQUIRE(chain::witness::is_push_size(chunk_cptrs{}));
+    BC_REQUIRE(chain::witness::is_push_size(chunk_cptrs{}));
 }
 
-BOOST_AUTO_TEST_CASE(witness__is_push_size__maximum__true)
+BC_AUTO_TEST_CASE(witness__is_push_size__maximum__true)
 {
     const auto element = to_shared<data_chunk>(max_push_data_size, 0x42_u8);
-    BOOST_REQUIRE(chain::witness::is_push_size(chunk_cptrs{ element }));
+    BC_REQUIRE(chain::witness::is_push_size(chunk_cptrs{ element }));
 }
 
-BOOST_AUTO_TEST_CASE(witness__is_push_size__oversized__false)
+BC_AUTO_TEST_CASE(witness__is_push_size__oversized__false)
 {
     const auto element = to_shared<data_chunk>(add1(max_push_data_size), 0x42_u8);
-    BOOST_REQUIRE(!chain::witness::is_push_size(chunk_cptrs{ element }));
+    BC_REQUIRE(!chain::witness::is_push_size(chunk_cptrs{ element }));
 }
 
 // Any oversized element fails the whole stack.
-BOOST_AUTO_TEST_CASE(witness__is_push_size__trailing_oversized__false)
+BC_AUTO_TEST_CASE(witness__is_push_size__trailing_oversized__false)
 {
     const auto small = to_shared<data_chunk>(1, 0x42_u8);
     const auto large = to_shared<data_chunk>(add1(max_push_data_size), 0x42_u8);
-    BOOST_REQUIRE(!chain::witness::is_push_size(chunk_cptrs{ small, large }));
+    BC_REQUIRE(!chain::witness::is_push_size(chunk_cptrs{ small, large }));
 }
 
 // is_reserved_pattern
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__single_hash__true)
+BC_AUTO_TEST_CASE(witness__is_reserved_pattern__single_hash__true)
 {
     const auto element = to_shared<data_chunk>(hash_size, 0x42_u8);
-    BOOST_REQUIRE(chain::witness::is_reserved_pattern(chunk_cptrs{ element }));
+    BC_REQUIRE(chain::witness::is_reserved_pattern(chunk_cptrs{ element }));
 }
 
-BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__empty__false)
+BC_AUTO_TEST_CASE(witness__is_reserved_pattern__empty__false)
 {
-    BOOST_REQUIRE(!chain::witness::is_reserved_pattern(chunk_cptrs{}));
+    BC_REQUIRE(!chain::witness::is_reserved_pattern(chunk_cptrs{}));
 }
 
-BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__wrong_size__false)
+BC_AUTO_TEST_CASE(witness__is_reserved_pattern__wrong_size__false)
 {
     const auto element = to_shared<data_chunk>(short_hash_size, 0x42_u8);
-    BOOST_REQUIRE(!chain::witness::is_reserved_pattern(chunk_cptrs{ element }));
+    BC_REQUIRE(!chain::witness::is_reserved_pattern(chunk_cptrs{ element }));
 }
 
-BOOST_AUTO_TEST_CASE(witness__is_reserved_pattern__two_hashes__false)
+BC_AUTO_TEST_CASE(witness__is_reserved_pattern__two_hashes__false)
 {
     const auto element = to_shared<data_chunk>(hash_size, 0x42_u8);
     const chunk_cptrs stack{ element, element };
-    BOOST_REQUIRE(!chain::witness::is_reserved_pattern(stack));
+    BC_REQUIRE(!chain::witness::is_reserved_pattern(stack));
 }
 
 // skip
 // ----------------------------------------------------------------------------
 // The return is presence (not superfluous).
 
-BOOST_AUTO_TEST_CASE(witness__skip__prefixed_non_empty__true)
+BC_AUTO_TEST_CASE(witness__skip__prefixed_non_empty__true)
 {
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(chain::witness::skip(reader, true));
-    BOOST_REQUIRE(reader);
-    BOOST_REQUIRE(reader.is_exhausted());
+    BC_REQUIRE(chain::witness::skip(reader, true));
+    BC_REQUIRE(reader);
+    BC_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_element__true)
+BC_AUTO_TEST_CASE(witness__skip__prefixed_empty_element__true)
 {
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>() } };
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(chain::witness::skip(reader, true));
-    BOOST_REQUIRE(reader);
-    BOOST_REQUIRE(reader.is_exhausted());
+    BC_REQUIRE(chain::witness::skip(reader, true));
+    BC_REQUIRE(reader);
+    BC_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_elements__true)
+BC_AUTO_TEST_CASE(witness__skip__prefixed_empty_elements__true)
 {
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>(), to_shared<data_chunk>() } };
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(chain::witness::skip(reader, true));
-    BOOST_REQUIRE(reader);
-    BOOST_REQUIRE(reader.is_exhausted());
+    BC_REQUIRE(chain::witness::skip(reader, true));
+    BC_REQUIRE(reader);
+    BC_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(witness__skip__unprefixed_empty_element__true)
+BC_AUTO_TEST_CASE(witness__skip__unprefixed_empty_element__true)
 {
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>() } };
     const auto data = instance.to_data(false);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(chain::witness::skip(reader, false));
-    BOOST_REQUIRE(reader);
-    BOOST_REQUIRE(reader.is_exhausted());
+    BC_REQUIRE(chain::witness::skip(reader, false));
+    BC_REQUIRE(reader);
+    BC_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(witness__skip__unprefixed_non_empty__true)
+BC_AUTO_TEST_CASE(witness__skip__unprefixed_non_empty__true)
 {
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x42_u8 }) } };
     const auto data = instance.to_data(false);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(chain::witness::skip(reader, false));
-    BOOST_REQUIRE(reader);
-    BOOST_REQUIRE(reader.is_exhausted());
+    BC_REQUIRE(chain::witness::skip(reader, false));
+    BC_REQUIRE(reader);
+    BC_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(witness__skip__prefixed_empty_stack__false)
+BC_AUTO_TEST_CASE(witness__skip__prefixed_empty_stack__false)
 {
     const chain::witness instance{ chunk_cptrs{} };
     const auto data = instance.to_data(true);
     stream::in::copy source{ data };
     read::bytes::istream reader{ source };
-    BOOST_REQUIRE(!chain::witness::skip(reader, true));
-    BOOST_REQUIRE(reader);
+    BC_REQUIRE(!chain::witness::skip(reader, true));
+    BC_REQUIRE(reader);
 }
 
 // construct
@@ -483,117 +483,117 @@ static data_stack witness_stack() NOEXCEPT
     return data_stack{ { 0x01_u8 }, { 0x02_u8, 0x03_u8 } };
 }
 
-BOOST_AUTO_TEST_CASE(witness__construct__copy_data_stack__expected)
+BC_AUTO_TEST_CASE(witness__construct__copy_data_stack__expected)
 {
     const auto stack = witness_stack();
     const chain::witness instance{ stack };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.stack().size(), two);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.stack().size(), two);
 }
 
-BOOST_AUTO_TEST_CASE(witness__construct__data_slice_prefixed__round_trips)
+BC_AUTO_TEST_CASE(witness__construct__data_slice_prefixed__round_trips)
 {
     const chain::witness expected{ witness_stack() };
     const auto data = expected.to_data(true);
     const chain::witness instance{ data, true };
-    BOOST_REQUIRE(instance == expected);
+    BC_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(witness__construct__data_slice_unprefixed__round_trips)
+BC_AUTO_TEST_CASE(witness__construct__data_slice_unprefixed__round_trips)
 {
     const chain::witness expected{ witness_stack() };
     const auto data = expected.to_data(false);
     const chain::witness instance{ data, false };
-    BOOST_REQUIRE(instance == expected);
+    BC_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(witness__construct__fast_stream__round_trips)
+BC_AUTO_TEST_CASE(witness__construct__fast_stream__round_trips)
 {
     const chain::witness expected{ witness_stack() };
     const auto data = expected.to_data(true);
     stream::in::fast source{ data };
     const chain::witness instance{ source, true };
-    BOOST_REQUIRE(instance == expected);
+    BC_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(witness__construct__istream__round_trips)
+BC_AUTO_TEST_CASE(witness__construct__istream__round_trips)
 {
     const chain::witness expected{ witness_stack() };
     const auto data = expected.to_data(true);
     const std::string text(data.cbegin(), data.cend());
     std::istringstream source{ text };
     const chain::witness instance{ source, true };
-    BOOST_REQUIRE(instance == expected);
+    BC_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(witness__inequality__different__true)
+BC_AUTO_TEST_CASE(witness__inequality__different__true)
 {
     const chain::witness instance1{ witness_stack() };
     const chain::witness instance2{ chunk_cptrs{} };
-    BOOST_REQUIRE(instance1 != instance2);
+    BC_REQUIRE(instance1 != instance2);
 }
 
 // serialization
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(witness__to_data__ostream__expected)
+BC_AUTO_TEST_CASE(witness__to_data__ostream__expected)
 {
     const chain::witness instance{ witness_stack() };
     const auto expected = instance.to_data(true);
     std::ostringstream output{};
     instance.to_data(output, true);
     const std::string text(expected.cbegin(), expected.cend());
-    BOOST_REQUIRE_EQUAL(output.str(), text);
+    BC_REQUIRE_EQUAL(output.str(), text);
 }
 
 // text
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(witness__construct__whitespace_mnemonic__empty)
+BC_AUTO_TEST_CASE(witness__construct__whitespace_mnemonic__empty)
 {
     const chain::witness instance{ "  " };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.stack().empty());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.stack().empty());
 }
 
-BOOST_AUTO_TEST_CASE(witness__construct__undelimited_mnemonic__invalid)
+BC_AUTO_TEST_CASE(witness__construct__undelimited_mnemonic__invalid)
 {
     const chain::witness instance{ "42" };
-    BOOST_REQUIRE(!instance.is_valid());
+    BC_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(witness__to_string__invalid__expected)
+BC_AUTO_TEST_CASE(witness__to_string__invalid__expected)
 {
     const chain::witness instance{ "42" };
-    BOOST_REQUIRE_EQUAL(instance.to_string(), "(?)");
+    BC_REQUIRE_EQUAL(instance.to_string(), "(?)");
 }
 
 // extract_sigop_script
 
 // A v0 program of an undefined size will not validate, so counts no sigops.
-BOOST_AUTO_TEST_CASE(witness__extract_sigop_script__undefined_v0_program__empty)
+BC_AUTO_TEST_CASE(witness__extract_sigop_script__undefined_v0_program__empty)
 {
     const auto program = base16_chunk("000102030405060708090a0b0c0d0e0f10111213141516");
     const script prevout{ script::to_pay_witness_pattern(0_u8, program) };
-    BOOST_REQUIRE(prevout.version() == script_version::segwit);
+    BC_REQUIRE(prevout.version() == script_version::segwit);
 
     const chain::witness instance{ chunk_cptrs{} };
     script out{ operations{ { opcode::pick } } };
-    BOOST_REQUIRE(instance.extract_sigop_script(out, prevout));
-    BOOST_REQUIRE(out.ops().empty());
+    BC_REQUIRE(instance.extract_sigop_script(out, prevout));
+    BC_REQUIRE(out.ops().empty());
 }
 
 // Versions above taproot are reserved, so count no sigops [bip141].
-BOOST_AUTO_TEST_CASE(witness__extract_sigop_script__reserved_version__empty)
+BC_AUTO_TEST_CASE(witness__extract_sigop_script__reserved_version__empty)
 {
     const auto program = base16_chunk("0001020304050607080910111213141516171819");
     const script prevout{ script::to_pay_witness_pattern(2_u8, program) };
-    BOOST_REQUIRE(prevout.version() == script_version::reserved);
+    BC_REQUIRE(prevout.version() == script_version::reserved);
 
     const chain::witness instance{ chunk_cptrs{} };
     script out{ operations{ { opcode::pick } } };
-    BOOST_REQUIRE(instance.extract_sigop_script(out, prevout));
-    BOOST_REQUIRE(out.ops().empty());
+    BC_REQUIRE(instance.extract_sigop_script(out, prevout));
+    BC_REQUIRE(out.ops().empty());
 }
 
 // extract_taproot (annex and undefined program size)
@@ -607,7 +607,7 @@ static chain::witness annexed_script_path(const data_chunk& control) NOEXCEPT
 }
 
 // The annex is discarded before the control block is popped [bip341].
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__annexed_tapscript__annex_dropped)
+BC_AUTO_TEST_CASE(witness__extract_taproot__annexed_tapscript__annex_dropped)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -616,31 +616,31 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__annexed_tapscript__annex_dropped)
     const auto instance = annexed_script_path(c0_control);
 
     const auto ec = instance.extract_taproot(leaf, out, stack, prevout);
-    BOOST_REQUIRE_EQUAL(ec, error::script_success);
-    BOOST_REQUIRE(leaf);
-    BOOST_REQUIRE_EQUAL(*leaf, c0_tapleaf);
-    BOOST_REQUIRE(stack->empty());
+    BC_REQUIRE_EQUAL(ec, error::script_success);
+    BC_REQUIRE(leaf);
+    BC_REQUIRE_EQUAL(*leaf, c0_tapleaf);
+    BC_REQUIRE(stack->empty());
 }
 
 // A v1 program that is not 32 bytes remains unencumbered [bip341].
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__undefined_program_size__unencumbered)
+BC_AUTO_TEST_CASE(witness__extract_taproot__undefined_program_size__unencumbered)
 {
     hash_cptr leaf{};
     script::cptr out{};
     chunk_cptrs_ptr stack{};
     const auto program = base16_chunk("0001020304050607080910111213141516171819");
     const script prevout{ script::to_pay_witness_pattern(1_u8, program) };
-    BOOST_REQUIRE(prevout.version() == script_version::taproot);
+    BC_REQUIRE(prevout.version() == script_version::taproot);
 
     const auto instance = script_path(c0_control);
     const auto ec = instance.extract_taproot(leaf, out, stack, prevout);
-    BOOST_REQUIRE_EQUAL(ec, error::script_success);
-    BOOST_REQUIRE(out->is_prevalid());
-    BOOST_REQUIRE(stack->empty());
+    BC_REQUIRE_EQUAL(ec, error::script_success);
+    BC_REQUIRE(out->is_prevalid());
+    BC_REQUIRE(stack->empty());
 }
 
 // A 32 byte v1 program with no witness stack has no spend type [bip341].
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__empty_stack__invalid_witness)
+BC_AUTO_TEST_CASE(witness__extract_taproot__empty_stack__invalid_witness)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -648,11 +648,11 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__empty_stack__invalid_witness)
     const auto prevout = taproot_prevout(c0_program);
     const chain::witness instance{ chunk_cptrs{} };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_witness);
 }
 
 // The annex is discarded before the spend type is determined [bip341].
-BOOST_AUTO_TEST_CASE(witness__extract_taproot__annexed_key_path__success_with_checksig)
+BC_AUTO_TEST_CASE(witness__extract_taproot__annexed_key_path__success_with_checksig)
 {
     hash_cptr leaf{};
     script::cptr out{};
@@ -660,11 +660,11 @@ BOOST_AUTO_TEST_CASE(witness__extract_taproot__annexed_key_path__success_with_ch
     const auto prevout = taproot_prevout(c0_program);
     const chain::witness instance{ chunk_cptrs{ to_shared<data_chunk>({ 0x24_u8 }), to_shared<data_chunk>(data_chunk{ 0x50_u8, 0x42_u8 }) } };
 
-    BOOST_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
-    BOOST_REQUIRE(!leaf);
-    BOOST_REQUIRE(*out == script{ { { opcode::checksig } } });
-    BOOST_REQUIRE_EQUAL(stack->size(), two);
-    BOOST_REQUIRE_EQUAL(*stack->back(), c0_program);
+    BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::script_success);
+    BC_REQUIRE(!leaf);
+    BC_REQUIRE(*out == script{ { { opcode::checksig } } });
+    BC_REQUIRE_EQUAL(stack->size(), two);
+    BC_REQUIRE_EQUAL(*stack->back(), c0_program);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

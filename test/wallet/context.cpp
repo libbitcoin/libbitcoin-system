@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(context_tests)
+BC_AUTO_TEST_SUITE(context_tests)
 
 using namespace bc::system::wallet;
 
@@ -27,91 +27,91 @@ using namespace bc::system::wallet;
 #define LTC_WIF_COMPRESSED "T7LvGRBeb2kKs7hPxSscvrYYNMPGRvbpt1dHcaP6QbSBUMKVEsBo"
 #define LTC_WIF_UNCOMPRESSED "6v6RJYJpV6qLEAg4PXnTGNeWJyjCepVHHYQdPZV7fRZtmHGAaGL"
 
-BOOST_AUTO_TEST_CASE(context__encoded__ltc_mainnet__expected_wif)
+BC_AUTO_TEST_CASE(context__encoded__ltc_mainnet__expected_wif)
 {
     const ec_private secret(base16_array(SECRET), ctx::ltc::main.versions());
-    BOOST_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_COMPRESSED);
+    BC_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(context__encoded__ltc_mainnet_uncompressed__expected_wif)
+BC_AUTO_TEST_CASE(context__encoded__ltc_mainnet_uncompressed__expected_wif)
 {
     const ec_private secret(base16_array(SECRET), ctx::ltc::main.versions(), false);
-    BOOST_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_UNCOMPRESSED);
+    BC_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_UNCOMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(context__construct__ltc_mainnet_wif__round_trips)
+BC_AUTO_TEST_CASE(context__construct__ltc_mainnet_wif__round_trips)
 {
     const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main.versions());
-    BOOST_REQUIRE(secret);
-    BOOST_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_COMPRESSED);
+    BC_REQUIRE(secret);
+    BC_REQUIRE_EQUAL(secret.encoded(), LTC_WIF_COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(context__to_payment_address__ltc_mainnet__ltc_prefix)
+BC_AUTO_TEST_CASE(context__to_payment_address__ltc_mainnet__ltc_prefix)
 {
     const ec_private secret(LTC_WIF_COMPRESSED, ctx::ltc::main.versions());
-    BOOST_REQUIRE_EQUAL(secret.to_payment_address().prefix(), prefix::p2kh::main::ltc);
+    BC_REQUIRE_EQUAL(secret.to_payment_address().prefix(), prefix::p2kh::main::ltc);
 }
 
-BOOST_AUTO_TEST_CASE(context__output_script__ltc_p2sh_address__pay_script_hash)
+BC_AUTO_TEST_CASE(context__output_script__ltc_p2sh_address__pay_script_hash)
 {
     const payment_address address(null_short_hash, ctx::ltc::main.p2sh);
     const auto script = address.output_script(ctx::ltc::main.p2kh, ctx::ltc::main.p2sh);
-    BOOST_REQUIRE(script.output_pattern() == chain::script_pattern::pay_script_hash);
+    BC_REQUIRE(script.output_pattern() == chain::script_pattern::pay_script_hash);
 }
 
-BOOST_AUTO_TEST_CASE(context__output_script__ltc_p2sh_address_btc_context__empty)
+BC_AUTO_TEST_CASE(context__output_script__ltc_p2sh_address_btc_context__empty)
 {
     const payment_address address(null_short_hash, ctx::ltc::main.p2sh);
-    BOOST_REQUIRE(address.output_script(ctx::btc::main.p2kh, ctx::btc::main.p2sh).ops().empty());
+    BC_REQUIRE(address.output_script(ctx::btc::main.p2kh, ctx::btc::main.p2sh).ops().empty());
 }
 
-BOOST_AUTO_TEST_CASE(context__construct__ltc_wif_btc_versions__invalid)
+BC_AUTO_TEST_CASE(context__construct__ltc_wif_btc_versions__invalid)
 {
-    BOOST_REQUIRE(!ec_private(LTC_WIF_COMPRESSED, ctx::btc::main.versions()));
+    BC_REQUIRE(!ec_private(LTC_WIF_COMPRESSED, ctx::btc::main.versions()));
 }
 
-BOOST_AUTO_TEST_CASE(context__construct__btc_wif_ltc_versions__invalid)
+BC_AUTO_TEST_CASE(context__construct__btc_wif_ltc_versions__invalid)
 {
-    BOOST_REQUIRE(!ec_private(BTC_WIF_COMPRESSED, ctx::ltc::main.versions()));
+    BC_REQUIRE(!ec_private(BTC_WIF_COMPRESSED, ctx::ltc::main.versions()));
 }
 
-BOOST_AUTO_TEST_CASE(context__construct__ltc_testnet_wif__round_trips)
+BC_AUTO_TEST_CASE(context__construct__ltc_testnet_wif__round_trips)
 {
     const ec_private secret(base16_array(SECRET), ctx::ltc::test.versions());
-    BOOST_REQUIRE_EQUAL(secret.wif_version(), prefix::wif::test::ltc);
-    BOOST_REQUIRE(ec_private(secret.encoded(), ctx::ltc::test.versions()));
+    BC_REQUIRE_EQUAL(secret.wif_version(), prefix::wif::test::ltc);
+    BC_REQUIRE(ec_private(secret.encoded(), ctx::ltc::test.versions()));
 }
 
 
-BOOST_AUTO_TEST_CASE(context__regtest__btc__testnet_versions_with_regtest_p2w)
+BC_AUTO_TEST_CASE(context__regtest__btc__testnet_versions_with_regtest_p2w)
 {
-    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.p2w, "bcrt");
-    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.versions(), ctx::btc::test.versions());
-    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.hd_prefixes(), ctx::btc::test.hd_prefixes());
-    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.p2sh, ctx::btc::test.p2sh);
+    BC_REQUIRE_EQUAL(ctx::btc::regtest.p2w, "bcrt");
+    BC_REQUIRE_EQUAL(ctx::btc::regtest.versions(), ctx::btc::test.versions());
+    BC_REQUIRE_EQUAL(ctx::btc::regtest.hd_prefixes(), ctx::btc::test.hd_prefixes());
+    BC_REQUIRE_EQUAL(ctx::btc::regtest.p2sh, ctx::btc::test.p2sh);
 }
 
-BOOST_AUTO_TEST_CASE(context__regtest__ltc__testnet_versions_with_regtest_p2w)
+BC_AUTO_TEST_CASE(context__regtest__ltc__testnet_versions_with_regtest_p2w)
 {
-    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.p2w, "rltc");
-    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.versions(), ctx::ltc::test.versions());
-    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.hd_prefixes(), ctx::ltc::test.hd_prefixes());
-    BOOST_REQUIRE_EQUAL(ctx::ltc::regtest.p2sh, ctx::ltc::test.p2sh);
+    BC_REQUIRE_EQUAL(ctx::ltc::regtest.p2w, "rltc");
+    BC_REQUIRE_EQUAL(ctx::ltc::regtest.versions(), ctx::ltc::test.versions());
+    BC_REQUIRE_EQUAL(ctx::ltc::regtest.hd_prefixes(), ctx::ltc::test.hd_prefixes());
+    BC_REQUIRE_EQUAL(ctx::ltc::regtest.p2sh, ctx::ltc::test.p2sh);
 }
 
-BOOST_AUTO_TEST_CASE(context__sp__btc_networks__bip352)
+BC_AUTO_TEST_CASE(context__sp__btc_networks__bip352)
 {
-    BOOST_REQUIRE_EQUAL(ctx::btc::main.sp, "sp");
-    BOOST_REQUIRE_EQUAL(ctx::btc::test.sp, "tsp");
-    BOOST_REQUIRE_EQUAL(ctx::btc::regtest.sp, "tsp");
-    BOOST_REQUIRE(ctx::ltc::main.sp.empty());
+    BC_REQUIRE_EQUAL(ctx::btc::main.sp, "sp");
+    BC_REQUIRE_EQUAL(ctx::btc::test.sp, "tsp");
+    BC_REQUIRE_EQUAL(ctx::btc::regtest.sp, "tsp");
+    BC_REQUIRE(ctx::ltc::main.sp.empty());
 }
 
-BOOST_AUTO_TEST_CASE(context__construct__regtest_wif__round_trips)
+BC_AUTO_TEST_CASE(context__construct__regtest_wif__round_trips)
 {
     const ec_private secret(base16_array(SECRET), ctx::btc::regtest.versions());
-    BOOST_REQUIRE(ec_private(secret.encoded(), ctx::btc::regtest.versions()));
-    BOOST_REQUIRE(!ec_private(secret.encoded(), ctx::btc::main.versions()));
+    BC_REQUIRE(ec_private(secret.encoded(), ctx::btc::regtest.versions()));
+    BC_REQUIRE(!ec_private(secret.encoded(), ctx::btc::main.versions()));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

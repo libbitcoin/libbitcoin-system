@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "../hash.hpp"
     
-BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
+BC_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(rmd128::hash(rmd128::half_t{})  == rmd_half128);
@@ -30,40 +30,40 @@ static_assert(rmd160::hash(rmd160::block_t{}) == rmd_full160);
 // rmd128
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
+BC_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
-    BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::half_t{}), rmd_half128);
-    BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::block_t{}), rmd_full128);
+    BC_REQUIRE_EQUAL(rmd128::hash(rmd128::half_t{}), rmd_half128);
+    BC_REQUIRE_EQUAL(rmd128::hash(rmd128::block_t{}), rmd_full128);
 }
 
-BOOST_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
 {
     // Verify non-const-evaluated to against public vectors.
     for (const auto& test: rmd128_tests)
     {
         const auto hash = accumulator<rmd128>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // rmd160
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__null_hash__expected)
+BC_AUTO_TEST_CASE(rmd__rmd160_hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
-    BOOST_REQUIRE_EQUAL(rmd160::hash(rmd160::half_t{}), rmd_half160);
-    BOOST_REQUIRE_EQUAL(rmd160::hash(rmd160::block_t{}), rmd_full160);
+    BC_REQUIRE_EQUAL(rmd160::hash(rmd160::half_t{}), rmd_half160);
+    BC_REQUIRE_EQUAL(rmd160::hash(rmd160::block_t{}), rmd_full160);
 }
 
-BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
 {
     // Verify non-const-evaluated to against public vectors
     for (const auto& test: rmd160_tests)
     {
         const auto hash = accumulator<rmd160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
@@ -516,20 +516,20 @@ static_assert(accessor160::functor<144>() == accessor160::get_f0());
 static_assert(accessor160::functor<159>() == accessor160::get_f0());
 
 // Multiple whole blocks stream through the iterable accumulate overload.
-BOOST_AUTO_TEST_CASE(rmd160__accumulate__multiple_blocks__matches_single_writes)
+BC_AUTO_TEST_CASE(rmd160__accumulate__multiple_blocks__matches_single_writes)
 {
     constexpr auto block_size = array_count<rmd160::block_t>;
     const data_chunk data(3u * block_size, 0x42);
 
     accumulator<rmd160> streamed{};
-    BOOST_REQUIRE(streamed.write(data));
+    BC_REQUIRE(streamed.write(data));
 
     accumulator<rmd160> written{};
-    BOOST_REQUIRE(written.write(data_chunk(block_size, 0x42)));
-    BOOST_REQUIRE(written.write(data_chunk(block_size, 0x42)));
-    BOOST_REQUIRE(written.write(data_chunk(block_size, 0x42)));
+    BC_REQUIRE(written.write(data_chunk(block_size, 0x42)));
+    BC_REQUIRE(written.write(data_chunk(block_size, 0x42)));
+    BC_REQUIRE(written.write(data_chunk(block_size, 0x42)));
 
-    BOOST_REQUIRE_EQUAL(streamed.flush(), written.flush());
+    BC_REQUIRE_EQUAL(streamed.flush(), written.flush());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

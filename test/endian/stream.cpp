@@ -18,36 +18,36 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_stream_tests)
+BC_AUTO_TEST_SUITE(endian_stream_tests)
 
 const auto alpha_forward = "BITCOIN!";
 const auto alpha_reverse = "!NIOCTIB";
 constexpr uint64_t value_alpha64 = 0x424954434f494e21;
 
-BOOST_AUTO_TEST_CASE(endian__from_big_endian__stream_to_integer__expected)
+BC_AUTO_TEST_CASE(endian__from_big_endian__stream_to_integer__expected)
 {
     std::stringstream stream{ alpha_forward };
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint64_t>(stream), value_alpha64);
+    BC_REQUIRE_EQUAL(from_big_endian<uint64_t>(stream), value_alpha64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__from_little_endian__stream_to_integer__expected)
+BC_AUTO_TEST_CASE(endian__from_little_endian__stream_to_integer__expected)
 {
     std::stringstream stream{ alpha_reverse };
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint64_t>(stream), value_alpha64);
+    BC_REQUIRE_EQUAL(from_little_endian<uint64_t>(stream), value_alpha64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_stream__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endian__integer_to_stream__expected)
 {
     std::stringstream stream;
     to_big_endian(stream, value_alpha64);
-    BOOST_REQUIRE_EQUAL(stream.str(), alpha_forward);
+    BC_REQUIRE_EQUAL(stream.str(), alpha_forward);
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_stream__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endian__integer_to_stream__expected)
 {
     std::stringstream stream;
     to_little_endian(stream, value_alpha64);
-    BOOST_REQUIRE_EQUAL(stream.str(), alpha_reverse);
+    BC_REQUIRE_EQUAL(stream.str(), alpha_reverse);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

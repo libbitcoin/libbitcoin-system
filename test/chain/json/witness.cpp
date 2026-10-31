@@ -20,9 +20,9 @@
 
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(witness_json_tests)
+BC_AUTO_TEST_SUITE(witness_json_tests)
 
-BOOST_AUTO_TEST_CASE(witness__json__conversions__expected)
+BC_AUTO_TEST_CASE(witness__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -41,20 +41,20 @@ BOOST_AUTO_TEST_CASE(witness__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<chain::witness>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<chain::witness>(value) == instance);
 }
 
-BOOST_AUTO_TEST_CASE(witness__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(witness__json__pointer_conversions__expected)
 {
     const chain::witness expected{ data_stack{ { 0x42, 0x43, 0x44 } } };
     const chain::witness::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<chain::witness::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<chain::witness::cptr>(value) == *instance);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

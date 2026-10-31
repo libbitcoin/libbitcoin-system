@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(functional_tests)
+BC_AUTO_TEST_SUITE(functional_tests)
 
 // madd52lo/madd52hi
 // ----------------------------------------------------------------------------
@@ -30,10 +30,10 @@ static_assert(f::madd52hi(7_u64, max52, max52) == 0x000ffffffffffffe_u64 + 7_u64
 static_assert(f::madd52lo(1_u64, 0x8000000000000003_u64, 5_u64) == 16_u64);
 static_assert(f::madd52hi(1_u64, 0x8000000000000003_u64, 5_u64) == 1_u64);
 
-BOOST_AUTO_TEST_CASE(functional__madd52__runtime__expected)
+BC_AUTO_TEST_CASE(functional__madd52__runtime__expected)
 {
-    BOOST_CHECK_EQUAL(f::madd52lo(7_u64, max52, max52), 8_u64);
-    BOOST_CHECK_EQUAL(f::madd52hi(7_u64, max52, max52), 0x000ffffffffffffe_u64 + 7_u64);
+    BC_CHECK_EQUAL(f::madd52lo(7_u64, max52, max52), 8_u64);
+    BC_CHECK_EQUAL(f::madd52hi(7_u64, max52, max52), 0x000ffffffffffffe_u64 + 7_u64);
 }
 
 // sub
@@ -45,10 +45,10 @@ static_assert(f::sub<64>(0x0010000000000000_u64, 1_u64) == 0x000fffffffffffff_u6
 static_assert(f::sub(0_u8, 1_u8) == max_uint8);
 static_assert(f::sub(0x42_u8, 0x02_u8) == 0x40_u8);
 
-BOOST_AUTO_TEST_CASE(functional__sub__runtime__expected)
+BC_AUTO_TEST_CASE(functional__sub__runtime__expected)
 {
-    BOOST_CHECK_EQUAL(f::sub(0_u64, 1_u64), max_uint64);
-    BOOST_CHECK_EQUAL(f::sub<64>(0x0010000000000000_u64, 1_u64), 0x000fffffffffffff_u64);
+    BC_CHECK_EQUAL(f::sub(0_u64, 1_u64), max_uint64);
+    BC_CHECK_EQUAL(f::sub<64>(0x0010000000000000_u64, 1_u64), 0x000fffffffffffff_u64);
 }
 
 // andnot/eq/select/any
@@ -82,10 +82,10 @@ constexpr std_array<uint64_t, 4> table{ 100, 101, 102, 103 };
 static_assert(f::gather(table.data(), 0_u64) == 100_u64);
 static_assert(f::gather(table.data(), 3_u64) == 103_u64);
 
-BOOST_AUTO_TEST_CASE(functional__gather__runtime__expected)
+BC_AUTO_TEST_CASE(functional__gather__runtime__expected)
 {
-    BOOST_CHECK_EQUAL(f::gather(table.data(), 1_u64), 101_u64);
-    BOOST_CHECK_EQUAL(f::gather(table.data(), 2_u64), 102_u64);
+    BC_CHECK_EQUAL(f::gather(table.data(), 1_u64), 101_u64);
+    BC_CHECK_EQUAL(f::gather(table.data(), 2_u64), 102_u64);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

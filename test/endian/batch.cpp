@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_set_tests)
+BC_AUTO_TEST_SUITE(endian_set_tests)
 
 template <size_t Count, typename Integral = uint32_t>
 using numbers = std_array<Integral, Count>;
@@ -87,32 +87,32 @@ static_assert(from_little_endians(native) == normalize(native, reversed));
 
 // These test 17 elements, above the loop unroll threshold.
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endians__non_constexpr__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endians__non_constexpr__expected)
 {
     numbers<size> out{};
     to_big_endians(out, native);
-    BOOST_REQUIRE_EQUAL(out, normalize(reversed, native));
+    BC_REQUIRE_EQUAL(out, normalize(reversed, native));
 }
 
-BOOST_AUTO_TEST_CASE(endian__from_big_endians__non_constexpr__expected)
+BC_AUTO_TEST_CASE(endian__from_big_endians__non_constexpr__expected)
 {
     numbers<size> out{};
     from_big_endians(out, reversed);
-    BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
+    BC_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endians__non_constexpr__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endians__non_constexpr__expected)
 {
     numbers<size> out{};
     to_little_endians(out, native);
-    BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
+    BC_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(endian__from_little_endians__non_constexpr__expected)
+BC_AUTO_TEST_CASE(endian__from_little_endians__non_constexpr__expected)
 {
     numbers<size> out{};
     from_little_endians(out, native);
-    BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
+    BC_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
 template <size_t Size>
@@ -123,44 +123,44 @@ inline const numbers<Size>& reduce(const numbers<size>& value)
 
 // These test return value and each level of the loop unroll (non-constexpr).
 
-BOOST_AUTO_TEST_CASE(endian__to_big_endians__loop_unroll__expected)
+BC_AUTO_TEST_CASE(endian__to_big_endians__loop_unroll__expected)
 {
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<1>(native)), reduce<1>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<2>(native)), reduce<2>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<3>(native)), reduce<3>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<4>(native)), reduce<4>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<5>(native)), reduce<5>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<6>(native)), reduce<6>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<7>(native)), reduce<7>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<8>(native)), reduce<8>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<9>(native)), reduce<9>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<10>(native)), reduce<10>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<11>(native)), reduce<11>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<12>(native)), reduce<12>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<13>(native)), reduce<13>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<14>(native)), reduce<14>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<15>(native)), reduce<15>(normalize(reversed, native)));
-    BOOST_CHECK_EQUAL(to_big_endians(reduce<16>(native)), reduce<16>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<1>(native)), reduce<1>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<2>(native)), reduce<2>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<3>(native)), reduce<3>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<4>(native)), reduce<4>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<5>(native)), reduce<5>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<6>(native)), reduce<6>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<7>(native)), reduce<7>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<8>(native)), reduce<8>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<9>(native)), reduce<9>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<10>(native)), reduce<10>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<11>(native)), reduce<11>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<12>(native)), reduce<12>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<13>(native)), reduce<13>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<14>(native)), reduce<14>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<15>(native)), reduce<15>(normalize(reversed, native)));
+    BC_CHECK_EQUAL(to_big_endians(reduce<16>(native)), reduce<16>(normalize(reversed, native)));
 }
 
-BOOST_AUTO_TEST_CASE(endian__to_little_endians__loop_unroll__expected)
+BC_AUTO_TEST_CASE(endian__to_little_endians__loop_unroll__expected)
 {
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<1>(native)), reduce<1>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<2>(native)), reduce<2>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<3>(native)), reduce<3>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<4>(native)), reduce<4>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<5>(native)), reduce<5>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<6>(native)), reduce<6>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<7>(native)), reduce<7>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<8>(native)), reduce<8>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<9>(native)), reduce<9>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<10>(native)), reduce<10>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<11>(native)), reduce<11>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<12>(native)), reduce<12>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<13>(native)), reduce<13>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<14>(native)), reduce<14>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<15>(native)), reduce<15>(normalize(native, reversed)));
-    BOOST_CHECK_EQUAL(to_little_endians(reduce<16>(native)), reduce<16>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<1>(native)), reduce<1>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<2>(native)), reduce<2>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<3>(native)), reduce<3>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<4>(native)), reduce<4>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<5>(native)), reduce<5>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<6>(native)), reduce<6>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<7>(native)), reduce<7>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<8>(native)), reduce<8>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<9>(native)), reduce<9>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<10>(native)), reduce<10>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<11>(native)), reduce<11>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<12>(native)), reduce<12>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<13>(native)), reduce<13>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<14>(native)), reduce<14>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<15>(native)), reduce<15>(normalize(native, reversed)));
+    BC_CHECK_EQUAL(to_little_endians(reduce<16>(native)), reduce<16>(normalize(native, reversed)));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

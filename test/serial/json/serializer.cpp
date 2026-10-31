@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(json_serializer_tests)
+BC_AUTO_TEST_SUITE(json_serializer_tests)
 
 using namespace system::json;
 
@@ -127,110 +127,110 @@ static bool all_chunks_match(const value& model, const std::string& expected)
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__serialize__models__expected)
+BC_AUTO_TEST_CASE(json_serializer__serialize__models__expected)
 {
     for (const auto& test: models)
-        BOOST_REQUIRE_EQUAL(serialize(test.model), test.expected);
+        BC_REQUIRE_EQUAL(serialize(test.model), test.expected);
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__models_every_chunk__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__models_every_chunk__expected)
 {
     for (const auto& test: models)
-        BOOST_REQUIRE_MESSAGE(all_chunks_match(test.model, test.expected), test.expected.substr(0, 80));
+        BC_REQUIRE_MESSAGE(all_chunks_match(test.model, test.expected), test.expected.substr(0, 80));
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__parsed_round_trip__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__parsed_round_trip__expected)
 {
     const std::string text{ R"({"a":[1,-2,3.5,"x\u0001\"",{"b":null}],"c":true})" };
     const auto model = parse(text);
-    BOOST_REQUIRE_EQUAL(serialize(model), text);
-    BOOST_REQUIRE(all_chunks_match(model, text));
+    BC_REQUIRE_EQUAL(serialize(model), text);
+    BC_REQUIRE(all_chunks_match(model, text));
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__escape_split__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__escape_split__expected)
 {
     const value model{ "\x01" };
-    BOOST_REQUIRE(chunks_match(model, 1, R"("\u0001")"));
-    BOOST_REQUIRE(chunks_match(model, 3, R"("\u0001")"));
-    BOOST_REQUIRE(chunks_match(model, 7, R"("\u0001")"));
+    BC_REQUIRE(chunks_match(model, 1, R"("\u0001")"));
+    BC_REQUIRE(chunks_match(model, 3, R"("\u0001")"));
+    BC_REQUIRE(chunks_match(model, 7, R"("\u0001")"));
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__fills_buffer__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__fills_buffer__expected)
 {
     const value model{ { "key", std::string(20, 'x') } };
     serializer writer{};
     writer.reset(&model);
     std::string buffer(8, '\0');
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"({"key":")");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
-    BOOST_REQUIRE(!writer.done());
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"(xxxx"})");
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"({"key":")");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
+    BC_REQUIRE(!writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"(xxxx"})");
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__done__exact_fill__done_without_empty_read)
+BC_AUTO_TEST_CASE(json_serializer__done__exact_fill__done_without_empty_read)
 {
     const value model{ "ab" };
     serializer writer{};
     writer.reset(&model);
     std::string buffer(4, '\0');
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 4), R"("ab")");
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 4), R"("ab")");
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__after_done__empty)
+BC_AUTO_TEST_CASE(json_serializer__read__after_done__empty)
 {
     const value model{ 1 };
     serializer writer{};
     writer.reset(&model);
     std::string buffer(4, '\0');
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 4), "1");
-    BOOST_REQUIRE(writer.done());
-    BOOST_REQUIRE(writer.read(buffer.data(), 4).empty());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 4), "1");
+    BC_REQUIRE(writer.done());
+    BC_REQUIRE(writer.read(buffer.data(), 4).empty());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__reset__null_model__done)
+BC_AUTO_TEST_CASE(json_serializer__reset__null_model__done)
 {
     serializer writer{};
     writer.reset(nullptr);
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__default__done)
+BC_AUTO_TEST_CASE(json_serializer__default__done)
 {
     const serializer writer{};
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__reset__reused__expected)
+BC_AUTO_TEST_CASE(json_serializer__reset__reused__expected)
 {
     const value first{ 1, 2 };
     const value second{ { "a", "b" } };
     serializer writer{};
     std::string buffer(3, '\0');
     writer.reset(&first);
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), "[1,");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), "[1,");
 
     writer.reset(&second);
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"({"a)");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(":")");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(b"})");
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"({"a)");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(":")");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(b"})");
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__stream__value__expected)
+BC_AUTO_TEST_CASE(json_serializer__stream__value__expected)
 {
     std::ostringstream stream{};
     stream << value{ { "a", 1 } };
-    BOOST_REQUIRE_EQUAL(stream.str(), R"({"a":1})");
+    BC_REQUIRE_EQUAL(stream.str(), R"({"a":1})");
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__serialize__object_erase_order__expected)
+BC_AUTO_TEST_CASE(json_serializer__serialize__object_erase_order__expected)
 {
     value model{ { "a", 1 }, { "b", 2 }, { "c", 3 } };
     model.as_object().erase("a");
-    BOOST_REQUIRE_EQUAL(serialize(model), R"({"c":3,"b":2})");
+    BC_REQUIRE_EQUAL(serialize(model), R"({"c":3,"b":2})");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

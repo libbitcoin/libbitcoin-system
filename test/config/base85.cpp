@@ -19,77 +19,77 @@
 #include "../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(base85_tests)
+BC_AUTO_TEST_SUITE(base85_tests)
 
 using namespace bc::system::config;
 
-BOOST_AUTO_TEST_CASE(base85__option_value__empty_token__empty)
+BC_AUTO_TEST_CASE(base85__option_value__empty_token__empty)
 {
     std::any value{};
     const std::unique_ptr<const options::value_semantic> semantic{ options::value<base85>() };
     semantic->parse(value, string_list{ "" }, "base85");
-    BOOST_REQUIRE(std::any_cast<base85>(value).to_string().empty());
+    BC_REQUIRE(std::any_cast<base85>(value).to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(base85__option_value__multiple_tokens__throws)
+BC_AUTO_TEST_CASE(base85__option_value__multiple_tokens__throws)
 {
     std::any value{};
     const std::unique_ptr<const options::value_semantic> semantic{ options::value<base85>() };
-    BOOST_REQUIRE_THROW(semantic->parse(value, string_list{ "foo", "bar" }, "base85"), validation_exception);
+    BC_REQUIRE_THROW(semantic->parse(value, string_list{ "foo", "bar" }, "base85"), validation_exception);
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__default__empty_and_aligned)
+BC_AUTO_TEST_CASE(base85__construct__default__empty_and_aligned)
 {
     const config::base85 instance{};
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE((const data_chunk&)instance == data_chunk{});
+    BC_REQUIRE(instance);
+    BC_REQUIRE((const data_chunk&)instance == data_chunk{});
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__copy_chunk__expected)
+BC_AUTO_TEST_CASE(base85__construct__copy_chunk__expected)
 {
     const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
     const config::base85 instance(value);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE((const data_chunk&)instance == value);
+    BC_REQUIRE(instance);
+    BC_REQUIRE((const data_chunk&)instance == value);
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__move_chunk__expected)
+BC_AUTO_TEST_CASE(base85__construct__move_chunk__expected)
 {
     data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
     const data_chunk expected{ 0x01, 0x02, 0x03, 0x04 };
     const config::base85 instance(std::move(value));
-    BOOST_REQUIRE((const data_chunk&)instance == expected);
+    BC_REQUIRE((const data_chunk&)instance == expected);
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__unaligned_chunk__false)
+BC_AUTO_TEST_CASE(base85__construct__unaligned_chunk__false)
 {
     const config::base85 instance(data_chunk{ 0x01, 0x02, 0x03 });
-    BOOST_REQUIRE(!instance);
+    BC_REQUIRE(!instance);
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__string__round_trips)
+BC_AUTO_TEST_CASE(base85__construct__string__round_trips)
 {
     const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
     const config::base85 instance(value);
     const config::base85 parsed(instance.to_string());
-    BOOST_REQUIRE((const data_chunk&)parsed == value);
+    BC_REQUIRE((const data_chunk&)parsed == value);
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__invalid_string__throws_istream_exception)
+BC_AUTO_TEST_CASE(base85__construct__invalid_string__throws_istream_exception)
 {
-    BOOST_REQUIRE_THROW(config::base85("\x01\x01\x01\x01\x01"), istream_exception);
+    BC_REQUIRE_THROW(config::base85("\x01\x01\x01\x01\x01"), istream_exception);
 }
 
-BOOST_AUTO_TEST_CASE(base85__construct__unaligned_string__throws_istream_exception)
+BC_AUTO_TEST_CASE(base85__construct__unaligned_string__throws_istream_exception)
 {
-    BOOST_REQUIRE_THROW(config::base85("abc"), istream_exception);
+    BC_REQUIRE_THROW(config::base85("abc"), istream_exception);
 }
 
-BOOST_AUTO_TEST_CASE(base85__stream_out__unaligned__throws_ostream_exception)
+BC_AUTO_TEST_CASE(base85__stream_out__unaligned__throws_ostream_exception)
 {
     const config::base85 instance(data_chunk{ 0x01, 0x02, 0x03 });
     std::ostringstream output{};
-    BOOST_REQUIRE_THROW(output << instance, ostream_exception);
+    BC_REQUIRE_THROW(output << instance, ostream_exception);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -20,151 +20,151 @@
 
 using namespace bc::system::config;
 
-BOOST_AUTO_TEST_SUITE(config_path_tests)
+BC_AUTO_TEST_SUITE(config_path_tests)
 
-BOOST_AUTO_TEST_CASE(path__construct__default__empty)
+BC_AUTO_TEST_CASE(path__construct__default__empty)
 {
     const path instance{};
-    BOOST_REQUIRE(instance.to_string().empty());
+    BC_REQUIRE(instance.to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__construct__string__expected)
+BC_AUTO_TEST_CASE(path__construct__string__expected)
 {
     const path instance{ std::string{ "foo/bar" } };
-    BOOST_REQUIRE_EQUAL(instance.to_string(), "foo/bar");
+    BC_REQUIRE_EQUAL(instance.to_string(), "foo/bar");
 }
 
-BOOST_AUTO_TEST_CASE(path__construct__literal__expected)
+BC_AUTO_TEST_CASE(path__construct__literal__expected)
 {
     const path instance{ "foo/bar" };
-    BOOST_REQUIRE_EQUAL(instance.to_string(), "foo/bar");
+    BC_REQUIRE_EQUAL(instance.to_string(), "foo/bar");
 }
 
-BOOST_AUTO_TEST_CASE(path__construct__empty_literal__empty)
+BC_AUTO_TEST_CASE(path__construct__empty_literal__empty)
 {
     const path instance{ "" };
-    BOOST_REQUIRE(instance.to_string().empty());
+    BC_REQUIRE(instance.to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__construct__empty_string__empty)
+BC_AUTO_TEST_CASE(path__construct__empty_string__empty)
 {
     const path instance{ std::string{} };
-    BOOST_REQUIRE(instance.to_string().empty());
+    BC_REQUIRE(instance.to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__construct__spaced_string__expected)
+BC_AUTO_TEST_CASE(path__construct__spaced_string__expected)
 {
     const path instance{ std::string{ "foo bar/baz qux" } };
-    BOOST_REQUIRE_EQUAL(instance.to_string(), "foo bar/baz qux");
+    BC_REQUIRE_EQUAL(instance.to_string(), "foo bar/baz qux");
 }
 
-BOOST_AUTO_TEST_CASE(path__cast__value__expected)
+BC_AUTO_TEST_CASE(path__cast__value__expected)
 {
     const path instance{ std::string{ "foo/bar" } };
     const std::filesystem::path& value = instance;
-    BOOST_REQUIRE(value == std::filesystem::path{ "foo/bar" });
+    BC_REQUIRE(value == std::filesystem::path{ "foo/bar" });
 }
 
-BOOST_AUTO_TEST_CASE(path__equality__same__true)
+BC_AUTO_TEST_CASE(path__equality__same__true)
 {
-    BOOST_REQUIRE(path{ "foo/bar" } == path{ "foo/bar" });
-    BOOST_REQUIRE(!(path{ "foo/bar" } != path{ "foo/bar" }));
+    BC_REQUIRE(path{ "foo/bar" } == path{ "foo/bar" });
+    BC_REQUIRE(!(path{ "foo/bar" } != path{ "foo/bar" }));
 }
 
-BOOST_AUTO_TEST_CASE(path__equality__different__false)
+BC_AUTO_TEST_CASE(path__equality__different__false)
 {
-    BOOST_REQUIRE(path{ "foo" } != path{ "bar" });
-    BOOST_REQUIRE(!(path{ "foo" } == path{ "bar" }));
+    BC_REQUIRE(path{ "foo" } != path{ "bar" });
+    BC_REQUIRE(!(path{ "foo" } == path{ "bar" }));
 }
 
-BOOST_AUTO_TEST_CASE(path__equality__literal__true)
+BC_AUTO_TEST_CASE(path__equality__literal__true)
 {
-    BOOST_REQUIRE(path{ "foo" } == "foo");
+    BC_REQUIRE(path{ "foo" } == "foo");
 }
 
-BOOST_AUTO_TEST_CASE(path__empty__default__true)
+BC_AUTO_TEST_CASE(path__empty__default__true)
 {
-    BOOST_REQUIRE(path{}.empty());
+    BC_REQUIRE(path{}.empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__string__default__empty)
+BC_AUTO_TEST_CASE(path__string__default__empty)
 {
-    BOOST_REQUIRE(path{}.string().empty());
+    BC_REQUIRE(path{}.string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__string__value__native)
+BC_AUTO_TEST_CASE(path__string__value__native)
 {
     const path instance{ "foo/bar" };
-    BOOST_REQUIRE_EQUAL(instance.string(), std::filesystem::path{ "foo/bar" }.string());
+    BC_REQUIRE_EQUAL(instance.string(), std::filesystem::path{ "foo/bar" }.string());
 }
 
-BOOST_AUTO_TEST_CASE(path__empty__value__false)
+BC_AUTO_TEST_CASE(path__empty__value__false)
 {
-    BOOST_REQUIRE(!path{ std::string{ "foo" } }.empty());
+    BC_REQUIRE(!path{ std::string{ "foo" } }.empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__divide__relative__appended)
+BC_AUTO_TEST_CASE(path__divide__relative__appended)
 {
     const path instance{ std::string{ "foo" } };
-    BOOST_REQUIRE((instance / "bar") == std::filesystem::path{ "foo" } / "bar");
+    BC_REQUIRE((instance / "bar") == std::filesystem::path{ "foo" } / "bar");
 }
 
-BOOST_AUTO_TEST_CASE(path__stream_out__empty__empty)
+BC_AUTO_TEST_CASE(path__stream_out__empty__empty)
 {
     std::ostringstream output{};
     output << path{};
-    BOOST_REQUIRE(output.str().empty());
+    BC_REQUIRE(output.str().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__stream_out__spaced__unquoted)
+BC_AUTO_TEST_CASE(path__stream_out__spaced__unquoted)
 {
     std::ostringstream output{};
     output << path{ std::string{ "foo bar" } };
-    BOOST_REQUIRE_EQUAL(output.str(), "foo bar");
+    BC_REQUIRE_EQUAL(output.str(), "foo bar");
 }
 
-BOOST_AUTO_TEST_CASE(path__stream_in__spaced__full_line)
+BC_AUTO_TEST_CASE(path__stream_in__spaced__full_line)
 {
     path instance{};
     std::istringstream{ "foo bar/baz" } >> instance;
-    BOOST_REQUIRE_EQUAL(instance.to_string(), "foo bar/baz");
+    BC_REQUIRE_EQUAL(instance.to_string(), "foo bar/baz");
 }
 
-BOOST_AUTO_TEST_CASE(path__stream_in__empty__empty)
+BC_AUTO_TEST_CASE(path__stream_in__empty__empty)
 {
     path instance{ std::string{ "foo" } };
     std::istringstream{ "" } >> instance;
-    BOOST_REQUIRE(instance.to_string().empty());
+    BC_REQUIRE(instance.to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__option_value__empty_token__empty)
+BC_AUTO_TEST_CASE(path__option_value__empty_token__empty)
 {
     std::any value{};
     const std::unique_ptr<const options::value_semantic> semantic{ options::value<path>() };
     semantic->parse(value, string_list{ "" }, "path");
-    BOOST_REQUIRE(std::any_cast<path>(value).to_string().empty());
+    BC_REQUIRE(std::any_cast<path>(value).to_string().empty());
 }
 
-BOOST_AUTO_TEST_CASE(path__option_value__spaced_token__expected)
+BC_AUTO_TEST_CASE(path__option_value__spaced_token__expected)
 {
     std::any value{};
     const std::unique_ptr<const options::value_semantic> semantic{ options::value<path>() };
     semantic->parse(value, string_list{ "foo bar/baz" }, "path");
-    BOOST_REQUIRE_EQUAL(std::any_cast<path>(value).to_string(), "foo bar/baz");
+    BC_REQUIRE_EQUAL(std::any_cast<path>(value).to_string(), "foo bar/baz");
 }
 
-BOOST_AUTO_TEST_CASE(path__option_value__multiple_tokens__throws)
+BC_AUTO_TEST_CASE(path__option_value__multiple_tokens__throws)
 {
     std::any value{};
     const std::unique_ptr<const options::value_semantic> semantic{ options::value<path>() };
-    BOOST_REQUIRE_THROW(semantic->parse(value, string_list{ "foo", "bar" }, "path"), validation_exception);
+    BC_REQUIRE_THROW(semantic->parse(value, string_list{ "foo", "bar" }, "path"), validation_exception);
 }
 
-BOOST_AUTO_TEST_CASE(path__construct__type__expected)
+BC_AUTO_TEST_CASE(path__construct__type__expected)
 {
     const config::path::type value{ "foo/bar" };
     const config::path instance(value);
-    BOOST_REQUIRE((const config::path::type&)instance == value);
+    BC_REQUIRE((const config::path::type&)instance == value);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

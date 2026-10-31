@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(base58_tests)
+BC_AUTO_TEST_SUITE(base58_tests)
 
 using namespace bc::system::config;
 
@@ -31,39 +31,39 @@ using namespace bc::system::config;
     0xa7, 0x97, 0x0c, 0xa3, 0x74, 0x51, 0x3d, 0xd0,  0x06 \
 }}
 
-BOOST_AUTO_TEST_CASE(base58__constructor__default__does_not_throw)
+BC_AUTO_TEST_CASE(base58__constructor__default__does_not_throw)
 {
-    BOOST_REQUIRE_NO_THROW(base58());
+    BC_REQUIRE_NO_THROW(base58());
 }
 
-BOOST_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
+BC_AUTO_TEST_CASE(base58__constructor__valid_string_cast__decodes)
 {
     const data_chunk original(BASE58_DECODED_A);
     const data_chunk instance(base58(BASE58_ENCODED_A));
-    BOOST_REQUIRE(original == instance);
+    BC_REQUIRE(original == instance);
 }
 
-BOOST_AUTO_TEST_CASE(base58__construct__copy_chunk__expected)
+BC_AUTO_TEST_CASE(base58__construct__copy_chunk__expected)
 {
     const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
     const config::base58 instance(value);
-    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, value);
+    BC_REQUIRE_EQUAL((const data_chunk&)instance, value);
 }
 
-BOOST_AUTO_TEST_CASE(base58__construct__move_chunk__expected)
+BC_AUTO_TEST_CASE(base58__construct__move_chunk__expected)
 {
     data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
     const data_chunk expected{ 0x01, 0x02, 0x03, 0x04 };
     const config::base58 instance(std::move(value));
-    BOOST_REQUIRE_EQUAL((const data_chunk&)instance, expected);
+    BC_REQUIRE_EQUAL((const data_chunk&)instance, expected);
 }
 
-BOOST_AUTO_TEST_CASE(base58__construct__invalid_string__throws_istream_exception)
+BC_AUTO_TEST_CASE(base58__construct__invalid_string__throws_istream_exception)
 {
-    BOOST_REQUIRE_THROW(config::base58("0OIl"), istream_exception);
+    BC_REQUIRE_THROW(config::base58("0OIl"), istream_exception);
 }
 
-BOOST_AUTO_TEST_CASE(base58__stream__round_trip__expected)
+BC_AUTO_TEST_CASE(base58__stream__round_trip__expected)
 {
     const data_chunk value{ 0x01, 0x02, 0x03, 0x04 };
     const config::base58 instance(value);
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(base58__stream__round_trip__expected)
 
     config::base58 parsed{};
     std::istringstream(output.str()) >> parsed;
-    BOOST_REQUIRE_EQUAL((const data_chunk&)parsed, value);
+    BC_REQUIRE_EQUAL((const data_chunk&)parsed, value);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

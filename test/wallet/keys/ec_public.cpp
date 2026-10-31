@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(ec_public_tests)
+BC_AUTO_TEST_SUITE(ec_public_tests)
 
 using namespace bc::system::wallet;
 
@@ -32,161 +32,161 @@ using namespace bc::system::wallet;
 
 // construct
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__default__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__default__invalid)
 {
-    BOOST_REQUIRE(!ec_public{});
+    BC_REQUIRE(!ec_public{});
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__compressed_string__round_trips)
+BC_AUTO_TEST_CASE(ec_public__construct__compressed_string__round_trips)
 {
     const ec_public instance(COMPRESSED);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.compressed());
-    BOOST_REQUIRE_EQUAL(instance.encoded(), COMPRESSED);
+    BC_REQUIRE(instance);
+    BC_REQUIRE(instance.compressed());
+    BC_REQUIRE_EQUAL(instance.encoded(), COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__uncompressed_string__round_trips)
+BC_AUTO_TEST_CASE(ec_public__construct__uncompressed_string__round_trips)
 {
     const ec_public instance(UNCOMPRESSED);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(!instance.compressed());
-    BOOST_REQUIRE_EQUAL(instance.encoded(), UNCOMPRESSED);
+    BC_REQUIRE(instance);
+    BC_REQUIRE(!instance.compressed());
+    BC_REQUIRE_EQUAL(instance.encoded(), UNCOMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__uncompressed_string__compressed_point)
+BC_AUTO_TEST_CASE(ec_public__construct__uncompressed_string__compressed_point)
 {
     const ec_public instance(UNCOMPRESSED);
-    BOOST_REQUIRE_EQUAL(encode_base16(instance.point()), COMPRESSED);
+    BC_REQUIRE_EQUAL(encode_base16(instance.point()), COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__not_base16__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__not_base16__invalid)
 {
-    BOOST_REQUIRE(!ec_public{ "bogus" });
+    BC_REQUIRE(!ec_public{ "bogus" });
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__not_a_point__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__not_a_point__invalid)
 {
-    BOOST_REQUIRE(!ec_public{ base16_chunk("0102030405") });
+    BC_REQUIRE(!ec_public{ base16_chunk("0102030405") });
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__off_curve_uncompressed__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__off_curve_uncompressed__invalid)
 {
-    BOOST_REQUIRE(!ec_public{ base16_chunk(OFF_CURVE) });
+    BC_REQUIRE(!ec_public{ base16_chunk(OFF_CURVE) });
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__uncompressed_point__expected)
+BC_AUTO_TEST_CASE(ec_public__construct__uncompressed_point__expected)
 {
     const ec_public instance(base16_array(UNCOMPRESSED), true);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE(instance.compressed());
-    BOOST_REQUIRE_EQUAL(instance.encoded(), COMPRESSED);
+    BC_REQUIRE(instance);
+    BC_REQUIRE(instance.compressed());
+    BC_REQUIRE_EQUAL(instance.encoded(), COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__off_curve_point__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__off_curve_point__invalid)
 {
-    BOOST_REQUIRE(!ec_public(base16_array(OFF_CURVE), true));
+    BC_REQUIRE(!ec_public(base16_array(OFF_CURVE), true));
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__bad_prefix_point__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__bad_prefix_point__invalid)
 {
     auto point = base16_array(UNCOMPRESSED);
     point.front() = 0x05;
-    BOOST_REQUIRE(!ec_public(point, true));
+    BC_REQUIRE(!ec_public(point, true));
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__private__expected)
+BC_AUTO_TEST_CASE(ec_public__construct__private__expected)
 {
     const ec_private secret(base16_array(SECRET));
-    BOOST_REQUIRE(secret);
+    BC_REQUIRE(secret);
 
     const ec_public instance(secret);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.point(), secret.to_public().point());
+    BC_REQUIRE(instance);
+    BC_REQUIRE_EQUAL(instance.point(), secret.to_public().point());
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__construct__invalid_private__invalid)
+BC_AUTO_TEST_CASE(ec_public__construct__invalid_private__invalid)
 {
-    BOOST_REQUIRE(!ec_public{ ec_private{} });
+    BC_REQUIRE(!ec_public{ ec_private{} });
 }
 
 // methods
 
-BOOST_AUTO_TEST_CASE(ec_public__to_data__compressed__expected)
+BC_AUTO_TEST_CASE(ec_public__to_data__compressed__expected)
 {
     data_chunk out;
-    BOOST_REQUIRE(ec_public(COMPRESSED).to_data(out));
-    BOOST_REQUIRE_EQUAL(encode_base16(out), COMPRESSED);
+    BC_REQUIRE(ec_public(COMPRESSED).to_data(out));
+    BC_REQUIRE_EQUAL(encode_base16(out), COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__to_data__uncompressed__expected)
+BC_AUTO_TEST_CASE(ec_public__to_data__uncompressed__expected)
 {
     data_chunk out;
-    BOOST_REQUIRE(ec_public(UNCOMPRESSED).to_data(out));
-    BOOST_REQUIRE_EQUAL(encode_base16(out), UNCOMPRESSED);
+    BC_REQUIRE(ec_public(UNCOMPRESSED).to_data(out));
+    BC_REQUIRE_EQUAL(encode_base16(out), UNCOMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__to_data__invalid__false)
+BC_AUTO_TEST_CASE(ec_public__to_data__invalid__false)
 {
     data_chunk out;
-    BOOST_REQUIRE(!ec_public{}.to_data(out));
+    BC_REQUIRE(!ec_public{}.to_data(out));
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__to_uncompressed__valid__expected)
+BC_AUTO_TEST_CASE(ec_public__to_uncompressed__valid__expected)
 {
     ec_uncompressed out;
-    BOOST_REQUIRE(ec_public(COMPRESSED).to_uncompressed(out));
-    BOOST_REQUIRE_EQUAL(encode_base16(out), UNCOMPRESSED);
+    BC_REQUIRE(ec_public(COMPRESSED).to_uncompressed(out));
+    BC_REQUIRE_EQUAL(encode_base16(out), UNCOMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__to_uncompressed__invalid__false)
+BC_AUTO_TEST_CASE(ec_public__to_uncompressed__invalid__false)
 {
     ec_uncompressed out;
-    BOOST_REQUIRE(!ec_public{}.to_uncompressed(out));
+    BC_REQUIRE(!ec_public{}.to_uncompressed(out));
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__to_payment_address__uncompressed__genesis_address)
+BC_AUTO_TEST_CASE(ec_public__to_payment_address__uncompressed__genesis_address)
 {
     const auto address = ec_public(UNCOMPRESSED).to_payment_address();
-    BOOST_REQUIRE(address);
-    BOOST_REQUIRE_EQUAL(address.encoded(), UNCOMPRESSED_ADDRESS);
+    BC_REQUIRE(address);
+    BC_REQUIRE_EQUAL(address.encoded(), UNCOMPRESSED_ADDRESS);
 }
 
 // operators
 
-BOOST_AUTO_TEST_CASE(ec_public__equality__same__equal)
+BC_AUTO_TEST_CASE(ec_public__equality__same__equal)
 {
     const ec_public left(COMPRESSED);
     const ec_public right(COMPRESSED);
-    BOOST_REQUIRE(left == right);
-    BOOST_REQUIRE(!(left != right));
-    BOOST_REQUIRE(!(left < right));
+    BC_REQUIRE(left == right);
+    BC_REQUIRE(!(left != right));
+    BC_REQUIRE(!(left < right));
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__equality__same_point_different_compression__unequal)
+BC_AUTO_TEST_CASE(ec_public__equality__same_point_different_compression__unequal)
 {
     const ec_public compressed(COMPRESSED);
     const ec_public uncompressed(UNCOMPRESSED);
-    BOOST_REQUIRE_EQUAL(compressed.point(), uncompressed.point());
-    BOOST_REQUIRE(compressed != uncompressed);
-    BOOST_REQUIRE(compressed < uncompressed);
+    BC_REQUIRE_EQUAL(compressed.point(), uncompressed.point());
+    BC_REQUIRE(compressed != uncompressed);
+    BC_REQUIRE(compressed < uncompressed);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__stream__valid__round_trips)
+BC_AUTO_TEST_CASE(ec_public__stream__valid__round_trips)
 {
     std::istringstream in{ COMPRESSED };
     ec_public instance{};
     in >> instance;
-    BOOST_REQUIRE_EQUAL(instance.encoded(), COMPRESSED);
+    BC_REQUIRE_EQUAL(instance.encoded(), COMPRESSED);
 
     std::ostringstream out{};
     out << instance;
-    BOOST_REQUIRE_EQUAL(out.str(), COMPRESSED);
+    BC_REQUIRE_EQUAL(out.str(), COMPRESSED);
 }
 
-BOOST_AUTO_TEST_CASE(ec_public__stream__invalid__throws)
+BC_AUTO_TEST_CASE(ec_public__stream__invalid__throws)
 {
     ec_public instance{};
-    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+    BC_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

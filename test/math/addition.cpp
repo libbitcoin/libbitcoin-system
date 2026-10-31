@@ -19,7 +19,7 @@
 #include "../test.hpp"
 
 // creates addition_tests namespace
-BOOST_AUTO_TEST_SUITE(addition_tests)
+BC_AUTO_TEST_SUITE(addition_tests)
 
 constexpr uint32_t pos_uint32 = 42;
 constexpr  int32_t pos_int32 = 42;
@@ -304,4 +304,4 @@ static_assert(delta<int8_t>(min_int32, max_int32) == minimum<int8_t>);
 static_assert(is_same_type<decltype(delta(int16_t{}, int32_t{})), int32_t>);
 static_assert(is_same_type<decltype(delta<int16_t>(int32_t{}, int32_t{})), int16_t>);
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

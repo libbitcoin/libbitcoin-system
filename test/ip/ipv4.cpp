@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(ipv4_tests)
+BC_AUTO_TEST_SUITE(ipv4_tests)
 
 using namespace ip;
 
@@ -65,109 +65,109 @@ const std_vector<std::string> invalid_ipv4
 
 // from_string
 
-BOOST_AUTO_TEST_CASE(ipv4__from_string__valid__expected_bytes)
+BC_AUTO_TEST_CASE(ipv4__from_string__valid__expected_bytes)
 {
     for (const auto& vector: valid_ipv4)
     {
         ipv4 out{};
-        BOOST_REQUIRE_MESSAGE(ipv4::from_string(out, vector.text), vector.text);
-        BOOST_REQUIRE_EQUAL(out.to_bytes(), vector.bytes);
+        BC_REQUIRE_MESSAGE(ipv4::from_string(out, vector.text), vector.text);
+        BC_REQUIRE_EQUAL(out.to_bytes(), vector.bytes);
     }
 }
 
-BOOST_AUTO_TEST_CASE(ipv4__from_string__invalid__false_unchanged)
+BC_AUTO_TEST_CASE(ipv4__from_string__invalid__false_unchanged)
 {
     for (const auto& text: invalid_ipv4)
     {
         ipv4 out{ ipv4::loopback() };
-        BOOST_REQUIRE_MESSAGE(!ipv4::from_string(out, text), text);
-        BOOST_REQUIRE_EQUAL(out, ipv4::loopback());
+        BC_REQUIRE_MESSAGE(!ipv4::from_string(out, text), text);
+        BC_REQUIRE_EQUAL(out, ipv4::loopback());
     }
 }
 
 // to_string
 
-BOOST_AUTO_TEST_CASE(ipv4__to_string__valid__round_trip)
+BC_AUTO_TEST_CASE(ipv4__to_string__valid__round_trip)
 {
     for (const auto& vector: valid_ipv4)
     {
-        BOOST_REQUIRE_EQUAL(ipv4{ vector.bytes }.to_string(), vector.text);
+        BC_REQUIRE_EQUAL(ipv4{ vector.bytes }.to_string(), vector.text);
     }
 }
 
-BOOST_AUTO_TEST_CASE(ipv4__to_string__default__unspecified)
+BC_AUTO_TEST_CASE(ipv4__to_string__default__unspecified)
 {
-    BOOST_REQUIRE_EQUAL(ipv4{}.to_string(), "0.0.0.0");
+    BC_REQUIRE_EQUAL(ipv4{}.to_string(), "0.0.0.0");
 }
 
 // statics
 
-BOOST_AUTO_TEST_CASE(ipv4__any__always__unspecified)
+BC_AUTO_TEST_CASE(ipv4__any__always__unspecified)
 {
-    BOOST_REQUIRE(ipv4::any().is_unspecified());
-    BOOST_REQUIRE_EQUAL(ipv4::any(), ipv4{});
+    BC_REQUIRE(ipv4::any().is_unspecified());
+    BC_REQUIRE_EQUAL(ipv4::any(), ipv4{});
 }
 
-BOOST_AUTO_TEST_CASE(ipv4__loopback__always__expected)
+BC_AUTO_TEST_CASE(ipv4__loopback__always__expected)
 {
     const ipv4::bytes_type expected{ 127, 0, 0, 1 };
-    BOOST_REQUIRE_EQUAL(ipv4::loopback().to_bytes(), expected);
+    BC_REQUIRE_EQUAL(ipv4::loopback().to_bytes(), expected);
 }
 
 // is_loopback
 
-BOOST_AUTO_TEST_CASE(ipv4__is_loopback__loopback_network__true)
+BC_AUTO_TEST_CASE(ipv4__is_loopback__loopback_network__true)
 {
     const ipv4 network{ { 127, 0, 0, 0 } };
     const ipv4 broadcast{ { 127, 255, 255, 255 } };
-    BOOST_REQUIRE(ipv4::loopback().is_loopback());
-    BOOST_REQUIRE(network.is_loopback());
-    BOOST_REQUIRE(broadcast.is_loopback());
+    BC_REQUIRE(ipv4::loopback().is_loopback());
+    BC_REQUIRE(network.is_loopback());
+    BC_REQUIRE(broadcast.is_loopback());
 }
 
-BOOST_AUTO_TEST_CASE(ipv4__is_loopback__other__false)
+BC_AUTO_TEST_CASE(ipv4__is_loopback__other__false)
 {
     const ipv4 above{ { 128, 0, 0, 1 } };
     const ipv4 below{ { 126, 255, 255, 255 } };
-    BOOST_REQUIRE(!ipv4{}.is_loopback());
-    BOOST_REQUIRE(!above.is_loopback());
-    BOOST_REQUIRE(!below.is_loopback());
+    BC_REQUIRE(!ipv4{}.is_loopback());
+    BC_REQUIRE(!above.is_loopback());
+    BC_REQUIRE(!below.is_loopback());
 }
 
 // is_unspecified
 
-BOOST_AUTO_TEST_CASE(ipv4__is_unspecified__default__true)
+BC_AUTO_TEST_CASE(ipv4__is_unspecified__default__true)
 {
-    BOOST_REQUIRE(ipv4{}.is_unspecified());
+    BC_REQUIRE(ipv4{}.is_unspecified());
 }
 
-BOOST_AUTO_TEST_CASE(ipv4__is_unspecified__nonzero__false)
+BC_AUTO_TEST_CASE(ipv4__is_unspecified__nonzero__false)
 {
     const ipv4 low{ { 0, 0, 0, 1 } };
     const ipv4 high{ { 1, 0, 0, 0 } };
-    BOOST_REQUIRE(!low.is_unspecified());
-    BOOST_REQUIRE(!high.is_unspecified());
+    BC_REQUIRE(!low.is_unspecified());
+    BC_REQUIRE(!high.is_unspecified());
 }
 
 // operators
 
-BOOST_AUTO_TEST_CASE(ipv4__ordering__by_octets__expected)
+BC_AUTO_TEST_CASE(ipv4__ordering__by_octets__expected)
 {
     const ipv4 first{ { 1, 2, 3, 4 } };
     const ipv4 second{ { 1, 2, 3, 5 } };
     const ipv4 third{ { 1, 2, 4, 0 } };
     const ipv4 fourth{ { 2, 0, 0, 0 } };
-    BOOST_REQUIRE(first == ipv4(first.to_bytes()));
-    BOOST_REQUIRE(first != second);
-    BOOST_REQUIRE(second < third);
-    BOOST_REQUIRE(fourth > third);
+    BC_REQUIRE(first == ipv4(first.to_bytes()));
+    BC_REQUIRE(first != second);
+    BC_REQUIRE(second < third);
+    BC_REQUIRE(fourth > third);
 }
 
-BOOST_AUTO_TEST_CASE(ipv4__ostream__loopback__expected)
+BC_AUTO_TEST_CASE(ipv4__ostream__loopback__expected)
 {
     std::stringstream stream{};
     stream << ipv4::loopback();
-    BOOST_REQUIRE_EQUAL(stream.str(), "127.0.0.1");
+    BC_REQUIRE_EQUAL(stream.str(), "127.0.0.1");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
