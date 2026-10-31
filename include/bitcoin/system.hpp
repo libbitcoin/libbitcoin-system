@@ -16,7 +16,6 @@
 
 #include <bitcoin/system/allocator.hpp>
 #include <bitcoin/system/arena.hpp>
-#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>

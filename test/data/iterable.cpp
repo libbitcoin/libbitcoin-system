@@ -118,7 +118,6 @@ BC_AUTO_TEST_CASE(iterable__data_arrays__parsing__expected)
     const auto end = iterable.end();
     auto it = iterable.begin();
 
-    // Boost macros can't handle the inline indirections.
     type element{ *it++ };
     BC_REQUIRE_EQUAL(element, base16_array("1111111122222222"));
     element = *it++;

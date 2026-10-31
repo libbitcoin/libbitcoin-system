@@ -1040,9 +1040,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\arena.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp">
-      <Filter>include\bitcoin\system</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\annex.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>

@@ -52,7 +52,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -63,7 +62,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -74,7 +72,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -85,7 +82,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -96,7 +92,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--enable-isystem --with-secp256k1"
 
@@ -107,7 +102,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--enable-isystem --with-secp256k1"
 
@@ -118,7 +112,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--enable-isystem --with-secp256k1"
 
@@ -129,7 +122,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--enable-isystem --with-secp256k1"
 
@@ -141,7 +133,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -153,7 +144,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -165,7 +155,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -177,7 +166,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -188,7 +176,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -199,7 +186,6 @@ jobs:
             cxx: "g++-13"
             flags: "--coverage -fprofile-update=atomic"
             coverage: "lcov"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -210,7 +196,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -221,7 +206,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -233,7 +217,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "valgrind"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem --with-valgrind --build-valgrind=secp256k1_ctime_tests"
 
@@ -244,7 +227,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -255,7 +237,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -266,7 +247,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -277,7 +257,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -289,7 +268,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -301,7 +279,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -313,7 +290,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -325,7 +301,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -337,7 +312,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -349,7 +323,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -361,7 +334,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -373,7 +345,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -386,7 +357,6 @@ jobs:
             coverage: ""
             package: "gcc-s390x-linux-gnu g++-s390x-linux-gnu qemu-user-static"
             host: "s390x-linux-gnu"
-            boost: ""
             secp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
@@ -397,7 +367,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -409,7 +378,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "gcc-14 g++-14"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -421,7 +389,6 @@ jobs:
             flags: "-m32"
             coverage: ""
             package: "gcc-15-multilib g++-15-multilib"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
 
@@ -434,7 +401,6 @@ jobs:
             coverage: ""
             package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
             host: "arm-linux-gnueabihf"
-            boost: ""
             secp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
@@ -447,7 +413,6 @@ jobs:
             coverage: ""
             package: "gcc-mingw-w64-x86-64-posix g++-mingw-w64-x86-64-posix"
             host: "x86_64-w64-mingw32"
-            boost: ""
             secp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
@@ -526,25 +491,6 @@ jobs:
             ./emulation
           fi
 
-      - name: Install boost headers [cross]
-        if: ${{ matrix.host }}
-        shell: bash
-        working-directory: 'libbitcoin-system'
-        env:
-          CC: 'gcc'
-          CXX: 'g++'
-        run: >
-          ./builds/gnu/install-gnu.sh
-          --build-use-local-src
-          --build-src-dir="${{ github.workspace }}"
-          --prefix="${{ github.workspace }}/prefix"
-          --build-obj-dir="obj"
-          --build-obj-dir-relative
-          --build-config="${{ matrix.config }}"
-          --build-link="${{ matrix.link }}"
-          --build-limit=external
-          --build-boost
-
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
@@ -558,10 +504,9 @@ jobs:
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
           --build-link="${{ matrix.link }}"
-          ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
           ${{ matrix.options }}
-          ${{ matrix.host && format('--host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
+          ${{ matrix.host && format('--host={0}', matrix.host) || '' }}
 
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
@@ -624,7 +569,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -635,7 +579,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -646,7 +589,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -657,7 +599,6 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -668,7 +609,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "-Dwith-secp256k1=ON"
 
@@ -679,7 +619,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "-Dwith-secp256k1=ON"
 
@@ -690,7 +629,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "-Dwith-secp256k1=ON"
 
@@ -701,7 +639,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "-Dwith-secp256k1=ON"
 
@@ -713,7 +650,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -725,7 +661,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -737,7 +672,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -749,7 +683,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -760,7 +693,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -771,7 +703,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -782,7 +713,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -793,7 +723,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -804,7 +733,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -815,7 +743,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -826,7 +753,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -837,7 +763,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -849,7 +774,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -861,7 +785,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -873,7 +796,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -885,7 +807,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -897,7 +818,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -909,7 +829,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -921,7 +840,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -933,7 +851,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: ""
 
@@ -1012,7 +929,6 @@ jobs:
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
           --build-link="${{ matrix.link }}"
-          ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
           ${{ matrix.options }}
 
@@ -1076,7 +992,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--build-skip-tests"
 
@@ -1086,7 +1001,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--build-skip-tests"
 
@@ -1096,7 +1010,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--build-skip-tests"
 
@@ -1106,7 +1019,6 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: "--build-secp256k1"
             options: "--build-skip-tests"
 
@@ -1117,7 +1029,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1128,7 +1039,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1139,7 +1049,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1150,7 +1059,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1160,7 +1068,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1170,7 +1077,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1180,7 +1086,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1190,7 +1095,6 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1200,7 +1104,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1210,7 +1113,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1220,7 +1122,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1230,7 +1131,6 @@ jobs:
             cxx: "g++-14"
             flags: ""
             coverage: ""
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1241,7 +1141,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1252,7 +1151,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1263,7 +1161,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1274,7 +1171,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-15 gcc-15"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1285,7 +1181,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1296,7 +1191,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1307,7 +1201,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1318,7 +1211,6 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            boost: "--build-boost"
             secp256k1: ""
             options: "--build-skip-tests"
 
@@ -1392,7 +1284,6 @@ jobs:
           --build-use-local-src
           --build-src-dir="${{ github.workspace }}"
           --build-preset="${{ matrix.preset }}"
-          ${{ matrix.boost }}
           ${{ matrix.secp256k1 }}
           ${{ matrix.options }}
 
@@ -1570,9 +1461,9 @@ jobs:
           }
           Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
           $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
-          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          Write-Host "Executing $BC_TEST_SINGLETON" -ForegroundColor Yellow;
           try {
-            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
+            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }}"
           }
           catch {
             $ERR = $_;

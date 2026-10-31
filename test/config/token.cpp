@@ -142,14 +142,17 @@ BC_AUTO_TEST_CASE(token__stream__empty_word__empty)
     BC_REQUIRE(output.str().empty());
 }
 
-BC_AUTO_TEST_CASE(token__lexical_cast__word__expected)
+BC_AUTO_TEST_CASE(token__stream__word__expected)
 {
-    BC_REQUIRE(boost::lexical_cast<config::selection>("testnet3") == selection::testnet3);
+    config::selection instance{};
+    std::istringstream("testnet3") >> instance;
+    BC_REQUIRE(instance == selection::testnet3);
 }
 
-BC_AUTO_TEST_CASE(token__lexical_cast__unknown__throws_istream_exception)
+BC_AUTO_TEST_CASE(token__stream__unknown__throws_istream_exception)
 {
-    BC_REQUIRE_THROW(boost::lexical_cast<config::selection>("testnet"), istream_exception);
+    config::selection instance{};
+    BC_REQUIRE_THROW(std::istringstream("testnet") >> instance, istream_exception);
 }
 
 BC_AUTO_TEST_SUITE_END()

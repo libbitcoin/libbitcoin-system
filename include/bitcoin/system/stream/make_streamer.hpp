@@ -24,7 +24,6 @@
 
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
-// But the boost type constraint 'is_virtual_base_of' triggers the warning.
 BC_PUSH_WARNING(DIAMOND_INHERITANCE)
 
 namespace libbitcoin {

@@ -39,15 +39,12 @@ src_libbitcoin_system_la_LIBS = src/libbitcoin-system.la
 src_libbitcoin_system_la_CPPFLAGS = \
     -I${top_builddir}/include \
     -I${srcdir}/../../include \
-    ${boost_BUILD_CPPFLAGS} \
     ${secp256k1_BUILD_CPPFLAGS}
 
 src_libbitcoin_system_la_LDFLAGS = \
-    ${boost_LDFLAGS} \
     ${secp256k1_LDFLAGS}
 
 src_libbitcoin_system_la_LIBADD = \
-    ${boost_LIBS} \
     ${secp256k1_LIBS}
 
 src_libbitcoin_system_la_SOURCES = \
@@ -308,7 +305,6 @@ include_bitcoin_systemdir = \
 include_bitcoin_system_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/allocator.hpp \
     ${srcdir}/../../include/bitcoin/system/arena.hpp \
-    ${srcdir}/../../include/bitcoin/system/boost.hpp \
     ${srcdir}/../../include/bitcoin/system/constants.hpp \
     ${srcdir}/../../include/bitcoin/system/constraints.hpp \
     ${srcdir}/../../include/bitcoin/system/define.hpp \
@@ -1233,16 +1229,13 @@ if WITH_TESTS
 check_PROGRAMS = test/libbitcoin-system-test
 
 test_libbitcoin_system_test_CPPFLAGS = \
-    ${boost_BUILD_CPPFLAGS} \
     ${src_libbitcoin_system_la_CPPFLAGS}
 
 test_libbitcoin_system_test_LDFLAGS = \
     ${mingw_program_LDFLAGS} \
-    ${boost_LDFLAGS} \
     ${src_libbitcoin_system_la_LDFLAGS}
 
 test_libbitcoin_system_test_LDADD = \
-    ${boost_LIBS} \
     ${src_libbitcoin_system_la_LIBS} \
     ${src_libbitcoin_system_la_LIBADD}
 

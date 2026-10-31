@@ -7,7 +7,7 @@ Source: src/crypto/secp256k1/cuda/kernels.cu, compiled for the device by clang
 Output: src/crypto/secp256k1/cuda/ptx.cpp
 
 Run from the repository root, after a build has generated version.hpp:
-  python3 tools/generate_cuda_ptx.py --boost <boost-include-directory>
+  python3 tools/generate_cuda_ptx.py
 
 On Windows the Visual Studio clang is used (C++ Clang Compiler component),
 otherwise clang++ on the path, or the --clang argument.
@@ -58,7 +58,7 @@ def visual_studio():
     return path or None
 
 
-def compile_ptx(clang, boost, ptx):
+def compile_ptx(clang, ptx):
     """Compile the kernels for the device, writing ptx text."""
     arguments = [
         "-x", "cuda", "--cuda-device-only",
@@ -67,9 +67,9 @@ def compile_ptx(clang, boost, ptx):
         "-D__host__=__attribute__((host))",
         "-D__device__=__attribute__((device))",
         "-D__global__=__attribute__((global))",
-        "-DWITH_PTX", "-DNDEBUG", "-DBOOST_ALL_NO_LIB", "-DBOOST_URL_HPP",
+        "-DWITH_PTX", "-DNDEBUG",
         "-I", "include", "-I", os.path.join("build", "include"),
-        "-I", boost, SOURCE, "-o", ptx]
+        SOURCE, "-o", ptx]
 
     if os.name == "nt":
         install = visual_studio()
@@ -80,7 +80,8 @@ def compile_ptx(clang, boost, ptx):
         if clang is None:
             clang = os.path.join(install, "VC", "Tools", "Llvm", "x64",
                 "bin", "clang++.exe")
-        arguments.insert(0, "-D_WIN32_WINNT=0x0A00")
+        arguments[0:0] = ["-DWIN32_LEAN_AND_MEAN", "-DNOMINMAX",
+            "-D_WIN32_WINNT=0x0A00"]
         command = 'call "{}" >nul && "{}" {}'.format(vcvars, clang,
             subprocess.list2cmdline(arguments))
         result = subprocess.run('cmd /s /c "{}"'.format(command))
@@ -151,8 +152,6 @@ def generate_cpp(deflated, size):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[1])
-    parser.add_argument("--boost", required=True,
-        help="boost include directory")
     parser.add_argument("--clang", help="clang++ executable")
     options = parser.parse_args()
 
@@ -161,7 +160,7 @@ def main():
 
     with tempfile.TemporaryDirectory() as directory:
         ptx = os.path.join(directory, "verify.ptx")
-        compile_ptx(options.clang, options.boost, ptx)
+        compile_ptx(options.clang, ptx)
         with open(ptx, "rb") as file:
             data = file.read()
 

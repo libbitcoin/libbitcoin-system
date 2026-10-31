@@ -38,7 +38,6 @@
 #                                Default: OFF
 # -Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification (inert on macOS).
 #                                Default: ON
-# --build-boost                Build Boost libraries
 # --build-secp256k1            Build libsecp256k1 libraries
 # --build-preset=<preset>      Specifies preset configuration to build.
 # --build-src-dir=<path>       Location for sources.
@@ -70,13 +69,6 @@ trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2'
 
 SEQUENTIAL=1
 
-if [[ -z ${boost_URLBASE} ]]; then
-    boost_URLBASE="https://archives.boost.io/release/1.86.0/source/"
-fi
-if [[ -z ${boost_FILENAME} ]]; then
-    boost_FILENAME="boost_1_86_0.tar.bz2"
-fi
-
 if [[ -z ${secp256k1_OWNER} ]]; then
     secp256k1_OWNER="bitcoin-core"
 fi
@@ -97,7 +89,6 @@ main()
 
     for OPTION in "$@"; do
         case ${OPTION} in
-            (--build-boost)                 BUILD_boost="yes";;
             (--build-secp256k1)             BUILD_secp256k1="yes";;
             (--build-preset=*)              BUILD_PRESET="${OPTION#*=}";;
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
@@ -121,7 +112,6 @@ main()
 
     CONFIGURE_OPTIONS_ORIGINAL=("$@")
     CONFIGURE_OPTIONS=("$@")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-boost/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-secp256k1/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-preset=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-src-dir=*/}")
@@ -450,11 +440,6 @@ main()
 
     # defaults and sanitization: generated options
 
-    if [[ -n "${BUILD_boost}" ]]; then
-        export BOOST_ROOT="${PREFIX}"
-        with_boost="--with-boost=${PREFIX}"
-    fi
-
 
     REMAP=()
     for argument in "${CONFIGURE_OPTIONS_CMAKE[@]}"; do
@@ -478,12 +463,6 @@ main()
 
     # declarations
 
-    boost_FLAGS=(
-        "-Wno-enum-constexpr-conversion")
-
-    boost_OPTIONS=(
-        "--with-headers")
-
     secp256k1_FLAGS=(
         "-w")
 
@@ -497,18 +476,6 @@ main()
     libbitcoin_system_FLAGS=()
 
     libbitcoin_system_OPTIONS=()
-
-    if [[ ${BUILD_LIMIT} == "external" ]] ||
-       [[ ${BUILD_LIMIT} == "dependencies" ]] ||
-       [[ ${BUILD_LIMIT} == "none" ]]; then
-        if [[ ${BUILD_boost} == "yes" ]]; then
-            source_archive "boost" "${boost_FILENAME}" "${boost_URLBASE}" "bzip2"
-            local SAVE_CPPFLAGS="${CPPFLAGS}"
-            export CPPFLAGS="${CPPFLAGS} ${boost_FLAGS[@]}"
-            build_boost "boost" "${boost_OPTIONS[@]}"
-            export CPPFLAGS="${SAVE_CPPFLAGS}"
-        fi
-    fi
 
     if [[ ${BUILD_LIMIT} == "external" ]] ||
        [[ ${BUILD_LIMIT} == "dependencies" ]] ||
@@ -543,69 +510,6 @@ main()
     fi
 
     msg_success "Completed successfully."
-}
-
-source_archive()
-{
-    local PROJECT="$1"
-    local FILENAME="$2"
-    local URL_BASE="$3"
-    local COMPRESSION="$4"
-    shift 4
-
-    msg_heading "Preparing to acquire ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}"
-
-    if [ -d "${PROJECT}" ] &&
-       [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
-        msg_warn "Reusing existing '${PROJECT}' directory..."
-        return 0
-    fi
-
-    if [ -d "${PROJECT}" ]; then
-        msg_warn "Encountered existing '${PROJECT}' directory..."
-        if [[ "${NONINTERACTIVE}" == "yes" ]]; then
-            CONFIRM="N"
-        else
-            read -p "Replace '${PROJECT}' directory with intended contents? [y/N] " CONFIRM
-        fi
-
-        if [[ "$(printf '%s' "${CONFIRM}" | tr '[:upper:]' '[:lower:]')" == "y" ]]; then
-            remove_directory_force "${PROJECT}"
-        else
-            msg_error "Aborted installation."
-            exit 0
-        fi
-    fi
-
-    msg "Retrieving ${PROJECT}..."
-
-    create_directory "${PROJECT}"
-    push_directory "${PROJECT}"
-
-    local TAR="tar"
-    local WGET="wget --quiet"
-    local CURL="curl --fail --silent --show-error --location"
-
-    # retrieve file, preferring wget (curl fallback for macOS)
-    if command -v wget >/dev/null 2>&1; then
-        ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
-    else
-        ${CURL} --output "${FILENAME}" "${URL_BASE}${FILENAME}"
-    fi
-
-    # extract to expected path
-    ${TAR} --extract --file "${FILENAME}" --${COMPRESSION} --strip-components=1
-    # ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
-
-    # pop ${PROJECT}
-    pop_directory
-
-    # pop ${BUILD_SRC_DIR}
-    pop_directory
-
-    msg_success "Completed download and extraction successfully."
 }
 
 github_repository_status()
@@ -668,93 +572,6 @@ source_github()
 
     github_repository_status "${REPOSITORY}"
     pop_directory # pop BUILD_SRC_DIR
-}
-
-build_boost()
-{
-    local PROJECT="$1"
-    shift
-
-    msg_heading "Preparing to build ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    local SAVE_IFS="${IFS}"
-    IFS=' '
-
-    # Compute configuration
-    if [[ "${BUILD_LINK}" == "dynamic" ]]; then
-        BOOST_LINK="shared"
-    elif [[ "${BUILD_LINK}" == "static" ]]; then
-        BOOST_LINK="static"
-    else
-        BOOST_LINK="static,shared"
-    fi
-
-    if [[ -n ${CC} ]]; then
-        BOOST_TOOLSET="toolset=${CC}"
-    fi
-
-    if [[ (${OS} == Linux && ${CC} == clang*) || (${OS} == OpenBSD) ]]; then
-        STDLIB_FLAG="-stdlib=lib${STDLIB}"
-        BOOST_CXXFLAGS="cxxflags=${STDLIB_FLAG}"
-        BOOST_LINKFLAGS="linkflags=${STDLIB_FLAG}"
-    fi
-
-    guessed_toolset=`${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh --guess-toolset`
-    CXXFLAGS="-w" ${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
-    cp "${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/b2" .
-
-    if [[ -n "${BOOST_CXXFLAGS}" ]]; then
-        BOOST_CXXFLAGS="${BOOST_CXXFLAGS} ${boost_FLAGS[@]}"
-    else
-        BOOST_CXXFLAGS="cxxflags=${boost_FLAGS[@]}"
-    fi
-
-    # Prebuild status report
-    msg "${PROJECT} configuration."
-    msg "--------------------------------------------------------------------"
-    msg "variant               : release"
-    msg "threading             : multi"
-    msg "toolset               : ${CC}"
-    msg "boost cxxflags        : ${BOOST_CXXFLAGS}"
-    msg "boost linkflags       : ${BOOST_LINKFLAGS}"
-    msg "link                  : ${BOOST_LINK}"
-    msg "-sNO_BZIP2            : 1"
-    msg "-sNO_ZSTD             : 1"
-    msg "-j                    : ${PARALLEL}"
-    msg "-d0                   : [suppress informational messages]"
-    msg "-q                    : [stop at the first error]"
-    msg "--reconfigure         : [ignore cached configuration]"
-    msg "--prefix              : ${PREFIX}"
-    msg "BOOST_OPTIONS         : $*"
-    msg "cxxflags (ignored)    : ${CXXFLAGS}"
-    msg "--------------------------------------------------------------------"
-
-    # Begin build
-    ./bootstrap.sh --with-bjam=./b2 --prefix=${PREFIX}
-
-    ./b2 install \
-        "cxxstd=20" \
-        "variant=release" \
-        "threading=multi" \
-        "${BOOST_TOOLSET}" \
-        "${BOOST_CXXFLAGS}" \
-        "${BOOST_LINKFLAGS}" \
-        "link=${BOOST_LINK}" \
-        "warnings=off" \
-        "-sNO_BZIP2=1" \
-        "-sNO_ZSTD=1" \
-        "-j ${PARALLEL}" \
-        "-d0" \
-        "-q" \
-        "--reconfigure" \
-        "--prefix=${PREFIX}" \
-        "$@"
-
-    IFS="${SAVE_IFS}"
-
-    pop_directory # BUILD_SRC_DIR
 }
 
 build_cmake()
@@ -1011,7 +828,6 @@ test_cmake()
 
 display_build_variables()
 {
-    msg "BUILD_boost                     : ${BUILD_boost}"
     msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
     msg "BUILD_PRESET                    : ${BUILD_PRESET}"
     msg "BUILD_LIMIT                     : ${BUILD_LIMIT}"
@@ -1047,7 +863,6 @@ display_toolchain_variables()
     msg "LD_LIBRARY_PATH                 : ${LD_LIBRARY_PATH}"
     msg "PKG_CONFIG_PATH                 : ${PKG_CONFIG_PATH}"
     msg "LDLIBS                          : ${LDLIBS}"
-    msg "BOOST_ROOT                      : ${BOOST_ROOT}"
     msg "CMAKE_PREFIX_PATH               : ${CMAKE_PREFIX_PATH}"
     msg "CMAKE_INSTALL_PREFIX            : ${CMAKE_INSTALL_PREFIX}"
     msg "CMAKE_INCLUDE_PATH              : ${CMAKE_INCLUDE_PATH}"
@@ -1056,8 +871,6 @@ display_toolchain_variables()
 
 display_constants()
 {
-    msg "boost_URLBASE                   : ${boost_URLBASE}"
-    msg "boost_FILENAME                  : ${boost_FILENAME}"
 
     msg "secp256k1_OWNER                 : ${secp256k1_OWNER}"
     msg "secp256k1_TAG                   : ${secp256k1_TAG}"
@@ -1101,7 +914,6 @@ help()
     msg "                               Default: OFF"
     msg "-Denable-cuda=<ON/OFF>       Use cuda (gpu) batch signature verification (inert on macOS)."
     msg "                               Default: ON"
-    msg "--build-boost                Build Boost libraries"
     msg "--build-secp256k1            Build libsecp256k1 libraries"
     msg "--build-preset=<preset>      Specifies preset configuration to build."
     msg "--build-src-dir=<path>       Location for sources."

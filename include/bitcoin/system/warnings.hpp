@@ -114,7 +114,7 @@
 BC_DISABLE_WARNING(ASSIGNMENT_WITHIN_CONDITIONAL)
 
 // Suppress C4459: declaration of 'one' hides global declaration.
-// This arises from boost templates defining 'one' as public variable.
+// This arises from secp256k1 algorithm locals named 'zero' and 'one'.
 BC_DISABLE_WARNING(LOCAL_HIDES_GLOBAL)
 
 #endif

@@ -10,8 +10,6 @@ include( CMakeFindDependencyMacro )
 
 include( "${CMAKE_CURRENT_LIST_DIR}/libbitcoin-system-targets.cmake" )
 
-find_dependency( Boost 1.86.0 REQUIRED )
-
 set( with-secp256k1 @with-secp256k1@ )
 
 if ( with-secp256k1 )
