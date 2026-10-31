@@ -1477,3 +1477,30 @@ test_libbitcoin_system_test_SOURCES = \
 TESTS = test_runner.sh
 
 endif WITH_TESTS
+
+# Installed Binaries.
+#==============================================================================
+# Target binary 'console/selector'
+#------------------------------------------------------------------------------
+if WITH_CONSOLE
+
+bin_PROGRAMS = console/selector
+
+console_selector_CPPFLAGS = \
+    ${src_libbitcoin_system_la_CPPFLAGS}
+
+console_selector_LDFLAGS = \
+    ${src_libbitcoin_system_la_LDFLAGS}
+
+console_selector_LDADD = \
+    ${src_libbitcoin_system_la_LIBS} \
+    ${src_libbitcoin_system_la_LIBADD}
+
+console_selector_SOURCES = \
+    ${srcdir}/../../console/main.cpp
+
+target_console = console/selector
+
+console: ${target_console}
+
+endif WITH_CONSOLE

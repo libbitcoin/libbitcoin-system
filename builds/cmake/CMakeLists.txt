@@ -99,6 +99,7 @@ option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
 option( enable-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
 option( with-tests "Compile with unit tests." ON )
+option( with-console "Compile with console application." ON )
 
 #------------------------------------------------------------------------------
 # Dependencies.
@@ -678,6 +679,57 @@ if ( with-tests )
 endif()
 
 #------------------------------------------------------------------------------
+# bitcoin-selector executable
+#------------------------------------------------------------------------------
+if ( with-console )
+  add_executable( bitcoin-selector )
+
+  target_compile_features( bitcoin-selector
+    PUBLIC
+      cxx_std_20
+  )
+
+  target_compile_options( bitcoin-selector
+    PRIVATE
+      -Wall
+      -Wextra
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
+      $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
+      $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
+      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
+  )
+
+  file( GLOB_RECURSE bitcoin_selector_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../console/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../console/*.cpp"
+  )
+
+  target_sources( bitcoin-selector
+    PRIVATE
+      ${bitcoin_selector_SOURCES}
+  )
+
+  target_link_libraries( bitcoin-selector
+    PRIVATE
+      bitcoin::system
+  )
+
+  set_target_properties( bitcoin-selector
+    PROPERTIES
+      VERSION ${PROJECT_VERSION}
+      SOVERSION ${PROJECT_VERSION_MAJOR}
+      EXPORT_NAME selector
+      OUTPUT_NAME selector
+  )
+endif()
+
+#------------------------------------------------------------------------------
 # Installation routine.
 #------------------------------------------------------------------------------
 include( GNUInstallDirs )
@@ -716,3 +768,14 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/libbitcoin-system-config-version.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libbitcoin-system
 )
+if ( with-console )
+  install( TARGETS bitcoin-selector
+    EXPORT bitcoin-selector-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILE_SET HEADERS
+  )
+
+endif()
