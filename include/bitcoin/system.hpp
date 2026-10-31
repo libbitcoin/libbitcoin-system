@@ -340,6 +340,15 @@
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
+#include <bitcoin/system/unit_test/aliases.hpp>
+#include <bitcoin/system/unit_test/checks.hpp>
+#include <bitcoin/system/unit_test/filter.hpp>
+#include <bitcoin/system/unit_test/macros.hpp>
+#include <bitcoin/system/unit_test/registry.hpp>
+#include <bitcoin/system/unit_test/runner.hpp>
+#include <bitcoin/system/unit_test/session.hpp>
+#include <bitcoin/system/unit_test/settings.hpp>
+#include <bitcoin/system/unit_test/unit_test.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/descriptor.hpp>
 #include <bitcoin/system/wallet/message.hpp>

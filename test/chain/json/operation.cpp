@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
 BOOST_AUTO_TEST_SUITE(operation_json_tests)

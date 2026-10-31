@@ -868,6 +868,17 @@ include_bitcoin_system_impl_unicodedir = \
 include_bitcoin_system_impl_unicode_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/unicode/ascii.ipp
 
+include_bitcoin_system_impl_unit_testdir = \
+    ${includedir}/bitcoin/system/impl/unit_test
+
+include_bitcoin_system_impl_unit_test_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/checks.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/filter.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/registry.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/runner.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/session.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/settings.ipp
+
 include_bitcoin_system_impl_wallet_addressesdir = \
     ${includedir}/bitcoin/system/impl/wallet/addresses
 
@@ -1104,6 +1115,20 @@ include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp \
     ${srcdir}/../../include/bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp \
     ${srcdir}/../../include/bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp
+
+include_bitcoin_system_unit_testdir = \
+    ${includedir}/bitcoin/system/unit_test
+
+include_bitcoin_system_unit_test_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/unit_test/aliases.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/checks.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/filter.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/macros.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/registry.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/runner.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/session.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/settings.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/unit_test.hpp
 
 include_bitcoin_system_walletdir = \
     ${includedir}/bitcoin/system/wallet
@@ -1500,6 +1525,10 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/unicode/utf8_everywhere/paths.cpp \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_istream.cpp \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_ostream.cpp \
+    ${srcdir}/../../test/unit_test/checks.cpp \
+    ${srcdir}/../../test/unit_test/filter.cpp \
+    ${srcdir}/../../test/unit_test/registry.cpp \
+    ${srcdir}/../../test/unit_test/settings.cpp \
     ${srcdir}/../../test/wallet/context.cpp \
     ${srcdir}/../../test/wallet/descriptor.cpp \
     ${srcdir}/../../test/wallet/message.cpp \

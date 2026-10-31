@@ -127,7 +127,7 @@ protected:
     virtual INLINE op_iterator end() const NOEXCEPT;
     virtual INLINE const transaction& tx() const NOEXCEPT;
     virtual INLINE const input_t& input() const NOEXCEPT;
-    virtual INLINE bool is_enabled(flags flag) const NOEXCEPT;
+    virtual bool is_enabled(flags flag) const NOEXCEPT;
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
@@ -218,9 +218,9 @@ protected:
     virtual INLINE void set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and op_codeseparator from returned subscript.
-    virtual INLINE script::cptr subscript(
+    virtual script::cptr subscript(
         const chunk_xptrs& endorsements) const NOEXCEPT;
-    virtual INLINE script::cptr subscript(
+    virtual script::cptr subscript(
         const chunk_xptr& endorsement) const NOEXCEPT;
 
     /// Signature hashing.

@@ -449,7 +449,9 @@
     <ClCompile Include="..\..\..\..\test\serial\json\value_ref.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\props.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\serialize.cpp" />
-    <ClCompile Include="..\..\..\..\test\settings.cpp" />
+    <ClCompile Include="..\..\..\..\test\settings.cpp">
+      <ObjectFileName>$(IntDir)test_settings.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\binary.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\device.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\copy_sink.cpp" />
@@ -495,6 +497,12 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\paths.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\checks.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\registry.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\settings.cpp">
+      <ObjectFileName>$(IntDir)test_unit_test_settings.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
