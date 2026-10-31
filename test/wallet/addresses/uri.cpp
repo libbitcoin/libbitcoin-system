@@ -393,14 +393,14 @@ BC_AUTO_TEST_CASE(uri__decode__port__expected)
     BC_REQUIRE(!instance.decode("http://a@b@host"));
 }
 
-BC_AUTO_TEST_CASE(uri__decode_query__plus__space)
+BC_AUTO_TEST_CASE(uri__decode_query__plus__literal)
 {
     uri instance;
     BC_REQUIRE(instance.decode("bitcoin:?message=hello+bitcoin&a%2Bb=c%2Bd"));
     BC_REQUIRE_EQUAL(instance.query(), "message=hello+bitcoin&a+b=c+d");
 
     const auto map = instance.decode_query();
-    BC_REQUIRE_EQUAL(map.at("message"), "hello bitcoin");
+    BC_REQUIRE_EQUAL(map.at("message"), "hello+bitcoin");
     BC_REQUIRE_EQUAL(map.at("a+b"), "c+d");
 }
 
