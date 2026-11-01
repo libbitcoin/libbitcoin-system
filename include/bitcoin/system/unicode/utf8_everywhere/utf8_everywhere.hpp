@@ -61,9 +61,9 @@
 
 // Regarding std lib paths:
 //
-// When working with std::filesystem::path and utf8 narrow characters on Win32
-// the thread must be configured for utf8 (std::locale::global). This is
-// configured by BC_USE_LIBBITCOIN_MAIN.
+// On Win32 std::filesystem::path interprets narrow characters in the ANSI code
+// page, not utf8. Convert between utf8 strings and paths with to_path and
+// from_path, which use the path's utf8 (char8_t) interface on all platforms.
 // en.cppreference.com/w/cpp/filesystem/path/string
 
 // Regarding console applications:

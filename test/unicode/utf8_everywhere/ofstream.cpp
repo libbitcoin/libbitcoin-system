@@ -48,4 +48,22 @@ BC_AUTO_TEST_CASE(ofstream__construct__valid_path__round_trip)
     BC_REQUIRE(!in.good());
 }
 
+BC_AUTO_TEST_CASE(ofstream__construct__unicode_path__round_trip)
+{
+    const auto name = TEST_NAME + std::string(reinterpret_cast<const char*>(u8"_文件名.txt"));
+    const auto path = to_path(TEST_DIRECTORY + "/" + name);
+    const std::string expected{ "libbitcoin" };
+
+    ofstream out(path, std::ofstream::out);
+    out << expected;
+    out.close();
+    BC_REQUIRE(out.good());
+    BC_REQUIRE_EQUAL(from_path(std::filesystem::directory_iterator{ to_path(TEST_DIRECTORY) }->path().filename()), name);
+
+    ifstream in(path);
+    std::string line;
+    BC_REQUIRE(std::getline(in, line));
+    BC_REQUIRE_EQUAL(line, expected);
+}
+
 BC_AUTO_TEST_SUITE_END()
