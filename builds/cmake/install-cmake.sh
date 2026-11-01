@@ -309,6 +309,8 @@ main()
             PARALLEL=$(nproc)
         elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
             PARALLEL=$(sysctl -n hw.ncpu)
+        elif [[ ${OS} == MINGW* ]] || [[ ${OS} == MSYS* ]]; then
+            PARALLEL=${NUMBER_OF_PROCESSORS}
         else
             msg_error "Unsupported system: '${OS}'"
             msg_error "  Unable to determine value for --build-parallel"

@@ -169,6 +169,22 @@ main()
         msg_verbose "BUILD_PRESET value 'nix-gnu-release-shared'."
         BUILD_CONFIG="release"
         BUILD_LINK="dynamic"
+    elif [[ "${BUILD_PRESET}" == "win-msvc-debug-static" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-msvc-debug-static'."
+        BUILD_CONFIG="debug"
+        BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "win-msvc-release-static" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-msvc-release-static'."
+        BUILD_CONFIG="release"
+        BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "win-clangcl-debug-static" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-clangcl-debug-static'."
+        BUILD_CONFIG="debug"
+        BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "win-clangcl-release-static" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-clangcl-release-static'."
+        BUILD_CONFIG="release"
+        BUILD_LINK="static"
     else
         msg_error "Unrecognized build-preset value '${BUILD_PRESET}'."
         help
@@ -325,6 +341,8 @@ main()
             PARALLEL=$(nproc)
         elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
             PARALLEL=$(sysctl -n hw.ncpu)
+        elif [[ ${OS} == MINGW* ]] || [[ ${OS} == MSYS* ]]; then
+            PARALLEL=${NUMBER_OF_PROCESSORS}
         else
             msg_error "Unsupported system: '${OS}'"
             msg_error "  Unable to determine value for --build-parallel"
@@ -386,34 +404,6 @@ main()
         ARCHTUNE="-march=native -mtune=native"
     fi
 
-    # translate BUILD_CONFIG to ZFLAGS
-    if [[ -n "${BUILD_CONFIG}" ]]; then
-        msg_verbose "*** Build config specified, calculating flags..."
-
-        if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-            BUILD_FLAGS="-Og -g1"
-        elif [[ "${BUILD_CONFIG}" == "release" ]]; then
-            BUILD_FLAGS="-O3"
-        fi
-
-        if [[ -z "${CFLAGS}" ]]; then
-            export CFLAGS="${ARCHTUNE} ${BUILD_FLAGS}"
-            msg_verbose "Exporting CFLAGS '${CFLAGS}'"
-        else
-            msg_verbose "CFLAGS initially '${CFLAGS}'"
-            export CFLAGS="${CFLAGS} ${ARCHTUNE} ${BUILD_FLAGS}"
-            msg_verbose "CFLAGS modified to '${CFLAGS}'"
-        fi
-
-        if [[ -z "${CXXFLAGS}" ]]; then
-            export CXXFLAGS="${ARCHTUNE} ${BUILD_FLAGS}"
-            msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
-        else
-            msg_verbose "CXXFLAGS initially '${CXXFLAGS}'"
-            export CXXFLAGS="${CXXFLAGS} ${ARCHTUNE} ${BUILD_FLAGS}"
-            msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
-        fi
-    fi
 
     # Specify cmake build
     if [[ "${BUILD_CONFIG}" == "debug" ]]; then
@@ -648,7 +638,7 @@ build_preset()
 
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
-        VERBOSITY_MAKE="VERBOSE=1"
+        VERBOSITY_MAKE="--verbose"
     fi
 
     msg_heading "Preparing to build ${PROJECT}"
@@ -679,11 +669,10 @@ build_preset()
 
     cmake ${VERBOSITY_CMAKE} -LA --preset="${BUILD_PRESET}" "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_SRC_PATH}"
 
-    # make
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} ${VERBOSITY_MAKE}
+        cmake --build . -j${JOBS} ${VERBOSITY_MAKE}
     else
-        make
+        cmake --build . ${VERBOSITY_MAKE}
     fi
 
     pop_directory # BUILD_OBJ_DIR
