@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/wallet/psbt/entry.hpp>
 
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -32,12 +33,12 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 bool entry::from_data(reader& source) NOEXCEPT
 {
     // A zero key length is the map terminator.
-    const auto size = source.read_size();
+    const auto size = source.read_size(chain::max_bytes);
     if (is_zero(size) || !source)
         return false;
 
     key = source.read_bytes(size);
-    value = source.read_bytes(source.read_size());
+    value = source.read_bytes(source.read_size(chain::max_bytes));
     return !!source;
 }
 
