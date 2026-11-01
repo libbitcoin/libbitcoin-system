@@ -83,6 +83,18 @@ BOOST_AUTO_TEST_CASE(hkdf__sha256__rfc5869_case_3__expected)
 }
 
 // bip324 key derivation (from bips.dev/324 packet encoding test vector 1).
+BOOST_AUTO_TEST_CASE(hkdf__sha256__maximum_size__extends_shorter)
+{
+    constexpr auto length = array_count<sha256::digest_t>;
+    constexpr auto maximum = hkdf<sha256>::maximum_size;
+    const sha256::digest_t prk{ 42 };
+    data_array<maximum - length> shorter{};
+    data_array<maximum> longer{};
+    hkdf<sha256>::expand(shorter, prk, {});
+    hkdf<sha256>::expand(longer, prk, {});
+    BOOST_REQUIRE(std::equal(shorter.begin(), shorter.end(), longer.begin()));
+}
+
 BOOST_AUTO_TEST_CASE(hkdf__sha256__bip324_session_id__expected)
 {
     // v2_ecdh shared secret for vector 1 (see secp256k1 ellswift tests).

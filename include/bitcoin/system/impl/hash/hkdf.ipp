@@ -50,9 +50,9 @@ expand(data_array<Size>& out, const digest_t& key,
 
     digest_t t{};
     auto it = out.begin();
-    for (uint8_t block = 1; block <= blocks; ++block)
+    for (auto block = one; block <= blocks; ++block)
     {
-        const data_array<one> count{ block };
+        const data_array<one> count{ narrow_cast<uint8_t>(block) };
         hmac<Algorithm> mac{ key };
 
         // rfc5869
