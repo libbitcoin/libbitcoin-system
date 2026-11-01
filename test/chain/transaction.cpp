@@ -191,6 +191,18 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__data_1__expected)
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
 }
 
+BOOST_AUTO_TEST_CASE(transaction__constructor__input_count_exceeds_data__invalid)
+{
+    const auto data = base16_chunk("00000000fe40420f00");
+    BOOST_REQUIRE(!transaction(data, true).is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__constructor__witness_input_count_exceeds_data__invalid)
+{
+    const auto data = base16_chunk("000000000001fe40420f00");
+    BOOST_REQUIRE(!transaction(data, true).is_valid());
+}
+
 BOOST_AUTO_TEST_CASE(transaction__constructor__superfluous_witness__invalid)
 {
     const auto data = base16_chunk(

@@ -147,7 +147,7 @@ read_puts(Source& source) NOEXCEPT
     const auto count = source.read_size(max_count);
 
     puts->reserve(count);
-    for (auto put = zero; put < count; ++put)
+    for (auto put = zero; put < count && source; ++put)
         puts->push_back(to_shared<Put>(source));
 
     // This is a pointer copy (non-const to const).

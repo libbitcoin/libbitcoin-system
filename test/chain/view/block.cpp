@@ -29,6 +29,14 @@ BOOST_AUTO_TEST_CASE(block_view__construct__empty__invalid)
     BOOST_CHECK(!view.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(block_view__construct__count_exceeds_buffer__invalid)
+{
+    auto data = base16_chunk("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fe40420f00");
+    const chain::view::block view{ std::move(data), true };
+    BOOST_CHECK(!view.is_valid());
+    BOOST_CHECK_EQUAL(view.transactions(), 0u);
+}
+
 BOOST_AUTO_TEST_CASE(block_view__construct__genesis__valid)
 {
     const auto& block = test::genesis;
