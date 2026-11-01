@@ -64,22 +64,6 @@ inline bool deserialize(data_chunk& out, const std::string_view& text) NOEXCEPT
     return decode_base16(out, text);
 }
 
-template <typename Value, size_t Size>
-bool deserialize(std_array<Value, Size>& out, const std::string_view& text) NOEXCEPT
-{
-    auto result = true;
-    const auto deserializer = [&result](const std::string_view& token) NOEXCEPT
-    {
-        Value value{};
-        result &= deserialize(value, token);
-        return value;
-    };
-
-    const auto tokens = split(text);
-    std::transform(tokens.cbegin(), tokens.cend(), out.begin(), deserializer);
-    return result;
-}
-
 template <typename Value>
 bool deserialize(std_vector<Value>& out, const std::string_view& text) NOEXCEPT
 {

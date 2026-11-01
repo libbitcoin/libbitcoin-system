@@ -50,11 +50,6 @@ bool deserialize(data_array<Size>& out, const std::string_view& text) NOEXCEPT;
 inline bool deserialize(data_chunk& out, const std::string_view& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
-template <typename Value, size_t Size>
-bool deserialize(std_array<Value, Size>& out,
-    const std::string_view& text) NOEXCEPT;
-
-/// Specialize arrays to add space delimiter.
 template <typename Value>
 bool deserialize(std_vector<Value>& out, const std::string_view& text) NOEXCEPT;
 
