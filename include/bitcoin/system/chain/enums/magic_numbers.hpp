@@ -111,6 +111,9 @@ constexpr size_t max_null_data_size = 80;
 /// Applies to block.txs, tx.inputs/witnesses, and tx.outputs.
 constexpr auto max_count = max_block_size;
 
+/// Applies to block.txs (one input and one output, both scripts empty).
+constexpr size_t min_transaction_size = 60;
+
 /// Applies to input.witness (stack size), script, 
 constexpr auto max_bytes = max_block_weight;
 

@@ -53,7 +53,10 @@ block::block(data_chunk&& block_buffer, bool witness) NOEXCEPT
     read::bytes::fast in(istream);
     in.skip_bytes(header::serialized_size());
 
-    const auto txs = in.read_size(max_count);
+    const auto size = buffer_->size();
+    const auto bytes = floored_subtract(size, header::serialized_size());
+    const auto limit = std::min(max_count, bytes / min_transaction_size);
+    const auto txs = in.read_size(limit);
     if (is_zero(txs))
         return;
 
