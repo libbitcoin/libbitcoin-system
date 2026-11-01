@@ -116,7 +116,8 @@ private:
         uint32_t version) NOEXCEPT;
 
     bool parse(reader& source) NOEXCEPT;
-    bool parse_global(reader& source) NOEXCEPT;
+    bool parse_global(reader& source, size_t& input_count,
+        size_t& output_count) NOEXCEPT;
     bool finalize(input& in, uint32_t index) NOEXCEPT;
     chain::input::cptr extract_input(size_t index) const NOEXCEPT;
 
