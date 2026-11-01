@@ -64,6 +64,16 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
+# Define the Windows platform and link the Windows system libraries for MinGW.
+# Programs link statically, and wmain programs link the unicode entry point.
+AS_CASE([${host_os}], [*mingw*],
+    [CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE -DWIN32_LEAN_AND_MEAN -DNOMINMAX -D_WIN32_WINNT=0x0A00"
+     LIBS="${LIBS} -lws2_32 -lmswsock -ldbghelp"
+     mingw_program_LDFLAGS="-all-static"
+     mingw_wmain_LDFLAGS="-municode"])
+AC_SUBST([mingw_program_LDFLAGS])
+AC_SUBST([mingw_wmain_LDFLAGS])
+
 # Run macros for operation of generated Makefiles, enable non-recursive make.
 # Unless [foreign] is specified standard GNU files will be required,
 # specifically: AUTHORS, COPYING, INSTALL, NEWS, README and ChangeLog.

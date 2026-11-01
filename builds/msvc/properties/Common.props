@@ -68,4 +68,16 @@
     </ClCompile>
   </ItemDefinitionGroup>
 
+  <!-- clang-cl enables x86 intrinsics by target feature, as gcc/clang, where msvc uses the WITH_ options. -->
+  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'Win32')">
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Option-sha)' == 'true'">-msse4.1 -msha %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-sha512)' == 'true'">-mavx2 -msha512 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-avx512ifma)' == 'true'">-mavx512ifma -mavx512vl %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-avxifma)' == 'true'">-mavxifma %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-aesni)' == 'true'">-msse4.1 -maes -mpclmul %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-vaes)' == 'true'">-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
 </Project>
