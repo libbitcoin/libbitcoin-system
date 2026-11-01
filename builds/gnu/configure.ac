@@ -155,6 +155,15 @@ AC_ARG_WITH([tests],
 AC_MSG_RESULT([$with_tests])
 AM_CONDITIONAL([WITH_TESTS], [test "x${with_tests}" != "xno"])
 
+AC_MSG_CHECKING([--with-console option])
+AC_ARG_WITH([console],
+    AS_HELP_STRING([--with-console],
+        [Compile with console application. @<:@default=yes@:>@]),
+    [with_console=$withval],
+    [with_console=yes])
+AC_MSG_RESULT([$with_console])
+AM_CONDITIONAL([WITH_CONSOLE], [test "x${with_console}" != "xno"])
+
 AC_MSG_CHECKING([--enable-shani option])
 AC_ARG_ENABLE([shani],
     AS_HELP_STRING([--enable-shani],

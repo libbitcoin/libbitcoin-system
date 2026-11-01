@@ -219,6 +219,7 @@
     <ClCompile Include="..\..\..\..\test\config\path.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\config\setting.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\token.cpp" />
     <ClCompile Include="..\..\..\..\test\config\url.cpp" />
     <ClCompile Include="..\..\..\..\test\config\utilities.cpp" />
     <ClCompile Include="..\..\..\..\test\config\version.cpp" />

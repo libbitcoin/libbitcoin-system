@@ -1075,6 +1075,7 @@ code block::accept(const context& ctx, size_t subsidy_interval,
 // This assumes that prevout and metadata caching are completed on all inputs.
 code block::confirm(const context& ctx) const NOEXCEPT
 {
+    // TODO: restore bip30 unspent coinbase collision check from prevout metadata.
     return confirm_transactions(ctx);
 }
 

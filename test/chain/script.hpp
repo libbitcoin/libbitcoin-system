@@ -66,9 +66,9 @@ struct script_test
     std::string input;
     std::string output;
     std::string description;
-    uint32_t input_sequence;
-    uint32_t locktime;
-    uint32_t version;
+    uint32_t input_sequence{};
+    uint32_t locktime{};
+    uint32_t version{};
 };
 
 typedef std_vector<script_test> script_test_list;

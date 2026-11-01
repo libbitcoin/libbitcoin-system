@@ -57,6 +57,12 @@ public:
     virtual uint32_t maximum_timespan() const NOEXCEPT;
     virtual uint32_t retargeting_interval() const NOEXCEPT;
 
+    /// Network.
+    /// -----------------------------------------------------------------------
+
+    /// The network of the defaults.
+    config::selection network{};
+
     /// Configured forks.
     /// -----------------------------------------------------------------------
     /// These are used by chain_state (only).

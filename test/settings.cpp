@@ -43,6 +43,7 @@ const chain::checkpoint::list mainnet_checkpoints
 BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
 {
     settings configuration;
+    BOOST_REQUIRE(configuration.network == chain::selection::none);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
@@ -64,6 +65,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
 BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
 {
     settings configuration(chain::selection::mainnet);
+    BOOST_REQUIRE(configuration.network == chain::selection::mainnet);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
@@ -113,6 +115,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet3_context__expected)
     };
 
     settings configuration(chain::selection::testnet3);
+    BOOST_REQUIRE(configuration.network == chain::selection::testnet3);
     BOOST_REQUIRE(!configuration.forks.time_warp_patch);
     BOOST_REQUIRE(!configuration.forks.block_storm_patch);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
@@ -164,6 +167,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet4_context__expected)
     };
 
     settings configuration(chain::selection::testnet4);
+    BOOST_REQUIRE(configuration.network == chain::selection::testnet4);
     BOOST_REQUIRE(configuration.forks.time_warp_patch);
     BOOST_REQUIRE(configuration.forks.block_storm_patch);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
@@ -208,6 +212,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet4_context__expected)
 BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
 {
     settings configuration(chain::selection::regtest);
+    BOOST_REQUIRE(configuration.network == chain::selection::regtest);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
     BOOST_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
@@ -251,6 +256,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__signet_context__expected)
     };
 
     settings configuration(chain::selection::signet);
+    BOOST_REQUIRE(configuration.network == chain::selection::signet);
     BOOST_REQUIRE(configuration.forks.signet);
     BOOST_REQUIRE(configuration.forks.difficult);
     BOOST_REQUIRE(configuration.forks.retarget);

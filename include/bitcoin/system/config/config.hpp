@@ -41,7 +41,9 @@
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
+#include <bitcoin/system/config/selection.hpp>
 #include <bitcoin/system/config/setting.hpp>
+#include <bitcoin/system/config/token.hpp>
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>

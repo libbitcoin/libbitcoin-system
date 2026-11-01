@@ -67,13 +67,13 @@ public:
     }
 
     /// Header context within chain.
-    uint32_t flags;
-    uint32_t timestamp;
-    uint32_t median_time_past;
-    size_t height;
-    uint32_t minimum_block_version;
-    uint32_t work_required;
-    uint32_t previous_timestamp;
+    uint32_t flags{};
+    uint32_t timestamp{};
+    uint32_t median_time_past{};
+    size_t height{};
+    uint32_t minimum_block_version{};
+    uint32_t work_required{};
+    uint32_t previous_timestamp{};
 };
 
 bool operator==(const context& left, const context& right) NOEXCEPT;

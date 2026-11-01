@@ -417,7 +417,9 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/point.hpp \
     ${srcdir}/../../include/bitcoin/system/config/printer.hpp \
     ${srcdir}/../../include/bitcoin/system/config/script.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/selection.hpp \
     ${srcdir}/../../include/bitcoin/system/config/setting.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/token.hpp \
     ${srcdir}/../../include/bitcoin/system/config/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/config/url.hpp \
     ${srcdir}/../../include/bitcoin/system/config/utilities.hpp \
@@ -603,7 +605,8 @@ include_bitcoin_system_impl_configdir = \
     ${includedir}/bitcoin/system/impl/config
 
 include_bitcoin_system_impl_config_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp
+    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/config/token.ipp
 
 include_bitcoin_system_impl_cryptodir = \
     ${includedir}/bitcoin/system/impl/crypto
@@ -1238,6 +1241,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/path.cpp \
     ${srcdir}/../../test/config/printer.cpp \
     ${srcdir}/../../test/config/setting.cpp \
+    ${srcdir}/../../test/config/token.cpp \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \
     ${srcdir}/../../test/config/version.cpp \
@@ -1473,3 +1477,30 @@ test_libbitcoin_system_test_SOURCES = \
 TESTS = test_runner.sh
 
 endif WITH_TESTS
+
+# Installed Binaries.
+#==============================================================================
+# Target binary 'console/selector'
+#------------------------------------------------------------------------------
+if WITH_CONSOLE
+
+bin_PROGRAMS = console/selector
+
+console_selector_CPPFLAGS = \
+    ${src_libbitcoin_system_la_CPPFLAGS}
+
+console_selector_LDFLAGS = \
+    ${src_libbitcoin_system_la_LDFLAGS}
+
+console_selector_LDADD = \
+    ${src_libbitcoin_system_la_LIBS} \
+    ${src_libbitcoin_system_la_LIBADD}
+
+console_selector_SOURCES = \
+    ${srcdir}/../../console/main.cpp
+
+target_console = console/selector
+
+console: ${target_console}
+
+endif WITH_CONSOLE

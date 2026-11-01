@@ -1271,7 +1271,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\selection.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\setting.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\token.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp">
@@ -2194,6 +2200,9 @@
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp">
+      <Filter>include\bitcoin\system\impl\config</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\config\token.ipp">
       <Filter>include\bitcoin\system\impl\config</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_bitslice.ipp">

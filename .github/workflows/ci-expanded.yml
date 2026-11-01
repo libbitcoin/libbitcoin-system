@@ -404,10 +404,11 @@ jobs:
           - image: ubuntu-24.04-arm
             config: "release"
             link: "static"
-            cc: "gcc-13"
-            cxx: "g++-13"
+            cc: "gcc-14"
+            cxx: "g++-14"
             flags: ""
             coverage: ""
+            package: "gcc-14 g++-14"
             boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
@@ -415,11 +416,11 @@ jobs:
           - image: ubuntu-24.04
             config: "release"
             link: "static"
-            cc: "gcc-13"
-            cxx: "g++-13"
+            cc: "gcc-15"
+            cxx: "g++-15"
             flags: "-m32"
             coverage: ""
-            package: "gcc-13-multilib g++-13-multilib"
+            package: "gcc-15-multilib g++-15-multilib"
             boost: "--build-boost"
             secp256k1: ""
             options: "--enable-isystem"
@@ -473,7 +474,9 @@ jobs:
           if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
              [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
              [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-16"* ]]; then
+             [[ "${{ matrix.package }}" == *"gcc-16"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-15-multilib"* ]] ||
+             [[ "${{ matrix.package }}" == *"g++-15-multilib"* ]]; then
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
             sudo apt-get update
           fi
@@ -956,7 +959,9 @@ jobs:
           if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
              [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
              [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-16"* ]]; then
+             [[ "${{ matrix.package }}" == *"gcc-16"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-15-multilib"* ]] ||
+             [[ "${{ matrix.package }}" == *"g++-15-multilib"* ]]; then
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
             sudo apt-get update
           fi
@@ -1339,7 +1344,9 @@ jobs:
           if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
              [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
              [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-16"* ]]; then
+             [[ "${{ matrix.package }}" == *"gcc-16"* ]] ||
+             [[ "${{ matrix.package }}" == *"gcc-15-multilib"* ]] ||
+             [[ "${{ matrix.package }}" == *"g++-15-multilib"* ]]; then
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
             sudo apt-get update
           fi

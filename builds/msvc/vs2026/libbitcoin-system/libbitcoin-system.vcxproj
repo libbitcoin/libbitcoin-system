@@ -536,7 +536,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\selection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\setting.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\url.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\utilities.hpp" />
@@ -844,6 +846,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\config\token.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_bitslice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_ctr.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_native.ipp" />
