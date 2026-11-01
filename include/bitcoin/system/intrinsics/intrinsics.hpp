@@ -39,7 +39,6 @@
 #include <bitcoin/system/intrinsics/none/none_aes.hpp>
 #include <bitcoin/system/intrinsics/none/none_sha.hpp>
 #include <bitcoin/system/intrinsics/rotate.hpp>
-#include <bitcoin/system/intrinsics/sve/sve.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 
 #endif

@@ -236,7 +236,6 @@
 #include <bitcoin/system/intrinsics/none/none_128.hpp>
 #include <bitcoin/system/intrinsics/none/none_aes.hpp>
 #include <bitcoin/system/intrinsics/none/none_sha.hpp>
-#include <bitcoin/system/intrinsics/sve/sve.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/machine/number.hpp>

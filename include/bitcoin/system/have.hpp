@@ -138,16 +138,6 @@
     #endif
 #endif
 
-// Custom options to use extended SVE variable width.
-#if defined(__ARM_FEATURE_SVE)
-    #if defined(WITH_512)
-        #define HAVE_512
-    #endif
-    #if defined(WITH_256)
-        #define HAVE_256
-    #endif
-#endif
-
 // bitcoin-core/secp256k1 (otherwise local secp256k1)
 #if defined(WITH_SECP256K1)
     #define HAVE_SECP256K1
@@ -182,7 +172,7 @@
     #define __AVX512VL__
 #endif
 
-/// vc++: ARM implies NEON, SVE not supported, CRYPTO requires custom option.
+/// vc++: ARM implies NEON, CRYPTO requires custom option.
 #if defined(HAVE_MSC) && defined(HAVE_ARM) && !defined(__ARM_NEON)
     #define __ARM_NEON
 #endif
@@ -237,9 +227,6 @@
     #define __ARM_NEON
 #endif
 #if defined(__ARM_FEATURE_SHA512) && !defined(__ARM_NEON)
-    #define __ARM_NEON
-#endif
-#if defined(__ARM_FEATURE_SVE) && !defined(__ARM_NEON)
     #define __ARM_NEON
 #endif
 
@@ -316,7 +303,6 @@
 #endif
 
 /// Map standard ARM defines for intrinsics usage. 
-/// SVE maximum width is not detectable (requires custom options).
 #if defined(HAVE_ARM64)
     // -march=armv8-a+aes
     #if defined(__ARM_FEATURE_AES) || defined(__ARM_FEATURE_CRYPTO)
@@ -327,10 +313,6 @@
     #if defined(__ARM_FEATURE_SHA512)
         #define HAVE_NEON_SHA3
         #define HAVE_SHA512
-    #endif
-    // -march=armv8-a+sve
-    #if defined(__ARM_FEATURE_SVE)
-        #define HAVE_SVE
     #endif
 #endif
 #if defined(HAVE_ARM)

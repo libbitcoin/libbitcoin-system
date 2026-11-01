@@ -666,7 +666,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_aes.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\sve\sve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\literals.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp" />

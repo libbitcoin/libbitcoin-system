@@ -891,12 +891,6 @@ include_bitcoin_system_intrinsics_none_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_sha.hpp
 
-include_bitcoin_system_intrinsics_svedir = \
-    ${includedir}/bitcoin/system/intrinsics/sve
-
-include_bitcoin_system_intrinsics_sve_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/intrinsics/sve/sve.hpp
-
 include_bitcoin_system_machinedir = \
     ${includedir}/bitcoin/system/machine
 
@@ -1353,7 +1347,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/intrinsics/types.cpp \
     ${srcdir}/../../test/intrinsics/platforms/intel.cpp \
     ${srcdir}/../../test/intrinsics/platforms/neon.cpp \
-    ${srcdir}/../../test/intrinsics/platforms/sve.cpp \
     ${srcdir}/../../test/machine/interpreter.cpp \
     ${srcdir}/../../test/machine/interpreter_connect.cpp \
     ${srcdir}/../../test/machine/interpreter_run.cpp \

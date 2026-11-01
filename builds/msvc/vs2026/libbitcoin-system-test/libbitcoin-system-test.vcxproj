@@ -367,7 +367,6 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\multiply.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\intel.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\neon.cpp" />
-    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\sve.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\rotate.cpp">
       <ObjectFileName>$(IntDir)test_intrinsics_rotate.obj</ObjectFileName>
     </ClCompile>
