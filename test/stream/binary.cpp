@@ -311,6 +311,14 @@ BOOST_AUTO_TEST_CASE(binary__index__contained__expected)
     BOOST_REQUIRE_EQUAL(instance[9], false);
 }
 
+BOOST_AUTO_TEST_CASE(binary__index__beyond_bits__false)
+{
+    const binary instance{ "1010111010" };
+    BOOST_REQUIRE_EQUAL(instance[10], false);
+    BOOST_REQUIRE_EQUAL(instance[15], false);
+    BOOST_REQUIRE_EQUAL(instance[16], false);
+}
+
 // stream >>
 
 BOOST_AUTO_TEST_CASE(binary__stream__in__expected)

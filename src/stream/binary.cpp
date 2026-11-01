@@ -137,7 +137,7 @@ binary::operator const data_chunk&() const NOEXCEPT
 bool binary::operator[](size_t index) const NOEXCEPT
 {
     const auto byte = index / byte_bits;
-    return (byte < bits_) && get_left(bytes_[byte], index % byte_bits);
+    return (index < bits_) && get_left(bytes_[byte], index % byte_bits);
 }
 
 bool binary::operator<(const binary& other) const NOEXCEPT
