@@ -2170,6 +2170,9 @@
     <ClInclude Include="..\..\..\..\build\include\bitcoin\system\version.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClCompile Include="..\..\..\..\build\src\version.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\annex.ipp">

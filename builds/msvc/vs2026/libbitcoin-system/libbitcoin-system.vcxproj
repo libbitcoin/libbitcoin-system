@@ -104,7 +104,13 @@
     <ConfigurableFile Include="..\..\..\..\include\bitcoin\system\version.hpp.in">
       <Generated>..\..\..\..\build\include\bitcoin\system\version.hpp</Generated>
     </ConfigurableFile>
+    <ConfigurableFile Include="..\..\..\..\src\version.cpp.in">
+      <Generated>..\..\..\..\build\src\version.cpp</Generated>
+    </ConfigurableFile>
     <ClInclude Include="..\..\..\..\build\include\bitcoin\system\version.hpp" />
+    <ClCompile Include="..\..\..\..\build\src\version.cpp">
+      <ObjectFileName>$(IntDir)build_src_version.obj</ObjectFileName>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\arena.cpp" />
