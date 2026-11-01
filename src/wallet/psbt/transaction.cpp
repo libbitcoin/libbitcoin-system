@@ -188,12 +188,14 @@ bool transaction::parse(reader& source) NOEXCEPT
         source.read_byte() != psbt_separator)
         return false;
 
-    if (!parse_global(source))
+    size_t input_count{};
+    size_t output_count{};
+    if (!parse_global(source, input_count, output_count))
         return false;
 
     const auto version0 = (version_ == version_0);
-    const auto ins = version0 ? tx_.inputs_ptr()->size() : inputs_.size();
-    const auto outs = version0 ? tx_.outputs_ptr()->size() : outputs_.size();
+    const auto ins = version0 ? tx_.inputs_ptr()->size() : input_count;
+    const auto outs = version0 ? tx_.outputs_ptr()->size() : output_count;
 
     inputs_.clear();
     for (auto count = ins; !is_zero(count); --count)
@@ -218,7 +220,8 @@ bool transaction::parse(reader& source) NOEXCEPT
     return source.is_exhausted();
 }
 
-bool transaction::parse_global(reader& source) NOEXCEPT
+bool transaction::parse_global(reader& source, size_t& input_count,
+    size_t& output_count) NOEXCEPT
 {
     std_vector<data_chunk> keys{};
     entry entry{};
@@ -226,8 +229,6 @@ bool transaction::parse_global(reader& source) NOEXCEPT
     bool has_tx_version{};
     bool has_input_count{};
     bool has_output_count{};
-    size_t input_count{};
-    size_t output_count{};
 
     while (entry.from_data(source))
     {
@@ -338,8 +339,6 @@ bool transaction::parse_global(reader& source) NOEXCEPT
             !has_output_count)
             return false;
 
-        inputs_.resize(input_count);
-        outputs_.resize(output_count);
         return true;
     }
 
