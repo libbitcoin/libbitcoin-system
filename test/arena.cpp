@@ -91,7 +91,7 @@ BC_AUTO_TEST_CASE(default_arena__allocate1__non_zero_bytes__non_null_allocation)
     BC_REQUIRE(!is_null(ptr));
 
     // Clean up unfaked allocation.
-    ::operator delete(ptr);
+    instance.deallocate(ptr, 42);
 }
 
 BC_AUTO_TEST_CASE(default_arena__allocate2__non_zero_bytes_max_align__non_null_allocation)
@@ -101,24 +101,25 @@ BC_AUTO_TEST_CASE(default_arena__allocate2__non_zero_bytes_max_align__non_null_a
     BC_REQUIRE(!is_null(ptr));
 
     // Clean up unfaked allocation.
-    ::operator delete(ptr);
+    instance.deallocate(ptr, 42, alignof(max_align_t));
 }
 
 // "The effect of dereferencing a pointer returned as a request for zero size is undefined."
 BC_AUTO_TEST_CASE(default_arena__allocate__zero_bytes__non_null)
 {
-    const auto ptr = default_arena{}.allocate(0);
+    default_arena instance{};
+    const auto ptr = instance.allocate(0);
     BC_REQUIRE(!is_null(ptr));
 
     // Clean up unfaked allocation (even though it was empty this would otherwise be a leak).
-    ::operator delete(ptr);
+    instance.deallocate(ptr, 0);
 }
 
 BC_AUTO_TEST_CASE(default_arena__deallocate1__non_zero_bytes__does_not_throw)
 {
     default_arena instance{};
     constexpr auto bytes = 42_size;
-    auto ptr = ::operator new(bytes);
+    auto ptr = instance.allocate(bytes);
     BC_REQUIRE_NO_THROW(instance.deallocate(ptr, bytes));
     ptr = nullptr;
 }
@@ -127,7 +128,7 @@ BC_AUTO_TEST_CASE(default_arena__deallocate2__non_zero_bytes_max_align__does_not
 {
     default_arena instance{};
     constexpr auto bytes = 42_size;
-    auto ptr = ::operator new(bytes);
+    auto ptr = instance.allocate(bytes);
     BC_REQUIRE_NO_THROW(instance.deallocate(ptr, bytes, alignof(max_align_t)));
     ptr = nullptr;
 }
