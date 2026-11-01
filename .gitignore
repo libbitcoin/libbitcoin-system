@@ -36,6 +36,9 @@ builds/gnu/*.pc
 # configured headers from in-tree configure
 builds/gnu/include
 
+# configured sources from in-tree make
+builds/gnu/src
+
 # msbuild/msvc
 /.vs
 *.db

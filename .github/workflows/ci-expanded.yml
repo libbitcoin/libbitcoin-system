@@ -438,6 +438,19 @@ jobs:
             secp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
+          - image: ubuntu-26.04
+            config: "release"
+            link: "static"
+            cc: "x86_64-w64-mingw32-gcc-posix"
+            cxx: "x86_64-w64-mingw32-g++-posix"
+            flags: ""
+            coverage: ""
+            package: "gcc-mingw-w64-x86-64-posix g++-mingw-w64-x86-64-posix"
+            host: "x86_64-w64-mingw32"
+            boost: ""
+            secp256k1: ""
+            options: "--enable-isystem --build-skip-test-run"
+
     runs-on: ${{ matrix.image }}
 
     env:

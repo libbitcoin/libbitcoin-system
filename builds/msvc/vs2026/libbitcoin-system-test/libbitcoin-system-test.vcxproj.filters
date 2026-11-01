@@ -675,9 +675,6 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\platforms\neon.cpp">
       <Filter>src\intrinsics\platforms</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\sve.cpp">
-      <Filter>src\intrinsics\platforms</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\intrinsics\rotate.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>

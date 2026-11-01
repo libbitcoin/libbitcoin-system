@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <!-- Substitutes @TOKEN@ values into each ConfigurableFile, writing %(Generated) only when its content changes. -->
-  <Target Name="ConfigureFiles" BeforeTargets="ClCompile;ResourceCompile" Inputs="%(ConfigurableFile.Identity)" Outputs="%(ConfigurableFile.Generated)">
+  <Target Name="ConfigureFiles" BeforeTargets="ClCompile;ResourceCompile" Condition="'@(ConfigurableFile)' != ''" Outputs="%(ConfigurableFile.Generated)">
 
     <Exec Command="git -C &quot;$(RepoRoot).&quot; rev-parse HEAD 2&gt;nul" Condition="'$(GitCommitHash)' == ''" ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />

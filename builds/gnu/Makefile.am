@@ -278,6 +278,26 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/x509/private_key.cpp \
     ${srcdir}/../../src/x509/verify.cpp
 
+nodist_src_libbitcoin_system_la_SOURCES = \
+    src/version.cpp
+
+src/version.cpp: FORCE
+	@${MKDIR_P} src
+	@commit=`git -C ${srcdir} rev-parse HEAD 2>/dev/null || echo unknown`; \
+	height=`git -C ${srcdir} rev-list --count HEAD 2>/dev/null || echo 0`; \
+	url=`git -C ${srcdir} ls-remote --get-url 2>/dev/null | grep -e '://' -e '@' || echo unknown`; \
+	if git -C ${srcdir} status --porcelain 2>/dev/null | grep -q . ; then dirty=1; else dirty=0; fi; \
+	sed -e "s|[@]LIBBITCOIN_VERSION_MAJOR[@]|${LIBBITCOIN_VERSION_MAJOR}|g" \
+	    -e "s|[@]LIBBITCOIN_VERSION_MINOR[@]|${LIBBITCOIN_VERSION_MINOR}|g" \
+	    -e "s|[@]LIBBITCOIN_VERSION_PATCH[@]|$$height|g" \
+	    -e "s|[@]GIT_COMMIT_HASH[@]|$$commit|g" \
+	    -e "s|[@]GIT_ORIGIN_URL[@]|$$url|g" \
+	    -e "s|[@]GIT_DIRTY[@]|$$dirty|g" \
+	    ${srcdir}/../../src/version.cpp.in > $@.tmp; \
+	if cmp -s $@.tmp $@; then rm -f $@.tmp; else mv -f $@.tmp $@; fi
+
+FORCE:
+
 include_bitcoindir = \
     ${includedir}/bitcoin
 
@@ -891,12 +911,6 @@ include_bitcoin_system_intrinsics_none_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_sha.hpp
 
-include_bitcoin_system_intrinsics_svedir = \
-    ${includedir}/bitcoin/system/intrinsics/sve
-
-include_bitcoin_system_intrinsics_sve_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/intrinsics/sve/sve.hpp
-
 include_bitcoin_system_machinedir = \
     ${includedir}/bitcoin/system/machine
 
@@ -1155,6 +1169,7 @@ test_libbitcoin_system_test_CPPFLAGS = \
     ${src_libbitcoin_system_la_CPPFLAGS}
 
 test_libbitcoin_system_test_LDFLAGS = \
+    ${mingw_program_LDFLAGS} \
     ${boost_LDFLAGS} \
     ${src_libbitcoin_system_la_LDFLAGS}
 
@@ -1353,7 +1368,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/intrinsics/types.cpp \
     ${srcdir}/../../test/intrinsics/platforms/intel.cpp \
     ${srcdir}/../../test/intrinsics/platforms/neon.cpp \
-    ${srcdir}/../../test/intrinsics/platforms/sve.cpp \
     ${srcdir}/../../test/machine/interpreter.cpp \
     ${srcdir}/../../test/machine/interpreter_connect.cpp \
     ${srcdir}/../../test/machine/interpreter_run.cpp \
@@ -1490,6 +1504,7 @@ console_selector_CPPFLAGS = \
     ${src_libbitcoin_system_la_CPPFLAGS}
 
 console_selector_LDFLAGS = \
+    ${mingw_program_LDFLAGS} \
     ${src_libbitcoin_system_la_LDFLAGS}
 
 console_selector_LDADD = \

@@ -1,0 +1,26 @@
+///////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+//
+//        GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+//
+///////////////////////////////////////////////////////////////////////////////
+#include <bitcoin/system/version.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+const build_version_t& build_version() noexcept
+{
+    static constexpr build_version_t value
+    {
+        "@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@.@LIBBITCOIN_VERSION_PATCH@",
+        "@GIT_COMMIT_HASH@",
+        "@GIT_ORIGIN_URL@",
+        @GIT_DIRTY@ != 0
+    };
+
+    return value;
+}
+
+} // namespace system
+} // namespace libbitcoin

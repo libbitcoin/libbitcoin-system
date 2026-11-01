@@ -58,7 +58,6 @@
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-system)' == 'static' Or '$(Linkage-libbitcoin-system)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Debug')) != -1">_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- Enable use of CPU intrinsics. -->
-      <!-- Eventually these options will be used to select SVE levels. -->
       <PreprocessorDefinitions Condition="'$(Option-sha)' == 'true'">WITH_SHA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-sha512)' == 'true'">WITH_SHA512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-avx512ifma)' == 'true'">WITH_AVX512IFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>

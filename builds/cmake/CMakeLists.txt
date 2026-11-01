@@ -6,7 +6,9 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
-find_package(Git QUIET)
+if ( NOT CMAKE_SCRIPT_MODE_FILE )
+    find_package(Git QUIET)
+endif()
 
 set( GIT_COMMIT_HASH "unknown" )
 set( GIT_COMMIT_HEIGHT 0 )
@@ -62,6 +64,11 @@ endif()
 set( LIBBITCOIN_VERSION_MAJOR 4 )
 set( LIBBITCOIN_VERSION_MINOR 0 )
 set( LIBBITCOIN_VERSION_PATCH ${GIT_COMMIT_HEIGHT} )
+
+if ( CMAKE_SCRIPT_MODE_FILE )
+    configure_file( ${CONFIGURE_INPUT} ${CONFIGURE_OUTPUT} @ONLY )
+    return()
+endif()
 
 project( libbitcoin-system
   VERSION ${LIBBITCOIN_VERSION_MAJOR}.${LIBBITCOIN_VERSION_MINOR}.${LIBBITCOIN_VERSION_PATCH}
@@ -526,6 +533,11 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/include/bitcoin/system/version.hpp
   @ONLY )
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../src/version.cpp.in
+  ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
+  @ONLY )
+
 #------------------------------------------------------------------------------
 # libbitcoin-system library
 #------------------------------------------------------------------------------
@@ -607,6 +619,19 @@ target_link_libraries( libbitcoin-system
     Boost::headers
     $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
 )
+
+add_custom_target( libbitcoin-system-version.cpp
+  COMMAND ${CMAKE_COMMAND}
+    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+    -DCONFIGURE_INPUT=${CMAKE_CURRENT_SOURCE_DIR}/../../src/version.cpp.in
+    -DCONFIGURE_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
+    -P ${CMAKE_CURRENT_LIST_FILE}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
+  VERBATIM )
+
+add_dependencies( libbitcoin-system libbitcoin-system-version.cpp )
+target_sources( libbitcoin-system PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp )
 
 set_target_properties( libbitcoin-system
   PROPERTIES
