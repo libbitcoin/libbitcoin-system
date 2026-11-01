@@ -198,7 +198,7 @@ inline bool get_arm(arm_feature feature) noexcept
         default:
             return false;
     }
-#elif defined(HAVE_MSC)
+#elif defined(HAVE_WINDOWS)
     switch (feature)
     {
         case arm_feature::neon:
