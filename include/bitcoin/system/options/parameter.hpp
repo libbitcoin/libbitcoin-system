@@ -33,7 +33,7 @@ namespace options {
     private: type name##_
 
 /// A tuple to represent a positional argument name count.
-typedef std::pair<const std::string, int> argument_pair;
+typedef std::pair<std::string, int> argument_pair;
 
 /// A type to represent the list of positional argument name counts.
 typedef std::vector<argument_pair> argument_list;
