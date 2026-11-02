@@ -18,29 +18,29 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(base_10_tests)
+BC_AUTO_TEST_SUITE(base_10_tests)
 
 #define TEST_AMOUNT(NAME, EXPECTED, ...) \
-BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
+BC_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
 { \
     uint64_t result, expected = EXPECTED; \
-    BOOST_REQUIRE(decode_base10(result, __VA_ARGS__)); \
-    BOOST_REQUIRE_EQUAL(result, expected); \
+    BC_REQUIRE(decode_base10(result, __VA_ARGS__)); \
+    BC_REQUIRE_EQUAL(result, expected); \
 }
 
 #define TEST_AMOUNT_FAIL(NAME, ...) \
-BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
+BC_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
 { \
     uint64_t result; \
-    BOOST_REQUIRE(!decode_base10(result, __VA_ARGS__)); \
+    BC_REQUIRE(!decode_base10(result, __VA_ARGS__)); \
 }
 
 #define TEST_FORMAT(CONDITION, EXPECTED, ...) \
-BOOST_AUTO_TEST_CASE(base10__encode_base10__##CONDITION##__formatted_string) \
+BC_AUTO_TEST_CASE(base10__encode_base10__##CONDITION##__formatted_string) \
 { \
     std::string expected = EXPECTED; \
     std::string result = encode_base10(__VA_ARGS__); \
-    BOOST_REQUIRE_EQUAL(result, expected); \
+    BC_REQUIRE_EQUAL(result, expected); \
 }
 
 // Limits:
@@ -109,4 +109,4 @@ TEST_FORMAT(normal_decimal, "4.2", 420000, mbtc_decimal_places)
 TEST_FORMAT(leading_zero, "0.42", 42000, mbtc_decimal_places)
 TEST_FORMAT(internal_leading_zero, "0.042", 4200, mbtc_decimal_places)
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

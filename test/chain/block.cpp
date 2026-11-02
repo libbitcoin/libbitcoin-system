@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include "../mocks/blocks.hpp"
 
-BOOST_AUTO_TEST_SUITE(block_tests)
+BC_AUTO_TEST_SUITE(block_tests)
 
 using namespace system::chain;
 
@@ -93,172 +93,172 @@ public:
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(block__constructor__default__invalid)
+BC_AUTO_TEST_CASE(block__constructor__default__invalid)
 {
     const block instance{};
-    BOOST_REQUIRE(!instance.is_valid());
+    BC_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__move__expected)
+BC_AUTO_TEST_CASE(block__constructor__move__expected)
 {
     const block expected(expected_header, expected_transactions::get());
     block copy(expected_header, expected_transactions::get());
     const block instance(std::move(copy));
-    BOOST_REQUIRE(instance == instance);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block::get());
+    BC_REQUIRE(instance == instance);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_block::get());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__copy__expected)
+BC_AUTO_TEST_CASE(block__constructor__copy__expected)
 {
     const block expected(expected_header, expected_transactions::get());
     const block instance(expected);
-    BOOST_REQUIRE(instance == instance);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block::get());
+    BC_REQUIRE(instance == instance);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_block::get());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
+BC_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
 {
     auto header = expected_header;
     auto transactions = expected_transactions::get();
     const block instance(std::move(header), std::move(transactions));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block::get());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_block::get());
 
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__copy_parameters__expected)
+BC_AUTO_TEST_CASE(block__constructor__copy_parameters__expected)
 {
     const auto header = expected_header;
     const auto& transactions = expected_transactions::get();
     const block instance(header, transactions);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block::get());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_block::get());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__data__expected)
+BC_AUTO_TEST_CASE(block__constructor__data__expected)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;
     const auto data = genesis.to_data(true);
     const accessor block(data, true);
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(!block.is_invalid_merkle_root());
+    BC_REQUIRE(block.is_valid());
+    BC_REQUIRE(!block.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__fast__success)
+BC_AUTO_TEST_CASE(block__constructor__fast__success)
 {
     const auto data = test::mock_block_b.to_data(true);
     test::reporting_arena<false> arena{};
     stream::in::fast stream(data);
     read::bytes::fast source(stream, &arena);
     const accessor block(source, true);
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(!block.is_invalid_merkle_root());
+    BC_REQUIRE(block.is_valid());
+    BC_REQUIRE(!block.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__stream__success)
+BC_AUTO_TEST_CASE(block__constructor__stream__success)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;
     const auto data = genesis.to_data(true);
     stream::in::copy stream(data);
     const accessor block(stream, true);
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(!block.is_invalid_merkle_root());
+    BC_REQUIRE(block.is_valid());
+    BC_REQUIRE(!block.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__reader__success)
+BC_AUTO_TEST_CASE(block__constructor__reader__success)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;
     const auto data = genesis.to_data(true);
     read::bytes::copy source(data);
     const accessor block(source, true);
-    BOOST_REQUIRE(block.is_valid());
-    BOOST_REQUIRE(!block.is_invalid_merkle_root());
+    BC_REQUIRE(block.is_valid());
+    BC_REQUIRE(!block.is_invalid_merkle_root());
 }
 
 // operators
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__assign__move__expected)
+BC_AUTO_TEST_CASE(block__assign__move__expected)
 {
     const auto& alpha = expected_block::get();
     auto gamma = alpha;
     const auto beta = std::move(gamma);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(block__assign__copy__expected)
+BC_AUTO_TEST_CASE(block__assign__copy__expected)
 {
     const auto& alpha = expected_block::get();
     const auto beta = alpha;
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(block__equality__same__true)
+BC_AUTO_TEST_CASE(block__equality__same__true)
 {
     const auto& alpha = expected_block::get();
     const block beta(alpha);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(block__equality__different__false)
+BC_AUTO_TEST_CASE(block__equality__different__false)
 {
     const auto& alpha = expected_block::get();
     const block beta;
-    BOOST_REQUIRE(!(alpha == beta));
+    BC_REQUIRE(!(alpha == beta));
 }
 
-BOOST_AUTO_TEST_CASE(block__inequality__same__false)
+BC_AUTO_TEST_CASE(block__inequality__same__false)
 {
     const auto& alpha = expected_block::get();
     const block beta(alpha);
-    BOOST_REQUIRE(!(alpha != beta));
+    BC_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(block__inequality__different__true)
+BC_AUTO_TEST_CASE(block__inequality__different__true)
 {
     const auto& alpha = expected_block::get();
     const block beta;
-    BOOST_REQUIRE(alpha != beta);
+    BC_REQUIRE(alpha != beta);
 }
 
 // to_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__to_data__data__expected)
+BC_AUTO_TEST_CASE(block__to_data__data__expected)
 {
     const auto size = expected_block::data().size();
-    BOOST_REQUIRE_EQUAL(size, expected_block::get().serialized_size(true));
+    BC_REQUIRE_EQUAL(size, expected_block::get().serialized_size(true));
 }
 
-BOOST_AUTO_TEST_CASE(block__to_data__stream__expected)
+BC_AUTO_TEST_CASE(block__to_data__stream__expected)
 {
     // Write block to stream.
     std::stringstream iostream{};
     expected_block::get().to_data(iostream, true);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const block copy(iostream, true);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_block::get());
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_block::get());
 }
 
-BOOST_AUTO_TEST_CASE(block__to_data__writer__expected)
+BC_AUTO_TEST_CASE(block__to_data__writer__expected)
 {
     // Write block to stream.
     std::stringstream iostream{};
     write::bytes::ostream out(iostream);
     expected_block::get().to_data(out, true);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const block copy(iostream, true);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_block::get());
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_block::get());
 }
 
 // properties
@@ -267,32 +267,32 @@ BOOST_AUTO_TEST_CASE(block__to_data__writer__expected)
 // weight
 
 // The coinbase claim is the spend of the first transaction.
-BOOST_AUTO_TEST_CASE(block__claim__coinbase_outputs__sum)
+BC_AUTO_TEST_CASE(block__claim__coinbase_outputs__sum)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const inputs ins{ input{ point{}, coinbase_script, 0xffffffff } };
     const outputs outs{ output{ 40, script{} }, output{ 2, script{} } };
     const transaction coinbase{ 1, ins, outs, 0 };
     const block instance{ header{}, transactions{ coinbase } };
-    BOOST_REQUIRE_EQUAL(instance.claim(), 42u);
+    BC_REQUIRE_EQUAL(instance.claim(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(block__claim__no_transactions__zero)
+BC_AUTO_TEST_CASE(block__claim__no_transactions__zero)
 {
     const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE_EQUAL(instance.claim(), 0u);
+    BC_REQUIRE_EQUAL(instance.claim(), 0u);
 }
 
 // A transaction without prevouts has no fee, so the coinbase contributes none.
-BOOST_AUTO_TEST_CASE(block__fees__unpopulated__zero)
+BC_AUTO_TEST_CASE(block__fees__unpopulated__zero)
 {
     const inputs ins{ input{ point{}, script{}, 0xffffffff } };
     const transaction coinbase{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
     const block instance{ header{}, transactions{ coinbase } };
-    BOOST_REQUIRE_EQUAL(instance.fees(), 0u);
+    BC_REQUIRE_EQUAL(instance.fees(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(block__fees__populated_spend__difference)
+BC_AUTO_TEST_CASE(block__fees__populated_spend__difference)
 {
     const inputs coins{ input{ point{}, script{}, 0xffffffff } };
     const transaction coinbase{ 1, coins, outputs{ output{ 0, script{} } }, 0 };
@@ -301,11 +301,11 @@ BOOST_AUTO_TEST_CASE(block__fees__populated_spend__difference)
     spend.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
 
     const block instance{ header{}, transactions{ coinbase, spend } };
-    BOOST_REQUIRE_EQUAL(instance.fees(), 12u);
+    BC_REQUIRE_EQUAL(instance.fees(), 12u);
 }
 
 // The reward is the subsidy plus fees, bounding the coinbase claim.
-BOOST_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy_plus_fees__false)
+BC_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy_plus_fees__false)
 {
     const inputs coins{ input{ point{}, script{}, 0xffffffff } };
     const transaction coinbase{ 1, coins, outputs{ output{ 5000000012, script{} } }, 0 };
@@ -314,11 +314,11 @@ BOOST_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy_plus_fees__false)
     spend.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
 
     const accessor instance{ header{}, transactions{ coinbase, spend } };
-    BOOST_REQUIRE_EQUAL(instance.fees(), 12u);
-    BOOST_REQUIRE(!instance.is_overspent(0, 210000, 5000000000, false));
+    BC_REQUIRE_EQUAL(instance.fees(), 12u);
+    BC_REQUIRE(!instance.is_overspent(0, 210000, 5000000000, false));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy_plus_fees__true)
+BC_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy_plus_fees__true)
 {
     const inputs coins{ input{ point{}, script{}, 0xffffffff } };
     const transaction coinbase{ 1, coins, outputs{ output{ 5000000013, script{} } }, 0 };
@@ -327,24 +327,24 @@ BOOST_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy_plus_fees__true)
     spend.inputs_ptr()->front()->prevout = to_shared(output{ 42, script{} });
 
     const accessor instance{ header{}, transactions{ coinbase, spend } };
-    BOOST_REQUIRE(instance.is_overspent(0, 210000, 5000000000, false));
+    BC_REQUIRE(instance.is_overspent(0, 210000, 5000000000, false));
 }
 
-BOOST_AUTO_TEST_CASE(block__spends__genesis__zero)
+BC_AUTO_TEST_CASE(block__spends__genesis__zero)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;
-    BOOST_REQUIRE(is_zero(genesis.spends()));
+    BC_REQUIRE(is_zero(genesis.spends()));
 }
 
-BOOST_AUTO_TEST_CASE(block__spends__coinbase_only__zero)
+BC_AUTO_TEST_CASE(block__spends__coinbase_only__zero)
 {
-    BOOST_REQUIRE(is_zero(test::mock_block_b.spends()));
+    BC_REQUIRE(is_zero(test::mock_block_b.spends()));
 }
 
-BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
+BC_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
 {
     const block instance{};
-    BOOST_REQUIRE_EQUAL(instance.hash(), instance.header().hash());
+    BC_REQUIRE_EQUAL(instance.hash(), instance.header().hash());
 }
 
 // is_malleable
@@ -356,10 +356,10 @@ BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
 // ----------------------------------------------------------------------------
 
 // check
-BOOST_AUTO_TEST_CASE(block__check__empty__empty_block)
+BC_AUTO_TEST_CASE(block__check__empty__empty_block)
 {
     const block instance{};
-    BOOST_REQUIRE_EQUAL(instance.check(), error::empty_block);
+    BC_REQUIRE_EQUAL(instance.check(), error::empty_block);
 }
 // accept
 // connect
@@ -367,13 +367,13 @@ BOOST_AUTO_TEST_CASE(block__check__empty__empty_block)
 // validation (protected)
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__is_empty__default__true)
+BC_AUTO_TEST_CASE(block__is_empty__default__true)
 {
     const accessor instance;
-    BOOST_REQUIRE(instance.is_empty());
+    BC_REQUIRE(instance.is_empty());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_empty__single_transaction__false)
+BC_AUTO_TEST_CASE(block__is_empty__single_transaction__false)
 {
     const accessor instance
     {
@@ -381,20 +381,20 @@ BOOST_AUTO_TEST_CASE(block__is_empty__single_transaction__false)
         { {} }
     };
 
-    BOOST_REQUIRE(!instance.is_empty());
+    BC_REQUIRE(!instance.is_empty());
 }
 
 // is_oversized
 // is_first_non_coinbase
 // is_extra_coinbases
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__empty__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__empty__false)
 {
     const accessor instance;
-    BOOST_REQUIRE(!instance.is_forward_reference());
+    BC_REQUIRE(!instance.is_forward_reference());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__multiple_empty_transactions__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__multiple_empty_transactions__false)
 {
     const accessor instance
     {
@@ -405,10 +405,10 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__multiple_empty_transactions__f
         }
     };
 
-    BOOST_REQUIRE(!instance.is_forward_reference());
+    BC_REQUIRE(!instance.is_forward_reference());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
 {
     const accessor instance
     {
@@ -419,10 +419,10 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__duplicate_transactions__false)
         }
     };
 
-    BOOST_REQUIRE(!instance.is_forward_reference());
+    BC_REQUIRE(!instance.is_forward_reference());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 {
     const transaction to{ 0, inputs{}, {}, 0 };
     const transaction from{ 0, { { { to.hash(false), 0 }, {}, 0 } }, {}, 0 };
@@ -435,10 +435,10 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
         }
     };
 
-    BOOST_REQUIRE(!instance.is_forward_reference());
+    BC_REQUIRE(!instance.is_forward_reference());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
+BC_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
 {
     const transaction cb{ 0, inputs{}, {}, 0 };
     const transaction to{ 0, inputs{}, {}, 42 };
@@ -453,43 +453,43 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
         }
     };
 
-    BOOST_REQUIRE(instance.is_forward_reference());
+    BC_REQUIRE(instance.is_forward_reference());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_empty__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__static_empty__false)
 {
-    BOOST_REQUIRE(!block::is_forward_reference({}, false));
-    BOOST_REQUIRE(!block::is_forward_reference({}, true));
+    BC_REQUIRE(!block::is_forward_reference({}, false));
+    BC_REQUIRE(!block::is_forward_reference({}, true));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_backward_reference__false)
-{
-    const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
-    const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
-    BOOST_REQUIRE(!block::is_forward_reference({ to, from }, false));
-}
-
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_forward_reference__true)
+BC_AUTO_TEST_CASE(block__is_forward_reference__static_backward_reference__false)
 {
     const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
     const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
-    BOOST_REQUIRE(block::is_forward_reference({ from, to }, false));
+    BC_REQUIRE(!block::is_forward_reference({ to, from }, false));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_forward_reference__static_coinbase_forward_reference__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__static_forward_reference__true)
 {
     const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
     const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
-    BOOST_REQUIRE(!block::is_forward_reference({ from, to }, true));
+    BC_REQUIRE(block::is_forward_reference({ from, to }, false));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__empty__false)
+BC_AUTO_TEST_CASE(block__is_forward_reference__static_coinbase_forward_reference__false)
+{
+    const auto to = to_shared<transaction>(0, inputs{}, outputs{}, 0);
+    const auto from = to_shared<transaction>(0, inputs{ { { to->hash(false), 0 }, {}, 0 } }, outputs{}, 0);
+    BC_REQUIRE(!block::is_forward_reference({ from, to }, true));
+}
+
+BC_AUTO_TEST_CASE(block__is_internal_double_spend__empty__false)
 {
     const accessor instance;
-    BOOST_REQUIRE(!instance.is_internal_double_spend());
+    BC_REQUIRE(!instance.is_internal_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__distinct_points__false)
+BC_AUTO_TEST_CASE(block__is_internal_double_spend__distinct_points__false)
 {
     const accessor instance
     {
@@ -502,10 +502,10 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__distinct_points__false)
         }
     };
 
-    BOOST_REQUIRE(!instance.is_internal_double_spend());
+    BC_REQUIRE(!instance.is_internal_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__nondistinct_points__true)
+BC_AUTO_TEST_CASE(block__is_internal_double_spend__nondistinct_points__true)
 {
     const accessor instance
     {
@@ -521,16 +521,16 @@ BOOST_AUTO_TEST_CASE(block__is_internal_double_spend__nondistinct_points__true)
         }
     };
 
-    BOOST_REQUIRE(instance.is_internal_double_spend());
+    BC_REQUIRE(instance.is_internal_double_spend());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__default__false)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__default__false)
 {
     const accessor instance;
-    BOOST_REQUIRE(!instance.is_invalid_merkle_root());
+    BC_REQUIRE(!instance.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__default_header_non_empty__true)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__default_header_non_empty__true)
 {
     const accessor instance
     {
@@ -538,34 +538,34 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__default_header_non_empty__tr
         { {} }
     };
 
-    BOOST_REQUIRE(instance.is_invalid_merkle_root());
+    BC_REQUIRE(instance.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__mainnet_genesis__false)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__mainnet_genesis__false)
 {
     const auto data = settings(selection::mainnet).genesis_block.to_data(true);
     const accessor genesis(data, true);
-    BOOST_REQUIRE(genesis.is_valid());
-    BOOST_REQUIRE(!genesis.is_invalid_merkle_root());
+    BC_REQUIRE(genesis.is_valid());
+    BC_REQUIRE(!genesis.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__testnet_genesis__false)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__testnet_genesis__false)
 {
     const auto data = settings(selection::testnet3).genesis_block.to_data(true);
     const accessor genesis(data, true);
-    BOOST_REQUIRE(genesis.is_valid());
-    BOOST_REQUIRE(!genesis.is_invalid_merkle_root());
+    BC_REQUIRE(genesis.is_valid());
+    BC_REQUIRE(!genesis.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__regtest_genesis__false)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__regtest_genesis__false)
 {
     const auto data = settings(selection::regtest).genesis_block.to_data(true);
     const accessor genesis(data, true);
-    BOOST_REQUIRE(genesis.is_valid());
-    BOOST_REQUIRE(!genesis.is_invalid_merkle_root());
+    BC_REQUIRE(genesis.is_valid());
+    BC_REQUIRE(!genesis.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__valid__false)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__valid__false)
 {
     constexpr auto data = base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a0000000"
@@ -592,11 +592,11 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__valid__false)
         "ab48788ac00000000");
 
     const accessor instance(data, true);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(!instance.is_invalid_merkle_root());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(!instance.is_invalid_merkle_root());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
+BC_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
 {
     constexpr auto data = base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
@@ -624,27 +624,27 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
         "76a914eb675c349c474bec8dea2d79d12cff6f330ab48788ac00000000");
 
     const accessor instance(data, true);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(!instance.is_invalid_merkle_root());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(!instance.is_invalid_merkle_root());
 }
 
 // merkle_branch
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__single_tx__empty)
+BC_AUTO_TEST_CASE(block__merkle_branch__single_tx__empty)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;
     const auto branch = genesis.merkle_branch(0, false);
-    BOOST_REQUIRE(branch.empty());
+    BC_REQUIRE(branch.empty());
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__position_out_of_range__empty)
+BC_AUTO_TEST_CASE(block__merkle_branch__position_out_of_range__empty)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;
-    BOOST_REQUIRE(genesis.merkle_branch(1, false).empty());
-    BOOST_REQUIRE(genesis.merkle_branch(999, false).empty());
+    BC_REQUIRE(genesis.merkle_branch(1, false).empty());
+    BC_REQUIRE(genesis.merkle_branch(999, false).empty());
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__expected)
+BC_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__expected)
 {
     const auto& block = expected_block::get();
     const auto branch0 = block.merkle_branch(0, false);
@@ -652,12 +652,12 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__expected)
     const auto branch2 = block.merkle_branch(2, false);
 
     const auto expected_size = ceilinged_log2(block.transactions());
-    BOOST_CHECK_EQUAL(branch0.size(), expected_size);
-    BOOST_CHECK_EQUAL(branch1.size(), expected_size);
-    BOOST_CHECK_EQUAL(branch2.size(), expected_size);
+    BC_CHECK_EQUAL(branch0.size(), expected_size);
+    BC_CHECK_EQUAL(branch1.size(), expected_size);
+    BC_CHECK_EQUAL(branch2.size(), expected_size);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__correct_siblings)
+BC_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__correct_siblings)
 {
     const auto& block = expected_block::get();
     const auto& txs = expected_transactions::get();
@@ -667,28 +667,28 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions__correct_si
     const auto tx2_hash = txs[2].hash(false);
 
     const auto branch0 = block.merkle_branch(0, false);
-    BOOST_REQUIRE_EQUAL(branch0.size(), expected_size);
-    BOOST_CHECK_EQUAL(branch0[0], tx1_hash);
-    BOOST_CHECK_EQUAL(branch0[1], bitcoin_hash(tx2_hash, tx2_hash));
+    BC_REQUIRE_EQUAL(branch0.size(), expected_size);
+    BC_CHECK_EQUAL(branch0[0], tx1_hash);
+    BC_CHECK_EQUAL(branch0[1], bitcoin_hash(tx2_hash, tx2_hash));
 
     const auto branch1 = block.merkle_branch(1, false);
-    BOOST_REQUIRE_EQUAL(branch1.size(), expected_size);
-    BOOST_CHECK_EQUAL(branch1[0], tx0_hash);
-    BOOST_CHECK_EQUAL(branch1[1], bitcoin_hash(tx2_hash, tx2_hash));
+    BC_REQUIRE_EQUAL(branch1.size(), expected_size);
+    BC_CHECK_EQUAL(branch1[0], tx0_hash);
+    BC_CHECK_EQUAL(branch1[1], bitcoin_hash(tx2_hash, tx2_hash));
 
     const auto branch2 = block.merkle_branch(2, false);
-    BOOST_REQUIRE_EQUAL(branch2.size(), expected_size);
-    BOOST_CHECK_EQUAL(branch2[0], tx2_hash);
-    BOOST_CHECK_EQUAL(branch2[1], bitcoin_hash(tx0_hash, tx1_hash));
+    BC_REQUIRE_EQUAL(branch2.size(), expected_size);
+    BC_CHECK_EQUAL(branch2[0], tx2_hash);
+    BC_CHECK_EQUAL(branch2[1], bitcoin_hash(tx0_hash, tx1_hash));
 }
 
 // These aren't actually witness txs, so result is the same as non-witness.
-BOOST_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions_witness__expected)
+BC_AUTO_TEST_CASE(block__merkle_branch__test_block_3_transactions_witness__expected)
 {
     const auto& block = expected_block::get();
     const auto non_witness = block.merkle_branch(1, false);
     const auto with_witness = block.merkle_branch(1, true);
-    BOOST_CHECK_EQUAL(non_witness, with_witness);
+    BC_CHECK_EQUAL(non_witness, with_witness);
 }
 
 hash_digest verify_merkle_proof(hash_digest current, const hashes& branch,
@@ -707,7 +707,7 @@ hash_digest verify_merkle_proof(hash_digest current, const hashes& branch,
     return current;
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
+BC_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
 {
     const auto& block = expected_block::get();
     const auto& txs = expected_transactions::get();
@@ -719,25 +719,25 @@ BOOST_AUTO_TEST_CASE(block__merkle_branch__round_trip__expected)
     // Test transaction at position 0
     {
         const auto branch = block.merkle_branch(0, false);
-        BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-        BOOST_CHECK_EQUAL(branch[0], tx1_hash);
-        BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
+        BC_REQUIRE_EQUAL(branch.size(), 2u);
+        BC_CHECK_EQUAL(branch[0], tx1_hash);
+        BC_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
     }
 
     // Test transaction at position 1
     {
         const auto branch = block.merkle_branch(1, false);
-        BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-        BOOST_CHECK_EQUAL(branch[0], tx0_hash);
-        BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
+        BC_REQUIRE_EQUAL(branch.size(), 2u);
+        BC_CHECK_EQUAL(branch[0], tx0_hash);
+        BC_CHECK_EQUAL(branch[1], bitcoin_hash(tx2_hash, tx2_hash));
     }
 
     // Test transaction at position 2 (duplicated leaf case)
     {
         const auto branch = block.merkle_branch(2, false);
-        BOOST_REQUIRE_EQUAL(branch.size(), 2u);
-        BOOST_CHECK_EQUAL(branch[0], tx2_hash);
-        BOOST_CHECK_EQUAL(branch[1], bitcoin_hash(tx0_hash, tx1_hash));
+        BC_REQUIRE_EQUAL(branch.size(), 2u);
+        BC_CHECK_EQUAL(branch[0], tx2_hash);
+        BC_CHECK_EQUAL(branch[1], bitcoin_hash(tx0_hash, tx1_hash));
     }
 }
 
@@ -758,80 +758,80 @@ static transaction spending_transaction()
     return transaction{ 1, ins, outs, 0 };
 }
 
-BOOST_AUTO_TEST_CASE(block__is_first_non_coinbase__coinbase_first__false)
+BC_AUTO_TEST_CASE(block__is_first_non_coinbase__coinbase_first__false)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
-    BOOST_REQUIRE(!instance.is_first_non_coinbase());
+    BC_REQUIRE(!instance.is_first_non_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_first_non_coinbase__spend_first__true)
+BC_AUTO_TEST_CASE(block__is_first_non_coinbase__spend_first__true)
 {
     const accessor instance{ header{}, transactions{ spending_transaction() } };
-    BOOST_REQUIRE(instance.is_first_non_coinbase());
+    BC_REQUIRE(instance.is_first_non_coinbase());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_extra_coinbases__two_coinbases__true)
+BC_AUTO_TEST_CASE(block__is_extra_coinbases__two_coinbases__true)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), coinbase_transaction(1, script{}) } };
-    BOOST_REQUIRE(instance.is_extra_coinbases());
+    BC_REQUIRE(instance.is_extra_coinbases());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_extra_coinbases__coinbase_and_spend__false)
+BC_AUTO_TEST_CASE(block__is_extra_coinbases__coinbase_and_spend__false)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
-    BOOST_REQUIRE(!instance.is_extra_coinbases());
+    BC_REQUIRE(!instance.is_extra_coinbases());
 }
 
 // bip34 requires the coinbase script begin with a minimal height push.
-BOOST_AUTO_TEST_CASE(block__is_invalid_coinbase_script__matching_height__false)
+BC_AUTO_TEST_CASE(block__is_invalid_coinbase_script__matching_height__false)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
-    BOOST_REQUIRE(!instance.is_invalid_coinbase_script(100));
+    BC_REQUIRE(!instance.is_invalid_coinbase_script(100));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_coinbase_script__mismatched_height__true)
+BC_AUTO_TEST_CASE(block__is_invalid_coinbase_script__mismatched_height__true)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
-    BOOST_REQUIRE(instance.is_invalid_coinbase_script(101));
+    BC_REQUIRE(instance.is_invalid_coinbase_script(101));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_hash_limit_exceeded__small_block__false)
+BC_AUTO_TEST_CASE(block__is_hash_limit_exceeded__small_block__false)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
-    BOOST_REQUIRE(!instance.is_hash_limit_exceeded());
+    BC_REQUIRE(!instance.is_hash_limit_exceeded());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_oversized__megabyte_script__true)
+BC_AUTO_TEST_CASE(block__is_oversized__megabyte_script__true)
 {
     const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, big) } };
-    BOOST_REQUIRE(instance.is_oversized());
-    BOOST_REQUIRE(instance.is_overweight());
+    BC_REQUIRE(instance.is_oversized());
+    BC_REQUIRE(instance.is_overweight());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_oversized__small_block__false)
+BC_AUTO_TEST_CASE(block__is_oversized__small_block__false)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
-    BOOST_REQUIRE(!instance.is_oversized());
-    BOOST_REQUIRE(!instance.is_overweight());
+    BC_REQUIRE(!instance.is_oversized());
+    BC_REQUIRE(!instance.is_overweight());
 }
 
 // Witness data with no coinbase commitment output invalidates the block.
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__segregated_no_commitment__true)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__segregated_no_commitment__true)
 {
     const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
     const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spend } };
-    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+    BC_REQUIRE(instance.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__unsegregated_no_commitment__false)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__unsegregated_no_commitment__false)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
-    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+    BC_REQUIRE(!instance.is_invalid_witness_commitment());
 }
 
 // Witness commitment [bip141].
@@ -881,117 +881,117 @@ static hash_digest expected_commitment(const hash_digest& reservation) NOEXCEPT
     return sha256::double_hash(null_hash, reservation);
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__commitment_without_reservation__true)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__commitment_without_reservation__true)
 {
     const accessor instance{ header{}, transactions{ commitment_coinbase(one_hash, witness{}) } };
-    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+    BC_REQUIRE(instance.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__wrong_commitment__true)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__wrong_commitment__true)
 {
     const accessor instance{ header{}, transactions{ commitment_coinbase(one_hash, reservation_witness(null_hash)) } };
-    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+    BC_REQUIRE(instance.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__valid_commitment__false)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__valid_commitment__false)
 {
     const auto commitment = expected_commitment(one_hash);
     const accessor instance{ header{}, transactions{ commitment_coinbase(commitment, reservation_witness(one_hash)) } };
-    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+    BC_REQUIRE(!instance.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_valid__false)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_valid__false)
 {
     const auto commitment = expected_commitment(one_hash);
     const accessor instance{ header{}, transactions{ two_commitment_coinbase(null_hash, commitment, reservation_witness(one_hash)) } };
-    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+    BC_REQUIRE(!instance.is_invalid_witness_commitment());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_invalid__true)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__last_commitment_invalid__true)
 {
     const auto commitment = expected_commitment(one_hash);
     const accessor instance{ header{}, transactions{ two_commitment_coinbase(commitment, null_hash, reservation_witness(one_hash)) } };
-    BOOST_REQUIRE(instance.is_invalid_witness_commitment());
+    BC_REQUIRE(instance.is_invalid_witness_commitment());
 }
 
 // segregated
 
-BOOST_AUTO_TEST_CASE(block__segregated__no_witness__zero)
+BC_AUTO_TEST_CASE(block__segregated__no_witness__zero)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
-    BOOST_REQUIRE(!instance.is_segregated());
-    BOOST_REQUIRE_EQUAL(instance.segregated(), zero);
+    BC_REQUIRE(!instance.is_segregated());
+    BC_REQUIRE_EQUAL(instance.segregated(), zero);
 }
 
-BOOST_AUTO_TEST_CASE(block__segregated__witness__counted)
+BC_AUTO_TEST_CASE(block__segregated__witness__counted)
 {
     const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
     const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spend, spend } };
-    BOOST_REQUIRE(instance.is_segregated());
-    BOOST_REQUIRE_EQUAL(instance.segregated(), two);
+    BC_REQUIRE(instance.is_segregated());
+    BC_REQUIRE_EQUAL(instance.segregated(), two);
 }
 
 // subsidy
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__subsidy__genesis__initial)
+BC_AUTO_TEST_CASE(block__subsidy__genesis__initial)
 {
-    BOOST_REQUIRE_EQUAL(block::subsidy(0, 210000, 5000000000, false), 5000000000u);
+    BC_REQUIRE_EQUAL(block::subsidy(0, 210000, 5000000000, false), 5000000000u);
 }
 
-BOOST_AUTO_TEST_CASE(block__subsidy__first_halving__half)
+BC_AUTO_TEST_CASE(block__subsidy__first_halving__half)
 {
-    BOOST_REQUIRE_EQUAL(block::subsidy(210000, 210000, 5000000000, false), 2500000000u);
+    BC_REQUIRE_EQUAL(block::subsidy(210000, 210000, 5000000000, false), 2500000000u);
 }
 
-BOOST_AUTO_TEST_CASE(block__subsidy__second_halving__quarter)
+BC_AUTO_TEST_CASE(block__subsidy__second_halving__quarter)
 {
-    BOOST_REQUIRE_EQUAL(block::subsidy(420000, 210000, 5000000000, false), 1250000000u);
+    BC_REQUIRE_EQUAL(block::subsidy(420000, 210000, 5000000000, false), 1250000000u);
 }
 
-BOOST_AUTO_TEST_CASE(block__subsidy__below_first_halving__initial)
+BC_AUTO_TEST_CASE(block__subsidy__below_first_halving__initial)
 {
-    BOOST_REQUIRE_EQUAL(block::subsidy(209999, 210000, 5000000000, false), 5000000000u);
+    BC_REQUIRE_EQUAL(block::subsidy(209999, 210000, 5000000000, false), 5000000000u);
 }
 
 // Pre-bip42 a sixty four halving shift is modulo, bip42 shifts to zero.
-BOOST_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_pre_bip42__initial)
+BC_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_pre_bip42__initial)
 {
-    BOOST_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, false), 5000000000u);
+    BC_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, false), 5000000000u);
 }
 
-BOOST_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_bip42__zero)
+BC_AUTO_TEST_CASE(block__subsidy__sixty_four_halvings_bip42__zero)
 {
-    BOOST_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, true), 0u);
+    BC_REQUIRE_EQUAL(block::subsidy(64u * 210000, 210000, 5000000000, true), 0u);
 }
 
 // is_overspent
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy__false)
+BC_AUTO_TEST_CASE(block__is_overspent__claim_at_subsidy__false)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(5000000000, script{}) } };
-    BOOST_REQUIRE(!instance.is_overspent(0, 210000, 5000000000, false));
+    BC_REQUIRE(!instance.is_overspent(0, 210000, 5000000000, false));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy__true)
+BC_AUTO_TEST_CASE(block__is_overspent__claim_above_subsidy__true)
 {
     const accessor instance{ header{}, transactions{ coinbase_transaction(5000000001, script{}) } };
-    BOOST_REQUIRE(instance.is_overspent(0, 210000, 5000000000, false));
+    BC_REQUIRE(instance.is_overspent(0, 210000, 5000000000, false));
 }
 
 // signature_operations
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__signature_operations__coinbase_checksigs__expected)
+BC_AUTO_TEST_CASE(block__signature_operations__coinbase_checksigs__expected)
 {
     const script coinbase_script(base16_chunk("02acad"), true);
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), 2u);
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, true), 8u);
-    BOOST_REQUIRE(!instance.is_signature_operations_limited(false, false));
+    BC_REQUIRE_EQUAL(instance.signature_operations(false, false), 2u);
+    BC_REQUIRE_EQUAL(instance.signature_operations(false, true), 8u);
+    BC_REQUIRE(!instance.is_signature_operations_limited(false, false));
 }
 
 // is_unspent_coinbase_collision
@@ -1008,29 +1008,29 @@ static transaction triad_tx64() NOEXCEPT
     return transaction{ 42, ins, outs, 42 };
 }
 
-BOOST_AUTO_TEST_CASE(block__check__no_transactions__empty_block)
+BC_AUTO_TEST_CASE(block__check__no_transactions__empty_block)
 {
     const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE_EQUAL(instance.check(), error::empty_block);
+    BC_REQUIRE_EQUAL(instance.check(), error::empty_block);
 }
 
-BOOST_AUTO_TEST_CASE(block__check__first_not_coinbase__first_not_coinbase)
+BC_AUTO_TEST_CASE(block__check__first_not_coinbase__first_not_coinbase)
 {
     const block instance{ header{}, transactions{ spending_transaction() } };
-    BOOST_REQUIRE_EQUAL(instance.check(false), error::first_not_coinbase);
+    BC_REQUIRE_EQUAL(instance.check(false), error::first_not_coinbase);
 }
 
 // A malleated block reports the commitment failure, not the structural one.
-BOOST_AUTO_TEST_CASE(block__check__malleated64_first_not_coinbase__invalid_transaction_commitment)
+BC_AUTO_TEST_CASE(block__check__malleated64_first_not_coinbase__invalid_transaction_commitment)
 {
     const accessor instance{ header{}, transactions{ triad_tx64(), triad_tx64() } };
-    BOOST_REQUIRE_EQUAL(triad_tx64().serialized_size(false), 64u);
-    BOOST_REQUIRE(instance.is_first_non_coinbase());
-    BOOST_REQUIRE_EQUAL(instance.check(false), error::invalid_transaction_commitment);
+    BC_REQUIRE_EQUAL(triad_tx64().serialized_size(false), 64u);
+    BC_REQUIRE(instance.is_first_non_coinbase());
+    BC_REQUIRE_EQUAL(instance.check(false), error::invalid_transaction_commitment);
 }
 
 // Duplicate points within one transaction are caught at block scope.
-BOOST_AUTO_TEST_CASE(block__check__duplicate_points_within_transaction__block_internal_double_spend)
+BC_AUTO_TEST_CASE(block__check__duplicate_points_within_transaction__block_internal_double_spend)
 {
     const inputs ins
     {
@@ -1041,11 +1041,11 @@ BOOST_AUTO_TEST_CASE(block__check__duplicate_points_within_transaction__block_in
     const transaction duplicated{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), duplicated } };
-    BOOST_REQUIRE_EQUAL(instance.check(false), error::block_internal_double_spend);
+    BC_REQUIRE_EQUAL(instance.check(false), error::block_internal_double_spend);
 }
 
 // Duplicate points across transactions are caught at block scope.
-BOOST_AUTO_TEST_CASE(block__check__duplicate_points_across_transactions__block_internal_double_spend)
+BC_AUTO_TEST_CASE(block__check__duplicate_points_across_transactions__block_internal_double_spend)
 {
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, 0xffffffff } };
     const transaction spend1{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
@@ -1053,33 +1053,33 @@ BOOST_AUTO_TEST_CASE(block__check__duplicate_points_across_transactions__block_i
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const auto txs = transactions{ coinbase_transaction(0, coinbase_script), spend1, spend2 };
     const block instance{ header{}, txs };
-    BOOST_REQUIRE_EQUAL(instance.check(false), error::block_internal_double_spend);
+    BC_REQUIRE_EQUAL(instance.check(false), error::block_internal_double_spend);
 }
 
-BOOST_AUTO_TEST_CASE(block__check__extra_coinbases__extra_coinbases)
+BC_AUTO_TEST_CASE(block__check__extra_coinbases__extra_coinbases)
 {
     const auto txs = transactions{ coinbase_transaction(0, script{}), coinbase_transaction(1, script{}) };
     const block instance{ header{}, txs };
-    BOOST_REQUIRE_EQUAL(instance.check(false), error::extra_coinbases);
+    BC_REQUIRE_EQUAL(instance.check(false), error::extra_coinbases);
 }
 
-BOOST_AUTO_TEST_CASE(block__check__identity_false__merkle_root_unchecked)
+BC_AUTO_TEST_CASE(block__check__identity_false__merkle_root_unchecked)
 {
     const block instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
-    BOOST_REQUIRE(instance.check(false) != error::invalid_transaction_commitment);
+    BC_REQUIRE(instance.check(false) != error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check__identity_true__invalid_transaction_commitment)
+BC_AUTO_TEST_CASE(block__check__identity_true__invalid_transaction_commitment)
 {
     const block instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
-    BOOST_REQUIRE_EQUAL(instance.check(true), error::invalid_transaction_commitment);
+    BC_REQUIRE_EQUAL(instance.check(true), error::invalid_transaction_commitment);
 }
 
 // The context free check delegates to the transaction check.
-BOOST_AUTO_TEST_CASE(block__check__invalid_coinbase_script_size__invalid_coinbase_script_size)
+BC_AUTO_TEST_CASE(block__check__invalid_coinbase_script_size__invalid_coinbase_script_size)
 {
     const block instance{ header{}, transactions{ coinbase_transaction(0, script{}) } };
-    BOOST_REQUIRE_EQUAL(instance.check(false), error::invalid_coinbase_script_size);
+    BC_REQUIRE_EQUAL(instance.check(false), error::invalid_coinbase_script_size);
 }
 
 // check(context)
@@ -1091,146 +1091,146 @@ static block triad_block() NOEXCEPT
     return block{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__minimal_block__block_success)
+BC_AUTO_TEST_CASE(block__check_context__minimal_block__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(triad_block().check(ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_bip34_off__block_success)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_bip34_off__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(triad_block().check(ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_bip34_on__coinbase_height_mismatch)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_bip34_on__coinbase_height_mismatch)
 {
     const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false), error::coinbase_height_mismatch);
+    BC_REQUIRE_EQUAL(triad_block().check(ctx, false), error::coinbase_height_mismatch);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__matching_coinbase_script_bip34_on__block_success)
+BC_AUTO_TEST_CASE(block__check_context__matching_coinbase_script_bip34_on__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
 // Heights above sixteen serialize as a nominal data push in both encodings.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_height_seventeen__block_success)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_height_seventeen__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x11 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0111"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0111"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 17, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
 // Heights one through sixteen serialize as a single byte small integer.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height__block_success)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("51"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("51"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
 // The sized push of a small integer height is not the minimal encoding.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_pushed_height_one__coinbase_height_mismatch)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_pushed_height_one__coinbase_height_mismatch)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01 }, false } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0101"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("0101"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height_sixteen__block_success)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_small_integer_height_sixteen__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x10 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("60"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("60"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 16, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
 // A zero-padded height is a minimal push but not a minimal number.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_zero_padded_height_one__coinbase_height_mismatch)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_zero_padded_height_one__coinbase_height_mismatch)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x00, 0x00 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("03010000"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("03010000"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_zero_padded_height_hundred__coinbase_height_mismatch)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_zero_padded_height_hundred__coinbase_height_mismatch)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64, 0x00 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("026400"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("026400"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
 }
 
 // A height with the high bit set requires exactly one sign byte.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_sign_byte_height__block_success)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_sign_byte_height__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x80, 0x00 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("028000"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("028000"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 128, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_sign_padded_height__coinbase_height_mismatch)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_sign_padded_height__coinbase_height_mismatch)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x80, 0x00, 0x00 }, true } } };
-    BOOST_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("03800000"));
+    BC_REQUIRE_EQUAL(coinbase_script.to_data(false), base16_chunk("03800000"));
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 128, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
 }
 
 // A non-minimal push opcode of the minimal number is not the minimal encoding.
-BOOST_AUTO_TEST_CASE(block__check_context__coinbase_script_push_one_height__coinbase_height_mismatch)
+BC_AUTO_TEST_CASE(block__check_context__coinbase_script_push_one_height__coinbase_height_mismatch)
 {
     const script coinbase_script(base16_chunk("4c0164"), false);
-    BOOST_REQUIRE(coinbase_script.is_valid());
-    BOOST_REQUIRE_EQUAL(coinbase_script.ops().size(), 1u);
+    BC_REQUIRE(coinbase_script.is_valid());
+    BC_REQUIRE_EQUAL(coinbase_script.ops().size(), 1u);
 
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     const context ctx{ flags::bip34_rule, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_height_mismatch);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__overweight_bip141_off__block_success)
+BC_AUTO_TEST_CASE(block__check_context__overweight_bip141_off__block_success)
 {
     const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, big) } };
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__overweight_bip141_on__block_weight_limit)
+BC_AUTO_TEST_CASE(block__check_context__overweight_bip141_on__block_weight_limit)
 {
     const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, big) } };
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_weight_limit);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_weight_limit);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_false__block_success)
+BC_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_false__block_success)
 {
     const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
@@ -1238,10 +1238,10 @@ BOOST_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_false__bl
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), spend } };
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_true__invalid_witness_commitment)
+BC_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_true__invalid_witness_commitment)
 {
     const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
@@ -1249,18 +1249,18 @@ BOOST_AUTO_TEST_CASE(block__check_context__witness_commitment_identity_true__inv
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), spend } };
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, true), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(instance.check(ctx, true), error::invalid_witness_commitment);
 }
 
 // The contextual check delegates to the transaction contextual check.
-BOOST_AUTO_TEST_CASE(block__check_context__locked_transaction__absolute_time_locked)
+BC_AUTO_TEST_CASE(block__check_context__locked_transaction__absolute_time_locked)
 {
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, sub1(0xffffffff) } };
     const transaction locked{ 1, ins, outputs{ output{ 0, script{} } }, 200 };
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script), locked } };
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::absolute_time_locked);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::absolute_time_locked);
 }
 
 // check_guard
@@ -1284,36 +1284,36 @@ static block witnessed_block() NOEXCEPT
     return block{ head, txs };
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard__witnessed_valid_merkle_root__block_success)
+BC_AUTO_TEST_CASE(block__check_guard__witnessed_valid_merkle_root__block_success)
 {
     const auto instance = witnessed_block();
-    BOOST_REQUIRE(instance.is_segregated());
-    BOOST_REQUIRE_EQUAL(instance.check_guard(), error::block_success);
+    BC_REQUIRE(instance.is_segregated());
+    BC_REQUIRE_EQUAL(instance.check_guard(), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard__witnessed_bip141_off__invalid_witness_commitment)
+BC_AUTO_TEST_CASE(block__check_guard__witnessed_bip141_off__invalid_witness_commitment)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(witnessed_block().check_guard(ctx), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(witnessed_block().check_guard(ctx), error::invalid_witness_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard__witnessed_bip141_on__invalid_witness_commitment)
+BC_AUTO_TEST_CASE(block__check_guard__witnessed_bip141_on__invalid_witness_commitment)
 {
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(witnessed_block().check_guard(ctx), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(witnessed_block().check_guard(ctx), error::invalid_witness_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard__unwitnessed_bip141_off__block_success)
+BC_AUTO_TEST_CASE(block__check_guard__unwitnessed_bip141_off__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
-    BOOST_REQUIRE(!instance.is_segregated());
-    BOOST_REQUIRE_EQUAL(instance.check_guard(ctx), error::block_success);
+    BC_REQUIRE(!instance.is_segregated());
+    BC_REQUIRE_EQUAL(instance.check_guard(ctx), error::block_success);
 }
 
 // A commitment output without witness data is not a malleation before bip141.
-BOOST_AUTO_TEST_CASE(block__check_guard__commitment_without_witness_bip141_off__block_success)
+BC_AUTO_TEST_CASE(block__check_guard__commitment_without_witness_bip141_off__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const script commitment(base16_chunk("6a24aa21a9ed0000000000000000000000000000000000000000000000000000000000000000"), false);
@@ -1321,9 +1321,9 @@ BOOST_AUTO_TEST_CASE(block__check_guard__commitment_without_witness_bip141_off__
     const outputs outs{ output{ 0, commitment } };
     const transaction coinbase{ 1, ins, outs, 0 };
     const block instance{ header{}, transactions{ coinbase } };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(!instance.is_segregated());
-    BOOST_REQUIRE_EQUAL(instance.check_guard(ctx), error::block_success);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(!instance.is_segregated());
+    BC_REQUIRE_EQUAL(instance.check_guard(ctx), error::block_success);
 }
 
 // check_guard (hashes)
@@ -1341,67 +1341,67 @@ static hash_digest witnessed_root() NOEXCEPT
     return bitcoin_hash(txs.front().hash(true), txs.back().hash(true));
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes__valid_merkle_root__block_success)
+BC_AUTO_TEST_CASE(block__check_guard_hashes__valid_merkle_root__block_success)
 {
     const auto txids = witnessed_txids();
     const auto root = bitcoin_hash(txids.front(), txids.back());
-    BOOST_REQUIRE_EQUAL(block::check_guard(root, txids, false), error::block_success);
+    BC_REQUIRE_EQUAL(block::check_guard(root, txids, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes__bad_merkle_root__invalid_transaction_commitment)
+BC_AUTO_TEST_CASE(block__check_guard_hashes__bad_merkle_root__invalid_transaction_commitment)
 {
-    BOOST_REQUIRE_EQUAL(block::check_guard(null_hash, witnessed_txids(), false), error::invalid_transaction_commitment);
+    BC_REQUIRE_EQUAL(block::check_guard(null_hash, witnessed_txids(), false), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes__malleated64__invalid_transaction_commitment)
+BC_AUTO_TEST_CASE(block__check_guard_hashes__malleated64__invalid_transaction_commitment)
 {
     const auto txids = witnessed_txids();
     const auto root = bitcoin_hash(txids.front(), txids.back());
-    BOOST_REQUIRE_EQUAL(block::check_guard(root, txids, true), error::invalid_transaction_commitment);
+    BC_REQUIRE_EQUAL(block::check_guard(root, txids, true), error::invalid_transaction_commitment);
 }
 
 // Four leaves with the last cloned from the third have the root of three.
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes__malleated32__invalid_transaction_commitment)
+BC_AUTO_TEST_CASE(block__check_guard_hashes__malleated32__invalid_transaction_commitment)
 {
     const auto txs = witnessed_transactions();
     const hashes txids{ txs.front().hash(false), txs.back().hash(false), one_hash, one_hash };
     const auto root = bitcoin_hash(bitcoin_hash(txids[0], txids[1]), bitcoin_hash(one_hash, one_hash));
-    BOOST_REQUIRE(block::is_malleated32(txids));
-    BOOST_REQUIRE_EQUAL(block::check_guard(root, txids, false), error::invalid_transaction_commitment);
+    BC_REQUIRE(block::is_malleated32(txids));
+    BC_REQUIRE_EQUAL(block::check_guard(root, txids, false), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes_context__segregated_bip141_off__invalid_witness_commitment)
+BC_AUTO_TEST_CASE(block__check_guard_hashes_context__segregated_bip141_off__invalid_witness_commitment)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto txs = witnessed_transactions();
-    BOOST_REQUIRE_EQUAL(block::check_guard(ctx, txs.front(), witnessed_root(), true), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(block::check_guard(ctx, txs.front(), witnessed_root(), true), error::invalid_witness_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes_context__segregated_bip141_on_no_commitment__invalid_witness_commitment)
+BC_AUTO_TEST_CASE(block__check_guard_hashes_context__segregated_bip141_on_no_commitment__invalid_witness_commitment)
 {
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
     const auto txs = witnessed_transactions();
-    BOOST_REQUIRE_EQUAL(block::check_guard(ctx, txs.front(), witnessed_root(), true), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(block::check_guard(ctx, txs.front(), witnessed_root(), true), error::invalid_witness_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes_context__unsegregated_bip141_off__block_success)
+BC_AUTO_TEST_CASE(block__check_guard_hashes_context__unsegregated_bip141_off__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const auto coinbase = coinbase_transaction(0, coinbase_script);
-    BOOST_REQUIRE_EQUAL(block::check_guard(ctx, coinbase, coinbase.hash(true), false), error::block_success);
+    BC_REQUIRE_EQUAL(block::check_guard(ctx, coinbase, coinbase.hash(true), false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes_context__commitment_without_reservation__invalid_witness_commitment)
+BC_AUTO_TEST_CASE(block__check_guard_hashes_context__commitment_without_reservation__invalid_witness_commitment)
 {
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
     const script commitment(base16_chunk("6a24aa21a9ed0000000000000000000000000000000000000000000000000000000000000000"), false);
     const inputs ins{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, 0xffffffff } };
     const transaction coinbase{ 1, ins, outputs{ output{ 0, commitment } }, 0 };
-    BOOST_REQUIRE_EQUAL(block::check_guard(ctx, coinbase, coinbase.hash(true), false), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(block::check_guard(ctx, coinbase, coinbase.hash(true), false), error::invalid_witness_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard_hashes_context__valid_commitment__block_success)
+BC_AUTO_TEST_CASE(block__check_guard_hashes_context__valid_commitment__block_success)
 {
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
     const auto txs = witnessed_transactions();
@@ -1411,27 +1411,27 @@ BOOST_AUTO_TEST_CASE(block__check_guard_hashes_context__valid_commitment__block_
     const witness reserved{ chunk_cptrs{ to_shared(data_chunk(hash_size, 0x00)) } };
     const inputs ins{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, reserved, 0xffffffff } };
     const transaction coinbase{ 1, ins, outputs{ output{ 0, commitment } }, 0 };
-    BOOST_REQUIRE_EQUAL(coinbase.hash(true), null_hash);
-    BOOST_REQUIRE_EQUAL(block::check_guard(ctx, coinbase, bitcoin_hash(coinbase.hash(true), spend_wtxid), true), error::block_success);
+    BC_REQUIRE_EQUAL(coinbase.hash(true), null_hash);
+    BC_REQUIRE_EQUAL(block::check_guard(ctx, coinbase, bitcoin_hash(coinbase.hash(true), spend_wtxid), true), error::block_success);
 }
 
 // accept
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__accept__claim_at_subsidy__block_success)
+BC_AUTO_TEST_CASE(block__accept__claim_at_subsidy__block_success)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(5000000000, coinbase_script) } };
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::block_success);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__accept__claim_above_subsidy__coinbase_value_limit)
+BC_AUTO_TEST_CASE(block__accept__claim_above_subsidy__coinbase_value_limit)
 {
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(5000000001, coinbase_script) } };
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::coinbase_value_limit);
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 210000, 5000000000), error::coinbase_value_limit);
 }
 
 // populate
@@ -1444,14 +1444,14 @@ static transaction populate_coinbase() NOEXCEPT
     return transaction{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
 }
 
-BOOST_AUTO_TEST_CASE(block__populate__no_transactions__block_success)
+BC_AUTO_TEST_CASE(block__populate__no_transactions__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate__internal_spend__prevout_populated)
+BC_AUTO_TEST_CASE(block__populate__internal_spend__prevout_populated)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1460,26 +1460,26 @@ BOOST_AUTO_TEST_CASE(block__populate__internal_spend__prevout_populated)
     const transaction tx2{ 1, ins2, outputs{ output{ 40, script{} } }, 0 };
 
     const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
 
     const auto& spender = instance.transactions_ptr()->back();
-    BOOST_REQUIRE(spender->inputs_ptr()->front()->prevout);
-    BOOST_REQUIRE_EQUAL(spender->inputs_ptr()->front()->prevout->value(), 42u);
+    BC_REQUIRE(spender->inputs_ptr()->front()->prevout);
+    BC_REQUIRE_EQUAL(spender->inputs_ptr()->front()->prevout->value(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate__external_spend__prevout_unpopulated)
+BC_AUTO_TEST_CASE(block__populate__external_spend__prevout_unpopulated)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
     const transaction spend{ 1, ins, outputs{ output{ 40, script{} } }, 0 };
 
     const block instance{ header{}, transactions{ populate_coinbase(), spend } };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
-    BOOST_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->prevout);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BC_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->prevout);
 }
 
 // The prevout of an internal spend is that of a non-coinbase transaction.
-BOOST_AUTO_TEST_CASE(block__populate__internal_spend__coinbase_metadata_false)
+BC_AUTO_TEST_CASE(block__populate__internal_spend__coinbase_metadata_false)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1488,12 +1488,12 @@ BOOST_AUTO_TEST_CASE(block__populate__internal_spend__coinbase_metadata_false)
     const transaction tx2{ 1, ins2, outputs{ output{ 40, script{} } }, 0 };
 
     const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
-    BOOST_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->metadata.coinbase);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BC_REQUIRE(!instance.transactions_ptr()->back()->inputs_ptr()->front()->metadata.coinbase);
 }
 
 // The coinbase output of a block cannot be spent within that block.
-BOOST_AUTO_TEST_CASE(block__populate__spend_of_block_coinbase__coinbase_maturity)
+BC_AUTO_TEST_CASE(block__populate__spend_of_block_coinbase__coinbase_maturity)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const auto coinbase = populate_coinbase();
@@ -1501,10 +1501,10 @@ BOOST_AUTO_TEST_CASE(block__populate__spend_of_block_coinbase__coinbase_maturity
     const transaction spend{ 1, ins, outputs{ output{ 40, script{} } }, 0 };
 
     const block instance{ header{}, transactions{ coinbase, spend } };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::coinbase_maturity);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::coinbase_maturity);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_on__relative_time_locked)
+BC_AUTO_TEST_CASE(block__populate__internally_locked_bip68_on__relative_time_locked)
 {
     const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
     const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1513,10 +1513,10 @@ BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_on__relative_time_
     const transaction tx2{ 2, ins2, outputs{ output{ 40, script{} } }, 0 };
 
     const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::relative_time_locked);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::relative_time_locked);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_off__block_success)
+BC_AUTO_TEST_CASE(block__populate__internally_locked_bip68_off__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1525,19 +1525,19 @@ BOOST_AUTO_TEST_CASE(block__populate__internally_locked_bip68_off__block_success
     const transaction tx2{ 2, ins2, outputs{ output{ 40, script{} } }, 0 };
 
     const block instance{ header{}, transactions{ populate_coinbase(), tx1, tx2 } };
-    BOOST_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
+    BC_REQUIRE_EQUAL(instance.populate(ctx), error::block_success);
 }
 
 // populate (collection)
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__populate_collection__empty__block_success)
+BC_AUTO_TEST_CASE(block__populate_collection__empty__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(block::populate(transaction_cptrs{}, ctx, false), error::block_success);
+    BC_REQUIRE_EQUAL(block::populate(transaction_cptrs{}, ctx, false), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate_collection__internal_spend__prevout_populated)
+BC_AUTO_TEST_CASE(block__populate_collection__internal_spend__prevout_populated)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1546,23 +1546,23 @@ BOOST_AUTO_TEST_CASE(block__populate_collection__internal_spend__prevout_populat
     const auto tx2 = to_shared<transaction>(1, ins2, outputs{ output{ 40, script{} } }, 0);
 
     const transaction_cptrs txs{ tx1, tx2 };
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
-    BOOST_REQUIRE(tx2->inputs_ptr()->front()->prevout);
-    BOOST_REQUIRE_EQUAL(tx2->inputs_ptr()->front()->prevout->value(), 42u);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BC_REQUIRE(tx2->inputs_ptr()->front()->prevout);
+    BC_REQUIRE_EQUAL(tx2->inputs_ptr()->front()->prevout->value(), 42u);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate_collection__external_spend__prevout_unpopulated)
+BC_AUTO_TEST_CASE(block__populate_collection__external_spend__prevout_unpopulated)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
     const auto spend = to_shared<transaction>(1, ins, outputs{ output{ 40, script{} } }, 0);
 
-    BOOST_REQUIRE_EQUAL(block::populate(transaction_cptrs{ spend }, ctx, false), error::block_success);
-    BOOST_REQUIRE(!spend->inputs_ptr()->front()->prevout);
+    BC_REQUIRE_EQUAL(block::populate(transaction_cptrs{ spend }, ctx, false), error::block_success);
+    BC_REQUIRE(!spend->inputs_ptr()->front()->prevout);
 }
 
 // The first tx of a package is a spender, unlike the coinbase of a block.
-BOOST_AUTO_TEST_CASE(block__populate_collection__first_tx_spend__prevout_populated)
+BC_AUTO_TEST_CASE(block__populate_collection__first_tx_spend__prevout_populated)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const inputs ins2{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1571,13 +1571,13 @@ BOOST_AUTO_TEST_CASE(block__populate_collection__first_tx_spend__prevout_populat
     const auto tx1 = to_shared<transaction>(1, ins1, outputs{ output{ 40, script{} } }, 0);
 
     const transaction_cptrs txs{ tx1, tx2 };
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
-    BOOST_REQUIRE(tx1->inputs_ptr()->front()->prevout);
-    BOOST_REQUIRE_EQUAL(tx1->inputs_ptr()->front()->prevout->value(), 42u);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BC_REQUIRE(tx1->inputs_ptr()->front()->prevout);
+    BC_REQUIRE_EQUAL(tx1->inputs_ptr()->front()->prevout->value(), 42u);
 }
 
 // Spending the first tx is coinbase_maturity for a block, allowed otherwise.
-BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__block_success)
+BC_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const auto first = to_shared<transaction>(populate_coinbase());
@@ -1585,13 +1585,13 @@ BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__block_succes
     const auto spend = to_shared<transaction>(1, ins, outputs{ output{ 40, script{} } }, 0);
 
     const transaction_cptrs txs{ first, spend };
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
-    BOOST_REQUIRE(spend->inputs_ptr()->front()->prevout);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BC_REQUIRE(spend->inputs_ptr()->front()->prevout);
 }
 
 // The first tx is the coinbase of a block and a spendable tx otherwise.
-BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__coinbase_metadata_populated)
+BC_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__coinbase_metadata_populated)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const auto first = to_shared<transaction>(populate_coinbase());
@@ -1599,14 +1599,14 @@ BOOST_AUTO_TEST_CASE(block__populate_collection__spend_of_first_tx__coinbase_met
     const auto spend = to_shared<transaction>(1, ins, outputs{ output{ 40, script{} } }, 0);
 
     const transaction_cptrs txs{ first, spend };
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
-    BOOST_REQUIRE(spend->inputs_ptr()->front()->metadata.coinbase);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, true), error::coinbase_maturity);
+    BC_REQUIRE(spend->inputs_ptr()->front()->metadata.coinbase);
 
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
-    BOOST_REQUIRE(!spend->inputs_ptr()->front()->metadata.coinbase);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::block_success);
+    BC_REQUIRE(!spend->inputs_ptr()->front()->metadata.coinbase);
 }
 
-BOOST_AUTO_TEST_CASE(block__populate_collection__internally_locked_bip68_on__relative_time_locked)
+BC_AUTO_TEST_CASE(block__populate_collection__internally_locked_bip68_on__relative_time_locked)
 {
     const context ctx{ flags::bip68_rule, 0, 0, 100, 0, 0, 0 };
     const inputs ins1{ input{ point{ one_hash, 0 }, script{}, max_input_sequence } };
@@ -1615,108 +1615,108 @@ BOOST_AUTO_TEST_CASE(block__populate_collection__internally_locked_bip68_on__rel
     const auto tx2 = to_shared<transaction>(2, ins2, outputs{ output{ 40, script{} } }, 0);
 
     const transaction_cptrs txs{ tx1, tx2 };
-    BOOST_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::relative_time_locked);
+    BC_REQUIRE_EQUAL(block::populate(txs, ctx, false), error::relative_time_locked);
 }
 
 // confirm
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__confirm__coinbase_only__block_success)
+BC_AUTO_TEST_CASE(block__confirm__coinbase_only__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(triad_block().confirm(ctx), error::block_success);
+    BC_REQUIRE_EQUAL(triad_block().confirm(ctx), error::block_success);
 }
 
 // header_ptr/transaction_hashes
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__header_ptr__genesis__matches_header)
+BC_AUTO_TEST_CASE(block__header_ptr__genesis__matches_header)
 {
     const auto& instance = test::genesis;
-    BOOST_REQUIRE(instance.header_ptr());
-    BOOST_REQUIRE(*instance.header_ptr() == instance.header());
+    BC_REQUIRE(instance.header_ptr());
+    BC_REQUIRE(*instance.header_ptr() == instance.header());
 }
 
-BOOST_AUTO_TEST_CASE(block__transaction_hashes__genesis__coinbase_hash)
+BC_AUTO_TEST_CASE(block__transaction_hashes__genesis__coinbase_hash)
 {
     const auto& instance = test::genesis;
     const auto& txs = *instance.transactions_ptr();
     const auto out = instance.transaction_hashes(false);
-    BOOST_REQUIRE_EQUAL(out.size(), 1u);
-    BOOST_REQUIRE_EQUAL(out.front(), txs.front()->hash(false));
+    BC_REQUIRE_EQUAL(out.size(), 1u);
+    BC_REQUIRE_EQUAL(out.front(), txs.front()->hash(false));
 }
 
-BOOST_AUTO_TEST_CASE(block__transaction_hashes__block2a__witness_distinguished)
+BC_AUTO_TEST_CASE(block__transaction_hashes__block2a__witness_distinguished)
 {
     const auto& instance = test::block2a;
     const auto& txs = *instance.transactions_ptr();
     const auto nominal = instance.transaction_hashes(false);
     const auto witnessed = instance.transaction_hashes(true);
-    BOOST_REQUIRE_EQUAL(nominal.size(), txs.size());
-    BOOST_REQUIRE_EQUAL(witnessed.size(), txs.size());
-    BOOST_REQUIRE_EQUAL(nominal.back(), txs.back()->hash(false));
-    BOOST_REQUIRE_EQUAL(witnessed.back(), txs.back()->hash(true));
-    BOOST_REQUIRE_NE(nominal.back(), witnessed.back());
+    BC_REQUIRE_EQUAL(nominal.size(), txs.size());
+    BC_REQUIRE_EQUAL(witnessed.size(), txs.size());
+    BC_REQUIRE_EQUAL(nominal.back(), txs.back()->hash(false));
+    BC_REQUIRE_EQUAL(witnessed.back(), txs.back()->hash(true));
+    BC_REQUIRE_NE(nominal.back(), witnessed.back());
 }
 
 // set_hashes
 // ----------------------------------------------------------------------------
 // Caches the header hash and each transaction hash from the serialization.
 
-BOOST_AUTO_TEST_CASE(block__set_hashes__genesis__matches_computed)
+BC_AUTO_TEST_CASE(block__set_hashes__genesis__matches_computed)
 {
     const auto& expected = test::genesis;
     const auto data = expected.to_data(true);
     block instance{ data, true };
     instance.set_hashes(data);
-    BOOST_REQUIRE_EQUAL(instance.hash(), expected.hash());
-    BOOST_REQUIRE_EQUAL(instance.transaction_hashes(false), expected.transaction_hashes(false));
+    BC_REQUIRE_EQUAL(instance.hash(), expected.hash());
+    BC_REQUIRE_EQUAL(instance.transaction_hashes(false), expected.transaction_hashes(false));
 }
 
-BOOST_AUTO_TEST_CASE(block__set_hashes__block2a__matches_computed)
+BC_AUTO_TEST_CASE(block__set_hashes__block2a__matches_computed)
 {
     const auto& expected = test::block2a;
     const auto data = expected.to_data(true);
     block instance{ data, true };
     instance.set_hashes(data);
-    BOOST_REQUIRE_EQUAL(instance.hash(), expected.hash());
-    BOOST_REQUIRE_EQUAL(instance.transaction_hashes(false), expected.transaction_hashes(false));
+    BC_REQUIRE_EQUAL(instance.hash(), expected.hash());
+    BC_REQUIRE_EQUAL(instance.transaction_hashes(false), expected.transaction_hashes(false));
 }
 
 // set_state/get_state
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__get_state__default__nullptr)
+BC_AUTO_TEST_CASE(block__get_state__default__nullptr)
 {
     const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE(!instance.get_state());
+    BC_REQUIRE(!instance.get_state());
 }
 
-BOOST_AUTO_TEST_CASE(block__set_state__assigned__same_state)
+BC_AUTO_TEST_CASE(block__set_state__assigned__same_state)
 {
     const settings settings(selection::mainnet);
     const auto state = std::make_shared<const chain_state>(chain_state::data{}, settings);
     const block instance{ header{}, transactions{} };
     instance.set_state(state);
-    BOOST_REQUIRE(instance.get_state() == state);
+    BC_REQUIRE(instance.get_state() == state);
 }
 
 // check/accept code mappings
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__check__oversized__block_size_limit)
+BC_AUTO_TEST_CASE(block__check__oversized__block_size_limit)
 {
     const script big{ operations{ operation{ data_chunk(1'000'000, 0x00), false } } };
     const block instance{ header{}, transactions{ coinbase_transaction(0, big) } };
-    BOOST_REQUIRE_EQUAL(instance.check(), error::block_size_limit);
+    BC_REQUIRE_EQUAL(instance.check(), error::block_size_limit);
 }
 
-BOOST_AUTO_TEST_CASE(block__check__forward_reference__forward_reference)
+BC_AUTO_TEST_CASE(block__check__forward_reference__forward_reference)
 {
     const transaction to{ 0, inputs{}, {}, 42 };
     const transaction from{ 0, { { { to.hash(false), 0 }, {}, 0 } }, {}, 0 };
     const block instance{ header{}, transactions{ coinbase_transaction(0, script{}), from, to } };
-    BOOST_REQUIRE_EQUAL(instance.check(), error::forward_reference);
+    BC_REQUIRE_EQUAL(instance.check(), error::forward_reference);
 }
 
 static block sigops_block(size_t checksigs) NOEXCEPT
@@ -1727,114 +1727,114 @@ static block sigops_block(size_t checksigs) NOEXCEPT
     return block{ header{}, transactions{ transaction{ 1, ins, outs, 0 } } };
 }
 
-BOOST_AUTO_TEST_CASE(block__accept__sigops_at_limit__block_success)
+BC_AUTO_TEST_CASE(block__accept__sigops_at_limit__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(sigops_block(max_block_sigops).accept(ctx, 210000, 5000000000), error::block_success);
+    BC_REQUIRE_EQUAL(sigops_block(max_block_sigops).accept(ctx, 210000, 5000000000), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__accept__sigops_above_limit__block_sigop_limit)
+BC_AUTO_TEST_CASE(block__accept__sigops_above_limit__block_sigop_limit)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(sigops_block(add1(max_block_sigops)).accept(ctx, 210000, 5000000000), error::block_sigop_limit);
+    BC_REQUIRE_EQUAL(sigops_block(add1(max_block_sigops)).accept(ctx, 210000, 5000000000), error::block_sigop_limit);
 }
 
 // BIP141: legacy sigops are scaled by four against a four times larger limit.
-BOOST_AUTO_TEST_CASE(block__accept__sigops_bip141__scaled_limit)
+BC_AUTO_TEST_CASE(block__accept__sigops_bip141__scaled_limit)
 {
     const context ctx{ flags::bip141_rule, 0, 0, 0, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(sigops_block(max_block_sigops).accept(ctx, 210000, 5000000000), error::block_success);
-    BOOST_REQUIRE_EQUAL(sigops_block(add1(max_block_sigops)).accept(ctx, 210000, 5000000000), error::block_sigop_limit);
+    BC_REQUIRE_EQUAL(sigops_block(max_block_sigops).accept(ctx, 210000, 5000000000), error::block_success);
+    BC_REQUIRE_EQUAL(sigops_block(add1(max_block_sigops)).accept(ctx, 210000, 5000000000), error::block_sigop_limit);
 }
 // pointer construction
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__constructor__pointers__expected)
+BC_AUTO_TEST_CASE(block__constructor__pointers__expected)
 {
     const auto head = to_shared(expected_header);
     const transactions_cptr txs{ to_shared<transaction_cptrs>() };
     const block instance{ head, txs };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header_ptr() == head);
-    BOOST_REQUIRE(instance.transactions_ptr() == txs);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.header_ptr() == head);
+    BC_REQUIRE(instance.transactions_ptr() == txs);
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__null_pointers__default_instances)
+BC_AUTO_TEST_CASE(block__constructor__null_pointers__default_instances)
 {
     const block instance{ chain::header::cptr{}, transactions_cptr{} };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.header() == header{});
-    BOOST_REQUIRE(instance.transactions_ptr()->empty());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.header() == header{});
+    BC_REQUIRE(instance.transactions_ptr()->empty());
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__istream__round_trips)
+BC_AUTO_TEST_CASE(block__constructor__istream__round_trips)
 {
     const auto& data = expected_block::data();
     const std::string text(data.cbegin(), data.cend());
     std::istringstream source{ text };
     const block instance{ source, true };
-    BOOST_REQUIRE(instance == expected_block::get());
+    BC_REQUIRE(instance == expected_block::get());
 }
 
 // computed properties
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__inputs_ptr__three_transactions__all_inputs)
+BC_AUTO_TEST_CASE(block__inputs_ptr__three_transactions__all_inputs)
 {
-    BOOST_REQUIRE_EQUAL(expected_block::get().inputs_ptr()->size(), 3u);
+    BC_REQUIRE_EQUAL(expected_block::get().inputs_ptr()->size(), 3u);
 }
 
-BOOST_AUTO_TEST_CASE(block__outputs__empty__zero)
-{
-    const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE_EQUAL(instance.outputs(), zero);
-}
-
-BOOST_AUTO_TEST_CASE(block__spends__empty__zero)
+BC_AUTO_TEST_CASE(block__outputs__empty__zero)
 {
     const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE_EQUAL(instance.spends(), zero);
+    BC_REQUIRE_EQUAL(instance.outputs(), zero);
 }
 
-BOOST_AUTO_TEST_CASE(block__get_hash__always__header_hash)
+BC_AUTO_TEST_CASE(block__spends__empty__zero)
+{
+    const block instance{ header{}, transactions{} };
+    BC_REQUIRE_EQUAL(instance.spends(), zero);
+}
+
+BC_AUTO_TEST_CASE(block__get_hash__always__header_hash)
 {
     const auto& instance = expected_block::get();
-    BOOST_REQUIRE_EQUAL(instance.get_hash(), expected_header.hash());
+    BC_REQUIRE_EQUAL(instance.get_hash(), expected_header.hash());
 }
 
 // Weight is 3 * base + 1 * total, so vsize is size when there is no witness.
-BOOST_AUTO_TEST_CASE(block__virtual_size__unwitnessed__serialized_size)
+BC_AUTO_TEST_CASE(block__virtual_size__unwitnessed__serialized_size)
 {
     const auto& instance = expected_block::get();
     const auto size = instance.serialized_size(true);
-    BOOST_REQUIRE_EQUAL(instance.virtual_size(), size);
+    BC_REQUIRE_EQUAL(instance.virtual_size(), size);
 }
 
 // empty block predicates
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__is_extra_coinbases__empty__false)
+BC_AUTO_TEST_CASE(block__is_extra_coinbases__empty__false)
 {
     const accessor instance{ header{}, transactions{} };
-    BOOST_REQUIRE(!instance.is_extra_coinbases());
+    BC_REQUIRE(!instance.is_extra_coinbases());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_coinbase_script__empty__false)
+BC_AUTO_TEST_CASE(block__is_invalid_coinbase_script__empty__false)
 {
     const accessor instance{ header{}, transactions{} };
-    BOOST_REQUIRE(!instance.is_invalid_coinbase_script(zero));
+    BC_REQUIRE(!instance.is_invalid_coinbase_script(zero));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_hash_limit_exceeded__empty__false)
+BC_AUTO_TEST_CASE(block__is_hash_limit_exceeded__empty__false)
 {
     const accessor instance{ header{}, transactions{} };
-    BOOST_REQUIRE(!instance.is_hash_limit_exceeded());
+    BC_REQUIRE(!instance.is_hash_limit_exceeded());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_invalid_witness_commitment__empty__false)
+BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__empty__false)
 {
     const accessor instance{ header{}, transactions{} };
-    BOOST_REQUIRE(!instance.is_invalid_witness_commitment());
+    BC_REQUIRE(!instance.is_invalid_witness_commitment());
 }
 
 // validation
@@ -1853,66 +1853,66 @@ static block unpopulated_block() NOEXCEPT
     };
 }
 
-BOOST_AUTO_TEST_CASE(block__check_guard__bad_merkle__transaction_commitment)
+BC_AUTO_TEST_CASE(block__check_guard__bad_merkle__transaction_commitment)
 {
     const block instance{ expected_header, expected_transactions::get() };
     const auto ec = instance.check_guard();
-    BOOST_REQUIRE_EQUAL(ec, error::invalid_transaction_commitment);
+    BC_REQUIRE_EQUAL(ec, error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_CASE(block__accept__unpopulated_spend__missing_prevout)
+BC_AUTO_TEST_CASE(block__accept__unpopulated_spend__missing_prevout)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto ec = unpopulated_block().accept(ctx, 210000, 5000000000);
-    BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
+    BC_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
 // An unpopulated prevout height is above any block height.
-BOOST_AUTO_TEST_CASE(block__confirm__unpopulated_spend__unconfirmed_spend)
+BC_AUTO_TEST_CASE(block__confirm__unpopulated_spend__unconfirmed_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto ec = unpopulated_block().confirm(ctx);
-    BOOST_REQUIRE_EQUAL(ec, error::unconfirmed_spend);
+    BC_REQUIRE_EQUAL(ec, error::unconfirmed_spend);
 }
 
 // The prevout is confirmed, but the coinbase it spends is not yet mature.
-BOOST_AUTO_TEST_CASE(block__confirm__immature_coinbase_spend__coinbase_maturity)
+BC_AUTO_TEST_CASE(block__confirm__immature_coinbase_spend__coinbase_maturity)
 {
     const context ctx{ flags::no_rules, 0, 0, 50, 0, 0, 0 };
     const auto instance = unpopulated_block();
     const auto& in = instance.transactions_ptr()->back()->inputs_ptr()->front();
     in->metadata.coinbase = true;
     in->metadata.prevout_height = 10;
-    BOOST_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
+    BC_REQUIRE_EQUAL(instance.confirm(ctx), error::coinbase_maturity);
 }
 
-BOOST_AUTO_TEST_CASE(block__connect__empty__block_success)
+BC_AUTO_TEST_CASE(block__connect__empty__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const block instance{ header{}, transactions{} };
-    BOOST_REQUIRE_EQUAL(instance.connect(ctx), error::block_success);
+    BC_REQUIRE_EQUAL(instance.connect(ctx), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__connect__unpopulated_spend__missing_prevout)
+BC_AUTO_TEST_CASE(block__connect__unpopulated_spend__missing_prevout)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto ec = unpopulated_block().connect(ctx);
-    BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
+    BC_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
-BOOST_AUTO_TEST_CASE(block__connect__capture_unpopulated__missing_prevout)
+BC_AUTO_TEST_CASE(block__connect__capture_unpopulated__missing_prevout)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto ec = unpopulated_block().connect(ctx, {});
-    BOOST_REQUIRE_EQUAL(ec, error::missing_previous_output);
+    BC_REQUIRE_EQUAL(ec, error::missing_previous_output);
 }
 
-BOOST_AUTO_TEST_CASE(block__constructor__fast_stream__round_trips)
+BC_AUTO_TEST_CASE(block__constructor__fast_stream__round_trips)
 {
     const auto& data = expected_block::data();
     stream::in::fast source{ data };
     const block instance{ source, true };
-    BOOST_REQUIRE(instance == expected_block::get());
+    BC_REQUIRE(instance == expected_block::get());
 }
 
 // Each spend contributes its own hash and its point hash, so 2250 spends
@@ -1935,23 +1935,23 @@ static block hash_limit_block() NOEXCEPT
     return block{ header{}, std::move(txs) };
 }
 
-BOOST_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50__temporary_hash_limit)
+BC_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50__temporary_hash_limit)
 {
     const context ctx{ flags::bip50_rule, 0, 0, 0, 0, 0, 0 };
     const auto instance = hash_limit_block();
-    BOOST_REQUIRE_EQUAL(instance.check(ctx, false), error::temporary_hash_limit);
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::temporary_hash_limit);
 }
 
 // The limit is not applied before bip50.
-BOOST_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50_off__not_applied)
+BC_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50_off__not_applied)
 {
     const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
     const auto instance = hash_limit_block();
-    BOOST_REQUIRE_NE(instance.check(ctx, false), error::temporary_hash_limit);
+    BC_REQUIRE_NE(instance.check(ctx, false), error::temporary_hash_limit);
 }
 
 // The size and weight limits are inclusive, so the boundary must be tested.
-BOOST_AUTO_TEST_CASE(block__is_oversized__at_limit__false)
+BC_AUTO_TEST_CASE(block__is_oversized__at_limit__false)
 {
     const script big{ operations{ operation{ data_chunk(max_block_size, 0x00), false } } };
     const accessor probe{ header{}, transactions{ coinbase_transaction(0, big) } };
@@ -1959,11 +1959,11 @@ BOOST_AUTO_TEST_CASE(block__is_oversized__at_limit__false)
 
     const script exact{ operations{ operation{ data_chunk(max_block_size - excess, 0x00), false } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, exact) } };
-    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), max_block_size);
-    BOOST_REQUIRE(!instance.is_oversized());
+    BC_REQUIRE_EQUAL(instance.serialized_size(false), max_block_size);
+    BC_REQUIRE(!instance.is_oversized());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_oversized__one_over_limit__true)
+BC_AUTO_TEST_CASE(block__is_oversized__one_over_limit__true)
 {
     const script big{ operations{ operation{ data_chunk(max_block_size, 0x00), false } } };
     const accessor probe{ header{}, transactions{ coinbase_transaction(0, big) } };
@@ -1971,11 +1971,11 @@ BOOST_AUTO_TEST_CASE(block__is_oversized__one_over_limit__true)
 
     const script over{ operations{ operation{ data_chunk(add1(max_block_size - excess), 0x00), false } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, over) } };
-    BOOST_REQUIRE_EQUAL(instance.serialized_size(false), add1(max_block_size));
-    BOOST_REQUIRE(instance.is_oversized());
+    BC_REQUIRE_EQUAL(instance.serialized_size(false), add1(max_block_size));
+    BC_REQUIRE(instance.is_oversized());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_overweight__at_limit__false)
+BC_AUTO_TEST_CASE(block__is_overweight__at_limit__false)
 {
     const script big{ operations{ operation{ data_chunk(max_block_size, 0x00), false } } };
     const accessor probe{ header{}, transactions{ coinbase_transaction(0, big) } };
@@ -1983,49 +1983,49 @@ BOOST_AUTO_TEST_CASE(block__is_overweight__at_limit__false)
 
     const script exact{ operations{ operation{ data_chunk(max_block_size - excess, 0x00), false } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, exact) } };
-    BOOST_REQUIRE_EQUAL(instance.weight(), max_block_weight);
-    BOOST_REQUIRE(!instance.is_overweight());
+    BC_REQUIRE_EQUAL(instance.weight(), max_block_weight);
+    BC_REQUIRE(!instance.is_overweight());
 }
 
 // check(context) [bip325]
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(block__check_context__signet_disabled__block_success)
+BC_AUTO_TEST_CASE(block__check_context__signet_disabled__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false, test::signet_challenge), error::block_success);
+    BC_REQUIRE_EQUAL(triad_block().check(ctx, false, test::signet_challenge), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__signet_empty_block__invalid_signet_solution)
+BC_AUTO_TEST_CASE(block__check_context__signet_empty_block__invalid_signet_solution)
 {
     const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(block{}.check(ctx, false, test::signet_challenge), error::invalid_signet_solution);
+    BC_REQUIRE_EQUAL(block{}.check(ctx, false, test::signet_challenge), error::invalid_signet_solution);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__signet_no_witness_commitment__invalid_signet_solution)
+BC_AUTO_TEST_CASE(block__check_context__signet_no_witness_commitment__invalid_signet_solution)
 {
     const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(triad_block().check(ctx, false, test::signet_challenge), error::invalid_signet_solution);
+    BC_REQUIRE_EQUAL(triad_block().check(ctx, false, test::signet_challenge), error::invalid_signet_solution);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__signet1__block_success)
+BC_AUTO_TEST_CASE(block__check_context__signet1__block_success)
 {
     const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(test::signet1.check(ctx, true, test::signet_challenge), error::block_success);
+    BC_REQUIRE_EQUAL(test::signet1.check(ctx, true, test::signet_challenge), error::block_success);
 }
 
 // An empty challenge is satisfied by a solution that leaves a true stack top.
-BOOST_AUTO_TEST_CASE(block__check_context__signet1_default_challenge__block_success)
+BC_AUTO_TEST_CASE(block__check_context__signet1_default_challenge__block_success)
 {
     const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(test::signet1.check(ctx), error::block_success);
+    BC_REQUIRE_EQUAL(test::signet1.check(ctx), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__check_context__signet1_other_challenge__invalid_signet_solution)
+BC_AUTO_TEST_CASE(block__check_context__signet1_other_challenge__invalid_signet_solution)
 {
     const script challenge{ operations{ { opcode::push_size_0 } } };
     const context ctx{ flags::signet_rule, 0, 0, 1, 0, 0, 0 };
-    BOOST_REQUIRE_EQUAL(test::signet1.check(ctx, true, challenge), error::invalid_signet_solution);
+    BC_REQUIRE_EQUAL(test::signet1.check(ctx, true, challenge), error::invalid_signet_solution);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

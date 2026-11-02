@@ -18,11 +18,11 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(mini_keys_tests)
+BC_AUTO_TEST_SUITE(mini_keys_tests)
 
-BOOST_AUTO_TEST_CASE(minikey_to_secret__test)
+BC_AUTO_TEST_CASE(minikey_to_secret__test)
 {
-    BOOST_REQUIRE(true);
+    BC_REQUIRE(true);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

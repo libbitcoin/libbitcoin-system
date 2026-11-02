@@ -19,46 +19,46 @@
 #include "../test.hpp"
 #include "aes_gcm.hpp"
 
-BOOST_AUTO_TEST_SUITE(aes128_gcm_tests)
+BC_AUTO_TEST_SUITE(aes128_gcm_tests)
 
 // Wycheproof.
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt__wycheproof_valid__expected)
+BC_AUTO_TEST_CASE(aes128_gcm__encrypt__wycheproof_valid__expected)
 {
     for (const auto& vector: aes128_gcm_valid_vectors)
     {
         aes128_gcm cipher{ vector.key };
         data_chunk out(vector.plain.size() + aes128_gcm::expansion);
         cipher.encrypt(vector.plain, vector.aad, vector.nonce, out);
-        BOOST_REQUIRE_MESSAGE(out == splice(vector.cipher, vector.tag), vector.id);
+        BC_REQUIRE_MESSAGE(out == splice(vector.cipher, vector.tag), vector.id);
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__wycheproof_valid__true_expected)
+BC_AUTO_TEST_CASE(aes128_gcm__decrypt__wycheproof_valid__true_expected)
 {
     for (const auto& vector: aes128_gcm_valid_vectors)
     {
         aes128_gcm cipher{ vector.key };
         data_chunk plain(vector.plain.size());
-        BOOST_REQUIRE_MESSAGE(cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
-        BOOST_REQUIRE_MESSAGE(plain == vector.plain, vector.id);
+        BC_REQUIRE_MESSAGE(cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
+        BC_REQUIRE_MESSAGE(plain == vector.plain, vector.id);
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__wycheproof_invalid__false_cleared)
+BC_AUTO_TEST_CASE(aes128_gcm__decrypt__wycheproof_invalid__false_cleared)
 {
     for (const auto& vector: aes128_gcm_invalid_vectors)
     {
         aes128_gcm cipher{ vector.key };
         data_chunk plain(vector.plain.size(), 0xff);
-        BOOST_REQUIRE_MESSAGE(!cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
-        BOOST_REQUIRE_MESSAGE(plain == data_chunk(vector.plain.size(), 0x00), vector.id);
+        BC_REQUIRE_MESSAGE(!cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
+        BC_REQUIRE_MESSAGE(plain == data_chunk(vector.plain.size(), 0x00), vector.id);
     }
 }
 
 // gcm spec test cases 2 and 4.
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt__gcm_spec_2__expected)
+BC_AUTO_TEST_CASE(aes128_gcm__encrypt__gcm_spec_2__expected)
 {
     constexpr aes128_gcm::secret key{};
     constexpr aes128_gcm::nonce iv{};
@@ -67,10 +67,10 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt__gcm_spec_2__expected)
     aes128_gcm cipher{ key };
     data_chunk out(plain.size() + aes128_gcm::expansion);
     cipher.encrypt(plain, {}, iv, out);
-    BOOST_REQUIRE_EQUAL(out, base16_chunk("0388dace60b6a392f328c2b971b2fe78ab6e47d42cec13bdf53a67b21257bddf"));
+    BC_REQUIRE_EQUAL(out, base16_chunk("0388dace60b6a392f328c2b971b2fe78ab6e47d42cec13bdf53a67b21257bddf"));
 }
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__gcm_spec_4__expected)
+BC_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__gcm_spec_4__expected)
 {
     constexpr auto key = base16_array("feffe9928665731c6d6a8f9467308308");
     constexpr auto iv = base16_array("cafebabefacedbaddecaf888");
@@ -81,11 +81,11 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__gcm_spec_4__expected)
     aes128_gcm cipher{ key };
     data_chunk out(plain.size() + aes128_gcm::expansion);
     cipher.encrypt(plain, aad, iv, out);
-    BOOST_REQUIRE_EQUAL(out, expected);
+    BC_REQUIRE_EQUAL(out, expected);
 
     data_chunk decrypted(plain.size());
-    BOOST_REQUIRE(cipher.decrypt(decrypted, aad, iv, out));
-    BOOST_REQUIRE_EQUAL(decrypted, plain);
+    BC_REQUIRE(cipher.decrypt(decrypted, aad, iv, out));
+    BC_REQUIRE_EQUAL(decrypted, plain);
 }
 
 // Segments, rekey, tamper.
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__gcm_spec_4__expected)
 // Split points of a 300 byte plain text, at and around block boundaries.
 constexpr std_array<size_t, 7> splits{ 0, 1, 15, 16, 17, 299, 300 };
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt__segments__same_as_whole)
+BC_AUTO_TEST_CASE(aes128_gcm__encrypt__segments__same_as_whole)
 {
     constexpr auto key = base16_array("feffe9928665731c6d6a8f9467308308");
     constexpr auto iv = base16_array("cafebabefacedbaddecaf888");
@@ -111,11 +111,11 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt__segments__same_as_whole)
         const auto second = const_byte_span{ plain }.subspan(split);
         data_chunk out(plain.size() + aes128_gcm::expansion);
         cipher.encrypt(first, second, aad, iv, out);
-        BOOST_REQUIRE_EQUAL(out, whole);
+        BC_REQUIRE_EQUAL(out, whole);
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__set_key__rekey__same_as_new)
+BC_AUTO_TEST_CASE(aes128_gcm__set_key__rekey__same_as_new)
 {
     constexpr aes128_gcm::secret key1{};
     constexpr auto key2 = base16_array("feffe9928665731c6d6a8f9467308308");
@@ -130,10 +130,10 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__set_key__rekey__same_as_new)
     data_chunk out2(plain.size() + aes128_gcm::expansion);
     cipher1.encrypt(plain, {}, iv, out1);
     cipher2.encrypt(plain, {}, iv, out2);
-    BOOST_REQUIRE_EQUAL(out1, out2);
+    BC_REQUIRE_EQUAL(out1, out2);
 }
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__tampered_aad__false_cleared)
+BC_AUTO_TEST_CASE(aes128_gcm__decrypt__tampered_aad__false_cleared)
 {
     constexpr auto key = base16_array("feffe9928665731c6d6a8f9467308308");
     constexpr auto iv = base16_array("cafebabefacedbaddecaf888");
@@ -146,11 +146,11 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__decrypt__tampered_aad__false_cleared)
     cipher.encrypt(plain, aad, iv, out);
 
     data_chunk decrypted(plain.size(), 0xff);
-    BOOST_REQUIRE(!cipher.decrypt(decrypted, tampered, iv, out));
-    BOOST_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00));
+    BC_REQUIRE(!cipher.decrypt(decrypted, tampered, iv, out));
+    BC_REQUIRE_EQUAL(decrypted, data_chunk(plain.size(), 0x00));
 }
 
-BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
+BC_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
 {
     constexpr std_array<size_t, 5> offsets{ 1, 5, 16, 32, 48 };
     const aes128_gcm::secret key{ 0x01, 0x02, 0x03 };
@@ -168,57 +168,57 @@ BOOST_AUTO_TEST_CASE(aes128_gcm__encrypt_decrypt__unaligned__same_as_aligned)
         data_chunk record(offset + size);
         const auto out = byte_span{ record }.subspan(offset);
         cipher.encrypt(plain, aad, nonce, out);
-        BOOST_REQUIRE_EQUAL(data_chunk(out.begin(), out.end()), expected);
+        BC_REQUIRE_EQUAL(data_chunk(out.begin(), out.end()), expected);
 
         data_chunk buffer(offset + plain.size());
         const auto text = byte_span{ buffer }.subspan(offset);
-        BOOST_REQUIRE(cipher.decrypt(text, aad, nonce, out));
-        BOOST_REQUIRE_EQUAL(data_chunk(text.begin(), text.end()), plain);
+        BC_REQUIRE(cipher.decrypt(text, aad, nonce, out));
+        BC_REQUIRE_EQUAL(data_chunk(text.begin(), text.end()), plain);
     });
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(aes256_gcm_tests)
+BC_AUTO_TEST_SUITE(aes256_gcm_tests)
 
 // Wycheproof.
 
-BOOST_AUTO_TEST_CASE(aes256_gcm__encrypt__wycheproof_valid__expected)
+BC_AUTO_TEST_CASE(aes256_gcm__encrypt__wycheproof_valid__expected)
 {
     for (const auto& vector: aes256_gcm_valid_vectors)
     {
         aes256_gcm cipher{ vector.key };
         data_chunk out(vector.plain.size() + aes256_gcm::expansion);
         cipher.encrypt(vector.plain, vector.aad, vector.nonce, out);
-        BOOST_REQUIRE_MESSAGE(out == splice(vector.cipher, vector.tag), vector.id);
+        BC_REQUIRE_MESSAGE(out == splice(vector.cipher, vector.tag), vector.id);
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes256_gcm__decrypt__wycheproof_valid__true_expected)
+BC_AUTO_TEST_CASE(aes256_gcm__decrypt__wycheproof_valid__true_expected)
 {
     for (const auto& vector: aes256_gcm_valid_vectors)
     {
         aes256_gcm cipher{ vector.key };
         data_chunk plain(vector.plain.size());
-        BOOST_REQUIRE_MESSAGE(cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
-        BOOST_REQUIRE_MESSAGE(plain == vector.plain, vector.id);
+        BC_REQUIRE_MESSAGE(cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
+        BC_REQUIRE_MESSAGE(plain == vector.plain, vector.id);
     }
 }
 
-BOOST_AUTO_TEST_CASE(aes256_gcm__decrypt__wycheproof_invalid__false_cleared)
+BC_AUTO_TEST_CASE(aes256_gcm__decrypt__wycheproof_invalid__false_cleared)
 {
     for (const auto& vector: aes256_gcm_invalid_vectors)
     {
         aes256_gcm cipher{ vector.key };
         data_chunk plain(vector.plain.size(), 0xff);
-        BOOST_REQUIRE_MESSAGE(!cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
-        BOOST_REQUIRE_MESSAGE(plain == data_chunk(vector.plain.size(), 0x00), vector.id);
+        BC_REQUIRE_MESSAGE(!cipher.decrypt(plain, vector.aad, vector.nonce, splice(vector.cipher, vector.tag)), vector.id);
+        BC_REQUIRE_MESSAGE(plain == data_chunk(vector.plain.size(), 0x00), vector.id);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(ghash_tests)
+BC_AUTO_TEST_SUITE(ghash_tests)
 
 using ghash_native = aes::ghash<true>;
 using ghash_sliced = aes::ghash<false>;
@@ -236,17 +236,17 @@ constexpr data_array<16> sliced_hash(const data_array<16>& key, const data_array
     return hash.flush();
 }
 
-BOOST_AUTO_TEST_CASE(ghash__flush__constexpr__native_same)
+BC_AUTO_TEST_CASE(ghash__flush__constexpr__native_same)
 {
     constexpr auto data = base16_array("0388dace60b6a392f328c2b971b2fe7800000000000000000000000000000080");
     constexpr auto expected = sliced_hash(hash_key, data);
 
     ghash_native hash{ hash_key };
     hash.write(data);
-    BOOST_REQUIRE_EQUAL(hash.flush(), expected);
+    BC_REQUIRE_EQUAL(hash.flush(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(ghash__write__sizes__variants_agree)
+BC_AUTO_TEST_CASE(ghash__write__sizes__variants_agree)
 {
     data_chunk data(sizes.back());
     chacha20{ sha256_hash(hash_key) }.stream(data);
@@ -260,15 +260,15 @@ BOOST_AUTO_TEST_CASE(ghash__write__sizes__variants_agree)
         sliced.write(text);
         native.write(text);
         sliced.write(text);
-        BOOST_REQUIRE_EQUAL(native.flush(), sliced.flush());
+        BC_REQUIRE_EQUAL(native.flush(), sliced.flush());
     }
 }
 
-BOOST_AUTO_TEST_CASE(ghash__flush__empty__zero)
+BC_AUTO_TEST_CASE(ghash__flush__empty__zero)
 {
     ghash_native hash{ hash_key };
     hash.write({});
-    BOOST_REQUIRE_EQUAL(hash.flush(), data_array<16>{});
+    BC_REQUIRE_EQUAL(hash.flush(), data_array<16>{});
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

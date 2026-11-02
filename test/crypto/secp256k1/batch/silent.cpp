@@ -20,7 +20,7 @@
 
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_silent_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_silent_tests)
 
 using namespace system::silent;
 
@@ -91,15 +91,15 @@ static bool is_alternating(const computed& result) NOEXCEPT
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__empty__empty)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__empty__empty)
 {
     const auto result = compute({});
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE(result.out.empty());
-    BOOST_REQUIRE(result.valid.empty());
+    BC_REQUIRE(result.success);
+    BC_REQUIRE(result.out.empty());
+    BC_REQUIRE(result.valid.empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__transactions__expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__transactions__expected)
 {
     columns columns{};
     columns.add(unlabeled_point, spend_secret);
@@ -109,44 +109,44 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__transactions__expected)
     const auto result = compute(columns);
     const auto expected_first = product(unlabeled_point, spend_secret);
     const auto expected_second = product(labeled_point, scan_secret);
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 1, 1, 1, 1 }));
-    BOOST_REQUIRE_EQUAL(result.out.at(0), expected_first);
-    BOOST_REQUIRE_EQUAL(result.out.at(1), expected_first);
-    BOOST_REQUIRE_EQUAL(result.out.at(2), expected_second);
-    BOOST_REQUIRE_EQUAL(result.out.at(3), expected_first);
+    BC_REQUIRE(result.success);
+    BC_REQUIRE_EQUAL(result.valid, (data_chunk{ 1, 1, 1, 1 }));
+    BC_REQUIRE_EQUAL(result.out.at(0), expected_first);
+    BC_REQUIRE_EQUAL(result.out.at(1), expected_first);
+    BC_REQUIRE_EQUAL(result.out.at(2), expected_second);
+    BC_REQUIRE_EQUAL(result.out.at(3), expected_first);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__zero_hash__invalid)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__zero_hash__invalid)
 {
     columns columns{};
     columns.add(unlabeled_point, ec_secret{});
     columns.add(labeled_point, scan_secret);
     const auto result = compute(columns);
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
-    BOOST_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
+    BC_REQUIRE(result.success);
+    BC_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
+    BC_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__invalid_sum__invalid)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__invalid_sum__invalid)
 {
     columns columns{};
     columns.add(null_ec_compressed, spend_secret);
     columns.add(labeled_point, scan_secret);
     const auto result = compute(columns);
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
-    BOOST_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
+    BC_REQUIRE(result.success);
+    BC_REQUIRE_EQUAL(result.valid, (data_chunk{ 0, 1 }));
+    BC_REQUIRE_EQUAL(result.out.at(1), product(labeled_point, scan_secret));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__chunks__expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__chunks__expected)
 {
     const auto result = compute(alternating(3000));
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE(is_alternating(result));
+    BC_REQUIRE(result.success);
+    BC_REQUIRE(is_alternating(result));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__without_gpu__cpu)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__without_gpu__cpu)
 {
     const auto columns = alternating(4);
     computed result{};
@@ -156,12 +156,12 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__without_gpu__cpu)
     bool use_gpu{ false };
     const stopper cancel{};
     result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes });
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE(!use_gpu);
-    BOOST_REQUIRE(is_alternating(result));
+    BC_REQUIRE(result.success);
+    BC_REQUIRE(!use_gpu);
+    BC_REQUIRE(is_alternating(result));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write__written_once_expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write__written_once_expected)
 {
     const auto columns = alternating(4);
     computed result{};
@@ -173,12 +173,12 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write__written_once_expect
     const stopper cancel{};
     const auto write = [&]() NOEXCEPT { ++writes; };
     result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE_EQUAL(writes, 1u);
-    BOOST_REQUIRE(is_alternating(result));
+    BC_REQUIRE(result.success);
+    BC_REQUIRE_EQUAL(writes, 1u);
+    BC_REQUIRE(is_alternating(result));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write_without_gpu__written_after_compute)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write_without_gpu__written_after_compute)
 {
     const auto columns = alternating(4);
     computed result{};
@@ -190,18 +190,18 @@ BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write_without_gpu__written
     const stopper cancel{};
     const auto write = [&]() NOEXCEPT { computed_first = is_alternating(result); };
     result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE(!use_gpu);
-    BOOST_REQUIRE(computed_first);
+    BC_REQUIRE(result.success);
+    BC_REQUIRE(!use_gpu);
+    BC_REQUIRE(computed_first);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_silent__compute__many_rows__expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__many_rows__expected)
 {
     const auto result = compute(alternating(70000));
-    BOOST_REQUIRE(result.success);
-    BOOST_REQUIRE(is_alternating(result));
+    BC_REQUIRE(result.success);
+    BC_REQUIRE(is_alternating(result));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

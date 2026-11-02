@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(block_malleable_tests)
+BC_AUTO_TEST_SUITE(block_malleable_tests)
 
 using namespace system::chain;
 
@@ -150,454 +150,454 @@ static transactions tx_set(const std::vector<uint32_t>& indexes) NOEXCEPT
     return txs;
 }
 
-BOOST_AUTO_TEST_CASE(block__transactions__sizes__expected)
+BC_AUTO_TEST_CASE(block__transactions__sizes__expected)
 {
-    BOOST_REQUIRE_EQUAL(txs::tx60().serialized_size(false), 60u);
-    BOOST_REQUIRE_EQUAL(txs::tx61().serialized_size(false), 61u);
-    BOOST_REQUIRE_EQUAL(txs::tx62().serialized_size(false), 62u);
-    BOOST_REQUIRE_EQUAL(txs::tx63().serialized_size(false), 63u);
-    BOOST_REQUIRE_EQUAL(txs::tx64().serialized_size(false), 64u);
-    BOOST_REQUIRE_EQUAL(txs::tx65().serialized_size(false), 65u);
-    BOOST_REQUIRE_EQUAL(txs::tx66().serialized_size(false), 66u);
+    BC_REQUIRE_EQUAL(txs::tx60().serialized_size(false), 60u);
+    BC_REQUIRE_EQUAL(txs::tx61().serialized_size(false), 61u);
+    BC_REQUIRE_EQUAL(txs::tx62().serialized_size(false), 62u);
+    BC_REQUIRE_EQUAL(txs::tx63().serialized_size(false), 63u);
+    BC_REQUIRE_EQUAL(txs::tx64().serialized_size(false), 64u);
+    BC_REQUIRE_EQUAL(txs::tx65().serialized_size(false), 65u);
+    BC_REQUIRE_EQUAL(txs::tx66().serialized_size(false), 66u);
 }
 
-BOOST_AUTO_TEST_CASE(block__malleable__empty__false)
+BC_AUTO_TEST_CASE(block__malleable__empty__false)
 {
     const accessor instance{};
-    BOOST_REQUIRE(!instance.is_malleable());
-    BOOST_REQUIRE(!instance.is_malleable64());
-    BOOST_REQUIRE(!instance.is_malleable32());
-    BOOST_REQUIRE(!instance.is_malleable32(0, 0));
-    BOOST_REQUIRE(!instance.is_malleated32());
-    BOOST_REQUIRE(!block::is_malleated32({}, 0));
+    BC_REQUIRE(!instance.is_malleable());
+    BC_REQUIRE(!instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleable32());
+    BC_REQUIRE(!instance.is_malleable32(0, 0));
+    BC_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!block::is_malleated32({}, 0));
 }
 
 // is_malleable
 
-BOOST_AUTO_TEST_CASE(block__is_malleable__64_not_32__true)
+BC_AUTO_TEST_CASE(block__is_malleable__64_not_32__true)
 {
     const accessor instance{ header, { txs::tx64() } };
-    BOOST_REQUIRE(instance.is_malleable());
-    BOOST_REQUIRE(instance.is_malleable64());
-    BOOST_REQUIRE(!instance.is_malleable32());
+    BC_REQUIRE(instance.is_malleable());
+    BC_REQUIRE(instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable__32_not_64__true)
+BC_AUTO_TEST_CASE(block__is_malleable__32_not_64__true)
 {
     const accessor instance{ header, { txs::tx60(), txs::tx61(), txs::tx62(), txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(instance.is_malleable());
-    BOOST_REQUIRE(!instance.is_malleable64());
-    BOOST_REQUIRE(instance.is_malleable32());
+    BC_REQUIRE(instance.is_malleable());
+    BC_REQUIRE(!instance.is_malleable64());
+    BC_REQUIRE(instance.is_malleable32());
 }
 
 // is_malleable32
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__one_64__false)
+BC_AUTO_TEST_CASE(block__is_malleable32__one_64__false)
 {
     const accessor instance{ header, { txs::tx64() } };
-    BOOST_REQUIRE(!instance.is_malleable32());
+    BC_REQUIRE(!instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__two__false)
+BC_AUTO_TEST_CASE(block__is_malleable32__two__false)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleable32());
+    BC_REQUIRE(!instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__three__true)
+BC_AUTO_TEST_CASE(block__is_malleable32__three__true)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(instance.is_malleable32());
+    BC_REQUIRE(instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__four__false)
+BC_AUTO_TEST_CASE(block__is_malleable32__four__false)
 {
     const accessor instance{ header, { txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(!instance.is_malleable32());
+    BC_REQUIRE(!instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__five__true)
+BC_AUTO_TEST_CASE(block__is_malleable32__five__true)
 {
     const accessor instance{ header, { txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(instance.is_malleable32());
+    BC_REQUIRE(instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__six__true)
+BC_AUTO_TEST_CASE(block__is_malleable32__six__true)
 {
     const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(instance.is_malleable32());
+    BC_REQUIRE(instance.is_malleable32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__six_duplicates__true)
+BC_AUTO_TEST_CASE(block__is_malleable32__six_duplicates__true)
 {
     const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx62(), txs::tx65(), txs::tx62() } };
-    BOOST_REQUIRE(instance.is_malleable32());
+    BC_REQUIRE(instance.is_malleable32());
 }
 
 // is_malleated32
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__one_64__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__one_64__false)
 {
     const accessor instance{ header, { txs::tx64() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__two_distinct__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__two_distinct__false)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__two_same__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__two_same__false)
 {
     const accessor instance{ header, { txs::tx65(), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__three_two_duplicated__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__three_two_duplicated__false)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx65(), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__four_distinct__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__four_distinct__false)
 {
     const accessor instance{ header, { txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__four_two_duplicated__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__four_two_duplicated__false)
 {
     const accessor instance{ header, { txs::tx63(), txs::tx64(), txs::tx63(), txs::tx64() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__five_two_duplicated__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__five_two_duplicated__false)
 {
     const accessor instance{ header, { txs::tx62(), txs::tx63(), txs::tx64(), txs::tx66(), txs::tx66() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__six_distinct__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__six_distinct__false)
 {
     const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__six_one_duplicated__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__six_one_duplicated__true)
 {
     const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx65() } };
-    BOOST_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE(instance.is_malleated32());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__eight_two_duplicated__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__eight_two_duplicated__true)
 {
     const accessor instance{ header, { txs::tx60(), txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx64(), txs::tx65() } };
-    BOOST_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE(instance.is_malleated32());
 }
 
 // Padded five is 0 1 2 3 4 4 4 4, its prefixes of six to eight share its root.
-BOOST_AUTO_TEST_CASE(block__is_malleated32__five_one_trailing_clone__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__five_one_trailing_clone__true)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4 }) };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 1u);
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE_EQUAL(instance.malleated32_size(), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__five_two_trailing_clones__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__five_two_trailing_clones__true)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4, 4 }) };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 2u);
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE_EQUAL(instance.malleated32_size(), 2u);
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__five_three_trailing_clones__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__five_three_trailing_clones__true)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4, 4, 4 }) };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 1u);
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE_EQUAL(instance.malleated32_size(), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__nine_two_trailing_clones__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__nine_two_trailing_clones__true)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8 }) };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 2u);
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE_EQUAL(instance.malleated32_size(), 2u);
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated32__nine_four_trailing_clones__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__nine_four_trailing_clones__true)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8 }) };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 4u);
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE_EQUAL(instance.malleated32_size(), 4u);
 }
 
 // Padded ten is 0..9 8 9 8 9 8 9, the last pair is cloned.
-BOOST_AUTO_TEST_CASE(block__is_malleated32__ten_two_trailing_pair_clones__true)
+BC_AUTO_TEST_CASE(block__is_malleated32__ten_two_trailing_pair_clones__true)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 9, 8, 9 }) };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE_EQUAL(instance.malleated32_size(), 4u);
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE_EQUAL(instance.malleated32_size(), 4u);
 }
 
 // Not a prefix of any padded set.
-BOOST_AUTO_TEST_CASE(block__is_malleated32__seven_two_distinct_trailing_clones__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__seven_two_distinct_trailing_clones__false)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 3, 4, 4 }) };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
 // Nine leaves are a depth deeper than any set of eight or fewer.
-BOOST_AUTO_TEST_CASE(block__is_malleated32__nine_five_trailing_clones__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__nine_five_trailing_clones__false)
 {
     const accessor instance{ header, tx_set({ 0, 1, 2, 3, 4, 4, 4, 4, 4 }) };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
 // Only the last node at a depth is cloned.
-BOOST_AUTO_TEST_CASE(block__is_malleated32__eight_leading_pair_clone__false)
+BC_AUTO_TEST_CASE(block__is_malleated32__eight_leading_pair_clone__false)
 {
     const accessor instance{ header, tx_set({ 0, 1, 0, 1, 2, 3, 4, 5 }) };
-    BOOST_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated32());
 }
 
 // merkle_index
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__one_of_one__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__one_of_one__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 1), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 1), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__one_of_two__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__one_of_two__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 2), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 1, 2), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 2), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 1, 2), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__two_of_two__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__two_of_two__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 2, 2), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 2, 2), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 2, 2), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 2, 2), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__three_of_four__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__three_of_four__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 3, 4), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 3, 4), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 3, 4), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 3, 4), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 3, 4), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 3, 4), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 3, 4), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 3, 4), 2u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__one_of_eight__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__one_of_eight__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 1, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(4, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(5, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(6, 1, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(7, 1, 8), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__three_of_eight__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__three_of_eight__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 3, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 3, 8), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 3, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 3, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 3, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 3, 8), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 3, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 3, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 3, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 3, 8), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 3, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 3, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(4, 3, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(5, 3, 8), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(6, 3, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(7, 3, 8), 2u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__five_of_eight__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__five_of_eight__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 5, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 5, 8), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 5, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 5, 8), 3u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 5, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 5, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 5, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 5, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 5, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 5, 8), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 5, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 5, 8), 3u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(4, 5, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(5, 5, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(6, 5, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(7, 5, 8), 4u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__six_of_eight__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__six_of_eight__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 6, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 6, 8), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 6, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 6, 8), 3u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 6, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 6, 8), 5u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 6, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 6, 8), 5u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 6, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 6, 8), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 6, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 6, 8), 3u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(4, 6, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(5, 6, 8), 5u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(6, 6, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(7, 6, 8), 5u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__seven_of_eight__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__seven_of_eight__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 7, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 7, 8), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 7, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 7, 8), 3u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 7, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 7, 8), 5u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 7, 8), 6u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 7, 8), 6u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 7, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 7, 8), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 7, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 7, 8), 3u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(4, 7, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(5, 7, 8), 5u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(6, 7, 8), 6u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(7, 7, 8), 6u);
 }
 
-BOOST_AUTO_TEST_CASE(block__merkle_index__eight_of_eight__expected)
+BC_AUTO_TEST_CASE(block__merkle_index__eight_of_eight__expected)
 {
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(0, 8, 8), 0u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(1, 8, 8), 1u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(2, 8, 8), 2u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(3, 8, 8), 3u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(4, 8, 8), 4u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(5, 8, 8), 5u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(6, 8, 8), 6u);
-    BOOST_REQUIRE_EQUAL(accessor::merkle_index(7, 8, 8), 7u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(0, 8, 8), 0u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(1, 8, 8), 1u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(2, 8, 8), 2u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(3, 8, 8), 3u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(4, 8, 8), 4u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(5, 8, 8), 5u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(6, 8, 8), 6u);
+    BC_REQUIRE_EQUAL(accessor::merkle_index(7, 8, 8), 7u);
 }
 
 // is_malleable64
 
-BOOST_AUTO_TEST_CASE(block__is_malleable64__one_64__true)
+BC_AUTO_TEST_CASE(block__is_malleable64__one_64__true)
 {
     const accessor instance{ header, { txs::tx64() } };
-    BOOST_REQUIRE(instance.is_malleable64());
+    BC_REQUIRE(instance.is_malleable64());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable64__one_65__false)
+BC_AUTO_TEST_CASE(block__is_malleable64__one_65__false)
 {
     const accessor instance{ header, { txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleable64());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable64__two_64__true)
+BC_AUTO_TEST_CASE(block__is_malleable64__two_64__true)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx64() } };
-    BOOST_REQUIRE(instance.is_malleable64());
+    BC_REQUIRE(instance.is_malleable64());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable64__two_64_65__false)
+BC_AUTO_TEST_CASE(block__is_malleable64__two_64_65__false)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleable64());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable64__three_64_65_64__false)
+BC_AUTO_TEST_CASE(block__is_malleable64__three_64_65_64__false)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleable64());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable64__three_64_64_64__true)
+BC_AUTO_TEST_CASE(block__is_malleable64__three_64_64_64__true)
 {
     const accessor instance{ header, { txs::tx64(), txs::tx64(), txs::tx64() } };
-    BOOST_REQUIRE(instance.is_malleable64());
+    BC_REQUIRE(instance.is_malleable64());
 }
 
 // is_malleable32
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__overflow__false)
+BC_AUTO_TEST_CASE(block__is_malleable32__overflow__false)
 {
-    BOOST_REQUIRE(!accessor::is_malleable32(0, 1));
-    BOOST_REQUIRE(!accessor::is_malleable32(1, 50));
-    BOOST_REQUIRE(!accessor::is_malleable32(2, 100));
+    BC_REQUIRE(!accessor::is_malleable32(0, 1));
+    BC_REQUIRE(!accessor::is_malleable32(1, 50));
+    BC_REQUIRE(!accessor::is_malleable32(2, 100));
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleable32__not_power2_width__false)
+BC_AUTO_TEST_CASE(block__is_malleable32__not_power2_width__false)
 {
-    BOOST_REQUIRE(!accessor::is_malleable32(3, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 3));
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 6));
+    BC_REQUIRE(!accessor::is_malleable32(3, 3));
+    BC_REQUIRE(!accessor::is_malleable32(6, 3));
+    BC_REQUIRE(!accessor::is_malleable32(9, 3));
+    BC_REQUIRE(!accessor::is_malleable32(12, 6));
 }
 
 // True where the node count (trailing comment) is odd and above one.
-BOOST_AUTO_TEST_CASE(block__is_malleable32__various__expected)
+BC_AUTO_TEST_CASE(block__is_malleable32__various__expected)
 {
-    BOOST_REQUIRE(!accessor::is_malleable32(1, 1)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(1, 1)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(2, 1)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(2, 2)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(2, 1)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(2, 2)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(3, 1)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(3, 2)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(3, 4)); // 1
+    BC_REQUIRE( accessor::is_malleable32(3, 1)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(3, 2)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(3, 4)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 1)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 2)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(4, 4)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(4, 1)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(4, 2)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(4, 4)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(5, 1)); // 5
-    BOOST_REQUIRE( accessor::is_malleable32(5, 2)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(5, 4)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(5, 8)); // 1
+    BC_REQUIRE( accessor::is_malleable32(5, 1)); // 5
+    BC_REQUIRE( accessor::is_malleable32(5, 2)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(5, 4)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(5, 8)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 1)); // 6
-    BOOST_REQUIRE( accessor::is_malleable32(6, 2)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 4)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(6, 8)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(6, 1)); // 6
+    BC_REQUIRE( accessor::is_malleable32(6, 2)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(6, 4)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(6, 8)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(7, 1)); // 7
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 2)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 4)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(7, 8)); // 1
+    BC_REQUIRE( accessor::is_malleable32(7, 1)); // 7
+    BC_REQUIRE(!accessor::is_malleable32(7, 2)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(7, 4)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(7, 8)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 1)); // 8
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 2)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 4)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(8, 8)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(8, 1)); // 8
+    BC_REQUIRE(!accessor::is_malleable32(8, 2)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(8, 4)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(8, 8)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(9, 1)); // 9
-    BOOST_REQUIRE( accessor::is_malleable32(9, 2)); // 5
-    BOOST_REQUIRE( accessor::is_malleable32(9, 4)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(9, 16)); // 1
+    BC_REQUIRE( accessor::is_malleable32(9, 1)); // 9
+    BC_REQUIRE( accessor::is_malleable32(9, 2)); // 5
+    BC_REQUIRE( accessor::is_malleable32(9, 4)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(9, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(9, 16)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(10, 1)); // 10
-    BOOST_REQUIRE( accessor::is_malleable32(10, 2)); // 5
-    BOOST_REQUIRE( accessor::is_malleable32(10, 4)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(10, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(10, 16)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(10, 1)); // 10
+    BC_REQUIRE( accessor::is_malleable32(10, 2)); // 5
+    BC_REQUIRE( accessor::is_malleable32(10, 4)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(10, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(10, 16)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(11, 1)); // 11
-    BOOST_REQUIRE(!accessor::is_malleable32(11, 2)); // 6
-    BOOST_REQUIRE( accessor::is_malleable32(11, 4)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(11, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(11, 16)); // 1
+    BC_REQUIRE( accessor::is_malleable32(11, 1)); // 11
+    BC_REQUIRE(!accessor::is_malleable32(11, 2)); // 6
+    BC_REQUIRE( accessor::is_malleable32(11, 4)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(11, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(11, 16)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 1)); // 12
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 2)); // 6
-    BOOST_REQUIRE( accessor::is_malleable32(12, 4)); // 3
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(12, 16)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(12, 1)); // 12
+    BC_REQUIRE(!accessor::is_malleable32(12, 2)); // 6
+    BC_REQUIRE( accessor::is_malleable32(12, 4)); // 3
+    BC_REQUIRE(!accessor::is_malleable32(12, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(12, 16)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(13, 1)); // 13
-    BOOST_REQUIRE( accessor::is_malleable32(13, 2)); // 7
-    BOOST_REQUIRE(!accessor::is_malleable32(13, 4)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(13, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(13, 16)); // 1
+    BC_REQUIRE( accessor::is_malleable32(13, 1)); // 13
+    BC_REQUIRE( accessor::is_malleable32(13, 2)); // 7
+    BC_REQUIRE(!accessor::is_malleable32(13, 4)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(13, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(13, 16)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(14, 1)); // 14
-    BOOST_REQUIRE( accessor::is_malleable32(14, 2)); // 7
-    BOOST_REQUIRE(!accessor::is_malleable32(14, 4)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(14, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(14, 16)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(14, 1)); // 14
+    BC_REQUIRE( accessor::is_malleable32(14, 2)); // 7
+    BC_REQUIRE(!accessor::is_malleable32(14, 4)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(14, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(14, 16)); // 1
 
-    BOOST_REQUIRE( accessor::is_malleable32(15, 1)); // 15
-    BOOST_REQUIRE(!accessor::is_malleable32(15, 2)); // 8
-    BOOST_REQUIRE(!accessor::is_malleable32(15, 4)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(15, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(15, 16)); // 1
+    BC_REQUIRE( accessor::is_malleable32(15, 1)); // 15
+    BC_REQUIRE(!accessor::is_malleable32(15, 2)); // 8
+    BC_REQUIRE(!accessor::is_malleable32(15, 4)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(15, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(15, 16)); // 1
 
-    BOOST_REQUIRE(!accessor::is_malleable32(16, 1)); // 16
-    BOOST_REQUIRE(!accessor::is_malleable32(16, 2)); // 8
-    BOOST_REQUIRE(!accessor::is_malleable32(16, 4)); // 4
-    BOOST_REQUIRE(!accessor::is_malleable32(16, 8)); // 2
-    BOOST_REQUIRE(!accessor::is_malleable32(16, 16)); // 1
+    BC_REQUIRE(!accessor::is_malleable32(16, 1)); // 16
+    BC_REQUIRE(!accessor::is_malleable32(16, 2)); // 8
+    BC_REQUIRE(!accessor::is_malleable32(16, 4)); // 4
+    BC_REQUIRE(!accessor::is_malleable32(16, 8)); // 2
+    BC_REQUIRE(!accessor::is_malleable32(16, 16)); // 1
 }
 
 // is_malleated64
@@ -616,74 +616,74 @@ static transaction tx64_spend(uint32_t index) NOEXCEPT
     };
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated64__empty__false)
+BC_AUTO_TEST_CASE(block__is_malleated64__empty__false)
 {
     const accessor instance{};
-    BOOST_REQUIRE(!instance.is_malleated64());
-    BOOST_REQUIRE(!instance.is_malleated());
+    BC_REQUIRE(!instance.is_malleated64());
+    BC_REQUIRE(!instance.is_malleated());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated64__spending_first_input__true)
+BC_AUTO_TEST_CASE(block__is_malleated64__spending_first_input__true)
 {
     const accessor instance{ header, { tx64_spend(0), tx64_spend(1) } };
-    BOOST_REQUIRE_EQUAL(tx64_spend(0).serialized_size(false), 64u);
-    BOOST_REQUIRE(instance.is_malleable64());
-    BOOST_REQUIRE(instance.is_malleated64());
-    BOOST_REQUIRE(instance.is_malleated());
+    BC_REQUIRE_EQUAL(tx64_spend(0).serialized_size(false), 64u);
+    BC_REQUIRE(instance.is_malleable64());
+    BC_REQUIRE(instance.is_malleated64());
+    BC_REQUIRE(instance.is_malleated());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated64__coinbase_first__false)
+BC_AUTO_TEST_CASE(block__is_malleated64__coinbase_first__false)
 {
     const accessor instance{ header, { txs::tx64(), tx64_spend(1) } };
-    BOOST_REQUIRE(instance.is_malleable64());
-    BOOST_REQUIRE(!instance.is_malleated64());
-    BOOST_REQUIRE(!instance.is_malleated());
+    BC_REQUIRE(instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleated64());
+    BC_REQUIRE(!instance.is_malleated());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated64__mixed_sizes__false)
+BC_AUTO_TEST_CASE(block__is_malleated64__mixed_sizes__false)
 {
     const accessor instance{ header, { tx64_spend(0), txs::tx65() } };
-    BOOST_REQUIRE(!instance.is_malleable64());
-    BOOST_REQUIRE(!instance.is_malleated64());
+    BC_REQUIRE(!instance.is_malleable64());
+    BC_REQUIRE(!instance.is_malleated64());
 }
 
 // is_malleated
 // ----------------------------------------------------------------------------
 
 // The composite is satisfied by the 32 byte shape alone.
-BOOST_AUTO_TEST_CASE(block__is_malleated__malleated32_only__true)
+BC_AUTO_TEST_CASE(block__is_malleated__malleated32_only__true)
 {
     const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx65() } };
-    BOOST_REQUIRE(instance.is_malleated32());
-    BOOST_REQUIRE(!instance.is_malleated64());
-    BOOST_REQUIRE(instance.is_malleated());
+    BC_REQUIRE(instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated64());
+    BC_REQUIRE(instance.is_malleated());
 }
 
-BOOST_AUTO_TEST_CASE(block__is_malleated__neither_shape__false)
+BC_AUTO_TEST_CASE(block__is_malleated__neither_shape__false)
 {
     const accessor instance{ header, { txs::tx60(), txs::tx61() } };
-    BOOST_REQUIRE(!instance.is_malleated32());
-    BOOST_REQUIRE(!instance.is_malleated64());
-    BOOST_REQUIRE(!instance.is_malleated());
+    BC_REQUIRE(!instance.is_malleated32());
+    BC_REQUIRE(!instance.is_malleated64());
+    BC_REQUIRE(!instance.is_malleated());
 }
 
 // malleated_or
 // ----------------------------------------------------------------------------
 // A malleated block is reported as a commitment failure.
 
-BOOST_AUTO_TEST_CASE(block__malleated_or__unmalleated__given_code)
+BC_AUTO_TEST_CASE(block__malleated_or__unmalleated__given_code)
 {
     const accessor instance{ header, { txs::tx60(), txs::tx61() } };
-    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_witness_commitment);
-    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::block_success);
+    BC_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_witness_commitment);
+    BC_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::block_success);
 }
 
-BOOST_AUTO_TEST_CASE(block__malleated_or__malleated__invalid_transaction_commitment)
+BC_AUTO_TEST_CASE(block__malleated_or__malleated__invalid_transaction_commitment)
 {
     const accessor instance{ header, { tx64_spend(0), tx64_spend(1) } };
-    BOOST_REQUIRE(instance.is_malleated());
-    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_transaction_commitment);
-    BOOST_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::invalid_transaction_commitment);
+    BC_REQUIRE(instance.is_malleated());
+    BC_REQUIRE_EQUAL(instance.malleated_or(error::invalid_witness_commitment), error::invalid_transaction_commitment);
+    BC_REQUIRE_EQUAL(instance.malleated_or(error::block_success), error::invalid_transaction_commitment);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -57,12 +57,6 @@ bool deserialize(std_vector<Value>& out, const std::string_view& text) NOEXCEPT;
 template <typename Value>
 bool deserialize(Value& out, const std::string_view& text) NOEXCEPT;
 
-/// Header-only std::from_chars for floating point.
-/// The std floating point overloads require macOS 26 (libc++ dylib).
-template <typename Float, if_floating_point<Float> = true>
-std::from_chars_result from_chars(const char* first, const char* last,
-    Float& out) NOEXCEPT;
-
 } // namespace system
 } // namespace libbitcoin
 

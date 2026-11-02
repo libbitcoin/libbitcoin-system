@@ -32,9 +32,9 @@ static_assert(byte_swap32_nominal(value32) == swap32);
 static_assert(byte_swap64_nominal(value64) == swap64);
 
 // platform intrinsic, falls back to nominal
-BOOST_AUTO_TEST_CASE(byte_swap__intrinsic__always__swapped)
+BC_AUTO_TEST_CASE(byte_swap__intrinsic__always__swapped)
 {
-    BOOST_REQUIRE_EQUAL(byte_swap16(value16), swap16);
-    BOOST_REQUIRE_EQUAL(byte_swap32(value32), swap32);
-    BOOST_REQUIRE_EQUAL(byte_swap64(value64), swap64);
+    BC_REQUIRE_EQUAL(byte_swap16(value16), swap16);
+    BC_REQUIRE_EQUAL(byte_swap32(value32), swap32);
+    BC_REQUIRE_EQUAL(byte_swap64(value64), swap64);
 }

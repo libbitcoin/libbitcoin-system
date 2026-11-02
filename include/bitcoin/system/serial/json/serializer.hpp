@@ -29,7 +29,7 @@ namespace json {
 /// Resumable compact serializer of a value tree into caller buffers.
 /// Each read fills the buffer unless the text completes within it, so memory
 /// is bounded by the buffer and the nesting depth. Doubles are written in
-/// shortest round-trip scientific form (e.g. 1.5E0), non-finite as null or
+/// shortest round-trip decimal form (e.g. 1.5, 1.0), non-finite as null or
 /// [-]1e99999, and strings escape only quote, reverse solidus and controls.
 class BC_API serializer
 {
@@ -57,6 +57,11 @@ private:
         bool keyed;
     };
 
+    // Sign, "0." and the fraction digits of the least subnormal double.
+    static constexpr auto pending_bytes = 3 +
+        std::numeric_limits<double>::max_digits10 -
+        std::numeric_limits<double>::min_exponent10;
+
     static size_t format(char* data, const value& element) NOEXCEPT;
 
     void pend(std::string_view text) NOEXCEPT;
@@ -76,7 +81,7 @@ private:
     bool done_{ true };
     bool texting_{};
     bool is_key_{};
-    char pending_[32]{};
+    char pending_[pending_bytes]{};
 };
 
 /// Serialize the value to a string.

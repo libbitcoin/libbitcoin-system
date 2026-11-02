@@ -42,11 +42,13 @@
         // generation. For these warnings, the state of the warning in effect
         // when the compiler reaches the function definition remains in effect
         // for the rest of the function. - MSDN
+        #define SIGNED_UNSIGNED_COMPARE 4018
         #define NARROWING_CONVERSION 4244
         #define DIAMOND_INHERITANCE 4250
         #define SIZE_NARROWING_CONVERSION 4267
         #define THROW_FROM_NOEXCEPT 4297
         #define TRUNCATED_CONSTANT 4310
+        #define SIGNED_UNSIGNED_EQUALITY 4389
         #define LOCAL_VARIABLE_NOT_INITIALIZED 4700
         #define UNREACHABLE_CODE 4702
         #define NOT_INLINED 4714
@@ -112,7 +114,7 @@
 BC_DISABLE_WARNING(ASSIGNMENT_WITHIN_CONDITIONAL)
 
 // Suppress C4459: declaration of 'one' hides global declaration.
-// This arises from boost templates defining 'one' as public variable.
+// This arises from secp256k1 algorithm locals named 'zero' and 'one'.
 BC_DISABLE_WARNING(LOCAL_HIDES_GLOBAL)
 
 #endif

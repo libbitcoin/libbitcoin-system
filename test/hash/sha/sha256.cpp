@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "../hash.hpp"
     
-BOOST_AUTO_TEST_SUITE(sha256_tests_)
+BC_AUTO_TEST_SUITE(sha256_tests_)
 
 constexpr auto vector = have_128 || have_256 || have_512;
 constexpr auto native = have_sha;
@@ -29,16 +29,16 @@ static_assert(sha256::hash(sha256::byte_t{}) == sha_byte256);
 static_assert(sha256::hash(sha256::half_t{}) == sha_half256);
 static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
 
-BOOST_AUTO_TEST_CASE(sha256__hash__null_hash__expected)
+BC_AUTO_TEST_CASE(sha256__hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
-    BOOST_REQUIRE_EQUAL(sha256::hash(sha256::byte_t{}), sha_byte256);
-    BOOST_REQUIRE_EQUAL(sha256::hash(sha256::half_t{}), sha_half256);
-    BOOST_REQUIRE_EQUAL(sha256::hash(sha256::block_t{}), sha_full256);
+    BC_REQUIRE_EQUAL(sha256::hash(sha256::byte_t{}), sha_byte256);
+    BC_REQUIRE_EQUAL(sha256::hash(sha256::half_t{}), sha_half256);
+    BC_REQUIRE_EQUAL(sha256::hash(sha256::block_t{}), sha_full256);
 }
 
 // accumulator<sha256>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha256_256__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_256__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, false, false, false>;
     static_assert(!sha_256::native);
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(sha256_256__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha256>::hash (true, false, false)
-BOOST_AUTO_TEST_CASE(sha256_256__tff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_256__tff_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, false, false>;
     static_assert(sha_256::native == native);
@@ -65,12 +65,12 @@ BOOST_AUTO_TEST_CASE(sha256_256__tff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha256>::hash (true, false, true)
-BOOST_AUTO_TEST_CASE(sha256_256__tft_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_256__tft_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, false, true>;
     static_assert(sha_256::native == native);
@@ -81,12 +81,12 @@ BOOST_AUTO_TEST_CASE(sha256_256__tft_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha256>::hash (true, true, false)
-BOOST_AUTO_TEST_CASE(sha256_256__ttf_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_256__ttf_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, false>;
     static_assert(sha_256::native == native);
@@ -97,12 +97,12 @@ BOOST_AUTO_TEST_CASE(sha256_256__ttf_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha256>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha256_256__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_256__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
     static_assert(sha_256::native == native);
@@ -113,12 +113,12 @@ BOOST_AUTO_TEST_CASE(sha256_256__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha256>::hash (false, true, false)
-BOOST_AUTO_TEST_CASE(sha256_256__ftf_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_256__ftf_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<256>, false, true, false>;
     static_assert(!sha_256::native);
@@ -129,12 +129,12 @@ BOOST_AUTO_TEST_CASE(sha256_256__ftf_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha_256_224>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha256_224__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_224__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_256_224 = sha::algorithm<sha::h256<224>, false, false, false>;
     static_assert(!sha_256_224::native);
@@ -145,12 +145,12 @@ BOOST_AUTO_TEST_CASE(sha256_224__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_224_tests)
     {
         const auto hash = accumulator<sha_256_224>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha_256_224>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha256_224__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha256_224__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_256_224 = sha::algorithm<sha::h256<224>, true, true, true>;
 
@@ -163,52 +163,52 @@ BOOST_AUTO_TEST_CASE(sha256_224__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha256_224_tests)
     {
         const auto hash = accumulator<sha_256_224>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // sha256::hash
-BOOST_AUTO_TEST_CASE(sha256__hash__one_block__expected)
+BC_AUTO_TEST_CASE(sha256__hash__one_block__expected)
 {
     static_assert(sha256::hash(std_array<sha256::block_t, 1>({ sha256::block_t{ 0 } })) == sha_full256);
-    BOOST_CHECK_EQUAL(sha256::hash(sha256::block_t{ 0 }), sha_full256);
+    BC_CHECK_EQUAL(sha256::hash(sha256::block_t{ 0 }), sha_full256);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__full_block__expected)
+BC_AUTO_TEST_CASE(sha256__hash__full_block__expected)
 {
     static_assert(sha256::hash(sha256::block_t{ 0 }) == sha_full256);
-    BOOST_CHECK_EQUAL(sha256::hash(sha256::block_t{ 0 }), sha_full256);
+    BC_CHECK_EQUAL(sha256::hash(sha256::block_t{ 0 }), sha_full256);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__state__equals_byteswapped_half)
+BC_AUTO_TEST_CASE(sha256__hash__state__equals_byteswapped_half)
 {
     constexpr auto expected = sha256::hash(sha256::half_t{ 42 });
     static_assert(sha256::finalize_second(sha256::state_t{ byteswap(42_u32) }) == expected);
-    BOOST_CHECK_EQUAL(sha256::finalize_second(sha256::state_t{ byteswap(42_u32) }), expected);
+    BC_CHECK_EQUAL(sha256::finalize_second(sha256::state_t{ byteswap(42_u32) }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__half_block__expected)
+BC_AUTO_TEST_CASE(sha256__hash__half_block__expected)
 {
     static_assert(sha256::hash(sha256::half_t{ 0 }) == sha_half256);
-    BOOST_CHECK_EQUAL(sha256::hash(sha256::half_t{ 0 }), sha_half256);
+    BC_CHECK_EQUAL(sha256::hash(sha256::half_t{ 0 }), sha_half256);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__half_blocks__expected)
+BC_AUTO_TEST_CASE(sha256__hash__half_blocks__expected)
 {
     constexpr auto expected = sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 });
     static_assert(sha256::hash(sha256::block_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
+    BC_CHECK_EQUAL(sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__quart_blocks__expected)
+BC_AUTO_TEST_CASE(sha256__hash__quart_blocks__expected)
 {
     constexpr auto expected = sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 });
     static_assert(sha256::hash(sha256::half_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 }), expected);
+    BC_CHECK_EQUAL(sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 }), expected);
 }
 
 // sha256::midstate
-BOOST_AUTO_TEST_CASE(sha256__midstate__half_blocks__expected)
+BC_AUTO_TEST_CASE(sha256__midstate__half_blocks__expected)
 {
     constexpr sha256::state_t expected
     {
@@ -225,163 +225,163 @@ BOOST_AUTO_TEST_CASE(sha256__midstate__half_blocks__expected)
     auto copy = expected;
 
     static_assert(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
-    BOOST_CHECK_EQUAL(sha256::finalize(copy, one), sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }));
+    BC_CHECK_EQUAL(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
+    BC_CHECK_EQUAL(sha256::finalize(copy, one), sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }));
 }
 
 // sha256::hash(midstate, half, half, half)
-BOOST_AUTO_TEST_CASE(sha256__hash__midstate_halves__expected)
+BC_AUTO_TEST_CASE(sha256__hash__midstate_halves__expected)
 {
     constexpr auto expected = base16_array("4d15b30bff844b820ef93243e53cd4c8600cce2b13f8999b09496a32d08cab7f");
     constexpr auto midstate = sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 1 });
     static_assert(sha256::hash(midstate, sha256::half_t{ 2 }, sha256::half_t{ 3 }, sha256::half_t{ 4 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::hash(midstate, sha256::half_t{ 2 }, sha256::half_t{ 3 }, sha256::half_t{ 4 }), expected);
+    BC_CHECK_EQUAL(sha256::hash(midstate, sha256::half_t{ 2 }, sha256::half_t{ 3 }, sha256::half_t{ 4 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__tagged_midstate_halves__tagged_hash)
+BC_AUTO_TEST_CASE(sha256__hash__tagged_midstate_halves__tagged_hash)
 {
     constexpr sha256::half_t first{ 1 };
     constexpr sha256::half_t second{ 2 };
     constexpr sha256::half_t third{ 3 };
     const auto expected = tagged_hash("BIP0340/challenge", splice(first, second, third));
-    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0340/challenge">, first, second, third), expected);
+    BC_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0340/challenge">, first, second, third), expected);
 }
 
 // sha256::hash(midstate, bytes)
-BOOST_AUTO_TEST_CASE(sha256__hash__midstate_bytes_minimal__tagged_hash)
+BC_AUTO_TEST_CASE(sha256__hash__midstate_bytes_minimal__tagged_hash)
 {
     const auto expected = tagged_hash("BIP0352/SharedSecret", data_chunk{});
-    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, data_array<zero>{}), expected);
+    BC_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, data_array<zero>{}), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__midstate_bytes_shared_secret__tagged_hash)
+BC_AUTO_TEST_CASE(sha256__hash__midstate_bytes_shared_secret__tagged_hash)
 {
     data_array<37> bytes{};
     bytes.fill(0x2a);
     const auto expected = tagged_hash("BIP0352/SharedSecret", bytes);
-    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, bytes), expected);
+    BC_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, bytes), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__hash__midstate_bytes_maximal__tagged_hash)
+BC_AUTO_TEST_CASE(sha256__hash__midstate_bytes_maximal__tagged_hash)
 {
     data_array<55> bytes{};
     bytes.fill(0x2a);
     const auto expected = tagged_hash("BIP0352/SharedSecret", bytes);
-    BOOST_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, bytes), expected);
+    BC_CHECK_EQUAL(sha256::hash(tagged_midstate<"BIP0352/SharedSecret">, bytes), expected);
 }
 
 // sha256::simple_hash
-BOOST_AUTO_TEST_CASE(sha256__simple_hash__minimal__expected)
+BC_AUTO_TEST_CASE(sha256__simple_hash__minimal__expected)
 {
-    BOOST_CHECK_EQUAL(sha256::simple_hash(data_array<zero>{}), accumulator<sha256>::hash(data_array<zero>{}));
+    BC_CHECK_EQUAL(sha256::simple_hash(data_array<zero>{}), accumulator<sha256>::hash(data_array<zero>{}));
 }
 
-BOOST_AUTO_TEST_CASE(sha256__simple_hash__byte__expected)
+BC_AUTO_TEST_CASE(sha256__simple_hash__byte__expected)
 {
     static_assert(sha256::simple_hash(data_array<one>{ 0 }) == sha_byte256);
-    BOOST_CHECK_EQUAL(sha256::simple_hash(data_array<one>{ 0 }), accumulator<sha256>::hash(data_array<one>{ 0 }));
+    BC_CHECK_EQUAL(sha256::simple_hash(data_array<one>{ 0 }), accumulator<sha256>::hash(data_array<one>{ 0 }));
 }
 
-BOOST_AUTO_TEST_CASE(sha256__simple_hash__maximal__expected)
+BC_AUTO_TEST_CASE(sha256__simple_hash__maximal__expected)
 {
-    BOOST_CHECK_EQUAL(sha256::simple_hash(data_array<sha256::space>{ 0 }), accumulator<sha256>::hash(data_array<sha256::space>{ 0 }));
+    BC_CHECK_EQUAL(sha256::simple_hash(data_array<sha256::space>{ 0 }), accumulator<sha256>::hash(data_array<sha256::space>{ 0 }));
 }
 
-BOOST_AUTO_TEST_CASE(sha256__simple_hash__quart_block__expected)
+BC_AUTO_TEST_CASE(sha256__simple_hash__quart_block__expected)
 {
-    BOOST_CHECK_EQUAL(sha256::simple_hash(sha256::quart_t{ 0 }), accumulator<sha256>::hash(sha256::quart_t{ 0 }));
+    BC_CHECK_EQUAL(sha256::simple_hash(sha256::quart_t{ 0 }), accumulator<sha256>::hash(sha256::quart_t{ 0 }));
 }
 
-BOOST_AUTO_TEST_CASE(sha256__simple_hash__half_block__expected)
+BC_AUTO_TEST_CASE(sha256__simple_hash__half_block__expected)
 {
     static_assert(sha256::simple_hash(sha256::half_t{ 0 }) == sha_half256);
-    BOOST_CHECK_EQUAL(sha256::simple_hash(sha256::half_t{ 0 }), accumulator<sha256>::hash(sha256::half_t{ 0 }));
+    BC_CHECK_EQUAL(sha256::simple_hash(sha256::half_t{ 0 }), accumulator<sha256>::hash(sha256::half_t{ 0 }));
 }
 
 // sha256::double_hash
-BOOST_AUTO_TEST_CASE(sha256__double_hash__full_block__expected)
+BC_AUTO_TEST_CASE(sha256__double_hash__full_block__expected)
 {
     constexpr auto expected = sha256::hash(sha256::hash(sha256::block_t{ 42 }));
     static_assert(sha256::double_hash(sha256::block_t{ 42 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::double_hash(sha256::block_t{ 42 }), expected);
+    BC_CHECK_EQUAL(sha256::double_hash(sha256::block_t{ 42 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__double_hash__half_block__expected)
+BC_AUTO_TEST_CASE(sha256__double_hash__half_block__expected)
 {
     constexpr auto expected = sha256::hash(sha256::hash(sha256::half_t{ 42 }));
     static_assert(sha256::double_hash(sha256::half_t{ 42 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::double_hash(sha256::half_t{ 42 }), expected);
+    BC_CHECK_EQUAL(sha256::double_hash(sha256::half_t{ 42 }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__double_hash__half_blocks__expected)
+BC_AUTO_TEST_CASE(sha256__double_hash__half_blocks__expected)
 {
     constexpr auto expected = sha256::hash(sha256::hash(block<sha256>(0, 1)));
     static_assert(sha256::double_hash({ 0 }, { 1 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::double_hash({ 0 }, { 1 }), expected);
+    BC_CHECK_EQUAL(sha256::double_hash({ 0 }, { 1 }), expected);
 }
 
 // sha256::merkle_hash
-BOOST_AUTO_TEST_CASE(sha256__merkle_hash__two__expected)
+BC_AUTO_TEST_CASE(sha256__merkle_hash__two__expected)
 {
     constexpr auto expected = sha256::double_hash({ 0 }, { 1 });
     static_assert(merkle_hash<sha256, 0, 1>(expected));
     sha256::digests_t digests{ { 0 }, { 1 } };
     sha256::merkle_hash(digests);
-    BOOST_CHECK_EQUAL(digests.size(), one);
-    BOOST_CHECK_EQUAL(digests.front(), expected);
+    BC_CHECK_EQUAL(digests.size(), one);
+    BC_CHECK_EQUAL(digests.front(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__merkle_hash__four__expected)
+BC_AUTO_TEST_CASE(sha256__merkle_hash__four__expected)
 {
     constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
     static_assert(merkle_hash<sha256, 0, 1, 2, 3>(expected1, expected2));
     sha256::digests_t digests{ { 0 }, { 1 }, { 2 }, { 3 } };
     sha256::merkle_hash(digests);
-    BOOST_CHECK_EQUAL(digests.size(), two);
-    BOOST_CHECK_EQUAL(digests.front(), expected1);
-    BOOST_CHECK_EQUAL(digests.back(), expected2);
+    BC_CHECK_EQUAL(digests.size(), two);
+    BC_CHECK_EQUAL(digests.front(), expected1);
+    BC_CHECK_EQUAL(digests.back(), expected2);
 }
 
 // sha256::merkle_root
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__empty__null_hash)
+BC_AUTO_TEST_CASE(sha256__merkle_root__empty__null_hash)
 {
     constexpr auto expected = null_hash;
     static_assert(sha256::merkle_root({}) == expected);
-    BOOST_CHECK_EQUAL(sha256::merkle_root({}), expected);
+    BC_CHECK_EQUAL(sha256::merkle_root({}), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__one__same)
+BC_AUTO_TEST_CASE(sha256__merkle_root__one__same)
 {
     constexpr auto expected = sha256::digest_t{ 42 };
     static_assert(sha256::merkle_root({ { 42 } }) == expected);
-    BOOST_CHECK_EQUAL(sha256::merkle_root({ { 42 } }), expected);
+    BC_CHECK_EQUAL(sha256::merkle_root({ { 42 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__two__expected)
+BC_AUTO_TEST_CASE(sha256__merkle_root__two__expected)
 {
     constexpr auto expected = sha256::double_hash({ 0 }, { 1 });
     // vc++ debug compiler failure.
     ////static_assert(sha256::merkle_root({ { 0 }, { 1 } }) == expected);
-    BOOST_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 } }), expected);
+    BC_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__three__expected)
+BC_AUTO_TEST_CASE(sha256__merkle_root__three__expected)
 {
     constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha256::double_hash({ 2 }, { 2 });
     constexpr auto expected = sha256::double_hash(expected1, expected2);
     static_assert(sha256::merkle_root({ { 0 }, { 1 }, { 2 } }) == expected);
-    BOOST_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 }, { 2 } }), expected);
+    BC_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 }, { 2 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__four__expected)
+BC_AUTO_TEST_CASE(sha256__merkle_root__four__expected)
 {
     constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
     constexpr auto expected = sha256::double_hash(expected1, expected2);
     static_assert(sha256::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
-    BOOST_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
+    BC_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

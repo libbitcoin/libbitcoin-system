@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(bytes_tests)
+BC_AUTO_TEST_SUITE(bytes_tests)
 
 // byte_width (unsigned/positive)
 static_assert(byte_width(0_u8) == 0);
@@ -276,4 +276,4 @@ static_assert(to_floored_bytes<uint11_t>(42u) == 42u / 8u);
 static_assert(to_floored_bytes<uint5_t>(0xffu) == (0xff & 0b00011111) / 8u);
 static_assert(is_same_type<decltype(to_floored_bytes<uint11_t>(0)), uint11_t>);
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -18,9 +18,9 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(fschacha20_tests)
+BC_AUTO_TEST_SUITE(fschacha20_tests)
 
-BOOST_AUTO_TEST_CASE(fschacha20__crypt__rekey_rotation__expected)
+BC_AUTO_TEST_CASE(fschacha20__crypt__rekey_rotation__expected)
 {
     struct fschacha20_vector
     {
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(fschacha20__crypt__rekey_rotation__expected)
             cipher.crypt(vector.plain, out);
 
         cipher.crypt(vector.plain, out);
-        BOOST_REQUIRE_EQUAL(out, vector.cipher);
+        BC_REQUIRE_EQUAL(out, vector.cipher);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

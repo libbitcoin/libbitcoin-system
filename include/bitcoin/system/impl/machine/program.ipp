@@ -120,7 +120,7 @@ input() const NOEXCEPT
 }
 
 TEMPLATE
-INLINE bool CLASS::
+inline bool CLASS::
 is_enabled(flags flag) const NOEXCEPT
 {
     return to_bool(flags_ & flag);

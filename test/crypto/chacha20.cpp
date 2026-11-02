@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(chacha20_tests)
+BC_AUTO_TEST_SUITE(chacha20_tests)
 
 // rfc8439 test vectors (as compiled in bitcoin core test framework).
 
@@ -71,7 +71,7 @@ const std_vector<chacha20_vector> chacha20_vectors
     }
 };
 
-BOOST_AUTO_TEST_CASE(chacha20__stream__rfc8439_vectors__expected)
+BC_AUTO_TEST_CASE(chacha20__stream__rfc8439_vectors__expected)
 {
     for (const auto& vector: chacha20_vectors)
     {
@@ -80,11 +80,11 @@ BOOST_AUTO_TEST_CASE(chacha20__stream__rfc8439_vectors__expected)
 
         data_array<64> keystream{};
         cipher.stream(keystream);
-        BOOST_REQUIRE_EQUAL(keystream, vector.keystream);
+        BC_REQUIRE_EQUAL(keystream, vector.keystream);
     }
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__crypt__zeros__keystream)
+BC_AUTO_TEST_CASE(chacha20__crypt__zeros__keystream)
 {
     const auto& vector = chacha20_vectors.front();
     chacha20 cipher{ vector.key };
@@ -93,10 +93,10 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__zeros__keystream)
     const data_array<64> zeros{};
     data_array<64> encrypted{};
     cipher.crypt(zeros, encrypted);
-    BOOST_REQUIRE_EQUAL(encrypted, vector.keystream);
+    BC_REQUIRE_EQUAL(encrypted, vector.keystream);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__crypt__round_trip__expected)
+BC_AUTO_TEST_CASE(chacha20__crypt__round_trip__expected)
 {
     const auto plain = base16_chunk("000102030405060708090a0b0c0d0e0f1011"
         "12131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031");
@@ -107,16 +107,16 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__round_trip__expected)
     encrypter.seek(42, 42, 0);
     data_chunk encrypted(plain.size());
     encrypter.crypt(plain, encrypted);
-    BOOST_REQUIRE_NE(encrypted, plain);
+    BC_REQUIRE_NE(encrypted, plain);
 
     chacha20 decrypter{ key };
     decrypter.seek(42, 42, 0);
     data_chunk decrypted(encrypted.size());
     decrypter.crypt(encrypted, decrypted);
-    BOOST_REQUIRE_EQUAL(decrypted, plain);
+    BC_REQUIRE_EQUAL(decrypted, plain);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__crypt__split_stream__continuous)
+BC_AUTO_TEST_CASE(chacha20__crypt__split_stream__continuous)
 {
     const auto& vector = chacha20_vectors.front();
 
@@ -129,10 +129,10 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__split_stream__continuous)
     cipher.crypt({ zeros.data(), 1 }, { encrypted.data(), 1 });
     cipher.crypt({ std::next(zeros.data(), 1), 41 }, { std::next(encrypted.data(), 1), 41 });
     cipher.crypt({ std::next(zeros.data(), 42), 22 }, { std::next(encrypted.data(), 42), 22 });
-    BOOST_REQUIRE_EQUAL(encrypted, vector.keystream);
+    BC_REQUIRE_EQUAL(encrypted, vector.keystream);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__stream__whole__matches_split)
+BC_AUTO_TEST_CASE(chacha20__stream__whole__matches_split)
 {
     const auto& vector = chacha20_vectors.front();
     constexpr size_t size = 1027;
@@ -155,10 +155,10 @@ BOOST_AUTO_TEST_CASE(chacha20__stream__whole__matches_split)
     splitter.stream(out2);
     splitter.stream(out3);
 
-    BOOST_REQUIRE_EQUAL(split, whole);
+    BC_REQUIRE_EQUAL(split, whole);
 }
 
-BOOST_AUTO_TEST_CASE(chacha20__crypt__whole__matches_split)
+BC_AUTO_TEST_CASE(chacha20__crypt__whole__matches_split)
 {
     const auto& vector = chacha20_vectors.front();
     constexpr size_t size = 1600;
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(chacha20__crypt__whole__matches_split)
     splitter.crypt(in2, out2);
     splitter.crypt(in3, out3);
 
-    BOOST_REQUIRE_EQUAL(split, whole);
+    BC_REQUIRE_EQUAL(split, whole);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

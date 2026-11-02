@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "../hash.hpp"
     
-BOOST_AUTO_TEST_SUITE(sha_algorithm_tests)
+BC_AUTO_TEST_SUITE(sha_algorithm_tests)
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha160::hash(sha160::half_t{})  == sha_half160);
@@ -32,7 +32,7 @@ static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 // Currently sha::algorithm schedule pads are cached for 1,2,3,4 blocks.
 // This verifies that sha::algorithm::schedule_n() is properly configured.
 // Testing any sha algorithm is sufficient to verify the configuration for all.
-BOOST_AUTO_TEST_CASE(verify_array_cache)
+BC_AUTO_TEST_CASE(verify_array_cache)
 {
     // Empty block scheduled pad is not currently cached, but included here for completeness.
     constexpr auto expected0 = base16_array("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
@@ -55,11 +55,11 @@ BOOST_AUTO_TEST_CASE(verify_array_cache)
 
     // Array caching is performed independently from chunk caching, though if
     // configured correctly the cache for each is the same values/locations.
-    BOOST_CHECK_EQUAL(sha256::hash(blocks0), expected0);
-    BOOST_CHECK_EQUAL(sha256::hash(blocks1), expected1);
-    BOOST_CHECK_EQUAL(sha256::hash(blocks2), expected2);
-    BOOST_CHECK_EQUAL(sha256::hash(blocks3), expected3);
-    BOOST_CHECK_EQUAL(sha256::hash(blocks4), expected4);
+    BC_CHECK_EQUAL(sha256::hash(blocks0), expected0);
+    BC_CHECK_EQUAL(sha256::hash(blocks1), expected1);
+    BC_CHECK_EQUAL(sha256::hash(blocks2), expected2);
+    BC_CHECK_EQUAL(sha256::hash(blocks3), expected3);
+    BC_CHECK_EQUAL(sha256::hash(blocks4), expected4);
 
     const data_chunk chunk0(0 * array_count<sha256::block_t>, 0x00_u8);
     const data_chunk chunk1(1 * array_count<sha256::block_t>, 0x00_u8);
@@ -67,11 +67,11 @@ BOOST_AUTO_TEST_CASE(verify_array_cache)
     const data_chunk chunk3(3 * array_count<sha256::block_t>, 0x00_u8);
     const data_chunk chunk4(4 * array_count<sha256::block_t>, 0x00_u8);
 
-    BOOST_CHECK_EQUAL(sha256_hash(chunk0), expected0);
-    BOOST_CHECK_EQUAL(sha256_hash(chunk1), expected1);
-    BOOST_CHECK_EQUAL(sha256_hash(chunk2), expected2);
-    BOOST_CHECK_EQUAL(sha256_hash(chunk3), expected3);
-    BOOST_CHECK_EQUAL(sha256_hash(chunk4), expected4);
+    BC_CHECK_EQUAL(sha256_hash(chunk0), expected0);
+    BC_CHECK_EQUAL(sha256_hash(chunk1), expected1);
+    BC_CHECK_EQUAL(sha256_hash(chunk2), expected2);
+    BC_CHECK_EQUAL(sha256_hash(chunk3), expected3);
+    BC_CHECK_EQUAL(sha256_hash(chunk4), expected4);
 }
 
 using namespace sha;
@@ -579,4 +579,4 @@ static_assert(Sigma<18, 14, 41>(66666_u64) == Sigma_ex<18, 14, 41>(66666_u64));
 static_assert(Sigma<14, 41, 18>(66666_u64) == Sigma_ex<14, 41, 18>(66666_u64));
 static_assert(Sigma<14, 18, 41>(66666_u64) == Sigma_ex<14, 18, 41>(66666_u64));
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

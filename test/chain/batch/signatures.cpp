@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(signatures_tests)
+BC_AUTO_TEST_SUITE(signatures_tests)
 
 using namespace system::chain;
 
@@ -51,64 +51,64 @@ const ec_signature schnorr_sig = base16_array
 
 // multisig
 
-BOOST_AUTO_TEST_CASE(signatures__multisig_rows__two_of_three__four)
+BC_AUTO_TEST_CASE(signatures__multisig_rows__two_of_three__four)
 {
-    BOOST_REQUIRE_EQUAL(multisig::rows(2, 3), 4u);
+    BC_REQUIRE_EQUAL(multisig::rows(2, 3), 4u);
 }
 
-BOOST_AUTO_TEST_CASE(signatures__multisig_rows__sigs_above_keys__zero)
+BC_AUTO_TEST_CASE(signatures__multisig_rows__sigs_above_keys__zero)
 {
-    BOOST_REQUIRE_EQUAL(multisig::rows(2, 1), zero);
+    BC_REQUIRE_EQUAL(multisig::rows(2, 1), zero);
 }
 
-BOOST_AUTO_TEST_CASE(signatures__multisig_rows__maximum_gap__zero)
+BC_AUTO_TEST_CASE(signatures__multisig_rows__maximum_gap__zero)
 {
-    BOOST_REQUIRE_EQUAL(multisig::rows(0, max_size_t), zero);
+    BC_REQUIRE_EQUAL(multisig::rows(0, max_size_t), zero);
 }
 
-BOOST_AUTO_TEST_CASE(signatures__multisig_rows__product_overflow__zero)
+BC_AUTO_TEST_CASE(signatures__multisig_rows__product_overflow__zero)
 {
     constexpr auto half = power2<size_t>(to_half(bits<size_t>));
-    BOOST_REQUIRE_EQUAL(multisig::rows(half, half + half), zero);
+    BC_REQUIRE_EQUAL(multisig::rows(half, half + half), zero);
 }
 
 // signatures (thread statics)
 
-BOOST_AUTO_TEST_CASE(signatures__signatures__thread_statics__stable_and_purgeable)
+BC_AUTO_TEST_CASE(signatures__signatures__thread_statics__stable_and_purgeable)
 {
     auto& ecdsa = signatures::ecdsa_rows();
     auto& schnorr = signatures::schnorr_rows();
-    BOOST_REQUIRE_EQUAL(&signatures::ecdsa_rows(), &ecdsa);
-    BOOST_REQUIRE_EQUAL(&signatures::schnorr_rows(), &schnorr);
+    BC_REQUIRE_EQUAL(&signatures::ecdsa_rows(), &ecdsa);
+    BC_REQUIRE_EQUAL(&signatures::schnorr_rows(), &schnorr);
 
     const signatures capture{ .enabled = true };
-    BOOST_REQUIRE(capture.ecdsa(ecdsa_sighash, ecdsa_key, ecdsa_sig));
-    BOOST_REQUIRE(capture.schnorr(schnorr_sighash, schnorr_key, schnorr_sig));
-    BOOST_REQUIRE_EQUAL(ecdsa.groups(), 1u);
-    BOOST_REQUIRE_EQUAL(schnorr.rows().size(), 1u);
+    BC_REQUIRE(capture.ecdsa(ecdsa_sighash, ecdsa_key, ecdsa_sig));
+    BC_REQUIRE(capture.schnorr(schnorr_sighash, schnorr_key, schnorr_sig));
+    BC_REQUIRE_EQUAL(ecdsa.groups(), 1u);
+    BC_REQUIRE_EQUAL(schnorr.rows().size(), 1u);
 
     signatures::purge();
-    BOOST_REQUIRE(ecdsa.empty());
-    BOOST_REQUIRE(schnorr.empty());
+    BC_REQUIRE(ecdsa.empty());
+    BC_REQUIRE(schnorr.empty());
 }
 
-BOOST_AUTO_TEST_CASE(signatures__signatures__threshold_cursor__appends_rows)
+BC_AUTO_TEST_CASE(signatures__signatures__threshold_cursor__appends_rows)
 {
     signatures::purge();
     auto& schnorr = signatures::schnorr_rows();
 
     const signatures capture{ .enabled = true };
     auto cursor = capture.threshold(two);
-    BOOST_REQUIRE(cursor.is_open());
-    BOOST_REQUIRE_EQUAL(schnorr.thresholds(), 2u);
+    BC_REQUIRE(cursor.is_open());
+    BC_REQUIRE_EQUAL(schnorr.thresholds(), 2u);
 
     cursor.write(schnorr_sighash, schnorr_key, schnorr_sig);
-    BOOST_REQUIRE(cursor.is_open());
+    BC_REQUIRE(cursor.is_open());
     cursor.write(schnorr_sighash, schnorr_key, schnorr_sig);
-    BOOST_REQUIRE(!cursor.is_open());
-    BOOST_REQUIRE_EQUAL(schnorr.rows().size(), 2u);
+    BC_REQUIRE(!cursor.is_open());
+    BC_REQUIRE_EQUAL(schnorr.rows().size(), 2u);
 
     signatures::purge();
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

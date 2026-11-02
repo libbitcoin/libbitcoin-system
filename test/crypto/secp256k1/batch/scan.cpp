@@ -20,7 +20,7 @@
 
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_scan_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_scan_tests)
 
 using namespace system::scan;
 using tx_links = std::vector<batch::tx_link_t>;
@@ -98,67 +98,67 @@ static tx_links scan_links(const transactions& txs,
     return out;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__empty__empty)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__empty__empty)
 {
-    BOOST_REQUIRE(scan_links({}, get_keys({}), false).empty());
+    BC_REQUIRE(scan_links({}, get_keys({}), false).empty());
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__unlabeled__expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__unlabeled__expected)
 {
     transactions txs{};
     txs.add(1, unlabeled_point, { labeled_key, unlabeled_key });
     txs.add(2, unlabeled_point, { labeled_key });
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), tx_links{ 1 });
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), tx_links{ 1 });
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__labeled__expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__labeled__expected)
 {
     transactions txs{};
     txs.add(1, unlabeled_point, { labeled_key });
     txs.add(2, labeled_point, { labeled_key });
     txs.add(3, labeled_point, { unlabeled_key });
-    BOOST_REQUIRE(scan_links(txs, get_keys({}), false).empty());
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({ 2, 3, 1001337 }), false), tx_links{ 2 });
+    BC_REQUIRE(scan_links(txs, get_keys({}), false).empty());
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({ 2, 3, 1001337 }), false), tx_links{ 2 });
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__no_outputs__skipped)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__no_outputs__skipped)
 {
     transactions txs{};
     txs.add(1, unlabeled_point, {});
     txs.add(2, unlabeled_point, { unlabeled_key });
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), tx_links{ 2 });
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), tx_links{ 2 });
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__invalid_point__skipped)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__invalid_point__skipped)
 {
     transactions txs{};
     txs.add(1, null_ec_compressed, { unlabeled_key });
     txs.add(2, unlabeled_point, { unlabeled_key });
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), tx_links{ 2 });
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), tx_links{ 2 });
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__chunk_straddle__once)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__chunk_straddle__once)
 {
     transactions txs{};
     txs.add(100, 1023, unlabeled_point, { labeled_key });
     txs.add(7, unlabeled_point, { labeled_key, unlabeled_key });
     txs.add(8, unlabeled_point, { unlabeled_key });
-    BOOST_REQUIRE_EQUAL(txs.points.size(), 1025u);
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), (tx_links{ 7, 8 }));
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), true), (tx_links{ 7, 8 }));
+    BC_REQUIRE_EQUAL(txs.points.size(), 1025u);
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({}), false), (tx_links{ 7, 8 }));
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({}), true), (tx_links{ 7, 8 }));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_scan__scan__gpu_transactions__expected)
+BC_AUTO_TEST_CASE(secp256k1_batch_scan__scan__gpu_transactions__expected)
 {
     transactions txs{};
     txs.add(100, 70000, unlabeled_point, { labeled_key });
     txs.add(7, unlabeled_point, { labeled_key, unlabeled_key });
     txs.add(8, labeled_point, { labeled_key });
     txs.add(9, labeled_point, { unlabeled_key });
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({}), true), (tx_links{ 7 }));
-    BOOST_REQUIRE_EQUAL(scan_links(txs, get_keys({ 2, 3, 1001337 }), true), (tx_links{ 7, 8 }));
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({}), true), (tx_links{ 7 }));
+    BC_REQUIRE_EQUAL(scan_links(txs, get_keys({ 2, 3, 1001337 }), true), (tx_links{ 7, 8 }));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 BC_POP_WARNING()

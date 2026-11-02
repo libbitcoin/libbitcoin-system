@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_swaps_tests)
+BC_AUTO_TEST_SUITE(endian_swaps_tests)
 
 template <typename Integer>
 constexpr auto normalize(Integer value)
@@ -75,72 +75,72 @@ static_assert(native_from_little_end(normalize(0x0102030405060708_u64)) == 0x010
 
 // to_big_end
 
-BOOST_AUTO_TEST_CASE(endian__native_to_big_end__not_constant_evaluated_signed__expected)
+BC_AUTO_TEST_CASE(endian__native_to_big_end__not_constant_evaluated_signed__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x01_i8)), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102_i16)), 0x0201_i16);
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x01020304_i32)), 0x04030201_i32);
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102030405060708_i64)), 0x0807060504030201_i64);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x01_i8)), 0x01_i8);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102_i16)), 0x0201_i16);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x01020304_i32)), 0x04030201_i32);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102030405060708_i64)), 0x0807060504030201_i64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_to_big_end__not_constant_evaluated_unsigned__expected)
+BC_AUTO_TEST_CASE(endian__native_to_big_end__not_constant_evaluated_unsigned__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x01_u8)), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102_u16)), 0x0201_u16);
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x01020304_u32)), 0x04030201_u32);
-    BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102030405060708_u64)), 0x0807060504030201_u64);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x01_u8)), 0x01_u8);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102_u16)), 0x0201_u16);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x01020304_u32)), 0x04030201_u32);
+    BC_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102030405060708_u64)), 0x0807060504030201_u64);
 }
 
 // to_big_end
 
-BOOST_AUTO_TEST_CASE(endian__native_to_little_end__not_constant_evaluated_signed__expected)
+BC_AUTO_TEST_CASE(endian__native_to_little_end__not_constant_evaluated_signed__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x01_i8)), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102_i16)), 0x0102_i16);
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x01020304_i32)), 0x01020304_i32);
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102030405060708_i64)), 0x0102030405060708_i64);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x01_i8)), 0x01_i8);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102_i16)), 0x0102_i16);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x01020304_i32)), 0x01020304_i32);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102030405060708_i64)), 0x0102030405060708_i64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_to_little_end__not_constant_evaluated_unsigned__expected)
+BC_AUTO_TEST_CASE(endian__native_to_little_end__not_constant_evaluated_unsigned__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x01_u8)), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102_u16)), 0x0102_u16);
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x01020304_u32)), 0x01020304_u32);
-    BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102030405060708_u64)), 0x0102030405060708_u64);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x01_u8)), 0x01_u8);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102_u16)), 0x0102_u16);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x01020304_u32)), 0x01020304_u32);
+    BC_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102030405060708_u64)), 0x0102030405060708_u64);
 }
 
 // from ends
 
-BOOST_AUTO_TEST_CASE(endian__native_from_big_end__not_constant_evaluated_signed__expected)
+BC_AUTO_TEST_CASE(endian__native_from_big_end__not_constant_evaluated_signed__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x01_i8)), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102_i16)), 0x0201_i16);
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x01020304_i32)), 0x04030201_i32);
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102030405060708_i64)), 0x0807060504030201_i64);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x01_i8)), 0x01_i8);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102_i16)), 0x0201_i16);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x01020304_i32)), 0x04030201_i32);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102030405060708_i64)), 0x0807060504030201_i64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_from_big_end__not_constant_evaluated_unsigned__expected)
+BC_AUTO_TEST_CASE(endian__native_from_big_end__not_constant_evaluated_unsigned__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x01_u8)), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102_u16)), 0x0201_u16);
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x01020304_u32)), 0x04030201_u32);
-    BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102030405060708_u64)), 0x0807060504030201_u64);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x01_u8)), 0x01_u8);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102_u16)), 0x0201_u16);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x01020304_u32)), 0x04030201_u32);
+    BC_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102030405060708_u64)), 0x0807060504030201_u64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_signed__expected)
+BC_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_signed__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x01_i8)), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102_i16)), 0x0102_i16);
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x01020304_i32)), 0x01020304_i32);
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102030405060708_i64)), 0x0102030405060708_i64);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x01_i8)), 0x01_i8);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102_i16)), 0x0102_i16);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x01020304_i32)), 0x01020304_i32);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102030405060708_i64)), 0x0102030405060708_i64);
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_unsigned__expected)
+BC_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_unsigned__expected)
 {
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x01_u8)), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102_u16)), 0x0102_u16);
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x01020304_u32)), 0x01020304_u32);
-    BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102030405060708_u64)), 0x0102030405060708_u64);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x01_u8)), 0x01_u8);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102_u16)), 0x0102_u16);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x01020304_u32)), 0x01020304_u32);
+    BC_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102030405060708_u64)), 0x0102030405060708_u64);
 }
 
 // extended lanes
@@ -149,48 +149,48 @@ static_assert(is_lane_swappable<uint32_t, xint128_t>);
 static_assert(!is_lane_swappable<uint32_t, uint32_t>);
 static_assert(!is_lane_swappable<uint32_t, data_chunk>);
 
-BOOST_AUTO_TEST_CASE(endian__native_to_big_end__extended__expected)
+BC_AUTO_TEST_CASE(endian__native_to_big_end__extended__expected)
 {
     if constexpr (have_128)
     {
         const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
         const auto swapped = native_to_big_end<uint64_t>(xword);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0807060504030201_u64);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1817161514131211_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0807060504030201_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1817161514131211_u64);
     }
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_to_little_end__extended__expected)
+BC_AUTO_TEST_CASE(endian__native_to_little_end__extended__expected)
 {
     if constexpr (have_128)
     {
         const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
         const auto swapped = native_to_little_end<uint64_t>(xword);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0102030405060708_u64);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1112131415161718_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0102030405060708_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1112131415161718_u64);
     }
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_from_big_end__extended__expected)
+BC_AUTO_TEST_CASE(endian__native_from_big_end__extended__expected)
 {
     if constexpr (have_128)
     {
         const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
         const auto swapped = native_from_big_end<uint64_t>(xword);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0807060504030201_u64);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1817161514131211_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0807060504030201_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1817161514131211_u64);
     }
 }
 
-BOOST_AUTO_TEST_CASE(endian__native_from_little_end__extended__expected)
+BC_AUTO_TEST_CASE(endian__native_from_little_end__extended__expected)
 {
     if constexpr (have_128)
     {
         const auto xword = f::set<xint128_t>(normalize(0x0102030405060708_u64), normalize(0x1112131415161718_u64));
         const auto swapped = native_from_little_end<uint64_t>(xword);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0102030405060708_u64);
-        BOOST_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1112131415161718_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 0>(swapped)), 0x0102030405060708_u64);
+        BC_REQUIRE_EQUAL((f::get<uint64_t, 1>(swapped)), 0x1112131415161718_u64);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

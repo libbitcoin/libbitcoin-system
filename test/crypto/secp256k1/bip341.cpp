@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_bip341_tests)
+BC_AUTO_TEST_SUITE(secp256k1_bip341_tests)
 
 // bitcoin/bips bip-0341/wallet-test-vectors.json (scriptPubKey)
 
@@ -40,29 +40,29 @@ const std::vector<tweak_vector> tweak_vectors
     { base16_array("55adf4e8967fbd2e29f20ac896e60c3b0f1d5b0efa9d34941b5958c7b0a0312d"), base16_array("6579138e7976dc13b6a92f7bfd5a2fc7684f5ea42419d43368301470f3b74ed9"), base16_array("75169f4001aa68f15bbed28b218df1d0a62cbbcf1188c6665110c293c907b831") },
 };
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip341__ec_add__tweak_vectors__expected_key)
+BC_AUTO_TEST_CASE(secp256k1_bip341__ec_add__tweak_vectors__expected_key)
 {
     for (size_t index{}; index < tweak_vectors.size(); ++index)
     {
         const auto& vector = tweak_vectors[index];
         ec_compressed point = splice(data_array<1>{ ec_even_sign }, vector.internal);
-        BOOST_REQUIRE_MESSAGE(ec_add(point, vector.tweak), index);
+        BC_REQUIRE_MESSAGE(ec_add(point, vector.tweak), index);
         const ec_xonly key = slice<one, ec_compressed_size>(point);
-        BOOST_REQUIRE_MESSAGE(key == vector.tweaked, index);
+        BC_REQUIRE_MESSAGE(key == vector.tweaked, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip341__verify_commitment__tweak_vectors__expected)
+BC_AUTO_TEST_CASE(secp256k1_bip341__verify_commitment__tweak_vectors__expected)
 {
     for (size_t index{}; index < tweak_vectors.size(); ++index)
     {
         const auto& vector = tweak_vectors[index];
         ec_compressed point = splice(data_array<1>{ ec_even_sign }, vector.internal);
-        BOOST_REQUIRE_MESSAGE(ec_add(point, vector.tweak), index);
+        BC_REQUIRE_MESSAGE(ec_add(point, vector.tweak), index);
 
         const auto parity = point.front() == ec_odd_sign;
-        BOOST_REQUIRE_MESSAGE(schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, parity), index);
-        BOOST_REQUIRE_MESSAGE(!schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, !parity), index);
+        BC_REQUIRE_MESSAGE(schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, parity), index);
+        BC_REQUIRE_MESSAGE(!schnorr::verify_commitment(vector.internal, vector.tweak, vector.tweaked, !parity), index);
     }
 }
 
@@ -89,48 +89,48 @@ const std::vector<spend_vector> spend_vectors
     { base16_array("77863416be0d0665e517e1c375fd6f75839544eca553675ef7fdf4949518ebaa"), base16_array("f9f400803e683727b14f463836e1e78e1c64417638aa066919291a225f0e8dd8"), base16_array("639f0281b7ac49e742cd25b7f188657626da1ad169209078e2761cefd91fd65e"), base16_array("ec18ce6af99f43815db543f47b8af5ff5df3b2cb7315c955aa4a86e8143d2bf5"), base16_array("cccb739eca6c13a8a89e6e5cd317ffe55669bbda23f2fd37b0f18755e008edd2"), base16_array("bbc9584a11074e83bc8c6759ec55401f0ae7b03ef290c3139814f545b58a9f8127258000874f44bc46db7646322107d4d86aec8e73b8719a61fff761d75b5dd9") },
 };
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip341__secret_to_public__spend_vectors__internal_key)
+BC_AUTO_TEST_CASE(secp256k1_bip341__secret_to_public__spend_vectors__internal_key)
 {
     for (size_t index{}; index < spend_vectors.size(); ++index)
     {
         const auto& vector = spend_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
+        BC_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
         const ec_xonly key = slice<one, ec_compressed_size>(point);
-        BOOST_REQUIRE_MESSAGE(key == vector.internal, index);
+        BC_REQUIRE_MESSAGE(key == vector.internal, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip341__ec_add__spend_vectors__tweaked_secret)
+BC_AUTO_TEST_CASE(secp256k1_bip341__ec_add__spend_vectors__tweaked_secret)
 {
     for (size_t index{}; index < spend_vectors.size(); ++index)
     {
         const auto& vector = spend_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
+        BC_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
 
         auto secret = vector.secret;
         if (point.front() == ec_odd_sign)
         {
-            BOOST_REQUIRE_MESSAGE(ec_negate(secret), index);
+            BC_REQUIRE_MESSAGE(ec_negate(secret), index);
         }
 
-        BOOST_REQUIRE_MESSAGE(ec_add(secret, vector.tweak), index);
-        BOOST_REQUIRE_MESSAGE(secret == vector.tweaked, index);
+        BC_REQUIRE_MESSAGE(ec_add(secret, vector.tweak), index);
+        BC_REQUIRE_MESSAGE(secret == vector.tweaked, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip341__verify_signature__spend_vectors__true)
+BC_AUTO_TEST_CASE(secp256k1_bip341__verify_signature__spend_vectors__true)
 {
     for (size_t index{}; index < spend_vectors.size(); ++index)
     {
         const auto& vector = spend_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.tweaked), index);
+        BC_REQUIRE_MESSAGE(secret_to_public(point, vector.tweaked), index);
 
         const ec_xonly key = slice<one, ec_compressed_size>(point);
-        BOOST_REQUIRE_MESSAGE(schnorr::verify_signature(key, vector.sighash, vector.signature), index);
+        BC_REQUIRE_MESSAGE(schnorr::verify_signature(key, vector.sighash, vector.signature), index);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

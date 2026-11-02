@@ -18,95 +18,95 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(iterable_tests)
+BC_AUTO_TEST_SUITE(iterable_tests)
 
-BOOST_AUTO_TEST_CASE(iterable__default_construct__always__empty)
+BC_AUTO_TEST_CASE(iterable__default_construct__always__empty)
 {
     const system::iterable<data_array<42>> iterable{};
-    BOOST_REQUIRE(iterable.empty());
-    BOOST_REQUIRE_EQUAL(iterable.size(), 0u);
-    BOOST_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
+    BC_REQUIRE(iterable.empty());
+    BC_REQUIRE_EQUAL(iterable.size(), 0u);
+    BC_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(mutable_iterable__default_construct__always__empty)
+BC_AUTO_TEST_CASE(mutable_iterable__default_construct__always__empty)
 {
     mutable_iterable<data_array<42>> iterable{};
-    BOOST_REQUIRE(iterable.empty());
-    BOOST_REQUIRE_EQUAL(iterable.size(), 0u);
-    BOOST_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
+    BC_REQUIRE(iterable.empty());
+    BC_REQUIRE_EQUAL(iterable.size(), 0u);
+    BC_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__distance__always__expected)
+BC_AUTO_TEST_CASE(iterable__distance__always__expected)
 {
     const auto& data = null_hash;
     constexpr auto count = hash_size / 3;
     const auto iterable = system::iterable<data_array<3>>(data);
-    BOOST_REQUIRE_EQUAL(iterable.size(), count);
-    BOOST_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
+    BC_REQUIRE_EQUAL(iterable.size(), count);
+    BC_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
 }
 
-BOOST_AUTO_TEST_CASE(mutable_iterable__distance__always__expected)
+BC_AUTO_TEST_CASE(mutable_iterable__distance__always__expected)
 {
     auto data = null_hash;
     constexpr auto count = hash_size / 3;
     auto iterable = mutable_iterable<data_array<3>>(data);
-    BOOST_REQUIRE_EQUAL(iterable.size(), count);
-    BOOST_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
+    BC_REQUIRE_EQUAL(iterable.size(), count);
+    BC_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__size__always__expected)
+BC_AUTO_TEST_CASE(iterable__size__always__expected)
 {
     constexpr auto& data = null_hash;
-    BOOST_REQUIRE_EQUAL(iterable<data_array<0>>(data).size(),  0u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<1>>(data).size(), 32u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<2>>(data).size(), 16u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<3>>(data).size(), 10u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<4>>(data).size(),  8u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<5>>(data).size(),  6u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<6>>(data).size(),  5u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<7>>(data).size(),  4u); // r4
-    BOOST_REQUIRE_EQUAL(iterable<data_array<8>>(data).size(),  4u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<9>>(data).size(),  3u); // r5
-    BOOST_REQUIRE_EQUAL(iterable<data_array<10>>(data).size(), 3u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<11>>(data).size(), 2u); // r10
-    BOOST_REQUIRE_EQUAL(iterable<data_array<12>>(data).size(), 2u); // r8
-    BOOST_REQUIRE_EQUAL(iterable<data_array<13>>(data).size(), 2u); // r6
-    BOOST_REQUIRE_EQUAL(iterable<data_array<14>>(data).size(), 2u); // r4
-    BOOST_REQUIRE_EQUAL(iterable<data_array<15>>(data).size(), 2u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<16>>(data).size(), 2u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<17>>(data).size(), 1u); //r15
-    BOOST_REQUIRE_EQUAL(iterable<data_array<31>>(data).size(), 1u); //r1
-    BOOST_REQUIRE_EQUAL(iterable<data_array<32>>(data).size(), 1u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<33>>(data).size(), 0u);
+    BC_REQUIRE_EQUAL(iterable<data_array<0>>(data).size(),  0u);
+    BC_REQUIRE_EQUAL(iterable<data_array<1>>(data).size(), 32u);
+    BC_REQUIRE_EQUAL(iterable<data_array<2>>(data).size(), 16u);
+    BC_REQUIRE_EQUAL(iterable<data_array<3>>(data).size(), 10u); // r2
+    BC_REQUIRE_EQUAL(iterable<data_array<4>>(data).size(),  8u);
+    BC_REQUIRE_EQUAL(iterable<data_array<5>>(data).size(),  6u); // r2
+    BC_REQUIRE_EQUAL(iterable<data_array<6>>(data).size(),  5u); // r2
+    BC_REQUIRE_EQUAL(iterable<data_array<7>>(data).size(),  4u); // r4
+    BC_REQUIRE_EQUAL(iterable<data_array<8>>(data).size(),  4u);
+    BC_REQUIRE_EQUAL(iterable<data_array<9>>(data).size(),  3u); // r5
+    BC_REQUIRE_EQUAL(iterable<data_array<10>>(data).size(), 3u); // r2
+    BC_REQUIRE_EQUAL(iterable<data_array<11>>(data).size(), 2u); // r10
+    BC_REQUIRE_EQUAL(iterable<data_array<12>>(data).size(), 2u); // r8
+    BC_REQUIRE_EQUAL(iterable<data_array<13>>(data).size(), 2u); // r6
+    BC_REQUIRE_EQUAL(iterable<data_array<14>>(data).size(), 2u); // r4
+    BC_REQUIRE_EQUAL(iterable<data_array<15>>(data).size(), 2u); // r2
+    BC_REQUIRE_EQUAL(iterable<data_array<16>>(data).size(), 2u);
+    BC_REQUIRE_EQUAL(iterable<data_array<17>>(data).size(), 1u); //r15
+    BC_REQUIRE_EQUAL(iterable<data_array<31>>(data).size(), 1u); //r1
+    BC_REQUIRE_EQUAL(iterable<data_array<32>>(data).size(), 1u);
+    BC_REQUIRE_EQUAL(iterable<data_array<33>>(data).size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(mutable_iterable__size__always__expected)
+BC_AUTO_TEST_CASE(mutable_iterable__size__always__expected)
 {
     auto data = null_hash;
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<0>>(data).size(),  0u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<1>>(data).size(), 32u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<2>>(data).size(), 16u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<3>>(data).size(), 10u); // r2
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<4>>(data).size(),  8u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<5>>(data).size(),  6u); // r2
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<6>>(data).size(),  5u); // r2
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<7>>(data).size(),  4u); // r4
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<8>>(data).size(),  4u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<9>>(data).size(),  3u); // r5
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<10>>(data).size(), 3u); // r2
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<11>>(data).size(), 2u); // r10
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<12>>(data).size(), 2u); // r8
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<13>>(data).size(), 2u); // r6
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<14>>(data).size(), 2u); // r4
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<15>>(data).size(), 2u); // r2
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<16>>(data).size(), 2u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<17>>(data).size(), 1u); //r15
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<31>>(data).size(), 1u); //r1
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<32>>(data).size(), 1u);
-    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<33>>(data).size(), 0u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<0>>(data).size(),  0u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<1>>(data).size(), 32u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<2>>(data).size(), 16u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<3>>(data).size(), 10u); // r2
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<4>>(data).size(),  8u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<5>>(data).size(),  6u); // r2
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<6>>(data).size(),  5u); // r2
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<7>>(data).size(),  4u); // r4
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<8>>(data).size(),  4u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<9>>(data).size(),  3u); // r5
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<10>>(data).size(), 3u); // r2
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<11>>(data).size(), 2u); // r10
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<12>>(data).size(), 2u); // r8
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<13>>(data).size(), 2u); // r6
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<14>>(data).size(), 2u); // r4
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<15>>(data).size(), 2u); // r2
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<16>>(data).size(), 2u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<17>>(data).size(), 1u); //r15
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<31>>(data).size(), 1u); //r1
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<32>>(data).size(), 1u);
+    BC_REQUIRE_EQUAL(mutable_iterable<data_array<33>>(data).size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__data_arrays__parsing__expected)
+BC_AUTO_TEST_CASE(iterable__data_arrays__parsing__expected)
 {
     const data_chunk data{};
     using type = data_array<8>;
@@ -118,19 +118,18 @@ BOOST_AUTO_TEST_CASE(iterable__data_arrays__parsing__expected)
     const auto end = iterable.end();
     auto it = iterable.begin();
 
-    // Boost macros can't handle the inline indirections.
     type element{ *it++ };
-    BOOST_REQUIRE_EQUAL(element, base16_array("1111111122222222"));
+    BC_REQUIRE_EQUAL(element, base16_array("1111111122222222"));
     element = *it++;
-    BOOST_REQUIRE_EQUAL(element, base16_array("3333333344444444"));
+    BC_REQUIRE_EQUAL(element, base16_array("3333333344444444"));
     element = *it++;
-    BOOST_REQUIRE_EQUAL(element, base16_array("5555555566666666"));
+    BC_REQUIRE_EQUAL(element, base16_array("5555555566666666"));
     element = *it++;
-    BOOST_REQUIRE_EQUAL(element, base16_array("7777777788888888"));
-    BOOST_REQUIRE(it == end);
+    BC_REQUIRE_EQUAL(element, base16_array("7777777788888888"));
+    BC_REQUIRE(it == end);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
+BC_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
 {
     const data_chunk data{};
     using type = std_array<std_array<uint8_t, 8>, 2>;
@@ -155,11 +154,11 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
     auto it = iterable<type>(hash).begin();
-    BOOST_REQUIRE_EQUAL(*it, expected0);
-    BOOST_REQUIRE_EQUAL(*(++it), expected1);
+    BC_REQUIRE_EQUAL(*it, expected0);
+    BC_REQUIRE_EQUAL(*(++it), expected1);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
+BC_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
 {
     const data_chunk data{};
     using type = std_array<std_array<uint8_t, 8>, 2>;
@@ -174,10 +173,10 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
     const auto it = iterable<type>(hash).template advance<1>().begin();
-    BOOST_REQUIRE_EQUAL(*it, expected);
+    BC_REQUIRE_EQUAL(*it, expected);
 }
 
-BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
+BC_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
 {
     data_chunk data{};
     using type = std_array<std_array<uint8_t, 2>, 4>;
@@ -192,10 +191,10 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
     for (auto& chunk: iterator)
         chunk.front().at(1) = 0xaa;
 
-    BOOST_REQUIRE_EQUAL(hash, expected);
+    BC_REQUIRE_EQUAL(hash, expected);
 }
 
-BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
+BC_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
 {
     data_chunk data{};
     using type = std_array<std_array<uint8_t, 2>, 4>;
@@ -207,10 +206,10 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
         chunk.front().at(0) = 0xaa;
 
     constexpr auto expected = base16_array("1111111122222222aa33333344444444aa55555566666666aa77777788888888");
-    BOOST_REQUIRE_EQUAL(hash, expected);
+    BC_REQUIRE_EQUAL(hash, expected);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
+BC_AUTO_TEST_CASE(iterable__array_cast__always__expected)
 {
     constexpr sha256::block_t expected1{ 1 };
     constexpr sha256::block_t expected2{ 2 };
@@ -252,8 +251,8 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     const auto bytes = data.front().data();
     const iterable_t iterable(size, bytes);
 
-    BOOST_REQUIRE_EQUAL(iterable.size(), 15u);
-    BOOST_REQUIRE_EQUAL(iterable.data(), data.front().data());
+    BC_REQUIRE_EQUAL(iterable.size(), 15u);
+    BC_REQUIRE_EQUAL(iterable.data(), data.front().data());
 
     ////const auto& blocks8 = array_cast<8>(iterable);    // zero offset overload.
     ////const auto& blocks4 = array_cast<4>(iterable, 8);
@@ -268,27 +267,27 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     ////static_assert(is_same_type<decltype(blocks0), const std_array<sha256::block_t, 0>&>);
 
     ////// 8 lanes
-    ////BOOST_REQUIRE_EQUAL(blocks8[0], expected1);
-    ////BOOST_REQUIRE_EQUAL(blocks8[1], expected2);
-    ////BOOST_REQUIRE_EQUAL(blocks8[2], expected3);
-    ////BOOST_REQUIRE_EQUAL(blocks8[3], expected4);
-    ////BOOST_REQUIRE_EQUAL(blocks8[4], expected5);
-    ////BOOST_REQUIRE_EQUAL(blocks8[5], expected6);
-    ////BOOST_REQUIRE_EQUAL(blocks8[6], expected7);
-    ////BOOST_REQUIRE_EQUAL(blocks8[7], expected8);
+    ////BC_REQUIRE_EQUAL(blocks8[0], expected1);
+    ////BC_REQUIRE_EQUAL(blocks8[1], expected2);
+    ////BC_REQUIRE_EQUAL(blocks8[2], expected3);
+    ////BC_REQUIRE_EQUAL(blocks8[3], expected4);
+    ////BC_REQUIRE_EQUAL(blocks8[4], expected5);
+    ////BC_REQUIRE_EQUAL(blocks8[5], expected6);
+    ////BC_REQUIRE_EQUAL(blocks8[6], expected7);
+    ////BC_REQUIRE_EQUAL(blocks8[7], expected8);
 
     ////// 4 lanes
-    ////BOOST_REQUIRE_EQUAL(blocks4[0], expected9);
-    ////BOOST_REQUIRE_EQUAL(blocks4[1], expected10);
-    ////BOOST_REQUIRE_EQUAL(blocks4[2], expected11);
-    ////BOOST_REQUIRE_EQUAL(blocks4[3], expected12);
+    ////BC_REQUIRE_EQUAL(blocks4[0], expected9);
+    ////BC_REQUIRE_EQUAL(blocks4[1], expected10);
+    ////BC_REQUIRE_EQUAL(blocks4[2], expected11);
+    ////BC_REQUIRE_EQUAL(blocks4[3], expected12);
 
     ////// 2 lanes
-    ////BOOST_REQUIRE_EQUAL(blocks2[0], expected13);
-    ////BOOST_REQUIRE_EQUAL(blocks2[1], expected14);
+    ////BC_REQUIRE_EQUAL(blocks2[0], expected13);
+    ////BC_REQUIRE_EQUAL(blocks2[1], expected14);
 
     ////// 1 lane
-    ////BOOST_REQUIRE_EQUAL(blocks1[0], expected15);
+    ////BC_REQUIRE_EQUAL(blocks1[0], expected15);
 
     const auto& blocks8_ = iterable.template to_array<8>(); // no offsetting (use advance)
     const auto& blocks4_ = iterable.template to_array<4>();
@@ -303,8 +302,8 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     static_assert(is_same_type<decltype(blocks0_), const std_array<sha256::block_t, 0>&>);
 
     // 8 lanes
-    BOOST_REQUIRE_EQUAL(blocks8_[0], expected1);
-    BOOST_REQUIRE_EQUAL(blocks8_[1], expected2);
+    BC_REQUIRE_EQUAL(blocks8_[0], expected1);
+    BC_REQUIRE_EQUAL(blocks8_[1], expected2);
 
     // These warn from std::array in g++12 but tests pass.
     // > warning: array subscript 2 is above array bounds of
@@ -313,28 +312,28 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     // Clearly the second dimension is within the bounds of [8], so this is bogus.
 
 #if !defined(HAVE_GNUC)
-    BOOST_REQUIRE_EQUAL(blocks8_[2], expected3);
-    BOOST_REQUIRE_EQUAL(blocks8_[3], expected4);
-    BOOST_REQUIRE_EQUAL(blocks8_[4], expected5);
-    BOOST_REQUIRE_EQUAL(blocks8_[5], expected6);
-    BOOST_REQUIRE_EQUAL(blocks8_[6], expected7);
-    BOOST_REQUIRE_EQUAL(blocks8_[7], expected8);
+    BC_REQUIRE_EQUAL(blocks8_[2], expected3);
+    BC_REQUIRE_EQUAL(blocks8_[3], expected4);
+    BC_REQUIRE_EQUAL(blocks8_[4], expected5);
+    BC_REQUIRE_EQUAL(blocks8_[5], expected6);
+    BC_REQUIRE_EQUAL(blocks8_[6], expected7);
+    BC_REQUIRE_EQUAL(blocks8_[7], expected8);
 #endif
 
     // 4 lanes
-    BOOST_REQUIRE_EQUAL(blocks4_[0], expected1);
-    BOOST_REQUIRE_EQUAL(blocks4_[1], expected2);
+    BC_REQUIRE_EQUAL(blocks4_[0], expected1);
+    BC_REQUIRE_EQUAL(blocks4_[1], expected2);
 #if !defined(HAVE_GNUC)
-    BOOST_REQUIRE_EQUAL(blocks4_[2], expected3);
-    BOOST_REQUIRE_EQUAL(blocks4_[3], expected4);
+    BC_REQUIRE_EQUAL(blocks4_[2], expected3);
+    BC_REQUIRE_EQUAL(blocks4_[3], expected4);
 #endif
 
     // 2 lanes
-    BOOST_REQUIRE_EQUAL(blocks2_[0], expected1);
-    BOOST_REQUIRE_EQUAL(blocks2_[1], expected2);
+    BC_REQUIRE_EQUAL(blocks2_[0], expected1);
+    BC_REQUIRE_EQUAL(blocks2_[1], expected2);
 
     // 1 lane
-    BOOST_REQUIRE_EQUAL(blocks1_[0], expected1);
+    BC_REQUIRE_EQUAL(blocks1_[0], expected1);
 }
 
 // Some extra stuff
@@ -401,4 +400,4 @@ public:
     }
 };
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

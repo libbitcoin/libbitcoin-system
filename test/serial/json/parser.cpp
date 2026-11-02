@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(json_parser_tests)
+BC_AUTO_TEST_SUITE(json_parser_tests)
 
 using namespace system::json;
 
@@ -46,31 +46,31 @@ static const std::vector<accepted> valid
     // numbers
     { "[0]", "[0]" },
     { "[-0]", "[0]" },
-    { "[-0.0]", "[-0E0]" },
+    { "[-0.0]", "[-0.0]" },
     { "[1]", "[1]" },
     { "[-1]", "[-1]" },
     { "[123]", "[123]" },
     { "[9223372036854775807]", "[9223372036854775807]" },
     { "[9223372036854775808]", "[9223372036854775808]" },
     { "[18446744073709551615]", "[18446744073709551615]" },
-    { "[18446744073709551616]", "[1.8446744073709552E19]" },
+    { "[18446744073709551616]", "[18446744073709551616.0]" },
     { "[-9223372036854775808]", "[-9223372036854775808]" },
-    { "[-9223372036854775809]", "[-9.223372036854776E18]" },
-    { "[1.5]", "[1.5E0]" },
-    { "[1e2]", "[1E2]" },
-    { "[1E+2]", "[1E2]" },
-    { "[1e-2]", "[1E-2]" },
-    { "[0e1]", "[0E0]" },
-    { "[0.1]", "[1E-1]" },
-    { "[123.456e78]", "[1.23456E80]" },
-    { "[1.7976931348623157e308]", "[1.7976931348623157E308]" },
-    { "[4.9e-324]", "[5E-324]" },
-    { "[0.30000000000000004]", "[3.0000000000000004E-1]" },
-    { "[1e-400]", "[0E0]" },
-    { "[-1e-400]", "[-0E0]" },
-    { "[0.0000001e-330]", "[0E0]" },
-    { "[-0.000000000000000000000000000001]", "[-1E-30]" },
-    { "[1.0,2.0]", "[1E0,2E0]" },
+    { "[-9223372036854775809]", "[-9223372036854775808.0]" },
+    { "[1.5]", "[1.5]" },
+    { "[1e2]", "[100.0]" },
+    { "[1E+2]", "[100.0]" },
+    { "[1e-2]", "[0.01]" },
+    { "[0e1]", "[0.0]" },
+    { "[0.1]", "[0.1]" },
+    { "[123.456e78]", "[123456000000000003773544074641513176432063851726237026847343602712484748520849408.0]" },
+    { "[1.7976931348623157e308]", "[179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.0]" },
+    { "[4.9e-324]", "[0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005]" },
+    { "[0.30000000000000004]", "[0.30000000000000004]" },
+    { "[1e-400]", "[0.0]" },
+    { "[-1e-400]", "[-0.0]" },
+    { "[0.0000001e-330]", "[0.0]" },
+    { "[-0.000000000000000000000000000001]", "[-0.000000000000000000000000000001]" },
+    { "[1.0,2.0]", "[1.0,2.0]" },
 
     // strings
     { R"("")", R"("")" },
@@ -274,289 +274,289 @@ static bool split_errors_match(const std::string& text,
 
 // parse
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__valid__expected)
+BC_AUTO_TEST_CASE(json_parser__parse__valid__expected)
 {
     for (const auto& test: valid)
     {
         code ec{};
         const auto out = parse(test.text, ec);
-        BOOST_REQUIRE_MESSAGE(!ec, test.text + " : " + ec.message());
-        BOOST_REQUIRE_EQUAL(serialize(out), test.expected);
+        BC_REQUIRE_MESSAGE(!ec, test.text + " : " + ec.message());
+        BC_REQUIRE_EQUAL(serialize(out), test.expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__invalid__expected_error)
+BC_AUTO_TEST_CASE(json_parser__parse__invalid__expected_error)
 {
     for (const auto& test: invalid)
     {
         code ec{};
         const auto out = parse(test.text, ec);
-        BOOST_REQUIRE_MESSAGE(ec == test.expected, test.text + " : " + ec.message());
-        BOOST_REQUIRE(out.is_null());
+        BC_REQUIRE_MESSAGE(ec == test.expected, test.text + " : " + ec.message());
+        BC_REQUIRE(out.is_null());
     }
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__valid_every_split__expected)
+BC_AUTO_TEST_CASE(json_parser__parse__valid_every_split__expected)
 {
     for (const auto& test: valid)
-        BOOST_REQUIRE_MESSAGE(splits_match(test.text), test.text);
+        BC_REQUIRE_MESSAGE(splits_match(test.text), test.text);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__valid_bytewise__expected)
+BC_AUTO_TEST_CASE(json_parser__parse__valid_bytewise__expected)
 {
     for (const auto& test: valid)
-        BOOST_REQUIRE_MESSAGE(bytewise_match(test.text), test.text);
+        BC_REQUIRE_MESSAGE(bytewise_match(test.text), test.text);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__invalid_every_split__expected_error)
+BC_AUTO_TEST_CASE(json_parser__parse__invalid_every_split__expected_error)
 {
     for (const auto& test: invalid)
-        BOOST_REQUIRE_MESSAGE(split_errors_match(test.text, test.expected), test.text);
+        BC_REQUIRE_MESSAGE(split_errors_match(test.text, test.expected), test.text);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__throwing_invalid__throws)
+BC_AUTO_TEST_CASE(json_parser__parse__throwing_invalid__throws)
 {
-    BOOST_REQUIRE_THROW(parse("[1,]"), std::system_error);
-    BOOST_REQUIRE_EQUAL(parse("[1]").as_array().size(), 1u);
+    BC_REQUIRE_THROW(parse("[1,]"), std::system_error);
+    BC_REQUIRE_EQUAL(parse("[1]").as_array().size(), 1u);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__kinds__expected)
+BC_AUTO_TEST_CASE(json_parser__parse__kinds__expected)
 {
     const auto out = parse(R"([-1,1,18446744073709551615,1.0,"a",true,null,{},[]])");
     const auto& values = out.as_array();
-    BOOST_REQUIRE(values.at(0).is_int64());
-    BOOST_REQUIRE(values.at(1).is_int64());
-    BOOST_REQUIRE(values.at(2).is_uint64());
-    BOOST_REQUIRE(values.at(3).is_double());
-    BOOST_REQUIRE(values.at(4).is_string());
-    BOOST_REQUIRE(values.at(5).is_bool());
-    BOOST_REQUIRE(values.at(6).is_null());
-    BOOST_REQUIRE(values.at(7).is_object());
-    BOOST_REQUIRE(values.at(8).is_array());
+    BC_REQUIRE(values.at(0).is_int64());
+    BC_REQUIRE(values.at(1).is_int64());
+    BC_REQUIRE(values.at(2).is_uint64());
+    BC_REQUIRE(values.at(3).is_double());
+    BC_REQUIRE(values.at(4).is_string());
+    BC_REQUIRE(values.at(5).is_bool());
+    BC_REQUIRE(values.at(6).is_null());
+    BC_REQUIRE(values.at(7).is_object());
+    BC_REQUIRE(values.at(8).is_array());
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__duplicate_key__last_value_first_position)
+BC_AUTO_TEST_CASE(json_parser__parse__duplicate_key__last_value_first_position)
 {
     const auto out = parse(R"({"a":1,"b":2,"a":3})");
-    BOOST_REQUIRE_EQUAL(out.as_object().cbegin()->key(), "a");
-    BOOST_REQUIRE_EQUAL(out.at("a").as_int64(), 3);
+    BC_REQUIRE_EQUAL(out.as_object().cbegin()->key(), "a");
+    BC_REQUIRE_EQUAL(out.at("a").as_int64(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__embedded_null__retained)
+BC_AUTO_TEST_CASE(json_parser__parse__embedded_null__retained)
 {
     const std::string text{ "[\"a\\u0000b\"]" };
     const auto out = parse(text);
-    BOOST_REQUIRE_EQUAL(out.at(0).as_string().size(), 3u);
-    BOOST_REQUIRE_EQUAL(out.at(0).as_string(), std::string("a\0b", 3));
+    BC_REQUIRE_EQUAL(out.at(0).as_string().size(), 3u);
+    BC_REQUIRE_EQUAL(out.at(0).as_string(), std::string("a\0b", 3));
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__raw_null_byte__syntax)
+BC_AUTO_TEST_CASE(json_parser__parse__raw_null_byte__syntax)
 {
     const std::string text{ "[\"a\0b\"]", 7 };
     code ec{};
     parse(text, ec);
-    BOOST_REQUIRE(ec == error::json_syntax);
+    BC_REQUIRE(ec == error::json_syntax);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__parse__trailing_null_byte__extra_data)
+BC_AUTO_TEST_CASE(json_parser__parse__trailing_null_byte__extra_data)
 {
     const std::string text{ "[1]\0", 4 };
     code ec{};
     parse(text, ec);
-    BOOST_REQUIRE(ec == error::json_extra_data);
+    BC_REQUIRE(ec == error::json_extra_data);
 }
 
 // write_some
 
-BOOST_AUTO_TEST_CASE(json_parser__write_some__document_then_more__stops_after_whitespace)
+BC_AUTO_TEST_CASE(json_parser__write_some__document_then_more__stops_after_whitespace)
 {
     const std::string text{ "{\"a\":1} \r\n{\"b\":2}" };
     code ec{};
     parser reader{};
-    BOOST_REQUIRE_EQUAL(reader.write_some(text.data(), text.size(), ec), 10u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
-    BOOST_REQUIRE_EQUAL(serialize(reader.release()), R"({"a":1})");
-    BOOST_REQUIRE(!reader.done());
+    BC_REQUIRE_EQUAL(reader.write_some(text.data(), text.size(), ec), 10u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(serialize(reader.release()), R"({"a":1})");
+    BC_REQUIRE(!reader.done());
 
     const auto rest = std::next(text.data(), 10);
-    BOOST_REQUIRE_EQUAL(reader.write_some(rest, text.size() - 10u, ec), 7u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
-    BOOST_REQUIRE_EQUAL(serialize(reader.release()), R"({"b":2})");
+    BC_REQUIRE_EQUAL(reader.write_some(rest, text.size() - 10u, ec), 7u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(serialize(reader.release()), R"({"b":2})");
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__write_some__done_then_whitespace__consumed)
+BC_AUTO_TEST_CASE(json_parser__write_some__done_then_whitespace__consumed)
 {
     code ec{};
     parser reader{};
-    BOOST_REQUIRE_EQUAL(reader.write_some("[]", 2, ec), 2u);
-    BOOST_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(reader.write_some("[]", 2, ec), 2u);
+    BC_REQUIRE(reader.done());
 
-    BOOST_REQUIRE_EQUAL(reader.write_some(" \n", 2, ec), 2u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(reader.write_some(" \n", 2, ec), 2u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__write_some__done_then_character__not_consumed)
+BC_AUTO_TEST_CASE(json_parser__write_some__done_then_character__not_consumed)
 {
     code ec{};
     parser reader{};
-    BOOST_REQUIRE_EQUAL(reader.write_some("[] x", 4, ec), 3u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(reader.write_some("[] x", 4, ec), 3u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__write_some__top_level_number__not_done_until_delimiter)
+BC_AUTO_TEST_CASE(json_parser__write_some__top_level_number__not_done_until_delimiter)
 {
     code ec{};
     parser reader{};
-    BOOST_REQUIRE_EQUAL(reader.write_some("123", 3, ec), 3u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(!reader.done());
+    BC_REQUIRE_EQUAL(reader.write_some("123", 3, ec), 3u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(!reader.done());
 
-    BOOST_REQUIRE_EQUAL(reader.write_some("4\n", 2, ec), 2u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
-    BOOST_REQUIRE_EQUAL(reader.release().as_int64(), 1234);
+    BC_REQUIRE_EQUAL(reader.write_some("4\n", 2, ec), 2u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(reader.release().as_int64(), 1234);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__finish__top_level_number__done)
+BC_AUTO_TEST_CASE(json_parser__finish__top_level_number__done)
 {
     code ec{};
     parser reader{};
     reader.write_some("-1.5", 4, ec);
-    BOOST_REQUIRE(!reader.done());
+    BC_REQUIRE(!reader.done());
 
     reader.finish(ec);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
-    BOOST_REQUIRE_EQUAL(reader.release().as_double(), -1.5);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
+    BC_REQUIRE_EQUAL(reader.release().as_double(), -1.5);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__finish__incomplete__json_incomplete)
+BC_AUTO_TEST_CASE(json_parser__finish__incomplete__json_incomplete)
 {
     code ec{};
     parser reader{};
     reader.write_some(R"({"a":)", 5, ec);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     reader.finish(ec);
-    BOOST_REQUIRE(ec == error::json_incomplete);
+    BC_REQUIRE(ec == error::json_incomplete);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__write_some__error__position_and_sticky)
+BC_AUTO_TEST_CASE(json_parser__write_some__error__position_and_sticky)
 {
     code ec{};
     parser reader{};
-    BOOST_REQUIRE_EQUAL(reader.write_some("[1,]", 4, ec), 3u);
-    BOOST_REQUIRE(ec == error::json_syntax);
+    BC_REQUIRE_EQUAL(reader.write_some("[1,]", 4, ec), 3u);
+    BC_REQUIRE(ec == error::json_syntax);
 
-    BOOST_REQUIRE_EQUAL(reader.write_some("1", 1, ec), 0u);
-    BOOST_REQUIRE(ec == error::json_syntax);
-    BOOST_REQUIRE(!reader.done());
-    BOOST_REQUIRE(reader.release().is_null());
+    BC_REQUIRE_EQUAL(reader.write_some("1", 1, ec), 0u);
+    BC_REQUIRE(ec == error::json_syntax);
+    BC_REQUIRE(!reader.done());
+    BC_REQUIRE(reader.release().is_null());
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__reset__after_error__parses)
+BC_AUTO_TEST_CASE(json_parser__reset__after_error__parses)
 {
     code ec{};
     parser reader{};
     reader.write_some("[1,]", 4, ec);
-    BOOST_REQUIRE(ec);
+    BC_REQUIRE(ec);
 
     reader.reset();
     reader.write_some("[1]", 3, ec);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(reader.done());
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(reader.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__write_some__empty__nothing)
+BC_AUTO_TEST_CASE(json_parser__write_some__empty__nothing)
 {
     code ec{};
     parser reader{};
-    BOOST_REQUIRE_EQUAL(reader.write_some("", 0, ec), 0u);
-    BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(!reader.done());
+    BC_REQUIRE_EQUAL(reader.write_some("", 0, ec), 0u);
+    BC_REQUIRE(!ec);
+    BC_REQUIRE(!reader.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__release__not_done__null)
+BC_AUTO_TEST_CASE(json_parser__release__not_done__null)
 {
     code ec{};
     parser reader{};
     reader.write_some("[1", 2, ec);
-    BOOST_REQUIRE(reader.release().is_null());
+    BC_REQUIRE(reader.release().is_null());
 }
 
 // limits
 
-BOOST_AUTO_TEST_CASE(json_parser__limits__max_depth__expected)
+BC_AUTO_TEST_CASE(json_parser__limits__max_depth__expected)
 {
     const parse_options options{ .max_depth = 2 };
     code ec{};
     parse("[[1]]", ec, options);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     parse("[[[1]]]", ec, options);
-    BOOST_REQUIRE(ec == error::json_too_deep);
+    BC_REQUIRE(ec == error::json_too_deep);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__limits__max_string__expected)
+BC_AUTO_TEST_CASE(json_parser__limits__max_string__expected)
 {
     const parse_options options{ .max_string = 3 };
     code ec{};
     parse(R"(["abc"])", ec, options);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     parse(R"(["abcd"])", ec, options);
-    BOOST_REQUIRE(ec == error::json_string_too_large);
+    BC_REQUIRE(ec == error::json_string_too_large);
 
     parse(R"(["ab\u00e9"])", ec, options);
-    BOOST_REQUIRE(ec == error::json_string_too_large);
+    BC_REQUIRE(ec == error::json_string_too_large);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__limits__max_key__expected)
+BC_AUTO_TEST_CASE(json_parser__limits__max_key__expected)
 {
     const parse_options options{ .max_key = 1 };
     code ec{};
     parse(R"({"a":"long value"})", ec, options);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     parse(R"({"ab":1})", ec, options);
-    BOOST_REQUIRE(ec == error::json_key_too_large);
+    BC_REQUIRE(ec == error::json_key_too_large);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__limits__max_array__expected)
+BC_AUTO_TEST_CASE(json_parser__limits__max_array__expected)
 {
     const parse_options options{ .max_array = 2 };
     code ec{};
     parse("[1,2]", ec, options);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     parse("[1,2,3]", ec, options);
-    BOOST_REQUIRE(ec == error::json_array_too_large);
+    BC_REQUIRE(ec == error::json_array_too_large);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__limits__max_object__expected)
+BC_AUTO_TEST_CASE(json_parser__limits__max_object__expected)
 {
     const parse_options options{ .max_object = 1 };
     code ec{};
     parse(R"({"a":1})", ec, options);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     parse(R"({"a":1,"b":2})", ec, options);
-    BOOST_REQUIRE(ec == error::json_object_too_large);
+    BC_REQUIRE(ec == error::json_object_too_large);
 }
 
-BOOST_AUTO_TEST_CASE(json_parser__limits__max_number__expected)
+BC_AUTO_TEST_CASE(json_parser__limits__max_number__expected)
 {
     const parse_options options{ .max_number = 3 };
     code ec{};
     parse("[123]", ec, options);
-    BOOST_REQUIRE(!ec);
+    BC_REQUIRE(!ec);
 
     parse("[1234]", ec, options);
-    BOOST_REQUIRE(ec == error::json_number_too_large);
+    BC_REQUIRE(ec == error::json_number_too_large);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

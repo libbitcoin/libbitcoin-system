@@ -97,24 +97,6 @@ std::ostream& operator<<(std::ostream& output, const path& argument) NOEXCEPT
     return output;
 }
 
-void validate(boost::any& value, const string_list& tokens, path*,
-    int) THROWS
-{
-    namespace po = boost::program_options;
-    po::validators::check_first_occurrence(value);
-
-    if (tokens.size() > one)
-        throw validation_exception
-        {
-            validation_exception::multiple_values_not_allowed
-        };
-
-    value = boost::any
-    {
-        path{ tokens.empty() ? std::string{} : tokens.front() }
-    };
-}
-
 } // namespace config
 } // namespace system
 } // namespace libbitcoin

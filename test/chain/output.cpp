@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(output_tests)
+BC_AUTO_TEST_SUITE(output_tests)
 
 namespace json = system::json;
 using namespace system::chain;
@@ -32,128 +32,128 @@ static const output expected_output(output_data);
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(output__constructor__default__invalid)
+BC_AUTO_TEST_CASE(output__constructor__default__invalid)
 {
     output instance;
-    BOOST_REQUIRE(!instance.is_valid());
+    BC_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__move__expected)
+BC_AUTO_TEST_CASE(output__constructor__move__expected)
 {
     auto copy = output_data;
     output instance(std::move(copy));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.value() == expected_output.value());
-    BOOST_REQUIRE(instance.script() == expected_output.script());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.value() == expected_output.value());
+    BC_REQUIRE(instance.script() == expected_output.script());
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__copy__expected)
+BC_AUTO_TEST_CASE(output__constructor__copy__expected)
 {
     const output instance(expected_output);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.value() == expected_output.value());
-    BOOST_REQUIRE(instance.script() == expected_output.script());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.value() == expected_output.value());
+    BC_REQUIRE(instance.script() == expected_output.script());
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__move_parameters__expected)
+BC_AUTO_TEST_CASE(output__constructor__move_parameters__expected)
 {
     auto script_copy = expected_output.script();
     output instance(expected_output.value(), std::move(script_copy));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.value() == expected_output.value());
-    BOOST_REQUIRE(instance.script() == expected_output.script());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.value() == expected_output.value());
+    BC_REQUIRE(instance.script() == expected_output.script());
 }
 
-BOOST_AUTO_TEST_CASE(output__constructor__copy_parameters__expected)
+BC_AUTO_TEST_CASE(output__constructor__copy_parameters__expected)
 {
     output instance(expected_output.value(), expected_output.script());
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.value() == expected_output.value());
-    BOOST_REQUIRE(instance.script() == expected_output.script());
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.value() == expected_output.value());
+    BC_REQUIRE(instance.script() == expected_output.script());
 }
 
 // operators
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(output__assign__copy__expected)
+BC_AUTO_TEST_CASE(output__assign__copy__expected)
 {
     const auto& alpha = expected_output;
     auto gamma = alpha;
     const auto beta = std::move(gamma);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(output__assign__move__expected)
+BC_AUTO_TEST_CASE(output__assign__move__expected)
 {
     const auto& alpha = expected_output;
     const auto beta = alpha;
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(output__equality__same__true)
+BC_AUTO_TEST_CASE(output__equality__same__true)
 {
     const auto& alpha = expected_output;
     const output beta(alpha);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(output__equality__different__false)
+BC_AUTO_TEST_CASE(output__equality__different__false)
 {
     const auto& alpha = expected_output;
     const output beta;
-    BOOST_REQUIRE(!(alpha == beta));
+    BC_REQUIRE(!(alpha == beta));
 }
 
-BOOST_AUTO_TEST_CASE(output__inequality__same__false)
+BC_AUTO_TEST_CASE(output__inequality__same__false)
 {
     const auto& alpha = expected_output;
     const output beta(alpha);
-    BOOST_REQUIRE(!(alpha != beta));
+    BC_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(output__inequality__different__true)
+BC_AUTO_TEST_CASE(output__inequality__different__true)
 {
     const auto& alpha = expected_output;
     const output beta;
-    BOOST_REQUIRE(alpha != beta);
+    BC_REQUIRE(alpha != beta);
 }
 
 // to_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(output__to_data__data__expected)
+BC_AUTO_TEST_CASE(output__to_data__data__expected)
 {
     const auto size = expected_output.to_data().size();
-    BOOST_REQUIRE_EQUAL(size, expected_output.serialized_size());
+    BC_REQUIRE_EQUAL(size, expected_output.serialized_size());
 }
 
-BOOST_AUTO_TEST_CASE(output__to_data__stream__expected)
+BC_AUTO_TEST_CASE(output__to_data__stream__expected)
 {
     // Write output to stream.
     std::stringstream iostream;
     expected_output.to_data(iostream);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const output copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_output);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_output);
 }
 
-BOOST_AUTO_TEST_CASE(output__to_data__writer__expected)
+BC_AUTO_TEST_CASE(output__to_data__writer__expected)
 {
     // Write output to stream.
     std::stringstream iostream;
     write::bytes::ostream out(iostream);
     expected_output.to_data(out);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const output copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_output);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_output);
 }
 
 // properties
@@ -166,101 +166,101 @@ BOOST_AUTO_TEST_CASE(output__to_data__writer__expected)
 
 // committed_hash
 
-BOOST_AUTO_TEST_CASE(output__committed_hash__commitment_pattern__expected)
+BC_AUTO_TEST_CASE(output__committed_hash__commitment_pattern__expected)
 {
     const script commitment(base16_chunk("6a24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
     const output instance{ 0, commitment };
 
     hash_cref out{ null_hash };
-    BOOST_REQUIRE(instance.committed_hash(out));
-    BOOST_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
+    BC_REQUIRE(instance.committed_hash(out));
+    BC_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
 }
 
 // Trailing bytes after the commitment have no consensus meaning [bip141].
-BOOST_AUTO_TEST_CASE(output__committed_hash__trailing_operations__expected)
+BC_AUTO_TEST_CASE(output__committed_hash__trailing_operations__expected)
 {
     const script commitment(base16_chunk("6a24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2051"), false);
     const output instance{ 0, commitment };
 
     hash_cref out{ null_hash };
-    BOOST_REQUIRE(instance.committed_hash(out));
-    BOOST_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
+    BC_REQUIRE(instance.committed_hash(out));
+    BC_REQUIRE_EQUAL(out.get(), base16_array("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"));
 }
 
-BOOST_AUTO_TEST_CASE(output__committed_hash__wrong_head__false)
+BC_AUTO_TEST_CASE(output__committed_hash__wrong_head__false)
 {
     const script commitment(base16_chunk("6a24aa21a9ee0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
     const output instance{ 0, commitment };
 
     hash_cref out{ null_hash };
-    BOOST_REQUIRE(!instance.committed_hash(out));
+    BC_REQUIRE(!instance.committed_hash(out));
 }
 
-BOOST_AUTO_TEST_CASE(output__committed_hash__short_push__false)
+BC_AUTO_TEST_CASE(output__committed_hash__short_push__false)
 {
     const script commitment(base16_chunk("6a23aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), false);
     const output instance{ 0, commitment };
 
     hash_cref out{ null_hash };
-    BOOST_REQUIRE(!instance.committed_hash(out));
+    BC_REQUIRE(!instance.committed_hash(out));
 }
 
-BOOST_AUTO_TEST_CASE(output__committed_hash__not_op_return__false)
+BC_AUTO_TEST_CASE(output__committed_hash__not_op_return__false)
 {
     const script commitment(base16_chunk("6b24aa21a9ed0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"), false);
     const output instance{ 0, commitment };
 
     hash_cref out{ null_hash };
-    BOOST_REQUIRE(!instance.committed_hash(out));
+    BC_REQUIRE(!instance.committed_hash(out));
 }
 
-BOOST_AUTO_TEST_CASE(output__signature_operations__checksig_checksigverify__expected)
+BC_AUTO_TEST_CASE(output__signature_operations__checksig_checksigverify__expected)
 {
     const script script(base16_chunk("02acad"), true);
-    BOOST_REQUIRE(script.is_valid());
+    BC_REQUIRE(script.is_valid());
 
     const output instance{ 42, script };
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(false), 2u);
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(true), 8u);
+    BC_REQUIRE_EQUAL(instance.signature_operations(false), 2u);
+    BC_REQUIRE_EQUAL(instance.signature_operations(true), 8u);
 }
 
 // is_dust
 
-BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_spendable__true)
+BC_AUTO_TEST_CASE(output__is_dust__below_minimum_spendable__true)
 {
     const output instance{ 41, script{ operations{ operation{ opcode::checksig } } } };
-    BOOST_REQUIRE(instance.is_dust(42));
+    BC_REQUIRE(instance.is_dust(42));
 }
 
-BOOST_AUTO_TEST_CASE(output__is_dust__at_minimum_spendable__false)
+BC_AUTO_TEST_CASE(output__is_dust__at_minimum_spendable__false)
 {
     const output instance{ 42, script{ operations{ operation{ opcode::checksig } } } };
-    BOOST_REQUIRE(!instance.is_dust(42));
+    BC_REQUIRE(!instance.is_dust(42));
 }
 
 // Provably unspendable outputs do not expand the unspent set, so are not dust.
-BOOST_AUTO_TEST_CASE(output__is_dust__below_minimum_unspendable__false)
+BC_AUTO_TEST_CASE(output__is_dust__below_minimum_unspendable__false)
 {
     const output instance{ 41, script{ operations{ operation{ opcode::op_return } } } };
-    BOOST_REQUIRE(!instance.is_dust(42));
+    BC_REQUIRE(!instance.is_dust(42));
 }
 
-BOOST_AUTO_TEST_CASE(output__construct__script_pointer__expected)
+BC_AUTO_TEST_CASE(output__construct__script_pointer__expected)
 {
     const auto value = to_shared<script>(script{ operations{ operation{ opcode::dup } } });
     const output instance{ 42, value };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.value(), 42u);
-    BOOST_REQUIRE(instance.script() == *value);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.value(), 42u);
+    BC_REQUIRE(instance.script() == *value);
 }
 
-BOOST_AUTO_TEST_CASE(output__construct__fast_stream__round_trips)
+BC_AUTO_TEST_CASE(output__construct__fast_stream__round_trips)
 {
     const output expected{ 42, script{ operations{ operation{ opcode::dup } } } };
     const auto data = expected.to_data();
     stream::in::fast source{ data };
     const output instance{ source };
-    BOOST_REQUIRE(instance == expected);
+    BC_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

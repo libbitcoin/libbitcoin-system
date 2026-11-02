@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "../hash.hpp"
     
-BOOST_AUTO_TEST_SUITE(sha160_tests_)
+BC_AUTO_TEST_SUITE(sha160_tests_)
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha160::hash(sha160::byte_t{}) == sha_byte160);
@@ -29,16 +29,16 @@ static_assert(sha160::hash(sha160::block_t{}) == sha_full160);
 constexpr auto vector = have_128 || have_256 || have_512;
 constexpr auto native = have_sha;
 
-BOOST_AUTO_TEST_CASE(sha160__hash__null_hash__expected)
+BC_AUTO_TEST_CASE(sha160__hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
-    BOOST_REQUIRE_EQUAL(sha160::hash(sha160::byte_t{}), sha_byte160);
-    BOOST_REQUIRE_EQUAL(sha160::hash(sha160::half_t{}), sha_half160);
-    BOOST_REQUIRE_EQUAL(sha160::hash(sha160::block_t{}), sha_full160);
+    BC_REQUIRE_EQUAL(sha160::hash(sha160::byte_t{}), sha_byte160);
+    BC_REQUIRE_EQUAL(sha160::hash(sha160::half_t{}), sha_half160);
+    BC_REQUIRE_EQUAL(sha160::hash(sha160::block_t{}), sha_full160);
 }
 
 // accumulator<sha160>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha160__fff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha160__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, false, false, false>;
     static_assert(!sha_160::native);
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(sha160__fff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha160>::hash (true, false, false)
-BOOST_AUTO_TEST_CASE(sha160__tff_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha160__tff_accumulator_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, false, false>;
     static_assert(sha_160::native == native);
@@ -65,12 +65,12 @@ BOOST_AUTO_TEST_CASE(sha160__tff_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha160>::hash (true, false, true)
-BOOST_AUTO_TEST_CASE(sha160__tft_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha160__tft_accumulator_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, false, true>;
     static_assert(sha_160::native == native);
@@ -81,12 +81,12 @@ BOOST_AUTO_TEST_CASE(sha160__tft_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha160>::hash (true, true, false)
-BOOST_AUTO_TEST_CASE(sha160__ttf_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha160__ttf_accumulator_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, true, false>;
     static_assert(sha_160::native == native);
@@ -97,12 +97,12 @@ BOOST_AUTO_TEST_CASE(sha160__ttf_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha160>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha160__ttt_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha160__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, true, true>;
     static_assert(sha_160::native == native);
@@ -113,12 +113,12 @@ BOOST_AUTO_TEST_CASE(sha160__ttt_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // accumulator<sha160>::hash (false, true, false)
-BOOST_AUTO_TEST_CASE(sha160__ftf_accumulator_hash__test_vectors__expected)
+BC_AUTO_TEST_CASE(sha160__ftf_accumulator_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, false, true, false>;
     static_assert(!sha_160::native);
@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(sha160__ftf_accumulator_hash__test_vectors__expected)
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
+        BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

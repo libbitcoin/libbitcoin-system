@@ -19,12 +19,12 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(utf8_ostream_tests)
+BC_AUTO_TEST_SUITE(utf8_ostream_tests)
 
 // std::wstring is not serializable.
 
 // Use of L is not recommended as it will only work for ascii.
-BOOST_AUTO_TEST_CASE(unicode_ostream__conditional__test)
+BC_AUTO_TEST_CASE(unicode_ostream__conditional__test)
 {
     std::wstringstream wide_stream;
     std::stringstream narrow_stream;
@@ -34,15 +34,15 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__conditional__test)
     output.flush();
 
 #ifdef HAVE_WINDOWS
-    BOOST_REQUIRE(narrow_stream.str().empty());
-    BOOST_REQUIRE(wide_stream.str() == L"ascii");
+    BC_REQUIRE(narrow_stream.str().empty());
+    BC_REQUIRE(wide_stream.str() == L"ascii");
 #else
-    BOOST_REQUIRE(wide_stream.str().empty());
-    BOOST_REQUIRE(narrow_stream.str() == "ascii");
+    BC_REQUIRE(wide_stream.str().empty());
+    BC_REQUIRE(narrow_stream.str() == "ascii");
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(unicode_ostream__non_ascii__test)
+BC_AUTO_TEST_CASE(unicode_ostream__non_ascii__test)
 {
     const auto utf8 = "テスト";
     const auto utf16 = to_utf16(utf8);
@@ -55,15 +55,15 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__non_ascii__test)
     output.flush();
 
 #ifdef HAVE_WINDOWS
-    BOOST_REQUIRE(narrow_stream.str().empty());
-    BOOST_REQUIRE(wide_stream.str() == utf16);
+    BC_REQUIRE(narrow_stream.str().empty());
+    BC_REQUIRE(wide_stream.str() == utf16);
 #else
-    BOOST_REQUIRE(wide_stream.str().empty());
-    BOOST_REQUIRE(narrow_stream.str() == utf8);
+    BC_REQUIRE(wide_stream.str().empty());
+    BC_REQUIRE(narrow_stream.str() == utf8);
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(unicode_ostream__overflow__test)
+BC_AUTO_TEST_CASE(unicode_ostream__overflow__test)
 {
     // This is a 20x10 matrix of 3 bytes per character triples (1800 bytes).
     // The buffer is 256 (wide) and 1024 (narrow), resulting in a potential
@@ -103,12 +103,12 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__overflow__test)
     output.flush();
 
 #ifdef HAVE_WINDOWS
-    BOOST_REQUIRE(narrow_stream.str().empty());
-    BOOST_REQUIRE(wide_stream.str() == utf16_600_chars);
+    BC_REQUIRE(narrow_stream.str().empty());
+    BC_REQUIRE(wide_stream.str() == utf16_600_chars);
 #else
-    BOOST_REQUIRE(wide_stream.str().empty());
-    BOOST_REQUIRE(narrow_stream.str() == utf8_1800_bytes);
+    BC_REQUIRE(wide_stream.str().empty());
+    BC_REQUIRE(narrow_stream.str() == utf8_1800_bytes);
 #endif
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

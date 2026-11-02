@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(hex_writer_tests)
+BC_AUTO_TEST_SUITE(hex_writer_tests)
 
 constexpr auto header_size = chain::header::serialized_size();
 
@@ -44,89 +44,89 @@ static std::string expected_base16() NOEXCEPT
     return hex;
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__stream__genesis_header__expected)
+BC_AUTO_TEST_CASE(hex_writer__stream__genesis_header__expected)
 {
     std::ostringstream hex{};
     write::base16::ostream hexer{ hex };
     genesis().header().to_data(hexer);
     hexer.flush();
-    BOOST_REQUIRE(hexer);
+    BC_REQUIRE(hexer);
 
     const auto expected = expected_base16();
-    BOOST_REQUIRE_EQUAL(hex.str(), expected);
+    BC_REQUIRE_EQUAL(hex.str(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__fast__genesis_header__expected)
+BC_AUTO_TEST_CASE(hex_writer__fast__genesis_header__expected)
 {
     data_chunk hex(header_size * two);
     stream::out::fast stream{ hex };
     write::base16::fast hexer{ stream };
     genesis().header().to_data(hexer);
     ////hexer.flush();
-    BOOST_REQUIRE(hexer);
-    BOOST_REQUIRE_EQUAL(to_string(hex), expected_base16());
+    BC_REQUIRE(hexer);
+    BC_REQUIRE_EQUAL(to_string(hex), expected_base16());
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__copy__genesis_header__expected)
+BC_AUTO_TEST_CASE(hex_writer__copy__genesis_header__expected)
 {
     data_chunk hex(header_size * two);
     write::base16::copy hexer{ hex };
     genesis().header().to_data(hexer);
     ////hexer.flush();
-    BOOST_REQUIRE(hexer);
-    BOOST_REQUIRE_EQUAL(to_string(hex), expected_base16());
+    BC_REQUIRE(hexer);
+    BC_REQUIRE_EQUAL(to_string(hex), expected_base16());
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__text__genesis_header__expected)
+BC_AUTO_TEST_CASE(hex_writer__text__genesis_header__expected)
 {
     std::string hex{};
     write::base16::text hexer{ hex };
     genesis().header().to_data(hexer);
     hexer.flush();
-    BOOST_REQUIRE(hexer);
-    BOOST_REQUIRE_EQUAL(hex, expected_base16());
+    BC_REQUIRE(hexer);
+    BC_REQUIRE_EQUAL(hex, expected_base16());
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__data__genesis_bheader__expected)
+BC_AUTO_TEST_CASE(hex_writer__data__genesis_bheader__expected)
 {
     data_chunk hex{};
     write::base16::data hexer{ hex };
     genesis().header().to_data(hexer);
     hexer.flush();
-    BOOST_REQUIRE(hexer);
-    BOOST_REQUIRE_EQUAL(to_string(hex), expected_base16());
+    BC_REQUIRE(hexer);
+    BC_REQUIRE_EQUAL(to_string(hex), expected_base16());
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__fast__multiple_batches__expected)
+BC_AUTO_TEST_CASE(hex_writer__fast__multiple_batches__expected)
 {
     const data_chunk data(1001, 0xa5);
     data_chunk hex(data.size() * two);
     stream::out::fast stream{ hex };
     write::base16::fast hexer{ stream };
     hexer.write_bytes(data);
-    BOOST_REQUIRE(hexer);
-    BOOST_REQUIRE_EQUAL(to_string(hex), encode_base16(data));
+    BC_REQUIRE(hexer);
+    BC_REQUIRE_EQUAL(to_string(hex), encode_base16(data));
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__text__batch_boundary__expected)
+BC_AUTO_TEST_CASE(hex_writer__text__batch_boundary__expected)
 {
     const data_chunk data(256, 0x5a);
     std::string hex{};
     write::base16::text hexer{ hex };
     hexer.write_bytes(data);
     hexer.flush();
-    BOOST_REQUIRE(hexer);
-    BOOST_REQUIRE_EQUAL(hex, encode_base16(data));
+    BC_REQUIRE(hexer);
+    BC_REQUIRE_EQUAL(hex, encode_base16(data));
 }
 
-BOOST_AUTO_TEST_CASE(hex_writer__fast__insufficient_target__invalid)
+BC_AUTO_TEST_CASE(hex_writer__fast__insufficient_target__invalid)
 {
     const data_chunk data(300, 0x42);
     data_chunk hex(data.size());
     stream::out::fast stream{ hex };
     write::base16::fast hexer{ stream };
     hexer.write_bytes(data);
-    BOOST_REQUIRE(!hexer);
+    BC_REQUIRE(!hexer);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

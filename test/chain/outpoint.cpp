@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(outpoint_tests)
+BC_AUTO_TEST_SUITE(outpoint_tests)
 
 namespace json = system::json;
 using namespace system::chain;
@@ -35,178 +35,178 @@ static const outpoint expected_outpoint{ outpoint_data };
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(outpoint__constructor__default__invalid)
+BC_AUTO_TEST_CASE(outpoint__constructor__default__invalid)
 {
     const outpoint instance;
-    BOOST_REQUIRE(!instance.is_valid());
+    BC_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__constructor__move__valid)
+BC_AUTO_TEST_CASE(outpoint__constructor__move__valid)
 {
     auto copy = expected_outpoint;
     const outpoint instance{ std::move(copy) };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_outpoint);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_outpoint);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__constructor__copy__valid)
+BC_AUTO_TEST_CASE(outpoint__constructor__copy__valid)
 {
     const outpoint instance{ expected_outpoint };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_outpoint);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_outpoint);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__constructor__move_parameters__valid)
+BC_AUTO_TEST_CASE(outpoint__constructor__move_parameters__valid)
 {
     constexpr uint32_t value{ 42 };
     constexpr uint32_t index{ 1234 };
     outpoint instance{ { outpoint_hash, index }, value };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.point().hash(), outpoint_hash);
-    BOOST_REQUIRE_EQUAL(instance.point().index(), index);
-    BOOST_REQUIRE_EQUAL(instance.value(), value);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.point().hash(), outpoint_hash);
+    BC_REQUIRE_EQUAL(instance.point().index(), index);
+    BC_REQUIRE_EQUAL(instance.value(), value);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__constructor__copy_parameters__valid)
+BC_AUTO_TEST_CASE(outpoint__constructor__copy_parameters__valid)
 {
     constexpr uint32_t value{ 42 };
     constexpr uint32_t index{ 1234 };
     point copy{ outpoint_hash, index };
     outpoint instance{ std::move(copy), value };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.point().hash(), outpoint_hash);
-    BOOST_REQUIRE_EQUAL(instance.point().index(), index);
-    BOOST_REQUIRE_EQUAL(instance.value(), value);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.point().hash(), outpoint_hash);
+    BC_REQUIRE_EQUAL(instance.point().index(), index);
+    BC_REQUIRE_EQUAL(instance.value(), value);
 }
 
 // operators
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(outpoint__assign__copy__expected)
+BC_AUTO_TEST_CASE(outpoint__assign__copy__expected)
 {
     const auto& alpha = expected_outpoint;
     auto gamma = alpha;
     const auto beta = std::move(gamma);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__assign__move__expected)
+BC_AUTO_TEST_CASE(outpoint__assign__move__expected)
 {
     const auto& alpha = expected_outpoint;
     const auto beta = alpha;
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__equality__same__true)
+BC_AUTO_TEST_CASE(outpoint__equality__same__true)
 {
     const auto& alpha = expected_outpoint;
     const outpoint beta(alpha);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__equality__different__false)
+BC_AUTO_TEST_CASE(outpoint__equality__different__false)
 {
     const auto& alpha = expected_outpoint;
     const outpoint beta;
-    BOOST_REQUIRE(!(alpha == beta));
+    BC_REQUIRE(!(alpha == beta));
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__inequality__same__false)
+BC_AUTO_TEST_CASE(outpoint__inequality__same__false)
 {
     const auto& alpha = expected_outpoint;
     const outpoint beta(alpha);
-    BOOST_REQUIRE(!(alpha != beta));
+    BC_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__inequality__different__true)
+BC_AUTO_TEST_CASE(outpoint__inequality__different__true)
 {
     const auto& alpha = expected_outpoint;
     const outpoint beta;
-    BOOST_REQUIRE(alpha != beta);
+    BC_REQUIRE(alpha != beta);
 }
 
 // to_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(outpoint__to_data__data__expected)
+BC_AUTO_TEST_CASE(outpoint__to_data__data__expected)
 {
     const auto size = expected_outpoint.to_data().size();
-    BOOST_REQUIRE_EQUAL(size, expected_outpoint.serialized_size());
+    BC_REQUIRE_EQUAL(size, expected_outpoint.serialized_size());
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__to_data__stream__expected)
+BC_AUTO_TEST_CASE(outpoint__to_data__stream__expected)
 {
     // Write outpoint to stream.
     std::stringstream iostream;
     expected_outpoint.to_data(iostream);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const outpoint copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_outpoint);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_outpoint);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__to_data__writer__expected)
+BC_AUTO_TEST_CASE(outpoint__to_data__writer__expected)
 {
     // Write outpoint to stream.
     std::stringstream iostream;
     write::bytes::ostream out(iostream);
     expected_outpoint.to_data(out);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const outpoint copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_outpoint);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_outpoint);
 }
 
 // properties
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(outpoint__is_null__not_null__false)
+BC_AUTO_TEST_CASE(outpoint__is_null__not_null__false)
 {
-    BOOST_REQUIRE(!expected_outpoint.is_null());
+    BC_REQUIRE(!expected_outpoint.is_null());
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__is_null__default_null__true)
+BC_AUTO_TEST_CASE(outpoint__is_null__default_null__true)
 {
-    BOOST_REQUIRE(outpoint{}.is_null());
+    BC_REQUIRE(outpoint{}.is_null());
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__serialized_size__always__expected)
+BC_AUTO_TEST_CASE(outpoint__serialized_size__always__expected)
 {
     static_assert(outpoint::serialized_size() == point::serialized_size() + sizeof(uint64_t));
-    BOOST_REQUIRE_EQUAL(outpoint::serialized_size(), point::serialized_size() + sizeof(uint64_t));
+    BC_REQUIRE_EQUAL(outpoint::serialized_size(), point::serialized_size() + sizeof(uint64_t));
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__construct__copy_point__expected)
+BC_AUTO_TEST_CASE(outpoint__construct__copy_point__expected)
 {
     const point value{ one_hash, 42 };
     const outpoint instance{ value, 99 };
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance.point() == value);
-    BOOST_REQUIRE_EQUAL(instance.value(), 99u);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance.point() == value);
+    BC_REQUIRE_EQUAL(instance.value(), 99u);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__construct__fast_stream__round_trips)
+BC_AUTO_TEST_CASE(outpoint__construct__fast_stream__round_trips)
 {
     const outpoint expected{ point{ one_hash, 42 }, 99 };
     const auto data = expected.to_data();
     stream::in::fast source{ data };
     const outpoint instance{ source };
-    BOOST_REQUIRE(instance == expected);
-    BOOST_REQUIRE_EQUAL(instance.value(), 99u);
+    BC_REQUIRE(instance == expected);
+    BC_REQUIRE_EQUAL(instance.value(), 99u);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__lesser__lesser_point__true)
+BC_AUTO_TEST_CASE(outpoint__lesser__lesser_point__true)
 {
     const outpoint instance1{ point{ one_hash, 1 }, 99 };
     const outpoint instance2{ point{ one_hash, 2 }, 0 };
-    BOOST_REQUIRE(instance1 < instance2);
-    BOOST_REQUIRE(!(instance2 < instance1));
+    BC_REQUIRE(instance1 < instance2);
+    BC_REQUIRE(!(instance2 < instance1));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

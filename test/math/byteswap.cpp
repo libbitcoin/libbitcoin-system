@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(byteswap_tests)
+BC_AUTO_TEST_SUITE(byteswap_tests)
 
 // Beware of type promotion (use explicit types).
 
@@ -32,20 +32,20 @@ static_assert(byteswap(0x0102_u16) == 0x0201);
 static_assert(byteswap(0x01020304_u32) == 0x04030201);
 static_assert(byteswap(0x0102030405060708_u64) == 0x0807060504030201);
 
-BOOST_AUTO_TEST_CASE(byteswap__signed__not_constant_evaluated_signed__swapped)
+BC_AUTO_TEST_CASE(byteswap__signed__not_constant_evaluated_signed__swapped)
 {
-    BOOST_REQUIRE_EQUAL(byteswap(0x01_i8), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102_i16), 0x0201_i16);
-    BOOST_REQUIRE_EQUAL(byteswap(0x01020304_i32), 0x04030201_i32);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102030405060708_i64), 0x0807060504030201_i64);
+    BC_REQUIRE_EQUAL(byteswap(0x01_i8), 0x01_i8);
+    BC_REQUIRE_EQUAL(byteswap(0x0102_i16), 0x0201_i16);
+    BC_REQUIRE_EQUAL(byteswap(0x01020304_i32), 0x04030201_i32);
+    BC_REQUIRE_EQUAL(byteswap(0x0102030405060708_i64), 0x0807060504030201_i64);
 }
 
-BOOST_AUTO_TEST_CASE(byteswap__unsigned___not_constant_evaluated_unsigned__swapped)
+BC_AUTO_TEST_CASE(byteswap__unsigned___not_constant_evaluated_unsigned__swapped)
 {
-    BOOST_REQUIRE_EQUAL(byteswap(0x01_u8), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102_u16), 0x0201_u16);
-    BOOST_REQUIRE_EQUAL(byteswap(0x01020304_u32), 0x04030201_u32);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102030405060708_u64), 0x0807060504030201_u64);
+    BC_REQUIRE_EQUAL(byteswap(0x01_u8), 0x01_u8);
+    BC_REQUIRE_EQUAL(byteswap(0x0102_u16), 0x0201_u16);
+    BC_REQUIRE_EQUAL(byteswap(0x01020304_u32), 0x04030201_u32);
+    BC_REQUIRE_EQUAL(byteswap(0x0102030405060708_u64), 0x0807060504030201_u64);
 }
 
 // from byte array to integral (performance comparison)
@@ -113,7 +113,7 @@ inline unsigned_type<Size> byte_swap_fast(const data_array<Size>& data) NOEXCEPT
     return byte_swap32(to_unsigned(value));
 }
 
-BOOST_AUTO_TEST_CASE(byteswap__three_approaches__disassembly__comparison)
+BC_AUTO_TEST_CASE(byteswap__three_approaches__disassembly__comparison)
 {
     constexpr auto value = native_to_little_end(0x01020304_u32);
     constexpr data_array<sizeof(uint32_t)> bytes{ 0x01_u8, 0x02_u8, 0x03_u8, 0x04_u8 };
@@ -122,9 +122,9 @@ BOOST_AUTO_TEST_CASE(byteswap__three_approaches__disassembly__comparison)
     const auto medi = byte_swap_medium(bytes);
     const auto slow = byte_swap_slow(bytes);
 
-    BOOST_REQUIRE_EQUAL(fast, value);
-    BOOST_REQUIRE_EQUAL(medi, value);
-    BOOST_REQUIRE_EQUAL(slow, value);
+    BC_REQUIRE_EQUAL(fast, value);
+    BC_REQUIRE_EQUAL(medi, value);
+    BC_REQUIRE_EQUAL(slow, value);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

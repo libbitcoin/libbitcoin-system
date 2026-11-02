@@ -20,25 +20,25 @@
 #include <sstream>
 #include "script.hpp"
 
-BOOST_AUTO_TEST_SUITE(script_extract_tests)
+BC_AUTO_TEST_SUITE(script_extract_tests)
 
 using namespace system::chain;
 using namespace system::machine;
 
 // extract_tapscript_threshold
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_2_of_3__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_2_of_3__true_expected)
 {
     const chain::script script{ make_tapscript_threshold_ops(2, 3) };
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(!operation::is_invalid(condition));
-    BOOST_CHECK_EQUAL(min, 2u);
-    BOOST_CHECK_EQUAL(max, 2u);
+    BC_CHECK(!operation::is_invalid(condition));
+    BC_CHECK_EQUAL(min, 2u);
+    BC_CHECK_EQUAL(max, 2u);
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_within__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_within__true_expected)
 {
     const auto xkey = to_chunk(ec_xonly{});
 
@@ -56,12 +56,12 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_within__true_exp
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(condition == opcode::within);
-    BOOST_CHECK_EQUAL(min, 1u);
-    BOOST_CHECK_EQUAL(max, 3u);
+    BC_CHECK(condition == opcode::within);
+    BC_CHECK_EQUAL(min, 1u);
+    BC_CHECK_EQUAL(max, 3u);
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequal__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequal__true_expected)
 {
     const auto xkey = to_chunk(ec_xonly{});
 
@@ -74,12 +74,12 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequal__true_e
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(condition == opcode::numequal);
-    BOOST_CHECK_EQUAL(min, 3u);
-    BOOST_CHECK_EQUAL(max, 3u);
+    BC_CHECK(condition == opcode::numequal);
+    BC_CHECK_EQUAL(min, 3u);
+    BC_CHECK_EQUAL(max, 3u);
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequalverify__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequalverify__true_expected)
 {
     const auto xkey = to_chunk(ec_xonly{});
 
@@ -92,12 +92,12 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__match_numequalverify__
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(condition == opcode::numequalverify);
-    BOOST_CHECK_EQUAL(min, 9u);
-    BOOST_CHECK_EQUAL(max, 9u);
+    BC_CHECK(condition == opcode::numequalverify);
+    BC_CHECK_EQUAL(min, 9u);
+    BC_CHECK_EQUAL(max, 9u);
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__mismatch_final__false)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__mismatch_final__false)
 {
     const auto xkey = to_chunk(ec_xonly{});
 
@@ -110,42 +110,42 @@ BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__mismatch_final__false)
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(operation::is_invalid(condition));
+    BC_CHECK(operation::is_invalid(condition));
 }
 
 // Multisig (pure k-of-k) pattern tests
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_1_of_1__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_1_of_1__true_expected)
 {
     const chain::script script{ make_tapscript_multisig_ops(1) };
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(condition == opcode::checksig);
-    BOOST_CHECK_EQUAL(min, 1u);
-    BOOST_CHECK_EQUAL(max, 1u);
+    BC_CHECK(condition == opcode::checksig);
+    BC_CHECK_EQUAL(min, 1u);
+    BC_CHECK_EQUAL(max, 1u);
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_2_of_2__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_2_of_2__true_expected)
 {
     const chain::script script{ make_tapscript_multisig_ops(2) };
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(condition == opcode::checksig);
-    BOOST_CHECK_EQUAL(min, 2u);
-    BOOST_CHECK_EQUAL(max, 2u);
+    BC_CHECK(condition == opcode::checksig);
+    BC_CHECK_EQUAL(min, 2u);
+    BC_CHECK_EQUAL(max, 2u);
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_3_of_3__true_expected)
+BC_AUTO_TEST_CASE(script__extract_tapscript_threshold__multisig_3_of_3__true_expected)
 {
     const chain::script script{ make_tapscript_multisig_ops(3) };
 
     size_t min{}, max{};
     const auto condition = script.extract_tapscript_threshold(min, max);
-    BOOST_CHECK(condition == opcode::checksig);
-    BOOST_CHECK_EQUAL(min, 3u);
-    BOOST_CHECK_EQUAL(max, 3u);
+    BC_CHECK(condition == opcode::checksig);
+    BC_CHECK_EQUAL(min, 3u);
+    BC_CHECK_EQUAL(max, 3u);
 }
 
 // extract_sigop_script
@@ -155,35 +155,35 @@ static script p2sh_prevout() NOEXCEPT
     return script{ script::to_pay_script_hash_pattern(short_hash{}) };
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_sigop_script__non_p2sh_prevout__false)
+BC_AUTO_TEST_CASE(script__extract_sigop_script__non_p2sh_prevout__false)
 {
     const script prevout{ operations{ operation{ opcode::checksig } } };
     const script input{ operations{ operation{ data_chunk{ 0x51 }, false } } };
     script embedded{};
-    BOOST_REQUIRE(!input.extract_sigop_script(embedded, prevout));
+    BC_REQUIRE(!input.extract_sigop_script(embedded, prevout));
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_sigop_script__empty_input_script__false)
+BC_AUTO_TEST_CASE(script__extract_sigop_script__empty_input_script__false)
 {
     const script input{};
     script embedded{};
-    BOOST_REQUIRE(!input.extract_sigop_script(embedded, p2sh_prevout()));
+    BC_REQUIRE(!input.extract_sigop_script(embedded, p2sh_prevout()));
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_sigop_script__non_push_input_script__false)
+BC_AUTO_TEST_CASE(script__extract_sigop_script__non_push_input_script__false)
 {
     const script input{ operations{ operation{ opcode::checksig } } };
     script embedded{};
-    BOOST_REQUIRE(!input.extract_sigop_script(embedded, p2sh_prevout()));
+    BC_REQUIRE(!input.extract_sigop_script(embedded, p2sh_prevout()));
 }
 
-BOOST_AUTO_TEST_CASE(script__extract_sigop_script__last_push__embedded)
+BC_AUTO_TEST_CASE(script__extract_sigop_script__last_push__embedded)
 {
     const script input{ operations{ operation{ data_chunk{ 0x52 }, false }, operation{ data_chunk{ 0xac }, false } } };
     script embedded{};
-    BOOST_REQUIRE(input.extract_sigop_script(embedded, p2sh_prevout()));
-    BOOST_REQUIRE(embedded == script{ operations{ operation{ opcode::checksig } } });
-    BOOST_REQUIRE_EQUAL(embedded.signature_operations(false), one);
+    BC_REQUIRE(input.extract_sigop_script(embedded, p2sh_prevout()));
+    BC_REQUIRE(embedded == script{ operations{ operation{ opcode::checksig } } });
+    BC_REQUIRE_EQUAL(embedded.signature_operations(false), one);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

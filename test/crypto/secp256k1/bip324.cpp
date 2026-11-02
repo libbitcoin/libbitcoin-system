@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_bip324_tests)
+BC_AUTO_TEST_SUITE(secp256k1_bip324_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -128,14 +128,14 @@ const std::vector<decode_vector> decode_vectors
     { base16_array("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffefbb982fffffffffffffffffffffffffffffffffffffffffffffffffffffffff6d6db1f"), base16_array("1c92ccdfcf4ac550c28db57cff0c8515cb26936c786584a70114008d6c33a34b") },
 };
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_decode__vectors__expected_x)
+BC_AUTO_TEST_CASE(secp256k1_bip324__ellswift_decode__vectors__expected_x)
 {
     for (size_t index{}; index < decode_vectors.size(); ++index)
     {
         const auto& vector = decode_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE_MESSAGE(ellswift::decode(point, vector.encoded), index);
-        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x, index);
+        BC_REQUIRE_MESSAGE(ellswift::decode(point, vector.encoded), index);
+        BC_REQUIRE_MESSAGE(to_x(point) == vector.x, index);
     }
 }
 
@@ -185,25 +185,25 @@ const std::vector<inverse_vector> inverse_vectors
     { base16_array("fd7d912a40f182a3588800d69ebfb5048766da206fd7ebc8d2436c81cbef6421"), base16_array("8d37c862054debe731694536ff46b273ec122b35a9bf1445ac3c4ff9f262c952"), 0x00, { bytes{}, bytes{}, bytes{}, bytes{}, bytes{}, bytes{}, bytes{}, bytes{} } },
 };
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip324__swift_inverse__vectors__expected_t)
+BC_AUTO_TEST_CASE(secp256k1_bip324__swift_inverse__vectors__expected_t)
 {
     for (size_t index{}; index < inverse_vectors.size(); ++index)
     {
         const auto& vector = inverse_vectors[index];
         field u{}, x{};
-        BOOST_REQUIRE_MESSAGE(accessor::from_bytes(u, vector.u), index);
-        BOOST_REQUIRE_MESSAGE(accessor::from_bytes(x, vector.x), index);
+        BC_REQUIRE_MESSAGE(accessor::from_bytes(u, vector.u), index);
+        BC_REQUIRE_MESSAGE(accessor::from_bytes(x, vector.x), index);
 
         for (uint8_t branch{}; branch < 8u; ++branch)
         {
             field t{};
             const auto valid = get_right(vector.valid, branch);
-            BOOST_REQUIRE_MESSAGE(accessor::swift_inverse(t, x, u, branch) == valid, (index << 8 | branch));
+            BC_REQUIRE_MESSAGE(accessor::swift_inverse(t, x, u, branch) == valid, (index << 8 | branch));
             if (valid)
             {
                 bytes out{};
                 accessor::to_bytes(out, t);
-                BOOST_REQUIRE_MESSAGE(out == vector.t[branch], (index << 8 | branch));
+                BC_REQUIRE_MESSAGE(out == vector.t[branch], (index << 8 | branch));
             }
         }
     }
@@ -233,31 +233,31 @@ const std::vector<packet_vector> packet_vectors
     { base16_array("0f69aeffeff6172647ee5aa80bfb418ee742f4e9f1a51b463ac7c120d620e37d"), base16_array("ffffffffffffffffffffffffffffffffffffffffffffffffffffffff04df0e67f9753e2cdb066b3b588a0069fde936a312e0d3f31acb335026b7072d8f2ad24c"), base16_array("12a50f3fafea7c1eeada4cf8d33777704b77361453afc83bda91eef349ae044d20126c6200547ea5a6911776c05dee2a7f1a9ba7dfbabbbd273c3ef29ef46e46"), true, base16_array("115b298a52a9362706ddd1e493de09443dd8ac2b0c3e4e5e8b6bb295598db05d"), base16_array("eef379db9bd4b1aa90fc347fad33f7d53083389e22e971036f59f4e29d325ac2"), base16_array("1756deace376ece25da9825fe49f76a9272a89a7b746c83ca2c4016f5a30ead4") },
 };
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_decode__packet_vectors__expected_x)
+BC_AUTO_TEST_CASE(secp256k1_bip324__ellswift_decode__packet_vectors__expected_x)
 {
     for (size_t index{}; index < packet_vectors.size(); ++index)
     {
         const auto& vector = packet_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE_MESSAGE(ellswift::decode(point, vector.ours), index);
-        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x_ours, index);
-        BOOST_REQUIRE_MESSAGE(ellswift::decode(point, vector.theirs), index);
-        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x_theirs, index);
+        BC_REQUIRE_MESSAGE(ellswift::decode(point, vector.ours), index);
+        BC_REQUIRE_MESSAGE(to_x(point) == vector.x_ours, index);
+        BC_REQUIRE_MESSAGE(ellswift::decode(point, vector.theirs), index);
+        BC_REQUIRE_MESSAGE(to_x(point) == vector.x_theirs, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip324__secret_to_public__packet_vectors__expected_x)
+BC_AUTO_TEST_CASE(secp256k1_bip324__secret_to_public__packet_vectors__expected_x)
 {
     for (size_t index{}; index < packet_vectors.size(); ++index)
     {
         const auto& vector = packet_vectors[index];
         ec_compressed point{};
-        BOOST_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
-        BOOST_REQUIRE_MESSAGE(to_x(point) == vector.x_ours, index);
+        BC_REQUIRE_MESSAGE(secret_to_public(point, vector.secret), index);
+        BC_REQUIRE_MESSAGE(to_x(point) == vector.x_ours, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_exchange__packet_vectors__expected_secret)
+BC_AUTO_TEST_CASE(secp256k1_bip324__ellswift_exchange__packet_vectors__expected_secret)
 {
     for (size_t index{}; index < packet_vectors.size(); ++index)
     {
@@ -265,9 +265,9 @@ BOOST_AUTO_TEST_CASE(secp256k1_bip324__ellswift_exchange__packet_vectors__expect
         hash_digest shared{};
         const auto& key_a = vector.initiating ? vector.ours : vector.theirs;
         const auto& key_b = vector.initiating ? vector.theirs : vector.ours;
-        BOOST_REQUIRE_MESSAGE(ellswift::exchange(shared, vector.secret, key_a, key_b, !vector.initiating), index);
-        BOOST_REQUIRE_MESSAGE(shared == vector.shared, index);
+        BC_REQUIRE_MESSAGE(ellswift::exchange(shared, vector.secret, key_a, key_b, !vector.initiating), index);
+        BC_REQUIRE_MESSAGE(shared == vector.shared, index);
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

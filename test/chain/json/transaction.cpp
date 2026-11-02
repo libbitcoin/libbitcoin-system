@@ -18,12 +18,11 @@
  */
 #include "../../test.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(transaction_json_tests)
+BC_AUTO_TEST_SUITE(transaction_json_tests)
 
-BOOST_AUTO_TEST_CASE(transaction__json__conversions__expected)
+BC_AUTO_TEST_CASE(transaction__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -106,11 +105,11 @@ BOOST_AUTO_TEST_CASE(transaction__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<transaction>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<transaction>(value) == instance);
 }
 
 
@@ -127,53 +126,53 @@ static const auto block840000_coinbase = base16_chunk(
     "131c4c95a7292e4372983148e62996bb5e2de0e4d1d801200000000000000000"
     "00000000000000000000000000000000000000000000000000000000");
 
-BOOST_AUTO_TEST_CASE(transaction__bitcoind__witness_coinbase_840000__size_and_witness_hash)
+BC_AUTO_TEST_CASE(transaction__bitcoind__witness_coinbase_840000__size_and_witness_hash)
 {
     const transaction tx{ block840000_coinbase, true };
-    BOOST_REQUIRE(tx.is_valid());
+    BC_REQUIRE(tx.is_valid());
 
     const auto value = json::value_from(bitcoind(tx));
     const auto& object = value.as_object();
 
-    BOOST_REQUIRE_EQUAL(object.at("txid").as_string(),
+    BC_REQUIRE_EQUAL(object.at("txid").as_string(),
         "a0db149ace545beabbd87a8d6b20ffd6aa3b5a50e58add49a3d435f898c272cf");
 
     // Witnessed hash, not the coinbase's null wtxid.
-    BOOST_REQUIRE_EQUAL(object.at("hash").as_string(),
+    BC_REQUIRE_EQUAL(object.at("hash").as_string(),
         "ba2a2a86efa306684a88b6e0cdb8abf25d9f66e6a851c9b9c67f25640cdacac8");
 
-    BOOST_REQUIRE_EQUAL(object.at("size").to_number<uint64_t>(), 316u);
-    BOOST_REQUIRE_EQUAL(object.at("vsize").to_number<uint64_t>(), 289u);
-    BOOST_REQUIRE_EQUAL(object.at("weight").to_number<uint64_t>(), 1156u);
-    BOOST_REQUIRE_EQUAL(object.at("version").to_number<uint32_t>(), 1u);
-    BOOST_REQUIRE_EQUAL(object.at("locktime").to_number<uint32_t>(), 0u);
+    BC_REQUIRE_EQUAL(object.at("size").to_number<uint64_t>(), 316u);
+    BC_REQUIRE_EQUAL(object.at("vsize").to_number<uint64_t>(), 289u);
+    BC_REQUIRE_EQUAL(object.at("weight").to_number<uint64_t>(), 1156u);
+    BC_REQUIRE_EQUAL(object.at("version").to_number<uint32_t>(), 1u);
+    BC_REQUIRE_EQUAL(object.at("locktime").to_number<uint32_t>(), 0u);
 
     const auto& vin = object.at("vin").as_array();
-    BOOST_REQUIRE_EQUAL(vin.size(), 1u);
-    BOOST_REQUIRE(vin.at(0u).as_object().contains("coinbase"));
-    BOOST_REQUIRE(!vin.at(0u).as_object().contains("txid"));
+    BC_REQUIRE_EQUAL(vin.size(), 1u);
+    BC_REQUIRE(vin.at(0u).as_object().contains("coinbase"));
+    BC_REQUIRE(!vin.at(0u).as_object().contains("txid"));
 
     // The coinbase witness reservation is emitted as any other witness.
     const auto& witness = vin.at(0u).as_object().at("txinwitness").as_array();
-    BOOST_REQUIRE_EQUAL(witness.size(), 1u);
-    BOOST_REQUIRE_EQUAL(witness.at(0u).as_string(), "0000000000000000000000000000000000000000000000000000000000000000");
+    BC_REQUIRE_EQUAL(witness.size(), 1u);
+    BC_REQUIRE_EQUAL(witness.at(0u).as_string(), "0000000000000000000000000000000000000000000000000000000000000000");
 
     const auto& vout = object.at("vout").as_array();
-    BOOST_REQUIRE_EQUAL(vout.size(), 3u);
+    BC_REQUIRE_EQUAL(vout.size(), 3u);
 
     const auto& script0 = vout.at(0u).as_object().at("scriptPubKey").as_object();
-    BOOST_REQUIRE_EQUAL(script0.at("asm").as_string(), "OP_DUP OP_HASH160 536ffa992491508dca0354e52f32a3a7a679a53a OP_EQUALVERIFY OP_CHECKSIG");
-    BOOST_REQUIRE_EQUAL(script0.at("hex").as_string(), "76a914536ffa992491508dca0354e52f32a3a7a679a53a88ac");
-    BOOST_REQUIRE_EQUAL(script0.at("type").as_string(), "pubkeyhash");
-    BOOST_REQUIRE(!script0.contains("addresses"));
+    BC_REQUIRE_EQUAL(script0.at("asm").as_string(), "OP_DUP OP_HASH160 536ffa992491508dca0354e52f32a3a7a679a53a OP_EQUALVERIFY OP_CHECKSIG");
+    BC_REQUIRE_EQUAL(script0.at("hex").as_string(), "76a914536ffa992491508dca0354e52f32a3a7a679a53a88ac");
+    BC_REQUIRE_EQUAL(script0.at("type").as_string(), "pubkeyhash");
+    BC_REQUIRE(!script0.contains("addresses"));
 
     const auto& script1 = vout.at(1u).as_object().at("scriptPubKey").as_object();
-    BOOST_REQUIRE_EQUAL(script1.at("asm").as_string(), "OP_RETURN 52534b424c4f434b3a52e15efafb3e2cf6dc2fc0e6bde5cb1d7d2143f1e089bd874e6b7913005fb2a0");
-    BOOST_REQUIRE_EQUAL(script1.at("type").as_string(), "nulldata");
+    BC_REQUIRE_EQUAL(script1.at("asm").as_string(), "OP_RETURN 52534b424c4f434b3a52e15efafb3e2cf6dc2fc0e6bde5cb1d7d2143f1e089bd874e6b7913005fb2a0");
+    BC_REQUIRE_EQUAL(script1.at("type").as_string(), "nulldata");
 
     const auto& script2 = vout.at(2u).as_object().at("scriptPubKey").as_object();
-    BOOST_REQUIRE_EQUAL(script2.at("asm").as_string(), "OP_RETURN aa21a9ed88601d3d03ccce017fe2131c4c95a7292e4372983148e62996bb5e2de0e4d1d8");
-    BOOST_REQUIRE_EQUAL(script2.at("type").as_string(), "nulldata");
+    BC_REQUIRE_EQUAL(script2.at("asm").as_string(), "OP_RETURN aa21a9ed88601d3d03ccce017fe2131c4c95a7292e4372983148e62996bb5e2de0e4d1d8");
+    BC_REQUIRE_EQUAL(script2.at("type").as_string(), "nulldata");
 }
 
 static transaction witnessed_transaction() NOEXCEPT
@@ -197,28 +196,28 @@ static transaction witnessed_transaction() NOEXCEPT
     return transaction{ 42, ins, outs, 24 };
 }
 
-BOOST_AUTO_TEST_CASE(transaction__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(transaction__json__pointer_conversions__expected)
 {
     const transaction::cptr instance{ to_shared(witnessed_transaction()) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<transaction::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<transaction::cptr>(value) == *instance);
 }
 
-BOOST_AUTO_TEST_CASE(transaction__json__bitcoind_verbose__native_transaction)
+BC_AUTO_TEST_CASE(transaction__json__bitcoind_verbose__native_transaction)
 {
     const auto instance = witnessed_transaction();
     const auto value = json::value_from(bitcoind_verbose(instance));
-    BOOST_REQUIRE(value == json::value_from(instance));
+    BC_REQUIRE(value == json::value_from(instance));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__json__bitcoind_verbose_pointers__expected)
+BC_AUTO_TEST_CASE(transaction__json__bitcoind_verbose_pointers__expected)
 {
     const transaction_cptrs txs{ to_shared(witnessed_transaction()) };
 
     const auto value = json::value_from(bitcoind_verbose(txs));
-    BOOST_REQUIRE_EQUAL(value.as_array().size(), 1u);
-    BOOST_REQUIRE(value.as_array().front() == json::value_from(*txs.front()));
+    BC_REQUIRE_EQUAL(value.as_array().size(), 1u);
+    BC_REQUIRE(value.as_array().front() == json::value_from(*txs.front()));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

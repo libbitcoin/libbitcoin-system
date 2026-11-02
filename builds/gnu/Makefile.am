@@ -39,15 +39,12 @@ src_libbitcoin_system_la_LIBS = src/libbitcoin-system.la
 src_libbitcoin_system_la_CPPFLAGS = \
     -I${top_builddir}/include \
     -I${srcdir}/../../include \
-    ${boost_BUILD_CPPFLAGS} \
     ${secp256k1_BUILD_CPPFLAGS}
 
 src_libbitcoin_system_la_LDFLAGS = \
-    ${boost_LDFLAGS} \
     ${secp256k1_LDFLAGS}
 
 src_libbitcoin_system_la_LIBADD = \
-    ${boost_LIBS} \
     ${secp256k1_LIBS}
 
 src_libbitcoin_system_la_SOURCES = \
@@ -111,28 +108,13 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/header.cpp \
     ${srcdir}/../../src/config/input.cpp \
     ${srcdir}/../../src/config/output.cpp \
-    ${srcdir}/../../src/config/parameter.cpp \
-    ${srcdir}/../../src/config/parser.cpp \
     ${srcdir}/../../src/config/path.cpp \
     ${srcdir}/../../src/config/point.cpp \
-    ${srcdir}/../../src/config/printer.cpp \
     ${srcdir}/../../src/config/script.cpp \
-    ${srcdir}/../../src/config/setting.cpp \
     ${srcdir}/../../src/config/transaction.cpp \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
-    ${srcdir}/../../src/config/program_options/cmdline.cpp \
-    ${srcdir}/../../src/config/program_options/config_file.cpp \
-    ${srcdir}/../../src/config/program_options/convert.cpp \
-    ${srcdir}/../../src/config/program_options/options_description.cpp \
-    ${srcdir}/../../src/config/program_options/parsers.cpp \
-    ${srcdir}/../../src/config/program_options/positional_options.cpp \
-    ${srcdir}/../../src/config/program_options/split.cpp \
-    ${srcdir}/../../src/config/program_options/utf8_codecvt_facet.cpp \
-    ${srcdir}/../../src/config/program_options/value_semantic.cpp \
-    ${srcdir}/../../src/config/program_options/variables_map.cpp \
-    ${srcdir}/../../src/config/program_options/winmain.cpp \
     ${srcdir}/../../src/crypto/aes_gcm.cpp \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
@@ -196,9 +178,22 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/filter/golomb.cpp \
     ${srcdir}/../../src/hash/accumulator.cpp \
     ${srcdir}/../../src/hash/checksum.cpp \
+    ${srcdir}/../../src/hash/crc32.cpp \
     ${srcdir}/../../src/hash/muhash.cpp \
     ${srcdir}/../../src/hash/siphash.cpp \
+    ${srcdir}/../../src/ip/address.cpp \
+    ${srcdir}/../../src/ip/endpoint.cpp \
+    ${srcdir}/../../src/ip/functions.cpp \
+    ${srcdir}/../../src/ip/ipv4.cpp \
+    ${srcdir}/../../src/ip/ipv6.cpp \
     ${srcdir}/../../src/math/math.cpp \
+    ${srcdir}/../../src/options/description.cpp \
+    ${srcdir}/../../src/options/parameter.cpp \
+    ${srcdir}/../../src/options/parser.cpp \
+    ${srcdir}/../../src/options/parsers.cpp \
+    ${srcdir}/../../src/options/printer.cpp \
+    ${srcdir}/../../src/options/setting.cpp \
+    ${srcdir}/../../src/options/variables.cpp \
     ${srcdir}/../../src/radix/base_10.cpp \
     ${srcdir}/../../src/radix/base_2048.cpp \
     ${srcdir}/../../src/radix/base_32.cpp \
@@ -310,7 +305,6 @@ include_bitcoin_systemdir = \
 include_bitcoin_system_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/allocator.hpp \
     ${srcdir}/../../include/bitcoin/system/arena.hpp \
-    ${srcdir}/../../include/bitcoin/system/boost.hpp \
     ${srcdir}/../../include/bitcoin/system/constants.hpp \
     ${srcdir}/../../include/bitcoin/system/constraints.hpp \
     ${srcdir}/../../include/bitcoin/system/define.hpp \
@@ -431,14 +425,10 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/header.hpp \
     ${srcdir}/../../include/bitcoin/system/config/input.hpp \
     ${srcdir}/../../include/bitcoin/system/config/output.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/parameter.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/parser.hpp \
     ${srcdir}/../../include/bitcoin/system/config/path.hpp \
     ${srcdir}/../../include/bitcoin/system/config/point.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/printer.hpp \
     ${srcdir}/../../include/bitcoin/system/config/script.hpp \
     ${srcdir}/../../include/bitcoin/system/config/selection.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/setting.hpp \
     ${srcdir}/../../include/bitcoin/system/config/token.hpp \
     ${srcdir}/../../include/bitcoin/system/config/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/config/url.hpp \
@@ -574,6 +564,7 @@ include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/algorithm.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/algorithms.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/checksum.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/crc32.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/functions.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hash.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/hkdf.hpp \
@@ -625,7 +616,6 @@ include_bitcoin_system_impl_configdir = \
     ${includedir}/bitcoin/system/impl/config
 
 include_bitcoin_system_impl_config_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/config/setting.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/config/token.ipp
 
 include_bitcoin_system_impl_cryptodir = \
@@ -800,6 +790,13 @@ include_bitcoin_system_impl_math_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/math/rotate.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/math/sign.ipp
 
+include_bitcoin_system_impl_optionsdir = \
+    ${includedir}/bitcoin/system/impl/options
+
+include_bitcoin_system_impl_options_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/options/setting.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/options/value.ipp
+
 include_bitcoin_system_impl_radixdir = \
     ${includedir}/bitcoin/system/impl/radix
 
@@ -850,11 +847,33 @@ include_bitcoin_system_impl_stream_streamers_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/stream/streamers/sha256t_writer.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/stream/streamers/sha256x2_writer.ipp
 
+include_bitcoin_system_impl_uintxdir = \
+    ${includedir}/bitcoin/system/impl/uintx
+
+include_bitcoin_system_impl_uintx_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/arithmetic.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/bitwise.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/compare.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/construct.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/division.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/uintx/text.ipp
+
 include_bitcoin_system_impl_unicodedir = \
     ${includedir}/bitcoin/system/impl/unicode
 
 include_bitcoin_system_impl_unicode_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/unicode/ascii.ipp
+
+include_bitcoin_system_impl_unit_testdir = \
+    ${includedir}/bitcoin/system/impl/unit_test
+
+include_bitcoin_system_impl_unit_test_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/checks.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/filter.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/registry.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/runner.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/session.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/unit_test/settings.ipp
 
 include_bitcoin_system_impl_wallet_addressesdir = \
     ${includedir}/bitcoin/system/impl/wallet/addresses
@@ -911,6 +930,17 @@ include_bitcoin_system_intrinsics_none_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_aes.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/none/none_sha.hpp
 
+include_bitcoin_system_ipdir = \
+    ${includedir}/bitcoin/system/ip
+
+include_bitcoin_system_ip_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/ip/address.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/endpoint.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/functions.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/ip.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/ipv4.hpp \
+    ${srcdir}/../../include/bitcoin/system/ip/ipv6.hpp
+
 include_bitcoin_system_machinedir = \
     ${includedir}/bitcoin/system/machine
 
@@ -943,6 +973,20 @@ include_bitcoin_system_math_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/math/power.hpp \
     ${srcdir}/../../include/bitcoin/system/math/rotate.hpp \
     ${srcdir}/../../include/bitcoin/system/math/sign.hpp
+
+include_bitcoin_system_optionsdir = \
+    ${includedir}/bitcoin/system/options
+
+include_bitcoin_system_options_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/options/description.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/options.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/parameter.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/parser.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/parsers.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/printer.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/setting.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/value.hpp \
+    ${srcdir}/../../include/bitcoin/system/options/variables.hpp
 
 include_bitcoin_system_radixdir = \
     ${includedir}/bitcoin/system/radix
@@ -1035,6 +1079,13 @@ include_bitcoin_system_stream_streamers_interfaces_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/stream/streamers/interfaces/bytereader.hpp \
     ${srcdir}/../../include/bitcoin/system/stream/streamers/interfaces/bytewriter.hpp
 
+include_bitcoin_system_uintxdir = \
+    ${includedir}/bitcoin/system/uintx
+
+include_bitcoin_system_uintx_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/uintx/uintx.hpp \
+    ${srcdir}/../../include/bitcoin/system/uintx/uintx_t.hpp
+
 include_bitcoin_system_unicodedir = \
     ${includedir}/bitcoin/system/unicode
 
@@ -1060,6 +1111,19 @@ include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp \
     ${srcdir}/../../include/bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp \
     ${srcdir}/../../include/bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp
+
+include_bitcoin_system_unit_testdir = \
+    ${includedir}/bitcoin/system/unit_test
+
+include_bitcoin_system_unit_test_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/unit_test/checks.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/filter.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/macros.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/registry.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/runner.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/session.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/settings.hpp \
+    ${srcdir}/../../include/bitcoin/system/unit_test/unit_test.hpp
 
 include_bitcoin_system_walletdir = \
     ${includedir}/bitcoin/system/wallet
@@ -1165,16 +1229,13 @@ if WITH_TESTS
 check_PROGRAMS = test/libbitcoin-system-test
 
 test_libbitcoin_system_test_CPPFLAGS = \
-    ${boost_BUILD_CPPFLAGS} \
     ${src_libbitcoin_system_la_CPPFLAGS}
 
 test_libbitcoin_system_test_LDFLAGS = \
     ${mingw_program_LDFLAGS} \
-    ${boost_LDFLAGS} \
     ${src_libbitcoin_system_la_LDFLAGS}
 
 test_libbitcoin_system_test_LDADD = \
-    ${boost_LIBS} \
     ${src_libbitcoin_system_la_LIBS} \
     ${src_libbitcoin_system_la_LIBADD}
 
@@ -1186,7 +1247,6 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/define.cpp \
     ${srcdir}/../../test/execution.cpp \
     ${srcdir}/../../test/funclets.cpp \
-    ${srcdir}/../../test/hacks.cpp \
     ${srcdir}/../../test/literals.cpp \
     ${srcdir}/../../test/main.cpp \
     ${srcdir}/../../test/settings.cpp \
@@ -1251,11 +1311,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/byte.cpp \
     ${srcdir}/../../test/config/endpoint.cpp \
     ${srcdir}/../../test/config/hash256.cpp \
-    ${srcdir}/../../test/config/parameter.cpp \
-    ${srcdir}/../../test/config/parser.cpp \
     ${srcdir}/../../test/config/path.cpp \
-    ${srcdir}/../../test/config/printer.cpp \
-    ${srcdir}/../../test/config/setting.cpp \
     ${srcdir}/../../test/config/token.cpp \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \
@@ -1336,6 +1392,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/filter/sieve.cpp \
     ${srcdir}/../../test/hash/accumulator.cpp \
     ${srcdir}/../../test/hash/checksum.cpp \
+    ${srcdir}/../../test/hash/crc32.cpp \
     ${srcdir}/../../test/hash/functions.cpp \
     ${srcdir}/../../test/hash/hkdf.cpp \
     ${srcdir}/../../test/hash/hmac.cpp \
@@ -1368,6 +1425,11 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/intrinsics/types.cpp \
     ${srcdir}/../../test/intrinsics/platforms/intel.cpp \
     ${srcdir}/../../test/intrinsics/platforms/neon.cpp \
+    ${srcdir}/../../test/ip/address.cpp \
+    ${srcdir}/../../test/ip/endpoint.cpp \
+    ${srcdir}/../../test/ip/functions.cpp \
+    ${srcdir}/../../test/ip/ipv4.cpp \
+    ${srcdir}/../../test/ip/ipv6.cpp \
     ${srcdir}/../../test/machine/interpreter.cpp \
     ${srcdir}/../../test/machine/interpreter_connect.cpp \
     ${srcdir}/../../test/machine/interpreter_run.cpp \
@@ -1393,6 +1455,14 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/math/rotate.cpp \
     ${srcdir}/../../test/math/sign.cpp \
     ${srcdir}/../../test/mocks/blocks.cpp \
+    ${srcdir}/../../test/options/description.cpp \
+    ${srcdir}/../../test/options/parameter.cpp \
+    ${srcdir}/../../test/options/parser.cpp \
+    ${srcdir}/../../test/options/parsers.cpp \
+    ${srcdir}/../../test/options/printer.cpp \
+    ${srcdir}/../../test/options/setting.cpp \
+    ${srcdir}/../../test/options/value.cpp \
+    ${srcdir}/../../test/options/variables.cpp \
     ${srcdir}/../../test/radix/base_10.cpp \
     ${srcdir}/../../test/radix/base_16.cpp \
     ${srcdir}/../../test/radix/base_2048.cpp \
@@ -1434,6 +1504,8 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/stream/streamers/sha256_writer.cpp \
     ${srcdir}/../../test/stream/streamers/sha256t_writer.cpp \
     ${srcdir}/../../test/stream/streamers/sha256x2_writer.cpp \
+    ${srcdir}/../../test/uintx/uint256_t.cpp \
+    ${srcdir}/../../test/uintx/uintx_t.cpp \
     ${srcdir}/../../test/unicode/ascii.cpp \
     ${srcdir}/../../test/unicode/code_points.cpp \
     ${srcdir}/../../test/unicode/conversion.cpp \
@@ -1444,6 +1516,10 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/unicode/utf8_everywhere/paths.cpp \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_istream.cpp \
     ${srcdir}/../../test/unicode/utf8_everywhere/unicode_ostream.cpp \
+    ${srcdir}/../../test/unit_test/checks.cpp \
+    ${srcdir}/../../test/unit_test/filter.cpp \
+    ${srcdir}/../../test/unit_test/registry.cpp \
+    ${srcdir}/../../test/unit_test/settings.cpp \
     ${srcdir}/../../test/wallet/context.cpp \
     ${srcdir}/../../test/wallet/descriptor.cpp \
     ${srcdir}/../../test/wallet/message.cpp \

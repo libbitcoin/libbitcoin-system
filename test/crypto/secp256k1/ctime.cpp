@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_ctime_tests)
+BC_AUTO_TEST_SUITE(secp256k1_ctime_tests)
 
 // Under valgrind a secret is undefined, so a branch or memory address that
 // depends on it is reported as an error, and each output is defined before it
@@ -30,10 +30,10 @@ const hash_digest message = base16_hash("f89572635651b2e4f89778350616989183c98d1
 const ec_ellswift key_a = base16_array("ec0adff257bbfe500c188c80b4fdd640f6b45a482bbc15fc7cef5931deff0aa186f6eb9bba7b85dc4dcc28b28722de1e3d9108b985e2967045668f66098e475b");
 const ec_ellswift key_b = base16_array("a4a94dfce69b4a2a0a099313d10f9f7e7d649d60501c9e1d274c300e0d89aafaffffffffffffffffffffffffffffffffffffffffffffffffffffffff8faf88d5");
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__secret_to_public__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__secret_to_public__undefined_secret__expected)
 {
     ec_compressed expected{};
-    BOOST_REQUIRE(secret_to_public(expected, secret1));
+    BC_REQUIRE(secret_to_public(expected, secret1));
 
     auto secret = secret1;
     classify(secret);
@@ -41,14 +41,14 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__secret_to_public__undefined_secret__expect
     auto result = secret_to_public(point, secret);
     declassify(result);
     declassify(point);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(point, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(point, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ec_add_secret__undefined_secrets__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ec_add_secret__undefined_secrets__expected)
 {
     auto expected = secret1;
-    BOOST_REQUIRE(ec_add(expected, secret2));
+    BC_REQUIRE(ec_add(expected, secret2));
 
     auto left = secret1;
     auto right = secret2;
@@ -57,31 +57,31 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__ec_add_secret__undefined_secrets__expected
     auto result = ec_add(left, right);
     declassify(result);
     declassify(left);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(left, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(left, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ec_add_point__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ec_add_point__undefined_secret__expected)
 {
     ec_compressed expected{};
-    BOOST_REQUIRE(secret_to_public(expected, secret1));
-    BOOST_REQUIRE(ec_add(expected, secret2));
+    BC_REQUIRE(secret_to_public(expected, secret1));
+    BC_REQUIRE(ec_add(expected, secret2));
 
     auto tweak = secret2;
     classify(tweak);
     ec_compressed point{};
-    BOOST_REQUIRE(secret_to_public(point, secret1));
+    BC_REQUIRE(secret_to_public(point, secret1));
     auto result = ec_add(point, tweak);
     declassify(result);
     declassify(point);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(point, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(point, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ec_multiply_secret__undefined_secrets__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ec_multiply_secret__undefined_secrets__expected)
 {
     auto expected = secret1;
-    BOOST_REQUIRE(ec_multiply(expected, secret2));
+    BC_REQUIRE(ec_multiply(expected, secret2));
 
     auto left = secret1;
     auto right = secret2;
@@ -90,31 +90,31 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__ec_multiply_secret__undefined_secrets__exp
     auto result = ec_multiply(left, right);
     declassify(result);
     declassify(left);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(left, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(left, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ec_multiply_point__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ec_multiply_point__undefined_secret__expected)
 {
     ec_compressed expected{};
-    BOOST_REQUIRE(secret_to_public(expected, secret1));
-    BOOST_REQUIRE(ec_multiply(expected, secret2));
+    BC_REQUIRE(secret_to_public(expected, secret1));
+    BC_REQUIRE(ec_multiply(expected, secret2));
 
     auto tweak = secret2;
     classify(tweak);
     ec_compressed point{};
-    BOOST_REQUIRE(secret_to_public(point, secret1));
+    BC_REQUIRE(secret_to_public(point, secret1));
     auto result = ec_multiply(point, tweak);
     declassify(result);
     declassify(point);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(point, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(point, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ecdsa_sign__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ecdsa_sign__undefined_secret__expected)
 {
     ec_signature expected{};
-    BOOST_REQUIRE(ecdsa::sign(expected, secret2, message));
+    BC_REQUIRE(ecdsa::sign(expected, secret2, message));
 
     auto secret = secret2;
     classify(secret);
@@ -122,14 +122,14 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__ecdsa_sign__undefined_secret__expected)
     auto result = ecdsa::sign(signature, secret, message);
     declassify(result);
     declassify(signature);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(signature, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(signature, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ecdsa_sign_recoverable__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ecdsa_sign_recoverable__undefined_secret__expected)
 {
     recoverable_signature expected{};
-    BOOST_REQUIRE(ecdsa::sign_recoverable(expected, secret2, message));
+    BC_REQUIRE(ecdsa::sign_recoverable(expected, secret2, message));
 
     auto secret = secret2;
     classify(secret);
@@ -137,15 +137,15 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__ecdsa_sign_recoverable__undefined_secret__
     auto result = ecdsa::sign_recoverable(signature, secret, message);
     declassify(result);
     declassify(signature);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(signature.signature, expected.signature);
-    BOOST_REQUIRE_EQUAL(signature.recovery_id, expected.recovery_id);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(signature.signature, expected.signature);
+    BC_REQUIRE_EQUAL(signature.recovery_id, expected.recovery_id);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__schnorr_sign__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__schnorr_sign__undefined_secret__expected)
 {
     ec_signature expected{};
-    BOOST_REQUIRE(schnorr::sign(expected, secret2, message, message));
+    BC_REQUIRE(schnorr::sign(expected, secret2, message, message));
 
     auto secret = secret2;
     classify(secret);
@@ -153,14 +153,14 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__schnorr_sign__undefined_secret__expected)
     auto result = schnorr::sign(signature, secret, message, message);
     declassify(result);
     declassify(signature);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(signature, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(signature, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ellswift_create__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ellswift_create__undefined_secret__expected)
 {
     ec_ellswift expected{};
-    BOOST_REQUIRE(ellswift::create(expected, secret1, message));
+    BC_REQUIRE(ellswift::create(expected, secret1, message));
 
     auto secret = secret1;
     classify(secret);
@@ -168,14 +168,14 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__ellswift_create__undefined_secret__expecte
     auto result = ellswift::create(key, secret, message);
     declassify(result);
     declassify(key);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(key, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(key, expected);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_ctime__ellswift_exchange__undefined_secret__expected)
+BC_AUTO_TEST_CASE(secp256k1_ctime__ellswift_exchange__undefined_secret__expected)
 {
     hash_digest expected{};
-    BOOST_REQUIRE(ellswift::exchange(expected, secret1, key_a, key_b, false));
+    BC_REQUIRE(ellswift::exchange(expected, secret1, key_a, key_b, false));
 
     auto secret = secret1;
     classify(secret);
@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_CASE(secp256k1_ctime__ellswift_exchange__undefined_secret__expec
     auto result = ellswift::exchange(shared, secret, key_a, key_b, false);
     declassify(result);
     declassify(shared);
-    BOOST_REQUIRE(result);
-    BOOST_REQUIRE_EQUAL(shared, expected);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(shared, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

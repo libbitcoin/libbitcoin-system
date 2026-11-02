@@ -115,6 +115,112 @@
                 "gnu-release",
                 "nix-base"
             ]
+        },
+        {
+            "name": "win-base",
+            "description": "Factored base settings for windows platforms (msvc developer environment).",
+            "hidden": true,
+            "generator": "Ninja",
+            "installDir": "${sourceParentDir}/../../../prefix/${presetName}",
+            "binaryDir": "${sourceParentDir}/../obj/${presetName}",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": {
+                  "type": "PATH",
+                  "value": "${sourceParentDir}/../../../prefix/${presetName}"
+                },
+                "CMAKE_INSTALL_PREFIX_PATH": {
+                  "type": "PATH",
+                  "value": "${sourceParentDir}/../../../prefix/${presetName}"
+                },
+                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+            }
+        },
+        {
+            "name": "msvc",
+            "description": "Factored msvc compiler settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
+            "name": "clangcl",
+            "description": "Factored clang-cl compiler settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-cl",
+                "CMAKE_CXX_COMPILER": "clang-cl"
+            }
+        },
+        {
+            "name": "win-debug",
+            "description": "Factored windows debug settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "win-release",
+            "description": "Factored windows release settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "win-msvc-debug-static",
+            "displayName": "Windows/MSVC/Debug/Static",
+            "description": "Debug build with msvc and static linking.",
+            "hidden": false,
+            "inherits": [
+                "static",
+                "win-debug",
+                "msvc",
+                "win-base"
+            ]
+        },
+        {
+            "name": "win-msvc-release-static",
+            "displayName": "Windows/MSVC/Release/Static",
+            "description": "Release build with msvc and static linking.",
+            "hidden": false,
+            "inherits": [
+                "static",
+                "win-release",
+                "msvc",
+                "win-base"
+            ]
+        },
+        {
+            "name": "win-clangcl-debug-static",
+            "displayName": "Windows/clang-cl/Debug/Static",
+            "description": "Debug build with clang-cl and static linking.",
+            "hidden": false,
+            "inherits": [
+                "static",
+                "win-debug",
+                "clangcl",
+                "win-base"
+            ]
+        },
+        {
+            "name": "win-clangcl-release-static",
+            "displayName": "Windows/clang-cl/Release/Static",
+            "description": "Release build with clang-cl and static linking.",
+            "hidden": false,
+            "inherits": [
+                "static",
+                "win-release",
+                "clangcl",
+                "win-base"
+            ]
         }
     ],
     "buildPresets": [
@@ -150,6 +256,30 @@
             "displayName": "*nix/GNU/Release/Shared",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-shared"
+        },
+        {
+            "name": "win-msvc-debug-static",
+            "displayName": "Windows/MSVC/Debug/Static",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-msvc-debug-static"
+        },
+        {
+            "name": "win-msvc-release-static",
+            "displayName": "Windows/MSVC/Release/Static",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-msvc-release-static"
+        },
+        {
+            "name": "win-clangcl-debug-static",
+            "displayName": "Windows/clang-cl/Debug/Static",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-clangcl-debug-static"
+        },
+        {
+            "name": "win-clangcl-release-static",
+            "displayName": "Windows/clang-cl/Release/Static",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-clangcl-release-static"
         }
     ]
 }

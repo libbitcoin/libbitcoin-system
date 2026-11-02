@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// hash_digest gets bypassed (up as an array of numbers) by boost.
+// hash_digest gets bypassed (up as an array of numbers) by json conversion.
 ////DEFINE_JSON_TO_TAG(hash_digest)
 ////{
 ////    hash_digest hash{};

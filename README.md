@@ -36,7 +36,6 @@ The master branch is current, pending the v4 release.
 | Requirement | Notes |
 |-------------|-------|
 | C++20 compiler | Verified in CI with GCC 13–16, Clang 18–19, Apple Clang and MSVC (Visual Studio 2026) |
-| Boost ≥ 1.86 | container, json, program_options, url, and unit_test_framework for tests |
 | Autoconf, Automake, Libtool, pkg-config | GNU Autotools builds |
 | CMake ≥ 3.30 | CMake builds |
 | git | Used by the installation scripts to clone dependencies |
@@ -63,7 +62,7 @@ libbitcoin-system ships with **three installation scripts**, each targeting a di
 | `builds/cmake/install-cmake.sh` | CMake | Linux, macOS — flexible |
 | `builds/cmake/install-presets.sh` | CMake with Presets | Linux — simplified, named configurations |
 
-Each script can download and build its dependencies (Boost and, optionally, a secp256k1 library) before building and installing libbitcoin-system. Unrecognized options are passed through as configuration options to all builds.
+Each script can download and build its optional dependency (a secp256k1 library) before building and installing libbitcoin-system. Unrecognized options are passed through as configuration options to all builds.
 
 ### GNU Autotools Build
 
@@ -75,7 +74,6 @@ cd libbitcoin-system
 
 ./builds/gnu/install-gnu.sh \
   --prefix=$HOME/libbitcoin \
-  --build-boost \
   --build-config=release \
   --build-link=static \
   --build-post-install-clean
@@ -90,7 +88,6 @@ On success the headers and library are installed under `$HOME/libbitcoin`, along
 | `--prefix=<path>` | absolute path | Installation destination (default `/usr/local`) |
 | `--build-config=<mode>` | `release`, `debug` | Build configuration |
 | `--build-link=<mode>` | `static`, `dynamic` | Link mode |
-| `--build-boost` | — | Build Boost from source |
 | `--build-secp256k1` | — | Build bitcoin-core/secp256k1 from source (with `--with-secp256k1`) |
 | `--build-use-local-src` | — | Reuse already-present source directories instead of cloning from GitHub |
 | `--build-skip-tests` | — | Skip test compilation and execution |
@@ -113,7 +110,6 @@ cd libbitcoin-system
 
 ./builds/cmake/install-cmake.sh \
   --prefix=$HOME/libbitcoin \
-  --build-boost \
   --build-config=release \
   --build-link=static \
   --build-post-install-clean
@@ -146,8 +142,7 @@ Named presets combine the toolchain, build type and link mode into a single `--b
 
 ```bash
 ./builds/cmake/install-presets.sh \
-  --build-preset=nix-gnu-release-static \
-  --build-boost
+  --build-preset=nix-gnu-release-static
 ```
 
 See all options:
@@ -168,11 +163,10 @@ Then follow the [GNU Autotools Build](#gnu-autotools-build) or [CMake Build](#cm
 
 ### Windows
 
-Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. Dependencies are NuGet packages, restored automatically when the solution is built. Only Boost is required; the secp256k1 library is an optional replacement for the internal implementation (see [secp256k1](#secp256k1)):
+Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. The only dependency is an optional NuGet package, restored automatically when the solution is built. The secp256k1 library is an optional replacement for the internal implementation (see [secp256k1](#secp256k1)):
 
 | Package | Version | Required |
 |---------|---------|----------|
-| `libbitcoin-boost` (with container, json, program_options, url and unit_test_framework) | 1.91.0 | yes |
 | `secp256k1_vc145` | 0.8.0 | no |
 
 Build from within Visual Studio, or from a command prompt with `builds\msvc\build-msvc.cmd`, which restores the NuGet packages and builds with MSBuild. The script runs `msbuild` and `nuget` from `PATH` (a Developer Command Prompt provides `msbuild`; `nuget.exe` must be downloaded). To use other executables, set the `MSBUILD_EXE` and `NUGET_EXE` environment variables before running it. Packages are restored to `.nuget\packages` under the source directory unless `NUGET_PKG_PATH` is set.
@@ -224,7 +218,6 @@ Example:
 ```bash
 ./builds/gnu/install-gnu.sh \
   --prefix=$HOME/libbitcoin \
-  --build-boost \
   --build-config=release \
   --build-link=static \
   --enable-shani \

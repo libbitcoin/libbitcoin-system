@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_multiply_tests)
+BC_AUTO_TEST_SUITE(intrinsics_multiply_tests)
 
 // mul_wide
 // ----------------------------------------------------------------------------
@@ -68,49 +68,49 @@ static bool mul_wide64_matches_nominal(uint64_t left, uint64_t right) NOEXCEPT
     return hi == nominal_hi && lo == nominal_lo;
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__mul_wide64__always__matches_nominal)
+BC_AUTO_TEST_CASE(intrinsics__mul_wide64__always__matches_nominal)
 {
-    BOOST_CHECK(mul_wide64_matches_nominal(0_u64, 0_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0_u64, max_uint64));
-    BOOST_CHECK(mul_wide64_matches_nominal(1_u64, max_uint64));
-    BOOST_CHECK(mul_wide64_matches_nominal(2_u64, max_uint64));
-    BOOST_CHECK(mul_wide64_matches_nominal(max_uint64, max_uint64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0xffffffff_u64, 0xffffffff_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0xffffffff_u64, 0x0000000100000000_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x0000000100000000_u64, 0x0000000100000000_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x0000000100000000_u64, max_uint64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x123456789abcdef0_u64, 0x0fedcba987654321_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x0fedcba987654321_u64, 0x123456789abcdef0_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x123456789abcdef0_u64, max_uint64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x8000000000000000_u64, 0x8000000000000000_u64));
-    BOOST_CHECK(mul_wide64_matches_nominal(0x8000000000000000_u64, 2_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0_u64, 0_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0_u64, max_uint64));
+    BC_CHECK(mul_wide64_matches_nominal(1_u64, max_uint64));
+    BC_CHECK(mul_wide64_matches_nominal(2_u64, max_uint64));
+    BC_CHECK(mul_wide64_matches_nominal(max_uint64, max_uint64));
+    BC_CHECK(mul_wide64_matches_nominal(0xffffffff_u64, 0xffffffff_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0xffffffff_u64, 0x0000000100000000_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0x0000000100000000_u64, 0x0000000100000000_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0x0000000100000000_u64, max_uint64));
+    BC_CHECK(mul_wide64_matches_nominal(0x123456789abcdef0_u64, 0x0fedcba987654321_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0x0fedcba987654321_u64, 0x123456789abcdef0_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0x123456789abcdef0_u64, max_uint64));
+    BC_CHECK(mul_wide64_matches_nominal(0x8000000000000000_u64, 0x8000000000000000_u64));
+    BC_CHECK(mul_wide64_matches_nominal(0x8000000000000000_u64, 2_u64));
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__mul_wide__runtime__expected)
+BC_AUTO_TEST_CASE(intrinsics__mul_wide__runtime__expected)
 {
     uint64_t hi64{}, lo64{};
     mul_wide(hi64, lo64, max_uint64, max_uint64);
-    BOOST_CHECK_EQUAL(hi64, 0xfffffffffffffffe_u64);
-    BOOST_CHECK_EQUAL(lo64, 0x0000000000000001_u64);
+    BC_CHECK_EQUAL(hi64, 0xfffffffffffffffe_u64);
+    BC_CHECK_EQUAL(lo64, 0x0000000000000001_u64);
 
     mul_wide(hi64, lo64, 0x123456789abcdef0_u64, 0x0fedcba987654321_u64);
-    BOOST_CHECK_EQUAL(hi64, 0x0121fa00ad77d742_u64);
-    BOOST_CHECK_EQUAL(lo64, 0x2236d88fe5618cf0_u64);
+    BC_CHECK_EQUAL(hi64, 0x0121fa00ad77d742_u64);
+    BC_CHECK_EQUAL(lo64, 0x2236d88fe5618cf0_u64);
 
     uint32_t hi32{}, lo32{};
     mul_wide(hi32, lo32, 0xffffffff_u32, 0xffffffff_u32);
-    BOOST_CHECK_EQUAL(hi32, 0xfffffffe_u32);
-    BOOST_CHECK_EQUAL(lo32, 0x00000001_u32);
+    BC_CHECK_EQUAL(hi32, 0xfffffffe_u32);
+    BC_CHECK_EQUAL(lo32, 0x00000001_u32);
 
     uint16_t hi16{}, lo16{};
     mul_wide(hi16, lo16, 0x1234_u16, 0x5678_u16);
-    BOOST_CHECK_EQUAL(hi16, 0x0626_u16);
-    BOOST_CHECK_EQUAL(lo16, 0x0060_u16);
+    BC_CHECK_EQUAL(hi16, 0x0626_u16);
+    BC_CHECK_EQUAL(lo16, 0x0060_u16);
 
     uint8_t hi8{}, lo8{};
     mul_wide(hi8, lo8, 0xff_u8, 0xff_u8);
-    BOOST_CHECK_EQUAL(hi8, 0xfe_u8);
-    BOOST_CHECK_EQUAL(lo8, 0x01_u8);
+    BC_CHECK_EQUAL(hi8, 0xfe_u8);
+    BC_CHECK_EQUAL(lo8, 0x01_u8);
 }
 
 // madd52lo/madd52hi
@@ -138,14 +138,14 @@ static_assert(madd52hi(max_uint64, max52, 2_u64) == 0_u64);
 static_assert(madd52lo(42_u64, 0_u64, max52) == 42_u64);
 static_assert(madd52hi(42_u64, 0_u64, max52) == 42_u64);
 
-BOOST_AUTO_TEST_CASE(intrinsics__madd52__runtime__expected)
+BC_AUTO_TEST_CASE(intrinsics__madd52__runtime__expected)
 {
-    BOOST_CHECK_EQUAL(madd52lo(7_u64, max52, max52), 8_u64);
-    BOOST_CHECK_EQUAL(madd52hi(7_u64, max52, max52), 0x000ffffffffffffe_u64 + 7_u64);
-    BOOST_CHECK_EQUAL(madd52lo(1_u64, 0x8000000000000003_u64, 5_u64), 16_u64);
-    BOOST_CHECK_EQUAL(madd52hi(1_u64, 0x8000000000000003_u64, 5_u64), 1_u64);
-    BOOST_CHECK_EQUAL(madd52lo(max_uint64, 1_u64, 2_u64), 1_u64);
-    BOOST_CHECK_EQUAL(madd52hi(max_uint64, max52, 2_u64), 0_u64);
+    BC_CHECK_EQUAL(madd52lo(7_u64, max52, max52), 8_u64);
+    BC_CHECK_EQUAL(madd52hi(7_u64, max52, max52), 0x000ffffffffffffe_u64 + 7_u64);
+    BC_CHECK_EQUAL(madd52lo(1_u64, 0x8000000000000003_u64, 5_u64), 16_u64);
+    BC_CHECK_EQUAL(madd52hi(1_u64, 0x8000000000000003_u64, 5_u64), 1_u64);
+    BC_CHECK_EQUAL(madd52lo(max_uint64, 1_u64, 2_u64), 1_u64);
+    BC_CHECK_EQUAL(madd52hi(max_uint64, max52, 2_u64), 0_u64);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

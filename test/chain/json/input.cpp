@@ -18,12 +18,11 @@
  */
 #include "../../test.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(input_json_tests)
+BC_AUTO_TEST_SUITE(input_json_tests)
 
-BOOST_AUTO_TEST_CASE(input__json__conversions__expected)
+BC_AUTO_TEST_CASE(input__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -57,14 +56,14 @@ BOOST_AUTO_TEST_CASE(input__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<input>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<input>(value) == instance);
 }
 
-BOOST_AUTO_TEST_CASE(input__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(input__json__pointer_conversions__expected)
 {
     const input expected
     {
@@ -76,12 +75,12 @@ BOOST_AUTO_TEST_CASE(input__json__pointer_conversions__expected)
 
     const input::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<input::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<input::cptr>(value) == *instance);
 }
 
 // A witness-less input serializes without the witness element.
-BOOST_AUTO_TEST_CASE(input__json__invalid_witness__no_witness_element)
+BC_AUTO_TEST_CASE(input__json__invalid_witness__no_witness_element)
 {
     const std::string_view text
     {
@@ -103,9 +102,9 @@ BOOST_AUTO_TEST_CASE(input__json__invalid_witness__no_witness_element)
         24
     };
 
-    BOOST_REQUIRE(!instance.witness().is_valid());
+    BC_REQUIRE(!instance.witness().is_valid());
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

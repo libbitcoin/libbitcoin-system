@@ -21,6 +21,7 @@
 
 #include <filesystem>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/options/options.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
@@ -69,12 +70,14 @@ private:
 BC_API std::filesystem::path operator/(const path& left,
     const std::filesystem::path& right) NOEXCEPT;
 
-/// Assign the token as the path, bypassing stream extraction, which cannot
-/// obtain an empty token and terminates a token at its first space.
-BC_API void validate(boost::any& value, const string_list& tokens, path*,
-    int) THROWS;
-
 } // namespace config
+
+namespace options {
+
+template <>
+struct is_whole_token_t<config::path> : std::true_type {};
+
+} // namespace options
 } // namespace system
 } // namespace libbitcoin
 

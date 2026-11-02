@@ -19,8 +19,15 @@
 #ifndef LIBBITCOIN_SYSTEM_ALLOCATOR_HPP
 #define LIBBITCOIN_SYSTEM_ALLOCATOR_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
+#include <limits>
+#include <memory>
+#include <memory_resource>
 #include <new>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 #include <bitcoin/system/arena.hpp>
 

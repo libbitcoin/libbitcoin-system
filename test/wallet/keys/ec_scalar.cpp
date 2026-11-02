@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(ec_scalar_tests)
+BC_AUTO_TEST_SUITE(ec_scalar_tests)
 
 const ec_secret secret1a = base16_array("b9d22ea0ed7e3d53cc9e1b3d436bb9260fc3211634c821f6bb3cb3a73ee7a0b5");
 const ec_secret secret1b = base16_array("f9416cd856d81a00366ad7234a7b5e5dbda61812e56effcb4cde0695bc092380");
@@ -36,516 +36,516 @@ const ec_compressed compressed2 = base16_array("0309ba8621aefd3b6ba4ca6d11a4746e
 
 // construct
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__default__false_zero)
+BC_AUTO_TEST_CASE(ec_scalar__construct__default__false_zero)
 {
     const ec_scalar value;
-    BOOST_REQUIRE(!value);
-    BOOST_REQUIRE_EQUAL(value, int64_t{ 0 });
+    BC_REQUIRE(!value);
+    BC_REQUIRE_EQUAL(value, int64_t{ 0 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__1__true_1)
+BC_AUTO_TEST_CASE(ec_scalar__construct__1__true_1)
 {
     const ec_scalar value(1);
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, int64_t{ 1 });
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, int64_t{ 1 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__copy_ec_scalar__expected)
+BC_AUTO_TEST_CASE(ec_scalar__construct__copy_ec_scalar__expected)
 {
     const ec_scalar value(positive42);
-    BOOST_REQUIRE(value);
+    BC_REQUIRE(value);
 
     const ec_scalar copy(value);
-    BOOST_REQUIRE(copy);
-    BOOST_REQUIRE_EQUAL(copy, positive42);
+    BC_REQUIRE(copy);
+    BC_REQUIRE_EQUAL(copy, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__copy_int64__expected)
+BC_AUTO_TEST_CASE(ec_scalar__construct__copy_int64__expected)
 {
     const ec_scalar value(42);
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, positive42);
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, positive42);
 
     const ec_scalar copy(value);
-    BOOST_REQUIRE(copy);
-    BOOST_REQUIRE_EQUAL(copy, value);
+    BC_REQUIRE(copy);
+    BC_REQUIRE_EQUAL(copy, value);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__move_ec_scalar__moved)
+BC_AUTO_TEST_CASE(ec_scalar__construct__move_ec_scalar__moved)
 {
     ec_scalar value(positive42);
-    BOOST_REQUIRE(value);
+    BC_REQUIRE(value);
 
     const ec_scalar copy(std::move(value));
-    BOOST_REQUIRE(copy);
-    BOOST_REQUIRE_EQUAL(copy, positive42);
+    BC_REQUIRE(copy);
+    BC_REQUIRE_EQUAL(copy, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__move_int64__moved)
+BC_AUTO_TEST_CASE(ec_scalar__construct__move_int64__moved)
 {
     ec_scalar value(42);
-    BOOST_REQUIRE(value);
+    BC_REQUIRE(value);
 
     const ec_scalar copy(std::move(value));
-    BOOST_REQUIRE(copy);
-    BOOST_REQUIRE_EQUAL(copy, positive42);
+    BC_REQUIRE(copy);
+    BC_REQUIRE_EQUAL(copy, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__ec_secret_copy__expected)
+BC_AUTO_TEST_CASE(ec_scalar__construct__ec_secret_copy__expected)
 {
     const ec_scalar value(positive42);
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, positive42);
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__ec_secret_move__moved)
+BC_AUTO_TEST_CASE(ec_scalar__construct__ec_secret_move__moved)
 {
     auto copy = positive42;
     const ec_scalar value(std::move(copy));
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, positive42);
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__int64_zero__false_zero)
+BC_AUTO_TEST_CASE(ec_scalar__construct__int64_zero__false_zero)
 {
     const ec_scalar value(0);
-    BOOST_REQUIRE(!value);
-    BOOST_REQUIRE_EQUAL(value, int64_t{ 0 });
+    BC_REQUIRE(!value);
+    BC_REQUIRE_EQUAL(value, int64_t{ 0 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__int64_42__true_42)
+BC_AUTO_TEST_CASE(ec_scalar__construct__int64_42__true_42)
 {
     const ec_scalar value(42);
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, int64_t{ 42 });
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, int64_t{ 42 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__min_int64__true_min_int64)
+BC_AUTO_TEST_CASE(ec_scalar__construct__min_int64__true_min_int64)
 {
     const ec_scalar value(bc::min_int64);
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, bc::min_int64);
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, bc::min_int64);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__construct__max_int64__true_max_int64)
+BC_AUTO_TEST_CASE(ec_scalar__construct__max_int64__true_max_int64)
 {
     const ec_scalar value(bc::max_int64);
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, bc::max_int64);
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, bc::max_int64);
 }
 
 // secret
 
-BOOST_AUTO_TEST_CASE(ec_scalar__secret__secret__expected)
+BC_AUTO_TEST_CASE(ec_scalar__secret__secret__expected)
 {
     const ec_scalar value(positive42);
-    BOOST_REQUIRE_EQUAL(value.secret(), positive42);
+    BC_REQUIRE_EQUAL(value.secret(), positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__secret__int64__expected)
+BC_AUTO_TEST_CASE(ec_scalar__secret__int64__expected)
 {
     const ec_scalar value(42);
-    BOOST_REQUIRE_EQUAL(value.secret(), positive42);
+    BC_REQUIRE_EQUAL(value.secret(), positive42);
 }
 
 // assignment
 
 // [-Wself-assign-overloaded]
-////BOOST_AUTO_TEST_CASE(ec_scalar__copy_assignment__self__expected)
+////BC_AUTO_TEST_CASE(ec_scalar__copy_assignment__self__expected)
 ////{
 ////    ec_scalar value(positive42);
 ////    value = value;
-////    BOOST_REQUIRE_EQUAL(value, positive42);
+////    BC_REQUIRE_EQUAL(value, positive42);
 ////}
 
 // [-Wself-assign-overloaded]
-////BOOST_AUTO_TEST_CASE(ec_scalar__move_assignment__self__expected)
+////BC_AUTO_TEST_CASE(ec_scalar__move_assignment__self__expected)
 ////{
 ////    ec_scalar value(positive42);
 ////    value = std::move(value);
-////    BOOST_REQUIRE_EQUAL(value, positive42);
+////    BC_REQUIRE_EQUAL(value, positive42);
 ////}
 
-BOOST_AUTO_TEST_CASE(ec_scalar__copy_scalar_assignment__positive__expected)
+BC_AUTO_TEST_CASE(ec_scalar__copy_scalar_assignment__positive__expected)
 {
     const ec_scalar value(positive42);
     const ec_scalar copy = value;
-    BOOST_REQUIRE_EQUAL(copy, value);
+    BC_REQUIRE_EQUAL(copy, value);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__move_scalar_assignment__positive__moved)
+BC_AUTO_TEST_CASE(ec_scalar__move_scalar_assignment__positive__moved)
 {
     ec_scalar value(positive42);
     const ec_scalar moved = std::move(value);
-    BOOST_REQUIRE_EQUAL(moved, positive42);
+    BC_REQUIRE_EQUAL(moved, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__copy_secret_assignment__positive__expected)
+BC_AUTO_TEST_CASE(ec_scalar__copy_secret_assignment__positive__expected)
 {
     const ec_scalar value(positive42);
     const ec_scalar copy = value;
-    BOOST_REQUIRE_EQUAL(copy, value);
+    BC_REQUIRE_EQUAL(copy, value);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__move_secret_assignment__positive__moved)
+BC_AUTO_TEST_CASE(ec_scalar__move_secret_assignment__positive__moved)
 {
     ec_secret value(positive42);
     const ec_secret copy = std::move(value);
-    BOOST_REQUIRE_EQUAL(copy, positive42);
+    BC_REQUIRE_EQUAL(copy, positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__int64_assignment__negative__expected)
+BC_AUTO_TEST_CASE(ec_scalar__int64_assignment__negative__expected)
 {
     ec_scalar value;
     value = -42;
-    BOOST_REQUIRE_EQUAL(value, -ec_scalar(positive42));
+    BC_REQUIRE_EQUAL(value, -ec_scalar(positive42));
 }
 
 // equality
 
-BOOST_AUTO_TEST_CASE(ec_scalar__equality__negatives__true)
+BC_AUTO_TEST_CASE(ec_scalar__equality__negatives__true)
 {
     const ec_scalar x(-1);
     const ec_scalar y(negative1);
-    BOOST_REQUIRE(x == y);
-    BOOST_REQUIRE(!(y != x));
+    BC_REQUIRE(x == y);
+    BC_REQUIRE(!(y != x));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__equality__zeros__true)
+BC_AUTO_TEST_CASE(ec_scalar__equality__zeros__true)
 {
     const ec_scalar x;
     const ec_scalar y(0);
-    BOOST_REQUIRE(x == y);
-    BOOST_REQUIRE(!(y != x));
+    BC_REQUIRE(x == y);
+    BC_REQUIRE(!(y != x));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__equality__positives__true)
+BC_AUTO_TEST_CASE(ec_scalar__equality__positives__true)
 {
     const ec_scalar x(42);
     const ec_scalar y(positive42);
-    BOOST_REQUIRE(x == y);
-    BOOST_REQUIRE(!(y != x));
+    BC_REQUIRE(x == y);
+    BC_REQUIRE(!(y != x));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__equality__int64__true)
+BC_AUTO_TEST_CASE(ec_scalar__equality__int64__true)
 {
     constexpr int64_t y = 42;
     const ec_scalar x(y);
-    BOOST_REQUIRE_EQUAL(x, y);
-    BOOST_REQUIRE_EQUAL(y, x);
+    BC_REQUIRE_EQUAL(x, y);
+    BC_REQUIRE_EQUAL(y, x);
 }
 
 // inequality
 
-BOOST_AUTO_TEST_CASE(ec_scalar__inequality__negative_positive__false)
+BC_AUTO_TEST_CASE(ec_scalar__inequality__negative_positive__false)
 {
     const ec_scalar x(-1);
     const ec_scalar y(+1);
-    BOOST_REQUIRE(!(y == x));
-    BOOST_REQUIRE(x != y);
+    BC_REQUIRE(!(y == x));
+    BC_REQUIRE(x != y);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__inequality__maximum_minimum__false)
+BC_AUTO_TEST_CASE(ec_scalar__inequality__maximum_minimum__false)
 {
     const ec_scalar x(bc::max_int64);
     const ec_scalar y(bc::min_int64);
-    BOOST_REQUIRE(!(y == x));
-    BOOST_REQUIRE(x != y);
+    BC_REQUIRE(!(y == x));
+    BC_REQUIRE(x != y);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__inequality__zero_positive__false)
+BC_AUTO_TEST_CASE(ec_scalar__inequality__zero_positive__false)
 {
     const ec_scalar x(0);
     const ec_scalar y(42);
-    BOOST_REQUIRE(!(x == y));
-    BOOST_REQUIRE((y != x));
+    BC_REQUIRE(!(x == y));
+    BC_REQUIRE((y != x));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__inequality__negative_zero__false)
+BC_AUTO_TEST_CASE(ec_scalar__inequality__negative_zero__false)
 {
     const ec_scalar x(-42);
     const ec_scalar y(0);
-    BOOST_REQUIRE(!(x == y));
-    BOOST_REQUIRE((y != x));
+    BC_REQUIRE(!(x == y));
+    BC_REQUIRE((y != x));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__inequality__int64__false)
+BC_AUTO_TEST_CASE(ec_scalar__inequality__int64__false)
 {
     const ec_scalar x(42);
     constexpr int64_t y = 24;
-    BOOST_REQUIRE_NE(x, y);
-    BOOST_REQUIRE_NE(y, x);
+    BC_REQUIRE_NE(x, y);
+    BC_REQUIRE_NE(y, x);
 }
 
 // negation
 
-BOOST_AUTO_TEST_CASE(ec_scalar__negation__of_42__unchanged_operand)
+BC_AUTO_TEST_CASE(ec_scalar__negation__of_42__unchanged_operand)
 {
     const ec_scalar value(42);
     -value;
-    BOOST_REQUIRE(value);
-    BOOST_REQUIRE_EQUAL(value, int64_t{ 42 });
+    BC_REQUIRE(value);
+    BC_REQUIRE_EQUAL(value, int64_t{ 42 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__negation__of_zero__zero)
+BC_AUTO_TEST_CASE(ec_scalar__negation__of_zero__zero)
 {
     const ec_scalar value;
-    BOOST_REQUIRE_EQUAL(value, int64_t{ 0 });
+    BC_REQUIRE_EQUAL(value, int64_t{ 0 });
 
     const auto negated = -value;
-    BOOST_REQUIRE_EQUAL(negated, int64_t{ 0 });
+    BC_REQUIRE_EQUAL(negated, int64_t{ 0 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__negation__of_positive__negative)
+BC_AUTO_TEST_CASE(ec_scalar__negation__of_positive__negative)
 {
     const ec_scalar value{ positive1 };
-    BOOST_REQUIRE(value);
+    BC_REQUIRE(value);
 
     const auto negated = -value;
-    BOOST_REQUIRE(negated);
-    BOOST_REQUIRE_EQUAL(negated, negative1);
+    BC_REQUIRE(negated);
+    BC_REQUIRE_EQUAL(negated, negative1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__negation__of_negative__positive)
+BC_AUTO_TEST_CASE(ec_scalar__negation__of_negative__positive)
 {
     const ec_scalar value{ negative1 };
-    BOOST_REQUIRE(value);
+    BC_REQUIRE(value);
 
     const auto negated = -value;
-    BOOST_REQUIRE(negated);
-    BOOST_REQUIRE_EQUAL(negated, positive1);
+    BC_REQUIRE(negated);
+    BC_REQUIRE_EQUAL(negated, positive1);
 }
 
 // sum
 
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__cool__expected)
+BC_AUTO_TEST_CASE(ec_scalar__sum__cool__expected)
 {
-    BOOST_REQUIRE_EQUAL((secret1a + secret1b), sum1);
+    BC_REQUIRE_EQUAL((secret1a + secret1b), sum1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__secret1a_secret1b__sum1)
+BC_AUTO_TEST_CASE(ec_scalar__sum__secret1a_secret1b__sum1)
 {
     const ec_scalar x{ secret1a };
     const ec_scalar y{ secret1b };
-    BOOST_REQUIRE_EQUAL((x + y), sum1);
+    BC_REQUIRE_EQUAL((x + y), sum1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__positive1_positive2__positive3)
+BC_AUTO_TEST_CASE(ec_scalar__sum__positive1_positive2__positive3)
 {
     const ec_scalar one_value{ positive1 };
     const ec_scalar two_value{ positive2 };
-    BOOST_REQUIRE_EQUAL((one_value + two_value), positive3);
+    BC_REQUIRE_EQUAL((one_value + two_value), positive3);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__positives__expected)
+BC_AUTO_TEST_CASE(ec_scalar__sum__positives__expected)
 {
     const ec_scalar x(24);
     const ec_scalar y(positive42);
-    BOOST_REQUIRE_EQUAL((x + y), int64_t{ 24 + 42 });
+    BC_REQUIRE_EQUAL((x + y), int64_t{ 24 + 42 });
 }
 
 // 0 + x : failure
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__zero_plus__fail)
+BC_AUTO_TEST_CASE(ec_scalar__sum__zero_plus__fail)
 {
     const ec_scalar x(0);
     const ec_scalar y(42);
-    BOOST_REQUIRE(!(x + y));
+    BC_REQUIRE(!(x + y));
 }
 
 // x + 0 : success
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__plus_zero__expected)
+BC_AUTO_TEST_CASE(ec_scalar__sum__plus_zero__expected)
 {
     const ec_scalar x(42);
     const ec_scalar y(0);
-    BOOST_REQUIRE_EQUAL((x + y), positive42);
+    BC_REQUIRE_EQUAL((x + y), positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__sum__one_negative__expected)
+BC_AUTO_TEST_CASE(ec_scalar__sum__one_negative__expected)
 {
     const ec_scalar x(-1);
     const ec_scalar y(42);
-    BOOST_REQUIRE_EQUAL(((x + y)), int64_t{ -1 + 42 });
+    BC_REQUIRE_EQUAL(((x + y)), int64_t{ -1 + 42 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__sum_assignment__positives__expected)
+BC_AUTO_TEST_CASE(ec_scalar__sum_assignment__positives__expected)
 {
     ec_scalar x(1);
     ec_scalar y(2);
     ec_scalar z(39);
-    BOOST_REQUIRE_EQUAL(((x += y)), int64_t{ 1 + 2 });
-    BOOST_REQUIRE_EQUAL(((y += z)), int64_t{ 2 + 39 });
-    BOOST_REQUIRE_EQUAL(((z += x)), positive42);
+    BC_REQUIRE_EQUAL(((x += y)), int64_t{ 1 + 2 });
+    BC_REQUIRE_EQUAL(((y += z)), int64_t{ 2 + 39 });
+    BC_REQUIRE_EQUAL(((z += x)), positive42);
 }
 
 // difference
 
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__cool__expected)
+BC_AUTO_TEST_CASE(ec_scalar__difference__cool__expected)
 {
-    BOOST_REQUIRE_EQUAL((positive1 - positive2), negative1);
+    BC_REQUIRE_EQUAL((positive1 - positive2), negative1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__positive1_positive2__negative1)
+BC_AUTO_TEST_CASE(ec_scalar__difference__positive1_positive2__negative1)
 {
     const ec_scalar one_value{ positive1 };
     const ec_scalar two_value{ positive2 };
-    BOOST_REQUIRE_EQUAL((one_value - two_value), negative1);
+    BC_REQUIRE_EQUAL((one_value - two_value), negative1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__same_positives__zero)
+BC_AUTO_TEST_CASE(ec_scalar__difference__same_positives__zero)
 {
     const ec_scalar x(42);
     const ec_scalar y(positive42);
-    BOOST_REQUIRE(!(x - y));
+    BC_REQUIRE(!(x - y));
 }
 
 // 0 - x : failure
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__from_zero__fail)
+BC_AUTO_TEST_CASE(ec_scalar__difference__from_zero__fail)
 {
     const ec_scalar x(0);
     const ec_scalar y(42);
-    BOOST_REQUIRE(!(x - y));
+    BC_REQUIRE(!(x - y));
 }
 
 // x - 0 : success
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__zero_from__expected)
+BC_AUTO_TEST_CASE(ec_scalar__difference__zero_from__expected)
 {
     const ec_scalar x(42);
     const ec_scalar y(0);
-    BOOST_REQUIRE_EQUAL((x - y), positive42);
+    BC_REQUIRE_EQUAL((x - y), positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__positive_running__expected)
+BC_AUTO_TEST_CASE(ec_scalar__difference__positive_running__expected)
 {
     const ec_scalar x(42);
     const ec_scalar y(+1);
     const ec_scalar z(-1);
-    BOOST_REQUIRE_EQUAL((x - y - z), positive42);
+    BC_REQUIRE_EQUAL((x - y - z), positive42);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__difference__negative_running__expected)
+BC_AUTO_TEST_CASE(ec_scalar__difference__negative_running__expected)
 {
     const ec_scalar x(-42);
     const ec_scalar y(+1);
     const ec_scalar z(-1);
-    BOOST_REQUIRE_EQUAL((x - y - z), int64_t{ -42 + 1 - 1 });
+    BC_REQUIRE_EQUAL((x - y - z), int64_t{ -42 + 1 - 1 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__difference_assignment__negative_running__expected)
+BC_AUTO_TEST_CASE(ec_scalar__difference_assignment__negative_running__expected)
 {
     ec_scalar x(1);
     ec_scalar y(2);
     ec_scalar z(41);
-    BOOST_REQUIRE_EQUAL(((x -= y)), int64_t{ 1 - 2 });
-    BOOST_REQUIRE_EQUAL(((y -= z)), int64_t{ 2 - 41 });
-    BOOST_REQUIRE_EQUAL(((z -= x)), positive42);
+    BC_REQUIRE_EQUAL(((x -= y)), int64_t{ 1 - 2 });
+    BC_REQUIRE_EQUAL(((y -= z)), int64_t{ 2 - 41 });
+    BC_REQUIRE_EQUAL(((z -= x)), positive42);
 }
 
 // product
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__cool__expected)
+BC_AUTO_TEST_CASE(ec_scalar__product__cool__expected)
 {
-    BOOST_REQUIRE_EQUAL((secret1a * secret1b), product1);
+    BC_REQUIRE_EQUAL((secret1a * secret1b), product1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__secret1a_secret1b__product1)
+BC_AUTO_TEST_CASE(ec_scalar__product__secret1a_secret1b__product1)
 {
     const ec_scalar x{ secret1a };
     const ec_scalar y{ secret1b };
-    BOOST_REQUIRE_EQUAL((x * y), product1);
+    BC_REQUIRE_EQUAL((x * y), product1);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__zero_positive2__zero)
+BC_AUTO_TEST_CASE(ec_scalar__product__zero_positive2__zero)
 {
     const ec_scalar zero_value;
     const ec_scalar two_value{ positive2 };
-    BOOST_REQUIRE_EQUAL((zero_value * two_value), zero_value);
+    BC_REQUIRE_EQUAL((zero_value * two_value), zero_value);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__positive1_positive2__positive2)
+BC_AUTO_TEST_CASE(ec_scalar__product__positive1_positive2__positive2)
 {
     const ec_scalar one_value{ positive1 };
     const ec_scalar two_value{ positive2 };
-    BOOST_REQUIRE_EQUAL((one_value * two_value), positive2);
+    BC_REQUIRE_EQUAL((one_value * two_value), positive2);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__positives__expected)
+BC_AUTO_TEST_CASE(ec_scalar__product__positives__expected)
 {
     const ec_scalar x(24);
     const ec_scalar y(positive42);
-    BOOST_REQUIRE_EQUAL((x * y), int64_t{ 24 * 42 });
+    BC_REQUIRE_EQUAL((x * y), int64_t{ 24 * 42 });
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__negative__expected)
+BC_AUTO_TEST_CASE(ec_scalar__product__negative__expected)
 {
     const ec_scalar x(-1);
     const ec_scalar y(+1);
     const ec_scalar z(42);
-    BOOST_REQUIRE_EQUAL((x * y * z), -ec_scalar(positive42));
+    BC_REQUIRE_EQUAL((x * y * z), -ec_scalar(positive42));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product_assignment__positives__expected)
+BC_AUTO_TEST_CASE(ec_scalar__product_assignment__positives__expected)
 {
     ec_scalar x(1);
     ec_scalar y(2);
     ec_scalar z(21);
-    BOOST_REQUIRE_EQUAL(((x *= y)), int64_t{ 1 * 2 });
-    BOOST_REQUIRE_EQUAL(((y *= z)), int64_t{ 2 * 21 });
-    BOOST_REQUIRE_EQUAL(((z *= x)), positive42);
+    BC_REQUIRE_EQUAL(((x *= y)), int64_t{ 1 * 2 });
+    BC_REQUIRE_EQUAL(((y *= z)), int64_t{ 2 * 21 });
+    BC_REQUIRE_EQUAL(((z *= x)), positive42);
 }
 
 // points
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__ec_secret_by_generator__expected_point)
+BC_AUTO_TEST_CASE(ec_scalar__product__ec_secret_by_generator__expected_point)
 {
     const auto product = secret2 * ec_point::generator;
-    BOOST_REQUIRE_EQUAL(product.point(), compressed2);
+    BC_REQUIRE_EQUAL(product.point(), compressed2);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__product__zero_by_generator__zero)
+BC_AUTO_TEST_CASE(ec_scalar__product__zero_by_generator__zero)
 {
     const auto product = null_hash * ec_point::generator;
-    BOOST_REQUIRE(!product);
+    BC_REQUIRE(!product);
 }
 
 
 // assignment
 
-BOOST_AUTO_TEST_CASE(ec_scalar__assign__secret_copy__expected)
+BC_AUTO_TEST_CASE(ec_scalar__assign__secret_copy__expected)
 {
     const auto secret = secret1a;
     ec_scalar instance{};
     instance = secret;
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.secret(), secret);
+    BC_REQUIRE(instance);
+    BC_REQUIRE_EQUAL(instance.secret(), secret);
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__assign__secret_move__expected)
+BC_AUTO_TEST_CASE(ec_scalar__assign__secret_move__expected)
 {
     auto secret = secret1a;
     ec_scalar instance{};
     instance = std::move(secret);
-    BOOST_REQUIRE(instance);
-    BOOST_REQUIRE_EQUAL(instance.secret(), secret1a);
+    BC_REQUIRE(instance);
+    BC_REQUIRE_EQUAL(instance.secret(), secret1a);
 }
 
 // integer comparison (reversed and negated forms are synthesized)
 
-BOOST_AUTO_TEST_CASE(ec_scalar__equality__integer__expected)
+BC_AUTO_TEST_CASE(ec_scalar__equality__integer__expected)
 {
     const ec_scalar instance{ 42_i64 };
-    BOOST_REQUIRE(instance == 42_i64);
-    BOOST_REQUIRE(!(instance == 43_i64));
-    BOOST_REQUIRE(instance != 43_i64);
-    BOOST_REQUIRE(!(instance != 42_i64));
+    BC_REQUIRE(instance == 42_i64);
+    BC_REQUIRE(!(instance == 43_i64));
+    BC_REQUIRE(instance != 43_i64);
+    BC_REQUIRE(!(instance != 42_i64));
 }
 
-BOOST_AUTO_TEST_CASE(ec_scalar__equality__integer_reversed__expected)
+BC_AUTO_TEST_CASE(ec_scalar__equality__integer_reversed__expected)
 {
     const ec_scalar instance{ 42_i64 };
-    BOOST_REQUIRE(42_i64 == instance);
-    BOOST_REQUIRE(!(43_i64 == instance));
-    BOOST_REQUIRE(43_i64 != instance);
-    BOOST_REQUIRE(!(42_i64 != instance));
+    BC_REQUIRE(42_i64 == instance);
+    BC_REQUIRE(!(43_i64 == instance));
+    BC_REQUIRE(43_i64 != instance);
+    BC_REQUIRE(!(42_i64 != instance));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

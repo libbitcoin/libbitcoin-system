@@ -18,12 +18,11 @@
  */
 #include "../../test.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(header_json_tests)
+BC_AUTO_TEST_SUITE(header_json_tests)
 
-BOOST_AUTO_TEST_CASE(header__json__conversions__expected)
+BC_AUTO_TEST_CASE(header__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -50,14 +49,14 @@ BOOST_AUTO_TEST_CASE(header__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<header>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<header>(value) == instance);
 }
 
-BOOST_AUTO_TEST_CASE(block__json__electrumx__expected)
+BC_AUTO_TEST_CASE(block__json__electrumx__expected)
 {
     const header instance
     {
@@ -82,10 +81,10 @@ BOOST_AUTO_TEST_CASE(block__json__electrumx__expected)
     };
 
     const auto value = json::value_from(electrumx(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_CASE(header__json__bitcoind__expected)
+BC_AUTO_TEST_CASE(header__json__bitcoind__expected)
 {
     const header instance
     {
@@ -108,21 +107,21 @@ BOOST_AUTO_TEST_CASE(header__json__bitcoind__expected)
             R"("nonce":45,)"
             R"("bits":"0000002c",)"
             R"("target":"0000000000000000000000000000000000000000000000000000000000000000",)"
-            R"("difficulty":1.0279680609929991E73)"
+            R"("difficulty":10279680609929991287291862081690162603039811275322398436355508145427054592.0)"
         "}"
     };
 
     const auto value = json::value_from(bitcoind(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_CASE(header__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(header__json__pointer_conversions__expected)
 {
     const header expected{ 42, null_hash, one_hash, 43, 44, 45 };
     const header::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<header::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<header::cptr>(value) == *instance);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

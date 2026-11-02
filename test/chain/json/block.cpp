@@ -19,12 +19,11 @@
 #include "../../test.hpp"
 #include "../../mocks/blocks.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(block_json_tests)
+BC_AUTO_TEST_SUITE(block_json_tests)
 
-BOOST_AUTO_TEST_CASE(block__json__native__expected)
+BC_AUTO_TEST_CASE(block__json__native__expected)
 {
     const std::string_view text
     {
@@ -87,14 +86,14 @@ BOOST_AUTO_TEST_CASE(block__json__native__expected)
     const auto& instance = test::mock_block_json;
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<block>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<block>(value) == instance);
 }
 
-BOOST_AUTO_TEST_CASE(block__json__bitcoind__expected)
+BC_AUTO_TEST_CASE(block__json__bitcoind__expected)
 {
     const std::string_view text
     {
@@ -107,7 +106,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind__expected)
             R"("nonce":45,)"
             R"("bits":"0000002c",)"
             R"("target":"0000000000000000000000000000000000000000000000000000000000000000",)"
-            R"("difficulty":1.0279680609929991E73,)"
+            R"("difficulty":10279680609929991287291862081690162603039811275322398436355508145427054592.0,)"
             R"("nTx":1,)"
             R"("strippedsize":197,)"
             R"("size":209,)"
@@ -117,10 +116,10 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind__expected)
 
     const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_CASE(block__json__bitcoind_hashed__expected)
+BC_AUTO_TEST_CASE(block__json__bitcoind_hashed__expected)
 {
     const std::string_view text
     {
@@ -133,7 +132,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_hashed__expected)
             R"("nonce":45,)"
             R"("bits":"0000002c",)"
             R"("target":"0000000000000000000000000000000000000000000000000000000000000000",)"
-            R"("difficulty":1.0279680609929991E73,)"
+            R"("difficulty":10279680609929991287291862081690162603039811275322398436355508145427054592.0,)"
             R"("nTx":1,)"
             R"("strippedsize":197,)"
             R"("size":209,)"
@@ -144,10 +143,10 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_hashed__expected)
 
     const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind_hashed(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_CASE(block__json__bitcoind_embedded__expected)
+BC_AUTO_TEST_CASE(block__json__bitcoind_embedded__expected)
 {
     const std::string_view text
     {
@@ -160,7 +159,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_embedded__expected)
             R"("nonce":45,)"
             R"("bits":"0000002c",)"
             R"("target":"0000000000000000000000000000000000000000000000000000000000000000",)"
-            R"("difficulty":1.0279680609929991E73,)"
+            R"("difficulty":10279680609929991287291862081690162603039811275322398436355508145427054592.0,)"
             R"("nTx":1,)"
             R"("strippedsize":197,)"
             R"("size":209,)"
@@ -171,10 +170,10 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_embedded__expected)
 
     const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind_embedded(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
-BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
+BC_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
 {
     const std::string_view text
     {
@@ -187,7 +186,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
             R"("nonce":45,)"
             R"("bits":"0000002c",)"
             R"("target":"0000000000000000000000000000000000000000000000000000000000000000",)"
-            R"("difficulty":1.0279680609929991E73,)"
+            R"("difficulty":10279680609929991287291862081690162603039811275322398436355508145427054592.0,)"
             R"("nTx":1,)"
             R"("strippedsize":197,)"
             R"("size":209,)"
@@ -231,7 +230,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
                     R"("vout":)"
                     "["
                         "{"
-                            R"("value":2.4E-7,)"
+                            R"("value":0.00000024,)"
                             R"("scriptPubKey":)"
                             "{"
                                 R"("asm":"OP_PICK",)"
@@ -241,7 +240,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
                             R"("n":0)"
                         "},"
                         "{"
-                            R"("value":4.2E-7,)"
+                            R"("value":0.00000042,)"
                             R"("scriptPubKey":)"
                             "{"
                                 R"("asm":"OP_ROLL",)"
@@ -258,7 +257,7 @@ BOOST_AUTO_TEST_CASE(block__json__bitcoind_verbose__expected)
 
     const auto& instance = test::mock_block_json;
     const auto value = json::value_from(bitcoind_verbose(instance));
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
 }
 
 static transaction witnessed_transaction() NOEXCEPT
@@ -282,7 +281,7 @@ static transaction witnessed_transaction() NOEXCEPT
     return transaction{ 42, ins, outs, 24 };
 }
 
-BOOST_AUTO_TEST_CASE(block__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(block__json__pointer_conversions__expected)
 {
     const block expected
     {
@@ -292,8 +291,8 @@ BOOST_AUTO_TEST_CASE(block__json__pointer_conversions__expected)
 
     const block::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<block::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<block::cptr>(value) == *instance);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

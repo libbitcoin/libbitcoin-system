@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_integrals_tests)
+BC_AUTO_TEST_SUITE(endian_integrals_tests)
 
 template <size_t Offset, typename Integral>
 constexpr data_array<sizeof(Integral) + Offset> to_big_test(Integral value) NOEXCEPT
@@ -89,37 +89,37 @@ static_assert(from_little<uint64_t, 8>(data_array<16>{ 16, 15, 14, 13, 12, 11, 1
 
 // Runtime instances, as the assertions above are evaluated by the compiler.
 
-BOOST_AUTO_TEST_CASE(endian_integrals__to_from__runtime_widths__round_trip)
+BC_AUTO_TEST_CASE(endian_integrals__to_from__runtime_widths__round_trip)
 {
     const auto value8 = 0x01_u8;
     const auto value16 = 0x0102_u16;
     const auto value32 = 0x01020304_u32;
     const auto value64 = 0x0102030405060708_u64;
 
-    BOOST_REQUIRE_EQUAL(to_big(value8), (data_array<1>{ 1 }));
-    BOOST_REQUIRE_EQUAL(to_little(value8), (data_array<1>{ 1 }));
-    BOOST_REQUIRE_EQUAL(to_big(value16), (data_array<2>{ 1, 2 }));
-    BOOST_REQUIRE_EQUAL(to_little(value16), (data_array<2>{ 2, 1 }));
-    BOOST_REQUIRE_EQUAL(to_big(value32), (data_array<4>{ 1, 2, 3, 4 }));
-    BOOST_REQUIRE_EQUAL(to_little(value32), (data_array<4>{ 4, 3, 2, 1 }));
-    BOOST_REQUIRE_EQUAL(to_big(value64), (data_array<8>{ 1, 2, 3, 4, 5, 6, 7, 8 }));
-    BOOST_REQUIRE_EQUAL(to_little(value64), (data_array<8>{ 8, 7, 6, 5, 4, 3, 2, 1 }));
+    BC_REQUIRE_EQUAL(to_big(value8), (data_array<1>{ 1 }));
+    BC_REQUIRE_EQUAL(to_little(value8), (data_array<1>{ 1 }));
+    BC_REQUIRE_EQUAL(to_big(value16), (data_array<2>{ 1, 2 }));
+    BC_REQUIRE_EQUAL(to_little(value16), (data_array<2>{ 2, 1 }));
+    BC_REQUIRE_EQUAL(to_big(value32), (data_array<4>{ 1, 2, 3, 4 }));
+    BC_REQUIRE_EQUAL(to_little(value32), (data_array<4>{ 4, 3, 2, 1 }));
+    BC_REQUIRE_EQUAL(to_big(value64), (data_array<8>{ 1, 2, 3, 4, 5, 6, 7, 8 }));
+    BC_REQUIRE_EQUAL(to_little(value64), (data_array<8>{ 8, 7, 6, 5, 4, 3, 2, 1 }));
 
-    BOOST_REQUIRE_EQUAL(from_big<uint8_t>(to_big(value8)), value8);
-    BOOST_REQUIRE_EQUAL(from_little<uint8_t>(to_little(value8)), value8);
-    BOOST_REQUIRE_EQUAL(from_big<uint16_t>(to_big(value16)), value16);
-    BOOST_REQUIRE_EQUAL(from_little<uint16_t>(to_little(value16)), value16);
-    BOOST_REQUIRE_EQUAL(from_big<uint32_t>(to_big(value32)), value32);
-    BOOST_REQUIRE_EQUAL(from_little<uint32_t>(to_little(value32)), value32);
-    BOOST_REQUIRE_EQUAL(from_big<uint64_t>(to_big(value64)), value64);
-    BOOST_REQUIRE_EQUAL(from_little<uint64_t>(to_little(value64)), value64);
+    BC_REQUIRE_EQUAL(from_big<uint8_t>(to_big(value8)), value8);
+    BC_REQUIRE_EQUAL(from_little<uint8_t>(to_little(value8)), value8);
+    BC_REQUIRE_EQUAL(from_big<uint16_t>(to_big(value16)), value16);
+    BC_REQUIRE_EQUAL(from_little<uint16_t>(to_little(value16)), value16);
+    BC_REQUIRE_EQUAL(from_big<uint32_t>(to_big(value32)), value32);
+    BC_REQUIRE_EQUAL(from_little<uint32_t>(to_little(value32)), value32);
+    BC_REQUIRE_EQUAL(from_big<uint64_t>(to_big(value64)), value64);
+    BC_REQUIRE_EQUAL(from_little<uint64_t>(to_little(value64)), value64);
 }
 
-BOOST_AUTO_TEST_CASE(endian_integrals__to__runtime_offset__round_trip)
+BC_AUTO_TEST_CASE(endian_integrals__to__runtime_offset__round_trip)
 {
     const auto value32 = 0x01020304_u32;
-    BOOST_REQUIRE_EQUAL(to_big_test<2>(value32), (data_array<6>{ 0, 0, 1, 2, 3, 4 }));
-    BOOST_REQUIRE_EQUAL(to_little_test<2>(value32), (data_array<6>{ 0, 0, 4, 3, 2, 1 }));
+    BC_REQUIRE_EQUAL(to_big_test<2>(value32), (data_array<6>{ 0, 0, 1, 2, 3, 4 }));
+    BC_REQUIRE_EQUAL(to_little_test<2>(value32), (data_array<6>{ 0, 0, 4, 3, 2, 1 }));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

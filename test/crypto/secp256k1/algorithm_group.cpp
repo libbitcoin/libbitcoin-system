@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_algorithm_group_tests)
+BC_AUTO_TEST_SUITE(secp256k1_algorithm_group_tests)
 
 class accessor
   : public secp256k1::algorithm
@@ -232,93 +232,93 @@ static_assert(is_point(flat(twice(projective(g1))), g2x, g2y));
 static_assert(is_point(flat(sum(twice(projective(g1)), g1)), g3x, g3y));
 static_assert(is_point(flat(sum(twice(twice(projective(g1))), sum(twice(projective(g1)), g1))), g7x, g7y));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__double__points__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__double__points__expected)
 {
-    BOOST_CHECK(is_point(flat(twice(projective(g1))), g2x, g2y));
-    BOOST_CHECK(is_point(flat(twice(twice(projective(g1)))), g4x, g4y));
-    BOOST_CHECK(is_point(flat(twice(projective(p1))), p2x, p2y));
+    BC_CHECK(is_point(flat(twice(projective(g1))), g2x, g2y));
+    BC_CHECK(is_point(flat(twice(twice(projective(g1)))), g4x, g4y));
+    BC_CHECK(is_point(flat(twice(projective(p1))), p2x, p2y));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__add__mixed__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__add__mixed__expected)
 {
-    BOOST_CHECK(is_point(flat(sum(g2j, g1)), g3x, g3y));
-    BOOST_CHECK(is_point(flat(sum(twice(g2j), g3)), g7x, g7y));
-    BOOST_CHECK(is_point(flat(sum(projective(p1), g1)), pgx, pgy));
-    BOOST_CHECK(is_point(flat(sum(projective(p1), g2)), pg2x, pg2y));
-    BOOST_CHECK(!f::any(uncomputed(g2j, g1)));
+    BC_CHECK(is_point(flat(sum(g2j, g1)), g3x, g3y));
+    BC_CHECK(is_point(flat(sum(twice(g2j), g3)), g7x, g7y));
+    BC_CHECK(is_point(flat(sum(projective(p1), g1)), pgx, pgy));
+    BC_CHECK(is_point(flat(sum(projective(p1), g2)), pg2x, pg2y));
+    BC_CHECK(!f::any(uncomputed(g2j, g1)));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__add__jacobian__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__add__jacobian__expected)
 {
-    BOOST_CHECK(is_point(flat(sum(g4j, g3j)), g7x, g7y));
-    BOOST_CHECK(is_point(flat(sum(g3j, projective(g4))), g7x, g7y));
-    BOOST_CHECK(is_point(flat(sum(g2j, projective(g1))), g3x, g3y));
-    BOOST_CHECK(!f::any(uncomputed(g4j, g3j)));
+    BC_CHECK(is_point(flat(sum(g4j, g3j)), g7x, g7y));
+    BC_CHECK(is_point(flat(sum(g3j, projective(g4))), g7x, g7y));
+    BC_CHECK(is_point(flat(sum(g2j, projective(g1))), g3x, g3y));
+    BC_CHECK(!f::any(uncomputed(g4j, g3j)));
 }
 
 // exceptions
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__add__exceptional__uncomputed)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__add__exceptional__uncomputed)
 {
-    BOOST_CHECK(f::any(uncomputed(g1j, g1)));
-    BOOST_CHECK(f::any(uncomputed(g1j, negated(g1))));
-    BOOST_CHECK(f::any(uncomputed(infinity, g1)));
-    BOOST_CHECK(f::any(uncomputed(g2j, twice(g1j))));
-    BOOST_CHECK(f::any(uncomputed(g2j, negated(g2j))));
-    BOOST_CHECK(f::any(uncomputed(infinity, g2j)));
-    BOOST_CHECK(f::any(uncomputed(g2j, infinity)));
+    BC_CHECK(f::any(uncomputed(g1j, g1)));
+    BC_CHECK(f::any(uncomputed(g1j, negated(g1))));
+    BC_CHECK(f::any(uncomputed(infinity, g1)));
+    BC_CHECK(f::any(uncomputed(g2j, twice(g1j))));
+    BC_CHECK(f::any(uncomputed(g2j, negated(g2j))));
+    BC_CHECK(f::any(uncomputed(infinity, g2j)));
+    BC_CHECK(f::any(uncomputed(g2j, infinity)));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__add_complete__exceptional__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__add_complete__exceptional__expected)
 {
-    BOOST_CHECK(is_point(flat(complete(g1j, g1)), g2x, g2y));
-    BOOST_CHECK(f::any(complete(g1j, negated(g1)).infinity));
-    BOOST_CHECK(is_point(flat(complete(infinity, g1)), gx, gy));
-    BOOST_CHECK(is_point(flat(complete(g2j, twice(g1j))), g4x, g4y));
-    BOOST_CHECK(f::any(complete(g2j, negated(g2j)).infinity));
-    BOOST_CHECK(is_point(flat(complete(infinity, g2j)), g2x, g2y));
-    BOOST_CHECK(is_point(flat(complete(g2j, infinity)), g2x, g2y));
-    BOOST_CHECK(is_point(flat(complete(g2j, g1)), g3x, g3y));
-    BOOST_CHECK(f::any(complete(infinity, infinity).infinity));
+    BC_CHECK(is_point(flat(complete(g1j, g1)), g2x, g2y));
+    BC_CHECK(f::any(complete(g1j, negated(g1)).infinity));
+    BC_CHECK(is_point(flat(complete(infinity, g1)), gx, gy));
+    BC_CHECK(is_point(flat(complete(g2j, twice(g1j))), g4x, g4y));
+    BC_CHECK(f::any(complete(g2j, negated(g2j)).infinity));
+    BC_CHECK(is_point(flat(complete(infinity, g2j)), g2x, g2y));
+    BC_CHECK(is_point(flat(complete(g2j, infinity)), g2x, g2y));
+    BC_CHECK(is_point(flat(complete(g2j, g1)), g3x, g3y));
+    BC_CHECK(f::any(complete(infinity, infinity).infinity));
 }
 
 // negate/endomorphism
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__negate__generator__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__negate__generator__expected)
 {
-    BOOST_CHECK(is_point(negated(g1), gx, gy_negated));
-    BOOST_CHECK(is_point(flat(negated(projective(g2))), g2x, g2y_negated));
-    BOOST_CHECK(is_point(mapped(g1), gx_beta, gy));
+    BC_CHECK(is_point(negated(g1), gx, gy_negated));
+    BC_CHECK(is_point(flat(negated(projective(g2))), g2x, g2y_negated));
+    BC_CHECK(is_point(mapped(g1), gx_beta, gy));
 }
 
 // conversion
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__to_affine__batch__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__to_affine__batch__expected)
 {
     const std_array<jacobian, 4> points{ g2j, g3j, g4j, sum(g4j, g3j) };
     std_array<affine, 4> out{};
     accessor::to_affine(out, points);
-    BOOST_CHECK(is_point(out[0], g2x, g2y));
-    BOOST_CHECK(is_point(out[1], g3x, g3y));
-    BOOST_CHECK(is_point(out[2], g4x, g4y));
-    BOOST_CHECK(is_point(out[3], g7x, g7y));
+    BC_CHECK(is_point(out[0], g2x, g2y));
+    BC_CHECK(is_point(out[1], g3x, g3y));
+    BC_CHECK(is_point(out[2], g4x, g4y));
+    BC_CHECK(is_point(out[3], g7x, g7y));
 }
 
 static_assert(is_point(lifted(g2x, false), g2x, g2y));
 static_assert(is_point(lifted(g2x, true), g2x, g2y_negated));
 static_assert(!is_liftable(zero_value));
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__lift__parity__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__lift__parity__expected)
 {
-    BOOST_CHECK(is_point(lifted(g2x, false), g2x, g2y));
-    BOOST_CHECK(is_point(lifted(g2x, true), g2x, g2y_negated));
-    BOOST_CHECK(is_point(lifted(gx, false), gx, gy));
-    BOOST_CHECK(is_point(lifted(px, true), px, py));
-    BOOST_CHECK(is_liftable(gx));
-    BOOST_CHECK(!is_liftable(zero_value));
+    BC_CHECK(is_point(lifted(g2x, false), g2x, g2y));
+    BC_CHECK(is_point(lifted(g2x, true), g2x, g2y_negated));
+    BC_CHECK(is_point(lifted(gx, false), gx, gy));
+    BC_CHECK(is_point(lifted(px, true), px, py));
+    BC_CHECK(is_liftable(gx));
+    BC_CHECK(!is_liftable(zero_value));
 }
 
 // lanes
@@ -459,11 +459,11 @@ template <size_t Lane, typename xWord>
 static void check_lane(const xjacobian<xWord>& out, xWord uncomputed,
     const jacobians& expected, const masks& expected_uncomputed)
 {
-    BOOST_CHECK_EQUAL((f::get<uint64_t, Lane>(uncomputed)), expected_uncomputed[Lane]);
+    BC_CHECK_EQUAL((f::get<uint64_t, Lane>(uncomputed)), expected_uncomputed[Lane]);
     if (!f::any(expected_uncomputed[Lane]) && !f::any(expected[Lane].infinity))
     {
-        BOOST_CHECK_EQUAL(flat(unpack<Lane>(out)).x, flat(expected[Lane]).x);
-        BOOST_CHECK_EQUAL(flat(unpack<Lane>(out)).y, flat(expected[Lane]).y);
+        BC_CHECK_EQUAL(flat(unpack<Lane>(out)).x, flat(expected[Lane]).x);
+        BC_CHECK_EQUAL(flat(unpack<Lane>(out)).y, flat(expected[Lane]).y);
     }
 }
 
@@ -637,24 +637,24 @@ static void check_lift()
 
         xaffine<xWord> out{};
         const auto valid = accessor::lift(out, pack<xWord>(xs), pack<xWord>(odds));
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 0>(valid)), max_uint64);
-        BOOST_CHECK_EQUAL((f::get<uint64_t, 1>(valid)), max_uint64);
-        BOOST_CHECK(is_point(unpack<0>(out), g2x, g2y));
-        BOOST_CHECK(is_point(unpack<1>(out), g2x, g2y_negated));
+        BC_CHECK_EQUAL((f::get<uint64_t, 0>(valid)), max_uint64);
+        BC_CHECK_EQUAL((f::get<uint64_t, 1>(valid)), max_uint64);
+        BC_CHECK(is_point(unpack<0>(out), g2x, g2y));
+        BC_CHECK(is_point(unpack<1>(out), g2x, g2y_negated));
 
         if constexpr (lanes<xWord> >= 4)
         {
-            BOOST_CHECK_EQUAL((f::get<uint64_t, 2>(valid)), 0_u64);
-            BOOST_CHECK_EQUAL((f::get<uint64_t, 3>(valid)), max_uint64);
-            BOOST_CHECK(is_point(unpack<3>(out), gx, gy));
+            BC_CHECK_EQUAL((f::get<uint64_t, 2>(valid)), 0_u64);
+            BC_CHECK_EQUAL((f::get<uint64_t, 3>(valid)), max_uint64);
+            BC_CHECK(is_point(unpack<3>(out), gx, gy));
         }
 
         if constexpr (lanes<xWord> >= 8)
         {
-            BOOST_CHECK(is_point(unpack<4>(out), px, py));
-            BOOST_CHECK(is_point(unpack<5>(out), g3x, g3y));
-            BOOST_CHECK(is_point(unpack<6>(out), g7x, g7y));
-            BOOST_CHECK(is_point(unpack<7>(out), g4x, g4y));
+            BC_CHECK(is_point(unpack<4>(out), px, py));
+            BC_CHECK(is_point(unpack<5>(out), g3x, g3y));
+            BC_CHECK(is_point(unpack<6>(out), g7x, g7y));
+            BC_CHECK(is_point(unpack<7>(out), g4x, g4y));
         }
     }
 }
@@ -671,50 +671,50 @@ static void check_to_affine()
 
         std_array<xaffine<xWord>, 2> out{};
         accessor::to_affine(out, in);
-        BOOST_CHECK_EQUAL(unpack<0>(out[0]).x, flat(mixed_left[0]).x);
-        BOOST_CHECK_EQUAL(unpack<0>(out[1]).y, flat(doubled_in[0]).y);
+        BC_CHECK_EQUAL(unpack<0>(out[0]).x, flat(mixed_left[0]).x);
+        BC_CHECK_EQUAL(unpack<0>(out[1]).y, flat(doubled_in[0]).y);
 
         if constexpr (lanes<xWord> >= 4)
         {
-            BOOST_CHECK_EQUAL(unpack<3>(out[0]).y, flat(mixed_left[3]).y);
-            BOOST_CHECK_EQUAL(unpack<3>(out[1]).x, flat(doubled_in[3]).x);
+            BC_CHECK_EQUAL(unpack<3>(out[0]).y, flat(mixed_left[3]).y);
+            BC_CHECK_EQUAL(unpack<3>(out[1]).x, flat(doubled_in[3]).x);
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__add_mixed__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__add_mixed__lanes__match_integral)
 {
     check_mixed<xint128_t>();
     check_mixed<xint256_t>();
     check_mixed<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__add_jacobian__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__add_jacobian__lanes__match_integral)
 {
     check_jacobian<xint128_t>();
     check_jacobian<xint256_t>();
     check_jacobian<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__double__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__double__lanes__match_integral)
 {
     check_double<xint128_t>();
     check_double<xint256_t>();
     check_double<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__lift__lanes__expected)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__lift__lanes__expected)
 {
     check_lift<xint128_t>();
     check_lift<xint256_t>();
     check_lift<xint512_t>();
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_algorithm_group__to_affine__lanes__match_integral)
+BC_AUTO_TEST_CASE(secp256k1_algorithm_group__to_affine__lanes__match_integral)
 {
     check_to_affine<xint128_t>();
     check_to_affine<xint256_t>();
     check_to_affine<xint512_t>();
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

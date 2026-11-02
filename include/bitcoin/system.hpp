@@ -16,7 +16,6 @@
 
 #include <bitcoin/system/allocator.hpp>
 #include <bitcoin/system/arena.hpp>
-#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
@@ -107,14 +106,10 @@
 #include <bitcoin/system/config/header.hpp>
 #include <bitcoin/system/config/input.hpp>
 #include <bitcoin/system/config/output.hpp>
-#include <bitcoin/system/config/parameter.hpp>
-#include <bitcoin/system/config/parser.hpp>
 #include <bitcoin/system/config/path.hpp>
 #include <bitcoin/system/config/point.hpp>
-#include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/selection.hpp>
-#include <bitcoin/system/config/setting.hpp>
 #include <bitcoin/system/config/token.hpp>
 #include <bitcoin/system/config/transaction.hpp>
 #include <bitcoin/system/config/url.hpp>
@@ -195,6 +190,7 @@
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/checksum.hpp>
+#include <bitcoin/system/hash/crc32.hpp>
 #include <bitcoin/system/hash/functions.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/hash/hkdf.hpp>
@@ -236,6 +232,12 @@
 #include <bitcoin/system/intrinsics/none/none_128.hpp>
 #include <bitcoin/system/intrinsics/none/none_aes.hpp>
 #include <bitcoin/system/intrinsics/none/none_sha.hpp>
+#include <bitcoin/system/ip/address.hpp>
+#include <bitcoin/system/ip/endpoint.hpp>
+#include <bitcoin/system/ip/functions.hpp>
+#include <bitcoin/system/ip/ip.hpp>
+#include <bitcoin/system/ip/ipv4.hpp>
+#include <bitcoin/system/ip/ipv6.hpp>
 #include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/machine/number.hpp>
@@ -259,6 +261,15 @@
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/rotate.hpp>
 #include <bitcoin/system/math/sign.hpp>
+#include <bitcoin/system/options/description.hpp>
+#include <bitcoin/system/options/options.hpp>
+#include <bitcoin/system/options/parameter.hpp>
+#include <bitcoin/system/options/parser.hpp>
+#include <bitcoin/system/options/parsers.hpp>
+#include <bitcoin/system/options/printer.hpp>
+#include <bitcoin/system/options/setting.hpp>
+#include <bitcoin/system/options/value.hpp>
+#include <bitcoin/system/options/variables.hpp>
 #include <bitcoin/system/radix/base_10.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
@@ -310,6 +321,8 @@
 #include <bitcoin/system/stream/streamers/interfaces/byteflipper.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
+#include <bitcoin/system/uintx/uintx.hpp>
+#include <bitcoin/system/uintx/uintx_t.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
@@ -326,6 +339,14 @@
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
+#include <bitcoin/system/unit_test/checks.hpp>
+#include <bitcoin/system/unit_test/filter.hpp>
+#include <bitcoin/system/unit_test/macros.hpp>
+#include <bitcoin/system/unit_test/registry.hpp>
+#include <bitcoin/system/unit_test/runner.hpp>
+#include <bitcoin/system/unit_test/session.hpp>
+#include <bitcoin/system/unit_test/settings.hpp>
+#include <bitcoin/system/unit_test/unit_test.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/descriptor.hpp>
 #include <bitcoin/system/wallet/message.hpp>

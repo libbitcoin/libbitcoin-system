@@ -49,13 +49,6 @@ template <typename Integer,
     if_integer<Integer> = true>
 data_chunk to_little_endian_size(Integer value, size_t excess=zero) NOEXCEPT;
 
-/// From chunk to uintx.
-/// ---------------------------------------------------------------------------
-/// uintx size infered from data value bit width (not vector size).
-
-inline uintx from_big_endian(const data_chunk& data) NOEXCEPT;
-inline uintx from_little_endian(const data_chunk& data) NOEXCEPT;
-
 } // namespace system
 } // namespace libbitcoin
 

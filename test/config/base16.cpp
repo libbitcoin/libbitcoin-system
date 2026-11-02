@@ -18,8 +18,8 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(base16_tests)
+BC_AUTO_TEST_SUITE(base16_tests)
 
 using namespace bc::system::config;
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

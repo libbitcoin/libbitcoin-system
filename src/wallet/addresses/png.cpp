@@ -18,8 +18,8 @@
  */
 #include <bitcoin/system/wallet/addresses/png.hpp>
 
-#include <boost/crc.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -128,12 +128,7 @@ static void write_chunk(write::bytes::ostream& writer,
     const data_chunk& chunk) NOEXCEPT
 {
     const auto length = chunk.size() - sizeof(chunk_type);
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    boost::crc_32_type crc{};
-    crc.process_bytes(chunk.data(), chunk.size());
-    const uint32_t checksum = crc.checksum();
-    BC_POP_WARNING()
+    const auto checksum = crc32(chunk);
 
     writer.write_4_bytes_big_endian(possible_narrow_cast<uint32_t>(length));
     writer.write_bytes(chunk);

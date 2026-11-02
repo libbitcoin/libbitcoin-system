@@ -18,10 +18,10 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(poly1305_tests)
+BC_AUTO_TEST_SUITE(poly1305_tests)
 
 // rfc8439 section 2.5.2.
-BOOST_AUTO_TEST_CASE(poly1305__flush__rfc8439_example__expected)
+BC_AUTO_TEST_CASE(poly1305__flush__rfc8439_example__expected)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -33,11 +33,11 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__rfc8439_example__expected)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
 // rfc8439 appendix A.3 (test vector 2, all zero key yields zero tag).
-BOOST_AUTO_TEST_CASE(poly1305__flush__zero_key__zero_tag)
+BC_AUTO_TEST_CASE(poly1305__flush__zero_key__zero_tag)
 {
     const poly1305::secret key{};
     const data_chunk message(64, 0xff_u8);
@@ -48,11 +48,11 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__zero_key__zero_tag)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
 // rfc8439 appendix A.3 test vector 2 (r zero, tag is s).
-BOOST_AUTO_TEST_CASE(poly1305__flush__vector_2__expected)
+BC_AUTO_TEST_CASE(poly1305__flush__vector_2__expected)
 {
     const auto key = base16_array(
         "0000000000000000000000000000000036e5f6b5c5e06070f0efca96227a863e");
@@ -70,12 +70,12 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__vector_2__expected)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
 // Split writes accumulate identically to a single write.
 // Long messages engage the lane-parallel paths (scalar tail remains covered).
-BOOST_AUTO_TEST_CASE(poly1305__flush__112_bytes__expected)
+BC_AUTO_TEST_CASE(poly1305__flush__112_bytes__expected)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -87,10 +87,10 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__112_bytes__expected)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
-BOOST_AUTO_TEST_CASE(poly1305__flush__240_bytes__expected)
+BC_AUTO_TEST_CASE(poly1305__flush__240_bytes__expected)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -102,10 +102,10 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__240_bytes__expected)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
-BOOST_AUTO_TEST_CASE(poly1305__flush__1024_bytes__expected)
+BC_AUTO_TEST_CASE(poly1305__flush__1024_bytes__expected)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -117,10 +117,10 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__1024_bytes__expected)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
-BOOST_AUTO_TEST_CASE(poly1305__flush__4104_bytes__expected)
+BC_AUTO_TEST_CASE(poly1305__flush__4104_bytes__expected)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -132,10 +132,10 @@ BOOST_AUTO_TEST_CASE(poly1305__flush__4104_bytes__expected)
 
     poly1305::tag tag{};
     mac.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
-BOOST_AUTO_TEST_CASE(poly1305__write__long_split__expected)
+BC_AUTO_TEST_CASE(poly1305__write__long_split__expected)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -149,10 +149,10 @@ BOOST_AUTO_TEST_CASE(poly1305__write__long_split__expected)
 
     poly1305::tag tag{};
     split.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
-BOOST_AUTO_TEST_CASE(poly1305__write__split__same_tag)
+BC_AUTO_TEST_CASE(poly1305__write__split__same_tag)
 {
     const auto key = base16_array(
         "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b");
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(poly1305__write__split__same_tag)
     split.write({ std::next(message.data(), 25), message.size() - 25 });
     poly1305::tag tag{};
     split.flush(tag);
-    BOOST_REQUIRE_EQUAL(tag, expected);
+    BC_REQUIRE_EQUAL(tag, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

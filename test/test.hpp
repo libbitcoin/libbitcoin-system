@@ -19,11 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_HPP
 #define LIBBITCOIN_SYSTEM_TEST_HPP
 
-#include <boost/test/unit_test.hpp>
-
 #include <chrono>
 #include <filesystem>
 #include <memory_resource>
+#include <sstream>
 #include <bitcoin/system.hpp>
 
 /// Have slow test execution (scrypt is slow by design).
@@ -31,9 +30,7 @@
 ////#define HAVE_PERFORMANCE_TESTS
 
 #define TEST_NAME \
-    boost::unit_test::framework::current_test_case().p_name.get()
-#define SUITE_NAME \
-    boost::unit_test::framework::current_auto_test_suite().p_name.get()
+    ::libbitcoin::system::unit_test::session::instance().case_name()
 #define TEST_DIRECTORY \
     test::directory
 #define TEST_PATH \
@@ -99,11 +96,11 @@ struct directory_setup_fixture
 
     directory_setup_fixture() NOEXCEPT
     {
-        BOOST_REQUIRE(clear(directory));
+        BC_REQUIRE(clear(directory));
     }
     ~directory_setup_fixture() NOEXCEPT
     {
-        BOOST_REQUIRE(clear(directory));
+        BC_REQUIRE(clear(directory));
     }
 };
 

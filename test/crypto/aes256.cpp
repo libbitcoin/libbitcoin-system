@@ -20,9 +20,9 @@
 
 // nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf (Appendix C)
 
-BOOST_AUTO_TEST_SUITE(aes256_tests)
+BC_AUTO_TEST_SUITE(aes256_tests)
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_1__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_1__expected)
 {
     constexpr auto key = base16_array("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
     constexpr aes256::block_t plain = base16_array("6bc1bee22e409f96e93d7e117393172a");
@@ -31,13 +31,13 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_1__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_2__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_2__expected)
 {
     constexpr auto key = base16_array("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
     constexpr aes256::block_t plain = base16_array("ae2d8a571e03ac9c9eb76fac45af8e51");
@@ -46,13 +46,13 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_2__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_3__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_3__expected)
 {
     constexpr auto key = base16_array("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
     constexpr aes256::block_t plain = base16_array("30c81c46a35ce411e5fbc1191a0a52ef");
@@ -61,13 +61,13 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_3__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_4__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_4__expected)
 {
     constexpr auto key = base16_array("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
     constexpr aes256::block_t plain = base16_array("f69f2445df4f9b17ad2b417be66c3710");
@@ -76,13 +76,13 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_4__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_5__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_5__expected)
 {
     constexpr auto key = base16_array("0000000000000000000000000000000000000000000000000000000000000000");
     constexpr aes256::block_t plain = base16_array("00000000000000000000000000000000");
@@ -91,13 +91,13 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_5__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_6__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_6__expected)
 {
     constexpr auto key = base16_array("feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308");
     constexpr aes256::block_t plain = base16_array("d9313225f88406e5a55909c5aff5269a");
@@ -106,13 +106,13 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_6__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_7__expected)
+BC_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_7__expected)
 {
     constexpr auto key = base16_array("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
     constexpr aes256::block_t plain = base16_array("00112233445566778899aabbccddeeff");
@@ -121,10 +121,10 @@ BOOST_AUTO_TEST_CASE(aes256__encrypt_decrypt__nist_7__expected)
     aes256::block_t block{ plain };
 
     aes256::encrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, cipher);
+    BC_REQUIRE_EQUAL(block, cipher);
 
     aes256::decrypt(block, key);
-    BOOST_REQUIRE_EQUAL(block, plain);
+    BC_REQUIRE_EQUAL(block, plain);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

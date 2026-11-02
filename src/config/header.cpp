@@ -27,8 +27,6 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost::program_options;
-
 header::header() NOEXCEPT
   : chain::header()
 {

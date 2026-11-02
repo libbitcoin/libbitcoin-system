@@ -28,8 +28,6 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost::program_options;
-
 // Input format is currently private to bx:
 // "txhash:index:sequence=max_input_sequence"
 

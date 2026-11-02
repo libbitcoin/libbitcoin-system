@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CONFIG_AUTHORITY_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/ip/ip.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -40,14 +41,14 @@ public:
 
     /// Deserialize [IPv6]|IPv4[:port][/cidr] (IPv6 [literal]).
     authority(const std::string& authority) THROWS;
-    authority(const asio::address& ip, uint16_t port, uint8_t cidr=0) NOEXCEPT;
-    authority(const asio::endpoint& endpoint) NOEXCEPT;
+    authority(const ip::address& ip, uint16_t port, uint8_t cidr=0) NOEXCEPT;
+    authority(const ip::endpoint& endpoint) NOEXCEPT;
 
     /// Properties.
     /// -----------------------------------------------------------------------
 
     /// The IPv4 or IPv6 address, denormalized (no mapped IPv6).
-    const asio::address& ip() const NOEXCEPT;
+    const ip::address& ip() const NOEXCEPT;
 
     /// The ip port of the authority.
     uint16_t port() const NOEXCEPT;
@@ -59,8 +60,8 @@ public:
     /// -----------------------------------------------------------------------
     /// All serializations are denormalized (IPv6 or IPv4).
 
-    /// The IPv4 or IPv6 address and port as an asio endpoint.
-    asio::endpoint to_endpoint() const NOEXCEPT;
+    /// The IPv4 or IPv6 address and port as an endpoint.
+    ip::endpoint to_endpoint() const NOEXCEPT;
 
     /// IPv6|IPv4
     std::string to_host() const NOEXCEPT;
@@ -82,7 +83,7 @@ public:
 
 private:
     // These are not thread safe.
-    asio::address ip_;
+    ip::address ip_;
     uint16_t port_;
     uint8_t cidr_;
 };

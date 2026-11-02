@@ -774,8 +774,7 @@ bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
     // Streams are valid unless read or peeked. Peek does not change stream
     // position, so it is used to force the stream into a failure state when
     // empty. peek past end always sets eofbit but peek state on empty is
-    // inconsistent across streams, though a flag is always set. eofbit is set
-    // by istringstream and badbit is set by boost.
+    // inconsistent across streams, though a flag is always set.
 
     if (!valid())
         return true;
@@ -843,7 +842,6 @@ size_t byte_reader<IStream>::getter() NOEXCEPT
     // Returns current position on success and pos_type(-1) on failure.
     try
     {
-        // This does not honor BOOST_EXCEPTION_DISABLE.
         position = stream_->tellg();
         validate();
     }
@@ -882,17 +880,12 @@ template <typename IStream>
 void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
 {
     // Force these to be consistent by treating zero seek as a no-op.
-    // boost/istringstream both succeed on non-empty zero seek.
-    // istringstream succeeds on empty zero seek, boost sets failbit.
     if (is_zero(offset))
         return;
 
     // Force these to be consistent, and avoid propagating exceptions.
-    // istringstream sets failbit on non-empty over/underflow, boost throws.
-    // boost/istringstream both set failbit on empty over/underflow.
     try
     {
-        // This does not honor BOOST_EXCEPTION_DISABLE.
         stream_->seekg(offset, IStream::cur);
         validate();
     }

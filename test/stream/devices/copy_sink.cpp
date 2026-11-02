@@ -18,21 +18,21 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(stream_tests)
+BC_AUTO_TEST_SUITE(stream_tests)
 
 // Sequence tests fail on clang, possibly std::pair wraps members.
 // Now failing on MSC as well.
 ////#if defined (HAVE_MSC)
 ////
-////BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__not_empty__expected)
+////BC_AUTO_TEST_CASE(copy_sink__output_sequence__not_empty__expected)
 ////{
 ////    constexpr auto size = 42u;
 ////    data_chunk sink(size);
 ////    copy_sink<data_slab> instance(sink);
 ////    const auto sequence = instance.output_sequence();
 ////    using char_type = typename device<data_chunk>::char_type;
-////    BOOST_REQUIRE(sequence.first == reinterpret_cast<char_type*>(&(*sink.begin())));
-////    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
+////    BC_REQUIRE(sequence.first == reinterpret_cast<char_type*>(&(*sink.begin())));
+////    BC_REQUIRE(sequence.second == std::next(sequence.first, size));
 ////}
 ////
 ////#endif // HAVE_MSC
@@ -42,74 +42,74 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // write
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__nullptr__false)
+BC_AUTO_TEST_CASE(copy_sink__write__nullptr__false)
 {
     data_chunk sink;
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), -1);
+    BC_REQUIRE_EQUAL(instance.write(nullptr, 0), -1);
 }
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__empty__true)
+BC_AUTO_TEST_CASE(copy_sink__write__empty__true)
 {
     const std::string from;
     data_chunk sink{ 0x00 };
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
 }
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__negative__false)
+BC_AUTO_TEST_CASE(copy_sink__write__negative__false)
 {
     const std::string from{ "a" };
     data_chunk sink{ 0x00 };
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), -1), -1);
-    BOOST_REQUIRE_EQUAL(sink[0], 0x00);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), -1), -1);
+    BC_REQUIRE_EQUAL(sink[0], 0x00);
 }
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__past_end__expected)
+BC_AUTO_TEST_CASE(copy_sink__write__past_end__expected)
 {
     const std::string from{ "a" };
     data_chunk sink{ 0x00 };
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 2), 1);
-    BOOST_REQUIRE_EQUAL(sink[0], from[0]);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 2), 1);
+    BC_REQUIRE_EQUAL(sink[0], from[0]);
 }
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__zero__zero)
+BC_AUTO_TEST_CASE(copy_sink__write__zero__zero)
 {
     const std::string from{ "a" };
     data_chunk sink{ 0x00 };
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
-    BOOST_REQUIRE_EQUAL(sink[0], 0x00);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 0), 0);
+    BC_REQUIRE_EQUAL(sink[0], 0x00);
 }
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__one__expected)
+BC_AUTO_TEST_CASE(copy_sink__write__one__expected)
 {
     const std::string from{ "a" };
     data_chunk sink{ 0x00 };
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), 1), 1);
-    BOOST_REQUIRE_EQUAL(sink[0], from[0]);
+    BC_REQUIRE_EQUAL(instance.write(from.data(), 1), 1);
+    BC_REQUIRE_EQUAL(sink[0], from[0]);
 }
 
-BOOST_AUTO_TEST_CASE(copy_sink__write__multiple__correct_tracking)
+BC_AUTO_TEST_CASE(copy_sink__write__multiple__correct_tracking)
 {
     const std::string from{ "abcdef" };
     data_chunk sink(6, 0x00);
     copy_sink<data_slab> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(&from[0], 1), 1);
-    BOOST_REQUIRE_EQUAL(sink[0], from[0]);
-    BOOST_REQUIRE_EQUAL(instance.write(&from[1], 2), 2);
-    BOOST_REQUIRE_EQUAL(sink[1], from[1]);
-    BOOST_REQUIRE_EQUAL(sink[2], from[2]);
-    BOOST_REQUIRE_EQUAL(instance.write(&from[3], 3), 3);
-    BOOST_REQUIRE_EQUAL(sink[3], from[3]);
-    BOOST_REQUIRE_EQUAL(sink[4], from[4]);
-    BOOST_REQUIRE_EQUAL(sink[5], from[5]);
-    BOOST_REQUIRE_EQUAL(instance.write(&from[6], 42), 0);
+    BC_REQUIRE_EQUAL(instance.write(&from[0], 1), 1);
+    BC_REQUIRE_EQUAL(sink[0], from[0]);
+    BC_REQUIRE_EQUAL(instance.write(&from[1], 2), 2);
+    BC_REQUIRE_EQUAL(sink[1], from[1]);
+    BC_REQUIRE_EQUAL(sink[2], from[2]);
+    BC_REQUIRE_EQUAL(instance.write(&from[3], 3), 3);
+    BC_REQUIRE_EQUAL(sink[3], from[3]);
+    BC_REQUIRE_EQUAL(sink[4], from[4]);
+    BC_REQUIRE_EQUAL(sink[5], from[5]);
+    BC_REQUIRE_EQUAL(instance.write(&from[6], 42), 0);
 }
 
 #endif // DISABLED
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

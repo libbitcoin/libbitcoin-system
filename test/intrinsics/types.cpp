@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_types_tests)
+BC_AUTO_TEST_SUITE(intrinsics_types_tests)
 
 // extended types
 // ----------------------------------------------------------------------------
@@ -303,4 +303,4 @@ static_assert(capacity<xint512_t, uint64_t, 2 * 4> == 1); // full
 static_assert(capacity<xint512_t, uint64_t, 3 * 4> == 0);
 ////static_assert(capacity<xint512_t, uint64_t, 0> == 0);
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

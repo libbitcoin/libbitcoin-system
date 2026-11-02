@@ -27,7 +27,7 @@
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 
       <!-- General -->
-      <!-- WarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
+      <!-- WarningLevel:EnableAllWarnings produce warning flood (mostly from STL). -->
       <WarningLevel>Level4</WarningLevel>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -52,8 +52,8 @@
       <ConformanceMode Condition="'$(PlatformToolset)' == 'v145'">true</ConformanceMode>
 
       <!-- External Includes -->
-      <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
-      <!-- Language extensions are enabled by default (required for STL/Boost). -->
+      <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL). -->
+      <!-- Language extensions are enabled by default (required for STL). -->
       <ExternalWarningLevel>Level4</ExternalWarningLevel>
     </ClCompile>
   </ItemDefinitionGroup>

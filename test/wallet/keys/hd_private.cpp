@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(hd_private_tests)
+BC_AUTO_TEST_SUITE(hd_private_tests)
 
 using namespace bc::system::wallet;
 
@@ -33,17 +33,17 @@ using namespace bc::system::wallet;
 #define TESTNET_M "tprv8ZgxMBicQKsPeDgjzdC36fs6bMjGApWDNLR9erAXMs5skhMv36j9MV5ecvfavji5khqjWaWSFhN3YcCUUdiKH6isR4Pwy3U5y5egddBr16m"
 #define TESTNET_M_PUBLIC "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
 
-BOOST_AUTO_TEST_CASE(hd_private__encoded__round_trip__expected)
+BC_AUTO_TEST_CASE(hd_private__encoded__round_trip__expected)
 {
     static const auto encoded = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi";
     const hd_private key(encoded);
-    BOOST_REQUIRE_EQUAL(key.encoded(), encoded);
+    BC_REQUIRE_EQUAL(key.encoded(), encoded);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__short_seed__expected)
+BC_AUTO_TEST_CASE(hd_private__derive_private__short_seed__expected)
 {
     data_chunk seed;
-    BOOST_REQUIRE(decode_base16(seed, SHORT_SEED));
+    BC_REQUIRE(decode_base16(seed, SHORT_SEED));
 
     const hd_private m(seed, hd_private::mainnet);
     const auto m0h = m.derive_private(hd_first_hardened_key);
@@ -52,18 +52,18 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__short_seed__expected)
     const auto m0h12h2 = m0h12h.derive_private(2);
     const auto m0h12h2x = m0h12h2.derive_private(1000000000);
 
-    BOOST_REQUIRE_EQUAL(m.encoded(), "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi");
-    BOOST_REQUIRE_EQUAL(m0h.encoded(), "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7");
-    BOOST_REQUIRE_EQUAL(m0h1.encoded(), "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs");
-    BOOST_REQUIRE_EQUAL(m0h12h.encoded(), "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM");
-    BOOST_REQUIRE_EQUAL(m0h12h2.encoded(), "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334");
-    BOOST_REQUIRE_EQUAL(m0h12h2x.encoded(), "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
+    BC_REQUIRE_EQUAL(m.encoded(), "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi");
+    BC_REQUIRE_EQUAL(m0h.encoded(), "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7");
+    BC_REQUIRE_EQUAL(m0h1.encoded(), "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs");
+    BC_REQUIRE_EQUAL(m0h12h.encoded(), "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM");
+    BC_REQUIRE_EQUAL(m0h12h2.encoded(), "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334");
+    BC_REQUIRE_EQUAL(m0h12h2x.encoded(), "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_public__short_seed__expected)
+BC_AUTO_TEST_CASE(hd_private__derive_public__short_seed__expected)
 {
     data_chunk seed;
-    BOOST_REQUIRE(decode_base16(seed, SHORT_SEED));
+    BC_REQUIRE(decode_base16(seed, SHORT_SEED));
 
     const hd_private m(seed, hd_private::mainnet);
     const auto m0h = m.derive_private(hd_first_hardened_key);
@@ -79,18 +79,18 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__short_seed__expected)
     const auto m0h12h2_pub = m0h12h.derive_public(2);
     const auto m0h12h2x_pub = m0h12h2.derive_public(1000000000);
 
-    BOOST_REQUIRE_EQUAL(m_pub.encoded(), "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
-    BOOST_REQUIRE_EQUAL(m0h_pub.encoded(), "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw");
-    BOOST_REQUIRE_EQUAL(m0h1_pub.encoded(), "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ");
-    BOOST_REQUIRE_EQUAL(m0h12h_pub.encoded(), "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5");
-    BOOST_REQUIRE_EQUAL(m0h12h2_pub.encoded(), "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBqaGJAyiLjTAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV");
-    BOOST_REQUIRE_EQUAL(m0h12h2x_pub.encoded(), "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy");
+    BC_REQUIRE_EQUAL(m_pub.encoded(), "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
+    BC_REQUIRE_EQUAL(m0h_pub.encoded(), "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw");
+    BC_REQUIRE_EQUAL(m0h1_pub.encoded(), "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ");
+    BC_REQUIRE_EQUAL(m0h12h_pub.encoded(), "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5");
+    BC_REQUIRE_EQUAL(m0h12h2_pub.encoded(), "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBqaGJAyiLjTAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV");
+    BC_REQUIRE_EQUAL(m0h12h2x_pub.encoded(), "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy");
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__long_seed__expected)
+BC_AUTO_TEST_CASE(hd_private__derive_private__long_seed__expected)
 {
     data_chunk seed;
-    BOOST_REQUIRE(decode_base16(seed, LONG_SEED));
+    BC_REQUIRE(decode_base16(seed, LONG_SEED));
 
     const hd_private m(seed, hd_private::mainnet);
     const auto m0 = m.derive_private(0);
@@ -99,18 +99,18 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__long_seed__expected)
     const auto m0xH1yH = m0xH1.derive_private(2147483646 + hd_first_hardened_key);
     const auto m0xH1yH2 = m0xH1yH.derive_private(2);
 
-    BOOST_REQUIRE_EQUAL(m.encoded(), "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U");
-    BOOST_REQUIRE_EQUAL(m0.encoded(), "xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt");
-    BOOST_REQUIRE_EQUAL(m0xH.encoded(), "xprv9wSp6B7kry3Vj9m1zSnLvN3xH8RdsPP1Mh7fAaR7aRLcQMKTR2vidYEeEg2mUCTAwCd6vnxVrcjfy2kRgVsFawNzmjuHc2YmYRmagcEPdU9");
-    BOOST_REQUIRE_EQUAL(m0xH1.encoded(), "xprv9zFnWC6h2cLgpmSA46vutJzBcfJ8yaJGg8cX1e5StJh45BBciYTRXSd25UEPVuesF9yog62tGAQtHjXajPPdbRCHuWS6T8XA2ECKADdw4Ef");
-    BOOST_REQUIRE_EQUAL(m0xH1yH.encoded(), "xprvA1RpRA33e1JQ7ifknakTFpgNXPmW2YvmhqLQYMmrj4xJXXWYpDPS3xz7iAxn8L39njGVyuoseXzU6rcxFLJ8HFsTjSyQbLYnMpCqE2VbFWc");
-    BOOST_REQUIRE_EQUAL(m0xH1yH2.encoded(), "xprvA2nrNbFZABcdryreWet9Ea4LvTJcGsqrMzxHx98MMrotbir7yrKCEXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j");
+    BC_REQUIRE_EQUAL(m.encoded(), "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U");
+    BC_REQUIRE_EQUAL(m0.encoded(), "xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt");
+    BC_REQUIRE_EQUAL(m0xH.encoded(), "xprv9wSp6B7kry3Vj9m1zSnLvN3xH8RdsPP1Mh7fAaR7aRLcQMKTR2vidYEeEg2mUCTAwCd6vnxVrcjfy2kRgVsFawNzmjuHc2YmYRmagcEPdU9");
+    BC_REQUIRE_EQUAL(m0xH1.encoded(), "xprv9zFnWC6h2cLgpmSA46vutJzBcfJ8yaJGg8cX1e5StJh45BBciYTRXSd25UEPVuesF9yog62tGAQtHjXajPPdbRCHuWS6T8XA2ECKADdw4Ef");
+    BC_REQUIRE_EQUAL(m0xH1yH.encoded(), "xprvA1RpRA33e1JQ7ifknakTFpgNXPmW2YvmhqLQYMmrj4xJXXWYpDPS3xz7iAxn8L39njGVyuoseXzU6rcxFLJ8HFsTjSyQbLYnMpCqE2VbFWc");
+    BC_REQUIRE_EQUAL(m0xH1yH2.encoded(), "xprvA2nrNbFZABcdryreWet9Ea4LvTJcGsqrMzxHx98MMrotbir7yrKCEXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j");
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
+BC_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
 {
     data_chunk seed;
-    BOOST_REQUIRE(decode_base16(seed, LONG_SEED));
+    BC_REQUIRE(decode_base16(seed, LONG_SEED));
 
     const hd_private m(seed, hd_private::mainnet);
     const auto m0 = m.derive_private(0);
@@ -126,39 +126,39 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
     const auto m0xH1yH_pub = m0xH1.derive_public(2147483646 + hd_first_hardened_key);
     const auto m0xH1yH2_pub = m0xH1yH.derive_public(2);
 
-    BOOST_REQUIRE_EQUAL(m_pub.encoded(), "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB");
-    BOOST_REQUIRE_EQUAL(m0_pub.encoded(), "xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH");
-    BOOST_REQUIRE_EQUAL(m0xH_pub.encoded(), "xpub6ASAVgeehLbnwdqV6UKMHVzgqAG8Gr6riv3Fxxpj8ksbH9ebxaEyBLZ85ySDhKiLDBrQSARLq1uNRts8RuJiHjaDMBU4Zn9h8LZNnBC5y4a");
-    BOOST_REQUIRE_EQUAL(m0xH1_pub.encoded(), "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg5EwVvmdMVCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon");
-    BOOST_REQUIRE_EQUAL(m0xH1yH_pub.encoded(), "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL");
-    BOOST_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(), "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
+    BC_REQUIRE_EQUAL(m_pub.encoded(), "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB");
+    BC_REQUIRE_EQUAL(m0_pub.encoded(), "xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH");
+    BC_REQUIRE_EQUAL(m0xH_pub.encoded(), "xpub6ASAVgeehLbnwdqV6UKMHVzgqAG8Gr6riv3Fxxpj8ksbH9ebxaEyBLZ85ySDhKiLDBrQSARLq1uNRts8RuJiHjaDMBU4Zn9h8LZNnBC5y4a");
+    BC_REQUIRE_EQUAL(m0xH1_pub.encoded(), "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg5EwVvmdMVCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon");
+    BC_REQUIRE_EQUAL(m0xH1yH_pub.encoded(), "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL");
+    BC_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(), "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key__decodes_to_invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__null_key__decodes_to_invalid)
 {
     // the 11...14rcJhr is a serialization of a null key;
     static const auto null_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
     const hd_private xprv_null(null_encoded);
 
-    BOOST_REQUIRE(!xprv_null);
+    BC_REQUIRE(!xprv_null);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__nonzero_private_key_padding__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__nonzero_private_key_padding__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGpWnsj83BHtEy5Zt8CcDr1UiRXuWCmTQLxEK9vbz5gPstX92JQ"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGpWnsj83BHtEy5Zt8CcDr1UiRXuWCmTQLxEK9vbz5gPstX92JQ"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__to_public__from_invalid_private__invalid)
+BC_AUTO_TEST_CASE(hd_private__to_public__from_invalid_private__invalid)
 {
     // the 11...14rcJhr is a serialization of a null key;
     static const auto xprv_invalid_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
     const hd_private xprv_invalid(xprv_invalid_encoded);
 
-    BOOST_REQUIRE(!xprv_invalid);
-    BOOST_REQUIRE(!xprv_invalid.to_public());
+    BC_REQUIRE(!xprv_invalid);
+    BC_REQUIRE(!xprv_invalid.to_public());
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__depth_overflow__invalid)
+BC_AUTO_TEST_CASE(hd_private__derive_private__depth_overflow__invalid)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
@@ -169,19 +169,19 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__depth_overflow__invalid)
     const auto xprv_255 = xprv_254.derive_private(14);
     const auto xprv_256 = xprv_255.derive_private(70);
 
-    BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
-    BOOST_REQUIRE(xprv_254);
+    BC_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
+    BC_REQUIRE(xprv_254);
 
     // the maximal valid depth is 255
-    BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
-    BOOST_REQUIRE(xprv_255);
+    BC_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
+    BC_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
-    BOOST_REQUIRE_EQUAL(xprv_256.lineage().depth, 0);
-    BOOST_REQUIRE(!xprv_256);
+    BC_REQUIRE_EQUAL(xprv_256.lineage().depth, 0);
+    BC_REQUIRE(!xprv_256);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__hardened_depth_overflow__invalid)
+BC_AUTO_TEST_CASE(hd_private__derive_private__hardened_depth_overflow__invalid)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
@@ -191,19 +191,19 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__hardened_depth_overflow__invali
     const auto xprv_255 = xprv_254.derive_private(1337 + hd_first_hardened_key);
     const auto xprv_256 = xprv_255.derive_private(8887 + hd_first_hardened_key);
 
-    BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
-    BOOST_REQUIRE(xprv_254);
+    BC_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
+    BC_REQUIRE(xprv_254);
 
     // the maximal valid depth is 255
-    BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
-    BOOST_REQUIRE(xprv_255);
+    BC_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
+    BC_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
-    BOOST_REQUIRE_EQUAL(xprv_256.lineage().depth, 0);
-    BOOST_REQUIRE(!xprv_256);
+    BC_REQUIRE_EQUAL(xprv_256.lineage().depth, 0);
+    BC_REQUIRE(!xprv_256);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_public__must_not_overflow_depth__expected)
+BC_AUTO_TEST_CASE(hd_private__derive_public__must_not_overflow_depth__expected)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
@@ -213,19 +213,19 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__must_not_overflow_depth__expecte
     const auto xprv_255 = xprv_254.derive_private(14);
     const auto xpub_256 = xprv_255.derive_public(70);
 
-    BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
-    BOOST_REQUIRE(xprv_254);
+    BC_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
+    BC_REQUIRE(xprv_254);
 
     // the maximal valid depth is 255
-    BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
-    BOOST_REQUIRE(xprv_255);
+    BC_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
+    BC_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
-    BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
-    BOOST_REQUIRE(!xpub_256);
+    BC_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
+    BC_REQUIRE(!xpub_256);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_public__hardened_must_not_overflow_depth__expected)
+BC_AUTO_TEST_CASE(hd_private__derive_public__hardened_must_not_overflow_depth__expected)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
@@ -235,176 +235,176 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__hardened_must_not_overflow_depth
     const auto xprv_255 = xprv_254.derive_private(141);
     const auto xpub_256 = xprv_255.derive_public(19287 + hd_first_hardened_key);
 
-    BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
-    BOOST_REQUIRE(xprv_254);
+    BC_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
+    BC_REQUIRE(xprv_254);
 
     // the maximal valid depth is 255
-    BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
-    BOOST_REQUIRE(xprv_255);
+    BC_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
+    BC_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
-    BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
-    BOOST_REQUIRE(!xpub_256);
+    BC_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
+    BC_REQUIRE(!xpub_256);
 }
 
 
 // Network prefixes.
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hd_private__encoded__testnet_short_seed__expected)
+BC_AUTO_TEST_CASE(hd_private__encoded__testnet_short_seed__expected)
 {
     data_chunk seed;
-    BOOST_REQUIRE(decode_base16(seed, SHORT_SEED));
+    BC_REQUIRE(decode_base16(seed, SHORT_SEED));
 
     const hd_private m(seed, hd_private::testnet);
-    BOOST_REQUIRE_EQUAL(m.encoded(), TESTNET_M);
-    BOOST_REQUIRE_EQUAL(m.to_public().encoded(), TESTNET_M_PUBLIC);
+    BC_REQUIRE_EQUAL(m.encoded(), TESTNET_M);
+    BC_REQUIRE_EQUAL(m.to_public().encoded(), TESTNET_M_PUBLIC);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__to_public__testnet_prefixes__testnet_public)
+BC_AUTO_TEST_CASE(hd_private__to_public__testnet_prefixes__testnet_public)
 {
     const hd_private key(TESTNET_M, hd_private::testnet);
-    BOOST_REQUIRE(key);
-    BOOST_REQUIRE_EQUAL(key.encoded(), TESTNET_M);
-    BOOST_REQUIRE_EQUAL(key.to_public().encoded(), TESTNET_M_PUBLIC);
+    BC_REQUIRE(key);
+    BC_REQUIRE_EQUAL(key.encoded(), TESTNET_M);
+    BC_REQUIRE_EQUAL(key.to_public().encoded(), TESTNET_M_PUBLIC);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__to_public__mainnet_prefixes__mainnet_public)
+BC_AUTO_TEST_CASE(hd_private__to_public__mainnet_prefixes__mainnet_public)
 {
     const hd_private key(MAINNET_M, hd_private::mainnet);
-    BOOST_REQUIRE(key);
-    BOOST_REQUIRE_EQUAL(key.encoded(), MAINNET_M);
-    BOOST_REQUIRE_EQUAL(key.to_public().encoded(), MAINNET_M_PUBLIC);
+    BC_REQUIRE(key);
+    BC_REQUIRE_EQUAL(key.encoded(), MAINNET_M);
+    BC_REQUIRE_EQUAL(key.to_public().encoded(), MAINNET_M_PUBLIC);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__testnet_key_mainnet_prefixes__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__testnet_key_mainnet_prefixes__invalid)
 {
     const hd_private key(TESTNET_M, hd_private::mainnet);
-    BOOST_REQUIRE(!key);
+    BC_REQUIRE(!key);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__mainnet_key_testnet_prefixes__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__mainnet_key_testnet_prefixes__invalid)
 {
     const hd_private key(MAINNET_M, hd_private::testnet);
-    BOOST_REQUIRE(!key);
+    BC_REQUIRE(!key);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__testnet_key_default_prefixes__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__testnet_key_default_prefixes__invalid)
 {
     const hd_private key(TESTNET_M);
-    BOOST_REQUIRE(!key);
+    BC_REQUIRE(!key);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__testnet_prefixes__prefixes_transitive)
+BC_AUTO_TEST_CASE(hd_private__derive_private__testnet_prefixes__prefixes_transitive)
 {
     const hd_private key(TESTNET_M, hd_private::testnet);
     const auto derived = key.derive_private(hd_first_hardened_key);
-    BOOST_REQUIRE(derived);
-    BOOST_REQUIRE_EQUAL(derived.lineage().prefixes, hd_private::testnet);
-    BOOST_REQUIRE_EQUAL(derived.encoded().substr(0, 4), "tprv");
-    BOOST_REQUIRE_EQUAL(key.derive_public(hd_first_hardened_key).encoded().substr(0, 4), "tpub");
+    BC_REQUIRE(derived);
+    BC_REQUIRE_EQUAL(derived.lineage().prefixes, hd_private::testnet);
+    BC_REQUIRE_EQUAL(derived.encoded().substr(0, 4), "tprv");
+    BC_REQUIRE_EQUAL(key.derive_public(hd_first_hardened_key).encoded().substr(0, 4), "tpub");
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__stream__mainnet_key__round_trips)
+BC_AUTO_TEST_CASE(hd_private__stream__mainnet_key__round_trips)
 {
     std::istringstream in{ MAINNET_M };
     hd_private instance{};
     in >> instance;
-    BOOST_REQUIRE_EQUAL(instance.encoded(), MAINNET_M);
-    BOOST_REQUIRE_EQUAL(instance.to_public().encoded(), MAINNET_M_PUBLIC);
+    BC_REQUIRE_EQUAL(instance.encoded(), MAINNET_M);
+    BC_REQUIRE_EQUAL(instance.to_public().encoded(), MAINNET_M_PUBLIC);
 
     std::ostringstream out{};
     out << instance;
-    BOOST_REQUIRE_EQUAL(out.str(), MAINNET_M);
+    BC_REQUIRE_EQUAL(out.str(), MAINNET_M);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__stream__testnet_key__throws)
+BC_AUTO_TEST_CASE(hd_private__stream__testnet_key__throws)
 {
     hd_private instance{};
-    BOOST_REQUIRE_THROW(std::istringstream(TESTNET_M) >> instance, istream_exception);
+    BC_REQUIRE_THROW(std::istringstream(TESTNET_M) >> instance, istream_exception);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__stream__invalid__throws)
+BC_AUTO_TEST_CASE(hd_private__stream__invalid__throws)
 {
     hd_private instance{};
-    BOOST_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
+    BC_REQUIRE_THROW(std::istringstream("bogus") >> instance, istream_exception);
 }
 
 // bip32 test vector 5 (invalid extended keys).
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__private_version_public_mismatch__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__private_version_public_mismatch__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGTQQD3dC4H2D5GBj7vWvSQaaBv5cxi9gafk7NF3pnBju6dwKvH"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGTQQD3dC4H2D5GBj7vWvSQaaBv5cxi9gafk7NF3pnBju6dwKvH"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__private_key_prefix_01__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__private_key_prefix_01__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD9y5gkZ6Eq3Rjuahrv17fEQ3Qen6J"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD9y5gkZ6Eq3Rjuahrv17fEQ3Qen6J"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__zero_depth_nonzero_parent_fingerprint__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__zero_depth_nonzero_parent_fingerprint__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s2SPatNQ9Vc6GTbVMFPFo7jsaZySyzk7L8n2uqKXJen3KUmvQNTuLh3fhZMBoG3G4ZW1N2kZuHEPY53qmbZzCHshoQnNf4GvELZfqTUrcv"));
+    BC_REQUIRE(!hd_private("xprv9s2SPatNQ9Vc6GTbVMFPFo7jsaZySyzk7L8n2uqKXJen3KUmvQNTuLh3fhZMBoG3G4ZW1N2kZuHEPY53qmbZzCHshoQnNf4GvELZfqTUrcv"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__zero_depth_nonzero_index__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__zero_depth_nonzero_index__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH4r4TsiLvyLXqM9P7k1K3EYhA1kkD6xuquB5i39AU8KF42acDyL3qsDbU9NmZn6MsGSUYZEsuoePmjzsB3eFKSUEh3Gu1N3cqVUN"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH4r4TsiLvyLXqM9P7k1K3EYhA1kkD6xuquB5i39AU8KF42acDyL3qsDbU9NmZn6MsGSUYZEsuoePmjzsB3eFKSUEh3Gu1N3cqVUN"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__unknown_version__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__unknown_version__invalid)
 {
-    BOOST_REQUIRE(!hd_private("DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHGMQzT7ayAmfo4z3gY5KfbrZWZ6St24UVf2Qgo6oujFktLHdHY4"));
+    BC_REQUIRE(!hd_private("DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHGMQzT7ayAmfo4z3gY5KfbrZWZ6St24UVf2Qgo6oujFktLHdHY4"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__private_key_zero__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__private_key_zero__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzF93Y5wvzdUayhgkkFoicQZcP3y52uPPxFnfoLZB21Teqt1VvEHx"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzF93Y5wvzdUayhgkkFoicQZcP3y52uPPxFnfoLZB21Teqt1VvEHx"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__private_key_order__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__private_key_order__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD5SDKr24z3aiUvKr9bJpdrcLg1y3G"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD5SDKr24z3aiUvKr9bJpdrcLg1y3G"));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__invalid_checksum__invalid)
+BC_AUTO_TEST_CASE(hd_private__constructor__invalid_checksum__invalid)
 {
-    BOOST_REQUIRE(!hd_private("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"));
+    BC_REQUIRE(!hd_private("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"));
 }
 
 // operators
 
-BOOST_AUTO_TEST_CASE(hd_private__equality__same__equal)
+BC_AUTO_TEST_CASE(hd_private__equality__same__equal)
 {
     const hd_private left(MAINNET_M, hd_private::mainnet);
     const hd_private right(MAINNET_M, hd_private::mainnet);
-    BOOST_REQUIRE(left == right);
-    BOOST_REQUIRE(!(left != right));
-    BOOST_REQUIRE(!(left < right));
+    BC_REQUIRE(left == right);
+    BC_REQUIRE(!(left != right));
+    BC_REQUIRE(!(left < right));
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__equality__different__unequal)
+BC_AUTO_TEST_CASE(hd_private__equality__different__unequal)
 {
     const hd_private left(MAINNET_M, hd_private::mainnet);
     const hd_private right = left.derive_private(0);
-    BOOST_REQUIRE(left != right);
+    BC_REQUIRE(left != right);
 }
 
 // cast
 
-BOOST_AUTO_TEST_CASE(hd_private__secret_cast__valid__matches_secret)
+BC_AUTO_TEST_CASE(hd_private__secret_cast__valid__matches_secret)
 {
     const hd_private instance(MAINNET_M, hd_private::mainnet);
     const ec_secret& secret = instance;
-    BOOST_REQUIRE_EQUAL(secret, instance.secret());
+    BC_REQUIRE_EQUAL(secret, instance.secret());
 }
 
 // construct
 
-BOOST_AUTO_TEST_CASE(hd_private__construct__null_secret__invalid)
+BC_AUTO_TEST_CASE(hd_private__construct__null_secret__invalid)
 {
-    BOOST_REQUIRE(!hd_private(null_hash, hd_chain_code{}, hd_private::mainnet));
+    BC_REQUIRE(!hd_private(null_hash, hd_chain_code{}, hd_private::mainnet));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -21,43 +21,43 @@
 
 #if defined(HAVE_PERFORMANCE_TESTS)
 
-BOOST_AUTO_TEST_SUITE(hash_performance_tests)
+BC_AUTO_TEST_SUITE(hash_performance_tests)
 
 using namespace performance;
 
 // sha256
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__stream_1m)
+BC_AUTO_TEST_CASE(hash_performance__sha256__stream_1m)
 {
     run_sha<sha::h256<>, stream_1m>("sha256 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__stream_32)
+BC_AUTO_TEST_CASE(hash_performance__sha256__stream_32)
 {
     run_sha<sha::h256<>, stream_32>("sha256 stream 32", 1'000'000);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__stream_32_uncached)
+BC_AUTO_TEST_CASE(hash_performance__sha256__stream_32_uncached)
 {
     const auto expected = stream_32<sha256_scalar>::run("sha256 stream 32 scalar cached", 1'000'000);
-    BOOST_CHECK_EQUAL(stream_32<sha256_uncached>::run("sha256 stream 32 scalar uncached", 1'000'000), expected);
+    BC_CHECK_EQUAL(stream_32<sha256_uncached>::run("sha256 stream 32 scalar uncached", 1'000'000), expected);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__fixed_32)
+BC_AUTO_TEST_CASE(hash_performance__sha256__fixed_32)
 {
     run_sha<sha::h256<>, fixed_32>("sha256 fixed 32", 1'000'000);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__double_64)
+BC_AUTO_TEST_CASE(hash_performance__sha256__double_64)
 {
     constexpr size_t calls = 500;
     const auto expected = double_64<sha256_scalar>("sha256 double 64 x 1024 scalar", calls);
 
     if constexpr (sha256_native::native)
     {
-        BOOST_CHECK_EQUAL(double_64<sha256_native>("sha256 double 64 x 1024 native", calls), expected);
-        BOOST_CHECK_EQUAL(double_64_native("sha256 double 64 x 1024 native 2 lanes", calls), expected);
+        BC_CHECK_EQUAL(double_64<sha256_native>("sha256 double 64 x 1024 native", calls), expected);
+        BC_CHECK_EQUAL(double_64_native("sha256 double 64 x 1024 native 2 lanes", calls), expected);
     }
 
     run_double_64_lanes<xint128_t>("sha256 double 64 x 1024 4 lanes", calls, expected);
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(hash_performance__sha256__double_64)
     run_double_64_lanes<xint512_t>("sha256 double 64 x 1024 16 lanes", calls, expected);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__merkle_root)
+BC_AUTO_TEST_CASE(hash_performance__sha256__merkle_root)
 {
     run_sha<sha::h256<>, root_9001>("sha256 merkle root 9001", 100);
 }
@@ -73,21 +73,21 @@ BOOST_AUTO_TEST_CASE(hash_performance__sha256__merkle_root)
 // other
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha160__stream_1m)
+BC_AUTO_TEST_CASE(hash_performance__sha160__stream_1m)
 {
     run_sha<sha::h160, stream_1m>("sha160 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha512__stream_1m)
+BC_AUTO_TEST_CASE(hash_performance__sha512__stream_1m)
 {
     run_sha<sha::h512<>, stream_1m>("sha512 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__rmd160__stream_1m)
+BC_AUTO_TEST_CASE(hash_performance__rmd160__stream_1m)
 {
     run_rmd160("rmd160 stream 1m", 100);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #endif

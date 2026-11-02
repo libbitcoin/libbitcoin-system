@@ -22,7 +22,7 @@
 
 #include <chrono>
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_performance_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_performance_tests)
 
 // Set CUDA_VISIBLE_DEVICES to empty to measure the processor path.
 
@@ -103,7 +103,7 @@ static double seconds(Function&& function) NOEXCEPT
     for (auto& time: times)
     {
         const auto start = std::chrono::steady_clock::now();
-        BOOST_CHECK(function());
+        BC_CHECK(function());
         time = duration(std::chrono::steady_clock::now() - start).count();
     }
 
@@ -152,26 +152,26 @@ static void report_batches(size_t count) NOEXCEPT
 // verify
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_performance__accelerated__reported)
+BC_AUTO_TEST_CASE(secp256k1_batch_performance__accelerated__reported)
 {
     std::cout << "compiled: " << batched::compiled() << ", accelerated: " << batched::accelerated() << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_performance__verify__1k)
+BC_AUTO_TEST_CASE(secp256k1_batch_performance__verify__1k)
 {
     report_batches(1'024);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_performance__verify__64k)
+BC_AUTO_TEST_CASE(secp256k1_batch_performance__verify__64k)
 {
     report_batches(65'536);
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1_batch_performance__verify__1m)
+BC_AUTO_TEST_CASE(secp256k1_batch_performance__verify__1m)
 {
     report_batches(1'048'576);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #endif

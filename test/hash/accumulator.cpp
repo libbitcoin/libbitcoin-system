@@ -18,9 +18,9 @@
  */
 #include "../test.hpp"
     
-BOOST_AUTO_TEST_SUITE(accumulator_tests)
+BC_AUTO_TEST_SUITE(accumulator_tests)
 
-BOOST_AUTO_TEST_SUITE(accumulator_engine_tests)
+BC_AUTO_TEST_SUITE(accumulator_engine_tests)
 
 template <typename Algorithm, bool Checked = true>
 struct accessor
@@ -48,7 +48,7 @@ using unchecked = accessor<sha512, false>;
 constexpr auto block_size = array_count<sha512::block_t>;
 constexpr auto count_size = sha512::count_bytes;
 
-BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_under_padding_boundary__pad_one)
+BC_AUTO_TEST_CASE(accumulator__write_flush__one_under_padding_boundary__pad_one)
 {
     // 55 is the last non-overflow byte (55 + 1 + 8 = 64).
     using access = accessor<sha256>;
@@ -60,17 +60,17 @@ BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_under_padding_boundary__pad_o
     static_assert(pad == 1u);
 
     access writer{};
-    BOOST_REQUIRE(writer.write(data));
-    BOOST_REQUIRE_EQUAL(writer.next(), bytes);
-    BOOST_REQUIRE_EQUAL(writer.gap(), size - bytes);
-    BOOST_REQUIRE_EQUAL(writer.pad_size(), pad);
-    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+    BC_REQUIRE(writer.write(data));
+    BC_REQUIRE_EQUAL(writer.next(), bytes);
+    BC_REQUIRE_EQUAL(writer.gap(), size - bytes);
+    BC_REQUIRE_EQUAL(writer.pad_size(), pad);
+    BC_REQUIRE_EQUAL(writer.flush(), expected);
 }
 
 // Notice that as bytes go from 55 to 56, padding goes from 1 to 64 (not zero).
 // This is because sha always requires a pad bit, and given that were are supporting
 // only byte-alignment, that means one byte pf padding is always required.
-BOOST_AUTO_TEST_CASE(accumulator__write_flush__at_padding_boundary__pad_64)
+BC_AUTO_TEST_CASE(accumulator__write_flush__at_padding_boundary__pad_64)
 {
     // 56 is the first overflow byte (56 + 1 + 8 = 65).
     using access = accessor<sha256>;
@@ -82,14 +82,14 @@ BOOST_AUTO_TEST_CASE(accumulator__write_flush__at_padding_boundary__pad_64)
     static_assert(pad == 0u);
 
     access writer{};
-    BOOST_REQUIRE(writer.write(data));
-    BOOST_REQUIRE_EQUAL(writer.next(), bytes);
-    BOOST_REQUIRE_EQUAL(writer.gap(), size - bytes);
-    BOOST_REQUIRE_EQUAL(writer.pad_size(), size);
-    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+    BC_REQUIRE(writer.write(data));
+    BC_REQUIRE_EQUAL(writer.next(), bytes);
+    BC_REQUIRE_EQUAL(writer.gap(), size - bytes);
+    BC_REQUIRE_EQUAL(writer.pad_size(), size);
+    BC_REQUIRE_EQUAL(writer.flush(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_over_padding_boundary__pad_63)
+BC_AUTO_TEST_CASE(accumulator__write_flush__one_over_padding_boundary__pad_63)
 {
     // 57 is the second overflow byte (57 + 1 + 8 = 66).
     using access = accessor<sha256>;
@@ -101,24 +101,24 @@ BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_over_padding_boundary__pad_63
     static_assert(pad == bit_all<size_t>);
 
     access writer{};
-    BOOST_REQUIRE(writer.write(data));
-    BOOST_REQUIRE_EQUAL(writer.next(), bytes);
-    BOOST_REQUIRE_EQUAL(writer.gap(), size - bytes);
-    BOOST_REQUIRE_EQUAL(writer.pad_size(), sub1(size));
-    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+    BC_REQUIRE(writer.write(data));
+    BC_REQUIRE_EQUAL(writer.next(), bytes);
+    BC_REQUIRE_EQUAL(writer.gap(), size - bytes);
+    BC_REQUIRE_EQUAL(writer.pad_size(), sub1(size));
+    BC_REQUIRE_EQUAL(writer.flush(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__construct__default__initial)
+BC_AUTO_TEST_CASE(accumulator__construct__default__initial)
 {
     constexpr checked writer{};
-    BOOST_REQUIRE(writer.is_full());
-    BOOST_REQUIRE(writer.is_empty());
-    BOOST_REQUIRE_EQUAL(writer.next(), zero);
-    BOOST_REQUIRE_EQUAL(writer.gap(), block_size);
-    BOOST_REQUIRE_EQUAL(writer.pad_size(), block_size - count_size);
+    BC_REQUIRE(writer.is_full());
+    BC_REQUIRE(writer.is_empty());
+    BC_REQUIRE_EQUAL(writer.next(), zero);
+    BC_REQUIRE_EQUAL(writer.gap(), block_size);
+    BC_REQUIRE_EQUAL(writer.pad_size(), block_size - count_size);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
+BC_AUTO_TEST_CASE(accumulator__construct__sized__expected)
 {
     constexpr auto blocks = 2u;
     constexpr sha512::state_t state{ 42 };
@@ -128,14 +128,14 @@ BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
     static_assert(is_zero(writer.next()));
     static_assert(writer.gap() == block_size);
     static_assert(writer.pad_size() == block_size - count_size);
-    BOOST_REQUIRE(writer.is_full());
-    BOOST_REQUIRE(writer.is_empty());
-    BOOST_REQUIRE_EQUAL(writer.next(), zero);
-    BOOST_REQUIRE_EQUAL(writer.gap(), block_size);
-    BOOST_REQUIRE_EQUAL(writer.pad_size(), block_size - count_size);
+    BC_REQUIRE(writer.is_full());
+    BC_REQUIRE(writer.is_empty());
+    BC_REQUIRE_EQUAL(writer.next(), zero);
+    BC_REQUIRE_EQUAL(writer.gap(), block_size);
+    BC_REQUIRE_EQUAL(writer.pad_size(), block_size - count_size);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
+BC_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
 {
     // Test expectation limited to sha256.
     using access = accessor<sha256>;
@@ -143,29 +143,29 @@ BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
     constexpr access writer{};
     static_assert(!writer.is_buffer_overflow(zero));
     static_assert(writer.is_buffer_overflow(max_size_t) == overflow);
-    BOOST_REQUIRE(!writer.is_buffer_overflow(zero));
-    BOOST_REQUIRE_EQUAL(writer.is_buffer_overflow(max_size_t), overflow);
+    BC_REQUIRE(!writer.is_buffer_overflow(zero));
+    BC_REQUIRE_EQUAL(writer.is_buffer_overflow(max_size_t), overflow);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
+BC_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
 {
     constexpr unchecked writer{};
     static_assert(!writer.is_buffer_overflow(zero));
     static_assert(!writer.is_buffer_overflow(max_size_t));
-    BOOST_REQUIRE(!writer.is_buffer_overflow(zero));
-    BOOST_REQUIRE(!writer.is_buffer_overflow(max_size_t));
+    BC_REQUIRE(!writer.is_buffer_overflow(zero));
+    BC_REQUIRE(!writer.is_buffer_overflow(max_size_t));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__stream_pad__always__expected)
+BC_AUTO_TEST_CASE(accumulator__stream_pad__always__expected)
 {
     constexpr auto expected = sha512::block_t{ bit_hi<sha512::byte_t> };
     static_assert(checked::stream_pad() == expected);
     constexpr checked writer{};
     static_assert(writer.stream_pad() == expected);
-    BOOST_REQUIRE_EQUAL(writer.stream_pad(), expected);
+    BC_REQUIRE_EQUAL(writer.stream_pad(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
+BC_AUTO_TEST_CASE(accumulator__serialize__default__initial)
 {
     // Test expectation limited to sha256.
     // Test state is bogus, so expecatation is not hash of zero data.
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
     using counter_t = std_array<sha256::byte_t, sha256::count_bytes>;
     constexpr auto expected = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
     static_assert(access::serialize(count) == expected);
-    BOOST_REQUIRE_EQUAL(access::serialize(count), expected);
+    BC_REQUIRE_EQUAL(access::serialize(count), expected);
 }
 
 // write (captures test of add_data1/2, accumulate, pad, flush, double_flush)
@@ -185,14 +185,14 @@ BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
 // write is not constexpr due to unsafe_array_cast, which ensures algorithm
 // remains fully constexpr (by not accepting byte*).
 
-BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
+BC_AUTO_TEST_CASE(accumulator__write__zero__true)
 {
     constexpr data_array<0> data{};
     checked writer{};
-    BOOST_REQUIRE(writer.write(data));
+    BC_REQUIRE(writer.write(data));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
+BC_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
     // Test state is bogus, so expecatation is not hash of data_array<42>{}.
@@ -204,14 +204,14 @@ BOOST_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
     constexpr data_array<bytes> data{};
     constexpr sha256::state_t state{};
     access writer{ state, blocks };
-    BOOST_REQUIRE(writer.write(data));
-    BOOST_REQUIRE_EQUAL(writer.next(), bytes);
-    BOOST_REQUIRE_EQUAL(writer.gap(), size - bytes);
-    BOOST_REQUIRE_EQUAL(writer.pad_size(), size - bytes - sha256::count_bytes);
-    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+    BC_REQUIRE(writer.write(data));
+    BC_REQUIRE_EQUAL(writer.next(), bytes);
+    BC_REQUIRE_EQUAL(writer.gap(), size - bytes);
+    BC_REQUIRE_EQUAL(writer.pad_size(), size - bytes - sha256::count_bytes);
+    BC_REQUIRE_EQUAL(writer.flush(), expected);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
+BC_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
     // Test state is bogus, so expecatation is not hash of data_array<42>{}.
@@ -222,75 +222,75 @@ BOOST_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
     constexpr data_array<bytes> data{};
     constexpr sha256::state_t state{};
     access writer{ state, blocks };
-    BOOST_REQUIRE(writer.write(data));
-    BOOST_REQUIRE_EQUAL(writer.double_flush(), expected);
+    BC_REQUIRE(writer.write(data));
+    BC_REQUIRE_EQUAL(writer.double_flush(), expected);
 }
 
 // Runtime instances, as distinct from the constexpr cases above, which the
 // compiler evaluates without generating code.
 
-BOOST_AUTO_TEST_CASE(accumulator__serialize__runtime__matches_constexpr)
+BC_AUTO_TEST_CASE(accumulator__serialize__runtime__matches_constexpr)
 {
     constexpr auto expected = checked::serialize(42);
     const auto size = 42_size;
-    BOOST_REQUIRE_EQUAL(checked::serialize(size), expected);
+    BC_REQUIRE_EQUAL(checked::serialize(size), expected);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__runtime_state__empty_and_full__expected)
+BC_AUTO_TEST_CASE(accumulator__runtime_state__empty_and_full__expected)
 {
     checked writer{};
-    BOOST_REQUIRE(writer.is_full());
-    BOOST_REQUIRE(writer.is_empty());
-    BOOST_REQUIRE(!writer.is_buffer_overflow(zero));
-    BOOST_REQUIRE_EQUAL(writer.next(), zero);
-    BOOST_REQUIRE_EQUAL(writer.gap(), block_size);
+    BC_REQUIRE(writer.is_full());
+    BC_REQUIRE(writer.is_empty());
+    BC_REQUIRE(!writer.is_buffer_overflow(zero));
+    BC_REQUIRE_EQUAL(writer.next(), zero);
+    BC_REQUIRE_EQUAL(writer.gap(), block_size);
 
-    BOOST_REQUIRE(writer.write(data_chunk(one, 0x00)));
-    BOOST_REQUIRE(!writer.is_full());
-    BOOST_REQUIRE(!writer.is_empty());
-    BOOST_REQUIRE_EQUAL(writer.next(), one);
-    BOOST_REQUIRE_EQUAL(writer.gap(), sub1(block_size));
+    BC_REQUIRE(writer.write(data_chunk(one, 0x00)));
+    BC_REQUIRE(!writer.is_full());
+    BC_REQUIRE(!writer.is_empty());
+    BC_REQUIRE_EQUAL(writer.next(), one);
+    BC_REQUIRE_EQUAL(writer.gap(), sub1(block_size));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__write__data_chunk_and_string__same_digest)
+BC_AUTO_TEST_CASE(accumulator__write__data_chunk_and_string__same_digest)
 {
     const std::string text{ "libbitcoin" };
     const data_chunk data{ text.cbegin(), text.cend() };
 
     accumulator<sha256> from_chunk{};
-    BOOST_REQUIRE(from_chunk.write(data));
+    BC_REQUIRE(from_chunk.write(data));
 
     accumulator<sha256> from_string{};
-    BOOST_REQUIRE(from_string.write(text));
+    BC_REQUIRE(from_string.write(text));
 
-    BOOST_REQUIRE_EQUAL(from_chunk.flush(), from_string.flush());
+    BC_REQUIRE_EQUAL(from_chunk.flush(), from_string.flush());
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__flush__data_chunk_out__matches_digest)
+BC_AUTO_TEST_CASE(accumulator__flush__data_chunk_out__matches_digest)
 {
     accumulator<sha256> writer{};
     accumulator<sha256> other{};
-    BOOST_REQUIRE(writer.write(std::string{ "libbitcoin" }));
-    BOOST_REQUIRE(other.write(std::string{ "libbitcoin" }));
+    BC_REQUIRE(writer.write(std::string{ "libbitcoin" }));
+    BC_REQUIRE(other.write(std::string{ "libbitcoin" }));
 
     data_chunk out(array_count<sha256::digest_t>, 0x00);
     writer.flush(out);
-    BOOST_REQUIRE_EQUAL(out, to_chunk(other.flush()));
+    BC_REQUIRE_EQUAL(out, to_chunk(other.flush()));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__double_flush__digest_out__matches_return)
+BC_AUTO_TEST_CASE(accumulator__double_flush__digest_out__matches_return)
 {
     accumulator<sha256> left{};
     accumulator<sha256> right{};
-    BOOST_REQUIRE(left.write(std::string{ "libbitcoin" }));
-    BOOST_REQUIRE(right.write(std::string{ "libbitcoin" }));
+    BC_REQUIRE(left.write(std::string{ "libbitcoin" }));
+    BC_REQUIRE(right.write(std::string{ "libbitcoin" }));
 
     sha256::digest_t digest{};
     left.double_flush(digest);
-    BOOST_REQUIRE_EQUAL(digest, right.double_flush());
+    BC_REQUIRE_EQUAL(digest, right.double_flush());
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__double_flush__empty__matches_written)
+BC_AUTO_TEST_CASE(accumulator__double_flush__empty__matches_written)
 {
     accumulator<sha256> writer{};
     const auto expected = writer.double_flush();
@@ -298,38 +298,38 @@ BOOST_AUTO_TEST_CASE(accumulator__double_flush__empty__matches_written)
     accumulator<sha256> other{};
     sha256::digest_t digest{};
     other.double_flush(digest);
-    BOOST_REQUIRE_EQUAL(digest, expected);
+    BC_REQUIRE_EQUAL(digest, expected);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__double_hash__chunk_and_string__same)
+BC_AUTO_TEST_CASE(accumulator__double_hash__chunk_and_string__same)
 {
     const std::string text{ "libbitcoin" };
     const data_chunk data{ text.cbegin(), text.cend() };
-    BOOST_REQUIRE_EQUAL(accumulator<sha256>::double_hash(data), accumulator<sha256>::double_hash(text));
+    BC_REQUIRE_EQUAL(accumulator<sha256>::double_hash(data), accumulator<sha256>::double_hash(text));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__double_hash_chunk__chunk_and_string__same)
+BC_AUTO_TEST_CASE(accumulator__double_hash_chunk__chunk_and_string__same)
 {
     const std::string text{ "libbitcoin" };
     const data_chunk data{ text.cbegin(), text.cend() };
-    BOOST_REQUIRE_EQUAL(accumulator<sha256>::double_hash_chunk(data), accumulator<sha256>::double_hash_chunk(text));
+    BC_REQUIRE_EQUAL(accumulator<sha256>::double_hash_chunk(data), accumulator<sha256>::double_hash_chunk(text));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__double_hash__multiple_blocks__matches_accumulated)
+BC_AUTO_TEST_CASE(accumulator__double_hash__multiple_blocks__matches_accumulated)
 {
     const data_chunk data(2u * array_count<sha256::block_t>, 0x42);
     accumulator<sha256> writer{};
-    BOOST_REQUIRE(writer.write(data));
-    BOOST_REQUIRE_EQUAL(accumulator<sha256>::double_hash(data), writer.double_flush());
+    BC_REQUIRE(writer.write(data));
+    BC_REQUIRE_EQUAL(accumulator<sha256>::double_hash(data), writer.double_flush());
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__hash__chunk_and_string__same)
+BC_AUTO_TEST_CASE(accumulator__hash__chunk_and_string__same)
 {
     const std::string text{ "libbitcoin" };
     const data_chunk data{ text.cbegin(), text.cend() };
-    BOOST_REQUIRE_EQUAL(accumulator<sha256>::hash(data), accumulator<sha256>::hash(text));
-    BOOST_REQUIRE_EQUAL(accumulator<sha256>::hash_chunk(data), accumulator<sha256>::hash_chunk(text));
+    BC_REQUIRE_EQUAL(accumulator<sha256>::hash(data), accumulator<sha256>::hash(text));
+    BC_REQUIRE_EQUAL(accumulator<sha256>::hash_chunk(data), accumulator<sha256>::hash_chunk(text));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

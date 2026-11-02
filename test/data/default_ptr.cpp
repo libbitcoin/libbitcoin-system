@@ -18,85 +18,85 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(default_ptr_tests)
+BC_AUTO_TEST_SUITE(default_ptr_tests)
 
 using type = data_chunk;
 using cptr = std::shared_ptr<const type>;
 
-BOOST_AUTO_TEST_CASE(default_ptr__construct__default__default_instance)
+BC_AUTO_TEST_CASE(default_ptr__construct__default__default_instance)
 {
     const default_ptr<type> instance{};
-    BOOST_REQUIRE(instance.get());
-    BOOST_REQUIRE(instance->empty());
+    BC_REQUIRE(instance.get());
+    BC_REQUIRE(instance->empty());
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__construct__null__default_instance)
+BC_AUTO_TEST_CASE(default_ptr__construct__null__default_instance)
 {
     const default_ptr<type> instance{ cptr{} };
-    BOOST_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
+    BC_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__construct__value__expected)
+BC_AUTO_TEST_CASE(default_ptr__construct__value__expected)
 {
     const auto pointer = to_shared<type>(type{ 0x42 });
     const default_ptr<type> instance{ pointer };
-    BOOST_REQUIRE_EQUAL(instance.get(), pointer);
-    BOOST_REQUIRE_EQUAL(*instance, type{ 0x42 });
+    BC_REQUIRE_EQUAL(instance.get(), pointer);
+    BC_REQUIRE_EQUAL(*instance, type{ 0x42 });
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__copy__always__shared)
+BC_AUTO_TEST_CASE(default_ptr__copy__always__shared)
 {
     const default_ptr<type> instance{ to_shared<type>(type{ 0x42 }) };
     const auto copy = instance;
-    BOOST_REQUIRE_EQUAL(copy.get(), instance.get());
+    BC_REQUIRE_EQUAL(copy.get(), instance.get());
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__move_construct__always__source_default)
+BC_AUTO_TEST_CASE(default_ptr__move_construct__always__source_default)
 {
     const auto pointer = to_shared<type>(type{ 0x42 });
     default_ptr<type> instance{ pointer };
     const auto moved = std::move(instance);
-    BOOST_REQUIRE_EQUAL(moved.get(), pointer);
-    BOOST_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
+    BC_REQUIRE_EQUAL(moved.get(), pointer);
+    BC_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__move_assign__always__source_default)
+BC_AUTO_TEST_CASE(default_ptr__move_assign__always__source_default)
 {
     const auto pointer = to_shared<type>(type{ 0x42 });
     default_ptr<type> instance{ pointer };
     default_ptr<type> assigned{};
     assigned = std::move(instance);
-    BOOST_REQUIRE_EQUAL(assigned.get(), pointer);
-    BOOST_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
+    BC_REQUIRE_EQUAL(assigned.get(), pointer);
+    BC_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__assign__null__default_instance)
+BC_AUTO_TEST_CASE(default_ptr__assign__null__default_instance)
 {
     default_ptr<type> instance{ to_shared<type>(type{ 0x42 }) };
     instance = cptr{};
-    BOOST_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
+    BC_REQUIRE_EQUAL(instance.get(), default_ptr<type>{}.get());
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__equality__same_pointer__true)
+BC_AUTO_TEST_CASE(default_ptr__equality__same_pointer__true)
 {
     const auto pointer = to_shared<type>(type{ 0x42 });
     const default_ptr<type> left{ pointer };
     const default_ptr<type> right{ pointer };
-    BOOST_REQUIRE(left == right);
+    BC_REQUIRE(left == right);
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__equality__same_value__false)
+BC_AUTO_TEST_CASE(default_ptr__equality__same_value__false)
 {
     const default_ptr<type> left{ to_shared<type>(type{ 0x42 }) };
     const default_ptr<type> right{ to_shared<type>(type{ 0x42 }) };
-    BOOST_REQUIRE(left != right);
+    BC_REQUIRE(left != right);
 }
 
-BOOST_AUTO_TEST_CASE(default_ptr__default_instance__distinct_types__distinct)
+BC_AUTO_TEST_CASE(default_ptr__default_instance__distinct_types__distinct)
 {
-    BOOST_REQUIRE_NE(
+    BC_REQUIRE_NE(
         static_cast<const void*>(default_ptr<data_chunk>{}.get().get()),
         static_cast<const void*>(default_ptr<hash_digest>{}.get().get()));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

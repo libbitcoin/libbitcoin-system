@@ -78,12 +78,12 @@ static_assert(power(2.0, 2u) == 4.0);
 static_assert(power(3.0, 3u) == 27.0);
 static_assert(power(1.5, 4u) == 5.0625);
 
-BOOST_AUTO_TEST_SUITE(power_tests)
+BC_AUTO_TEST_SUITE(power_tests)
 
 // uintx is not constexpr.
-BOOST_AUTO_TEST_CASE(power_uintx_tests)
+BC_AUTO_TEST_CASE(power_uintx_tests)
 {
-    BOOST_REQUIRE(true);
+    BC_REQUIRE(true);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

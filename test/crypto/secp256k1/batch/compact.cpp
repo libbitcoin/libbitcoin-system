@@ -18,6 +18,6 @@
  */
 #include "../../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_batch_compact_tests)
+BC_AUTO_TEST_SUITE(secp256k1_batch_compact_tests)
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -37,10 +37,8 @@ Cflags: \
     @sha512@ \
     @sse41@ \
     @aesni@ \
-    @vaes@ \
-    @boost_CPPFLAGS@
+    @vaes@
 
 Libs: \
     -L${libdir} \
-    -lbitcoin-system \
-    @boost_LDFLAGS@
+    -lbitcoin-system

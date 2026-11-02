@@ -250,19 +250,19 @@ void run_sha(const std::string& name, size_t calls) NOEXCEPT
     if constexpr (vector_t::vector)
     {
         const auto vector = Workload<vector_t>::run(name + " vector", calls);
-        BOOST_CHECK_EQUAL(vector, expected);
+        BC_CHECK_EQUAL(vector, expected);
     }
 
     if constexpr (native_t::native)
     {
         const auto native = Workload<native_t>::run(name + " native", calls);
-        BOOST_CHECK_EQUAL(native, expected);
+        BC_CHECK_EQUAL(native, expected);
     }
 
     if constexpr (both_t::native && both_t::vector)
     {
         const auto both = Workload<both_t>::run(name + " native vector", calls);
-        BOOST_CHECK_EQUAL(both, expected);
+        BC_CHECK_EQUAL(both, expected);
     }
 }
 
@@ -279,7 +279,7 @@ inline void run_rmd160(const std::string& name, size_t calls) NOEXCEPT
         std::copy(digest.cbegin(), digest.cend(), expected.begin());
     }
 
-    BOOST_CHECK_EQUAL(stream_1m<rmd160>::run(name, calls), expected);
+    BC_CHECK_EQUAL(stream_1m<rmd160>::run(name, calls), expected);
 }
 
 template <typename xWord>
@@ -288,7 +288,7 @@ void run_double_64_lanes(const std::string& name, size_t calls,
 {
     if constexpr (have<xWord>)
     {
-        BOOST_CHECK_EQUAL(double_64_lanes<xWord>(name, calls), expected);
+        BC_CHECK_EQUAL(double_64_lanes<xWord>(name, calls), expected);
     }
 }
 

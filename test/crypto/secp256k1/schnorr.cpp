@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(secp256k1_tests)
+BC_AUTO_TEST_SUITE(secp256k1_tests)
 
 // bitcoin/bips bip-0340/test-vectors.csv (rows 0-14, 32 byte messages).
 
@@ -51,7 +51,7 @@ const std::vector<bip340_vector> bip340_vectors
     { {}, base16_array("fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc30"), {}, base16_array("243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89"), base16_array("6cff5c3ba86c69ea4b7376f31a9bcb4f74c1976089b2d9963da2e5543e17776969e89b4c5564d00349106b8497785dd7d1d713a8ae82b32fa79d5f7fc407d39b"), false }
 };
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_sign__bip340_vectors__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_sign__bip340_vectors__expected)
 {
     for (size_t index{}; index < bip340_vectors.size(); ++index)
     {
@@ -60,46 +60,46 @@ BOOST_AUTO_TEST_CASE(secp256k1__schnorr_sign__bip340_vectors__expected)
             continue;
 
         ec_signature signature{};
-        BOOST_REQUIRE_MESSAGE(schnorr::sign(signature, vector.secret, vector.message, vector.auxiliary), index);
-        BOOST_REQUIRE_MESSAGE(signature == vector.signature, index);
+        BC_REQUIRE_MESSAGE(schnorr::sign(signature, vector.secret, vector.message, vector.auxiliary), index);
+        BC_REQUIRE_MESSAGE(signature == vector.signature, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_verify_signature__bip340_vectors__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_verify_signature__bip340_vectors__expected)
 {
     for (size_t index{}; index < bip340_vectors.size(); ++index)
     {
         const auto& vector = bip340_vectors[index];
-        BOOST_REQUIRE_MESSAGE(schnorr::verify_signature(vector.key, vector.message, vector.signature) == vector.valid, index);
+        BC_REQUIRE_MESSAGE(schnorr::verify_signature(vector.key, vector.message, vector.signature) == vector.valid, index);
     }
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_sign__zero_secret__false)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_sign__zero_secret__false)
 {
     ec_signature signature{};
-    BOOST_REQUIRE(!schnorr::sign(signature, {}, bip340_vectors.front().message, {}));
+    BC_REQUIRE(!schnorr::sign(signature, {}, bip340_vectors.front().message, {}));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_verify_commitment__tweaked__expected)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_verify_commitment__tweaked__expected)
 {
     const auto& internal = bip340_vectors.at(1).key;
     const hash_digest tweak = base16_array("0101010101010101010101010101010101010101010101010101010101010101");
 
     ec_compressed tweaked = splice(data_array<1>{ ec_even_sign }, internal);
-    BOOST_REQUIRE(ec_add(tweaked, tweak));
+    BC_REQUIRE(ec_add(tweaked, tweak));
 
     const auto parity = tweaked.front() == ec_odd_sign;
     const auto tweaked_key = slice<one, ec_compressed_size>(tweaked);
-    BOOST_REQUIRE(schnorr::verify_commitment(internal, tweak, tweaked_key, parity));
-    BOOST_REQUIRE(!schnorr::verify_commitment(internal, tweak, tweaked_key, !parity));
-    BOOST_REQUIRE(!schnorr::verify_commitment(internal, {}, tweaked_key, parity));
+    BC_REQUIRE(schnorr::verify_commitment(internal, tweak, tweaked_key, parity));
+    BC_REQUIRE(!schnorr::verify_commitment(internal, tweak, tweaked_key, !parity));
+    BC_REQUIRE(!schnorr::verify_commitment(internal, {}, tweaked_key, parity));
 }
 
-BOOST_AUTO_TEST_CASE(secp256k1__schnorr_verify_commitment__tweak_overflow__false)
+BC_AUTO_TEST_CASE(secp256k1__schnorr_verify_commitment__tweak_overflow__false)
 {
     const auto& internal = bip340_vectors.at(1).key;
     const hash_digest tweak = base16_array("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
-    BOOST_REQUIRE(!schnorr::verify_commitment(internal, tweak, internal, false));
+    BC_REQUIRE(!schnorr::verify_commitment(internal, tweak, internal, false));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

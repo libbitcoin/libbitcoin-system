@@ -23,7 +23,7 @@
 
 #include <atomic>
 
-BOOST_AUTO_TEST_SUITE(hash_performance_tests)
+BC_AUTO_TEST_SUITE(hash_performance_tests)
 
 using namespace performance;
 
@@ -51,16 +51,16 @@ struct dirty_64
     }
 };
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha256__dirty_upper_64)
+BC_AUTO_TEST_CASE(hash_performance__sha256__dirty_upper_64)
 {
     run_sha<sha::h256<>, dirty_64>("sha256 dirty upper 64", 100'000);
 }
 
-BOOST_AUTO_TEST_CASE(hash_performance__sha160__dirty_upper_64)
+BC_AUTO_TEST_CASE(hash_performance__sha160__dirty_upper_64)
 {
     run_sha<sha::h160, dirty_64>("sha160 dirty upper 64", 100'000);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #endif

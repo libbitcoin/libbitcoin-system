@@ -32,7 +32,7 @@ namespace config {
 
 // Default authority is IPv6 unspecified (not IPv6-mapped unspecified).
 authority::authority() NOEXCEPT
-  : authority(boost::asio::ip::address_v6{}, {})
+  : authority(ip::ipv6{}, {})
 {
 }
 
@@ -45,13 +45,13 @@ authority::authority(const std::string& authority) THROWS
 
 // This allows unusable CIDR values (ok).
 // IPv6-mapped IPv4 are normalized to IPv4.
-authority::authority(const asio::address& ip, uint16_t port,
+authority::authority(const ip::address& ip, uint16_t port,
     uint8_t cidr) NOEXCEPT
-  : ip_(config::denormalize(ip)), port_(port), cidr_(cidr)
+  : ip_(ip::denormalize(ip)), port_(port), cidr_(cidr)
 {
 }
 
-authority::authority(const asio::endpoint& endpoint) NOEXCEPT
+authority::authority(const ip::endpoint& endpoint) NOEXCEPT
   : authority(endpoint.address(), endpoint.port())
 {
 }
@@ -59,7 +59,7 @@ authority::authority(const asio::endpoint& endpoint) NOEXCEPT
 // Properties.
 // ----------------------------------------------------------------------------
 
-const asio::address& authority::ip() const NOEXCEPT
+const ip::address& authority::ip() const NOEXCEPT
 {
     return ip_;
 }
@@ -77,19 +77,19 @@ uint8_t authority::cidr() const NOEXCEPT
 // Methods.
 // ----------------------------------------------------------------------------
 
-asio::endpoint authority::to_endpoint() const NOEXCEPT
+ip::endpoint authority::to_endpoint() const NOEXCEPT
 {
     return { ip(), port() };
 }
 
 std::string authority::to_host() const NOEXCEPT
 {
-    return config::to_host(ip());
+    return ip::to_host(ip());
 }
 
 std::string authority::to_literal() const NOEXCEPT
 {
-    return config::to_literal(ip());
+    return ip::to_literal(ip());
 }
 
 std::string authority::to_string() const NOEXCEPT
@@ -122,8 +122,8 @@ bool operator==(const authority& left, const authority& right) NOEXCEPT
 
     // one zero (host) and one non-zero (subnet) cidr, match host to subnet.
     return is_zero(left.cidr()) ?
-        config::is_member(left.ip(), right.ip(), right.cidr()) :
-        config::is_member(right.ip(), left.ip(), left.cidr());
+        ip::is_member(left.ip(), right.ip(), right.cidr()) :
+        ip::is_member(right.ip(), left.ip(), left.cidr());
 }
 
 bool operator!=(const authority& left, const authority& right) NOEXCEPT

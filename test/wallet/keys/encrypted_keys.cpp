@@ -18,52 +18,52 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(encrypted_tests)
+BC_AUTO_TEST_SUITE(encrypted_tests)
 
 using namespace bc::system::wallet;
 
 // 4 seconds of test here.
 #if defined(HAVE_SLOW_TESTS)
 
-BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
+BC_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
 {
     const auto encoded_password = base16_array("cf92cc8100f0909080f09f92a9");
     std::string passphrase(encoded_password.cbegin(), encoded_password.cend());
 
     // This confirms that the passphrase decodes as expected in BIP38.
     std::string normal{ passphrase };
-    BOOST_REQUIRE(to_canonical_composition(normal));
+    BC_REQUIRE(to_canonical_composition(normal));
     data_chunk normalized(normal.size());
     std::copy_n(normal.cbegin(), normal.size(), normalized.begin());
-    BOOST_REQUIRE_EQUAL(encode_base16(normalized), "cf9300f0909080f09f92a9");
+    BC_REQUIRE_EQUAL(encode_base16(normalized), "cf9300f0909080f09f92a9");
 }
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__create_token_lot)
+BC_AUTO_TEST_SUITE(encrypted__create_token_lot)
 
 #define BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, bytes, lot, sequence) \
     encrypted_token out_token; \
-    BOOST_REQUIRE(create_token(out_token, passphrase, bytes, lot, sequence))
+    BC_REQUIRE(create_token(out_token, passphrase, bytes, lot, sequence))
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__lot_overlow__false)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__lot_overlow__false)
 {
     constexpr size_t lot = add1(1048575u);
     constexpr size_t sequence = 0;
     constexpr auto passphrase = "";
     constexpr auto salt = base16_array("baadf00d");
     encrypted_token out_token{};
-    BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
+    BC_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
 {
     constexpr size_t lot = 0;
     constexpr size_t sequence = add1(4095u);
     constexpr auto passphrase = "";
     const auto salt = base16_array("baadf00d");
     encrypted_token out_token{};
-    BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
+    BC_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
 // These fail on a presumably-correct out_token expectation.
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
 // it round trips as expected. This feature has no valid use case, so this is largely educational.
 
 // BIP38 TEST1: EC multiply, no compression, lot/sequence numbers
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__test1_lot_sequence__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__test1_lot_sequence__expected)
 {
     constexpr size_t lot = 263183;
     constexpr size_t sequence = 1;
@@ -86,12 +86,12 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__test1_lot_sequence__expected)
     // 4 bytes: SHA256(SHA256(expected_bitcoin_address))[0...3], used both for typo checking and as salt.
     const auto salt = slice<0, 4>(bitcoin_hash("1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh"));
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    /////BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseaB8feaLQDENqCgr4gKZpmf4VoaT6qdjJNJiv7fsKvjqavcJxvuR1hy25aTu5sX");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecqNtLBXsF9TH22M7dS5cDEmAcJarBm4Ffq44uitwJCHzdUChma9qhmp5rW6bKB");
+    /////BC_REQUIRE_EQUAL(encode_base58(out_token), "passphraseaB8feaLQDENqCgr4gKZpmf4VoaT6qdjJNJiv7fsKvjqavcJxvuR1hy25aTu5sX");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecqNtLBXsF9TH22M7dS5cDEmAcJarBm4Ffq44uitwJCHzdUChma9qhmp5rW6bKB");
 }
 
 // BIP38 TEST2: EC multiply, no compression, lot/sequence numbers
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__test2_lot_sequence__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__test2_lot_sequence__expected)
 {
     constexpr size_t lot = 806938;
     constexpr size_t sequence = 1;
@@ -101,101 +101,101 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__test2_lot_sequence__expected)
     // 4 bytes: SHA256(SHA256(expected_bitcoin_address))[0...3], used both for typo checking and as salt.
     const auto salt = slice<0, 4>(bitcoin_hash("1Lurmih3KruL4xDB5FmHof38yawNtP9oGf"));
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    ////BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrased3z9rQJHSyBkNBwTRPkUGNVEVrUAcfAXDyRU1V28ie6hNFbqDwbFBvsTK7yWVK");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasea1oq5xcU5KtCyVFGn8S9YavhYugJhtMCoGBiKZrPqui13mBfpwZJE3ZxwJgpoT");
+    ////BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrased3z9rQJHSyBkNBwTRPkUGNVEVrUAcfAXDyRU1V28ie6hNFbqDwbFBvsTK7yWVK");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasea1oq5xcU5KtCyVFGn8S9YavhYugJhtMCoGBiKZrPqui13mBfpwZJE3ZxwJgpoT");
 }
 
 // These test a potentially-incorrect out_token expectation.
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__defaults__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__defaults__expected)
 {
     constexpr size_t lot = 0;
     constexpr size_t sequence = 0;
     constexpr auto passphrase = "";
     constexpr auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7yQVcg1eQKPuX7rzGwBtEH1YSZnKbyk75x3rugZu1ci4RyF4rEn");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7yQVcg1eQKPuX7rzGwBtEH1YSZnKbyk75x3rugZu1ci4RyF4rEn");
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase__expected)
 {
     constexpr size_t lot = 0;
     constexpr size_t sequence = 0;
     constexpr auto passphrase = "passphrase";
     constexpr auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7x4pQXMhsJs2j7L8LTV8ujk9jGqgzUrafBeto9VrabP5SmvANvz");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7x4pQXMhsJs2j7L8LTV8ujk9jGqgzUrafBeto9VrabP5SmvANvz");
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_max__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_max__expected)
 {
     constexpr size_t lot = 1048575;
     constexpr size_t sequence = 0;
     constexpr auto passphrase = "passphrase";
     constexpr auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDqG47STo7JmV9N54hD7MwQvg5uy9QzkbSSytdMncP5FDPicAZGrwZxbpWZ");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDqG47STo7JmV9N54hD7MwQvg5uy9QzkbSSytdMncP5FDPicAZGrwZxbpWZ");
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_sequence_max__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_sequence_max__expected)
 {
     constexpr size_t lot = 0;
     constexpr size_t sequence = 4095;
     constexpr auto passphrase = "passphrase";
     constexpr auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuoJgtMqVyPSkUHyUiZmFkDN3thQ4MBDF1Yzyvp9JbhxariXj79n4poh");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuoJgtMqVyPSkUHyUiZmFkDN3thQ4MBDF1Yzyvp9JbhxariXj79n4poh");
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_sequence__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_sequence__expected)
 {
     constexpr size_t lot = 42;
     constexpr size_t sequence = 42;
     constexpr auto passphrase = "passphrase";
     constexpr auto salt = base16_array("baadf00d");
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuvh7ir7ubb8Kkf4xHiHLSvBZNvULif3PairUW3tFLficwUrkkV4Pp8D");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuvh7ir7ubb8Kkf4xHiHLSvBZNvULif3PairUW3tFLficwUrkkV4Pp8D");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__create_token_entropy)
+BC_AUTO_TEST_SUITE(encrypted__create_token_entropy)
 
 #define BC_CREATE_TOKEN_ENTROPY(passphrase, bytes) \
     encrypted_token out_token; \
     create_token(out_token, passphrase, bytes)
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__defaults__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_entropy__defaults__expected)
 {
     constexpr auto passphrase = "";
     constexpr auto entropy = base16_array("baadf00dbaadf00d");
     BC_CREATE_TOKEN_ENTROPY(passphrase, entropy);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6yLmJ7TQ49fKnQtsgjybNgNHAKBCQKoFZcTNjNJtg4oCUgtPt3");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6yLmJ7TQ49fKnQtsgjybNgNHAKBCQKoFZcTNjNJtg4oCUgtPt3");
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__passphrase__expected)
+BC_AUTO_TEST_CASE(encrypted__create_token_entropy__passphrase__expected)
 {
     constexpr auto passphrase = "passphrase";
     constexpr auto entropy = base16_array("baadf00dbaadf00d");
     BC_CREATE_TOKEN_ENTROPY(passphrase, entropy);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__encrypt_private)
+BC_AUTO_TEST_SUITE(encrypted__encrypt_private)
 
 #define BC_REQUIRE_ENCRYPT(secret, passphrase, version, compressed, expected) \
     encrypted_private out_private; \
-    BOOST_REQUIRE(encrypt(out_private, secret, passphrase, version, compressed)); \
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), expected)
+    BC_REQUIRE(encrypt(out_private, secret, passphrase, version, compressed)); \
+    BC_REQUIRE_EQUAL(encode_base58(out_private), expected)
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_0__expected)
+BC_AUTO_TEST_CASE(encrypted__encrypt_private__vector_0__expected)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_0__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_1__expected)
+BC_AUTO_TEST_CASE(encrypted__encrypt_private__vector_1__expected)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_1__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_2_compressed__expected)
+BC_AUTO_TEST_CASE(encrypted__encrypt_private__vector_2_compressed__expected)
 {
     constexpr auto compression = true;
     constexpr uint8_t version = 0x00;
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_2_compressed__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_3_compressed__expected)
+BC_AUTO_TEST_CASE(encrypted__encrypt_private__vector_3_compressed__expected)
 {
     constexpr auto compression = true;
     constexpr uint8_t version = 0x00;
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_3_compressed__expected)
 }
 
 // #3 from: github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_unicode__expected)
+BC_AUTO_TEST_CASE(encrypted__encrypt_private__vector_unicode__expected)
 {
     constexpr auto compression = false;
     constexpr const uint8_t version = 0x00;
@@ -246,11 +246,11 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_unicode__expected)
     BC_REQUIRE_ENCRYPT(secret, passphrase, version, compression, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__decrypt1)
+BC_AUTO_TEST_SUITE(encrypted__decrypt1)
 
 // TODO: create compressed+multiplied and altchain/testnet vector(s).
 
@@ -258,123 +258,123 @@ BOOST_AUTO_TEST_SUITE(encrypted__decrypt1)
     ec_secret out_secret; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
-    BOOST_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, passphrase))
+    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, passphrase))
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_0__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_0__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg");
     BC_REQUIRE_DECRYPT_SECRET(key, "TestingOneTwoThree");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_1__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_1__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PRNFFkZc2NZ6dJqFfhRoFNMR9Lnyj7dYGrzdgXXVMXcxoKTePPX1dWByq");
     BC_REQUIRE_DECRYPT_SECRET(key, "Satoshi");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_2_compressed__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_2_compressed__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PYNKZ1EAgYgmQfmNVamxyXVWHzK5s6DGhwP4J5o44cvXdoY7sRzhtpUeo");
     BC_REQUIRE_DECRYPT_SECRET(key, "TestingOneTwoThree");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_3_compressed__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_3_compressed__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PYLtMnXvfG3oJde97zRyLYFZCYizPU5T3LwgdYJz1fRhh16bU7u6PPmY7");
     BC_REQUIRE_DECRYPT_SECRET(key, "Satoshi");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_4_multiplied__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_4_multiplied__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PfQu77ygVyJLZjfvMLyhLMQbYnu5uguoJJ4kMCLqWwPEdfpwANVS76gTX");
     BC_REQUIRE_DECRYPT_SECRET(key, "TestingOneTwoThree");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "a43a940577f4e97f5c4d39eb14ff083a98187c64ea7c99ef7ce460833959a519");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "a43a940577f4e97f5c4d39eb14ff083a98187c64ea7c99ef7ce460833959a519");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_5_multiplied__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_5_multiplied__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PfLGnQs6VZnrNpmVKfjotbnQuaJK4KZoPFrAjx1JMJUa1Ft8gnf5WxfKd");
     BC_REQUIRE_DECRYPT_SECRET(key, "Satoshi");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "c2c8036df268f498099350718c4a3ef3984d2be84618c2650f5171dcc5eb660a");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "c2c8036df268f498099350718c4a3ef3984d2be84618c2650f5171dcc5eb660a");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_6_multiplied_lot__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_6_multiplied_lot__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PgNBNNzDkKdhkT6uJntUXwwzQV8Rr2tZcbkDcuC9DZRsS6AtHts4Ypo1j");
     BC_REQUIRE_DECRYPT_SECRET(key, "MOLON LABE");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "44ea95afbf138356a05ea32110dfd627232d0f2991ad221187be356f19fa8190");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "44ea95afbf138356a05ea32110dfd627232d0f2991ad221187be356f19fa8190");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_7_multiplied_lot__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_7_multiplied_lot__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PgGWtx25kUg8QWvwuJAgorN6k9FbE25rv5dMRwu5SKMnfpfVe5mar2ngH");
     BC_REQUIRE_DECRYPT_SECRET(key, "ΜΟΛΩΝ ΛΑΒΕ");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "ca2759aa4adb0f96c414f36abeb8db59342985be9fa50faac228c8e7d90e3006");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "ca2759aa4adb0f96c414f36abeb8db59342985be9fa50faac228c8e7d90e3006");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_8_multiplied__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_8_multiplied__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
     BC_REQUIRE_DECRYPT_SECRET(key, "libbitcoin test");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "fb4bfb0bfe151d524b0b11983b9f826d6a0bc7f7bdc480864a1b557ff0c59eb4");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "fb4bfb0bfe151d524b0b11983b9f826d6a0bc7f7bdc480864a1b557ff0c59eb4");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_9_multiplied__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_9_multiplied__expected)
 {
     constexpr uint8_t expected_version = 0x00;
     const auto key = base58_array("6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
     BC_REQUIRE_DECRYPT_SECRET(key, "Libbitcoin BIP38 Test Vector");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), "97c745cc980e5a070e12d0bff3f539b70748aadb406045fc1b42d4ded559a564");
-    BOOST_REQUIRE_EQUAL(out_version, expected_version);
-    BOOST_REQUIRE(!out_is_compressed);
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), "97c745cc980e5a070e12d0bff3f539b70748aadb406045fc1b42d4ded559a564");
+    BC_REQUIRE_EQUAL(out_version, expected_version);
+    BC_REQUIRE(!out_is_compressed);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__decrypt_public)
+BC_AUTO_TEST_SUITE(encrypted__decrypt_public)
 
 // TODO: create compressed and altchain/testnet vector(s).
 
@@ -382,65 +382,65 @@ BOOST_AUTO_TEST_SUITE(encrypted__decrypt_public)
     ec_compressed out_point; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
-    BOOST_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
-    BOOST_REQUIRE_EQUAL(out_version, version); \
-    BOOST_REQUIRE(!out_is_compressed); \
+    BC_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
+    BC_REQUIRE_EQUAL(out_version, version); \
+    BC_REQUIRE(!out_is_compressed); \
     const auto derived_address = payment_address(ec_public{ out_point, out_is_compressed }, out_version).encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_6_lot__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_public__vector_6_lot__expected)
 {
     constexpr uint8_t version = 0x00;
     const auto key = base58_array("cfrm38V8aXBn7JWA1ESmFMUn6erxeBGZGAxJPY4e36S9QWkzZKtaVqLNMgnifETYw7BPwWC9aPD");
     BC_REQUIRE_DECRYPT_POINT(key, "MOLON LABE", version);
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "03e20f3b812f630d0374eefe776e983549d5cdde87780be45cb9def7ee339dfed4");
-    BOOST_REQUIRE_EQUAL(derived_address, "1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "03e20f3b812f630d0374eefe776e983549d5cdde87780be45cb9def7ee339dfed4");
+    BC_REQUIRE_EQUAL(derived_address, "1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh");
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_7_lot__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_public__vector_7_lot__expected)
 {
     constexpr uint8_t version = 0x00;
     const auto key = base58_array("cfrm38V8G4qq2ywYEFfWLD5Cc6msj9UwsG2Mj4Z6QdGJAFQpdatZLavkgRd1i4iBMdRngDqDs51");
     BC_REQUIRE_DECRYPT_POINT(key, "ΜΟΛΩΝ ΛΑΒΕ", version);
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "0215fb4e4e62fcec936920dbda69e83facfe2cc5e152fafcf474c8fa0dcf5023f3");
-    BOOST_REQUIRE_EQUAL(derived_address, "1Lurmih3KruL4xDB5FmHof38yawNtP9oGf");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "0215fb4e4e62fcec936920dbda69e83facfe2cc5e152fafcf474c8fa0dcf5023f3");
+    BC_REQUIRE_EQUAL(derived_address, "1Lurmih3KruL4xDB5FmHof38yawNtP9oGf");
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_8__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_public__vector_8__expected)
 {
     constexpr uint8_t version = 0x00;
     const auto key = base58_array("cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
     BC_REQUIRE_DECRYPT_POINT(key, "libbitcoin test", version);
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e");
-    BOOST_REQUIRE_EQUAL(derived_address, "1NQgLnFz1ZzF6KkCJ4SM3xz3Jy1q2hEEax");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "02c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e");
+    BC_REQUIRE_EQUAL(derived_address, "1NQgLnFz1ZzF6KkCJ4SM3xz3Jy1q2hEEax");
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_9__expected)
+BC_AUTO_TEST_CASE(encrypted__decrypt_public__vector_9__expected)
 {
     constexpr uint8_t version = 0x00;
     const auto key = base58_array("cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
     BC_REQUIRE_DECRYPT_POINT(key, "Libbitcoin BIP38 Test Vector", version);
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
-    BOOST_REQUIRE_EQUAL(derived_address, "1NjjvGqXDrx1DvrhjYJxzrpyopk1ygHTSJ");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+    BC_REQUIRE_EQUAL(derived_address, "1NjjvGqXDrx1DvrhjYJxzrpyopk1ygHTSJ");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair)
+BC_AUTO_TEST_SUITE(encrypted__create_key_pair)
 
 // TODO: create compressed vector(s).
 
 #define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
     ec_compressed out_point; \
     encrypted_private out_private; \
-    BOOST_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
+    BC_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
 
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
@@ -448,68 +448,68 @@ BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
     const auto token = base58_array("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_compressed out_point{};
     encrypted_private out_private{};
-    BOOST_REQUIRE(!create_key_pair(out_private, out_point, token, seed, version, compression));
+    BC_REQUIRE(!create_key_pair(out_private, out_point, token, seed, version, compression));
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_8__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair__vector_8__expected)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
     constexpr auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_array("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
 
     ec_uncompressed decompressed{};
-    BOOST_REQUIRE(decompress(decompressed, out_point));
-    BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
+    BC_REQUIRE(decompress(decompressed, out_point));
+    BC_REQUIRE_EQUAL(encode_base16(decompressed), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9__expected)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
     constexpr auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_array("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
 
     ec_uncompressed decompressed{};
-    BOOST_REQUIRE(decompress(decompressed, out_point));
-    BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
+    BC_REQUIRE(decompress(decompressed, out_point));
+    BC_REQUIRE_EQUAL(encode_base16(decompressed), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed__expected)
 {
     constexpr auto compression = true;
     constexpr uint8_t version = 0x00;
     constexpr auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_array("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
 // altchain vectors are based on preliminary bidirectional mapping proposal.
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed_testnet__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed_testnet__expected)
 {
     constexpr auto compression = true;
     constexpr uint8_t version = 111;
     constexpr auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_array("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
+BC_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
 
 // TODO: create compressed vector(s).
 
@@ -517,83 +517,83 @@ BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
     ec_compressed out_point; \
     encrypted_public out_public; \
     encrypted_private out_private; \
-    BOOST_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
+    BC_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
 
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum__false)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum__false)
 {
     constexpr auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_array("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_compressed out_point{};
     encrypted_public out_public{};
     encrypted_private out_private{};
-    BOOST_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
+    BC_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_8__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_8__expected)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
     constexpr auto seed = base16_array("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_array("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
+    BC_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
 
     ec_uncompressed decompressed{};
-    BOOST_REQUIRE(decompress(decompressed, out_point));
-    BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
+    BC_REQUIRE(decompress(decompressed, out_point));
+    BC_REQUIRE_EQUAL(encode_base16(decompressed), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9__expected)
 {
     constexpr auto compression = false;
     constexpr uint8_t version = 0x00;
     constexpr auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_array("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
+    BC_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
 
     ec_uncompressed decompressed{};
-    BOOST_REQUIRE(decompress(decompressed, out_point));
-    BOOST_REQUIRE_EQUAL(encode_base16(decompressed), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
+    BC_REQUIRE(decompress(decompressed, out_point));
+    BC_REQUIRE_EQUAL(encode_base16(decompressed), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_compressed__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_compressed__expected)
 {
     constexpr auto compression = true;
     constexpr uint8_t version = 0x00;
     constexpr auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_array("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38VUEdzHWKfUjdNjV22wyFNGgtRHYhXdBFT7fWw7cCJbCobryAYUThq4BbTPP15g4SeBsug");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
+    BC_REQUIRE_EQUAL(encode_base58(out_public), "cfrm38VUEdzHWKfUjdNjV22wyFNGgtRHYhXdBFT7fWw7cCJbCobryAYUThq4BbTPP15g4SeBsug");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
 // altchain vectors are based on preliminary bidirectional mapping proposal.
-BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
+BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
 {
     constexpr auto compression = true;
     constexpr uint8_t version = 111;
     constexpr auto seed = base16_array("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_array("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compression);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm2zc77zW4FRDALEVBoKmmT79Q7KshtvLZoN62JADnXGPEcPosMx8sM8Ry4ieGW3FXUEoBwk2");
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+    BC_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
+    BC_REQUIRE_EQUAL(encode_base58(out_public), "cfrm2zc77zW4FRDALEVBoKmmT79Q7KshtvLZoN62JADnXGPEcPosMx8sM8Ry4ieGW3FXUEoBwk2");
+    BC_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(encrypted__round_trips)
+BC_AUTO_TEST_SUITE(encrypted__round_trips)
 
-BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_version_and_compression)
+BC_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_version_and_compression)
 {
     constexpr auto secret = base16_array("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
     constexpr auto passphrase = "passphrase";
@@ -602,27 +602,27 @@ BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_vers
     encrypted_private out_private_key{};
     constexpr uint8_t version = 111;
     constexpr auto is_compressed = true;
-    BOOST_REQUIRE(encrypt(out_private_key, secret, passphrase, version, is_compressed));
+    BC_REQUIRE(encrypt(out_private_key, secret, passphrase, version, is_compressed));
 
     // Decrypt the secret from the private key.
     const auto& private_key = out_private_key;
     ec_secret out_secret{};
     uint8_t out_version = 42;
     bool out_is_compressed = false;
-    BOOST_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, private_key, passphrase));
-    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), encode_base16(secret));
-    BOOST_REQUIRE_EQUAL(out_is_compressed, is_compressed);
-    BOOST_REQUIRE_EQUAL(out_version, version);
+    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, private_key, passphrase));
+    BC_REQUIRE_EQUAL(encode_base16(out_secret), encode_base16(secret));
+    BC_REQUIRE_EQUAL(out_is_compressed, is_compressed);
+    BC_REQUIRE_EQUAL(out_version, version);
 }
 
-BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
+BC_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.
     encrypted_token out_token{};
     const auto passphrase = "passphrase";
     const auto entropy = base16_array("baadf00dbaadf00d");
-    BOOST_REQUIRE(create_token(out_token, passphrase, entropy));
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
+    BC_REQUIRE(create_token(out_token, passphrase, entropy));
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
 
     // Create the private key.
     const auto& token = out_token;
@@ -631,34 +631,34 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testn
     constexpr uint8_t version = 111;
     constexpr auto is_compressed = false;
     constexpr auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
-    BOOST_REQUIRE(create_key_pair(out_private_key, out_point, token, seed, version, is_compressed));
+    BC_REQUIRE(create_key_pair(out_private_key, out_point, token, seed, version, is_compressed));
 
     // Extract the secret from the private key.
     const auto& private_key = out_private_key;
     ec_secret out_secret{};
     uint8_t out_version = 42;
     bool out_is_compressed = true;
-    BOOST_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, private_key, passphrase));
-    BOOST_REQUIRE_EQUAL(out_is_compressed, is_compressed);
-    BOOST_REQUIRE_EQUAL(out_version, version);
+    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, private_key, passphrase));
+    BC_REQUIRE_EQUAL(out_is_compressed, is_compressed);
+    BC_REQUIRE_EQUAL(out_version, version);
 
     // Validate the point derived from key creation against the secret-derived point.
     // The out point is always compressed, since the user can always decompress it.
     ec_compressed compressed{};
-    BOOST_REQUIRE(secret_to_public(compressed, out_secret));
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
+    BC_REQUIRE(secret_to_public(compressed, out_secret));
+    BC_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
 }
 
 // This tests a potentially-incorrect out_token expectation. See comments above.
 // However the value round-trips as expected and there is no reference implementation.
-BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
+BC_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.
     encrypted_token out_token{};
     constexpr auto passphrase = "passphrase";
     constexpr auto salt = base16_array("baadf00d");
-    BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuvh54RYUFyPSp3i1qXjatYK8LM1K4Ujd7KVkuzEiJA8PvRdcSaSuq2J");
+    BC_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
+    BC_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuvh54RYUFyPSp3i1qXjatYK8LM1K4Ujd7KVkuzEiJA8PvRdcSaSuq2J");
 
     // Create the public/private key pair.
     const auto& token = out_token;
@@ -668,7 +668,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
     constexpr uint8_t version = 111;
     constexpr auto is_compressed = true;
     constexpr auto seed = base16_array("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
-    BOOST_REQUIRE(create_key_pair(out_private_key, out_public_key, out_point, token, seed, version, is_compressed));
+    BC_REQUIRE(create_key_pair(out_private_key, out_public_key, out_point, token, seed, version, is_compressed));
 
     // Extract the secret from the private key.
     const auto& private_key = out_private_key;
@@ -676,24 +676,24 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_
     uint8_t out_version1 = 42;
     bool out_is_compressed1 = false;
     ec_compressed compressed{};
-    BOOST_REQUIRE(decrypt(out_secret1, out_version1, out_is_compressed1, private_key, passphrase));
-    BOOST_REQUIRE_EQUAL(out_is_compressed1, is_compressed);
-    BOOST_REQUIRE_EQUAL(out_version1, version);
-    BOOST_REQUIRE(secret_to_public(compressed, out_secret1));
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
+    BC_REQUIRE(decrypt(out_secret1, out_version1, out_is_compressed1, private_key, passphrase));
+    BC_REQUIRE_EQUAL(out_is_compressed1, is_compressed);
+    BC_REQUIRE_EQUAL(out_version1, version);
+    BC_REQUIRE(secret_to_public(compressed, out_secret1));
+    BC_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
 
     // Extract the point from the public key.
     const auto& public_key = out_public_key;
     ec_compressed out_point2{};
     uint8_t out_version2 = 42;
     bool out_is_compressed2 = false;
-    BOOST_REQUIRE(decrypt(out_point2, out_version2, out_is_compressed2, public_key, passphrase));
-    BOOST_REQUIRE_EQUAL(out_is_compressed2, is_compressed);
-    BOOST_REQUIRE_EQUAL(out_version2, version);
-    BOOST_REQUIRE_EQUAL(encode_base16(out_point2), encode_base16(compressed));
+    BC_REQUIRE(decrypt(out_point2, out_version2, out_is_compressed2, public_key, passphrase));
+    BC_REQUIRE_EQUAL(out_is_compressed2, is_compressed);
+    BC_REQUIRE_EQUAL(out_version2, version);
+    BC_REQUIRE_EQUAL(encode_base16(out_point2), encode_base16(compressed));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()
 
 #endif // HAVE_SLOW_TESTS
 
@@ -701,14 +701,14 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // These are not actual tests, just for emitting the version maps.
 
-//BOOST_AUTO_TEST_SUITE(encrypted__altchain_versions)
+//BC_AUTO_TEST_SUITE(encrypted__altchain_versions)
 //
 //static std::string hex(uint8_t number)
 //{
 //    return encode_base16(data_chunk{ number });
 //}
 //
-//BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
+//BC_AUTO_TEST_CASE(encrypted__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
 //{
 //    encrypted_private out_private_key;
 //    const auto secret = base16_array("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
@@ -717,15 +717,15 @@ BOOST_AUTO_TEST_SUITE_END()
 //    for (size_t version = 0x00; version <= 0xFF; ++version)
 //    {
 //        const auto byte = static_cast<uint8_t>(version);
-//        BOOST_REQUIRE(encrypt(out_private_key, secret, "passphrase", byte, compressed));
+//        BC_REQUIRE(encrypt(out_private_key, secret, "passphrase", byte, compressed));
 //
 //        auto key = encode_base58(out_private_key);
 //        key.resize(2);
-//        BOOST_TEST_MESSAGE("0x" + hex(byte) + " " + key);
+//        BC_TEST_MESSAGE("0x" + hex(byte) + " " + key);
 //    }
 //}
 //
-//BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
+//BC_AUTO_TEST_CASE(encrypted__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
 //{
 //    encrypted_token out_token;
 //    create_token(out_token, "passphrase", base16_array("baadf00dbaadf00d"));
@@ -740,18 +740,18 @@ BOOST_AUTO_TEST_SUITE_END()
 //    for (size_t version = 0x00; version <= 0xFF; ++version)
 //    {
 //        const auto byte = static_cast<uint8_t>(version);
-//        BOOST_REQUIRE(create_key_pair(out_private_key, out_public_key, unused, token, seed, byte, compressed));
+//        BC_REQUIRE(create_key_pair(out_private_key, out_public_key, unused, token, seed, byte, compressed));
 //
 //        auto private_key = encode_base58(out_private_key);
 //        auto public_key = encode_base58(out_public_key);
 //        private_key.resize(2);
 //        public_key.resize(7);
-//        BOOST_TEST_MESSAGE("0x" + hex(byte) + " " + private_key + " " + public_key);
+//        BC_TEST_MESSAGE("0x" + hex(byte) + " " + private_key + " " + public_key);
 //    }
 //}
 //
-//BOOST_AUTO_TEST_SUITE_END()
+//BC_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

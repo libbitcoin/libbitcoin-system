@@ -28,8 +28,6 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost::program_options;
-
 // Outputs format is currently private to bx:
 // "script:value"
 

@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/chain/witness.hpp>
 
+#include <sstream>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

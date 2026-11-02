@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(point_tests)
+BC_AUTO_TEST_SUITE(point_tests)
 
 namespace json = system::json;
 using namespace system::chain;
@@ -31,178 +31,178 @@ static const point expected_point(point_data);
 // ----------------------------------------------------------------------------
 // tests construction, native properties, is_valid
 
-BOOST_AUTO_TEST_CASE(point__constructor__default__invalid)
+BC_AUTO_TEST_CASE(point__constructor__default__invalid)
 {
     const point instance;
-    BOOST_REQUIRE(!instance.is_valid());
+    BC_REQUIRE(!instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(point__constructor__move__valid)
+BC_AUTO_TEST_CASE(point__constructor__move__valid)
 {
     auto copy = expected_point;
     const point instance(std::move(copy));
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_point);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_point);
 }
 
-BOOST_AUTO_TEST_CASE(point__constructor__copy__valid)
+BC_AUTO_TEST_CASE(point__constructor__copy__valid)
 {
     const point instance(expected_point);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_point);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE(instance == expected_point);
 }
 
-BOOST_AUTO_TEST_CASE(point__constructor__move_parameters__valid)
+BC_AUTO_TEST_CASE(point__constructor__move_parameters__valid)
 {
     const uint32_t index = 1234;
     auto copy = point_hash;
     point instance(std::move(copy), index);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.hash(), point_hash);
-    BOOST_REQUIRE_EQUAL(instance.index(), index);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.hash(), point_hash);
+    BC_REQUIRE_EQUAL(instance.index(), index);
 }
 
-BOOST_AUTO_TEST_CASE(point__constructor__copy_parameters__valid)
+BC_AUTO_TEST_CASE(point__constructor__copy_parameters__valid)
 {
     const uint32_t index = 1234;
     point instance(point_hash, index);
-    BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.hash(), point_hash);
-    BOOST_REQUIRE_EQUAL(instance.index(), index);
+    BC_REQUIRE(instance.is_valid());
+    BC_REQUIRE_EQUAL(instance.hash(), point_hash);
+    BC_REQUIRE_EQUAL(instance.index(), index);
 }
 
 // operators
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(point__assign__copy__expected)
+BC_AUTO_TEST_CASE(point__assign__copy__expected)
 {
     const auto& alpha = expected_point;
     auto gamma = alpha;
     const auto beta = std::move(gamma);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(point__assign__move__expected)
+BC_AUTO_TEST_CASE(point__assign__move__expected)
 {
     const auto& alpha = expected_point;
     const auto beta = alpha;
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(point__equality__same__true)
+BC_AUTO_TEST_CASE(point__equality__same__true)
 {
     const auto& alpha = expected_point;
     const point beta(alpha);
-    BOOST_REQUIRE(alpha == beta);
+    BC_REQUIRE(alpha == beta);
 }
 
-BOOST_AUTO_TEST_CASE(point__equality__different__false)
+BC_AUTO_TEST_CASE(point__equality__different__false)
 {
     const auto& alpha = expected_point;
     const point beta;
-    BOOST_REQUIRE(!(alpha == beta));
+    BC_REQUIRE(!(alpha == beta));
 }
 
-BOOST_AUTO_TEST_CASE(point__inequality__same__false)
+BC_AUTO_TEST_CASE(point__inequality__same__false)
 {
     const auto& alpha = expected_point;
     const point beta(alpha);
-    BOOST_REQUIRE(!(alpha != beta));
+    BC_REQUIRE(!(alpha != beta));
 }
 
-BOOST_AUTO_TEST_CASE(point__inequality__different__true)
+BC_AUTO_TEST_CASE(point__inequality__different__true)
 {
     const auto& alpha = expected_point;
     const point beta;
-    BOOST_REQUIRE(alpha != beta);
+    BC_REQUIRE(alpha != beta);
 }
 
 // to_data
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(point__to_data__data__expected)
+BC_AUTO_TEST_CASE(point__to_data__data__expected)
 {
     const auto size = expected_point.to_data().size();
-    BOOST_REQUIRE_EQUAL(size, expected_point.serialized_size());
+    BC_REQUIRE_EQUAL(size, expected_point.serialized_size());
 }
 
-BOOST_AUTO_TEST_CASE(point__to_data__stream__expected)
+BC_AUTO_TEST_CASE(point__to_data__stream__expected)
 {
     // Write point to stream.
     std::stringstream iostream;
     expected_point.to_data(iostream);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const point copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_point);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_point);
 }
 
-BOOST_AUTO_TEST_CASE(point__to_data__writer__expected)
+BC_AUTO_TEST_CASE(point__to_data__writer__expected)
 {
     // Write point to stream.
     std::stringstream iostream;
     write::bytes::ostream out(iostream);
     expected_point.to_data(out);
-    BOOST_REQUIRE(iostream);
+    BC_REQUIRE(iostream);
 
     // Verify stream contents.
     const point copy(iostream);
-    BOOST_REQUIRE(iostream);
-    BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_point);
+    BC_REQUIRE(iostream);
+    BC_REQUIRE(copy.is_valid());
+    BC_REQUIRE(copy == expected_point);
 }
 
 // properties
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(point__is_null__not_null__false)
+BC_AUTO_TEST_CASE(point__is_null__not_null__false)
 {
-    BOOST_REQUIRE(!expected_point.is_null());
+    BC_REQUIRE(!expected_point.is_null());
 }
 
-BOOST_AUTO_TEST_CASE(point__is_null__default_null__true)
+BC_AUTO_TEST_CASE(point__is_null__default_null__true)
 {
-    BOOST_REQUIRE(point{}.is_null());
+    BC_REQUIRE(point{}.is_null());
 }
 
-BOOST_AUTO_TEST_CASE(point__serialized_size__always__expected)
+BC_AUTO_TEST_CASE(point__serialized_size__always__expected)
 {
     static_assert(point::serialized_size() == hash_size + sizeof(uint32_t));
-    BOOST_REQUIRE_EQUAL(point::serialized_size(), hash_size + sizeof(uint32_t));
+    BC_REQUIRE_EQUAL(point::serialized_size(), hash_size + sizeof(uint32_t));
 }
 
-BOOST_AUTO_TEST_CASE(point__construct__fast_stream__round_trips)
+BC_AUTO_TEST_CASE(point__construct__fast_stream__round_trips)
 {
     const point expected{ one_hash, 42 };
     const auto data = expected.to_data();
     stream::in::fast source{ data };
     const point instance{ source };
-    BOOST_REQUIRE(instance == expected);
+    BC_REQUIRE(instance == expected);
 }
 
 // Constant reference optimizers.
 
-BOOST_AUTO_TEST_CASE(point__cref_lesser__lesser_index__true)
+BC_AUTO_TEST_CASE(point__cref_lesser__lesser_index__true)
 {
     const point instance1{ one_hash, 1 };
     const point instance2{ one_hash, 2 };
     const point_cref left{ instance1 };
     const point_cref right{ instance2 };
-    BOOST_REQUIRE(left < right);
-    BOOST_REQUIRE(!(right < left));
+    BC_REQUIRE(left < right);
+    BC_REQUIRE(!(right < left));
 }
 
-BOOST_AUTO_TEST_CASE(point__cref_inequality__different__true)
+BC_AUTO_TEST_CASE(point__cref_inequality__different__true)
 {
     const point instance1{ one_hash, 1 };
     const point instance2{ one_hash, 2 };
     const point_cref left{ instance1 };
     const point_cref right{ instance2 };
-    BOOST_REQUIRE(left != right);
-    BOOST_REQUIRE(!(left != left));
+    BC_REQUIRE(left != right);
+    BC_REQUIRE(!(left != left));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

@@ -81,6 +81,25 @@ set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../.." )
 if ( MSVC )
   set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
   set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
+
+  if ( BUILD_SHARED_LIBS )
+    message( FATAL_ERROR "Shared libraries are not supported with the MSVC frontend." )
+  endif()
+
+  add_compile_options(
+    /W4
+    /bigobj
+    /permissive-
+    /Zc:__cplusplus
+    /Zc:preprocessor
+    $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-command-line-argument> )
+
+  add_compile_definitions(
+    UNICODE
+    _UNICODE
+    WIN32_LEAN_AND_MEAN
+    NOMINMAX
+    _WIN32_WINNT=0x0A00 )
 endif()
 
 include(CheckCCompilerFlag)
@@ -112,14 +131,10 @@ option( with-console "Compile with console application." ON )
 # Dependencies.
 #------------------------------------------------------------------------------
 if ( BUILD_SHARED_LIBS )
-  set( Boost_USE_STATIC_LIBS "OFF" )
   set( libsecp256k1_USE_STATIC_LIBS "OFF" )
 else()
-  set( Boost_USE_STATIC_LIBS "ON" )
   set( libsecp256k1_USE_STATIC_LIBS "ON" )
 endif()
-
-find_package( Boost 1.86.0 REQUIRED )
 
 if ( with-secp256k1 )
   find_package( libsecp256k1 0.8.0 REQUIRED )
@@ -193,330 +208,369 @@ endif()
 #------------------------------------------------------------------------------
 # Compiler options.
 #------------------------------------------------------------------------------
+if ( NOT MSVC )
 
-if ( enable-avx2 )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx -mavx2" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
-      return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
-      }" TEST_COMPILES_AVX2 )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_AVX2 )
-    message( FATAL_ERROR "Compiler does not support '-mavx -mavx2'." )
+  if ( enable-avx2 )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx -mavx2" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
+        return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
+        }" TEST_COMPILES_AVX2 )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_AVX2 )
+      message( FATAL_ERROR "Compiler does not support '-mavx -mavx2'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
+        return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
+        }" DETECTED_FLAG_AVX2 )
+    if ( DETECTED_FLAG_AVX2 )
+      message( WARNING "Environmental override enabling option 'avx2'." )
+    endif()
+  endif()
+
+  if ( enable-avx512 )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512f -mavx512bw -mavx512vl" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+        __m256i b = _mm256_set1_epi32(3);
+        return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
+        }" TEST_COMPILES_AVX512 )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_AVX512 )
+      message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw -mavx512vl'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+        __m256i b = _mm256_set1_epi32(3);
+        return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
+        }" DETECTED_FLAG_AVX512 )
+    if ( DETECTED_FLAG_AVX512 )
+      message( WARNING "Environmental override enabling option 'avx512'." )
+    endif()
+  endif()
+
+  if ( enable-avx512ifma )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512ifma -mavx512vl" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m512i a = _mm512_set1_epi64(3);
+        __m256i b = _mm256_set1_epi64x(5);
+        return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
+        }" TEST_COMPILES_AVX512IFMA )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_AVX512IFMA )
+      message( FATAL_ERROR "Compiler does not support '-mavx512ifma -mavx512vl'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m512i a = _mm512_set1_epi64(3);
+        __m256i b = _mm256_set1_epi64x(5);
+        return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
+        }" DETECTED_FLAG_AVX512IFMA )
+    if ( DETECTED_FLAG_AVX512IFMA )
+      message( WARNING "Environmental override enabling option 'avx512ifma'." )
+    endif()
+  endif()
+
+  if ( enable-avxifma )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavxifma" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set1_epi64x(3);
+        __m128i b = _mm_set1_epi64x(5);
+        return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
+        }" TEST_COMPILES_AVXIFMA )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_AVXIFMA )
+      message( FATAL_ERROR "Compiler does not support '-mavxifma'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set1_epi64x(3);
+        __m128i b = _mm_set1_epi64x(5);
+        return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
+        }" DETECTED_FLAG_AVXIFMA )
+    if ( DETECTED_FLAG_AVXIFMA )
+      message( WARNING "Environmental override enabling option 'avxifma'." )
+    endif()
+  endif()
+
+  if ( enable-shani )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4 -msha" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m128i a = _mm_set1_epi32(0);
+        __m128i b = _mm_set1_epi32(15);
+        __m128i k = _mm_set1_epi32(31);
+        return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
+        }" TEST_COMPILES_SHANI )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_SHANI )
+      message( FATAL_ERROR "Compiler does not support '-msse4 -msha'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m128i a = _mm_set1_epi32(0);
+        __m128i b = _mm_set1_epi32(15);
+        __m128i k = _mm_set1_epi32(31);
+        return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
+        }" DETECTED_FLAG_SHANI )
+    if ( DETECTED_FLAG_SHANI )
+      message( WARNING "Environmental override enabling option 'shani'." )
+    endif()
+  endif()
+
+  if ( enable-sha512 )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -msha512" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set1_epi64x(0);
+        __m128i k = _mm_set1_epi64x(15);
+        return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
+        }" TEST_COMPILES_SHA512 )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_SHA512 )
+      message( FATAL_ERROR "Compiler does not support '-mavx2 -msha512'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set1_epi64x(0);
+        __m128i k = _mm_set1_epi64x(15);
+        return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
+        }" DETECTED_FLAG_SHA512 )
+    if ( DETECTED_FLAG_SHA512 )
+      message( WARNING "Environmental override enabling option 'sha512'." )
+    endif()
+  endif()
+
+  if ( enable-sse41 )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m128i a = _mm_set1_epi32(0);
+        __m128i b = _mm_set1_epi32(15);
+        return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
+        }" TEST_COMPILES_SSE41 )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_SSE41 )
+      message( FATAL_ERROR "Compiler does not support '-msse4.1'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m128i a = _mm_set1_epi32(0);
+        __m128i b = _mm_set1_epi32(15);
+        return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
+        }" DETECTED_FLAG_SSE41 )
+    if ( DETECTED_FLAG_SSE41 )
+      message( WARNING "Environmental override enabling option 'sse41'." )
+    endif()
+  endif()
+
+  if ( enable-aesni )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1 -maes -mpclmul" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m128i a = _mm_set1_epi32(1);
+        __m128i b = _mm_set1_epi32(3);
+        return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
+        }" TEST_COMPILES_AESNI )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_AESNI )
+      message( FATAL_ERROR "Compiler does not support '-msse4.1 -maes -mpclmul'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m128i a = _mm_set1_epi32(1);
+        __m128i b = _mm_set1_epi32(3);
+        return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
+        }" DETECTED_FLAG_AESNI )
+    if ( DETECTED_FLAG_AESNI )
+      message( WARNING "Environmental override enabling option 'aesni'." )
+    endif()
+  endif()
+
+  if ( enable-vaes )
+    set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -maes -mpclmul -mvaes -mvpclmulqdq" )
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set1_epi32(1);
+        __m256i b = _mm256_set1_epi32(3);
+        return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
+        }" TEST_COMPILES_VAES )
+    set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    if ( !TEST_COMPILES_VAES )
+      message( FATAL_ERROR "Compiler does not support '-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq'." )
+    endif()
+  else()
+    check_cxx_source_compiles( "
+      #include <stdint.h>
+      #include <immintrin.h>
+        int main() {
+        __m256i a = _mm256_set1_epi32(1);
+        __m256i b = _mm256_set1_epi32(3);
+        return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
+        }" DETECTED_FLAG_VAES )
+    if ( DETECTED_FLAG_VAES )
+      message( WARNING "Environmental override enabling option 'vaes'." )
+    endif()
+  endif()
+
+  check_cxx_compiler_flag( "-Wall" HAS_FLAG_WALL )
+  if ( !HAS_FLAG_WALL )
+      message( FATAL_ERROR "Compiler does not support '-Wall'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wextra" HAS_FLAG_WEXTRA )
+  if ( !HAS_FLAG_WEXTRA )
+      message( FATAL_ERROR "Compiler does not support '-Wextra'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-reorder" HAS_FLAG_WNO-REORDER )
+  if ( !HAS_FLAG_WNO-REORDER )
+      message( FATAL_ERROR "Compiler does not support '-Wno-reorder'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-missing-field-initializers" HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
+  if ( !HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
+      message( FATAL_ERROR "Compiler does not support '-Wno-missing-field-initializers'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-missing-braces" HAS_FLAG_WNO-MISSING-BRACES )
+  if ( !HAS_FLAG_WNO-MISSING-BRACES )
+      message( FATAL_ERROR "Compiler does not support '-Wno-missing-braces'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-comment" HAS_FLAG_WNO-COMMENT )
+  if ( !HAS_FLAG_WNO-COMMENT )
+      message( FATAL_ERROR "Compiler does not support '-Wno-comment'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-deprecated-copy" HAS_FLAG_WNO-DEPRECATED-COPY )
+  if ( !HAS_FLAG_WNO-DEPRECATED-COPY )
+      message( FATAL_ERROR "Compiler does not support '-Wno-deprecated-copy'." )
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-ignored-attributes" HAS_FLAG_WNO-IGNORED-ATTRIBUTES )
+  if ( !HAS_FLAG_WNO-IGNORED-ATTRIBUTES )
+      message( FATAL_ERROR "Compiler does not support '-Wno-ignored-attributes'." )
+  endif()
+
+  if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+    check_cxx_compiler_flag( "-Wno-mismatched-tags" HAS_FLAG_WNO-MISMATCHED-TAGS )
+    if ( !HAS_FLAG_WNO-MISMATCHED-TAGS )
+        message( FATAL_ERROR "Compiler does not support '-Wno-mismatched-tags'." )
+    endif()
+  endif()
+
+  check_cxx_compiler_flag( "-Wno-long-long" HAS_FLAG_WNO-LONG-LONG )
+  if ( !HAS_FLAG_WNO-LONG-LONG )
+      message( FATAL_ERROR "Compiler does not support '-Wno-long-long'." )
+  endif()
+
+  if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
+    check_cxx_compiler_flag( "-fno-var-tracking-assignments" HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
+    if ( !HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
+        message( FATAL_ERROR "Compiler does not support '-fno-var-tracking-assignments'." )
+    endif()
+  endif()
+
+  check_cxx_compiler_flag( "-fstack-protector-all" HAS_FLAG_FSTACK-PROTECTOR-ALL )
+  if ( !HAS_FLAG_FSTACK-PROTECTOR-ALL )
+      message( FATAL_ERROR "Compiler does not support '-fstack-protector-all'." )
   endif()
 else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
-      return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
-      }" DETECTED_FLAG_AVX2 )
-  if ( DETECTED_FLAG_AVX2 )
-    message( WARNING "Environmental override enabling option 'avx2'." )
+
+  if ( enable-avx2 )
+    message( FATAL_ERROR "Option 'enable-avx2' is not supported with the MSVC frontend." )
   endif()
-endif()
 
-if ( enable-avx512 )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512f -mavx512bw -mavx512vl" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
-      __m256i b = _mm256_set1_epi32(3);
-      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
-      }" TEST_COMPILES_AVX512 )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_AVX512 )
-    message( FATAL_ERROR "Compiler does not support '-mavx512f -mavx512bw -mavx512vl'." )
+  if ( enable-avx512 )
+    message( FATAL_ERROR "Option 'enable-avx512' is not supported with the MSVC frontend." )
   endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
-      __m256i b = _mm256_set1_epi32(3);
-      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);
-      }" DETECTED_FLAG_AVX512 )
-  if ( DETECTED_FLAG_AVX512 )
-    message( WARNING "Environmental override enabling option 'avx512'." )
+
+  if ( enable-avx512ifma )
+    message( FATAL_ERROR "Option 'enable-avx512ifma' is not supported with the MSVC frontend." )
   endif()
-endif()
 
-if ( enable-avx512ifma )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512ifma -mavx512vl" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m512i a = _mm512_set1_epi64(3);
-      __m256i b = _mm256_set1_epi64x(5);
-      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
-      }" TEST_COMPILES_AVX512IFMA )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_AVX512IFMA )
-    message( FATAL_ERROR "Compiler does not support '-mavx512ifma -mavx512vl'." )
+  if ( enable-avxifma )
+    message( FATAL_ERROR "Option 'enable-avxifma' is not supported with the MSVC frontend." )
   endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m512i a = _mm512_set1_epi64(3);
-      __m256i b = _mm256_set1_epi64x(5);
-      return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);
-      }" DETECTED_FLAG_AVX512IFMA )
-  if ( DETECTED_FLAG_AVX512IFMA )
-    message( WARNING "Environmental override enabling option 'avx512ifma'." )
+
+  if ( enable-shani )
+    message( FATAL_ERROR "Option 'enable-shani' is not supported with the MSVC frontend." )
   endif()
-endif()
 
-if ( enable-avxifma )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavxifma" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set1_epi64x(3);
-      __m128i b = _mm_set1_epi64x(5);
-      return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
-      }" TEST_COMPILES_AVXIFMA )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_AVXIFMA )
-    message( FATAL_ERROR "Compiler does not support '-mavxifma'." )
+  if ( enable-sha512 )
+    message( FATAL_ERROR "Option 'enable-sha512' is not supported with the MSVC frontend." )
   endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set1_epi64x(3);
-      __m128i b = _mm_set1_epi64x(5);
-      return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);
-      }" DETECTED_FLAG_AVXIFMA )
-  if ( DETECTED_FLAG_AVXIFMA )
-    message( WARNING "Environmental override enabling option 'avxifma'." )
+
+  if ( enable-sse41 )
+    message( FATAL_ERROR "Option 'enable-sse41' is not supported with the MSVC frontend." )
   endif()
-endif()
 
-if ( enable-shani )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4 -msha" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m128i a = _mm_set1_epi32(0);
-      __m128i b = _mm_set1_epi32(15);
-      __m128i k = _mm_set1_epi32(31);
-      return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
-      }" TEST_COMPILES_SHANI )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_SHANI )
-    message( FATAL_ERROR "Compiler does not support '-msse4 -msha'." )
+  if ( enable-aesni )
+    message( FATAL_ERROR "Option 'enable-aesni' is not supported with the MSVC frontend." )
   endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m128i a = _mm_set1_epi32(0);
-      __m128i b = _mm_set1_epi32(15);
-      __m128i k = _mm_set1_epi32(31);
-      return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
-      }" DETECTED_FLAG_SHANI )
-  if ( DETECTED_FLAG_SHANI )
-    message( WARNING "Environmental override enabling option 'shani'." )
+
+  if ( enable-vaes )
+    message( FATAL_ERROR "Option 'enable-vaes' is not supported with the MSVC frontend." )
   endif()
-endif()
-
-if ( enable-sha512 )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -msha512" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set1_epi64x(0);
-      __m128i k = _mm_set1_epi64x(15);
-      return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
-      }" TEST_COMPILES_SHA512 )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_SHA512 )
-    message( FATAL_ERROR "Compiler does not support '-mavx2 -msha512'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set1_epi64x(0);
-      __m128i k = _mm_set1_epi64x(15);
-      return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);
-      }" DETECTED_FLAG_SHA512 )
-  if ( DETECTED_FLAG_SHA512 )
-    message( WARNING "Environmental override enabling option 'sha512'." )
-  endif()
-endif()
-
-if ( enable-sse41 )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m128i a = _mm_set1_epi32(0);
-      __m128i b = _mm_set1_epi32(15);
-      return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
-      }" TEST_COMPILES_SSE41 )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_SSE41 )
-    message( FATAL_ERROR "Compiler does not support '-msse4.1'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m128i a = _mm_set1_epi32(0);
-      __m128i b = _mm_set1_epi32(15);
-      return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
-      }" DETECTED_FLAG_SSE41 )
-  if ( DETECTED_FLAG_SSE41 )
-    message( WARNING "Environmental override enabling option 'sse41'." )
-  endif()
-endif()
-
-if ( enable-aesni )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1 -maes -mpclmul" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m128i a = _mm_set1_epi32(1);
-      __m128i b = _mm_set1_epi32(3);
-      return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
-      }" TEST_COMPILES_AESNI )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_AESNI )
-    message( FATAL_ERROR "Compiler does not support '-msse4.1 -maes -mpclmul'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m128i a = _mm_set1_epi32(1);
-      __m128i b = _mm_set1_epi32(3);
-      return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));
-      }" DETECTED_FLAG_AESNI )
-  if ( DETECTED_FLAG_AESNI )
-    message( WARNING "Environmental override enabling option 'aesni'." )
-  endif()
-endif()
-
-if ( enable-vaes )
-  set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx2 -maes -mpclmul -mvaes -mvpclmulqdq" )
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set1_epi32(1);
-      __m256i b = _mm256_set1_epi32(3);
-      return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
-      }" TEST_COMPILES_VAES )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-  if ( !TEST_COMPILES_VAES )
-    message( FATAL_ERROR "Compiler does not support '-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq'." )
-  endif()
-else()
-  check_cxx_source_compiles( "
-    #include <stdint.h>
-    #include <immintrin.h>
-      int main() {
-      __m256i a = _mm256_set1_epi32(1);
-      __m256i b = _mm256_set1_epi32(3);
-      return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);
-      }" DETECTED_FLAG_VAES )
-  if ( DETECTED_FLAG_VAES )
-    message( WARNING "Environmental override enabling option 'vaes'." )
-  endif()
-endif()
-
-check_cxx_compiler_flag( "-Wall" HAS_FLAG_WALL )
-if ( !HAS_FLAG_WALL )
-    message( FATAL_ERROR "Compiler does not support '-Wall'." )
-endif()
-
-check_cxx_compiler_flag( "-Wextra" HAS_FLAG_WEXTRA )
-if ( !HAS_FLAG_WEXTRA )
-    message( FATAL_ERROR "Compiler does not support '-Wextra'." )
-endif()
-
-check_cxx_compiler_flag( "-Wno-reorder" HAS_FLAG_WNO-REORDER )
-if ( !HAS_FLAG_WNO-REORDER )
-    message( FATAL_ERROR "Compiler does not support '-Wno-reorder'." )
-endif()
-
-check_cxx_compiler_flag( "-Wno-missing-field-initializers" HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
-if ( !HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
-    message( FATAL_ERROR "Compiler does not support '-Wno-missing-field-initializers'." )
-endif()
-
-check_cxx_compiler_flag( "-Wno-missing-braces" HAS_FLAG_WNO-MISSING-BRACES )
-if ( !HAS_FLAG_WNO-MISSING-BRACES )
-    message( FATAL_ERROR "Compiler does not support '-Wno-missing-braces'." )
-endif()
-
-check_cxx_compiler_flag( "-Wno-comment" HAS_FLAG_WNO-COMMENT )
-if ( !HAS_FLAG_WNO-COMMENT )
-    message( FATAL_ERROR "Compiler does not support '-Wno-comment'." )
-endif()
-
-check_cxx_compiler_flag( "-Wno-deprecated-copy" HAS_FLAG_WNO-DEPRECATED-COPY )
-if ( !HAS_FLAG_WNO-DEPRECATED-COPY )
-    message( FATAL_ERROR "Compiler does not support '-Wno-deprecated-copy'." )
-endif()
-
-check_cxx_compiler_flag( "-Wno-ignored-attributes" HAS_FLAG_WNO-IGNORED-ATTRIBUTES )
-if ( !HAS_FLAG_WNO-IGNORED-ATTRIBUTES )
-    message( FATAL_ERROR "Compiler does not support '-Wno-ignored-attributes'." )
-endif()
-
-if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  check_cxx_compiler_flag( "-Wno-mismatched-tags" HAS_FLAG_WNO-MISMATCHED-TAGS )
-  if ( !HAS_FLAG_WNO-MISMATCHED-TAGS )
-      message( FATAL_ERROR "Compiler does not support '-Wno-mismatched-tags'." )
-  endif()
-endif()
-
-check_cxx_compiler_flag( "-Wno-long-long" HAS_FLAG_WNO-LONG-LONG )
-if ( !HAS_FLAG_WNO-LONG-LONG )
-    message( FATAL_ERROR "Compiler does not support '-Wno-long-long'." )
-endif()
-
-if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
-  check_cxx_compiler_flag( "-fno-var-tracking-assignments" HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
-  if ( !HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
-      message( FATAL_ERROR "Compiler does not support '-fno-var-tracking-assignments'." )
-  endif()
-endif()
-
-check_cxx_compiler_flag( "-fstack-protector-all" HAS_FLAG_FSTACK-PROTECTOR-ALL )
-if ( !HAS_FLAG_FSTACK-PROTECTOR-ALL )
-    message( FATAL_ERROR "Compiler does not support '-fstack-protector-all'." )
 endif()
 
 #------------------------------------------------------------------------------
@@ -549,31 +603,33 @@ target_compile_features( libbitcoin-system
     cxx_std_20
 )
 
-target_compile_options( libbitcoin-system
-  PUBLIC
-    $<$<BOOL:${enable-avx2}>:-mavx -mavx2>
-    $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw -mavx512vl>
-    $<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>
-    $<$<BOOL:${enable-avxifma}>:-mavxifma>
-    $<$<BOOL:${enable-shani}>:-msse4 -msha>
-    $<$<BOOL:${enable-sha512}>:-mavx2 -msha512>
-    $<$<BOOL:${enable-sse41}>:-msse4.1>
-    $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
-    $<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>
-  PRIVATE
-    -Wall
-    -Wextra
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
-    $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
-    $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-    $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
-)
+if ( NOT MSVC )
+  target_compile_options( libbitcoin-system
+    PUBLIC
+      $<$<BOOL:${enable-avx2}>:-mavx -mavx2>
+      $<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw -mavx512vl>
+      $<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>
+      $<$<BOOL:${enable-avxifma}>:-mavxifma>
+      $<$<BOOL:${enable-shani}>:-msse4 -msha>
+      $<$<BOOL:${enable-sha512}>:-mavx2 -msha512>
+      $<$<BOOL:${enable-sse41}>:-msse4.1>
+      $<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>
+      $<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>
+    PRIVATE
+      -Wall
+      -Wextra
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
+      $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
+      $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
+      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
+  )
+endif()
 
 target_compile_definitions( libbitcoin-system
   PRIVATE
@@ -582,6 +638,13 @@ target_compile_definitions( libbitcoin-system
     $<$<BOOL:${with-valgrind}>:WITH_VALGRIND>
     $<$<BOOL:${enable-cuda}>:WITH_CUDA>
 )
+
+if ( MSVC )
+  target_compile_definitions( libbitcoin-system
+    PUBLIC
+      BC_STATIC
+  )
+endif()
 
 file( GLOB_RECURSE libbitcoin_system_HEADERS CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/../../include/*.h"
@@ -616,7 +679,6 @@ target_include_directories( libbitcoin-system
 
 target_link_libraries( libbitcoin-system
   PUBLIC
-    Boost::headers
     $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
 )
 
@@ -664,21 +726,23 @@ if ( with-tests )
       cxx_std_20
   )
 
-  target_compile_options( libbitcoin-system-test
-    PRIVATE
-      -Wall
-      -Wextra
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
-      $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
-      $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
-  )
+  if ( NOT MSVC )
+    target_compile_options( libbitcoin-system-test
+      PRIVATE
+        -Wall
+        -Wextra
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
+        $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
+        $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
+    )
+  endif()
 
   file( GLOB_RECURSE libbitcoin_system_test_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../test/*.c"
@@ -692,7 +756,6 @@ if ( with-tests )
 
   target_link_libraries( libbitcoin-system-test
     PRIVATE
-      Boost::headers
       bitcoin::system
   )
 
@@ -714,21 +777,23 @@ if ( with-console )
       cxx_std_20
   )
 
-  target_compile_options( bitcoin-selector
-    PRIVATE
-      -Wall
-      -Wextra
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
-      $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
-      $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
-      $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
-  )
+  if ( NOT MSVC )
+    target_compile_options( bitcoin-selector
+      PRIVATE
+        -Wall
+        -Wextra
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-comment>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-copy>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-ignored-attributes>
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-long-long>
+        $<$<CXX_COMPILER_ID:GNU>:-fno-var-tracking-assignments>
+        $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
+    )
+  endif()
 
   file( GLOB_RECURSE bitcoin_selector_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../console/*.c"

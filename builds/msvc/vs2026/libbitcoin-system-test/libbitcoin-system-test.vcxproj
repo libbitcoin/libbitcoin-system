@@ -210,15 +210,11 @@
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\byte.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\parser.cpp">
-      <ObjectFileName>$(IntDir)test_config_parser.obj</ObjectFileName>
+    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp">
+      <ObjectFileName>$(IntDir)test_config_endpoint.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\path.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\setting.cpp" />
     <ClCompile Include="..\..\..\..\test\config\token.cpp" />
     <ClCompile Include="..\..\..\..\test\config\url.cpp" />
     <ClCompile Include="..\..\..\..\test\config\utilities.cpp" />
@@ -306,7 +302,9 @@
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\swaps.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp">
+      <ObjectFileName>$(IntDir)test_endian_uintx_t.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\unsafe.cpp" />
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />
@@ -322,10 +320,12 @@
     <ClCompile Include="..\..\..\..\test\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\test\filter\sieve.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
-    <ClCompile Include="..\..\..\..\test\hacks.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\crc32.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
+      <ObjectFileName>$(IntDir)test_hash_functions.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\hkdf.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\muhash.cpp" />
@@ -373,6 +373,15 @@
     <ClCompile Include="..\..\..\..\test\intrinsics\types.cpp">
       <ObjectFileName>$(IntDir)test_intrinsics_types.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ip\address.cpp" />
+    <ClCompile Include="..\..\..\..\test\ip\endpoint.cpp">
+      <ObjectFileName>$(IntDir)test_ip_endpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ip\functions.cpp">
+      <ObjectFileName>$(IntDir)test_ip_functions.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ip\ipv4.cpp" />
+    <ClCompile Include="..\..\..\..\test\ip\ipv6.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter_connect.cpp" />
@@ -402,6 +411,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\mocks\blocks.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\description.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\parser.cpp">
+      <ObjectFileName>$(IntDir)test_options_parser.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\options\parsers.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\setting.cpp" />
+    <ClCompile Include="..\..\..\..\test\options\value.cpp">
+      <ObjectFileName>$(IntDir)test_options_value.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\options\variables.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
@@ -421,11 +442,15 @@
       <ObjectFileName>$(IntDir)test_serial_json_parser.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\serial\json\serializer.cpp" />
-    <ClCompile Include="..\..\..\..\test\serial\json\value.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\json\value.cpp">
+      <ObjectFileName>$(IntDir)test_serial_json_value.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\serial\json\value_ref.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\props.cpp" />
     <ClCompile Include="..\..\..\..\test\serial\serialize.cpp" />
-    <ClCompile Include="..\..\..\..\test\settings.cpp" />
+    <ClCompile Include="..\..\..\..\test\settings.cpp">
+      <ObjectFileName>$(IntDir)test_settings.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\binary.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\device.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\copy_sink.cpp" />
@@ -455,6 +480,10 @@
     <ClCompile Include="..\..\..\..\test\types.cpp">
       <ObjectFileName>$(IntDir)test_types.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\uintx\uint256_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\uintx\uintx_t.cpp">
+      <ObjectFileName>$(IntDir)test_uintx_uintx_t.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp">
@@ -467,6 +496,12 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\paths.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\checks.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\registry.cpp" />
+    <ClCompile Include="..\..\..\..\test\unit_test\settings.cpp">
+      <ObjectFileName>$(IntDir)test_unit_test_settings.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
@@ -559,14 +594,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets')" />
     <Import Project="$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The Missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets'))" />
   </Target>
   <ItemGroup>

@@ -153,8 +153,7 @@ static std::string encode(const std::string_view& text, Allowed allowed) NOEXCEP
 }
 
 // Input must be valid (is_encoded).
-static std::string decode(const std::string_view& text,
-    bool plus_is_space=false) NOEXCEPT
+static std::string decode(const std::string_view& text) NOEXCEPT
 {
     std::string out{};
     out.reserve(text.size());
@@ -167,7 +166,7 @@ static std::string decode(const std::string_view& text,
         }
         else
         {
-            out.push_back(plus_is_space && *it == '+' ? ' ' : *it);
+            out.push_back(*it);
         }
     }
 
@@ -551,7 +550,7 @@ uri::query_map uri::decode_query() const NOEXCEPT
         const auto value = equals == npos ? std::string_view{} :
             std::string_view{ parameter }.substr(add1(equals));
 
-        out[wallet::decode(key, true)] = wallet::decode(value, true);
+        out[wallet::decode(key)] = wallet::decode(value);
     }
 
     return out;

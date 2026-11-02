@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(xsalsa20_poly1305_tests)
+BC_AUTO_TEST_SUITE(xsalsa20_poly1305_tests)
 
 // nacl tests/secretbox.c (key is crypto_box_beforenm of the rfc7748 pair).
 const auto secretbox_key = base16_array("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389");
@@ -36,70 +36,70 @@ const auto secretbox_cipher = base16_chunk(
     "90224368517acfeabd6bb3732bc0e9da99832b61ca01b6de56244a9e88d5f9b3"
     "7973f622a43d14a6599b1f654cb45a74e355a5");
 
-BOOST_AUTO_TEST_CASE(xsalsa20_poly1305__encrypt__nacl_secretbox__expected)
+BC_AUTO_TEST_CASE(xsalsa20_poly1305__encrypt__nacl_secretbox__expected)
 {
     xsalsa20_poly1305 box{ secretbox_key };
     data_chunk cipher(secretbox_plain.size() + xsalsa20_poly1305::expansion);
     box.encrypt(secretbox_plain, secretbox_nonce, cipher);
-    BOOST_REQUIRE_EQUAL(cipher, secretbox_cipher);
+    BC_REQUIRE_EQUAL(cipher, secretbox_cipher);
 }
 
-BOOST_AUTO_TEST_CASE(xsalsa20_poly1305__decrypt__nacl_secretbox__expected)
+BC_AUTO_TEST_CASE(xsalsa20_poly1305__decrypt__nacl_secretbox__expected)
 {
     xsalsa20_poly1305 box{ secretbox_key };
     data_chunk plain(secretbox_cipher.size() - xsalsa20_poly1305::expansion);
-    BOOST_REQUIRE(box.decrypt(plain, secretbox_nonce, secretbox_cipher));
-    BOOST_REQUIRE_EQUAL(plain, secretbox_plain);
+    BC_REQUIRE(box.decrypt(plain, secretbox_nonce, secretbox_cipher));
+    BC_REQUIRE_EQUAL(plain, secretbox_plain);
 }
 
-BOOST_AUTO_TEST_CASE(xsalsa20_poly1305__decrypt__tampered__false_and_cleared)
+BC_AUTO_TEST_CASE(xsalsa20_poly1305__decrypt__tampered__false_and_cleared)
 {
     auto cipher = secretbox_cipher;
     cipher.back() ^= 0x01;
 
     xsalsa20_poly1305 box{ secretbox_key };
     data_chunk plain(cipher.size() - xsalsa20_poly1305::expansion, 0xff);
-    BOOST_REQUIRE(!box.decrypt(plain, secretbox_nonce, cipher));
-    BOOST_REQUIRE_EQUAL(plain, data_chunk(plain.size(), 0x00));
+    BC_REQUIRE(!box.decrypt(plain, secretbox_nonce, cipher));
+    BC_REQUIRE_EQUAL(plain, data_chunk(plain.size(), 0x00));
 }
 
-BOOST_AUTO_TEST_CASE(xsalsa20_poly1305__decrypt__wrong_nonce__false)
+BC_AUTO_TEST_CASE(xsalsa20_poly1305__decrypt__wrong_nonce__false)
 {
     auto nonce = secretbox_nonce;
     nonce.front() ^= 0x01;
 
     xsalsa20_poly1305 box{ secretbox_key };
     data_chunk plain(secretbox_cipher.size() - xsalsa20_poly1305::expansion);
-    BOOST_REQUIRE(!box.decrypt(plain, nonce, secretbox_cipher));
+    BC_REQUIRE(!box.decrypt(plain, nonce, secretbox_cipher));
 }
 
-BOOST_AUTO_TEST_CASE(xsalsa20_poly1305__encrypt__empty__tag_only_round_trip)
+BC_AUTO_TEST_CASE(xsalsa20_poly1305__encrypt__empty__tag_only_round_trip)
 {
     xsalsa20_poly1305 box{ secretbox_key };
     data_chunk cipher(xsalsa20_poly1305::expansion);
     box.encrypt({}, secretbox_nonce, cipher);
 
     data_chunk plain{};
-    BOOST_REQUIRE(box.decrypt(plain, secretbox_nonce, cipher));
+    BC_REQUIRE(box.decrypt(plain, secretbox_nonce, cipher));
 }
 
 // nacl tests/box.c: crypto_box is the secretbox under the hsalsa20 of the x25519 shared secret.
-BOOST_AUTO_TEST_CASE(xsalsa20_poly1305__encrypt__nacl_box_composition__expected)
+BC_AUTO_TEST_CASE(xsalsa20_poly1305__encrypt__nacl_box_composition__expected)
 {
     const auto alice_secret = base16_array("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a");
     const auto bob_public = base16_array("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f");
 
     x25519::key shared{};
-    BOOST_REQUIRE(x25519::multiply(shared, alice_secret, bob_public));
+    BC_REQUIRE(x25519::multiply(shared, alice_secret, bob_public));
 
     salsa20::secret key{};
     salsa20::hsalsa20(key, shared, salsa20::input{});
-    BOOST_REQUIRE_EQUAL(key, secretbox_key);
+    BC_REQUIRE_EQUAL(key, secretbox_key);
 
     xsalsa20_poly1305 box{ key };
     data_chunk cipher(secretbox_plain.size() + xsalsa20_poly1305::expansion);
     box.encrypt(secretbox_plain, secretbox_nonce, cipher);
-    BOOST_REQUIRE_EQUAL(cipher, secretbox_cipher);
+    BC_REQUIRE_EQUAL(cipher, secretbox_cipher);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

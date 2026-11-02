@@ -18,12 +18,11 @@
  */
 #include "../../test.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(outpoint_json_tests)
+BC_AUTO_TEST_SUITE(outpoint_json_tests)
 
-BOOST_AUTO_TEST_CASE(outpoint__json__conversions__expected)
+BC_AUTO_TEST_CASE(outpoint__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -45,20 +44,20 @@ BOOST_AUTO_TEST_CASE(outpoint__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<outpoint>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<outpoint>(value) == instance);
 }
 
-BOOST_AUTO_TEST_CASE(outpoint__json__pointer_conversions__expected)
+BC_AUTO_TEST_CASE(outpoint__json__pointer_conversions__expected)
 {
     const outpoint expected{ point{ one_hash, 42 }, 24 };
     const outpoint::cptr instance{ to_shared(expected) };
     const auto value = json::value_from(instance);
-    BOOST_REQUIRE(value == json::value_from(*instance));
-    BOOST_REQUIRE(*json::value_to<outpoint::cptr>(value) == *instance);
+    BC_REQUIRE(value == json::value_from(*instance));
+    BC_REQUIRE(*json::value_to<outpoint::cptr>(value) == *instance);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

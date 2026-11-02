@@ -20,13 +20,17 @@
 #define LIBBITCOIN_SYSTEM_EXCEPTIONS_HPP
 
 #include <exception>
-#include <bitcoin/system/boost.hpp>
+#include <iostream>
+#include <new>
+#include <stdexcept>
+#include <string>
+#include <bitcoin/system/warnings.hpp>
 
 namespace libbitcoin {
 
 /// We do not use exceptions for general purpose error handling.
 
-/// Dependencies, including boost, may throw.
+/// Dependencies may throw.
 /// We try to avoid the use of external API calls that throw.
 /// If an external API is documented to throw for non-exceptional results, we
 /// catch and squash. If an external API throws unepxectedly, our pervasize use
@@ -52,9 +56,63 @@ using overflow_exception = std::overflow_error;
 
 /// Streams.
 using ostream_exception = std::iostream::failure;
-using istream_exception = boost::program_options::invalid_option_value;
-using ifstream_exception = boost::program_options::reading_file;
-using validation_exception = boost::program_options::validation_error;
+
+/// Options.
+class option_exception
+  : public std::logic_error
+{
+public:
+    explicit option_exception(const std::string& message)
+      : std::logic_error(message)
+    {
+    }
+};
+
+/// The token is not a valid value for its option.
+class istream_exception
+  : public option_exception
+{
+public:
+    explicit istream_exception(const std::string& token,
+        const std::string& option={}, const std::string& detail={})
+      : option_exception("the argument ('" + token + "') for option " +
+            (option.empty() ? std::string{} : "'" + option + "' ") +
+            "is invalid" + detail),
+        token_(token)
+    {
+    }
+
+    const std::string& token() const NOEXCEPT
+    {
+        return token_;
+    }
+
+private:
+    std::string token_;
+};
+
+/// The configuration file cannot be read.
+class ifstream_exception
+  : public option_exception
+{
+public:
+    explicit ifstream_exception(const std::string& path)
+      : option_exception("can not read options configuration file '" +
+            path + "'")
+    {
+    }
+};
+
+/// The options are inconsistent with their declarations.
+class validation_exception
+  : public option_exception
+{
+public:
+    explicit validation_exception(const std::string& message)
+      : option_exception(message)
+    {
+    }
+};
 
 /// Allocation.
 using allocation_exception = std::bad_alloc;

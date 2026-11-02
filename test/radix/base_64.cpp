@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(base_64_tests)
+BC_AUTO_TEST_SUITE(base_64_tests)
 
 #define BASE64_MURRAY "TXVycmF5IFJvdGhiYXJk"
 #define BASE64_DATA_MURRAY \
@@ -35,49 +35,49 @@ BOOST_AUTO_TEST_SUITE(base_64_tests)
     0x6e, 0x64, 0x20, 0x53, 0x74, 0x61, 0x74, 0x65 \
 }
 
-BOOST_AUTO_TEST_CASE(encode_base64_empty_test)
+BC_AUTO_TEST_CASE(encode_base64_empty_test)
 {
     data_chunk decoded;
-    BOOST_REQUIRE_EQUAL(encode_base64(decoded), "");
+    BC_REQUIRE_EQUAL(encode_base64(decoded), "");
 }
 
-BOOST_AUTO_TEST_CASE(decode_base64_empty_test)
+BC_AUTO_TEST_CASE(decode_base64_empty_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(decode_base64(result, ""));
-    BOOST_REQUIRE(result == data_chunk());
+    BC_REQUIRE(decode_base64(result, ""));
+    BC_REQUIRE(result == data_chunk());
 }
 
-BOOST_AUTO_TEST_CASE(encode_base64_test)
+BC_AUTO_TEST_CASE(encode_base64_test)
 {
     data_chunk decoded(BASE64_DATA_MURRAY);
-    BOOST_REQUIRE_EQUAL(encode_base64(decoded), BASE64_MURRAY);
+    BC_REQUIRE_EQUAL(encode_base64(decoded), BASE64_MURRAY);
 }
 
-BOOST_AUTO_TEST_CASE(decode_base64_valid_test)
+BC_AUTO_TEST_CASE(decode_base64_valid_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(decode_base64(result, BASE64_MURRAY));
-    BOOST_REQUIRE(result == data_chunk(BASE64_DATA_MURRAY));
+    BC_REQUIRE(decode_base64(result, BASE64_MURRAY));
+    BC_REQUIRE(result == data_chunk(BASE64_DATA_MURRAY));
 }
 
-BOOST_AUTO_TEST_CASE(encode_base64_padded_test)
+BC_AUTO_TEST_CASE(encode_base64_padded_test)
 {
     data_chunk decoded(BASE64_DATA_BOOK);
-    BOOST_REQUIRE_EQUAL(encode_base64(decoded), BASE64_BOOK);
+    BC_REQUIRE_EQUAL(encode_base64(decoded), BASE64_BOOK);
 }
 
-BOOST_AUTO_TEST_CASE(decode_base64_padded_valid_test)
+BC_AUTO_TEST_CASE(decode_base64_padded_valid_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(decode_base64(result, BASE64_BOOK));
-    BOOST_REQUIRE(result == data_chunk(BASE64_DATA_BOOK));
+    BC_REQUIRE(decode_base64(result, BASE64_BOOK));
+    BC_REQUIRE(result == data_chunk(BASE64_DATA_BOOK));
 }
 
-BOOST_AUTO_TEST_CASE(decode_base64_invalid_test)
+BC_AUTO_TEST_CASE(decode_base64_invalid_test)
 {
     data_chunk result;
-    BOOST_REQUIRE(!decode_base64(result, "!@#$%^&*()"));
+    BC_REQUIRE(!decode_base64(result, "!@#$%^&*()"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

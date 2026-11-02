@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(sha3_tests)
+BC_AUTO_TEST_SUITE(sha3_tests)
 
 using sha3_224 = sha3::algorithm<sha3::h224<>>;
 using sha3_384 = sha3::algorithm<sha3::h384<>>;
@@ -50,50 +50,50 @@ static_assert(keccak_256::simple_hash(sha3_256::bytes_t<0>{}) == keccak_empty256
 
 // simple_hash (const-evaluated)
 
-BOOST_AUTO_TEST_CASE(sha3__simple_hash__empty__expected)
+BC_AUTO_TEST_CASE(sha3__simple_hash__empty__expected)
 {
-    BOOST_REQUIRE_EQUAL(sha3_224::simple_hash(sha3_224::bytes_t<0>{}), empty224);
-    BOOST_REQUIRE_EQUAL(sha3_256::simple_hash(sha3_256::bytes_t<0>{}), empty256);
-    BOOST_REQUIRE_EQUAL(sha3_384::simple_hash(sha3_384::bytes_t<0>{}), empty384);
-    BOOST_REQUIRE_EQUAL(sha3_512::simple_hash(sha3_512::bytes_t<0>{}), empty512);
+    BC_REQUIRE_EQUAL(sha3_224::simple_hash(sha3_224::bytes_t<0>{}), empty224);
+    BC_REQUIRE_EQUAL(sha3_256::simple_hash(sha3_256::bytes_t<0>{}), empty256);
+    BC_REQUIRE_EQUAL(sha3_384::simple_hash(sha3_384::bytes_t<0>{}), empty384);
+    BC_REQUIRE_EQUAL(sha3_512::simple_hash(sha3_512::bytes_t<0>{}), empty512);
 }
 
-BOOST_AUTO_TEST_CASE(sha3__simple_hash__abc__expected)
+BC_AUTO_TEST_CASE(sha3__simple_hash__abc__expected)
 {
-    BOOST_REQUIRE_EQUAL(sha3_224::simple_hash(abc), abc224);
-    BOOST_REQUIRE_EQUAL(sha3_256::simple_hash(abc), abc256);
-    BOOST_REQUIRE_EQUAL(sha3_384::simple_hash(abc), abc384);
-    BOOST_REQUIRE_EQUAL(sha3_512::simple_hash(abc), abc512);
+    BC_REQUIRE_EQUAL(sha3_224::simple_hash(abc), abc224);
+    BC_REQUIRE_EQUAL(sha3_256::simple_hash(abc), abc256);
+    BC_REQUIRE_EQUAL(sha3_384::simple_hash(abc), abc384);
+    BC_REQUIRE_EQUAL(sha3_512::simple_hash(abc), abc512);
 }
 
-BOOST_AUTO_TEST_CASE(sha3__simple_hash__448_bit_message__expected)
+BC_AUTO_TEST_CASE(sha3__simple_hash__448_bit_message__expected)
 {
-    BOOST_REQUIRE_EQUAL(sha3_256::simple_hash(long_message), long256);
+    BC_REQUIRE_EQUAL(sha3_256::simple_hash(long_message), long256);
 }
 
 // hash (blocks)
 
-BOOST_AUTO_TEST_CASE(sha3__hash__full_block__matches_streamed)
+BC_AUTO_TEST_CASE(sha3__hash__full_block__matches_streamed)
 {
     // A full rate block absorbs, then pad10*1 adds a second (empty tail).
     constexpr sha3_256::block_t block{};
     auto state = sha3_256::H::get;
     sha3_256::accumulate(state, block);
-    BOOST_REQUIRE_EQUAL(sha3_256::finalize(state), sha3_256::hash(block));
+    BC_REQUIRE_EQUAL(sha3_256::finalize(state), sha3_256::hash(block));
 }
 
-BOOST_AUTO_TEST_CASE(sha3__hash__half_and_byte__match_simple)
+BC_AUTO_TEST_CASE(sha3__hash__half_and_byte__match_simple)
 {
     // The partial block overloads are simple_hash of the same bytes.
     constexpr sha3_256::half_t half{};
     constexpr sha3_256::bytes_t<1> byte{ 'a' };
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(half), sha3_256::simple_hash(half));
-    BOOST_REQUIRE_EQUAL(sha3_256::hash(0x61_u8), sha3_256::simple_hash(byte));
+    BC_REQUIRE_EQUAL(sha3_256::hash(half), sha3_256::simple_hash(half));
+    BC_REQUIRE_EQUAL(sha3_256::hash(0x61_u8), sha3_256::simple_hash(byte));
 }
 
 // accumulate/finalize
 
-BOOST_AUTO_TEST_CASE(sha3__accumulate_finalize__one_million_a__expected)
+BC_AUTO_TEST_CASE(sha3__accumulate_finalize__one_million_a__expected)
 {
     // 1,000,000 bytes is 7352 rate blocks of 136 plus a 128 byte tail.
     const data_chunk data(999'872, 'a');
@@ -102,20 +102,20 @@ BOOST_AUTO_TEST_CASE(sha3__accumulate_finalize__one_million_a__expected)
 
     auto state = sha3_256::H::get;
     sha3_256::accumulate(state, { data.size(), data.data() });
-    BOOST_REQUIRE_EQUAL(sha3_256::finalize(state, tail), million256);
+    BC_REQUIRE_EQUAL(sha3_256::finalize(state, tail), million256);
 }
 
 // keccak
 
-BOOST_AUTO_TEST_CASE(keccak__simple_hash__empty__expected)
+BC_AUTO_TEST_CASE(keccak__simple_hash__empty__expected)
 {
-    BOOST_REQUIRE_EQUAL(keccak_256::simple_hash(keccak_256::bytes_t<0>{}), keccak_empty256);
+    BC_REQUIRE_EQUAL(keccak_256::simple_hash(keccak_256::bytes_t<0>{}), keccak_empty256);
 }
 
-BOOST_AUTO_TEST_CASE(keccak__simple_hash__abc__differs_from_sha3)
+BC_AUTO_TEST_CASE(keccak__simple_hash__abc__differs_from_sha3)
 {
     // Domain separation alone distinguishes the two.
-    BOOST_REQUIRE_NE(keccak_256::simple_hash(abc), sha3_256::simple_hash(abc));
+    BC_REQUIRE_NE(keccak_256::simple_hash(abc), sha3_256::simple_hash(abc));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

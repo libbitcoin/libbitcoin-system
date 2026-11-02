@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include <sstream>
 
-BOOST_AUTO_TEST_SUITE(json_serializer_tests)
+BC_AUTO_TEST_SUITE(json_serializer_tests)
 
 using namespace system::json;
 
@@ -48,27 +48,27 @@ static const std::vector<serialized> models
     { value{ max_uint64 }, "18446744073709551615" },
 
     // doubles
-    { value{ 0.0 }, "0E0" },
-    { value{ -0.0 }, "-0E0" },
-    { value{ 1.0 }, "1E0" },
-    { value{ -1.0 }, "-1E0" },
-    { value{ 1.5 }, "1.5E0" },
-    { value{ 0.1 }, "1E-1" },
-    { value{ 0.3 }, "3E-1" },
-    { value{ 100.0 }, "1E2" },
-    { value{ 1234.5 }, "1.2345E3" },
-    { value{ 2.0 / 3.0 }, "6.666666666666666E-1" },
-    { value{ 1e21 }, "1E21" },
-    { value{ 1e22 }, "1E22" },
-    { value{ 1e-7 }, "1E-7" },
-    { value{ 1e100 }, "1E100" },
-    { value{ 1e-100 }, "1E-100" },
-    { value{ 123456789012345678.0 }, "1.2345678901234568E17" },
-    { value{ 9007199254740992.0 }, "9.007199254740992E15" },
-    { value{ 5e-324 }, "5E-324" },
-    { value{ 2.2250738585072014e-308 }, "2.2250738585072014E-308" },
-    { value{ 1.7976931348623157e308 }, "1.7976931348623157E308" },
-    { value{ 0.30000000000000004 }, "3.0000000000000004E-1" },
+    { value{ 0.0 }, "0.0" },
+    { value{ -0.0 }, "-0.0" },
+    { value{ 1.0 }, "1.0" },
+    { value{ -1.0 }, "-1.0" },
+    { value{ 1.5 }, "1.5" },
+    { value{ 0.1 }, "0.1" },
+    { value{ 0.3 }, "0.3" },
+    { value{ 100.0 }, "100.0" },
+    { value{ 1234.5 }, "1234.5" },
+    { value{ 2.0 / 3.0 }, "0.6666666666666666" },
+    { value{ 1e21 }, "1000000000000000000000.0" },
+    { value{ 1e22 }, "10000000000000000000000.0" },
+    { value{ 1e-7 }, "0.0000001" },
+    { value{ 1e100 }, "10000000000000000159028911097599180468360808563945281389781327557747838772170381060813469985856815104.0" },
+    { value{ 1e-100 }, "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001" },
+    { value{ 123456789012345678.0 }, "123456789012345680.0" },
+    { value{ 9007199254740992.0 }, "9007199254740992.0" },
+    { value{ 5e-324 }, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005" },
+    { value{ 2.2250738585072014e-308 }, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000022250738585072014" },
+    { value{ 1.7976931348623157e308 }, "179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.0" },
+    { value{ 0.30000000000000004 }, "0.30000000000000004" },
     { value{ nan_ }, "null" },
     { value{ infinity }, "1e99999" },
     { value{ -infinity }, "-1e99999" },
@@ -92,7 +92,7 @@ static const std::vector<serialized> models
     { value{ { "a", 1 }, { "b\n", { true, false } } }, R"({"a":1,"b\n":[true,false]})" },
     { value{ { "", value(object{}) } }, R"({"":{}})" },
     { value{ value(array{}), value(array{}) }, "[[],[]]" },
-    { value{ { "k", { { "k", { { "k", { 1.5 } } } } } } }, R"({"k":{"k":{"k":[1.5E0]}}})" }
+    { value{ { "k", { { "k", { { "k", { 1.5 } } } } } } }, R"({"k":{"k":{"k":[1.5]}}})" }
 };
 
 // Read with the chunk size, true if every read but the last is full and the
@@ -127,110 +127,110 @@ static bool all_chunks_match(const value& model, const std::string& expected)
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__serialize__models__expected)
+BC_AUTO_TEST_CASE(json_serializer__serialize__models__expected)
 {
     for (const auto& test: models)
-        BOOST_REQUIRE_EQUAL(serialize(test.model), test.expected);
+        BC_REQUIRE_EQUAL(serialize(test.model), test.expected);
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__models_every_chunk__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__models_every_chunk__expected)
 {
     for (const auto& test: models)
-        BOOST_REQUIRE_MESSAGE(all_chunks_match(test.model, test.expected), test.expected.substr(0, 80));
+        BC_REQUIRE_MESSAGE(all_chunks_match(test.model, test.expected), test.expected.substr(0, 80));
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__parsed_round_trip__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__parsed_round_trip__expected)
 {
-    const std::string text{ R"({"a":[1,-2,3.5E0,"x\u0001\"",{"b":null}],"c":true})" };
+    const std::string text{ R"({"a":[1,-2,3.5,"x\u0001\"",{"b":null}],"c":true})" };
     const auto model = parse(text);
-    BOOST_REQUIRE_EQUAL(serialize(model), text);
-    BOOST_REQUIRE(all_chunks_match(model, text));
+    BC_REQUIRE_EQUAL(serialize(model), text);
+    BC_REQUIRE(all_chunks_match(model, text));
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__escape_split__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__escape_split__expected)
 {
     const value model{ "\x01" };
-    BOOST_REQUIRE(chunks_match(model, 1, R"("\u0001")"));
-    BOOST_REQUIRE(chunks_match(model, 3, R"("\u0001")"));
-    BOOST_REQUIRE(chunks_match(model, 7, R"("\u0001")"));
+    BC_REQUIRE(chunks_match(model, 1, R"("\u0001")"));
+    BC_REQUIRE(chunks_match(model, 3, R"("\u0001")"));
+    BC_REQUIRE(chunks_match(model, 7, R"("\u0001")"));
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__fills_buffer__expected)
+BC_AUTO_TEST_CASE(json_serializer__read__fills_buffer__expected)
 {
     const value model{ { "key", std::string(20, 'x') } };
     serializer writer{};
     writer.reset(&model);
     std::string buffer(8, '\0');
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"({"key":")");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
-    BOOST_REQUIRE(!writer.done());
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"(xxxx"})");
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"({"key":")");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), "xxxxxxxx");
+    BC_REQUIRE(!writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 8), R"(xxxx"})");
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__done__exact_fill__done_without_empty_read)
+BC_AUTO_TEST_CASE(json_serializer__done__exact_fill__done_without_empty_read)
 {
     const value model{ "ab" };
     serializer writer{};
     writer.reset(&model);
     std::string buffer(4, '\0');
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 4), R"("ab")");
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 4), R"("ab")");
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__read__after_done__empty)
+BC_AUTO_TEST_CASE(json_serializer__read__after_done__empty)
 {
     const value model{ 1 };
     serializer writer{};
     writer.reset(&model);
     std::string buffer(4, '\0');
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 4), "1");
-    BOOST_REQUIRE(writer.done());
-    BOOST_REQUIRE(writer.read(buffer.data(), 4).empty());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 4), "1");
+    BC_REQUIRE(writer.done());
+    BC_REQUIRE(writer.read(buffer.data(), 4).empty());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__reset__null_model__done)
+BC_AUTO_TEST_CASE(json_serializer__reset__null_model__done)
 {
     serializer writer{};
     writer.reset(nullptr);
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__default__done)
+BC_AUTO_TEST_CASE(json_serializer__default__done)
 {
     const serializer writer{};
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__reset__reused__expected)
+BC_AUTO_TEST_CASE(json_serializer__reset__reused__expected)
 {
     const value first{ 1, 2 };
     const value second{ { "a", "b" } };
     serializer writer{};
     std::string buffer(3, '\0');
     writer.reset(&first);
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), "[1,");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), "[1,");
 
     writer.reset(&second);
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"({"a)");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(":")");
-    BOOST_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(b"})");
-    BOOST_REQUIRE(writer.done());
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"({"a)");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(":")");
+    BC_REQUIRE_EQUAL(writer.read(buffer.data(), 3), R"(b"})");
+    BC_REQUIRE(writer.done());
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__stream__value__expected)
+BC_AUTO_TEST_CASE(json_serializer__stream__value__expected)
 {
     std::ostringstream stream{};
     stream << value{ { "a", 1 } };
-    BOOST_REQUIRE_EQUAL(stream.str(), R"({"a":1})");
+    BC_REQUIRE_EQUAL(stream.str(), R"({"a":1})");
 }
 
-BOOST_AUTO_TEST_CASE(json_serializer__serialize__object_erase_order__expected)
+BC_AUTO_TEST_CASE(json_serializer__serialize__object_erase_order__expected)
 {
     value model{ { "a", 1 }, { "b", 2 }, { "c", 3 } };
     model.as_object().erase("a");
-    BOOST_REQUIRE_EQUAL(serialize(model), R"({"c":3,"b":2})");
+    BC_REQUIRE_EQUAL(serialize(model), R"({"c":3,"b":2})");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

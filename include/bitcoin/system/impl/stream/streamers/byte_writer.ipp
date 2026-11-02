@@ -393,7 +393,6 @@ size_t byte_writer<OStream>::getter() NOEXCEPT
     // Returns current position on success and pos_type(-1) on failure.
     try
     {
-        // This does not honor BOOST_EXCEPTION_DISABLE.
         position = stream_->tellp();
         validate();
     }

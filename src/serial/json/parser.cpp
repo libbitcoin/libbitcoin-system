@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/serial/json/parser.hpp>
 
+#include <bit>
 #include <charconv>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -43,44 +44,160 @@ static bool is_decimal(char character) NOEXCEPT
     return character >= '0' && character <= '9';
 }
 
-// The magnitude of an out of range number is below the double domain.
-static bool is_underflow(std::string_view token) NOEXCEPT
+// Decimal digits that can affect rounding to double (halfway cases).
+constexpr size_t significant_digits = 768;
+
+// Decimal orders of magnitude bounding the nonzero finite doubles: 10^lowest
+// is below half the least subnormal and the greatest double is below 10^highest.
+constexpr int64_t lowest_order = std::numeric_limits<double>::min_exponent10 -
+    std::numeric_limits<double>::max_digits10;
+constexpr int64_t highest_order =
+    add1(std::numeric_limits<double>::max_exponent10);
+
+// Exact numerator and denominator (under four bits per decimal digit), with
+// room for the quotient scaled to one limb.
+constexpr auto exact_digits = significant_digits + 1u +
+    possible_narrow_cast<size_t>(to_unsigned(-lowest_order));
+using exact_t = uintx_t<4u * exact_digits + bits<uint64_t>>;
+
+static double signed_zero(bool negative) NOEXCEPT
 {
-    constexpr int32_t saturation = 1'000'000;
+    return negative ? -0.0 : 0.0;
+}
+
+// Correctly rounded double of a valid JSON number, false if out of range.
+static bool to_double(double& out, std::string_view token) NOEXCEPT
+{
     auto it = token.cbegin();
-    if (*it == '-')
-        ++it;
-
-    int32_t magnitude{};
-    if (*it == '0')
-    {
-        ++it;
-        if (it != token.cend() && *it == '.')
-            for (++it; it != token.cend() && *it == '0'; ++it)
-                magnitude = std::max(magnitude - 1, -saturation);
-    }
-    else
-    {
-        for (; it != token.cend() && is_decimal(*it); ++it)
-            magnitude = std::min(magnitude + 1, saturation);
-    }
-
-    while (it != token.cend() && *it != 'e' && *it != 'E')
-        ++it;
-
-    if (it == token.cend())
-        return magnitude < 0;
-
-    ++it;
     const auto negative = (*it == '-');
-    if (*it == '-' || *it == '+')
+    if (negative)
         ++it;
 
-    int32_t exponent{};
-    for (; it != token.cend(); ++it)
-        exponent = std::min(exponent * 10 + (*it - '0'), saturation);
+    // The number is digits * 10^scale, with truncated digits as a sticky one.
+    std::string digits{};
+    int64_t scale{};
+    auto truncated = false;
+    for (; it != token.cend() && is_decimal(*it); ++it)
+    {
+        if (digits.size() < significant_digits)
+        {
+            if (!digits.empty() || *it != '0')
+                digits.push_back(*it);
+        }
+        else
+        {
+            truncated |= (*it != '0');
+            ++scale;
+        }
+    }
 
-    return (negative ? magnitude - exponent : magnitude + exponent) < 0;
+    if (it != token.cend() && *it == '.')
+    {
+        for (++it; it != token.cend() && is_decimal(*it); ++it)
+        {
+            if (digits.size() < significant_digits)
+            {
+                if (!digits.empty() || *it != '0')
+                    digits.push_back(*it);
+
+                --scale;
+            }
+            else
+            {
+                truncated |= (*it != '0');
+            }
+        }
+    }
+
+    if (it != token.cend())
+    {
+        ++it;
+        const auto minus = (*it == '-');
+        if (*it == '-' || *it == '+')
+            ++it;
+
+        int64_t exponent{};
+        for (; it != token.cend(); ++it)
+            exponent = std::min(exponent * 10 + (*it - '0'),
+                int64_t{ max_int32 });
+
+        scale += minus ? -exponent : exponent;
+    }
+
+    if (truncated)
+    {
+        digits.push_back('1');
+        --scale;
+    }
+
+    while (!digits.empty() && digits.back() == '0')
+    {
+        digits.pop_back();
+        ++scale;
+    }
+
+    // digits * 10^scale is within [10^(order - 1), 10^order).
+    const auto order = to_signed(digits.size()) + scale;
+    if (digits.empty() || order <= lowest_order)
+    {
+        out = signed_zero(negative);
+        return true;
+    }
+
+    if (order > highest_order)
+        return false;
+
+    exact_t numerator{};
+    for (const auto digit: digits)
+        numerator = numerator * 10u + to_unsigned(digit - '0');
+
+    exact_t denominator{ 1 };
+    if (is_negative(scale))
+        denominator = power<exact_t>(10u, to_unsigned(-scale));
+    else
+        numerator *= power<exact_t>(10u, to_unsigned(scale));
+
+    // Quotient scaled into [2^54, 2^56), leaving guard bits below 53.
+    constexpr auto guarded = add1(add1(std::numeric_limits<double>::digits));
+    const auto shift = guarded -
+        (possible_narrow_and_sign_cast<int>(numerator.msb()) -
+        possible_narrow_and_sign_cast<int>(denominator.msb()));
+
+    if (is_negative(shift))
+        denominator <<= to_unsigned(-shift);
+    else
+        numerator <<= to_unsigned(shift);
+
+    const auto quotient = (numerator / denominator).convert_to<uint64_t>();
+    const auto sticky = is_nonzero(numerator % denominator);
+
+    // Bits dropped below the double precision, more when subnormal.
+    constexpr auto least_exponent =
+        sub1(std::numeric_limits<double>::min_exponent);
+    const auto width = std::bit_width(quotient);
+    const auto leading = sub1(width) - shift;
+    auto drop = width - std::numeric_limits<double>::digits;
+    if (leading < least_exponent)
+        drop += least_exponent - leading;
+
+    if (to_unsigned(drop) >= bits<uint64_t>)
+    {
+        out = signed_zero(negative);
+        return true;
+    }
+
+    const auto kept = quotient >> drop;
+    const auto rest = quotient & sub1(power2<uint64_t>(to_unsigned(drop)));
+    const auto half = power2<uint64_t>(to_unsigned(sub1(drop)));
+    const auto up = rest > half || (rest == half && (sticky || is_odd(kept)));
+    const auto magnitude = std::ldexp(to_floating(kept + (up ? 1u : 0u)),
+        drop - shift);
+
+    if (std::isinf(magnitude))
+        return false;
+
+    out = negative ? -magnitude : magnitude;
+    return true;
 }
 
 // Return the hex value of the character, or -1.
@@ -855,18 +972,8 @@ code parser::to_number(json::value& out) NOEXCEPT
     }
 
     double number{};
-    const auto result = from_chars(first, last, number);
-    if (result.ec == std::errc::result_out_of_range)
-    {
-        if (!is_underflow(token_))
-            return fail(error::json_exponent_overflow);
-
-        number = token_.front() == '-' ? -0.0 : 0.0;
-    }
-    else if (result.ec != std::errc{} || result.ptr != last)
-    {
-        return fail(error::json_syntax);
-    }
+    if (!to_double(number, token_))
+        return fail(error::json_exponent_overflow);
 
     out = number;
     return {};

@@ -18,9 +18,9 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(fschacha20_poly1305_tests)
+BC_AUTO_TEST_SUITE(fschacha20_poly1305_tests)
 
-BOOST_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_500__expected)
+BC_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_500__expected)
 {
     const auto plain = base16_chunk(
         "d6a4cb04ef0f7c09c1866ed29dc24d820e75b0491032a51b4c3366f9ca35c19e"
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_500__expected)
 
     data_chunk cipher(plain.size() + fschacha20_poly1305::expansion);
     encrypter.encrypt(plain, aad, cipher);
-    BOOST_REQUIRE_EQUAL(cipher, expected);
+    BC_REQUIRE_EQUAL(cipher, expected);
 
     // Decrypt round trip at the same message index.
     data_chunk empty_plain{};
@@ -58,11 +58,11 @@ BOOST_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_500__expected)
         decrypter.decrypt(empty_plain, {}, empty_cipher);
 
     data_chunk decrypted(plain.size());
-    BOOST_REQUIRE(decrypter.decrypt(decrypted, aad, cipher));
-    BOOST_REQUIRE_EQUAL(decrypted, plain);
+    BC_REQUIRE(decrypter.decrypt(decrypted, aad, cipher));
+    BC_REQUIRE_EQUAL(decrypted, plain);
 }
 
-BOOST_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_60000__expected)
+BC_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_60000__expected)
 {
     const auto plain = base16_chunk(
         "8349b7a2690b63d01204800c288ff1138a1d473c832c90ea8b3fc102d0bb3adc"
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(fschacha20_poly1305__encrypt__seek_60000__expected)
 
     data_chunk cipher(plain.size() + fschacha20_poly1305::expansion);
     encrypter.encrypt(plain, aad, cipher);
-    BOOST_REQUIRE_EQUAL(cipher, expected);
+    BC_REQUIRE_EQUAL(cipher, expected);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

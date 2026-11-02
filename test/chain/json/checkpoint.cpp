@@ -18,12 +18,11 @@
  */
 #include "../../test.hpp"
 
-using namespace boost;
 using namespace bc::system::chain;
 
-BOOST_AUTO_TEST_SUITE(checkpoint_json_tests)
+BC_AUTO_TEST_SUITE(checkpoint_json_tests)
 
-BOOST_AUTO_TEST_CASE(checkpoint__json__conversions__expected)
+BC_AUTO_TEST_CASE(checkpoint__json__conversions__expected)
 {
     const std::string_view text
     {
@@ -41,11 +40,11 @@ BOOST_AUTO_TEST_CASE(checkpoint__json__conversions__expected)
 
     const auto value = json::value_from(instance);
 
-    BOOST_REQUIRE_EQUAL(json::serialize(value), text);
-    BOOST_REQUIRE(json::parse(text) == value);
+    BC_REQUIRE_EQUAL(json::serialize(value), text);
+    BC_REQUIRE(json::parse(text) == value);
 
-    BOOST_REQUIRE(json::value_from(instance) == value);
-    BOOST_REQUIRE(json::value_to<checkpoint>(value) == instance);
+    BC_REQUIRE(json::value_from(instance) == value);
+    BC_REQUIRE(json::value_to<checkpoint>(value) == instance);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BC_AUTO_TEST_SUITE_END()

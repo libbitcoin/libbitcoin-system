@@ -61,10 +61,7 @@ std::istream& operator>>(std::istream& stream, base16& argument) THROWS
     stream >> base16;
 
     if (!decode_base16(argument.value_, base16))
-    {
-        using namespace boost::program_options;
         throw istream_exception(base16);
-    }
 
     return stream;
 }

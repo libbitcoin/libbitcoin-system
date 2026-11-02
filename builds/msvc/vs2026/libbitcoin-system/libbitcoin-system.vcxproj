@@ -224,7 +224,9 @@
       <ObjectFileName>$(IntDir)src_config_block.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\byte.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
+      <ObjectFileName>$(IntDir)src_config_endpoint.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\hash160.cpp" />
     <ClCompile Include="..\..\..\..\src\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\src\config\header.cpp">
@@ -236,30 +238,13 @@
     <ClCompile Include="..\..\..\..\src\config\output.cpp">
       <ObjectFileName>$(IntDir)src_config_output.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\parser.cpp">
-      <ObjectFileName>$(IntDir)src_config_parser.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\path.cpp" />
     <ClCompile Include="..\..\..\..\src\config\point.cpp">
       <ObjectFileName>$(IntDir)src_config_point.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\cmdline.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\config_file.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\convert.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\options_description.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\parsers.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\positional_options.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\split.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\utf8_codecvt_facet.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\value_semantic.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\variables_map.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\program_options\winmain.cpp" />
     <ClCompile Include="..\..\..\..\src\config\script.cpp">
       <ObjectFileName>$(IntDir)src_config_script.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\config\setting.cpp" />
     <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
       <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
     </ClCompile>
@@ -343,11 +328,28 @@
     <ClCompile Include="..\..\..\..\src\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\crc32.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\muhash.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\address.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\endpoint.cpp">
+      <ObjectFileName>$(IntDir)src_ip_endpoint.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\ip\functions.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\ipv4.cpp" />
+    <ClCompile Include="..\..\..\..\src\ip\ipv6.cpp" />
     <ClCompile Include="..\..\..\..\src\math\math.cpp">
       <ObjectFileName>$(IntDir)src_math_math.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\options\description.cpp" />
+    <ClCompile Include="..\..\..\..\src\options\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\src\options\parser.cpp">
+      <ObjectFileName>$(IntDir)src_options_parser.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\options\parsers.cpp" />
+    <ClCompile Include="..\..\..\..\src\options\printer.cpp" />
+    <ClCompile Include="..\..\..\..\src\options\setting.cpp" />
+    <ClCompile Include="..\..\..\..\src\options\variables.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_32.cpp" />
@@ -460,7 +462,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\allocator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\arena.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\annex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\batch\cursor.hpp" />
@@ -536,14 +537,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\input.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\output.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\parameter.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\parser.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\path.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\point.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\selection.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\setting.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\url.hpp" />
@@ -631,6 +628,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithms.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\checksum.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\crc32.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\functions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hkdf.hpp" />
@@ -673,6 +671,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\endpoint.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\functions.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\ip.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\ipv4.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\ip\ipv6.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\literals.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\machine.hpp" />
@@ -697,6 +701,15 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\description.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\options.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\parameter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\parsers.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\printer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\setting.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\value.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\options\variables.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
@@ -752,6 +765,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streams.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\typelets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\types.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\uintx\uintx.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\uintx\uintx_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\code_points.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\conversion.hpp" />
@@ -768,6 +783,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\checks.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\macros.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\registry.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\runner.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\session.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\settings.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unit_test\unit_test.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\bitcoin_uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\checked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\payment_address.hpp" />
@@ -827,6 +850,7 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\inflate.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp" />
@@ -850,7 +874,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\tapscript.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\config\setting.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\config\token.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_bitslice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_ctr.ipp" />
@@ -954,6 +977,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\rotate.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\options\setting.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\options\value.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />
@@ -974,7 +999,19 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256t_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256x2_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\arithmetic.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\bitwise.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\compare.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\construct.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\division.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\uintx\text.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\unicode\ascii.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unit_test\checks.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unit_test\filter.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unit_test\registry.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unit_test\runner.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unit_test\session.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unit_test\settings.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionaries.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionary.ipp" />
@@ -988,14 +1025,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets" Condition="Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets')" />
     <Import Project="$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The Missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)libbitcoin-boost.1.91.0.1\build\libbitcoin-boost.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc145.0.8.0\build\native\secp256k1_vc145.targets'))" />
   </Target>
   <ItemGroup>

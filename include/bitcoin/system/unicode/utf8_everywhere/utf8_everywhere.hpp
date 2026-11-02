@@ -59,14 +59,11 @@
 // const auto utf16 = L"acción.кошка.日本国";
 // std::wcout << utf16;
 
-// Regarding std lib (or boost) paths:
+// Regarding std lib paths:
 //
-// When working with boost and utf8 narrow characters on Win32 the thread must
-// be configured for utf8 (std::locale::global). This is configured by
-// BC_USE_LIBBITCOIN_MAIN.
-// When working with boost::filesystem::path the static path object must be
-// imbued with the utf8 locale or paths will be incorrectly translated.
-// When using std::filesystem::path this is handled by std::locale::global.
+// On Win32 std::filesystem::path interprets narrow characters in the ANSI code
+// page, not utf8. Convert between utf8 strings and paths with to_path and
+// from_path, which use the path's utf8 (char8_t) interface on all platforms.
 // en.cppreference.com/w/cpp/filesystem/path/string
 
 // Regarding console applications:
