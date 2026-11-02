@@ -329,18 +329,8 @@ chain_state::activations chain_state::activation(const data& values,
         result.flags |= flags::bip342_rule;
     }
 
-    // bip30_deactivate fork enforced above bip30_deactivate (bip34) checkpoint.
-    const auto bip30_deactivate = forks.bip30 && forks.bip30_deactivate &&
-        (values.bip30_deactivate_hash == settings.bip30_deactivate_checkpoint.hash());
-
-    // bip30_reactivate fork is enforced above the bip30_reactivate height.
-    const auto bip30_reactivate = bip30_deactivate && forks.bip30_reactivate &&
-        (height >= settings.bip30_reactivate_height);
-
-    // bip30 is disabled by bip30_deactivate and reenabled by bip30_reactivate.
-    // Otherwise if not exception, existing duplicate coinbase must be spent.
-    if (forks.bip30 && (!bip30_deactivate || bip30_reactivate) &&
-        !is_bip30_exception(values.hash, height))
+    // If not exception, existing duplicate coinbase must be spent.
+    if (forks.bip30 && !is_bip30_exception(values.hash, height))
     {
         result.flags |= flags::bip30_rule;
     }
@@ -570,24 +560,6 @@ uint32_t chain_state::easy_work_required(const data& values,
 }
 
 // ****************************************************************************
-// CONSENSUS: Hardcoded in satoshi client 0.10.0 (pull request #6931), based on
-// the assumption that bip34 made bip30 redundant (at least if bip34 active).
-// However it was later learned that bip34 does not make bip30 redundant. As a
-// result satoshi client 0.17.0 (pull request #12204) restored the checks. This
-// constitutes a hard fork and a subsequent soft fork in addition to bip30. We
-// refer to these as bip30_deactivate and bip30_reactivate and roll them into
-// the bip30 flag for validation purposes.
-// ****************************************************************************
-size_t chain_state::bip30_deactivate_height(size_t height,
-    const checkpoint& bip30_deactivate_checkpoint) NOEXCEPT
-{
-    const auto activation_height = bip30_deactivate_checkpoint.height();
-
-    // Require bip30_deactivate hash at heights at/above bip30_deactivate active.
-    return height < activation_height ? map::unrequested : activation_height;
-}
-
-// ****************************************************************************
 // CONSENSUS: Hardcoded with bip90 activated.
 // ****************************************************************************
 size_t chain_state::bip9_bit0_height(size_t height,
@@ -631,11 +603,6 @@ chain_state::map chain_state::get_map(size_t height,
 {
     const auto& forks = settings.forks;
     map map{};
-
-    // The checkpoint at/above which bip30_deactivate rule is enforced.
-    if (forks.bip30 && forks.bip30_deactivate)
-        map.bip30_deactivate_height = bip30_deactivate_height(height,
-            settings.bip30_deactivate_checkpoint);
 
     // The checkpoint at/above which bip9_bit0 rules are enforced.
     if (forks.bip68 || forks.bip112 || forks.bip113)
@@ -757,7 +724,6 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // Replace previous block state with tx pool chain state for next height
     // Preserve top block timestamp for use in computation of staleness.
-    // Preserve data.bip30_deactivate_hash promotion.
     // Preserve data.bip9_bit0_hash promotion.
     // Preserve data.bip9_bit1_hash promotion.
     // bits.self is unused.
@@ -794,10 +760,6 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
-
-    // Cache hash of bip30_deactivate block, otherwise use preceding state.
-    if (data.height == settings.bip30_deactivate_checkpoint.height())
-        data.bip30_deactivate_hash = data.hash;
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
@@ -841,10 +803,6 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
-
-    // Cache hash of bip30_deactivate block, otherwise use preceding state.
-    if (data.height == settings.bip30_deactivate_checkpoint.height())
-        data.bip30_deactivate_hash = data.hash;
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())

@@ -73,9 +73,6 @@ public:
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget{};
 
-        /// mainnet: 227931, testnet: 21111 (or map::unrequested)
-        size_t bip30_deactivate_height{ unrequested };
-
         /// mainnet: 419328, testnet: 770112 (or map::unrequested)
         size_t bip9_bit0_height{ unrequested };
 
@@ -94,9 +91,6 @@ public:
 
         /// Hash of the candidate block or null_hash for memory pool.
         hash_digest hash{};
-
-        /// Hash of the bip34 block that inactivates bip30, or null_hash.
-        hash_digest bip30_deactivate_hash{};
 
         /// Hash of the bip9_bit0 block or null_hash if unrequested.
         hash_digest bip9_bit0_hash{};
@@ -223,8 +217,6 @@ private:
     static size_t retarget_height(size_t height, const forks& forks,
         size_t retargeting_interval) NOEXCEPT;
 
-    static size_t bip30_deactivate_height(size_t height,
-        const checkpoint& bip30_deactivate_checkpoint) NOEXCEPT;
     static size_t bip9_bit0_height(size_t height,
         const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT;
     static size_t bip9_bit1_height(size_t height,

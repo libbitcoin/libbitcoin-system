@@ -115,9 +115,6 @@ public:
     size_t bip90_bip65_height{};
     size_t bip90_bip66_height{};
 
-    size_t bip30_reactivate_height{};
-    chain::checkpoint bip30_deactivate_checkpoint{};
-
     /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit0_active_checkpoint{};
 

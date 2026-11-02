@@ -285,22 +285,11 @@ BC_AUTO_TEST_CASE(chain_state__activation__default_data__bip30_rule)
     BC_REQUIRE(to_bool(state.flags & flags::bip30_rule));
 }
 
-BC_AUTO_TEST_CASE(chain_state__activation__bip30_deactivate_hash__no_bip30_rule)
+BC_AUTO_TEST_CASE(chain_state__activation__bip34_height__bip30_rule)
 {
     settings settings(selection::mainnet);
     chain_state::data values{};
-    values.bip30_deactivate_hash = settings.bip30_deactivate_checkpoint.hash();
-    values.height = settings.bip30_deactivate_checkpoint.height();
-    const auto state = test_chain_state::activation(values, settings.forks, settings);
-    BC_REQUIRE(!to_bool(state.flags & flags::bip30_rule));
-}
-
-BC_AUTO_TEST_CASE(chain_state__activation__bip30_reactivate_height__bip30_rule)
-{
-    settings settings(selection::mainnet);
-    chain_state::data values{};
-    values.bip30_deactivate_hash = settings.bip30_deactivate_checkpoint.hash();
-    values.height = settings.bip30_reactivate_height;
+    values.height = settings.bip90_bip34_height;
     const auto state = test_chain_state::activation(values, settings.forks, settings);
     BC_REQUIRE(to_bool(state.flags & flags::bip30_rule));
 }
@@ -501,7 +490,6 @@ BC_AUTO_TEST_CASE(chain_state__get_map__genesis__default)
     BC_REQUIRE_EQUAL(map.bits.count, 0u);
     BC_REQUIRE_EQUAL(map.version.count, 0u);
     BC_REQUIRE_EQUAL(map.timestamp.count, 0u);
-    BC_REQUIRE_EQUAL(map.bip30_deactivate_height, chain_state::map::unrequested);
     BC_REQUIRE_EQUAL(map.bip9_bit0_height, chain_state::map::unrequested);
     BC_REQUIRE_EQUAL(map.bip9_bit1_height, chain_state::map::unrequested);
     BC_REQUIRE_EQUAL(map.bip9_bit2_height, chain_state::map::unrequested);
@@ -582,7 +570,6 @@ BC_AUTO_TEST_CASE(chain_state__get_map__genesis_checkpoints__requested)
     BC_REQUIRE_EQUAL(map.bits.count, 0u);
     BC_REQUIRE_EQUAL(map.version.count, 0u);
     BC_REQUIRE_EQUAL(map.timestamp.count, 0u);
-    BC_REQUIRE_EQUAL(map.bip30_deactivate_height, 0u);
     BC_REQUIRE_EQUAL(map.bip9_bit0_height, 0u);
     BC_REQUIRE_EQUAL(map.bip9_bit1_height, 0u);
     BC_REQUIRE_EQUAL(map.bip9_bit2_height, 0u);
@@ -1170,13 +1157,12 @@ BC_AUTO_TEST_CASE(chain_state__work_required__ltc_time_warp_patch__easier)
 
 // checkpoint caching
 // ----------------------------------------------------------------------------
-// The bip9 and bip30_deactivate hashes are cached at their checkpoint height,
-// and the cached hash activates the associated rules.
+// The bip9 hashes are cached at their checkpoint height, and the cached hash
+// activates the associated rules.
 
 static chain::chain_state::data uncached_values()
 {
     auto values = transition_values();
-    values.bip30_deactivate_hash = one_hash;
     values.bip9_bit0_hash = one_hash;
     values.bip9_bit1_hash = one_hash;
     values.bip9_bit2_hash = one_hash;
@@ -1185,7 +1171,6 @@ static chain::chain_state::data uncached_values()
 
 static void set_checkpoints(settings& settings, const hash_digest& hash)
 {
-    settings.bip30_deactivate_checkpoint = { hash, 43 };
     settings.bip9_bit0_active_checkpoint = { hash, 43 };
     settings.bip9_bit1_active_checkpoint = { hash, 43 };
     settings.bip9_bit2_active_checkpoint = { hash, 43 };

@@ -41,8 +41,20 @@ enum flags : uint32_t
     /// Pay-to-script-hash enabled (soft fork, feature).
     bip16_rule = bit_right<uint32_t>(2),
 
-    /// No duplicated unspent transaction ids (soft/hard/soft fork, deflation).
-    /// This (initially) soft fork rule expires and then unexpires (hard/soft).
+    // Coinbases from before bip34 activation that satisfy bip34 at a later
+    // height, by duplicable height (original height), below 10,000,000:
+    // 1,983,702 (164,384), 3,708,179 (169,895), 3,709,183 (170,307),
+    // 3,712,990 (171,896), 3,713,413 (172,069), 3,714,082 (172,357),
+    // 3,714,265 (172,428), 3,761,471 (183,669), 4,275,806 (196,988),
+    // 5,208,854 (174,151), 5,327,833 (201,577), 7,299,941 (206,039),
+    // 7,299,941 (206,354), 8,624,845 (147,396), 8,631,390 (149,732),
+    // 8,631,629 (149,813), 8,631,693 (149,838), 8,632,995 (150,283),
+    // 8,636,474 (151,491), 8,638,716 (152,374), 8,639,231 (152,599),
+    // 8,641,929 (153,662), 9,558,101 (177,628).
+    // delvingbitcoin.org/t/great-consensus-cleanup-revival/710/4
+    // gist.github.com/darosior/3a5ac0a8d935fa9d3e90310590ca6699
+
+    /// No duplicated unspent transaction ids (soft fork, deflation).
     bip30_rule = bit_right<uint32_t>(3),
 
     /// Coinbase must include height, redundant w/bip30 (soft fork, arbitrary).
@@ -98,7 +110,7 @@ enum flags : uint32_t
     // github.com/bitcoin/bitcoin/pull/2657
 
     // [0.12.0] No bip30 check above bip34 activation at block 227,931 (hard
-    // fork, deflation). Configured as bip30_deactivate.
+    // fork, deflation).
     // github.com/bitcoin/bitcoin/pull/6931
 
     // [0.15.0] The inflation bug, duplicate inputs accepted in blocks (hard
@@ -118,7 +130,7 @@ enum flags : uint32_t
     // github.com/bitcoin/bitcoin/pull/11739
 
     // [0.17.0] bip30 checked again from block 1,983,702 (soft fork,
-    // deflation). Configured as bip30_reactivate.
+    // deflation).
     // github.com/bitcoin/bitcoin/pull/12204
 
     // [0.19.0] bip9 bit0 group buried at block 419,328 and bit1 group at
