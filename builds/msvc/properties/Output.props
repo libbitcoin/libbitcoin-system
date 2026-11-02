@@ -8,6 +8,8 @@
     <RepoRoot>$(ProjectDir)..\..\..\..\</RepoRoot>
     <SourceRoot>$(ProjectDir)..\..\..\..\..\</SourceRoot>    
     <OutDir>$(ProjectDir)..\..\..\..\bin\$(PlatformName)\$(DebugOrRelease)\$(PlatformToolset)\$(DefaultLinkage)\</OutDir>
+    <!-- Dynamic outputs of all repositories share one directory, so each executable loads its dependency DLLs in place. -->
+    <OutDir Condition="'$(DefaultLinkage)' == 'dynamic'">$(ProjectDir)..\..\..\..\..\bin\$(PlatformName)\$(DebugOrRelease)\$(PlatformToolset)\$(DefaultLinkage)\</OutDir>
     <IntDir>$(ProjectDir)..\..\..\..\obj\$(TargetName)\$(PlatformName)\$(DebugOrRelease)\$(PlatformToolset)\$(DefaultLinkage)\</IntDir>
     <TargetDir>$(OutDir)</TargetDir>
     <TargetName>$(TargetName)</TargetName>
