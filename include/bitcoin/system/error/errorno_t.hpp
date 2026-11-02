@@ -111,7 +111,7 @@ enum errorno_t
     wrong_protocol_type = EPROTOTYPE
 };
 
-DECLARE_ERROR_T_CODE_CATEGORY(errorno);
+DECLARE_ERROR_T_CODE_CATEGORY(errorno, BC_API);
 
 /// errno helpers.
 void clear_errno() NOEXCEPT;

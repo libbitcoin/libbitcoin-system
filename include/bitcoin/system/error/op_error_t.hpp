@@ -142,7 +142,7 @@ enum op_error_t : uint8_t
     op_check_sig_add7
 };
 
-DECLARE_ERROR_T_CODE_CATEGORY(op_error);
+DECLARE_ERROR_T_CODE_CATEGORY(op_error, BC_API);
 
 } // namespace error
 } // namespace system

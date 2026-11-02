@@ -41,7 +41,7 @@ enum x509_error_t : uint8_t
     extended_key_usage_invalid
 };
 
-DECLARE_ERROR_T_CODE_CATEGORY(x509_error);
+DECLARE_ERROR_T_CODE_CATEGORY(x509_error, BC_API);
 
 } // namespace error
 } // namespace system

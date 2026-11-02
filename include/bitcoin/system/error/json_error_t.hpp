@@ -64,7 +64,7 @@ enum json_error_t : uint8_t
     json_exhausted_variants
 };
 
-DECLARE_ERROR_T_CODE_CATEGORY(json_error);
+DECLARE_ERROR_T_CODE_CATEGORY(json_error, BC_API);
 
 } // namespace error
 } // namespace system

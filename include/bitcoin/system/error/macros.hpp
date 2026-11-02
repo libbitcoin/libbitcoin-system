@@ -49,9 +49,9 @@ template<> struct hash<cat##_t> \
 } // namespace std
 
 // For use of codes without conditions.
-#define DECLARE_ERROR_T_CODE_CATEGORY(cat) \
+#define DECLARE_ERROR_T_CODE_CATEGORY(cat, api) \
 enum cat##_condition_t {};\
-class BC_API cat##_category \
+class api cat##_category \
   : public std::error_category \
 { \
     static const message_map<cat##_t> messages; \
@@ -62,14 +62,14 @@ public: \
     virtual std::string message(int condition) const noexcept; \
     virtual std::error_condition default_error_condition(int value) const noexcept; \
 }; \
-std::error_code make_error_code(cat##_t value) noexcept; \
-std::error_condition make_error_condition(cat##_t value) noexcept
+api std::error_code make_error_code(cat##_t value) noexcept; \
+api std::error_condition make_error_condition(cat##_t value) noexcept
 
 // This adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires the
 // corresponding DEFINE_ERROR_T_EQUIVALENCE. For use of codes with conditions.
-#define DECLARE_ERROR_T_CONDITION_CATEGORY(cat) \
+#define DECLARE_ERROR_T_CONDITION_CATEGORY(cat, api) \
 enum cat##_condition_t {};\
-class BC_API cat##_category \
+class api cat##_category \
   : public std::error_category \
 { \
     static const message_map<cat##_t> messages; \
@@ -81,8 +81,8 @@ public: \
     virtual std::error_condition default_error_condition(int value) const noexcept; \
     virtual bool equivalent(const std::error_code& value, int condition) const noexcept; \
 }; \
-std::error_code make_error_code(cat##_t value) noexcept; \
-std::error_condition make_error_condition(cat##_t value) noexcept
+api std::error_code make_error_code(cat##_t value) noexcept; \
+api std::error_condition make_error_condition(cat##_t value) noexcept
 
 #define DEFINE_ERROR_T_CATEGORY(cat, category_name, unmapped) \
 const cat##_category cat##_category::singleton; \
