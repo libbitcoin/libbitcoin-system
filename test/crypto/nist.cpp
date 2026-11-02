@@ -379,3 +379,77 @@ BC_AUTO_TEST_CASE(nist__secp384r1_agree__generated_pair__same_shared)
 }
 
 BC_AUTO_TEST_SUITE_END()
+
+BC_AUTO_TEST_SUITE(nist_ctime_tests)
+
+// Under valgrind a secret is undefined, so a branch or memory address that
+// depends on it is reported as an error, and each output is defined before it
+// is compared to the same computation on the defined secret.
+
+const auto ctime_p256_secret = base16_array("c9afa9d845ba75166b5c215767b1d6934e50c3db36e89b127b8a622b120f6721");
+const auto ctime_p384_secret = base16_array("6b9d3dad2e1b8c1c05b19875b6659f4de23c3b667bf297ba9aa47740787137d896d5724e4c70a825f872c9ea60d2edf5");
+const auto ctime_digest = base16_hash("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
+
+BC_AUTO_TEST_CASE(nist_ctime__secp256r1_public_key__undefined_secret__expected)
+{
+    secp256r1::point_t expected{};
+    BC_REQUIRE(secp256r1::public_key(expected, ctime_p256_secret));
+
+    auto secret = ctime_p256_secret;
+    classify(secret);
+    secp256r1::point_t point{};
+    auto result = secp256r1::public_key(point, secret);
+    declassify(result);
+    declassify(point);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(point, expected);
+}
+
+BC_AUTO_TEST_CASE(nist_ctime__secp256r1_sign__undefined_secret__expected)
+{
+    secp256r1::signature_t expected{};
+    BC_REQUIRE(secp256r1::sign(expected, ctime_p256_secret, ctime_digest));
+
+    auto secret = ctime_p256_secret;
+    classify(secret);
+    secp256r1::signature_t signature{};
+    auto result = secp256r1::sign(signature, secret, ctime_digest);
+    declassify(result);
+    declassify(signature);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(signature, expected);
+}
+
+BC_AUTO_TEST_CASE(nist_ctime__secp256r1_agree__undefined_secret__expected)
+{
+    secp256r1::point_t point{};
+    BC_REQUIRE(secp256r1::public_key(point, ctime_p256_secret));
+    secp256r1::shared_t expected{};
+    BC_REQUIRE(secp256r1::agree(expected, ctime_p256_secret, point));
+
+    auto secret = ctime_p256_secret;
+    classify(secret);
+    secp256r1::shared_t shared{};
+    auto result = secp256r1::agree(shared, secret, point);
+    declassify(result);
+    declassify(shared);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(shared, expected);
+}
+
+BC_AUTO_TEST_CASE(nist_ctime__secp384r1_sign__undefined_secret__expected)
+{
+    secp384r1::signature_t expected{};
+    BC_REQUIRE(secp384r1::sign(expected, ctime_p384_secret, ctime_digest));
+
+    auto secret = ctime_p384_secret;
+    classify(secret);
+    secp384r1::signature_t signature{};
+    auto result = secp384r1::sign(signature, secret, ctime_digest);
+    declassify(result);
+    declassify(signature);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(signature, expected);
+}
+
+BC_AUTO_TEST_SUITE_END()
