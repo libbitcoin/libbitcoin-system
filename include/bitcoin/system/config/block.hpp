@@ -38,9 +38,9 @@ public:
 
     std::string to_string() const NOEXCEPT;
 
-    friend std::istream& operator>>(std::istream& stream,
+    friend BC_API std::istream& operator>>(std::istream& stream,
         block& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& stream,
+    friend BC_API std::ostream& operator<<(std::ostream& stream,
         const block& argument) NOEXCEPT;
 };
 

@@ -290,14 +290,14 @@ namespace ctx
 // TODO: these are static initializations.
 
 /// Predefined contexts for use as default parameter values.
-extern const context btc_mainnet;
-extern const context btc_testnet;
-extern const context btc_regtest;
-extern const context ltc_mainnet;
-extern const context ltc_testnet;
-extern const context ltc_regtest;
+extern BC_API const context btc_mainnet;
+extern BC_API const context btc_testnet;
+extern BC_API const context btc_regtest;
+extern BC_API const context ltc_mainnet;
+extern BC_API const context ltc_testnet;
+extern BC_API const context ltc_regtest;
 
-extern const context btc;
+extern BC_API const context btc;
 
 } // namespace wallet
 } // namespace system

@@ -76,8 +76,8 @@ public:
 
     /// Operators.
     bool operator<(const payment_address& other) const NOEXCEPT;
-    friend std::istream& operator>>(std::istream& in, payment_address& to);
-    friend std::ostream& operator<<(std::ostream& out,
+    friend BC_API std::istream& operator>>(std::istream& in, payment_address& to);
+    friend BC_API std::ostream& operator<<(std::ostream& out,
         const payment_address& of) NOEXCEPT;
 
     /// Cast operators.

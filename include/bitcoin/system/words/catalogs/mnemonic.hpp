@@ -32,16 +32,16 @@ typedef words::dictionary<2048> catalog;
 
 // TODO: these are static initializations.
 
-extern const catalog::words en;
-extern const catalog::words es;
-extern const catalog::words it;
-extern const catalog::words fr;
-extern const catalog::words cs;
-extern const catalog::words pt;
-extern const catalog::words ja;
-extern const catalog::words ko;
-extern const catalog::words zh_Hans;
-extern const catalog::words zh_Hant;
+extern BC_API const catalog::words en;
+extern BC_API const catalog::words es;
+extern BC_API const catalog::words it;
+extern BC_API const catalog::words fr;
+extern BC_API const catalog::words cs;
+extern BC_API const catalog::words pt;
+extern BC_API const catalog::words ja;
+extern BC_API const catalog::words ko;
+extern BC_API const catalog::words zh_Hans;
+extern BC_API const catalog::words zh_Hant;
 
 typedef words::dictionaries<10, catalog::size()> catalogs;
 

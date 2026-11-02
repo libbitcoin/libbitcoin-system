@@ -37,9 +37,9 @@ public:
 
     operator const data_chunk&() const NOEXCEPT;
 
-    friend std::istream& operator>>(std::istream& stream,
+    friend BC_API std::istream& operator>>(std::istream& stream,
         base64& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& stream,
+    friend BC_API std::ostream& operator<<(std::ostream& stream,
         const base64& argument) NOEXCEPT;
 
 private:

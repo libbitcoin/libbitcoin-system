@@ -55,8 +55,8 @@ public:
     /// Operators.
     bool operator==(const transaction& other) const NOEXCEPT;
     bool operator!=(const transaction& other) const NOEXCEPT;
-    friend std::istream& operator>>(std::istream& in, transaction& to);
-    friend std::ostream& operator<<(std::ostream& out,
+    friend BC_API std::istream& operator>>(std::istream& in, transaction& to);
+    friend BC_API std::ostream& operator<<(std::ostream& out,
         const transaction& of) NOEXCEPT;
 
     /// Cast operators.

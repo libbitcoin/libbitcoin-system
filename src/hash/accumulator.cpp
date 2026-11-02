@@ -25,8 +25,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Explicit template instantiation.
-template class accumulator<sha256>;
-template class accumulator<sha512>;
+template class BC_API accumulator<sha256>;
+template class BC_API accumulator<sha512>;
 
 }
 }

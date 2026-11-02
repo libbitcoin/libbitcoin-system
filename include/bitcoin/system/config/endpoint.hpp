@@ -73,9 +73,9 @@ public:
     /// Operators.
     /// -----------------------------------------------------------------------
 
-    friend std::istream& operator>>(std::istream& input,
+    friend BC_API std::istream& operator>>(std::istream& input,
         endpoint& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& output,
+    friend BC_API std::ostream& operator<<(std::ostream& output,
         const endpoint& argument) NOEXCEPT;
 
 private:

@@ -80,8 +80,8 @@ using aes128_gcm = aes_gcm<aes128>;
 using aes256_gcm = aes_gcm<aes256>;
 
 /// Prevent implicit template instantiation.
-extern template class aes_gcm<aes128>;
-extern template class aes_gcm<aes256>;
+extern template class BC_API aes_gcm<aes128>;
+extern template class BC_API aes_gcm<aes256>;
 
 } // namespace system
 } // namespace libbitcoin

@@ -114,9 +114,9 @@ enum errorno_t
 DECLARE_ERROR_T_CODE_CATEGORY(errorno, BC_API);
 
 /// errno helpers.
-void clear_errno() NOEXCEPT;
-void set_errno(errorno_t value) NOEXCEPT;
-std::error_code get_errno() NOEXCEPT;
+BC_API void clear_errno() NOEXCEPT;
+BC_API void set_errno(errorno_t value) NOEXCEPT;
+BC_API std::error_code get_errno() NOEXCEPT;
 
 } // namespace error
 } // namespace system

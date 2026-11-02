@@ -42,10 +42,10 @@ public:
     operator type() const NOEXCEPT;
 
     /// Deserialize from input stream (throws on invalid format).
-    friend std::istream& operator>>(std::istream& input, byte& argument) THROWS;
+    friend BC_API std::istream& operator>>(std::istream& input, byte& argument) THROWS;
 
     /// Serialize to output stream.
-    friend std::ostream& operator<<(std::ostream& output,
+    friend BC_API std::ostream& operator<<(std::ostream& output,
         const byte& argument) NOEXCEPT;
 
 private:

@@ -95,7 +95,7 @@ private:
 };
 
 /// Arbitrary compare, for uniqueness sorting.
-bool operator<(const outpoint& left, const outpoint& right) NOEXCEPT;
+BC_API bool operator<(const outpoint& left, const outpoint& right) NOEXCEPT;
 
 typedef std_vector<outpoint> outpoints;
 

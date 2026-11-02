@@ -103,7 +103,7 @@ protected:
     };
 
     /// A parsed key expression.
-    struct key_expression
+    struct BC_API key_expression
     {
         key_form form{ key_form::invalid };
         std::optional<psbt::key_origin> origin{};

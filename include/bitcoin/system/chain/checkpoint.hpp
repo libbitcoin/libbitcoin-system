@@ -92,13 +92,13 @@ private:
     bool valid_;
 };
 
-bool operator<(const checkpoint& left, const checkpoint& right) NOEXCEPT;
-bool operator==(const checkpoint& left, const checkpoint& right) NOEXCEPT;
-bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT;
+BC_API bool operator<(const checkpoint& left, const checkpoint& right) NOEXCEPT;
+BC_API bool operator==(const checkpoint& left, const checkpoint& right) NOEXCEPT;
+BC_API bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT;
 
 // TODO: rationalize with config.
-std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS;
-std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT;
+BC_API std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS;
+BC_API std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT;
 
 typedef std::vector<checkpoint> checkpoints;
 

@@ -165,8 +165,8 @@ private:
 };
 
 /// Prevent implicit template instantiation.
-extern template class accumulator<sha256>;
-extern template class accumulator<sha512>;
+extern template class BC_API accumulator<sha256>;
+extern template class BC_API accumulator<sha512>;
 
 } // namespace system
 } // namespace libbitcoin

@@ -30,43 +30,43 @@ typedef std::vector<std::string> string_list;
 typedef std::pair<char32_t, char32_t> char32_interval;
 
 /// The space (0x00000020) character is the only ASCII separator.
-extern const std::string ascii_space;
-extern const string_list ascii_separators;
-extern const string_list ascii_whitespace;
+extern BC_API const std::string ascii_space;
+extern BC_API const string_list ascii_separators;
+extern BC_API const string_list ascii_whitespace;
 
 /// The ideographic space (0x00003000) character is required for BIP39.
-extern const std::string ideographic_space;
-extern const string_list unicode_separators;
-extern const string_list unicode_whitespace;
+extern BC_API const std::string ideographic_space;
+extern BC_API const string_list unicode_separators;
+extern BC_API const string_list unicode_whitespace;
 
 /// ASCII subset of Unicode tables.
 constexpr size_t char_separators_count = 1;
 constexpr size_t char_whitespace_count = 6;
-extern const char char_separators[char_separators_count];
-extern const char char_whitespace[char_whitespace_count];
+extern BC_API const char char_separators[char_separators_count];
+extern BC_API const char char_whitespace[char_whitespace_count];
 
 /// Unicode character subsets.
 constexpr size_t char32_separators_count = 17;
 constexpr size_t char32_whitespace_count = 25;
-extern const char32_t char32_separators[char32_separators_count];
-extern const char32_t char32_whitespace[char32_whitespace_count];
+extern BC_API const char32_t char32_separators[char32_separators_count];
+extern BC_API const char32_t char32_whitespace[char32_whitespace_count];
 
 /// Unicode character subset intervals.
 constexpr size_t char32_diacritics_count = 197;
 constexpr size_t char32_chinese_japanese_korean_count = 29;
-extern const char32_interval char32_diacritics[char32_diacritics_count];
-extern const char32_interval char32_chinese_japanese_korean[
+extern BC_API const char32_interval char32_diacritics[char32_diacritics_count];
+extern BC_API const char32_interval char32_chinese_japanese_korean[
     char32_chinese_japanese_korean_count];
 
 /// Python's generated Unicode combining class index.
 constexpr size_t combining_index_count = 342;
-extern const uint8_t combining_index[combining_index_count];
+extern BC_API const uint8_t combining_index[combining_index_count];
 
 /// Python's generated Unicode database.
 constexpr size_t unicode_data1_count = 8704;
 constexpr size_t unicode_data2_count = 34176;
-extern const uint16_t unicode_data1[unicode_data1_count];
-extern const uint16_t unicode_data2[unicode_data2_count];
+extern BC_API const uint16_t unicode_data1[unicode_data1_count];
+extern BC_API const uint16_t unicode_data2[unicode_data2_count];
 
 } // namespace system
 } // namespace libbitcoin
