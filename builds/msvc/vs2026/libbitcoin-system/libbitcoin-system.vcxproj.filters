@@ -86,97 +86,97 @@
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\crypto">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\crypto\aes">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\crypto\nist">
+    <Filter Include="include\bitcoin\system\impl\crypto\aes">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\crypto\secp256k1">
+    <Filter Include="include\bitcoin\system\impl\crypto\nist">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\crypto\shamir">
+    <Filter Include="include\bitcoin\system\impl\crypto\secp256k1">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\data">
+    <Filter Include="include\bitcoin\system\impl\crypto\shamir">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\endian">
+    <Filter Include="include\bitcoin\system\impl\data">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\filter">
+    <Filter Include="include\bitcoin\system\impl\endian">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000002}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\hash">
+    <Filter Include="include\bitcoin\system\impl\filter">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\impl\hash">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\hash\rmd">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\hash\sha">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\hash\sha3">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\machine">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\math">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\options">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\impl\radix">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\impl\serial">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\serial\json">
+    <Filter Include="include\bitcoin\system\impl\serial">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\stream">
+    <Filter Include="include\bitcoin\system\impl\serial\json">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\stream\iostream">
+    <Filter Include="include\bitcoin\system\impl\stream">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\stream\streamers">
+    <Filter Include="include\bitcoin\system\impl\stream\iostream">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\uintx">
+    <Filter Include="include\bitcoin\system\impl\stream\streamers">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\unicode">
+    <Filter Include="include\bitcoin\system\impl\uintx">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\unit_test">
+    <Filter Include="include\bitcoin\system\impl\unicode">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\wallet">
+    <Filter Include="include\bitcoin\system\impl\unit_test">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\wallet\addresses">
+    <Filter Include="include\bitcoin\system\impl\wallet">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\impl\words">
+    <Filter Include="include\bitcoin\system\impl\wallet\addresses">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics">
+    <Filter Include="include\bitcoin\system\impl\words">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics\intel">
+    <Filter Include="include\bitcoin\system\intrinsics">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics\neon">
+    <Filter Include="include\bitcoin\system\intrinsics\intel">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics\none">
+    <Filter Include="include\bitcoin\system\intrinsics\neon">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\intrinsics\none">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\ip">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
