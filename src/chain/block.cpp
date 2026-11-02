@@ -519,35 +519,6 @@ bool block::is_invalid_coinbase_script(size_t height) const NOEXCEPT
     return !script::is_coinbase_pattern(script.ops(), height);
 }
 
-// TODO: add bip50 to chain_state with timestamp range activation.
-// "Special short-term limits to avoid 10,000 BDB lock limit.
-// Count of unique txids <= 4500 to prevent 10000 BDB lock exhaustion.
-// header.timestamp > 1363039171 && header.timestamp < 1368576000."
-bool block::is_hash_limit_exceeded() const NOEXCEPT
-{
-    if (txs_->empty())
-        return false;
-
-    // A set is used to collapse duplicates.
-    unordered_set_of_hash_cref hashes(txs_->size());
-
-    // Just the coinbase tx hash, skip its null input hashes.
-    hashes.emplace(txs_->front()->get_hash(false));
-
-    for (auto tx = std::next(txs_->cbegin()); tx != txs_->cend(); ++tx)
-    {
-        // Insert the transaction hash.
-        hashes.emplace((*tx)->get_hash(false));
-        const auto& inputs = (*tx)->inputs_ptr();
-
-        // Insert all input point hashes.
-        for (const auto& input: *inputs)
-            hashes.emplace(input->point().hash());
-    }
-
-    return hashes.size() > hash_limit;
-}
-
 // Malleability does not imply malleated.
 bool block::is_malleable() const NOEXCEPT
 {
@@ -1025,22 +996,18 @@ code block::check(bool identity) const NOEXCEPT
 // timestamp
 // median_time_past
 
-// Use of get_hash() in is_hash_limit_exceeded makes this thread-unsafe.
 // bip141 should be disabled when the node is not accepting witness data.
 code block::check(const context& ctx, bool identity,
     const script& challenge) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
-    const auto bip50 = ctx.is_enabled(bip50_rule);
     const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
     if (bip34 && is_invalid_coinbase_script(ctx.height))
         return error::coinbase_height_mismatch;
-    if (bip50 && is_hash_limit_exceeded())
-        return error::temporary_hash_limit;
     if (bip141 && identity && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
     if (signet && is_invalid_signet_solution(challenge))

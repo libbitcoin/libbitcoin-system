@@ -33,8 +33,7 @@ namespace error {
 enum op_error_t : uint8_t
 {
     op_success = 0,
-    op_not_implemented = add1<int>(script_error_t::script_error_last),
-    op_invalid,
+    op_invalid = add1<int>(script_error_t::script_error_last),
     op_reserved,
     op_push_size,
     op_push_one_size,

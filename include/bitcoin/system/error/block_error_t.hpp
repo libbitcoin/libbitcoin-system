@@ -65,7 +65,6 @@ enum block_error_t : uint8_t
     block_sigop_limit,
     invalid_witness_commitment,
     block_weight_limit,
-    temporary_hash_limit,
     invalid_signet_solution,
 
     // connect block

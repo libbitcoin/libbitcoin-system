@@ -29,15 +29,6 @@ BC_AUTO_TEST_CASE(op_error_t__code__op_success__false_expected_message)
     BC_REQUIRE_EQUAL(ec.message(), "opcode success");
 }
 
-BC_AUTO_TEST_CASE(op_error_t__code__op_not_implemented__true_expected_message)
-{
-    constexpr auto value = error::op_not_implemented;
-    const auto ec = code(value);
-    BC_REQUIRE(ec);
-    BC_REQUIRE(ec == value);
-    BC_REQUIRE_EQUAL(ec.message(), "opcode not implemented");
-}
-
 BC_AUTO_TEST_CASE(op_error_t__code__op_invalid__true_expected_message)
 {
     constexpr auto value = error::op_invalid;

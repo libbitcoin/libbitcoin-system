@@ -60,7 +60,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { block_sigop_limit, "too many block signature operations" },
     { invalid_witness_commitment, "invalid witness commitment" },
     { block_weight_limit, "block weight limit exceeded" },
-    { temporary_hash_limit, "block contains too many hashes" },
     { invalid_signet_solution, "invalid signet block solution" },
 
     // connect block

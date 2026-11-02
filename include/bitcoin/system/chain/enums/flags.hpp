@@ -84,46 +84,59 @@ enum flags : uint32_t
     /// Taproot: validation of tapscripts.
     bip342_rule = bit_right<uint32_t>(16),
 
-    /// TODO: hardwired or obsoleted (historical).
-    /// -----------------------------------------------------------------------
+    // bitcoind consensus changes, not specified before release.
+    // ------------------------------------------------------------------------
 
-    /// Promote nop1..nop10 [0.3.6] (hard fork, expansion).
-    /// Combined script max 20,000 bytes, push_data 520 (soft fork, arbitrary).
-    /// Initial script and push_data size limits (soft fork, arbitrary).
-    /// Demote return, op_ver, verif, vernotif (soft fork, security).
-    nops_rule = bit_right<uint32_t>(17),
+    // [0.8.0] The LevelDB store drops the Berkeley DB lock limit, chain split
+    // at block 225,430 (hard fork, determinism).
+    // github.com/bitcoin/bitcoin/pull/1677
 
-    /// Splits script evaluation, activated by [0.3.7] (hard fork, security).
-    /// Per script max 10,000 bytes, one more total byte than prior, as the
-    /// previous limit was imposed after concatenating with op_codeseparator.
-    split_rule = bit_right<uint32_t>(18),
+    // [0.8.1] Max 4,500 tx and input hashes per block before 2013-05-15 (soft
+    // fork, determinism), then expired (hard fork, determinism). Specified
+    // after the fact as bip50, code removed in [0.9.0].
+    // github.com/bitcoin/bitcoin/commit/8bd02881899bbae2d8e5082081e02c7d577994e5
+    // github.com/bitcoin/bitcoin/pull/2657
 
-    /// Invalidate op_cat, etc. [0.3.9] (soft fork, security).
-    cats_rule = bit_right<uint32_t>(19),
+    // [0.12.0] No bip30 check above bip34 activation at block 227,931 (hard
+    // fork, deflation). Configured as bip30_deactivate.
+    // github.com/bitcoin/bitcoin/pull/6931
 
-    /// The original rule leaked output value, was plugged here (soft fork).
-    /// This was activated at block 74,638 [0.3.10], later to all blocks.
-    plug_rule = bit_right<uint32_t>(20),
+    // [0.15.0] The inflation bug, duplicate inputs accepted in blocks (hard
+    // fork, inflation). The check was removed from blocks in [0.14.0].
+    // github.com/bitcoin/bitcoin/pull/9049
+    // github.com/bitcoin/bitcoin/pull/10195
 
-    /// Limit block size to 1,000,000 bytes (soft fork, system DoS).
-    /// Limit signature operations per block (soft fork, system DoS).
-    /// This was activated at block 79,400 [0.3.12], and later to all blocks.
-    size_rule = bit_right<uint32_t>(21),
+    // [0.16.0] bip16 moved from its activation time to block 173,805 (hard
+    // fork, arbitrary).
+    // github.com/bitcoin/bitcoin/pull/11389
 
-    /// Release [0.8.0] removal of hash limit, chain split at block 225,430.
-    /// Original rule was from Berkely DB [unknown] (hard fork, determinism).
-    unlock_rule = bit_right<uint32_t>(22),
+    // [0.16.3] The inflation bug fixed (soft fork, inflation).
+    // github.com/bitcoin/bitcoin/pull/14247
 
-    /// This allowed double spends, applied and removed (hard fork, inflation).
-    /// Activated (hard fork) in [0.15.0] deactivated (soft fork) in [0.16.3].
-    inflation_rule = bit_right<uint32_t>(23),
+    // [0.17.0] bip16 and bip141 script rules from genesis, one bip16 block
+    // excepted by hash (soft fork, arbitrary).
+    // github.com/bitcoin/bitcoin/pull/11739
 
-    /// Tx and input hashes max 4,500 per block (soft/hard fork, determinism).
-    /// This (initially) soft fork rule expires, which makes it a hard fork.
-    bip50_rule = bit_right<uint32_t>(24),
+    // [0.17.0] bip30 checked again from block 1,983,702 (soft fork,
+    // deflation). Configured as bip30_reactivate.
+    // github.com/bitcoin/bitcoin/pull/12204
 
-    /// Reduces threshold segregated witness signaling (soft fork, feature).
-    bip91_rule = bit_right<uint32_t>(25),
+    // [0.19.0] bip9 bit0 group buried at block 419,328 and bit1 group at
+    // block 481,824 (hard fork, arbitrary).
+    // github.com/bitcoin/bitcoin/pull/16060
+
+    // [24.0] bip341 and bip342 script rules wherever bip141 applies, so from
+    // genesis, one block excepted by hash (soft fork, arbitrary).
+    // github.com/bitcoin/bitcoin/pull/23536
+
+    // [30.0] Checkpoints removed, forks below the last checkpoint accepted
+    // (hard fork, security).
+    // github.com/bitcoin/bitcoin/pull/31649
+
+    // bip91 was implemented, and proposed for [0.14.3] on 2017-07-21, but was
+    // never merged or released.
+    // github.com/bitcoin/bitcoin/pull/10444
+    // github.com/bitcoin/bitcoin/pull/10900
 
     /// Signet only
     signet_rule = bit_right<uint32_t>(26),
@@ -171,10 +184,6 @@ enum flags : uint32_t
     bip9_bit2_group =
         flags::bip341_rule |
         flags::bip342_rule,
-
-    /////// Rules that use BIP9 bit 4 ("segsignal") first time activation.
-    ////bip9_bit4_group =
-    ////    flags::bip91_rule,
 
     /// Mask to set all rule bits (32).
     all_rules = bit_all<uint32_t>

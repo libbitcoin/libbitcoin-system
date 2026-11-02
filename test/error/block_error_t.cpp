@@ -239,15 +239,6 @@ BC_AUTO_TEST_CASE(block_error_t__code__block_weight_limit__true_expected_message
     BC_REQUIRE_EQUAL(ec.message(), "block weight limit exceeded");
 }
 
-BC_AUTO_TEST_CASE(block_error_t__code__temporary_hash_limit__true_expected_message)
-{
-    constexpr auto value = error::temporary_hash_limit;
-    const auto ec = code(value);
-    BC_REQUIRE(ec);
-    BC_REQUIRE(ec == value);
-    BC_REQUIRE_EQUAL(ec.message(), "block contains too many hashes");
-}
-
 BC_AUTO_TEST_CASE(block_error_t__code__invalid_signet_solution__true_expected_message)
 {
     constexpr auto value = error::invalid_signet_solution;

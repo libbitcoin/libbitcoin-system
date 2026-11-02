@@ -50,7 +50,6 @@ constexpr size_t max_number_size_five = 5;
 /// Validation consensus constants.
 /// ---------------------------------------------------------------------------
 
-constexpr size_t hash_limit = 4500;
 constexpr size_t min_coinbase_size = 2;
 constexpr size_t max_coinbase_size = 100;
 constexpr size_t coinbase_maturity = 100;

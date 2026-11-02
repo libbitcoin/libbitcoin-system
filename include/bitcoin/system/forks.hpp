@@ -63,9 +63,6 @@ struct forks
     bool bip341;
     bool bip342;
 
-    /////// bip9 bit4 activation group ("segsignal").
-    ////bool bip91;
-
     /// Regtest does not retarget.
     bool retarget;
 
