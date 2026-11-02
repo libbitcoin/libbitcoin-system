@@ -105,7 +105,7 @@ private:
 };
 
 /// Arbitrary compare, for uniqueness sorting.
-bool operator<(const point& left, const point& right) NOEXCEPT;
+BC_API bool operator<(const point& left, const point& right) NOEXCEPT;
 
 typedef std_vector<point> points;
 

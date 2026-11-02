@@ -131,15 +131,9 @@ BC_AUTO_TEST_CASE(interpreter__op_unevaluated__reserved_code__op_reserved)
     BC_REQUIRE_EQUAL(code{ machine->op_unevaluated(opcode::op_ver) }, error::op_reserved);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_nop_code__nops_rule__op_success)
+BC_AUTO_TEST_CASE(interpreter__op_nop_code__always__op_success)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_nop(opcode::nop4) }, error::op_success);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_nop_code__no_rules__op_success)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_nop(opcode::nop4) }, error::op_success);
 }
 
@@ -149,232 +143,118 @@ BC_AUTO_TEST_CASE(interpreter__op_nop__always__op_success)
     BC_REQUIRE_EQUAL(code{ machine->op_nop() }, error::op_success);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_ver__nops_rule__op_reserved)
+BC_AUTO_TEST_CASE(interpreter__op_ver__always__op_reserved)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_ver() }, error::op_reserved);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_ver__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_ver() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_verif__nops_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_verif__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_verif() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_verif__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_verif() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_vernotif__nops_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_vernotif__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_vernotif() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_vernotif__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_vernotif() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_return__nops_rule__op_reserved)
+BC_AUTO_TEST_CASE(interpreter__op_return__always__op_reserved)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_return() }, error::op_reserved);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_return__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_return() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_cat__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_cat__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_cat() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_cat__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_cat() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_substr__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_substr__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_substr() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_substr__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_substr() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_left__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_left__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_left() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_left__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_left() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_right__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_right__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_right() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_right__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_right() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_invert__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_invert__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_invert() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_invert__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_invert() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_and__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_and__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_and() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_and__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_and() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_or__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_or__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_or() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_or__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_or() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_xor__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_xor__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_xor() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_xor__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_xor() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_mul2__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_mul2__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_mul2() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_mul2__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_mul2() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_div2__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_div2__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_div2() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_div2__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_div2() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_mul__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_mul__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_mul() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_mul__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_mul() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_div__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_div__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_div() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_div__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_div() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_mod__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_mod__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_mod() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_mod__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_mod() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_lshift__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_lshift__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_lshift() }, error::op_invalid);
 }
 
-BC_AUTO_TEST_CASE(interpreter__op_lshift__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_lshift() }, error::op_not_implemented);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_rshift__cats_rule__op_invalid)
+BC_AUTO_TEST_CASE(interpreter__op_rshift__always__op_invalid)
 {
     machine_accessor<contiguous_stack> machine{ {}, flags::all_rules };
     BC_REQUIRE_EQUAL(code{ machine->op_rshift() }, error::op_invalid);
-}
-
-BC_AUTO_TEST_CASE(interpreter__op_rshift__no_rules__op_not_implemented)
-{
-    machine_accessor<contiguous_stack> machine{ {}, flags::no_rules };
-    BC_REQUIRE_EQUAL(code{ machine->op_rshift() }, error::op_not_implemented);
 }
 
 // Conditional operations.

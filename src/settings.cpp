@@ -47,8 +47,6 @@ settings::settings() NOEXCEPT
 {
     forks.bip16 = true;
     forks.bip30 = true;
-    forks.bip30_deactivate = true;
-    forks.bip30_reactivate = true;
     forks.bip34 = true;
     forks.bip42 = true;
     forks.bip65 = true;
@@ -126,8 +124,6 @@ settings::settings(chain::selection context) NOEXCEPT
 
             forks.bip16 = true;
             forks.bip30 = true;
-            forks.bip30_deactivate = true;
-            forks.bip30_reactivate = true;
             forks.bip34 = true;
             forks.bip42 = true;
             forks.bip65 = true;
@@ -157,8 +153,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 227931;
             bip90_bip65_height = 388381;
             bip90_bip66_height = 363725;
-            bip30_reactivate_height = 1983702;
-            bip30_deactivate_checkpoint = { "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", 227931 };
             bip9_bit0_active_checkpoint = { "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328 };
             bip9_bit1_active_checkpoint = { "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824 };
             bip9_bit2_active_checkpoint = { "0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632 };
@@ -230,8 +224,6 @@ settings::settings(chain::selection context) NOEXCEPT
 
             forks.bip16 = true;
             forks.bip30 = true;
-            forks.bip30_deactivate = true;
-            forks.bip30_reactivate = true;
             forks.bip34 = true;
             forks.bip42 = true;
             forks.bip65 = true;
@@ -261,11 +253,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 21111;
             bip90_bip65_height = 581885;
             bip90_bip66_height = 330776;
-
-            // Approximation, see satoshi PR#12204.
-            bip30_reactivate_height = 486'000'000_size;
-
-            bip30_deactivate_checkpoint = { "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8", 21111 };
             bip9_bit0_active_checkpoint = { "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112 };
             bip9_bit1_active_checkpoint = { "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624 };
             bip9_bit2_active_checkpoint = { "000000000000eb906ab072652b86b05a1afeb95df53ed5c5a63aa3574e1f1b33", 2011968};
@@ -322,8 +309,6 @@ settings::settings(chain::selection context) NOEXCEPT
 
             forks.bip16 = true;
             forks.bip30 = true;
-            forks.bip30_deactivate = true;
-            forks.bip30_reactivate = true;
             forks.bip34 = true;
             forks.bip42 = true;
             forks.bip65 = true;
@@ -353,11 +338,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 1;
             bip90_bip65_height = 1;
             bip90_bip66_height = 1;
-
-            // Approximation, see satoshi PR#12204.
-            bip30_reactivate_height = 486'000'000_size;
-
-            bip30_deactivate_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1 };
             bip9_bit0_active_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1 };
             bip9_bit1_active_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1 };
             bip9_bit2_active_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1};
@@ -419,8 +399,6 @@ settings::settings(chain::selection context) NOEXCEPT
 
             forks.bip16 = true;
             forks.bip30 = true;
-            forks.bip30_deactivate = true;
-            forks.bip30_reactivate = true;
             forks.bip34 = true;
             forks.bip42 = true;
             forks.bip65 = true;
@@ -450,8 +428,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 100000000;
             bip90_bip65_height = 1351;
             bip90_bip66_height = 1251;
-            bip30_reactivate_height = 0;
-            bip30_deactivate_checkpoint = { "0000000000000000000000000000000000000000000000000000000000000000", 0 };
 
             // bip9's are fixed and closed, so assume genesis activation.
             // bip90 assumes a historical bip34 activation block, so use genesis.
@@ -512,8 +488,6 @@ settings::settings(chain::selection context) NOEXCEPT
 
             forks.bip16 = true;
             forks.bip30 = true;
-            forks.bip30_deactivate = true;
-            forks.bip30_reactivate = true;
             forks.bip34 = true;
             forks.bip42 = true;
             forks.bip65 = true;
@@ -543,11 +517,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 1;
             bip90_bip65_height = 1;
             bip90_bip66_height = 1;
-
-            // Approximation, see satoshi PR#12204.
-            bip30_reactivate_height = 486'000'000_size;
-
-            bip30_deactivate_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
             bip9_bit0_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
             bip9_bit1_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
             bip9_bit2_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };

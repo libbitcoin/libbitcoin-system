@@ -30,8 +30,8 @@ namespace electrum_v1 {
 
 typedef words::dictionary<1626> catalog;
 
-extern const catalog::words en;
-extern const catalog::words pt;
+extern BC_API const catalog::words en;
+extern BC_API const catalog::words pt;
 
 typedef words::dictionaries<2, catalog::size()> catalogs;
 

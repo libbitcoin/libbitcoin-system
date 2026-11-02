@@ -25,13 +25,13 @@
 
 /// Based on example code in bip66, but without signature hash byte.
 /// https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki
-bool is_valid_bip66_signature_encoding(
+BC_API bool is_valid_bip66_signature_encoding(
     const bc::system::data_slice& sig) NOEXCEPT;
 
 /// Parse a signature in lax DER, as required for signatures before bip66.
 /// https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki#motivation
 /// Based on https://github.com/bitcoin-core/secp256k1/blob/master/contrib/lax_der_parsing.c
-bool ecdsa_signature_parse_der_lax(bc::system::ec_signature& sig,
+BC_API bool ecdsa_signature_parse_der_lax(bc::system::ec_signature& sig,
     const uint8_t* input, size_t inputlen) NOEXCEPT;
 
 #endif // LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP

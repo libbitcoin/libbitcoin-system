@@ -83,7 +83,6 @@ public:
     using block::is_invalid_merkle_root;
     using block::is_overweight;
     using block::is_invalid_coinbase_script;
-    using block::is_hash_limit_exceeded;
     using block::is_invalid_witness_commitment;
     using block::is_overspent;
     using block::is_signature_operations_limited;
@@ -795,12 +794,6 @@ BC_AUTO_TEST_CASE(block__is_invalid_coinbase_script__mismatched_height__true)
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     BC_REQUIRE(instance.is_invalid_coinbase_script(101));
-}
-
-BC_AUTO_TEST_CASE(block__is_hash_limit_exceeded__small_block__false)
-{
-    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), spending_transaction() } };
-    BC_REQUIRE(!instance.is_hash_limit_exceeded());
 }
 
 BC_AUTO_TEST_CASE(block__is_oversized__megabyte_script__true)
@@ -1825,12 +1818,6 @@ BC_AUTO_TEST_CASE(block__is_invalid_coinbase_script__empty__false)
     BC_REQUIRE(!instance.is_invalid_coinbase_script(zero));
 }
 
-BC_AUTO_TEST_CASE(block__is_hash_limit_exceeded__empty__false)
-{
-    const accessor instance{ header{}, transactions{} };
-    BC_REQUIRE(!instance.is_hash_limit_exceeded());
-}
-
 BC_AUTO_TEST_CASE(block__is_invalid_witness_commitment__empty__false)
 {
     const accessor instance{ header{}, transactions{} };
@@ -1913,41 +1900,6 @@ BC_AUTO_TEST_CASE(block__constructor__fast_stream__round_trips)
     stream::in::fast source{ data };
     const block instance{ source, true };
     BC_REQUIRE(instance == expected_block::get());
-}
-
-// Each spend contributes its own hash and its point hash, so 2250 spends
-// plus the coinbase exceed the 4500 unique hash limit [bip50].
-static block hash_limit_block() NOEXCEPT
-{
-    transactions txs{ coinbase_transaction(0, script{}) };
-    txs.reserve(2251u);
-
-    for (uint32_t tx = 0; tx < 2250u; ++tx)
-    {
-        hash_digest hash{};
-        hash[0] = narrow_cast<uint8_t>(tx);
-        hash[1] = narrow_cast<uint8_t>(shift_right(tx, 8u));
-        const inputs ins{ input{ point{ hash, 0 }, script{}, max_input_sequence } };
-        const outputs outs{ output{ 0, script{} } };
-        txs.push_back(transaction{ 1, ins, outs, 0 });
-    }
-
-    return block{ header{}, std::move(txs) };
-}
-
-BC_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50__temporary_hash_limit)
-{
-    const context ctx{ flags::bip50_rule, 0, 0, 0, 0, 0, 0 };
-    const auto instance = hash_limit_block();
-    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::temporary_hash_limit);
-}
-
-// The limit is not applied before bip50.
-BC_AUTO_TEST_CASE(block__check__hash_limit_exceeded_bip50_off__not_applied)
-{
-    const context ctx{ flags::no_rules, 0, 0, 0, 0, 0, 0 };
-    const auto instance = hash_limit_block();
-    BC_REQUIRE_NE(instance.check(ctx, false), error::temporary_hash_limit);
 }
 
 // The size and weight limits are inclusive, so the boundary must be tested.

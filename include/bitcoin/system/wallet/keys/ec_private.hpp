@@ -92,8 +92,8 @@ public:
     bool operator<(const ec_private& other) const NOEXCEPT;
     bool operator==(const ec_private& other) const NOEXCEPT;
     bool operator!=(const ec_private& other) const NOEXCEPT;
-    friend std::istream& operator>>(std::istream& in, ec_private& to);
-    friend std::ostream& operator<<(std::ostream& out,
+    friend BC_API std::istream& operator>>(std::istream& in, ec_private& to);
+    friend BC_API std::ostream& operator<<(std::ostream& out,
         const ec_private& of) NOEXCEPT;
 
     /// Serializer.

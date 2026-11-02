@@ -55,11 +55,11 @@ public:
     std::string to_string() const NOEXCEPT;
 
     /// Deserialize from input stream (reads the full line).
-    friend std::istream& operator>>(std::istream& input, path& argument)
+    friend BC_API std::istream& operator>>(std::istream& input, path& argument)
         NOEXCEPT;
 
     /// Serialize to output stream.
-    friend std::ostream& operator<<(std::ostream& output,
+    friend BC_API std::ostream& operator<<(std::ostream& output,
         const path& argument) NOEXCEPT;
 
 private:

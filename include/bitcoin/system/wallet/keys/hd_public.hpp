@@ -79,8 +79,8 @@ public:
     bool operator<(const hd_public& other) const NOEXCEPT;
     bool operator==(const hd_public& other) const NOEXCEPT;
     bool operator!=(const hd_public& other) const NOEXCEPT;
-    friend std::istream& operator>>(std::istream& in, hd_public& to);
-    friend std::ostream& operator<<(std::ostream& out,
+    friend BC_API std::istream& operator>>(std::istream& in, hd_public& to);
+    friend BC_API std::ostream& operator<<(std::ostream& out,
         const hd_public& of) NOEXCEPT;
 
     /// Cast operators.

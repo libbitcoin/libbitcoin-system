@@ -76,9 +76,9 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Same format as construct(string) and to_string().
-    friend std::istream& operator>>(std::istream& input,
+    friend BC_API std::istream& operator>>(std::istream& input,
         authority& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& output,
+    friend BC_API std::ostream& operator<<(std::ostream& output,
         const authority& argument) NOEXCEPT;
 
 private:

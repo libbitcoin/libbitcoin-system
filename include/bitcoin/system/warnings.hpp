@@ -56,6 +56,8 @@
         #define DEPRECATED_DECLARATION 4996
 
         // Global (see below).
+        #define DLL_INTERFACE_MEMBER 4251
+        #define DLL_INTERFACE_BASE 4275
         #define LOCAL_HIDES_GLOBAL 4459
         #define ASSIGNMENT_WITHIN_CONDITIONAL 4706
 
@@ -109,6 +111,12 @@
     #define BC_PUSH_WARNING(value)
     #define BC_POP_WARNING()
 #endif
+
+// Suppress C4251: member needs to have dll-interface to be used by clients.
+// Suppress C4275: non dll-interface base of a dll-interface class.
+// These arise from std members and bases of exported classes.
+BC_DISABLE_WARNING(DLL_INTERFACE_MEMBER)
+BC_DISABLE_WARNING(DLL_INTERFACE_BASE)
 
  // Suppress C4706: assignment within conditional expression (allowed).
 BC_DISABLE_WARNING(ASSIGNMENT_WITHIN_CONDITIONAL)

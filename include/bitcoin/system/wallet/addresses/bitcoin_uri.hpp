@@ -44,8 +44,8 @@ public:
     bool operator<(const bitcoin_uri& other) const NOEXCEPT;
     bool operator==(const bitcoin_uri& other) const NOEXCEPT;
     bool operator!=(const bitcoin_uri& other) const NOEXCEPT;
-    friend std::istream& operator>>(std::istream& in, bitcoin_uri& to);
-    friend std::ostream& operator<<(std::ostream& out,
+    friend BC_API std::istream& operator>>(std::istream& in, bitcoin_uri& to);
+    friend BC_API std::ostream& operator<<(std::ostream& out,
         const bitcoin_uri& from) NOEXCEPT;
 
     /// Test whether the URI has been initialized.

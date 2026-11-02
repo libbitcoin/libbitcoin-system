@@ -35,11 +35,7 @@ struct forks
     bool bip90;
 
     /// github.com/bitcoin/bitcoin/commit/a206b0ea12eb4606b93323268fc81a4f1f952531
-    /// github.com/bitcoin/bitcoin/pull/6931
-    /// github.com/bitcoin/bitcoin/pull/12204
     bool bip30;
-    bool bip30_deactivate;
-    bool bip30_reactivate;
 
     /// github.com/bitcoin/bitcoin/pull/3842
     bool bip42;
@@ -62,9 +58,6 @@ struct forks
     /// bip9 bit2 activation group ("taproot").
     bool bip341;
     bool bip342;
-
-    /////// bip9 bit4 activation group ("segsignal").
-    ////bool bip91;
 
     /// Regtest does not retarget.
     bool retarget;

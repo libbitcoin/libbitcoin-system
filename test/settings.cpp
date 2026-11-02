@@ -289,7 +289,6 @@ BC_AUTO_TEST_CASE(settings__construct__signet_context__expected)
     BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1u);
     BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1u);
     const chain::checkpoint block1("00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1u);
-    BC_REQUIRE_EQUAL(configuration.bip30_deactivate_checkpoint, block1);
     BC_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, block1);
     BC_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, block1);
     BC_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, block1);

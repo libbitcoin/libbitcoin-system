@@ -76,8 +76,8 @@ public:
     uint32_t previous_timestamp{};
 };
 
-bool operator==(const context& left, const context& right) NOEXCEPT;
-bool operator!=(const context& left, const context& right) NOEXCEPT;
+BC_API bool operator==(const context& left, const context& right) NOEXCEPT;
+BC_API bool operator!=(const context& left, const context& right) NOEXCEPT;
 
 } // namespace chain
 } // namespace system

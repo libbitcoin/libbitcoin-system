@@ -508,15 +508,12 @@ code block::check(const context& ctx, const script& challenge) const NOEXCEPT
     BC_ASSERT(is_populated());
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
-    const auto bip50 = ctx.is_enabled(bip50_rule);
     const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
     if (bip34 && is_invalid_coinbase_script(ctx.height))
         return error::coinbase_height_mismatch;
-    if (bip50 && is_hash_limit_exceeded())
-        return error::temporary_hash_limit;
     if (signet && is_invalid_signet_solution(challenge))
         return error::invalid_signet_solution;
 
@@ -616,27 +613,6 @@ bool block::is_invalid_coinbase_script(size_t height) const NOEXCEPT
 
     const auto& script = txs_.front().inputs_begin()->script();
     return !script::is_coinbase_pattern(script.ops(), height);
-}
-
-bool block::is_hash_limit_exceeded() const NOEXCEPT
-{
-    if (txs_.empty())
-        return false;
-
-    // A set is used to collapse duplicates.
-    unordered_set_of_hash_cref hashes(txs_.size());
-
-    // Just the coinbase tx hash, skip its null input hashes.
-    hashes.emplace(txs_.front().hash(false));
-
-    for (auto tx = std::next(txs_.cbegin()); tx != txs_.cend(); ++tx)
-    {
-        hashes.emplace(tx->hash(false));
-        for (auto in = tx->inputs_begin(); in != tx->inputs_end(); ++in)
-            hashes.emplace(in->point_hash());
-    }
-
-    return hashes.size() > hash_limit;
 }
 
 bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT

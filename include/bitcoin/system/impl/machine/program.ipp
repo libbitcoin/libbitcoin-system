@@ -55,8 +55,6 @@ TEMPLATE
 INLINE error::script_error_t CLASS::
 initialize() const NOEXCEPT
 {
-    // TODO: nops rule must first be enabled in tests and config.
-    constexpr auto nops = true; ////is_enabled(flags::nops_rule);
     const auto bip141 = is_enabled(flags::bip141_rule);
     const auto bip342 = is_enabled(flags::bip342_rule);
 
@@ -77,7 +75,7 @@ initialize() const NOEXCEPT
         return error::invalid_witness_stack;
 
     // Script size limit (10,000) [0.3.7+], removed [bip342].
-    if (!bip342 && nops && script_->is_oversized())
+    if (!bip342 && script_->is_oversized())
         return error::invalid_script_size;
 
     // Fail if any op invalid (invalid codes reduced in tapscript).

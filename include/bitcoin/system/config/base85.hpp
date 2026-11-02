@@ -46,9 +46,9 @@ public:
     /// The key as a base85 encoded (z85) string.
     std::string to_string() const;
 
-    friend std::istream& operator>>(std::istream& stream,
+    friend BC_API std::istream& operator>>(std::istream& stream,
         base85& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& stream,
+    friend BC_API std::ostream& operator<<(std::ostream& stream,
         const base85& argument);
 
 private:

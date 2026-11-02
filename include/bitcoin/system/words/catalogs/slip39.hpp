@@ -30,7 +30,7 @@ namespace slip39 {
 
 typedef words::dictionary<1024> catalog;
 
-extern const catalog::words en;
+extern BC_API const catalog::words en;
 
 typedef words::dictionaries<1, catalog::size()> catalogs;
 

@@ -42,9 +42,9 @@ public:
     operator const hash_digest&() const NOEXCEPT;
     operator uint256_t() const NOEXCEPT;
 
-    friend std::istream& operator>>(std::istream& stream,
+    friend BC_API std::istream& operator>>(std::istream& stream,
         hash256& argument) THROWS;
-    friend std::ostream& operator<<(std::ostream& stream,
+    friend BC_API std::ostream& operator<<(std::ostream& stream,
         const hash256& argument) NOEXCEPT;
 
 private:

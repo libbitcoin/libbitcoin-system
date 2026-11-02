@@ -97,7 +97,6 @@ protected:
     bool is_internal_double_spend() const NOEXCEPT;
     bool is_overweight() const NOEXCEPT;
     bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;
-    bool is_hash_limit_exceeded() const NOEXCEPT;
     bool is_invalid_signet_solution(const script& challenge) const NOEXCEPT;
     bool is_overspent(size_t height, size_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;

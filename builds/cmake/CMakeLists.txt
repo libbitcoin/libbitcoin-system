@@ -770,15 +770,15 @@ endif()
 # bitcoin-selector executable
 #------------------------------------------------------------------------------
 if ( with-console )
-  add_executable( bitcoin-selector )
+  add_library( bitcoin-selector-objects STATIC )
 
-  target_compile_features( bitcoin-selector
+  target_compile_features( bitcoin-selector-objects
     PUBLIC
       cxx_std_20
   )
 
   if ( NOT MSVC )
-    target_compile_options( bitcoin-selector
+    target_compile_options( bitcoin-selector-objects
       PRIVATE
         -Wall
         -Wextra
@@ -795,19 +795,27 @@ if ( with-console )
     )
   endif()
 
-  file( GLOB_RECURSE bitcoin_selector_SOURCES CONFIGURE_DEPENDS
+  file( GLOB_RECURSE bitcoin_selector_objects_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../console/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../console/*.cpp"
   )
 
-  target_sources( bitcoin-selector
+  target_sources( bitcoin-selector-objects
     PRIVATE
-      ${bitcoin_selector_SOURCES}
+      ${bitcoin_selector_objects_SOURCES}
   )
+
+  target_link_libraries( bitcoin-selector-objects
+    PRIVATE
+      bitcoin::system
+  )
+
+  file( CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/bitcoin-selector.cpp" CONTENT "" )
+  add_executable( bitcoin-selector "${CMAKE_CURRENT_BINARY_DIR}/bitcoin-selector.cpp" )
 
   target_link_libraries( bitcoin-selector
     PRIVATE
-      bitcoin::system
+      $<LINK_LIBRARY:WHOLE_ARCHIVE,bitcoin-selector-objects>
   )
 
   set_target_properties( bitcoin-selector

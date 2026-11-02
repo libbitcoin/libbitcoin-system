@@ -46,7 +46,7 @@ enum error_t
     error_last
 };
 
-DECLARE_ERROR_T_CODE_CATEGORY(error);
+DECLARE_ERROR_T_CODE_CATEGORY(error, BC_API);
 
 } // namespace error
 } // namespace system

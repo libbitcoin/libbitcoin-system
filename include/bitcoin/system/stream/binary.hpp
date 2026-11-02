@@ -60,10 +60,10 @@ private:
     data_chunk bytes_;
 };
 
-bool operator==(const binary& left, const binary& right) NOEXCEPT;
-bool operator!=(const binary& left, const binary& right) NOEXCEPT;
-std::istream& operator>>(std::istream& in, binary& to) NOEXCEPT;
-std::ostream& operator<<(std::ostream& out, const binary& of) NOEXCEPT;
+BC_API bool operator==(const binary& left, const binary& right) NOEXCEPT;
+BC_API bool operator!=(const binary& left, const binary& right) NOEXCEPT;
+BC_API std::istream& operator>>(std::istream& in, binary& to) NOEXCEPT;
+BC_API std::ostream& operator<<(std::ostream& out, const binary& of) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

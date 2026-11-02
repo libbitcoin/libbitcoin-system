@@ -25,8 +25,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Explicit template instantiation.
-template class aes_gcm<aes128>;
-template class aes_gcm<aes256>;
+template class BC_API aes_gcm<aes128>;
+template class BC_API aes_gcm<aes256>;
 
 } // namespace system
 } // namespace libbitcoin

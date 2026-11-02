@@ -132,8 +132,8 @@ class BC_API witness_address
     /// Operators.
     bool operator<(const witness_address& other) const NOEXCEPT;
 
-    friend std::istream& operator>>(std::istream& in, witness_address& to);
-    friend std::ostream& operator<<(std::ostream& out,
+    friend BC_API std::istream& operator>>(std::istream& in, witness_address& to);
+    friend BC_API std::ostream& operator<<(std::ostream& out,
         const witness_address& of) NOEXCEPT;
 
     /// Cast operators.

@@ -26,10 +26,10 @@ namespace system {
 namespace secp256k1 {
 
 /// Generator table slices, each computed at compile time.
-extern DEVICE const std_array<const uint64_t*, 16> generator_slices;
+extern BC_API DEVICE const std_array<const uint64_t*, 16> generator_slices;
 
 /// Comb table parts, each computed at compile time.
-extern DEVICE const std_array<const uint64_t*, 3> comb_parts;
+extern BC_API DEVICE const std_array<const uint64_t*, 3> comb_parts;
 
 } // namespace secp256k1
 } // namespace system
