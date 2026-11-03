@@ -43,6 +43,7 @@ enum block_error_t : uint8_t
     anachronistic_timestamp,
     incorrect_proof_of_work,
     early_timestamp,
+    negative_timespan,
 
     // confirm header
     orphan_block,

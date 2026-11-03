@@ -1344,9 +1344,49 @@ BC_AUTO_TEST_CASE(chain_state__get_map__no_retarget__unrequested)
     settings settings(selection::mainnet);
     settings.forks.difficult = false;
     settings.forks.retarget = false;
+    settings.forks.bip54_timespan = false;
     const auto map = chain_state::get_map(42, settings);
     BC_REQUIRE_EQUAL(map.bits.count, one);
     BC_REQUIRE_EQUAL(map.timestamp_retarget, chain_state::map::unrequested);
+}
+
+// bip54 requires the period's first timestamp without retargeting.
+BC_AUTO_TEST_CASE(chain_state__get_map__no_retarget_bip54_timespan__requested)
+{
+    settings settings(selection::mainnet);
+    settings.forks.difficult = false;
+    settings.forks.retarget = false;
+    settings.forks.bip54_timespan = true;
+    const auto map = chain_state::get_map(42, settings);
+    BC_REQUIRE_EQUAL(map.bits.count, one);
+    BC_REQUIRE_EQUAL(map.timestamp_retarget, 0u);
+}
+
+// Promotion from a retarget height carries that block's timestamp as the
+// retarget timestamp of the period, without retargeting.
+BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_from_retarget_height__retarget_timestamp)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    auto values = transition_values();
+    values.height = settings.retargeting_interval();
+    values.timestamp.retarget = 7;
+    const chain_state parent{ std::move(values), settings };
+    const chain_state state{ parent, transition_header(1100u), settings };
+    BC_REQUIRE_EQUAL(parent.retarget_timestamp(), 7u);
+    BC_REQUIRE_EQUAL(state.retarget_timestamp(), parent.timestamp());
+    BC_REQUIRE_EQUAL(state.context().retarget_timestamp, 1000u);
+}
+
+BC_AUTO_TEST_CASE(chain_state__context__retarget_timestamp__expected)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    auto values = transition_values();
+    values.timestamp.retarget = 7;
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE_EQUAL(state.retarget_timestamp(), 7u);
+    BC_REQUIRE_EQUAL(state.context().retarget_timestamp, 7u);
 }
 
 // properties

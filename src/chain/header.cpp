@@ -382,6 +382,8 @@ code header::accept(const context& ctx,
         return error::incorrect_proof_of_work;
     if (ctx.is_early_timestamp(retargeting_interval))
         return error::early_timestamp;
+    if (ctx.is_negative_timespan(retargeting_interval))
+        return error::negative_timespan;
 
     return error::block_success;
 }

@@ -89,6 +89,15 @@ BC_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_expected_me
     BC_REQUIRE_EQUAL(ec.message(), "proof of work does not match bits field");
 }
 
+BC_AUTO_TEST_CASE(block_error_t__code__negative_timespan__true_expected_message)
+{
+    constexpr auto value = error::negative_timespan;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "retarget timespan is negative");
+}
+
 BC_AUTO_TEST_CASE(block_error_t__code__early_timestamp__true_expected_message)
 {
     constexpr auto value = error::early_timestamp;

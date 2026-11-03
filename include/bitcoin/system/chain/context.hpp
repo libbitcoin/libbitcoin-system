@@ -68,6 +68,15 @@ public:
             && (timestamp < floored_subtract(previous_timestamp, limit));
     }
 
+    // The block's timestamp is before that of the first block of its period,
+    // on the last block of the period (bip54).
+    inline bool is_negative_timespan(uint32_t retargeting_interval) const NOEXCEPT
+    {
+        return is_enabled(chain::flags::bip54_timespan_rule)
+            && (height % retargeting_interval == sub1(retargeting_interval))
+            && (timestamp < retarget_timestamp);
+    }
+
     /// Header context within chain.
     uint32_t flags{};
     uint32_t timestamp{};
@@ -76,6 +85,7 @@ public:
     uint32_t minimum_block_version{};
     uint32_t work_required{};
     uint32_t previous_timestamp{};
+    uint32_t retarget_timestamp{};
 };
 
 BC_API bool operator==(const context& left, const context& right) NOEXCEPT;

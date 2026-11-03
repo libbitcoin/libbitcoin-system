@@ -62,7 +62,7 @@ public:
     };
 
     /// The number of bip9 deployments (settings).
-    static constexpr size_t deployment_count = 4;
+    static constexpr size_t deployment_count = 5;
 
     /// bip9 deployment parameters. A deployment is signaled if it is
     /// configured with a nonzero threshold, unless always active or buried.
@@ -278,6 +278,7 @@ public:
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
     uint32_t previous_timestamp() const NOEXCEPT;
+    uint32_t retarget_timestamp() const NOEXCEPT;
     uint32_t median_time_past() const NOEXCEPT;
     uint32_t flags() const NOEXCEPT;
     size_t height() const NOEXCEPT;

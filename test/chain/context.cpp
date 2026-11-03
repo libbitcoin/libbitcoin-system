@@ -61,6 +61,15 @@ BC_AUTO_TEST_CASE(context__is_anachronistic_timestamp__at_median__true)
     BC_REQUIRE(!instance.is_anachronistic_timestamp(101));
 }
 
+BC_AUTO_TEST_CASE(context__equality__retarget_timestamp__compared)
+{
+    const context left{ 0, 0, 0, 0, 0, 0, 0, 1 };
+    const context right{ 0, 0, 0, 0, 0, 0, 0, 2 };
+    const context same{ 0, 0, 0, 0, 0, 0, 0, 1 };
+    BC_REQUIRE(left != right);
+    BC_REQUIRE(left == same);
+}
+
 BC_AUTO_TEST_CASE(context__is_invalid_work__mismatch__true)
 {
     const context instance{ 0, 0, 0, 0, 0, 0x1d00ffff, 0 };
@@ -133,6 +142,38 @@ BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_and_patch__patch_limit)
     constexpr auto limit = possible_narrow_cast<uint32_t>(10000u - max_timewarp);
     const context instance{ flags::bip54_timewarp_rule | flags::time_warp_patch, sub1(limit), 0, 2016, 0, 0, 10000 };
     BC_REQUIRE(instance.is_early_timestamp(2016));
+}
+
+// is_negative_timespan
+// ----------------------------------------------------------------------------
+// bip54 requires the last block of a period at/after the period's first.
+
+BC_AUTO_TEST_CASE(context__is_negative_timespan__rule_disabled__false)
+{
+    const context instance{ flags::no_rules, 99, 0, 2015, 0, 0, 0, 100 };
+    BC_REQUIRE(!instance.is_negative_timespan(2016));
+}
+
+BC_AUTO_TEST_CASE(context__is_negative_timespan__not_last_height__false)
+{
+    const context instance{ flags::bip54_timespan_rule, 99, 0, 2014, 0, 0, 0, 100 };
+    BC_REQUIRE(!instance.is_negative_timespan(2016));
+    const context next{ flags::bip54_timespan_rule, 99, 0, 2016, 0, 0, 0, 100 };
+    BC_REQUIRE(!next.is_negative_timespan(2016));
+}
+
+BC_AUTO_TEST_CASE(context__is_negative_timespan__at_first__false)
+{
+    const context instance{ flags::bip54_timespan_rule, 100, 0, 2015, 0, 0, 0, 100 };
+    BC_REQUIRE(!instance.is_negative_timespan(2016));
+}
+
+BC_AUTO_TEST_CASE(context__is_negative_timespan__below_first__true)
+{
+    const context instance{ flags::bip54_timespan_rule, 99, 0, 2015, 0, 0, 0, 100 };
+    BC_REQUIRE(instance.is_negative_timespan(2016));
+    const context later{ flags::bip54_timespan_rule, 99, 0, 4031, 0, 0, 0, 100 };
+    BC_REQUIRE(later.is_negative_timespan(2016));
 }
 
 BC_AUTO_TEST_SUITE_END()

@@ -108,7 +108,8 @@ inline deployments_t deployments(const system::settings& settings) NOEXCEPT
         settings.bip9_bit0_deployment,
         settings.bip9_bit1_deployment,
         settings.bip9_bit2_deployment,
-        settings.bip54_timewarp_deployment
+        settings.bip54_timewarp_deployment,
+        settings.bip54_timespan_deployment
     };
 }
 
@@ -194,6 +195,8 @@ uint32_t chain_state::configured_flags(const forks& forks) NOEXCEPT
         result |= flags::bip342_rule;
     if (forks.bip54_timewarp)
         result |= flags::bip54_timewarp_rule;
+    if (forks.bip54_timespan)
+        result |= flags::bip54_timespan_rule;
 
     return result;
 }
@@ -484,7 +487,7 @@ size_t chain_state::timestamp_count(size_t height, const forks&) NOEXCEPT
 size_t chain_state::retarget_height(size_t height, const forks& forks,
     size_t retargeting_interval) NOEXCEPT
 {
-    if (!forks.retarget)
+    if (!forks.retarget && !forks.bip54_timespan)
         return map::unrequested;
 
     // Height must be a positive multiple of interval, so underflow safe.
@@ -897,10 +900,10 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     if (data.timestamp.ordered.size() > timestamp_count(height, forks))
         data.timestamp.ordered.pop_front();
 
-    // Regtest does not perform retargeting.
+    // Regtest does not retarget, but may require the timestamp for bip54.
     // If promoting from retarget height, move that timestamp into retarget.
-    if (forks.retarget && is_retarget_height(sub1(height),
-        settings.retargeting_interval()))
+    if ((forks.retarget || forks.bip54_timespan) &&
+        is_retarget_height(sub1(height), settings.retargeting_interval()))
     {
         // Conditionally patch time warp bug (e.g. Litecoin).
         data.timestamp.retarget = (forks.ltc_time_warp_patch && !is_one(height)) ?
@@ -1065,7 +1068,8 @@ chain::context chain_state::context() const NOEXCEPT
         possible_narrow_cast<uint32_t>(height()),
         minimum_block_version(),
         work_required(),
-        previous_timestamp()
+        previous_timestamp(),
+        retarget_timestamp()
     };
 }
 
@@ -1099,6 +1103,11 @@ uint32_t chain_state::timestamp() const NOEXCEPT
 uint32_t chain_state::previous_timestamp() const NOEXCEPT
 {
     return data_.timestamp.ordered.empty() ? 0 : timestamp_high(data_);
+}
+
+uint32_t chain_state::retarget_timestamp() const NOEXCEPT
+{
+    return data_.timestamp.retarget;
 }
 
 uint32_t chain_state::median_time_past() const NOEXCEPT

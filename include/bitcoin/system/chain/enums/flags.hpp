@@ -99,6 +99,9 @@ enum flags : uint32_t
     /// No retarget block more than two hours before its parent (soft fork, security).
     bip54_timewarp_rule = bit_right<uint32_t>(17),
 
+    /// No period-closing block before the period's first block (soft fork, security).
+    bip54_timespan_rule = bit_right<uint32_t>(18),
+
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 
