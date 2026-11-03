@@ -68,7 +68,7 @@ public:
     /// configured with a nonzero threshold, unless always active or buried.
     struct deployment
     {
-        /// A start of this value is active from genesis, without signaling.
+        /// A start of this value is active above genesis, without signaling.
         static constexpr uint32_t always_active = max_uint32;
 
         /// Version bit offset signaled.

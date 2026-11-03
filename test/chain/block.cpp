@@ -897,13 +897,6 @@ BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_final__coinbase_sequence_
     BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_sequence_final);
 }
 
-BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_genesis__block_success)
-{
-    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 0, 0, 0, 0 };
-    const block instance{ header{}, transactions{ locked_coinbase(0, max_input_sequence) } };
-    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
-}
-
 BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_off__block_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };

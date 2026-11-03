@@ -387,7 +387,7 @@ chain_state::activations chain_state::activation(const data& values,
         result.flags |= flags::bip342_rule;
     }
 
-    // Signaled deployments are enforced once active, others if always active.
+    // Signaled deployments are enforced once active, always above genesis.
     const auto list = deployments(settings);
     for (size_t index{}; index < list.size(); ++index)
     {
@@ -395,9 +395,10 @@ chain_state::activations chain_state::activation(const data& values,
         if (!is_configured(deployment, configured))
             continue;
 
+        const auto always = deployment.start == deployment::always_active;
         if (is_signaled(deployment, settings, configured) ?
             values.signals.at(index).state == deployment_state::active :
-            deployment.start == deployment::always_active)
+            always && !is_zero(height))
             result.flags |= deployment.flags;
     }
 
