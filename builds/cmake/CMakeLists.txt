@@ -838,6 +838,14 @@ if ( with-console )
     file( GLOB bitcoin_selector_RESOURCES CONFIGURE_DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/../../builds/msvc/*.rc" )
     target_sources( bitcoin-selector PRIVATE ${bitcoin_selector_RESOURCES} )
+    target_include_directories( bitcoin-selector
+      PRIVATE
+        $<TARGET_PROPERTY:bitcoin-selector-objects,INCLUDE_DIRECTORIES>
+    )
+    target_compile_options( bitcoin-selector
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:RC>:-c65001>
+    )
   endif()
 
   target_link_libraries( bitcoin-selector

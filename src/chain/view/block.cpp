@@ -509,8 +509,7 @@ code block::check(const context& ctx, const script& challenge) const NOEXCEPT
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip54_txsize = ctx.is_enabled(bip54_txsize_rule);
-    const auto bip54_coinbase = ctx.is_enabled(bip54_coinbase_rule) &&
-        !is_zero(ctx.height);
+    const auto bip54_coinbase = ctx.is_enabled(bip54_coinbase_rule);
     const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())

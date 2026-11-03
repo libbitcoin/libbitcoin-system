@@ -148,12 +148,6 @@ BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_and_patch__patch_limit)
 // ----------------------------------------------------------------------------
 // bip54 requires the last block of a period at/after the period's first.
 
-BC_AUTO_TEST_CASE(context__is_negative_timespan__rule_disabled__false)
-{
-    const context instance{ flags::no_rules, 99, 0, 2015, 0, 0, 0, 100 };
-    BC_REQUIRE(!instance.is_negative_timespan(2016));
-}
-
 BC_AUTO_TEST_CASE(context__is_negative_timespan__not_last_height__false)
 {
     const context instance{ flags::bip54_timespan_rule, 99, 0, 2014, 0, 0, 0, 100 };

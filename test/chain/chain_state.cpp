@@ -469,9 +469,19 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active__bip68_rule)
     settings.forks.bip90 = false;
     settings.forks.retarget = false;
     settings.bip9_bit0_deployment.start = chain_state::deployment::always_active;
-    const chain_state state{ chain_state::data{}, settings };
+    const chain_state state{ signaled_values(1), settings };
     BC_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
     BC_REQUIRE(!to_bool(state.flags() & flags::bip141_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active_genesis__no_bip68_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    settings.bip9_bit0_deployment.start = chain_state::deployment::always_active;
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip68_rule));
 }
 
 BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active_unconfigured__no_bip68_rule)
@@ -491,8 +501,15 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active_unconfigured_
 BC_AUTO_TEST_CASE(chain_state__activation__regtest__bip54_rules)
 {
     const settings settings(selection::regtest);
-    const chain_state state{ chain_state::data{}, settings };
+    const chain_state state{ signaled_values(1), settings };
     BC_REQUIRE(to_bool(state.flags() & flags::bip54_timewarp_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__regtest_genesis__no_bip54_rules)
+{
+    const settings settings(selection::regtest);
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip54_timewarp_rule));
 }
 
 BC_AUTO_TEST_CASE(chain_state__activation__mainnet__no_bip54_rules)
