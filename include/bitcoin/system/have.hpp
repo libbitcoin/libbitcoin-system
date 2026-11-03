@@ -67,6 +67,9 @@
 #if defined(_MSVC_STL_VERSION)
     #define HAVE_MSVC_STL
 #endif
+#if defined(_LIBCPP_VERSION)
+    #define HAVE_LIBCPP
+#endif
 
 /// Determines linker defines (Windows vs. Unix/Linux).
 #if defined(_MSC_VER) && !defined(WITH_PTX)
