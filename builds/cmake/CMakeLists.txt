@@ -834,6 +834,12 @@ if ( with-console )
   file( CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/bitcoin-selector.cpp" CONTENT "" )
   add_executable( bitcoin-selector "${CMAKE_CURRENT_BINARY_DIR}/bitcoin-selector.cpp" )
 
+  if ( WIN32 )
+    file( GLOB bitcoin_selector_RESOURCES CONFIGURE_DEPENDS
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../builds/msvc/*.rc" )
+    target_sources( bitcoin-selector PRIVATE ${bitcoin_selector_RESOURCES} )
+  endif()
+
   target_link_libraries( bitcoin-selector
     PRIVATE
       $<LINK_LIBRARY:WHOLE_ARCHIVE,bitcoin-selector-objects>
