@@ -842,10 +842,6 @@ if ( with-console )
       PRIVATE
         $<TARGET_PROPERTY:bitcoin-selector-objects,INCLUDE_DIRECTORIES>
     )
-    target_compile_options( bitcoin-selector
-      PRIVATE
-        $<$<COMPILE_LANGUAGE:RC>:-c65001>
-    )
   endif()
 
   target_link_libraries( bitcoin-selector
