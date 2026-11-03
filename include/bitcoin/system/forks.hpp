@@ -63,6 +63,7 @@ struct forks
     bool bip54_timewarp;
     bool bip54_timespan;
     bool bip54_sigops;
+    bool bip54_txsize;
 
     /// Regtest does not retarget.
     bool retarget;

@@ -751,6 +751,24 @@ BC_AUTO_TEST_CASE(block_view__check_context__coinbase_height_bip34__coinbase_hei
     BC_REQUIRE_EQUAL(view.check(ctx), error::coinbase_height_mismatch);
 }
 
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_txsize_64_bytes__invalid_transaction_size)
+{
+    const context ctx{ flags::bip54_txsize_rule, 0, 0, 100, 0, 0, 0 };
+    const transaction tx64{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff010000000000000000040051525400000000"), true };
+    chain::view::block view{ view_block_data({ view_coinbase(), tx64 }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data({ { 1, script{} } })), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::invalid_transaction_size);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_txsize_65_bytes__not_invalid_transaction_size)
+{
+    const context ctx{ flags::bip54_txsize_rule, 0, 0, 100, 0, 0, 0 };
+    const transaction tx65{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff01000000000000000005005152545800000000"), true };
+    chain::view::block view{ view_block_data({ view_coinbase(), tx65 }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data({ { 1, script{} } })), error::block_success);
+    BC_REQUIRE_NE(view.check(ctx), error::invalid_transaction_size);
+}
+
 BC_AUTO_TEST_CASE(block_view__check_context__absolute_locked__absolute_time_locked)
 {
     const auto tx1 = transaction{ 1, inputs{ input{ point{ one_hash, 0 }, script{}, 0 } }, outputs{ output{ 42, script{} } }, 200 };

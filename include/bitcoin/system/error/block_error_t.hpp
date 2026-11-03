@@ -67,6 +67,7 @@ enum block_error_t : uint8_t
     invalid_witness_commitment,
     block_weight_limit,
     invalid_signet_solution,
+    invalid_transaction_size,
 
     // connect block
     invalid_signature,

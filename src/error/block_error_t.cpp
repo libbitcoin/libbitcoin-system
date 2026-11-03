@@ -63,6 +63,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { invalid_witness_commitment, "invalid witness commitment" },
     { block_weight_limit, "block weight limit exceeded" },
     { invalid_signet_solution, "invalid signet block solution" },
+    { invalid_transaction_size, "invalid transaction size" },
 
     // connect block
     { invalid_signature, "invalid batched signature" },

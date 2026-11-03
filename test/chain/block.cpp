@@ -83,6 +83,7 @@ public:
     using block::is_invalid_merkle_root;
     using block::is_overweight;
     using block::is_invalid_coinbase_script;
+    using block::is_invalid_transaction_size;
     using block::is_invalid_witness_commitment;
     using block::is_overspent;
     using block::is_signature_operations_limited;
@@ -794,6 +795,50 @@ BC_AUTO_TEST_CASE(block__is_invalid_coinbase_script__mismatched_height__true)
     const script coinbase_script{ operations{ operation{ data_chunk{ 0x64 }, true } } };
     const accessor instance{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
     BC_REQUIRE(instance.is_invalid_coinbase_script(101));
+}
+
+// bip54 test vectors (txsize.json).
+static const transaction tx63{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff0100000000000000000300515200000000"), true };
+static const transaction tx64{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff010000000000000000040051525400000000"), true };
+static const transaction tx65{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff01000000000000000005005152545800000000"), true };
+static const transaction tx64_witnessed{ base16_chunk("02000000000101827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff01000000000000000004005152540108213245576281941200000000"), true };
+
+BC_AUTO_TEST_CASE(block__is_invalid_transaction_size__63_and_65_bytes__false)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), tx63, tx65 } };
+    BC_REQUIRE_EQUAL(tx63.serialized_size(false), 63u);
+    BC_REQUIRE_EQUAL(tx65.serialized_size(false), 65u);
+    BC_REQUIRE(!instance.is_invalid_transaction_size());
+}
+
+BC_AUTO_TEST_CASE(block__is_invalid_transaction_size__64_bytes__true)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), tx64 } };
+    BC_REQUIRE_EQUAL(tx64.serialized_size(false), invalid_transaction_size);
+    BC_REQUIRE(instance.is_invalid_transaction_size());
+}
+
+// The witness is excluded from the size.
+BC_AUTO_TEST_CASE(block__is_invalid_transaction_size__64_bytes_witnessed__true)
+{
+    const accessor instance{ header{}, transactions{ coinbase_transaction(0, script{}), tx64_witnessed } };
+    BC_REQUIRE_EQUAL(tx64_witnessed.serialized_size(false), invalid_transaction_size);
+    BC_REQUIRE_GT(tx64_witnessed.serialized_size(true), invalid_transaction_size);
+    BC_REQUIRE(instance.is_invalid_transaction_size());
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_txsize_on__invalid_transaction_size)
+{
+    const context ctx{ flags::bip54_txsize_rule, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, script{}), tx64 } };
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::invalid_transaction_size);
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_txsize_off__not_invalid_transaction_size)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{ coinbase_transaction(0, script{}), tx64 } };
+    BC_REQUIRE_NE(instance.check(ctx, false), error::invalid_transaction_size);
 }
 
 BC_AUTO_TEST_CASE(block__is_oversized__megabyte_script__true)

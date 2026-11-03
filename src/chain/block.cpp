@@ -519,6 +519,17 @@ bool block::is_invalid_coinbase_script(size_t height) const NOEXCEPT
     return !script::is_coinbase_pattern(script.ops(), height);
 }
 
+// A transaction of two merkle leaves size is indistinguishable from a node.
+bool block::is_invalid_transaction_size() const NOEXCEPT
+{
+    const auto invalid = [](const auto& tx) NOEXCEPT
+    {
+        return tx->serialized_size(false) == invalid_transaction_size;
+    };
+
+    return std::any_of(txs_->cbegin(), txs_->cend(), invalid);
+}
+
 // Malleability does not imply malleated.
 bool block::is_malleable() const NOEXCEPT
 {
@@ -1002,12 +1013,15 @@ code block::check(const context& ctx, bool identity,
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
+    const auto bip54 = ctx.is_enabled(bip54_txsize_rule);
     const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
     if (bip34 && is_invalid_coinbase_script(ctx.height))
         return error::coinbase_height_mismatch;
+    if (bip54 && is_invalid_transaction_size())
+        return error::invalid_transaction_size;
     if (bip141 && identity && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
     if (signet && is_invalid_signet_solution(challenge))

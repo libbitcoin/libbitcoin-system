@@ -105,6 +105,9 @@ enum flags : uint32_t
     /// Limit accurate legacy sigops of each transaction's inputs (soft fork, security).
     bip54_sigops_rule = bit_right<uint32_t>(19),
 
+    /// No transaction of 64 bytes witness-stripped (soft fork, security).
+    bip54_txsize_rule = bit_right<uint32_t>(20),
+
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 
