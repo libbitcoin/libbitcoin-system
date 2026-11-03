@@ -71,12 +71,28 @@
   <!-- clang-cl enables x86 intrinsics by target feature, as gcc/clang, where msvc uses the WITH_ options. -->
   <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'Win32')">
     <ClCompile>
-      <AdditionalOptions Condition="'$(Option-sha)' == 'true'">-msse4.1 -msha %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-shani)' == 'true'">-msse4.1 -msha %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Option-sha512)' == 'true'">-mavx2 -msha512 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Option-avx512ifma)' == 'true'">-mavx512ifma -mavx512vl %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Option-avxifma)' == 'true'">-mavxifma %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Option-aesni)' == 'true'">-msse4.1 -maes -mpclmul %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Option-vaes)' == 'true'">-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- clang-cl enables arm intrinsics by one -march of all extensions, as gcc/clang, where msvc uses the WITH_ options. -->
+  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And '$(Platform)' == 'ARM64'">
+    <ClCompile>
+      <ArmBase Condition="'$(Option-sha2)' == 'true' Or '$(Option-aes)' == 'true'">armv8-a</ArmBase>
+      <ArmBase Condition="'$(Option-sha3)' == 'true'">armv8.2-a</ArmBase>
+      <ArmExtensions Condition="'$(Option-sha2)' == 'true'">%(ArmExtensions)+sha2</ArmExtensions>
+      <ArmExtensions Condition="'$(Option-aes)' == 'true'">%(ArmExtensions)+aes</ArmExtensions>
+      <ArmExtensions Condition="'$(Option-sha3)' == 'true'">%(ArmExtensions)+sha3</ArmExtensions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And '$(Platform)' == 'ARM64' And ('$(Option-sha2)' == 'true' Or '$(Option-aes)' == 'true' Or '$(Option-sha3)' == 'true')">
+    <ClCompile>
+      <AdditionalOptions>-march=%(ArmBase)%(ArmExtensions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
 

@@ -254,14 +254,14 @@ AC_ARG_ENABLE([sse41],
 AC_MSG_RESULT([$enable_sse41])
 AM_CONDITIONAL([ENABLE_SSE41], [test "x${enable_sse41}" != "xno"])
 
-AC_MSG_CHECKING([--enable-sha option])
-AC_ARG_ENABLE([sha],
-    AS_HELP_STRING([--enable-sha],
+AC_MSG_CHECKING([--enable-sha2 option])
+AC_ARG_ENABLE([sha2],
+    AS_HELP_STRING([--enable-sha2],
         [Use ARM SHA1/SHA256 Extensions. @<:@default=no@:>@]),
-    [enable_sha=$enableval],
-    [enable_sha=no])
-AC_MSG_RESULT([$enable_sha])
-AM_CONDITIONAL([ENABLE_SHA], [test "x${enable_sha}" != "xno"])
+    [enable_sha2=$enableval],
+    [enable_sha2=no])
+AC_MSG_RESULT([$enable_sha2])
+AM_CONDITIONAL([ENABLE_SHA2], [test "x${enable_sha2}" != "xno"])
 
 AC_MSG_CHECKING([--enable-sha3 option])
 AC_ARG_ENABLE([sha3],
@@ -749,6 +749,25 @@ AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
 
 # Check architecture.
 #==============================================================================
+arm_base=""
+arm_extensions=""
+AS_IF([test "x${enable_aes}" != "xno"],
+  [ arm_base="armv8-a"; arm_extensions="${arm_extensions}+aes"; ])
+AS_IF([test "x${enable_sha2}" != "xno"],
+  [ arm_base="armv8-a"; arm_extensions="${arm_extensions}+sha2"; ])
+AS_IF([test "x${enable_sha3}" != "xno"],
+  [ arm_base="armv8.2-a"; arm_extensions="${arm_extensions}+sha3"; ])
+
+AS_IF([test "x${arm_extensions}" != "x"],
+  [
+    AS_CASE(["${CFLAGS} ${CXXFLAGS}"],
+      [*-march=*|*-mcpu=*],
+      [ AC_MSG_ERROR([Compiler flags -march or -mcpu conflict with enabled ARM extension options.]) ])
+    CFLAGS="${CFLAGS} -march=${arm_base}${arm_extensions}";
+    CXXFLAGS="${CXXFLAGS} -march=${arm_base}${arm_extensions}";
+    AC_SUBST([arm_march], ["-march=${arm_base}${arm_extensions}"])
+  ])
+
 AC_COMPILE_IFELSE(
   [
     AC_LANG_PROGRAM(
@@ -785,18 +804,18 @@ AC_COMPILE_IFELSE(
         return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
       ]])
   ],
-  [ TEST_COMPILES_SHA="yes"; ],
-  [ TEST_COMPILES_SHA="no"; ])
+  [ TEST_COMPILES_SHA2="yes"; ],
+  [ TEST_COMPILES_SHA2="no"; ])
 
-AS_IF([test "x${enable_sha}" != "xno"],
+AS_IF([test "x${enable_sha2}" != "xno"],
   [
-    AS_IF([test "x${TEST_COMPILES_SHA}" != "xno"],
-      [ AC_MSG_WARN(Detected 'sha'.) ],
-      [ AC_MSG_ERROR(Expected feature not detected 'sha') ])
+    AS_IF([test "x${TEST_COMPILES_SHA2}" != "xno"],
+      [ AC_MSG_WARN(Detected 'sha2'.) ],
+      [ AC_MSG_ERROR(Expected feature not detected 'sha2') ])
   ],[
-    AS_IF([test "x${TEST_COMPILES_SHA}" != "xno"],
-      [ AC_MSG_WARN(Environment enabling option 'sha'.) ],
-      [ AC_MSG_WARN(Unexpected feature not detected 'sha') ])
+    AS_IF([test "x${TEST_COMPILES_SHA2}" != "xno"],
+      [ AC_MSG_WARN(Environment enabling option 'sha2'.) ],
+      [ AC_MSG_WARN(Unexpected feature not detected 'sha2') ])
 ])
 
 AC_COMPILE_IFELSE(

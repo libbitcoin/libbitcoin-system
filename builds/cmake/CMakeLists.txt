@@ -118,7 +118,7 @@ option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
 option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
-option( enable-sha "Use ARM SHA1/SHA256 Extensions." OFF )
+option( enable-sha2 "Use ARM SHA1/SHA256 Extensions." OFF )
 option( enable-sha3 "Use ARM SHA3 Extensions for SHA512." OFF )
 option( enable-aes "Use ARM AES and PMULL Extensions." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
@@ -144,6 +144,33 @@ endif()
 #------------------------------------------------------------------------------
 # Architecture options.
 #------------------------------------------------------------------------------
+set( arm_base "" )
+set( arm_extensions "" )
+if ( NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
+  if ( enable-aes )
+    set( arm_base "armv8-a" )
+    string( APPEND arm_extensions "+aes" )
+  endif()
+  if ( enable-sha2 )
+    set( arm_base "armv8-a" )
+    string( APPEND arm_extensions "+sha2" )
+  endif()
+  if ( enable-sha3 )
+    set( arm_base "armv8.2-a" )
+    string( APPEND arm_extensions "+sha3" )
+  endif()
+endif()
+
+set( arm_march "" )
+if ( arm_extensions )
+  if ( "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}" MATCHES "-march=|-mcpu=" )
+    message( FATAL_ERROR "Compiler flags -march or -mcpu conflict with enabled ARM extension options." )
+  endif()
+
+  set( arm_march "-march=${arm_base}${arm_extensions}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${arm_march}" )
+endif()
+
 check_cxx_source_compiles( "
   #include <arm_neon.h>
     int main() {
@@ -169,19 +196,19 @@ check_cxx_source_compiles( "
     int main() {
     uint32x4_t a = vdupq_n_u32(0);
     return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-    }" TEST_COMPILES_SHA )
+    }" TEST_COMPILES_SHA2 )
 
-if ( enable-sha )
-  if ( TEST_COMPILES_SHA )
-    message( WARNING "Detected 'sha'" )
+if ( enable-sha2 )
+  if ( TEST_COMPILES_SHA2 )
+    message( WARNING "Detected 'sha2'" )
   else()
-    message( FATAL_ERROR "Expected feature not detected 'sha'" )
+    message( FATAL_ERROR "Expected feature not detected 'sha2'" )
   endif()
 else()
-  if ( TEST_COMPILES_SHA )
-    message( WARNING "Environment enabling option 'sha'" )
+  if ( TEST_COMPILES_SHA2 )
+    message( WARNING "Environment enabling option 'sha2'" )
   else()
-    message( WARNING "Unexpected feature not detected 'sha'" )
+    message( WARNING "Unexpected feature not detected 'sha2'" )
   endif()
 endif()
 check_cxx_source_compiles( "
@@ -536,40 +563,12 @@ if ( NOT MSVC )
   endif()
 else()
 
-  if ( enable-avx2 )
-    message( FATAL_ERROR "Option 'enable-avx2' is not supported with the MSVC frontend." )
-  endif()
-
   if ( enable-avx512 )
-    message( FATAL_ERROR "Option 'enable-avx512' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-avx512ifma )
-    message( FATAL_ERROR "Option 'enable-avx512ifma' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-avxifma )
-    message( FATAL_ERROR "Option 'enable-avxifma' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-shani )
-    message( FATAL_ERROR "Option 'enable-shani' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-sha512 )
-    message( FATAL_ERROR "Option 'enable-sha512' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-sse41 )
-    message( FATAL_ERROR "Option 'enable-sse41' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-aesni )
-    message( FATAL_ERROR "Option 'enable-aesni' is not supported with the MSVC frontend." )
-  endif()
-
-  if ( enable-vaes )
-    message( FATAL_ERROR "Option 'enable-vaes' is not supported with the MSVC frontend." )
+    set( msvc_arch "AVX512" )
+  elseif ( enable-avx2 )
+    set( msvc_arch "AVX2" )
+  elseif ( enable-sse41 )
+    set( msvc_arch "AVX" )
   endif()
 endif()
 
@@ -630,6 +629,40 @@ if ( NOT MSVC )
       $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
   )
 endif()
+
+if ( MSVC )
+  target_compile_options( libbitcoin-system
+    PUBLIC
+      $<$<BOOL:${msvc_arch}>:/arch:${msvc_arch}>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avx2}>:-mavx -mavx2>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw -mavx512vl>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avxifma}>:-mavxifma>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-shani}>:-msse4 -msha>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-sha512}>:-mavx2 -msha512>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-sse41}>:-msse4.1>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-aesni}>:-msse4.1 -maes -mpclmul>>
+      $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-vaes}>:-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq>>
+  )
+
+  target_compile_definitions( libbitcoin-system
+    PUBLIC
+      $<$<BOOL:${enable-aes}>:WITH_AES>
+      $<$<BOOL:${enable-sha2}>:WITH_SHA2>
+      $<$<BOOL:${enable-sha3}>:WITH_SHA3>
+      $<$<BOOL:${enable-avx512ifma}>:WITH_AVX512IFMA>
+      $<$<BOOL:${enable-avxifma}>:WITH_AVXIFMA>
+      $<$<BOOL:${enable-shani}>:WITH_SHANI>
+      $<$<BOOL:${enable-sha512}>:WITH_SHA512>
+      $<$<BOOL:${enable-aesni}>:WITH_AESNI>
+      $<$<BOOL:${enable-vaes}>:WITH_VAES>
+  )
+endif()
+
+target_compile_options( libbitcoin-system
+  PUBLIC
+    $<$<BOOL:${arm_march}>:${arm_march}>
+)
 
 target_compile_definitions( libbitcoin-system
   PRIVATE

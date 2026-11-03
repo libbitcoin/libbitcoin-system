@@ -26,7 +26,7 @@
 #                                Default: OFF
 # -Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions.
 #                                Default: OFF
-# -Denable-sha=<ON/OFF>        Use ARM SHA1/SHA256 Extensions.
+# -Denable-sha2=<ON/OFF>       Use ARM SHA1/SHA256 Extensions.
 #                                Default: OFF
 # -Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512.
 #                                Default: OFF
@@ -891,7 +891,7 @@ help()
     msg "                               Default: OFF"
     msg "-Denable-sse41=<ON/OFF>      Use SSE4.1 hardware instructions."
     msg "                               Default: OFF"
-    msg "-Denable-sha=<ON/OFF>        Use ARM SHA1/SHA256 Extensions."
+    msg "-Denable-sha2=<ON/OFF>       Use ARM SHA1/SHA256 Extensions."
     msg "                               Default: OFF"
     msg "-Denable-sha3=<ON/OFF>       Use ARM SHA3 Extensions for SHA512."
     msg "                               Default: OFF"

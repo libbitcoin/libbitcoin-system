@@ -17,12 +17,15 @@
   <!-- These will compile to the target regardless of the compiling platform. -->
   <!-- That will result in a crash of test/executable execution if mismatched. -->
   <PropertyGroup>
-    <Option-sha Condition="'$(Option-sha)' == ''">false</Option-sha>
+    <Option-shani Condition="'$(Option-shani)' == ''">false</Option-shani>
     <Option-sha512 Condition="'$(Option-sha512)' == ''">false</Option-sha512>
     <Option-avx512ifma Condition="'$(Option-avx512ifma)' == ''">false</Option-avx512ifma>
     <Option-avxifma Condition="'$(Option-avxifma)' == ''">false</Option-avxifma>
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
+    <Option-sha2 Condition="'$(Option-sha2)' == ''">false</Option-sha2>
+    <Option-sha3 Condition="'$(Option-sha3)' == ''">false</Option-sha3>
+    <Option-aes Condition="'$(Option-aes)' == ''">false</Option-aes>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
   </PropertyGroup>
 
@@ -36,12 +39,15 @@
   <!-- Messages -->
 
   <Target Name="SystemOptionInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Option-sha        : $(Option-sha)" Importance="high"/>
+    <Message Text="Option-shani      : $(Option-shani)" Importance="high"/>
     <Message Text="Option-sha512     : $(Option-sha512)" Importance="high"/>
     <Message Text="Option-avx512ifma : $(Option-avx512ifma)" Importance="high"/>
     <Message Text="Option-avxifma    : $(Option-avxifma)" Importance="high"/>
     <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
     <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
+    <Message Text="Option-sha2       : $(Option-sha2)" Importance="high"/>
+    <Message Text="Option-sha3       : $(Option-sha3)" Importance="high"/>
+    <Message Text="Option-aes        : $(Option-aes)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
   </Target>
 
@@ -58,12 +64,15 @@
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-system)' == 'static' Or '$(Linkage-libbitcoin-system)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Debug')) != -1">_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- Enable use of CPU intrinsics. -->
-      <PreprocessorDefinitions Condition="'$(Option-sha)' == 'true'">WITH_SHA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-shani)' == 'true'">WITH_SHANI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-sha512)' == 'true'">WITH_SHA512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-avx512ifma)' == 'true'">WITH_AVX512IFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-avxifma)' == 'true'">WITH_AVXIFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sha2)' == 'true'">WITH_SHA2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sha3)' == 'true'">WITH_SHA3;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-aes)' == 'true'">WITH_AES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>    
     <Link>
       <!-- 4099: warns about missing PDB files. -->

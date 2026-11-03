@@ -43,7 +43,7 @@ constexpr std::array features
 
     // Arm
     feature{ "aes",        &try_neon_aes<> },
-    feature{ "sha",        &try_neon_sha<> },
+    feature{ "sha2",       &try_neon_sha2<> },
     feature{ "sha3",       &try_neon_sha3<> },
     feature{ "neon",       &try_neon<> }
 };

@@ -101,27 +101,15 @@
 /// WITH_ build symbols.
 /// ---------------------------------------------------------------------------
 
-/// vc++: There are no flags for SHANI/CRYPTO, so use custom WITH_SHA option.
-#if defined(HAVE_MSC) && defined(WITH_SHA)
-    #if defined(HAVE_XCPU)
-        #define __SHA__
-    #elif defined(HAVE_ARM)
-        #define __ARM_FEATURE_CRYPTO
-    #endif
-#endif
-
-/// vc++: There are no flags for SHA512/SHA3, so use custom WITH_SHA512 option.
-#if defined(HAVE_MSC) && defined(WITH_SHA512)
-    #if defined(HAVE_XCPU)
-        #define __SHA512__
-    #elif defined(HAVE_ARM)
-        #define __ARM_FEATURE_SHA512
-    #endif
-#endif
-
-/// vc++: There are no flags for AVX512IFMA, AVXIFMA, AES-NI and VAES, so use
-/// custom WITH_AVX512IFMA, WITH_AVXIFMA, WITH_AESNI and WITH_VAES options.
+/// vc++: There are no flags for SHANI, SHA512, AVX512IFMA, AVXIFMA, AES-NI and
+/// VAES, so use custom WITH_ options.
 #if defined(HAVE_MSC) && defined(HAVE_XCPU)
+    #if defined(WITH_SHANI)
+        #define __SHA__
+    #endif
+    #if defined(WITH_SHA512)
+        #define __SHA512__
+    #endif
     #if defined(WITH_AVX512IFMA)
         #define __AVX512IFMA__
     #endif
@@ -135,6 +123,19 @@
     #if defined(WITH_VAES)
         #define __VAES__
         #define __VPCLMULQDQ__
+    #endif
+#endif
+
+/// vc++: There are no flags for SHA2, SHA3 and AES, so use custom WITH_ options.
+#if defined(HAVE_MSC) && defined(HAVE_ARM)
+    #if defined(WITH_SHA2)
+        #define __ARM_FEATURE_SHA2
+    #endif
+    #if defined(WITH_SHA3)
+        #define __ARM_FEATURE_SHA512
+    #endif
+    #if defined(WITH_AES)
+        #define __ARM_FEATURE_AES
     #endif
 #endif
 

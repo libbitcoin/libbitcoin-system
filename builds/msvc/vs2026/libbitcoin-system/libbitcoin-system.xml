@@ -2,23 +2,26 @@
 <ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
   <Rule Name="libbitcoin-system-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
     <Rule.Categories>
-      <Category Name="sha" DisplayName="sha" />
+      <Category Name="shani" DisplayName="shani" />
       <Category Name="sha512" DisplayName="sha512" />
       <Category Name="arch" DisplayName="arch" />
       <Category Name="avx512ifma" DisplayName="avx512ifma" />
       <Category Name="avxifma" DisplayName="avxifma" />
       <Category Name="aesni" DisplayName="aesni" />
       <Category Name="vaes" DisplayName="vaes" />
+      <Category Name="sha2" DisplayName="sha2" />
+      <Category Name="sha3" DisplayName="sha3" />
+      <Category Name="aes" DisplayName="aes" />
       <Category Name="cuda" DisplayName="cuda" />
     </Rule.Categories>
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
     </Rule.DataSource>
-    <EnumProperty Name="Option-sha512" DisplayName="Enable SHA512 Native Hashing" Description="Requires SHA512 (xcpu) or SHA3 (arm) CPU." Category="sha512">
+    <EnumProperty Name="Option-sha512" DisplayName="Enable SHA512 Native Hashing" Description="Requires SHA512 (xcpu) CPU." Category="sha512">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
-    <EnumProperty Name="Option-sha" DisplayName="Enable SHA Native Hashing" Description="Requires SHANI (xcpu) or Neon (arm) CPU." Category="sha">
+    <EnumProperty Name="Option-shani" DisplayName="Enable SHA-NI Native Hashing" Description="Requires SHANI (xcpu) CPU." Category="shani">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
@@ -41,6 +44,18 @@
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
     <EnumProperty Name="Option-vaes" DisplayName="Enable VAES Encryption" Description="Requires VAES, VPCLMULQDQ and AVX2 (xcpu) CPU." Category="vaes">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-sha2" DisplayName="Enable SHA2 Native Hashing" Description="Requires SHA2 (arm) CPU." Category="sha2">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-sha3" DisplayName="Enable SHA3 Native Hashing" Description="Requires SHA3 (arm) CPU." Category="sha3">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-aes" DisplayName="Enable AES Encryption" Description="Requires AES and PMULL (arm) CPU." Category="aes">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
