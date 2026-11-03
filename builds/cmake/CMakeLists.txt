@@ -842,6 +842,10 @@ if ( with-console )
       PRIVATE
         $<TARGET_PROPERTY:bitcoin-selector-objects,INCLUDE_DIRECTORIES>
     )
+
+    if ( MSVC )
+      target_link_options( bitcoin-selector PRIVATE /MANIFEST:NO )
+    endif()
   endif()
 
   target_link_libraries( bitcoin-selector

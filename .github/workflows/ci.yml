@@ -104,7 +104,7 @@ jobs:
             link: "static"
             cc: "gcc-13"
             cxx: "g++-13"
-            flags: "--coverage -fprofile-update=atomic"
+            flags: "--coverage -fprofile-update=atomic -fno-inline"
             coverage: "lcov"
             secp256k1: ""
             options: "--enable-isystem"
