@@ -108,6 +108,9 @@ enum flags : uint32_t
     /// No transaction of 64 bytes witness-stripped (soft fork, security).
     bip54_txsize_rule = bit_right<uint32_t>(20),
 
+    /// Coinbase locktime is the parent height and sequence is not final (soft fork, deflation).
+    bip54_coinbase_rule = bit_right<uint32_t>(21),
+
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 

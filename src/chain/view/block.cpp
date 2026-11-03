@@ -508,15 +508,21 @@ code block::check(const context& ctx, const script& challenge) const NOEXCEPT
     BC_ASSERT(is_populated());
     const auto bip141 = ctx.is_enabled(bip141_rule);
     const auto bip34 = ctx.is_enabled(bip34_rule);
-    const auto bip54 = ctx.is_enabled(bip54_txsize_rule);
+    const auto bip54_txsize = ctx.is_enabled(bip54_txsize_rule);
+    const auto bip54_coinbase = ctx.is_enabled(bip54_coinbase_rule) &&
+        !is_zero(ctx.height);
     const auto signet = ctx.is_enabled(signet_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
     if (bip34 && is_invalid_coinbase_script(ctx.height))
         return error::coinbase_height_mismatch;
-    if (bip54 && is_invalid_transaction_size())
+    if (bip54_txsize && is_invalid_transaction_size())
         return error::invalid_transaction_size;
+    if (bip54_coinbase && is_invalid_coinbase_locktime(ctx.height))
+        return error::coinbase_locktime_mismatch;
+    if (bip54_coinbase && is_final_coinbase_sequence())
+        return error::coinbase_sequence_final;
     if (signet && is_invalid_signet_solution(challenge))
         return error::invalid_signet_solution;
 
@@ -616,6 +622,22 @@ bool block::is_invalid_coinbase_script(size_t height) const NOEXCEPT
 
     const auto& script = txs_.front().inputs_begin()->script();
     return !script::is_coinbase_pattern(script.ops(), height);
+}
+
+bool block::is_invalid_coinbase_locktime(size_t height) const NOEXCEPT
+{
+    if (txs_.empty())
+        return false;
+
+    return txs_.front().locktime() != sub1(height);
+}
+
+bool block::is_final_coinbase_sequence() const NOEXCEPT
+{
+    if (txs_.empty() || is_zero(txs_.front().inputs()))
+        return false;
+
+    return txs_.front().inputs_begin()->is_final();
 }
 
 bool block::is_invalid_transaction_size() const NOEXCEPT

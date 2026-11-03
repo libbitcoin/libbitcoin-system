@@ -111,7 +111,8 @@ inline deployments_t deployments(const system::settings& settings) NOEXCEPT
         settings.bip54_timewarp_deployment,
         settings.bip54_timespan_deployment,
         settings.bip54_sigops_deployment,
-        settings.bip54_txsize_deployment
+        settings.bip54_txsize_deployment,
+        settings.bip54_coinbase_deployment
     };
 }
 
@@ -203,6 +204,8 @@ uint32_t chain_state::configured_flags(const forks& forks) NOEXCEPT
         result |= flags::bip54_sigops_rule;
     if (forks.bip54_txsize)
         result |= flags::bip54_txsize_rule;
+    if (forks.bip54_coinbase)
+        result |= flags::bip54_coinbase_rule;
 
     return result;
 }

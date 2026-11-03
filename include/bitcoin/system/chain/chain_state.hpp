@@ -62,7 +62,7 @@ public:
     };
 
     /// The number of bip9 deployments (settings).
-    static constexpr size_t deployment_count = 7;
+    static constexpr size_t deployment_count = 8;
 
     /// bip9 deployment parameters. A deployment is signaled if it is
     /// configured with a nonzero threshold, unless always active or buried.

@@ -68,6 +68,8 @@ enum block_error_t : uint8_t
     block_weight_limit,
     invalid_signet_solution,
     invalid_transaction_size,
+    coinbase_locktime_mismatch,
+    coinbase_sequence_final,
 
     // connect block
     invalid_signature,

@@ -275,6 +275,24 @@ BC_AUTO_TEST_CASE(block_error_t__code__invalid_transaction_size__true_expected_m
     BC_REQUIRE_EQUAL(ec.message(), "invalid transaction size");
 }
 
+BC_AUTO_TEST_CASE(block_error_t__code__coinbase_locktime_mismatch__true_expected_message)
+{
+    constexpr auto value = error::coinbase_locktime_mismatch;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "coinbase locktime does not match height");
+}
+
+BC_AUTO_TEST_CASE(block_error_t__code__coinbase_sequence_final__true_expected_message)
+{
+    constexpr auto value = error::coinbase_sequence_final;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "coinbase sequence is final");
+}
+
 BC_AUTO_TEST_CASE(block_error_t__code__invalid_signature__true_expected_message)
 {
     constexpr auto value = error::invalid_signature;

@@ -191,6 +191,8 @@ protected:
     bool is_overweight() const NOEXCEPT;
     bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;
     bool is_invalid_transaction_size() const NOEXCEPT;
+    bool is_invalid_coinbase_locktime(size_t height) const NOEXCEPT;
+    bool is_final_coinbase_sequence() const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;
     bool is_invalid_signet_solution(const script& challenge) const NOEXCEPT;
 

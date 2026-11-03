@@ -769,6 +769,31 @@ BC_AUTO_TEST_CASE(block_view__check_context__bip54_txsize_65_bytes__not_invalid_
     BC_REQUIRE_NE(view.check(ctx), error::invalid_transaction_size);
 }
 
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_coinbase_zero_locktime__coinbase_locktime_mismatch)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    chain::view::block view{ view_block_data({ view_coinbase() }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::coinbase_locktime_mismatch);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_coinbase_final__coinbase_sequence_final)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 1, 0, 0, 0 };
+    chain::view::block view{ view_block_data({ view_coinbase() }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::coinbase_sequence_final);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_coinbase_locked__block_success)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    const transaction coinbase{ 1, inputs{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, 0 } }, outputs{ output{ initial_subsidy, script{} } }, 99 };
+    chain::view::block view{ view_block_data({ coinbase }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::block_success);
+}
+
 BC_AUTO_TEST_CASE(block_view__check_context__absolute_locked__absolute_time_locked)
 {
     const auto tx1 = transaction{ 1, inputs{ input{ point{ one_hash, 0 }, script{}, 0 } }, outputs{ output{ 42, script{} } }, 200 };

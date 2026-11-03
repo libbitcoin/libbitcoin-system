@@ -84,6 +84,8 @@ public:
     using block::is_overweight;
     using block::is_invalid_coinbase_script;
     using block::is_invalid_transaction_size;
+    using block::is_invalid_coinbase_locktime;
+    using block::is_final_coinbase_sequence;
     using block::is_invalid_witness_commitment;
     using block::is_overspent;
     using block::is_signature_operations_limited;
@@ -839,6 +841,74 @@ BC_AUTO_TEST_CASE(block__check_context__bip54_txsize_off__not_invalid_transactio
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
     const block instance{ header{}, transactions{ coinbase_transaction(0, script{}), tx64 } };
     BC_REQUIRE_NE(instance.check(ctx, false), error::invalid_transaction_size);
+}
+
+// bip54 requires the coinbase locktime to be the parent height and the
+// coinbase sequence to be non-final.
+static transaction locked_coinbase(uint32_t locktime, uint32_t sequence)
+{
+    const inputs ins{ input{ point{}, script{}, sequence } };
+    const outputs outs{ output{ 0, script{} } };
+    return transaction{ 1, ins, outs, locktime };
+}
+
+BC_AUTO_TEST_CASE(block__is_invalid_coinbase_locktime__parent_height__false)
+{
+    const accessor instance{ header{}, transactions{ locked_coinbase(99, 0) } };
+    BC_REQUIRE(!instance.is_invalid_coinbase_locktime(100));
+}
+
+BC_AUTO_TEST_CASE(block__is_invalid_coinbase_locktime__own_height__true)
+{
+    const accessor instance{ header{}, transactions{ locked_coinbase(100, 0) } };
+    BC_REQUIRE(instance.is_invalid_coinbase_locktime(100));
+}
+
+BC_AUTO_TEST_CASE(block__is_final_coinbase_sequence__maximum_non_final__false)
+{
+    const accessor instance{ header{}, transactions{ locked_coinbase(99, sub1(max_input_sequence)) } };
+    BC_REQUIRE(!instance.is_final_coinbase_sequence());
+}
+
+BC_AUTO_TEST_CASE(block__is_final_coinbase_sequence__final__true)
+{
+    const accessor instance{ header{}, transactions{ locked_coinbase(99, max_input_sequence) } };
+    BC_REQUIRE(instance.is_final_coinbase_sequence());
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_locked__block_success)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{ locked_coinbase(99, 0) } };
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_own_height__coinbase_locktime_mismatch)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{ locked_coinbase(100, 0) } };
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_locktime_mismatch);
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_final__coinbase_sequence_final)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{ locked_coinbase(99, max_input_sequence) } };
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::coinbase_sequence_final);
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_genesis__block_success)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 0, 0, 0, 0 };
+    const block instance{ header{}, transactions{ locked_coinbase(0, max_input_sequence) } };
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
+}
+
+BC_AUTO_TEST_CASE(block__check_context__bip54_coinbase_off__block_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const block instance{ header{}, transactions{ locked_coinbase(100, max_input_sequence) } };
+    BC_REQUIRE_EQUAL(instance.check(ctx, false), error::block_success);
 }
 
 BC_AUTO_TEST_CASE(block__is_oversized__megabyte_script__true)

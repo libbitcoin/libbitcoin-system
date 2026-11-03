@@ -124,6 +124,7 @@ public:
     chain::chain_state::deployment bip54_timespan_deployment{};
     chain::chain_state::deployment bip54_sigops_deployment{};
     chain::chain_state::deployment bip54_txsize_deployment{};
+    chain::chain_state::deployment bip54_coinbase_deployment{};
 
     /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit0_active_checkpoint{};
