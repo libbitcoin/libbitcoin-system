@@ -118,7 +118,7 @@ option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
 option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
 option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
 option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
-option( enable-sha "Use ARM SHA1/SHA256 Extensions." OFF )
+option( enable-sha2 "Use ARM SHA1/SHA256 Extensions." OFF )
 option( enable-sha3 "Use ARM SHA3 Extensions for SHA512." OFF )
 option( enable-aes "Use ARM AES and PMULL Extensions." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
@@ -151,7 +151,7 @@ if ( NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
     set( arm_base "armv8-a" )
     string( APPEND arm_extensions "+aes" )
   endif()
-  if ( enable-sha )
+  if ( enable-sha2 )
     set( arm_base "armv8-a" )
     string( APPEND arm_extensions "+sha2" )
   endif()
@@ -196,19 +196,19 @@ check_cxx_source_compiles( "
     int main() {
     uint32x4_t a = vdupq_n_u32(0);
     return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);
-    }" TEST_COMPILES_SHA )
+    }" TEST_COMPILES_SHA2 )
 
-if ( enable-sha )
-  if ( TEST_COMPILES_SHA )
-    message( WARNING "Detected 'sha'" )
+if ( enable-sha2 )
+  if ( TEST_COMPILES_SHA2 )
+    message( WARNING "Detected 'sha2'" )
   else()
-    message( FATAL_ERROR "Expected feature not detected 'sha'" )
+    message( FATAL_ERROR "Expected feature not detected 'sha2'" )
   endif()
 else()
-  if ( TEST_COMPILES_SHA )
-    message( WARNING "Environment enabling option 'sha'" )
+  if ( TEST_COMPILES_SHA2 )
+    message( WARNING "Environment enabling option 'sha2'" )
   else()
-    message( WARNING "Unexpected feature not detected 'sha'" )
+    message( WARNING "Unexpected feature not detected 'sha2'" )
   endif()
 endif()
 check_cxx_source_compiles( "
@@ -647,12 +647,12 @@ if ( MSVC )
 
   target_compile_definitions( libbitcoin-system
     PUBLIC
-      $<$<BOOL:${enable-aes}>:WITH_SHA>
-      $<$<BOOL:${enable-sha}>:WITH_SHA>
-      $<$<BOOL:${enable-sha3}>:WITH_SHA512>
+      $<$<BOOL:${enable-aes}>:WITH_AES>
+      $<$<BOOL:${enable-sha2}>:WITH_SHA2>
+      $<$<BOOL:${enable-sha3}>:WITH_SHA3>
       $<$<BOOL:${enable-avx512ifma}>:WITH_AVX512IFMA>
       $<$<BOOL:${enable-avxifma}>:WITH_AVXIFMA>
-      $<$<BOOL:${enable-shani}>:WITH_SHA>
+      $<$<BOOL:${enable-shani}>:WITH_SHANI>
       $<$<BOOL:${enable-sha512}>:WITH_SHA512>
       $<$<BOOL:${enable-aesni}>:WITH_AESNI>
       $<$<BOOL:${enable-vaes}>:WITH_VAES>

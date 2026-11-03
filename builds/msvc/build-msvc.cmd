@@ -20,7 +20,7 @@ REM --enable-avx512             Use Intel AVX512 intrinsics.
 REM --enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2).
 REM --enable-avx2               Use Intel AVX2 intrinsics.
 REM --enable-sse41              Use SSE4.1 hardware instructions.
-REM --enable-sha                Use ARM SHA1/SHA256 Extensions.
+REM --enable-sha2               Use ARM SHA1/SHA256 Extensions.
 REM --enable-sha3               Use ARM SHA3 Extensions for SHA512.
 REM --enable-aes                Use ARM AES and PMULL Extensions.
 REM --[enable/disable]-cuda     Use cuda (gpu) batch signature verification (inert on macOS).
@@ -209,9 +209,9 @@ if "!libbitcoin_system_TAG!" == "" (
         goto :end_parse_input
     ) else if "%~1" == "--enable-shani" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-sha=true"
+            set "libbitcoin-system_PARAMS=/p:Option-shani=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha=true"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-shani=true"
         )
     ) else if "%~1" == "--enable-sha512" (
         if "!libbitcoin-system_PARAMS!" == "" (
@@ -261,23 +261,23 @@ if "!libbitcoin_system_TAG!" == "" (
         ) else (
             set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sse41=true"
         )
-    ) else if "%~1" == "--enable-sha" (
+    ) else if "%~1" == "--enable-sha2" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-sha=true"
+            set "libbitcoin-system_PARAMS=/p:Option-sha2=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha=true"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha2=true"
         )
     ) else if "%~1" == "--enable-sha3" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-sha512=true"
+            set "libbitcoin-system_PARAMS=/p:Option-sha3=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha512=true"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha3=true"
         )
     ) else if "%~1" == "--enable-aes" (
         if "!libbitcoin-system_PARAMS!" == "" (
-            set "libbitcoin-system_PARAMS=/p:Option-sha=true"
+            set "libbitcoin-system_PARAMS=/p:Option-aes=true"
         ) else (
-            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-sha=true"
+            set "libbitcoin-system_PARAMS=!libbitcoin-system_PARAMS! /p:Option-aes=true"
         )
     ) else if "%~1" == "--enable-cuda" (
         if "!libbitcoin-system_PARAMS!" == "" (
@@ -546,7 +546,7 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "--enable-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2)."
     call :msg "--enable-avx2               Use Intel AVX2 intrinsics."
     call :msg "--enable-sse41              Use SSE4.1 hardware instructions."
-    call :msg "--enable-sha                Use ARM SHA1/SHA256 Extensions."
+    call :msg "--enable-sha2               Use ARM SHA1/SHA256 Extensions."
     call :msg "--enable-sha3               Use ARM SHA3 Extensions for SHA512."
     call :msg "--enable-aes                Use ARM AES and PMULL Extensions."
     call :msg "--[enable/disable]-cuda     Use cuda (gpu) batch signature verification (inert on macOS)."

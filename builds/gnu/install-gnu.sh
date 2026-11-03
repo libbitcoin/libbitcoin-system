@@ -26,8 +26,8 @@
 #                                 Default: --disable-avx2
 # --<enable/disable>-sse41      Use SSE4.1 hardware instructions.
 #                                 Default: --disable-sse41
-# --<enable/disable>-sha        Use ARM SHA1/SHA256 Extensions.
-#                                 Default: --disable-sha
+# --<enable/disable>-sha2       Use ARM SHA1/SHA256 Extensions.
+#                                 Default: --disable-sha2
 # --<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512.
 #                                 Default: --disable-sha3
 # --<enable/disable>-aes        Use ARM AES and PMULL Extensions.
@@ -884,8 +884,8 @@ help()
     msg "                                Default: --disable-avx2"
     msg "--<enable/disable>-sse41      Use SSE4.1 hardware instructions."
     msg "                                Default: --disable-sse41"
-    msg "--<enable/disable>-sha        Use ARM SHA1/SHA256 Extensions."
-    msg "                                Default: --disable-sha"
+    msg "--<enable/disable>-sha2       Use ARM SHA1/SHA256 Extensions."
+    msg "                                Default: --disable-sha2"
     msg "--<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512."
     msg "                                Default: --disable-sha3"
     msg "--<enable/disable>-aes        Use ARM AES and PMULL Extensions."
