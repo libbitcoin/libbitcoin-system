@@ -63,6 +63,7 @@ project( libbitcoin-system
   DESCRIPTION "Bitcoin Cross-Platform C++ Development Toolkit"
   LANGUAGES C CXX )
 
+set( CMAKE_CXX_SCAN_FOR_MODULES OFF )
 
 set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../.." )
 
