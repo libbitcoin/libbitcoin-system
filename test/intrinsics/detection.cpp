@@ -269,9 +269,9 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__always__match)
     BC_CHECK_EQUAL(get_arm(arm_feature::neon), try_neon());
 }
 
-BC_AUTO_TEST_CASE(intrinsics_detection__try_neon_sha__always__match)
+BC_AUTO_TEST_CASE(intrinsics_detection__try_neon_sha2__always__match)
 {
-    BC_CHECK_EQUAL(get_arm(arm_feature::sha1) && get_arm(arm_feature::sha256), try_neon_sha());
+    BC_CHECK_EQUAL(get_arm(arm_feature::sha1) && get_arm(arm_feature::sha256), try_neon_sha2());
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon_aes__always__match)
@@ -305,7 +305,7 @@ static bool half_arm(arm_feature feature) NOEXCEPT
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_none__false)
 {
     BC_CHECK(!try_neon<none_arm>());
-    BC_CHECK(!try_neon_sha<none_arm>());
+    BC_CHECK(!try_neon_sha2<none_arm>());
     BC_CHECK(!try_neon_aes<none_arm>());
     BC_CHECK(!try_neon_sha3<none_arm>());
 }
@@ -313,7 +313,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_none__false)
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_all__true)
 {
     BC_CHECK(try_neon<all_arm>());
-    BC_CHECK(try_neon_sha<all_arm>());
+    BC_CHECK(try_neon_sha2<all_arm>());
     BC_CHECK(try_neon_aes<all_arm>());
     BC_CHECK(try_neon_sha3<all_arm>());
 }
@@ -321,7 +321,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_all__true)
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_half__false)
 {
     BC_CHECK(!try_neon<half_arm>());
-    BC_CHECK(!try_neon_sha<half_arm>());
+    BC_CHECK(!try_neon_sha2<half_arm>());
     BC_CHECK(!try_neon_aes<half_arm>());
     BC_CHECK(!try_neon_sha3<half_arm>());
 }

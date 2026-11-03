@@ -270,7 +270,7 @@ inline bool try_neon() NOEXCEPT
 }
 
 template <auto Arm = get_arm>
-inline bool try_neon_sha() NOEXCEPT
+inline bool try_neon_sha2() NOEXCEPT
 {
     return Arm(arm_feature::sha1)
         && Arm(arm_feature::sha256);
