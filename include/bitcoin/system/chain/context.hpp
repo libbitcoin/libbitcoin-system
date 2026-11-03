@@ -72,8 +72,7 @@ public:
     // on the last block of the period (bip54).
     inline bool is_negative_timespan(uint32_t retargeting_interval) const NOEXCEPT
     {
-        return is_enabled(chain::flags::bip54_timespan_rule)
-            && (height % retargeting_interval == sub1(retargeting_interval))
+        return (height % retargeting_interval == sub1(retargeting_interval))
             && (timestamp < retarget_timestamp);
     }
 
