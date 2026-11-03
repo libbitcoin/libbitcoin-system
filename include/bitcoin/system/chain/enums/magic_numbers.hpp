@@ -59,6 +59,8 @@ constexpr size_t max_block_size = 1'000'000;
 constexpr size_t max_sigops_factor = 50;
 constexpr size_t max_block_sigops = max_block_size / max_sigops_factor;
 constexpr size_t max_timewarp = 600;
+constexpr size_t max_timewarp_bip54 = 2 * 60 * 60;
+constexpr size_t invalid_transaction_size = 64;
 constexpr uint64_t satoshi_per_bitcoin = 100'000'000;
 
 /// Relative locktime consensus constants.
@@ -75,6 +77,7 @@ constexpr size_t relative_locktime_mask_left = 16;
 
 constexpr size_t heavy_sigops_factor = 4;
 constexpr size_t max_fast_sigops = heavy_sigops_factor * max_block_sigops;
+constexpr size_t max_prevout_sigops = 2'500;
 constexpr size_t light_weight_factor = 4;
 constexpr size_t max_block_weight = light_weight_factor * max_block_size;
 constexpr size_t base_size_contribution = 3;

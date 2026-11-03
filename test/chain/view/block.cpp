@@ -751,6 +751,49 @@ BC_AUTO_TEST_CASE(block_view__check_context__coinbase_height_bip34__coinbase_hei
     BC_REQUIRE_EQUAL(view.check(ctx), error::coinbase_height_mismatch);
 }
 
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_txsize_64_bytes__invalid_transaction_size)
+{
+    const context ctx{ flags::bip54_txsize_rule, 0, 0, 100, 0, 0, 0 };
+    const transaction tx64{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff010000000000000000040051525400000000"), true };
+    chain::view::block view{ view_block_data({ view_coinbase(), tx64 }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data({ { 1, script{} } })), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::invalid_transaction_size);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_txsize_65_bytes__not_invalid_transaction_size)
+{
+    const context ctx{ flags::bip54_txsize_rule, 0, 0, 100, 0, 0, 0 };
+    const transaction tx65{ base16_chunk("0200000001827da3d85a6547d6b03662d2cb86982d655a6f390547285a3bf9ec9f28e0c8831500000000ffffffff01000000000000000005005152545800000000"), true };
+    chain::view::block view{ view_block_data({ view_coinbase(), tx65 }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data({ { 1, script{} } })), error::block_success);
+    BC_REQUIRE_NE(view.check(ctx), error::invalid_transaction_size);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_coinbase_zero_locktime__coinbase_locktime_mismatch)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    chain::view::block view{ view_block_data({ view_coinbase() }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::coinbase_locktime_mismatch);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_coinbase_final__coinbase_sequence_final)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 1, 0, 0, 0 };
+    chain::view::block view{ view_block_data({ view_coinbase() }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::coinbase_sequence_final);
+}
+
+BC_AUTO_TEST_CASE(block_view__check_context__bip54_coinbase_locked__block_success)
+{
+    const context ctx{ flags::bip54_coinbase_rule, 0, 0, 100, 0, 0, 0 };
+    const transaction coinbase{ 1, inputs{ input{ point{}, script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } }, 0 } }, outputs{ output{ initial_subsidy, script{} } }, 99 };
+    chain::view::block view{ view_block_data({ coinbase }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, {}), error::block_success);
+    BC_REQUIRE_EQUAL(view.check(ctx), error::block_success);
+}
+
 BC_AUTO_TEST_CASE(block_view__check_context__absolute_locked__absolute_time_locked)
 {
     const auto tx1 = transaction{ 1, inputs{ input{ point{ one_hash, 0 }, script{}, 0 } }, outputs{ output{ 42, script{} } }, 200 };
@@ -781,6 +824,20 @@ BC_AUTO_TEST_CASE(block_view__accept__overspent__spend_exceeds_value)
     chain::view::block view{ view_block_data({ view_coinbase(), tx1 }), true };
     BC_REQUIRE_EQUAL(view.populate(no_rules_context, view_prevouts_data({ { 50, script{} } })), error::block_success);
     BC_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::spend_exceeds_value);
+}
+
+// bip54 limits each transaction to 2500 accurately counted legacy sigops.
+BC_AUTO_TEST_CASE(block_view__accept__bip54_sigops_above_limit__transaction_prevout_sigop_limit)
+{
+    const context ctx{ flags::bip54_sigops_rule, 0, 0, 100, 0, 0, 0 };
+    const auto count = add1(max_prevout_sigops / 20u);
+    const inputs ins(count, input{ point{ one_hash, 0 }, script{}, max_input_sequence });
+    const transaction tx1{ 1, ins, outputs{ output{ 1, script{} } }, 0 };
+    const outputs prevouts(count, output{ 1, script{ operations{ operation{ opcode::checkmultisig } } } });
+    chain::view::block view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(prevouts)), error::block_success);
+    BC_REQUIRE_EQUAL(view.accept(ctx, subsidy_interval, initial_subsidy), error::transaction_prevout_sigop_limit);
+    BC_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::block_success);
 }
 
 // bip143 native p2wpkh (inputs: p2pk, p2wpkh).

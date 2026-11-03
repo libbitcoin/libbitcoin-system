@@ -105,6 +105,7 @@ public:
     uint64_t spend() const NOEXCEPT;
     uint64_t value() const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+    size_t prevout_signature_operations() const NOEXCEPT;
 
     /// Validation (block view population required).
     /// -----------------------------------------------------------------------
@@ -134,6 +135,7 @@ protected:
         uint32_t median_time_past, bool bip113) const NOEXCEPT;
     bool is_missing_prevouts() const NOEXCEPT;
     bool is_overspent() const NOEXCEPT;
+    bool is_prevout_signature_operations_limited() const NOEXCEPT;
     code connect_input(const context& ctx, const input_iterator& it,
         const signatures& capture) const NOEXCEPT;
 

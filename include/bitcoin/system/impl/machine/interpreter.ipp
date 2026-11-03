@@ -1091,6 +1091,7 @@ op_check_multisig_verify() NOEXCEPT
         return error::op_success;
 
     auto it = endorsements.cbegin();
+    auto spare_keys = keys.size() - endorsements.size();
     const auto subscript = this->subscript(endorsements);
     const auto bip66 = this->is_enabled(flags::bip66_rule);
 
@@ -1126,6 +1127,8 @@ op_check_multisig_verify() NOEXCEPT
         // Verify ECDSA signature against public key and cache signature hash.
         if (this->verify_ecdsa_unbatched(*key, this->cached_hash(), sig))
             ++it;
+        else if (is_zero(spare_keys--))
+            return error::op_check_multisig_mismatch;
     }
 
     // All endorsements must be verified against a key.

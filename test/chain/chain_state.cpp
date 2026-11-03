@@ -27,8 +27,11 @@ struct test_chain_state
 {
     using chain::chain_state::activation;
     using chain::chain_state::median_time_past;
+    using chain::chain_state::next_state;
     using chain::chain_state::work_required;
 };
+
+using state_t = chain_state::deployment_state;
 
 // activation (version signalled soft forks)
 // ----------------------------------------------------------------------------
@@ -274,6 +277,243 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit2_hash__taproot_rules)
     BC_REQUIRE(!to_bool(state.flags & flags::bip141_rule));
 }
 
+// next_state (bip9 deployment transitions)
+// ----------------------------------------------------------------------------
+
+static const chain_state::deployment bip9_test{ 0, 0, 100, 200, 10, 0, false, false };
+static const chain_state::deployment speedy_test{ 0, 0, 100, 200, 10, 4032, true, false };
+
+BC_AUTO_TEST_CASE(chain_state__next_state__defined_below_start__defined)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::defined, 99, 0, 2016) == state_t::defined);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__defined_at_start__started)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::defined, 100, 0, 2016) == state_t::started);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__defined_at_timeout__failed)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::defined, 200, 0, 2016) == state_t::failed);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__speedy_defined_at_timeout__started)
+{
+    BC_REQUIRE(test_chain_state::next_state(speedy_test, state_t::defined, 200, 0, 2016) == state_t::started);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__started_below_threshold__started)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::started, 150, 9, 2016) == state_t::started);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__started_at_threshold__locked_in)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::started, 150, 10, 2016) == state_t::locked_in);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__started_at_threshold_and_timeout__failed)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::started, 200, 10, 2016) == state_t::failed);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__speedy_started_at_threshold_and_timeout__locked_in)
+{
+    BC_REQUIRE(test_chain_state::next_state(speedy_test, state_t::started, 200, 10, 2016) == state_t::locked_in);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__speedy_started_below_threshold_at_timeout__failed)
+{
+    BC_REQUIRE(test_chain_state::next_state(speedy_test, state_t::started, 200, 9, 2016) == state_t::failed);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__locked_in__active)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::locked_in, 150, 0, 2016) == state_t::active);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__speedy_locked_in_below_activation_height__locked_in)
+{
+    BC_REQUIRE(test_chain_state::next_state(speedy_test, state_t::locked_in, 300, 0, 2016) == state_t::locked_in);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__speedy_locked_in_at_activation_height__active)
+{
+    BC_REQUIRE(test_chain_state::next_state(speedy_test, state_t::locked_in, 300, 0, 4032) == state_t::active);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__speedy_defined_below_start_at_timeout__defined)
+{
+    const chain_state::deployment late{ 0, 0, 300, 200, 10, 0, true, false };
+    BC_REQUIRE(test_chain_state::next_state(late, state_t::defined, 250, 0, 2016) == state_t::defined);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__active__active)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::active, 300, 0, 2016) == state_t::active);
+}
+
+BC_AUTO_TEST_CASE(chain_state__next_state__failed__failed)
+{
+    BC_REQUIRE(test_chain_state::next_state(bip9_test, state_t::failed, 150, 10, 2016) == state_t::failed);
+}
+
+// is_signal
+// ----------------------------------------------------------------------------
+
+BC_AUTO_TEST_CASE(chain_state__is_signal__base_and_bit__true)
+{
+    BC_REQUIRE(chain_state::is_signal(0x20000001, 0x20000000, 0));
+}
+
+BC_AUTO_TEST_CASE(chain_state__is_signal__base_without_bit__false)
+{
+    BC_REQUIRE(!chain_state::is_signal(0x20000002, 0x20000000, 0));
+}
+
+BC_AUTO_TEST_CASE(chain_state__is_signal__bit_without_base__false)
+{
+    BC_REQUIRE(!chain_state::is_signal(0x00000001, 0x20000000, 0));
+}
+
+BC_AUTO_TEST_CASE(chain_state__is_signal__other_top_bits__false)
+{
+    BC_REQUIRE(!chain_state::is_signal(0x60000001, 0x20000000, 0));
+}
+
+// activation (bip9 signaled)
+// ----------------------------------------------------------------------------
+// Boundaries descend from the boundary at/below the height.
+
+static chain_state::data::signal::boundary started_boundary(const chain_state::deployment& deployment, size_t count)
+{
+    return { deployment.start, count };
+}
+
+// Construction above genesis requires the previous block bits.
+static chain_state::data signaled_values(size_t height)
+{
+    chain_state::data values{};
+    values.height = height;
+    values.bits.ordered.push_back(0x1e0ffff0u);
+    return values;
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_signaled_lock_in__bip68_bip112_bip113_rules)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    const auto& deployment = settings.bip9_bit0_deployment;
+    auto values = signaled_values(3 * 2016 + 5);
+    values.signals[0].ordered = { started_boundary(deployment, 0), started_boundary(deployment, deployment.threshold), started_boundary(deployment, 0) };
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip112_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip113_rule));
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip141_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_signaled_below_threshold__no_bip68_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    const auto& deployment = settings.bip9_bit0_deployment;
+    auto values = signaled_values(3 * 2016 + 5);
+    values.signals[0].ordered = { started_boundary(deployment, 0), started_boundary(deployment, sub1(deployment.threshold)), started_boundary(deployment, 0) };
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip68_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_checkpoint_hash_signaled__no_bip68_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    chain_state::data values{};
+    values.bip9_bit0_hash = settings.bip9_bit0_active_checkpoint.hash();
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip68_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit2_signaled_below_activation_height__no_taproot_rules)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    const auto& deployment = settings.bip9_bit2_deployment;
+    auto values = signaled_values(3 * 2016 + 5);
+    values.signals[2].ordered = { started_boundary(deployment, 0), started_boundary(deployment, deployment.threshold), started_boundary(deployment, 0) };
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip341_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit2_signaled_at_activation_height__taproot_rules)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    const auto& deployment = settings.bip9_bit2_deployment;
+    auto values = signaled_values(add1(deployment.activation_height));
+    values.signals[2].ordered = { started_boundary(deployment, 0), started_boundary(deployment, deployment.threshold), started_boundary(deployment, 0) };
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE(to_bool(state.flags() & flags::bip341_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip342_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active__bip68_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    settings.bip9_bit0_deployment.start = chain_state::deployment::always_active;
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(to_bool(state.flags() & flags::bip68_rule));
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip141_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active_unconfigured__no_bip68_rule)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    settings.forks.bip68 = false;
+    settings.forks.bip112 = false;
+    settings.forks.bip113 = false;
+    settings.bip9_bit0_deployment.start = chain_state::deployment::always_active;
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip68_rule));
+}
+
+// bip54 deployments are always active on regtest and never signaled elsewhere.
+BC_AUTO_TEST_CASE(chain_state__activation__regtest__bip54_rules)
+{
+    const settings settings(selection::regtest);
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_timewarp_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__mainnet__no_bip54_rules)
+{
+    const settings settings(selection::mainnet);
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip54_timewarp_rule));
+    BC_REQUIRE_EQUAL(chain_state::get_map(1000, settings).signals[3].high, chain_state::map::unrequested);
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_signaled_bip90__checkpoint_only)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const auto& deployment = settings.bip9_bit0_deployment;
+    auto values = signaled_values(3 * 2016 + 5);
+    values.signals[0].ordered = { started_boundary(deployment, 0), started_boundary(deployment, deployment.threshold), started_boundary(deployment, 0) };
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip68_rule));
+}
+
 // activation (bip30 lifecycle)
 // ----------------------------------------------------------------------------
 
@@ -320,6 +560,13 @@ BC_AUTO_TEST_CASE(chain_state__activation__mainnet_configuration__retarget_diffi
 
 // median_time_past
 // ----------------------------------------------------------------------------
+
+BC_AUTO_TEST_CASE(chain_state__median__even_count__upper_middle)
+{
+    BC_REQUIRE_EQUAL(chain_state::median({}), 0u);
+    BC_REQUIRE_EQUAL(chain_state::median({ 5, 1, 3 }), 3u);
+    BC_REQUIRE_EQUAL(chain_state::median({ 4, 1, 3, 2 }), 3u);
+}
 
 BC_AUTO_TEST_CASE(chain_state__median_time_past__empty__zero)
 {
@@ -561,6 +808,42 @@ BC_AUTO_TEST_CASE(chain_state__get_map__at_bip9_bit0_checkpoint__requested)
     const auto height = settings.bip9_bit0_active_checkpoint.height();
     const auto map = chain_state::get_map(height, settings);
     BC_REQUIRE_EQUAL(map.bip9_bit0_height, height);
+}
+
+BC_AUTO_TEST_CASE(chain_state__get_map__bip9_signaled__signal_requested)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    const auto height = add1(settings.bip9_bit0_active_checkpoint.height());
+    const auto map = chain_state::get_map(height, settings);
+    BC_REQUIRE_EQUAL(map.bip9_bit0_height, settings.bip9_bit0_active_checkpoint.height());
+    BC_REQUIRE_EQUAL(map.signals[0].high, settings.bip9_bit0_active_checkpoint.height());
+    BC_REQUIRE_EQUAL(map.signals[0].period, settings.bip9_activation_period);
+    BC_REQUIRE_EQUAL(map.signals[0].base, settings.bip9_version_base);
+    BC_REQUIRE_EQUAL(map.signals[0].bit, settings.bip9_bit0_deployment.bit);
+    BC_REQUIRE_EQUAL(map.signals[0].start, settings.bip9_bit0_deployment.start);
+    BC_REQUIRE_EQUAL(map.signals[0].timeout, settings.bip9_bit0_deployment.timeout);
+    BC_REQUIRE_EQUAL(map.signals[2].bit, settings.bip9_bit2_deployment.bit);
+}
+
+BC_AUTO_TEST_CASE(chain_state__get_map__bip9_buried__signal_unrequested)
+{
+    const settings settings(selection::mainnet);
+    const auto height = settings.bip9_bit0_active_checkpoint.height();
+    const auto map = chain_state::get_map(height, settings);
+    BC_REQUIRE_EQUAL(map.bip9_bit0_height, height);
+    BC_REQUIRE_EQUAL(map.signals[0].high, chain_state::map::unrequested);
+    BC_REQUIRE_EQUAL(map.signals[1].high, chain_state::map::unrequested);
+    BC_REQUIRE_EQUAL(map.signals[2].high, chain_state::map::unrequested);
+}
+
+BC_AUTO_TEST_CASE(chain_state__get_map__bip9_undeployed__checkpoint_requested)
+{
+    settings settings(selection::regtest);
+    settings.forks.bip90 = false;
+    const auto map = chain_state::get_map(0, settings);
+    BC_REQUIRE_EQUAL(map.bip9_bit0_height, 0u);
+    BC_REQUIRE_EQUAL(map.signals[0].high, chain_state::map::unrequested);
 }
 
 BC_AUTO_TEST_CASE(chain_state__get_map__genesis_checkpoints__requested)
@@ -815,6 +1098,56 @@ BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header__pool_promotion)
     BC_REQUIRE_EQUAL(state.median_time_past(), pool.median_time_past());
 }
 
+// Two block periods with a threshold of one: locked in at boundary 2 by the
+// signal of block 1, and active at boundary 4.
+BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_bip9_signal__active_at_next_boundary)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    settings.bip9_activation_period = 2;
+    settings.bip9_bit0_deployment.start = 1;
+    settings.bip9_bit0_deployment.timeout = max_uint32;
+    settings.bip9_bit0_deployment.threshold = 1;
+    auto values = transition_values();
+    values.height = 1;
+    values.version.self = 0x20000001;
+    values.signals[0].state = state_t::started;
+    const chain_state parent{ std::move(values), settings };
+    const chain::header header2{ 4u, one_hash, system::hash_digest{}, 1100u, 0x1e0ffff0u, 0u };
+    const chain::header header3{ 4u, header2.hash(), system::hash_digest{}, 1200u, 0x1e0ffff0u, 0u };
+    const chain::header header4{ 4u, header3.hash(), system::hash_digest{}, 1300u, 0x1e0ffff0u, 0u };
+    const chain_state state2{ parent, header2, settings };
+    const chain_state state3{ state2, header3, settings };
+    const chain_state state4{ state3, header4, settings };
+    BC_REQUIRE(!to_bool(state2.flags() & flags::bip68_rule));
+    BC_REQUIRE(!to_bool(state3.flags() & flags::bip68_rule));
+    BC_REQUIRE(to_bool(state4.flags() & flags::bip68_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_bip9_no_signal__not_active)
+{
+    settings settings(selection::mainnet);
+    settings.forks.bip90 = false;
+    settings.forks.retarget = false;
+    settings.bip9_activation_period = 2;
+    settings.bip9_bit0_deployment.start = 1;
+    settings.bip9_bit0_deployment.timeout = max_uint32;
+    settings.bip9_bit0_deployment.threshold = 1;
+    auto values = transition_values();
+    values.height = 1;
+    values.version.self = 0x00000001;
+    values.signals[0].state = state_t::started;
+    const chain_state parent{ std::move(values), settings };
+    const chain::header header2{ 4u, one_hash, system::hash_digest{}, 1100u, 0x1e0ffff0u, 0u };
+    const chain::header header3{ 4u, header2.hash(), system::hash_digest{}, 1200u, 0x1e0ffff0u, 0u };
+    const chain::header header4{ 4u, header3.hash(), system::hash_digest{}, 1300u, 0x1e0ffff0u, 0u };
+    const chain_state state2{ parent, header2, settings };
+    const chain_state state3{ state2, header3, settings };
+    const chain_state state4{ state3, header4, settings };
+    BC_REQUIRE(!to_bool(state4.flags() & flags::bip68_rule));
+}
+
 // block storm patch
 // ----------------------------------------------------------------------------
 // BIP94: the retarget is computed from the first block of the period, so a
@@ -1011,9 +1344,49 @@ BC_AUTO_TEST_CASE(chain_state__get_map__no_retarget__unrequested)
     settings settings(selection::mainnet);
     settings.forks.difficult = false;
     settings.forks.retarget = false;
+    settings.forks.bip54_timespan = false;
     const auto map = chain_state::get_map(42, settings);
     BC_REQUIRE_EQUAL(map.bits.count, one);
     BC_REQUIRE_EQUAL(map.timestamp_retarget, chain_state::map::unrequested);
+}
+
+// bip54 requires the period's first timestamp without retargeting.
+BC_AUTO_TEST_CASE(chain_state__get_map__no_retarget_bip54_timespan__requested)
+{
+    settings settings(selection::mainnet);
+    settings.forks.difficult = false;
+    settings.forks.retarget = false;
+    settings.forks.bip54_timespan = true;
+    const auto map = chain_state::get_map(42, settings);
+    BC_REQUIRE_EQUAL(map.bits.count, one);
+    BC_REQUIRE_EQUAL(map.timestamp_retarget, 0u);
+}
+
+// Promotion from a retarget height carries that block's timestamp as the
+// retarget timestamp of the period, without retargeting.
+BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_from_retarget_height__retarget_timestamp)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    auto values = transition_values();
+    values.height = settings.retargeting_interval();
+    values.timestamp.retarget = 7;
+    const chain_state parent{ std::move(values), settings };
+    const chain_state state{ parent, transition_header(1100u), settings };
+    BC_REQUIRE_EQUAL(parent.retarget_timestamp(), 7u);
+    BC_REQUIRE_EQUAL(state.retarget_timestamp(), parent.timestamp());
+    BC_REQUIRE_EQUAL(state.context().retarget_timestamp, 1000u);
+}
+
+BC_AUTO_TEST_CASE(chain_state__context__retarget_timestamp__expected)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    auto values = transition_values();
+    values.timestamp.retarget = 7;
+    const chain_state state{ std::move(values), settings };
+    BC_REQUIRE_EQUAL(state.retarget_timestamp(), 7u);
+    BC_REQUIRE_EQUAL(state.context().retarget_timestamp, 7u);
 }
 
 // properties

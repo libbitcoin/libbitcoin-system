@@ -89,6 +89,24 @@ BC_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_expected_me
     BC_REQUIRE_EQUAL(ec.message(), "proof of work does not match bits field");
 }
 
+BC_AUTO_TEST_CASE(block_error_t__code__negative_timespan__true_expected_message)
+{
+    constexpr auto value = error::negative_timespan;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "retarget timespan is negative");
+}
+
+BC_AUTO_TEST_CASE(block_error_t__code__early_timestamp__true_expected_message)
+{
+    constexpr auto value = error::early_timestamp;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "retarget block timestamp is too early");
+}
+
 // confirm header
 
 BC_AUTO_TEST_CASE(block_error_t__code__orphan_block__true_expected_message)
@@ -246,6 +264,33 @@ BC_AUTO_TEST_CASE(block_error_t__code__invalid_signet_solution__true_expected_me
     BC_REQUIRE(ec);
     BC_REQUIRE(ec == value);
     BC_REQUIRE_EQUAL(ec.message(), "invalid signet block solution");
+}
+
+BC_AUTO_TEST_CASE(block_error_t__code__invalid_transaction_size__true_expected_message)
+{
+    constexpr auto value = error::invalid_transaction_size;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "invalid transaction size");
+}
+
+BC_AUTO_TEST_CASE(block_error_t__code__coinbase_locktime_mismatch__true_expected_message)
+{
+    constexpr auto value = error::coinbase_locktime_mismatch;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "coinbase locktime does not match height");
+}
+
+BC_AUTO_TEST_CASE(block_error_t__code__coinbase_sequence_final__true_expected_message)
+{
+    constexpr auto value = error::coinbase_sequence_final;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "coinbase sequence is final");
 }
 
 BC_AUTO_TEST_CASE(block_error_t__code__invalid_signature__true_expected_message)

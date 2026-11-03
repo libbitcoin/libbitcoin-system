@@ -438,6 +438,27 @@ BC_AUTO_TEST_CASE(header__accept__time_warp_patch_on__early_timestamp)
     BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::early_timestamp);
 }
 
+BC_AUTO_TEST_CASE(header__accept__bip54_timewarp_on__early_timestamp)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::bip54_timewarp_rule, 100, 99, 2016, 4, 0x207fffff, max_uint32 };
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::early_timestamp);
+}
+
+BC_AUTO_TEST_CASE(header__accept__bip54_timespan_on__negative_timespan)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::bip54_timespan_rule, 100, 99, 2015, 4, 0x207fffff, 0, 101 };
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::negative_timespan);
+}
+
+BC_AUTO_TEST_CASE(header__accept__bip54_timespan_at_first__block_success)
+{
+    const header instance{ 4, hash_digest{}, hash_digest{}, 100, 0x207fffff, 0 };
+    const context ctx{ flags::bip54_timespan_rule, 100, 99, 2015, 4, 0x207fffff, 0, 100 };
+    BC_REQUIRE_EQUAL(instance.accept(ctx, 2016), error::block_success);
+}
+
 BC_AUTO_TEST_CASE(header__check__zero_bits__invalid_proof_of_work)
 {
     const settings settings(selection::mainnet);

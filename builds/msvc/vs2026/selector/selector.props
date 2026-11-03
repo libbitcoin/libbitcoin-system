@@ -5,6 +5,7 @@
     <_PropertySheetDisplayName>Bitcoin Selector Settings</_PropertySheetDisplayName>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
 
   <!-- Configuration -->

@@ -38,6 +38,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { insufficient_block_version, "block version rejected at current height" },
     { anachronistic_timestamp, "block timestamp is too early" },
     { incorrect_proof_of_work, "proof of work does not match bits field" },
+    { negative_timespan, "retarget timespan is negative" },
+    { early_timestamp, "retarget block timestamp is too early" },
 
     // confirm header
     { orphan_block, "block parent is missing" },
@@ -61,6 +63,9 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { invalid_witness_commitment, "invalid witness commitment" },
     { block_weight_limit, "block weight limit exceeded" },
     { invalid_signet_solution, "invalid signet block solution" },
+    { invalid_transaction_size, "invalid transaction size" },
+    { coinbase_locktime_mismatch, "coinbase locktime does not match height" },
+    { coinbase_sequence_final, "coinbase sequence is final" },
 
     // connect block
     { invalid_signature, "invalid batched signature" },

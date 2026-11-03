@@ -45,6 +45,39 @@ settings::settings() NOEXCEPT
     bip9_version_bit2(1 << 2),
     bip9_version_base(0x20000000)
 {
+    bip9_bit0_deployment.bit = 0;
+    bip9_bit0_deployment.flags =
+        chain::flags::bip68_rule |
+        chain::flags::bip112_rule |
+        chain::flags::bip113_rule;
+    bip9_bit0_deployment.buried = true;
+    bip9_bit1_deployment.bit = 1;
+    bip9_bit1_deployment.flags =
+        chain::flags::bip141_rule |
+        chain::flags::bip143_rule |
+        chain::flags::bip147_rule;
+    bip9_bit1_deployment.buried = true;
+    bip9_bit2_deployment.bit = 2;
+    bip9_bit2_deployment.flags =
+        chain::flags::bip341_rule |
+        chain::flags::bip342_rule;
+    bip9_bit2_deployment.buried = true;
+    bip54_timewarp_deployment.bit = 5;
+    bip54_timewarp_deployment.flags = chain::flags::bip54_timewarp_rule;
+    bip54_timewarp_deployment.speedy = true;
+    bip54_timespan_deployment.bit = 6;
+    bip54_timespan_deployment.flags = chain::flags::bip54_timespan_rule;
+    bip54_timespan_deployment.speedy = true;
+    bip54_sigops_deployment.bit = 7;
+    bip54_sigops_deployment.flags = chain::flags::bip54_sigops_rule;
+    bip54_sigops_deployment.speedy = true;
+    bip54_txsize_deployment.bit = 8;
+    bip54_txsize_deployment.flags = chain::flags::bip54_txsize_rule;
+    bip54_txsize_deployment.speedy = true;
+    bip54_coinbase_deployment.bit = 9;
+    bip54_coinbase_deployment.flags = chain::flags::bip54_coinbase_rule;
+    bip54_coinbase_deployment.speedy = true;
+
     forks.bip16 = true;
     forks.bip30 = true;
     forks.bip34 = true;
@@ -60,6 +93,11 @@ settings::settings() NOEXCEPT
     forks.bip147 = true;
     forks.bip341 = true;
     forks.bip342 = true;
+    forks.bip54_timewarp = true;
+    forks.bip54_timespan = true;
+    forks.bip54_sigops = true;
+    forks.bip54_txsize = true;
+    forks.bip54_coinbase = true;
     forks.retarget = true;                     // !regtest
     forks.difficult = true;                    // !testnet
     forks.time_warp_patch = false;             // testnet4
@@ -137,6 +175,11 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
+            forks.bip54_timewarp = true;
+            forks.bip54_timespan = true;
+            forks.bip54_sigops = true;
+            forks.bip54_txsize = true;
+            forks.bip54_coinbase = true;
             forks.retarget = true;                     // !regtest
             forks.difficult = true;                    // !testnet
             forks.time_warp_patch = false;             // testnet4
@@ -153,6 +196,18 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 227931;
             bip90_bip65_height = 388381;
             bip90_bip66_height = 363725;
+            bip9_activation_period = 2016;
+            bip9_bit0_deployment.start = 1462060800;
+            bip9_bit0_deployment.timeout = 1493596800;
+            bip9_bit0_deployment.threshold = 1916;
+            bip9_bit1_deployment.start = 1479168000;
+            bip9_bit1_deployment.timeout = 1510704000;
+            bip9_bit1_deployment.threshold = 1916;
+            bip9_bit2_deployment.start = 1619222400;
+            bip9_bit2_deployment.timeout = 1628640000;
+            bip9_bit2_deployment.threshold = 1815;
+            bip9_bit2_deployment.activation_height = 709632;
+            bip9_bit2_deployment.speedy = true;
             bip9_bit0_active_checkpoint = { "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328 };
             bip9_bit1_active_checkpoint = { "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824 };
             bip9_bit2_active_checkpoint = { "0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632 };
@@ -237,6 +292,11 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
+            forks.bip54_timewarp = true;
+            forks.bip54_timespan = true;
+            forks.bip54_sigops = true;
+            forks.bip54_txsize = true;
+            forks.bip54_coinbase = true;
             forks.retarget = true;                     // !regtest
             forks.difficult = false;                   // !testnet
             forks.time_warp_patch = false;             // testnet4
@@ -253,6 +313,17 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 21111;
             bip90_bip65_height = 581885;
             bip90_bip66_height = 330776;
+            bip9_activation_period = 2016;
+            bip9_bit0_deployment.start = 1456790400;
+            bip9_bit0_deployment.timeout = 1493596800;
+            bip9_bit0_deployment.threshold = 1512;
+            bip9_bit1_deployment.start = 1462060800;
+            bip9_bit1_deployment.timeout = 1493596800;
+            bip9_bit1_deployment.threshold = 1512;
+            bip9_bit2_deployment.start = 1619222400;
+            bip9_bit2_deployment.timeout = 1628640000;
+            bip9_bit2_deployment.threshold = 1512;
+            bip9_bit2_deployment.speedy = true;
             bip9_bit0_active_checkpoint = { "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112 };
             bip9_bit1_active_checkpoint = { "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624 };
             bip9_bit2_active_checkpoint = { "000000000000eb906ab072652b86b05a1afeb95df53ed5c5a63aa3574e1f1b33", 2011968};
@@ -322,6 +393,11 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
+            forks.bip54_timewarp = true;
+            forks.bip54_timespan = true;
+            forks.bip54_sigops = true;
+            forks.bip54_txsize = true;
+            forks.bip54_coinbase = true;
             forks.retarget = true;                     // !regtest
             forks.difficult = false;                   // !testnet
             forks.time_warp_patch = true;              // testnet4
@@ -354,6 +430,7 @@ settings::settings(chain::selection context) NOEXCEPT
         {
             proof_of_work_limit = 0x207fffff;
             subsidy_interval_blocks = 150;
+            retargeting_interval_seconds = 24 * 60 * 60;
             genesis_block = chain::block
             {
                 data_chunk
@@ -412,6 +489,11 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
+            forks.bip54_timewarp = true;
+            forks.bip54_timespan = true;
+            forks.bip54_sigops = true;
+            forks.bip54_txsize = true;
+            forks.bip54_coinbase = true;
             forks.retarget = false;                    // !regtest
             forks.difficult = true;                    // !testnet
             forks.time_warp_patch = false;             // testnet4
@@ -434,6 +516,11 @@ settings::settings(chain::selection context) NOEXCEPT
             bip9_bit0_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             bip9_bit1_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             bip9_bit2_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            bip54_timewarp_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_timespan_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_sigops_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_txsize_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_coinbase_deployment.start = chain::chain_state::deployment::always_active;
             checkpoints = {};
             milestone = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             minimum_work = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
@@ -501,6 +588,11 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip147 = true;
             forks.bip341 = true;
             forks.bip342 = true;
+            forks.bip54_timewarp = true;
+            forks.bip54_timespan = true;
+            forks.bip54_sigops = true;
+            forks.bip54_txsize = true;
+            forks.bip54_coinbase = true;
             forks.retarget = true;                     // !regtest
             forks.difficult = true;                    // !testnet
             forks.time_warp_patch = false;             // testnet4

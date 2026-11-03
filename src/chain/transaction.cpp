@@ -620,6 +620,22 @@ bool transaction::is_signature_operations_limited(bool bip16,
     return signature_operations(bip16, bip141) > limit;
 }
 
+size_t transaction::prevout_signature_operations() const NOEXCEPT
+{
+    // Overflow returns max_size_t.
+    const auto in = [](size_t total, const auto& input) NOEXCEPT
+    {
+        return ceilinged_add(total, input->prevout_signature_operations());
+    };
+
+    return std::accumulate(inputs_->cbegin(), inputs_->cend(), zero, in);
+}
+
+bool transaction::is_prevout_signature_operations_limited() const NOEXCEPT
+{
+    return prevout_signature_operations() > max_prevout_sigops;
+}
+
 // Check (context free).
 // ----------------------------------------------------------------------------
 
@@ -966,9 +982,10 @@ code transaction::check(const context& ctx) const NOEXCEPT
 
 // Do not need to invoke on coinbase.
 // This assumes that prevout caching is completed on all inputs.
-code transaction::accept(const context&) const NOEXCEPT
+code transaction::accept(const context& ctx) const NOEXCEPT
 {
     ////BC_ASSERT(!is_coinbase());
+    const auto bip54 = ctx.is_enabled(bip54_sigops_rule);
 
     if (is_coinbase())
         return error::transaction_success;
@@ -976,6 +993,8 @@ code transaction::accept(const context&) const NOEXCEPT
         return error::missing_previous_output;
     if (is_overspent())
         return error::spend_exceeds_value;
+    if (bip54 && is_prevout_signature_operations_limited())
+        return error::transaction_prevout_sigop_limit;
 
     return error::transaction_success;
 }

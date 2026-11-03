@@ -40,7 +40,6 @@ struct build_version_t
 {
     std::string_view semantic;
     std::string_view commit_hash;
-    std::string_view repository_url;
     bool dirty;
 };
 

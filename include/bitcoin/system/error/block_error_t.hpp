@@ -43,6 +43,7 @@ enum block_error_t : uint8_t
     anachronistic_timestamp,
     incorrect_proof_of_work,
     early_timestamp,
+    negative_timespan,
 
     // confirm header
     orphan_block,
@@ -66,6 +67,9 @@ enum block_error_t : uint8_t
     invalid_witness_commitment,
     block_weight_limit,
     invalid_signet_solution,
+    invalid_transaction_size,
+    coinbase_locktime_mismatch,
+    coinbase_sequence_final,
 
     // connect block
     invalid_signature,

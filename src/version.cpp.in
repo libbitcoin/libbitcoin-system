@@ -15,7 +15,6 @@ const build_version_t& build_version() noexcept
     {
         "@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@.@LIBBITCOIN_VERSION_PATCH@",
         "@GIT_COMMIT_HASH@",
-        "@GIT_ORIGIN_URL@",
         @GIT_DIRTY@ != 0
     };
 

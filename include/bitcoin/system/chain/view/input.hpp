@@ -65,6 +65,7 @@ public:
     /// Methods.
     bool is_roller() const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+    size_t prevout_signature_operations() const NOEXCEPT;
 
     /// Public mutable prevout, populated by block view (null if not).
     mutable const output* prevout{};

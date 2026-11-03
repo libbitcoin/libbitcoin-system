@@ -57,13 +57,24 @@ public:
         return bits != work_required;
     }
 
-    // Testnet4 / BIP94 specific (the block's timestamp is too early on
-    // difficulty adjustment block).
+    // The block's timestamp is too early on a difficulty adjustment block.
     inline bool is_early_timestamp(uint32_t retargeting_interval) const NOEXCEPT
     {
-        return is_enabled(chain::flags::time_warp_patch)
+        const auto bip94 = is_enabled(chain::flags::time_warp_patch);
+        const auto bip54 = is_enabled(chain::flags::bip54_timewarp_rule);
+        const auto limit = bip94 ? max_timewarp : max_timewarp_bip54;
+        return (bip94 || bip54)
             && is_zero(height % retargeting_interval)
-            && (timestamp < floored_subtract(previous_timestamp, max_timewarp));
+            && (timestamp < floored_subtract(previous_timestamp, limit));
+    }
+
+    // The block's timestamp is before that of the first block of its period,
+    // on the last block of the period (bip54).
+    inline bool is_negative_timespan(uint32_t retargeting_interval) const NOEXCEPT
+    {
+        return is_enabled(chain::flags::bip54_timespan_rule)
+            && (height % retargeting_interval == sub1(retargeting_interval))
+            && (timestamp < retarget_timestamp);
     }
 
     /// Header context within chain.
@@ -74,6 +85,7 @@ public:
     uint32_t minimum_block_version{};
     uint32_t work_required{};
     uint32_t previous_timestamp{};
+    uint32_t retarget_timestamp{};
 };
 
 BC_API bool operator==(const context& left, const context& right) NOEXCEPT;

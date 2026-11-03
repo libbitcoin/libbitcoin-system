@@ -438,6 +438,26 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     return sigops;
 }
 
+// Counts input script sigops with those of the prevout script, or of the
+// embedded script of a pay-to-script-hash prevout (zero if not push only).
+size_t input::prevout_signature_operations() const NOEXCEPT
+{
+    const auto sigops = script_->signature_operations(true);
+
+    // Null prevout/input (coinbase) cannot have embedded script.
+    if (!prevout)
+        return sigops;
+
+    chain::script embedded;
+    if (script_->extract_sigop_script(embedded, prevout->script()))
+        return ceilinged_add(sigops, embedded.signature_operations(true));
+
+    if (script::is_pay_script_hash_pattern(prevout->script().ops()))
+        return sigops;
+
+    return ceilinged_add(sigops, prevout->script().signature_operations(true));
+}
+
 BC_POP_WARNING()
 
 } // namespace chain

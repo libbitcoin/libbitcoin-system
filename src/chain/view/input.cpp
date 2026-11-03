@@ -177,6 +177,22 @@ size_t input::signature_operations(bool bip16,
     return sigops;
 }
 
+size_t input::prevout_signature_operations() const NOEXCEPT
+{
+    const auto sigops = script().signature_operations(true);
+    if (is_null(prevout))
+        return sigops;
+
+    chain::script embedded;
+    if (script().extract_sigop_script(embedded, prevout->script()))
+        return ceilinged_add(sigops, embedded.signature_operations(true));
+
+    if (script::is_pay_script_hash_pattern(prevout->script().ops()))
+        return sigops;
+
+    return ceilinged_add(sigops, prevout->script().signature_operations(true));
+}
+
 } // namespace view
 } // namespace chain
 } // namespace system

@@ -291,6 +291,61 @@ BC_AUTO_TEST_CASE(script__multisig__soft_errors__push_false)
     }
 }
 
+// Keys and endorsements are both evaluated from the top of the stack.
+constexpr auto multisig_not_key_a = "03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864";
+constexpr auto multisig_not_key_b = "02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c";
+
+// The spend is not a coinbase, so that it can be endorsed.
+static transaction_accessor multisig_not_spend(const std::string& input_script, const std::string& output_script)
+{
+    const transaction_accessor tx{ 0, inputs{ { point{ one_hash, 0 }, script{ input_script }, 0 } }, outputs{}, 0 };
+    tx.inputs_ptr()->front()->prevout = to_shared(output{ {}, script{ output_script } });
+    return tx;
+}
+
+// 3-of-3 with the signed key second or top, scriptSig: 0 [bad] [bad] [sig].
+static transaction_accessor multisig_not_tx(bool signed_key_on_top)
+{
+    const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
+    ec_compressed point;
+    if (!secret_to_public(point, secret))
+        return {};
+
+    const auto signed_key = encode_base16(point);
+    const auto key2 = signed_key_on_top ? multisig_not_key_b : signed_key;
+    const auto key3 = signed_key_on_top ? signed_key : multisig_not_key_b;
+    const auto output = "3 [" + std::string{ multisig_not_key_a } + "] [" + key2 + "] [" + key3 + "] 3 checkmultisig not";
+
+    endorsement top;
+    const auto unsigned_tx = multisig_not_spend("", output);
+    if (!unsigned_tx.create_endorsement(top, secret, script{ output }, 0, 0, coverage::hash_all, script_version::unversioned, flags::no_rules))
+        return {};
+
+    return multisig_not_spend("0 [0101] [0101] [" + encode_base16(top) + "]", output);
+}
+
+BC_AUTO_TEST_CASE(script__multisig_not__top_endorsement_fails_top_key__invalid_der_not_decoded)
+{
+    const auto tx = multisig_not_tx(false);
+    BC_REQUIRE(tx.is_valid());
+
+    // Three endorsements remain against two keys, so the op is false.
+    BC_CHECK(tx.connect({ flags::no_rules }, 0) == error::script_success);
+    BC_CHECK(tx.connect({ flags::bip66_rule }, 0) == error::script_success);
+    BC_CHECK(tx.connect({ flags::all_rules }, 0) == error::script_success);
+}
+
+BC_AUTO_TEST_CASE(script__multisig_not__top_endorsement_verifies_top_key__invalid_der_decoded)
+{
+    const auto tx = multisig_not_tx(true);
+    BC_REQUIRE(tx.is_valid());
+
+    // Two endorsements remain against two keys, so the next is decoded.
+    BC_CHECK(tx.connect({ flags::no_rules }, 0) == error::script_success);
+    BC_CHECK(tx.connect({ flags::bip66_rule }, 0) == error::op_check_multisig_decode_signature);
+    BC_CHECK(tx.connect({ flags::all_rules }, 0) == error::op_check_multisig_decode_signature);
+}
+
 BC_AUTO_TEST_CASE(script__checksigverify__empty_key_without_bip342__empty_endorsement)
 {
     const script_test test

@@ -96,6 +96,21 @@ enum flags : uint32_t
     /// Taproot: validation of tapscripts.
     bip342_rule = bit_right<uint32_t>(16),
 
+    /// No retarget block more than two hours before its parent (soft fork, security).
+    bip54_timewarp_rule = bit_right<uint32_t>(17),
+
+    /// No period-closing block before the period's first block (soft fork, security).
+    bip54_timespan_rule = bit_right<uint32_t>(18),
+
+    /// Limit accurate legacy sigops of each transaction's inputs (soft fork, security).
+    bip54_sigops_rule = bit_right<uint32_t>(19),
+
+    /// No transaction of 64 bytes witness-stripped (soft fork, security).
+    bip54_txsize_rule = bit_right<uint32_t>(20),
+
+    /// Coinbase locktime is the parent height and sequence is not final (soft fork, deflation).
+    bip54_coinbase_rule = bit_right<uint32_t>(21),
+
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 
