@@ -1078,6 +1078,17 @@ BC_AUTO_TEST_CASE(psbt__others__no_global_unknowns__empty)
     BC_REQUIRE(instance.others().empty());
 }
 
+BC_AUTO_TEST_CASE(psbt__others__global_type_above_core_range__preserved)
+{
+    const transaction instance{ base16_chunk("70736274ff" "01000a" "00000000000000000000" "03fd000101aa" "00") };
+    BC_REQUIRE(instance);
+    BC_REQUIRE_EQUAL(instance.others().size(), one);
+    BC_REQUIRE_EQUAL(instance.others().front().key, base16_chunk("fd0001"));
+    const transaction copy{ instance.to_chunk() };
+    BC_REQUIRE(copy);
+    BC_REQUIRE(copy.others() == instance.others());
+}
+
 BC_AUTO_TEST_CASE(psbt__fallback_locktime__version_0__none)
 {
     const transaction instance{ VALID_EMPTY_TX };
@@ -1470,6 +1481,24 @@ static bool parse_input(input& in, const data_chunk& data, uint32_t version) NOE
 {
     read::bytes::copy source(data);
     return in.from_data(source, version);
+}
+
+BC_AUTO_TEST_CASE(psbt__output_from_data__type_above_core_range__preserved)
+{
+    output instance{};
+    BC_REQUIRE(parse_output(instance, base16_chunk("03fd000101aa" "00"), transaction::version_0));
+    BC_REQUIRE_EQUAL(instance.others.size(), one);
+    BC_REQUIRE_EQUAL(instance.others.front().key, base16_chunk("fd0001"));
+    BC_REQUIRE(!instance.embedded_script);
+}
+
+BC_AUTO_TEST_CASE(psbt__input_from_data__type_above_core_range__preserved)
+{
+    input instance{};
+    BC_REQUIRE(parse_input(instance, base16_chunk("03fd000101aa" "00"), transaction::version_0));
+    BC_REQUIRE_EQUAL(instance.others.size(), one);
+    BC_REQUIRE_EQUAL(instance.others.front().key, base16_chunk("fd0001"));
+    BC_REQUIRE(!instance.non_witness_utxo);
 }
 
 BC_AUTO_TEST_CASE(psbt__output_from_data__duplicate_key__false)

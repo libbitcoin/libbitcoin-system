@@ -177,7 +177,7 @@ witness witness::from_data(reader& source, bool prefix) NOEXCEPT
         const auto count = source.read_size(max_bytes);
         stack.reserve(count);
 
-        for (size_t element{}; element < count; ++element)
+        for (size_t element{}; element < count && source; ++element)
         {
             stack.push_back(read_element(source));
             size += element_size(stack.back());

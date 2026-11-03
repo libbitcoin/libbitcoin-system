@@ -235,6 +235,13 @@ bool transaction::parse_global(reader& source, size_t& input_count,
         if (is_duplicate(keys, entry.key))
             return false;
 
+        // Only core types are typed, larger ones are preserved untyped.
+        if (entry.type() > max_uint8)
+        {
+            others_.push_back(std::move(entry));
+            continue;
+        }
+
         auto data = entry.keydata();
         const auto typed = data.empty();
         switch (static_cast<global_key>(entry.type()))

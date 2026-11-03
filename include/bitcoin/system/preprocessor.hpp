@@ -125,6 +125,13 @@
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
+/// Applies api to an explicit instantiation definition (NX exports by declaration).
+#if defined(HAVE_WINDOWS_LIBS)
+    #define BC_INSTANCE(api) api
+#else
+    #define BC_INSTANCE(api)
+#endif
+
 /// Inlines.
 /// ---------------------------------------------------------------------------
 

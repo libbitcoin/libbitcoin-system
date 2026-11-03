@@ -135,7 +135,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
         const auto count = source.read_size(max_count);
         txs->reserve(count);
 
-        for (size_t tx{}; tx < count; ++tx)
+        for (size_t tx{}; tx < count && source; ++tx)
             txs->push_back(to_shared<transaction>(source, witness));
 
         // This is a pointer copy (non-const to const).
