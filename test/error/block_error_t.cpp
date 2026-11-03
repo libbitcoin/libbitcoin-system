@@ -89,6 +89,15 @@ BC_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_expected_me
     BC_REQUIRE_EQUAL(ec.message(), "proof of work does not match bits field");
 }
 
+BC_AUTO_TEST_CASE(block_error_t__code__early_timestamp__true_expected_message)
+{
+    constexpr auto value = error::early_timestamp;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "retarget block timestamp is too early");
+}
+
 // confirm header
 
 BC_AUTO_TEST_CASE(block_error_t__code__orphan_block__true_expected_message)

@@ -107,7 +107,8 @@ inline deployments_t deployments(const system::settings& settings) NOEXCEPT
     {
         settings.bip9_bit0_deployment,
         settings.bip9_bit1_deployment,
-        settings.bip9_bit2_deployment
+        settings.bip9_bit2_deployment,
+        settings.bip54_timewarp_deployment
     };
 }
 
@@ -191,6 +192,8 @@ uint32_t chain_state::configured_flags(const forks& forks) NOEXCEPT
         result |= flags::bip341_rule;
     if (forks.bip342)
         result |= flags::bip342_rule;
+    if (forks.bip54_timewarp)
+        result |= flags::bip54_timewarp_rule;
 
     return result;
 }

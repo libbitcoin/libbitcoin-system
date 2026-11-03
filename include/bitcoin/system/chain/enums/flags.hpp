@@ -96,6 +96,9 @@ enum flags : uint32_t
     /// Taproot: validation of tapscripts.
     bip342_rule = bit_right<uint32_t>(16),
 
+    /// No retarget block more than two hours before its parent (soft fork, security).
+    bip54_timewarp_rule = bit_right<uint32_t>(17),
+
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 

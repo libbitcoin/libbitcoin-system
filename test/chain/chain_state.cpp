@@ -487,6 +487,22 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_always_active_unconfigured_
     BC_REQUIRE(!to_bool(state.flags() & flags::bip68_rule));
 }
 
+// bip54 deployments are always active on regtest and never signaled elsewhere.
+BC_AUTO_TEST_CASE(chain_state__activation__regtest__bip54_rules)
+{
+    const settings settings(selection::regtest);
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_timewarp_rule));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__mainnet__no_bip54_rules)
+{
+    const settings settings(selection::mainnet);
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip54_timewarp_rule));
+    BC_REQUIRE_EQUAL(chain_state::get_map(1000, settings).signals[3].high, chain_state::map::unrequested);
+}
+
 BC_AUTO_TEST_CASE(chain_state__activation__bip9_bit0_signaled_bip90__checkpoint_only)
 {
     settings settings(selection::mainnet);

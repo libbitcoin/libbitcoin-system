@@ -88,6 +88,8 @@ BC_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BC_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 950u);
     BC_REQUIRE_EQUAL(configuration.bip34_activation_sample, 1000u);
     BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 227931u);
+    BC_REQUIRE(configuration.forks.bip54_timewarp);
+    BC_REQUIRE_EQUAL(configuration.bip54_timewarp_deployment.threshold, 0u);
     BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 388381u);
     BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 363725u);
     const chain::checkpoint bit0_active("000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328u);
@@ -232,6 +234,7 @@ BC_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
     BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
     BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 100000000u);
+    BC_REQUIRE_EQUAL(configuration.bip54_timewarp_deployment.start, chain::chain_state::deployment::always_active);
     BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 1351u);
     BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 1251u);
     const chain::checkpoint genesis(genesis_block.hash(), 0u);

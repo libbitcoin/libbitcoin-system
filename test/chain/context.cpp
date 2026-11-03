@@ -106,4 +106,33 @@ BC_AUTO_TEST_CASE(context__is_early_timestamp__floored_previous__false)
     BC_REQUIRE(!instance.is_early_timestamp(2016));
 }
 
+// bip54 bounds the retarget block timestamp to two hours before its parent.
+BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_at_limit__false)
+{
+    constexpr auto limit = possible_narrow_cast<uint32_t>(10000u - max_timewarp_bip54);
+    const context instance{ flags::bip54_timewarp_rule, limit, 0, 2016, 0, 0, 10000 };
+    BC_REQUIRE(!instance.is_early_timestamp(2016));
+}
+
+BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_below_limit__true)
+{
+    constexpr auto limit = possible_narrow_cast<uint32_t>(10000u - max_timewarp_bip54);
+    const context instance{ flags::bip54_timewarp_rule, sub1(limit), 0, 2016, 0, 0, 10000 };
+    BC_REQUIRE(instance.is_early_timestamp(2016));
+}
+
+BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_not_retarget_height__false)
+{
+    const context instance{ flags::bip54_timewarp_rule, 0, 0, 2015, 0, 0, 10000 };
+    BC_REQUIRE(!instance.is_early_timestamp(2016));
+}
+
+// The bip94 bound takes precedence where both apply.
+BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_and_patch__patch_limit)
+{
+    constexpr auto limit = possible_narrow_cast<uint32_t>(10000u - max_timewarp);
+    const context instance{ flags::bip54_timewarp_rule | flags::time_warp_patch, sub1(limit), 0, 2016, 0, 0, 10000 };
+    BC_REQUIRE(instance.is_early_timestamp(2016));
+}
+
 BC_AUTO_TEST_SUITE_END()

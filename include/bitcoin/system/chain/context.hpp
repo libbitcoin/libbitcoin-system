@@ -57,13 +57,15 @@ public:
         return bits != work_required;
     }
 
-    // Testnet4 / BIP94 specific (the block's timestamp is too early on
-    // difficulty adjustment block).
+    // The block's timestamp is too early on a difficulty adjustment block.
     inline bool is_early_timestamp(uint32_t retargeting_interval) const NOEXCEPT
     {
-        return is_enabled(chain::flags::time_warp_patch)
+        const auto bip94 = is_enabled(chain::flags::time_warp_patch);
+        const auto bip54 = is_enabled(chain::flags::bip54_timewarp_rule);
+        const auto limit = bip94 ? max_timewarp : max_timewarp_bip54;
+        return (bip94 || bip54)
             && is_zero(height % retargeting_interval)
-            && (timestamp < floored_subtract(previous_timestamp, max_timewarp));
+            && (timestamp < floored_subtract(previous_timestamp, limit));
     }
 
     /// Header context within chain.

@@ -59,6 +59,9 @@ struct forks
     bool bip341;
     bool bip342;
 
+    /// bip54 deployments.
+    bool bip54_timewarp;
+
     /// Regtest does not retarget.
     bool retarget;
 

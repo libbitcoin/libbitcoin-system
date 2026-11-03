@@ -38,6 +38,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { insufficient_block_version, "block version rejected at current height" },
     { anachronistic_timestamp, "block timestamp is too early" },
     { incorrect_proof_of_work, "proof of work does not match bits field" },
+    { early_timestamp, "retarget block timestamp is too early" },
 
     // confirm header
     { orphan_block, "block parent is missing" },
