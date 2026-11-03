@@ -80,4 +80,13 @@
     </ClCompile>
   </ItemDefinitionGroup>
 
+  <!-- clang-cl enables arm intrinsics by one -march of all extensions, as gcc/clang, where msvc uses the WITH_ options. -->
+  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And '$(Platform)' == 'ARM64'">
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Option-sha)' == 'true' And '$(Option-sha512)' != 'true'">-march=armv8-a+sha2+aes %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-sha)' != 'true' And '$(Option-sha512)' == 'true'">-march=armv8.2-a+sha3 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-sha)' == 'true' And '$(Option-sha512)' == 'true'">-march=armv8.2-a+sha2+aes+sha3 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
 </Project>

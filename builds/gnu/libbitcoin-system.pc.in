@@ -37,7 +37,8 @@ Cflags: \
     @sha512@ \
     @sse41@ \
     @aesni@ \
-    @vaes@
+    @vaes@ \
+    @arm_march@
 
 Libs: \
     -L${libdir} \

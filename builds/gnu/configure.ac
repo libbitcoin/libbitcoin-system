@@ -749,6 +749,25 @@ AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
 
 # Check architecture.
 #==============================================================================
+arm_base=""
+arm_extensions=""
+AS_IF([test "x${enable_aes}" != "xno"],
+  [ arm_base="armv8-a"; arm_extensions="${arm_extensions}+aes"; ])
+AS_IF([test "x${enable_sha}" != "xno"],
+  [ arm_base="armv8-a"; arm_extensions="${arm_extensions}+sha2"; ])
+AS_IF([test "x${enable_sha3}" != "xno"],
+  [ arm_base="armv8.2-a"; arm_extensions="${arm_extensions}+sha3"; ])
+
+AS_IF([test "x${arm_extensions}" != "x"],
+  [
+    AS_CASE(["${CFLAGS} ${CXXFLAGS}"],
+      [*-march=*|*-mcpu=*],
+      [ AC_MSG_ERROR([Compiler flags -march or -mcpu conflict with enabled ARM extension options.]) ])
+    CFLAGS="${CFLAGS} -march=${arm_base}${arm_extensions}";
+    CXXFLAGS="${CXXFLAGS} -march=${arm_base}${arm_extensions}";
+    AC_SUBST([arm_march], ["-march=${arm_base}${arm_extensions}"])
+  ])
+
 AC_COMPILE_IFELSE(
   [
     AC_LANG_PROGRAM(
