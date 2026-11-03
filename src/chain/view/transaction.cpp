@@ -621,14 +621,18 @@ code transaction::check(const context& ctx) const NOEXCEPT
     return error::transaction_success;
 }
 
-code transaction::accept(const context&) const NOEXCEPT
+code transaction::accept(const context& ctx) const NOEXCEPT
 {
+    const auto bip54 = ctx.is_enabled(bip54_sigops_rule);
+
     if (coinbase_)
         return error::transaction_success;
     if (is_missing_prevouts())
         return error::missing_previous_output;
     if (is_overspent())
         return error::spend_exceeds_value;
+    if (bip54 && is_prevout_signature_operations_limited())
+        return error::transaction_prevout_sigop_limit;
 
     return error::transaction_success;
 }
@@ -702,6 +706,23 @@ bool transaction::is_overspent() const NOEXCEPT
 {
     BC_ASSERT(!coinbase_);
     return spend() > value();
+}
+
+size_t transaction::prevout_signature_operations() const NOEXCEPT
+{
+    BC_ASSERT(populated_);
+    size_t total{};
+
+    // Overflow returns max_size_t.
+    for (auto in = inputs_begin_; in != inputs_end_; ++in)
+        total = ceilinged_add(total, in->prevout_signature_operations());
+
+    return total;
+}
+
+bool transaction::is_prevout_signature_operations_limited() const NOEXCEPT
+{
+    return prevout_signature_operations() > max_prevout_sigops;
 }
 
 code transaction::connect_input(const context& ctx,

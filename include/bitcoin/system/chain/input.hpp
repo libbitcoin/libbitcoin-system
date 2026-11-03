@@ -112,6 +112,9 @@ public:
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
+    /// Accurate sigops of input and prevout or embedded script (no witness).
+    size_t prevout_signature_operations() const NOEXCEPT;
+
     /// Requires metadata.prevout_height and median_time_past (otherwise true).
     bool is_relative_locked(size_t height,
         uint32_t median_time_past) const NOEXCEPT;

@@ -783,6 +783,20 @@ BC_AUTO_TEST_CASE(block_view__accept__overspent__spend_exceeds_value)
     BC_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::spend_exceeds_value);
 }
 
+// bip54 limits each transaction to 2500 accurately counted legacy sigops.
+BC_AUTO_TEST_CASE(block_view__accept__bip54_sigops_above_limit__transaction_prevout_sigop_limit)
+{
+    const context ctx{ flags::bip54_sigops_rule, 0, 0, 100, 0, 0, 0 };
+    const auto count = add1(max_prevout_sigops / 20u);
+    const inputs ins(count, input{ point{ one_hash, 0 }, script{}, max_input_sequence });
+    const transaction tx1{ 1, ins, outputs{ output{ 1, script{} } }, 0 };
+    const outputs prevouts(count, output{ 1, script{ operations{ operation{ opcode::checkmultisig } } } });
+    chain::view::block view{ view_block_data({ view_coinbase(), tx1 }), true };
+    BC_REQUIRE_EQUAL(view.populate(ctx, view_prevouts_data(prevouts)), error::block_success);
+    BC_REQUIRE_EQUAL(view.accept(ctx, subsidy_interval, initial_subsidy), error::transaction_prevout_sigop_limit);
+    BC_REQUIRE_EQUAL(view.accept(no_rules_context, subsidy_interval, initial_subsidy), error::block_success);
+}
+
 // bip143 native p2wpkh (inputs: p2pk, p2wpkh).
 static const auto bip143_tx_data = base16_chunk("01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee635711000000");
 static const script bip143_p2pk_script(base16_chunk("2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac"), false);

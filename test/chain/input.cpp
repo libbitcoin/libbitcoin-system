@@ -579,4 +579,73 @@ BC_AUTO_TEST_CASE(input__signature_operations__no_prevout__input_script_only)
     BC_REQUIRE_EQUAL(instance.signature_operations(true, true), heavy_sigops_factor);
 }
 
+// prevout_signature_operations
+// ----------------------------------------------------------------------------
+// bip54 counts accurately, so a preceding OP_1..OP_16 bounds a multisig.
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__no_prevout__input_script_only)
+{
+    const input instance{ point{}, script{ operations{ operation{ opcode::checksig }, operation{ opcode::checksig } } }, 42 };
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), two);
+}
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__bare_multisig__accurate)
+{
+    const script prevout{ operations{ operation{ opcode::push_positive_2 }, operation{ opcode::checkmultisig } } };
+    const auto instance = sigops_input(script{}, prevout);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), two);
+    BC_REQUIRE_EQUAL(prevout.signature_operations(false), 20u);
+}
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__embedded_multisig__accurate)
+{
+    const auto data = script{ operations{ operation{ opcode::push_positive_3 }, operation{ opcode::checkmultisig } } }.to_data(false);
+    const script prevout{ script::to_pay_script_hash_pattern(bitcoin_short_hash(data)) };
+    const script input_script{ operations{ operation{ data, false } } };
+    const auto instance = sigops_input(input_script, prevout);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), 3u);
+}
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__script_hash_not_push_only__input_script_only)
+{
+    const script prevout{ script::to_pay_script_hash_pattern(short_hash{}) };
+    const script input_script{ operations{ operation{ opcode::checksig } } };
+    const auto instance = sigops_input(input_script, prevout);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), one);
+}
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__script_hash_numeric_last_push__input_script_only)
+{
+    const script prevout{ script::to_pay_script_hash_pattern(short_hash{}) };
+    const script input_script{ operations{ operation{ opcode::checksig }, operation{ opcode::push_positive_16 } } };
+    const auto instance = sigops_input(input_script, prevout);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), one);
+}
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__script_hash_empty_input_script__zero)
+{
+    const script prevout{ script::to_pay_script_hash_pattern(short_hash{}) };
+    const auto instance = sigops_input(script{}, prevout);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), zero);
+}
+
+// A truncated push consumes the remaining script, so counting stops there.
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__truncated_push__counted_to_truncation)
+{
+    const script input_script(base16_chunk("acac4c05ac"), false);
+    const script prevout{ operations{ operation{ opcode::checksig } } };
+    const auto instance = sigops_input(input_script, prevout);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), 3u);
+}
+
+BC_AUTO_TEST_CASE(input__prevout_signature_operations__witness_script__not_counted)
+{
+    const auto data = script{ operations{ operation{ opcode::checksig }, operation{ opcode::checksig } } }.to_data(false);
+    const data_chunk program(hash_size, 0x01_u8);
+    const script prevout{ script::to_pay_witness_pattern(0, program) };
+    const chunk_cptrs stack{ to_shared<data_chunk>(data) };
+    const auto instance = sigops_input(script{}, prevout, chain::witness{ stack });
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), zero);
+}
+
 BC_AUTO_TEST_SUITE_END()

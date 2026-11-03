@@ -102,6 +102,9 @@ enum flags : uint32_t
     /// No period-closing block before the period's first block (soft fork, security).
     bip54_timespan_rule = bit_right<uint32_t>(18),
 
+    /// Limit accurate legacy sigops of each transaction's inputs (soft fork, security).
+    bip54_sigops_rule = bit_right<uint32_t>(19),
+
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 

@@ -2286,6 +2286,41 @@ BC_AUTO_TEST_CASE(transaction__accept__output_value_overflow__spend_exceeds_valu
     BC_REQUIRE_EQUAL(instance.accept(ctx), error::spend_exceeds_value);
 }
 
+// bip54 limits each transaction to 2500 accurately counted legacy sigops.
+static transaction multisig_spend(size_t count)
+{
+    const inputs ins(count, input{ point{ one_hash, 0 }, script{}, max_input_sequence });
+    const outputs outs{ output{ 42, script{} } };
+    const transaction instance{ 1, ins, outs, 0 };
+    for (const auto& in: *instance.inputs_ptr())
+        in->prevout = to_shared(output{ 1, script{ operations{ operation{ opcode::checkmultisig } } } });
+
+    return instance;
+}
+
+BC_AUTO_TEST_CASE(transaction__accept__bip54_sigops_at_limit__transaction_success)
+{
+    const context ctx{ flags::bip54_sigops_rule, 0, 0, 100, 0, 0, 0 };
+    const auto instance = multisig_spend(max_prevout_sigops / 20u);
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), max_prevout_sigops);
+    BC_REQUIRE_EQUAL(instance.accept(ctx), error::transaction_success);
+}
+
+BC_AUTO_TEST_CASE(transaction__accept__bip54_sigops_above_limit__transaction_prevout_sigop_limit)
+{
+    const context ctx{ flags::bip54_sigops_rule, 0, 0, 100, 0, 0, 0 };
+    const auto instance = multisig_spend(add1(max_prevout_sigops / 20u));
+    BC_REQUIRE_EQUAL(instance.prevout_signature_operations(), add1(max_prevout_sigops / 20u) * 20u);
+    BC_REQUIRE_EQUAL(instance.accept(ctx), error::transaction_prevout_sigop_limit);
+}
+
+BC_AUTO_TEST_CASE(transaction__accept__bip54_sigops_disabled__transaction_success)
+{
+    const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
+    const auto instance = multisig_spend(add1(max_prevout_sigops / 20u));
+    BC_REQUIRE_EQUAL(instance.accept(ctx), error::transaction_success);
+}
+
 BC_AUTO_TEST_CASE(transaction__accept__populated__transaction_success)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };

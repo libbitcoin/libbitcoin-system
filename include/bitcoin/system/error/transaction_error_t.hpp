@@ -53,6 +53,7 @@ enum transaction_error_t
     coinbase_maturity,
     spend_exceeds_value,
     transaction_sigop_limit,
+    transaction_prevout_sigop_limit,
     absolute_time_locked,
     relative_time_locked,
     transaction_weight_limit,

@@ -168,6 +168,15 @@ BC_AUTO_TEST_CASE(transaction_error_t__code__transaction_sigop_limit__true_expec
     BC_REQUIRE_EQUAL(ec.message(), "too many transaction embedded signature operations");
 }
 
+BC_AUTO_TEST_CASE(transaction_error_t__code__transaction_prevout_sigop_limit__true_expected_message)
+{
+    constexpr auto value = error::transaction_prevout_sigop_limit;
+    const auto ec = code(value);
+    BC_REQUIRE(ec);
+    BC_REQUIRE(ec == value);
+    BC_REQUIRE_EQUAL(ec.message(), "too many transaction prevout signature operations");
+}
+
 BC_AUTO_TEST_CASE(transaction_error_t__code__absolute_time_locked__true_expected_message)
 {
     constexpr auto value = error::absolute_time_locked;

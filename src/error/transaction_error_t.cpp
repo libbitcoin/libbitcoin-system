@@ -47,6 +47,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
     { coinbase_maturity, "immature coinbase spent" },
     { spend_exceeds_value, "spend exceeds value of inputs" },
     { transaction_sigop_limit, "too many transaction embedded signature operations" },
+    { transaction_prevout_sigop_limit, "too many transaction prevout signature operations" },
     { absolute_time_locked, "transaction absolute time locked" },
     { relative_time_locked, "transaction relative time locked" },
     { transaction_weight_limit, "transaction weight limit exceeded" },

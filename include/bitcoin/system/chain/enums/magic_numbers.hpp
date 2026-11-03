@@ -76,6 +76,7 @@ constexpr size_t relative_locktime_mask_left = 16;
 
 constexpr size_t heavy_sigops_factor = 4;
 constexpr size_t max_fast_sigops = heavy_sigops_factor * max_block_sigops;
+constexpr size_t max_prevout_sigops = 2'500;
 constexpr size_t light_weight_factor = 4;
 constexpr size_t max_block_weight = light_weight_factor * max_block_size;
 constexpr size_t base_size_contribution = 3;
