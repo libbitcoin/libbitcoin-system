@@ -23,9 +23,6 @@ m4_define([_git_dirty],
 
 m4_define([_GIT_DIRTY], m4_ifnblank(_git_dirty, [_git_dirty], [0]))
 
-m4_define([_GIT_ORIGIN_URL],
-    m4_dquote(m4_esyscmd_s([git ls-remote --get-url 2>/dev/null | grep -e '://' -e '@' || echo unknown])))
-
 m4_define([_LIBBITCOIN_VERSION_MAJOR], [4])
 m4_define([_LIBBITCOIN_VERSION_MINOR], [0])
 m4_define([_LIBBITCOIN_VERSION_PATCH], [_GIT_COMMIT_HEIGHT])
@@ -44,8 +41,6 @@ AC_SUBST([GIT_COMMIT_HEIGHT], [_GIT_COMMIT_HEIGHT])
 AC_MSG_NOTICE([GIT_COMMIT_HEIGHT : ${GIT_COMMIT_HEIGHT}])
 AC_SUBST([GIT_DIRTY], [_GIT_DIRTY])
 AC_MSG_NOTICE([GIT_DIRTY : ${GIT_DIRTY}])
-AC_SUBST([GIT_ORIGIN_URL], [_GIT_ORIGIN_URL])
-AC_MSG_NOTICE([GIT_ORIGIN_URL : ${GIT_ORIGIN_URL}])
 
 AC_SUBST([LIBBITCOIN_VERSION_MAJOR], [_LIBBITCOIN_VERSION_MAJOR])
 AC_MSG_NOTICE([LIBBITCOIN_VERSION_MAJOR : ${LIBBITCOIN_VERSION_MAJOR}])
