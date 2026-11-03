@@ -68,6 +68,13 @@ bool input::from_data(reader& source, uint32_t version) NOEXCEPT
         if (is_duplicate(keys, entry.key))
             return false;
 
+        // Only core types are typed, larger ones are preserved untyped.
+        if (entry.type() > max_uint8)
+        {
+            others.push_back(std::move(entry));
+            continue;
+        }
+
         auto data = entry.keydata();
         const auto typed = data.empty();
         switch (static_cast<input_key>(entry.type()))
