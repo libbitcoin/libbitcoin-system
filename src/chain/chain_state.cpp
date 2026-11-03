@@ -89,6 +89,46 @@ inline bool is_bip30_exception(const hash_digest& hash,
             height == mainnet_bip30_exception_checkpoint2.height());
 }
 
+// The top three version bits are reserved for the bip9 version base.
+constexpr uint32_t bip9_version_mask = 0xe0000000;
+
+// The period boundary at or below the height.
+inline size_t period_floor(size_t height, size_t period) NOEXCEPT
+{
+    return floored_divide(height, period) * period;
+}
+
+typedef std::array<chain_state::deployment,
+    chain_state::deployment_count> deployments_t;
+
+inline deployments_t deployments(const system::settings& settings) NOEXCEPT
+{
+    return
+    {
+        settings.bip9_bit0_deployment,
+        settings.bip9_bit1_deployment,
+        settings.bip9_bit2_deployment
+    };
+}
+
+inline bool is_configured(const chain_state::deployment& deployment,
+    uint32_t configured) NOEXCEPT
+{
+    return !is_zero(bit_and(deployment.flags, configured));
+}
+
+inline bool is_signaled(const chain_state::deployment& deployment,
+    const system::settings& settings, uint32_t configured) NOEXCEPT
+{
+    const auto always = chain_state::deployment::always_active;
+
+    return is_configured(deployment, configured)
+        && deployment.start != always
+        && !is_zero(deployment.threshold)
+        && !is_zero(settings.bip9_activation_period)
+        && !(settings.forks.bip90 && deployment.buried);
+}
+
 inline uint32_t timestamp_high(const chain_state::data& values) NOEXCEPT
 {
     return values.timestamp.ordered.back();
@@ -304,29 +344,46 @@ chain_state::activations chain_state::activation(const data& values,
         result.minimum_block_version = settings.bip34_version;
     }
 
-    // TODO: bip9 historical activation.
+    const auto configured = configured_flags(forks);
 
-    // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
-    if (values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
+    // Unsignaled bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
+    if (!is_signaled(settings.bip9_bit0_deployment, settings, configured) &&
+        values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
     {
         result.flags |= flags::bip68_rule;
         result.flags |= flags::bip112_rule;
         result.flags |= flags::bip113_rule;
     }
 
-    // bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
-    if (values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
+    // Unsignaled bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
+    if (!is_signaled(settings.bip9_bit1_deployment, settings, configured) &&
+        values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
     {
         result.flags |= flags::bip141_rule;
         result.flags |= flags::bip143_rule;
         result.flags |= flags::bip147_rule;
     }
 
-    // bip9_bit2 forks are enforced above the bip9_bit2 checkpoint.
-    if (values.bip9_bit2_hash == settings.bip9_bit2_active_checkpoint.hash())
+    // Unsignaled bip9_bit2 forks are enforced above the bip9_bit2 checkpoint.
+    if (!is_signaled(settings.bip9_bit2_deployment, settings, configured) &&
+        values.bip9_bit2_hash == settings.bip9_bit2_active_checkpoint.hash())
     {
         result.flags |= flags::bip341_rule;
         result.flags |= flags::bip342_rule;
+    }
+
+    // Signaled deployments are enforced once active, others if always active.
+    const auto list = deployments(settings);
+    for (size_t index{}; index < list.size(); ++index)
+    {
+        const auto& deployment = list.at(index);
+        if (!is_configured(deployment, configured))
+            continue;
+
+        if (is_signaled(deployment, settings, configured) ?
+            values.signals.at(index).state == deployment_state::active :
+            deployment.start == deployment::always_active)
+            result.flags |= deployment.flags;
     }
 
     // If not exception, existing duplicate coinbase must be spent.
@@ -336,6 +393,54 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     return result;
+}
+
+// github.com/bitcoin/bips/blob/master/bip-0009.mediawiki#state-transitions
+// github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#deployment
+chain_state::deployment_state chain_state::next_state(
+    const deployment& deployment, deployment_state state,
+    uint32_t median_time_past, size_t count, size_t boundary) NOEXCEPT
+{
+    const auto started = median_time_past >= deployment.start;
+    const auto timed_out = median_time_past >= deployment.timeout;
+    const auto locked_in = count >= deployment.threshold;
+
+    switch (state)
+    {
+        // bip9 fails a deployment that times out before it starts.
+        case deployment_state::defined:
+        {
+            if (!deployment.speedy && timed_out)
+                return deployment_state::failed;
+
+            return started ? deployment_state::started : state;
+        }
+
+        // bip9 checks timeout before threshold, speedy trial after.
+        case deployment_state::started:
+        {
+            if (!deployment.speedy && timed_out)
+                return deployment_state::failed;
+
+            if (locked_in)
+                return deployment_state::locked_in;
+
+            return timed_out ? deployment_state::failed : state;
+        }
+
+        case deployment_state::locked_in:
+        {
+            return boundary >= deployment.activation_height ?
+                deployment_state::active : state;
+        }
+
+        case deployment_state::active:
+        case deployment_state::failed:
+        default:
+        {
+            return state;
+        }
+    }
 }
 
 size_t chain_state::bits_count(size_t height, const forks& forks,
@@ -397,14 +502,7 @@ size_t chain_state::retarget_height(size_t height, const forks& forks,
 uint32_t chain_state::median_time_past(const data& values,
     const forks&) NOEXCEPT
 {
-    // Sort the times by value to obtain the median.
-    auto times = sort_copy(values.timestamp.ordered);
-
-    // Consensus defines median time using modulo 2 element selection.
-    // This differs from arithmetic median which averages two middle values.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return times.empty() ? 0 : times.at(to_half(times.size()));
-    BC_POP_WARNING()
+    return median(values.timestamp.ordered);
 }
 
 // work_required
@@ -595,6 +693,23 @@ size_t chain_state::bip9_bit2_height(size_t height,
     return height < activation_height ? map::unrequested : activation_height;
 }
 
+chain_state::map::signal chain_state::bip9_signal(size_t height,
+    const deployment& deployment, const system::settings& settings) NOEXCEPT
+{
+    const auto period = settings.bip9_activation_period;
+
+    // Sample periods down from the boundary at/below height.
+    return
+    {
+        period_floor(height, period),
+        period,
+        settings.bip9_version_base,
+        deployment.bit,
+        deployment.start,
+        deployment.timeout
+    };
+}
+
 // Public static
 // ----------------------------------------------------------------------------
 
@@ -618,6 +733,14 @@ chain_state::map chain_state::get_map(size_t height,
     if (forks.bip341 || forks.bip342)
         map.bip9_bit2_height = bip9_bit2_height(height,
             settings.bip9_bit2_active_checkpoint);
+
+    // The signal periods of each signaled deployment.
+    const auto configured = configured_flags(forks);
+    const auto list = deployments(settings);
+    for (size_t index{}; index < list.size(); ++index)
+        if (is_signaled(list.at(index), settings, configured))
+            map.signals.at(index) = bip9_signal(height, list.at(index),
+                settings);
 
     // Genesis has no preceding block data (regtest checkpoints are at genesis).
     if (is_zero(height))
@@ -644,6 +767,26 @@ chain_state::map chain_state::get_map(size_t height,
     return map;
 }
 
+// Consensus defines median time using modulo 2 element selection.
+// This differs from arithmetic median which averages two middle values.
+uint32_t chain_state::median(const timestamps& times) NOEXCEPT
+{
+    const auto sorted = sort_copy(times);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return sorted.empty() ? 0 : sorted.at(to_half(sorted.size()));
+    BC_POP_WARNING()
+}
+
+bool chain_state::is_signal(uint32_t version, uint32_t base,
+    uint32_t bit) NOEXCEPT
+{
+    return bit_and(version, bip9_version_mask) == base
+        && get_right(version, bit);
+}
+
+// Only a miner signals, in the version of a block templated on the pool
+// state. Configured bip9 groups are signaled unconditionally, where bip9
+// defines signaling only while a deployment is started or locked in.
 uint32_t chain_state::signal_version(const system::settings& settings) NOEXCEPT
 {
     const auto& forks = settings.forks;
@@ -673,6 +816,45 @@ uint32_t chain_state::signal_version(const system::settings& settings) NOEXCEPT
         return settings.bip34_version;
 
     return settings.first_version;
+}
+
+// Signals.
+// ----------------------------------------------------------------------------
+
+// Count the previous block signal, and change state at a period boundary.
+void chain_state::promote(data::signal& signal, const deployment& deployment,
+    uint32_t version, uint32_t median_time_past, size_t height,
+    const system::settings& settings) NOEXCEPT
+{
+    const auto period = settings.bip9_activation_period;
+    if (is_signal(version, settings.bip9_version_base, deployment.bit))
+        ++signal.count;
+
+    if (is_zero(height % period))
+    {
+        signal.state = next_state(deployment, signal.state, median_time_past,
+            signal.count, height);
+        signal.count = zero;
+    }
+}
+
+// Change state at each sampled boundary, from defined below the first.
+void chain_state::reduce(data::signal& signal, const deployment& deployment,
+    size_t height, size_t period) NOEXCEPT
+{
+    if (signal.ordered.empty())
+        return;
+
+    const auto high = period_floor(height, period);
+    auto boundary = high - sub1(signal.ordered.size()) * period;
+    for (const auto& value: std::views::reverse(signal.ordered))
+    {
+        signal.state = next_state(deployment, signal.state,
+            value.median_time_past, value.count, boundary);
+        boundary += period;
+    }
+
+    signal.ordered.clear();
 }
 
 // Constructors.
@@ -721,6 +903,15 @@ chain_state::data chain_state::to_pool(const chain_state& top,
         data.timestamp.retarget = (forks.ltc_time_warp_patch && !is_one(height)) ?
             *std::next(data.timestamp.ordered.crbegin()) : data.timestamp.self;
     }
+
+    // Promote bip9 signaling from the previous block to this height.
+    const auto mtp = median_time_past(data, forks);
+    const auto configured = configured_flags(forks);
+    const auto list = deployments(settings);
+    for (size_t index{}; index < list.size(); ++index)
+        if (is_signaled(list.at(index), settings, configured))
+            promote(data.signals.at(index), list.at(index),
+                data.version.self, mtp, height, settings);
 
     // Replace previous block state with tx pool chain state for next height
     // Preserve top block timestamp for use in computation of staleness.
@@ -831,10 +1022,26 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 {
 }
 
+chain_state::data chain_state::to_values(data values,
+    const system::settings& settings) NOEXCEPT
+{
+    const auto period = settings.bip9_activation_period;
+    const auto configured = configured_flags(settings.forks);
+    const auto list = deployments(settings);
+
+    // Compute bip9 states from sampled boundaries.
+    for (size_t index{}; index < list.size(); ++index)
+        if (is_signaled(list.at(index), settings, configured))
+            reduce(values.signals.at(index), list.at(index), values.height,
+                period);
+
+    return values;
+}
+
 // From scratch (e.g. raw data obtained from store).
 chain_state::chain_state(data&& values,
     const system::settings& settings) NOEXCEPT
-  : data_(std::move(values)),
+  : data_(to_values(std::move(values), settings)),
     forks_(settings.forks),
     activations_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),

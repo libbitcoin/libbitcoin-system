@@ -115,6 +115,12 @@ public:
     size_t bip90_bip65_height{};
     size_t bip90_bip66_height{};
 
+    /// Activation parameters (bip9-style activations).
+    size_t bip9_activation_period{};
+    chain::chain_state::deployment bip9_bit0_deployment{};
+    chain::chain_state::deployment bip9_bit1_deployment{};
+    chain::chain_state::deployment bip9_bit2_deployment{};
+
     /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit0_active_checkpoint{};
 

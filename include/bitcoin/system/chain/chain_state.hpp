@@ -51,6 +51,53 @@ public:
     typedef std::shared_ptr<const chain_state> cptr;
     typedef struct { size_t count; size_t high; } range;
 
+    /// bip9 deployment states, by period.
+    enum class deployment_state : uint8_t
+    {
+        defined,
+        started,
+        locked_in,
+        active,
+        failed
+    };
+
+    /// The number of bip9 deployments (settings).
+    static constexpr size_t deployment_count = 3;
+
+    /// bip9 deployment parameters. A deployment is signaled if it is
+    /// configured with a nonzero threshold, unless always active or buried.
+    struct deployment
+    {
+        /// A start of this value is active from genesis, without signaling.
+        static constexpr uint32_t always_active = max_uint32;
+
+        /// Version bit offset signaled.
+        uint32_t bit{};
+
+        /// Rule flags activated.
+        uint32_t flags{};
+
+        /// Median time past at/above which signaling starts.
+        uint32_t start{};
+
+        /// Median time past at/above which signaling fails.
+        uint32_t timeout{};
+
+        /// Signaling blocks of a period required for lock in.
+        size_t threshold{};
+
+        /// Height at/above which a lock in activates.
+        size_t activation_height{};
+
+        /// Threshold is checked before timeout (speedy trial).
+        bool speedy{};
+
+        /// Activated by checkpoint when bip90 is configured.
+        bool buried{};
+
+        bool operator==(const deployment& other) const NOEXCEPT = default;
+    };
+
     /// Heights used to identify construction requirements.
     /// All values are lower-bounded by the genesis block height.
     /// Obtaining all values even in the case where the set of queries could be
@@ -81,6 +128,22 @@ public:
 
         /// mainnet: 709632, testnet: 2011968 (or map::unrequested)
         size_t bip9_bit2_height{ unrequested };
+
+        /// Periods of a signaled bip9 deployment, sampled from high down to
+        /// the first boundary with median time past below start.
+        struct signal
+        {
+            /// (block - (block % period)) (or map::unrequested)
+            size_t high{ unrequested };
+            size_t period{};
+            uint32_t base{};
+            uint32_t bit{};
+            uint32_t start{};
+            uint32_t timeout{};
+        };
+
+        /// Signal periods by deployment (if signaled).
+        std::array<signal, deployment_count> signals{};
     };
 
     /// Values used to populate chain state at the target height.
@@ -100,6 +163,32 @@ public:
 
         /// Hash of the bip9_bit2 block or null_hash if unrequested.
         hash_digest bip9_bit2_hash{};
+
+        /// Signaling of a bip9 deployment.
+        struct signal
+        {
+            /// Median time past at a period boundary and signal count of the
+            /// period that it closes.
+            struct boundary
+            {
+                uint32_t median_time_past{};
+                size_t count{};
+            };
+
+            /// State of the block's period.
+            deployment_state state{};
+
+            /// Signaling blocks of the block's period below the block.
+            size_t count{};
+
+            /// Boundaries from map high down to the first above the last
+            /// defined boundary, by descending height (consumed on
+            /// construction).
+            std::vector<boundary> ordered{};
+        };
+
+        /// Signaling by deployment (if signaled).
+        std::array<signal, deployment_count> signals{};
 
         /// Sum of all work from genesis to block height.
         uint256_t cumulative_work{};
@@ -159,6 +248,13 @@ public:
     /// The flags of all configured forks, independent of activation.
     static uint32_t configured_flags(const forks& forks) NOEXCEPT;
 
+    /// The median of the timestamps (zero if empty).
+    static uint32_t median(const timestamps& times) NOEXCEPT;
+
+    /// The block version signals the bip9 deployment bit.
+    static bool is_signal(uint32_t version, uint32_t base,
+        uint32_t bit) NOEXCEPT;
+
     /// Create pool state from top chain top block state.
     chain_state(const chain_state& top,
         const system::settings& settings) NOEXCEPT;
@@ -204,6 +300,11 @@ protected:
     static uint32_t median_time_past(const data& values,
         const forks& forks) NOEXCEPT;
 
+    /// The deployment state of the period opened by the boundary.
+    static deployment_state next_state(const deployment& deployment,
+        deployment_state state, uint32_t median_time_past, size_t count,
+        size_t boundary) NOEXCEPT;
+
     /// Returns zero if data is invalid.
     static uint32_t work_required(const data& values,
         const forks& forks, const system::settings& settings) NOEXCEPT;
@@ -223,12 +324,23 @@ private:
         const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
     static size_t bip9_bit2_height(size_t height,
         const checkpoint& bip9_bit2_active_checkpoint) NOEXCEPT;
+    static map::signal bip9_signal(size_t height,
+        const deployment& deployment,
+        const system::settings& settings) NOEXCEPT;
+
+    static void promote(data::signal& signal, const deployment& deployment,
+        uint32_t version, uint32_t median_time_past, size_t height,
+        const system::settings& settings) NOEXCEPT;
+    static void reduce(data::signal& signal, const deployment& deployment,
+        size_t height, size_t period) NOEXCEPT;
 
     static data to_pool(const chain_state& top,
         const system::settings& settings) NOEXCEPT;
     static data to_block(const chain_state& pool, const block& block,
         const system::settings& settings) NOEXCEPT;
     static data to_header(const chain_state& parent, const header& header,
+        const system::settings& settings) NOEXCEPT;
+    static data to_values(data values,
         const system::settings& settings) NOEXCEPT;
 
     static uint32_t work_required_retarget_bits(const data& values,
