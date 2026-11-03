@@ -430,6 +430,7 @@ settings::settings(chain::selection context) NOEXCEPT
         {
             proof_of_work_limit = 0x207fffff;
             subsidy_interval_blocks = 150;
+            retargeting_interval_seconds = 24 * 60 * 60;
             genesis_block = chain::block
             {
                 data_chunk

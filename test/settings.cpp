@@ -225,11 +225,11 @@ BC_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BC_REQUIRE(configuration.network == chain::selection::regtest);
     BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
-    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 86400u);
     BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 545259519u);
-    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
-    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
-    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 21600u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 345600u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 144u);
     const chain::block genesis_block = configuration.genesis_block;
     BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4adae5494dffff7f20020000000101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
     BC_REQUIRE_EQUAL(configuration.first_version, 1u);
