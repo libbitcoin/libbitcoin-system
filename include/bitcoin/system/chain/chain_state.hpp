@@ -65,7 +65,7 @@ public:
     static constexpr size_t deployment_count = 8;
 
     /// bip9 deployment parameters. A deployment is signaled if it is
-    /// configured with a nonzero threshold, unless always active or buried.
+    /// configured with a nonzero threshold, unless always active.
     struct deployment
     {
         /// A start of this value is active above genesis, without signaling.
@@ -92,9 +92,6 @@ public:
         /// Threshold is checked before timeout (speedy trial).
         bool speedy{};
 
-        /// Activated by checkpoint when bip90 is configured.
-        bool buried{};
-
         bool operator==(const deployment& other) const NOEXCEPT = default;
     };
 
@@ -119,15 +116,6 @@ public:
 
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget{};
-
-        /// mainnet: 419328, testnet: 770112 (or map::unrequested)
-        size_t bip9_bit0_height{ unrequested };
-
-        /// mainnet: 481824, testnet: 834624 (or map::unrequested)
-        size_t bip9_bit1_height{ unrequested };
-
-        /// mainnet: 709632, testnet: 2011968 (or map::unrequested)
-        size_t bip9_bit2_height{ unrequested };
 
         /// Periods of a signaled bip9 deployment, sampled from high down to
         /// the first boundary with median time past below start.
@@ -154,15 +142,6 @@ public:
 
         /// Hash of the candidate block or null_hash for memory pool.
         hash_digest hash{};
-
-        /// Hash of the bip9_bit0 block or null_hash if unrequested.
-        hash_digest bip9_bit0_hash{};
-
-        /// Hash of the bip9_bit1 block or null_hash if unrequested.
-        hash_digest bip9_bit1_hash{};
-
-        /// Hash of the bip9_bit2 block or null_hash if unrequested.
-        hash_digest bip9_bit2_hash{};
 
         /// Signaling of a bip9 deployment.
         struct signal
@@ -319,12 +298,6 @@ private:
     static size_t retarget_height(size_t height, const forks& forks,
         size_t retargeting_interval) NOEXCEPT;
 
-    static size_t bip9_bit0_height(size_t height,
-        const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT;
-    static size_t bip9_bit1_height(size_t height,
-        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
-    static size_t bip9_bit2_height(size_t height,
-        const checkpoint& bip9_bit2_active_checkpoint) NOEXCEPT;
     static map::signal bip9_signal(size_t height,
         const deployment& deployment,
         const system::settings& settings) NOEXCEPT;
@@ -337,8 +310,8 @@ private:
 
     static data to_pool(const chain_state& top,
         const system::settings& settings) NOEXCEPT;
-    static data to_block(const chain_state& pool, const block& block,
-        const system::settings& settings) NOEXCEPT;
+    static data to_block(const chain_state& pool,
+        const block& block) NOEXCEPT;
     static data to_header(const chain_state& parent, const header& header,
         const system::settings& settings) NOEXCEPT;
     static data to_values(data values,

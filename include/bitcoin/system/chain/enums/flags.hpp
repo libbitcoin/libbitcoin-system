@@ -148,7 +148,7 @@ enum flags : uint32_t
     // deflation).
     // github.com/bitcoin/bitcoin/pull/12204
 
-    // [0.19.0] bip9 bit0 group buried at block 419,328 and bit1 group at
+    // [0.19.0] bip9 bit0 group frozen at block 419,328 and bit1 group at
     // block 481,824 (hard fork, arbitrary).
     // github.com/bitcoin/bitcoin/pull/16060
 

@@ -50,18 +50,15 @@ settings::settings() NOEXCEPT
         chain::flags::bip68_rule |
         chain::flags::bip112_rule |
         chain::flags::bip113_rule;
-    bip9_bit0_deployment.buried = true;
     bip9_bit1_deployment.bit = 1;
     bip9_bit1_deployment.flags =
         chain::flags::bip141_rule |
         chain::flags::bip143_rule |
         chain::flags::bip147_rule;
-    bip9_bit1_deployment.buried = true;
     bip9_bit2_deployment.bit = 2;
     bip9_bit2_deployment.flags =
         chain::flags::bip341_rule |
         chain::flags::bip342_rule;
-    bip9_bit2_deployment.buried = true;
     bip54_timewarp_deployment.bit = 5;
     bip54_timewarp_deployment.flags = chain::flags::bip54_timewarp_rule;
     bip54_timewarp_deployment.speedy = true;
@@ -85,7 +82,7 @@ settings::settings() NOEXCEPT
     forks.bip65 = true;
     forks.bip66 = true;
     forks.bip68 = true;
-    forks.bip90 = true;
+    forks.bip90 = false;
     forks.bip112 = true;
     forks.bip113 = true;
     forks.bip141 = true;
@@ -167,7 +164,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -208,9 +205,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip9_bit2_deployment.threshold = 1815;
             bip9_bit2_deployment.activation_height = 709632;
             bip9_bit2_deployment.speedy = true;
-            bip9_bit0_active_checkpoint = { "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328 };
-            bip9_bit1_active_checkpoint = { "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824 };
-            bip9_bit2_active_checkpoint = { "0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632 };
             checkpoints =
             {
                 { "00000000000000004d9b4ef50f0f9d686fd69db2e03af35a100370c64632a983", 295000 },
@@ -284,7 +278,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -324,9 +318,6 @@ settings::settings(chain::selection context) NOEXCEPT
             bip9_bit2_deployment.timeout = 1628640000;
             bip9_bit2_deployment.threshold = 1512;
             bip9_bit2_deployment.speedy = true;
-            bip9_bit0_active_checkpoint = { "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112 };
-            bip9_bit1_active_checkpoint = { "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624 };
-            bip9_bit2_active_checkpoint = { "000000000000eb906ab072652b86b05a1afeb95df53ed5c5a63aa3574e1f1b33", 2011968};
             checkpoints =
             {
                 { "000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70", 546 }
@@ -385,7 +376,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -408,15 +399,15 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
 
             bip16_activation_time = 1329264000;
-            bip34_activation_threshold = 51;
-            bip34_enforcement_threshold = 75;
-            bip34_activation_sample = 100;
-            bip90_bip34_height = 1;
-            bip90_bip65_height = 1;
-            bip90_bip66_height = 1;
-            bip9_bit0_active_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1 };
-            bip9_bit1_active_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1 };
-            bip9_bit2_active_checkpoint = { "0000000012982b6d5f621229286b880e909984df669c2afabb102ce311b13f28", 1};
+            bip34_activation_threshold = 0;
+            bip34_enforcement_threshold = 0;
+            bip34_activation_sample = 0;
+            bip90_bip34_height = 0;
+            bip90_bip65_height = 0;
+            bip90_bip66_height = 0;
+            bip9_bit0_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit1_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit2_deployment.start = chain::chain_state::deployment::always_active;
             checkpoints =
             {
                 { "00000000da84f2bafbbc53dee25a72ae507ff4914b867c565be350b0da8bf043", 0 }
@@ -481,7 +472,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -510,12 +501,9 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip34_height = 100000000;
             bip90_bip65_height = 1351;
             bip90_bip66_height = 1251;
-
-            // bip9's are fixed and closed, so assume genesis activation.
-            // bip90 assumes a historical bip34 activation block, so use genesis.
-            bip9_bit0_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
-            bip9_bit1_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
-            bip9_bit2_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            bip9_bit0_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit1_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit2_deployment.start = chain::chain_state::deployment::always_active;
             bip54_timewarp_deployment.start = chain::chain_state::deployment::always_active;
             bip54_timespan_deployment.start = chain::chain_state::deployment::always_active;
             bip54_sigops_deployment.start = chain::chain_state::deployment::always_active;
@@ -580,7 +568,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -603,15 +591,15 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
 
             bip16_activation_time = 1329264000;
-            bip34_activation_threshold = 51;
-            bip34_enforcement_threshold = 75;
-            bip34_activation_sample = 100;
-            bip90_bip34_height = 1;
-            bip90_bip65_height = 1;
-            bip90_bip66_height = 1;
-            bip9_bit0_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
-            bip9_bit1_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
-            bip9_bit2_active_checkpoint = { "00000086d6b2636cb2a392d45edc4ec544a10024d30141c9adf4bfd9de533b53", 1 };
+            bip34_activation_threshold = 0;
+            bip34_enforcement_threshold = 0;
+            bip34_activation_sample = 0;
+            bip90_bip34_height = 0;
+            bip90_bip65_height = 0;
+            bip90_bip66_height = 0;
+            bip9_bit0_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit1_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit2_deployment.start = chain::chain_state::deployment::always_active;
             checkpoints =
             {
                 { "00000008819873e925422c1ff0f99f7cc9bbb232af63a077a480a3633bee1ef6", 0 }

@@ -130,8 +130,7 @@ inline bool is_signaled(const chain_state::deployment& deployment,
     return is_configured(deployment, configured)
         && deployment.start != always
         && !is_zero(deployment.threshold)
-        && !is_zero(settings.bip9_activation_period)
-        && !(settings.forks.bip90 && deployment.buried);
+        && !is_zero(settings.bip9_activation_period);
 }
 
 inline uint32_t timestamp_high(const chain_state::data& values) NOEXCEPT
@@ -360,32 +359,6 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     const auto configured = configured_flags(forks);
-
-    // Unsignaled bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
-    if (!is_signaled(settings.bip9_bit0_deployment, settings, configured) &&
-        values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
-    {
-        result.flags |= flags::bip68_rule;
-        result.flags |= flags::bip112_rule;
-        result.flags |= flags::bip113_rule;
-    }
-
-    // Unsignaled bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
-    if (!is_signaled(settings.bip9_bit1_deployment, settings, configured) &&
-        values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
-    {
-        result.flags |= flags::bip141_rule;
-        result.flags |= flags::bip143_rule;
-        result.flags |= flags::bip147_rule;
-    }
-
-    // Unsignaled bip9_bit2 forks are enforced above the bip9_bit2 checkpoint.
-    if (!is_signaled(settings.bip9_bit2_deployment, settings, configured) &&
-        values.bip9_bit2_hash == settings.bip9_bit2_active_checkpoint.hash())
-    {
-        result.flags |= flags::bip341_rule;
-        result.flags |= flags::bip342_rule;
-    }
 
     // Signaled deployments are enforced once active, always above genesis.
     const auto list = deployments(settings);
@@ -673,42 +646,6 @@ uint32_t chain_state::easy_work_required(const data& values,
     return proof_of_work_limit;
 }
 
-// ****************************************************************************
-// CONSENSUS: Hardcoded with bip90 activated.
-// ****************************************************************************
-size_t chain_state::bip9_bit0_height(size_t height,
-    const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT
-{
-    const auto activation_height = bip9_bit0_active_checkpoint.height();
-
-    // Require bip9_bit0 hash at heights at/above bip9_bit0 active.
-    return height < activation_height ? map::unrequested : activation_height;
-}
-
-// ****************************************************************************
-// CONSENSUS: Hardcoded in satoshi client (pull request #????).
-// ****************************************************************************
-size_t chain_state::bip9_bit1_height(size_t height,
-    const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT
-{
-    const auto activation_height = bip9_bit1_active_checkpoint.height();
-
-    // Require bip9_bit1 hash at heights at/above bip9_bit1 active.
-    return height < activation_height ? map::unrequested : activation_height;
-}
-
-// ****************************************************************************
-// CONSENSUS: Not yet hardcoded in satoshi client (as of 0.29.0).
-// ****************************************************************************
-size_t chain_state::bip9_bit2_height(size_t height,
-    const checkpoint& bip9_bit2_active_checkpoint) NOEXCEPT
-{
-    const auto activation_height = bip9_bit2_active_checkpoint.height();
-
-    // Require bip9_bit2 hash at heights at/above bip9_bit2 active.
-    return height < activation_height ? map::unrequested : activation_height;
-}
-
 chain_state::map::signal chain_state::bip9_signal(size_t height,
     const deployment& deployment, const system::settings& settings) NOEXCEPT
 {
@@ -735,21 +672,6 @@ chain_state::map chain_state::get_map(size_t height,
     const auto& forks = settings.forks;
     map map{};
 
-    // The checkpoint at/above which bip9_bit0 rules are enforced.
-    if (forks.bip68 || forks.bip112 || forks.bip113)
-        map.bip9_bit0_height = bip9_bit0_height(height,
-            settings.bip9_bit0_active_checkpoint);
-
-    // The checkpoint at/above which bip9_bit1 rules are enforced.
-    if (forks.bip141 || forks.bip143 || forks.bip147)
-        map.bip9_bit1_height = bip9_bit1_height(height,
-            settings.bip9_bit1_active_checkpoint);
-
-    // The checkpoint at/above which bip9_bit2 rules are enforced.
-    if (forks.bip341 || forks.bip342)
-        map.bip9_bit2_height = bip9_bit2_height(height,
-            settings.bip9_bit2_active_checkpoint);
-
     // The signal periods of each signaled deployment.
     const auto configured = configured_flags(forks);
     const auto list = deployments(settings);
@@ -758,7 +680,7 @@ chain_state::map chain_state::get_map(size_t height,
             map.signals.at(index) = bip9_signal(height, list.at(index),
                 settings);
 
-    // Genesis has no preceding block data (regtest checkpoints are at genesis).
+    // Genesis has no preceding block data.
     if (is_zero(height))
         return map;
 
@@ -931,8 +853,6 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // Replace previous block state with tx pool chain state for next height
     // Preserve top block timestamp for use in computation of staleness.
-    // Preserve data.bip9_bit0_hash promotion.
-    // Preserve data.bip9_bit1_hash promotion.
     // bits.self is unused.
     data.height = height;
     data.hash = {};
@@ -954,7 +874,7 @@ chain_state::chain_state(const chain_state& top,
 }
 
 chain_state::data chain_state::to_block(const chain_state& pool,
-    const block& block, const system::settings& settings) NOEXCEPT
+    const block& block) NOEXCEPT
 {
     // Copy data from presumed same-height pool state.
     chain_state::data data{ pool.data_ };
@@ -968,18 +888,6 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
 
-    // Cache hash of bip9 bit0 height block, otherwise use preceding state.
-    if (data.height == settings.bip9_bit0_active_checkpoint.height())
-        data.bip9_bit0_hash = data.hash;
-
-    // Cache hash of bip9 bit1 height block, otherwise use preceding state.
-    if (data.height == settings.bip9_bit1_active_checkpoint.height())
-        data.bip9_bit1_hash = data.hash;
-
-    // Cache hash of bip9 bit2 height block, otherwise use preceding state.
-    if (data.height == settings.bip9_bit2_active_checkpoint.height())
-        data.bip9_bit2_hash = data.hash;
-
     return data;
 }
 
@@ -987,7 +895,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 // This assumes that the pool state is the same height as the block.
 chain_state::chain_state(const chain_state& pool, const block& block,
     const system::settings& settings) NOEXCEPT
-  : data_(to_block(pool, block, settings)),
+  : data_(to_block(pool, block)),
     forks_(pool.forks_),
     activations_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
@@ -1010,18 +918,6 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
-
-    // Cache hash of bip9 bit0 height block, otherwise use preceding state.
-    if (data.height == settings.bip9_bit0_active_checkpoint.height())
-        data.bip9_bit0_hash = data.hash;
-
-    // Cache hash of bip9 bit1 height block, otherwise use preceding state.
-    if (data.height == settings.bip9_bit1_active_checkpoint.height())
-        data.bip9_bit1_hash = data.hash;
-
-    // Cache hash of bip9 bit2 height block, otherwise use preceding state.
-    if (data.height == settings.bip9_bit2_active_checkpoint.height())
-        data.bip9_bit2_hash = data.hash;
 
     return data;
 }

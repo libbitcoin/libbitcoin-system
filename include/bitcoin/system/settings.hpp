@@ -126,15 +126,6 @@ public:
     chain::chain_state::deployment bip54_txsize_deployment{};
     chain::chain_state::deployment bip54_coinbase_deployment{};
 
-    /// This cannot be reactivated in a future branch due to window expiration.
-    chain::checkpoint bip9_bit0_active_checkpoint{};
-
-    /// This cannot be reactivated in a future branch due to window expiration.
-    chain::checkpoint bip9_bit1_active_checkpoint{};
-
-    /// This cannot be reactivated in a future branch due to window expiration.
-    chain::checkpoint bip9_bit2_active_checkpoint{};
-
     /// A block that is presumed to be valid but not required to be present.
     chain::checkpoint milestone{};
 
