@@ -432,7 +432,7 @@ electrum::seed_prefix electrum::to_prefix(const string_list& words) NOEXCEPT
     if (contained_by(tokens) == language::none)
         return seed_prefix::none;
 
-    return normalized_to_prefix(words);
+    return normalized_to_prefix(tokens);
 }
 
 electrum::seed_prefix electrum::to_prefix(const std::string& sentence) NOEXCEPT

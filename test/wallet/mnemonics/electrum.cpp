@@ -177,7 +177,7 @@ BC_AUTO_TEST_CASE(electrum__is_prefix_words__old__true)
 
 BC_AUTO_TEST_CASE(electrum__is_prefix_words__bip39__true)
 {
-    BC_REQUIRE(TODO_TESTS);
+    BC_REQUIRE(electrum::is_prefix(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"), prefix::bip39));
 }
 
 BC_AUTO_TEST_CASE(electrum__is_prefix_words__ascii_upper_case__true)
@@ -199,14 +199,38 @@ BC_AUTO_TEST_CASE(electrum__is_prefix_sentence__valid__true)
 // It's very possible that a BIP39-created mnemonic may conflict with electrum,
 // but harder to create in the other direction.
 
-BC_AUTO_TEST_CASE(electrum__to_prefix_words__todo__todo)
+BC_AUTO_TEST_CASE(electrum__to_prefix_words__electrum__expected)
 {
-    BC_REQUIRE(TODO_TESTS);
+    BC_REQUIRE(electrum::to_prefix(split(mnemonic_standard)) == prefix::standard);
+    BC_REQUIRE(electrum::to_prefix(split(mnemonic_witness)) == prefix::witness);
+    BC_REQUIRE(electrum::to_prefix(split(mnemonic_two_factor_authentication)) == prefix::two_factor_authentication);
+    BC_REQUIRE(electrum::to_prefix(split(mnemonic_two_factor_authentication_witness)) == prefix::two_factor_authentication_witness);
 }
 
-BC_AUTO_TEST_CASE(electrum__to_prefix_sentence__todo__todo)
+BC_AUTO_TEST_CASE(electrum__to_prefix_words__uppercased__expected)
 {
-    BC_REQUIRE(TODO_TESTS);
+    const auto vector = vectors[electrum_vector::english];
+    BC_REQUIRE(electrum::to_prefix(split(ascii_to_upper(vector.mnemonic))) == vector.prefix);
+}
+
+BC_AUTO_TEST_CASE(electrum__to_prefix_words__bip39__bip39)
+{
+    BC_REQUIRE(electrum::to_prefix(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about")) == prefix::bip39);
+}
+
+BC_AUTO_TEST_CASE(electrum__to_prefix_words__unprefixed__none)
+{
+    BC_REQUIRE(electrum::to_prefix(split("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon")) == prefix::none);
+}
+
+BC_AUTO_TEST_CASE(electrum__to_prefix_words__non_dictionary__none)
+{
+    BC_REQUIRE(electrum::to_prefix(split("foo bar baz")) == prefix::none);
+}
+
+BC_AUTO_TEST_CASE(electrum__to_prefix_sentence__standard__standard)
+{
+    BC_REQUIRE(electrum::to_prefix(mnemonic_standard) == prefix::standard);
 }
 
 // to_key
