@@ -35,12 +35,10 @@ using state_t = chain_state::deployment_state;
 
 // activation (version signalled soft forks)
 // ----------------------------------------------------------------------------
-// The bip90 fork is disabled so that version signalling is exercised.
 
 BC_AUTO_TEST_CASE(chain_state__activation__no_signal_history__no_version_rules)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     const auto state = test_chain_state::activation(values, settings.forks, settings);
     BC_REQUIRE(!to_bool(state.flags & flags::bip34_rule));
@@ -52,7 +50,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__no_signal_history__no_version_rules)
 BC_AUTO_TEST_CASE(chain_state__activation__bip34_at_activation_threshold__bip34_rule)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = settings.bip34_version;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip34_version);
@@ -65,7 +62,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip34_at_activation_threshold__bip34_
 BC_AUTO_TEST_CASE(chain_state__activation__bip34_below_activation_threshold__no_bip34_rule)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = settings.bip34_version;
     values.version.ordered = chain_state::versions(sub1(settings.bip34_activation_threshold), settings.bip34_version);
@@ -76,7 +72,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip34_below_activation_threshold__no_
 BC_AUTO_TEST_CASE(chain_state__activation__bip34_signalled_but_low_self_version__no_bip34_rule)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = 1;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip34_version);
@@ -87,7 +82,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip34_signalled_but_low_self_version_
 BC_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip34_rule)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = 0x80000000;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip34_version);
@@ -98,7 +92,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip34_rule)
 BC_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip66_rule)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = 0x80000000;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip66_version);
@@ -109,7 +102,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip66_rule)
 BC_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip65_rule)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = 0x80000000;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip65_version);
@@ -120,7 +112,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__negative_self_version__no_bip65_rule)
 BC_AUTO_TEST_CASE(chain_state__activation__negative_history_versions__not_counted)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = settings.bip34_version;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, 0x80000000);
@@ -131,7 +122,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__negative_history_versions__not_counte
 BC_AUTO_TEST_CASE(chain_state__activation__bip66_signalled__bip66_and_bip34_rules)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = settings.bip66_version;
     values.version.ordered = chain_state::versions(settings.bip34_activation_threshold, settings.bip66_version);
@@ -144,7 +134,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip66_signalled__bip66_and_bip34_rule
 BC_AUTO_TEST_CASE(chain_state__activation__bip65_at_enforcement_threshold__minimum_version_four)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = settings.bip65_version;
     values.version.ordered = chain_state::versions(settings.bip34_enforcement_threshold, settings.bip65_version);
@@ -158,7 +147,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip65_at_enforcement_threshold__minim
 BC_AUTO_TEST_CASE(chain_state__activation__bip66_at_enforcement_threshold__minimum_version_three)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
     chain_state::data values{};
     values.version.self = settings.bip66_version;
     values.version.ordered = chain_state::versions(settings.bip34_enforcement_threshold, settings.bip66_version);
@@ -172,6 +160,7 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip66_at_enforcement_threshold__minim
 BC_AUTO_TEST_CASE(chain_state__activation__bip90_below_bip34_height__no_version_rules)
 {
     settings settings(selection::mainnet);
+    settings.forks.bip90 = true;
     chain_state::data values{};
     values.height = sub1(settings.bip90_bip34_height);
     const auto state = test_chain_state::activation(values, settings.forks, settings);
@@ -182,6 +171,7 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip90_below_bip34_height__no_version_
 BC_AUTO_TEST_CASE(chain_state__activation__bip90_at_bip34_height__bip34_rule_frozen)
 {
     settings settings(selection::mainnet);
+    settings.forks.bip90 = true;
     chain_state::data values{};
     values.height = settings.bip90_bip34_height;
     const auto state = test_chain_state::activation(values, settings.forks, settings);
@@ -194,6 +184,7 @@ BC_AUTO_TEST_CASE(chain_state__activation__bip90_at_bip34_height__bip34_rule_fro
 BC_AUTO_TEST_CASE(chain_state__activation__bip90_at_bip65_height__all_version_rules_frozen)
 {
     settings settings(selection::mainnet);
+    settings.forks.bip90 = true;
     chain_state::data values{};
     values.height = settings.bip90_bip65_height;
     const auto state = test_chain_state::activation(values, settings.forks, settings);
@@ -490,7 +481,7 @@ BC_AUTO_TEST_CASE(chain_state__activation__mainnet_configuration__retarget_diffi
     BC_REQUIRE(to_bool(state.flags & flags::retarget));
     BC_REQUIRE(to_bool(state.flags & flags::difficult));
     BC_REQUIRE(to_bool(state.flags & flags::bip42_rule));
-    BC_REQUIRE(to_bool(state.flags & flags::bip90_rule));
+    BC_REQUIRE(!to_bool(state.flags & flags::bip90_rule));
 }
 
 // median_time_past
@@ -682,9 +673,9 @@ BC_AUTO_TEST_CASE(chain_state__get_map__mainnet_height__expected_ranges)
     BC_REQUIRE_EQUAL(map.timestamp.high, 999u);
     BC_REQUIRE_EQUAL(map.version.high, 999u);
 
-    // Mainnet does not use bits in retargeting, and bip90 freezes versions.
+    // Mainnet does not use bits in retargeting.
     BC_REQUIRE_EQUAL(map.bits.count, 1u);
-    BC_REQUIRE_EQUAL(map.version.count, 0u);
+    BC_REQUIRE_EQUAL(map.version.count, settings.bip34_activation_sample);
     BC_REQUIRE_EQUAL(map.timestamp.count, median_time_past_interval);
 }
 
@@ -695,12 +686,12 @@ BC_AUTO_TEST_CASE(chain_state__get_map__below_median_time_past_interval__height_
     BC_REQUIRE_EQUAL(map.timestamp.count, 5u);
 }
 
-BC_AUTO_TEST_CASE(chain_state__get_map__version_signalling_enabled__sample_count)
+BC_AUTO_TEST_CASE(chain_state__get_map__version_signalling_frozen__no_versions)
 {
     settings settings(selection::mainnet);
-    settings.forks.bip90 = false;
+    settings.forks.bip90 = true;
     const auto map = chain_state::get_map(10000, settings);
-    BC_REQUIRE_EQUAL(map.version.count, settings.bip34_activation_sample);
+    BC_REQUIRE_EQUAL(map.version.count, 0u);
 }
 
 BC_AUTO_TEST_CASE(chain_state__get_map__retarget_height__expected)

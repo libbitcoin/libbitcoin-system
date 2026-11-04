@@ -82,7 +82,7 @@ settings::settings() NOEXCEPT
     forks.bip65 = true;
     forks.bip66 = true;
     forks.bip68 = true;
-    forks.bip90 = true;
+    forks.bip90 = false;
     forks.bip112 = true;
     forks.bip113 = true;
     forks.bip141 = true;
@@ -164,7 +164,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -278,7 +278,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -376,7 +376,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -399,12 +399,12 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
 
             bip16_activation_time = 1329264000;
-            bip34_activation_threshold = 51;
-            bip34_enforcement_threshold = 75;
-            bip34_activation_sample = 100;
-            bip90_bip34_height = 1;
-            bip90_bip65_height = 1;
-            bip90_bip66_height = 1;
+            bip34_activation_threshold = 0;
+            bip34_enforcement_threshold = 0;
+            bip34_activation_sample = 0;
+            bip90_bip34_height = 0;
+            bip90_bip65_height = 0;
+            bip90_bip66_height = 0;
             bip9_bit0_deployment.start = chain::chain_state::deployment::always_active;
             bip9_bit1_deployment.start = chain::chain_state::deployment::always_active;
             bip9_bit2_deployment.start = chain::chain_state::deployment::always_active;
@@ -472,7 +472,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -568,7 +568,7 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip65 = true;
             forks.bip66 = true;
             forks.bip68 = true;
-            forks.bip90 = true;
+            forks.bip90 = false;
             forks.bip112 = true;
             forks.bip113 = true;
             forks.bip141 = true;
@@ -591,12 +591,12 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.ltc_scrypt_proof_of_work = false;    // litecoin
 
             bip16_activation_time = 1329264000;
-            bip34_activation_threshold = 51;
-            bip34_enforcement_threshold = 75;
-            bip34_activation_sample = 100;
-            bip90_bip34_height = 1;
-            bip90_bip65_height = 1;
-            bip90_bip66_height = 1;
+            bip34_activation_threshold = 0;
+            bip34_enforcement_threshold = 0;
+            bip34_activation_sample = 0;
+            bip90_bip34_height = 0;
+            bip90_bip65_height = 0;
+            bip90_bip66_height = 0;
             bip9_bit0_deployment.start = chain::chain_state::deployment::always_active;
             bip9_bit1_deployment.start = chain::chain_state::deployment::always_active;
             bip9_bit2_deployment.start = chain::chain_state::deployment::always_active;
