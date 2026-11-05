@@ -303,15 +303,17 @@ char* serializer::write_text(char* out, const char* end) NOEXCEPT
     const auto text = text_;
     while (out != end && offset_ < text.size())
     {
+        // The scan for an escape is bounded by the space, as is the copy.
+        const auto space = possible_narrow_and_sign_cast<size_t>(
+            std::distance<const char*>(out, end));
+        const auto limit = std::min(text.size(), offset_ + space);
         auto run = offset_;
-        while (run < text.size() && is_zero(escapes[to_unsigned(text[run])]))
+        while (run < limit && is_zero(escapes[to_unsigned(text[run])]))
             ++run;
 
         if (run > offset_)
         {
-            const auto space = possible_narrow_and_sign_cast<size_t>(
-                std::distance<const char*>(out, end));
-            const auto size = std::min(run - offset_, space);
+            const auto size = run - offset_;
             std::memcpy(out, &text[offset_], size);
             offset_ += size;
             out = std::next(out, size);
