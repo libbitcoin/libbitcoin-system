@@ -239,6 +239,18 @@ BC_AUTO_TEST_CASE(deserialize__integer__invalid_base10__false)
     BC_REQUIRE(!deserialize(out, "????"));
 }
 
+BC_AUTO_TEST_CASE(deserialize__integer__trailing_text__false)
+{
+    uint16_t out;
+    BC_REQUIRE(!deserialize(out, "42abc"));
+}
+
+BC_AUTO_TEST_CASE(deserialize__integer__negative_unsigned__false)
+{
+    uint16_t out;
+    BC_REQUIRE(!deserialize(out, "-1"));
+}
+
 BC_AUTO_TEST_CASE(deserialize__int__untrimmed_base10__true)
 {
     int out;
