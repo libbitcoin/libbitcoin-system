@@ -36,8 +36,8 @@
 #                                 Default: --with-secp256k1
 # --<with/without>-valgrind     Use valgrind memcheck client requests.
 #                                 Default: --without-valgrind
-# --<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS).
-#                                 Default: --enable-cuda
+# --<with/without>-cuda         Use cuda (gpu) batch signature verification (inert on macOS).
+#                                 Default: --with-cuda
 # --<with/without>-performance-tests Compile performance tests.
 #                                 Default: --without-performance-tests
 # --<with/without>-slow-tests   Compile slow tests.
@@ -898,8 +898,8 @@ help()
     msg "                                Default: --with-secp256k1"
     msg "--<with/without>-valgrind     Use valgrind memcheck client requests."
     msg "                                Default: --without-valgrind"
-    msg "--<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS)."
-    msg "                                Default: --enable-cuda"
+    msg "--<with/without>-cuda         Use cuda (gpu) batch signature verification (inert on macOS)."
+    msg "                                Default: --with-cuda"
     msg "--<with/without>-performance-tests Compile performance tests."
     msg "                                Default: --without-performance-tests"
     msg "--<with/without>-slow-tests   Compile slow tests."

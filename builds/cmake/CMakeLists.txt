@@ -112,7 +112,7 @@ option( enable-sha3 "Use ARM SHA3 Extensions for SHA512." OFF )
 option( enable-aes "Use ARM AES and PMULL Extensions." OFF )
 option( with-secp256k1 "Use native secp256k1 interface, otherwise external library." ON )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
-option( enable-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
+option( with-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
 option( with-tests "Compile with unit tests." ON )
 option( with-performance-tests "Compile performance tests." OFF )
 option( with-slow-tests "Compile slow tests." OFF )
@@ -660,7 +660,7 @@ target_compile_definitions( libbitcoin-system
     $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
     $<$<NOT:$<BOOL:${with-secp256k1}>>:SECP256K1_VERSION=${secp256k1_VERSION}>
     $<$<BOOL:${with-valgrind}>:WITH_VALGRIND>
-    $<$<BOOL:${enable-cuda}>:WITH_CUDA>
+    $<$<BOOL:${with-cuda}>:WITH_CUDA>
 )
 
 if ( MSVC )
