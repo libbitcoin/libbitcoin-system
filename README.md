@@ -88,7 +88,7 @@ On success the headers and library are installed under `$HOME/libbitcoin`, along
 | `--prefix=<path>` | absolute path | Installation destination (default `/usr/local`) |
 | `--build-config=<mode>` | `release`, `debug` | Build configuration |
 | `--build-link=<mode>` | `static`, `dynamic` | Link mode |
-| `--build-secp256k1` | — | Build bitcoin-core/secp256k1 from source (with `--with-secp256k1`) |
+| `--build-libsecp256k1` | — | Build bitcoin-core/secp256k1 from source (with `--without-secp256k1`) |
 | `--build-use-local-src` | — | Reuse already-present source directories instead of cloning from GitHub |
 | `--build-skip-tests` | — | Skip test compilation and execution |
 | `--build-parallel=<n>` | integer | Number of parallel compile jobs |
@@ -120,7 +120,7 @@ The script options are those of the Autotools script. The configuration options 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `-Dwith-tests=<ON/OFF>` | `ON` | Compile with unit tests |
-| `-Dwith-secp256k1=<ON/OFF>` | `OFF` | Use bitcoin-core/secp256k1 |
+| `-Dwith-secp256k1=<ON/OFF>` | `ON` | Use native secp256k1, otherwise an external library |
 | `-Denable-<extension>=<ON/OFF>` | `OFF` | See [CPU Extensions](#cpu-extensions) |
 
 See all options:
@@ -183,9 +183,9 @@ The secp256k1 elliptic curve implementation is internal, and can be replaced by 
 
 | Library | GNU | CMake | Notes |
 |---------|-----|-------|-------|
-| [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) | `--with-secp256k1` | `-Dwith-secp256k1=ON` | Add `--build-secp256k1` to build it from source |
+| [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) | `--without-secp256k1` | `-Dwith-secp256k1=OFF` | Add `--build-libsecp256k1` to build it from source |
 
-`WITH_SECP256K1` replaces only the calls made through the libsecp256k1 interface, so any other implementation of it can be linked in place of bitcoin-core/secp256k1. Batch verification remains internal.
+An external library replaces only the calls made through the libsecp256k1 interface, so any other implementation of it can be linked in place of bitcoin-core/secp256k1. Batch verification remains internal.
 
 ---
 

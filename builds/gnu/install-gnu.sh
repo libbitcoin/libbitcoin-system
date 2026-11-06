@@ -42,7 +42,7 @@
 #                                 Default: --without-performance-tests
 # --<with/without>-slow-tests   Compile slow tests.
 #                                 Default: --without-slow-tests
-# --build-secp256k1             Build libsecp256k1 libraries
+# --build-libsecp256k1          Build bitcoin core libsecp256k1 libraries
 # --build-src-dir=<path>        Location for sources.
 #                                 Default: $(pwd)
 # --build-obj-dir=<path>        Location for intermediate objects.
@@ -104,7 +104,7 @@ main()
 
     for OPTION in "$@"; do
         case ${OPTION} in
-            (--build-secp256k1)             BUILD_secp256k1="yes";;
+            (--build-libsecp256k1)          BUILD_libsecp256k1="yes";;
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
             (--build-obj-dir=*)             BUILD_OBJ_DIR="${OPTION#*=}";;
             (--build-obj-dir-relative)      BUILD_OBJ_DIR_RELATIVE="yes";;
@@ -128,7 +128,7 @@ main()
 
     CONFIGURE_OPTIONS_ORIGINAL=("$@")
     CONFIGURE_OPTIONS=("$@")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-secp256k1/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-libsecp256k1/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-obj-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-obj-dir-relative/}")
@@ -502,7 +502,7 @@ main()
     if [[ ${BUILD_LIMIT} == "external" ]] ||
        [[ ${BUILD_LIMIT} == "dependencies" ]] ||
        [[ ${BUILD_LIMIT} == "none" ]]; then
-        if [[ ${BUILD_secp256k1} == "yes" ]]; then
+        if [[ ${BUILD_libsecp256k1} == "yes" ]]; then
             source_github "${secp256k1_OWNER}" "secp256k1" "${secp256k1_TAG}"
             local SAVE_CPPFLAGS="${CPPFLAGS}"
             export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
@@ -814,7 +814,7 @@ test_gnu()
 
 display_build_variables()
 {
-    msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
+    msg "BUILD_libsecp256k1              : ${BUILD_libsecp256k1}"
     msg "BUILD_LIMIT                     : ${BUILD_LIMIT}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
     msg "BUILD_OBJ_DIR                   : ${BUILD_OBJ_DIR}"
@@ -904,7 +904,7 @@ help()
     msg "                                Default: --without-performance-tests"
     msg "--<with/without>-slow-tests   Compile slow tests."
     msg "                                Default: --without-slow-tests"
-    msg "--build-secp256k1             Build libsecp256k1 libraries"
+    msg "--build-libsecp256k1          Build bitcoin core libsecp256k1 libraries"
     msg "--build-src-dir=<path>        Location for sources."
     msg "                                Default: $(pwd)"
     msg "--build-obj-dir=<path>        Location for intermediate objects."

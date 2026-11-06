@@ -87,7 +87,7 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -97,7 +97,7 @@ jobs:
             cxx: "clang++-18"
             flags: ""
             coverage: ""
-            secp256k1: "--build-secp256k1"
+            libsecp256k1: "--build-libsecp256k1"
             options: "--enable-isystem --without-secp256k1"
 
           - image: ubuntu-24.04
@@ -108,7 +108,7 @@ jobs:
             flags: ""
             coverage: ""
             package: "clang-19 clang++-19"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -118,7 +118,7 @@ jobs:
             cxx: "g++-13"
             flags: "--coverage -fprofile-update=atomic -fno-inline"
             coverage: "lcov"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -130,7 +130,7 @@ jobs:
             coverage: ""
             package: "gcc-s390x-linux-gnu g++-s390x-linux-gnu qemu-user-static"
             host: "s390x-linux-gnu"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
           - image: macos-26-intel
@@ -140,7 +140,7 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04-arm
@@ -151,7 +151,7 @@ jobs:
             flags: ""
             coverage: ""
             package: "gcc-14 g++-14"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -162,7 +162,7 @@ jobs:
             flags: "-m32"
             coverage: ""
             package: "gcc-15-multilib g++-15-multilib"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
@@ -174,7 +174,7 @@ jobs:
             coverage: ""
             package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
             host: "arm-linux-gnueabihf"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
           - image: ubuntu-26.04
@@ -186,7 +186,7 @@ jobs:
             coverage: ""
             package: "gcc-mingw-w64-x86-64-posix g++-mingw-w64-x86-64-posix"
             host: "x86_64-w64-mingw32"
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
     runs-on: ${{ matrix.image }}
@@ -282,7 +282,7 @@ jobs:
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
           --build-link="${{ matrix.link }}"
-          ${{ matrix.secp256k1 }}
+          ${{ matrix.libsecp256k1 }}
           ${{ matrix.options }}
           ${{ matrix.host && format('--host={0}', matrix.host) || '' }}
 
@@ -347,7 +347,7 @@ jobs:
             cxx: "clang++"
             flags: ""
             coverage: ""
-            secp256k1: ""
+            libsecp256k1: ""
             options: ""
 
           - image: ubuntu-24.04
@@ -358,7 +358,7 @@ jobs:
             flags: ""
             coverage: ""
             package: "g++-16 gcc-16"
-            secp256k1: ""
+            libsecp256k1: ""
             options: ""
 
     runs-on: ${{ matrix.image }}
@@ -441,7 +441,7 @@ jobs:
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
           --build-link="${{ matrix.link }}"
-          ${{ matrix.secp256k1 }}
+          ${{ matrix.libsecp256k1 }}
           ${{ matrix.options }}
 
       - name: Coverage calculation
@@ -504,7 +504,7 @@ jobs:
             cxx: ""
             flags: ""
             coverage: ""
-            secp256k1: ""
+            libsecp256k1: ""
             options: ""
 
           - image: windows-latest
@@ -513,7 +513,7 @@ jobs:
             cxx: ""
             flags: ""
             coverage: ""
-            secp256k1: ""
+            libsecp256k1: ""
             options: ""
 
           - image: ubuntu-24.04
@@ -522,7 +522,7 @@ jobs:
             cxx: "g++-13"
             flags: ""
             coverage: ""
-            secp256k1: ""
+            libsecp256k1: ""
             options: "--build-skip-tests"
 
     runs-on: ${{ matrix.image }}
@@ -600,7 +600,7 @@ jobs:
           --build-use-local-src
           --build-src-dir="${{ github.workspace }}"
           --build-preset="${{ matrix.preset }}"
-          ${{ matrix.secp256k1 }}
+          ${{ matrix.libsecp256k1 }}
           ${{ matrix.options }}
 
       - name: Coverage calculation
