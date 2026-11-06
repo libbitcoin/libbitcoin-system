@@ -24,6 +24,27 @@
 namespace libbitcoin {
 namespace system {
 
+/// left * right after cast of each to Explicit type.
+/// Result defaults to greater of operand types.
+/// Result size must not be lesser than either operand.
+/// Use is_multiply_overflow<Explicit>(left, right) to guard.
+template <place1 = place1{}, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Integer multiply(Integer left, Integer right) NOEXCEPT;
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Explicit multiply(Integer left, Integer right) NOEXCEPT;
+template <place2 = place2{}, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr to_greater_type<Left, Right> multiply(Left left, Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr Explicit multiply(Left left, Right right) NOEXCEPT;
+
 /// Safely determine whether product is a whole multiple of value.
 template <typename Integer,
     if_integer<Integer> = true>
