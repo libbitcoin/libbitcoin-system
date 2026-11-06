@@ -88,8 +88,13 @@ public:
 
 protected:
     /// Guard helpers.
+    static bool is_invalid_merkle_root(hashes&& leaves,
+        const hash_digest& merkle) NOEXCEPT;
+    static bool is_invalid_witness_commitment(const transaction& first,
+        const hash_digest& witness_root, bool segregated) NOEXCEPT;
     bool is_malleated() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
+    bool is_invalid_merkle_root(const hash_digest& merkle) const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;
 
     /// Validation helpers.
@@ -137,10 +142,6 @@ private:
     hash_digest header_merkle_root() const NOEXCEPT;
     hashes transaction_hashes(bool witness) const NOEXCEPT;
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
-
-    // Witness commitment.
-    bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
-    bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
     // Population.
     void populate_inputs() NOEXCEPT;

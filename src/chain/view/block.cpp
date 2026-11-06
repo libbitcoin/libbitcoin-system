@@ -217,23 +217,40 @@ bool block::is_malleated() const NOEXCEPT
 
 bool block::is_invalid_merkle_root() const NOEXCEPT
 {
-    return generate_merkle_root(false) != header_merkle_root();
+    return is_invalid_merkle_root(header_merkle_root());
+}
+
+bool block::is_invalid_merkle_root(const hash_digest& merkle) const NOEXCEPT
+{
+    return is_invalid_merkle_root(transaction_hashes(false), merkle);
+}
+
+// static
+bool block::is_invalid_merkle_root(hashes&& leaves,
+    const hash_digest& merkle) NOEXCEPT
+{
+    return sha256::merkle_root(std::move(leaves)) != merkle;
 }
 
 bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
-    if (txs_.empty())
-        return false;
+    return !txs_.empty() && is_invalid_witness_commitment(txs_.front(),
+        generate_merkle_root(true), is_segregated());
+}
 
+// static
+bool block::is_invalid_witness_commitment(const transaction& first,
+    const hash_digest& witness_root, bool segregated) NOEXCEPT
+{
     hash_cref commit{ null_hash };
-    if (!get_witness_commitment(commit))
-        return is_segregated();
+    if (!first.get_witness_commitment(commit))
+        return segregated;
 
     hash_cref reserve{ null_hash };
-    if (!get_witness_reservation(reserve))
+    if (!first.get_witness_reservation(reserve))
         return true;
 
-    return commit != sha256::double_hash(generate_merkle_root(true), reserve);
+    return commit != sha256::double_hash(witness_root, reserve);
 }
 
 // malleation
@@ -325,20 +342,6 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
 hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
     return sha256::merkle_root(transaction_hashes(witness));
-}
-
-// witness commitment
-// ----------------------------------------------------------------------------
-// private
-
-bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
-{
-    return !txs_.empty() && txs_.front().get_witness_commitment(commitment);
-}
-
-bool block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
-{
-    return !txs_.empty() && txs_.front().get_witness_reservation(reservation);
 }
 
 // population
