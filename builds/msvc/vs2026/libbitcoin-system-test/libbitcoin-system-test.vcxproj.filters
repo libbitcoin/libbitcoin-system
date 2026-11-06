@@ -339,6 +339,9 @@
     <ClCompile Include="..\..\..\..\test\config\version.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\witness.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\constants.cpp">
       <Filter>src</Filter>
     </ClCompile>
