@@ -171,7 +171,7 @@ AM_CONDITIONAL([WITH_CONSOLE], [test "x${with_console}" != "xno"])
 AC_MSG_CHECKING([--enable-shani option])
 AC_ARG_ENABLE([shani],
     AS_HELP_STRING([--enable-shani],
-        [Use Intel SHA Extensions. @<:@default=no@:>@]),
+        [Add Intel SHA Extensions via compilation options. @<:@default=no@:>@]),
     [enable_shani=$enableval],
     [enable_shani=no])
 AC_MSG_RESULT([$enable_shani])
@@ -180,7 +180,7 @@ AM_CONDITIONAL([ENABLE_SHANI], [test "x${enable_shani}" != "xno"])
 AC_MSG_CHECKING([--enable-sha512 option])
 AC_ARG_ENABLE([sha512],
     AS_HELP_STRING([--enable-sha512],
-        [Use Intel SHA512 Extensions (implies AVX2). @<:@default=no@:>@]),
+        [Add Intel SHA512 Extensions (implies AVX2) via compilation options. @<:@default=no@:>@]),
     [enable_sha512=$enableval],
     [enable_sha512=no])
 AC_MSG_RESULT([$enable_sha512])
@@ -189,7 +189,7 @@ AM_CONDITIONAL([ENABLE_SHA512], [test "x${enable_sha512}" != "xno"])
 AC_MSG_CHECKING([--enable-aesni option])
 AC_ARG_ENABLE([aesni],
     AS_HELP_STRING([--enable-aesni],
-        [Use Intel AES-NI and PCLMULQDQ intrinsics. @<:@default=no@:>@]),
+        [Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options. @<:@default=no@:>@]),
     [enable_aesni=$enableval],
     [enable_aesni=no])
 AC_MSG_RESULT([$enable_aesni])
@@ -198,7 +198,7 @@ AM_CONDITIONAL([ENABLE_AESNI], [test "x${enable_aesni}" != "xno"])
 AC_MSG_CHECKING([--enable-vaes option])
 AC_ARG_ENABLE([vaes],
     AS_HELP_STRING([--enable-vaes],
-        [Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2). @<:@default=no@:>@]),
+        [Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options. @<:@default=no@:>@]),
     [enable_vaes=$enableval],
     [enable_vaes=no])
 AC_MSG_RESULT([$enable_vaes])
@@ -207,7 +207,7 @@ AM_CONDITIONAL([ENABLE_VAES], [test "x${enable_vaes}" != "xno"])
 AC_MSG_CHECKING([--enable-avx512ifma option])
 AC_ARG_ENABLE([avx512ifma],
     AS_HELP_STRING([--enable-avx512ifma],
-        [Use Intel AVX512 IFMA intrinsics (implies AVX512VL). @<:@default=no@:>@]),
+        [Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options. @<:@default=no@:>@]),
     [enable_avx512ifma=$enableval],
     [enable_avx512ifma=no])
 AC_MSG_RESULT([$enable_avx512ifma])
@@ -216,7 +216,7 @@ AM_CONDITIONAL([ENABLE_AVX512IFMA], [test "x${enable_avx512ifma}" != "xno"])
 AC_MSG_CHECKING([--enable-avx512 option])
 AC_ARG_ENABLE([avx512],
     AS_HELP_STRING([--enable-avx512],
-        [Use Intel AVX512 intrinsics. @<:@default=no@:>@]),
+        [Add Intel AVX512 intrinsics via compilation options. @<:@default=no@:>@]),
     [enable_avx512=$enableval],
     [enable_avx512=no])
 AC_MSG_RESULT([$enable_avx512])
@@ -225,7 +225,7 @@ AM_CONDITIONAL([ENABLE_AVX512], [test "x${enable_avx512}" != "xno"])
 AC_MSG_CHECKING([--enable-avxifma option])
 AC_ARG_ENABLE([avxifma],
     AS_HELP_STRING([--enable-avxifma],
-        [Use Intel AVX IFMA intrinsics (implies AVX2). @<:@default=no@:>@]),
+        [Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options. @<:@default=no@:>@]),
     [enable_avxifma=$enableval],
     [enable_avxifma=no])
 AC_MSG_RESULT([$enable_avxifma])
@@ -234,7 +234,7 @@ AM_CONDITIONAL([ENABLE_AVXIFMA], [test "x${enable_avxifma}" != "xno"])
 AC_MSG_CHECKING([--enable-avx2 option])
 AC_ARG_ENABLE([avx2],
     AS_HELP_STRING([--enable-avx2],
-        [Use Intel AVX2 intrinsics. @<:@default=no@:>@]),
+        [Add Intel AVX2 intrinsics via compilation options. @<:@default=no@:>@]),
     [enable_avx2=$enableval],
     [enable_avx2=no])
 AC_MSG_RESULT([$enable_avx2])
@@ -243,7 +243,7 @@ AM_CONDITIONAL([ENABLE_AVX2], [test "x${enable_avx2}" != "xno"])
 AC_MSG_CHECKING([--enable-sse41 option])
 AC_ARG_ENABLE([sse41],
     AS_HELP_STRING([--enable-sse41],
-        [Use SSE4.1 hardware instructions. @<:@default=no@:>@]),
+        [Add SSE4.1 hardware instructions via compilation options. @<:@default=no@:>@]),
     [enable_sse41=$enableval],
     [enable_sse41=no])
 AC_MSG_RESULT([$enable_sse41])
@@ -252,7 +252,7 @@ AM_CONDITIONAL([ENABLE_SSE41], [test "x${enable_sse41}" != "xno"])
 AC_MSG_CHECKING([--enable-sha2 option])
 AC_ARG_ENABLE([sha2],
     AS_HELP_STRING([--enable-sha2],
-        [Use ARM SHA1/SHA256 Extensions. @<:@default=no@:>@]),
+        [Check for ARM SHA1/SHA256 Extensions. @<:@default=no@:>@]),
     [enable_sha2=$enableval],
     [enable_sha2=no])
 AC_MSG_RESULT([$enable_sha2])
@@ -261,7 +261,7 @@ AM_CONDITIONAL([ENABLE_SHA2], [test "x${enable_sha2}" != "xno"])
 AC_MSG_CHECKING([--enable-sha3 option])
 AC_ARG_ENABLE([sha3],
     AS_HELP_STRING([--enable-sha3],
-        [Use ARM SHA3 Extensions for SHA512. @<:@default=no@:>@]),
+        [Check for ARM SHA3 Extensions for SHA512. @<:@default=no@:>@]),
     [enable_sha3=$enableval],
     [enable_sha3=no])
 AC_MSG_RESULT([$enable_sha3])
@@ -270,7 +270,7 @@ AM_CONDITIONAL([ENABLE_SHA3], [test "x${enable_sha3}" != "xno"])
 AC_MSG_CHECKING([--enable-aes option])
 AC_ARG_ENABLE([aes],
     AS_HELP_STRING([--enable-aes],
-        [Use ARM AES and PMULL Extensions. @<:@default=no@:>@]),
+        [Check for ARM AES and PMULL Extensions. @<:@default=no@:>@]),
     [enable_aes=$enableval],
     [enable_aes=no])
 AC_MSG_RESULT([$enable_aes])
@@ -294,14 +294,14 @@ AC_ARG_WITH([valgrind],
 AC_MSG_RESULT([$with_valgrind])
 AM_CONDITIONAL([WITH_VALGRIND], [test "x${with_valgrind}" != "xno"])
 
-AC_MSG_CHECKING([--enable-cuda option])
-AC_ARG_ENABLE([cuda],
-    AS_HELP_STRING([--enable-cuda],
+AC_MSG_CHECKING([--with-cuda option])
+AC_ARG_WITH([cuda],
+    AS_HELP_STRING([--with-cuda],
         [Use cuda (gpu) batch signature verification (inert on macOS). @<:@default=yes@:>@]),
-    [enable_cuda=$enableval],
-    [enable_cuda=yes])
-AC_MSG_RESULT([$enable_cuda])
-AM_CONDITIONAL([ENABLE_CUDA], [test "x${enable_cuda}" != "xno"])
+    [with_cuda=$withval],
+    [with_cuda=yes])
+AC_MSG_RESULT([$with_cuda])
+AM_CONDITIONAL([WITH_CUDA], [test "x${with_cuda}" != "xno"])
 
 # Set flags.
 #==============================================================================
@@ -744,25 +744,6 @@ AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
 
 # Check architecture.
 #==============================================================================
-arm_base=""
-arm_extensions=""
-AS_IF([test "x${enable_aes}" != "xno"],
-  [ arm_base="armv8-a"; arm_extensions="${arm_extensions}+aes"; ])
-AS_IF([test "x${enable_sha2}" != "xno"],
-  [ arm_base="armv8-a"; arm_extensions="${arm_extensions}+sha2"; ])
-AS_IF([test "x${enable_sha3}" != "xno"],
-  [ arm_base="armv8.2-a"; arm_extensions="${arm_extensions}+sha3"; ])
-
-AS_IF([test "x${arm_extensions}" != "x"],
-  [
-    AS_CASE(["${CFLAGS} ${CXXFLAGS}"],
-      [*-march=*|*-mcpu=*],
-      [ AC_MSG_ERROR([Compiler flags -march or -mcpu conflict with enabled ARM extension options.]) ])
-    CFLAGS="${CFLAGS} -march=${arm_base}${arm_extensions}";
-    CXXFLAGS="${CXXFLAGS} -march=${arm_base}${arm_extensions}";
-    AC_SUBST([arm_march], ["-march=${arm_base}${arm_extensions}"])
-  ])
-
 AC_COMPILE_IFELSE(
   [
     AC_LANG_PROGRAM(
@@ -879,7 +860,7 @@ AS_IF([test "x${with_valgrind}" != "xno"], [
         AC_DEFINE([WITH_VALGRIND])
     ])
 
-AS_IF([test "x${enable_cuda}" != "xno"], [
+AS_IF([test "x${with_cuda}" != "xno"], [
         AC_DEFINE([WITH_CUDA])
     ])
 
