@@ -303,6 +303,24 @@ AC_ARG_WITH([cuda],
 AC_MSG_RESULT([$with_cuda])
 AM_CONDITIONAL([WITH_CUDA], [test "x${with_cuda}" != "xno"])
 
+AC_MSG_CHECKING([--with-performance-tests option])
+AC_ARG_WITH([performance-tests],
+    AS_HELP_STRING([--with-performance-tests],
+        [Compile performance tests. @<:@default=no@:>@]),
+    [with_performance_tests=$withval],
+    [with_performance_tests=no])
+AC_MSG_RESULT([$with_performance_tests])
+AM_CONDITIONAL([WITH_PERFORMANCE_TESTS], [test "x${with_performance_tests}" != "xno"])
+
+AC_MSG_CHECKING([--with-slow-tests option])
+AC_ARG_WITH([slow-tests],
+    AS_HELP_STRING([--with-slow-tests],
+        [Compile slow tests. @<:@default=no@:>@]),
+    [with_slow_tests=$withval],
+    [with_slow_tests=no])
+AC_MSG_RESULT([$with_slow_tests])
+AM_CONDITIONAL([WITH_SLOW_TESTS], [test "x${with_slow_tests}" != "xno"])
+
 # Set flags.
 #==============================================================================
 AS_IF([test "x${enable_avx2}" != "xno"],
@@ -862,6 +880,14 @@ AS_IF([test "x${with_valgrind}" != "xno"], [
 
 AS_IF([test "x${with_cuda}" != "xno"], [
         AC_DEFINE([WITH_CUDA])
+    ])
+
+AS_IF([test "x${with_performance_tests}" != "xno"], [
+        AC_DEFINE([WITH_PERFORMANCE_TESTS])
+    ])
+
+AS_IF([test "x${with_slow_tests}" != "xno"], [
+        AC_DEFINE([WITH_SLOW_TESTS])
     ])
 
 AC_CONFIG_FILES([

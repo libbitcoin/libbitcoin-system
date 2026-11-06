@@ -25,9 +25,13 @@
 #include <sstream>
 #include <bitcoin/system.hpp>
 
-/// Have slow test execution (scrypt is slow by design).
-////#define HAVE_SLOW_TESTS
-////#define HAVE_PERFORMANCE_TESTS
+#if defined(WITH_PERFORMANCE_TESTS)
+    #define HAVE_PERFORMANCE_TESTS
+#endif
+
+#if defined(WITH_SLOW_TESTS)
+    #define HAVE_SLOW_TESTS
+#endif
 
 #define TEST_NAME \
     ::libbitcoin::system::unit_test::session::instance().case_name()

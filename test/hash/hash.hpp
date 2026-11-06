@@ -282,7 +282,6 @@ const auto sha_5 = data_chunk(1'000'000_size, to_byte('a'));
 #if !defined(HAVE_SLOW_TESTS)
     constexpr auto sha_test_count = 5;
 #else
-    #define BIG_SHA_TEST
     constexpr auto sha_test_count = 6;
 
     // requires > uint64_t size_t.
@@ -312,7 +311,7 @@ const std_array<sha160_test, sha_test_count> sha160_tests
     { sha_3, base16_array("84983e441c3bd26ebaae4aa1f95129e5e54670f1") },
     { sha_4, base16_array("a49b2446a02c645bf419f995b67091253a04a259") },
     { sha_5, base16_array("34aa973cd4c4daa4f61eeb2bdbad27316534016f") }
-#if defined(BIG_SHA_TEST)
+#if defined(HAVE_SLOW_TESTS)
    ,{ sha_6, base16_array("7789f0c9ef7bfc40d93311143dfbe69e2017f592") }
 #endif
 };
@@ -334,7 +333,7 @@ const std_array<sha256_256_test, sha_test_count> sha256_256_tests
     { sha_3, base16_array("248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1") },
     { sha_4, base16_array("cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1") },
     { sha_5, base16_array("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") }
-#if defined(BIG_SHA_TEST)
+#if defined(HAVE_SLOW_TESTS)
    ,{ sha_6, base16_array("50e72a0e26442fe2552dc3938ac58658228c0cbfb1d2ca872ae435266fcd055e") }
 #endif
 };
@@ -356,7 +355,7 @@ const std_array<sha256_224_test, sha_test_count> sha256_224_tests
     { sha_3, base16_array("75388b16512776cc5dba5da1fd890150b0c6455cb4f58b1952522525") },
     { sha_4, base16_array("c97ca9a559850ce97a04a96def6d99a9e0e0e2ab14e6b8df265fc0b3") },
     { sha_5, base16_array("20794655980c91d8bbb4c1ea97618a4bf03f42581948b2ee4ee7ad67") }
-#if defined(BIG_SHA_TEST)
+#if defined(HAVE_SLOW_TESTS)
    ,{ sha_6, base16_array("b5989713ca4fe47a009f8621980b34e6d63ed3063b2a0a2c867d8a85") }
 #endif
 };
@@ -378,7 +377,7 @@ const std_array<sha512_512_test, sha_test_count> sha512_512_tests
     { sha_3, base16_array("204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596fd15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445") },
     { sha_4, base16_array("8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909") },
     { sha_5, base16_array("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") }
-#if defined(BIG_SHA_TEST)
+#if defined(HAVE_SLOW_TESTS)
    ,{ sha_6, base16_array("b47c933421ea2db149ad6e10fce6c7f93d0752380180ffd7f4629a712134831d77be6091b819ed352c2967a2e2d4fa5050723c9630691f1a05a7281dbe6c1086") }
 #endif
 };
@@ -400,7 +399,7 @@ const std_array<sha512_384_test, sha_test_count> sha512_384_tests
     { sha_3, base16_array("3391fdddfc8dc7393707a65b1b4709397cf8b1d162af05abfe8f450de5f36bc6b0455a8520bc4e6f5fe95b1fe3c8452b") },
     { sha_4, base16_array("09330c33f71147e83d192fc782cd1b4753111b173b3b05d22fa08086e3b0f712fcc7c71a557e2db966c3e9fa91746039") },
     { sha_5, base16_array("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") }
-#if defined(BIG_SHA_TEST)
+#if defined(HAVE_SLOW_TESTS)
    ,{ sha_6, base16_array("5441235cc0235341ed806a64fb354742b5e5c02a3c5cb71b5f63fb793458d8fdae599c8cd8884943c04f11b31b89f023") }
 #endif
 };

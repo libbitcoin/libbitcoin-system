@@ -8,7 +8,40 @@
 # Script managing the build and installation of libbitcoin-system and its dependencies.
 #
 # Script options:
-
+# --<enable/disable>-shani      Use Intel SHA Extensions.
+#                                 Default: --disable-shani
+# --<enable/disable>-sha512     Use Intel SHA512 Extensions (implies AVX2).
+#                                 Default: --disable-sha512
+# --<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics.
+#                                 Default: --disable-aesni
+# --<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
+#                                 Default: --disable-vaes
+# --<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
+#                                 Default: --disable-avx512ifma
+# --<enable/disable>-avx512     Use Intel AVX512 intrinsics.
+#                                 Default: --disable-avx512
+# --<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2).
+#                                 Default: --disable-avxifma
+# --<enable/disable>-avx2       Use Intel AVX2 intrinsics.
+#                                 Default: --disable-avx2
+# --<enable/disable>-sse41      Use SSE4.1 hardware instructions.
+#                                 Default: --disable-sse41
+# --<enable/disable>-sha2       Use ARM SHA1/SHA256 Extensions.
+#                                 Default: --disable-sha2
+# --<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512.
+#                                 Default: --disable-sha3
+# --<enable/disable>-aes        Use ARM AES and PMULL Extensions.
+#                                 Default: --disable-aes
+# --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
+#                                 Default: --without-secp256k1
+# --<with/without>-valgrind     Use valgrind memcheck client requests.
+#                                 Default: --without-valgrind
+# --<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS).
+#                                 Default: --enable-cuda
+# --<with/without>-performance-tests Compile performance tests.
+#                                 Default: --without-performance-tests
+# --<with/without>-slow-tests   Compile slow tests.
+#                                 Default: --without-slow-tests
 # --build-secp256k1             Build libsecp256k1 libraries
 # --build-src-dir=<path>        Location for sources.
 #                                 Default: $(pwd)
@@ -39,54 +72,6 @@
 # --noninteractive              Disable any prompt using default.
 # --verbose                     Display verbose script output.
 # --help, -h                    Display usage, overriding script execution.
-#
-# Hardware configuration options for arm64:
-# --hardware-aes                Use ARM AES and PMULL Extensions.
-# --hardware-sha2               Use ARM SHA1/SHA256 Extensions.
-# --hardware-sha3               Use ARM SHA3 Extensions for SHA512.
-#
-# Hardware configuration options for x64:
-# --hardware-avx2               Use Intel AVX2 intrinsics.
-# --hardware-avx512             Use Intel AVX512 intrinsics.
-# --hardware-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
-# --hardware-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2).
-# --hardware-shani              Use Intel SHA Extensions.
-# --hardware-sha512             Use Intel SHA512 Extensions (implies AVX2).
-# --hardware-sse41              Use SSE4.1 hardware instructions.
-# --hardware-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics.
-# --hardware-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
-#
-# Recognized pass-through options:
-# --<enable/disable>-shani      Add Intel SHA Extensions via compilation options.
-#                                 Default: --disable-shani
-# --<enable/disable>-sha512     Add Intel SHA512 Extensions (implies AVX2) via compilation options.
-#                                 Default: --disable-sha512
-# --<enable/disable>-aesni      Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options.
-#                                 Default: --disable-aesni
-# --<enable/disable>-vaes       Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options.
-#                                 Default: --disable-vaes
-# --<enable/disable>-avx512ifma Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options.
-#                                 Default: --disable-avx512ifma
-# --<enable/disable>-avx512     Add Intel AVX512 intrinsics via compilation options.
-#                                 Default: --disable-avx512
-# --<enable/disable>-avxifma    Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options.
-#                                 Default: --disable-avxifma
-# --<enable/disable>-avx2       Add Intel AVX2 intrinsics via compilation options.
-#                                 Default: --disable-avx2
-# --<enable/disable>-sse41      Add SSE4.1 hardware instructions via compilation options.
-#                                 Default: --disable-sse41
-# --<enable/disable>-sha2       Check for ARM SHA1/SHA256 Extensions.
-#                                 Default: --disable-sha2
-# --<enable/disable>-sha3       Check for ARM SHA3 Extensions for SHA512.
-#                                 Default: --disable-sha3
-# --<enable/disable>-aes        Check for ARM AES and PMULL Extensions.
-#                                 Default: --disable-aes
-# --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
-#                                 Default: --without-secp256k1
-# --<with/without>-valgrind     Use valgrind memcheck client requests.
-#                                 Default: --without-valgrind
-# --<with/without>-cuda         Use cuda (gpu) batch signature verification (inert on macOS).
-#                                 Default: --with-cuda
 #
 # All unrecognized options provided shall be passed as configuration
 # options for all dependencies.
@@ -120,18 +105,6 @@ main()
     for OPTION in "$@"; do
         case ${OPTION} in
             (--build-secp256k1)             BUILD_secp256k1="yes";;
-            (--hardware-aes)                HARDWARE_AES="yes";;
-            (--hardware-sha2)               HARDWARE_SHA2="yes";;
-            (--hardware-sha3)               HARDWARE_SHA3="yes";;
-            (--hardware-avx2)               HARDWARE_AVX2="yes";;
-            (--hardware-avx512)             HARDWARE_AVX512="yes";;
-            (--hardware-avx512ifma)         HARDWARE_AVX512IFMA="yes";;
-            (--hardware-avxifma)            HARDWARE_AVXIFMA="yes";;
-            (--hardware-shani)              HARDWARE_SHANI="yes";;
-            (--hardware-sha512)             HARDWARE_SHA512="yes";;
-            (--hardware-sse41)              HARDWARE_SSE41="yes";;
-            (--hardware-aesni)              HARDWARE_AESNI="yes";;
-            (--hardware-vaes)               HARDWARE_VAES="yes";;
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
             (--build-obj-dir=*)             BUILD_OBJ_DIR="${OPTION#*=}";;
             (--build-obj-dir-relative)      BUILD_OBJ_DIR_RELATIVE="yes";;
@@ -175,18 +148,6 @@ main()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--verbose/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--help/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#-h/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-aes/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sha2/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sha3/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avx2/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avx512/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avx512ifma/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avxifma/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-shani/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sha512/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sse41/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-aesni/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-vaes/}")
     CONFIGURE_OPTIONS_CMAKE=()
     CONFIGURE_OPTIONS_GNU=("${CONFIGURE_OPTIONS[@]}")
     msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
@@ -418,111 +379,6 @@ main()
     # HARDWARE_OPTIMIZED
     if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
         ARCHTUNE="-march=native -mtune=native"
-    fi
-
-    # Platform options: arm64
-
-    if [[ "${HARDWARE_AES}" == "yes" ]]; then
-        HARDWARE_PLATFORM_ARM64="yes"
-        ARCHBASE="armv8-a"
-        ARCHSUFFIX="${ARCHSUFFIX}+aes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-aes" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-aes" )
-    fi
-
-    if [[ "${HARDWARE_SHA2}" == "yes" ]]; then
-        HARDWARE_PLATFORM_ARM64="yes"
-        ARCHBASE="armv8-a"
-        ARCHSUFFIX="${ARCHSUFFIX}+sha2"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-sha2" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-sha2" )
-    fi
-
-    if [[ "${HARDWARE_SHA3}" == "yes" ]]; then
-        HARDWARE_PLATFORM_ARM64="yes"
-        ARCHBASE="armv8.2-a"
-        ARCHSUFFIX="${ARCHSUFFIX}+sha3"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-sha3" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-sha3" )
-    fi
-
-    if [[ ${HARDWARE_PLATFORM_ARM64} == "yes" ]]; then
-        ARCHTUNE="${ARCHBASE}${ARCHSUFFIX}"
-    fi
-
-    # Platform options: x64
-
-    if [[ "${HARDWARE_AVX2}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-avx2" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-avx2" )
-    fi
-
-    if [[ "${HARDWARE_AVX512}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-avx512" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-avx512" )
-    fi
-
-    if [[ "${HARDWARE_AVX512IFMA}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-avx512ifma" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-avx512ifma" )
-    fi
-
-    if [[ "${HARDWARE_AVXIFMA}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-avxifma" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-avxifma" )
-    fi
-
-    if [[ "${HARDWARE_SHANI}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-shani" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-shani" )
-    fi
-
-    if [[ "${HARDWARE_SHA512}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-sha512" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-sha512" )
-    fi
-
-    if [[ "${HARDWARE_SSE41}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-sse41" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-sse41" )
-    fi
-
-    if [[ "${HARDWARE_AESNI}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-aesni" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-aesni" )
-    fi
-
-    if [[ "${HARDWARE_VAES}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "--enable-vaes" )
-        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-vaes" )
-    fi
-
-    HARDWARE_PLATFORM_COUNT=0
-    if [[ ${HARDWARE_PLATFORM_ARM64} == "yes" ]]; then
-        HARDWARE_PLATFORM_COUNT=$((HARDWARE_PLATFORM_COUNT + 1))
-    fi
-    if [[ ${HARDWARE_PLATFORM_X64} == "yes" ]]; then
-        HARDWARE_PLATFORM_COUNT=$((HARDWARE_PLATFORM_COUNT + 1))
-    fi
-
-    if [ ${HARDWARE_PLATFORM_COUNT} -gt 1 ]; then
-        msg_error "Hardware options spanning more than one platform have been specified."
-        exit 1
-    fi
-
-    if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]] &&
-        [ ${HARDWARE_PLATFORM_COUNT} -gt 0 ]; then
-        msg_error "Hardware optimization cannot be reliably rationalized with hardware platform options."
-        exit 1
     fi
 
     # translate BUILD_CONFIG to ZFLAGS
@@ -1014,7 +870,40 @@ help()
     msg "Script managing the build and installation of libbitcoin-system and its dependencies."
     msg ""
     msg "Script options:"
-
+    msg "--<enable/disable>-shani      Use Intel SHA Extensions."
+    msg "                                Default: --disable-shani"
+    msg "--<enable/disable>-sha512     Use Intel SHA512 Extensions (implies AVX2)."
+    msg "                                Default: --disable-sha512"
+    msg "--<enable/disable>-aesni      Use Intel AES-NI and PCLMULQDQ intrinsics."
+    msg "                                Default: --disable-aesni"
+    msg "--<enable/disable>-vaes       Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+    msg "                                Default: --disable-vaes"
+    msg "--<enable/disable>-avx512ifma Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+    msg "                                Default: --disable-avx512ifma"
+    msg "--<enable/disable>-avx512     Use Intel AVX512 intrinsics."
+    msg "                                Default: --disable-avx512"
+    msg "--<enable/disable>-avxifma    Use Intel AVX IFMA intrinsics (implies AVX2)."
+    msg "                                Default: --disable-avxifma"
+    msg "--<enable/disable>-avx2       Use Intel AVX2 intrinsics."
+    msg "                                Default: --disable-avx2"
+    msg "--<enable/disable>-sse41      Use SSE4.1 hardware instructions."
+    msg "                                Default: --disable-sse41"
+    msg "--<enable/disable>-sha2       Use ARM SHA1/SHA256 Extensions."
+    msg "                                Default: --disable-sha2"
+    msg "--<enable/disable>-sha3       Use ARM SHA3 Extensions for SHA512."
+    msg "                                Default: --disable-sha3"
+    msg "--<enable/disable>-aes        Use ARM AES and PMULL Extensions."
+    msg "                                Default: --disable-aes"
+    msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
+    msg "                                Default: --without-secp256k1"
+    msg "--<with/without>-valgrind     Use valgrind memcheck client requests."
+    msg "                                Default: --without-valgrind"
+    msg "--<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS)."
+    msg "                                Default: --enable-cuda"
+    msg "--<with/without>-performance-tests Compile performance tests."
+    msg "                                Default: --without-performance-tests"
+    msg "--<with/without>-slow-tests   Compile slow tests."
+    msg "                                Default: --without-slow-tests"
     msg "--build-secp256k1             Build libsecp256k1 libraries"
     msg "--build-src-dir=<path>        Location for sources."
     msg "                                Default: $(pwd)"
@@ -1045,54 +934,6 @@ help()
     msg "--noninteractive              Disable any prompt using default."
     msg "--verbose                     Display verbose script output."
     msg "--help, -h                    Display usage, overriding script execution."
-    msg ""
-    msg "Hardware configuration options for arm64:"
-    msg "--hardware-aes                Use ARM AES and PMULL Extensions."
-    msg "--hardware-sha2               Use ARM SHA1/SHA256 Extensions."
-    msg "--hardware-sha3               Use ARM SHA3 Extensions for SHA512."
-    msg ""
-    msg "Hardware configuration options for x64:"
-    msg "--hardware-avx2               Use Intel AVX2 intrinsics."
-    msg "--hardware-avx512             Use Intel AVX512 intrinsics."
-    msg "--hardware-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
-    msg "--hardware-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2)."
-    msg "--hardware-shani              Use Intel SHA Extensions."
-    msg "--hardware-sha512             Use Intel SHA512 Extensions (implies AVX2)."
-    msg "--hardware-sse41              Use SSE4.1 hardware instructions."
-    msg "--hardware-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics."
-    msg "--hardware-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
-    msg ""
-    msg "Recognized pass-through options:"
-    msg "--<enable/disable>-shani      Add Intel SHA Extensions via compilation options."
-    msg "                                Default: --disable-shani"
-    msg "--<enable/disable>-sha512     Add Intel SHA512 Extensions (implies AVX2) via compilation options."
-    msg "                                Default: --disable-sha512"
-    msg "--<enable/disable>-aesni      Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options."
-    msg "                                Default: --disable-aesni"
-    msg "--<enable/disable>-vaes       Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options."
-    msg "                                Default: --disable-vaes"
-    msg "--<enable/disable>-avx512ifma Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options."
-    msg "                                Default: --disable-avx512ifma"
-    msg "--<enable/disable>-avx512     Add Intel AVX512 intrinsics via compilation options."
-    msg "                                Default: --disable-avx512"
-    msg "--<enable/disable>-avxifma    Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options."
-    msg "                                Default: --disable-avxifma"
-    msg "--<enable/disable>-avx2       Add Intel AVX2 intrinsics via compilation options."
-    msg "                                Default: --disable-avx2"
-    msg "--<enable/disable>-sse41      Add SSE4.1 hardware instructions via compilation options."
-    msg "                                Default: --disable-sse41"
-    msg "--<enable/disable>-sha2       Check for ARM SHA1/SHA256 Extensions."
-    msg "                                Default: --disable-sha2"
-    msg "--<enable/disable>-sha3       Check for ARM SHA3 Extensions for SHA512."
-    msg "                                Default: --disable-sha3"
-    msg "--<enable/disable>-aes        Check for ARM AES and PMULL Extensions."
-    msg "                                Default: --disable-aes"
-    msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
-    msg "                                Default: --without-secp256k1"
-    msg "--<with/without>-valgrind     Use valgrind memcheck client requests."
-    msg "                                Default: --without-valgrind"
-    msg "--<with/without>-cuda         Use cuda (gpu) batch signature verification (inert on macOS)."
-    msg "                                Default: --with-cuda"
     msg ""
     msg "All unrecognized options provided shall be passed as configuration"
     msg "options for all dependencies."

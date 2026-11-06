@@ -114,6 +114,8 @@ option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
 option( with-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
 option( with-tests "Compile with unit tests." ON )
+option( with-performance-tests "Compile performance tests." OFF )
+option( with-slow-tests "Compile slow tests." OFF )
 option( with-console "Compile with console application." ON )
 
 #------------------------------------------------------------------------------
@@ -733,6 +735,12 @@ if ( with-tests )
         $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
     )
   endif()
+
+  target_compile_definitions( libbitcoin-system-test
+    PRIVATE
+      $<$<BOOL:${with-performance-tests}>:WITH_PERFORMANCE_TESTS>
+      $<$<BOOL:${with-slow-tests}>:WITH_SLOW_TESTS>
+  )
 
   file( GLOB_RECURSE libbitcoin_system_test_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../test/*.c"
