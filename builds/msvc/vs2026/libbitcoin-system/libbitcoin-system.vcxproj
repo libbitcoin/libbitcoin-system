@@ -619,6 +619,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\execution.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\bloom.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\bloom_array.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\filter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\golomb.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\sieve.hpp" />
@@ -923,6 +924,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx_t.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\unsafe.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\filter\bloom.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\filter\bloom_array.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\filter\sieve.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\accumulator.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\checksum.ipp" />

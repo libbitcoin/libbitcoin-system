@@ -567,6 +567,9 @@
     <ClCompile Include="..\..\..\..\test\filter\bloom.cpp">
       <Filter>src\filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\filter\bloom_array.cpp">
+      <Filter>src\filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\filter\golomb.cpp">
       <Filter>src\filter</Filter>
     </ClCompile>

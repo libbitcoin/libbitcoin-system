@@ -550,6 +550,7 @@ include_bitcoin_system_filterdir = \
 
 include_bitcoin_system_filter_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/filter/bloom.hpp \
+    ${srcdir}/../../include/bitcoin/system/filter/bloom_array.hpp \
     ${srcdir}/../../include/bitcoin/system/filter/filter.hpp \
     ${srcdir}/../../include/bitcoin/system/filter/golomb.hpp \
     ${srcdir}/../../include/bitcoin/system/filter/sieve.hpp
@@ -703,6 +704,7 @@ include_bitcoin_system_impl_filterdir = \
 
 include_bitcoin_system_impl_filter_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/filter/bloom.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/filter/bloom_array.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/filter/sieve.ipp
 
 include_bitcoin_system_impl_hashdir = \
@@ -1386,6 +1388,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/error/transaction_error_t.cpp \
     ${srcdir}/../../test/error/x509_error_t.cpp \
     ${srcdir}/../../test/filter/bloom.cpp \
+    ${srcdir}/../../test/filter/bloom_array.cpp \
     ${srcdir}/../../test/filter/golomb.cpp \
     ${srcdir}/../../test/filter/sieve.cpp \
     ${srcdir}/../../test/hash/accumulator.cpp \

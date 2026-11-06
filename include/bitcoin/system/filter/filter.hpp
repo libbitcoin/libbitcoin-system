@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
 
 #include <bitcoin/system/filter/bloom.hpp>
+#include <bitcoin/system/filter/bloom_array.hpp>
 #include <bitcoin/system/filter/golomb.hpp>
 #include <bitcoin/system/filter/sieve.hpp>
 

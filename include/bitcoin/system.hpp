@@ -183,6 +183,7 @@
 #include <bitcoin/system/error/transaction_error_t.hpp>
 #include <bitcoin/system/error/x509_error_t.hpp>
 #include <bitcoin/system/filter/bloom.hpp>
+#include <bitcoin/system/filter/bloom_array.hpp>
 #include <bitcoin/system/filter/filter.hpp>
 #include <bitcoin/system/filter/golomb.hpp>
 #include <bitcoin/system/filter/sieve.hpp>
