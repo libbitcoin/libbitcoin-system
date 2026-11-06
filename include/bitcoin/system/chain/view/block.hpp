@@ -48,6 +48,9 @@ public:
     void to_data(std::ostream& stream, bool witness) const NOEXCEPT;
     void to_data(writer& sink, bool witness) const NOEXCEPT;
 
+    /// The source buffer (the witnessed form).
+    const chunk_cptr& buffer() const NOEXCEPT;
+
     /// Properties (hash is dynamically computed).
     bool is_valid() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;

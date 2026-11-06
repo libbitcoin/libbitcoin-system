@@ -86,6 +86,13 @@ BC_AUTO_TEST_CASE(block_view__to_data__genesis__matches_block)
     BC_CHECK_EQUAL(view.to_data(false), block.to_data(false));
 }
 
+BC_AUTO_TEST_CASE(block_view__buffer__block1a__source)
+{
+    const auto data = test::block1a.to_data(true);
+    const chain::view::block view{ system::data_chunk{ data }, true };
+    BC_CHECK_EQUAL(*view.buffer(), data);
+}
+
 BC_AUTO_TEST_CASE(block_view__to_data__block1a_witness__matches_block)
 {
     const auto& block = test::block1a;
