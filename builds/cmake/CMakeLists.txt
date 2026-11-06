@@ -110,10 +110,12 @@ option( enable-sse41 "Add SSE4.1 hardware instructions via compilation options."
 option( enable-sha2 "Check for ARM SHA1/SHA256 Extensions." OFF )
 option( enable-sha3 "Check for ARM SHA3 Extensions for SHA512." OFF )
 option( enable-aes "Check for ARM AES and PMULL Extensions." OFF )
-option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
+option( with-secp256k1 "Use native secp256k1 interface, otherwise external library." ON )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
 option( with-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
 option( with-tests "Compile with unit tests." ON )
+option( with-performance-tests "Compile performance tests." OFF )
+option( with-slow-tests "Compile slow tests." OFF )
 option( with-console "Compile with console application." ON )
 
 #------------------------------------------------------------------------------
@@ -125,7 +127,7 @@ else()
   set( libsecp256k1_USE_STATIC_LIBS "ON" )
 endif()
 
-if ( with-secp256k1 )
+if ( NOT with-secp256k1 )
   find_package( libsecp256k1 0.8.0 REQUIRED )
   set( secp256k1_VERSION ${libsecp256k1_VERSION} )
 endif()
@@ -624,7 +626,7 @@ endif()
 target_compile_definitions( libbitcoin-system
   PRIVATE
     $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
-    $<$<BOOL:${with-secp256k1}>:SECP256K1_VERSION=${secp256k1_VERSION}>
+    $<$<NOT:$<BOOL:${with-secp256k1}>>:SECP256K1_VERSION=${secp256k1_VERSION}>
     $<$<BOOL:${with-valgrind}>:WITH_VALGRIND>
     $<$<BOOL:${with-cuda}>:WITH_CUDA>
 )
@@ -669,7 +671,7 @@ target_include_directories( libbitcoin-system
 
 target_link_libraries( libbitcoin-system
   PUBLIC
-    $<$<BOOL:${with-secp256k1}>:libsecp256k1::secp256k1>
+    $<$<NOT:$<BOOL:${with-secp256k1}>>:libsecp256k1::secp256k1>
 )
 
 add_custom_target( libbitcoin-system-version.cpp
@@ -733,6 +735,12 @@ if ( with-tests )
         $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all>
     )
   endif()
+
+  target_compile_definitions( libbitcoin-system-test
+    PRIVATE
+      $<$<BOOL:${with-performance-tests}>:WITH_PERFORMANCE_TESTS>
+      $<$<BOOL:${with-slow-tests}>:WITH_SLOW_TESTS>
+  )
 
   file( GLOB_RECURSE libbitcoin_system_test_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/../../test/*.c"

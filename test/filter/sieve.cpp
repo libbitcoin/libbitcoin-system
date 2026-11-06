@@ -21,8 +21,6 @@
 
 BC_AUTO_TEST_SUITE(sieve_tests)
 
-////#define HAVE_SLOW_TESTS
-
 template <size_t m, size_t k>
 class accessor
   : public sieve<m, k>

@@ -21,6 +21,8 @@
       <!--<Optimization>Disabled</Optimization>-->
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
+      <PreprocessorDefinitions Condition="'$(Option-performance-tests)' == 'true'">WITH_PERFORMANCE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-slow-tests)' == 'true'">WITH_SLOW_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
       <Command>"$(TargetPath)" --log_level=warning --run_test=* --show_progress=no --build_info=yes</Command>
@@ -38,22 +40,30 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">dynamic</Linkage-secp256k1>
     <Linkage-libbitcoin-system>dynamic</Linkage-libbitcoin-system>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">ltcg</Linkage-secp256k1>
     <Linkage-libbitcoin-system>ltcg</Linkage-libbitcoin-system>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">static</Linkage-secp256k1>
     <Linkage-libbitcoin-system>static</Linkage-libbitcoin-system>
+  </PropertyGroup>
+
+  <!-- Options -->
+
+  <PropertyGroup>
+    <Option-performance-tests Condition="'$(Option-performance-tests)' == ''">false</Option-performance-tests>
+    <Option-slow-tests Condition="'$(Option-slow-tests)' == ''">false</Option-slow-tests>
   </PropertyGroup>
 
   <!-- Messages -->
 
+  <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Option-performance-tests : $(Option-performance-tests)" Importance="high"/>
+    <Message Text="Option-slow-tests        : $(Option-slow-tests)" Importance="high"/>
+  </Target>
+
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
     <Message Text="Linkage-_system   : $(Linkage-libbitcoin-system)" Importance="high"/>
   </Target>
 

@@ -104,6 +104,11 @@ void block::to_data(writer& sink, bool witness) const NOEXCEPT
         tx.to_data(sink, false);
 }
 
+const chunk_cptr& block::buffer() const NOEXCEPT
+{
+    return buffer_;
+}
+
 // public
 // ----------------------------------------------------------------------------
 

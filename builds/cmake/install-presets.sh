@@ -9,7 +9,7 @@
 #
 # Script options:
 
-# --build-secp256k1            Build libsecp256k1 libraries
+# --build-libsecp256k1         Build bitcoin core libsecp256k1 libraries
 # --build-preset=<preset>      Specifies preset configuration to build.
 # --build-src-dir=<path>       Location for sources.
 #                                Default: $(pwd)
@@ -70,12 +70,16 @@
 #                                Default: OFF
 # -Denable-aes=<ON/OFF>        Check for ARM AES and PMULL Extensions.
 #                                Default: OFF
-# -Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library.
-#                                Default: OFF
+# -Dwith-secp256k1=<ON/OFF>    Use native secp256k1 interface, otherwise external library.
+#                                Default: ON
 # -Dwith-valgrind=<ON/OFF>     Use valgrind memcheck client requests.
 #                                Default: OFF
 # -Dwith-cuda=<ON/OFF>         Use cuda (gpu) batch signature verification (inert on macOS).
 #                                Default: ON
+# -Dwith-performance-tests=<ON/OFF> Compile performance tests.
+#                                Default: OFF
+# -Dwith-slow-tests=<ON/OFF>   Compile slow tests.
+#                                Default: OFF
 #
 # All unrecognized options provided shall be passed as configuration
 # options for all dependencies.
@@ -108,7 +112,7 @@ main()
 
     for OPTION in "$@"; do
         case ${OPTION} in
-            (--build-secp256k1)             BUILD_secp256k1="yes";;
+            (--build-libsecp256k1)          BUILD_libsecp256k1="yes";;
             (--hardware-aes)                HARDWARE_AES="yes";;
             (--hardware-sha2)               HARDWARE_SHA2="yes";;
             (--hardware-sha3)               HARDWARE_SHA3="yes";;
@@ -143,7 +147,7 @@ main()
 
     CONFIGURE_OPTIONS_ORIGINAL=("$@")
     CONFIGURE_OPTIONS=("$@")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-secp256k1/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-libsecp256k1/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-preset=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-src-dir=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-limit=*/}")
@@ -606,7 +610,7 @@ main()
     if [[ ${BUILD_LIMIT} == "external" ]] ||
        [[ ${BUILD_LIMIT} == "dependencies" ]] ||
        [[ ${BUILD_LIMIT} == "none" ]]; then
-        if [[ ${BUILD_secp256k1} == "yes" ]]; then
+        if [[ ${BUILD_libsecp256k1} == "yes" ]]; then
             source_github "${secp256k1_OWNER}" "secp256k1" "${secp256k1_TAG}"
             local SAVE_CPPFLAGS="${CPPFLAGS}"
             export CPPFLAGS="${CPPFLAGS} ${secp256k1_FLAGS[@]}"
@@ -953,7 +957,7 @@ test_cmake()
 
 display_build_variables()
 {
-    msg "BUILD_secp256k1                 : ${BUILD_secp256k1}"
+    msg "BUILD_libsecp256k1              : ${BUILD_libsecp256k1}"
     msg "BUILD_PRESET                    : ${BUILD_PRESET}"
     msg "BUILD_LIMIT                     : ${BUILD_LIMIT}"
     msg "BUILD_SRC_DIR                   : ${BUILD_SRC_DIR}"
@@ -1010,7 +1014,7 @@ help()
     msg ""
     msg "Script options:"
 
-    msg "--build-secp256k1            Build libsecp256k1 libraries"
+    msg "--build-libsecp256k1         Build bitcoin core libsecp256k1 libraries"
     msg "--build-preset=<preset>      Specifies preset configuration to build."
     msg "--build-src-dir=<path>       Location for sources."
     msg "                               Default: $(pwd)"
@@ -1071,12 +1075,16 @@ help()
     msg "                               Default: OFF"
     msg "-Denable-aes=<ON/OFF>        Check for ARM AES and PMULL Extensions."
     msg "                               Default: OFF"
-    msg "-Dwith-secp256k1=<ON/OFF>    Use bitcoin-core/secp256k1 library."
-    msg "                               Default: OFF"
+    msg "-Dwith-secp256k1=<ON/OFF>    Use native secp256k1 interface, otherwise external library."
+    msg "                               Default: ON"
     msg "-Dwith-valgrind=<ON/OFF>     Use valgrind memcheck client requests."
     msg "                               Default: OFF"
     msg "-Dwith-cuda=<ON/OFF>         Use cuda (gpu) batch signature verification (inert on macOS)."
     msg "                               Default: ON"
+    msg "-Dwith-performance-tests=<ON/OFF> Compile performance tests."
+    msg "                               Default: OFF"
+    msg "-Dwith-slow-tests=<ON/OFF>   Compile slow tests."
+    msg "                               Default: OFF"
     msg ""
     msg "All unrecognized options provided shall be passed as configuration"
     msg "options for all dependencies."
