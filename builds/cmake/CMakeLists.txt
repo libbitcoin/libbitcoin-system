@@ -98,21 +98,21 @@ include(CheckCXXSourceCompiles)
 #------------------------------------------------------------------------------
 # Project options.
 #------------------------------------------------------------------------------
-option( enable-shani "Use Intel SHA Extensions." OFF )
-option( enable-sha512 "Use Intel SHA512 Extensions (implies AVX2)." OFF )
-option( enable-aesni "Use Intel AES-NI and PCLMULQDQ intrinsics." OFF )
-option( enable-vaes "Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)." OFF )
-option( enable-avx512ifma "Use Intel AVX512 IFMA intrinsics (implies AVX512VL)." OFF )
-option( enable-avx512 "Use Intel AVX512 intrinsics." OFF )
-option( enable-avxifma "Use Intel AVX IFMA intrinsics (implies AVX2)." OFF )
-option( enable-avx2 "Use Intel AVX2 intrinsics." OFF )
-option( enable-sse41 "Use SSE4.1 hardware instructions." OFF )
-option( enable-sha2 "Use ARM SHA1/SHA256 Extensions." OFF )
-option( enable-sha3 "Use ARM SHA3 Extensions for SHA512." OFF )
-option( enable-aes "Use ARM AES and PMULL Extensions." OFF )
+option( enable-shani "Add Intel SHA Extensions via compilation options." OFF )
+option( enable-sha512 "Add Intel SHA512 Extensions (implies AVX2) via compilation options." OFF )
+option( enable-aesni "Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options." OFF )
+option( enable-vaes "Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options." OFF )
+option( enable-avx512ifma "Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options." OFF )
+option( enable-avx512 "Add Intel AVX512 intrinsics via compilation options." OFF )
+option( enable-avxifma "Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options." OFF )
+option( enable-avx2 "Add Intel AVX2 intrinsics via compilation options." OFF )
+option( enable-sse41 "Add SSE4.1 hardware instructions via compilation options." OFF )
+option( enable-sha2 "Check for ARM SHA1/SHA256 Extensions." OFF )
+option( enable-sha3 "Check for ARM SHA3 Extensions for SHA512." OFF )
+option( enable-aes "Check for ARM AES and PMULL Extensions." OFF )
 option( with-secp256k1 "Use bitcoin-core/secp256k1 library." OFF )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
-option( enable-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
+option( with-cuda "Use cuda (gpu) batch signature verification (inert on macOS)." ON )
 option( with-tests "Compile with unit tests." ON )
 option( with-console "Compile with console application." ON )
 
@@ -133,33 +133,6 @@ endif()
 #------------------------------------------------------------------------------
 # Architecture options.
 #------------------------------------------------------------------------------
-set( arm_base "" )
-set( arm_extensions "" )
-if ( NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
-  if ( enable-aes )
-    set( arm_base "armv8-a" )
-    string( APPEND arm_extensions "+aes" )
-  endif()
-  if ( enable-sha2 )
-    set( arm_base "armv8-a" )
-    string( APPEND arm_extensions "+sha2" )
-  endif()
-  if ( enable-sha3 )
-    set( arm_base "armv8.2-a" )
-    string( APPEND arm_extensions "+sha3" )
-  endif()
-endif()
-
-set( arm_march "" )
-if ( arm_extensions )
-  if ( "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}" MATCHES "-march=|-mcpu=" )
-    message( FATAL_ERROR "Compiler flags -march or -mcpu conflict with enabled ARM extension options." )
-  endif()
-
-  set( arm_march "-march=${arm_base}${arm_extensions}" )
-  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${arm_march}" )
-endif()
-
 check_cxx_source_compiles( "
   #include <arm_neon.h>
     int main() {
@@ -648,17 +621,12 @@ if ( MSVC )
   )
 endif()
 
-target_compile_options( libbitcoin-system
-  PUBLIC
-    $<$<BOOL:${arm_march}>:${arm_march}>
-)
-
 target_compile_definitions( libbitcoin-system
   PRIVATE
     $<$<BOOL:${with-secp256k1}>:WITH_SECP256K1>
     $<$<BOOL:${with-secp256k1}>:SECP256K1_VERSION=${secp256k1_VERSION}>
     $<$<BOOL:${with-valgrind}>:WITH_VALGRIND>
-    $<$<BOOL:${enable-cuda}>:WITH_CUDA>
+    $<$<BOOL:${with-cuda}>:WITH_CUDA>
 )
 
 if ( MSVC )
