@@ -32,8 +32,8 @@
 #                                 Default: --disable-sha3
 # --<enable/disable>-aes        Use ARM AES and PMULL Extensions.
 #                                 Default: --disable-aes
-# --<with/without>-secp256k1    Use bitcoin-core/secp256k1 library.
-#                                 Default: --without-secp256k1
+# --<with/without>-secp256k1    Use native secp256k1 interface, otherwise external library.
+#                                 Default: --with-secp256k1
 # --<with/without>-valgrind     Use valgrind memcheck client requests.
 #                                 Default: --without-valgrind
 # --<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS).
@@ -894,8 +894,8 @@ help()
     msg "                                Default: --disable-sha3"
     msg "--<enable/disable>-aes        Use ARM AES and PMULL Extensions."
     msg "                                Default: --disable-aes"
-    msg "--<with/without>-secp256k1    Use bitcoin-core/secp256k1 library."
-    msg "                                Default: --without-secp256k1"
+    msg "--<with/without>-secp256k1    Use native secp256k1 interface, otherwise external library."
+    msg "                                Default: --with-secp256k1"
     msg "--<with/without>-valgrind     Use valgrind memcheck client requests."
     msg "                                Default: --without-valgrind"
     msg "--<enable/disable>-cuda       Use cuda (gpu) batch signature verification (inert on macOS)."

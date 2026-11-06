@@ -279,9 +279,9 @@ AM_CONDITIONAL([ENABLE_AES], [test "x${enable_aes}" != "xno"])
 AC_MSG_CHECKING([--with-secp256k1 option])
 AC_ARG_WITH([secp256k1],
     AS_HELP_STRING([--with-secp256k1],
-        [Use bitcoin-core/secp256k1 library. @<:@default=no@:>@]),
+        [Use native secp256k1 interface, otherwise external library. @<:@default=yes@:>@]),
     [with_secp256k1=$withval],
-    [with_secp256k1=no])
+    [with_secp256k1=yes])
 AC_MSG_RESULT([$with_secp256k1])
 AM_CONDITIONAL([WITH_SECP256K1], [test "x${with_secp256k1}" != "xno"])
 
@@ -839,7 +839,7 @@ AS_IF([test "x${enable_sha3}" != "xno"],
 
 # Check dependencies.
 #==============================================================================
-AS_IF([test "x${with_secp256k1}" != "xno"],
+AS_IF([test "x${with_secp256k1}" = "xno"],
   [
     PKG_CHECK_MODULES(
       [secp256k1],
@@ -870,7 +870,7 @@ AS_IF([test "x${with_secp256k1}" != "xno"], [
         AC_DEFINE([WITH_SECP256K1])
     ])
 
-AS_IF([test "x${with_secp256k1}" != "xno"], [
+AS_IF([test "x${with_secp256k1}" = "xno"], [
         AC_DEFINE_UNQUOTED([SECP256K1_VERSION], [${secp256k1_VERSION}])
     ])
 

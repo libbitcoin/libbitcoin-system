@@ -93,7 +93,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "--enable-isystem --with-secp256k1"
+            options: "--enable-isystem --without-secp256k1"
 
           - image: ubuntu-24.04
             config: "debug"
@@ -103,7 +103,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "--enable-isystem --with-secp256k1"
+            options: "--enable-isystem --without-secp256k1"
 
           - image: ubuntu-24.04
             config: "release"
@@ -113,7 +113,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "--enable-isystem --with-secp256k1"
+            options: "--enable-isystem --without-secp256k1"
 
           - image: ubuntu-24.04
             config: "release"
@@ -123,7 +123,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "--enable-isystem --with-secp256k1"
+            options: "--enable-isystem --without-secp256k1"
 
           - image: ubuntu-24.04
             config: "debug"
@@ -626,7 +626,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "-Dwith-secp256k1=ON"
+            options: "-Dwith-secp256k1=OFF"
 
           - image: ubuntu-24.04
             config: "debug"
@@ -636,7 +636,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "-Dwith-secp256k1=ON"
+            options: "-Dwith-secp256k1=OFF"
 
           - image: ubuntu-24.04
             config: "release"
@@ -646,7 +646,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "-Dwith-secp256k1=ON"
+            options: "-Dwith-secp256k1=OFF"
 
           - image: ubuntu-24.04
             config: "release"
@@ -656,7 +656,7 @@ jobs:
             flags: ""
             coverage: ""
             secp256k1: "--build-secp256k1"
-            options: "-Dwith-secp256k1=ON"
+            options: "-Dwith-secp256k1=OFF"
 
           - image: ubuntu-24.04
             config: "debug"

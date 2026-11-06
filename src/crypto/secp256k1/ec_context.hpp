@@ -21,12 +21,12 @@
 
 #include <bitcoin/system/define.hpp>
 #if defined(HAVE_SECP256K1)
+    #include "interface.hpp"
+#else
     #include <secp256k1.h>
     #include <secp256k1_ellswift.h>
     #include <secp256k1_recovery.h>
     #include <secp256k1_schnorrsig.h>
-#else
-    #include "interface.hpp"
 #endif
 
 namespace libbitcoin {

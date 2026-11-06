@@ -26,7 +26,7 @@
     <Option-sha2 Condition="'$(Option-sha2)' == ''">false</Option-sha2>
     <Option-sha3 Condition="'$(Option-sha3)' == ''">false</Option-sha3>
     <Option-aes Condition="'$(Option-aes)' == ''">false</Option-aes>
-    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
+    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
   </PropertyGroup>
 
   <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->

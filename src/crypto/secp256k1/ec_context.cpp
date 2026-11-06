@@ -67,12 +67,12 @@ const secp256k1_context* ec_context_verify::context() NOEXCEPT
 
 std::string secp256k1_library() NOEXCEPT
 {
-#if defined(HAVE_SECP256K1) && defined(SECP256K1_VERSION)
-    return "libsecp256k1 " EC_STRING(SECP256K1_VERSION);
-#elif defined(HAVE_SECP256K1)
-    return "libsecp256k1";
-#else
+#if defined(HAVE_SECP256K1)
     return "internal";
+#elif defined(SECP256K1_VERSION)
+    return "libsecp256k1 " EC_STRING(SECP256K1_VERSION);
+#else
+    return "libsecp256k1";
 #endif
 }
 

@@ -47,16 +47,6 @@
     <NuGetPackageRoot>..\..\..\..\..\.nuget\packages\</NuGetPackageRoot>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">dynamic</Linkage-secp256k1>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">ltcg</Linkage-secp256k1>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
-    <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">static</Linkage-secp256k1>
-  </PropertyGroup>
-  
   <!-- Options -->
 
   <!-- These create non-portability. -->
@@ -72,7 +62,7 @@
     <Option-sha2 Condition="'$(Option-sha2)' == ''">false</Option-sha2>
     <Option-sha3 Condition="'$(Option-sha3)' == ''">false</Option-sha3>
     <Option-aes Condition="'$(Option-aes)' == ''">false</Option-aes>
-    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
+    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
     <Option-cuda Condition="'$(Option-cuda)' == ''">true</Option-cuda>
   </PropertyGroup>
 
@@ -97,12 +87,6 @@
     <Message Text="Option-aes        : $(Option-aes)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
     <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
-  </Target>
-
-  <!-- Linkage -->
-
-  <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
   </Target>
 
 </Project>

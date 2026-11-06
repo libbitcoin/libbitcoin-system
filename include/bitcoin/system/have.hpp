@@ -142,7 +142,7 @@
     #endif
 #endif
 
-// bitcoin-core/secp256k1 (otherwise local secp256k1)
+// native secp256k1 (otherwise external secp256k1)
 #if defined(WITH_SECP256K1)
     #define HAVE_SECP256K1
 #endif

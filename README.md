@@ -163,11 +163,7 @@ Then follow the [GNU Autotools Build](#gnu-autotools-build) or [CMake Build](#cm
 
 ### Windows
 
-Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. The only dependency is an optional NuGet package, restored automatically when the solution is built. The secp256k1 library is an optional replacement for the internal implementation (see [secp256k1](#secp256k1)):
-
-| Package | Version | Required |
-|---------|---------|----------|
-| `secp256k1_vc145` | 0.8.0 | no |
+Visual Studio 2026 (v145 toolset) solution and project files are in `builds/msvc/vs2026/`. There are no package dependencies.
 
 Build from within Visual Studio, or from a command prompt with `builds\msvc\build-msvc.cmd`, which restores the NuGet packages and builds with MSBuild. The script runs `msbuild` and `nuget` from `PATH` (a Developer Command Prompt provides `msbuild`; `nuget.exe` must be downloaded). To use other executables, set the `MSBUILD_EXE` and `NUGET_EXE` environment variables before running it. Packages are restored to `.nuget\packages` under the source directory unless `NUGET_PKG_PATH` is set.
 
