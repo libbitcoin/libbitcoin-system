@@ -18,6 +18,12 @@ on:
       - 'include/**'
       - 'src/**'
       - 'test/**'
+      - '!builds/gnu/AUTHORS'
+      - '!builds/gnu/COPYING'
+      - '!builds/gnu/ChangeLog'
+      - '!builds/gnu/INSTALL'
+      - '!builds/gnu/NEWS'
+      - '!builds/gnu/README'
   push:
     branches:
       - '**'
@@ -31,6 +37,12 @@ on:
       - 'include/**'
       - 'src/**'
       - 'test/**'
+      - '!builds/gnu/AUTHORS'
+      - '!builds/gnu/COPYING'
+      - '!builds/gnu/ChangeLog'
+      - '!builds/gnu/INSTALL'
+      - '!builds/gnu/NEWS'
+      - '!builds/gnu/README'
   workflow_dispatch:
 
 concurrency:
