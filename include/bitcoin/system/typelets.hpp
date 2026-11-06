@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPELETS_HPP
 #define LIBBITCOIN_SYSTEM_TYPELETS_HPP
 
+#include <optional>
 #include <tuple>
 #include <bitcoin/system/funclets.hpp>
 
@@ -122,6 +123,13 @@ template<typename Type>
 struct is_std_vector_t<std::vector<Type>> : std::true_type {};
 template<typename Type>
 constexpr bool is_std_vector = is_std_vector_t<Type>::value;
+
+template<typename>
+struct is_std_optional_t : std::false_type {};
+template<typename Type>
+struct is_std_optional_t<std::optional<Type>> : std::true_type {};
+template<typename Type>
+constexpr bool is_std_optional = is_std_optional_t<Type>::value;
 
 template <typename Type, std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
 constexpr size_t array_count = std::tuple_size_v<std::decay_t<Type>>;

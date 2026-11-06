@@ -84,6 +84,20 @@ BC_AUTO_TEST_CASE(setting__values__path__unquoted_text)
     BC_REQUIRE_EQUAL(instance->values(), (string_list{ "bitcoin.cfg" }));
 }
 
+BC_AUTO_TEST_CASE(setting__values__empty_optional__empty_element)
+{
+    std::optional<uint32_t> store{};
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BC_REQUIRE_EQUAL(instance->values(), (string_list{ "" }));
+}
+
+BC_AUTO_TEST_CASE(setting__values__engaged_optional__decimal_text)
+{
+    std::optional<uint32_t> store{ 42 };
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BC_REQUIRE_EQUAL(instance->values(), (string_list{ "42" }));
+}
+
 BC_AUTO_TEST_CASE(setting__values__empty_vector__empty)
 {
     string_list store{};
@@ -257,6 +271,20 @@ BC_AUTO_TEST_CASE(setting__default_text__empty_path__empty)
     std::filesystem::path store{};
     const std::unique_ptr<const printable> instance{ setting(&store) };
     BC_REQUIRE_EQUAL(instance->default_text(), "empty");
+}
+
+BC_AUTO_TEST_CASE(setting__default_text__empty_optional__empty)
+{
+    std::optional<uint32_t> store{};
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BC_REQUIRE_EQUAL(instance->default_text(), "empty");
+}
+
+BC_AUTO_TEST_CASE(setting__default_text__engaged_optional__quoted_decimal)
+{
+    std::optional<uint32_t> store{ 65536 };
+    const std::unique_ptr<const printable> instance{ setting(&store) };
+    BC_REQUIRE_EQUAL(instance->default_text(), "'65536'");
 }
 
 BC_AUTO_TEST_CASE(setting__default_text__empty_vector__empty)

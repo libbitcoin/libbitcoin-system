@@ -40,7 +40,11 @@ inline std::string setting_text(const std::filesystem::path& value) NOEXCEPT
 template <typename Type>
 std::string setting_text(const Type& value) NOEXCEPT
 {
-    if constexpr (is_floating_point<Type>)
+    if constexpr (is_std_optional<Type>)
+    {
+        return value.has_value() ? setting_text(value.value()) : std::string{};
+    }
+    else if constexpr (is_floating_point<Type>)
     {
         return serialize_fixed(value);
     }
@@ -124,7 +128,7 @@ template <typename Type>
 void setting_value<Type>::parse(std::any& value, const string_list& tokens,
     const std::string& option) const THROWS
 {
-    if constexpr (is_integral<Type>)
+    if constexpr (is_integral<Type> || is_std_optional<Type>)
     {
         string_list ungrouped{};
         ungrouped.reserve(tokens.size());

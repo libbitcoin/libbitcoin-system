@@ -216,7 +216,11 @@ template <typename Type>
 template <typename Element>
 std::string typed_value<Type>::to_text(const Element& value) NOEXCEPT
 {
-    if constexpr (is_integral<Element> && is_one(sizeof(Element)))
+    if constexpr (is_std_optional<Element>)
+    {
+        return value.has_value() ? to_text(value.value()) : std::string{};
+    }
+    else if constexpr (is_integral<Element> && is_one(sizeof(Element)))
     {
         // Single byte integers are numbers, not characters.
         return std::to_string(value);
@@ -244,7 +248,11 @@ Element typed_value<Type>::parse_token(const std::string& token,
         return istream_exception{ token, option };
     };
 
-    if constexpr (is_same_type<Element, std::string>)
+    if constexpr (is_std_optional<Element>)
+    {
+        return parse_token<typename Element::value_type>(token, option);
+    }
+    else if constexpr (is_same_type<Element, std::string>)
     {
         return token;
     }

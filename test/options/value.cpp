@@ -275,6 +275,18 @@ BC_AUTO_TEST_CASE(value__parse__extractable_spaces__whole_token)
     BC_REQUIRE(parse_one<config::path>("a b/c") == config::path{ "a b/c" });
 }
 
+BC_AUTO_TEST_CASE(value__parse__optional__engaged)
+{
+    BC_REQUIRE_EQUAL(parse_one<std::optional<uint32_t>>("42").value(), 42u);
+    BC_REQUIRE_EQUAL(parse_one<std::optional<std::string>>("").value(), "");
+}
+
+BC_AUTO_TEST_CASE(value__parse__optional_invalid__throws)
+{
+    std::any out{};
+    BC_REQUIRE_THROW(make<std::optional<uint32_t>>()->parse(out, { "x" }, "name"), istream_exception);
+}
+
 BC_AUTO_TEST_CASE(value__parse__vector__appended)
 {
     std::any out{};
