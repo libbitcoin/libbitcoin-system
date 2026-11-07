@@ -78,6 +78,15 @@ public:
         const argument_list& arguments,
         const variables_map& variables={}) NOEXCEPT;
 
+    /// Populate with normalized parameter data, described by defaults.
+    /// option     The metadata of the option to test.
+    /// defaults   The metadata of the option bound to its default value.
+    /// arguments  The list of supported positional arguments.
+    /// variables  The parsed variables, for provenance.
+    void initialize(const option_metadata& option,
+        const option_metadata& defaults, const argument_list& arguments,
+        const variables_map& variables={}) NOEXCEPT;
+
     /// Determine if the option is an argument by testing for it by name in the
     /// positional options collection and if so return the position.
     /// option     The metadata of the option to position.

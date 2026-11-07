@@ -397,6 +397,53 @@ BC_AUTO_TEST_CASE(printer__format_settings_table__unconfigured_setting__unmarked
     );
 }
 
+BC_AUTO_TEST_CASE(printer__format_settings_table__defaults__described_by_defaults)
+{
+    uint32_t threads = 42;
+    options_description options;
+    options.add_options()
+        ("network.threads", setting(&threads), "Thread count, defaults to {}.");
+
+    uint32_t default_threads = 7;
+    options_description defaults;
+    defaults.add_options()
+        ("network.threads", setting(&default_threads), "Thread count, defaults to {}.");
+
+    variables_map variables;
+    const char* argv[]{ "test" };
+    store(parse_command_line(1, argv, options, {}), variables);
+
+    printer help(options, defaults, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
+    help.initialize();
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Thread count, defaults to '7'.\n"
+        "threads = 42\n"
+    );
+}
+
+BC_AUTO_TEST_CASE(printer__format_settings_table__defaults_without_option__described_by_option)
+{
+    uint32_t threads = 42;
+    options_description options;
+    options.add_options()
+        ("network.threads", setting(&threads), "Thread count, defaults to {}.");
+
+    variables_map variables;
+    const char* argv[]{ "test" };
+    store(parse_command_line(1, argv, options, {}), variables);
+
+    printer help(options, options_description{}, variables, CONFIG_APPLICATION, CONFIG_DESCRIPTION);
+    help.initialize();
+    BC_REQUIRE_EQUAL(help.format_settings_table(),
+        "\n"
+        "[network]\n"
+        "# Thread count, defaults to '42'.\n"
+        "threads = 42\n"
+    );
+}
+
 BC_AUTO_TEST_CASE(printer__format_settings_table__nested_section__expected)
 {
     std::string rate{ "5" };
