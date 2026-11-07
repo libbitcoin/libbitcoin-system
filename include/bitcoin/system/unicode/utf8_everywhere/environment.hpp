@@ -67,9 +67,9 @@ BC_API int call_utf8_main(int argc, wchar_t* argv[],
     { \
     namespace system \
     { \
-        auto& cin = std::cin; \
-        auto& cout = std::cout; \
-        auto& cerr = std::cerr; \
+        auto& cin = cin_stream(); \
+        auto& cout = cout_stream(); \
+        auto& cerr = cerr_stream(); \
         int main(int argc, char* argv[]); \
     } \
     } \

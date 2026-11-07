@@ -112,7 +112,13 @@ void unset_console_echo() NOEXCEPT
 
 #else // HAVE_WINDOWS
 
-std::istream& cin_stream() THROWS { return std::cin; }
+// Untied, so reading does not flush cout from the reading thread.
+std::istream& cin_stream() THROWS
+{
+    std::cin.tie(nullptr);
+    return std::cin;
+}
+
 std::ostream& cout_stream() THROWS { return std::cout; }
 std::ostream& cerr_stream() THROWS {  return std::cerr; }
 inline void set_utf8_stdio(FILE*) THROWS {}
