@@ -462,7 +462,19 @@ hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 
 bool block::is_invalid_merkle_root() const NOEXCEPT
 {
-    return generate_merkle_root(false) != header_->merkle_root();
+    return is_invalid_merkle_root(header_->merkle_root());
+}
+
+bool block::is_invalid_merkle_root(const hash_digest& merkle) const NOEXCEPT
+{
+    return is_invalid_merkle_root(transaction_hashes(false), merkle);
+}
+
+// static
+bool block::is_invalid_merkle_root(hashes&& leaves,
+    const hash_digest& merkle) NOEXCEPT
+{
+    return sha256::merkle_root(std::move(leaves)) != merkle;
 }
 
 // static
@@ -949,8 +961,9 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 code block::check_guard(const hash_digest& merkle_root, const hashes& txids,
     bool malleated64) NOEXCEPT
 {
-    if (malleated64 || is_malleated32(txids) ||
-        sha256::merkle_root(hashes{ txids }) != merkle_root)
+    if (malleated64 || is_malleated32(txids))
+        return error::invalid_transaction_commitment;
+    if (is_invalid_merkle_root(hashes{ txids }, merkle_root))
         return error::invalid_transaction_commitment;
 
     return error::block_success;
@@ -961,11 +974,15 @@ code block::check_guard(const hash_digest& merkle_root, const hashes& txids,
 code block::check_guard(const context& ctx, const transaction& first,
     const hash_digest& witness_root, bool segregated) NOEXCEPT
 {
-    const auto invalid = ctx.is_enabled(bip141_rule) ?
-        is_invalid_witness_commitment(first, witness_root, segregated) :
-        segregated;
+    const auto bip141 = ctx.is_enabled(bip141_rule);
 
-    return invalid ? error::invalid_witness_commitment : error::block_success;
+    if (bip141 &&
+        is_invalid_witness_commitment(first, witness_root, segregated))
+        return error::invalid_witness_commitment;
+    if (!bip141 && segregated)
+        return error::invalid_witness_commitment;
+
+    return error::block_success;
 }
 
 code block::check_guard() const NOEXCEPT

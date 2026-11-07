@@ -339,6 +339,9 @@
     <ClCompile Include="..\..\..\..\test\config\version.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\witness.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\constants.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -565,6 +568,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\filter\bloom.cpp">
+      <Filter>src\filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\filter\bloom_array.cpp">
       <Filter>src\filter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\filter\golomb.cpp">

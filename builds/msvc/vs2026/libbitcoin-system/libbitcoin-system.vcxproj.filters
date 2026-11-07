@@ -549,6 +549,9 @@
     <ClCompile Include="..\..\..\..\src\config\version.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\witness.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\aes_gcm.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -1292,6 +1295,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\version.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\witness.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
@@ -1509,6 +1515,9 @@
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\bloom.hpp">
+      <Filter>include\bitcoin\system\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\bloom_array.hpp">
       <Filter>include\bitcoin\system\filter</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\filter.hpp">
@@ -2425,6 +2434,9 @@
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\filter\bloom.ipp">
+      <Filter>include\bitcoin\system\impl\filter</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\filter\bloom_array.ipp">
       <Filter>include\bitcoin\system\impl\filter</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\filter\sieve.ipp">

@@ -115,6 +115,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/url.cpp \
     ${srcdir}/../../src/config/utilities.cpp \
     ${srcdir}/../../src/config/version.cpp \
+    ${srcdir}/../../src/config/witness.cpp \
     ${srcdir}/../../src/crypto/aes_gcm.cpp \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
@@ -431,7 +432,8 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/transaction.hpp \
     ${srcdir}/../../include/bitcoin/system/config/url.hpp \
     ${srcdir}/../../include/bitcoin/system/config/utilities.hpp \
-    ${srcdir}/../../include/bitcoin/system/config/version.hpp
+    ${srcdir}/../../include/bitcoin/system/config/version.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/witness.hpp
 
 include_bitcoin_system_cryptodir = \
     ${includedir}/bitcoin/system/crypto
@@ -550,6 +552,7 @@ include_bitcoin_system_filterdir = \
 
 include_bitcoin_system_filter_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/filter/bloom.hpp \
+    ${srcdir}/../../include/bitcoin/system/filter/bloom_array.hpp \
     ${srcdir}/../../include/bitcoin/system/filter/filter.hpp \
     ${srcdir}/../../include/bitcoin/system/filter/golomb.hpp \
     ${srcdir}/../../include/bitcoin/system/filter/sieve.hpp
@@ -703,6 +706,7 @@ include_bitcoin_system_impl_filterdir = \
 
 include_bitcoin_system_impl_filter_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/filter/bloom.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/filter/bloom_array.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/filter/sieve.ipp
 
 include_bitcoin_system_impl_hashdir = \
@@ -1314,6 +1318,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/url.cpp \
     ${srcdir}/../../test/config/utilities.cpp \
     ${srcdir}/../../test/config/version.cpp \
+    ${srcdir}/../../test/config/witness.cpp \
     ${srcdir}/../../test/crypto/aes.cpp \
     ${srcdir}/../../test/crypto/aes256.cpp \
     ${srcdir}/../../test/crypto/aes_gcm.cpp \
@@ -1386,6 +1391,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/error/transaction_error_t.cpp \
     ${srcdir}/../../test/error/x509_error_t.cpp \
     ${srcdir}/../../test/filter/bloom.cpp \
+    ${srcdir}/../../test/filter/bloom_array.cpp \
     ${srcdir}/../../test/filter/golomb.cpp \
     ${srcdir}/../../test/filter/sieve.cpp \
     ${srcdir}/../../test/hash/accumulator.cpp \

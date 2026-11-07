@@ -44,5 +44,6 @@
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/config/version.hpp>
+#include <bitcoin/system/config/witness.hpp>
 
 #endif
