@@ -115,6 +115,7 @@
 #include <bitcoin/system/config/url.hpp>
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/config/version.hpp>
+#include <bitcoin/system/config/witness.hpp>
 #include <bitcoin/system/crypto/aes_gcm.hpp>
 #include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/crypto/chacha20.hpp>
@@ -183,6 +184,7 @@
 #include <bitcoin/system/error/transaction_error_t.hpp>
 #include <bitcoin/system/error/x509_error_t.hpp>
 #include <bitcoin/system/filter/bloom.hpp>
+#include <bitcoin/system/filter/bloom_array.hpp>
 #include <bitcoin/system/filter/filter.hpp>
 #include <bitcoin/system/filter/golomb.hpp>
 #include <bitcoin/system/filter/sieve.hpp>

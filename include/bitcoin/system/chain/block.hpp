@@ -163,6 +163,8 @@ public:
     code populate(const context& ctx) const NOEXCEPT;
 
 protected:
+    static bool is_invalid_merkle_root(hashes&& leaves,
+        const hash_digest& merkle) NOEXCEPT;
     static bool is_invalid_witness_commitment(const transaction& first,
         const hash_digest& witness_root, bool segregated) NOEXCEPT;
 
@@ -184,6 +186,7 @@ protected:
     bool is_forward_reference() const NOEXCEPT;
     bool is_internal_double_spend() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
+    bool is_invalid_merkle_root(const hash_digest& merkle) const NOEXCEPT;
 
     /// Accept (contextual).
     /// -----------------------------------------------------------------------

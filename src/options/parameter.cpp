@@ -32,6 +32,13 @@ const char parameter::option_prefix_char = '-';
 void parameter::initialize(const option_metadata& option,
     const argument_list& arguments, const variables_map& variables) NOEXCEPT
 {
+    initialize(option, option, arguments, variables);
+}
+
+void parameter::initialize(const option_metadata& option,
+    const option_metadata& defaults, const argument_list& arguments,
+    const variables_map& variables) NOEXCEPT
+{
     const auto semantic = option.semantic();
     const auto bound = dynamic_cast<const printable*>(semantic.get());
 
@@ -42,7 +49,7 @@ void parameter::initialize(const option_metadata& option,
     set_values(bound ? bound->values() : string_list{});
     set_long_name(option.long_name());
     set_short_name(short_name(option));
-    set_description(description(option));
+    set_description(description(defaults));
     set_format_name(option.format_name());
     set_format_parameter(option.format_parameter());
 }

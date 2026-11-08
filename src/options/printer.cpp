@@ -89,6 +89,14 @@ printer::printer(const options_metadata& settings,
 {
 }
 
+printer::printer(const options_metadata& settings,
+    const options_metadata& defaults, const variables_map& variables,
+    const std::string& application, const std::string& description) NOEXCEPT
+  : options_(settings), defaults_(defaults), variables_(variables),
+    application_(application), description_(description)
+{
+}
+
 // Formatters
 // ----------------------------------------------------------------------------
 
@@ -458,7 +466,10 @@ void printer::generate_parameters() NOEXCEPT
     parameter param;
     for (auto option_ptr: opts.options())
     {
-        param.initialize(*option_ptr, argument_names, variables());
+        const auto& name = option_ptr->long_name();
+        const auto defaulted = defaults().find_nothrow(name, false);
+        const auto& source = is_null(defaulted) ? *option_ptr : *defaulted;
+        param.initialize(*option_ptr, source, argument_names, variables());
 
         // Sort non-positional parameters (i.e. options).
         if (param.position() == parameter::not_positional)

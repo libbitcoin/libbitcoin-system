@@ -20,6 +20,88 @@
 
 BC_AUTO_TEST_SUITE(multiplication_tests)
 
+// multiply
+// ----------------------------------------------------------------------------
+
+constexpr uint32_t pos_uint32 = 42;
+constexpr  int32_t pos_int32 = 42;
+constexpr  int32_t zer_int32 = 0;
+constexpr  int32_t neg_int32 = -42;
+
+static_assert(is_zero(multiply(min_uint32, max_uint32)));
+static_assert(multiply(pos_uint32, pos_uint32) == 1'764);
+static_assert(is_zero(multiply(zer_int32, max_int32)));
+static_assert(multiply(neg_int32, neg_int32) == 1'764);
+static_assert(multiply(pos_int32, neg_int32) == -1'764);
+static_assert(multiply(pos_uint32, 2_u64) == 84);
+static_assert(multiply<int64_t>(max_int32, max_int32) == 4'611'686'014'132'420'609);
+static_assert(multiply<uint64_t>(max_uint32, max_uint32) == 18'446'744'065'119'617'025_u64);
+static_assert(is_zero(multiply<uint8_t>(16_u16, 16_u32)));
+
+// Unsigned overflow (signed overflow fails constexpr evaluation).
+static_assert(is_one(multiply(max_uint32, max_uint32)));
+static_assert(is_multiply_overflow(max_uint32, max_uint32));
+
+// Single type (signed).
+static_assert(is_same_type<decltype(multiply(0, 0)), int>);
+static_assert(is_same_type<decltype(multiply(0_i08, 0_i08)), int8_t>);
+static_assert(is_same_type<decltype(multiply(0_i16, 0_i16)), int16_t>);
+static_assert(is_same_type<decltype(multiply(0_i32, 0_i32)), int32_t>);
+static_assert(is_same_type<decltype(multiply(0_i64, 0_i64)), int64_t>);
+
+// Single type (unsigned).
+static_assert(is_same_type<decltype(multiply(0_u08, 0_u08)), uint8_t>);
+static_assert(is_same_type<decltype(multiply(0_u16, 0_u16)), uint16_t>);
+static_assert(is_same_type<decltype(multiply(0_u32, 0_u32)), uint32_t>);
+static_assert(is_same_type<decltype(multiply(0_u64, 0_u64)), uint64_t>);
+
+// Implicit type (signed).
+static_assert(is_same_type<decltype(multiply(0_i08, 0_i16)), int16_t>);
+static_assert(is_same_type<decltype(multiply(0_i16, 0_i32)), int32_t>);
+static_assert(is_same_type<decltype(multiply(0_i32, 0_i64)), int64_t>);
+static_assert(is_same_type<decltype(multiply(0_i16, 0_i8)), int16_t>);
+static_assert(is_same_type<decltype(multiply(0_i32, 0_i16)), int32_t>);
+static_assert(is_same_type<decltype(multiply(0_i64, 0_i32)), int64_t>);
+
+// Implicit type (unsigned).
+static_assert(is_same_type<decltype(multiply(0_u08, 0_u16)), uint16_t>);
+static_assert(is_same_type<decltype(multiply(0_u16, 0_u32)), uint32_t>);
+static_assert(is_same_type<decltype(multiply(0_u32, 0_u64)), uint64_t>);
+static_assert(is_same_type<decltype(multiply(0_u16, 0_u08)), uint16_t>);
+static_assert(is_same_type<decltype(multiply(0_u32, 0_u16)), uint32_t>);
+static_assert(is_same_type<decltype(multiply(0_u64, 0_u32)), uint64_t>);
+
+// Explicit narrowing/non-narrowing, same signs.
+static_assert(is_same_type<decltype(multiply<int8_t>(0, 0)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_i08)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_i16)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_i32)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_i64)), int8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_u08)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_u16)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_u32)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_u64)), uint8_t>);
+
+// Explicit reassigning narrowing/non-narrowing, same signs.
+static_assert(is_same_type<decltype(multiply<int8_t>(0_u08, 0_u08)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_u08, 0_u16)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_u08, 0_u32)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_u08, 0_u64)), int8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_i8, 0_i08)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_i8, 0_i16)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_i8, 0_i32)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_i8, 0_i64)), uint8_t>);
+
+// Explicit reassigning narrowing/non-narrowing, mixed signs.
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_u08)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_u16)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_u32)), int8_t>);
+static_assert(is_same_type<decltype(multiply<int8_t>(0_i08, 0_u64)), int8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_i08)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_i16)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_i32)), uint8_t>);
+static_assert(is_same_type<decltype(multiply<uint8_t>(0_u8, 0_i64)), uint8_t>);
+
 // is_multiple
 // ----------------------------------------------------------------------------
 
