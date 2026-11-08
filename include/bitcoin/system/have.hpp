@@ -101,6 +101,8 @@
     #define HAVE_ARM
 #elif defined(__s390x__)
     #define HAVE_S390X
+#elif defined(__powerpc64__)
+    #define HAVE_PPC64
 #elif !defined(WITH_PTX)
     #error "Unsupported architecture."
 #endif
