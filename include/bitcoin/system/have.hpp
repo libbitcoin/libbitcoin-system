@@ -45,6 +45,10 @@
     #define HAVE_WINDOWS
 #endif
 
+#if defined(HAVE_FREEBSD) || defined(HAVE_OPENBSD) || defined(HAVE_NETBSD)
+    #define HAVE_BSD
+#endif
+
 // Others excluded presently due to lack of verified support.
 #if defined(HAVE_LINUX) || defined(HAVE_APPLE)
     #define HAVE_POSIX
