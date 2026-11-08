@@ -265,6 +265,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\algorithm.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\compact.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\device.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\ecdsa.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_batch_ecdsa.obj</ObjectFileName>
     </ClCompile>
@@ -572,6 +573,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\compact.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\device.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\ecdsa.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\scan.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\batch\schnorr.hpp" />
