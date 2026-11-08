@@ -246,6 +246,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\compact.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_compact.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\device.cpp">
+      <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_device.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\batch\ecdsa.cpp">
       <ObjectFileName>$(IntDir)test_crypto_secp256k1_batch_ecdsa.obj</ObjectFileName>
     </ClCompile>
@@ -456,7 +459,9 @@
       <ObjectFileName>$(IntDir)test_settings.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\binary.cpp" />
-    <ClCompile Include="..\..\..\..\test\stream\device.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\device.cpp">
+      <ObjectFileName>$(IntDir)test_stream_device.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\devices\copy_sink.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\copy_source.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\flip_sink.cpp" />

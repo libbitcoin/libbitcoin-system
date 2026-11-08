@@ -139,6 +139,7 @@
 #include <bitcoin/system/crypto/secp256k1/tables.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/batch.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/compact.hpp>
+#include <bitcoin/system/crypto/secp256k1/batch/device.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/scan.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>

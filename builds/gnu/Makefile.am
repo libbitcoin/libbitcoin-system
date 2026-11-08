@@ -137,6 +137,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/recover.cpp \
     ${srcdir}/../../src/crypto/secp256k1/schnorr.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/compact.cpp \
+    ${srcdir}/../../src/crypto/secp256k1/batch/device.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/ecdsa.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/scan.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/schnorr.cpp \
@@ -482,6 +483,7 @@ include_bitcoin_system_crypto_secp256k1_batchdir = \
 include_bitcoin_system_crypto_secp256k1_batch_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/batch.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/compact.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/device.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/scan.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1/batch/schnorr.hpp \
@@ -1350,6 +1352,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/secp256k1/schnorr.cpp \
     ${srcdir}/../../test/crypto/secp256k1/wycheproof.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/compact.cpp \
+    ${srcdir}/../../test/crypto/secp256k1/batch/device.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/ecdsa.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/performance.cpp \
     ${srcdir}/../../test/crypto/secp256k1/batch/scan.cpp \
