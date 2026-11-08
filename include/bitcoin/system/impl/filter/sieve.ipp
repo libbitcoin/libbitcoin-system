@@ -193,25 +193,25 @@ consteval CLASS::masks_t CLASS::generate_masks() NOEXCEPT
 
     // Progressively divide previous row masks into subsequent row.
     // Each row adds one mask, with previous row masks sacrificing bits for it.
-    for (type row = 1; row < screens; ++row)
+    for (auto row = one; row < screens; ++row)
     {
-        for (type col = 0; col < row; ++col)
-            table[off[row] + col] = table[off[sub1(row)] + col];
+        for (size_t column{}; column < row; ++column)
+            table[off[row] + column] = table[off[sub1(row)] + column];
 
         for (auto mask = row; !is_zero(mask); --mask)
         {
-            const auto col = sub1(mask);
+            const auto column = sub1(mask);
             const auto div = floored_divide(screen_bits, add1(row));
             const auto mod = floored_modulo(screen_bits, add1(row));
-            const auto target = div + to_int(col < mod);
-            const auto prior = table[off[row] + col];
+            const auto target = div + to_int(column < mod);
+            const auto prior = table[off[row] + column];
             auto bits = floored_subtract(ones_count(prior), target);
             while (!is_zero(bits))
             {
-                const auto bit = right_zeros(table[off[row] + col]);
+                const auto bit = right_zeros(table[off[row] + column]);
                 if (bit < screen_bits)
                 {
-                    set_right_into(table[off[row] + col], bit, false);
+                    set_right_into(table[off[row] + column], bit, false);
                     set_right_into(table[off[row] + row], bit, true);
                     --bits;
                 }
@@ -221,8 +221,8 @@ consteval CLASS::masks_t CLASS::generate_masks() NOEXCEPT
 
     // Unset last row high order screen bit to avoid sentinel conflict.
     // This may result in one empty mask, and therefore a false positive.
-    for (type col = 0; col < screens; ++col)
-        set_right_into(table[off[sub1(screens)] + col], sentinel, false);
+    for (size_t column{}; column < screens; ++column)
+        set_right_into(table[off[sub1(screens)] + column], sentinel, false);
 
     return table;
 }

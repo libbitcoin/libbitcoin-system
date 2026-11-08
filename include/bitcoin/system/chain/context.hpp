@@ -65,7 +65,7 @@ public:
         const auto limit = bip94 ? max_timewarp : max_timewarp_bip54;
         return (bip94 || bip54)
             && is_zero(height % retargeting_interval)
-            && (timestamp < floored_subtract(previous_timestamp, limit));
+            && (timestamp < floored_subtract<uint32_t>(previous_timestamp, limit));
     }
 
     // The block's timestamp is before that of the first block of its period,
