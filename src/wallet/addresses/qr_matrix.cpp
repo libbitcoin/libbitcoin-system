@@ -242,7 +242,7 @@ uint32_t qr_matrix::format_bits(recovery_level level, size_t mask) NOEXCEPT
     const auto data = bit_or(shift_left(indicator, 3),
         possible_narrow_cast<uint32_t>(mask));
     return bit_xor(bit_or(shift_left(data, 10),
-        bch_remainder(data, 0x0537, 10)), 0x5412u);
+        bch_remainder(data, 0x0537, 10)), 0x5412_u32);
 }
 
 uint32_t qr_matrix::version_bits(uint8_t version) NOEXCEPT
