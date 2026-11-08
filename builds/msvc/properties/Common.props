@@ -11,17 +11,9 @@
   </ImportGroup>
 
   <PropertyGroup Label="Configuration">
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <PreferredToolArchitecture Condition="'$(PROCESSOR_ARCHITECTURE)' == 'AMD64'">x64</PreferredToolArchitecture>
   </PropertyGroup>
 
-  <!-- Option-clang compiles with the Visual Studio clang-cl under the configured toolset. -->
-  <PropertyGroup>
-    <Option-clang Condition="'$(Option-clang)' == ''">false</Option-clang>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Option-clang)' == 'true'">
-    <CLToolExe>clang-cl.exe</CLToolExe>
-    <CLToolPath>$(VCInstallDir)Tools\Llvm\x64\bin</CLToolPath>
-  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -46,10 +38,12 @@
       <LanguageStandard Condition="'$(PlatformToolset)' == 'v142'">stdcpp17</LanguageStandard>
       <LanguageStandard Condition="'$(PlatformToolset)' == 'v143'">stdcpp20</LanguageStandard>
       <LanguageStandard Condition="'$(PlatformToolset)' == 'v145'">stdcpp20</LanguageStandard>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'ClangCL'">stdcpp20</LanguageStandard>
       <ConformanceMode Condition="'$(PlatformToolset)' == 'v141'">false</ConformanceMode>
       <ConformanceMode Condition="'$(PlatformToolset)' == 'v142'">true</ConformanceMode>
       <ConformanceMode Condition="'$(PlatformToolset)' == 'v143'">true</ConformanceMode>
       <ConformanceMode Condition="'$(PlatformToolset)' == 'v145'">true</ConformanceMode>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'ClangCL'">true</ConformanceMode>
 
       <!-- External Includes -->
       <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL). -->
@@ -59,7 +53,7 @@
   </ItemDefinitionGroup>
 
   <!-- clang-cl applies external warnings to system headers, and ignores some msvc options. -->
-  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true'">
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL'">
     <ClCompile>
       <AdditionalOptions Condition="'$(Platform)' == 'Win32'">--target=i686-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Platform)' == 'ARM64'">--target=aarch64-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
@@ -69,7 +63,7 @@
   </ItemDefinitionGroup>
 
   <!-- clang-cl enables x86 intrinsics by target feature, as gcc/clang, where msvc uses the WITH_ options. -->
-  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'Win32')">
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'Win32')">
     <ClCompile>
       <AdditionalOptions Condition="'$(Option-shani)' == 'true'">-msse4.1 -msha %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Option-sha512)' == 'true'">-mavx2 -msha512 %(AdditionalOptions)</AdditionalOptions>
@@ -81,7 +75,7 @@
   </ItemDefinitionGroup>
 
   <!-- clang-cl enables arm intrinsics by one -march of all extensions, as gcc/clang, where msvc uses the WITH_ options. -->
-  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And '$(Platform)' == 'ARM64'">
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL' And '$(Platform)' == 'ARM64'">
     <ClCompile>
       <ArmBase Condition="'$(Option-sha2)' == 'true' Or '$(Option-aes)' == 'true'">armv8-a</ArmBase>
       <ArmBase Condition="'$(Option-sha3)' == 'true'">armv8.2-a</ArmBase>
@@ -90,7 +84,7 @@
       <ArmExtensions Condition="'$(Option-sha3)' == 'true'">%(ArmExtensions)+sha3</ArmExtensions>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Option-clang)' == 'true' And '$(Platform)' == 'ARM64' And ('$(Option-sha2)' == 'true' Or '$(Option-aes)' == 'true' Or '$(Option-sha3)' == 'true')">
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL' And '$(Platform)' == 'ARM64' And ('$(Option-sha2)' == 'true' Or '$(Option-aes)' == 'true' Or '$(Option-sha3)' == 'true')">
     <ClCompile>
       <AdditionalOptions>-march=%(ArmBase)%(ArmExtensions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>

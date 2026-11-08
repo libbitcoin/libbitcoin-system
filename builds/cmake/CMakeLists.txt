@@ -91,6 +91,13 @@ if ( MSVC )
     _WIN32_WINNT=0x0A00 )
 endif()
 
+# Link POSIX threads on BSD.
+if ( CMAKE_SYSTEM_NAME MATCHES "BSD" )
+  set( THREADS_PREFER_PTHREAD_FLAG ON )
+  find_package( Threads REQUIRED )
+  link_libraries( Threads::Threads )
+endif()
+
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)

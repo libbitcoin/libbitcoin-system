@@ -172,7 +172,7 @@ jobs:
             cxx: "arm-linux-gnueabihf-g++"
             flags: ""
             coverage: ""
-            package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
+            package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf qemu-user-static"
             host: "arm-linux-gnueabihf"
             libsecp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
