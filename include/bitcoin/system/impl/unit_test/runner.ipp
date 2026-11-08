@@ -365,6 +365,10 @@ inline void runner::build_info() const NOEXCEPT
     const std::string platform{ "Linux" };
 #elif defined(HAVE_FREEBSD)
     const std::string platform{ "FreeBSD" };
+#elif defined(HAVE_OPENBSD)
+    const std::string platform{ "OpenBSD" };
+#elif defined(HAVE_NETBSD)
+    const std::string platform{ "NetBSD" };
 #else
     const std::string platform{ "unknown" };
 #endif

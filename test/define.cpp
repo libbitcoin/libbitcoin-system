@@ -30,13 +30,13 @@
     static_assert(!have_32b);
 #endif
 
-#if defined(HAVE_X64) || defined(HAVE_ARM64) || defined(HAVE_S390X)
+#if defined(HAVE_X64) || defined(HAVE_ARM64) || defined(HAVE_S390X) || defined(HAVE_PPC64)
     static_assert(have_64b);
 #else
     static_assert(!have_64b);
 #endif
 
-#if defined(HAVE_S390X)
+#if defined(HAVE_S390X) || (defined(HAVE_PPC64) && defined(__BIG_ENDIAN__))
     static_assert(is_big_endian);
 #else
     static_assert(is_little_endian);
