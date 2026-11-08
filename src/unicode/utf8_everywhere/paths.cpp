@@ -29,6 +29,10 @@
 #ifdef HAVE_APPLE
     #include <mach-o/dyld.h>
 #endif
+#if defined(HAVE_FREEBSD) || defined(HAVE_NETBSD)
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
+#endif
 #include <filesystem>
 #include <system_error>
 #include <bitcoin/system/define.hpp>
@@ -225,6 +229,26 @@ std::filesystem::path module_path() NOEXCEPT
 
     // The path may be a symlink or contain relative segments, so qualify it.
     return qualified_path({ std::string{ buffer.data() } });
+#elif defined(HAVE_FREEBSD) || defined(HAVE_NETBSD)
+#if defined(HAVE_FREEBSD)
+    const std::array<int, 4> name{ CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+#else
+    const std::array<int, 4> name{ CTL_KERN, KERN_PROC_ARGS, -1, KERN_PROC_PATHNAME };
+#endif
+
+    // The call populates the size when the buffer is null.
+    const auto count = possible_narrow_cast<u_int>(name.size());
+    size_t size{};
+    if (!is_zero(::sysctl(name.data(), count, nullptr, &size, nullptr, 0)) ||
+        is_zero(size))
+        return {};
+
+    std::vector<char> buffer(size);
+    if (!is_zero(::sysctl(name.data(), count, buffer.data(), &size, nullptr,
+        0)))
+        return {};
+
+    return { std::string{ buffer.data() } };
 #else
     return {};
 #endif
