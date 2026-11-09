@@ -447,6 +447,73 @@ BC_AUTO_TEST_CASE(settings__sorted_checkpoints__mainnet_default_expected)
     BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().front().height(), 11111_size);
 }
 
+// initialize
+
+BC_AUTO_TEST_CASE(settings__initialize__mainnet__mainnet)
+{
+    settings configuration{ chain::selection::mainnet };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::mainnet);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__testnet3__testnet3)
+{
+    settings configuration{ chain::selection::testnet3 };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet3);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__testnet4__testnet4)
+{
+    settings configuration{ chain::selection::testnet4 };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet4);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__regtest__regtest)
+{
+    settings configuration{ chain::selection::regtest };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::regtest);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__signet__signet)
+{
+    settings configuration{ chain::selection::signet };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::signet);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__testnet5__testnet5)
+{
+    settings configuration{ chain::selection::testnet5 };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet5);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__default__none)
+{
+    settings configuration{};
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::none);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__mainnet_with_testnet4_genesis__testnet4)
+{
+    settings configuration{ chain::selection::mainnet };
+    configuration.genesis_block = settings{ chain::selection::testnet4 }.genesis_block;
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet4);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__mainnet_with_unknown_genesis__none)
+{
+    settings configuration{ chain::selection::mainnet };
+    configuration.genesis_block = chain::block{ chain::header{ 1, null_hash, null_hash, 0, 0, 0 }, chain::transactions{} };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::none);
+}
+
 BC_AUTO_TEST_CASE(settings__top_checkpoint__testnet3_empty__genesis)
 {
     settings configuration(chain::selection::testnet3);

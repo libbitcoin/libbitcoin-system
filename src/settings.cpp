@@ -715,6 +715,25 @@ settings::settings(chain::selection context) NOEXCEPT
     }
 }
 
+void settings::initialize() NOEXCEPT
+{
+    genesis_network = chain::selection::none;
+    if (!genesis_block.is_valid())
+        return;
+
+    const auto genesis = genesis_block.hash();
+    for (const auto word: config::selection::words)
+    {
+        chain::selection context{};
+        if (config::selection::from_word(context, word) &&
+            settings{ context }.genesis_block.hash() == genesis)
+        {
+            genesis_network = context;
+            return;
+        }
+    }
+}
+
 // Computed properties.
 // ----------------------------------------------------------------------------
 // These are not used internal to system.

@@ -37,6 +37,9 @@ public:
     settings() NOEXCEPT;
     settings(chain::selection context) NOEXCEPT;
 
+    /// Derive the network of the genesis block (const thereafter).
+    virtual void initialize() NOEXCEPT;
+
     /// Computed properties.
     /// -----------------------------------------------------------------------
 
@@ -62,6 +65,9 @@ public:
 
     /// The network of the defaults.
     config::selection network{};
+
+    /// The network of the genesis block, none if not that of a network.
+    chain::selection genesis_network{};
 
     /// Configured forks.
     /// -----------------------------------------------------------------------
