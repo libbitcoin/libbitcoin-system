@@ -30,9 +30,9 @@ namespace config {
 /// The chain::selection words.
 struct selection_words
 {
-    static constexpr std::array<std::string_view, 6> words
+    static constexpr std::array<std::string_view, 7> words
     {
-        "", "mainnet", "testnet3", "testnet4", "regtest", "signet"
+        "", "mainnet", "testnet3", "testnet4", "regtest", "signet", "testnet5"
     };
 };
 

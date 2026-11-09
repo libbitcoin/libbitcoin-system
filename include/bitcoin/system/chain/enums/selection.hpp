@@ -33,7 +33,8 @@ enum class selection
     testnet3,
     testnet4,
     regtest,
-    signet
+    signet,
+    testnet5
 };
 
 } // namespace config

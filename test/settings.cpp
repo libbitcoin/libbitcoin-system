@@ -316,6 +316,66 @@ BC_AUTO_TEST_CASE(settings__construct__signet_context__expected)
     BC_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
+BC_AUTO_TEST_CASE(settings__construct__testnet5_context__expected)
+{
+    settings configuration(chain::selection::testnet5);
+    BC_REQUIRE(configuration.network == chain::selection::testnet5);
+    BC_REQUIRE(configuration.forks.difficult);
+    BC_REQUIRE(configuration.forks.retarget);
+    BC_REQUIRE(!configuration.forks.time_warp_patch);
+    BC_REQUIRE(!configuration.forks.block_storm_patch);
+    BC_REQUIRE(!configuration.forks.signet);
+    BC_REQUIRE(configuration.forks.bip54_timewarp);
+    BC_REQUIRE(configuration.forks.bip54_timespan);
+    BC_REQUIRE(configuration.forks.bip54_sigops);
+    BC_REQUIRE(configuration.forks.bip54_txsize);
+    BC_REQUIRE(configuration.forks.bip54_coinbase);
+    BC_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
+    BC_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval_seconds, 1209600u);
+    BC_REQUIRE_EQUAL(configuration.proof_of_work_limit, 0x1a0fffffu);
+    BC_REQUIRE_EQUAL(configuration.minimum_timespan(), 302400u);
+    BC_REQUIRE_EQUAL(configuration.maximum_timespan(), 4838400u);
+    BC_REQUIRE_EQUAL(configuration.retargeting_interval(), 2016u);
+    const chain::block genesis_block = configuration.genesis_block;
+    BC_REQUIRE_EQUAL(encode_base16(genesis_block.to_data(false)), "00401c200000000000000000000000000000000000000000000000000000000000000000de48bbaa869592873fc4e5042f2931f9b42bb7e8ddeccd373df845d80983409b9663e96af8ff071b9916ba730101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff5b04ffff001d01044c52323032362d31312d3033203937343334332030303030303030303030303030303030303030306138366436646132633135363364303836363864396563313863636535386362386338363564346133316338ffffffff0100f2052a010000000a6a089763e96a0000000000000000");
+    BC_REQUIRE_EQUAL(encode_hash(genesis_block.hash()), "000000000001bd3ade1e24d07c1a3677d4868c34f2f1696fa419e3b9f061b1e0");
+    BC_REQUIRE_EQUAL(configuration.first_version, 1u);
+    BC_REQUIRE_EQUAL(configuration.bip34_version, 2u);
+    BC_REQUIRE_EQUAL(configuration.bip66_version, 3u);
+    BC_REQUIRE_EQUAL(configuration.bip65_version, 4u);
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
+    BC_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
+    BC_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 0u);
+    BC_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 0u);
+    BC_REQUIRE_EQUAL(configuration.bip34_activation_sample, 0u);
+    BC_REQUIRE(!configuration.forks.bip90);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip34_height, 0u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip65_height, 0u);
+    BC_REQUIRE_EQUAL(configuration.bip90_bip66_height, 0u);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit0_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit1_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip9_bit2_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip54_timewarp_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip54_timespan_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip54_sigops_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip54_txsize_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.bip54_coinbase_deployment.start, chain::chain_state::deployment::always_active);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BC_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
+    BC_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
+    BC_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BC_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
+    const chain::checkpoint genesis(genesis_block.hash(), 0u);
+    const chain::checkpoint::list checkpoints{ genesis };
+    BC_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BC_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000")));
+    BC_REQUIRE_EQUAL(configuration.milestone, genesis);
+}
+
 // methods
 // ----------------------------------------------------------------------------
 
@@ -385,6 +445,73 @@ BC_AUTO_TEST_CASE(settings__sorted_checkpoints__mainnet_default_expected)
     BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().back().height(), 295000_size);
     BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().front(), mainnet_checkpoints.back());
     BC_REQUIRE_EQUAL(configuration.sorted_checkpoints().front().height(), 11111_size);
+}
+
+// initialize
+
+BC_AUTO_TEST_CASE(settings__initialize__mainnet__mainnet)
+{
+    settings configuration{ chain::selection::mainnet };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::mainnet);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__testnet3__testnet3)
+{
+    settings configuration{ chain::selection::testnet3 };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet3);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__testnet4__testnet4)
+{
+    settings configuration{ chain::selection::testnet4 };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet4);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__regtest__regtest)
+{
+    settings configuration{ chain::selection::regtest };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::regtest);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__signet__signet)
+{
+    settings configuration{ chain::selection::signet };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::signet);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__testnet5__testnet5)
+{
+    settings configuration{ chain::selection::testnet5 };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet5);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__default__none)
+{
+    settings configuration{};
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::none);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__mainnet_with_testnet4_genesis__testnet4)
+{
+    settings configuration{ chain::selection::mainnet };
+    configuration.genesis_block = settings{ chain::selection::testnet4 }.genesis_block;
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::testnet4);
+}
+
+BC_AUTO_TEST_CASE(settings__initialize__mainnet_with_unknown_genesis__none)
+{
+    settings configuration{ chain::selection::mainnet };
+    configuration.genesis_block = chain::block{ chain::header{ 1, null_hash, null_hash, 0, 0, 0 }, chain::transactions{} };
+    configuration.initialize();
+    BC_REQUIRE(configuration.genesis_network == chain::selection::none);
 }
 
 BC_AUTO_TEST_CASE(settings__top_checkpoint__testnet3_empty__genesis)
