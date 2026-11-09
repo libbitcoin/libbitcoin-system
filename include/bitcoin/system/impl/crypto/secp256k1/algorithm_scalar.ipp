@@ -57,13 +57,13 @@ constexpr void algorithm::reduce(scalar_t& r, uint64_t overflow) NOEXCEPT
 
 constexpr uint64_t algorithm::to_mask(bool value) NOEXCEPT
 {
-    return 0_u64 - to_int<uint64_t>(value);
+    return opaque(0_u64 - to_int<uint64_t>(value));
 }
 
 // The high bit of value or its negation is set for any nonzero value.
 constexpr uint64_t algorithm::zero_mask(uint64_t value) NOEXCEPT
 {
-    return sub1((value | (0_u64 - value)) >> sub1(bits<uint64_t>));
+    return opaque(sub1((value | (0_u64 - value)) >> sub1(bits<uint64_t>)));
 }
 
 // Folds limbs above 2^256 by 2^256 = 2^256 - n (mod n), from 512 to 385 to
