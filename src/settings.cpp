@@ -610,6 +610,104 @@ settings::settings(chain::selection context) NOEXCEPT
             break;
         }
 
+        case chain::selection::testnet5:
+        {
+            proof_of_work_limit = 0x1a0fffff;
+
+            // TODO: BIP95 placeholder genesis, replace once mined.
+            genesis_block = chain::block
+            {
+                data_chunk
+                {
+                    0x00, 0x40, 0x1c, 0x20, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0xde, 0x48, 0xbb, 0xaa,
+                    0x86, 0x95, 0x92, 0x87, 0x3f, 0xc4, 0xe5, 0x04,
+                    0x2f, 0x29, 0x31, 0xf9, 0xb4, 0x2b, 0xb7, 0xe8,
+                    0xdd, 0xec, 0xcd, 0x37, 0x3d, 0xf8, 0x45, 0xd8,
+                    0x09, 0x83, 0x40, 0x9b, 0x96, 0x63, 0xe9, 0x6a,
+                    0xf8, 0xff, 0x07, 0x1b, 0x99, 0x16, 0xba, 0x73,
+                    0x01, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+                    0xff, 0xff, 0x5b, 0x04, 0xff, 0xff, 0x00, 0x1d,
+                    0x01, 0x04, 0x4c, 0x52, 0x32, 0x30, 0x32, 0x36,
+                    0x2d, 0x31, 0x31, 0x2d, 0x30, 0x33, 0x20, 0x39,
+                    0x37, 0x34, 0x33, 0x34, 0x33, 0x20, 0x30, 0x30,
+                    0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+                    0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+                    0x30, 0x30, 0x61, 0x38, 0x36, 0x64, 0x36, 0x64,
+                    0x61, 0x32, 0x63, 0x31, 0x35, 0x36, 0x33, 0x64,
+                    0x30, 0x38, 0x36, 0x36, 0x38, 0x64, 0x39, 0x65,
+                    0x63, 0x31, 0x38, 0x63, 0x63, 0x65, 0x35, 0x38,
+                    0x63, 0x62, 0x38, 0x63, 0x38, 0x36, 0x35, 0x64,
+                    0x34, 0x61, 0x33, 0x31, 0x63, 0x38, 0xff, 0xff,
+                    0xff, 0xff, 0x01, 0x00, 0xf2, 0x05, 0x2a, 0x01,
+                    0x00, 0x00, 0x00, 0x0a, 0x6a, 0x08, 0x97, 0x63,
+                    0xe9, 0x6a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00
+                }, false
+            };
+
+            forks.bip16 = true;
+            forks.bip30 = true;
+            forks.bip34 = true;
+            forks.bip42 = true;
+            forks.bip65 = true;
+            forks.bip66 = true;
+            forks.bip68 = true;
+            forks.bip90 = false;
+            forks.bip112 = true;
+            forks.bip113 = true;
+            forks.bip141 = true;
+            forks.bip143 = true;
+            forks.bip147 = true;
+            forks.bip341 = true;
+            forks.bip342 = true;
+            forks.bip54_timewarp = true;
+            forks.bip54_timespan = true;
+            forks.bip54_sigops = true;
+            forks.bip54_txsize = true;
+            forks.bip54_coinbase = true;
+            forks.retarget = true;                     // !regtest
+            forks.difficult = true;                    // !testnet
+            forks.time_warp_patch = false;             // testnet4
+            forks.block_storm_patch = false;           // testnet4
+            forks.signet = false;                      // signet
+            forks.ltc_time_warp_patch = false;         // litecoin
+            forks.ltc_retarget_overflow_patch = false; // litecoin
+            forks.ltc_scrypt_proof_of_work = false;    // litecoin
+
+            bip16_activation_time = 1329264000;
+            bip34_activation_threshold = 0;
+            bip34_enforcement_threshold = 0;
+            bip34_activation_sample = 0;
+            bip90_bip34_height = 0;
+            bip90_bip65_height = 0;
+            bip90_bip66_height = 0;
+            bip9_bit0_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit1_deployment.start = chain::chain_state::deployment::always_active;
+            bip9_bit2_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_timewarp_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_timespan_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_sigops_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_txsize_deployment.start = chain::chain_state::deployment::always_active;
+            bip54_coinbase_deployment.start = chain::chain_state::deployment::always_active;
+
+            // TODO: BIP95 placeholder genesis hash, replace once mined.
+            checkpoints =
+            {
+                { "000000000001bd3ade1e24d07c1a3677d4868c34f2f1696fa419e3b9f061b1e0", 0 }
+            };
+            milestone = { "000000000001bd3ade1e24d07c1a3677d4868c34f2f1696fa419e3b9f061b1e0", 0 };
+            minimum_work = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
+            break;
+        }
+
         default:
         case chain::selection::none:
         {

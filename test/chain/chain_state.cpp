@@ -440,6 +440,49 @@ BC_AUTO_TEST_CASE(chain_state__activation__mainnet__no_bip54_rules)
     BC_REQUIRE_EQUAL(chain_state::get_map(1000, settings).signals[3].high, chain_state::map::unrequested);
 }
 
+BC_AUTO_TEST_CASE(chain_state__activation__testnet5__bip54_rules)
+{
+    const settings settings(selection::testnet5);
+    const chain_state state{ signaled_values(1), settings };
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_timewarp_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_timespan_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_sigops_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_txsize_rule));
+    BC_REQUIRE(to_bool(state.flags() & flags::bip54_coinbase_rule));
+    BC_REQUIRE(!to_bool(state.flags() & flags::time_warp_patch));
+    BC_REQUIRE(!to_bool(state.flags() & flags::block_storm_patch));
+}
+
+BC_AUTO_TEST_CASE(chain_state__activation__testnet5_genesis__no_bip54_rules)
+{
+    const settings settings(selection::testnet5);
+    const chain_state state{ chain_state::data{}, settings };
+    BC_REQUIRE(!to_bool(state.flags() & flags::bip54_timewarp_rule));
+}
+
+// A block more than twice the spacing after its parent.
+static chain_state::data late_values(const settings& settings)
+{
+    chain_state::data values{};
+    values.height = 5;
+    values.timestamp.ordered.push_back(1000000);
+    values.timestamp.self = 1000000 + 3 * settings.block_spacing_seconds;
+    values.bits.ordered.push_back(0x1903a30c);
+    return values;
+}
+
+BC_AUTO_TEST_CASE(chain_state__work_required__testnet4_late_block__proof_of_work_limit)
+{
+    const settings settings(selection::testnet4);
+    BC_REQUIRE_EQUAL(test_chain_state::work_required(late_values(settings), settings.forks, settings), settings.proof_of_work_limit);
+}
+
+BC_AUTO_TEST_CASE(chain_state__work_required__testnet5_late_block__previous_bits)
+{
+    const settings settings(selection::testnet5);
+    BC_REQUIRE_EQUAL(test_chain_state::work_required(late_values(settings), settings.forks, settings), 0x1903a30cu);
+}
+
 // activation (bip30 lifecycle)
 // ----------------------------------------------------------------------------
 

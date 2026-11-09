@@ -35,7 +35,8 @@ static const std::vector<word_vector> word_vectors
     { selection::testnet3, "testnet3" },
     { selection::testnet4, "testnet4" },
     { selection::regtest, "regtest" },
-    { selection::signet, "signet" }
+    { selection::signet, "signet" },
+    { selection::testnet5, "testnet5" }
 };
 
 BC_AUTO_TEST_CASE(token__construct__default__zero_value)
@@ -121,7 +122,7 @@ BC_AUTO_TEST_CASE(token__constexpr__words__expected)
 
 BC_AUTO_TEST_CASE(token__names__selection__parsed_words)
 {
-    BC_REQUIRE_EQUAL(config::selection::names(), "mainnet|testnet3|testnet4|regtest|signet");
+    BC_REQUIRE_EQUAL(config::selection::names(), "mainnet|testnet3|testnet4|regtest|signet|testnet5");
 }
 
 BC_AUTO_TEST_CASE(token__stream__round_trip__expected)
