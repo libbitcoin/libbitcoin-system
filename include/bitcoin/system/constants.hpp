@@ -175,6 +175,18 @@ namespace libbitcoin {
     constexpr auto have_vaes = false;
 #endif
 
+#if defined(HAVE_X86_64_V2)
+    constexpr auto have_x86_64_v2 = true;
+#else
+    constexpr auto have_x86_64_v2 = false;
+#endif
+
+#if defined(HAVE_X86_64_V3)
+    constexpr auto have_x86_64_v3 = true;
+#else
+    constexpr auto have_x86_64_v3 = false;
+#endif
+
 #if defined(HAVE_NEON)
     constexpr auto have_neon = true;
 #else
@@ -191,6 +203,12 @@ namespace libbitcoin {
     constexpr auto have_neon_aes = true;
 #else
     constexpr auto have_neon_aes = false;
+#endif
+
+#if defined(HAVE_LSE)
+    constexpr auto have_lse = true;
+#else
+    constexpr auto have_lse = false;
 #endif
 
 #if defined(HAVE_FAST_MATH)

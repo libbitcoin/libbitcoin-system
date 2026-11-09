@@ -36,7 +36,7 @@ namespace system {
 
 #if defined(HAVE_XCPU)
 
-inline bool read_xcr(uint64_t& value, uint32_t index) noexcept
+BASELINE inline bool read_xcr(uint64_t& value, uint32_t index) noexcept
 {
 #if defined(HAVE_XGETBV)
     value = _xgetbv(index);
@@ -51,8 +51,8 @@ inline bool read_xcr(uint64_t& value, uint32_t index) noexcept
 #endif
 }
 
-inline bool read_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-    uint32_t leaf, uint32_t subleaf) noexcept
+BASELINE inline bool read_cpu(uint32_t& a, uint32_t& b, uint32_t& c,
+    uint32_t& d, uint32_t leaf, uint32_t subleaf) noexcept
 {
 #if defined(HAVE_XCPUIDEX)
     int out[4]{};
@@ -74,7 +74,7 @@ inline bool read_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 }
 
 // macOS enables avx512 state (xcr0 bits 5-7) on first use.
-inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
+BASELINE inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 {
 #if defined(HAVE_APPLE)
     constexpr uint64_t avx512_state = 0xe0;
@@ -94,8 +94,8 @@ inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 }
 
 // A leaf above the highest of its range (standard or extended) is invalid.
-inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-    uint32_t leaf, uint32_t subleaf) noexcept
+BASELINE inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c,
+    uint32_t& d, uint32_t leaf, uint32_t subleaf) noexcept
 {
     constexpr uint32_t extended = 0x80000000;
     return read_cpu(a, b, c, d, leaf & extended, 0) && leaf <= a
@@ -104,13 +104,13 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 
 #else // HAVE_XCPU
 
-inline bool get_xcr(uint64_t&, uint32_t) noexcept
+BASELINE inline bool get_xcr(uint64_t&, uint32_t) noexcept
 {
     return false;
 }
 
-inline bool get_cpu(uint32_t&, uint32_t&, uint32_t&, uint32_t&, uint32_t,
-    uint32_t) noexcept
+BASELINE inline bool get_cpu(uint32_t&, uint32_t&, uint32_t&, uint32_t&,
+    uint32_t, uint32_t) noexcept
 {
     return false;
 }
@@ -126,7 +126,8 @@ enum class arm_feature
     sha1,
     sha256,
     sha3,
-    sha512
+    sha512,
+    atomics
 };
 
 #if defined(HAVE_ARM)
@@ -134,7 +135,8 @@ enum class arm_feature
 #if defined(HAVE_APPLE)
 
 // The legacy name is read only when the name is not defined.
-inline bool read_sysctl(const char* name, const char* legacy = nullptr) noexcept
+BASELINE inline bool read_sysctl(const char* name,
+    const char* legacy = nullptr) noexcept
 {
     int value{};
     auto size = sizeof(int);
@@ -150,7 +152,7 @@ inline bool read_sysctl(const char* name, const char* legacy = nullptr) noexcept
 
 #endif // HAVE_APPLE
 
-inline bool get_arm(arm_feature feature) noexcept
+BASELINE inline bool get_arm(arm_feature feature) noexcept
 {
 #if defined(HAVE_LINUX) && defined(HAVE_ARM64)
     const auto caps = getauxval(AT_HWCAP);
@@ -170,6 +172,8 @@ inline bool get_arm(arm_feature feature) noexcept
             return (caps & HWCAP_SHA3) != 0;
         case arm_feature::sha512:
             return (caps & HWCAP_SHA512) != 0;
+        case arm_feature::atomics:
+            return (caps & HWCAP_ATOMICS) != 0;
         default:
             return false;
     }
@@ -195,6 +199,9 @@ inline bool get_arm(arm_feature feature) noexcept
         case arm_feature::sha512:
             return read_sysctl("hw.optional.arm.FEAT_SHA512",
                 "hw.optional.armv8_2_sha512");
+        case arm_feature::atomics:
+            return read_sysctl("hw.optional.arm.FEAT_LSE",
+                "hw.optional.armv8_1_atomics");
         default:
             return false;
     }
@@ -216,6 +223,9 @@ inline bool get_arm(arm_feature feature) noexcept
         case arm_feature::sha512:
             return ::IsProcessorFeaturePresent(
                 PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE) != FALSE;
+        case arm_feature::atomics:
+            return ::IsProcessorFeaturePresent(
+                PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE) != FALSE;
         default:
             return false;
     }
@@ -226,7 +236,7 @@ inline bool get_arm(arm_feature feature) noexcept
 
 #else // HAVE_ARM
 
-inline bool get_arm(arm_feature) noexcept
+BASELINE inline bool get_arm(arm_feature) noexcept
 {
     return false;
 }

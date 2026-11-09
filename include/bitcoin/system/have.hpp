@@ -301,6 +301,17 @@
     #if defined(__VAES__) && defined(__VPCLMULQDQ__)
         #define HAVE_VAES
     #endif
+    // -march=x86-64-v3
+    // vc++: Advanced Vector Extensions 2 (/arch:AVX2) is treated as this level.
+    #if defined(HAVE_X64) && (defined(__BMI2__) || defined(__FMA__) || \
+        defined(__MOVBE__) || (defined(HAVE_MSC) && defined(__AVX2__)))
+        #define HAVE_X86_64_V3
+    #endif
+    // -march=x86-64-v2
+    #if defined(HAVE_X64) && (defined(HAVE_X86_64_V3) || \
+        defined(__SSE4_2__) || defined(__POPCNT__))
+        #define HAVE_X86_64_V2
+    #endif
 
     // 52 bit fused multiply-add by lane width.
     #if defined(HAVE_AVX512IFMA) || defined(HAVE_AVXIFMA)
@@ -323,6 +334,10 @@
     #if defined(__ARM_FEATURE_SHA512)
         #define HAVE_NEON_SHA3
         #define HAVE_SHA512
+    #endif
+    // -march=armv8.1-a
+    #if defined(__ARM_FEATURE_ATOMICS)
+        #define HAVE_LSE
     #endif
 #endif
 #if defined(HAVE_ARM)
