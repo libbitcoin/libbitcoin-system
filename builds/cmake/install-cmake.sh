@@ -161,37 +161,37 @@ main()
 
     CONFIGURE_OPTIONS_ORIGINAL=("$@")
     CONFIGURE_OPTIONS=("$@")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-libsecp256k1/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-src-dir=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-obj-dir=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-obj-dir-relative/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-limit=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-config=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-link=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-full-repositories/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-post-install-clean/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-skip-tests/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-skip-test-run/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-parallel=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-use-local-src/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--prefix=*/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-optimized/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--noninteractive/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--verbose/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--help/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#-h/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-aes/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sha2/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sha3/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avx2/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avx512/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avx512ifma/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-avxifma/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-shani/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sha512/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-sse41/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-aesni/}")
-    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-vaes/}")
+    remove_configure_option "--build-libsecp256k1"
+    remove_configure_option "--build-src-dir=*"
+    remove_configure_option "--build-obj-dir=*"
+    remove_configure_option "--build-obj-dir-relative"
+    remove_configure_option "--build-limit=*"
+    remove_configure_option "--build-config=*"
+    remove_configure_option "--build-link=*"
+    remove_configure_option "--build-full-repositories"
+    remove_configure_option "--build-post-install-clean"
+    remove_configure_option "--build-skip-tests"
+    remove_configure_option "--build-skip-test-run"
+    remove_configure_option "--build-parallel=*"
+    remove_configure_option "--build-use-local-src"
+    remove_configure_option "--prefix=*"
+    remove_configure_option "--hardware-optimized"
+    remove_configure_option "--noninteractive"
+    remove_configure_option "--verbose"
+    remove_configure_option "--help"
+    remove_configure_option "-h"
+    remove_configure_option "--hardware-aes"
+    remove_configure_option "--hardware-sha2"
+    remove_configure_option "--hardware-sha3"
+    remove_configure_option "--hardware-avx2"
+    remove_configure_option "--hardware-avx512"
+    remove_configure_option "--hardware-avx512ifma"
+    remove_configure_option "--hardware-avxifma"
+    remove_configure_option "--hardware-shani"
+    remove_configure_option "--hardware-sha512"
+    remove_configure_option "--hardware-sse41"
+    remove_configure_option "--hardware-aesni"
+    remove_configure_option "--hardware-vaes"
     CONFIGURE_OPTIONS_CMAKE=("${CONFIGURE_OPTIONS[@]}")
     msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
     msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
@@ -354,7 +354,7 @@ main()
     if [[ -z "${PARALLEL}" ]]; then
         if [[ ${OS} == Linux ]]; then
             PARALLEL=$(nproc)
-        elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
+        elif [[ ${OS} == Darwin ]] || [[ ${OS} == *BSD ]]; then
             PARALLEL=$(sysctl -n hw.ncpu)
         elif [[ ${OS} == MINGW* ]] || [[ ${OS} == MSYS* ]]; then
             PARALLEL=${NUMBER_OF_PROCESSORS}
@@ -370,15 +370,13 @@ main()
 
     # state rationalization of standard build variables
 
-    if [[ ${OS} == OpenBSD ]]; then
+    if [[ ${OS} == *BSD ]]; then
         make() { gmake "$@"; }
     fi
 
     if [[ -z "${STDLIB}" ]]; then
         if [[ ${OS} == Darwin ]]; then
             STDLIB="c++"
-        elif [[ ${OS} == OpenBSD ]]; then
-            STDLIB="estdc++"
         else
             STDLIB="stdc++"
         fi
@@ -389,8 +387,6 @@ main()
     if [[ -z "${CC}" ]]; then
         if [[ ${OS} == Darwin ]]; then
             export CC="clang"
-        elif [[ ${OS} == OpenBSD ]]; then
-            export CC="egcc"
         fi
     else
         msg_verbose "CC using defined value '${CC}'"
@@ -399,8 +395,6 @@ main()
     if [[ -z "${CXX}" ]]; then
         if [[ ${OS} == Darwin ]]; then
             export CXX="clang++"
-        elif [[ ${OS} == OpenBSD ]]; then
-            export CXX="eg++"
         fi
     else
         msg_verbose "CXX using defined value '${CXX}'"
@@ -443,7 +437,7 @@ main()
     fi
 
     if [[ ${HARDWARE_PLATFORM_ARM64} == "yes" ]]; then
-        ARCHTUNE="${ARCHBASE}${ARCHSUFFIX}"
+        ARCHTUNE="-march=${ARCHBASE}${ARCHSUFFIX}"
     fi
 
     # Platform options: x64
@@ -559,7 +553,7 @@ main()
         fi
     fi
 
-    if [[ ${OS} == Linux && ${CC} == clang* ]] || [[ ${OS} == OpenBSD ]]; then
+    if [[ ${OS} == Linux && ${CC} == clang* ]]; then
         export LDLIBS="-l${STDLIB} ${LDLIBS}"
         msg_verbose "LDLIBS has been manipulated to encode STDLIB linkage."
     fi
@@ -1043,6 +1037,21 @@ display_configure_options()
             msg "${OPTION}"
         fi
     done
+}
+
+remove_configure_option()
+{
+    local PATTERN="$1"
+    local RETAINED=()
+    local OPTION
+
+    for OPTION in "${CONFIGURE_OPTIONS[@]}"; do
+        if [[ ${OPTION} != ${PATTERN} ]]; then
+            RETAINED=("${RETAINED[@]}" "${OPTION}")
+        fi
+    done
+
+    CONFIGURE_OPTIONS=("${RETAINED[@]}")
 }
 
 

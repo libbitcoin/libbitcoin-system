@@ -369,7 +369,31 @@ jobs:
             package: "gcc-s390x-linux-gnu g++-s390x-linux-gnu qemu-user-static"
             host: "s390x-linux-gnu"
             libsecp256k1: ""
-            options: "--enable-isystem --build-skip-test-run"
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "powerpc64le-linux-gnu-gcc"
+            cxx: "powerpc64le-linux-gnu-g++"
+            flags: ""
+            coverage: ""
+            package: "gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu qemu-user-static"
+            host: "powerpc64le-linux-gnu"
+            libsecp256k1: ""
+            options: "--enable-isystem"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "powerpc64-linux-gnu-gcc"
+            cxx: "powerpc64-linux-gnu-g++"
+            flags: ""
+            coverage: ""
+            package: "gcc-powerpc64-linux-gnu g++-powerpc64-linux-gnu qemu-user-static"
+            host: "powerpc64-linux-gnu"
+            libsecp256k1: ""
+            options: "--enable-isystem"
 
           - image: macos-26-intel
             config: "release"
@@ -410,10 +434,10 @@ jobs:
             cxx: "arm-linux-gnueabihf-g++"
             flags: ""
             coverage: ""
-            package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
+            package: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf qemu-user-static"
             host: "arm-linux-gnueabihf"
             libsecp256k1: ""
-            options: "--enable-isystem --build-skip-test-run"
+            options: "--enable-isystem"
 
           - image: ubuntu-26.04
             config: "release"
@@ -424,6 +448,45 @@ jobs:
             coverage: ""
             package: "gcc-mingw-w64-x86-64-posix g++-mingw-w64-x86-64-posix"
             host: "x86_64-w64-mingw32"
+            libsecp256k1: ""
+            options: "--enable-isystem --build-skip-test-run"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument"
+            cxx: "clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument"
+            flags: ""
+            coverage: ""
+            package: "lld-18"
+            host: "x86_64-unknown-freebsd15.1"
+            sysroot: "https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz 3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f"
+            libsecp256k1: ""
+            options: "--enable-isystem --build-skip-test-run"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument"
+            cxx: "clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument"
+            flags: ""
+            coverage: ""
+            package: "lld-18"
+            host: "x86_64-unknown-openbsd7.9"
+            sysroot: "https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz 923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz 21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9"
+            libsecp256k1: ""
+            options: "--enable-isystem --build-skip-test-run"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument"
+            cxx: "clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s"
+            flags: ""
+            coverage: ""
+            package: "lld-18"
+            host: "x86_64-unknown-netbsd11.0"
+            sysroot: "https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz 06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz 8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50"
             libsecp256k1: ""
             options: "--enable-isystem --build-skip-test-run"
 
@@ -495,6 +558,21 @@ jobs:
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Prepare sysroot [cross]
+        if: ${{ matrix.sysroot }}
+        shell: bash
+        run: |
+          mkdir -p /tmp/sysroot
+          set -- ${{ matrix.sysroot }}
+          while [[ $# -gt 1 ]]; do
+            curl --fail --silent --show-error --location --output sysroot.archive "$1"
+            echo "$2  sysroot.archive" | sha256sum --check
+            tar -xf sysroot.archive -C /tmp/sysroot
+            rm sysroot.archive
+            shift 2
+          done
+          find /tmp/sysroot -name '*.la' -delete
+
       - name: Verify emulation [cross]
         if: ${{ matrix.host }}
         shell: bash
@@ -510,6 +588,143 @@ jobs:
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
+        env:
+          MAKEFLAGS: "${{ matrix.host && 'TESTS=' || '' }}"
+        run: >
+          ./builds/gnu/install-gnu.sh
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
+          ${{ !matrix.host && '--build-post-install-clean' || '' }}
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+          ${{ matrix.libsecp256k1 }}
+          ${{ matrix.options }}
+          ${{ matrix.host && format('--host={0}', matrix.host) || '' }}
+
+      - name: Execute tests [cross]
+        if: ${{ matrix.host && !contains(matrix.options, '--build-skip-test') }}
+        shell: bash
+        working-directory: 'libbitcoin-system/obj/builds/gnu'
+        run: >
+          ./test/libbitcoin-system-test
+          --log_level=test_suite
+          --report_level=short
+          --show_progress=no
+          --detect_memory_leak=0
+          --build_info=yes
+
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        run: |
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --extract coverage.info "${{ github.workspace }}/libbitcoin-system/include/*" "${{ github.workspace }}/libbitcoin-system/src/*" --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/libbitcoin-system/src/words/catalogs/*" "${{ github.workspace }}/libbitcoin-system/src/crypto/secp256k1/cuda/*" --output-file coverage.info
+
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        working-directory: 'libbitcoin-system'
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-linux-x86_64.tar.gz
+          curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-checksums.txt
+          grep -F coveralls-linux-x86_64.tar.gz coveralls-checksums.txt | sha256sum -c
+          tar -xzf coveralls-linux-x86_64.tar.gz
+          ./coveralls report --format lcov coverage.info
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -e "libbitcoin-system/obj/Testing/Temporary/LastTest.log" ]]; then
+            cp "libbitcoin-system/obj/Testing/Temporary/LastTest.log" libbitcoin-system-LastTest.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test-suite.log" ]]; then
+            cp "libbitcoin-system/obj/test-suite.log" libbitcoin-system-test-suite.errors
+          fi
+          if [[ -e "libbitcoin-system/obj/test.log" ]]; then
+            cp "libbitcoin-system/obj/test.log" libbitcoin-system-test.errors
+          fi
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*.errors
+          retention-days: 1
+          if-no-files-found: warn
+
+  musl:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "gcc"
+            cxx: "g++"
+            flags: ""
+            coverage: ""
+            options: "--enable-isystem"
+
+    runs-on: ${{ matrix.image }}
+    container:
+      image: alpine:3.24
+      volumes:
+        - ${{ github.workspace }}:${{ github.workspace }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Prepare toolchain [alpine]
+        shell: sh
+        run: |
+          apk add --no-cache bash git build-base autoconf automake libtool pkgconf linux-headers ${{ matrix.package || '' }}
+
+      - name: Get branch name
+        id: get-branch
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            echo "branch=$GITHUB_HEAD_REF" >> $GITHUB_OUTPUT
+          else
+            echo "branch=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository [libbitcoin-system]
+        id: checkout-libbitcoin-system
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: ${{ github.repository }}
+
+      - name: Environmental Computation
+        shell: bash
+        run: |
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
+          fi
+
+      - name: Execute installation
+        shell: bash
+        working-directory: 'libbitcoin-system'
         run: >
           ./builds/gnu/install-gnu.sh
           --build-use-local-src
@@ -520,9 +735,7 @@ jobs:
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
           --build-link="${{ matrix.link }}"
-          ${{ matrix.libsecp256k1 }}
           ${{ matrix.options }}
-          ${{ matrix.host && format('--host={0}', matrix.host) || '' }}
 
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
@@ -870,6 +1083,42 @@ jobs:
             libsecp256k1: ""
             options: ""
 
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument"
+            cxx: "clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument"
+            flags: ""
+            coverage: ""
+            package: "lld-18"
+            sysroot: "https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz 3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f"
+            libsecp256k1: ""
+            options: "--build-skip-test-run -DCMAKE_SYSTEM_NAME=FreeBSD -DCMAKE_SYSTEM_PROCESSOR=x86_64"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument"
+            cxx: "clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument"
+            flags: ""
+            coverage: ""
+            package: "lld-18"
+            sysroot: "https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz 923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz 21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9"
+            libsecp256k1: ""
+            options: "--build-skip-test-run -DCMAKE_SYSTEM_NAME=OpenBSD -DCMAKE_SYSTEM_PROCESSOR=x86_64"
+
+          - image: ubuntu-24.04
+            config: "release"
+            link: "static"
+            cc: "clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument"
+            cxx: "clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s"
+            flags: ""
+            coverage: ""
+            package: "lld-18"
+            sysroot: "https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz 06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz 8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50"
+            libsecp256k1: ""
+            options: "--build-skip-test-run -DCMAKE_SYSTEM_NAME=NetBSD -DCMAKE_SYSTEM_PROCESSOR=x86_64"
+
     runs-on: ${{ matrix.image }}
 
     env:
@@ -936,6 +1185,21 @@ jobs:
           if [[ "${{ matrix.link }}" == "dynamic" ]]; then
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
+
+      - name: Prepare sysroot [cross]
+        if: ${{ matrix.sysroot }}
+        shell: bash
+        run: |
+          mkdir -p /tmp/sysroot
+          set -- ${{ matrix.sysroot }}
+          while [[ $# -gt 1 ]]; do
+            curl --fail --silent --show-error --location --output sysroot.archive "$1"
+            echo "$2  sysroot.archive" | sha256sum --check
+            tar -xf sysroot.archive -C /tmp/sysroot
+            rm sysroot.archive
+            shift 2
+          done
+          find /tmp/sysroot -name '*.la' -delete
 
       - name: Execute installation
         shell: bash

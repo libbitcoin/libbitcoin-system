@@ -93,6 +93,13 @@ AC_SUBST([LIBTOOL_DEPS])
 # Determine C++ compiler to use.
 AC_PROG_CXX
 
+# Link POSIX threads on BSD.
+AS_CASE([${host_os}], [*bsd*],
+    [AX_PTHREAD([], [AC_MSG_ERROR([POSIX threads are required.])])
+     LIBS="${PTHREAD_LIBS} ${LIBS}"
+     CFLAGS="${CFLAGS} ${PTHREAD_CFLAGS}"
+     CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"])
+
 # Enable sed for substitution.
 AC_PROG_SED
 
