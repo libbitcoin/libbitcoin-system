@@ -24,13 +24,13 @@
 namespace libbitcoin {
 namespace system {
 
-/// If negate/absolute is called with the domain minimum value, this aborts the
-/// process, as this is undefinable behavior in twos complement representation.
+/// If negate is called with the domain minimum value, this aborts the process,
+/// as this is undefinable behavior in twos complement representation.
 
 /// Conversions.
 /// ---------------------------------------------------------------------------
 
-/// Signed absolute value (unsafe), converts to unsigned.
+/// Signed absolute value, converts to unsigned.
 template <typename Signed, if_signed_integer<Signed> = true>
 constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT;
 
