@@ -42,12 +42,14 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
-// absolute(minimum<Signed>) overflows to add1(maximum<Signed>) for all types.
 template <typename Signed, if_signed_integer<Signed>>
 constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT
 {
     // std::abs is signed types only and not constexpr until C++23 (avoid).
-    return to_unsigned(is_negative(value) ? negate(value) : value);
+    using Unsigned = to_unsigned_type<Signed>;
+    const auto mask = depromote<Unsigned>(Unsigned{} -
+        to_int<Unsigned>(is_negative(value)));
+    return depromote<Unsigned>((to_unsigned(value) ^ mask) - mask);
 }
 
 template <typename Unsigned, if_unsigned_integer<Unsigned>>

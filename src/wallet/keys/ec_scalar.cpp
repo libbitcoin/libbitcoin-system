@@ -78,7 +78,7 @@ ec_scalar ec_scalar::from_int64(int64_t value) NOEXCEPT
     });
 
     // All hashes and secrets are stored as big-endian by convention.
-    // absolute(minimum<int64_t>) overflows to zero, intended behavior.
+    // absolute(minimum<int64_t>) is 2^63, which negates to the scalar -2^63.
     writer.write_8_bytes_big_endian(absolute(value));
 
     return value > 0 ? ec_scalar{ secret } : -ec_scalar{ secret };

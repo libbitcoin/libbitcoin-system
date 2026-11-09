@@ -189,6 +189,52 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_vaes__always__match)
     BC_CHECK_EQUAL(expected && vaes && vpclmulqdq, try_vaes());
 }
 
+BC_AUTO_TEST_CASE(intrinsics_detection__is_avx512__always__match)
+{
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto avx2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::avx2_ebx_bit);
+    const auto avx512f = get_right(cpu7.ebx, cpu7_0::avx512f_ebx_bit);
+    const auto avx512bw = get_right(cpu7.ebx, cpu7_0::avx512bw_ebx_bit);
+    const auto avx512vl = get_right(cpu7.ebx, cpu7_0::avx512vl_ebx_bit);
+    const auto expected = get_avx(cpu1) && get_xcr_avx512() && avx2;
+    BC_CHECK_EQUAL(expected && avx512f && avx512bw && avx512vl, is_avx512());
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__try_x86_64_v2__always__match)
+{
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto ext1 = get_registers(cpu80000001_0::leaf, cpu80000001_0::subleaf);
+    const auto sse3 = get_right(cpu1.ecx, cpu1_0::sse3_ecx_bit);
+    const auto ssse3 = get_right(cpu1.ecx, cpu1_0::ssse3_ecx_bit);
+    const auto cx16 = get_right(cpu1.ecx, cpu1_0::cx16_ecx_bit);
+    const auto sse41 = get_right(cpu1.ecx, cpu1_0::sse41_ecx_bit);
+    const auto sse42 = get_right(cpu1.ecx, cpu1_0::sse42_ecx_bit);
+    const auto popcnt = get_right(cpu1.ecx, cpu1_0::popcnt_ecx_bit);
+    const auto lahf = ext1.valid && get_right(ext1.ecx, cpu80000001_0::lahf_ecx_bit);
+    BC_CHECK_EQUAL(cpu1.valid && sse3 && ssse3 && cx16 && sse41 && sse42 && popcnt && lahf, try_x86_64_v2());
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__try_x86_64_v3__always__match)
+{
+    const auto cpu1 = get_registers(cpu1_0::leaf, cpu1_0::subleaf);
+    const auto cpu7 = get_registers(cpu7_0::leaf, cpu7_0::subleaf);
+    const auto ext1 = get_registers(cpu80000001_0::leaf, cpu80000001_0::subleaf);
+    const auto fma = get_right(cpu1.ecx, cpu1_0::fma_ecx_bit);
+    const auto movbe = get_right(cpu1.ecx, cpu1_0::movbe_ecx_bit);
+    const auto f16c = get_right(cpu1.ecx, cpu1_0::f16c_ecx_bit);
+    const auto bmi1 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::bmi1_ebx_bit);
+    const auto bmi2 = cpu7.valid && get_right(cpu7.ebx, cpu7_0::bmi2_ebx_bit);
+    const auto lzcnt = ext1.valid && get_right(ext1.ecx, cpu80000001_0::lzcnt_ecx_bit);
+    const auto expected = try_x86_64_v2() && try_avx2() && cpu1.valid;
+    BC_CHECK_EQUAL(expected && fma && movbe && f16c && bmi1 && bmi2 && lzcnt, try_x86_64_v3());
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__try_compiled__always__true)
+{
+    BC_CHECK(try_compiled());
+}
+
 // faked registers
 
 static bool none_cpu(uint32_t&, uint32_t&, uint32_t&, uint32_t&, uint32_t,
@@ -234,6 +280,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_none__false)
     BC_CHECK(!is_avx512_low<none_cpu>());
     BC_CHECK(!try_shani<none_cpu>());
     BC_CHECK((!try_sha512<none_cpu, all_xcr>()));
+    BC_CHECK((!is_avx512<none_cpu, all_xcr>()));
     BC_CHECK((!try_avx512<none_cpu, all_xcr>()));
     BC_CHECK((!try_avx512ifma<none_cpu, all_xcr>()));
     BC_CHECK((!try_avxifma<none_cpu, all_xcr>()));
@@ -241,6 +288,8 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_none__false)
     BC_CHECK(!try_sse41<none_cpu>());
     BC_CHECK(!try_aesni<none_cpu>());
     BC_CHECK((!try_vaes<none_cpu, all_xcr>()));
+    BC_CHECK(!try_x86_64_v2<none_cpu>());
+    BC_CHECK((!try_x86_64_v3<none_cpu, all_xcr>()));
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
@@ -248,6 +297,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
     BC_CHECK(!is_avx512_low<all_cpu>());
     BC_CHECK(try_shani<all_cpu>());
     BC_CHECK((try_sha512<all_cpu, all_xcr>()));
+    BC_CHECK((is_avx512<all_cpu, all_xcr>()));
     BC_CHECK((try_avx512<all_cpu, all_xcr>()));
     BC_CHECK((try_avx512ifma<all_cpu, all_xcr>()));
     BC_CHECK((try_avxifma<all_cpu, all_xcr>()));
@@ -255,11 +305,14 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
     BC_CHECK(try_sse41<all_cpu>());
     BC_CHECK(try_aesni<all_cpu>());
     BC_CHECK((try_vaes<all_cpu, all_xcr>()));
+    BC_CHECK(try_x86_64_v2<all_cpu>());
+    BC_CHECK((try_x86_64_v3<all_cpu, all_xcr>()));
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try_avx512__faked_throttled__false)
 {
     BC_CHECK(is_avx512_low<throttled_cpu>());
+    BC_CHECK((is_avx512<throttled_cpu, all_xcr>()));
     BC_CHECK((!try_avx512<throttled_cpu, all_xcr>()));
     BC_CHECK((try_avx512ifma<throttled_cpu, all_xcr>()));
 }
@@ -282,6 +335,11 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon_aes__always__match)
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon_sha3__always__match)
 {
     BC_CHECK_EQUAL(get_arm(arm_feature::sha3) && get_arm(arm_feature::sha512), try_neon_sha3());
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__try_lse__always__match)
+{
+    BC_CHECK_EQUAL(get_arm(arm_feature::atomics), try_lse());
 }
 
 static bool none_arm(arm_feature) NOEXCEPT
@@ -308,6 +366,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_none__false)
     BC_CHECK(!try_neon_sha2<none_arm>());
     BC_CHECK(!try_neon_aes<none_arm>());
     BC_CHECK(!try_neon_sha3<none_arm>());
+    BC_CHECK(!try_lse<none_arm>());
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_all__true)
@@ -316,6 +375,8 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_all__true)
     BC_CHECK(try_neon_sha2<all_arm>());
     BC_CHECK(try_neon_aes<all_arm>());
     BC_CHECK(try_neon_sha3<all_arm>());
+    BC_CHECK(try_lse<all_arm>());
+    BC_CHECK((try_compiled<all_cpu, all_xcr, all_arm>()));
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_half__false)

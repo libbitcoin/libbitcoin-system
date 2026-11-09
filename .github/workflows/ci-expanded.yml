@@ -210,7 +210,7 @@ jobs:
             options: "--enable-isystem"
 
           - image: ubuntu-24.04
-            config: "debug"
+            config: "release"
             link: "static"
             cc: "gcc-14"
             cxx: "g++-14"
@@ -221,7 +221,7 @@ jobs:
             options: "--enable-isystem --with-valgrind --build-valgrind=secp256k1_ctime_tests"
 
           - image: ubuntu-24.04
-            config: "debug"
+            config: "release"
             link: "static"
             cc: "clang-18"
             cxx: "clang++-18"
@@ -571,6 +571,7 @@ jobs:
             rm sysroot.archive
             shift 2
           done
+          chmod -R u+rwX /tmp/sysroot
           find /tmp/sysroot -name '*.la' -delete
 
       - name: Verify emulation [cross]
@@ -1199,6 +1200,7 @@ jobs:
             rm sysroot.archive
             shift 2
           done
+          chmod -R u+rwX /tmp/sysroot
           find /tmp/sysroot -name '*.la' -delete
 
       - name: Execute installation

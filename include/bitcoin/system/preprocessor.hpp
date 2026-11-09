@@ -146,6 +146,22 @@
     #define INLINE inline
 #endif
 
+/// Baseline code generation.
+/// ---------------------------------------------------------------------------
+
+/// Compile a function for the base instruction set of its architecture.
+/// msc does not support per function instruction set selection.
+#if (defined(HAVE_GNUC) || defined(HAVE_CLANG)) && defined(HAVE_X64)
+    #define BASELINE __attribute__((target("arch=x86-64," \
+        "no-sse3,no-ssse3,no-sse4.1,no-sse4.2,no-popcnt,no-avx,no-avx2," \
+        "no-avx512f,no-fma,no-f16c,no-bmi,no-bmi2,no-lzcnt,no-movbe," \
+        "no-sha,no-aes,no-pclmul")))
+#elif (defined(HAVE_GNUC) || defined(HAVE_CLANG)) && defined(HAVE_ARM64)
+    #define BASELINE __attribute__((target("arch=armv8-a")))
+#else
+    #define BASELINE
+#endif
+
 /// Device compilation.
 /// ---------------------------------------------------------------------------
 
