@@ -103,17 +103,12 @@ multiply_add(uint64_t t, uint64_t a, uint64_t b, uint64_t& carry) NOEXCEPT
     return lo;
 }
 
-// out = mask ? a : b, with mask all ones or all zeros. The mask is made opaque
-// to the optimizer, which could otherwise branch on it.
+// out = mask ? a : b, with mask all ones or all zeros.
 TEMPLATE
 INLINE constexpr void CLASS::
 select(limbs_t& out, uint64_t mask, const limbs_t& a, const limbs_t& b) NOEXCEPT
 {
-#if !defined(HAVE_MSC)
-    if (!std::is_constant_evaluated())
-        __asm__("" : "+r"(mask));
-#endif
-
+    mask = opaque(mask);
     for (size_t word{}; word < words; ++word)
     {
         const auto from_a = bit_and(a[word], mask);

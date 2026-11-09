@@ -188,6 +188,17 @@ inline void declassify(const Type& value) NOEXCEPT
     declassify(&value, sizeof(Type));
 }
 
+/// Hide an integer from the optimizer, which then cannot branch on its value.
+template <typename Integer, if_integral_integer<Integer> = true>
+INLINE constexpr Integer opaque(Integer value) NOEXCEPT
+{
+#if !defined(HAVE_MSC) && !defined(HAVE_PTX)
+    if (!std::is_constant_evaluated())
+        __asm__("" : "+r"(value));
+#endif
+    return value;
+}
+
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
