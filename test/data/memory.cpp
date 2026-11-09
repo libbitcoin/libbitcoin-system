@@ -413,4 +413,18 @@ BC_AUTO_TEST_CASE(memory__wipe__object__zeroed)
     BC_REQUIRE_EQUAL(value.right, 0);
 }
 
+// opaque
+
+static_assert(opaque(42u) == 42u);
+static_assert(opaque(max_uint64) == max_uint64);
+static_assert(opaque(min_int8) == min_int8);
+
+BC_AUTO_TEST_CASE(memory__opaque__values__unchanged)
+{
+    BC_REQUIRE_EQUAL(opaque(0_u8), 0_u8);
+    BC_REQUIRE_EQUAL(opaque(max_uint32), max_uint32);
+    BC_REQUIRE_EQUAL(opaque(max_uint64), max_uint64);
+    BC_REQUIRE_EQUAL(opaque(min_int64), min_int64);
+}
+
 BC_AUTO_TEST_SUITE_END()
