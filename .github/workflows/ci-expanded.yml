@@ -416,6 +416,28 @@ jobs:
             libsecp256k1: ""
             options: "--enable-isystem"
 
+          - image: ubuntu-24.04-arm
+            config: "release"
+            link: "static"
+            cc: "gcc-14"
+            cxx: "g++-14"
+            flags: ""
+            coverage: ""
+            package: "gcc-14 g++-14 valgrind"
+            libsecp256k1: ""
+            options: "--enable-isystem --hardware-aes --hardware-sha2 --with-valgrind --build-valgrind=secp256k1_ctime_tests"
+
+          - image: ubuntu-24.04-arm
+            config: "release"
+            link: "static"
+            cc: "clang-18"
+            cxx: "clang++-18"
+            flags: ""
+            coverage: ""
+            package: "clang-18 valgrind"
+            libsecp256k1: ""
+            options: "--enable-isystem --hardware-aes --hardware-sha2 --with-valgrind --build-valgrind=secp256k1_ctime_tests"
+
           - image: ubuntu-24.04
             config: "release"
             link: "static"
