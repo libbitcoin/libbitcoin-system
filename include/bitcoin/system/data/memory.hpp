@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_DATA_MEMORY_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -195,6 +196,23 @@ INLINE constexpr Integer opaque(Integer value) NOEXCEPT
 #if !defined(HAVE_MSC) && !defined(HAVE_PTX)
     if (!std::is_constant_evaluated())
         __asm__("" : "+r"(value));
+#endif
+    return value;
+}
+
+/// Hide an extended integer from the optimizer, as with an integer.
+template <typename Extended, if_extended<Extended> = true>
+INLINE Extended opaque(Extended value) NOEXCEPT
+{
+#if !defined(HAVE_MSC) && !defined(HAVE_PTX)
+    if constexpr (have<Extended>)
+    {
+    #if defined(HAVE_NEON)
+        __asm__("" : "+w"(value));
+    #else
+        __asm__("" : "+x"(value));
+    #endif
+    }
 #endif
     return value;
 }
