@@ -1,62 +1,43 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <_PropertySheetDisplayName>Libbitcoin System Test Common Settings</_PropertySheetDisplayName>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <_PropertySheetDisplayName>libbitcoin-system-test Settings</_PropertySheetDisplayName>
   </PropertyGroup>
 
-  <!-- User Interface -->
-
   <ItemGroup Label="BuildOptionsExtension">
-    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(ProjectName).xml" />
+    <PropertyPageSchema Condition="Exists('$(MSBuildThisFileDirectory)libbitcoin-system-test.xml')" Include="$(MSBuildThisFileDirectory)libbitcoin-system-test.xml" />
   </ItemGroup>
-
-  <!-- Configuration -->
 
   <ItemDefinitionGroup>
     <ClCompile>
-      <!-- Set to prevent excessive compilation time due to large data statements. -->
-      <!--<Optimization>Disabled</Optimization>-->
-      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions Condition="'$(Option-performance-tests)' == 'true'">WITH_PERFORMANCE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-slow-tests)' == 'true'">WITH_SLOW_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
+    <PostBuildEvent Condition="'$(DebugOrRelease)' == 'Release'">
       <Command>"$(TargetPath)" --log_level=warning --run_test=* --show_progress=no --build_info=yes</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-
-  <!-- Dependencies -->
 
   <ImportGroup Label="PropertySheets">
     <Import Project="$(SolutionDir)libbitcoin-system.import.props" />
   </ImportGroup>
 
-  <PropertyGroup Condition="'$(NuGetPackageRoot)' == ''">
-    <NuGetPackageRoot>..\..\..\..\..\.nuget\packages\</NuGetPackageRoot>
+  <PropertyGroup>
+    <Linkage-libbitcoin-system>$(DefaultLinkage)</Linkage-libbitcoin-system>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-libbitcoin-system>dynamic</Linkage-libbitcoin-system>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
-    <Linkage-libbitcoin-system>ltcg</Linkage-libbitcoin-system>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
-    <Linkage-libbitcoin-system>static</Linkage-libbitcoin-system>
-  </PropertyGroup>
-
-  <!-- Options -->
 
   <PropertyGroup>
     <Option-performance-tests Condition="'$(Option-performance-tests)' == ''">false</Option-performance-tests>
     <Option-slow-tests Condition="'$(Option-slow-tests)' == ''">false</Option-slow-tests>
   </PropertyGroup>
-
-  <!-- Messages -->
 
   <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Option-performance-tests : $(Option-performance-tests)" Importance="high"/>
@@ -64,7 +45,7 @@
   </Target>
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Linkage-_system   : $(Linkage-libbitcoin-system)" Importance="high"/>
+    <Message Text="Linkage-libbitcoin-system : $(Linkage-libbitcoin-system)" Importance="high"/>
   </Target>
 
 </Project>

@@ -1,15 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <PropertyGroup>
     <_PropertySheetDisplayName>ARM64 Settings</_PropertySheetDisplayName>
   </PropertyGroup>
-    
+
   <ItemDefinitionGroup>
     <ClCompile>
-      <!-- Note that Win32 defines may cause WIN32 to become defined when using Windows headers, 
-      but _WIN32 implies Windows 32-bit or above. These are safe for ARM64 builds and ensure 
-      compatibility with Windows headers. _ARM64 indicates the ARM64 architecture. -->
       <PreprocessorDefinitions>WIN32;_WIN32;_ARM64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -18,6 +21,12 @@
     <Lib>
       <AdditionalOptions>/MACHINE:ARM64 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL'">
+    <ClCompile>
+      <AdditionalOptions>--target=aarch64-pc-windows-msvc %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
   </ItemDefinitionGroup>
 
 </Project>

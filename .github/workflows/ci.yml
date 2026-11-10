@@ -588,7 +588,7 @@ jobs:
       - name: Environmental Computation
         shell: bash
         run: |
-          if [[ "${{ matrix.preset }}" == *shared* ]]; then
+          if [[ "${{ matrix.preset }}" == *shared* && "${{ matrix.image }}" != windows* ]]; then
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
@@ -742,7 +742,7 @@ jobs:
         working-directory: 'libbitcoin-system'
         run: |
           Write-Host "Locating test executables..." -ForegroundColor Yellow;
-          $BC_TEST_EXES = @(Get-ChildItem -Path "bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
+          $BC_TEST_EXES = @(Get-ChildItem -Path "bin", "..\bin" -recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
           If ($BC_TEST_EXES.Count -ne 1) {
             Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
             exit 1;

@@ -1,32 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <PropertyGroup>
     <_PropertySheetDisplayName>x64 Settings</_PropertySheetDisplayName>
-  </PropertyGroup>
-    
-  <!-- Overridable per machine (e.g. Directory.Build.props above repos, or environment). -->
-  <PropertyGroup>
     <Option-arch Condition="'$(Option-arch)' == ''">AdvancedVectorExtensions2</Option-arch>
   </PropertyGroup>
 
-  <!-- Literal (not macro) values retain property page presentation text. -->
   <ItemDefinitionGroup>
     <ClCompile>
+      <PreprocessorDefinitions>WIN32;_WIN32;WIN64;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'StreamingSIMDExtensions'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'StreamingSIMDExtensions2'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'AdvancedVectorExtensions'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'AdvancedVectorExtensions2'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Option-arch)' == 'AdvancedVectorExtensions512'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
-    </ClCompile>
-  </ItemDefinitionGroup>
-
-  <ItemDefinitionGroup>
-    <ClCompile>
-      <!-- Note that Win64 defines may cause WIN32 to become defined when using windows headers, 
-      but _WIN32 implies Windows 32 bit or above. If the standard headers are not included 
-      these are sometimes required even for 64 bit builds and should never cause harm there.-->
-      <PreprocessorDefinitions>WIN32;_WIN32;WIN64;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX64</TargetMachine>

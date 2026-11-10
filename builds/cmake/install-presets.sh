@@ -224,6 +224,14 @@ main()
         msg_verbose "BUILD_PRESET value 'win-msvc-release-static'."
         BUILD_CONFIG="release"
         BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "win-msvc-debug-shared" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-msvc-debug-shared'."
+        BUILD_CONFIG="debug"
+        BUILD_LINK="dynamic"
+    elif [[ "${BUILD_PRESET}" == "win-msvc-release-shared" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-msvc-release-shared'."
+        BUILD_CONFIG="release"
+        BUILD_LINK="dynamic"
     elif [[ "${BUILD_PRESET}" == "win-clangcl-debug-static" ]]; then
         msg_verbose "BUILD_PRESET value 'win-clangcl-debug-static'."
         BUILD_CONFIG="debug"
@@ -232,6 +240,14 @@ main()
         msg_verbose "BUILD_PRESET value 'win-clangcl-release-static'."
         BUILD_CONFIG="release"
         BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "win-clangcl-debug-shared" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-clangcl-debug-shared'."
+        BUILD_CONFIG="debug"
+        BUILD_LINK="dynamic"
+    elif [[ "${BUILD_PRESET}" == "win-clangcl-release-shared" ]]; then
+        msg_verbose "BUILD_PRESET value 'win-clangcl-release-shared'."
+        BUILD_CONFIG="release"
+        BUILD_LINK="dynamic"
     else
         msg_error "Unrecognized build-preset value '${BUILD_PRESET}'."
         help

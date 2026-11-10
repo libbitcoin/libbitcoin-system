@@ -1313,6 +1313,24 @@ jobs:
             libsecp256k1: ""
             options: ""
 
+          - image: windows-latest
+            preset: "win-msvc-release-shared"
+            cc: ""
+            cxx: ""
+            flags: ""
+            coverage: ""
+            libsecp256k1: ""
+            options: ""
+
+          - image: windows-latest
+            preset: "win-clangcl-release-shared"
+            cc: ""
+            cxx: ""
+            flags: ""
+            coverage: ""
+            libsecp256k1: ""
+            options: ""
+
           - image: ubuntu-24.04
             preset: "nix-gnu-debug-shared"
             cc: "clang-18"
@@ -1604,7 +1622,7 @@ jobs:
       - name: Environmental Computation
         shell: bash
         run: |
-          if [[ "${{ matrix.preset }}" == *shared* ]]; then
+          if [[ "${{ matrix.preset }}" == *shared* && "${{ matrix.image }}" != windows* ]]; then
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
@@ -1687,6 +1705,20 @@ jobs:
             tests: "*"
             options: ""
 
+          - image: windows-latest
+            configuration: "DynamicRelease"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+            options: ""
+
+          - image: windows-latest
+            configuration: "DynamicDebug"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+            options: ""
+
           - image: windows-2025-vs2026
             configuration: "StaticRelease"
             platform: "x64"
@@ -1710,6 +1742,13 @@ jobs:
 
           - image: windows-latest
             configuration: "StaticRelease"
+            platform: "x64"
+            version: "vs2026"
+            tests: "*"
+            options: "--build-compiler clang"
+
+          - image: windows-latest
+            configuration: "DynamicRelease"
             platform: "x64"
             version: "vs2026"
             tests: "*"
@@ -1786,7 +1825,7 @@ jobs:
         working-directory: 'libbitcoin-system'
         run: |
           Write-Host "Locating test executables..." -ForegroundColor Yellow;
-          $BC_TEST_EXES = @(Get-ChildItem -Path "bin" -recurse | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
+          $BC_TEST_EXES = @(Get-ChildItem -Path "bin", "..\bin" -recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq "libbitcoin-system-test.exe" });
           If ($BC_TEST_EXES.Count -ne 1) {
             Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
             exit 1;

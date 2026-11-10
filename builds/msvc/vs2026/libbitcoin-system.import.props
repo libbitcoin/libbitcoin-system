@@ -1,97 +1,108 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup Label="Globals">
-    <_PropertySheetDisplayName>Libbitcoin System Import Settings</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>libbitcoin-system Import Settings</_PropertySheetDisplayName>
   </PropertyGroup>
-
-  <!-- User Interface -->
 
   <ItemGroup Label="BuildOptionsExtension">
     <PropertyPageSchema Include="$(MSBuildThisFileDirectory)libbitcoin-system.import.xml" />
   </ItemGroup>
-  
-  <!-- Options -->
 
-  <!-- These create non-portability. -->
-  <!-- These will compile to the target regardless of the compiling platform. -->
-  <!-- That will result in a crash of test/executable execution if mismatched. -->
   <PropertyGroup>
     <Option-shani Condition="'$(Option-shani)' == ''">false</Option-shani>
     <Option-sha512 Condition="'$(Option-sha512)' == ''">false</Option-sha512>
-    <Option-avx512ifma Condition="'$(Option-avx512ifma)' == ''">false</Option-avx512ifma>
-    <Option-avxifma Condition="'$(Option-avxifma)' == ''">false</Option-avxifma>
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
+    <Option-avx512ifma Condition="'$(Option-avx512ifma)' == ''">false</Option-avx512ifma>
+    <Option-avx512 Condition="'$(Option-avx512)' == ''">false</Option-avx512>
+    <Option-avxifma Condition="'$(Option-avxifma)' == ''">false</Option-avxifma>
+    <Option-avx2 Condition="'$(Option-avx2)' == ''">false</Option-avx2>
+    <Option-sse41 Condition="'$(Option-sse41)' == ''">false</Option-sse41>
     <Option-sha2 Condition="'$(Option-sha2)' == ''">false</Option-sha2>
     <Option-sha3 Condition="'$(Option-sha3)' == ''">false</Option-sha3>
     <Option-aes Condition="'$(Option-aes)' == ''">false</Option-aes>
-    <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">true</Option-secp256k1>
   </PropertyGroup>
 
-  <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->
-  <PropertyGroup Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'Win32'">
-    <Option-arch Condition="'$(Option-sse41)' == 'true' And ('$(Option-arch)' == '' Or '$(Option-arch)' == 'StreamingSIMDExtensions' Or '$(Option-arch)' == 'StreamingSIMDExtensions2')">AdvancedVectorExtensions</Option-arch>
-    <Option-arch Condition="('$(Option-avx2)' == 'true' Or '$(Option-avxifma)' == 'true' Or '$(Option-vaes)' == 'true' Or '$(Option-sha512)' == 'true') And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions2</Option-arch>
+  <PropertyGroup Condition="'$(Platform)' == 'Win32' Or '$(Platform)' == 'x64'">
+    <Option-arch Condition="'$(Option-sse41)' == 'true' And '$(Option-arch)' != 'AdvancedVectorExtensions2' And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions</Option-arch>
+    <Option-arch Condition="('$(Option-avx2)' == 'true' Or '$(Option-avxifma)' == 'true' Or '$(Option-sha512)' == 'true' Or '$(Option-vaes)' == 'true') And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions2</Option-arch>
     <Option-arch Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</Option-arch>
   </PropertyGroup>
 
-  <!-- Messages -->
-
-  <Target Name="SystemOptionInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Option-shani      : $(Option-shani)" Importance="high"/>
-    <Message Text="Option-sha512     : $(Option-sha512)" Importance="high"/>
-    <Message Text="Option-avx512ifma : $(Option-avx512ifma)" Importance="high"/>
-    <Message Text="Option-avxifma    : $(Option-avxifma)" Importance="high"/>
-    <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
-    <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
-    <Message Text="Option-sha2       : $(Option-sha2)" Importance="high"/>
-    <Message Text="Option-sha3       : $(Option-sha3)" Importance="high"/>
-    <Message Text="Option-aes        : $(Option-aes)" Importance="high"/>
-    <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
-  </Target>
-
-  <!-- Linkage -->
-
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\..\libbitcoin-system\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\..\libbitcoin-system\build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-
-      <!-- NOMINMAX enables use of std::min/max without conflict. -->
-      <!-- WIN32_LEAN_AND_MEAN avoids inclusion of certain headers, winsock.h conflicts with use of winsock2.h. -->
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\..\libbitcoin-system\build\include\;$(ProjectDir)..\..\..\..\..\libbitcoin-system\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-system)' == 'static' Or '$(Linkage-libbitcoin-system)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Debug')) != -1">_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <!-- Enable use of CPU intrinsics. -->
-      <PreprocessorDefinitions Condition="'$(Option-shani)' == 'true'">WITH_SHANI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-sha512)' == 'true'">WITH_SHA512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-avx512ifma)' == 'true'">WITH_AVX512IFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-avxifma)' == 'true'">WITH_AVXIFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-shani)' == 'true'">WITH_SHANI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sha512)' == 'true'">WITH_SHA512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-aes)' == 'true'">WITH_AES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-sha2)' == 'true'">WITH_SHA2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-sha3)' == 'true'">WITH_SHA3;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-aes)' == 'true'">WITH_AES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>    
-    <Link>
-      <!-- 4099: warns about missing PDB files. -->
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
-    </Link>  
+    </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Linkage-libbitcoin-system)' != ''">libbitcoin-system.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-    <Link>
-      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Debug')) != -1">
-        $(ProjectDir)..\..\..\..\..\libbitcoin-system\bin\$(PlatformName)\Debug\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;
-        $(ProjectDir)..\..\..\..\..\libbitcoin-system\obj\libbitcoin-system\$(PlatformName)\Debug\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;%(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Release')) != -1">
-        $(ProjectDir)..\..\..\..\..\libbitcoin-system\bin\$(PlatformName)\Release\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;
-        $(ProjectDir)..\..\..\..\..\libbitcoin-system\obj\libbitcoin-system\$(PlatformName)\Release\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;%(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Debug')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin-system\bin\$(PlatformName)\Debug\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;$(ProjectDir)..\..\..\..\..\libbitcoin-system\obj\libbitcoin-system\$(PlatformName)\Debug\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Release')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin-system\bin\$(PlatformName)\Release\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;$(ProjectDir)..\..\..\..\..\libbitcoin-system\obj\libbitcoin-system\$(PlatformName)\Release\$(PlatformToolset)\$(Linkage-libbitcoin-system)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories Condition="'$(Linkage-libbitcoin-system)' == 'dynamic' And $(Configuration.IndexOf('Debug')) != -1">$(ProjectDir)..\..\..\..\..\bin\$(PlatformName)\Debug\$(PlatformToolset)\dynamic\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories Condition="'$(Linkage-libbitcoin-system)' == 'dynamic' And $(Configuration.IndexOf('Release')) != -1">$(ProjectDir)..\..\..\..\..\bin\$(PlatformName)\Release\$(PlatformToolset)\dynamic\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x64')">
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Option-avx2)' == 'true'">-mavx -mavx2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-avx512)' == 'true'">-mavx512f -mavx512bw -mavx512vl %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-avx512ifma)' == 'true'">-mavx512ifma -mavx512vl %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-avxifma)' == 'true'">-mavxifma %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-shani)' == 'true'">-msse4 -msha %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-sha512)' == 'true'">-mavx2 -msha512 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-sse41)' == 'true'">-msse4.1 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-aesni)' == 'true'">-msse4.1 -maes -mpclmul %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Option-vaes)' == 'true'">-mavx2 -maes -mpclmul -mvaes -mvpclmulqdq %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL' And ('$(Platform)' == 'ARM64')">
+    <ClCompile>
+      <ArmBase Condition="'$(Option-aes)' == 'true'">armv8-a</ArmBase>
+      <ArmBase Condition="'$(Option-sha2)' == 'true'">armv8-a</ArmBase>
+      <ArmBase Condition="'$(Option-sha3)' == 'true'">armv8.2-a</ArmBase>
+      <ArmExtensions Condition="'$(Option-aes)' == 'true'">%(ArmExtensions)+aes</ArmExtensions>
+      <ArmExtensions Condition="'$(Option-sha2)' == 'true'">%(ArmExtensions)+sha2</ArmExtensions>
+      <ArmExtensions Condition="'$(Option-sha3)' == 'true'">%(ArmExtensions)+sha3</ArmExtensions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'ClangCL' And ('$(Platform)' == 'ARM64') And ('$(Option-aes)' == 'true' Or '$(Option-sha2)' == 'true' Or '$(Option-sha3)' == 'true')">
+    <ClCompile>
+      <AdditionalOptions>-march=%(ArmBase)%(ArmExtensions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <Target Name="libbitcoin_system_OptionInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Option-shani      : $(Option-shani)" Importance="high"/>
+    <Message Text="Option-sha512     : $(Option-sha512)" Importance="high"/>
+    <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
+    <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
+    <Message Text="Option-avx512ifma : $(Option-avx512ifma)" Importance="high"/>
+    <Message Text="Option-avx512     : $(Option-avx512)" Importance="high"/>
+    <Message Text="Option-avxifma    : $(Option-avxifma)" Importance="high"/>
+    <Message Text="Option-avx2       : $(Option-avx2)" Importance="high"/>
+    <Message Text="Option-sse41      : $(Option-sse41)" Importance="high"/>
+    <Message Text="Option-sha2       : $(Option-sha2)" Importance="high"/>
+    <Message Text="Option-sha3       : $(Option-sha3)" Importance="high"/>
+    <Message Text="Option-aes        : $(Option-aes)" Importance="high"/>
+  </Target>
+
 </Project>
