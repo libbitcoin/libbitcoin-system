@@ -21,13 +21,15 @@
 
 BC_AUTO_TEST_SUITE(hmac_tests)
 
+// system::hmac is qualified as NetBSD <stdlib.h> declares a global hmac().
+
 // test.expected size mismatch
 ////BC_AUTO_TEST_CASE(hmac__rmd128__test_vectors__expected)
 ////{
 ////    // No test vectors, just exercising.
 ////    for (const auto& test : hmac_sha160_tests)
 ////    {
-////        const auto hash = hmac<rmd128>::code(test.data, test.key);
+////        const auto hash = system::hmac<rmd128>::code(test.data, test.key);
 ////        BC_REQUIRE_NE(hash, test.expected);
 ////    }
 ////}
@@ -37,7 +39,7 @@ BC_AUTO_TEST_CASE(hmac__rmd160__test_vectors__expected)
     // No test vectors, just exercising.
     for (const auto& test: hmac_sha160_tests)
     {
-        const auto hash = hmac<rmd160>::code(test.data, test.key);
+        const auto hash = system::hmac<rmd160>::code(test.data, test.key);
         BC_REQUIRE_NE(hash, test.expected);
     }
 }
@@ -46,7 +48,7 @@ BC_AUTO_TEST_CASE(hmac__sha160__test_vectors__expected)
 {
     for (const auto& test: hmac_sha160_tests)
     {
-        const auto hash = hmac<sha160>::code(test.data, test.key);
+        const auto hash = system::hmac<sha160>::code(test.data, test.key);
         BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
@@ -55,7 +57,7 @@ BC_AUTO_TEST_CASE(hmac__sha256__test_vectors__expected)
 {
     for (const auto& test: hmac_sha256_tests)
     {
-        const auto hash = hmac<sha256>::code(test.data, test.key);
+        const auto hash = system::hmac<sha256>::code(test.data, test.key);
         BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
@@ -64,7 +66,7 @@ BC_AUTO_TEST_CASE(hmac__sha512__test_vectors__expected)
 {
     for (const auto& test: hmac_sha512_tests)
     {
-        const auto hash = hmac<sha512>::code(test.data, test.key);
+        const auto hash = system::hmac<sha512>::code(test.data, test.key);
         BC_REQUIRE_EQUAL(hash, test.expected);
     }
 }
