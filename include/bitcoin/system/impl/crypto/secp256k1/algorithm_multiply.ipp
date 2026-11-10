@@ -481,7 +481,7 @@ constexpr void algorithm::lookup(affine_t<Word>& r,
         for (size_t at{}; at < Size; ++at)
         {
             const auto first = f::broadcast<Word>(uint64_t{ at * stride });
-            const auto mask = f::eq<64>(offset, f::add<64>(first, ids));
+            const auto mask = opaque(f::eq<64>(offset, f::add<64>(first, ids)));
             const auto& x = table[at].x;
             const auto& y = table[at].y;
             for (size_t limb{}; limb < size; ++limb)
