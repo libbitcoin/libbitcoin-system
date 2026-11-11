@@ -1,8 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <_PropertySheetDisplayName>Console Debug Dynamic</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>DebugDEXE Settings</_PropertySheetDisplayName>
     <DefaultLinkage>dynamic</DefaultLinkage>
   </PropertyGroup>
 
@@ -10,11 +16,11 @@
     <Import Project="Debug.props" />
     <Import Project="EXE.props" />
   </ImportGroup>
-  
+
   <ItemDefinitionGroup>
     <ClCompile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
-  
+
 </Project>

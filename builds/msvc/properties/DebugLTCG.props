@@ -1,13 +1,20 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ |  Copyright (c) 2014-2026 libbitcoin-system developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <PropertyGroup>
-    <_PropertySheetDisplayName>Static Debug Link Time Code Generation Library</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>DebugLTCG Settings</_PropertySheetDisplayName>
   </PropertyGroup>
-  
+
   <ImportGroup Label="PropertySheets">
     <Import Project="Debug.props" />
-    <Import Project="LTCG.props" />
+    <Import Project="LIB.props" />
+    <Import Project="Link.props" />
   </ImportGroup>
 
   <ItemDefinitionGroup>

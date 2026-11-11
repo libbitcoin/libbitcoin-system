@@ -136,8 +136,7 @@
                 "CMAKE_INSTALL_PREFIX_PATH": {
                   "type": "PATH",
                   "value": "${sourceParentDir}/../../../prefix/${presetName}"
-                },
-                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+                }
             }
         },
         {
@@ -199,6 +198,30 @@
             ]
         },
         {
+            "name": "win-msvc-debug-shared",
+            "displayName": "Windows/MSVC/Debug/Shared",
+            "description": "Debug build with msvc and shared linking.",
+            "hidden": false,
+            "inherits": [
+                "shared",
+                "win-debug",
+                "msvc",
+                "win-base"
+            ]
+        },
+        {
+            "name": "win-msvc-release-shared",
+            "displayName": "Windows/MSVC/Release/Shared",
+            "description": "Release build with msvc and shared linking.",
+            "hidden": false,
+            "inherits": [
+                "shared",
+                "win-release",
+                "msvc",
+                "win-base"
+            ]
+        },
+        {
             "name": "win-clangcl-debug-static",
             "displayName": "Windows/clang-cl/Debug/Static",
             "description": "Debug build with clang-cl and static linking.",
@@ -217,6 +240,30 @@
             "hidden": false,
             "inherits": [
                 "static",
+                "win-release",
+                "clangcl",
+                "win-base"
+            ]
+        },
+        {
+            "name": "win-clangcl-debug-shared",
+            "displayName": "Windows/clang-cl/Debug/Shared",
+            "description": "Debug build with clang-cl and shared linking.",
+            "hidden": false,
+            "inherits": [
+                "shared",
+                "win-debug",
+                "clangcl",
+                "win-base"
+            ]
+        },
+        {
+            "name": "win-clangcl-release-shared",
+            "displayName": "Windows/clang-cl/Release/Shared",
+            "description": "Release build with clang-cl and shared linking.",
+            "hidden": false,
+            "inherits": [
+                "shared",
                 "win-release",
                 "clangcl",
                 "win-base"
@@ -270,6 +317,18 @@
             "configurePreset": "win-msvc-release-static"
         },
         {
+            "name": "win-msvc-debug-shared",
+            "displayName": "Windows/MSVC/Debug/Shared",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-msvc-debug-shared"
+        },
+        {
+            "name": "win-msvc-release-shared",
+            "displayName": "Windows/MSVC/Release/Shared",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-msvc-release-shared"
+        },
+        {
             "name": "win-clangcl-debug-static",
             "displayName": "Windows/clang-cl/Debug/Static",
             "inherits": [ "nix-target-list" ],
@@ -280,6 +339,18 @@
             "displayName": "Windows/clang-cl/Release/Static",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "win-clangcl-release-static"
+        },
+        {
+            "name": "win-clangcl-debug-shared",
+            "displayName": "Windows/clang-cl/Debug/Shared",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-clangcl-debug-shared"
+        },
+        {
+            "name": "win-clangcl-release-shared",
+            "displayName": "Windows/clang-cl/Release/Shared",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "win-clangcl-release-shared"
         }
     ]
 }
