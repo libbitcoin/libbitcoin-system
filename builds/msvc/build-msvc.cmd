@@ -11,17 +11,17 @@ REM ###########################################################################
 REM Script managing the build of libbitcoin-system.
 REM
 REM Script options:
-REM --enable-shani              Add Intel SHA Extensions via compilation options.
+REM --enable-shani              Add Intel SHA Extensions (implies AES-NI) via compilation options.
 REM --enable-sha512             Add Intel SHA512 Extensions (implies AVX2) via compilation options.
 REM --enable-aesni              Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options.
 REM --enable-vaes               Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options.
-REM --enable-avx512ifma         Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options.
-REM --enable-avx512             Add Intel AVX512 intrinsics via compilation options.
-REM --enable-avxifma            Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options.
-REM --enable-avx2               Add Intel AVX2 intrinsics via compilation options.
+REM --enable-avx512ifma         Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options.
+REM --enable-avx512             Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options.
+REM --enable-avxifma            Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options.
+REM --enable-avx2               Add Intel AVX2 intrinsics (implies AES-NI) via compilation options.
 REM --enable-sse41              Add SSE4.1 hardware instructions via compilation options.
-REM --enable-sha2               Check for ARM SHA1/SHA256 Extensions.
-REM --enable-sha3               Check for ARM SHA3 Extensions for SHA512.
+REM --enable-sha2               Check for ARM SHA1/SHA256 Extensions (implies AES).
+REM --enable-sha3               Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES).
 REM --enable-aes                Check for ARM AES and PMULL Extensions.
 REM --[with/without]-cuda       Use cuda (gpu) batch signature verification (inert on macOS).
 REM --build-config config       Build configuration.
@@ -538,17 +538,17 @@ if "!libbitcoin_system_TAG!" == "" (
     call :msg "Script managing the build of libbitcoin-system."
     call :msg ""
     call :msg "Script options:"
-    call :msg "--enable-shani              Add Intel SHA Extensions via compilation options."
+    call :msg "--enable-shani              Add Intel SHA Extensions (implies AES-NI) via compilation options."
     call :msg "--enable-sha512             Add Intel SHA512 Extensions (implies AVX2) via compilation options."
     call :msg "--enable-aesni              Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options."
     call :msg "--enable-vaes               Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options."
-    call :msg "--enable-avx512ifma         Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options."
-    call :msg "--enable-avx512             Add Intel AVX512 intrinsics via compilation options."
-    call :msg "--enable-avxifma            Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options."
-    call :msg "--enable-avx2               Add Intel AVX2 intrinsics via compilation options."
+    call :msg "--enable-avx512ifma         Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options."
+    call :msg "--enable-avx512             Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options."
+    call :msg "--enable-avxifma            Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options."
+    call :msg "--enable-avx2               Add Intel AVX2 intrinsics (implies AES-NI) via compilation options."
     call :msg "--enable-sse41              Add SSE4.1 hardware instructions via compilation options."
-    call :msg "--enable-sha2               Check for ARM SHA1/SHA256 Extensions."
-    call :msg "--enable-sha3               Check for ARM SHA3 Extensions for SHA512."
+    call :msg "--enable-sha2               Check for ARM SHA1/SHA256 Extensions (implies AES)."
+    call :msg "--enable-sha3               Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)."
     call :msg "--enable-aes                Check for ARM AES and PMULL Extensions."
     call :msg "--[with/without]-cuda       Use cuda (gpu) batch signature verification (inert on macOS)."
     call :msg "--build-config config       Build configuration."

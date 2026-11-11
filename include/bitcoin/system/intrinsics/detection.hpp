@@ -70,6 +70,8 @@ namespace cpu7_0
     constexpr auto avx2_ebx_bit = 5;
     constexpr auto bmi2_ebx_bit = 8;
     constexpr auto avx512f_ebx_bit = 16;
+    constexpr auto avx512dq_ebx_bit = 17;
+    constexpr auto avx512cd_ebx_bit = 28;
     constexpr auto avx512bw_ebx_bit = 30;
     constexpr auto shani_ebx_bit = 29;
     constexpr auto avx512ifma_ebx_bit = 21;
@@ -318,6 +320,17 @@ BASELINE inline bool try_x86_64_v3() NOEXCEPT
         && get_bit<cpu80000001_0::lzcnt_ecx_bit>(ecx);  // LZCNT
 }
 
+template <auto Cpu = get_cpu, auto Xcr = get_xcr>
+BASELINE inline bool try_x86_64_v4() NOEXCEPT
+{
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return try_x86_64_v3<Cpu, Xcr>()
+        && is_avx512<Cpu, Xcr>()                        // AVX512F/BW/VL, ZMM
+        && Cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::avx512cd_ebx_bit>(ebx)       // AVX512CD
+        && get_bit<cpu7_0::avx512dq_ebx_bit>(ebx);      // AVX512DQ
+}
+
 /// Runtime checks for ARM NEON, SHA, AES, SHA3 and LSE availability.
 /// ---------------------------------------------------------------------------
 
@@ -370,6 +383,7 @@ BASELINE inline bool try_compiled() NOEXCEPT
 
     return (!have_x86_64_v2 || try_x86_64_v2<Cpu>())
         && (!have_x86_64_v3 || try_x86_64_v3<Cpu, Xcr>())
+        && (!have_x86_64_v4 || try_x86_64_v4<Cpu, Xcr>())
         && (!have_sse41 || try_sse41<Cpu>())
         && (!have_avx2 || try_avx2<Cpu, Xcr>())
         && (!have_avx512 || is_avx512<Cpu, Xcr>())

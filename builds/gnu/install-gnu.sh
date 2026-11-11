@@ -42,22 +42,22 @@
 #
 # Hardware configuration options for arm64:
 # --hardware-aes                Use ARM AES and PMULL Extensions.
-# --hardware-sha2               Use ARM SHA1/SHA256 Extensions.
-# --hardware-sha3               Use ARM SHA3 Extensions for SHA512.
+# --hardware-sha2               Use ARM SHA1/SHA256 Extensions (implies AES).
+# --hardware-sha3               Use ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES).
 #
 # Hardware configuration options for x64:
-# --hardware-avx2               Use Intel AVX2 intrinsics.
-# --hardware-avx512             Use Intel AVX512 intrinsics.
-# --hardware-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL).
-# --hardware-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2).
-# --hardware-shani              Use Intel SHA Extensions.
+# --hardware-avx2               Use Intel AVX2 intrinsics (implies AES-NI).
+# --hardware-avx512             Use Intel AVX512 intrinsics (implies AVX2 and AES-NI).
+# --hardware-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI).
+# --hardware-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI).
+# --hardware-shani              Use Intel SHA Extensions (implies AES-NI).
 # --hardware-sha512             Use Intel SHA512 Extensions (implies AVX2).
 # --hardware-sse41              Use SSE4.1 hardware instructions.
 # --hardware-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics.
 # --hardware-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #
 # Recognized pass-through options:
-# --<enable/disable>-shani      Add Intel SHA Extensions via compilation options.
+# --<enable/disable>-shani      Add Intel SHA Extensions (implies AES-NI) via compilation options.
 #                                 Default: --disable-shani
 # --<enable/disable>-sha512     Add Intel SHA512 Extensions (implies AVX2) via compilation options.
 #                                 Default: --disable-sha512
@@ -65,19 +65,19 @@
 #                                 Default: --disable-aesni
 # --<enable/disable>-vaes       Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options.
 #                                 Default: --disable-vaes
-# --<enable/disable>-avx512ifma Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options.
+# --<enable/disable>-avx512ifma Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options.
 #                                 Default: --disable-avx512ifma
-# --<enable/disable>-avx512     Add Intel AVX512 intrinsics via compilation options.
+# --<enable/disable>-avx512     Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options.
 #                                 Default: --disable-avx512
-# --<enable/disable>-avxifma    Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options.
+# --<enable/disable>-avxifma    Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options.
 #                                 Default: --disable-avxifma
-# --<enable/disable>-avx2       Add Intel AVX2 intrinsics via compilation options.
+# --<enable/disable>-avx2       Add Intel AVX2 intrinsics (implies AES-NI) via compilation options.
 #                                 Default: --disable-avx2
 # --<enable/disable>-sse41      Add SSE4.1 hardware instructions via compilation options.
 #                                 Default: --disable-sse41
-# --<enable/disable>-sha2       Check for ARM SHA1/SHA256 Extensions.
+# --<enable/disable>-sha2       Check for ARM SHA1/SHA256 Extensions (implies AES).
 #                                 Default: --disable-sha2
-# --<enable/disable>-sha3       Check for ARM SHA3 Extensions for SHA512.
+# --<enable/disable>-sha3       Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES).
 #                                 Default: --disable-sha3
 # --<enable/disable>-aes        Check for ARM AES and PMULL Extensions.
 #                                 Default: --disable-aes
@@ -416,6 +416,41 @@ main()
     # HARDWARE_OPTIMIZED
     if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
         ARCHTUNE="-march=native -mtune=native"
+    fi
+
+    if [[ "${HARDWARE_SHA2}" == "yes" ]]; then
+        HARDWARE_AES="yes"
+    fi
+
+    if [[ "${HARDWARE_SHA3}" == "yes" ]]; then
+        HARDWARE_SHA2="yes"
+        HARDWARE_AES="yes"
+    fi
+
+    if [[ "${HARDWARE_AVX2}" == "yes" ]]; then
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_AVX512}" == "yes" ]]; then
+        HARDWARE_AVX2="yes"
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_AVX512IFMA}" == "yes" ]]; then
+        HARDWARE_AVX512="yes"
+        HARDWARE_AVX2="yes"
+        HARDWARE_SHANI="yes"
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_AVXIFMA}" == "yes" ]]; then
+        HARDWARE_AVX2="yes"
+        HARDWARE_SHANI="yes"
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_SHANI}" == "yes" ]]; then
+        HARDWARE_AESNI="yes"
     fi
 
     # Platform options: arm64
@@ -1046,22 +1081,22 @@ help()
     msg ""
     msg "Hardware configuration options for arm64:"
     msg "--hardware-aes                Use ARM AES and PMULL Extensions."
-    msg "--hardware-sha2               Use ARM SHA1/SHA256 Extensions."
-    msg "--hardware-sha3               Use ARM SHA3 Extensions for SHA512."
+    msg "--hardware-sha2               Use ARM SHA1/SHA256 Extensions (implies AES)."
+    msg "--hardware-sha3               Use ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)."
     msg ""
     msg "Hardware configuration options for x64:"
-    msg "--hardware-avx2               Use Intel AVX2 intrinsics."
-    msg "--hardware-avx512             Use Intel AVX512 intrinsics."
-    msg "--hardware-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
-    msg "--hardware-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2)."
-    msg "--hardware-shani              Use Intel SHA Extensions."
+    msg "--hardware-avx2               Use Intel AVX2 intrinsics (implies AES-NI)."
+    msg "--hardware-avx512             Use Intel AVX512 intrinsics (implies AVX2 and AES-NI)."
+    msg "--hardware-avx512ifma         Use Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI)."
+    msg "--hardware-avxifma            Use Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI)."
+    msg "--hardware-shani              Use Intel SHA Extensions (implies AES-NI)."
     msg "--hardware-sha512             Use Intel SHA512 Extensions (implies AVX2)."
     msg "--hardware-sse41              Use SSE4.1 hardware instructions."
     msg "--hardware-aesni              Use Intel AES-NI and PCLMULQDQ intrinsics."
     msg "--hardware-vaes               Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg ""
     msg "Recognized pass-through options:"
-    msg "--<enable/disable>-shani      Add Intel SHA Extensions via compilation options."
+    msg "--<enable/disable>-shani      Add Intel SHA Extensions (implies AES-NI) via compilation options."
     msg "                                Default: --disable-shani"
     msg "--<enable/disable>-sha512     Add Intel SHA512 Extensions (implies AVX2) via compilation options."
     msg "                                Default: --disable-sha512"
@@ -1069,19 +1104,19 @@ help()
     msg "                                Default: --disable-aesni"
     msg "--<enable/disable>-vaes       Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options."
     msg "                                Default: --disable-vaes"
-    msg "--<enable/disable>-avx512ifma Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options."
+    msg "--<enable/disable>-avx512ifma Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options."
     msg "                                Default: --disable-avx512ifma"
-    msg "--<enable/disable>-avx512     Add Intel AVX512 intrinsics via compilation options."
+    msg "--<enable/disable>-avx512     Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options."
     msg "                                Default: --disable-avx512"
-    msg "--<enable/disable>-avxifma    Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options."
+    msg "--<enable/disable>-avxifma    Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options."
     msg "                                Default: --disable-avxifma"
-    msg "--<enable/disable>-avx2       Add Intel AVX2 intrinsics via compilation options."
+    msg "--<enable/disable>-avx2       Add Intel AVX2 intrinsics (implies AES-NI) via compilation options."
     msg "                                Default: --disable-avx2"
     msg "--<enable/disable>-sse41      Add SSE4.1 hardware instructions via compilation options."
     msg "                                Default: --disable-sse41"
-    msg "--<enable/disable>-sha2       Check for ARM SHA1/SHA256 Extensions."
+    msg "--<enable/disable>-sha2       Check for ARM SHA1/SHA256 Extensions (implies AES)."
     msg "                                Default: --disable-sha2"
-    msg "--<enable/disable>-sha3       Check for ARM SHA3 Extensions for SHA512."
+    msg "--<enable/disable>-sha3       Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)."
     msg "                                Default: --disable-sha3"
     msg "--<enable/disable>-aes        Check for ARM AES and PMULL Extensions."
     msg "                                Default: --disable-aes"

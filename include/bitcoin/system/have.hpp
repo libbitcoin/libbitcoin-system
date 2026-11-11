@@ -110,9 +110,12 @@
 /// WITH_ build symbols.
 /// ---------------------------------------------------------------------------
 
-/// vc++: There are no flags for SHANI, SHA512, AVX512IFMA, AVXIFMA, AES-NI and
-/// VAES, so use custom WITH_ options.
+/// vc++: There are no flags for SSE4.1, SHANI, SHA512, AVX512IFMA, AVXIFMA,
+/// AES-NI and VAES, so use custom WITH_ options.
 #if defined(HAVE_MSC) && defined(HAVE_XCPU)
+    #if defined(WITH_SSE41) && !defined(__SSE4_1__)
+        #define __SSE4_1__
+    #endif
     #if defined(WITH_SHANI)
         #define __SHA__
     #endif
@@ -301,10 +304,17 @@
     #if defined(__VAES__) && defined(__VPCLMULQDQ__)
         #define HAVE_VAES
     #endif
+    // -march=x86-64-v4
+    // vc++: Advanced Vector Extensions 512 (/arch:AVX512) is this level.
+    #if defined(HAVE_X64) && defined(__AVX512F__) && defined(__AVX512BW__) && \
+        defined(__AVX512CD__) && defined(__AVX512DQ__) && defined(__AVX512VL__)
+        #define HAVE_X86_64_V4
+    #endif
     // -march=x86-64-v3
     // vc++: Advanced Vector Extensions 2 (/arch:AVX2) is treated as this level.
-    #if defined(HAVE_X64) && (defined(__BMI2__) || defined(__FMA__) || \
-        defined(__MOVBE__) || (defined(HAVE_MSC) && defined(__AVX2__)))
+    #if defined(HAVE_X64) && (defined(HAVE_X86_64_V4) || defined(__BMI2__) || \
+        defined(__FMA__) || defined(__MOVBE__) || \
+        (defined(HAVE_MSC) && defined(__AVX2__)))
         #define HAVE_X86_64_V3
     #endif
     // -march=x86-64-v2

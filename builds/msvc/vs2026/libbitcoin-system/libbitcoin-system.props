@@ -25,6 +25,7 @@
       <PreprocessorDefinitions Condition="'$(Option-avxifma)' == 'true'">WITH_AVXIFMA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-shani)' == 'true'">WITH_SHANI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-sha512)' == 'true'">WITH_SHA512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sse41)' == 'true'">WITH_SSE41;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-aesni)' == 'true'">WITH_AESNI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-vaes)' == 'true'">WITH_VAES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-aes)' == 'true'">WITH_AES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -85,8 +86,24 @@
     <Option-cuda Condition="'$(Option-cuda)' == ''">true</Option-cuda>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Option-aesni Condition="'$(Option-shani)' == 'true'">true</Option-aesni>
+    <Option-avx512 Condition="'$(Option-avx512ifma)' == 'true'">true</Option-avx512>
+    <Option-avx2 Condition="'$(Option-avx512ifma)' == 'true'">true</Option-avx2>
+    <Option-shani Condition="'$(Option-avx512ifma)' == 'true'">true</Option-shani>
+    <Option-aesni Condition="'$(Option-avx512ifma)' == 'true'">true</Option-aesni>
+    <Option-avx2 Condition="'$(Option-avx512)' == 'true'">true</Option-avx2>
+    <Option-aesni Condition="'$(Option-avx512)' == 'true'">true</Option-aesni>
+    <Option-avx2 Condition="'$(Option-avxifma)' == 'true'">true</Option-avx2>
+    <Option-shani Condition="'$(Option-avxifma)' == 'true'">true</Option-shani>
+    <Option-aesni Condition="'$(Option-avxifma)' == 'true'">true</Option-aesni>
+    <Option-aesni Condition="'$(Option-avx2)' == 'true'">true</Option-aesni>
+    <Option-aes Condition="'$(Option-sha2)' == 'true'">true</Option-aes>
+    <Option-sha2 Condition="'$(Option-sha3)' == 'true'">true</Option-sha2>
+    <Option-aes Condition="'$(Option-sha3)' == 'true'">true</Option-aes>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Platform)' == 'Win32' Or '$(Platform)' == 'x64'">
-    <Option-arch Condition="'$(Option-sse41)' == 'true' And '$(Option-arch)' != 'AdvancedVectorExtensions2' And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions</Option-arch>
     <Option-arch Condition="('$(Option-avx2)' == 'true' Or '$(Option-avxifma)' == 'true' Or '$(Option-sha512)' == 'true' Or '$(Option-vaes)' == 'true') And '$(Option-arch)' != 'AdvancedVectorExtensions512'">AdvancedVectorExtensions2</Option-arch>
     <Option-arch Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</Option-arch>
   </PropertyGroup>

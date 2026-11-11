@@ -21,39 +21,53 @@
 
 using namespace bc::system;
 
-struct feature
-{
-    const char* name;
-    bool(*supported)() NOEXCEPT;
-};
-
 // The "try" functions are safe for instructions not compiled in.
-constexpr std::array features
+// selector                     Write each supported build tag, one per line.
+// selector <program>           Write the release file name for this machine.
+// selector <program> <release> Write the release download url for this machine.
+int main(int argc, char* argv[])
 {
-    // Intel/AMD
-    feature{ "aesni",      &try_aesni<> },
-    feature{ "vaes",       &try_vaes<> },
-    feature{ "shani",      &try_shani<> },
-    feature{ "sha512",     &try_sha512<> },
-    feature{ "sse41",      &try_sse41<> },
-    feature{ "avx2",       &try_avx2<> },
-    feature{ "avx512",     &try_avx512<> },
-    feature{ "avxifma",    &try_avxifma<> },
-    feature{ "avx512ifma", &try_avx512ifma<> },
+    const auto tags = detected_tags();
 
-    // Arm
-    feature{ "aes",        &try_neon_aes<> },
-    feature{ "sha2",       &try_neon_sha2<> },
-    feature{ "sha3",       &try_neon_sha3<> },
-    feature{ "neon",       &try_neon<> }
-};
+    if (argc < 2)
+    {
+        const std::array<std::pair<const char*, bool>, 8> supported
+        {
+            std::pair{ "sse41",      tags.sse41 },
+            std::pair{ "avx2",       tags.avx2 },
+            std::pair{ "avx512",     tags.avx512 },
+            std::pair{ "avxifma",    tags.avxifma },
+            std::pair{ "avx512ifma", tags.avx512ifma },
+            std::pair{ "shani",      tags.shani },
+            std::pair{ "sha2",       tags.sha2 },
+            std::pair{ "sha3",       tags.sha3 }
+        };
 
-// Write the instruction set extensions this processor supports, one per line.
-int main()
-{
-    for (const auto& extension: features)
-        if (extension.supported())
-            std::cout << extension.name << std::endl;
+        for (const auto& [name, value]: supported)
+            if (value)
+                std::cout << name << std::endl;
+
+        return EXIT_SUCCESS;
+    }
+
+    const std::string program{ argv[1] };
+    const std::string repository = program == "bs" ? "libbitcoin-server" : "";
+
+    const auto name = build_name(program, tags);
+    if (repository.empty() || name.empty() || argc > 3)
+    {
+        std::cerr << "usage: selector [bs [<release>]]" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (argc == 2)
+    {
+        std::cout << name << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    std::cout << "https://github.com/libbitcoin/" << repository
+        << "/releases/download/" << argv[2] << "/" << name << std::endl;
 
     return EXIT_SUCCESS;
 }

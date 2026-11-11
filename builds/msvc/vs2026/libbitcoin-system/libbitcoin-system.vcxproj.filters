@@ -1679,6 +1679,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\tags.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>

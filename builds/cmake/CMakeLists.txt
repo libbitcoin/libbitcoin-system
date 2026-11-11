@@ -128,17 +128,17 @@ include(CheckCXXSourceCompiles)
 #------------------------------------------------------------------------------
 # Project options.
 #------------------------------------------------------------------------------
-option( enable-shani "Add Intel SHA Extensions via compilation options." OFF )
+option( enable-shani "Add Intel SHA Extensions (implies AES-NI) via compilation options." OFF )
 option( enable-sha512 "Add Intel SHA512 Extensions (implies AVX2) via compilation options." OFF )
 option( enable-aesni "Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options." OFF )
 option( enable-vaes "Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options." OFF )
-option( enable-avx512ifma "Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options." OFF )
-option( enable-avx512 "Add Intel AVX512 intrinsics via compilation options." OFF )
-option( enable-avxifma "Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options." OFF )
-option( enable-avx2 "Add Intel AVX2 intrinsics via compilation options." OFF )
+option( enable-avx512ifma "Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options." OFF )
+option( enable-avx512 "Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options." OFF )
+option( enable-avxifma "Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options." OFF )
+option( enable-avx2 "Add Intel AVX2 intrinsics (implies AES-NI) via compilation options." OFF )
 option( enable-sse41 "Add SSE4.1 hardware instructions via compilation options." OFF )
-option( enable-sha2 "Check for ARM SHA1/SHA256 Extensions." OFF )
-option( enable-sha3 "Check for ARM SHA3 Extensions for SHA512." OFF )
+option( enable-sha2 "Check for ARM SHA1/SHA256 Extensions (implies AES)." OFF )
+option( enable-sha3 "Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)." OFF )
 option( enable-aes "Check for ARM AES and PMULL Extensions." OFF )
 option( with-secp256k1 "Use native secp256k1 interface, otherwise external library." ON )
 option( with-valgrind "Use valgrind memcheck client requests." OFF )
@@ -147,6 +147,41 @@ option( with-tests "Compile with unit tests." ON )
 option( with-performance-tests "Compile performance tests." OFF )
 option( with-slow-tests "Compile slow tests." OFF )
 option( with-console "Compile with console application." ON )
+
+if ( enable-shani )
+  set( enable-aesni ON )
+endif()
+
+if ( enable-avx512ifma )
+  set( enable-avx512 ON )
+  set( enable-avx2 ON )
+  set( enable-shani ON )
+  set( enable-aesni ON )
+endif()
+
+if ( enable-avx512 )
+  set( enable-avx2 ON )
+  set( enable-aesni ON )
+endif()
+
+if ( enable-avxifma )
+  set( enable-avx2 ON )
+  set( enable-shani ON )
+  set( enable-aesni ON )
+endif()
+
+if ( enable-avx2 )
+  set( enable-aesni ON )
+endif()
+
+if ( enable-sha2 )
+  set( enable-aes ON )
+endif()
+
+if ( enable-sha3 )
+  set( enable-sha2 ON )
+  set( enable-aes ON )
+endif()
 
 #------------------------------------------------------------------------------
 # Dependencies.
@@ -561,8 +596,6 @@ else()
     set( msvc_arch "AVX512" )
   elseif ( enable-avx2 OR enable-avxifma OR enable-sha512 OR enable-vaes )
     set( msvc_arch "AVX2" )
-  elseif ( enable-sse41 )
-    set( msvc_arch "AVX" )
   endif()
 endif()
 
@@ -627,7 +660,7 @@ endif()
 if ( MSVC )
   target_compile_options( libbitcoin-system
     PUBLIC
-      $<$<BOOL:${msvc_arch}>:/arch:${msvc_arch}>
+      $<$<AND:$<NOT:$<CXX_COMPILER_ID:Clang>>,$<BOOL:${msvc_arch}>>:/arch:${msvc_arch}>
       $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avx2}>:-mavx -mavx2>>
       $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avx512}>:-mavx512f -mavx512bw -mavx512vl>>
       $<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${enable-avx512ifma}>:-mavx512ifma -mavx512vl>>
@@ -648,6 +681,7 @@ if ( MSVC )
       $<$<BOOL:${enable-avxifma}>:WITH_AVXIFMA>
       $<$<BOOL:${enable-shani}>:WITH_SHANI>
       $<$<BOOL:${enable-sha512}>:WITH_SHA512>
+      $<$<BOOL:${enable-sse41}>:WITH_SSE41>
       $<$<BOOL:${enable-aesni}>:WITH_AESNI>
       $<$<BOOL:${enable-vaes}>:WITH_VAES>
   )
