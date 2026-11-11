@@ -413,6 +413,41 @@ main()
         ARCHTUNE="-march=native -mtune=native"
     fi
 
+    if [[ "${HARDWARE_SHA2}" == "yes" ]]; then
+        HARDWARE_AES="yes"
+    fi
+
+    if [[ "${HARDWARE_SHA3}" == "yes" ]]; then
+        HARDWARE_SHA2="yes"
+        HARDWARE_AES="yes"
+    fi
+
+    if [[ "${HARDWARE_AVX2}" == "yes" ]]; then
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_AVX512}" == "yes" ]]; then
+        HARDWARE_AVX2="yes"
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_AVX512IFMA}" == "yes" ]]; then
+        HARDWARE_AVX512="yes"
+        HARDWARE_AVX2="yes"
+        HARDWARE_SHANI="yes"
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_AVXIFMA}" == "yes" ]]; then
+        HARDWARE_AVX2="yes"
+        HARDWARE_SHANI="yes"
+        HARDWARE_AESNI="yes"
+    fi
+
+    if [[ "${HARDWARE_SHANI}" == "yes" ]]; then
+        HARDWARE_AESNI="yes"
+    fi
+
     # Platform options: arm64
 
     if [[ "${HARDWARE_AES}" == "yes" ]]; then
