@@ -221,6 +221,7 @@
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/intrinsics/multiply.hpp>
 #include <bitcoin/system/intrinsics/rotate.hpp>
+#include <bitcoin/system/intrinsics/tags.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_128.hpp>

@@ -178,7 +178,7 @@ AM_CONDITIONAL([WITH_CONSOLE], [test "x${with_console}" != "xno"])
 AC_MSG_CHECKING([--enable-shani option])
 AC_ARG_ENABLE([shani],
     AS_HELP_STRING([--enable-shani],
-        [Add Intel SHA Extensions via compilation options. @<:@default=no@:>@]),
+        [Add Intel SHA Extensions (implies AES-NI) via compilation options. @<:@default=no@:>@]),
     [enable_shani=$enableval],
     [enable_shani=no])
 AC_MSG_RESULT([$enable_shani])
@@ -214,7 +214,7 @@ AM_CONDITIONAL([ENABLE_VAES], [test "x${enable_vaes}" != "xno"])
 AC_MSG_CHECKING([--enable-avx512ifma option])
 AC_ARG_ENABLE([avx512ifma],
     AS_HELP_STRING([--enable-avx512ifma],
-        [Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options. @<:@default=no@:>@]),
+        [Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options. @<:@default=no@:>@]),
     [enable_avx512ifma=$enableval],
     [enable_avx512ifma=no])
 AC_MSG_RESULT([$enable_avx512ifma])
@@ -223,7 +223,7 @@ AM_CONDITIONAL([ENABLE_AVX512IFMA], [test "x${enable_avx512ifma}" != "xno"])
 AC_MSG_CHECKING([--enable-avx512 option])
 AC_ARG_ENABLE([avx512],
     AS_HELP_STRING([--enable-avx512],
-        [Add Intel AVX512 intrinsics via compilation options. @<:@default=no@:>@]),
+        [Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options. @<:@default=no@:>@]),
     [enable_avx512=$enableval],
     [enable_avx512=no])
 AC_MSG_RESULT([$enable_avx512])
@@ -232,7 +232,7 @@ AM_CONDITIONAL([ENABLE_AVX512], [test "x${enable_avx512}" != "xno"])
 AC_MSG_CHECKING([--enable-avxifma option])
 AC_ARG_ENABLE([avxifma],
     AS_HELP_STRING([--enable-avxifma],
-        [Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options. @<:@default=no@:>@]),
+        [Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options. @<:@default=no@:>@]),
     [enable_avxifma=$enableval],
     [enable_avxifma=no])
 AC_MSG_RESULT([$enable_avxifma])
@@ -241,7 +241,7 @@ AM_CONDITIONAL([ENABLE_AVXIFMA], [test "x${enable_avxifma}" != "xno"])
 AC_MSG_CHECKING([--enable-avx2 option])
 AC_ARG_ENABLE([avx2],
     AS_HELP_STRING([--enable-avx2],
-        [Add Intel AVX2 intrinsics via compilation options. @<:@default=no@:>@]),
+        [Add Intel AVX2 intrinsics (implies AES-NI) via compilation options. @<:@default=no@:>@]),
     [enable_avx2=$enableval],
     [enable_avx2=no])
 AC_MSG_RESULT([$enable_avx2])
@@ -259,7 +259,7 @@ AM_CONDITIONAL([ENABLE_SSE41], [test "x${enable_sse41}" != "xno"])
 AC_MSG_CHECKING([--enable-sha2 option])
 AC_ARG_ENABLE([sha2],
     AS_HELP_STRING([--enable-sha2],
-        [Check for ARM SHA1/SHA256 Extensions. @<:@default=no@:>@]),
+        [Check for ARM SHA1/SHA256 Extensions (implies AES). @<:@default=no@:>@]),
     [enable_sha2=$enableval],
     [enable_sha2=no])
 AC_MSG_RESULT([$enable_sha2])
@@ -268,7 +268,7 @@ AM_CONDITIONAL([ENABLE_SHA2], [test "x${enable_sha2}" != "xno"])
 AC_MSG_CHECKING([--enable-sha3 option])
 AC_ARG_ENABLE([sha3],
     AS_HELP_STRING([--enable-sha3],
-        [Check for ARM SHA3 Extensions for SHA512. @<:@default=no@:>@]),
+        [Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES). @<:@default=no@:>@]),
     [enable_sha3=$enableval],
     [enable_sha3=no])
 AC_MSG_RESULT([$enable_sha3])
@@ -327,6 +327,20 @@ AC_ARG_WITH([slow-tests],
     [with_slow_tests=no])
 AC_MSG_RESULT([$with_slow_tests])
 AM_CONDITIONAL([WITH_SLOW_TESTS], [test "x${with_slow_tests}" != "xno"])
+
+AS_IF([test "x${enable_shani}" != "xno"], [enable_aesni=yes])
+
+AS_IF([test "x${enable_avx512ifma}" != "xno"], [enable_avx512=yes enable_avx2=yes enable_shani=yes enable_aesni=yes])
+
+AS_IF([test "x${enable_avx512}" != "xno"], [enable_avx2=yes enable_aesni=yes])
+
+AS_IF([test "x${enable_avxifma}" != "xno"], [enable_avx2=yes enable_shani=yes enable_aesni=yes])
+
+AS_IF([test "x${enable_avx2}" != "xno"], [enable_aesni=yes])
+
+AS_IF([test "x${enable_sha2}" != "xno"], [enable_aes=yes])
+
+AS_IF([test "x${enable_sha3}" != "xno"], [enable_sha2=yes enable_aes=yes])
 
 # Set flags.
 #==============================================================================

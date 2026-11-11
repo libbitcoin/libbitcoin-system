@@ -904,6 +904,7 @@ include_bitcoin_system_intrinsics_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/intrinsics/intrinsics.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/multiply.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/rotate.hpp \
+    ${srcdir}/../../include/bitcoin/system/intrinsics/tags.hpp \
     ${srcdir}/../../include/bitcoin/system/intrinsics/types.hpp
 
 include_bitcoin_system_intrinsics_inteldir = \
