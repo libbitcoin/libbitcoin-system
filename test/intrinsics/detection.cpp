@@ -290,6 +290,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_none__false)
     BC_CHECK((!try_vaes<none_cpu, all_xcr>()));
     BC_CHECK(!try_x86_64_v2<none_cpu>());
     BC_CHECK((!try_x86_64_v3<none_cpu, all_xcr>()));
+    BC_CHECK((!try_x86_64_v4<none_cpu, all_xcr>()));
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
@@ -307,6 +308,7 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try__faked_all__true)
     BC_CHECK((try_vaes<all_cpu, all_xcr>()));
     BC_CHECK(try_x86_64_v2<all_cpu>());
     BC_CHECK((try_x86_64_v3<all_cpu, all_xcr>()));
+    BC_CHECK((try_x86_64_v4<all_cpu, all_xcr>()));
 }
 
 BC_AUTO_TEST_CASE(intrinsics_detection__try_avx512__faked_throttled__false)
@@ -385,6 +387,78 @@ BC_AUTO_TEST_CASE(intrinsics_detection__try_neon__faked_half__false)
     BC_CHECK(!try_neon_sha2<half_arm>());
     BC_CHECK(!try_neon_aes<half_arm>());
     BC_CHECK(!try_neon_sha3<half_arm>());
+}
+
+// build tags
+
+static std::string suffix(const build_tags& tags) NOEXCEPT
+{
+    return join(build_suffix(tags), "-");
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__detected_tags__faked_none__none)
+{
+    const auto tags = detected_tags<none_cpu, all_xcr, none_arm>();
+    BC_CHECK(!tags.sse41);
+    BC_CHECK(!tags.avx2);
+    BC_CHECK(!tags.avx512);
+    BC_CHECK(!tags.avxifma);
+    BC_CHECK(!tags.avx512ifma);
+    BC_CHECK(!tags.shani);
+    BC_CHECK(!tags.sha2);
+    BC_CHECK(!tags.sha3);
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__detected_tags__faked_all__all)
+{
+    const auto tags = detected_tags<all_cpu, all_xcr, all_arm>();
+    BC_CHECK(tags.sse41);
+    BC_CHECK(tags.avx2);
+    BC_CHECK(tags.avx512);
+    BC_CHECK(tags.avxifma);
+    BC_CHECK(tags.avx512ifma);
+    BC_CHECK(tags.shani);
+    BC_CHECK(tags.sha2);
+    BC_CHECK(tags.sha3);
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__detected_tags__faked_throttled__no_avx512)
+{
+    const auto tags = detected_tags<throttled_cpu, all_xcr, none_arm>();
+    BC_CHECK(tags.sse41);
+    BC_CHECK(tags.avx2);
+    BC_CHECK(!tags.avx512);
+    BC_CHECK(tags.avxifma);
+    BC_CHECK(!tags.avx512ifma);
+    BC_CHECK(tags.shani);
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__detected_tags__faked_half_arm__none)
+{
+    const auto tags = detected_tags<none_cpu, all_xcr, half_arm>();
+    BC_CHECK(!tags.sha2);
+    BC_CHECK(!tags.sha3);
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__build_suffix__x64__canonical)
+{
+    BC_CHECK_EQUAL(suffix({}), "");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true }), "sse41");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .shani = true }), "shani");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true }), "avx2");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .shani = true }), "avx2-shani");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .avxifma = true, .shani = true }), "avxifma");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .avx512 = true }), "avx512");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .avx512 = true, .shani = true }), "avx512-shani");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .avx512 = true, .avxifma = true, .shani = true }), "avx512-avxifma");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .avx512 = true, .avx512ifma = true, .shani = true }), "avx512ifma");
+    BC_CHECK_EQUAL(suffix({ .sse41 = true, .avx2 = true, .avx512 = true, .avxifma = true, .avx512ifma = true, .shani = true }), "avx512ifma");
+}
+
+BC_AUTO_TEST_CASE(intrinsics_detection__build_suffix__arm64__canonical)
+{
+    BC_CHECK_EQUAL(suffix({ .sha2 = true }), "sha2");
+    BC_CHECK_EQUAL(suffix({ .sha2 = true, .sha3 = true }), "sha3");
 }
 
 BC_AUTO_TEST_SUITE_END()

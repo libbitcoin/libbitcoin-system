@@ -187,6 +187,12 @@ namespace libbitcoin {
     constexpr auto have_x86_64_v3 = false;
 #endif
 
+#if defined(HAVE_X86_64_V4)
+    constexpr auto have_x86_64_v4 = true;
+#else
+    constexpr auto have_x86_64_v4 = false;
+#endif
+
 #if defined(HAVE_NEON)
     constexpr auto have_neon = true;
 #else
