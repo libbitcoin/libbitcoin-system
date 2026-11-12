@@ -37,14 +37,6 @@ static const auto most_hash = uint256_t(MOST_HASH);
 "0x8437390223499ab234bf128e8cd092343485898923aaaaabbcbcc4874353fff4"
 static const auto odd_hash = uint256_t(ODD_HASH);
 
-#define HALF_HASH \
-"0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff"
-static const auto half_hash = uint256_t(HALF_HASH);
-
-#define QUARTER_HASH \
-"0x000000000000000000000000000000000000000000000000ffffffffffffffff"
-static const auto quarter_hash = uint256_t(QUARTER_HASH);
-
 #define UNIT_HASH \
 "0x0000000000000000000000000000000000000000000000000000000000000001"
 static const auto unit_hash = uint256_t(UNIT_HASH);
