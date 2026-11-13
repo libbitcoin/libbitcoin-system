@@ -129,6 +129,19 @@ public:
         std::span<const bridge_t> rivals{};
     };
 
+    /// Mark of a row in a template.
+    enum class mark : uint8_t
+    {
+        /// Present and in the chosen outcome of its component, if any.
+        unmarked,
+
+        /// Not present, or not in the chosen outcome of its component.
+        excluded,
+
+        /// In the template.
+        taken
+    };
+
     /// Lane counts of a word.
     template <typename Word>
     static constexpr auto link_lanes = capacity<Word, link_t>;
@@ -246,6 +259,26 @@ public:
     /// descendants, and each relabeled into its component.
     static void revive(const columns_t& columns, link_t row) NOEXCEPT;
 
+    /// Template (frontier, table columns).
+    /// -----------------------------------------------------------------------
+
+    /// Each row marked excluded if not present, or if not in the outcome of
+    /// highest fee among the first maximum outcomes of its component, with
+    /// its descendants. A component of more than maximum_members members or
+    /// cliques is excluded whole.
+    template <typename Word>
+    static void resolve(std::span<mark> marks, const columns_t& columns,
+        size_t maximum_outcomes) NOEXCEPT;
+
+    /// The unmarked rows taken by chunk rate within the budget, in rounds
+    /// until none is taken, ascending (parents precede children). A chunk is
+    /// the untaken ancestry of a row within depth parent steps, cut to its
+    /// leading rows that fit, and its rate is fee over chargeable size. A
+    /// chunk changed by a take of its round is deferred to the next.
+    static void pack(std::vector<link_t>& out, std::span<mark> marks,
+        const columns_t& columns, const totals_t& budget, size_t depth,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
     /// Columns (whole table).
     /// -----------------------------------------------------------------------
 
@@ -323,6 +356,27 @@ protected:
     /// Mask of the losers of the outcome at index.
     static constexpr mask_t losers(const component_t& component,
         size_t index) NOEXCEPT;
+
+    /// Index of the outcome of highest fee (the first of equals).
+    template <typename Word>
+    static constexpr size_t best(const std::span<const mask_t>& outcomes,
+        const component_t& component, const graph_t& graph) NOEXCEPT;
+
+    /// The row and its descendants marked excluded.
+    static void discard(std::span<mark> marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
+
+    /// The component of the row (unbounded) and its descendants marked
+    /// excluded.
+    static void forfeit(std::span<mark> marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
+
+    /// The rows (ascending) and totals of the chunk of the row, false if its
+    /// untaken ancestry is deeper than depth, has an excluded row, or has no
+    /// leading row within the available totals.
+    static bool chunk(std::vector<link_t>& out, totals_t& sum,
+        const std::span<const mark>& marks, const graph_t& graph, link_t row,
+        size_t depth, const totals_t& available) NOEXCEPT;
 
     /// The rows made present (if confirmable), with confirmable descendants.
     static void restore(std::vector<link_t>& out, const columns_t& columns,

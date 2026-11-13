@@ -24,6 +24,7 @@ class accessor
   : public pool::algorithm
 {
 public:
+    using algorithm::best;
     using algorithm::index;
     using algorithm::losers;
 };
@@ -36,6 +37,7 @@ using totals_t = accessor::totals_t;
 using columns_t = accessor::columns_t;
 using graph_t = accessor::graph_t;
 using component_t = accessor::component_t;
+using mark = accessor::mark;
 constexpr auto none = accessor::none;
 constexpr auto absent = accessor::absent;
 constexpr auto boundary = accessor::boundary;
@@ -90,6 +92,26 @@ struct chain_state
     std_array<link_t, 3> siblings{ { none, none, none } };
     std_array<link_t, 3> rivals{ { none, 2, 1 } };
     std_array<link_t, 3> scratch{};
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
+// Rows: R=0, S=1 spends R:0, T=2 spends S:0, each uncontested.
+struct line_state
+{
+    std_array<link_t, 3> cells{ { unlabeled, unlabeled, unlabeled } };
+    std_array<link_t, 3> children{ { 1, 2, none } };
+    std_array<edges_t, 3> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 } } };
+    std_array<totals_t, 3> totals
+    {
+        { { 10, 100, 1 }, { 10, 100, 1 }, { 400, 100, 1 } }
+    };
+    std_array<link_t, 3> parents{ { none, 0, 1 } };
+    std_array<link_t, 3> siblings{ { none, none, none } };
+    std_array<link_t, 3> rivals{ { none, none, none } };
 
     columns_t columns() NOEXCEPT
     {
@@ -263,6 +285,41 @@ static bool evaluates_as_integral() NOEXCEPT
     {
         return true;
     }
+}
+
+template <typename Word>
+static bool bests_as_integral() NOEXCEPT
+{
+    if constexpr (have_<Word>())
+    {
+        auto labeled = label<link_t>();
+        const auto out = component(labeled);
+        const graph_t graph{ labeled.columns() };
+        std_array<mask_t, 19> masks{};
+        size_t at{};
+        std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
+        {
+            return accessor::outcome(out, at++ % 4);
+        });
+
+        return accessor::best<Word>(masks, out, graph) ==
+            accessor::best<uint64_t>(masks, out, graph);
+    }
+    else
+    {
+        return true;
+    }
+}
+
+// The template rows of the resolved scenario within the budget size.
+static std::vector<link_t> template_of(uint32_t size) NOEXCEPT
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    std::vector<link_t> out{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024);
+    accessor::pack(out, marks, labeled.columns(), { 0, size, 100 }, 25, 20);
+    return out;
 }
 
 // A table of the scenario less P, with P as the candidate (row 4, input 5
@@ -686,6 +743,166 @@ BC_AUTO_TEST_CASE(pool_algorithm__covered__added_fee_at_rate__expected)
     BC_REQUIRE(!accessor::covered(650, 500, 100, 1'501));
     BC_REQUIRE(accessor::covered(500, 650, 0, 1));
     BC_REQUIRE(!accessor::covered(500, 650, 1, 1));
+}
+
+// template
+// ----------------------------------------------------------------------------
+
+BC_AUTO_TEST_CASE(pool_algorithm__best__scenario__highest_fee_index)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const auto masks = outcomes_of(out);
+    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph), 2u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__best__extended__same_as_integral)
+{
+    BC_REQUIRE(bests_as_integral<xint128_t>());
+    BC_REQUIRE(bests_as_integral<xint256_t>());
+    BC_REQUIRE(bests_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__scenario__highest_fee_outcome)
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024);
+    BC_REQUIRE(marks[0] == mark::unmarked);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit__best_of_first)
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 2);
+    BC_REQUIRE(marks[0] == mark::unmarked);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::excluded);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__no_outcomes__component_excluded)
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 0);
+    BC_REQUIRE(marks[0] == mark::excluded);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::excluded);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::excluded);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__boundary_row__excluded)
+{
+    line_state line{};
+    line.cells[0] = boundary;
+    std_array<mark, 3> marks{};
+    accessor::resolve<link_t>(marks, line.columns(), 1'024);
+    BC_REQUIRE(marks[0] == mark::excluded);
+    BC_REQUIRE(marks[1] == mark::unmarked);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__resolved_scenario__winners_ascending)
+{
+    const auto out = template_of(1'000);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 2u);
+    BC_REQUIRE_EQUAL(out[2], 4u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__two_rows__highest_rate_chunk)
+{
+    const auto out = template_of(200);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 4u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__one_row__split_chunk_outrated)
+{
+    const auto out = template_of(100);
+    BC_REQUIRE_EQUAL(out.size(), 1u);
+    BC_REQUIRE_EQUAL(out[0], 2u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain__whole_chunk)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 100 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+    BC_REQUIRE(marks[0] == mark::taken);
+    BC_REQUIRE(marks[1] == mark::taken);
+    BC_REQUIRE(marks[2] == mark::taken);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_deeper_than_depth__taken_in_rounds)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 100 }, 0, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_over_size__leading_rows)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 250, 100 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_over_sigops__leading_rows)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 2 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__excluded_parent__descendant_not_taken)
+{
+    line_state line{};
+    std_array<mark, 3> marks{ { mark::unmarked, mark::excluded, mark::unmarked } };
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 100 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 1u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__empty_budget__empty)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), {}, 2, 20);
+    BC_REQUIRE(out.empty());
 }
 
 // transitions
