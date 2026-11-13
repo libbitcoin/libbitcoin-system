@@ -304,33 +304,13 @@ constexpr void algorithm::evaluate(uint64_t& best, uint64_t& best_without,
 {
     best = zero;
     best_without = zero;
-    const auto consider = [&](mask_t outcome, uint64_t fee) NOEXCEPT
-    {
-        best = std::max(best, fee);
-        if (is_zero(outcome & candidate))
-            best_without = std::max(best_without, fee);
-    };
-
-    const auto count = outcomes.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = mask_lanes<Word>;
-        aligned_array<uint64_t, lanes> sums{};
-        for (; index + lanes <= count; index += lanes)
+    each_fee<Word>(zero, outcomes, component, graph,
+        [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            store(sums.data(), fees<Word>(load<Word>(&outcomes[index]),
-                component, graph));
-
-            for (size_t lane{}; lane < lanes; ++lane)
-                consider(outcomes[index + lane], sums[lane]);
-        }
-    }
-
-    for (; index < count; ++index)
-        consider(outcomes[index], fees<uint64_t>(outcomes[index], component,
-            graph));
+            best = std::max(best, fee);
+            if (is_zero(outcomes[index] & candidate))
+                best_without = std::max(best_without, fee);
+        });
 }
 
 constexpr bool algorithm::covered(uint64_t best, uint64_t best_without,
@@ -568,24 +548,7 @@ constexpr void algorithm::gather(std::span<link_t> out,
     const std::span<const link_t>& values,
     const std::span<const link_t>& indexes) NOEXCEPT
 {
-    const auto count = indexes.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = link_lanes<Word>;
-        const auto nones = f::broadcast<Word>(none);
-        for (; index + lanes <= count; index += lanes)
-        {
-            const auto at = load<Word>(&indexes[index]);
-            const auto missing = f::eq<bits<link_t>>(at, nones);
-            const auto found = f::gather(values.data(), f::andnot(missing, at));
-            store(&out[index], f::select(missing, nones, found));
-        }
-    }
-
-    for (; index < count; ++index)
-        out[index] = (indexes[index] == none) ? none : values[indexes[index]];
+    gather_<Word>(zero, out, values, indexes);
 }
 
 constexpr void algorithm::initialize(const columns_t& columns) NOEXCEPT
@@ -654,38 +617,7 @@ constexpr bool algorithm::collect(component_t& out, link_t label,
     const std::span<const link_t>& cells) NOEXCEPT
 {
     out = {};
-    const auto rows = cells.size();
-    const auto add = [&](size_t row) NOEXCEPT
-    {
-        if (out.count == maximum_members)
-            return false;
-
-        out.rows[out.count++] = possible_narrow_cast<link_t>(row);
-        return true;
-    };
-
-    size_t row{};
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = link_lanes<Word>;
-        const auto wanted = f::broadcast<Word>(label);
-        for (; row + lanes <= rows; row += lanes)
-        {
-            const auto found = f::eq<bits<link_t>>(load<Word>(&cells[row]),
-                wanted);
-
-            if (f::any(found))
-                for (auto lane = row; lane < row + lanes; ++lane)
-                    if (cells[lane] == label && !add(lane))
-                        return false;
-        }
-    }
-
-    for (; row < rows; ++row)
-        if (cells[row] == label && !add(row))
-            return false;
-
-    return true;
+    return collect_<Word>(zero, out, label, cells);
 }
 
 template <typename Word>
@@ -693,28 +625,7 @@ inline void algorithm::find(std::vector<link_t>& out,
     const std::span<const link_t>& values, link_t value) NOEXCEPT
 {
     out.clear();
-    const auto count = values.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = link_lanes<Word>;
-        const auto wanted = f::broadcast<Word>(value);
-        for (; index + lanes <= count; index += lanes)
-        {
-            const auto found = f::eq<bits<link_t>>(load<Word>(&values[index]),
-                wanted);
-
-            if (f::any(found))
-                for (auto lane = index; lane < index + lanes; ++lane)
-                    if (values[lane] == value)
-                        out.push_back(possible_narrow_cast<link_t>(lane));
-        }
-    }
-
-    for (; index < count; ++index)
-        if (values[index] == value)
-            out.push_back(possible_narrow_cast<link_t>(index));
+    find_<Word>(zero, out, values, value);
 }
 
 // Internals.
@@ -934,34 +845,15 @@ constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
 {
     size_t out{};
     uint64_t most{};
-    const auto consider = [&](size_t index, uint64_t fee) NOEXCEPT
-    {
-        if (fee > most)
+    each_fee<Word>(zero, outcomes, component, graph,
+        [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            most = fee;
-            out = index;
-        }
-    };
-
-    const auto count = outcomes.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = mask_lanes<Word>;
-        aligned_array<uint64_t, lanes> sums{};
-        for (; index + lanes <= count; index += lanes)
-        {
-            store(sums.data(), fees<Word>(load<Word>(&outcomes[index]),
-                component, graph));
-
-            for (size_t lane{}; lane < lanes; ++lane)
-                consider(index + lane, sums[lane]);
-        }
-    }
-
-    for (; index < count; ++index)
-        consider(index, fees<uint64_t>(outcomes[index], component, graph));
+            if (fee > most)
+            {
+                most = fee;
+                out = index;
+            }
+        });
 
     return out;
 }
@@ -1153,6 +1045,148 @@ INLINE constexpr Word algorithm::fees(Word outcomes,
     }
 
     return sum;
+}
+
+template <typename Word, typename Visitor>
+constexpr void algorithm::each_fee(size_t index,
+    const std::span<const mask_t>& outcomes, const component_t& component,
+    const graph_t& graph, const Visitor& visit) NOEXCEPT
+{
+    const auto count = outcomes.size();
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = mask_lanes<Word>;
+            aligned_array<uint64_t, lanes> sums{};
+            for (; index + lanes <= count; index += lanes)
+            {
+                store(sums.data(), fees<Word>(load<Word>(&outcomes[index]),
+                    component, graph));
+
+                for (size_t lane{}; lane < lanes; ++lane)
+                    visit(index + lane, sums[lane]);
+            }
+        }
+
+        each_fee<narrower<Word, mask_t>>(index, outcomes, component, graph,
+            visit);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            visit(index, fees<mask_t>(outcomes[index], component, graph));
+    }
+}
+
+template <typename Word>
+constexpr void algorithm::gather_(size_t index, std::span<link_t> out,
+    const std::span<const link_t>& values,
+    const std::span<const link_t>& indexes) NOEXCEPT
+{
+    const auto count = indexes.size();
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = link_lanes<Word>;
+            const auto nones = f::broadcast<Word>(none);
+            for (; index + lanes <= count; index += lanes)
+            {
+                const auto at = load<Word>(&indexes[index]);
+                const auto missing = f::eq<bits<link_t>>(at, nones);
+                const auto found = f::gather(values.data(),
+                    f::andnot(missing, at));
+
+                store(&out[index], f::select(missing, nones, found));
+            }
+        }
+
+        gather_<narrower<Word, link_t>>(index, out, values, indexes);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            out[index] = (indexes[index] == none) ? none :
+                values[indexes[index]];
+    }
+}
+
+template <typename Word>
+constexpr bool algorithm::collect_(size_t index, component_t& out,
+    link_t label, const std::span<const link_t>& cells) NOEXCEPT
+{
+    const auto count = cells.size();
+    const auto add = [&](size_t row) NOEXCEPT
+    {
+        if (out.count == maximum_members)
+            return false;
+
+        out.rows[out.count++] = possible_narrow_cast<link_t>(row);
+        return true;
+    };
+
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = link_lanes<Word>;
+            const auto wanted = f::broadcast<Word>(label);
+            for (; index + lanes <= count; index += lanes)
+            {
+                const auto found = f::eq<bits<link_t>>(
+                    load<Word>(&cells[index]), wanted);
+
+                if (f::any(found))
+                    for (auto row = index; row < index + lanes; ++row)
+                        if (cells[row] == label && !add(row))
+                            return false;
+            }
+        }
+
+        return collect_<narrower<Word, link_t>>(index, out, label, cells);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            if (cells[index] == label && !add(index))
+                return false;
+
+        return true;
+    }
+}
+
+template <typename Word>
+inline void algorithm::find_(size_t index, std::vector<link_t>& out,
+    const std::span<const link_t>& values, link_t value) NOEXCEPT
+{
+    const auto count = values.size();
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = link_lanes<Word>;
+            const auto wanted = f::broadcast<Word>(value);
+            for (; index + lanes <= count; index += lanes)
+            {
+                const auto found = f::eq<bits<link_t>>(
+                    load<Word>(&values[index]), wanted);
+
+                if (f::any(found))
+                    for (auto row = index; row < index + lanes; ++row)
+                        if (values[row] == value)
+                            out.push_back(possible_narrow_cast<link_t>(row));
+            }
+        }
+
+        find_<narrower<Word, link_t>>(index, out, values, value);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            if (values[index] == value)
+                out.push_back(possible_narrow_cast<link_t>(index));
+    }
 }
 
 template <typename Word, typename Integral>

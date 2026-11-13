@@ -41,8 +41,8 @@ namespace pool {
 /// uncontested row of any ancestry is in no component.
 ///
 /// Frontier operations walk from a row and touch only its component and
-/// ancestry. Column operations pass over every row, one element per lane of
-/// an extended integral word.
+/// ancestry. Column operations pass over every row. Lane operations take full
+/// words at each available width from Word down, then one element at a time.
 class algorithm
 {
 public:
@@ -222,8 +222,8 @@ public:
         size_t index) NOEXCEPT;
 
     /// Highest fee over the outcomes, and over those excluding every member
-    /// of the candidate mask, one outcome per lane.
-    template <typename Word>
+    /// of the candidate mask.
+    template <typename Word = xint512_t>
     static constexpr void evaluate(uint64_t& best, uint64_t& best_without,
         const std::span<const mask_t>& outcomes, mask_t candidate,
         const component_t& component, const graph_t& graph) NOEXCEPT;
@@ -266,7 +266,7 @@ public:
     /// highest fee among the first maximum outcomes of its component, with
     /// its descendants. A component of more than maximum_members members or
     /// cliques is excluded whole.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static void resolve(std::span<mark> marks, const columns_t& columns,
         size_t maximum_outcomes) NOEXCEPT;
 
@@ -283,7 +283,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Each value at its index (out[i] = values[indexes[i]]), none for none.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static constexpr void gather(std::span<link_t> out,
         const std::span<const link_t>& values,
         const std::span<const link_t>& indexes) NOEXCEPT;
@@ -296,17 +296,17 @@ public:
     /// relevant parents, its rivals and (if relevant) its children, true if
     /// any cell changed. Repeated to a fixed point, labels identify
     /// components. Scratch holds one link per input.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static constexpr bool propagate(const columns_t& columns,
         std::span<link_t> scratch) NOEXCEPT;
 
     /// Rows with the label, false if more than maximum_members.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static constexpr bool collect(component_t& out, link_t label,
         const std::span<const link_t>& cells) NOEXCEPT;
 
     /// Indexes of the values equal to the value.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static void find(std::vector<link_t>& out,
         const std::span<const link_t>& values, link_t value) NOEXCEPT;
 
@@ -388,10 +388,33 @@ protected:
     static void reform(const columns_t& columns,
         const std::span<const link_t>& rows) NOEXCEPT;
 
+    /// The next narrower extended word, else the integral.
+    template <typename Word, typename Integral>
+    using narrower = iif<is_same_type<Word, xint512_t>, xint256_t,
+        iif<is_same_type<Word, xint256_t>, xint128_t, Integral>>;
+
     /// Lanes of fee sums of the outcomes, members broadcast and selected.
     template <typename Word>
     INLINE static constexpr Word fees(Word outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
+
+    /// Each outcome index and its fee, from the index.
+    template <typename Word, typename Visitor>
+    static constexpr void each_fee(size_t index,
+        const std::span<const mask_t>& outcomes, const component_t& component,
+        const graph_t& graph, const Visitor& visit) NOEXCEPT;
+
+    /// The lane operations, from the index.
+    template <typename Word>
+    static constexpr void gather_(size_t index, std::span<link_t> out,
+        const std::span<const link_t>& values,
+        const std::span<const link_t>& indexes) NOEXCEPT;
+    template <typename Word>
+    static constexpr bool collect_(size_t index, component_t& out,
+        link_t label, const std::span<const link_t>& cells) NOEXCEPT;
+    template <typename Word>
+    static void find_(size_t index, std::vector<link_t>& out,
+        const std::span<const link_t>& values, link_t value) NOEXCEPT;
 
     /// Lanes of integrals at the pointer.
     template <typename Word, typename Integral>

@@ -166,149 +166,110 @@ static std_array<mask_t, 4> outcomes_of(const component_t& out) NOEXCEPT
     return masks;
 }
 
-// Lane comparisons return true where the word is unavailable.
 template <typename Word>
 static bool gathers_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    std_array<link_t, 47> values{};
+    std_array<link_t, 47> indexes{};
+    size_t at{};
+    std::generate(values.begin(), values.end(), [&]() NOEXCEPT
     {
-        std_array<link_t, 37> values{};
-        std_array<link_t, 37> indexes{};
-        size_t at{};
-        std::generate(values.begin(), values.end(), [&]() NOEXCEPT
-        {
-            return possible_narrow_cast<link_t>(at++ * 7);
-        });
+        return possible_narrow_cast<link_t>(at++ * 7);
+    });
 
-        at = zero;
-        std::generate(indexes.begin(), indexes.end(), [&]() NOEXCEPT
-        {
-            const auto index = at++;
-            return is_zero(index % 5) ? none :
-                possible_narrow_cast<link_t>((index * 11) % values.size());
-        });
-
-        std_array<link_t, 37> expected{};
-        std_array<link_t, 37> out{};
-        accessor::gather<link_t>(expected, values, indexes);
-        accessor::gather<Word>(out, values, indexes);
-        return out == expected;
-    }
-    else
+    at = zero;
+    std::generate(indexes.begin(), indexes.end(), [&]() NOEXCEPT
     {
-        return true;
-    }
+        const auto index = at++;
+        return is_zero(index % 5) ? none :
+            possible_narrow_cast<link_t>((index * 11) % values.size());
+    });
+
+    std_array<link_t, 47> expected{};
+    std_array<link_t, 47> out{};
+    accessor::gather<link_t>(expected, values, indexes);
+    accessor::gather<Word>(out, values, indexes);
+    return out == expected;
 }
 
 template <typename Word>
 static bool propagates_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
-        return label<Word>().cells == label<link_t>().cells;
-    else
-        return true;
+    return label<Word>().cells == label<link_t>().cells;
 }
 
 template <typename Word>
 static bool collects_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    std_array<link_t, 79> cells{};
+    size_t at{};
+    std::generate(cells.begin(), cells.end(), [&]() NOEXCEPT
     {
-        std_array<link_t, 69> cells{};
-        size_t at{};
-        std::generate(cells.begin(), cells.end(), [&]() NOEXCEPT
-        {
-            return possible_narrow_cast<link_t>(at++ % 3);
-        });
+        return possible_narrow_cast<link_t>(at++ % 3);
+    });
 
-        component_t expected{};
-        component_t out{};
-        return accessor::collect<link_t>(expected, 1, cells) &&
-            accessor::collect<Word>(out, 1, cells) &&
-            out.rows == expected.rows && out.count == expected.count;
-    }
-    else
-    {
-        return true;
-    }
+    component_t expected{};
+    component_t out{};
+    return accessor::collect<link_t>(expected, 1, cells) &&
+        accessor::collect<Word>(out, 1, cells) &&
+        out.rows == expected.rows && out.count == expected.count;
 }
 
 template <typename Word>
 static bool finds_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    std_array<link_t, 47> values{};
+    size_t at{};
+    std::generate(values.begin(), values.end(), [&]() NOEXCEPT
     {
-        std_array<link_t, 37> values{};
-        size_t at{};
-        std::generate(values.begin(), values.end(), [&]() NOEXCEPT
-        {
-            return possible_narrow_cast<link_t>(at++ % 4);
-        });
+        return possible_narrow_cast<link_t>(at++ % 4);
+    });
 
-        std::vector<link_t> expected{};
-        std::vector<link_t> out{};
-        accessor::find<link_t>(expected, values, 3);
-        accessor::find<Word>(out, values, 3);
-        return out == expected;
-    }
-    else
-    {
-        return true;
-    }
+    std::vector<link_t> expected{};
+    std::vector<link_t> out{};
+    accessor::find<link_t>(expected, values, 3);
+    accessor::find<Word>(out, values, 3);
+    return out == expected;
 }
 
 template <typename Word>
 static bool evaluates_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std_array<mask_t, 23> masks{};
+    size_t at{};
+    std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
     {
-        auto labeled = label<link_t>();
-        const auto out = component(labeled);
-        const graph_t graph{ labeled.columns() };
-        std_array<mask_t, 19> masks{};
-        size_t at{};
-        std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
-        {
-            return accessor::outcome(out, at++ % 4);
-        });
+        return accessor::outcome(out, at++ % 4);
+    });
 
-        const std_array<link_t, 1> candidates{ { 4 } };
-        const auto candidate = accessor::members(out, candidates);
-        uint64_t best{}, best_without{}, best_x{}, best_without_x{};
-        accessor::evaluate<uint64_t>(best, best_without, masks, candidate,
-            out, graph);
-        accessor::evaluate<Word>(best_x, best_without_x, masks, candidate,
-            out, graph);
-        return best_x == best && best_without_x == best_without;
-    }
-    else
-    {
-        return true;
-    }
+    const std_array<link_t, 1> candidates{ { 4 } };
+    const auto candidate = accessor::members(out, candidates);
+    uint64_t best{}, best_without{}, best_x{}, best_without_x{};
+    accessor::evaluate<uint64_t>(best, best_without, masks, candidate,
+        out, graph);
+    accessor::evaluate<Word>(best_x, best_without_x, masks, candidate,
+        out, graph);
+    return best_x == best && best_without_x == best_without;
 }
 
 template <typename Word>
 static bool bests_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std_array<mask_t, 23> masks{};
+    size_t at{};
+    std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
     {
-        auto labeled = label<link_t>();
-        const auto out = component(labeled);
-        const graph_t graph{ labeled.columns() };
-        std_array<mask_t, 19> masks{};
-        size_t at{};
-        std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
-        {
-            return accessor::outcome(out, at++ % 4);
-        });
+        return accessor::outcome(out, at++ % 4);
+    });
 
-        return accessor::best<Word>(masks, out, graph) ==
-            accessor::best<uint64_t>(masks, out, graph);
-    }
-    else
-    {
-        return true;
-    }
+    return accessor::best<Word>(masks, out, graph) ==
+        accessor::best<uint64_t>(masks, out, graph);
 }
 
 // The template rows of the resolved scenario within the budget size.
