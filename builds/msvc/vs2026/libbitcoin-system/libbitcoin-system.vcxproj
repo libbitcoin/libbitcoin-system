@@ -718,6 +718,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\setting.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\variables.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\pool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
@@ -988,6 +990,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\options\setting.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\options\value.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\algorithm.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />

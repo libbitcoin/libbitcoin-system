@@ -274,6 +274,8 @@
 #include <bitcoin/system/options/setting.hpp>
 #include <bitcoin/system/options/value.hpp>
 #include <bitcoin/system/options/variables.hpp>
+#include <bitcoin/system/pool/algorithm.hpp>
+#include <bitcoin/system/pool/pool.hpp>
 #include <bitcoin/system/radix/base_10.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
