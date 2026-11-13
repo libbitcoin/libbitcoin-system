@@ -192,11 +192,10 @@ public:
     static constexpr mask_t members(const component_t& component,
         const std::span<const link_t>& rows) NOEXCEPT;
 
-    /// Chargeable size of the members and of their present ancestors outside
-    /// the component, false if over the limit.
-    static bool ancestry(uint64_t& out, const graph_t& graph,
-        const component_t& component, uint32_t bytes_per_sigop,
-        uint64_t limit) NOEXCEPT;
+    /// Totals of the members and of their present ancestors outside the
+    /// component, false if over the limit in size or in sigops.
+    static bool ancestry(totals_t& out, const graph_t& graph,
+        const component_t& component, const totals_t& limit) NOEXCEPT;
 
     /// Outcomes.
     /// -----------------------------------------------------------------------

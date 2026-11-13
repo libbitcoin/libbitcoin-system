@@ -223,11 +223,10 @@ constexpr algorithm::mask_t algorithm::members(const component_t& component,
     return out;
 }
 
-inline bool algorithm::ancestry(uint64_t& out, const graph_t& graph,
-    const component_t& component, uint32_t bytes_per_sigop,
-    uint64_t limit) NOEXCEPT
+inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
+    const component_t& component, const totals_t& limit) NOEXCEPT
 {
-    out = zero;
+    out = {};
     std::vector<link_t> visited{};
     std::vector<link_t> pending{};
     const auto push = [&](link_t row) NOEXCEPT
@@ -242,8 +241,10 @@ inline bool algorithm::ancestry(uint64_t& out, const graph_t& graph,
 
     const auto charge = [&](link_t row) NOEXCEPT
     {
-        out = ceilinged_add(out, chargeable(totals(graph, row),
-            bytes_per_sigop));
+        const auto& add = totals(graph, row);
+        out.fee = ceilinged_add(out.fee, add.fee);
+        out.size = ceilinged_add(out.size, add.size);
+        out.sigops = ceilinged_add(out.sigops, add.sigops);
 
         const auto slice = edges(graph, row);
         for (auto input = slice.first; input < slice.first + slice.count;
@@ -254,7 +255,7 @@ inline bool algorithm::ancestry(uint64_t& out, const graph_t& graph,
                 push(up);
         }
 
-        return out <= limit;
+        return out.size <= limit.size && out.sigops <= limit.sigops;
     };
 
     for (size_t member{}; member < component.count; ++member)

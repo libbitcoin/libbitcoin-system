@@ -550,18 +550,23 @@ BC_AUTO_TEST_CASE(pool_algorithm__members__rows__mask_of_members)
     BC_REQUIRE_EQUAL(accessor::members(out, candidates), 0b10100u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__ancestry__component__chargeable_sum)
+BC_AUTO_TEST_CASE(pool_algorithm__ancestry__component__totals_within_limit)
 {
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
-    uint64_t bytes{};
-    uint64_t over{};
-    const auto fits = accessor::ancestry(bytes, graph, out, 20, 500);
-    const auto exceeds = accessor::ancestry(over, graph, out, 20, 499);
+    totals_t sum{};
+    totals_t over_size{};
+    totals_t over_sigops{};
+    const auto fits = accessor::ancestry(sum, graph, out, { 0, 500, 5 });
+    const auto exceeds_size = accessor::ancestry(over_size, graph, out, { 0, 499, 5 });
+    const auto exceeds_sigops = accessor::ancestry(over_sigops, graph, out, { 0, 500, 4 });
     BC_REQUIRE(fits);
-    BC_REQUIRE_EQUAL(bytes, 500u);
-    BC_REQUIRE(!exceeds);
+    BC_REQUIRE_EQUAL(sum.fee, 1'150u);
+    BC_REQUIRE_EQUAL(sum.size, 500u);
+    BC_REQUIRE_EQUAL(sum.sigops, 5u);
+    BC_REQUIRE(!exceeds_size);
+    BC_REQUIRE(!exceeds_sigops);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__ancestry__uncontested_ancestor__included)
@@ -569,13 +574,15 @@ BC_AUTO_TEST_CASE(pool_algorithm__ancestry__uncontested_ancestor__included)
     auto chain = label_chain();
     const graph_t graph{ chain.columns() };
     component_t out{};
-    uint64_t bytes{};
+    totals_t sum{};
     const auto collected = accessor::collect(out, graph, 2);
-    const auto fits = accessor::ancestry(bytes, graph, out, 20, 1'000);
+    const auto fits = accessor::ancestry(sum, graph, out, { 0, 1'000, 10 });
     BC_REQUIRE(collected);
     BC_REQUIRE_EQUAL(out.count, 2u);
     BC_REQUIRE(fits);
-    BC_REQUIRE_EQUAL(bytes, 300u);
+    BC_REQUIRE_EQUAL(sum.fee, 60u);
+    BC_REQUIRE_EQUAL(sum.size, 300u);
+    BC_REQUIRE_EQUAL(sum.sigops, 3u);
 }
 
 // candidates (graph)
