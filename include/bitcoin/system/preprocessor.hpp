@@ -231,10 +231,6 @@
     #define _ARM_USE_NEW_NEON_INTRINSICS
 #endif
 
-#if defined(HAVE_WINDOWS) && (_WIN32_WINNT >= 0x0602)
-    #define HAVE_MEMORY_PRIORITY
-#endif
-
 /// Workarounds for C++ noncompliance.
 /// ---------------------------------------------------------------------------
 
