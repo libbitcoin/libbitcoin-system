@@ -188,6 +188,18 @@ INLINE xint256_t mul(xint256_t a, xint256_t b) NOEXCEPT
         return _mm256_mul_epu32(a, b);
 }
 
+// AVX2
+template <auto S>
+INLINE xint256_t min(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_min_epu8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_min_epu16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm256_min_epu32(a, b);
+}
+
 // AVX512IFMA+AVX512VL or AVXIFMA (AVX2)
 template <auto S>
 INLINE xint256_t madd52lo(xint256_t c, xint256_t a, xint256_t b) NOEXCEPT
@@ -430,6 +442,26 @@ INLINE xint256_t gather(const uint64_t* table, xint256_t index) NOEXCEPT
 #endif
 }
 
+// AVX2
+INLINE xint256_t gather(const uint32_t* table, xint256_t index) NOEXCEPT
+{
+#if defined(HAVE_MSC)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint256_t>(
+        table[possible_narrow_cast<size_t>(get<uint32_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 1>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 2>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 3>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 4>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 5>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 6>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 7>(index))]);
+    BC_POP_WARNING()
+#else
+    return _mm256_i32gather_epi32(pointer_cast<const int>(table), index,
+        sizeof(uint32_t));
+#endif
+}
 
 /// interleave (for matrix transposition)
 /// ---------------------------------------------------------------------------
