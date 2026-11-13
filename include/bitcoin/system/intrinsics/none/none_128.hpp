@@ -165,6 +165,11 @@ INLINE xint128_t gather(const uint64_t*, xint128_t) NOEXCEPT
     return {};
 }
 
+INLINE xint128_t gather(const uint32_t*, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
 /// interleave (for matrix transposition)
 /// ---------------------------------------------------------------------------
 

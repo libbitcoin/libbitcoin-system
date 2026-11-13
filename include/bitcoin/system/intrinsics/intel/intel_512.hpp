@@ -175,6 +175,20 @@ INLINE xint512_t mul(xint512_t a, xint512_t b) NOEXCEPT
         return _mm512_mul_epu32(a, b);
 }
 
+// AVX512BW (8/16 bit), AVX512F (32/64 bit)
+template <auto S>
+INLINE xint512_t min(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm512_min_epu8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm512_min_epu16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm512_min_epu32(a, b);
+    if constexpr (S == bits<uint64_t>)
+        return _mm512_min_epu64(a, b);
+}
+
 // AVX512IFMA (AVX512F)
 template <auto S>
 INLINE xint512_t madd52lo(xint512_t c, xint512_t a, xint512_t b) NOEXCEPT
@@ -451,6 +465,33 @@ INLINE xint512_t gather(const uint64_t* table, xint512_t index) NOEXCEPT
 #endif
 }
 
+// AVX512F
+INLINE xint512_t gather(const uint32_t* table, xint512_t index) NOEXCEPT
+{
+#if defined(HAVE_MSC)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint512_t>(
+        table[possible_narrow_cast<size_t>(get<uint32_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 1>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 2>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 3>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 4>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 5>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 6>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 7>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 8>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 9>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 10>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 11>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 12>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 13>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 14>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 15>(index))]);
+    BC_POP_WARNING()
+#else
+    return _mm512_i32gather_epi32(index, table, sizeof(uint32_t));
+#endif
+}
 
 /// interleave (for matrix transposition)
 /// ---------------------------------------------------------------------------

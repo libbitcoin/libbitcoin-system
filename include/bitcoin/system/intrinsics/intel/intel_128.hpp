@@ -180,6 +180,18 @@ INLINE xint128_t mul(xint128_t a, xint128_t b) NOEXCEPT
         return _mm_mul_epu32(a, b);
 }
 
+// SSE4.1
+template <auto S>
+INLINE xint128_t min(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (S == bits<uint8_t>)
+        return _mm_min_epu8(a, b);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_min_epu16(a, b);
+    if constexpr (S == bits<uint32_t>)
+        return _mm_min_epu32(a, b);
+}
+
 // AVX512IFMA+AVX512VL or AVXIFMA (SSE2)
 template <auto S>
 INLINE xint128_t madd52lo(xint128_t c, xint128_t a, xint128_t b) NOEXCEPT
@@ -396,6 +408,17 @@ INLINE xint128_t gather(const uint64_t* table, xint128_t index) NOEXCEPT
     BC_POP_WARNING()
 }
 
+// SSE4.1
+INLINE xint128_t gather(const uint32_t* table, xint128_t index) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    return set<xint128_t>(
+        table[possible_narrow_cast<size_t>(get<uint32_t, 0>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 1>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 2>(index))],
+        table[possible_narrow_cast<size_t>(get<uint32_t, 3>(index))]);
+    BC_POP_WARNING()
+}
 
 /// interleave (for matrix transposition)
 /// ---------------------------------------------------------------------------

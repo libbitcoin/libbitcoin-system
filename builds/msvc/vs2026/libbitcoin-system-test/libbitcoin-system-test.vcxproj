@@ -430,6 +430,9 @@
       <ObjectFileName>$(IntDir)test_options_value.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\options\variables.cpp" />
+    <ClCompile Include="..\..\..\..\test\pool\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_pool_algorithm.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />

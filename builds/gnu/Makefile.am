@@ -801,6 +801,12 @@ include_bitcoin_system_impl_options_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/options/setting.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/options/value.ipp
 
+include_bitcoin_system_impl_pooldir = \
+    ${includedir}/bitcoin/system/impl/pool
+
+include_bitcoin_system_impl_pool_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/impl/pool/algorithm.ipp
+
 include_bitcoin_system_impl_radixdir = \
     ${includedir}/bitcoin/system/impl/radix
 
@@ -992,6 +998,13 @@ include_bitcoin_system_options_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/options/setting.hpp \
     ${srcdir}/../../include/bitcoin/system/options/value.hpp \
     ${srcdir}/../../include/bitcoin/system/options/variables.hpp
+
+include_bitcoin_system_pooldir = \
+    ${includedir}/bitcoin/system/pool
+
+include_bitcoin_system_pool_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/pool/algorithm.hpp \
+    ${srcdir}/../../include/bitcoin/system/pool/pool.hpp
 
 include_bitcoin_system_radixdir = \
     ${includedir}/bitcoin/system/radix
@@ -1471,6 +1484,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/options/setting.cpp \
     ${srcdir}/../../test/options/value.cpp \
     ${srcdir}/../../test/options/variables.cpp \
+    ${srcdir}/../../test/pool/algorithm.cpp \
     ${srcdir}/../../test/radix/base_10.cpp \
     ${srcdir}/../../test/radix/base_16.cpp \
     ${srcdir}/../../test/radix/base_2048.cpp \
