@@ -223,11 +223,10 @@ constexpr algorithm::mask_t algorithm::members(const component_t& component,
     return out;
 }
 
-inline bool algorithm::ancestry(uint64_t& out, const graph_t& graph,
-    const component_t& component, uint32_t bytes_per_sigop,
-    uint64_t limit) NOEXCEPT
+inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
+    const component_t& component, const totals_t& limit) NOEXCEPT
 {
-    out = zero;
+    out = {};
     std::vector<link_t> visited{};
     std::vector<link_t> pending{};
     const auto push = [&](link_t row) NOEXCEPT
@@ -242,8 +241,10 @@ inline bool algorithm::ancestry(uint64_t& out, const graph_t& graph,
 
     const auto charge = [&](link_t row) NOEXCEPT
     {
-        out = ceilinged_add(out, chargeable(totals(graph, row),
-            bytes_per_sigop));
+        const auto& add = totals(graph, row);
+        out.fee = ceilinged_add(out.fee, add.fee);
+        out.size = ceilinged_add(out.size, add.size);
+        out.sigops = ceilinged_add(out.sigops, add.sigops);
 
         const auto slice = edges(graph, row);
         for (auto input = slice.first; input < slice.first + slice.count;
@@ -254,7 +255,7 @@ inline bool algorithm::ancestry(uint64_t& out, const graph_t& graph,
                 push(up);
         }
 
-        return out <= limit;
+        return out.size <= limit.size && out.sigops <= limit.sigops;
     };
 
     for (size_t member{}; member < component.count; ++member)
@@ -303,33 +304,13 @@ constexpr void algorithm::evaluate(uint64_t& best, uint64_t& best_without,
 {
     best = zero;
     best_without = zero;
-    const auto consider = [&](mask_t outcome, uint64_t fee) NOEXCEPT
-    {
-        best = std::max(best, fee);
-        if (is_zero(outcome & candidate))
-            best_without = std::max(best_without, fee);
-    };
-
-    const auto count = outcomes.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = mask_lanes<Word>;
-        aligned_array<uint64_t, lanes> sums{};
-        for (; index + lanes <= count; index += lanes)
+    each_fee<Word>(zero, outcomes, component, graph,
+        [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            store(sums.data(), fees<Word>(load<Word>(&outcomes[index]),
-                component, graph));
-
-            for (size_t lane{}; lane < lanes; ++lane)
-                consider(outcomes[index + lane], sums[lane]);
-        }
-    }
-
-    for (; index < count; ++index)
-        consider(outcomes[index], fees<uint64_t>(outcomes[index], component,
-            graph));
+            best = std::max(best, fee);
+            if (is_zero(outcomes[index] & candidate))
+                best_without = std::max(best_without, fee);
+        });
 }
 
 constexpr bool algorithm::covered(uint64_t best, uint64_t best_without,
@@ -436,6 +417,129 @@ inline void algorithm::revive(const columns_t& columns, link_t row) NOEXCEPT
     reform(columns, affected);
 }
 
+// Template (frontier, table columns).
+// ----------------------------------------------------------------------------
+
+template <typename Word>
+inline void algorithm::resolve(std::span<mark> marks,
+    const columns_t& columns, size_t maximum_outcomes) NOEXCEPT
+{
+    const graph_t graph{ columns };
+    const auto count = columns.cells.size();
+    for (size_t row{}; row < count; ++row)
+        marks[row] = is_present(columns.cells[row]) ? mark::unmarked :
+            mark::excluded;
+
+    std::vector<mask_t> masks{};
+    for (size_t at{}; at < count; ++at)
+    {
+        // A component is resolved at its label, its lowest member row.
+        const auto row = possible_narrow_cast<link_t>(at);
+        if (!is_labeled(columns.cells[row]) || columns.cells[row] != row)
+            continue;
+
+        component_t component{};
+        const auto total = collect(component, graph, row) &&
+            relate(component, graph) ? std::min(outcomes(component),
+                maximum_outcomes) : zero;
+
+        if (is_zero(total))
+        {
+            forfeit(marks, graph, row);
+            continue;
+        }
+
+        masks.resize(total);
+        for (size_t index{}; index < total; ++index)
+            masks[index] = outcome(component, index);
+
+        const auto chosen = masks[best<Word>(masks, component, graph)];
+        for (size_t member{}; member < component.count; ++member)
+            if (!get_right(chosen, member))
+                discard(marks, graph, component.rows[member]);
+    }
+}
+
+inline void algorithm::pack(std::vector<link_t>& out, std::span<mark> marks,
+    const columns_t& columns, const totals_t& budget, size_t depth,
+    uint32_t bytes_per_sigop) NOEXCEPT
+{
+    struct score_t
+    {
+        link_t row{};
+        uint64_t rate{};
+        uint64_t fee{};
+        size_t count{};
+    };
+
+    const graph_t graph{ columns };
+    const auto count = columns.cells.size();
+    std::vector<score_t> scores{};
+    std::vector<link_t> rows{};
+    totals_t used{};
+
+    const auto available = [&]() NOEXCEPT -> totals_t
+    {
+        return
+        {
+            {},
+            floored_subtract(budget.size, used.size),
+            floored_subtract(budget.sigops, used.sigops)
+        };
+    };
+
+    // Compared in satoshis per virtual kilobyte.
+    const auto rate = [&](const totals_t& sum) NOEXCEPT
+    {
+        return ceilinged_multiply(sum.fee, 1'000_u64) /
+            std::max(chargeable(sum, bytes_per_sigop), 1_u64);
+    };
+
+    for (auto taken = true; taken;)
+    {
+        taken = false;
+        scores.clear();
+        for (size_t at{}; at < count; ++at)
+        {
+            totals_t sum{};
+            const auto row = possible_narrow_cast<link_t>(at);
+            if (marks[row] == mark::unmarked &&
+                chunk(rows, sum, marks, graph, row, depth, available()))
+                scores.push_back({ row, rate(sum), sum.fee, rows.size() });
+        }
+
+        std::sort(scores.begin(), scores.end(),
+            [](const score_t& left, const score_t& right) NOEXCEPT
+            {
+                return left.rate == right.rate ? left.row < right.row :
+                    left.rate > right.rate;
+            });
+
+        for (const auto& score: scores)
+        {
+            totals_t sum{};
+            if (marks[score.row] != mark::unmarked ||
+                !chunk(rows, sum, marks, graph, score.row, depth,
+                    available()) ||
+                rows.size() != score.count || sum.fee != score.fee)
+                continue;
+
+            for (const auto row: rows)
+                marks[row] = mark::taken;
+
+            used.fee = ceilinged_add(used.fee, sum.fee);
+            used.size = ceilinged_add(used.size, sum.size);
+            used.sigops = ceilinged_add(used.sigops, sum.sigops);
+            taken = true;
+        }
+    }
+
+    out.clear();
+    for (size_t at{}; at < count; ++at)
+        if (marks[at] == mark::taken)
+            out.push_back(possible_narrow_cast<link_t>(at));
+}
+
 // Columns (whole table).
 // ----------------------------------------------------------------------------
 
@@ -444,24 +548,7 @@ constexpr void algorithm::gather(std::span<link_t> out,
     const std::span<const link_t>& values,
     const std::span<const link_t>& indexes) NOEXCEPT
 {
-    const auto count = indexes.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = link_lanes<Word>;
-        const auto nones = f::broadcast<Word>(none);
-        for (; index + lanes <= count; index += lanes)
-        {
-            const auto at = load<Word>(&indexes[index]);
-            const auto missing = f::eq<bits<link_t>>(at, nones);
-            const auto found = f::gather(values.data(), f::andnot(missing, at));
-            store(&out[index], f::select(missing, nones, found));
-        }
-    }
-
-    for (; index < count; ++index)
-        out[index] = (indexes[index] == none) ? none : values[indexes[index]];
+    gather_<Word>(zero, out, values, indexes);
 }
 
 constexpr void algorithm::initialize(const columns_t& columns) NOEXCEPT
@@ -530,38 +617,7 @@ constexpr bool algorithm::collect(component_t& out, link_t label,
     const std::span<const link_t>& cells) NOEXCEPT
 {
     out = {};
-    const auto rows = cells.size();
-    const auto add = [&](size_t row) NOEXCEPT
-    {
-        if (out.count == maximum_members)
-            return false;
-
-        out.rows[out.count++] = possible_narrow_cast<link_t>(row);
-        return true;
-    };
-
-    size_t row{};
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = link_lanes<Word>;
-        const auto wanted = f::broadcast<Word>(label);
-        for (; row + lanes <= rows; row += lanes)
-        {
-            const auto found = f::eq<bits<link_t>>(load<Word>(&cells[row]),
-                wanted);
-
-            if (f::any(found))
-                for (auto lane = row; lane < row + lanes; ++lane)
-                    if (cells[lane] == label && !add(lane))
-                        return false;
-        }
-    }
-
-    for (; row < rows; ++row)
-        if (cells[row] == label && !add(row))
-            return false;
-
-    return true;
+    return collect_<Word>(zero, out, label, cells);
 }
 
 template <typename Word>
@@ -569,28 +625,7 @@ inline void algorithm::find(std::vector<link_t>& out,
     const std::span<const link_t>& values, link_t value) NOEXCEPT
 {
     out.clear();
-    const auto count = values.size();
-    size_t index{};
-
-    if constexpr (is_extended<Word>)
-    {
-        constexpr auto lanes = link_lanes<Word>;
-        const auto wanted = f::broadcast<Word>(value);
-        for (; index + lanes <= count; index += lanes)
-        {
-            const auto found = f::eq<bits<link_t>>(load<Word>(&values[index]),
-                wanted);
-
-            if (f::any(found))
-                for (auto lane = index; lane < index + lanes; ++lane)
-                    if (values[lane] == value)
-                        out.push_back(possible_narrow_cast<link_t>(lane));
-        }
-    }
-
-    for (; index < count; ++index)
-        if (values[index] == value)
-            out.push_back(possible_narrow_cast<link_t>(index));
+    find_<Word>(zero, out, values, value);
 }
 
 // Internals.
@@ -804,6 +839,143 @@ constexpr algorithm::mask_t algorithm::losers(const component_t& component,
     return out;
 }
 
+template <typename Word>
+constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
+    const component_t& component, const graph_t& graph) NOEXCEPT
+{
+    size_t out{};
+    uint64_t most{};
+    each_fee<Word>(zero, outcomes, component, graph,
+        [&](size_t index, uint64_t fee) NOEXCEPT
+        {
+            if (fee > most)
+            {
+                most = fee;
+                out = index;
+            }
+        });
+
+    return out;
+}
+
+inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
+    link_t row) NOEXCEPT
+{
+    std::vector<link_t> pending{ row };
+    marks[row] = mark::excluded;
+
+    while (!pending.empty())
+    {
+        const auto next = pending.back();
+        pending.pop_back();
+        each_child(graph, next, [&](link_t down) NOEXCEPT
+        {
+            if (marks[down] != mark::excluded)
+            {
+                marks[down] = mark::excluded;
+                pending.push_back(down);
+            }
+        });
+    }
+}
+
+inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
+    link_t row) NOEXCEPT
+{
+    std::vector<link_t> found{ row };
+    const auto add = [&](link_t next) NOEXCEPT
+    {
+        if (std::ranges::find(found, next) == found.end())
+            found.push_back(next);
+    };
+
+    for (size_t at{}; at < found.size(); ++at)
+    {
+        const auto member = found[at];
+        const auto slice = edges(graph, member);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            const auto up = parent(graph, input);
+            if (up != none && is_labeled(cell(graph, up)))
+                add(up);
+
+            each_rival(graph, input, [&](link_t other) NOEXCEPT
+            {
+                const auto rival_row = owner(graph, other);
+                if (is_present(cell(graph, rival_row)))
+                    add(rival_row);
+            });
+        }
+
+        each_child(graph, member, [&](link_t down) NOEXCEPT
+        {
+            if (is_present(cell(graph, down)))
+                add(down);
+        });
+    }
+
+    for (const auto member: found)
+        discard(marks, graph, member);
+}
+
+inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
+    const std::span<const mark>& marks, const graph_t& graph, link_t row,
+    size_t depth, const totals_t& available) NOEXCEPT
+{
+    sum = {};
+    out.assign(one, row);
+
+    // Each level holds the untaken parents of the previous level.
+    for (size_t level{}, begin{}; begin < out.size(); ++level)
+    {
+        const auto end = out.size();
+        for (auto at = begin; at < end; ++at)
+        {
+            const auto slice = edges(graph, out[at]);
+            for (auto input = slice.first;
+                input < slice.first + slice.count; ++input)
+            {
+                const auto up = parent(graph, input);
+                if (up == none || marks[up] == mark::taken ||
+                    is_boundary(cell(graph, up)))
+                    continue;
+
+                if (marks[up] == mark::excluded)
+                    return false;
+
+                if (std::ranges::find(out, up) != out.end())
+                    continue;
+
+                if (level == depth)
+                    return false;
+
+                out.push_back(up);
+            }
+        }
+
+        begin = end;
+    }
+
+    std::sort(out.begin(), out.end());
+    auto cut = out.begin();
+    for (; cut != out.end(); ++cut)
+    {
+        const auto& add = totals(graph, *cut);
+        const auto size = ceilinged_add(sum.size, add.size);
+        const auto sigops = ceilinged_add(sum.sigops, add.sigops);
+        if (size > available.size || sigops > available.sigops)
+            break;
+
+        sum.fee = ceilinged_add(sum.fee, add.fee);
+        sum.size = size;
+        sum.sigops = sigops;
+    }
+
+    out.erase(cut, out.end());
+    return !out.empty();
+}
+
 inline void algorithm::restore(std::vector<link_t>& out,
     const columns_t& columns, link_t row) NOEXCEPT
 {
@@ -873,6 +1045,148 @@ INLINE constexpr Word algorithm::fees(Word outcomes,
     }
 
     return sum;
+}
+
+template <typename Word, typename Visitor>
+constexpr void algorithm::each_fee(size_t index,
+    const std::span<const mask_t>& outcomes, const component_t& component,
+    const graph_t& graph, const Visitor& visit) NOEXCEPT
+{
+    const auto count = outcomes.size();
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = mask_lanes<Word>;
+            aligned_array<uint64_t, lanes> sums{};
+            for (; index + lanes <= count; index += lanes)
+            {
+                store(sums.data(), fees<Word>(load<Word>(&outcomes[index]),
+                    component, graph));
+
+                for (size_t lane{}; lane < lanes; ++lane)
+                    visit(index + lane, sums[lane]);
+            }
+        }
+
+        each_fee<narrower<Word, mask_t>>(index, outcomes, component, graph,
+            visit);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            visit(index, fees<mask_t>(outcomes[index], component, graph));
+    }
+}
+
+template <typename Word>
+constexpr void algorithm::gather_(size_t index, std::span<link_t> out,
+    const std::span<const link_t>& values,
+    const std::span<const link_t>& indexes) NOEXCEPT
+{
+    const auto count = indexes.size();
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = link_lanes<Word>;
+            const auto nones = f::broadcast<Word>(none);
+            for (; index + lanes <= count; index += lanes)
+            {
+                const auto at = load<Word>(&indexes[index]);
+                const auto missing = f::eq<bits<link_t>>(at, nones);
+                const auto found = f::gather(values.data(),
+                    f::andnot(missing, at));
+
+                store(&out[index], f::select(missing, nones, found));
+            }
+        }
+
+        gather_<narrower<Word, link_t>>(index, out, values, indexes);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            out[index] = (indexes[index] == none) ? none :
+                values[indexes[index]];
+    }
+}
+
+template <typename Word>
+constexpr bool algorithm::collect_(size_t index, component_t& out,
+    link_t label, const std::span<const link_t>& cells) NOEXCEPT
+{
+    const auto count = cells.size();
+    const auto add = [&](size_t row) NOEXCEPT
+    {
+        if (out.count == maximum_members)
+            return false;
+
+        out.rows[out.count++] = possible_narrow_cast<link_t>(row);
+        return true;
+    };
+
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = link_lanes<Word>;
+            const auto wanted = f::broadcast<Word>(label);
+            for (; index + lanes <= count; index += lanes)
+            {
+                const auto found = f::eq<bits<link_t>>(
+                    load<Word>(&cells[index]), wanted);
+
+                if (f::any(found))
+                    for (auto row = index; row < index + lanes; ++row)
+                        if (cells[row] == label && !add(row))
+                            return false;
+            }
+        }
+
+        return collect_<narrower<Word, link_t>>(index, out, label, cells);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            if (cells[index] == label && !add(index))
+                return false;
+
+        return true;
+    }
+}
+
+template <typename Word>
+inline void algorithm::find_(size_t index, std::vector<link_t>& out,
+    const std::span<const link_t>& values, link_t value) NOEXCEPT
+{
+    const auto count = values.size();
+    if constexpr (is_extended<Word>)
+    {
+        if constexpr (have<Word>)
+        {
+            constexpr auto lanes = link_lanes<Word>;
+            const auto wanted = f::broadcast<Word>(value);
+            for (; index + lanes <= count; index += lanes)
+            {
+                const auto found = f::eq<bits<link_t>>(
+                    load<Word>(&values[index]), wanted);
+
+                if (f::any(found))
+                    for (auto row = index; row < index + lanes; ++row)
+                        if (values[row] == value)
+                            out.push_back(possible_narrow_cast<link_t>(row));
+            }
+        }
+
+        find_<narrower<Word, link_t>>(index, out, values, value);
+    }
+    else
+    {
+        for (; index < count; ++index)
+            if (values[index] == value)
+                out.push_back(possible_narrow_cast<link_t>(index));
+    }
 }
 
 template <typename Word, typename Integral>

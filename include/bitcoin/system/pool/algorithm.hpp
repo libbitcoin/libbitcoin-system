@@ -41,8 +41,8 @@ namespace pool {
 /// uncontested row of any ancestry is in no component.
 ///
 /// Frontier operations walk from a row and touch only its component and
-/// ancestry. Column operations pass over every row, one element per lane of
-/// an extended integral word.
+/// ancestry. Column operations pass over every row. Lane operations take full
+/// words at each available width from Word down, then one element at a time.
 class algorithm
 {
 public:
@@ -129,6 +129,19 @@ public:
         std::span<const bridge_t> rivals{};
     };
 
+    /// Mark of a row in a template.
+    enum class mark : uint8_t
+    {
+        /// Present and in the chosen outcome of its component, if any.
+        unmarked,
+
+        /// Not present, or not in the chosen outcome of its component.
+        excluded,
+
+        /// In the template.
+        taken
+    };
+
     /// Lane counts of a word.
     template <typename Word>
     static constexpr auto link_lanes = capacity<Word, link_t>;
@@ -192,11 +205,10 @@ public:
     static constexpr mask_t members(const component_t& component,
         const std::span<const link_t>& rows) NOEXCEPT;
 
-    /// Chargeable size of the members and of their present ancestors outside
-    /// the component, false if over the limit.
-    static bool ancestry(uint64_t& out, const graph_t& graph,
-        const component_t& component, uint32_t bytes_per_sigop,
-        uint64_t limit) NOEXCEPT;
+    /// Totals of the members and of their present ancestors outside the
+    /// component, false if over the limit in size or in sigops.
+    static bool ancestry(totals_t& out, const graph_t& graph,
+        const component_t& component, const totals_t& limit) NOEXCEPT;
 
     /// Outcomes.
     /// -----------------------------------------------------------------------
@@ -210,8 +222,8 @@ public:
         size_t index) NOEXCEPT;
 
     /// Highest fee over the outcomes, and over those excluding every member
-    /// of the candidate mask, one outcome per lane.
-    template <typename Word>
+    /// of the candidate mask.
+    template <typename Word = xint512_t>
     static constexpr void evaluate(uint64_t& best, uint64_t& best_without,
         const std::span<const mask_t>& outcomes, mask_t candidate,
         const component_t& component, const graph_t& graph) NOEXCEPT;
@@ -247,11 +259,31 @@ public:
     /// descendants, and each relabeled into its component.
     static void revive(const columns_t& columns, link_t row) NOEXCEPT;
 
+    /// Template (frontier, table columns).
+    /// -----------------------------------------------------------------------
+
+    /// Each row marked excluded if not present, or if not in the outcome of
+    /// highest fee among the first maximum outcomes of its component, with
+    /// its descendants. A component of more than maximum_members members or
+    /// cliques is excluded whole.
+    template <typename Word = xint512_t>
+    static void resolve(std::span<mark> marks, const columns_t& columns,
+        size_t maximum_outcomes) NOEXCEPT;
+
+    /// The unmarked rows taken by chunk rate within the budget, in rounds
+    /// until none is taken, ascending (parents precede children). A chunk is
+    /// the untaken ancestry of a row within depth parent steps, cut to its
+    /// leading rows that fit, and its rate is fee over chargeable size. A
+    /// chunk changed by a take of its round is deferred to the next.
+    static void pack(std::vector<link_t>& out, std::span<mark> marks,
+        const columns_t& columns, const totals_t& budget, size_t depth,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
     /// Columns (whole table).
     /// -----------------------------------------------------------------------
 
     /// Each value at its index (out[i] = values[indexes[i]]), none for none.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static constexpr void gather(std::span<link_t> out,
         const std::span<const link_t>& values,
         const std::span<const link_t>& indexes) NOEXCEPT;
@@ -264,17 +296,17 @@ public:
     /// relevant parents, its rivals and (if relevant) its children, true if
     /// any cell changed. Repeated to a fixed point, labels identify
     /// components. Scratch holds one link per input.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static constexpr bool propagate(const columns_t& columns,
         std::span<link_t> scratch) NOEXCEPT;
 
     /// Rows with the label, false if more than maximum_members.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static constexpr bool collect(component_t& out, link_t label,
         const std::span<const link_t>& cells) NOEXCEPT;
 
     /// Indexes of the values equal to the value.
-    template <typename Word>
+    template <typename Word = xint512_t>
     static void find(std::vector<link_t>& out,
         const std::span<const link_t>& values, link_t value) NOEXCEPT;
 
@@ -325,6 +357,27 @@ protected:
     static constexpr mask_t losers(const component_t& component,
         size_t index) NOEXCEPT;
 
+    /// Index of the outcome of highest fee (the first of equals).
+    template <typename Word>
+    static constexpr size_t best(const std::span<const mask_t>& outcomes,
+        const component_t& component, const graph_t& graph) NOEXCEPT;
+
+    /// The row and its descendants marked excluded.
+    static void discard(std::span<mark> marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
+
+    /// The component of the row (unbounded) and its descendants marked
+    /// excluded.
+    static void forfeit(std::span<mark> marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
+
+    /// The rows (ascending) and totals of the chunk of the row, false if its
+    /// untaken ancestry is deeper than depth, has an excluded row, or has no
+    /// leading row within the available totals.
+    static bool chunk(std::vector<link_t>& out, totals_t& sum,
+        const std::span<const mark>& marks, const graph_t& graph, link_t row,
+        size_t depth, const totals_t& available) NOEXCEPT;
+
     /// The rows made present (if confirmable), with confirmable descendants.
     static void restore(std::vector<link_t>& out, const columns_t& columns,
         link_t row) NOEXCEPT;
@@ -335,10 +388,33 @@ protected:
     static void reform(const columns_t& columns,
         const std::span<const link_t>& rows) NOEXCEPT;
 
+    /// The next narrower extended word, else the integral.
+    template <typename Word, typename Integral>
+    using narrower = iif<is_same_type<Word, xint512_t>, xint256_t,
+        iif<is_same_type<Word, xint256_t>, xint128_t, Integral>>;
+
     /// Lanes of fee sums of the outcomes, members broadcast and selected.
     template <typename Word>
     INLINE static constexpr Word fees(Word outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
+
+    /// Each outcome index and its fee, from the index.
+    template <typename Word, typename Visitor>
+    static constexpr void each_fee(size_t index,
+        const std::span<const mask_t>& outcomes, const component_t& component,
+        const graph_t& graph, const Visitor& visit) NOEXCEPT;
+
+    /// The lane operations, from the index.
+    template <typename Word>
+    static constexpr void gather_(size_t index, std::span<link_t> out,
+        const std::span<const link_t>& values,
+        const std::span<const link_t>& indexes) NOEXCEPT;
+    template <typename Word>
+    static constexpr bool collect_(size_t index, component_t& out,
+        link_t label, const std::span<const link_t>& cells) NOEXCEPT;
+    template <typename Word>
+    static void find_(size_t index, std::vector<link_t>& out,
+        const std::span<const link_t>& values, link_t value) NOEXCEPT;
 
     /// Lanes of integrals at the pointer.
     template <typename Word, typename Integral>

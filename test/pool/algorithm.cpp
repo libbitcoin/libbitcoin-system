@@ -24,6 +24,7 @@ class accessor
   : public pool::algorithm
 {
 public:
+    using algorithm::best;
     using algorithm::index;
     using algorithm::losers;
 };
@@ -36,6 +37,7 @@ using totals_t = accessor::totals_t;
 using columns_t = accessor::columns_t;
 using graph_t = accessor::graph_t;
 using component_t = accessor::component_t;
+using mark = accessor::mark;
 constexpr auto none = accessor::none;
 constexpr auto absent = accessor::absent;
 constexpr auto boundary = accessor::boundary;
@@ -97,6 +99,26 @@ struct chain_state
     }
 };
 
+// Rows: R=0, S=1 spends R:0, T=2 spends S:0, each uncontested.
+struct line_state
+{
+    std_array<link_t, 3> cells{ { unlabeled, unlabeled, unlabeled } };
+    std_array<link_t, 3> children{ { 1, 2, none } };
+    std_array<edges_t, 3> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 } } };
+    std_array<totals_t, 3> totals
+    {
+        { { 10, 100, 1 }, { 10, 100, 1 }, { 400, 100, 1 } }
+    };
+    std_array<link_t, 3> parents{ { none, 0, 1 } };
+    std_array<link_t, 3> siblings{ { none, none, none } };
+    std_array<link_t, 3> rivals{ { none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 template <typename Word>
 static state label() NOEXCEPT
 {
@@ -144,125 +166,121 @@ static std_array<mask_t, 4> outcomes_of(const component_t& out) NOEXCEPT
     return masks;
 }
 
-// Lane comparisons return true where the word is unavailable.
 template <typename Word>
 static bool gathers_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    std_array<link_t, 47> values{};
+    std_array<link_t, 47> indexes{};
+    size_t at{};
+    std::generate(values.begin(), values.end(), [&]() NOEXCEPT
     {
-        std_array<link_t, 37> values{};
-        std_array<link_t, 37> indexes{};
-        size_t at{};
-        std::generate(values.begin(), values.end(), [&]() NOEXCEPT
-        {
-            return possible_narrow_cast<link_t>(at++ * 7);
-        });
+        return possible_narrow_cast<link_t>(at++ * 7);
+    });
 
-        at = zero;
-        std::generate(indexes.begin(), indexes.end(), [&]() NOEXCEPT
-        {
-            const auto index = at++;
-            return is_zero(index % 5) ? none :
-                possible_narrow_cast<link_t>((index * 11) % values.size());
-        });
-
-        std_array<link_t, 37> expected{};
-        std_array<link_t, 37> out{};
-        accessor::gather<link_t>(expected, values, indexes);
-        accessor::gather<Word>(out, values, indexes);
-        return out == expected;
-    }
-    else
+    at = zero;
+    std::generate(indexes.begin(), indexes.end(), [&]() NOEXCEPT
     {
-        return true;
-    }
+        const auto index = at++;
+        return is_zero(index % 5) ? none :
+            possible_narrow_cast<link_t>((index * 11) % values.size());
+    });
+
+    std_array<link_t, 47> expected{};
+    std_array<link_t, 47> out{};
+    accessor::gather<link_t>(expected, values, indexes);
+    accessor::gather<Word>(out, values, indexes);
+    return out == expected;
 }
 
 template <typename Word>
 static bool propagates_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
-        return label<Word>().cells == label<link_t>().cells;
-    else
-        return true;
+    return label<Word>().cells == label<link_t>().cells;
 }
 
 template <typename Word>
 static bool collects_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    std_array<link_t, 79> cells{};
+    size_t at{};
+    std::generate(cells.begin(), cells.end(), [&]() NOEXCEPT
     {
-        std_array<link_t, 69> cells{};
-        size_t at{};
-        std::generate(cells.begin(), cells.end(), [&]() NOEXCEPT
-        {
-            return possible_narrow_cast<link_t>(at++ % 3);
-        });
+        return possible_narrow_cast<link_t>(at++ % 3);
+    });
 
-        component_t expected{};
-        component_t out{};
-        return accessor::collect<link_t>(expected, 1, cells) &&
-            accessor::collect<Word>(out, 1, cells) &&
-            out.rows == expected.rows && out.count == expected.count;
-    }
-    else
-    {
-        return true;
-    }
+    component_t expected{};
+    component_t out{};
+    return accessor::collect<link_t>(expected, 1, cells) &&
+        accessor::collect<Word>(out, 1, cells) &&
+        out.rows == expected.rows && out.count == expected.count;
 }
 
 template <typename Word>
 static bool finds_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    std_array<link_t, 47> values{};
+    size_t at{};
+    std::generate(values.begin(), values.end(), [&]() NOEXCEPT
     {
-        std_array<link_t, 37> values{};
-        size_t at{};
-        std::generate(values.begin(), values.end(), [&]() NOEXCEPT
-        {
-            return possible_narrow_cast<link_t>(at++ % 4);
-        });
+        return possible_narrow_cast<link_t>(at++ % 4);
+    });
 
-        std::vector<link_t> expected{};
-        std::vector<link_t> out{};
-        accessor::find<link_t>(expected, values, 3);
-        accessor::find<Word>(out, values, 3);
-        return out == expected;
-    }
-    else
-    {
-        return true;
-    }
+    std::vector<link_t> expected{};
+    std::vector<link_t> out{};
+    accessor::find<link_t>(expected, values, 3);
+    accessor::find<Word>(out, values, 3);
+    return out == expected;
 }
 
 template <typename Word>
 static bool evaluates_as_integral() NOEXCEPT
 {
-    if constexpr (have_<Word>())
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std_array<mask_t, 23> masks{};
+    size_t at{};
+    std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
     {
-        auto labeled = label<link_t>();
-        const auto out = component(labeled);
-        const graph_t graph{ labeled.columns() };
-        std_array<mask_t, 19> masks{};
-        size_t at{};
-        std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
-        {
-            return accessor::outcome(out, at++ % 4);
-        });
+        return accessor::outcome(out, at++ % 4);
+    });
 
-        const std_array<link_t, 1> candidates{ { 4 } };
-        const auto candidate = accessor::members(out, candidates);
-        uint64_t best{}, best_without{}, best_x{}, best_without_x{};
-        accessor::evaluate<uint64_t>(best, best_without, masks, candidate,
-            out, graph);
-        accessor::evaluate<Word>(best_x, best_without_x, masks, candidate,
-            out, graph);
-        return best_x == best && best_without_x == best_without;
-    }
-    else
+    const std_array<link_t, 1> candidates{ { 4 } };
+    const auto candidate = accessor::members(out, candidates);
+    uint64_t best{}, best_without{}, best_x{}, best_without_x{};
+    accessor::evaluate<uint64_t>(best, best_without, masks, candidate,
+        out, graph);
+    accessor::evaluate<Word>(best_x, best_without_x, masks, candidate,
+        out, graph);
+    return best_x == best && best_without_x == best_without;
+}
+
+template <typename Word>
+static bool bests_as_integral() NOEXCEPT
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std_array<mask_t, 23> masks{};
+    size_t at{};
+    std::generate(masks.begin(), masks.end(), [&]() NOEXCEPT
     {
-        return true;
-    }
+        return accessor::outcome(out, at++ % 4);
+    });
+
+    return accessor::best<Word>(masks, out, graph) ==
+        accessor::best<uint64_t>(masks, out, graph);
+}
+
+// The template rows of the resolved scenario within the budget size.
+static std::vector<link_t> template_of(uint32_t size) NOEXCEPT
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    std::vector<link_t> out{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024);
+    accessor::pack(out, marks, labeled.columns(), { 0, size, 100 }, 25, 20);
+    return out;
 }
 
 // A table of the scenario less P, with P as the candidate (row 4, input 5
@@ -550,18 +568,23 @@ BC_AUTO_TEST_CASE(pool_algorithm__members__rows__mask_of_members)
     BC_REQUIRE_EQUAL(accessor::members(out, candidates), 0b10100u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__ancestry__component__chargeable_sum)
+BC_AUTO_TEST_CASE(pool_algorithm__ancestry__component__totals_within_limit)
 {
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
-    uint64_t bytes{};
-    uint64_t over{};
-    const auto fits = accessor::ancestry(bytes, graph, out, 20, 500);
-    const auto exceeds = accessor::ancestry(over, graph, out, 20, 499);
+    totals_t sum{};
+    totals_t over_size{};
+    totals_t over_sigops{};
+    const auto fits = accessor::ancestry(sum, graph, out, { 0, 500, 5 });
+    const auto exceeds_size = accessor::ancestry(over_size, graph, out, { 0, 499, 5 });
+    const auto exceeds_sigops = accessor::ancestry(over_sigops, graph, out, { 0, 500, 4 });
     BC_REQUIRE(fits);
-    BC_REQUIRE_EQUAL(bytes, 500u);
-    BC_REQUIRE(!exceeds);
+    BC_REQUIRE_EQUAL(sum.fee, 1'150u);
+    BC_REQUIRE_EQUAL(sum.size, 500u);
+    BC_REQUIRE_EQUAL(sum.sigops, 5u);
+    BC_REQUIRE(!exceeds_size);
+    BC_REQUIRE(!exceeds_sigops);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__ancestry__uncontested_ancestor__included)
@@ -569,13 +592,15 @@ BC_AUTO_TEST_CASE(pool_algorithm__ancestry__uncontested_ancestor__included)
     auto chain = label_chain();
     const graph_t graph{ chain.columns() };
     component_t out{};
-    uint64_t bytes{};
+    totals_t sum{};
     const auto collected = accessor::collect(out, graph, 2);
-    const auto fits = accessor::ancestry(bytes, graph, out, 20, 1'000);
+    const auto fits = accessor::ancestry(sum, graph, out, { 0, 1'000, 10 });
     BC_REQUIRE(collected);
     BC_REQUIRE_EQUAL(out.count, 2u);
     BC_REQUIRE(fits);
-    BC_REQUIRE_EQUAL(bytes, 300u);
+    BC_REQUIRE_EQUAL(sum.fee, 60u);
+    BC_REQUIRE_EQUAL(sum.size, 300u);
+    BC_REQUIRE_EQUAL(sum.sigops, 3u);
 }
 
 // candidates (graph)
@@ -679,6 +704,166 @@ BC_AUTO_TEST_CASE(pool_algorithm__covered__added_fee_at_rate__expected)
     BC_REQUIRE(!accessor::covered(650, 500, 100, 1'501));
     BC_REQUIRE(accessor::covered(500, 650, 0, 1));
     BC_REQUIRE(!accessor::covered(500, 650, 1, 1));
+}
+
+// template
+// ----------------------------------------------------------------------------
+
+BC_AUTO_TEST_CASE(pool_algorithm__best__scenario__highest_fee_index)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const auto masks = outcomes_of(out);
+    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph), 2u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__best__extended__same_as_integral)
+{
+    BC_REQUIRE(bests_as_integral<xint128_t>());
+    BC_REQUIRE(bests_as_integral<xint256_t>());
+    BC_REQUIRE(bests_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__scenario__highest_fee_outcome)
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024);
+    BC_REQUIRE(marks[0] == mark::unmarked);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit__best_of_first)
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 2);
+    BC_REQUIRE(marks[0] == mark::unmarked);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::excluded);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__no_outcomes__component_excluded)
+{
+    auto labeled = label<link_t>();
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 0);
+    BC_REQUIRE(marks[0] == mark::excluded);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::excluded);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::excluded);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__boundary_row__excluded)
+{
+    line_state line{};
+    line.cells[0] = boundary;
+    std_array<mark, 3> marks{};
+    accessor::resolve<link_t>(marks, line.columns(), 1'024);
+    BC_REQUIRE(marks[0] == mark::excluded);
+    BC_REQUIRE(marks[1] == mark::unmarked);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__resolved_scenario__winners_ascending)
+{
+    const auto out = template_of(1'000);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 2u);
+    BC_REQUIRE_EQUAL(out[2], 4u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__two_rows__highest_rate_chunk)
+{
+    const auto out = template_of(200);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 4u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__one_row__split_chunk_outrated)
+{
+    const auto out = template_of(100);
+    BC_REQUIRE_EQUAL(out.size(), 1u);
+    BC_REQUIRE_EQUAL(out[0], 2u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain__whole_chunk)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 100 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+    BC_REQUIRE(marks[0] == mark::taken);
+    BC_REQUIRE(marks[1] == mark::taken);
+    BC_REQUIRE(marks[2] == mark::taken);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_deeper_than_depth__taken_in_rounds)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 100 }, 0, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_over_size__leading_rows)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 250, 100 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_over_sigops__leading_rows)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 2 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__excluded_parent__descendant_not_taken)
+{
+    line_state line{};
+    std_array<mark, 3> marks{ { mark::unmarked, mark::excluded, mark::unmarked } };
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), { 0, 1'000, 100 }, 2, 20);
+    BC_REQUIRE_EQUAL(out.size(), 1u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__empty_budget__empty)
+{
+    line_state line{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, line.columns(), {}, 2, 20);
+    BC_REQUIRE(out.empty());
 }
 
 // transitions
