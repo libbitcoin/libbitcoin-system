@@ -382,7 +382,7 @@ code header::accept(const context& ctx,
         return error::anachronistic_timestamp;
     if (ctx.is_invalid_work(bits_))
         return error::incorrect_proof_of_work;
-    if (ctx.is_early_timestamp(retargeting_interval))
+    if (ctx.is_early_timestamp(timestamp_, retargeting_interval))
         return error::early_timestamp;
     if (bip54_timespan && ctx.is_negative_timespan(retargeting_interval))
         return error::negative_timespan;
