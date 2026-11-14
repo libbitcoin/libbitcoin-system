@@ -50,7 +50,7 @@
 #endif
 
 // Others excluded presently due to lack of verified support.
-#if defined(HAVE_LINUX) || defined(HAVE_APPLE)
+#if defined(HAVE_LINUX) || defined(HAVE_APPLE) || defined(HAVE_FREEBSD)
     #define HAVE_POSIX
 #endif
 
