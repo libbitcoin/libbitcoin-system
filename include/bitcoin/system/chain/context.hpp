@@ -73,10 +73,12 @@ public:
 
     // The block's timestamp is before that of the first block of its period,
     // on the last block of the period (bip54).
-    inline bool is_negative_timespan(uint32_t retargeting_interval) const NOEXCEPT
+    inline bool is_negative_timespan(uint32_t block_timestamp,
+        uint32_t retargeting_interval) const NOEXCEPT
     {
-        return (height % retargeting_interval == sub1(retargeting_interval))
-            && (timestamp < retarget_timestamp);
+        return is_enabled(chain::flags::bip54_timespan_rule)
+            && (height % retargeting_interval == sub1(retargeting_interval))
+            && (block_timestamp < retarget_timestamp);
     }
 
     /// Header context within chain.
