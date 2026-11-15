@@ -677,15 +677,18 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_512.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_aes.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_crc.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\multiply.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_128.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_aes.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_crc.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_128.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_aes.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_crc.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\tags.hpp" />
@@ -868,6 +871,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\private_key.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp" />
+    <ClInclude Include="..\..\..\..\src\compression\framing.hpp" />
     <ClInclude Include="..\..\..\..\src\compression\rfc1951.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp" />

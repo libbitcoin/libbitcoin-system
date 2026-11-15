@@ -234,13 +234,16 @@
 #include <bitcoin/system/intrinsics/intel/intel_256.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_512.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_aes.hpp>
+#include <bitcoin/system/intrinsics/intel/intel_crc.hpp>
 #include <bitcoin/system/intrinsics/intel/intel_sha.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 #include <bitcoin/system/intrinsics/neon/neon_128.hpp>
 #include <bitcoin/system/intrinsics/neon/neon_aes.hpp>
+#include <bitcoin/system/intrinsics/neon/neon_crc.hpp>
 #include <bitcoin/system/intrinsics/neon/neon_sha.hpp>
 #include <bitcoin/system/intrinsics/none/none_128.hpp>
 #include <bitcoin/system/intrinsics/none/none_aes.hpp>
+#include <bitcoin/system/intrinsics/none/none_crc.hpp>
 #include <bitcoin/system/intrinsics/none/none_sha.hpp>
 #include <bitcoin/system/ip/address.hpp>
 #include <bitcoin/system/ip/endpoint.hpp>
