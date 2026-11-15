@@ -20,6 +20,33 @@
 
 BC_AUTO_TEST_SUITE(png_tests)
 
+// The inflated image data (scanlines) of a png of one image data chunk.
+static data_chunk scanlines(const data_chunk& png)
+{
+    constexpr size_t field = sizeof(uint32_t);
+    const std::string type{ "IDAT" };
+    const auto it = std::search(png.begin(), png.end(), type.begin(),
+        type.end());
+
+    const data_chunk length(std::prev(it, field), it);
+    const auto begin = std::next(it, field);
+    const auto end = std::next(begin, from_big_endian<uint32_t>(length));
+
+    data_chunk out{};
+    zlib_inflate(out, data_chunk(begin, end));
+    return out;
+}
+
+// Rows of one byte, each prefixed by filter type zero.
+static data_chunk filtered_rows(size_t count, uint8_t byte)
+{
+    data_chunk out{};
+    for (size_t row = 0; row < count; ++row)
+        out.insert(out.end(), { 0x00, byte });
+
+    return out;
+}
+
 BC_AUTO_TEST_CASE(png__to_image__rectangular_image__true)
 {
     // A rectangle of 5 pixel width has 1 byte rows, so any number of bytes is ok.
@@ -88,21 +115,17 @@ BC_AUTO_TEST_CASE(png__to_image__perfect_square__expected_true)
         0x81, 0x8a, 0xa3, 0xd3, // crc32
 
         // IDAT
-        0x00, 0x00, 0x00, 0x13, // length
+        0x00, 0x00, 0x00, 0x0e, // length
         0x49, 0x44, 0x41, 0x54, // "IDAT"
-        0x78, 0x01,             // zlib header (deflate, stored)
-        0x01,                   // final stored block
-        0x08, 0x00,             // block length (little endian)
-        0xf7, 0xff,             // ones complement of block length
+        0x78, 0x9c,             // zlib header (deflate, default)
 
-        // Scanlines, each prefixed by filter type, inverted.
-        0x00, 0xdf,             // 1101 1111
-        0x00, 0x5f,             // 0101 1111
-        0x00, 0xdf,             // 1101 1111
-        0x00, 0x4f,             // 0100 1111
+        // Final fixed block of the scanlines, each prefixed by filter type,
+        // inverted: 00 df (1101 1111), 00 5f (0101 1111), 00 df, 00 4f.
+        0x63, 0xb8, 0xcf, 0x10,
+        0x0f, 0xc4, 0xfe, 0x00,
 
         0x0a, 0xe8, 0x02, 0x6d, // adler32
-        0xae, 0x0d, 0x1e, 0x2e, // crc32
+        0x40, 0xaa, 0x6d, 0xa1, // crc32
 
         // IEND
         0x00, 0x00, 0x00, 0x00, // length
@@ -118,25 +141,18 @@ BC_AUTO_TEST_CASE(png__to_image__perfect_square__expected_true)
     BC_REQUIRE_EQUAL(encode_base16(png), encode_base16(expected));
 }
 
-BC_AUTO_TEST_CASE(png__to_image__multiple_blocks__expected_true)
+BC_AUTO_TEST_CASE(png__to_image__repeated_rows__compressed)
 {
-    // 40000 rows of 1 byte are 80000 scanline bytes, two stored blocks.
+    // 40000 rows of 1 byte are 80000 scanline bytes, 'x' (0x78) inverted.
     static const auto size = 40000u;
     static const auto width = 8u;
-    static const auto first = 43u;
-    static const auto second = first + 5u + 65535u;
 
     data_chunk bitmap(size, 'x');
     data_chunk png;
     stream::out::data stream(png);
     BC_REQUIRE(png::to_image(stream, bitmap, width));
-    BC_REQUIRE_EQUAL(png.size(), 80073u);
-
-    const auto begin = png.cbegin();
-    const data_slice block1(std::next(begin, first), std::next(begin, first + 5u));
-    const data_slice block2(std::next(begin, second), std::next(begin, second + 5u));
-    BC_REQUIRE_EQUAL(encode_base16(block1), "00ffff0000");
-    BC_REQUIRE_EQUAL(encode_base16(block2), "0181387ec7");
+    BC_REQUIRE_EQUAL(png.size(), 157u);
+    BC_REQUIRE_EQUAL(scanlines(png), filtered_rows(size, 0x87));
 }
 
 BC_AUTO_TEST_CASE(png__to_image__excessive_image_size__false)
