@@ -212,6 +212,10 @@
       <ObjectFileName>$(IntDir)src_chain_witness.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness_extract.cpp" />
+    <ClCompile Include="..\..\..\..\src\compression\deflate.cpp" />
+    <ClCompile Include="..\..\..\..\src\compression\gzip.cpp" />
+    <ClCompile Include="..\..\..\..\src\compression\inflate.cpp" />
+    <ClCompile Include="..\..\..\..\src\compression\zlib.cpp" />
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
@@ -331,6 +335,7 @@
     <ClCompile Include="..\..\..\..\src\execution.cpp" />
     <ClCompile Include="..\..\..\..\src\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\adler32.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\crc32.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\muhash.cpp" />
@@ -524,6 +529,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\view\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\view\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\witness.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compression\compression.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compression\deflate.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compression\gzip.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compression\inflate.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\compression\zlib.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\authority.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base2.hpp" />
@@ -632,6 +642,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\forks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\accumulator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\adler32.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithms.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\checksum.hpp" />
@@ -857,10 +868,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\private_key.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\verify.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp" />
+    <ClInclude Include="..\..\..\..\src\compression\rfc1951.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\inflate.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp" />

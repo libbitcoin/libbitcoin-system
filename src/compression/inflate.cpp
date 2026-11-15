@@ -16,37 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_INFLATE_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_INFLATE_HPP
+#include <bitcoin/system/compression/inflate.hpp>
 
+#include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
-
-// based on:
-// rfc-editor.org/rfc/rfc1951.txt
+#include "rfc1951.hpp"
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
-namespace cuda {
+
+using namespace rfc1951;
 
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-/// Raw deflate decoder (rfc1951) into output of the exact inflated size.
 class inflater
 {
 public:
-    inflater(const data_slice& in, std::string& out) NOEXCEPT
-      : in_{ in }, out_{ out }
+    inflater(data_chunk& out, const data_slice& in, size_t limit) NOEXCEPT
+      : in_{ in }, out_{ out }, limit_{ is_zero(limit) ? max_size_t : limit }
     {
     }
 
-    /// True if the stream is valid, consumed, and exactly fills the output.
+    /// True if the stream is valid and within the limit.
     bool inflate() NOEXCEPT
     {
+        out_.clear();
         auto last = false;
         while (!last)
         {
@@ -86,69 +85,26 @@ public:
             }
         }
 
-        return position_ == in_.size() && written_ == out_.size();
+        return true;
+    }
+
+    /// The byte size of the stream, once inflated.
+    size_t consumed() const NOEXCEPT
+    {
+        return position_;
     }
 
 private:
-    static constexpr uint32_t stored_block = 0;
-    static constexpr uint32_t fixed_block = 1;
-    static constexpr uint32_t dynamic_block = 2;
-    static constexpr size_t maximum_bits = 15;
-    static constexpr size_t literal_codes = 288;
-    static constexpr size_t literal_limit = 286;
-    static constexpr size_t distance_codes = 30;
-    static constexpr size_t length_codes = 19;
-    static constexpr uint16_t end_of_block = 256;
-    static constexpr uint16_t first_length = 257;
-    static constexpr uint16_t repeat_previous = 16;
-
     struct huffman
     {
         std_array<uint16_t, add1(maximum_bits)> count{};
         std_array<uint16_t, literal_codes> symbol{};
     };
 
-    // Lengths 257..285 (rfc1951 3.2.5).
-    static constexpr std_array<uint16_t, 29> length_base
+    bool room(size_t count) const NOEXCEPT
     {
-        3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51,
-        59, 67, 83, 99, 115, 131, 163, 195, 227, 258
-    };
-
-    static constexpr std_array<uint8_t, 29> length_extra
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,
-        4, 5, 5, 5, 5, 0
-    };
-
-    // Distances 0..29 (rfc1951 3.2.5).
-    static constexpr std_array<uint16_t, distance_codes> distance_base
-    {
-        1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385,
-        513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385,
-        24577
-    };
-
-    static constexpr std_array<uint8_t, distance_codes> distance_extra
-    {
-        0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,
-        10, 11, 11, 12, 12, 13, 13
-    };
-
-    // Code length repeat extra bits and minimums (rfc1951 3.2.7).
-    static constexpr std_array<uint8_t, 3> repeat_extra{ 2, 3, 7 };
-    static constexpr std_array<uint8_t, 3> repeat_base{ 3, 3, 11 };
-
-    // Order of the code length code lengths (rfc1951 3.2.7).
-    static constexpr std_array<uint8_t, length_codes> length_order
-    {
-        16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
-    };
-
-    // Fixed literal code lengths by symbol range (rfc1951 3.2.6).
-    static constexpr std_array<uint16_t, 4> fixed_ends{ 144, 256, 280, 288 };
-    static constexpr std_array<uint8_t, 4> fixed_lengths{ 8, 9, 7, 8 };
-    static constexpr uint8_t fixed_distance_length = 5;
+        return count <= limit_ - std::min(limit_, out_.size());
+    }
 
     // Bits are taken from the low end of each byte (rfc1951 3.1.1).
     bool take(uint32_t& out, size_t count) NOEXCEPT
@@ -182,12 +138,12 @@ private:
             length != bit_xor(complement, wide_cast<uint32_t>(max_uint16)))
             return false;
 
-        if (length > in_.size() - position_ || length > out_.size() - written_)
+        if (length > in_.size() - position_ || !room(length))
             return false;
 
-        for (; !is_zero(length); --length)
-            out_[written_++] = possible_sign_cast<char>(in_[position_++]);
-
+        const auto begin = std::next(in_.begin(), position_);
+        out_.insert(out_.end(), begin, std::next(begin, length));
+        position_ += length;
         return true;
     }
 
@@ -261,11 +217,10 @@ private:
 
             if (symbol < end_of_block)
             {
-                if (written_ == out_.size())
+                if (!room(one))
                     return false;
 
-                const auto byte = narrow_cast<uint8_t>(symbol);
-                out_[written_++] = possible_sign_cast<char>(byte);
+                out_.push_back(narrow_cast<uint8_t>(symbol));
                 continue;
             }
 
@@ -286,11 +241,14 @@ private:
                 return false;
 
             const size_t distance = distance_base[symbol] + extra;
-            if (distance > written_ || length > out_.size() - written_)
+            if (distance > out_.size() || !room(length))
                 return false;
 
-            for (size_t byte = 0; byte < length; ++byte, ++written_)
-                out_[written_] = out_[written_ - distance];
+            for (size_t byte = 0; byte < length; ++byte)
+            {
+                const auto value = out_[out_.size() - distance];
+                out_.push_back(value);
+            }
         }
     }
 
@@ -323,13 +281,14 @@ private:
         uint32_t literal_count{};
         uint32_t distance_count{};
         uint32_t length_count{};
-        if (!take(literal_count, 5) || !take(distance_count, 5) ||
-            !take(length_count, 4))
+        if (!take(literal_count, literal_count_bits) ||
+            !take(distance_count, distance_count_bits) ||
+            !take(length_count, length_count_bits))
             return false;
 
         literal_count += first_length;
         distance_count += one;
-        length_count += 4u;
+        length_count += minimum_length_count;
         if (literal_count > literal_limit || distance_count > distance_codes)
             return false;
 
@@ -337,7 +296,7 @@ private:
         for (size_t index = 0; index < length_count; ++index)
         {
             uint32_t length{};
-            if (!take(length, 3))
+            if (!take(length, code_length_bits))
                 return false;
 
             lengths[length_order[index]] = narrow_cast<uint8_t>(length);
@@ -394,9 +353,9 @@ private:
     }
 
     const data_slice in_;
-    std::string& out_;
+    data_chunk& out_;
+    const size_t limit_;
     size_t position_{};
-    size_t written_{};
     uint32_t buffer_{};
     size_t bit_count_{};
 };
@@ -404,10 +363,24 @@ private:
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
+BC_POP_WARNING()
 
-} // namespace cuda
-} // namespace secp256k1
+bool inflate(data_chunk& out, const data_slice& in, size_t limit) NOEXCEPT
+{
+    size_t consumed{};
+    return inflate(out, consumed, in, limit) && consumed == in.size();
+}
+
+bool inflate(data_chunk& out, size_t& consumed, const data_slice& in,
+    size_t limit) NOEXCEPT
+{
+    inflater decoder{ out, in, limit };
+    if (!decoder.inflate())
+        return false;
+
+    consumed = decoder.consumed();
+    return true;
+}
+
 } // namespace system
 } // namespace libbitcoin
-
-#endif

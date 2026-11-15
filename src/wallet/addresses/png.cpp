@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/wallet/addresses/png.hpp>
 
+#include <bitcoin/system/compression/compression.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -53,7 +54,7 @@ enum color_type : uint8_t
 
 enum compression_method : uint8_t
 {
-    deflate = 0
+    deflated = 0
 };
 
 enum filter_method : uint8_t
@@ -71,57 +72,11 @@ enum filter_type : uint8_t
     unfiltered = 0
 };
 
-enum zlib_header : uint16_t
-{
-    // Deflate, 32k window, fastest (stored), check bits.
-    stored_deflate = 0x7801
-};
-
-enum block_header : uint8_t
-{
-    // BFINAL bit and BTYPE stored (00), padded to a byte boundary.
-    intermediate_block = 0x00,
-    final_block = 0x01
-};
-
-// Stored block length and its ones complement follow the block header.
-constexpr size_t max_block_bytes = max_uint16;
-constexpr auto block_overhead = sizeof(block_header) + sizeof(uint16_t) +
-    sizeof(uint16_t);
-
-// Adler-32 modulus, the largest prime less than 2^16.
-constexpr uint32_t adler_modulus = 65521;
-
-// Size of the zlib stream of stored blocks for the given filtered data size.
-constexpr size_t stream_size(size_t raw) NOEXCEPT
-{
-    const auto blocks = ceilinged_divide(raw, max_block_bytes);
-    return sizeof(zlib_header) + raw + blocks * block_overhead +
-        sizeof(uint32_t);
-}
-
 // Chunk length is limited to 2^31-1.
 constexpr size_t max_chunk_bytes = to_half(max_uint32);
 
-// Rows of one byte double the image size with filter bytes.
 constexpr size_t image_limit = 0x3ffe0000;
-static_assert(stream_size(two * image_limit) <= max_chunk_bytes,
-    "PNG image data must fit in one chunk.");
-
 size_t png::max_image_bytes = image_limit;
-
-static uint32_t adler32(const data_chunk& data) NOEXCEPT
-{
-    uint32_t low{ 1 };
-    uint32_t high{ 0 };
-    for (const auto byte: data)
-    {
-        low = (low + byte) % adler_modulus;
-        high = (high + low) % adler_modulus;
-    }
-
-    return bit_or(shift_left(high, bits<uint16_t>), low);
-}
 
 // Chunk is the type followed by the data, both of which the crc covers.
 static void write_chunk(write::bytes::ostream& writer,
@@ -168,7 +123,7 @@ bool png::to_image(std::ostream& out, const data_chunk& data,
     header_writer.write_4_bytes_big_endian(height);
     header_writer.write_byte(bit_depth::one_bit);
     header_writer.write_byte(color_type::grayscale);
-    header_writer.write_byte(compression_method::deflate);
+    header_writer.write_byte(compression_method::deflated);
     header_writer.write_byte(filter_method::adaptive);
     header_writer.write_byte(interlace_method::no_interlace);
     header_writer.flush();
@@ -191,28 +146,15 @@ bool png::to_image(std::ostream& out, const data_chunk& data,
 
     // =============== IDAT ===============
 
+    const auto stream = zlib_deflate(raw);
+    if (stream.size() > max_chunk_bytes)
+        return false;
+
     data_chunk image{};
-    image.reserve(sizeof(chunk_type) + stream_size(raw_size));
-    read::bytes::copy raw_reader(raw);
+    image.reserve(sizeof(chunk_type) + stream.size());
     write::bytes::data image_writer(image);
     image_writer.write_4_bytes_big_endian(chunk_type::image_data);
-    image_writer.write_2_bytes_big_endian(zlib_header::stored_deflate);
-
-    // Stored (uncompressed) deflate blocks.
-    for (auto remaining = raw_size; !is_zero(remaining);)
-    {
-        const auto length = std::min(remaining, max_block_bytes);
-        const auto block = narrow_cast<uint16_t>(length);
-        remaining -= length;
-
-        const auto last = is_zero(remaining);
-        image_writer.write_byte(last ? final_block : intermediate_block);
-        image_writer.write_2_bytes_little_endian(block);
-        image_writer.write_2_bytes_little_endian(bit_not(block));
-        image_writer.write_bytes(raw_reader, length);
-    }
-
-    image_writer.write_4_bytes_big_endian(adler32(raw));
+    image_writer.write_bytes(stream);
     image_writer.flush();
 
     // =============== IEND ===============
