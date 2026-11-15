@@ -21,15 +21,29 @@
 
 using namespace bc::system;
 
+// A console owned by this process alone (double click) closes on exit.
+static void hold_console()
+{
+#if defined(HAVE_WINDOWS)
+    DWORD process{};
+    if (GetConsoleProcessList(&process, 1) == 1)
+    {
+        std::cout << "Press <enter> to exit..." << std::endl;
+        std::cin.get();
+    }
+#endif
+}
+
 // The "try" functions are safe for instructions not compiled in.
-// selector                     Write each supported build tag, one per line.
-// selector <program>           Write the release file name for this machine.
-// selector <program> <release> Write the release download url for this machine.
+// selector           Write the bs release file name for this machine.
+// selector <release> Write the bs release download url for this machine.
+// selector --tags    Write each supported build tag, one per line.
 int main(int argc, char* argv[])
 {
     const auto tags = detected_tags();
+    const std::string option{ argc == 2 ? argv[1] : "" };
 
-    if (argc < 2)
+    if (option == "--tags")
     {
         const std::array<std::pair<const char*, bool>, 8> supported
         {
@@ -50,24 +64,20 @@ int main(int argc, char* argv[])
         return EXIT_SUCCESS;
     }
 
-    const std::string program{ argv[1] };
-    const std::string repository = program == "bs" ? "libbitcoin-server" : "";
-
-    const auto name = build_name(program, tags);
-    if (repository.empty() || name.empty() || argc > 3)
+    const auto name = build_name("bs", tags);
+    if (name.empty() || argc > 2 || option.starts_with("-"))
     {
-        std::cerr << "usage: selector [bs [<release>]]" << std::endl;
+        std::cerr << "usage: selector [<release> | --tags]" << std::endl;
+        hold_console();
         return EXIT_FAILURE;
     }
 
-    if (argc == 2)
-    {
+    if (option.empty())
         std::cout << name << std::endl;
-        return EXIT_SUCCESS;
-    }
+    else
+        std::cout << "https://github.com/libbitcoin/libbitcoin-server"
+            << "/releases/download/" << option << "/" << name << std::endl;
 
-    std::cout << "https://github.com/libbitcoin/" << repository
-        << "/releases/download/" << argv[2] << "/" << name << std::endl;
-
+    hold_console();
     return EXIT_SUCCESS;
 }
