@@ -773,31 +773,26 @@ template <typename Visitor>
 constexpr void algorithm::each_rival(const graph_t& graph, link_t input,
     const Visitor& visit) NOEXCEPT
 {
+    // A candidate input enters the ring of its table rival, which excludes it.
     const auto count = graph.table.rows.size();
-    std::vector<link_t> seen{ input };
-    const auto step = [&](link_t next) NOEXCEPT
-    {
-        if (next == none || std::ranges::find(seen, next) != seen.end())
-            return false;
+    const auto next = rival(graph, input);
+    const auto start = (input >= count && next < count) ? next : input;
+    auto at = start;
 
-        seen.push_back(next);
-        return true;
-    };
-
-    // A table input bridges to the candidate inputs spending its point.
-    for (auto at = input;;)
+    do
     {
+        if (at != input)
+            visit(at);
+
+        // A table input bridges to the candidate inputs spending its point.
         if (at < count)
             for (const auto& bridge: graph.rivals)
-                if (bridge.from == at && step(bridge.to))
+                if (bridge.from == at && bridge.to != input)
                     visit(bridge.to);
 
         at = rival(graph, at);
-        if (!step(at))
-            return;
-
-        visit(at);
     }
+    while (at != none && at != start);
 }
 
 constexpr bool algorithm::contested(const graph_t& graph, link_t row) NOEXCEPT
