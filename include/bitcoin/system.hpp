@@ -89,6 +89,11 @@
 #include <bitcoin/system/chain/view/input.hpp>
 #include <bitcoin/system/chain/view/output.hpp>
 #include <bitcoin/system/chain/view/transaction.hpp>
+#include <bitcoin/system/compression/compression.hpp>
+#include <bitcoin/system/compression/deflate.hpp>
+#include <bitcoin/system/compression/gzip.hpp>
+#include <bitcoin/system/compression/inflate.hpp>
+#include <bitcoin/system/compression/zlib.hpp>
 #include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>
@@ -190,6 +195,7 @@
 #include <bitcoin/system/filter/golomb.hpp>
 #include <bitcoin/system/filter/sieve.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
+#include <bitcoin/system/hash/adler32.hpp>
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/checksum.hpp>

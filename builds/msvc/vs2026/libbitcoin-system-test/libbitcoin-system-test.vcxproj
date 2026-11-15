@@ -198,6 +198,10 @@
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp">
       <ObjectFileName>$(IntDir)test_chain_witness.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\compression\deflate.cpp" />
+    <ClCompile Include="..\..\..\..\test\compression\gzip.cpp" />
+    <ClCompile Include="..\..\..\..\test\compression\inflate.cpp" />
+    <ClCompile Include="..\..\..\..\test\compression\zlib.cpp" />
     <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base2.cpp" />
@@ -328,6 +332,7 @@
     <ClCompile Include="..\..\..\..\test\filter\sieve.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\adler32.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\crc32.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">

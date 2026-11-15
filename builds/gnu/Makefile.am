@@ -92,6 +92,10 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/chain/view/output.cpp \
     ${srcdir}/../../src/chain/view/transaction.cpp \
     ${srcdir}/../../src/chain/view/transaction_sighash.cpp \
+    ${srcdir}/../../src/compression/deflate.cpp \
+    ${srcdir}/../../src/compression/gzip.cpp \
+    ${srcdir}/../../src/compression/inflate.cpp \
+    ${srcdir}/../../src/compression/zlib.cpp \
     ${srcdir}/../../src/config/authority.cpp \
     ${srcdir}/../../src/config/base16.cpp \
     ${srcdir}/../../src/config/base2.cpp \
@@ -179,6 +183,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/error/x509_error_t.cpp \
     ${srcdir}/../../src/filter/golomb.cpp \
     ${srcdir}/../../src/hash/accumulator.cpp \
+    ${srcdir}/../../src/hash/adler32.cpp \
     ${srcdir}/../../src/hash/checksum.cpp \
     ${srcdir}/../../src/hash/crc32.cpp \
     ${srcdir}/../../src/hash/muhash.cpp \
@@ -404,6 +409,16 @@ include_bitcoin_system_chain_view_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/chain/view/output.hpp \
     ${srcdir}/../../include/bitcoin/system/chain/view/transaction.hpp
 
+include_bitcoin_system_compressiondir = \
+    ${includedir}/bitcoin/system/compression
+
+include_bitcoin_system_compression_HEADERS = \
+    ${srcdir}/../../include/bitcoin/system/compression/compression.hpp \
+    ${srcdir}/../../include/bitcoin/system/compression/deflate.hpp \
+    ${srcdir}/../../include/bitcoin/system/compression/gzip.hpp \
+    ${srcdir}/../../include/bitcoin/system/compression/inflate.hpp \
+    ${srcdir}/../../include/bitcoin/system/compression/zlib.hpp
+
 include_bitcoin_system_configdir = \
     ${includedir}/bitcoin/system/config
 
@@ -564,6 +579,7 @@ include_bitcoin_system_hashdir = \
 
 include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/accumulator.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/adler32.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/algorithm.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/algorithms.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/checksum.hpp \
@@ -1317,6 +1333,10 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/chain/view/input.cpp \
     ${srcdir}/../../test/chain/view/output.cpp \
     ${srcdir}/../../test/chain/view/transaction.cpp \
+    ${srcdir}/../../test/compression/deflate.cpp \
+    ${srcdir}/../../test/compression/gzip.cpp \
+    ${srcdir}/../../test/compression/inflate.cpp \
+    ${srcdir}/../../test/compression/zlib.cpp \
     ${srcdir}/../../test/config/authority.cpp \
     ${srcdir}/../../test/config/base16.cpp \
     ${srcdir}/../../test/config/base2.cpp \
@@ -1412,6 +1432,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/filter/golomb.cpp \
     ${srcdir}/../../test/filter/sieve.cpp \
     ${srcdir}/../../test/hash/accumulator.cpp \
+    ${srcdir}/../../test/hash/adler32.cpp \
     ${srcdir}/../../test/hash/checksum.cpp \
     ${srcdir}/../../test/hash/crc32.cpp \
     ${srcdir}/../../test/hash/functions.cpp \
