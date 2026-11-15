@@ -82,7 +82,10 @@ private:
     };
 
     bool pull() NOEXCEPT;
+    void refill() NOEXCEPT;
+    void restore() NOEXCEPT;
     void drop(size_t bits) NOEXCEPT;
+    void copy(size_t size, size_t distance) NOEXCEPT;
     step header() NOEXCEPT;
     step stored_length() NOEXCEPT;
     step stored_copy() NOEXCEPT;

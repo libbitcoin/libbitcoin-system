@@ -41,6 +41,27 @@ static bool fed(data_chunk& out, const data_chunk& data)
     return decoder.done();
 }
 
+// The output of a decoder fed parts of step bytes, each part followed by any
+// it did not consume, false if invalid or incomplete.
+static bool parted(data_chunk& out, const data_chunk& data, size_t step)
+{
+    size_t offset{};
+    inflater decoder{};
+    while (offset < data.size() && !decoder.done())
+    {
+        size_t consumed{};
+        const auto size = std::min(step, data.size() - offset);
+        const auto begin = std::next(data.begin(), offset);
+        const auto part = data_slice(begin, std::next(begin, size));
+        if (!decoder.write(out, consumed, part) || is_zero(consumed))
+            return false;
+
+        offset += consumed;
+    }
+
+    return decoder.done();
+}
+
 // The output of a decoder of limited growth per write, false if invalid or
 // incomplete.
 static bool paused(data_chunk& out, const data_chunk& data, size_t limit)
@@ -126,6 +147,20 @@ BC_AUTO_TEST_CASE(inflater__bytewise_truncated__incomplete)
     data_chunk out{};
     const data_chunk truncated(fox_fixed.begin(), std::prev(fox_fixed.end()));
     BC_REQUIRE(!fed<inflater>(out, truncated));
+}
+
+BC_AUTO_TEST_CASE(inflater__parted_dynamic__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(parted(out, counted_dynamic, 9));
+    BC_REQUIRE_EQUAL(out, counted);
+}
+
+BC_AUTO_TEST_CASE(inflater__parted_fixed__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(parted(out, fox_fixed, 3));
+    BC_REQUIRE_EQUAL(out, fox);
 }
 
 BC_AUTO_TEST_CASE(inflater__paused__expected)

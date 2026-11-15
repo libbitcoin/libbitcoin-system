@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "rfc1951.hpp"
 
@@ -246,7 +247,7 @@ bool inflater::write(data_chunk& out, size_t& consumed, const data_slice& in,
     limit_ = is_zero(limit) ? max_size_t : limit;
     const auto history = window_.size();
 
-    auto valid = true;
+    auto valid = true, starved = false;
     while (valid && state_ != state::done && !full())
     {
         step result{};
@@ -266,9 +267,15 @@ bool inflater::write(data_chunk& out, size_t& consumed, const data_slice& in,
             valid = false;
         else if (result == step::more &&
             (state_ == state::stored_copy || !pull()))
+        {
+            starved = true;
             break;
+        }
     }
 
+    // The bits of a step starved of input are retained for its completion.
+    if (!starved)
+        restore();
     const auto begin = std::next(window_.begin(), history);
     out.insert(out.end(), begin, window_.end());
     if (window_.size() > window_size)
@@ -298,6 +305,29 @@ bool inflater::pull() NOEXCEPT
     buffer_ |= shift_left(byte, bit_count_);
     bit_count_ += byte_bits;
     return true;
+}
+
+// Fills the buffer to at least 56 bits from eight bytes of input. Bits of the
+// partially taken byte above the count are those that the next refill or pull
+// sets in the same position.
+void inflater::refill() NOEXCEPT
+{
+    const auto bytes = unsafe_from_little_endian<uint64_t>(std::next(in_,
+        position_));
+
+    const auto taken = (sub1(bits<uint64_t>) - bit_count_) / byte_bits;
+    buffer_ |= shift_left(bytes, bit_count_);
+    position_ += taken;
+    bit_count_ += taken * byte_bits;
+}
+
+// Returns whole bytes of the buffer to the input of the current write.
+void inflater::restore() NOEXCEPT
+{
+    const auto whole = bit_count_ / byte_bits;
+    position_ -= whole;
+    bit_count_ -= whole * byte_bits;
+    buffer_ = bit_and(buffer_, unmask_right<uint64_t>(bit_count_));
 }
 
 void inflater::drop(size_t bits) NOEXCEPT
@@ -357,6 +387,7 @@ inflater::step inflater::stored_length() NOEXCEPT
         return step::invalid;
 
     drop(stored_length_bits);
+    restore();
     remaining_ = possible_narrow_cast<size_t>(length);
     state_ = state::stored_copy;
     return step::next;
@@ -493,11 +524,35 @@ inflater::step inflater::lengths() NOEXCEPT
     return step::next;
 }
 
+// The match of size at distance, copied in whole parts that do not overlap,
+// each the pattern so far (a distance less than the size repeats).
+void inflater::copy(size_t size, size_t distance) NOEXCEPT
+{
+    const auto end = window_.size();
+    const auto start = end - distance;
+    window_.resize(end + size);
+
+    const auto from = std::next(window_.begin(), start);
+    auto to = std::next(window_.begin(), end);
+    for (auto remaining = size; !is_zero(remaining);)
+    {
+        const auto part = std::min(remaining,
+            sign_cast<size_t>(std::distance(from, to)));
+
+        to = std::copy_n(from, part, to);
+        remaining -= part;
+    }
+}
+
 // Literals and length/distance pairs, each decoded whole (rfc1951 3.2.5).
+// Each is decoded from a refilled buffer while eight bytes of input remain.
 inflater::step inflater::codes() NOEXCEPT
 {
     while (!full())
     {
+        if (size_ - position_ >= sizeof(uint64_t))
+            refill();
+
         size_t symbol{}, length{};
         auto found = decode(symbol, length, literals_, buffer_, bit_count_);
         if (found != decoded::found)
@@ -555,12 +610,7 @@ inflater::step inflater::codes() NOEXCEPT
             return step::invalid;
 
         drop(used + distance_extra_bits);
-        for (size_t byte{}; byte < size; ++byte)
-        {
-            const auto value = window_[window_.size() - distance];
-            window_.push_back(value);
-        }
-
+        copy(size, distance);
         produced_ += size;
     }
 
