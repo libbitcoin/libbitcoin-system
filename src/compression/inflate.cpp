@@ -42,15 +42,14 @@ public:
     {
     }
 
-    /// True if the stream is valid and within the limit.
+    // True if the stream is valid and within the limit.
     bool inflate() NOEXCEPT
     {
         out_.clear();
         auto last = false;
         while (!last)
         {
-            uint32_t final{};
-            uint32_t type{};
+            uint32_t final{}, type{};
             if (!take(final, one) || !take(type, two))
                 return false;
 
@@ -88,7 +87,7 @@ public:
         return true;
     }
 
-    /// The byte size of the stream, once inflated.
+    // The byte size of the stream, once inflated.
     size_t consumed() const NOEXCEPT
     {
         return position_;
@@ -131,8 +130,7 @@ private:
         buffer_ = zero;
         bit_count_ = zero;
 
-        uint32_t length{};
-        uint32_t complement{};
+        uint32_t length{}, complement{};
         if (!take(length, bits<uint16_t>) ||
             !take(complement, bits<uint16_t>) ||
             length != bit_xor(complement, wide_cast<uint32_t>(max_uint16)))
@@ -152,12 +150,12 @@ private:
         size_t size) NOEXCEPT
     {
         out = {};
-        for (size_t symbol = 0; symbol < size; ++symbol)
+        for (size_t symbol{}; symbol < size; ++symbol)
             ++out.count[lengths[symbol]];
 
+        auto left = one;
         out.count[zero] = zero;
-        size_t left = one;
-        for (size_t length = one; length <= maximum_bits; ++length)
+        for (auto length = one; length <= maximum_bits; ++length)
         {
             left = shift_left(left);
             if (out.count[length] > left)
@@ -167,10 +165,10 @@ private:
         }
 
         std_array<uint16_t, add1(maximum_bits)> offsets{};
-        for (size_t length = one; length < maximum_bits; ++length)
+        for (auto length = one; length < maximum_bits; ++length)
             offsets[add1(length)] = offsets[length] + out.count[length];
 
-        for (size_t symbol = 0; symbol < size; ++symbol)
+        for (size_t symbol{}; symbol < size; ++symbol)
             if (is_nonzero(lengths[symbol]))
                 out.symbol[offsets[lengths[symbol]]++] =
                     possible_narrow_cast<uint16_t>(symbol);
@@ -178,13 +176,28 @@ private:
         return true;
     }
 
+    // Complete code, or if partial a single one bit code or none.
+    static bool complete(const huffman& code, bool partial) NOEXCEPT
+    {
+        size_t used{}, left{ one };
+        for (auto length = one; length <= maximum_bits; ++length)
+        {
+            left = shift_left(left) - code.count[length];
+            used += code.count[length];
+        }
+
+        if (is_zero(left))
+            return true;
+
+        return partial && (is_zero(used) ||
+            (is_one(used) && is_one(code.count[one])));
+    }
+
     // Codes are read most significant bit first (rfc1951 3.1.1).
     bool decode(uint16_t& out, const huffman& code) NOEXCEPT
     {
-        size_t value{};
-        size_t first{};
-        size_t index{};
-        for (size_t length = one; length <= maximum_bits; ++length)
+        size_t value{}, first{}, index{};
+        for (auto length = one; length <= maximum_bits; ++length)
         {
             uint32_t bit{};
             if (!take(bit, one))
@@ -244,7 +257,7 @@ private:
             if (distance > out_.size() || !room(length))
                 return false;
 
-            for (size_t byte = 0; byte < length; ++byte)
+            for (size_t byte{}; byte < length; ++byte)
             {
                 const auto value = out_[out_.size() - distance];
                 out_.push_back(value);
@@ -257,19 +270,19 @@ private:
     {
         std_array<uint8_t, literal_codes> lengths{};
         size_t start{};
-        for (size_t range = 0; range < fixed_ends.size(); ++range)
+        for (size_t range{}; range < fixed_ends.size(); ++range)
         {
             const auto end = fixed_ends[range];
             std::fill(std::next(lengths.begin(), start),
                 std::next(lengths.begin(), end), fixed_lengths[range]);
+
             start = end;
         }
 
         std_array<uint8_t, distance_codes> distance{};
         distance.fill(fixed_distance_length);
 
-        huffman literals{};
-        huffman distances{};
+        huffman literals{}, distances{};
         build(literals, lengths.data(), lengths.size());
         build(distances, distance.data(), distance.size());
         return codes(literals, distances);
@@ -278,22 +291,20 @@ private:
     // Dynamic Huffman codes (rfc1951 3.2.7).
     bool dynamic() NOEXCEPT
     {
-        uint32_t literal_count{};
-        uint32_t distance_count{};
-        uint32_t length_count{};
+        uint32_t literal_count{}, distance_count{}, length_count{};
         if (!take(literal_count, literal_count_bits) ||
             !take(distance_count, distance_count_bits) ||
             !take(length_count, length_count_bits))
             return false;
 
-        literal_count += first_length;
         distance_count += one;
+        literal_count += first_length;
         length_count += minimum_length_count;
         if (literal_count > literal_limit || distance_count > distance_codes)
             return false;
 
         std_array<uint8_t, literal_codes + distance_codes> lengths{};
-        for (size_t index = 0; index < length_count; ++index)
+        for (size_t index{}; index < length_count; ++index)
         {
             uint32_t length{};
             if (!take(length, code_length_bits))
@@ -303,12 +314,13 @@ private:
         }
 
         huffman code_lengths{};
-        if (!build(code_lengths, lengths.data(), length_codes))
+        if (!build(code_lengths, lengths.data(), length_codes) ||
+            !complete(code_lengths, false))
             return false;
 
         lengths.fill(0_u8);
         const size_t total = literal_count + distance_count;
-        for (size_t index = 0; index < total;)
+        for (size_t index{}; index < total;)
         {
             uint16_t symbol{};
             if (!decode(symbol, code_lengths))
@@ -326,8 +338,8 @@ private:
             const auto value = (symbol == repeat_previous) ?
                 lengths[sub1(index)] : 0_u8;
 
-            const size_t kind = symbol - repeat_previous;
             uint32_t repeat{};
+            const size_t kind = symbol - repeat_previous;
             if (!take(repeat, repeat_extra[kind]))
                 return false;
 
@@ -335,23 +347,24 @@ private:
             if (repeat > total - index)
                 return false;
 
-            for (; !is_zero(repeat); --repeat)
+            while (!is_zero(repeat--))
                 lengths[index++] = value;
         }
 
         if (is_zero(lengths[end_of_block]))
             return false;
 
-        huffman literals{};
-        huffman distances{};
+        huffman literals{}, distances{};
         const auto distance_lengths = std::next(lengths.data(), literal_count);
         if (!build(literals, lengths.data(), literal_count) ||
-            !build(distances, distance_lengths, distance_count))
+            !build(distances, distance_lengths, distance_count) ||
+            !complete(literals, true) || !complete(distances, true))
             return false;
 
         return codes(literals, distances);
     }
 
+    // These are not thread safe.
     const data_slice in_;
     data_chunk& out_;
     const size_t limit_;

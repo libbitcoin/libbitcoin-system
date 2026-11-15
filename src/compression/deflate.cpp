@@ -134,7 +134,7 @@ static size_t index_of(const std_array<uint16_t, Size>& bases,
 static uint16_t reverse_code(uint16_t code, size_t length) NOEXCEPT
 {
     uint16_t out{};
-    for (size_t bit = 0; bit < length; ++bit)
+    for (size_t bit{}; bit < length; ++bit)
     {
         out = bit_or(shift_left(out), bit_and(code, 1_u16));
         code = shift_right(code);
@@ -151,8 +151,8 @@ static void assign_codes(code_tree<Size>& out) NOEXCEPT
     for (const auto length: out.lengths)
         ++count[length];
 
-    count[zero] = zero;
     size_t code{};
+    count[zero] = zero;
     std_array<size_t, add1(maximum_bits)> next{};
     for (size_t length = one; length <= maximum_bits; ++length)
     {
@@ -160,7 +160,7 @@ static void assign_codes(code_tree<Size>& out) NOEXCEPT
         next[length] = code;
     }
 
-    for (size_t symbol = 0; symbol < Size; ++symbol)
+    for (size_t symbol{}; symbol < Size; ++symbol)
     {
         const auto length = out.lengths[symbol];
         if (is_nonzero(length))
@@ -183,11 +183,11 @@ static void build_tree(code_tree<Size>& out, const frequencies<Size>& counts,
     };
 
     std_vector<item> leaves{};
-    for (size_t symbol = 0; symbol < Size; ++symbol)
+    for (size_t symbol{}; symbol < Size; ++symbol)
         if (is_nonzero(counts[symbol]))
             leaves.emplace_back(counts[symbol], symbol);
 
-    for (size_t symbol = 0; leaves.size() < two; ++symbol)
+    for (size_t symbol{}; leaves.size() < two; ++symbol)
         if (is_zero(counts[symbol]))
             leaves.emplace_back(one, symbol);
 
@@ -223,7 +223,7 @@ static void build_tree(code_tree<Size>& out, const frequencies<Size>& counts,
     }
 
     std_array<size_t, add1(maximum_bits)> count{};
-    for (size_t leaf = 0; leaf < leaves.size(); ++leaf)
+    for (size_t leaf{}; leaf < leaves.size(); ++leaf)
         ++count[std::min(depths[leaf], limit)];
 
     // Lengthen codes until the clamped lengths satisfy the Kraft equality.
@@ -262,13 +262,14 @@ static const literal_tree& fixed_literals() NOEXCEPT
 {
     static const auto code = []() NOEXCEPT
     {
-        literal_tree out{};
         size_t start{};
-        for (size_t range = 0; range < fixed_ends.size(); ++range)
+        literal_tree out{};
+        for (size_t range{}; range < fixed_ends.size(); ++range)
         {
             const auto end = fixed_ends[range];
             std::fill(std::next(out.lengths.begin(), start),
                 std::next(out.lengths.begin(), end), fixed_lengths[range]);
+
             start = end;
         }
 
@@ -320,7 +321,7 @@ static lz_symbols tokenize(const data_slice& in) NOEXCEPT
     };
 
     lz_symbols out{};
-    for (size_t position = 0; position < size;)
+    for (size_t position{}; position < size;)
     {
         size_t best{};
         size_t best_distance{};
@@ -328,7 +329,7 @@ static lz_symbols tokenize(const data_slice& in) NOEXCEPT
         {
             const auto limit = std::min(maximum_match, size - position);
             auto candidate = heads[hash_key(in, position)];
-            for (size_t chain = 0; candidate != no_position &&
+            for (size_t chain{}; candidate != no_position &&
                 chain < maximum_chain; ++chain)
             {
                 const auto distance = position - candidate;
@@ -404,7 +405,7 @@ static length_tokens run_lengths(const data_chunk& lengths) NOEXCEPT
     constexpr auto minimum_long_zeros = repeat_base[2];
 
     length_tokens out{};
-    for (size_t index = 0; index < lengths.size();)
+    for (size_t index{}; index < lengths.size();)
     {
         const auto length = lengths[index];
         size_t run{ one };
@@ -603,7 +604,7 @@ static void write_block(stream_writer& writer, const lz_symbols& data,
     writer.write(literal_count - first_length, literal_count_bits);
     writer.write(distance_count - one, distance_count_bits);
     writer.write(length_count - minimum_length_count, length_count_bits);
-    for (size_t index = 0; index < length_count; ++index)
+    for (size_t index{}; index < length_count; ++index)
         writer.write(code_lengths.lengths[length_order[index]],
             code_length_bits);
 

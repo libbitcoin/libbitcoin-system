@@ -98,6 +98,45 @@ BC_AUTO_TEST_CASE(inflate__invalid_length_symbol__false)
     BC_REQUIRE(!inflate(out, base16_chunk("1b03")));
 }
 
+BC_AUTO_TEST_CASE(inflate__incomplete_literal_codes__false)
+{
+    data_chunk out{};
+    BC_REQUIRE(!inflate(out, base16_chunk("05c001040000008020000000000000000000000000030000000000000000000000000000000000000087")));
+}
+
+BC_AUTO_TEST_CASE(inflate__incomplete_length_codes__false)
+{
+    data_chunk out{};
+    BC_REQUIRE(!inflate(out, base16_chunk("05c001040000000020000000000000000000000000010000000000000000000000000000000000000025")));
+}
+
+BC_AUTO_TEST_CASE(inflate__incomplete_distance_codes__false)
+{
+    data_chunk out{};
+    BC_REQUIRE(!inflate(out, base16_chunk("0dc0010400000080200000000000000000000000000100000000000000000000000000000000000000bf09")));
+}
+
+BC_AUTO_TEST_CASE(inflate__single_distance_code__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(inflate(out, base16_chunk("0dc00104000000802000000000000000000000000001000000000000000000000000000000000000009f05")));
+    BC_REQUIRE_EQUAL(out, to_chunk(std::string{ "aaaa" }));
+}
+
+BC_AUTO_TEST_CASE(inflate__empty_distance_codes__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(inflate(out, base16_chunk("05c001040000000010000000000000000000000000010000000000000000000000000000000000008004")));
+    BC_REQUIRE_EQUAL(out, to_chunk(std::string{ "a" }));
+}
+
+BC_AUTO_TEST_CASE(inflate__single_literal_code__empty)
+{
+    data_chunk out{};
+    BC_REQUIRE(inflate(out, base16_chunk("05c001040000000010000000000000000000000000000000000000000000000000000000000000008001")));
+    BC_REQUIRE(out.empty());
+}
+
 BC_AUTO_TEST_CASE(inflate__trailing_data__false)
 {
     data_chunk out{};
