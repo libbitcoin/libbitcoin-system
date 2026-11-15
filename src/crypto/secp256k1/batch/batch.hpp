@@ -102,16 +102,15 @@ data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
 LCOV_EXCL_START("Requires a gpu.")
 
 template <typename Batch, typename Verify>
-data_chunk batch_verify(const stopper& cancel, bool& use_gpu, Batch& batch,
+data_chunk batch_verify(const stopper& cancel, bool& used_gpu, Batch& batch,
     Verify&& verify) NOEXCEPT
 {
     namespace cuda = secp256k1::cuda;
 
     data_chunk results{};
-    use_gpu = use_gpu && cuda::available() &&
-        cuda::verify(cancel, results, batch);
+    used_gpu = cuda::available() && cuda::verify(cancel, results, batch);
 
-    return use_gpu ? results : batch_verify_(cancel, batch, verify);
+    return used_gpu ? results : batch_verify_(cancel, batch, verify);
 }
 
 LCOV_EXCL_STOP()

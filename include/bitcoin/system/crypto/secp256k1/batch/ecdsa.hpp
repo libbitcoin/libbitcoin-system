@@ -45,7 +45,7 @@ struct BC_API batch
 
     static batched::links_t verify(const stopper& cancel,
         const batch& batch) NOEXCEPT;
-    static batched::links_t verify(const stopper& cancel, bool& use_gpu,
+    static batched::links_t verify(const stopper& cancel, bool& used_gpu,
         const batch& batch) NOEXCEPT;
 
     std::span<const correlate_t> correlates;
@@ -59,7 +59,7 @@ protected:
         const multisig_matrix& successes) NOEXCEPT;
     static batched::links_t get_failures(const stopper& cancel,
         const data_chunk& out, const batch& in) NOEXCEPT;
-    static data_chunk evaluate(const stopper& cancel, bool& use_gpu,
+    static data_chunk evaluate(const stopper& cancel, bool& used_gpu,
         const batch& batch) NOEXCEPT;
     static batched::links_t correlate(const stopper& cancel,
         const data_chunk& out, const batch& batch) NOEXCEPT;

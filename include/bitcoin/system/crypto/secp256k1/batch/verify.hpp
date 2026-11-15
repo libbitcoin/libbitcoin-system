@@ -35,7 +35,10 @@ constexpr link terminal{ 0xff, 0xff, 0xff };
 /// True iff hardware (GPU) batch acceleration is compiled in.
 BC_API bool compiled() NOEXCEPT;
 
-/// True iff batch verification is hardware (GPU) accelerated.
+/// Set whether hardware (GPU) acceleration is used (enabled by default).
+BC_API void accelerate(bool enable) NOEXCEPT;
+
+/// True iff hardware (GPU) acceleration is enabled and available.
 BC_API bool accelerated() NOEXCEPT;
 
 } // namespace batched
