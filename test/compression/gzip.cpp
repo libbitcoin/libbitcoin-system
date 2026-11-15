@@ -88,6 +88,29 @@ BC_AUTO_TEST_CASE(gzip_deflater__written_parts__gzip_deflate)
     BC_REQUIRE_EQUAL(written<gzip_deflater>(data, 4096), gzip_deflate(data));
 }
 
+// Bytes of noise, repetition and noise, coded in stored and dynamic blocks.
+static data_chunk mixed(uint32_t seed)
+{
+    data_chunk out(120000, 'x');
+    for (size_t index{}; index < 40000; ++index)
+    {
+        seed = seed * 1103515245_u32 + 12345_u32;
+        out[index] = narrow_cast<uint8_t>(shift_right(seed, 16));
+        out[index + 80000] = narrow_cast<uint8_t>(shift_right(seed, 8));
+    }
+
+    return out;
+}
+
+BC_AUTO_TEST_CASE(gzip_inflate__mixed_members__expected)
+{
+    const auto first = mixed(1);
+    const auto second = mixed(2);
+    data_chunk out{};
+    BC_REQUIRE(gzip_inflate(out, splice(gzip_deflate(first), gzip_deflate(second))));
+    BC_REQUIRE_EQUAL(out, splice(first, second));
+}
+
 BC_AUTO_TEST_CASE(gzip_deflate__empty__expected)
 {
     BC_REQUIRE_EQUAL(gzip_deflate(data_chunk{}), base16_chunk("1f8b08000000000000ff03000000000000000000"));
