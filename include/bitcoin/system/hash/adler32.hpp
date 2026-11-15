@@ -25,8 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// Adler-32 as used by zlib (rfc1950).
-BC_API uint32_t adler32(const data_slice& data) NOEXCEPT;
+/// Adler-32 as used by zlib (rfc1950), continuing adler.
+BC_API uint32_t adler32(const data_slice& data, uint32_t adler=1) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

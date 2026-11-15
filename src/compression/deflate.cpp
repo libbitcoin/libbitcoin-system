@@ -24,6 +24,7 @@
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "rfc1951.hpp"
 
@@ -35,27 +36,27 @@ using namespace rfc1951;
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 // Match search: hash of minimum_match bytes, chained within the window.
 constexpr size_t hash_bits = 15;
 constexpr size_t hash_mask = sub1(power2(hash_bits));
 constexpr size_t window_mask = sub1(window_size);
 constexpr size_t maximum_chain = 128;
-constexpr size_t no_position = max_size_t;
+constexpr uint32_t no_position = max_uint32;
 
-// Symbols coded per block, each block coded by its own frequencies.
+// Symbols and input bytes coded per block, each block coded by its own
+// frequencies.
 constexpr size_t block_symbols = 16384;
+constexpr size_t block_bytes = 65536;
+
+// Input bytes buffered beyond the window, and those held back for a match.
+constexpr size_t input_bytes = window_size;
+constexpr size_t lookahead = maximum_match + minimum_match;
 
 // Bits of a stored block header (excluding alignment) and its lengths.
 constexpr size_t block_header_bits = 3;
 constexpr size_t stored_overhead_bits = sub1(byte_bits) + 2u * bits<uint16_t>;
-
-// A literal (zero distance), or a match length and distance.
-struct lz_symbol
-{
-    uint16_t value;
-    uint16_t distance;
-};
 
 // A code length code and its repeat count bits.
 struct length_token
@@ -64,8 +65,25 @@ struct length_token
     uint16_t extra;
 };
 
-using lz_symbols = std_vector<lz_symbol>;
+using lz_symbols = std_vector<uint32_t>;
 using length_tokens = std_vector<length_token>;
+
+// A literal (zero distance), or a match length and distance.
+constexpr uint32_t to_symbol(size_t value, size_t distance) NOEXCEPT
+{
+    return possible_narrow_cast<uint32_t>(bit_or(shift_left(distance,
+        bits<uint16_t>), value));
+}
+
+constexpr size_t value_of(uint32_t symbol) NOEXCEPT
+{
+    return bit_and<uint32_t>(symbol, max_uint16);
+}
+
+constexpr size_t distance_of(uint32_t symbol) NOEXCEPT
+{
+    return shift_right(symbol, bits<uint16_t>);
+}
 
 template <size_t Size>
 struct code_tree
@@ -85,14 +103,14 @@ using length_tree = code_tree<length_codes>;
 class stream_writer
 {
 public:
-    stream_writer(data_chunk& out) NOEXCEPT
-      : out_{ out }
+    stream_writer(data_chunk& out, size_t& buffer, size_t& count) NOEXCEPT
+      : out_{ out }, buffer_{ buffer }, bit_count_{ count }
     {
     }
 
     void write(size_t value, size_t count) NOEXCEPT
     {
-        buffer_ = bit_or(buffer_, shift_left(value, bit_count_));
+        buffer_ |= shift_left(value, bit_count_);
         bit_count_ += count;
         while (bit_count_ >= byte_bits)
         {
@@ -115,8 +133,8 @@ public:
 
 private:
     data_chunk& out_;
-    size_t buffer_{};
-    size_t bit_count_{};
+    size_t& buffer_;
+    size_t& bit_count_;
 };
 
 // Symbol coding.
@@ -134,7 +152,7 @@ static size_t index_of(const std_array<uint16_t, Size>& bases,
 static uint16_t reverse_code(uint16_t code, size_t length) NOEXCEPT
 {
     uint16_t out{};
-    for (size_t bit = 0; bit < length; ++bit)
+    for (size_t bit{}; bit < length; ++bit)
     {
         out = bit_or(shift_left(out), bit_and(code, 1_u16));
         code = shift_right(code);
@@ -151,8 +169,8 @@ static void assign_codes(code_tree<Size>& out) NOEXCEPT
     for (const auto length: out.lengths)
         ++count[length];
 
-    count[zero] = zero;
     size_t code{};
+    count[zero] = zero;
     std_array<size_t, add1(maximum_bits)> next{};
     for (size_t length = one; length <= maximum_bits; ++length)
     {
@@ -160,7 +178,7 @@ static void assign_codes(code_tree<Size>& out) NOEXCEPT
         next[length] = code;
     }
 
-    for (size_t symbol = 0; symbol < Size; ++symbol)
+    for (size_t symbol{}; symbol < Size; ++symbol)
     {
         const auto length = out.lengths[symbol];
         if (is_nonzero(length))
@@ -183,11 +201,11 @@ static void build_tree(code_tree<Size>& out, const frequencies<Size>& counts,
     };
 
     std_vector<item> leaves{};
-    for (size_t symbol = 0; symbol < Size; ++symbol)
+    for (size_t symbol{}; symbol < Size; ++symbol)
         if (is_nonzero(counts[symbol]))
             leaves.emplace_back(counts[symbol], symbol);
 
-    for (size_t symbol = 0; leaves.size() < two; ++symbol)
+    for (size_t symbol{}; leaves.size() < two; ++symbol)
         if (is_zero(counts[symbol]))
             leaves.emplace_back(one, symbol);
 
@@ -223,7 +241,7 @@ static void build_tree(code_tree<Size>& out, const frequencies<Size>& counts,
     }
 
     std_array<size_t, add1(maximum_bits)> count{};
-    for (size_t leaf = 0; leaf < leaves.size(); ++leaf)
+    for (size_t leaf{}; leaf < leaves.size(); ++leaf)
         ++count[std::min(depths[leaf], limit)];
 
     // Lengthen codes until the clamped lengths satisfy the Kraft equality.
@@ -262,13 +280,14 @@ static const literal_tree& fixed_literals() NOEXCEPT
 {
     static const auto code = []() NOEXCEPT
     {
-        literal_tree out{};
         size_t start{};
-        for (size_t range = 0; range < fixed_ends.size(); ++range)
+        literal_tree out{};
+        for (size_t range{}; range < fixed_ends.size(); ++range)
         {
             const auto end = fixed_ends[range];
             std::fill(std::next(out.lengths.begin(), start),
                 std::next(out.lengths.begin(), end), fixed_lengths[range]);
+
             start = end;
         }
 
@@ -298,85 +317,11 @@ static const distance_tree& fixed_distances() NOEXCEPT
 static size_t hash_key(const data_slice& in, size_t position) NOEXCEPT
 {
     constexpr auto shift = hash_bits / minimum_match;
-    const auto first = wide_cast<size_t>(in[position]);
-    const auto second = wide_cast<size_t>(in[add1(position)]);
-    const auto third = wide_cast<size_t>(in[position + two]);
+    const size_t first = in[position];
+    const size_t second = in[add1(position)];
+    const size_t third = in[position + two];
     return bit_and(bit_xor(bit_xor(shift_left(first, two * shift),
         shift_left(second, shift)), third), hash_mask);
-}
-
-// Greedy longest match within the window at each position.
-static lz_symbols tokenize(const data_slice& in) NOEXCEPT
-{
-    const auto size = in.size();
-    std_vector<size_t> heads(add1(hash_mask), no_position);
-    std_vector<size_t> chains(window_size, no_position);
-
-    const auto insert = [&](size_t position) NOEXCEPT
-    {
-        const auto key = hash_key(in, position);
-        chains[bit_and(position, window_mask)] = heads[key];
-        heads[key] = position;
-    };
-
-    lz_symbols out{};
-    for (size_t position = 0; position < size;)
-    {
-        size_t best{};
-        size_t best_distance{};
-        if (position + minimum_match <= size)
-        {
-            const auto limit = std::min(maximum_match, size - position);
-            auto candidate = heads[hash_key(in, position)];
-            for (size_t chain = 0; candidate != no_position &&
-                chain < maximum_chain; ++chain)
-            {
-                const auto distance = position - candidate;
-                if (distance > window_size)
-                    break;
-
-                if (in[candidate + best] == in[position + best])
-                {
-                    size_t length{};
-                    while (length < limit &&
-                        in[candidate + length] == in[position + length])
-                        ++length;
-
-                    if (length > best)
-                    {
-                        best = length;
-                        best_distance = distance;
-                        if (best == limit)
-                            break;
-                    }
-                }
-
-                candidate = chains[bit_and(candidate, window_mask)];
-            }
-
-            insert(position);
-        }
-
-        if (best < minimum_match)
-        {
-            out.push_back({ in[position], zero });
-            ++position;
-            continue;
-        }
-
-        out.push_back(
-        {
-            narrow_cast<uint16_t>(best),
-            narrow_cast<uint16_t>(best_distance)
-        });
-
-        const auto end = position + best;
-        for (++position; position < end; ++position)
-            if (position + minimum_match <= size)
-                insert(position);
-    }
-
-    return out;
 }
 
 // Blocks (rfc1951 3.2.3).
@@ -387,7 +332,7 @@ static size_t coded_bits(const code_tree<Size>& code,
     const frequencies<Size>& counts) NOEXCEPT
 {
     size_t out{};
-    for (size_t symbol = 0; symbol < Size; ++symbol)
+    for (size_t symbol{}; symbol < Size; ++symbol)
         out += counts[symbol] * code.lengths[symbol];
 
     return out;
@@ -404,7 +349,7 @@ static length_tokens run_lengths(const data_chunk& lengths) NOEXCEPT
     constexpr auto minimum_long_zeros = repeat_base[2];
 
     length_tokens out{};
-    for (size_t index = 0; index < lengths.size();)
+    for (size_t index{}; index < lengths.size();)
     {
         const auto length = lengths[index];
         size_t run{ one };
@@ -456,22 +401,22 @@ static void write_symbols(stream_writer& writer, const lz_symbols& data,
 {
     for (auto index = begin; index < end; ++index)
     {
-        const auto& item = data[index];
-        if (is_zero(item.distance))
+        const auto value = value_of(data[index]);
+        const auto offset = distance_of(data[index]);
+        if (is_zero(offset))
         {
-            writer.write(literals.codes[item.value],
-                literals.lengths[item.value]);
+            writer.write(literals.codes[value], literals.lengths[value]);
             continue;
         }
 
-        const auto length = index_of(length_base, item.value);
+        const auto length = index_of(length_base, value);
         const auto code = first_length + length;
         writer.write(literals.codes[code], literals.lengths[code]);
-        writer.write(item.value - length_base[length], length_extra[length]);
+        writer.write(value - length_base[length], length_extra[length]);
 
-        const auto distance = index_of(distance_base, item.distance);
+        const auto distance = index_of(distance_base, offset);
         writer.write(distances.codes[distance], distances.lengths[distance]);
-        writer.write(item.distance - distance_base[distance],
+        writer.write(offset - distance_base[distance],
             distance_extra[distance]);
     }
 
@@ -509,15 +454,16 @@ static void write_block(stream_writer& writer, const lz_symbols& data,
     size_t extra_bits{};
     for (auto index = begin; index < end; ++index)
     {
-        const auto& item = data[index];
-        if (is_zero(item.distance))
+        const auto value = value_of(data[index]);
+        const auto offset = distance_of(data[index]);
+        if (is_zero(offset))
         {
-            ++literal_counts[item.value];
+            ++literal_counts[value];
             continue;
         }
 
-        const auto length = index_of(length_base, item.value);
-        const auto distance = index_of(distance_base, item.distance);
+        const auto length = index_of(length_base, value);
+        const auto distance = index_of(distance_base, offset);
         ++literal_counts[first_length + length];
         ++distance_counts[distance];
         extra_bits += length_extra[length] + distance_extra[distance];
@@ -603,7 +549,7 @@ static void write_block(stream_writer& writer, const lz_symbols& data,
     writer.write(literal_count - first_length, literal_count_bits);
     writer.write(distance_count - one, distance_count_bits);
     writer.write(length_count - minimum_length_count, length_count_bits);
-    for (size_t index = 0; index < length_count; ++index)
+    for (size_t index{}; index < length_count; ++index)
         writer.write(code_lengths.lengths[length_order[index]],
             code_length_bits);
 
@@ -618,35 +564,190 @@ static void write_block(stream_writer& writer, const lz_symbols& data,
     write_symbols(writer, data, begin, end, literals, distances);
 }
 
+// Compares whole words, advancing length past equal bytes, false if unequal.
+template <typename xWord>
+INLINE bool match_words(size_t& length, const uint8_t* left,
+    const uint8_t* right, size_t limit) NOEXCEPT
+{
+    if constexpr (have<xWord>)
+    {
+        constexpr auto bytes = sizeof(xWord);
+        for (; limit - length >= bytes; length += bytes)
+        {
+            const auto index = f::first_unequal(
+                f::load<xWord>(std::next(left, length)),
+                f::load<xWord>(std::next(right, length)));
+
+            if (index < bytes)
+            {
+                length += index;
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+// The length of the match at candidate to that at position, up to limit, or
+// zero if the byte at best differs (the match cannot exceed best).
+static size_t match_length(const data_chunk& window, size_t candidate,
+    size_t position, size_t best, size_t limit) NOEXCEPT
+{
+    if (window[candidate + best] != window[position + best])
+        return zero;
+
+    size_t length{};
+    const auto left = std::next(window.data(), candidate);
+    const auto right = std::next(window.data(), position);
+    if (match_words<xint512_t>(length, left, right, limit) &&
+        match_words<xint256_t>(length, left, right, limit) &&
+        match_words<xint128_t>(length, left, right, limit))
+        while (length < limit && left[length] == right[length])
+            ++length;
+
+    return length;
+}
+
+// deflater
+// ----------------------------------------------------------------------------
+
+deflater::deflater() NOEXCEPT
+  : heads_(add1(hash_mask), no_position),
+    chains_(window_size, no_position)
+{
+}
+
+void deflater::write(data_chunk& out, const data_slice& data) NOEXCEPT
+{
+    auto it = data.begin();
+    for (auto remaining = data.size(); !is_zero(remaining);)
+    {
+        const auto size = std::min(input_bytes, remaining);
+        const auto end = std::next(it, size);
+        window_.insert(window_.end(), it, end);
+        remaining -= size;
+        it = end;
+        tokenize(out, false);
+    }
+}
+
+void deflater::flush(data_chunk& out) NOEXCEPT
+{
+    tokenize(out, true);
+    emit(out, true);
+    stream_writer{ out, buffer_, bit_count_ }.align();
+    *this = deflater{};
+}
+
+void deflater::insert(size_t position) NOEXCEPT
+{
+    const auto key = hash_key(window_, position);
+    chains_[bit_and(position, window_mask)] = heads_[key];
+    heads_[key] = possible_narrow_cast<uint32_t>(position);
+}
+
+// Positions shift by the window, so each keeps its chain slot.
+void deflater::slide() NOEXCEPT
+{
+    constexpr auto shift = possible_narrow_cast<uint32_t>(window_size);
+    const auto rebase = [](uint32_t& position) NOEXCEPT
+    {
+        position = position == no_position || position < shift ?
+            no_position : position - shift;
+    };
+
+    window_.erase(window_.begin(), std::next(window_.begin(), window_size));
+    position_ -= window_size;
+    std::for_each(heads_.begin(), heads_.end(), rebase);
+    std::for_each(chains_.begin(), chains_.end(), rebase);
+}
+
+// Greedy longest match within the window at each position, holding back the
+// lookahead until the stream ends.
+void deflater::tokenize(data_chunk& out, bool final) NOEXCEPT
+{
+    while (position_ < window_.size() &&
+        (final || window_.size() - position_ >= lookahead))
+    {
+        if (position_ >= two * window_size)
+            slide();
+
+        const auto size = window_.size();
+        size_t best{}, best_distance{};
+        if (position_ + minimum_match <= size)
+        {
+            const auto limit = std::min(maximum_match, size - position_);
+            auto candidate = heads_[hash_key(window_, position_)];
+            for (size_t chain{}; candidate != no_position &&
+                chain < maximum_chain; ++chain)
+            {
+                const auto distance = position_ - candidate;
+                if (distance > window_size)
+                    break;
+
+                const auto length = match_length(window_, candidate,
+                    position_, best, limit);
+
+                if (length > best)
+                {
+                    best = length;
+                    best_distance = distance;
+                    if (best == limit)
+                        break;
+                }
+
+                candidate = chains_[bit_and<size_t>(candidate, window_mask)];
+            }
+
+            insert(position_);
+        }
+
+        if (best < minimum_match)
+        {
+            add(out, to_symbol(window_[position_], zero), one);
+            ++position_;
+            continue;
+        }
+
+        add(out, to_symbol(best, best_distance), best);
+        const auto end = position_ + best;
+        for (++position_; position_ < end; ++position_)
+            if (position_ + minimum_match <= size)
+                insert(position_);
+    }
+}
+
+// A full block is coded once another symbol follows it.
+void deflater::add(data_chunk& out, uint32_t symbol, size_t size) NOEXCEPT
+{
+    if (symbols_.size() == block_symbols || raw_.size() >= block_bytes)
+        emit(out, false);
+
+    const auto begin = std::next(window_.begin(), position_);
+    symbols_.push_back(symbol);
+    raw_.insert(raw_.end(), begin, std::next(begin, size));
+}
+
+void deflater::emit(data_chunk& out, bool last) NOEXCEPT
+{
+    stream_writer writer{ out, buffer_, bit_count_ };
+    write_block(writer, symbols_, zero, symbols_.size(), raw_, last);
+    symbols_.clear();
+    raw_.clear();
+}
+
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 
 data_chunk deflate(const data_slice& in) NOEXCEPT
 {
-    const auto data = tokenize(in);
-
     data_chunk out{};
-    stream_writer writer{ out };
-    size_t begin{};
-    auto position = in.begin();
-    do
-    {
-        const auto end = std::min(data.size(), begin + block_symbols);
-
-        size_t size{};
-        for (auto index = begin; index < end; ++index)
-            size += is_zero(data[index].distance) ? one : data[index].value;
-
-        const auto next = std::next(position, size);
-        write_block(writer, data, begin, end, data_slice(position, next),
-            end == data.size());
-
-        position = next;
-        begin = end;
-    } while (begin < data.size());
-
-    writer.align();
+    deflater encoder{};
+    encoder.write(out, in);
+    encoder.flush(out);
     return out;
 }
 

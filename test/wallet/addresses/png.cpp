@@ -41,7 +41,7 @@ static data_chunk scanlines(const data_chunk& png)
 static data_chunk filtered_rows(size_t count, uint8_t byte)
 {
     data_chunk out{};
-    for (size_t row = 0; row < count; ++row)
+    for (size_t row{}; row < count; ++row)
         out.insert(out.end(), { 0x00, byte });
 
     return out;
@@ -151,7 +151,7 @@ BC_AUTO_TEST_CASE(png__to_image__repeated_rows__compressed)
     data_chunk png;
     stream::out::data stream(png);
     BC_REQUIRE(png::to_image(stream, bitmap, width));
-    BC_REQUIRE_EQUAL(png.size(), 157u);
+    BC_REQUIRE_EQUAL(png.size(), 171u);
     BC_REQUIRE_EQUAL(scanlines(png), filtered_rows(size, 0x87));
 }
 

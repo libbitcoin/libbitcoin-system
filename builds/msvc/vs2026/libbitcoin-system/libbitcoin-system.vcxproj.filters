@@ -1691,6 +1691,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_aes.hpp">
       <Filter>include\bitcoin\system\intrinsics\intel</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_crc.hpp">
+      <Filter>include\bitcoin\system\intrinsics\intel</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_sha.hpp">
       <Filter>include\bitcoin\system\intrinsics\intel</Filter>
     </ClInclude>
@@ -1709,6 +1712,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_aes.hpp">
       <Filter>include\bitcoin\system\intrinsics\neon</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_crc.hpp">
+      <Filter>include\bitcoin\system\intrinsics\neon</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_sha.hpp">
       <Filter>include\bitcoin\system\intrinsics\neon</Filter>
     </ClInclude>
@@ -1716,6 +1722,9 @@
       <Filter>include\bitcoin\system\intrinsics\none</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_aes.hpp">
+      <Filter>include\bitcoin\system\intrinsics\none</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_crc.hpp">
       <Filter>include\bitcoin\system\intrinsics\none</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp">
@@ -2263,6 +2272,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\x509\x509.hpp">
       <Filter>include\bitcoin\system\x509</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\compression\framing.hpp">
+      <Filter>src\compression</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\compression\rfc1951.hpp">
       <Filter>src\compression</Filter>

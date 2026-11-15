@@ -34,336 +34,552 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-class inflater
+using huffman = inflater::huffman;
+
+// A root table entry: the symbol and its code length (zero if longer).
+constexpr size_t entry_bits = 4;
+constexpr auto entry_mask = sub1(power2<uint16_t>(entry_bits));
+constexpr auto root_size = power2(inflater::root_bits);
+constexpr auto root_mask = sub1(root_size);
+
+// Stored block lengths.
+constexpr size_t stored_length_bits = 2u * bits<uint16_t>;
+
+enum class decoded : uint8_t
 {
-public:
-    inflater(data_chunk& out, const data_slice& in, size_t limit) NOEXCEPT
-      : in_{ in }, out_{ out }, limit_{ is_zero(limit) ? max_size_t : limit }
+    found,
+    more,
+    invalid
+};
+
+// Codes.
+// ----------------------------------------------------------------------------
+
+constexpr uint16_t to_entry(size_t symbol, size_t length) NOEXCEPT
+{
+    return possible_narrow_cast<uint16_t>(bit_or(shift_left(symbol,
+        entry_bits), length));
+}
+
+constexpr size_t entry_symbol(uint16_t entry) NOEXCEPT
+{
+    return shift_right(entry, entry_bits);
+}
+
+constexpr size_t entry_length(uint16_t entry) NOEXCEPT
+{
+    return bit_and(entry, entry_mask);
+}
+
+// Codes are written most significant bit first (rfc1951 3.1.1).
+constexpr size_t reverse_code(size_t code, size_t length) NOEXCEPT
+{
+    size_t out{};
+    for (size_t bit{}; bit < length; ++bit)
     {
+        out = bit_or(shift_left(out), bit_and(code, one));
+        code = shift_right(code);
     }
 
-    /// True if the stream is valid and within the limit.
-    bool inflate() NOEXCEPT
+    return out;
+}
+
+// Canonical code and root table from lengths, false if over-subscribed
+// (rfc1951 3.2.2).
+static bool build(huffman& out, const uint8_t* lengths, size_t size) NOEXCEPT
+{
+    out = {};
+    for (size_t symbol{}; symbol < size; ++symbol)
+        ++out.count[lengths[symbol]];
+
+    auto left = one;
+    out.count[zero] = zero;
+    for (auto length = one; length <= maximum_bits; ++length)
     {
-        out_.clear();
-        auto last = false;
-        while (!last)
-        {
-            uint32_t final{};
-            uint32_t type{};
-            if (!take(final, one) || !take(type, two))
-                return false;
-
-            last = is_one(final);
-            switch (type)
-            {
-                case stored_block:
-                {
-                    if (!stored())
-                        return false;
-
-                    break;
-                }
-                case fixed_block:
-                {
-                    if (!fixed())
-                        return false;
-
-                    break;
-                }
-                case dynamic_block:
-                {
-                    if (!dynamic())
-                        return false;
-
-                    break;
-                }
-                default:
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /// The byte size of the stream, once inflated.
-    size_t consumed() const NOEXCEPT
-    {
-        return position_;
-    }
-
-private:
-    struct huffman
-    {
-        std_array<uint16_t, add1(maximum_bits)> count{};
-        std_array<uint16_t, literal_codes> symbol{};
-    };
-
-    bool room(size_t count) const NOEXCEPT
-    {
-        return count <= limit_ - std::min(limit_, out_.size());
-    }
-
-    // Bits are taken from the low end of each byte (rfc1951 3.1.1).
-    bool take(uint32_t& out, size_t count) NOEXCEPT
-    {
-        while (bit_count_ < count)
-        {
-            if (position_ == in_.size())
-                return false;
-
-            const auto byte = wide_cast<uint32_t>(in_[position_++]);
-            buffer_ = bit_or(buffer_, shift_left(byte, bit_count_));
-            bit_count_ += byte_bits;
-        }
-
-        out = bit_and(buffer_, unmask_right<uint32_t>(count));
-        buffer_ = shift_right(buffer_, count);
-        bit_count_ -= count;
-        return true;
-    }
-
-    // Uncompressed block, byte aligned (rfc1951 3.2.4).
-    bool stored() NOEXCEPT
-    {
-        buffer_ = zero;
-        bit_count_ = zero;
-
-        uint32_t length{};
-        uint32_t complement{};
-        if (!take(length, bits<uint16_t>) ||
-            !take(complement, bits<uint16_t>) ||
-            length != bit_xor(complement, wide_cast<uint32_t>(max_uint16)))
+        left = shift_left(left);
+        if (out.count[length] > left)
             return false;
 
-        if (length > in_.size() - position_ || !room(length))
-            return false;
-
-        const auto begin = std::next(in_.begin(), position_);
-        out_.insert(out_.end(), begin, std::next(begin, length));
-        position_ += length;
-        return true;
+        left -= out.count[length];
     }
 
-    // Canonical code from lengths, false if over-subscribed (rfc1951 3.2.2).
-    static bool build(huffman& out, const uint8_t* lengths,
-        size_t size) NOEXCEPT
+    size_t code{};
+    std_array<uint16_t, add1(maximum_bits)> offsets{};
+    std_array<size_t, add1(maximum_bits)> next{};
+    for (auto length = one; length <= maximum_bits; ++length)
     {
-        out = {};
-        for (size_t symbol = 0; symbol < size; ++symbol)
-            ++out.count[lengths[symbol]];
-
-        out.count[zero] = zero;
-        size_t left = one;
-        for (size_t length = one; length <= maximum_bits; ++length)
-        {
-            left = shift_left(left);
-            if (out.count[length] > left)
-                return false;
-
-            left -= out.count[length];
-        }
-
-        std_array<uint16_t, add1(maximum_bits)> offsets{};
-        for (size_t length = one; length < maximum_bits; ++length)
+        code = shift_left(code + out.count[sub1(length)]);
+        next[length] = code;
+        if (length < maximum_bits)
             offsets[add1(length)] = offsets[length] + out.count[length];
+    }
 
-        for (size_t symbol = 0; symbol < size; ++symbol)
-            if (is_nonzero(lengths[symbol]))
-                out.symbol[offsets[lengths[symbol]]++] =
-                    possible_narrow_cast<uint16_t>(symbol);
+    for (size_t symbol{}; symbol < size; ++symbol)
+    {
+        const size_t length = lengths[symbol];
+        if (is_zero(length))
+            continue;
 
+        out.symbol[offsets[length]++] = possible_narrow_cast<uint16_t>(symbol);
+        if (length > inflater::root_bits)
+        {
+            ++next[length];
+            continue;
+        }
+
+        const auto entry = to_entry(symbol, length);
+        const auto step = power2(length);
+        for (auto index = reverse_code(next[length]++, length);
+            index < root_size; index += step)
+            out.table[index] = entry;
+    }
+
+    return true;
+}
+
+// Complete code, or if partial a single one bit code or none.
+static bool complete(const huffman& code, bool partial) NOEXCEPT
+{
+    size_t used{}, left{ one };
+    for (auto length = one; length <= maximum_bits; ++length)
+    {
+        left = shift_left(left) - code.count[length];
+        used += code.count[length];
+    }
+
+    if (is_zero(left))
         return true;
+
+    return partial && (is_zero(used) ||
+        (is_one(used) && is_one(code.count[one])));
+}
+
+// The symbol of the code that begins bits, of which available are valid.
+static decoded decode(size_t& symbol, size_t& length, const huffman& code,
+    uint64_t bits, size_t available) NOEXCEPT
+{
+    const auto root = possible_narrow_cast<size_t>(bit_and<uint64_t>(bits,
+        root_mask));
+
+    const auto entry = code.table[root];
+    if (!is_zero(entry_length(entry)))
+    {
+        length = entry_length(entry);
+        if (length > available)
+            return decoded::more;
+
+        symbol = entry_symbol(entry);
+        return decoded::found;
     }
 
     // Codes are read most significant bit first (rfc1951 3.1.1).
-    bool decode(uint16_t& out, const huffman& code) NOEXCEPT
+    size_t value{}, first{}, index{};
+    for (length = one; length <= maximum_bits; ++length)
     {
-        size_t value{};
-        size_t first{};
-        size_t index{};
-        for (size_t length = one; length <= maximum_bits; ++length)
+        if (length > available)
+            return decoded::more;
+
+        const auto bit = possible_narrow_cast<size_t>(bit_and<uint64_t>(
+            shift_right(bits, sub1(length)), one));
+
+        value = bit_or(value, bit);
+
+        const size_t count = code.count[length];
+        if (value < first + count)
         {
-            uint32_t bit{};
-            if (!take(bit, one))
-                return false;
-
-            value = bit_or<size_t>(value, bit);
-            const size_t count = code.count[length];
-            if (value < first + count)
-            {
-                out = code.symbol[index + value - first];
-                return true;
-            }
-
-            index += count;
-            first = shift_left(first + count);
-            value = shift_left(value);
+            symbol = code.symbol[index + value - first];
+            return decoded::found;
         }
 
-        return false;
+        index += count;
+        first = shift_left(first + count);
+        value = shift_left(value);
     }
 
-    // Literals and length/distance pairs (rfc1951 3.2.5).
-    bool codes(const huffman& literals, const huffman& distances) NOEXCEPT
+    return decoded::invalid;
+}
+
+static const std_array<huffman, two>& fixed() NOEXCEPT
+{
+    static const auto codes = []() NOEXCEPT
     {
-        while (true)
-        {
-            uint16_t symbol{};
-            if (!decode(symbol, literals))
-                return false;
-
-            if (symbol < end_of_block)
-            {
-                if (!room(one))
-                    return false;
-
-                out_.push_back(narrow_cast<uint8_t>(symbol));
-                continue;
-            }
-
-            if (symbol == end_of_block)
-                return true;
-
-            const size_t index = symbol - first_length;
-            if (index >= length_base.size())
-                return false;
-
-            uint32_t extra{};
-            if (!take(extra, length_extra[index]))
-                return false;
-
-            const size_t length = length_base[index] + extra;
-            if (!decode(symbol, distances) || symbol >= distance_codes ||
-                !take(extra, distance_extra[symbol]))
-                return false;
-
-            const size_t distance = distance_base[symbol] + extra;
-            if (distance > out_.size() || !room(length))
-                return false;
-
-            for (size_t byte = 0; byte < length; ++byte)
-            {
-                const auto value = out_[out_.size() - distance];
-                out_.push_back(value);
-            }
-        }
-    }
-
-    // Fixed Huffman codes (rfc1951 3.2.6).
-    bool fixed() NOEXCEPT
-    {
-        std_array<uint8_t, literal_codes> lengths{};
         size_t start{};
-        for (size_t range = 0; range < fixed_ends.size(); ++range)
+        std_array<uint8_t, literal_codes> lengths{};
+        for (size_t range{}; range < fixed_ends.size(); ++range)
         {
             const auto end = fixed_ends[range];
             std::fill(std::next(lengths.begin(), start),
                 std::next(lengths.begin(), end), fixed_lengths[range]);
+
             start = end;
         }
 
         std_array<uint8_t, distance_codes> distance{};
         distance.fill(fixed_distance_length);
 
-        huffman literals{};
-        huffman distances{};
-        build(literals, lengths.data(), lengths.size());
-        build(distances, distance.data(), distance.size());
-        return codes(literals, distances);
-    }
+        std_array<huffman, two> out{};
+        build(out.front(), lengths.data(), lengths.size());
+        build(out.back(), distance.data(), distance.size());
+        return out;
+    }();
 
-    // Dynamic Huffman codes (rfc1951 3.2.7).
-    bool dynamic() NOEXCEPT
+    return codes;
+}
+
+// inflater
+// ----------------------------------------------------------------------------
+
+inflater::inflater() NOEXCEPT = default;
+
+bool inflater::done() const NOEXCEPT
+{
+    return state_ == state::done;
+}
+
+bool inflater::write(data_chunk& out, size_t& consumed, const data_slice& in,
+    size_t limit) NOEXCEPT
+{
+    in_ = in.data();
+    size_ = in.size();
+    position_ = zero;
+    produced_ = zero;
+    limit_ = is_zero(limit) ? max_size_t : limit;
+    const auto history = window_.size();
+
+    auto valid = true;
+    while (valid && state_ != state::done && !full())
     {
-        uint32_t literal_count{};
-        uint32_t distance_count{};
-        uint32_t length_count{};
-        if (!take(literal_count, literal_count_bits) ||
-            !take(distance_count, distance_count_bits) ||
-            !take(length_count, length_count_bits))
-            return false;
-
-        literal_count += first_length;
-        distance_count += one;
-        length_count += minimum_length_count;
-        if (literal_count > literal_limit || distance_count > distance_codes)
-            return false;
-
-        std_array<uint8_t, literal_codes + distance_codes> lengths{};
-        for (size_t index = 0; index < length_count; ++index)
+        step result{};
+        switch (state_)
         {
-            uint32_t length{};
-            if (!take(length, code_length_bits))
-                return false;
-
-            lengths[length_order[index]] = narrow_cast<uint8_t>(length);
+            case state::header: result = header(); break;
+            case state::stored_length: result = stored_length(); break;
+            case state::stored_copy: result = stored_copy(); break;
+            case state::table: result = table(); break;
+            case state::code_lengths: result = code_lengths(); break;
+            case state::lengths: result = lengths(); break;
+            case state::codes: result = codes(); break;
+            case state::done: result = step::next; break;
         }
 
-        huffman code_lengths{};
-        if (!build(code_lengths, lengths.data(), length_codes))
-            return false;
-
-        lengths.fill(0_u8);
-        const size_t total = literal_count + distance_count;
-        for (size_t index = 0; index < total;)
-        {
-            uint16_t symbol{};
-            if (!decode(symbol, code_lengths))
-                return false;
-
-            if (symbol < repeat_previous)
-            {
-                lengths[index++] = narrow_cast<uint8_t>(symbol);
-                continue;
-            }
-
-            if (symbol == repeat_previous && is_zero(index))
-                return false;
-
-            const auto value = (symbol == repeat_previous) ?
-                lengths[sub1(index)] : 0_u8;
-
-            const size_t kind = symbol - repeat_previous;
-            uint32_t repeat{};
-            if (!take(repeat, repeat_extra[kind]))
-                return false;
-
-            repeat += repeat_base[kind];
-            if (repeat > total - index)
-                return false;
-
-            for (; !is_zero(repeat); --repeat)
-                lengths[index++] = value;
-        }
-
-        if (is_zero(lengths[end_of_block]))
-            return false;
-
-        huffman literals{};
-        huffman distances{};
-        const auto distance_lengths = std::next(lengths.data(), literal_count);
-        if (!build(literals, lengths.data(), literal_count) ||
-            !build(distances, distance_lengths, distance_count))
-            return false;
-
-        return codes(literals, distances);
+        if (result == step::invalid)
+            valid = false;
+        else if (result == step::more &&
+            (state_ == state::stored_copy || !pull()))
+            break;
     }
 
-    const data_slice in_;
-    data_chunk& out_;
-    const size_t limit_;
-    size_t position_{};
-    uint32_t buffer_{};
-    size_t bit_count_{};
-};
+    const auto begin = std::next(window_.begin(), history);
+    out.insert(out.end(), begin, window_.end());
+    if (window_.size() > window_size)
+        window_.erase(window_.begin(), std::prev(window_.end(), window_size));
+
+    consumed = position_;
+    in_ = nullptr;
+    size_ = zero;
+    return valid;
+}
+
+// private
+// ----------------------------------------------------------------------------
+
+bool inflater::full() const NOEXCEPT
+{
+    return produced_ >= limit_;
+}
+
+// Bits are taken from the low end of each byte (rfc1951 3.1.1).
+bool inflater::pull() NOEXCEPT
+{
+    if (position_ == size_)
+        return false;
+
+    const uint64_t byte = in_[position_++];
+    buffer_ |= shift_left(byte, bit_count_);
+    bit_count_ += byte_bits;
+    return true;
+}
+
+void inflater::drop(size_t bits) NOEXCEPT
+{
+    buffer_ = shift_right(buffer_, bits);
+    bit_count_ -= bits;
+}
+
+// Block header (rfc1951 3.2.3).
+inflater::step inflater::header() NOEXCEPT
+{
+    if (bit_count_ < add1(two))
+        return step::more;
+
+    last_ = is_one(bit_and<uint64_t>(buffer_, one));
+    const auto type = bit_and<uint64_t>(shift_right(buffer_), 3);
+    drop(add1(two));
+
+    switch (type)
+    {
+        case stored_block:
+        {
+            drop(bit_count_ % byte_bits);
+            state_ = state::stored_length;
+            return step::next;
+        }
+        case fixed_block:
+        {
+            literals_ = fixed().front();
+            distances_ = fixed().back();
+            state_ = state::codes;
+            return step::next;
+        }
+        case dynamic_block:
+        {
+            state_ = state::table;
+            return step::next;
+        }
+        default:
+        {
+            return step::invalid;
+        }
+    }
+}
+
+// Uncompressed block, byte aligned (rfc1951 3.2.4).
+inflater::step inflater::stored_length() NOEXCEPT
+{
+    if (bit_count_ < stored_length_bits)
+        return step::more;
+
+    const auto length = bit_and<uint64_t>(buffer_, max_uint16);
+    const auto complement = bit_and<uint64_t>(shift_right(buffer_,
+        bits<uint16_t>), max_uint16);
+
+    if (length != bit_xor<uint64_t>(complement, max_uint16))
+        return step::invalid;
+
+    drop(stored_length_bits);
+    remaining_ = possible_narrow_cast<size_t>(length);
+    state_ = state::stored_copy;
+    return step::next;
+}
+
+inflater::step inflater::stored_copy() NOEXCEPT
+{
+    if (is_zero(remaining_))
+    {
+        state_ = last_ ? state::done : state::header;
+        return step::next;
+    }
+
+    const auto size = std::min({ remaining_, size_ - position_,
+        limit_ - produced_ });
+
+    if (is_zero(size))
+        return step::more;
+
+    const auto begin = std::next(in_, position_);
+    window_.insert(window_.end(), begin, std::next(begin, size));
+    position_ += size;
+    produced_ += size;
+    remaining_ -= size;
+    return step::next;
+}
+
+// Dynamic Huffman code counts (rfc1951 3.2.7).
+inflater::step inflater::table() NOEXCEPT
+{
+    constexpr auto width = literal_count_bits + distance_count_bits +
+        length_count_bits;
+
+    if (bit_count_ < width)
+        return step::more;
+
+    literal_count_ = possible_narrow_cast<size_t>(bit_and<uint64_t>(buffer_,
+        sub1(power2(literal_count_bits)))) + first_length;
+    distance_count_ = possible_narrow_cast<size_t>(bit_and<uint64_t>(
+        shift_right(buffer_, literal_count_bits),
+        sub1(power2(distance_count_bits)))) + one;
+    length_count_ = possible_narrow_cast<size_t>(bit_and<uint64_t>(
+        shift_right(buffer_, literal_count_bits + distance_count_bits),
+        sub1(power2(length_count_bits)))) + minimum_length_count;
+
+    drop(width);
+    if (literal_count_ > literal_limit || distance_count_ > distance_codes)
+        return step::invalid;
+
+    index_ = zero;
+    lengths_.fill(0_u8);
+    state_ = state::code_lengths;
+    return step::next;
+}
+
+// Code length code lengths (rfc1951 3.2.7).
+inflater::step inflater::code_lengths() NOEXCEPT
+{
+    for (; index_ < length_count_; ++index_)
+    {
+        if (bit_count_ < code_length_bits)
+            return step::more;
+
+        const auto length = bit_and<uint64_t>(buffer_,
+            sub1(power2(code_length_bits)));
+
+        lengths_[length_order[index_]] = narrow_cast<uint8_t>(length);
+        drop(code_length_bits);
+    }
+
+    if (!build(code_lengths_, lengths_.data(), length_codes) ||
+        !complete(code_lengths_, false))
+        return step::invalid;
+
+    index_ = zero;
+    lengths_.fill(0_u8);
+    state_ = state::lengths;
+    return step::next;
+}
+
+// Literal/length and distance code lengths (rfc1951 3.2.7).
+inflater::step inflater::lengths() NOEXCEPT
+{
+    const auto total = literal_count_ + distance_count_;
+    while (index_ < total)
+    {
+        size_t symbol{}, length{};
+        const auto found = decode(symbol, length, code_lengths_, buffer_,
+            bit_count_);
+
+        if (found != decoded::found)
+            return found == decoded::more ? step::more : step::invalid;
+
+        if (symbol < repeat_previous)
+        {
+            drop(length);
+            lengths_[index_++] = narrow_cast<uint8_t>(symbol);
+            continue;
+        }
+
+        const auto kind = symbol - repeat_previous;
+        const size_t extra = repeat_extra[kind];
+        if (bit_count_ < length + extra)
+            return step::more;
+
+        if (symbol == repeat_previous && is_zero(index_))
+            return step::invalid;
+
+        const auto value = (symbol == repeat_previous) ?
+            lengths_[sub1(index_)] : 0_u8;
+
+        auto repeat = repeat_base[kind] + possible_narrow_cast<size_t>(
+            bit_and<uint64_t>(shift_right(buffer_, length),
+                sub1(power2(extra))));
+
+        if (repeat > total - index_)
+            return step::invalid;
+
+        drop(length + extra);
+        while (!is_zero(repeat--))
+            lengths_[index_++] = value;
+    }
+
+    if (is_zero(lengths_[end_of_block]))
+        return step::invalid;
+
+    const auto distance_lengths = std::next(lengths_.data(), literal_count_);
+    if (!build(literals_, lengths_.data(), literal_count_) ||
+        !build(distances_, distance_lengths, distance_count_) ||
+        !complete(literals_, true) || !complete(distances_, true))
+        return step::invalid;
+
+    state_ = state::codes;
+    return step::next;
+}
+
+// Literals and length/distance pairs, each decoded whole (rfc1951 3.2.5).
+inflater::step inflater::codes() NOEXCEPT
+{
+    while (!full())
+    {
+        size_t symbol{}, length{};
+        auto found = decode(symbol, length, literals_, buffer_, bit_count_);
+        if (found != decoded::found)
+            return found == decoded::more ? step::more : step::invalid;
+
+        if (symbol < end_of_block)
+        {
+            drop(length);
+            window_.push_back(narrow_cast<uint8_t>(symbol));
+            ++produced_;
+            continue;
+        }
+
+        if (symbol == end_of_block)
+        {
+            drop(length);
+            state_ = last_ ? state::done : state::header;
+            return step::next;
+        }
+
+        const auto index = symbol - first_length;
+        if (index >= length_base.size())
+            return step::invalid;
+
+        auto used = length;
+        const size_t length_extra_bits = length_extra[index];
+        if (bit_count_ < used + length_extra_bits)
+            return step::more;
+
+        const auto size = length_base[index] + possible_narrow_cast<size_t>(
+            bit_and<uint64_t>(shift_right(buffer_, used),
+                sub1(power2(length_extra_bits))));
+
+        used += length_extra_bits;
+        size_t code{};
+        found = decode(code, length, distances_, shift_right(buffer_, used),
+            bit_count_ - used);
+
+        if (found != decoded::found)
+            return found == decoded::more ? step::more : step::invalid;
+
+        if (code >= distance_codes)
+            return step::invalid;
+
+        used += length;
+        const size_t distance_extra_bits = distance_extra[code];
+        if (bit_count_ < used + distance_extra_bits)
+            return step::more;
+
+        const auto distance = distance_base[code] + possible_narrow_cast<size_t>(
+            bit_and<uint64_t>(shift_right(buffer_, used),
+                sub1(power2(distance_extra_bits))));
+
+        if (distance > window_.size())
+            return step::invalid;
+
+        drop(used + distance_extra_bits);
+        for (size_t byte{}; byte < size; ++byte)
+        {
+            const auto value = window_[window_.size() - distance];
+            window_.push_back(value);
+        }
+
+        produced_ += size;
+    }
+
+    return step::next;
+}
 
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
+
+// One-shot.
+// ----------------------------------------------------------------------------
+
+// Decoding pauses past the limit, which then fails.
+static size_t pause_of(size_t limit) NOEXCEPT
+{
+    return is_zero(limit) || limit == max_size_t ? zero : add1(limit);
+}
 
 bool inflate(data_chunk& out, const data_slice& in, size_t limit) NOEXCEPT
 {
@@ -374,12 +590,12 @@ bool inflate(data_chunk& out, const data_slice& in, size_t limit) NOEXCEPT
 bool inflate(data_chunk& out, size_t& consumed, const data_slice& in,
     size_t limit) NOEXCEPT
 {
-    inflater decoder{ out, in, limit };
-    if (!decoder.inflate())
+    out.clear();
+    inflater decoder{};
+    if (!decoder.write(out, consumed, in, pause_of(limit)) || !decoder.done())
         return false;
 
-    consumed = decoder.consumed();
-    return true;
+    return is_zero(limit) || out.size() <= limit;
 }
 
 } // namespace system

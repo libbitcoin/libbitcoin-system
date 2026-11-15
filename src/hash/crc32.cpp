@@ -20,6 +20,7 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 // based on:
@@ -50,17 +51,33 @@ constexpr auto table = []() NOEXCEPT
     return out;
 }();
 
-uint32_t crc32(const data_slice& data) NOEXCEPT
+// Carryless multiplication folds 16 byte blocks, from four blocks.
+constexpr size_t fold_block = 16;
+constexpr size_t fold_minimum = 4u * fold_block;
+constexpr auto use_clmul = have_aes && have_128;
+
+uint32_t crc32(const data_slice& data, uint32_t crc) NOEXCEPT
 {
-    auto crc = max_uint32;
-    for (const auto byte: data)
+    auto value = bit_not(crc);
+    auto it = data.begin();
+    if constexpr (use_clmul)
     {
-        const auto index = bit_and(bit_xor(crc, wide_cast<uint32_t>(byte)),
-            wide_cast<uint32_t>(max_uint8));
-        crc = bit_xor(table.at(index), shift_right(crc, byte_bits));
+        if (data.size() >= fold_minimum)
+        {
+            const auto size = data.size() - data.size() % fold_block;
+            value = crc::checksum(value, it, size);
+            it = std::next(it, size);
+        }
     }
 
-    return bit_not(crc);
+    for (; it != data.end(); ++it)
+    {
+        const auto index = bit_and<uint32_t>(bit_xor<uint32_t>(value, *it),
+            max_uint8);
+        value = bit_xor(table.at(index), shift_right(value, byte_bits));
+    }
+
+    return bit_not(value);
 }
 
 } // namespace system

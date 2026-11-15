@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_INTRINSICS_NEON_128_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/count.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 
@@ -460,6 +461,20 @@ INLINE bool any(xint128_t a) NOEXCEPT
 {
     const auto halves = vorr_u32(vget_low_u32(a), vget_high_u32(a));
     return !is_zero(vget_lane_u32(vpmax_u32(halves, halves), 0));
+}
+
+// The index of the first unequal byte, or the word size if equal.
+// Each byte of the comparison narrows to a four bit nibble of the mask.
+INLINE size_t first_unequal(xint128_t a, xint128_t b) NOEXCEPT
+{
+    constexpr auto nibble = to_half(byte_bits);
+    const auto equal = vceqq_u8(vreinterpretq_u8_u32(a),
+        vreinterpretq_u8_u32(b));
+    const auto narrowed = vshrn_n_u16(vreinterpretq_u16_u8(vmvnq_u8(equal)),
+        nibble);
+    const auto unequal = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);
+    return is_zero(unequal) ? sizeof(xint128_t) :
+        sign_cast<size_t>(count_right_zeros(unequal)) / nibble;
 }
 
 /// gather

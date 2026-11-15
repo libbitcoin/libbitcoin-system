@@ -25,8 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// CRC-32 (ISO-HDLC) as used by zlib and png (rfc1952).
-BC_API uint32_t crc32(const data_slice& data) NOEXCEPT;
+/// CRC-32 (ISO-HDLC) as used by zlib and png (rfc1952), continuing crc.
+BC_API uint32_t crc32(const data_slice& data, uint32_t crc=0) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

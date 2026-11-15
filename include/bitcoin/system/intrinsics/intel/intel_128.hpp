@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_INTRINSICS_INTEL_128_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/count.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
@@ -393,6 +394,18 @@ INLINE xint128_t select(xint128_t mask, xint128_t a, xint128_t b) NOEXCEPT
 INLINE bool any(xint128_t a) NOEXCEPT
 {
     return is_zero(_mm_testz_si128(a, a));
+}
+
+// SSE2
+// The index of the first unequal byte, or the word size if equal.
+INLINE size_t first_unequal(xint128_t a, xint128_t b) NOEXCEPT
+{
+    const auto equal = _mm_movemask_epi8(_mm_cmpeq_epi8(a, b));
+    const auto unequal = bit_xor<uint32_t>(sign_cast<uint32_t>(equal),
+        max_uint16);
+
+    return is_zero(unequal) ? sizeof(xint128_t) :
+        sign_cast<size_t>(count_right_zeros(unequal));
 }
 
 /// gather
