@@ -24,6 +24,59 @@ BC_AUTO_TEST_SUITE(zlib_tests)
 const auto fox = to_chunk(std::string{ "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. " });
 const auto fox_zlib = base16_chunk("789c0bc94855282ccd4cce56482aca2fcf5348cbaf50c82acd2d2856c82f4b2d5228014ae72456552aa4e4a7eb29840c0ec500fa60409d");
 
+
+// The output of a decoder fed one byte at a time, false if invalid or
+// incomplete.
+template <typename Decoder>
+static bool fed(data_chunk& out, const data_chunk& data)
+{
+    Decoder decoder{};
+    for (const auto byte: data)
+    {
+        size_t consumed{};
+        if (!decoder.write(out, consumed, data_chunk{ byte }))
+            return false;
+    }
+
+    return decoder.done();
+}
+
+// The stream of data written to an encoder in parts of step bytes.
+template <typename Encoder>
+static data_chunk written(const data_chunk& data, size_t step)
+{
+    data_chunk out{};
+    Encoder encoder{};
+    for (size_t offset{}; offset < data.size(); offset += step)
+    {
+        const auto size = std::min(step, data.size() - offset);
+        const auto begin = std::next(data.begin(), offset);
+        encoder.write(out, data_slice(begin, std::next(begin, size)));
+    }
+
+    encoder.flush(out);
+    return out;
+}
+
+BC_AUTO_TEST_CASE(zlib_inflater__bytewise__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(fed<zlib_inflater>(out, fox_zlib));
+    BC_REQUIRE_EQUAL(out, fox);
+}
+
+BC_AUTO_TEST_CASE(zlib_inflater__bytewise_bad_check__false)
+{
+    data_chunk out{};
+    BC_REQUIRE(!fed<zlib_inflater>(out, base16_chunk("789c030000000002")));
+}
+
+BC_AUTO_TEST_CASE(zlib_deflater__written_parts__zlib_deflate)
+{
+    const data_chunk data(70000, 'z');
+    BC_REQUIRE_EQUAL(written<zlib_deflater>(data, 4096), zlib_deflate(data));
+}
+
 BC_AUTO_TEST_CASE(zlib_deflate__empty__expected)
 {
     BC_REQUIRE_EQUAL(zlib_deflate(data_chunk{}), base16_chunk("789c030000000001"));

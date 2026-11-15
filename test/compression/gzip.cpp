@@ -28,6 +28,66 @@ const auto hello_header_crc = base16_chunk("1f8b08020000000000ff90c9cb48cdc9c957
 const auto hello_extra_comment = base16_chunk("1f8b08140000000000ff03006162636e6f746500cb48cdc9c95728cf2fca49010085114a0d0b000000");
 const auto bang_gzip = base16_chunk("1f8b08000000000002ff530400d3ff6b9e01000000");
 
+
+// The output of a decoder fed one byte at a time, false if invalid or
+// incomplete.
+template <typename Decoder>
+static bool fed(data_chunk& out, const data_chunk& data)
+{
+    Decoder decoder{};
+    for (const auto byte: data)
+    {
+        size_t consumed{};
+        if (!decoder.write(out, consumed, data_chunk{ byte }))
+            return false;
+    }
+
+    return decoder.done();
+}
+
+// The stream of data written to an encoder in parts of step bytes.
+template <typename Encoder>
+static data_chunk written(const data_chunk& data, size_t step)
+{
+    data_chunk out{};
+    Encoder encoder{};
+    for (size_t offset{}; offset < data.size(); offset += step)
+    {
+        const auto size = std::min(step, data.size() - offset);
+        const auto begin = std::next(data.begin(), offset);
+        encoder.write(out, data_slice(begin, std::next(begin, size)));
+    }
+
+    encoder.flush(out);
+    return out;
+}
+
+BC_AUTO_TEST_CASE(gzip_inflater__bytewise_members__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(fed<gzip_inflater>(out, splice(hello_gzip, bang_gzip)));
+    BC_REQUIRE_EQUAL(out, to_chunk(std::string{ "hello world!" }));
+}
+
+BC_AUTO_TEST_CASE(gzip_inflater__bytewise_header_crc__expected)
+{
+    data_chunk out{};
+    BC_REQUIRE(fed<gzip_inflater>(out, hello_header_crc));
+    BC_REQUIRE_EQUAL(out, hello);
+}
+
+BC_AUTO_TEST_CASE(gzip_inflater__bytewise_partial_member__incomplete)
+{
+    data_chunk out{};
+    BC_REQUIRE(!fed<gzip_inflater>(out, splice(hello_gzip, base16_chunk("1f8b"))));
+}
+
+BC_AUTO_TEST_CASE(gzip_deflater__written_parts__gzip_deflate)
+{
+    const data_chunk data(70000, 'g');
+    BC_REQUIRE_EQUAL(written<gzip_deflater>(data, 4096), gzip_deflate(data));
+}
+
 BC_AUTO_TEST_CASE(gzip_deflate__empty__expected)
 {
     BC_REQUIRE_EQUAL(gzip_deflate(data_chunk{}), base16_chunk("1f8b08000000000000ff03000000000000000000"));
