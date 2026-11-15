@@ -24,6 +24,7 @@
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "rfc1951.hpp"
 
@@ -35,6 +36,7 @@ using namespace rfc1951;
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 // Match search: hash of minimum_match bytes, chained within the window.
 constexpr size_t hash_bits = 15;
@@ -562,6 +564,31 @@ static void write_block(stream_writer& writer, const lz_symbols& data,
     write_symbols(writer, data, begin, end, literals, distances);
 }
 
+// Compares whole words, advancing length past equal bytes, false if unequal.
+template <typename xWord>
+INLINE bool match_words(size_t& length, const uint8_t* left,
+    const uint8_t* right, size_t limit) NOEXCEPT
+{
+    if constexpr (have<xWord>)
+    {
+        constexpr auto bytes = sizeof(xWord);
+        for (; limit - length >= bytes; length += bytes)
+        {
+            const auto index = f::first_unequal(
+                f::load<xWord>(std::next(left, length)),
+                f::load<xWord>(std::next(right, length)));
+
+            if (index < bytes)
+            {
+                length += index;
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 // The length of the match at candidate to that at position, up to limit, or
 // zero if the byte at best differs (the match cannot exceed best).
 static size_t match_length(const data_chunk& window, size_t candidate,
@@ -571,9 +598,13 @@ static size_t match_length(const data_chunk& window, size_t candidate,
         return zero;
 
     size_t length{};
-    while (length < limit &&
-        window[candidate + length] == window[position + length])
-        ++length;
+    const auto left = std::next(window.data(), candidate);
+    const auto right = std::next(window.data(), position);
+    if (match_words<xint512_t>(length, left, right, limit) &&
+        match_words<xint256_t>(length, left, right, limit) &&
+        match_words<xint128_t>(length, left, right, limit))
+        while (length < limit && left[length] == right[length])
+            ++length;
 
     return length;
 }
@@ -706,6 +737,7 @@ void deflater::emit(data_chunk& out, bool last) NOEXCEPT
     raw_.clear();
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

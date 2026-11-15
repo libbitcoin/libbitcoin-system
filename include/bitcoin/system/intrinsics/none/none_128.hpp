@@ -157,6 +157,11 @@ INLINE bool any(xint128_t) NOEXCEPT
     return false;
 }
 
+INLINE size_t first_unequal(xint128_t, xint128_t) NOEXCEPT
+{
+    return {};
+}
+
 /// gather
 /// ---------------------------------------------------------------------------
 

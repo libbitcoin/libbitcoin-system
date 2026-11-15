@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_INTRINSICS_INTEL_512_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/count.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
@@ -438,6 +439,15 @@ INLINE xint512_t select(xint512_t mask, xint512_t a, xint512_t b) NOEXCEPT
 INLINE bool any(xint512_t a) NOEXCEPT
 {
     return !is_zero(_mm512_test_epi64_mask(a, a));
+}
+
+// AVX512BW
+// The index of the first unequal byte, or the word size if equal.
+INLINE size_t first_unequal(xint512_t a, xint512_t b) NOEXCEPT
+{
+    const uint64_t unequal = _mm512_cmpneq_epi8_mask(a, b);
+    return is_zero(unequal) ? sizeof(xint512_t) :
+        sign_cast<size_t>(count_right_zeros(unequal));
 }
 
 /// gather
