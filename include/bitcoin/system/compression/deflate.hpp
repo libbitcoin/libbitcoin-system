@@ -25,8 +25,42 @@
 namespace libbitcoin {
 namespace system {
 
-/// Raw deflate (rfc1951) encode, each block stored, fixed or dynamic Huffman,
-/// whichever is smallest.
+/// Not thread safe.
+/// Raw deflate (rfc1951) encoder of a stream written in parts, each block
+/// stored, fixed or dynamic Huffman, whichever is smallest. Memory is bounded
+/// by the window and one block, independent of the stream size.
+class BC_API deflater
+{
+public:
+    DEFAULT_COPY_MOVE_DESTRUCT(deflater);
+
+    deflater() NOEXCEPT;
+
+    /// Encode data, appending completed output to out.
+    void write(data_chunk& out, const data_slice& data) NOEXCEPT;
+
+    /// Encode the remainder and end the stream, appending to out, after
+    /// which another stream may be written.
+    void flush(data_chunk& out) NOEXCEPT;
+
+private:
+    void insert(size_t position) NOEXCEPT;
+    void slide() NOEXCEPT;
+    void tokenize(data_chunk& out, bool final) NOEXCEPT;
+    void add(data_chunk& out, uint32_t symbol, size_t size) NOEXCEPT;
+    void emit(data_chunk& out, bool last) NOEXCEPT;
+
+    data_chunk window_{};
+    std_vector<uint32_t> heads_;
+    std_vector<uint32_t> chains_;
+    std_vector<uint32_t> symbols_{};
+    data_chunk raw_{};
+    size_t position_{};
+    size_t buffer_{};
+    size_t bit_count_{};
+};
+
+/// Raw deflate (rfc1951) encode of the entire input.
 BC_API data_chunk deflate(const data_slice& in) NOEXCEPT;
 
 } // namespace system
