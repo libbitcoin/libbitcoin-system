@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LIBRARY_HPP
 #define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LIBRARY_HPP
 
+#include <bitcoin/system/compression/compression.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include "inflate.hpp"
 #include "ptx.hpp"
 
 #if !defined(HAVE_WINDOWS)
@@ -145,8 +145,13 @@ inline bool resolve(functions& out, void* library) NOEXCEPT
 
 inline bool inflate(std::string& out) NOEXCEPT
 {
-    out.assign(ptx_size(), '\0');
-    return inflater{ deflated_ptx(), out }.inflate();
+    data_chunk inflated{};
+    if (!system::inflate(inflated, deflated_ptx(), ptx_size()) ||
+        inflated.size() != ptx_size())
+        return false;
+
+    out = to_string(inflated);
+    return true;
 }
 
 BC_POP_WARNING()

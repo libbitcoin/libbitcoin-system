@@ -89,9 +89,6 @@ constexpr size_t max_block_bytes = max_uint16;
 constexpr auto block_overhead = sizeof(block_header) + sizeof(uint16_t) +
     sizeof(uint16_t);
 
-// Adler-32 modulus, the largest prime less than 2^16.
-constexpr uint32_t adler_modulus = 65521;
-
 // Size of the zlib stream of stored blocks for the given filtered data size.
 constexpr size_t stream_size(size_t raw) NOEXCEPT
 {
@@ -109,19 +106,6 @@ static_assert(stream_size(two * image_limit) <= max_chunk_bytes,
     "PNG image data must fit in one chunk.");
 
 size_t png::max_image_bytes = image_limit;
-
-static uint32_t adler32(const data_chunk& data) NOEXCEPT
-{
-    uint32_t low{ 1 };
-    uint32_t high{ 0 };
-    for (const auto byte: data)
-    {
-        low = (low + byte) % adler_modulus;
-        high = (high + low) % adler_modulus;
-    }
-
-    return bit_or(shift_left(high, bits<uint16_t>), low);
-}
 
 // Chunk is the type followed by the data, both of which the crc covers.
 static void write_chunk(write::bytes::ostream& writer,
