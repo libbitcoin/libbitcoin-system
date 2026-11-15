@@ -247,7 +247,7 @@ bool inflater::write(data_chunk& out, size_t& consumed, const data_slice& in,
     limit_ = is_zero(limit) ? max_size_t : limit;
     const auto history = window_.size();
 
-    auto valid = true;
+    auto valid = true, starved = false;
     while (valid && state_ != state::done && !full())
     {
         step result{};
@@ -267,10 +267,15 @@ bool inflater::write(data_chunk& out, size_t& consumed, const data_slice& in,
             valid = false;
         else if (result == step::more &&
             (state_ == state::stored_copy || !pull()))
+        {
+            starved = true;
             break;
+        }
     }
 
-    restore();
+    // The bits of a step starved of input are retained for its completion.
+    if (!starved)
+        restore();
     const auto begin = std::next(window_.begin(), history);
     out.insert(out.end(), begin, window_.end());
     if (window_.size() > window_size)
