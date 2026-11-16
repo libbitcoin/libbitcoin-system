@@ -71,6 +71,14 @@ bool label(pool::report_t& out, const std::span<uint32_t>& cells,
     const std::span<const uint32_t>& rows,
     const std::span<const uint32_t>& rivals) NOEXCEPT;
 
+/// Settle the pool cells in place on gpu, with passes and transfer reported.
+/// False if gpu is not available, cannot hold the columns, or failed, which
+/// disables it.
+bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT;
+
 } // namespace cuda
 } // namespace secp256k1
 } // namespace system

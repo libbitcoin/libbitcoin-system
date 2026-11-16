@@ -188,35 +188,16 @@ public:
         const std::span<const uint32_t>& rows,
         const std::span<const uint32_t>& rivals) NOEXCEPT
     {
-        turn turn{ turns_, false };
-        if (failed_.load() || !pooled_ || cells.empty() || rows.empty())
-            return false;
+        return scan(out, label_, cells, edges, rows, rivals);
+    }
 
-        using clock = std::chrono::steady_clock;
-        const auto start = clock::now();
-        pointer_t base{};
-        const pool_layout columns{ cells.size(), rows.size() };
-        if (call_.context_current(context_) != success ||
-            call_.allocate(&base, columns.bytes) != success)
-            return false;
-
-        size_t passes{};
-        pool::report_t::duration transfer{ clock::now() - start };
-        const auto result = label(passes, transfer, base, columns, cells,
-            edges, rows, rivals);
-
-        const auto finish = clock::now();
-        call_.deallocate(base);
-        transfer += clock::now() - finish;
-        if (result != success)
-        {
-            failed_.store(true);
-            return false;
-        }
-
-        out.passes = passes;
-        out.transfer = transfer;
-        return true;
+    /// Settle the pool cells in place, false if not available or on failure.
+    bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
+        const std::span<const pool_layout::edges_t>& edges,
+        const std::span<const uint32_t>& rows,
+        const std::span<const uint32_t>& rivals) NOEXCEPT
+    {
+        return scan(out, settle_, cells, edges, rows, rivals);
     }
 
 private:
@@ -486,10 +467,57 @@ private:
             parameters, nullptr);
     }
 
-    // Stage the pool columns, label to the fixed point and return the cells.
-    result_t label(size_t& passes, pool::report_t::duration& transfer,
-        pointer_t base, const pool_layout& columns,
+    // Kernels of a pool scan: once over the rows, once over the inputs, and
+    // over the inputs to the fixed point.
+    struct pool_kernels
+    {
+        handle_t rows;
+        handle_t inputs;
+        handle_t pass;
+    };
+
+    // Scan the pool cells in place, with passes and transfer reported.
+    bool scan(pool::report_t& out, const pool_kernels& kernels,
         const std::span<uint32_t>& cells,
+        const std::span<const pool_layout::edges_t>& edges,
+        const std::span<const uint32_t>& rows,
+        const std::span<const uint32_t>& rivals) NOEXCEPT
+    {
+        turn turn{ turns_, false };
+        if (failed_.load() || !pooled_ || cells.empty() || rows.empty())
+            return false;
+
+        using clock = std::chrono::steady_clock;
+        const auto start = clock::now();
+        pointer_t base{};
+        const pool_layout columns{ cells.size(), rows.size() };
+        if (call_.context_current(context_) != success ||
+            call_.allocate(&base, columns.bytes) != success)
+            return false;
+
+        size_t passes{};
+        pool::report_t::duration transfer{ clock::now() - start };
+        const auto result = scan(passes, transfer, base, columns, kernels,
+            cells, edges, rows, rivals);
+
+        const auto finish = clock::now();
+        call_.deallocate(base);
+        transfer += clock::now() - finish;
+        if (result != success)
+        {
+            failed_.store(true);
+            return false;
+        }
+
+        out.passes = passes;
+        out.transfer = transfer;
+        return true;
+    }
+
+    // Stage the pool columns, scan to the fixed point and return the cells.
+    result_t scan(size_t& passes, pool::report_t::duration& transfer,
+        pointer_t base, const pool_layout& columns,
+        const pool_kernels& kernels, const std::span<uint32_t>& cells,
         const std::span<const pool_layout::edges_t>& edges,
         const std::span<const uint32_t>& rows,
         const std::span<const uint32_t>& rivals) NOEXCEPT
@@ -528,9 +556,9 @@ private:
 
         transfer += clock::now() - upload;
         if (result == success)
-            result = launch(prepare_, cells.size(), stream, parameters);
+            result = launch(kernels.rows, cells.size(), stream, parameters);
         if (result == success)
-            result = launch(seed_, rows.size(), stream, parameters);
+            result = launch(kernels.inputs, rows.size(), stream, parameters);
 
         constexpr uint32_t clear{};
         uint32_t changed{ 1 };
@@ -539,7 +567,8 @@ private:
             ++passes;
             result = call_.copy_to_async(flag, &clear, sizeof(clear), stream);
             if (result == success)
-                result = launch(label_, rows.size(), stream, parameters);
+                result = launch(kernels.pass, rows.size(), stream,
+                    parameters);
             if (result == success)
                 result = call_.copy_from_async(&changed, flag,
                     sizeof(changed), stream);
@@ -625,8 +654,12 @@ private:
             return call_.module_function(&out, module_, name) == success;
         };
 
-        pooled_ = found(prepare_, "prepare_pool") &&
-            found(seed_, "seed_pool") && found(label_, "label_pool");
+        pooled_ = found(label_.rows, "prepare_pool") &&
+            found(label_.inputs, "seed_pool") &&
+            found(label_.pass, "label_pool") &&
+            found(settle_.rows, "reduce_pool") &&
+            found(settle_.inputs, "contest_pool") &&
+            found(settle_.pass, "descend_pool");
 
         const auto bytes = std::min(maximum_bytes, free / memory_share);
         half_bytes_ = bytes / two;
@@ -819,9 +852,8 @@ private:
     handle_t schnorr_{};
     handle_t scan_{};
     handle_t silent_{};
-    handle_t prepare_{};
-    handle_t seed_{};
-    handle_t label_{};
+    pool_kernels label_{};
+    pool_kernels settle_{};
     pointer_t staging_{};
     size_t half_bytes_{};
     std_array<handle_t, two> streams_{};

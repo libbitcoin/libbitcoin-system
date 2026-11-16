@@ -91,7 +91,7 @@ struct scan_arguments
 };
 
 /// Arguments of the pool kernels, columns in device memory. Owners is the
-/// row of each input, written by prepare_pool.
+/// row of each input, written by prepare_pool and reduce_pool.
 struct pool_arguments
 {
     uint32_t* cells;

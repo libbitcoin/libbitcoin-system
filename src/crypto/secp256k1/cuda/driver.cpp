@@ -94,6 +94,15 @@ bool label(pool::report_t& out, const std::span<uint32_t>& cells,
         context::instance().label(out, cells, edges, rows, rivals);
 }
 
+bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT
+{
+    return available() &&
+        context::instance().settle(out, cells, edges, rows, rivals);
+}
+
 #else
 
 bool compiled() NOEXCEPT
@@ -136,6 +145,14 @@ bool compute(const stopper&, const std::span<ec_compressed>&,
 }
 
 bool label(pool::report_t&, const std::span<uint32_t>&,
+    const std::span<const pool::algorithm::edges_t>&,
+    const std::span<const uint32_t>&,
+    const std::span<const uint32_t>&) NOEXCEPT
+{
+    return false;
+}
+
+bool settle(pool::report_t&, const std::span<uint32_t>&,
     const std::span<const pool::algorithm::edges_t>&,
     const std::span<const uint32_t>&,
     const std::span<const uint32_t>&) NOEXCEPT

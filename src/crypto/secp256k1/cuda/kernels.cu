@@ -226,6 +226,17 @@ public:
         return holds(graph(arguments), owning, input) ? owning : row;
     }
 
+    /// The row as owner of its inputs.
+    static __device__ void own(const cuda::pool_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        const auto slice = edges(graph(arguments), row);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+            if (input < arguments.input_count)
+                arguments.owners[input] = row;
+    }
+
     /// A present cell made unlabeled, and the row as owner of its inputs.
     static __device__ void prepare(const cuda::pool_arguments& arguments,
         link_t row) NOEXCEPT
@@ -234,11 +245,7 @@ public:
         if (is_present(cell(columns, row)))
             set_cell(columns, row, unlabeled);
 
-        const auto slice = edges(columns, row);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-            if (input < arguments.input_count)
-                arguments.owners[input] = row;
+        own(arguments, row);
     }
 
     static __device__ void seed(const cuda::pool_arguments& arguments,
@@ -276,6 +283,64 @@ public:
 
         if (changed)
             *arguments.changed = 1;
+    }
+};
+
+class settler
+  : public labeler
+{
+public:
+    /// The cell without derived causes, and the row as owner of its inputs.
+    static __device__ void reduce(const cuda::pool_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        const auto columns = graph(arguments);
+        set_cell(columns, row, reduced(cell(columns, row)));
+        own(arguments, row);
+    }
+
+    static __device__ void contest(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (arguments.rivals[input] == none ||
+            !holds(graph(arguments), row, input))
+            return;
+
+        algorithm::contest(graph(arguments), row, input,
+            [&](link_t at) NOEXCEPT
+            {
+                return owner(arguments, at, row);
+            },
+            [&](link_t to, link_t value) NOEXCEPT
+            {
+                raise(arguments, to, value);
+            });
+    }
+
+    static __device__ void descend(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (!holds(graph(arguments), row, input))
+            return;
+
+        const auto changed = inherit(graph(arguments), row, input,
+            [&](link_t to, link_t value) NOEXCEPT
+            {
+                raise(arguments, to, value);
+            });
+
+        if (changed)
+            *arguments.changed = 1;
+    }
+
+protected:
+    // A scan raises one cause, so the raised cell is the greater.
+    static __device__ void raise(const cuda::pool_arguments& arguments,
+        link_t to, link_t value) NOEXCEPT
+    {
+        __nvvm_atom_max_gen_ui(&arguments.cells[to], to_column(value));
     }
 };
 
@@ -363,4 +428,25 @@ extern "C" __global__ void label_pool(cuda::pool_arguments arguments)
     const auto input = verifier::row();
     if (input < arguments.input_count)
         labeler::label(arguments, input);
+}
+
+extern "C" __global__ void reduce_pool(cuda::pool_arguments arguments)
+{
+    const auto row = verifier::row();
+    if (row < arguments.row_count)
+        settler::reduce(arguments, row);
+}
+
+extern "C" __global__ void contest_pool(cuda::pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        settler::contest(arguments, input);
+}
+
+extern "C" __global__ void descend_pool(cuda::pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        settler::descend(arguments, input);
 }

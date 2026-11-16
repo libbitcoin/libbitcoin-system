@@ -983,7 +983,6 @@ BC_AUTO_TEST_CASE(pool_algorithm__settle__wide__same_as_descend)
     BC_REQUIRE(out.cells == expected.cells);
     BC_REQUIRE_EQUAL(report.rows, wide_rows);
     BC_REQUIRE(is_nonzero(report.passes));
-    BC_REQUIRE(!report.device);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__settle__confirmed__same_as_frontier_confirm)
