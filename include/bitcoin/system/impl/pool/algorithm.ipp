@@ -53,6 +53,27 @@ constexpr bool algorithm::is_boundary(link_t cell) NOEXCEPT
     return cell == boundary;
 }
 
+constexpr bool algorithm::is_absent(link_t cell) NOEXCEPT
+{
+    return cell >= absent && cell < boundary;
+}
+
+constexpr algorithm::link_t algorithm::raised(link_t cell,
+    link_t cause) NOEXCEPT
+{
+    return bit_or(is_absent(cell) ? cell : absent, cause);
+}
+
+constexpr algorithm::link_t algorithm::lowered(link_t cell,
+    link_t cause) NOEXCEPT
+{
+    if (!is_absent(cell))
+        return cell;
+
+    const auto left = bit_and(cell, bit_not(cause));
+    return left == absent ? unlabeled : left;
+}
+
 constexpr uint64_t algorithm::chargeable(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
@@ -766,7 +787,7 @@ constexpr bool algorithm::confirmable(const graph_t& graph,
         ++input)
     {
         const auto up = parent(graph, input);
-        if (up != none && cell(graph, up) == absent)
+        if (up != none && is_absent(cell(graph, up)))
             return false;
 
         each_rival(graph, input, [&](link_t other) NOEXCEPT
@@ -1060,7 +1081,7 @@ inline void algorithm::restore(std::vector<link_t>& out,
     const columns_t& columns, link_t row) NOEXCEPT
 {
     const graph_t graph{ columns };
-    if (cell(graph, row) != absent || !confirmable(graph, row))
+    if (!is_absent(cell(graph, row)) || !confirmable(graph, row))
         return;
 
     set_cell(graph, row, unlabeled);

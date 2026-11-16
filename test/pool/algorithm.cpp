@@ -780,6 +780,237 @@ BC_AUTO_TEST_CASE(pool_algorithm__label__wide__same_as_propagate)
     BC_REQUIRE(out.cells == expected.cells);
 }
 
+// reset/descend (columns)
+// ----------------------------------------------------------------------------
+
+constexpr auto rivaled = bit_or(absent, accessor::rivaled);
+constexpr auto inherited = bit_or(absent, accessor::ancestor);
+constexpr auto conflicted = bit_or(absent, accessor::conflicted);
+constexpr auto insufficient = bit_or(absent, accessor::insufficient);
+
+// Absence over the columns at the lane width of the word (or integral).
+template <typename Word, typename State>
+static void settle(State& out) NOEXCEPT
+{
+    accessor::reset<Word>(out.columns());
+    while (accessor::descend<Word>(out.columns()));
+}
+
+// The wide table with row 0 confirmed and row 9 conflicted.
+template <typename Word>
+static wide_state settle_wide() NOEXCEPT
+{
+    wide_state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    out.cells[9] = accessor::to_column(conflicted);
+    settle<Word, wide_state>(out);
+    return out;
+}
+
+template <typename Word>
+static bool settles_wide_as_integral() NOEXCEPT
+{
+    return settle_wide<Word>().cells == settle_wide<link_t>().cells;
+}
+
+// The wide table with row 0 confirmed and row 9 conflicted, after one pass.
+template <typename Word>
+static wide_state descend_wide() NOEXCEPT
+{
+    wide_state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    out.cells[9] = accessor::to_column(conflicted);
+    accessor::reset<Word>(out.columns());
+    accessor::descend<Word>(out.columns());
+    return out;
+}
+
+template <typename Word>
+static bool descends_wide_as_integral() NOEXCEPT
+{
+    return descend_wide<Word>().cells == descend_wide<link_t>().cells;
+}
+
+// The cells agree on the state of each row, and on the labels of the present.
+template <typename State>
+static bool same_presence(const State& left, const State& right) NOEXCEPT
+{
+    for (size_t row{}; row < left.cells.size(); ++row)
+    {
+        const auto one_cell = cell(left.cells, row);
+        const auto other = cell(right.cells, row);
+        const auto present = accessor::is_present(one_cell);
+        if (present != accessor::is_present(other) ||
+            accessor::is_boundary(one_cell) != accessor::is_boundary(other) ||
+            (present && one_cell != other))
+            return false;
+    }
+
+    return true;
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__is_absent__cells__expected)
+{
+    BC_REQUIRE(!accessor::is_absent(0u));
+    BC_REQUIRE(!accessor::is_absent(unlabeled));
+    BC_REQUIRE(accessor::is_absent(absent));
+    BC_REQUIRE(accessor::is_absent(conflicted));
+    BC_REQUIRE(accessor::is_absent(bit_or(absent, accessor::derived)));
+    BC_REQUIRE(!accessor::is_absent(boundary));
+    BC_REQUIRE(!accessor::is_present(insufficient));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__raised__cells__expected)
+{
+    BC_REQUIRE_EQUAL(accessor::raised(0u, accessor::conflicted), conflicted);
+    BC_REQUIRE_EQUAL(accessor::raised(unlabeled, accessor::rivaled), rivaled);
+    BC_REQUIRE_EQUAL(accessor::raised(rivaled, accessor::conflicted), bit_or(rivaled, accessor::conflicted));
+    BC_REQUIRE_EQUAL(accessor::raised(conflicted, accessor::conflicted), conflicted);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__lowered__cells__expected)
+{
+    BC_REQUIRE_EQUAL(accessor::lowered(0u, accessor::conflicted), 0u);
+    BC_REQUIRE_EQUAL(accessor::lowered(boundary, accessor::conflicted), boundary);
+    BC_REQUIRE_EQUAL(accessor::lowered(conflicted, accessor::conflicted), unlabeled);
+    BC_REQUIRE_EQUAL(accessor::lowered(conflicted, accessor::rivaled), conflicted);
+    BC_REQUIRE_EQUAL(accessor::lowered(bit_or(rivaled, accessor::conflicted), accessor::conflicted), rivaled);
+    BC_REQUIRE_EQUAL(accessor::lowered(absent, accessor::conflicted), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__confirmed_rival__rival_and_its_child_absent)
+{
+    state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), boundary);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), rivaled);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 2)));
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 4)));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__rival_unconfirmed__all_present)
+{
+    state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    settle<link_t, state>(out);
+    out.cells[0] = accessor::to_column(unlabeled);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), unlabeled);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 2)));
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), unlabeled);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 4)));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__conflicted__kept_and_its_child_absent)
+{
+    state out{};
+    out.cells[1] = accessor::to_column(conflicted);
+    settle<link_t, state>(out);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 0)));
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), conflicted);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 2)));
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 4)));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__reset__conflict_cleared__present)
+{
+    state out{};
+    out.cells[1] = accessor::to_column(conflicted);
+    settle<link_t, state>(out);
+    out.cells[1] = accessor::to_column(absent);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__insufficient_with_confirmed_rival__both_causes)
+{
+    state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    out.cells[1] = accessor::to_column(insufficient);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), bit_or(insufficient, accessor::rivaled));
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__absent_parent_of_conflicted__both_causes)
+{
+    state out{};
+    out.cells[1] = accessor::to_column(conflicted);
+    out.cells[3] = accessor::to_column(conflicted);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), conflicted);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), bit_or(conflicted, accessor::ancestor));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__wide__expected)
+{
+    const auto out = settle_wide<link_t>();
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), boundary);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), rivaled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 4), inherited);
+    BC_REQUIRE_EQUAL(cell(out.cells, 7), inherited);
+    BC_REQUIRE_EQUAL(cell(out.cells, 9), conflicted);
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 2)));
+    BC_REQUIRE(accessor::is_present(cell(out.cells, 12)));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__wide_extended__same_as_integral)
+{
+    BC_REQUIRE(settles_wide_as_integral<xint128_t>());
+    BC_REQUIRE(settles_wide_as_integral<xint256_t>());
+    BC_REQUIRE(settles_wide_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__descend__wide_extended_one_pass__same_as_integral)
+{
+    BC_REQUIRE(descends_wide_as_integral<xint128_t>());
+    BC_REQUIRE(descends_wide_as_integral<xint256_t>());
+    BC_REQUIRE(descends_wide_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__settle__wide__same_as_descend)
+{
+    const auto expected = settle_wide<link_t>();
+    wide_state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    out.cells[9] = accessor::to_column(conflicted);
+    const auto report = pool::settle(out.columns());
+    BC_REQUIRE(out.cells == expected.cells);
+    BC_REQUIRE_EQUAL(report.rows, wide_rows);
+    BC_REQUIRE(is_nonzero(report.passes));
+    BC_REQUIRE(!report.device);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__settle__confirmed__same_as_frontier_confirm)
+{
+    auto frontier = label<link_t>();
+    auto out = label<link_t>();
+    accessor::confirm(frontier.columns(), 0);
+    out.cells[0] = accessor::to_column(boundary);
+    pool::settle(out.columns());
+    pool::label(out.columns());
+    BC_REQUIRE(same_presence(out, frontier));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__settle__unconfirmed__same_as_frontier_unconfirm)
+{
+    auto frontier = label<link_t>();
+    auto out = label<link_t>();
+    accessor::confirm(frontier.columns(), 0);
+    accessor::unconfirm(frontier.columns(), 0);
+    out.cells[0] = accessor::to_column(boundary);
+    pool::settle(out.columns());
+    out.cells[0] = accessor::to_column(unlabeled);
+    pool::settle(out.columns());
+    pool::label(out.columns());
+    BC_REQUIRE(same_presence(out, frontier));
+}
+
 // collect (frontier and columns)
 // ----------------------------------------------------------------------------
 

@@ -165,6 +165,21 @@ public:
     static constexpr link_t absent = add1(unlabeled);
     static constexpr link_t boundary = shift_left(absent, one);
 
+    /// Cause of absence (flag of an absent cell): a parent is absent.
+    static constexpr link_t ancestor = power2<link_t>(0u);
+
+    /// Cause of absence: a rival has confirmed.
+    static constexpr link_t rivaled = power2<link_t>(1u);
+
+    /// Cause of absence: a confirmed tx spends its point (a block conflict).
+    static constexpr link_t conflicted = power2<link_t>(2u);
+
+    /// Cause of absence: its context is not sufficient.
+    static constexpr link_t insufficient = power2<link_t>(3u);
+
+    /// The causes derived from the columns.
+    static constexpr link_t derived = bit_or(ancestor, rivaled);
+
     /// Cells.
     /// -----------------------------------------------------------------------
 
@@ -176,6 +191,15 @@ public:
 
     /// The row has confirmed.
     static constexpr bool is_boundary(link_t cell) NOEXCEPT;
+
+    /// The row cannot confirm, for the causes it carries.
+    static constexpr bool is_absent(link_t cell) NOEXCEPT;
+
+    /// The cell made absent for the cause.
+    static constexpr link_t raised(link_t cell, link_t cause) NOEXCEPT;
+
+    /// The absent cell without the cause, present if none remains.
+    static constexpr link_t lowered(link_t cell, link_t cause) NOEXCEPT;
 
     /// Chargeable size of a row (virtual size or sigops at bytes per sigop).
     static constexpr uint64_t chargeable(const totals_t& totals,
@@ -306,6 +330,14 @@ public:
     /// One pass of minimum label propagation, true if any cell changed.
     template <typename Word = xint512_t>
     static constexpr bool propagate(const columns_t& columns) NOEXCEPT;
+
+    /// Each absent cell left its stored causes, rivals of the confirmed absent.
+    template <typename Word = xint512_t>
+    static constexpr void reset(const columns_t& columns) NOEXCEPT;
+
+    /// One pass of absence from parents to children, true if any cell changed.
+    template <typename Word = xint512_t>
+    static constexpr bool descend(const columns_t& columns) NOEXCEPT;
 
     /// Rows with the label, false if more than maximum_members.
     template <typename Word = xint512_t>
@@ -441,6 +473,24 @@ protected:
     static constexpr bool exchange(const graph_t& graph, link_t row,
         link_t input) NOEXCEPT;
 
+    /// The cell without its derived causes, present if none remains.
+    static constexpr link_t reduced(link_t cell) NOEXCEPT;
+
+    /// The input's row made absent for a confirmed rival, true if changed.
+    template <typename Owner, typename Raise>
+    static constexpr bool contest(const graph_t& graph, link_t row,
+        link_t input, const Owner& owning, const Raise& raise) NOEXCEPT;
+
+    /// The input's row made absent for an absent parent, true if changed.
+    template <typename Raise>
+    static constexpr bool inherit(const graph_t& graph, link_t row,
+        link_t input, const Raise& raise) NOEXCEPT;
+
+    /// The contest and inherit of an input over the table columns alone.
+    static constexpr bool contest(const graph_t& graph, link_t input) NOEXCEPT;
+    static constexpr bool inherit(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
     /// Lanes of the stored words in native order (and the reverse).
     template <typename Word>
     INLINE static constexpr Word native(Word word) NOEXCEPT;
@@ -458,6 +508,15 @@ protected:
     static constexpr void seed_(size_t index, const graph_t& graph) NOEXCEPT;
     template <typename Word>
     static constexpr bool propagate_(size_t index, link_t& row,
+        const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr void reduce_(size_t index,
+        std::span<link_t> cells) NOEXCEPT;
+    template <typename Word>
+    static constexpr void contest_(size_t index,
+        const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr bool descend_(size_t index, link_t& row,
         const graph_t& graph) NOEXCEPT;
     template <typename Word>
     static constexpr bool collect_(size_t index, component_t& out,
@@ -479,5 +538,6 @@ protected:
 
 #include <bitcoin/system/impl/pool/algorithm.ipp>
 #include <bitcoin/system/impl/pool/label.ipp>
+#include <bitcoin/system/impl/pool/settle.ipp>
 
 #endif

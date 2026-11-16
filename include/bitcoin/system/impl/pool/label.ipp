@@ -88,14 +88,14 @@ constexpr void algorithm::seed(const graph_t& graph, link_t row, link_t input,
     if (cell(graph, row) != unlabeled)
         return;
 
-    auto rivaled = false;
+    auto contended = false;
     each_rival(graph, input, [&](link_t other) NOEXCEPT
     {
         if (is_present(cell(graph, owning(other))))
-            rivaled = true;
+            contended = true;
     });
 
-    if (rivaled)
+    if (contended)
         set_cell(graph, row, row);
 }
 
