@@ -24,26 +24,9 @@
 # --build-parallel=<int>       Number of jobs to run simultaneously.
 #                                Default: supported platforms use nproc/sysctl
 # --build-use-local-src        Use existing sources in relevant paths.
-# --hardware-optimized         Inform compiler to apply applicable optimizations for the host hardware.
 # --noninteractive             Disable any prompt using default.
 # --verbose                    Display verbose script output.
 # --help, -h                   Display usage, overriding script execution.
-#
-# Hardware configuration options for arm64:
-# --hardware-aes               Use ARM AES and PMULL Extensions.
-# --hardware-sha2              Use ARM SHA1/SHA256 Extensions (implies AES).
-# --hardware-sha3              Use ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES).
-#
-# Hardware configuration options for x64:
-# --hardware-avx2              Use Intel AVX2 intrinsics (implies AES-NI).
-# --hardware-avx512            Use Intel AVX512 intrinsics (implies AVX2 and AES-NI).
-# --hardware-avx512ifma        Use Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI).
-# --hardware-avxifma           Use Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI).
-# --hardware-shani             Use Intel SHA Extensions (implies AES-NI).
-# --hardware-sha512            Use Intel SHA512 Extensions (implies AVX2).
-# --hardware-sse41             Use SSE4.1 hardware instructions.
-# --hardware-aesni             Use Intel AES-NI and PCLMULQDQ intrinsics.
-# --hardware-vaes              Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2).
 #
 # Recognized pass-through options:
 # -Denable-shani=<ON/OFF>      Add Intel SHA Extensions (implies AES-NI) via compilation options.
@@ -113,18 +96,6 @@ main()
     for OPTION in "$@"; do
         case ${OPTION} in
             (--build-libsecp256k1)          BUILD_libsecp256k1="yes";;
-            (--hardware-aes)                HARDWARE_AES="yes";;
-            (--hardware-sha2)               HARDWARE_SHA2="yes";;
-            (--hardware-sha3)               HARDWARE_SHA3="yes";;
-            (--hardware-avx2)               HARDWARE_AVX2="yes";;
-            (--hardware-avx512)             HARDWARE_AVX512="yes";;
-            (--hardware-avx512ifma)         HARDWARE_AVX512IFMA="yes";;
-            (--hardware-avxifma)            HARDWARE_AVXIFMA="yes";;
-            (--hardware-shani)              HARDWARE_SHANI="yes";;
-            (--hardware-sha512)             HARDWARE_SHA512="yes";;
-            (--hardware-sse41)              HARDWARE_SSE41="yes";;
-            (--hardware-aesni)              HARDWARE_AESNI="yes";;
-            (--hardware-vaes)               HARDWARE_VAES="yes";;
             (--build-preset=*)              BUILD_PRESET="${OPTION#*=}";;
             (--build-src-dir=*)             BUILD_SRC_DIR="${OPTION#*=}";;
             (--build-limit=*)               BUILD_LIMIT="${OPTION#*=}";;
@@ -134,7 +105,6 @@ main()
             (--build-skip-test-run)         BUILD_SKIP_TEST_RUN="yes";;
             (--build-parallel=*)            PARALLEL="${OPTION#*=}";;
             (--build-use-local-src)         BUILD_USE_LOCAL_SRC="yes";;
-            (--hardware-optimized)          HARDWARE_OPTIMIZED="yes";;
             (--noninteractive)              NONINTERACTIVE="yes";;
             (--verbose)                     DISPLAY_VERBOSE="yes";;
             (--help|-h)                     DISPLAY_HELP="yes";;
@@ -157,23 +127,10 @@ main()
     remove_configure_option "--build-skip-test-run"
     remove_configure_option "--build-parallel=*"
     remove_configure_option "--build-use-local-src"
-    remove_configure_option "--hardware-optimized"
     remove_configure_option "--noninteractive"
     remove_configure_option "--verbose"
     remove_configure_option "--help"
     remove_configure_option "-h"
-    remove_configure_option "--hardware-aes"
-    remove_configure_option "--hardware-sha2"
-    remove_configure_option "--hardware-sha3"
-    remove_configure_option "--hardware-avx2"
-    remove_configure_option "--hardware-avx512"
-    remove_configure_option "--hardware-avx512ifma"
-    remove_configure_option "--hardware-avxifma"
-    remove_configure_option "--hardware-shani"
-    remove_configure_option "--hardware-sha512"
-    remove_configure_option "--hardware-sse41"
-    remove_configure_option "--hardware-aesni"
-    remove_configure_option "--hardware-vaes"
     CONFIGURE_OPTIONS_CMAKE=("${CONFIGURE_OPTIONS[@]}")
     msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
     msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
@@ -214,6 +171,22 @@ main()
         BUILD_LINK="static"
     elif [[ "${BUILD_PRESET}" == "nix-gnu-release-shared" ]]; then
         msg_verbose "BUILD_PRESET value 'nix-gnu-release-shared'."
+        BUILD_CONFIG="release"
+        BUILD_LINK="dynamic"
+    elif [[ "${BUILD_PRESET}" == "nix-gnu-debug-static-native" ]]; then
+        msg_verbose "BUILD_PRESET value 'nix-gnu-debug-static-native'."
+        BUILD_CONFIG="debug"
+        BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "nix-gnu-debug-shared-native" ]]; then
+        msg_verbose "BUILD_PRESET value 'nix-gnu-debug-shared-native'."
+        BUILD_CONFIG="debug"
+        BUILD_LINK="dynamic"
+    elif [[ "${BUILD_PRESET}" == "nix-gnu-release-static-native" ]]; then
+        msg_verbose "BUILD_PRESET value 'nix-gnu-release-static-native'."
+        BUILD_CONFIG="release"
+        BUILD_LINK="static"
+    elif [[ "${BUILD_PRESET}" == "nix-gnu-release-shared-native" ]]; then
+        msg_verbose "BUILD_PRESET value 'nix-gnu-release-shared-native'."
         BUILD_CONFIG="release"
         BUILD_LINK="dynamic"
     elif [[ "${BUILD_PRESET}" == "win-msvc-debug-static" ]]; then
@@ -456,138 +429,6 @@ main()
         msg_verbose "MACOSX_DEPLOYMENT_TARGET using defined value '${MACOSX_DEPLOYMENT_TARGET}'"
     fi
 
-    # HARDWARE_OPTIMIZED
-    if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
-        ARCHTUNE="-march=native -mtune=native"
-    fi
-
-    if [[ "${HARDWARE_SHA2}" == "yes" ]]; then
-        HARDWARE_AES="yes"
-    fi
-
-    if [[ "${HARDWARE_SHA3}" == "yes" ]]; then
-        HARDWARE_SHA2="yes"
-        HARDWARE_AES="yes"
-    fi
-
-    if [[ "${HARDWARE_AVX2}" == "yes" ]]; then
-        HARDWARE_AESNI="yes"
-    fi
-
-    if [[ "${HARDWARE_AVX512}" == "yes" ]]; then
-        HARDWARE_AVX2="yes"
-        HARDWARE_AESNI="yes"
-    fi
-
-    if [[ "${HARDWARE_AVX512IFMA}" == "yes" ]]; then
-        HARDWARE_AVX512="yes"
-        HARDWARE_AVX2="yes"
-        HARDWARE_SHANI="yes"
-        HARDWARE_AESNI="yes"
-    fi
-
-    if [[ "${HARDWARE_AVXIFMA}" == "yes" ]]; then
-        HARDWARE_AVX2="yes"
-        HARDWARE_SHANI="yes"
-        HARDWARE_AESNI="yes"
-    fi
-
-    if [[ "${HARDWARE_SHANI}" == "yes" ]]; then
-        HARDWARE_AESNI="yes"
-    fi
-
-    # Platform options: arm64
-
-    if [[ "${HARDWARE_AES}" == "yes" ]]; then
-        HARDWARE_PLATFORM_ARM64="yes"
-        ARCHBASE="armv8-a"
-        ARCHSUFFIX="${ARCHSUFFIX}+aes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-aes=ON" )
-    fi
-
-    if [[ "${HARDWARE_SHA2}" == "yes" ]]; then
-        HARDWARE_PLATFORM_ARM64="yes"
-        ARCHBASE="armv8-a"
-        ARCHSUFFIX="${ARCHSUFFIX}+sha2"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-sha2=ON" )
-    fi
-
-    if [[ "${HARDWARE_SHA3}" == "yes" ]]; then
-        HARDWARE_PLATFORM_ARM64="yes"
-        ARCHBASE="armv8.2-a"
-        ARCHSUFFIX="${ARCHSUFFIX}+sha3"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-sha3=ON" )
-    fi
-
-    if [[ ${HARDWARE_PLATFORM_ARM64} == "yes" ]]; then
-        ARCHTUNE="-march=${ARCHBASE}${ARCHSUFFIX}"
-    fi
-
-    # Platform options: x64
-
-    if [[ "${HARDWARE_AVX2}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-avx2=ON" )
-    fi
-
-    if [[ "${HARDWARE_AVX512}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-avx512=ON" )
-    fi
-
-    if [[ "${HARDWARE_AVX512IFMA}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-avx512ifma=ON" )
-    fi
-
-    if [[ "${HARDWARE_AVXIFMA}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-avxifma=ON" )
-    fi
-
-    if [[ "${HARDWARE_SHANI}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-shani=ON" )
-    fi
-
-    if [[ "${HARDWARE_SHA512}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-sha512=ON" )
-    fi
-
-    if [[ "${HARDWARE_SSE41}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-sse41=ON" )
-    fi
-
-    if [[ "${HARDWARE_AESNI}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-aesni=ON" )
-    fi
-
-    if [[ "${HARDWARE_VAES}" == "yes" ]]; then
-        HARDWARE_PLATFORM_X64="yes"
-        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Denable-vaes=ON" )
-    fi
-
-    HARDWARE_PLATFORM_COUNT=0
-    if [[ ${HARDWARE_PLATFORM_ARM64} == "yes" ]]; then
-        HARDWARE_PLATFORM_COUNT=$((HARDWARE_PLATFORM_COUNT + 1))
-    fi
-    if [[ ${HARDWARE_PLATFORM_X64} == "yes" ]]; then
-        HARDWARE_PLATFORM_COUNT=$((HARDWARE_PLATFORM_COUNT + 1))
-    fi
-
-    if [ ${HARDWARE_PLATFORM_COUNT} -gt 1 ]; then
-        msg_error "Hardware options spanning more than one platform have been specified."
-        exit 1
-    fi
-
-    if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]] &&
-        [ ${HARDWARE_PLATFORM_COUNT} -gt 0 ]; then
-        msg_error "Hardware optimization cannot be reliably rationalized with hardware platform options."
-        exit 1
-    fi
 
 
     # Specify cmake build
@@ -1074,26 +915,9 @@ help()
     msg "--build-parallel=<int>       Number of jobs to run simultaneously."
     msg "                               Default: supported platforms use nproc/sysctl"
     msg "--build-use-local-src        Use existing sources in relevant paths."
-    msg "--hardware-optimized         Inform compiler to apply applicable optimizations for the host hardware."
     msg "--noninteractive             Disable any prompt using default."
     msg "--verbose                    Display verbose script output."
     msg "--help, -h                   Display usage, overriding script execution."
-    msg ""
-    msg "Hardware configuration options for arm64:"
-    msg "--hardware-aes               Use ARM AES and PMULL Extensions."
-    msg "--hardware-sha2              Use ARM SHA1/SHA256 Extensions (implies AES)."
-    msg "--hardware-sha3              Use ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)."
-    msg ""
-    msg "Hardware configuration options for x64:"
-    msg "--hardware-avx2              Use Intel AVX2 intrinsics (implies AES-NI)."
-    msg "--hardware-avx512            Use Intel AVX512 intrinsics (implies AVX2 and AES-NI)."
-    msg "--hardware-avx512ifma        Use Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI)."
-    msg "--hardware-avxifma           Use Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI)."
-    msg "--hardware-shani             Use Intel SHA Extensions (implies AES-NI)."
-    msg "--hardware-sha512            Use Intel SHA512 Extensions (implies AVX2)."
-    msg "--hardware-sse41             Use SSE4.1 hardware instructions."
-    msg "--hardware-aesni             Use Intel AES-NI and PCLMULQDQ intrinsics."
-    msg "--hardware-vaes              Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
     msg ""
     msg "Recognized pass-through options:"
     msg "-Denable-shani=<ON/OFF>      Add Intel SHA Extensions (implies AES-NI) via compilation options."
