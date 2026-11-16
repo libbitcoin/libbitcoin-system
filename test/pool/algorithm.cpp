@@ -99,7 +99,6 @@ struct state
         { none, none, none, none, none, none }
     };
     std_array<link_t, inputs> rivals{ { 1, 0, 3, 2, none, none } };
-    std_array<link_t, inputs> scratch{};
 
     columns_t columns() NOEXCEPT
     {
@@ -131,7 +130,6 @@ struct chain_state
     std_array<link_t, 3> parents{ { 0, none, none } };
     std_array<link_t, 3> siblings{ { none, none, none } };
     std_array<link_t, 3> rivals{ { none, 2, 1 } };
-    std_array<link_t, 3> scratch{};
 
     columns_t columns() NOEXCEPT
     {
@@ -170,12 +168,163 @@ struct line_state
     }
 };
 
+// Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
+// Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
+// 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
+struct merge_state
+{
+    merge_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 5> cells{ { 0, 0, 0, 0, 0 } };
+    std_array<link_t, 5> children{ { 4, none, 5, none, none } };
+    std_array<edges_t, 5> edges
+    {
+        { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 }, { 4, 2 } }
+    };
+    std_array<totals_t, 5> totals
+    {
+        {
+            { 10, 100, 1 }, { 10, 100, 1 }, { 10, 100, 1 }, { 10, 100, 1 },
+            { 10, 100, 1 }
+        }
+    };
+    std_array<link_t, 6> parents{ { none, none, none, none, 0, 2 } };
+    std_array<link_t, 6> siblings{ { none, none, none, none, none, none } };
+    std_array<link_t, 6> rivals{ { 1, 0, 3, 2, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
+// Rows: E=0, F=1 (absent), G=2, each spending X:0. Ring: X:0 (0, 1, 2).
+struct ring_state
+{
+    ring_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 3> cells{ { 0, absent, 0 } };
+    std_array<link_t, 3> children{ { none, none, none } };
+    std_array<edges_t, 3> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 } } };
+    std_array<totals_t, 3> totals
+    {
+        { { 10, 100, 1 }, { 10, 100, 1 }, { 10, 100, 1 } }
+    };
+    std_array<link_t, 3> parents{ { none, none, none } };
+    std_array<link_t, 3> siblings{ { none, none, none } };
+    std_array<link_t, 3> rivals{ { 1, 2, 0 } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
+// Rows 0..39, each with one input, and a second where row % 7 is 3. A row
+// spends the row three before it unless row % 3 is 0. Rings: first inputs of
+// rows (0, 1) and (9, 12), second inputs of rows (3, 10, 17) and (31, 38).
+constexpr size_t wide_rows = 40;
+constexpr size_t wide_inputs = 46;
+
+struct wide_state
+{
+    wide_state() NOEXCEPT
+    {
+        children.fill(none);
+        parents.fill(none);
+        siblings.fill(none);
+        rivals.fill(none);
+
+        link_t input{};
+        for (size_t row{}; row < wide_rows; ++row)
+        {
+            const link_t count = (row % 7) == 3 ? 2 : 1;
+            totals[row] = { 10, 100, 1 };
+            edges[row] = { input, count };
+            firsts[row] = input;
+            if (row >= 3 && is_nonzero(row % 3))
+                spend(input, possible_narrow_cast<link_t>(row - 3));
+
+            input += count;
+        }
+
+        ring(firsts[0], firsts[1], firsts[0]);
+        ring(firsts[9], firsts[12], firsts[9]);
+        ring(add1(firsts[3]), add1(firsts[10]), add1(firsts[17]));
+        ring(add1(firsts[31]), add1(firsts[38]), add1(firsts[31]));
+
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    void spend(link_t input, link_t parent) NOEXCEPT
+    {
+        parents[input] = parent;
+        siblings[input] = children[parent];
+        children[parent] = input;
+    }
+
+    // A ring of two inputs repeats the first as the third.
+    void ring(link_t first, link_t second, link_t third) NOEXCEPT
+    {
+        rivals[first] = second;
+        rivals[second] = third;
+        rivals[third] = (third == first) ? second : first;
+    }
+
+    std_array<link_t, wide_rows> firsts{};
+    std_array<link_t, wide_rows> cells{};
+    std_array<link_t, wide_rows> children{};
+    std_array<edges_t, wide_rows> edges{};
+    std_array<totals_t, wide_rows> totals{};
+    std_array<link_t, wide_inputs> parents{};
+    std_array<link_t, wide_inputs> siblings{};
+    std_array<link_t, wide_inputs> rivals{};
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
+template <typename Word, typename State>
+static State label_of() NOEXCEPT
+{
+    State out{};
+    accessor::initialize<Word>(out.columns());
+    while (accessor::propagate<Word>(out.columns()));
+    return out;
+}
+
 template <typename Word>
 static state label() NOEXCEPT
 {
     state out{};
-    accessor::initialize(out.columns());
-    while (accessor::propagate<Word>(out.columns(), out.scratch));
+    accessor::initialize<Word>(out.columns());
+    while (accessor::propagate<Word>(out.columns()));
     return out;
 }
 
@@ -184,7 +333,7 @@ static state label_without_a() NOEXCEPT
     state out{};
     out.cells[1] = accessor::to_column(absent);
     accessor::initialize(out.columns());
-    while (accessor::propagate<link_t>(out.columns(), out.scratch));
+    while (accessor::propagate<link_t>(out.columns()));
     return out;
 }
 
@@ -192,7 +341,7 @@ static chain_state label_chain() NOEXCEPT
 {
     chain_state out{};
     accessor::initialize(out.columns());
-    while (accessor::propagate<link_t>(out.columns(), out.scratch));
+    while (accessor::propagate<link_t>(out.columns()));
     return out;
 }
 
@@ -218,36 +367,39 @@ static std_array<mask_t, 4> outcomes_of(const component_t& out) NOEXCEPT
 }
 
 template <typename Word>
-static bool gathers_as_integral() NOEXCEPT
-{
-    std_array<link_t, 47> values{};
-    std_array<link_t, 47> indexes{};
-    size_t at{};
-    std::generate(values.begin(), values.end(), [&]() NOEXCEPT
-    {
-        return possible_narrow_cast<link_t>(at++ * 7);
-    });
-
-    at = zero;
-    std::generate(indexes.begin(), indexes.end(), [&]() NOEXCEPT
-    {
-        const auto index = at++;
-        return is_zero(index % 5) ? none :
-            possible_narrow_cast<link_t>((index * 11) % values.size());
-    });
-
-    indexes = stored(indexes);
-    std_array<link_t, 47> expected{};
-    std_array<link_t, 47> out{};
-    accessor::gather<link_t>(expected, values, indexes);
-    accessor::gather<Word>(out, values, indexes);
-    return out == expected;
-}
-
-template <typename Word>
 static bool propagates_as_integral() NOEXCEPT
 {
     return label<Word>().cells == label<link_t>().cells;
+}
+
+static wide_state label_wide() NOEXCEPT
+{
+    wide_state out{};
+    pool::label(out.columns());
+    return out;
+}
+
+template <typename Word>
+static bool propagates_wide_as_integral() NOEXCEPT
+{
+    const auto expected = label_of<link_t, wide_state>();
+    return label_of<Word, wide_state>().cells == expected.cells;
+}
+
+// The wide table after one pass.
+template <typename Word>
+static wide_state propagate_wide() NOEXCEPT
+{
+    wide_state out{};
+    accessor::initialize<Word>(out.columns());
+    accessor::propagate<Word>(out.columns());
+    return out;
+}
+
+template <typename Word>
+static bool propagates_wide_once_as_integral() NOEXCEPT
+{
+    return propagate_wide<Word>().cells == propagate_wide<link_t>().cells;
 }
 
 template <typename Word>
@@ -524,29 +676,6 @@ BC_AUTO_TEST_CASE(pool_algorithm__fee_rate__size_sigops_or_empty__per_chargeable
     BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 0, 0 }, 20), 1'000'000u);
 }
 
-// gather
-// ----------------------------------------------------------------------------
-
-BC_AUTO_TEST_CASE(pool_algorithm__gather__integral__expected)
-{
-    const std_array<link_t, 6> values{ { 10, 11, 12, 13, 14, 15 } };
-    const auto indexes = stored(std_array<link_t, 5>{ { 5, 3, none, 0, 4 } });
-    std_array<link_t, 5> out{};
-    accessor::gather<link_t>(out, values, indexes);
-    BC_REQUIRE_EQUAL(out[0], 15u);
-    BC_REQUIRE_EQUAL(out[1], 13u);
-    BC_REQUIRE_EQUAL(out[2], none);
-    BC_REQUIRE_EQUAL(out[3], 10u);
-    BC_REQUIRE_EQUAL(out[4], 14u);
-}
-
-BC_AUTO_TEST_CASE(pool_algorithm__gather__extended__same_as_integral)
-{
-    BC_REQUIRE(gathers_as_integral<xint128_t>());
-    BC_REQUIRE(gathers_as_integral<xint256_t>());
-    BC_REQUIRE(gathers_as_integral<xint512_t>());
-}
-
 // initialize/propagate (columns)
 // ----------------------------------------------------------------------------
 
@@ -594,6 +723,61 @@ BC_AUTO_TEST_CASE(pool_algorithm__propagate__extended__same_as_integral)
     BC_REQUIRE(propagates_as_integral<xint128_t>());
     BC_REQUIRE(propagates_as_integral<xint256_t>());
     BC_REQUIRE(propagates_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__propagate__child_of_two_cliques__one_label)
+{
+    const auto out = label_of<link_t, merge_state>();
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 4), 0u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__propagate__absent_ring_member__passed_over)
+{
+    const auto out = label_of<link_t, ring_state>();
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), absent);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), 0u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__propagate__wide__expected)
+{
+    const auto out = label_of<link_t, wide_state>();
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 17), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 37), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 38), 0u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 9), 9u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 12), 9u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 14), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 24), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 39), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__propagate__wide_extended__same_as_integral)
+{
+    BC_REQUIRE(propagates_wide_as_integral<xint128_t>());
+    BC_REQUIRE(propagates_wide_as_integral<xint256_t>());
+    BC_REQUIRE(propagates_wide_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__propagate__wide_extended_one_pass__same_as_integral)
+{
+    BC_REQUIRE(propagates_wide_once_as_integral<xint128_t>());
+    BC_REQUIRE(propagates_wide_once_as_integral<xint256_t>());
+    BC_REQUIRE(propagates_wide_once_as_integral<xint512_t>());
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__label__wide__same_as_propagate)
+{
+    const auto expected = label_of<link_t, wide_state>();
+    const auto out = label_wide();
+    BC_REQUIRE(out.cells == expected.cells);
 }
 
 // collect (frontier and columns)

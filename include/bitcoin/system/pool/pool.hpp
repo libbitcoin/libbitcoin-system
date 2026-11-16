@@ -20,5 +20,7 @@
 #define LIBBITCOIN_SYSTEM_POOL_POOL_HPP
 
 #include <bitcoin/system/pool/algorithm.hpp>
+#include <bitcoin/system/pool/label.hpp>
+#include <bitcoin/system/pool/report.hpp>
 
 #endif

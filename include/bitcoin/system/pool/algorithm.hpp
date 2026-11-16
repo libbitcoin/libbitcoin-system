@@ -299,19 +299,13 @@ public:
     /// Columns (whole table).
     /// -----------------------------------------------------------------------
 
-    /// Each value at its index (out[i] = values[indexes[i]]), none for none.
-    template <typename Word = xint512_t>
-    static constexpr void gather(std::span<link_t> out,
-        const std::span<const link_t>& values,
-        const std::span<const link_t>& indexes) NOEXCEPT;
-
     /// Each present cell labeled by its own index if in a clique.
+    template <typename Word = xint512_t>
     static constexpr void initialize(const columns_t& columns) NOEXCEPT;
 
     /// One pass of minimum label propagation, true if any cell changed.
     template <typename Word = xint512_t>
-    static constexpr bool propagate(const columns_t& columns,
-        std::span<link_t> scratch) NOEXCEPT;
+    static constexpr bool propagate(const columns_t& columns) NOEXCEPT;
 
     /// Rows with the label, false if more than maximum_members.
     template <typename Word = xint512_t>
@@ -424,11 +418,47 @@ protected:
         const std::span<const mask_t>& outcomes, const component_t& component,
         const graph_t& graph, const Visitor& visit) NOEXCEPT;
 
+    /// The first row from the row whose inputs end beyond the input.
+    static constexpr link_t advance(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// The row holds the input.
+    static constexpr bool holds(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// The input's row labeled by its own index if unlabeled with a rival.
+    template <typename Owner>
+    static constexpr void seed(const graph_t& graph, link_t row, link_t input,
+        const Owner& owning) NOEXCEPT;
+
+    /// The input's row and parent lowered to its least label, true if changed.
+    template <typename Owner, typename Lower>
+    static constexpr bool exchange(const graph_t& graph, link_t row,
+        link_t input, const Owner& owning, const Lower& lower) NOEXCEPT;
+
+    /// The seed and exchange of an input over the table columns alone.
+    static constexpr void seed(const graph_t& graph, link_t input) NOEXCEPT;
+    static constexpr bool exchange(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// Lanes of the stored words in native order (and the reverse).
+    template <typename Word>
+    INLINE static constexpr Word native(Word word) NOEXCEPT;
+
+    /// Lanes of the inputs that can lower a cell or that have a rival.
+    template <typename Word>
+    INLINE static constexpr Word active(Word own, Word parents, Word rivals,
+        const link_t* cells) NOEXCEPT;
+
     /// The lane operations, from the index.
     template <typename Word>
-    static constexpr void gather_(size_t index, std::span<link_t> out,
-        const std::span<const link_t>& values,
-        const std::span<const link_t>& indexes) NOEXCEPT;
+    static constexpr void unlabel_(size_t index,
+        std::span<link_t> cells) NOEXCEPT;
+    template <typename Word>
+    static constexpr void seed_(size_t index, const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr bool propagate_(size_t index, link_t& row,
+        const graph_t& graph) NOEXCEPT;
     template <typename Word>
     static constexpr bool collect_(size_t index, component_t& out,
         link_t label, const std::span<const link_t>& cells) NOEXCEPT;
@@ -448,5 +478,6 @@ protected:
 } // namespace libbitcoin
 
 #include <bitcoin/system/impl/pool/algorithm.ipp>
+#include <bitcoin/system/impl/pool/label.ipp>
 
 #endif

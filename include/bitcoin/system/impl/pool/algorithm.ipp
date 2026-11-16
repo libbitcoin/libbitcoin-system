@@ -581,74 +581,6 @@ inline uint64_t algorithm::estimate(const projection_t& projection,
 // ----------------------------------------------------------------------------
 
 template <typename Word>
-constexpr void algorithm::gather(std::span<link_t> out,
-    const std::span<const link_t>& values,
-    const std::span<const link_t>& indexes) NOEXCEPT
-{
-    gather_<Word>(zero, out, values, indexes);
-}
-
-constexpr void algorithm::initialize(const columns_t& columns) NOEXCEPT
-{
-    const graph_t graph{ columns };
-    const auto count = columns.cells.size();
-    for (size_t row{}; row < count; ++row)
-    {
-        const auto link = possible_narrow_cast<link_t>(row);
-        if (is_present(cell(graph, link)))
-            set_cell(graph, link, contested(graph, link) ? link : unlabeled);
-    }
-}
-
-template <typename Word>
-constexpr bool algorithm::propagate(const columns_t& columns,
-    std::span<link_t> scratch) NOEXCEPT
-{
-    const graph_t graph{ columns };
-    gather<Word>(scratch, columns.cells, columns.rows);
-
-    auto changed = false;
-    const auto count = columns.cells.size();
-    for (size_t at{}; at < count; ++at)
-    {
-        const auto row = possible_narrow_cast<link_t>(at);
-        const auto own = cell(graph, row);
-        if (!is_present(own))
-            continue;
-
-        auto down = unlabeled;
-        const auto slice = edges(graph, row);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-        {
-            down = std::min(down, from_column(scratch[input]));
-            each_rival(graph, input, [&](link_t other) NOEXCEPT
-            {
-                down = std::min(down, cell(graph, owner(graph, other)));
-            });
-        }
-
-        // An uncontested row without a relevant parent is irrelevant.
-        if (!is_labeled(own) && !is_labeled(down))
-            continue;
-
-        auto label = std::min(own, down);
-        each_child(graph, row, [&](link_t child) NOEXCEPT
-        {
-            label = std::min(label, cell(graph, child));
-        });
-
-        if (label != own)
-        {
-            set_cell(graph, row, label);
-            changed = true;
-        }
-    }
-
-    return changed;
-}
-
-template <typename Word>
 constexpr bool algorithm::collect(component_t& out, link_t label,
     const std::span<const link_t>& cells) NOEXCEPT
 {
@@ -1227,38 +1159,12 @@ constexpr void algorithm::each_fee(size_t index,
 }
 
 template <typename Word>
-constexpr void algorithm::gather_(size_t index, std::span<link_t> out,
-    const std::span<const link_t>& values,
-    const std::span<const link_t>& indexes) NOEXCEPT
+INLINE constexpr Word algorithm::native(Word word) NOEXCEPT
 {
-    const auto count = indexes.size();
-    if constexpr (is_extended<Word>)
-    {
-        if constexpr (have<Word> && is_little_endian)
-        {
-            constexpr auto lanes = link_lanes<Word>;
-            const auto nones = f::broadcast<Word>(none);
-            for (; index + lanes <= count; index += lanes)
-            {
-                const auto at = load<Word>(&indexes[index]);
-                const auto missing = f::eq<bits<link_t>>(at, nones);
-                const auto valid = f::andnot(missing, at);
-                const auto found = f::gather(values.data(), valid);
-
-                store(&out[index], f::select(missing, nones, found));
-            }
-        }
-
-        gather_<narrower<Word, link_t>>(index, out, values, indexes);
-    }
+    if constexpr (is_little_endian)
+        return word;
     else
-    {
-        for (; index < count; ++index)
-        {
-            const auto at = from_column(indexes[index]);
-            out[index] = (at == none) ? none : values[at];
-        }
-    }
+        return f::byteswap<link_t>(word);
 }
 
 template <typename Word>
