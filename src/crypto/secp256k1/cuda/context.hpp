@@ -182,6 +182,43 @@ public:
             });
     }
 
+    /// Label the pool cells in place, false if not available or on failure.
+    bool label(pool::report_t& out, const std::span<uint32_t>& cells,
+        const std::span<const pool_layout::edges_t>& edges,
+        const std::span<const uint32_t>& rows,
+        const std::span<const uint32_t>& rivals) NOEXCEPT
+    {
+        turn turn{ turns_, false };
+        if (failed_.load() || !pooled_ || cells.empty() || rows.empty())
+            return false;
+
+        using clock = std::chrono::steady_clock;
+        const auto start = clock::now();
+        pointer_t base{};
+        const pool_layout columns{ cells.size(), rows.size() };
+        if (call_.context_current(context_) != success ||
+            call_.allocate(&base, columns.bytes) != success)
+            return false;
+
+        size_t passes{};
+        pool::report_t::duration transfer{ clock::now() - start };
+        const auto result = label(passes, transfer, base, columns, cells,
+            edges, rows, rivals);
+
+        const auto finish = clock::now();
+        call_.deallocate(base);
+        transfer += clock::now() - finish;
+        if (result != success)
+        {
+            failed_.store(true);
+            return false;
+        }
+
+        out.passes = passes;
+        out.transfer = transfer;
+        return true;
+    }
+
 private:
     context() NOEXCEPT
       : loaded_(load())
@@ -437,6 +474,90 @@ private:
         return result;
     }
 
+    // Queue a kernel over the count of elements on the stream.
+    result_t launch(handle_t kernel, size_t count, handle_t stream,
+        void** parameters) NOEXCEPT
+    {
+        const auto blocks = possible_narrow_cast<unsigned>(
+            ceilinged_divide(count, threads));
+
+        return call_.launch(kernel, blocks, 1, 1,
+            possible_narrow_cast<unsigned>(threads), 1, 1, 0, stream,
+            parameters, nullptr);
+    }
+
+    // Stage the pool columns, label to the fixed point and return the cells.
+    result_t label(size_t& passes, pool::report_t::duration& transfer,
+        pointer_t base, const pool_layout& columns,
+        const std::span<uint32_t>& cells,
+        const std::span<const pool_layout::edges_t>& edges,
+        const std::span<const uint32_t>& rows,
+        const std::span<const uint32_t>& rivals) NOEXCEPT
+    {
+        const auto stream = streams_.front();
+        const auto flag = base + columns.changed;
+        using edges_t = pool_layout::edges_t;
+        pool_arguments arguments
+        {
+            reinterpret_cast<uint32_t*>(base),
+            reinterpret_cast<const edges_t*>(base + columns.edges),
+            reinterpret_cast<const uint32_t*>(base + columns.rows),
+            reinterpret_cast<const uint32_t*>(base + columns.rivals),
+            reinterpret_cast<uint32_t*>(base + columns.owners),
+            reinterpret_cast<uint32_t*>(flag),
+            possible_narrow_cast<uint32_t>(cells.size()),
+            possible_narrow_cast<uint32_t>(rows.size())
+        };
+
+        using clock = std::chrono::steady_clock;
+        void* parameters[]{ &arguments };
+        const auto upload = clock::now();
+        auto result = call_.copy_to_async(base, cells.data(),
+            cells.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.edges, edges.data(),
+                edges.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.rows, rows.data(),
+                rows.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.rivals, rivals.data(),
+                rivals.size_bytes(), stream);
+        if (result == success)
+            result = call_.stream_synchronize(stream);
+
+        transfer += clock::now() - upload;
+        if (result == success)
+            result = launch(prepare_, cells.size(), stream, parameters);
+        if (result == success)
+            result = launch(seed_, rows.size(), stream, parameters);
+
+        constexpr uint32_t clear{};
+        uint32_t changed{ 1 };
+        while (result == success && is_nonzero(changed))
+        {
+            ++passes;
+            result = call_.copy_to_async(flag, &clear, sizeof(clear), stream);
+            if (result == success)
+                result = launch(label_, rows.size(), stream, parameters);
+            if (result == success)
+                result = call_.copy_from_async(&changed, flag,
+                    sizeof(changed), stream);
+            if (result == success)
+                result = call_.stream_synchronize(stream);
+        }
+
+        const auto download = clock::now();
+        if (result == success)
+            result = call_.copy_from_async(cells.data(), base,
+                cells.size_bytes(), stream);
+        if (result == success)
+            result = call_.stream_synchronize(stream);
+
+        transfer += clock::now() - download;
+        return result;
+    }
+
     bool load() NOEXCEPT
     {
         const auto library = load_library();
@@ -497,6 +618,15 @@ private:
         size_t free{}, total{};
         if (call_.memory(&free, &total) != success)
             return false;
+
+        // The embedded kernels may lack the pool kernels.
+        const auto found = [&](handle_t& out, const char* name) NOEXCEPT
+        {
+            return call_.module_function(&out, module_, name) == success;
+        };
+
+        pooled_ = found(prepare_, "prepare_pool") &&
+            found(seed_, "seed_pool") && found(label_, "label_pool");
 
         const auto bytes = std::min(maximum_bytes, free / memory_share);
         half_bytes_ = bytes / two;
@@ -689,6 +819,9 @@ private:
     handle_t schnorr_{};
     handle_t scan_{};
     handle_t silent_{};
+    handle_t prepare_{};
+    handle_t seed_{};
+    handle_t label_{};
     pointer_t staging_{};
     size_t half_bytes_{};
     std_array<handle_t, two> streams_{};
@@ -697,6 +830,7 @@ private:
     size_t scan_rows_{};
     size_t silent_rows_{};
     bool retained_{};
+    bool pooled_{};
     turns turns_{};
     std::atomic_bool failed_{};
     const bool loaded_;

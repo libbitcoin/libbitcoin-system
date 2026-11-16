@@ -195,6 +195,90 @@ private:
     }
 };
 
+class labeler
+  : public pool::algorithm
+{
+public:
+    static __device__ graph_t graph(
+        const cuda::pool_arguments& arguments) NOEXCEPT
+    {
+        columns_t table{};
+        table.cells = { arguments.cells, arguments.row_count };
+        table.edges = { arguments.edges, arguments.row_count };
+        table.rows = { arguments.rows, arguments.input_count };
+        table.rivals = { arguments.rivals, arguments.input_count };
+
+        // clang (22.1) crashes compiling accessors over null candidate
+        // columns, so the empty candidate columns are at the table's.
+        columns_t extra{};
+        extra.cells = { arguments.cells, zero };
+        extra.edges = { arguments.edges, zero };
+        extra.rows = { arguments.rows, zero };
+        extra.rivals = { arguments.rivals, zero };
+        return { table, extra };
+    }
+
+    /// The row of the input, the given row if no row holds the input.
+    static __device__ link_t owner(const cuda::pool_arguments& arguments,
+        link_t input, link_t row) NOEXCEPT
+    {
+        const auto owning = arguments.owners[input];
+        return holds(graph(arguments), owning, input) ? owning : row;
+    }
+
+    /// A present cell made unlabeled, and the row as owner of its inputs.
+    static __device__ void prepare(const cuda::pool_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        const auto columns = graph(arguments);
+        if (is_present(cell(columns, row)))
+            set_cell(columns, row, unlabeled);
+
+        const auto slice = edges(columns, row);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+            if (input < arguments.input_count)
+                arguments.owners[input] = row;
+    }
+
+    static __device__ void seed(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (arguments.rivals[input] == none ||
+            !holds(graph(arguments), row, input))
+            return;
+
+        algorithm::seed(graph(arguments), row, input,
+            [&](link_t at) NOEXCEPT
+            {
+                return owner(arguments, at, row);
+            });
+    }
+
+    static __device__ void label(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (!holds(graph(arguments), row, input))
+            return;
+
+        const auto changed = exchange(graph(arguments), row, input,
+            [&](link_t at) NOEXCEPT
+            {
+                return owner(arguments, at, row);
+            },
+            [&](link_t to, link_t value) NOEXCEPT
+            {
+                const auto stored = to_column(value);
+                __nvvm_atom_min_gen_ui(&arguments.cells[to], stored);
+            });
+
+        if (changed)
+            *arguments.changed = 1;
+    }
+};
+
 extern "C"
 {
     __device__ uint64_t generator_table[verifier::slice_count]
@@ -258,4 +342,25 @@ extern "C" __global__ void compute_silent(
         arguments.valid[row] = verifier::compute(
             arguments.points[row], arguments.sums[row],
             arguments.hashes[row]);
+}
+
+extern "C" __global__ void prepare_pool(cuda::pool_arguments arguments)
+{
+    const auto row = verifier::row();
+    if (row < arguments.row_count)
+        labeler::prepare(arguments, row);
+}
+
+extern "C" __global__ void seed_pool(cuda::pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        labeler::seed(arguments, input);
+}
+
+extern "C" __global__ void label_pool(cuda::pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        labeler::label(arguments, input);
 }

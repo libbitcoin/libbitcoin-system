@@ -85,6 +85,15 @@ bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
     return context::instance().compute(cancel, out, valid, sums, hashes);
 }
 
+bool label(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT
+{
+    return available() &&
+        context::instance().label(out, cells, edges, rows, rivals);
+}
+
 #else
 
 bool compiled() NOEXCEPT
@@ -122,6 +131,14 @@ bool scan(const stopper&, std::vector<prefix>&, data_chunk&,
 bool compute(const stopper&, const std::span<ec_compressed>&,
     const std::span<uint8_t>&, const std::span<const ec_compressed>&,
     const std::span<const ec_secret>&) NOEXCEPT
+{
+    return false;
+}
+
+bool label(pool::report_t&, const std::span<uint32_t>&,
+    const std::span<const pool::algorithm::edges_t>&,
+    const std::span<const uint32_t>&,
+    const std::span<const uint32_t>&) NOEXCEPT
 {
     return false;
 }

@@ -23,6 +23,7 @@
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/pool/pool.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -87,6 +88,20 @@ struct scan_arguments
     std_array<scan_keys::affine, maximum_labels> labels;
     uint32_t label_count;
     uint32_t count;
+};
+
+/// Arguments of the pool kernels, columns in device memory. Owners is the
+/// row of each input, written by prepare_pool.
+struct pool_arguments
+{
+    uint32_t* cells;
+    const pool::algorithm::edges_t* edges;
+    const uint32_t* rows;
+    const uint32_t* rivals;
+    uint32_t* owners;
+    uint32_t* changed;
+    uint32_t row_count;
+    uint32_t input_count;
 };
 
 } // namespace cuda

@@ -138,6 +138,35 @@ struct silent_layout
     const size_t valid;
 };
 
+/// Columns of the pool within its device allocation.
+struct pool_layout
+{
+    using edges_t = pool::algorithm::edges_t;
+    static constexpr size_t align = 256;
+
+    static constexpr size_t round(size_t bytes) NOEXCEPT
+    {
+        return ceilinged_divide(bytes, align) * align;
+    }
+
+    constexpr pool_layout(size_t count, size_t inputs) NOEXCEPT
+      : edges(round(count * sizeof(uint32_t))),
+        rows(round(edges + count * sizeof(edges_t))),
+        rivals(round(rows + inputs * sizeof(uint32_t))),
+        owners(round(rivals + inputs * sizeof(uint32_t))),
+        changed(round(owners + inputs * sizeof(uint32_t))),
+        bytes(round(changed + sizeof(uint32_t)))
+    {
+    }
+
+    const size_t edges;
+    const size_t rows;
+    const size_t rivals;
+    const size_t owners;
+    const size_t changed;
+    const size_t bytes;
+};
+
 /// Receiver keys decoded into scan arguments, false if invalid.
 struct scan_receiver
   : algorithm

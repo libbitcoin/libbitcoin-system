@@ -22,6 +22,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/pool/algorithm.hpp>
 #include <bitcoin/system/pool/report.hpp>
+#include "../crypto/secp256k1/cuda/driver.hpp"
 
 namespace libbitcoin {
 namespace system {
@@ -31,14 +32,24 @@ report_t label(const algorithm::columns_t& columns) NOEXCEPT
 {
     using clock = std::chrono::steady_clock;
     const auto start = clock::now();
-    report_t out{ columns.cells.size() };
-    algorithm::initialize(columns);
+    const auto& cells = columns.cells;
+    const auto& edges = columns.edges;
+    const auto& rows = columns.rows;
+    const auto& rivals = columns.rivals;
+    report_t out{ cells.size() };
 
-    do
+    out.device = secp256k1::cuda::label(out, cells, edges, rows, rivals);
+    if (!out.device)
     {
-        ++out.passes;
+        algorithm::initialize(columns);
+
+        do
+        {
+            ++out.passes;
+        }
+        while (algorithm::propagate(columns));
     }
-    while (algorithm::propagate(columns));
+
     out.time = clock::now() - start;
     return out;
 }
