@@ -153,11 +153,13 @@ BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__without_gpu__cpu)
     result.out.resize(columns.sums.size());
     result.valid.resize(columns.sums.size());
 
-    bool use_gpu{ false };
+    bool used_gpu{ true };
     const stopper cancel{};
-    result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes });
+    batched::accelerate(false);
+    result.success = batch::compute(cancel, used_gpu, result.out, result.valid, { columns.sums, columns.hashes });
+    batched::accelerate(true);
     BC_REQUIRE(result.success);
-    BC_REQUIRE(!use_gpu);
+    BC_REQUIRE(!used_gpu);
     BC_REQUIRE(is_alternating(result));
 }
 
@@ -169,10 +171,10 @@ BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write__written_once_expected)
     result.valid.resize(columns.sums.size());
 
     size_t writes{};
-    bool use_gpu{ true };
+    bool used_gpu{};
     const stopper cancel{};
     const auto write = [&]() NOEXCEPT { ++writes; };
-    result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
+    result.success = batch::compute(cancel, used_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
     BC_REQUIRE(result.success);
     BC_REQUIRE_EQUAL(writes, 1u);
     BC_REQUIRE(is_alternating(result));
@@ -186,12 +188,14 @@ BC_AUTO_TEST_CASE(secp256k1_batch_silent__compute__write_without_gpu__written_af
     result.valid.resize(columns.sums.size());
 
     bool computed_first{};
-    bool use_gpu{ false };
+    bool used_gpu{ true };
     const stopper cancel{};
     const auto write = [&]() NOEXCEPT { computed_first = is_alternating(result); };
-    result.success = batch::compute(cancel, use_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
+    batched::accelerate(false);
+    result.success = batch::compute(cancel, used_gpu, result.out, result.valid, { columns.sums, columns.hashes }, write);
+    batched::accelerate(true);
     BC_REQUIRE(result.success);
-    BC_REQUIRE(!use_gpu);
+    BC_REQUIRE(!used_gpu);
     BC_REQUIRE(computed_first);
 }
 

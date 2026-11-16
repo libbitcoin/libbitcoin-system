@@ -18,6 +18,7 @@
  */
 #include "driver.hpp"
 
+#include <atomic>
 #include <span>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -38,14 +39,21 @@ namespace cuda {
 // Interface.
 // ----------------------------------------------------------------------------
 
+static std::atomic_bool gate{ true };
+
 bool compiled() NOEXCEPT
 {
     return true;
 }
 
+void enable(bool enabled) NOEXCEPT
+{
+    gate.store(enabled);
+}
+
 bool available() NOEXCEPT
 {
-    return context::instance().available();
+    return gate.load() && context::instance().available();
 }
 
 bool verify(const stopper& cancel, data_chunk& out,
@@ -82,6 +90,10 @@ bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
 bool compiled() NOEXCEPT
 {
     return false;
+}
+
+void enable(bool) NOEXCEPT
+{
 }
 
 bool available() NOEXCEPT

@@ -125,10 +125,12 @@ BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_all_valid_without_gpu_
     };
 
     const stopper cancel{};
-    bool use_gpu{ false };
-    const auto tokens = batch::verify(cancel, use_gpu, in);
+    bool used_gpu{ true };
+    batched::accelerate(false);
+    const auto tokens = batch::verify(cancel, used_gpu, in);
+    batched::accelerate(true);
     BC_REQUIRE(tokens.empty());
-    BC_REQUIRE(!use_gpu);
+    BC_REQUIRE(!used_gpu);
 }
 
 BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)

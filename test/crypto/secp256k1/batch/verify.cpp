@@ -29,4 +29,12 @@ BC_AUTO_TEST_CASE(secp256k1__batched__accelerated__implies_compiled)
     BC_REQUIRE(!batched::accelerated() || compiled);
 }
 
+BC_AUTO_TEST_CASE(secp256k1__batched__accelerate__false__not_accelerated)
+{
+    batched::accelerate(false);
+    const auto accelerated = batched::accelerated();
+    batched::accelerate(true);
+    BC_REQUIRE(!accelerated);
+}
+
 BC_AUTO_TEST_SUITE_END()

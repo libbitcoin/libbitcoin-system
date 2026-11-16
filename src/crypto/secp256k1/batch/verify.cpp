@@ -32,6 +32,11 @@ bool batched::compiled() NOEXCEPT
     return secp256k1::cuda::compiled();
 }
 
+void batched::accelerate(bool enable) NOEXCEPT
+{
+    secp256k1::cuda::enable(enable);
+}
+
 bool batched::accelerated() NOEXCEPT
 {
     return secp256k1::cuda::available();

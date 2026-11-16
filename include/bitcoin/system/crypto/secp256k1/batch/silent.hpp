@@ -43,10 +43,10 @@ struct BC_API batch
     static bool compute(const stopper& cancel,
         const std::span<ec_compressed>& out,
         const std::span<uint8_t>& valid, const batch& batch) NOEXCEPT;
-    static bool compute(const stopper& cancel, bool& use_gpu,
+    static bool compute(const stopper& cancel, bool& used_gpu,
         const std::span<ec_compressed>& out,
         const std::span<uint8_t>& valid, const batch& batch) NOEXCEPT;
-    static bool compute(const stopper& cancel, bool& use_gpu,
+    static bool compute(const stopper& cancel, bool& used_gpu,
         const std::span<ec_compressed>& out,
         const std::span<uint8_t>& valid, const batch& batch,
         const std::function<void()>& write) NOEXCEPT;

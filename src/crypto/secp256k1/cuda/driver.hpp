@@ -34,7 +34,10 @@ namespace cuda {
 /// True if gpu verification is compiled in.
 bool compiled() NOEXCEPT;
 
-/// True if gpu is loaded and has not failed.
+/// Set whether gpu is used (enabled by default).
+void enable(bool enabled) NOEXCEPT;
+
+/// True if gpu is enabled, loaded and has not failed.
 bool available() NOEXCEPT;
 
 /// Verify rows on gpu, one result byte per row, empty if all rows are valid

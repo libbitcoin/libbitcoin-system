@@ -108,11 +108,11 @@ bool silent::batch::compute(const stopper& cancel,
     const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
     const batch& batch) NOEXCEPT
 {
-    bool use_gpu{ true };
-    return compute(cancel, use_gpu, out, valid, batch);
+    bool used_gpu{};
+    return compute(cancel, used_gpu, out, valid, batch);
 }
 
-bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
+bool silent::batch::compute(const stopper& cancel, bool& used_gpu,
     const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
     const batch& batch) NOEXCEPT
 {
@@ -122,18 +122,17 @@ bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
 
     namespace cuda = secp256k1::cuda;
 
-    use_gpu = use_gpu
-        && cuda::available()
+    used_gpu = cuda::available()
         && cuda::compute(cancel, out, valid, batch.sums, batch.hashes);
 
-    if (!use_gpu)
+    if (!used_gpu)
         cpu_compute<chunk_rows>(cancel, out, valid, batch.sums, batch.hashes);
 
     return !cancel;
 }
 
 // Gpu computes while caller writes, cpu computes before.
-bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
+bool silent::batch::compute(const stopper& cancel, bool& used_gpu,
     const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
     const batch& batch, const std::function<void()>& write) NOEXCEPT
 {
@@ -143,9 +142,9 @@ bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
 
     namespace cuda = secp256k1::cuda;
 
-    if (!use_gpu || !cuda::available())
+    if (!cuda::available())
     {
-        use_gpu = false;
+        used_gpu = false;
         cpu_compute<chunk_rows>(cancel, out, valid, batch.sums, batch.hashes);
         write();
         return !cancel;
@@ -157,9 +156,9 @@ bool silent::batch::compute(const stopper& cancel, bool& use_gpu,
     });
 
     write();
-    use_gpu = computed.get();
+    used_gpu = computed.get();
 
-    if (!use_gpu)
+    if (!used_gpu)
         cpu_compute<chunk_rows>(cancel, out, valid, batch.sums, batch.hashes);
 
     return !cancel;
