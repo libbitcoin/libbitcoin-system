@@ -588,6 +588,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\ed25519.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -1373,7 +1376,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\curve25519.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ed25519.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20.hpp">
@@ -2389,6 +2398,9 @@
       <Filter>include\bitcoin\system\impl\crypto\aes</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes_gcm.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\curve25519.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_der.ipp">

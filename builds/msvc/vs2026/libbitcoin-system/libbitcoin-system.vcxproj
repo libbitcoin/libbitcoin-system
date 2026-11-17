@@ -262,6 +262,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\chacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\ed25519.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\maybe_random.cpp" />
@@ -571,7 +572,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\chacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\curve25519.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ed25519.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20_poly1305.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\maybe_random.hpp" />
@@ -909,6 +912,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\algorithm_single.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes\ghash.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes_gcm.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\curve25519.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_der.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_ecdsa.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_keys.ipp" />
