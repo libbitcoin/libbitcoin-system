@@ -2,19 +2,11 @@
     "version": 5,
     "configurePresets": [
         {
-            "name": "nix-base",
-            "description": "Factored base settings for non-windows *nix based platforms.",
+            "name": "base-pathing",
+            "description": "Factored base settings for all platforms.",
             "hidden": true,
             "installDir": "${sourceParentDir}/../../../prefix/${presetName}",
             "binaryDir": "${sourceParentDir}/../obj/${presetName}",
-            "condition": {
-                "type": "inList",
-                "string": "${hostSystemName}",
-                "list": [
-                    "Darwin",
-                    "Linux"
-                ]
-            },
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": {
                   "type": "PATH",
@@ -31,27 +23,65 @@
             }
         },
         {
-            "name": "gnu-debug",
+            "name": "nix-base",
+            "description": "Factored base settings for non-windows *nix based platforms.",
+            "hidden": true,
+            "condition": {
+                "type": "inList",
+                "string": "${hostSystemName}",
+                "list": [
+                    "Darwin",
+                    "Linux"
+                ]
+            }
+        },
+        {
+            "name": "win-base",
+            "description": "Factored base settings for windows platforms (msvc developer environment).",
+            "hidden": true,
+            "generator": "Ninja",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "config-debug",
             "description": "Factored debug settings.",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "config-release",
+            "description": "Factored release settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "gnu-debug",
+            "description": "Factored gnu specific debug settings.",
+            "hidden": true,
+            "cacheVariables": {
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g1 --coverage -fprofile-update=atomic",
                 "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g1 --coverage -fprofile-update=atomic"
             }
         },
         {
             "name": "gnu-release",
-            "description": "Factored release settings.",
+            "description": "Factored gnu specific release settings.",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3",
                 "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3"
             }
         },
         {
-            "name": "static",
+            "name": "link-static",
             "description": "Factored static linking settings.",
             "hidden": true,
             "cacheVariables": {
@@ -62,7 +92,7 @@
             }
         },
         {
-            "name": "shared",
+            "name": "link-shared",
             "description": "Factored shared/dynamic linking settings.",
             "hidden": true,
             "cacheVariables": {
@@ -73,12 +103,39 @@
             }
         },
         {
+            "name": "compiler-msvc",
+            "description": "Factored msvc compiler settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
+            "name": "compiler-clangcl",
+            "description": "Factored clang-cl compiler settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-cl",
+                "CMAKE_CXX_COMPILER": "clang-cl"
+            }
+        },
+        {
+            "name": "optimization-host-native",
+            "description": "Factored settings for march/mtune using for local execution.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -march=native -mtune=native",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -march=native -mtune=native"
+            }
+        },
+        {
             "name": "nix-gnu-debug-static",
             "displayName": "*nix/GNU/Debug/Static",
             "description": "Debug build with static linking.",
             "hidden": false,
             "inherits": [
-                "static",
+                "link-static",
                 "gnu-debug",
                 "nix-base"
             ]
@@ -89,7 +146,7 @@
             "description": "Debug build with shared linking.",
             "hidden": false,
             "inherits": [
-                "shared",
+                "link-shared",
                 "gnu-debug",
                 "nix-base"
             ]
@@ -100,7 +157,7 @@
             "description": "Release build with static linking and standard optimizations.",
             "hidden": false,
             "inherits": [
-                "static",
+                "link-static",
                 "gnu-release",
                 "nix-base"
             ]
@@ -111,67 +168,58 @@
             "description": "Release build with shared linking and standard optimizations.",
             "hidden": false,
             "inherits": [
-                "shared",
+                "link-shared",
                 "gnu-release",
                 "nix-base"
             ]
         },
         {
-            "name": "win-base",
-            "description": "Factored base settings for windows platforms (msvc developer environment).",
-            "hidden": true,
-            "generator": "Ninja",
-            "installDir": "${sourceParentDir}/../../../prefix/${presetName}",
-            "binaryDir": "${sourceParentDir}/../obj/${presetName}",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "cacheVariables": {
-                "CMAKE_PREFIX_PATH": {
-                  "type": "PATH",
-                  "value": "${sourceParentDir}/../../../prefix/${presetName}"
-                },
-                "CMAKE_INSTALL_PREFIX_PATH": {
-                  "type": "PATH",
-                  "value": "${sourceParentDir}/../../../prefix/${presetName}"
-                }
-            }
+            "name": "nix-gnu-debug-static-native",
+            "displayName": "*nix/GNU/Debug/Static",
+            "description": "Debug build with static linking for native architecture.",
+            "hidden": false,
+            "inherits": [
+                "optimization-host-native",
+                "link-static",
+                "gnu-debug",
+                "nix-base"
+            ]
         },
         {
-            "name": "msvc",
-            "description": "Factored msvc compiler settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
-            }
+            "name": "nix-gnu-debug-shared-native",
+            "displayName": "*nix/GNU/Debug/Shared",
+            "description": "Debug build with shared linking for native architecture.",
+            "hidden": false,
+            "inherits": [
+                "optimization-host-native",
+                "link-shared",
+                "gnu-debug",
+                "nix-base"
+            ]
         },
         {
-            "name": "clangcl",
-            "description": "Factored clang-cl compiler settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-cl",
-                "CMAKE_CXX_COMPILER": "clang-cl"
-            }
+            "name": "nix-gnu-release-static-native",
+            "displayName": "*nix/GNU/Release/Static",
+            "description": "Release build with static linking and standard optimizations for native architecture.",
+            "hidden": false,
+            "inherits": [
+                "optimization-host-native",
+                "link-static",
+                "gnu-release",
+                "nix-base"
+            ]
         },
         {
-            "name": "win-debug",
-            "description": "Factored windows debug settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "win-release",
-            "description": "Factored windows release settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+            "name": "nix-gnu-release-shared-native",
+            "displayName": "*nix/GNU/Release/Shared",
+            "description": "Release build with shared linking and standard optimizations for native architecture.",
+            "hidden": false,
+            "inherits": [
+                "optimization-host-native",
+                "link-shared",
+                "gnu-release",
+                "nix-base"
+            ]
         },
         {
             "name": "win-msvc-debug-static",
@@ -179,9 +227,9 @@
             "description": "Debug build with msvc and static linking.",
             "hidden": false,
             "inherits": [
-                "static",
-                "win-debug",
-                "msvc",
+                "link-static",
+                "config-debug",
+                "compiler-msvc",
                 "win-base"
             ]
         },
@@ -191,9 +239,9 @@
             "description": "Release build with msvc and static linking.",
             "hidden": false,
             "inherits": [
-                "static",
-                "win-release",
-                "msvc",
+                "link-static",
+                "config-release",
+                "compiler-msvc",
                 "win-base"
             ]
         },
@@ -203,9 +251,9 @@
             "description": "Debug build with msvc and shared linking.",
             "hidden": false,
             "inherits": [
-                "shared",
-                "win-debug",
-                "msvc",
+                "link-shared",
+                "config-debug",
+                "compiler-msvc",
                 "win-base"
             ]
         },
@@ -215,9 +263,9 @@
             "description": "Release build with msvc and shared linking.",
             "hidden": false,
             "inherits": [
-                "shared",
-                "win-release",
-                "msvc",
+                "link-shared",
+                "config-release",
+                "compiler-msvc",
                 "win-base"
             ]
         },
@@ -227,9 +275,9 @@
             "description": "Debug build with clang-cl and static linking.",
             "hidden": false,
             "inherits": [
-                "static",
-                "win-debug",
-                "clangcl",
+                "link-static",
+                "config-debug",
+                "compiler-clangcl",
                 "win-base"
             ]
         },
@@ -239,9 +287,9 @@
             "description": "Release build with clang-cl and static linking.",
             "hidden": false,
             "inherits": [
-                "static",
-                "win-release",
-                "clangcl",
+                "link-static",
+                "config-release",
+                "compiler-clangcl",
                 "win-base"
             ]
         },
@@ -251,9 +299,9 @@
             "description": "Debug build with clang-cl and shared linking.",
             "hidden": false,
             "inherits": [
-                "shared",
-                "win-debug",
-                "clangcl",
+                "link-shared",
+                "config-debug",
+                "compiler-clangcl",
                 "win-base"
             ]
         },
@@ -263,9 +311,9 @@
             "description": "Release build with clang-cl and shared linking.",
             "hidden": false,
             "inherits": [
-                "shared",
-                "win-release",
-                "clangcl",
+                "link-shared",
+                "config-release",
+                "compiler-clangcl",
                 "win-base"
             ]
         }
@@ -303,6 +351,30 @@
             "displayName": "*nix/GNU/Release/Shared",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-shared"
+        },
+        {
+            "name": "nix-gnu-debug-static-native",
+            "displayName": "*nix/GNU/Debug/Static",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "nix-gnu-debug-static-native"
+        },
+        {
+            "name": "nix-gnu-debug-shared-native",
+            "displayName": "*nix/GNU/Debug/Shared",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "nix-gnu-debug-shared-native"
+        },
+        {
+            "name": "nix-gnu-release-static-native",
+            "displayName": "*nix/GNU/Release/Static",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "nix-gnu-release-static-native"
+        },
+        {
+            "name": "nix-gnu-release-shared-native",
+            "displayName": "*nix/GNU/Release/Shared",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "nix-gnu-release-shared-native"
         },
         {
             "name": "win-msvc-debug-static",
