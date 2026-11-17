@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// The field of Curve25519 and edwards25519, p = 2^255 - 19.
+/// Field of Curve25519 and edwards25519, p = 2^255 - 19.
 class BC_API curve25519
 {
 protected:
@@ -34,20 +34,20 @@ protected:
     static constexpr size_t limbs = 16;
     typedef std_array<int64_t, limbs> field;
 
-    /// Field elements serialize to 256 bits, little-endian.
+    /// Elements serialize to 256 bits, little-endian.
     static constexpr size_t element_size = 32;
     typedef data_array<element_size> element;
 
-    /// Limbs are radix 2^16, and may be negative between carries.
+    /// Limbs radix 2^16, may be negative between carries.
     static constexpr auto radix_bits = 16_size;
     static constexpr auto radix = bit_right<int64_t>(radix_bits);
 
-    /// The prime p in radix 2^16 limbs (low, middle, high).
+    /// Prime p in radix 2^16 limbs (low, middle, high).
     static constexpr int64_t prime_low = 0xffed;
     static constexpr int64_t prime_middle = 0xffff;
     static constexpr int64_t prime_high = 0x7fff;
 
-    /// The fold of a limb carried beyond 2^256, 38 = 2 * 19 (mod p).
+    /// Fold of limb carried beyond 2^256, 38 = 2 * 19 (mod p).
     static constexpr int64_t fold = 38;
 
     static constexpr void carry(field& out) NOEXCEPT;

@@ -104,7 +104,7 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     wipe(e);
     wipe(f);
 
-    // An all zero result indicates a low order point (all bytes are read).
+    // All zero result is low order point (all bytes read).
     uint8_t bits{};
     for (const auto byte: out)
         bits |= byte;

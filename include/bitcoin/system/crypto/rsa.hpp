@@ -27,32 +27,29 @@
 namespace libbitcoin {
 namespace system {
 
-/// RSA signature verification (rfc8017), moduli of up to 4096 bits.
-/// Public key operations only, which are not constant time.
+/// RSA verification (rfc8017), moduli to 4096 bits, not constant time.
 class BC_API rsa
 {
 public:
-    /// The largest supported modulus.
+    /// Largest supported modulus.
     static constexpr size_t maximum_bits = 4096;
     static constexpr size_t maximum_size = bytes<maximum_bits>;
 
-    /// A public key, modulus and exponent as big-endian magnitudes.
+    /// Public key, modulus and exponent as big-endian magnitudes.
     struct public_key
     {
         data_chunk modulus{};
         data_chunk exponent{};
     };
 
-    /// Decode a der RSAPublicKey (pkcs1), false if invalid or too large.
+    /// Decode der RSAPublicKey (pkcs1), false if invalid or too large.
     static bool decode(public_key& out, const_byte_span der) NOEXCEPT;
 
-    /// True if a pkcs1 v1.5 signature of payload, which is a DigestInfo and
-    /// digest (rfc8017 9.2), or a bare digest as signed by Tor.
+    /// True if pkcs1 v1.5 signature of payload (DigestInfo+digest or digest).
     static bool verify_pkcs1(const public_key& key, const_byte_span signature,
         const_byte_span payload) NOEXCEPT;
 
-    /// True if a pss signature of digest, with mgf1 and a salt of the digest's
-    /// hash (sha256, sha384 or sha512 by digest size).
+    /// True if pss signature of digest, mgf1 and salt of hash (by digest size).
     static bool verify_pss(const public_key& key, const_byte_span signature,
         const_byte_span digest) NOEXCEPT;
 

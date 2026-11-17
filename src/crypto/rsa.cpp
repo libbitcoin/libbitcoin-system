@@ -46,7 +46,7 @@ constexpr uint8_t pss_separator = 0x01;
 constexpr uint8_t pss_trailer = 0xbc;
 constexpr data_array<8> pss_prefix{};
 
-// A big-endian magnitude without leading zeros.
+// Big-endian magnitude without leading zeros.
 static data_chunk to_magnitude(const_byte_span value) NOEXCEPT
 {
     const auto first = std::find_if(value.begin(), value.end(),
@@ -58,7 +58,7 @@ static data_chunk to_magnitude(const_byte_span value) NOEXCEPT
     return { first, value.end() };
 }
 
-// mgf1 (rfc8017 B.2.1), the hashes of seed and each big-endian counter.
+// mgf1 (rfc8017 B.2.1), hashes of seed and each big-endian counter.
 template <typename Hash>
 static data_chunk mask(const_byte_span seed, size_t size) NOEXCEPT
 {
@@ -87,7 +87,7 @@ static bool pss_verify(const_byte_span encoded, size_t bits,
     if (size < hash_size + salt_size + two || encoded.back() != pss_trailer)
         return false;
 
-    // The high bits of the encoding beyond its bit size must be zero.
+    // Encoding bits beyond its bit size must be zero.
     const auto masked = encoded.first(size - hash_size - one);
     const auto hash = encoded.subspan(masked.size(), hash_size);
     const auto unused = to_bits(size) - bits;
@@ -100,7 +100,7 @@ static bool pss_verify(const_byte_span encoded, size_t bits,
 
     mask_left_into(block.front(), unused);
 
-    // The unmasked block is zero padding, the separator and the salt.
+    // Unmasked block is zero padding, separator and salt.
     const auto padding = block.size() - salt_size - one;
     const auto start = block.begin();
     const auto zero_padding = std::all_of(start, std::next(start, padding),
@@ -149,7 +149,7 @@ bool rsa::verify_pkcs1(const public_key& key, const_byte_span signature,
     if (!open(encoded, key, signature))
         return false;
 
-    // The payload follows a zero byte, block type, padding and zero byte.
+    // Payload follows zero byte, block type, padding and zero byte.
     const auto size = encoded.size();
     if (size < payload.size() + pkcs1_minimum_padding + pkcs1_framing)
         return false;
@@ -171,8 +171,7 @@ bool rsa::verify_pss(const public_key& key, const_byte_span signature,
     if (!open(encoded, key, signature))
         return false;
 
-    // The encoding has one bit less than the modulus, so one byte less when
-    // the modulus bit size is one more than a multiple of eight.
+    // Encoding has one bit less than modulus, a byte less if bits = 8n + 1.
     const auto modulus_bits = to_bits(sub1(key.modulus.size())) +
         bit_width(key.modulus.front());
     const auto bits = sub1(modulus_bits);
@@ -207,7 +206,7 @@ bool rsa::verify_pss(const public_key& key, const_byte_span signature,
 // protected
 // ----------------------------------------------------------------------------
 
-// A minimal odd modulus of supported size, exponent odd in [3, n - 1].
+// Minimal odd modulus of supported size, odd exponent in [3, n - 1].
 bool rsa::is_valid(const public_key& key) NOEXCEPT
 {
     const auto& n = key.modulus;
@@ -228,7 +227,7 @@ rsa::element rsa::multiply(const element& left, const element& right,
     return element{ (product{ left } * product{ right }) % product{ modulus } };
 }
 
-// Left to right binary exponentiation over the public exponent.
+// Left to right binary exponentiation over public exponent.
 rsa::element rsa::power(const element& base, const element& exponent,
     const element& modulus) NOEXCEPT
 {
@@ -243,7 +242,7 @@ rsa::element rsa::power(const element& base, const element& exponent,
     return result;
 }
 
-// rsavp1 and i2osp (rfc8017 5.2.2, 4.1), to the size of the modulus.
+// rsavp1 and i2osp (rfc8017 5.2.2, 4.1), to modulus size.
 bool rsa::open(data_chunk& out, const public_key& key,
     const_byte_span signature) NOEXCEPT
 {

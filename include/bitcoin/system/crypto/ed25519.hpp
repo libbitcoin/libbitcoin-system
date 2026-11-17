@@ -27,9 +27,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// Ed25519 signatures over edwards25519 (rfc8032), with key blinding
-/// (rend-spec-v3 A.2). Secret key operations are constant time.
-/// Seeds, scalars and points are 256 bits, little-endian.
+/// Ed25519 signatures (rfc8032) and key blinding (rend-spec-v3 A.2).
+/// Secret key operations constant time, values 256 bit little-endian.
 class BC_API ed25519
   : public curve25519
 {
@@ -38,32 +37,32 @@ public:
     static constexpr size_t key_size = 32;
     typedef data_array<key_size> key;
 
-    /// An expanded secret is a scalar followed by a nonce prefix.
+    /// Expanded secret, scalar followed by nonce prefix.
     static constexpr size_t expanded_size = two * key_size;
     typedef data_array<expanded_size> expanded;
 
-    /// A signature is a point (R) followed by a scalar (S).
+    /// Signature, point (R) followed by scalar (S).
     static constexpr size_t signature_size = two * key_size;
     typedef data_array<signature_size> signature;
 
-    /// The expanded secret of a seed (clamped scalar, prefix).
+    /// Expanded secret of seed (clamped scalar, prefix).
     static expanded expand(const key& seed) NOEXCEPT;
 
-    /// The point (public key) of an expanded secret.
+    /// Point (public key) of expanded secret.
     static key public_key(const expanded& secret) NOEXCEPT;
 
     /// Sign message by expanded secret, given its point.
     static signature sign(const expanded& secret, const key& point,
         const_byte_span message) NOEXCEPT;
 
-    /// True if value is a valid signature of message for point.
+    /// True if value is valid signature of message for point.
     static bool verify(const signature& value, const key& point,
         const_byte_span message) NOEXCEPT;
 
-    /// Blind point by factor (clamped), false if not a valid point.
+    /// Blind point by factor (clamped), false if invalid point.
     static bool blind(key& out, const key& point, const key& factor) NOEXCEPT;
 
-    /// Blind expanded secret by factor (clamped), deriving the prefix.
+    /// Blind expanded secret by factor (clamped), deriving prefix.
     static expanded blind(const expanded& secret, const key& factor) NOEXCEPT;
 
 protected:
@@ -71,32 +70,32 @@ protected:
     static constexpr size_t coordinates = 4;
     typedef std_array<field, coordinates> extended;
 
-    /// Scalar products are 64 radix 2^8 digits (unreduced) over int64.
+    /// Scalar products, 64 radix 2^8 digits (unreduced) over int64.
     static constexpr size_t digits = 64;
     typedef std_array<int64_t, digits> product;
 
-    /// The curve constant d = -121665 / 121666 (mod p).
+    /// Curve constant d = -121665 / 121666 (mod p).
     static constexpr field curve_d
     {
         0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
         0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203
     };
 
-    /// The curve constant doubled, 2 * d (mod p).
+    /// Curve constant doubled, 2 * d (mod p).
     static constexpr field curve_d2
     {
         0xf159, 0x26b2, 0x9b94, 0xebd6, 0xb156, 0x8283, 0x149a, 0x00e0,
         0xd130, 0xeef3, 0x80f2, 0x198e, 0xfce7, 0x56df, 0xd9dc, 0x2406
     };
 
-    /// A square root of -1 (mod p), 2^((p - 1) / 4).
+    /// Square root of -1 (mod p), 2^((p - 1) / 4).
     static constexpr field root
     {
         0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
         0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
     };
 
-    /// The base point B, with y = 4 / 5 (mod p) and x even.
+    /// Base point B, y = 4 / 5 (mod p), x even.
     static constexpr field base_x
     {
         0xd51a, 0x8f25, 0x2d60, 0xc956, 0xa7b2, 0x9525, 0xc760, 0x692c,
@@ -108,7 +107,7 @@ protected:
         0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666
     };
 
-    /// The group order l = 2^252 + 27742317777372353535851937790883648493.
+    /// Group order l = 2^252 + 27742317777372353535851937790883648493.
     static constexpr key order = base16_array(
         "edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010");
 
