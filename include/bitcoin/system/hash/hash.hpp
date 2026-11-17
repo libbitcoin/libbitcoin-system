@@ -33,5 +33,6 @@
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/siphash.hpp>
+#include <bitcoin/system/hash/sponge.hpp>
 
 #endif

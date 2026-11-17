@@ -26,13 +26,16 @@
 #include <bitcoin/system/crypto/algorithms.hpp>
 #include <bitcoin/system/crypto/chacha20.hpp>
 #include <bitcoin/system/crypto/chacha20_poly1305.hpp>
+#include <bitcoin/system/crypto/curve25519.hpp>
 #include <bitcoin/system/crypto/fschacha20.hpp>
 #include <bitcoin/system/crypto/fschacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
+#include <bitcoin/system/crypto/ed25519.hpp>
 #include <bitcoin/system/crypto/poly1305.hpp>
 #include <bitcoin/system/crypto/maybe_random.hpp>
 #include <bitcoin/system/crypto/nist/algorithm.hpp>
 #include <bitcoin/system/crypto/nist/nist.hpp>
+#include <bitcoin/system/crypto/rsa.hpp>
 #include <bitcoin/system/crypto/salsa20.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>

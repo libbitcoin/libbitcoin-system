@@ -18,14 +18,14 @@
  */
 #include "../test.hpp"
 
-BC_AUTO_TEST_SUITE(x25519_tests)
-
 // rfc7748 section 6.1 (Diffie-Hellman).
 const auto alice_secret = base16_array("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a");
 const auto alice_public = base16_array("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a");
 const auto bob_secret = base16_array("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb");
 const auto bob_public = base16_array("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f");
 const auto shared_secret = base16_array("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742");
+
+BC_AUTO_TEST_SUITE(x25519_tests)
 
 BC_AUTO_TEST_CASE(x25519__multiply__alice_base__public_key)
 {
@@ -136,6 +136,38 @@ BC_AUTO_TEST_CASE(x25519__generate__unsanitized__consistent_keys)
     x25519::key derived{};
     BC_REQUIRE(x25519::multiply(derived, secret));
     BC_REQUIRE_EQUAL(derived, public_key);
+}
+
+BC_AUTO_TEST_SUITE_END()
+
+BC_AUTO_TEST_SUITE(x25519_ctime_tests)
+
+// Under valgrind a secret is undefined, so a branch or memory address that
+// depends on it is reported as an error, and each output is defined before it
+// is compared to the expected value.
+
+BC_AUTO_TEST_CASE(x25519_ctime__multiply__undefined_secret_base__public_key)
+{
+    auto secret = alice_secret;
+    classify(secret);
+    x25519::key out{};
+    auto result = x25519::multiply(out, secret);
+    declassify(result);
+    declassify(out);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(out, alice_public);
+}
+
+BC_AUTO_TEST_CASE(x25519_ctime__multiply__undefined_secret__shared_secret)
+{
+    auto secret = alice_secret;
+    classify(secret);
+    x25519::key out{};
+    auto result = x25519::multiply(out, secret, bob_public);
+    declassify(result);
+    declassify(out);
+    BC_REQUIRE(result);
+    BC_REQUIRE_EQUAL(out, shared_secret);
 }
 
 BC_AUTO_TEST_SUITE_END()

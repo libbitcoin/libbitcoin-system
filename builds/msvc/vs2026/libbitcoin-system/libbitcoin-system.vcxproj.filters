@@ -588,6 +588,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\ed25519.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -598,6 +601,9 @@
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\rsa.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp">
@@ -1373,7 +1379,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\curve25519.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ed25519.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\fschacha20.hpp">
@@ -1392,6 +1404,9 @@
       <Filter>include\bitcoin\system\crypto\nist</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\rsa.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp">
@@ -1656,6 +1671,9 @@
       <Filter>include\bitcoin\system\hash\sha</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\siphash.hpp">
+      <Filter>include\bitcoin\system\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sponge.hpp">
       <Filter>include\bitcoin\system\hash</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp">
@@ -2388,6 +2406,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\aes_gcm.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\curve25519.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\nist\algorithm_der.ipp">
       <Filter>include\bitcoin\system\impl\crypto\nist</Filter>
     </None>
@@ -2597,6 +2618,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_stream.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sponge.ipp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>

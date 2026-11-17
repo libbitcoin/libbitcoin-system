@@ -60,6 +60,25 @@ finalize(state_t& state, const bytes_t<Size>& tail) NOEXCEPT
     return output(state);
 }
 
+// Extendable output (explicitly finalized).
+// ----------------------------------------------------------------------------
+// The final permutation of absorbing is the first permutation of squeezing.
+
+TEMPLATE
+constexpr void CLASS::
+seal(state_t& state, size_t size, const byte_t* tail) NOEXCEPT
+{
+    xor_rate(state, pad(size, tail));
+}
+
+TEMPLATE
+constexpr typename CLASS::block_t CLASS::
+squeeze(state_t& state) NOEXCEPT
+{
+    permute(state);
+    return extract(state);
+}
+
 } // namespace sha3
 } // namespace system
 } // namespace libbitcoin

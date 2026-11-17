@@ -124,10 +124,12 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/chacha20.cpp \
     ${srcdir}/../../src/crypto/chacha20_poly1305.cpp \
     ${srcdir}/../../src/crypto/der_parser.cpp \
+    ${srcdir}/../../src/crypto/ed25519.cpp \
     ${srcdir}/../../src/crypto/fschacha20.cpp \
     ${srcdir}/../../src/crypto/fschacha20_poly1305.cpp \
     ${srcdir}/../../src/crypto/maybe_random.cpp \
     ${srcdir}/../../src/crypto/poly1305.cpp \
+    ${srcdir}/../../src/crypto/rsa.cpp \
     ${srcdir}/../../src/crypto/salsa20.cpp \
     ${srcdir}/../../src/crypto/x25519.cpp \
     ${srcdir}/../../src/crypto/xsalsa20_poly1305.cpp \
@@ -460,11 +462,14 @@ include_bitcoin_system_crypto_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/crypto/chacha20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/chacha20_poly1305.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/crypto.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/curve25519.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/der_parser.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/ed25519.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/fschacha20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/fschacha20_poly1305.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/maybe_random.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/poly1305.hpp \
+    ${srcdir}/../../include/bitcoin/system/crypto/rsa.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/salsa20.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/secp256k1.hpp \
     ${srcdir}/../../include/bitcoin/system/crypto/x25519.hpp \
@@ -591,7 +596,8 @@ include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/muhash.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/pbkd.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/scrypt.hpp \
-    ${srcdir}/../../include/bitcoin/system/hash/siphash.hpp
+    ${srcdir}/../../include/bitcoin/system/hash/siphash.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/sponge.hpp
 
 include_bitcoin_system_hash_rmddir = \
     ${includedir}/bitcoin/system/hash/rmd
@@ -641,7 +647,8 @@ include_bitcoin_system_impl_cryptodir = \
     ${includedir}/bitcoin/system/impl/crypto
 
 include_bitcoin_system_impl_crypto_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes_gcm.ipp
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/aes_gcm.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/crypto/curve25519.ipp
 
 include_bitcoin_system_impl_crypto_aesdir = \
     ${includedir}/bitcoin/system/impl/crypto/aes
@@ -737,7 +744,8 @@ include_bitcoin_system_impl_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/hash/hkdf.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/hmac.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/pbkd.ipp \
-    ${srcdir}/../../include/bitcoin/system/impl/hash/scrypt.ipp
+    ${srcdir}/../../include/bitcoin/system/impl/hash/scrypt.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sponge.ipp
 
 include_bitcoin_system_impl_hash_rmddir = \
     ${includedir}/bitcoin/system/impl/hash/rmd
@@ -1363,12 +1371,14 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/crypto/aes_gcm.cpp \
     ${srcdir}/../../test/crypto/chacha20.cpp \
     ${srcdir}/../../test/crypto/chacha20_poly1305.cpp \
+    ${srcdir}/../../test/crypto/ed25519.cpp \
     ${srcdir}/../../test/crypto/fschacha20.cpp \
     ${srcdir}/../../test/crypto/fschacha20_poly1305.cpp \
     ${srcdir}/../../test/crypto/maybe_random.cpp \
     ${srcdir}/../../test/crypto/nist.cpp \
     ${srcdir}/../../test/crypto/performance.cpp \
     ${srcdir}/../../test/crypto/poly1305.cpp \
+    ${srcdir}/../../test/crypto/rsa.cpp \
     ${srcdir}/../../test/crypto/salsa20.cpp \
     ${srcdir}/../../test/crypto/shamir.cpp \
     ${srcdir}/../../test/crypto/x25519.cpp \
@@ -1445,6 +1455,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/pbkd.cpp \
     ${srcdir}/../../test/hash/scrypt.cpp \
     ${srcdir}/../../test/hash/siphash.cpp \
+    ${srcdir}/../../test/hash/sponge.cpp \
     ${srcdir}/../../test/hash/performance/performance.cpp \
     ${srcdir}/../../test/hash/performance/transition.cpp \
     ${srcdir}/../../test/hash/rmd/algorithm.cpp \

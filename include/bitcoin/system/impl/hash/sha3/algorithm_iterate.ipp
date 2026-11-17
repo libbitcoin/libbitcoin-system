@@ -31,14 +31,20 @@ namespace sha3 {
 
 TEMPLATE
 constexpr void CLASS::
-absorb(state_t& state, const block_t& block) NOEXCEPT
+xor_rate(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t words{};
     input(words, block);
 
     for (size_t word{}; word < SHA3::block_words; ++word)
         state[word] ^= words[word];
+}
 
+TEMPLATE
+constexpr void CLASS::
+absorb(state_t& state, const block_t& block) NOEXCEPT
+{
+    xor_rate(state, block);
     permute(state);
 }
 

@@ -29,8 +29,9 @@ namespace sha3 {
 struct sha3k_t{};
 struct sha3h_t{};
 
-/// Padding domain separation byte (FIPS202 SHA3 vs. original Keccak).
+/// Padding domain separation byte (FIPS202 SHA3, SHAKE and original Keccak).
 constexpr uint8_t sha3_domain = 0x06;
+constexpr uint8_t shake_domain = 0x1f;
 constexpr uint8_t keccak_domain = 0x01;
 
 /// The Keccak-f[1600] permutation, invariant across all digest sizes.

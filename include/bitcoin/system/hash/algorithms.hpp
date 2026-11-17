@@ -43,6 +43,7 @@ using sha512     = sha::algorithm<sha::h512<>>;
 
 /// bc::system sha3 algorithm aliases (sponge, scalar).
 using sha3_256   = sha3::algorithm<sha3::h256<>>;
+using shake_256  = sha3::algorithm<sha3::h256<sha3::shake_domain>>;
 using keccak_256 = sha3::algorithm<sha3::h256<sha3::keccak_domain>>;
 
 } // namespace system

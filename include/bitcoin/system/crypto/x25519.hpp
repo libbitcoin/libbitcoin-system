@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_X25519_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_X25519_HPP
 
+#include <bitcoin/system/crypto/curve25519.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -28,6 +29,7 @@ namespace system {
 /// X25519 Diffie-Hellman function over Curve25519 (rfc7748).
 /// Scalars are clamped and points are u-coordinates, both little-endian.
 class BC_API x25519
+  : public curve25519
 {
 public:
     /// Scalars and points are always 256 bits.
@@ -45,20 +47,7 @@ public:
         bool sanitize=true) NOEXCEPT;
 
 protected:
-    /// Field elements are sixteen radix 2^16 limbs (unreduced) over int64.
-    static constexpr size_t limbs = 16;
-    typedef std_array<int64_t, limbs> field;
-
-    static constexpr void carry(field& out) NOEXCEPT;
-    static constexpr void square(field& out, const field& a) NOEXCEPT;
-    static constexpr void invert(field& out, const field& a) NOEXCEPT;
-    static constexpr void select(field& p, field& q, int64_t bit) NOEXCEPT;
-    static constexpr void add(field& out, const field& a, const field& b) NOEXCEPT;
-    static constexpr void subtract(field& out, const field& a, const field& b) NOEXCEPT;
-    static constexpr void multiply(field& out, const field& a, const field& b) NOEXCEPT;
-
-    static void pack(key& out, const field& in) NOEXCEPT;
-    static void unpack(field& out, const key& in) NOEXCEPT;
+    using curve25519::multiply;
 };
 
 } // namespace system

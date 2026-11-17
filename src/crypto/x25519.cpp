@@ -21,13 +21,12 @@
 #include <bitcoin/system/crypto/maybe_random.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 
 // based on:
 // datatracker.ietf.org/doc/html/rfc7748
-// tweetnacl.cr.yp.to (field arithmetic)
+// tweetnacl.cr.yp.to (ladder)
 // [Bernstein, Josefsson, Liusvaara]
 
 namespace libbitcoin {
@@ -35,19 +34,6 @@ namespace system {
 
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-
-// Limbs are radix 2^16 over int64, and may be negative between carries. The
-// limb count and the radix width are both sixteen, but are not related.
-constexpr auto radix_bits = 16_size;
-constexpr auto radix = bit_right<int64_t>(radix_bits);
-
-// The field prime p = 2^255 - 19 in radix 2^16 limbs (low, middle, high).
-constexpr int64_t prime_low = 0xffed;
-constexpr int64_t prime_middle = 0xffff;
-constexpr int64_t prime_high = 0x7fff;
-
-// The fold of a limb carried beyond 2^256, which is 38 = 2 * 19 (mod p).
-constexpr int64_t fold = 38;
 
 // x25519
 // ----------------------------------------------------------------------------
@@ -118,11 +104,12 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     wipe(e);
     wipe(f);
 
-    // An all zero result indicates a low order point.
-    return std::any_of(out.cbegin(), out.cend(), [](uint8_t byte) NOEXCEPT
-    {
-        return !is_zero(byte);
-    });
+    // An all zero result indicates a low order point (all bytes are read).
+    uint8_t bits{};
+    for (const auto byte: out)
+        bits |= byte;
+
+    return is_nonzero(bits);
 }
 
 bool x25519::multiply(key& out, const key& scalar) NOEXCEPT
@@ -151,147 +138,6 @@ void x25519::generate(key& private_key, key& public_key, bool sanitize) NOEXCEPT
     }
     while (!multiply(public_key, private_key) ||
         !allowed(private_key, sanitize) || !allowed(public_key, sanitize));
-}
-
-// field
-// ----------------------------------------------------------------------------
-
-// Propagate limb carries, folding top limb overflow (p = 2^255 - 19).
-constexpr void x25519::carry(field& out) NOEXCEPT
-{
-    for (size_t index{}; index < limbs; ++index)
-    {
-        // The radix is added so that the floored carry of a negative limb is
-        // one less than that of a positive limb, which is then subtracted.
-        out[index] += radix;
-        const auto carried = floored_divide(out[index], radix);
-
-        if (index < sub1(limbs))
-            out[add1(index)] += sub1(carried);
-        else
-            out[zero] += sub1(carried) * fold;
-
-        out[index] -= carried * radix;
-    }
-}
-
-// Constant time conditional swap (bit is zero or one).
-constexpr void x25519::select(field& p, field& q, int64_t bit) NOEXCEPT
-{
-    const auto mask = negate(bit);
-
-    for (size_t index{}; index < limbs; ++index)
-    {
-        const auto swap = bit_and(mask, bit_xor(p[index], q[index]));
-        p[index] ^= swap;
-        q[index] ^= swap;
-    }
-}
-
-constexpr void x25519::add(field& out, const field& a,
-    const field& b) NOEXCEPT
-{
-    for (size_t index{}; index < limbs; ++index)
-        out[index] = (a[index] + b[index]);
-}
-
-constexpr void x25519::subtract(field& out, const field& a,
-    const field& b) NOEXCEPT
-{
-    for (size_t index{}; index < limbs; ++index)
-        out[index] = (a[index] - b[index]);
-}
-
-constexpr void x25519::multiply(field& out, const field& a,
-    const field& b) NOEXCEPT
-{
-    std_array<int64_t, sub1(two * limbs)> product{};
-
-    for (size_t i{}; i < limbs; ++i)
-        for (size_t j{}; j < limbs; ++j)
-            product[i + j] += (a[i] * b[j]);
-
-    // Reduce the upper half, as 2^256 = 38 (mod p).
-    for (size_t index{}; index < sub1(limbs); ++index)
-        product[index] += (product[index + limbs] * fold);
-
-    for (size_t index{}; index < limbs; ++index)
-        out[index] = product[index];
-
-    carry(out);
-    carry(out);
-}
-
-constexpr void x25519::square(field& out, const field& a) NOEXCEPT
-{
-    multiply(out, a, a);
-}
-
-// Inversion by exponentiation to p - 2 (Fermat), constant time.
-constexpr void x25519::invert(field& out, const field& a) NOEXCEPT
-{
-    auto c = a;
-
-    for (size_t index{ 254 }; index > zero; --index)
-    {
-        const auto exponent = sub1(index);
-        square(c, c);
-
-        if (exponent != 2 && exponent != 4)
-            multiply(c, c, a);
-    }
-
-    out = c;
-}
-
-// Fully reduce and serialize little-endian.
-void x25519::pack(key& out, const field& in) NOEXCEPT
-{
-    auto t = in;
-    carry(t);
-    carry(t);
-    carry(t);
-
-    // Subtract p twice, keeping the result only if non-negative.
-    for (size_t pass{}; pass < two; ++pass)
-    {
-        // A negative limb borrows from the next and is normalized to radix.
-        field m{};
-        m[zero] = t[zero] - prime_low;
-
-        for (auto index = one; index < sub1(limbs); ++index)
-        {
-            auto& previous = m[sub1(index)];
-            m[index] = t[index] - prime_middle - to_int(is_negative(previous));
-            previous = floored_modulo(previous, radix);
-        }
-
-        auto& penultimate = m[sub1(sub1(limbs))];
-        auto& last = m[sub1(limbs)];
-        last = t[sub1(limbs)] - prime_high - to_int(is_negative(penultimate));
-        penultimate = floored_modulo(penultimate, radix);
-
-        // The subtraction is kept only if the top limb did not borrow.
-        select(t, m, to_int(!is_negative(last)));
-    }
-
-    std_array<uint16_t, limbs> words{};
-    for (size_t index{}; index < limbs; ++index)
-        words[index] = possible_narrow_and_sign_cast<uint16_t>(t[index]);
-
-    to_little_endians(out, words);
-}
-
-// Deserialize little-endian, masking the unused top bit.
-void x25519::unpack(field& out, const key& in) NOEXCEPT
-{
-    std_array<uint16_t, limbs> words{};
-    from_little_endians(words, in);
-
-    for (size_t index{}; index < limbs; ++index)
-        out[index] = words[index];
-
-    set_right_into(out[sub1(limbs)], sub1(radix_bits), false);
 }
 
 BC_POP_WARNING()

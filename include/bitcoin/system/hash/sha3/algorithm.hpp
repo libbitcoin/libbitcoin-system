@@ -40,7 +40,7 @@ namespace sha3 {
 // Hacking our way around an MSVC compiler bug (see sha::algorithm).
 #define CLASSIF algorithm<SHA3, true>
 
-/// SHA3 and Keccak hashing algorithm (sponge over Keccak-f[1600]).
+/// SHA3, SHAKE and Keccak hashing algorithm (sponge over Keccak-f[1600]).
 template <typename SHA3,
     if_same<typename SHA3::T, sha3h_t> = true>
 class algorithm
@@ -110,6 +110,16 @@ public:
     static constexpr digest_t finalize(state_t& state,
         const bytes_t<Size>& tail) NOEXCEPT;
 
+    /// Extendable output (explicitly finalized).
+    /// -----------------------------------------------------------------------
+
+    /// Add the padded trailing partial block (size not greater than space).
+    static constexpr void seal(state_t& state, size_t size,
+        const byte_t* tail) NOEXCEPT;
+
+    /// Permute the sealed state and return the next block of output.
+    static constexpr block_t squeeze(state_t& state) NOEXCEPT;
+
 protected:
     /// Keccak-f[1600] functions.
     /// -----------------------------------------------------------------------
@@ -140,12 +150,15 @@ protected:
     template <size_t ...Words>
     static constexpr void output_(block_t& bytes, const state_t& state,
         std::index_sequence<Words...>) NOEXCEPT;
+    static constexpr block_t extract(const state_t& state) NOEXCEPT;
     static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     template <size_t Size>
     static constexpr block_t pad(const bytes_t<Size>& tail) NOEXCEPT;
     static constexpr block_t pad(size_t size, const byte_t* tail) NOEXCEPT;
 
+    static constexpr void xor_rate(state_t& state,
+        const block_t& block) NOEXCEPT;
     static constexpr void absorb(state_t& state, const block_t& block) NOEXCEPT;
 
     /// Iteration.

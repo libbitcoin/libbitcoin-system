@@ -233,6 +233,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\aes_gcm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\chacha20_poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\ed25519.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\maybe_random.cpp" />
@@ -241,6 +242,7 @@
       <ObjectFileName>$(IntDir)test_crypto_performance.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\rsa.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_group.cpp" />
@@ -368,6 +370,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha3\sha3.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\sponge.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\add.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\count.cpp" />

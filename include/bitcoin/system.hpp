@@ -126,11 +126,14 @@
 #include <bitcoin/system/crypto/chacha20.hpp>
 #include <bitcoin/system/crypto/chacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/crypto/curve25519.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
+#include <bitcoin/system/crypto/ed25519.hpp>
 #include <bitcoin/system/crypto/fschacha20.hpp>
 #include <bitcoin/system/crypto/fschacha20_poly1305.hpp>
 #include <bitcoin/system/crypto/maybe_random.hpp>
 #include <bitcoin/system/crypto/poly1305.hpp>
+#include <bitcoin/system/crypto/rsa.hpp>
 #include <bitcoin/system/crypto/salsa20.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/x25519.hpp>
@@ -208,6 +211,7 @@
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/siphash.hpp>
+#include <bitcoin/system/hash/sponge.hpp>
 #include <bitcoin/system/hash/rmd/algorithm.hpp>
 #include <bitcoin/system/hash/rmd/rmd.hpp>
 #include <bitcoin/system/hash/rmd/rmd128.hpp>

@@ -37,6 +37,8 @@ constexpr auto abc512 = base16_array("b751850b1a57168a5693cd924b6b096e08f6218274
 constexpr auto long256 = base16_array("41c0dba2a9d6240849100376a8235e2c82e1b9998a999e21db32dd97496d3376");
 constexpr auto million256 = base16_array("5c8875ae474a3634ba4fd55ec85bffd661f32aca75c6d699d0cdcb6c115891c1");
 constexpr auto keccak_empty256 = base16_array("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+constexpr auto shake_empty256 = base16_array("46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762f");
+constexpr auto shake_abc512 = base16_array("483366601360a8771c6863080cc4114d8db44530f8f1e1ee4f94ea37e78b5739d5a15bef186a5386c75744c0527e1faa9f8726e462a12a4feb06bd8801e751e4");
 
 constexpr std_array<uint8_t, 3> abc{ 'a', 'b', 'c' };
 constexpr auto long_message = to_array(
@@ -103,6 +105,37 @@ BC_AUTO_TEST_CASE(sha3__accumulate_finalize__one_million_a__expected)
     auto state = sha3_256::H::get;
     sha3_256::accumulate(state, { data.size(), data.data() });
     BC_REQUIRE_EQUAL(sha3_256::finalize(state, tail), million256);
+}
+
+// seal/squeeze
+
+BC_AUTO_TEST_CASE(sha3__seal_squeeze__abc__leading_digest)
+{
+    auto state = sha3_256::H::get;
+    sha3_256::seal(state, abc.size(), abc.data());
+    const auto block = sha3_256::squeeze(state);
+    const auto& digest = array_cast<uint8_t, 32>(block);
+    BC_REQUIRE_EQUAL(digest, abc256);
+}
+
+// shake
+
+BC_AUTO_TEST_CASE(shake__seal_squeeze__empty__expected)
+{
+    auto state = shake_256::H::get;
+    shake_256::seal(state, zero, nullptr);
+    const auto block = shake_256::squeeze(state);
+    const auto& output = array_cast<uint8_t, 32>(block);
+    BC_REQUIRE_EQUAL(output, shake_empty256);
+}
+
+BC_AUTO_TEST_CASE(shake__seal_squeeze__abc__expected)
+{
+    auto state = shake_256::H::get;
+    shake_256::seal(state, abc.size(), abc.data());
+    const auto block = shake_256::squeeze(state);
+    const auto& output = array_cast<uint8_t, 64>(block);
+    BC_REQUIRE_EQUAL(output, shake_abc512);
 }
 
 // keccak

@@ -710,6 +710,32 @@ static_assert(shift_right<uint8_t>(0x80, 5, false) == 0x04u);
 static_assert(shift_right<uint8_t>(0x80, 6, false) == 0x02u);
 static_assert(shift_right<uint8_t>(0x80, 7, false) == 0x01u);
 static_assert(shift_right<uint8_t>(0x80, 9, false) == 0x40u);
+
+// Signed shift right is arithmetic (floored, sign extending).
+static_assert(shift_right<int8_t>(0_i8, 1) == 0_i8);
+static_assert(shift_right<int8_t>(64_i8, 1) == 32_i8);
+static_assert(shift_right<int8_t>(127_i8, 6) == 1_i8);
+static_assert(shift_right<int8_t>(127_i8, 8, true) == 0_i8);
+static_assert(shift_right<int8_t>(1_ni8, 1) == 1_ni8);
+static_assert(shift_right<int8_t>(3_ni8, 1) == 2_ni8);
+static_assert(shift_right<int8_t>(0b10000000_i8, 1) == 0b11000000_i8);
+static_assert(shift_right<int8_t>(0b10000000_i8, 7) == 1_ni8);
+static_assert(shift_right<int8_t>(0b10000000_i8, 8, true) == 1_ni8);
+static_assert(shift_right<int8_t>(0b10000000_i8, 9, true) == 1_ni8);
+static_assert(shift_right<int8_t>(0b10000000_i8, 8, false) == 0b10000000_i8);
+static_assert(shift_right<int8_t>(0b10000000_i8, 9, false) == 0b11000000_i8);
+static_assert(is_same_type<decltype(shift_right<int8_t>(0, 0, true)), int8_t>);
+
+constexpr int8_t shifted_right_into(int8_t value, size_t shift,
+    bool overflow) NOEXCEPT
+{
+    shift_right_into(value, shift, overflow);
+    return value;
+}
+
+static_assert(shifted_right_into(3_ni8, 1, true) == 2_ni8);
+static_assert(shifted_right_into(0b10000000_i8, 8, true) == 1_ni8);
+static_assert(shifted_right_into(0b10000000_i8, 9, false) == 0b11000000_i8);
 static_assert(is_same_type<decltype(shift_left<uint8_t>(0, 0, true)), uint8_t>);
 
 // rotate_right
