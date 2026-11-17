@@ -35,11 +35,11 @@ namespace system {
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-// Scalar digits are radix 2^8, and may be negative between carries.
+// Scalar digits radix 2^8, may be negative between carries.
 constexpr auto digit_bits = 8_size;
 constexpr auto digit_radix = bit_right<int64_t>(digit_bits);
 
-// The nonce prefix of a blinded secret is derived from this and the prefix.
+// Blinded secret nonce prefix derives from this and prefix.
 constexpr auto blind_string = to_array(
     "Derive temporary signing key hash input");
 
@@ -48,7 +48,7 @@ constexpr auto blind_string = to_array(
 
 ed25519::expanded ed25519::expand(const key& seed) NOEXCEPT
 {
-    // The low half of the seed hash is the scalar, the high half the prefix.
+    // Low half of seed hash is scalar, high half is prefix.
     auto secret = sha512_hash(seed);
     auto& scalar = array_cast<uint8_t, key_size>(secret);
     scalar = clamp(scalar);
@@ -104,7 +104,7 @@ bool ed25519::verify(const signature& value, const key& point,
     challenge_hash.write(message.size(), message.data());
     const auto challenge = reduce(challenge_hash.flush());
 
-    // The encoding of SB - kA must be R (cofactorless).
+    // Encoding of SB - kA must be R (cofactorless).
     opposite(a);
     auto check = multiply(generator(), response);
     add(check, multiply(a, challenge));
@@ -139,7 +139,7 @@ ed25519::expanded ed25519::blind(const expanded& secret,
 // field
 // ----------------------------------------------------------------------------
 
-// The low bit of the fully reduced element (the sign of x).
+// Low bit of fully reduced element (sign of x).
 bool ed25519::parity(const field& a) NOEXCEPT
 {
     element bytes{};
@@ -157,7 +157,7 @@ bool ed25519::same(const field& a, const field& b) NOEXCEPT
     return left == right;
 }
 
-// The power a^((p - 5) / 8), from which a square root is derived.
+// Power a^((p - 5) / 8), from which square root derives.
 constexpr void ed25519::root_power(field& out, const field& a) NOEXCEPT
 {
     auto c = a;
@@ -189,15 +189,14 @@ constexpr ed25519::extended ed25519::generator() NOEXCEPT
     return out;
 }
 
-// The opposite point (-x, y).
+// Opposite point (-x, y).
 constexpr void ed25519::opposite(extended& p) NOEXCEPT
 {
     subtract(p[0], {}, p[0]);
     subtract(p[3], {}, p[3]);
 }
 
-// Unified addition (also doubling), p may be q. All inputs are read before
-// any output is written.
+// Unified addition (also doubling), p may be q (inputs read before output).
 constexpr void ed25519::add(extended& p, const extended& q) NOEXCEPT
 {
     field a{};
@@ -237,7 +236,7 @@ constexpr void ed25519::select(extended& p, extended& q, int64_t bit) NOEXCEPT
         select(p[index], q[index], bit);
 }
 
-// Constant time ladder over all 256 bits of the scalar.
+// Constant time ladder over all 256 scalar bits.
 constexpr ed25519::extended ed25519::multiply(const extended& point,
     const key& scalar) NOEXCEPT
 {
@@ -283,7 +282,7 @@ bool ed25519::decode(extended& out, const key& point) NOEXCEPT
     auto encoded = point;
     set_right_into(encoded.back(), 7, false);
 
-    // The y coordinate must be less than p.
+    // Coordinate y must be less than p.
     auto& [x, y, z, t] = out;
     element canonical{};
     unpack(y, encoded);
@@ -315,7 +314,7 @@ bool ed25519::decode(extended& out, const key& point) NOEXCEPT
     multiply(x, x, v);
     multiply(x, x, v);
 
-    // If vx^2 is not u then x * sqrt(-1) is the root, if any.
+    // If vx^2 is not u, x * sqrt(-1) is the root, if any.
     field check{};
     square(check, x);
     multiply(check, check, v);
@@ -327,7 +326,7 @@ bool ed25519::decode(extended& out, const key& point) NOEXCEPT
     if (!same(check, u))
         return false;
 
-    // There is no negative zero.
+    // No negative zero.
     if (sign && same(x, {}))
         return false;
 
@@ -341,7 +340,7 @@ bool ed25519::decode(extended& out, const key& point) NOEXCEPT
 // scalars
 // ----------------------------------------------------------------------------
 
-// Clear the low three bits and the high bit, set the next highest bit.
+// Clear low three bits and high bit, set next highest bit.
 constexpr ed25519::key ed25519::clamp(const key& scalar) NOEXCEPT
 {
     auto clamped = scalar;
@@ -351,7 +350,7 @@ constexpr ed25519::key ed25519::clamp(const key& scalar) NOEXCEPT
     return clamped;
 }
 
-// The scalar is less than l (not constant time).
+// Scalar is less than l (not constant time).
 constexpr bool ed25519::is_canonical(const key& scalar) NOEXCEPT
 {
     for (auto index = key_size; index > zero; --index)
@@ -364,9 +363,8 @@ constexpr bool ed25519::is_canonical(const key& scalar) NOEXCEPT
     return false;
 }
 
-// Reduce modulo l = 2^252 + c. Each digit above 2^256 folds into the digits
-// below it, as 2^256 = -16c (mod l). The sixteen digits of c are followed by
-// four digits of carry. The mask of a signed digit is its floored remainder.
+// Reduce mod l = 2^252 + c, folding digits above 2^256 as 2^256 = -16c (mod l).
+// Fold spans 16 digits of c, 4 of carry; digit mask is floored remainder.
 constexpr ed25519::key ed25519::reduce(product& x) NOEXCEPT
 {
     constexpr auto high_bits = 4_size;
@@ -392,7 +390,7 @@ constexpr ed25519::key ed25519::reduce(product& x) NOEXCEPT
         x[index] = 0;
     }
 
-    // Subtract the multiple of l carried in the high nibble of digit 31.
+    // Subtract multiple of l carried in high nibble of digit 31.
     int64_t carry{};
     for (size_t digit{}; digit < key_size; ++digit)
     {

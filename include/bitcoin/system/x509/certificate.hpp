@@ -68,8 +68,7 @@ struct certificate
     uint64_t not_before{};
     uint64_t not_after{};
 
-    /// Subject public key, an uncompressed sec1 point of the curve (ec) or a
-    /// der RSAPublicKey (rsa).
+    /// Subject key, uncompressed sec1 point (ec) or der RSAPublicKey (rsa).
     x509::key_type key_type{};
     x509::curve curve{};
     data_chunk public_key{};

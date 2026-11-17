@@ -39,7 +39,7 @@ write(const_byte_span data) NOEXCEPT
 {
     BC_ASSERT(!sealed_);
 
-    // Complete a buffered partial block.
+    // Complete buffered partial block.
     if (is_nonzero(offset_))
     {
         const auto count = std::min(block_bytes - offset_, data.size());
@@ -76,7 +76,7 @@ TEMPLATE
 inline void CLASS::
 squeeze(byte_span out) NOEXCEPT
 {
-    // Seal the buffered tail, leaving no buffered output.
+    // Seal buffered tail, leaving no buffered output.
     if (!sealed_)
     {
         Algorithm::seal(state_, offset_, buffer_.data());

@@ -113,11 +113,11 @@ public:
     /// Extendable output (explicitly finalized).
     /// -----------------------------------------------------------------------
 
-    /// Add the padded trailing partial block (size not greater than space).
+    /// Add padded trailing partial block (size not greater than space).
     static constexpr void seal(state_t& state, size_t size,
         const byte_t* tail) NOEXCEPT;
 
-    /// Permute the sealed state and return the next block of output.
+    /// Permute sealed state, returning next block of output.
     static constexpr block_t squeeze(state_t& state) NOEXCEPT;
 
 protected:

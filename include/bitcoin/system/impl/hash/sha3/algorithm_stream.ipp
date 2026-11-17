@@ -62,7 +62,7 @@ finalize(state_t& state, const bytes_t<Size>& tail) NOEXCEPT
 
 // Extendable output (explicitly finalized).
 // ----------------------------------------------------------------------------
-// The final permutation of absorbing is the first permutation of squeezing.
+// Final absorb permutation is first squeeze permutation.
 
 TEMPLATE
 constexpr void CLASS::

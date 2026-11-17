@@ -32,7 +32,7 @@ const auto test3_public = base16_array("fc51cd8e6218a1a38da47ed00230f0580816ed13
 const auto test3_message = base16_chunk("af82");
 const auto test3_signature = base16_array("6291d657deec24024827e69c3abe01a30ce548a284743a445e3680d7db5ac3ac18ff9b538d16f290ae67f760984dc6594a7c15e9716ed28dc027beceea1ec40a");
 
-// test 1 with S + l, with a bit of R flipped, and invalid point encodings.
+// Test 1 with S + l, flipped R bit, and invalid point encodings.
 const auto response_plus_order = base16_array("e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901554c8c7872aa064e049dbb3013fbf29380d25bf5f0595bbe24655141438e7a101b");
 const auto altered_commitment = base16_array("e4564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b");
 const auto prime_y = base16_array("edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f");

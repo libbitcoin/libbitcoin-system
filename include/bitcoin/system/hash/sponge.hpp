@@ -26,8 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Sponge accumulator, finalized to a digest or squeezed (extendable output).
-/// Algorithm is a sha3 algorithm (sha3_256, shake_256, keccak_256).
+/// Sha3 sponge accumulator, finalized to digest or squeezed (extendable).
 template <typename Algorithm,
     if_same<typename Algorithm::H::T, sha3::sha3h_t> = true>
 class sponge
@@ -37,14 +36,14 @@ public:
 
     using digest_t = typename Algorithm::digest_t;
 
-    /// Sponge accumulator, not writable once output is taken.
+    /// Not writable once output taken.
     inline sponge() NOEXCEPT;
     inline void write(const_byte_span data) NOEXCEPT;
 
-    /// Squeeze the next digest size of output (the digest when first).
+    /// Squeeze next digest size of output (the digest when first).
     inline digest_t flush() NOEXCEPT;
 
-    /// Squeeze the next out.size() bytes of output.
+    /// Squeeze next out.size() bytes of output.
     inline void squeeze(byte_span out) NOEXCEPT;
 
 protected:
