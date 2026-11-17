@@ -1010,6 +1010,185 @@ BC_AUTO_TEST_CASE(pool_algorithm__settle__unconfirmed__same_as_frontier_unconfir
     BC_REQUIRE(same_presence(out, frontier));
 }
 
+// suffice (columns)
+// ----------------------------------------------------------------------------
+
+// Twenty rows validated under flags 7 at height 100 and median time past
+// 1000, but for row 2 (flags 5), row 4 (median time past 2000), row 6 (height
+// 500) and row 17 (height 101).
+constexpr size_t context_rows = 20;
+constexpr accessor::context_t validated{ 7, 100, 1000 };
+constexpr accessor::context_t regained{ 7, 500, 2000 };
+constexpr uint32_t required = 4;
+constexpr uint32_t missing = 8;
+
+struct context_state
+{
+    context_state() NOEXCEPT
+    {
+        cells.fill(unlabeled);
+        flags.fill(validated.flags);
+        heights.fill(validated.height);
+        medians.fill(validated.median);
+        flags[2] = 5;
+        medians[4] = 2000;
+        heights[6] = 500;
+        heights[17] = 101;
+
+        cells = stored(cells);
+        flags = stored(flags);
+        heights = stored(heights);
+        medians = stored(medians);
+    }
+
+    columns_t columns() NOEXCEPT
+    {
+        columns_t out{};
+        out.cells = cells;
+        out.flags = flags;
+        out.heights = heights;
+        out.medians = medians;
+        return out;
+    }
+
+    std_array<link_t, context_rows> cells{};
+    std_array<uint32_t, context_rows> flags{};
+    std_array<uint32_t, context_rows> heights{};
+    std_array<uint32_t, context_rows> medians{};
+};
+
+// The table swept under the context at the lane width of the word.
+template <typename Word>
+static context_state suffice_as(const accessor::context_t& context) NOEXCEPT
+{
+    context_state out{};
+    accessor::suffice<Word>(out.columns(), context, required);
+    return out;
+}
+
+// The table swept under the validated and then the regained context.
+template <typename Word>
+static context_state suffice_twice() NOEXCEPT
+{
+    auto out = suffice_as<Word>(validated);
+    accessor::suffice<Word>(out.columns(), regained, required);
+    return out;
+}
+
+template <typename Word>
+static bool suffices_as_integral() NOEXCEPT
+{
+    const auto once = suffice_as<link_t>(validated);
+    const auto twice = suffice_twice<link_t>();
+    return suffice_as<Word>(validated).cells == once.cells &&
+        suffice_twice<Word>().cells == twice.cells;
+}
+
+// The count of rows left insufficient under the validated context.
+template <typename Word>
+static size_t insufficient_rows() NOEXCEPT
+{
+    context_state out{};
+    return accessor::suffice<Word>(out.columns(), validated, required);
+}
+
+// The count of rows left insufficient when a required flag is not held.
+template <typename Word>
+static size_t unable_rows() NOEXCEPT
+{
+    context_state out{};
+    return accessor::suffice<Word>(out.columns(), validated, missing);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__is_sufficient__contexts__expected)
+{
+    BC_REQUIRE(accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, required));
+    BC_REQUIRE(accessor::is_sufficient({ 7, 99, 999 }, { 7, 100, 1000 }, required));
+    BC_REQUIRE(accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, 0));
+    BC_REQUIRE(!accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, missing));
+    BC_REQUIRE(!accessor::is_sufficient({ 5, 100, 1000 }, { 7, 100, 1000 }, required));
+    BC_REQUIRE(!accessor::is_sufficient({ 7, 101, 1000 }, { 7, 100, 1000 }, required));
+    BC_REQUIRE(!accessor::is_sufficient({ 7, 100, 1001 }, { 7, 100, 1000 }, required));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__required_not_held__all_insufficient)
+{
+    BC_REQUIRE_EQUAL(unable_rows<link_t>(), context_rows);
+    BC_REQUIRE_EQUAL(unable_rows<xint128_t>(), context_rows);
+    BC_REQUIRE_EQUAL(unable_rows<xint256_t>(), context_rows);
+    BC_REQUIRE_EQUAL(unable_rows<xint512_t>(), context_rows);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__validated__four_insufficient)
+{
+    const auto out = suffice_as<link_t>(validated);
+    BC_REQUIRE_EQUAL(insufficient_rows<link_t>(), 4u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), insufficient);
+    BC_REQUIRE_EQUAL(cell(out.cells, 4), insufficient);
+    BC_REQUIRE_EQUAL(cell(out.cells, 6), insufficient);
+    BC_REQUIRE_EQUAL(cell(out.cells, 17), insufficient);
+    BC_REQUIRE_EQUAL(cell(out.cells, 19), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__regained__only_flags_insufficient)
+{
+    const auto out = suffice_twice<link_t>();
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), insufficient);
+    BC_REQUIRE_EQUAL(cell(out.cells, 4), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 6), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 17), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__confirmed__unchanged_and_uncounted)
+{
+    context_state out{};
+    out.cells[2] = accessor::to_column(boundary);
+    const auto count = accessor::suffice<link_t>(out.columns(), validated, required);
+    BC_REQUIRE_EQUAL(count, 3u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), boundary);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__conflicted__cause_kept)
+{
+    context_state out{};
+    out.cells[0] = accessor::to_column(conflicted);
+    out.cells[2] = accessor::to_column(conflicted);
+    accessor::suffice<link_t>(out.columns(), validated, required);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), conflicted);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), bit_or(conflicted, accessor::insufficient));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__labeled__label_kept)
+{
+    context_state out{};
+    out.cells[0] = accessor::to_column(8u);
+    accessor::suffice<link_t>(out.columns(), validated, required);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), 8u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__extended__same_as_integral)
+{
+    BC_REQUIRE(suffices_as_integral<xint128_t>());
+    BC_REQUIRE(suffices_as_integral<xint256_t>());
+    BC_REQUIRE(suffices_as_integral<xint512_t>());
+    BC_REQUIRE_EQUAL(insufficient_rows<xint128_t>(), 4u);
+    BC_REQUIRE_EQUAL(insufficient_rows<xint256_t>(), 4u);
+    BC_REQUIRE_EQUAL(insufficient_rows<xint512_t>(), 4u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__entry__same_as_integral)
+{
+    const auto expected = suffice_as<link_t>(validated);
+    context_state out{};
+    size_t count{};
+    const auto report = pool::suffice(count, out.columns(), validated, required);
+    BC_REQUIRE(out.cells == expected.cells);
+    BC_REQUIRE_EQUAL(count, 4u);
+    BC_REQUIRE_EQUAL(report.rows, context_rows);
+    BC_REQUIRE_EQUAL(report.passes, 1u);
+}
+
 // collect (frontier and columns)
 // ----------------------------------------------------------------------------
 

@@ -57,6 +57,14 @@ public:
         link_t count{};
     };
 
+    /// Flags, height and median time past of a validation.
+    struct context_t
+    {
+        uint32_t flags{};
+        uint32_t height{};
+        uint32_t median{};
+    };
+
     /// An edge from a table row or input to a candidate input.
     struct bridge_t
     {
@@ -97,6 +105,11 @@ public:
 
         /// Next input spending the same point (a ring), none if sole.
         std::span<const link_t> rivals{};
+
+        /// Flags, height and median time past of the validation of the row.
+        std::span<const uint32_t> flags{};
+        std::span<const uint32_t> heights{};
+        std::span<const uint32_t> medians{};
     };
 
     /// The table columns with candidate columns and bridging edges appended.
@@ -200,6 +213,11 @@ public:
 
     /// The absent cell without the cause, present if none remains.
     static constexpr link_t lowered(link_t cell, link_t cause) NOEXCEPT;
+
+    /// The stored context holds under the current: the same flags, with the
+    /// required among them, and neither height nor median time past greater.
+    static constexpr bool is_sufficient(const context_t& stored,
+        const context_t& current, uint32_t required) NOEXCEPT;
 
     /// Chargeable size of a row (virtual size or sigops at bytes per sigop).
     static constexpr uint64_t chargeable(const totals_t& totals,
@@ -338,6 +356,11 @@ public:
     /// One pass of absence from parents to children, true if any cell changed.
     template <typename Word = xint512_t>
     static constexpr bool descend(const columns_t& columns) NOEXCEPT;
+
+    /// Each unconfirmed cell absent or not for its context, the count absent.
+    template <typename Word = xint512_t>
+    static constexpr size_t suffice(const columns_t& columns,
+        const context_t& context, uint32_t required) NOEXCEPT;
 
     /// Rows with the label, false if more than maximum_members.
     template <typename Word = xint512_t>
@@ -491,6 +514,10 @@ protected:
     static constexpr bool inherit(const graph_t& graph, link_t row,
         link_t input) NOEXCEPT;
 
+    /// The row's cell absent or not for its context, true if absent for it.
+    static constexpr bool suffice(const columns_t& columns, link_t row,
+        const context_t& context, uint32_t required) NOEXCEPT;
+
     /// Lanes of the stored words in native order (and the reverse).
     template <typename Word>
     INLINE static constexpr Word native(Word word) NOEXCEPT;
@@ -519,6 +546,9 @@ protected:
     static constexpr bool descend_(size_t index, link_t& row,
         const graph_t& graph) NOEXCEPT;
     template <typename Word>
+    static constexpr size_t suffice_(size_t index, const columns_t& columns,
+        const context_t& context, uint32_t required) NOEXCEPT;
+    template <typename Word>
     static constexpr bool collect_(size_t index, component_t& out,
         link_t label, const std::span<const link_t>& cells) NOEXCEPT;
     template <typename Word>
@@ -539,5 +569,6 @@ protected:
 #include <bitcoin/system/impl/pool/algorithm.ipp>
 #include <bitcoin/system/impl/pool/label.ipp>
 #include <bitcoin/system/impl/pool/settle.ipp>
+#include <bitcoin/system/impl/pool/suffice.ipp>
 
 #endif

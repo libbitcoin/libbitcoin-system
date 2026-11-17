@@ -23,5 +23,6 @@
 #include <bitcoin/system/pool/label.hpp>
 #include <bitcoin/system/pool/report.hpp>
 #include <bitcoin/system/pool/settle.hpp>
+#include <bitcoin/system/pool/suffice.hpp>
 
 #endif
