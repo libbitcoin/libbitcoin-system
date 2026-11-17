@@ -208,6 +208,7 @@
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/siphash.hpp>
+#include <bitcoin/system/hash/sponge.hpp>
 #include <bitcoin/system/hash/rmd/algorithm.hpp>
 #include <bitcoin/system/hash/rmd/rmd.hpp>
 #include <bitcoin/system/hash/rmd/rmd128.hpp>

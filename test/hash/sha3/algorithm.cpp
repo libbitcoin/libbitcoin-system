@@ -30,6 +30,7 @@ static_assert(sha3_256::block_bytes == 136);
 static_assert(sha3_384::block_bytes == 104);
 static_assert(sha3_512::block_bytes == 72);
 static_assert(keccak_256::block_bytes == 136);
+static_assert(shake_256::block_bytes == 136);
 
 static_assert(array_count<sha3_224::digest_t> == 28);
 static_assert(array_count<sha3_256::digest_t> == 32);
@@ -40,6 +41,7 @@ static_assert(array_count<sha3_256::state_t> == 25);
 static_assert(std::is_same_v<sha3_256::word_t, uint64_t>);
 static_assert(sha3_256::H::domain == sha3::sha3_domain);
 static_assert(keccak_256::H::domain == sha3::keccak_domain);
+static_assert(shake_256::H::domain == sha3::shake_domain);
 static_assert(sha3_256::space == 135);
 
 // The initial state is zero (sponge).

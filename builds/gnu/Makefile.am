@@ -591,7 +591,8 @@ include_bitcoin_system_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/hash/muhash.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/pbkd.hpp \
     ${srcdir}/../../include/bitcoin/system/hash/scrypt.hpp \
-    ${srcdir}/../../include/bitcoin/system/hash/siphash.hpp
+    ${srcdir}/../../include/bitcoin/system/hash/siphash.hpp \
+    ${srcdir}/../../include/bitcoin/system/hash/sponge.hpp
 
 include_bitcoin_system_hash_rmddir = \
     ${includedir}/bitcoin/system/hash/rmd
@@ -737,7 +738,8 @@ include_bitcoin_system_impl_hash_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/impl/hash/hkdf.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/hmac.ipp \
     ${srcdir}/../../include/bitcoin/system/impl/hash/pbkd.ipp \
-    ${srcdir}/../../include/bitcoin/system/impl/hash/scrypt.ipp
+    ${srcdir}/../../include/bitcoin/system/impl/hash/scrypt.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/hash/sponge.ipp
 
 include_bitcoin_system_impl_hash_rmddir = \
     ${includedir}/bitcoin/system/impl/hash/rmd
@@ -1445,6 +1447,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/hash/pbkd.cpp \
     ${srcdir}/../../test/hash/scrypt.cpp \
     ${srcdir}/../../test/hash/siphash.cpp \
+    ${srcdir}/../../test/hash/sponge.cpp \
     ${srcdir}/../../test/hash/performance/performance.cpp \
     ${srcdir}/../../test/hash/performance/transition.cpp \
     ${srcdir}/../../test/hash/rmd/algorithm.cpp \

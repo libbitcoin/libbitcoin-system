@@ -56,13 +56,21 @@ output_(block_t& bytes, const state_t& state,
 }
 
 TEMPLATE
+constexpr typename CLASS::block_t CLASS::
+extract(const state_t& state) NOEXCEPT
+{
+    block_t bytes{};
+    output_(bytes, state, std::make_index_sequence<SHA3::block_words>{});
+    return bytes;
+}
+
+TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
     // The digest is the leading bytes of the rate (single squeeze).
     static_assert(array_count<digest_t> <= block_bytes);
-    block_t bytes{};
-    output_(bytes, state, std::make_index_sequence<SHA3::block_words>{});
+    const auto bytes = extract(state);
 
     digest_t digest{};
     std::copy_n(bytes.cbegin(), array_count<digest_t>, digest.begin());

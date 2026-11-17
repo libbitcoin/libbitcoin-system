@@ -368,6 +368,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha3\sha3.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\sponge.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\add.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\count.cpp" />
