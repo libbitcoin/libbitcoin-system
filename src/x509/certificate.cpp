@@ -23,11 +23,12 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/x509/der.hpp>
 #include <bitcoin/system/x509/oids.hpp>
 #include <bitcoin/system/x509/pem.hpp>
 
-// rfc5280 (profile), rfc5480 (keys), rfc5758 (signatures)
+// rfc5280 (profile), rfc5480 (keys), rfc5758 (signatures), rfc4055 (rsa)
 
 namespace libbitcoin {
 namespace system {
@@ -54,43 +55,84 @@ static data_chunk to_data(const_byte_span bytes) NOEXCEPT
     return { bytes.begin(), bytes.end() };
 }
 
-// AlgorithmIdentifier of an ECDSA signature (parameters absent).
+// RSA algorithm parameters are null or absent (rfc4055 5).
+static void read_null_parameters(reader& algorithm) NOEXCEPT
+{
+    if (algorithm.peek() == null_tag)
+        algorithm.read_null();
+}
+
+// AlgorithmIdentifier of an ECDSA (parameters absent) or RSA signature.
 static bool parse_algorithm(signature_algorithm& out,
     const_byte_span encoding) NOEXCEPT
 {
     reader outer{ encoding };
     auto algorithm = outer.read_nested(sequence_tag);
     const auto identifier = algorithm.read_oid();
-    if (!outer.is_complete() || !algorithm.is_complete())
-        return false;
 
     if (is_equal(identifier, oid::ecdsa_sha256))
     {
         out = signature_algorithm::ecdsa_sha256;
-        return true;
     }
-
-    if (is_equal(identifier, oid::ecdsa_sha384))
+    else if (is_equal(identifier, oid::ecdsa_sha384))
     {
         out = signature_algorithm::ecdsa_sha384;
-        return true;
+    }
+    else if (is_equal(identifier, oid::rsa_sha256))
+    {
+        out = signature_algorithm::rsa_sha256;
+        read_null_parameters(algorithm);
+    }
+    else if (is_equal(identifier, oid::rsa_sha384))
+    {
+        out = signature_algorithm::rsa_sha384;
+        read_null_parameters(algorithm);
+    }
+    else if (is_equal(identifier, oid::rsa_sha512))
+    {
+        out = signature_algorithm::rsa_sha512;
+        read_null_parameters(algorithm);
+    }
+    else
+    {
+        return false;
     }
 
-    return false;
+    return outer.is_complete() && algorithm.is_complete();
 }
 
-// SubjectPublicKeyInfo of a named curve and uncompressed point.
+// SubjectPublicKeyInfo of an RSAPublicKey.
+static bool parse_rsa_key(certificate& out, reader& information,
+    reader& algorithm) NOEXCEPT
+{
+    read_null_parameters(algorithm);
+    const auto key = information.read_bit_string();
+    if (!information.is_complete() || !algorithm.is_complete())
+        return false;
+
+    rsa::public_key value{};
+    out.key_type = key_type::rsa;
+    out.public_key = to_data(key);
+    return rsa::decode(value, key);
+}
+
+// SubjectPublicKeyInfo of a named curve and uncompressed point, or RSA.
 static bool parse_key(certificate& out, reader& source) NOEXCEPT
 {
     auto information = source.read_nested(sequence_tag);
     auto algorithm = information.read_nested(sequence_tag);
-    const auto key_type = algorithm.read_oid();
+    const auto type = algorithm.read_oid();
+    if (is_equal(type, oid::rsa_encryption))
+        return parse_rsa_key(out, information, algorithm);
+
     const auto named_curve = algorithm.read_oid();
     const auto point = information.read_bit_string();
     if (!information.is_complete() || !algorithm.is_complete() ||
-        !is_equal(key_type, oid::ec_public_key) || point.empty() ||
+        !is_equal(type, oid::ec_public_key) || point.empty() ||
         (point.front() != uncompressed))
         return false;
+
+    out.key_type = key_type::ec;
 
     if (is_equal(named_curve, oid::secp256r1))
     {
@@ -364,6 +406,14 @@ bool parse(certificates& out, const std::string& text) NOEXCEPT
 // verification
 // ----------------------------------------------------------------------------
 
+// DigestInfo encodings preceding each digest (rfc8017 9.2, note 1).
+constexpr auto sha256_info = base16_array(
+    "3031300d060960864801650304020105000420");
+constexpr auto sha384_info = base16_array(
+    "3041300d060960864801650304020205000430");
+constexpr auto sha512_info = base16_array(
+    "3051300d060960864801650304020305000440");
+
 template <typename Curve>
 static bool verify_signature(const data_chunk& key, const data_chunk& der,
     const_byte_span digest) NOEXCEPT
@@ -377,21 +427,65 @@ static bool verify_signature(const data_chunk& key, const data_chunk& der,
     return Curve::verify(signature, point, digest);
 }
 
-bool is_signed_by(const certificate& subject,
-    const certificate& issuer) NOEXCEPT
+static bool verify_ecdsa(const certificate& subject,
+    const certificate& issuer, const_byte_span digest) NOEXCEPT
 {
-    const auto sha384 = (subject.algorithm ==
-        signature_algorithm::ecdsa_sha384);
-    const auto digest = sha384 ?
-        to_chunk(accumulator<sha512_384>::hash(subject.signed_data)) :
-        to_chunk(sha256_hash(subject.signed_data));
-
     const auto& key = issuer.public_key;
     const auto& signature = subject.signature;
+    if (issuer.key_type != key_type::ec)
+        return false;
+
     if (issuer.curve == curve::secp384r1)
         return verify_signature<secp384r1>(key, signature, digest);
 
     return verify_signature<secp256r1>(key, signature, digest);
+}
+
+template <size_t Size, size_t Digest>
+static bool verify_rsa(const certificate& subject, const certificate& issuer,
+    const data_array<Size>& info, const data_array<Digest>& digest) NOEXCEPT
+{
+    rsa::public_key key{};
+    return (issuer.key_type == key_type::rsa) &&
+        rsa::decode(key, issuer.public_key) &&
+        rsa::verify_pkcs1(key, subject.signature, splice(info, digest));
+}
+
+bool is_signed_by(const certificate& subject,
+    const certificate& issuer) NOEXCEPT
+{
+    const auto& data = subject.signed_data;
+    switch (subject.algorithm)
+    {
+        case signature_algorithm::ecdsa_sha256:
+        {
+            return verify_ecdsa(subject, issuer, sha256_hash(data));
+        }
+        case signature_algorithm::ecdsa_sha384:
+        {
+            const auto digest = accumulator<sha512_384>::hash(data);
+            return verify_ecdsa(subject, issuer, digest);
+        }
+        case signature_algorithm::rsa_sha256:
+        {
+            return verify_rsa(subject, issuer, sha256_info,
+                sha256_hash(data));
+        }
+        case signature_algorithm::rsa_sha384:
+        {
+            return verify_rsa(subject, issuer, sha384_info,
+                accumulator<sha512_384>::hash(data));
+        }
+        case signature_algorithm::rsa_sha512:
+        {
+            return verify_rsa(subject, issuer, sha512_info,
+                sha512_hash(data));
+        }
+        default:
+        {
+            return false;
+        }
+    }
 }
 
 BC_POP_WARNING()

@@ -123,6 +123,15 @@ static data_chunk key(const_byte_span type, const_byte_span curve, const data_ch
     return wrap(sequence_tag, splice(identifiers, wrap(bit_string_tag, splice(base16_chunk("00"), point))));
 }
 
+static data_chunk rsa_key(const data_chunk& parameters,
+    const data_chunk& public_key)
+{
+    const auto identifier = wrap(oid_tag, chunk(oid::rsa_encryption));
+    const auto type = wrap(sequence_tag, splice(identifier, parameters));
+    const auto content = splice(base16_chunk("00"), public_key);
+    return wrap(sequence_tag, splice(type, wrap(bit_string_tag, content)));
+}
+
 static bool parses(const data_chunk& der)
 {
     certificate out{};
@@ -322,6 +331,73 @@ BC_AUTO_TEST_CASE(certificate__parse__unsupported_curve__false)
     BC_REQUIRE(!parses(join(fields)));
 }
 
+// rsa
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_root__expected)
+{
+    const auto out = parsed(fixture::rsa_root_pem);
+    BC_REQUIRE(out.key_type == key_type::rsa);
+    BC_REQUIRE(out.algorithm == signature_algorithm::rsa_sha256);
+    BC_REQUIRE(out.authority);
+    BC_REQUIRE_EQUAL(out.issuer, out.subject);
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_server__expected)
+{
+    const auto out = parsed(fixture::rsa_server_pem);
+    BC_REQUIRE(out.key_type == key_type::rsa);
+    BC_REQUIRE(out.algorithm == signature_algorithm::rsa_sha384);
+    BC_REQUIRE(!out.authority);
+    BC_REQUIRE_EQUAL(out.dns_names.size(), 1u);
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_issued__secp256r1_key)
+{
+    const auto out = parsed(fixture::rsa_issued_pem);
+    BC_REQUIRE(out.key_type == key_type::ec);
+    BC_REQUIRE(out.curve == curve::secp256r1);
+    BC_REQUIRE(out.algorithm == signature_algorithm::rsa_sha256);
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_pss__false)
+{
+    BC_REQUIRE(!parses(first_block(fixture::rsa_pss_pem)));
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_key_absent_parameters__expected)
+{
+    auto fields = split(fixture::rsa_server_pem);
+    const auto public_key = parsed(fixture::rsa_server_pem).public_key;
+    fields.key = rsa_key({}, public_key);
+    certificate out{};
+    BC_REQUIRE(parse(out, join(fields)));
+    BC_REQUIRE(out.key_type == key_type::rsa);
+    BC_REQUIRE_EQUAL(out.public_key, public_key);
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_key_invalid__false)
+{
+    auto fields = split(fixture::rsa_server_pem);
+    fields.key = rsa_key(base16_chunk("0500"), base16_chunk("3003020101"));
+    BC_REQUIRE(!parses(join(fields)));
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_algorithm_absent_parameters__expected)
+{
+    auto fields = split(fixture::rsa_server_pem);
+    fields.algorithm = algorithm(oid::rsa_sha384);
+    fields.outer_algorithm = fields.algorithm;
+    BC_REQUIRE(parses(join(fields)));
+}
+
+BC_AUTO_TEST_CASE(certificate__parse__rsa_algorithm_other_parameters__false)
+{
+    auto fields = split(fixture::rsa_server_pem);
+    fields.algorithm = wrap(sequence_tag, splice(wrap(oid_tag, chunk(oid::rsa_sha384)), base16_chunk("0101ff")));
+    fields.outer_algorithm = fields.algorithm;
+    BC_REQUIRE(!parses(join(fields)));
+}
+
 // extensions
 
 BC_AUTO_TEST_CASE(certificate__parse__unknown_noncritical_extension__ignored)
@@ -470,6 +546,39 @@ BC_AUTO_TEST_CASE(certificate__is_signed_by__intermediate_by_secp384r1_root__tru
 BC_AUTO_TEST_CASE(certificate__is_signed_by__server_by_root__false)
 {
     BC_REQUIRE(!is_signed_by(parsed(fixture::server_pem), parsed(fixture::root_pem)));
+}
+
+BC_AUTO_TEST_CASE(certificate__is_signed_by__rsa_root_by_itself__true)
+{
+    const auto root = parsed(fixture::rsa_root_pem);
+    BC_REQUIRE(is_signed_by(root, root));
+}
+
+BC_AUTO_TEST_CASE(certificate__is_signed_by__rsa_server_by_rsa_root__true)
+{
+    BC_REQUIRE(is_signed_by(parsed(fixture::rsa_server_pem), parsed(fixture::rsa_root_pem)));
+}
+
+BC_AUTO_TEST_CASE(certificate__is_signed_by__secp256r1_by_rsa_root__true)
+{
+    BC_REQUIRE(is_signed_by(parsed(fixture::rsa_issued_pem), parsed(fixture::rsa_root_pem)));
+}
+
+BC_AUTO_TEST_CASE(certificate__is_signed_by__rsa_server_by_ec_issuer__false)
+{
+    BC_REQUIRE(!is_signed_by(parsed(fixture::rsa_server_pem), parsed(fixture::intermediate_pem)));
+}
+
+BC_AUTO_TEST_CASE(certificate__is_signed_by__ec_server_by_rsa_issuer__false)
+{
+    BC_REQUIRE(!is_signed_by(parsed(fixture::server_pem), parsed(fixture::rsa_root_pem)));
+}
+
+BC_AUTO_TEST_CASE(certificate__is_signed_by__invalid_rsa_issuer_key__false)
+{
+    auto issuer = parsed(fixture::rsa_root_pem);
+    issuer.public_key.pop_back();
+    BC_REQUIRE(!is_signed_by(parsed(fixture::rsa_server_pem), issuer));
 }
 
 BC_AUTO_TEST_CASE(certificate__is_signed_by__invalid_issuer_key__false)
