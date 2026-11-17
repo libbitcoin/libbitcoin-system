@@ -242,6 +242,7 @@
       <ObjectFileName>$(IntDir)test_crypto_performance.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\rsa.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_field.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\secp256k1\algorithm_group.cpp" />

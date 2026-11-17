@@ -267,6 +267,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\fschacha20_poly1305.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\maybe_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\rsa.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\salsa20.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\algorithm.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\compact.cpp" />
@@ -581,6 +582,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\nist\algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\nist\nist.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\poly1305.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\rsa.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\salsa20.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1\algorithm.hpp" />
