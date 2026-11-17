@@ -374,17 +374,15 @@ code header::check(uint32_t timestamp_limit_seconds,
 code header::accept(const context& ctx,
     uint32_t retargeting_interval) const NOEXCEPT
 {
-    const auto bip54_timespan = ctx.is_enabled(bip54_timespan_rule);
-
     if (ctx.is_insufficient_version(version_))
         return error::insufficient_block_version;
     if (ctx.is_anachronistic_timestamp(timestamp_))
         return error::anachronistic_timestamp;
     if (ctx.is_invalid_work(bits_))
         return error::incorrect_proof_of_work;
-    if (ctx.is_early_timestamp(retargeting_interval))
+    if (ctx.is_early_timestamp(timestamp_, retargeting_interval))
         return error::early_timestamp;
-    if (bip54_timespan && ctx.is_negative_timespan(retargeting_interval))
+    if (ctx.is_negative_timespan(timestamp_, retargeting_interval))
         return error::negative_timespan;
 
     return error::block_success;
