@@ -167,6 +167,25 @@ struct pool_layout
     const size_t bytes;
 };
 
+/// Columns of the pool contexts within their device allocation.
+struct context_layout
+{
+    constexpr context_layout(size_t count) NOEXCEPT
+      : flags(pool_layout::round(count * sizeof(uint32_t))),
+        heights(pool_layout::round(flags + count * sizeof(uint32_t))),
+        medians(pool_layout::round(heights + count * sizeof(uint32_t))),
+        failed(pool_layout::round(medians + count * sizeof(uint32_t))),
+        bytes(pool_layout::round(failed + sizeof(uint32_t)))
+    {
+    }
+
+    const size_t flags;
+    const size_t heights;
+    const size_t medians;
+    const size_t failed;
+    const size_t bytes;
+};
+
 /// Receiver keys decoded into scan arguments, false if invalid.
 struct scan_receiver
   : algorithm

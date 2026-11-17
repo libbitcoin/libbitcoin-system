@@ -200,6 +200,30 @@ public:
         return scan(out, settle_, cells, edges, rows, rivals);
     }
 
+    /// Mark the pool cells by context in place, with the count insufficient,
+    /// false if not available or on failure.
+    bool suffice(pool::report_t& out, size_t& failed,
+        const std::span<uint32_t>& cells,
+        const std::span<const uint32_t>& flags,
+        const std::span<const uint32_t>& heights,
+        const std::span<const uint32_t>& medians,
+        const pool::algorithm::context_t& context,
+        uint32_t required) NOEXCEPT
+    {
+        if (cells.empty())
+            return false;
+
+        const context_layout columns{ cells.size() };
+        return staged(out, columns.bytes,
+            [&](size_t& passes, pool::report_t::duration& transfer,
+                pointer_t base) NOEXCEPT
+            {
+                ++passes;
+                return suffice(failed, transfer, base, columns, cells, flags,
+                    heights, medians, context, required);
+            });
+    }
+
 private:
     context() NOEXCEPT
       : loaded_(load())
@@ -476,29 +500,25 @@ private:
         handle_t pass;
     };
 
-    // Scan the pool cells in place, with passes and transfer reported.
-    bool scan(pool::report_t& out, const pool_kernels& kernels,
-        const std::span<uint32_t>& cells,
-        const std::span<const pool_layout::edges_t>& edges,
-        const std::span<const uint32_t>& rows,
-        const std::span<const uint32_t>& rivals) NOEXCEPT
+    // Run the staged scan over an allocation of the bytes, with passes and
+    // transfer reported.
+    template <typename Scan>
+    bool staged(pool::report_t& out, size_t bytes, const Scan& scan) NOEXCEPT
     {
         turn turn{ turns_, false };
-        if (failed_.load() || !pooled_ || cells.empty() || rows.empty())
+        if (failed_.load() || !pooled_)
             return false;
 
         using clock = std::chrono::steady_clock;
         const auto start = clock::now();
         pointer_t base{};
-        const pool_layout columns{ cells.size(), rows.size() };
         if (call_.context_current(context_) != success ||
-            call_.allocate(&base, columns.bytes) != success)
+            call_.allocate(&base, bytes) != success)
             return false;
 
         size_t passes{};
         pool::report_t::duration transfer{ clock::now() - start };
-        const auto result = scan(passes, transfer, base, columns, kernels,
-            cells, edges, rows, rivals);
+        const auto result = scan(passes, transfer, base);
 
         const auto finish = clock::now();
         call_.deallocate(base);
@@ -512,6 +532,26 @@ private:
         out.passes = passes;
         out.transfer = transfer;
         return true;
+    }
+
+    // Scan the pool cells in place, with passes and transfer reported.
+    bool scan(pool::report_t& out, const pool_kernels& kernels,
+        const std::span<uint32_t>& cells,
+        const std::span<const pool_layout::edges_t>& edges,
+        const std::span<const uint32_t>& rows,
+        const std::span<const uint32_t>& rivals) NOEXCEPT
+    {
+        if (cells.empty() || rows.empty())
+            return false;
+
+        const pool_layout columns{ cells.size(), rows.size() };
+        return staged(out, columns.bytes,
+            [&](size_t& passes, pool::report_t::duration& transfer,
+                pointer_t base) NOEXCEPT
+            {
+                return scan(passes, transfer, base, columns, kernels, cells,
+                    edges, rows, rivals);
+            });
     }
 
     // Stage the pool columns, scan to the fixed point and return the cells.
@@ -587,6 +627,73 @@ private:
         return result;
     }
 
+    // Stage the context columns, mark the cells and return them with the
+    // count insufficient.
+    result_t suffice(size_t& failed, pool::report_t::duration& transfer,
+        pointer_t base, const context_layout& columns,
+        const std::span<uint32_t>& cells,
+        const std::span<const uint32_t>& flags,
+        const std::span<const uint32_t>& heights,
+        const std::span<const uint32_t>& medians,
+        const pool::algorithm::context_t& context,
+        uint32_t required) NOEXCEPT
+    {
+        const auto stream = streams_.front();
+        const auto tally = base + columns.failed;
+        context_arguments arguments
+        {
+            reinterpret_cast<uint32_t*>(base),
+            reinterpret_cast<const uint32_t*>(base + columns.flags),
+            reinterpret_cast<const uint32_t*>(base + columns.heights),
+            reinterpret_cast<const uint32_t*>(base + columns.medians),
+            reinterpret_cast<uint32_t*>(tally),
+            context,
+            required,
+            possible_narrow_cast<uint32_t>(cells.size())
+        };
+
+        using clock = std::chrono::steady_clock;
+        void* parameters[]{ &arguments };
+        uint32_t count{};
+        const auto upload = clock::now();
+        auto result = call_.copy_to_async(base, cells.data(),
+            cells.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.flags, flags.data(),
+                flags.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.heights,
+                heights.data(), heights.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(base + columns.medians,
+                medians.data(), medians.size_bytes(), stream);
+        if (result == success)
+            result = call_.copy_to_async(tally, &count, sizeof(count),
+                stream);
+        if (result == success)
+            result = call_.stream_synchronize(stream);
+
+        transfer += clock::now() - upload;
+        if (result == success)
+            result = launch(suffice_, cells.size(), stream, parameters);
+        if (result == success)
+            result = call_.stream_synchronize(stream);
+
+        const auto download = clock::now();
+        if (result == success)
+            result = call_.copy_from_async(&count, tally, sizeof(count),
+                stream);
+        if (result == success)
+            result = call_.copy_from_async(cells.data(), base,
+                cells.size_bytes(), stream);
+        if (result == success)
+            result = call_.stream_synchronize(stream);
+
+        transfer += clock::now() - download;
+        failed = count;
+        return result;
+    }
+
     bool load() NOEXCEPT
     {
         const auto library = load_library();
@@ -659,7 +766,8 @@ private:
             found(label_.pass, "label_pool") &&
             found(settle_.rows, "reduce_pool") &&
             found(settle_.inputs, "contest_pool") &&
-            found(settle_.pass, "descend_pool");
+            found(settle_.pass, "descend_pool") &&
+            found(suffice_, "suffice_pool");
 
         const auto bytes = std::min(maximum_bytes, free / memory_share);
         half_bytes_ = bytes / two;
@@ -854,6 +962,7 @@ private:
     handle_t silent_{};
     pool_kernels label_{};
     pool_kernels settle_{};
+    handle_t suffice_{};
     pointer_t staging_{};
     size_t half_bytes_{};
     std_array<handle_t, two> streams_{};

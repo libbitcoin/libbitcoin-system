@@ -22,6 +22,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/pool/algorithm.hpp>
 #include <bitcoin/system/pool/report.hpp>
+#include "../crypto/secp256k1/cuda/driver.hpp"
 
 namespace libbitcoin {
 namespace system {
@@ -32,9 +33,21 @@ report_t suffice(size_t& out, const algorithm::columns_t& columns,
 {
     using clock = std::chrono::steady_clock;
     const auto start = clock::now();
-    report_t report{ columns.cells.size() };
-    out = algorithm::suffice(columns, context, required);
-    report.passes = one;
+    const auto& cells = columns.cells;
+    const auto& flags = columns.flags;
+    const auto& heights = columns.heights;
+    const auto& medians = columns.medians;
+    report_t report{ cells.size() };
+
+    report.device = secp256k1::cuda::suffice(report, out, cells, flags,
+        heights, medians, context, required);
+
+    if (!report.device)
+    {
+        out = algorithm::suffice(columns, context, required);
+        report.passes = one;
+    }
+
     report.time = clock::now() - start;
     return report;
 }

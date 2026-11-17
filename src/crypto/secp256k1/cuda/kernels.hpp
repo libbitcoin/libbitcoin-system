@@ -104,6 +104,20 @@ struct pool_arguments
     uint32_t input_count;
 };
 
+/// Arguments of the pool context kernel, columns in device memory. Failed
+/// is the count of rows whose context is not sufficient.
+struct context_arguments
+{
+    uint32_t* cells;
+    const uint32_t* flags;
+    const uint32_t* heights;
+    const uint32_t* medians;
+    uint32_t* failed;
+    pool::algorithm::context_t context;
+    uint32_t required;
+    uint32_t row_count;
+};
+
 } // namespace cuda
 } // namespace secp256k1
 } // namespace system
