@@ -410,87 +410,59 @@ constexpr void algorithm::relabel(const columns_t& columns,
         columns.cells[component.rows[member]] = label;
 }
 
-inline void algorithm::exclude(const columns_t& columns, link_t row) NOEXCEPT
+inline bool algorithm::admit(const columns_t& columns, link_t row,
+    bool conflict) NOEXCEPT
 {
+    walk_t walk{};
     const graph_t graph{ columns };
-    std::vector<link_t> pending{ row };
-    set_cell(graph, row, absent);
+    set_cell(graph, row, conflict ? bit_or(absent, conflicted) : unlabeled);
 
-    while (!pending.empty())
+    // Its children are the rows adopted by it.
+    walk.affected.push_back(row);
+    walk.pending.push_back(row);
+    each_child(graph, row, [&](link_t down) NOEXCEPT
     {
-        const auto next = pending.back();
-        pending.pop_back();
-        each_child(graph, next, [&](link_t down) NOEXCEPT
-        {
-            if (is_present(cell(graph, down)))
-            {
-                set_cell(graph, down, absent);
-                pending.push_back(down);
-            }
-        });
-    }
+        walk.pending.push_back(down);
+    });
+
+    return spread(walk, columns);
 }
 
-inline void algorithm::admit(const columns_t& columns, link_t row) NOEXCEPT
+inline bool algorithm::confirm(const columns_t& columns,
+    const std::span<const link_t>& rows,
+    const std::span<const link_t>& conflicts) NOEXCEPT
 {
-    const std_array<link_t, one> rows{ { row } };
-    columns.cells[row] = to_column(unlabeled);
-    reform(columns, rows);
+    walk_t walk{};
+    const graph_t graph{ columns };
+    for (const auto row: rows)
+        change(walk, columns, row, boundary);
+
+    for (const auto row: conflicts)
+        if (!is_boundary(cell(graph, row)))
+            change(walk, columns, row, raised(cell(graph, row), conflicted));
+
+    return spread(walk, columns);
 }
 
-inline void algorithm::confirm(const columns_t& columns, link_t row) NOEXCEPT
+inline bool algorithm::unconfirm(const columns_t& columns,
+    const std::span<const link_t>& rows,
+    const std::span<const link_t>& conflicts) NOEXCEPT
 {
+    walk_t walk{};
     const graph_t graph{ columns };
-    component_t former{};
-    const auto labeled = is_labeled(cell(graph, row)) &&
-        collect(former, graph, row);
-
-    set_cell(graph, row, boundary);
-    const auto slice = edges(graph, row);
-    for (auto input = slice.first; input < slice.first + slice.count; ++input)
+    for (const auto row: rows)
     {
-        each_rival(graph, input, [&](link_t other) NOEXCEPT
-        {
-            const auto rival_row = owner(graph, other);
-            if (is_present(cell(graph, rival_row)))
-                exclude(columns, rival_row);
-        });
-    }
+        if (!is_boundary(cell(graph, row)))
+            continue;
 
-    if (!labeled)
-        return;
-
-    std::vector<link_t> rest{};
-    for (size_t member{}; member < former.count; ++member)
-        if (is_present(cell(graph, former.rows[member])))
-            rest.push_back(former.rows[member]);
-
-    reform(columns, rest);
-}
-
-inline void algorithm::unconfirm(const columns_t& columns, link_t row) NOEXCEPT
-{
-    const graph_t graph{ columns };
-    std::vector<link_t> affected{ row };
-    set_cell(graph, row, unlabeled);
-
-    const auto slice = edges(graph, row);
-    for (auto input = slice.first; input < slice.first + slice.count; ++input)
-    {
-        each_rival(graph, input, [&](link_t other) NOEXCEPT
-        {
-            restore(affected, columns, owner(graph, other));
-        });
+        change(walk, columns, row, unlabeled);
+        walk.pending.push_back(row);
     }
 
-    reform(columns, affected);
-}
+    for (const auto row: conflicts)
+        change(walk, columns, row, lowered(cell(graph, row), conflicted));
 
-inline void algorithm::revive(const columns_t& columns, link_t row) NOEXCEPT
-{
-    std::vector<link_t> affected{};
-    restore(affected, columns, row);
-    reform(columns, affected);
+    return spread(walk, columns);
 }
 
 // Template (frontier, table columns).
@@ -778,28 +750,6 @@ constexpr bool algorithm::descended(const graph_t& graph, link_t row) NOEXCEPT
     return false;
 }
 
-constexpr bool algorithm::confirmable(const graph_t& graph,
-    link_t row) NOEXCEPT
-{
-    auto out = true;
-    const auto slice = edges(graph, row);
-    for (auto input = slice.first; out && input < slice.first + slice.count;
-        ++input)
-    {
-        const auto up = parent(graph, input);
-        if (up != none && is_absent(cell(graph, up)))
-            return false;
-
-        each_rival(graph, input, [&](link_t other) NOEXCEPT
-        {
-            if (is_boundary(cell(graph, owner(graph, other))))
-                out = false;
-        });
-    }
-
-    return out;
-}
-
 constexpr size_t algorithm::index(const component_t& component,
     link_t row) NOEXCEPT
 {
@@ -1077,22 +1027,91 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
     return !out.empty();
 }
 
-inline void algorithm::restore(std::vector<link_t>& out,
-    const columns_t& columns, link_t row) NOEXCEPT
+inline algorithm::link_t algorithm::resolved(const graph_t& graph,
+    link_t row) NOEXCEPT
 {
-    const graph_t graph{ columns };
-    if (!is_absent(cell(graph, row)) || !confirmable(graph, row))
-        return;
+    const auto own = cell(graph, row);
+    if (is_boundary(own))
+        return own;
 
-    set_cell(graph, row, unlabeled);
-    out.push_back(row);
-    each_child(graph, row, [&](link_t down) NOEXCEPT
+    auto next = reduced(own);
+    const auto slice = edges(graph, row);
+    for (auto input = slice.first; input < slice.first + slice.count; ++input)
     {
-        restore(out, columns, down);
-    });
+        const auto up = parent(graph, input);
+        if (up != none && is_absent(cell(graph, up)))
+            next = raised(next, ancestor);
+
+        each_rival(graph, input, [&](link_t other) NOEXCEPT
+        {
+            if (is_boundary(cell(graph, owner(graph, other))))
+                next = raised(next, rivaled);
+        });
+    }
+
+    return next;
 }
 
-inline void algorithm::reform(const columns_t& columns,
+// The children of a row depend on its absence, and its rivals on its
+// confirmation. A labeled row that leaves its component leaves the rest of it
+// to relabel, and a row made present joins one.
+inline void algorithm::change(walk_t& walk, const columns_t& columns,
+    link_t row, link_t next) NOEXCEPT
+{
+    const graph_t graph{ columns };
+    const auto own = cell(graph, row);
+    if (next == own)
+        return;
+
+    if (is_labeled(own) && !is_present(next))
+    {
+        component_t former{};
+        if (collect(former, graph, row))
+            walk.affected.insert(walk.affected.end(), former.rows.cbegin(),
+                std::next(former.rows.cbegin(), former.count));
+        else
+            walk.complete = false;
+    }
+
+    set_cell(graph, row, next);
+    if (is_present(next) && !is_present(own))
+        walk.affected.push_back(row);
+
+    if (is_absent(next) != is_absent(own))
+    {
+        each_child(graph, row, [&](link_t down) NOEXCEPT
+        {
+            walk.pending.push_back(down);
+        });
+    }
+
+    if (is_boundary(next) == is_boundary(own))
+        return;
+
+    const auto slice = edges(graph, row);
+    for (auto input = slice.first; input < slice.first + slice.count; ++input)
+    {
+        each_rival(graph, input, [&](link_t other) NOEXCEPT
+        {
+            walk.pending.push_back(owner(graph, other));
+        });
+    }
+}
+
+inline bool algorithm::spread(walk_t& walk, const columns_t& columns) NOEXCEPT
+{
+    const graph_t graph{ columns };
+    while (!walk.pending.empty())
+    {
+        const auto row = walk.pending.back();
+        walk.pending.pop_back();
+        change(walk, columns, row, resolved(graph, row));
+    }
+
+    return reform(columns, walk.affected) && walk.complete;
+}
+
+inline bool algorithm::reform(const columns_t& columns,
     const std::span<const link_t>& rows) NOEXCEPT
 {
     const graph_t graph{ columns };
@@ -1117,6 +1136,7 @@ inline void algorithm::reform(const columns_t& columns,
         }
     }
 
+    auto complete = true;
     for (const auto row: rows)
     {
         // A row relabeled by a previous component carries a lower label.
@@ -1126,7 +1146,11 @@ inline void algorithm::reform(const columns_t& columns,
         component_t component{};
         if (collect(component, graph, row))
             relabel(columns, component);
+        else
+            complete = false;
     }
+
+    return complete;
 }
 
 template <typename Word>

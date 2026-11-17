@@ -18,6 +18,8 @@
  */
 #include "../test.hpp"
 
+#include <random>
+
 BC_AUTO_TEST_SUITE(pool_algorithm_tests)
 
 class accessor
@@ -831,24 +833,6 @@ static bool descends_wide_as_integral() NOEXCEPT
     return descend_wide<Word>().cells == descend_wide<link_t>().cells;
 }
 
-// The cells agree on the state of each row, and on the labels of the present.
-template <typename State>
-static bool same_presence(const State& left, const State& right) NOEXCEPT
-{
-    for (size_t row{}; row < left.cells.size(); ++row)
-    {
-        const auto one_cell = cell(left.cells, row);
-        const auto other = cell(right.cells, row);
-        const auto present = accessor::is_present(one_cell);
-        if (present != accessor::is_present(other) ||
-            accessor::is_boundary(one_cell) != accessor::is_boundary(other) ||
-            (present && one_cell != other))
-            return false;
-    }
-
-    return true;
-}
-
 BC_AUTO_TEST_CASE(pool_algorithm__is_absent__cells__expected)
 {
     BC_REQUIRE(!accessor::is_absent(0u));
@@ -983,31 +967,6 @@ BC_AUTO_TEST_CASE(pool_algorithm__settle__wide__same_as_descend)
     BC_REQUIRE(out.cells == expected.cells);
     BC_REQUIRE_EQUAL(report.rows, wide_rows);
     BC_REQUIRE(is_nonzero(report.passes));
-}
-
-BC_AUTO_TEST_CASE(pool_algorithm__settle__confirmed__same_as_frontier_confirm)
-{
-    auto frontier = label<link_t>();
-    auto out = label<link_t>();
-    accessor::confirm(frontier.columns(), 0);
-    out.cells[0] = accessor::to_column(boundary);
-    pool::settle(out.columns());
-    pool::label(out.columns());
-    BC_REQUIRE(same_presence(out, frontier));
-}
-
-BC_AUTO_TEST_CASE(pool_algorithm__settle__unconfirmed__same_as_frontier_unconfirm)
-{
-    auto frontier = label<link_t>();
-    auto out = label<link_t>();
-    accessor::confirm(frontier.columns(), 0);
-    accessor::unconfirm(frontier.columns(), 0);
-    out.cells[0] = accessor::to_column(boundary);
-    pool::settle(out.columns());
-    out.cells[0] = accessor::to_column(unlabeled);
-    pool::settle(out.columns());
-    pool::label(out.columns());
-    BC_REQUIRE(same_presence(out, frontier));
 }
 
 // suffice (columns)
@@ -1711,52 +1670,268 @@ BC_AUTO_TEST_CASE(pool_algorithm__estimate__no_blocks__maximum)
 // transitions
 // ----------------------------------------------------------------------------
 
-BC_AUTO_TEST_CASE(pool_algorithm__exclude__row__descendants_absent)
+// Present rows labeled by the columns.
+template <typename State>
+static void relabel(State& out) NOEXCEPT
 {
-    auto labeled = label<link_t>();
-    accessor::exclude(labeled.columns(), 1);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 0), 0u);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), absent);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 2), 0u);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), absent);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 4), 0u);
+    accessor::initialize<link_t>(out.columns());
+    while (accessor::propagate<link_t>(out.columns()));
+}
+
+// The rows made boundary and the conflicts conflicted, by the columns.
+template <typename State>
+static void confirm_by_columns(State& out,
+    const std::span<const link_t>& block,
+    const std::span<const link_t>& conflicts) NOEXCEPT
+{
+    for (const auto row: block)
+        out.cells[row] = accessor::to_column(boundary);
+
+    for (const auto row: conflicts)
+    {
+        const auto own = cell(out.cells, row);
+        if (own != boundary)
+            out.cells[row] = accessor::to_column(accessor::raised(own,
+                accessor::conflicted));
+    }
+
+    settle<link_t, State>(out);
+    relabel(out);
+}
+
+// The boundary rows made unconfirmed and the conflicts not conflicted, by the
+// columns.
+template <typename State>
+static void unconfirm_by_columns(State& out,
+    const std::span<const link_t>& block,
+    const std::span<const link_t>& conflicts) NOEXCEPT
+{
+    for (const auto row: block)
+        if (cell(out.cells, row) == boundary)
+            out.cells[row] = accessor::to_column(unlabeled);
+
+    for (const auto row: conflicts)
+        out.cells[row] = accessor::to_column(accessor::lowered(
+            cell(out.cells, row), accessor::conflicted));
+
+    settle<link_t, State>(out);
+    relabel(out);
+}
+
+// The wide table after the rows confirm with the conflicts, and then after
+// they unconfirm, by the walk and by the columns.
+static bool walks_wide_as_columns(const std::vector<link_t>& block,
+    const std::vector<link_t>& conflicts) NOEXCEPT
+{
+    auto walked = label_of<link_t, wide_state>();
+    auto scanned = label_of<link_t, wide_state>();
+    const auto complete = accessor::confirm(walked.columns(), block, conflicts);
+    confirm_by_columns(scanned, block, conflicts);
+    const auto same = walked.cells == scanned.cells;
+    const auto restored = accessor::unconfirm(walked.columns(), block,
+        conflicts);
+
+    unconfirm_by_columns(scanned, block, conflicts);
+    return complete && same && restored && walked.cells == scanned.cells;
+}
+
+// A random table. A row has one to three inputs, each spending an earlier row
+// or none with equal odds. One in four of the first inputs that spend no row
+// starts a ring of two or three of them.
+struct random_state
+{
+    random_state(size_t count, uint32_t seed) NOEXCEPT
+    {
+        std::mt19937 generator(seed);
+        std::vector<link_t> free{};
+        cells.assign(count, unlabeled);
+        children.assign(count, none);
+        totals.assign(count, totals_t{ 10, 100, 1 });
+        edges.resize(count);
+
+        for (size_t row{}; row < count; ++row)
+        {
+            const auto inputs = possible_narrow_cast<link_t>(
+                add1(generator() % 3u));
+
+            const auto first = possible_narrow_cast<link_t>(parents.size());
+            edges[row] = { first, inputs };
+            for (link_t at{}; at < inputs; ++at)
+            {
+                const auto input = first + at;
+                const auto spend = is_nonzero(row) &&
+                    is_zero(generator() % 2u);
+
+                const auto parent = spend ? possible_narrow_cast<link_t>(
+                    generator() % row) : none;
+
+                parents.push_back(parent);
+                siblings.push_back(spend ? children[parent] : none);
+                rivals.push_back(none);
+                if (spend)
+                    children[parent] = input;
+            }
+
+            if (parents[first] == none)
+                free.push_back(first);
+        }
+
+        for (size_t at{}; at + 3u <= free.size();)
+        {
+            const auto size = 2u + (generator() % 2u);
+            if (is_nonzero(generator() % 4u))
+            {
+                ++at;
+                continue;
+            }
+
+            for (size_t member{}; member < size; ++member)
+                rivals[free[at + member]] = free[at + (add1(member) % size)];
+
+            at += size;
+        }
+
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+        relabel(*this);
+    }
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+
+    std::vector<link_t> cells{};
+    std::vector<link_t> children{};
+    std::vector<edges_t> edges{};
+    std::vector<totals_t> totals{};
+    std::vector<link_t> parents{};
+    std::vector<link_t> siblings{};
+    std::vector<link_t> rivals{};
+};
+
+// Random rows of the table.
+static std::vector<link_t> random_rows(std::mt19937& generator, size_t count,
+    size_t rows) NOEXCEPT
+{
+    std::vector<link_t> out(count);
+    for (auto& row: out)
+        row = possible_narrow_cast<link_t>(generator() % rows);
+
+    return out;
+}
+
+// Random blocks, confirmed and half of them unconfirmed, by the walk and by
+// the columns. A walk that meets an oversized component is relabeled by the
+// columns, and at least one walk must not.
+static bool walks_random_as_columns(uint32_t seed) NOEXCEPT
+{
+    constexpr size_t rows = 300;
+    constexpr size_t steps = 40;
+    std::mt19937 generator(add1(seed));
+    random_state walked{ rows, seed };
+    auto scanned = walked;
+    size_t complete{};
+
+    for (size_t step{}; step < steps; ++step)
+    {
+        const auto block = random_rows(generator, 8, rows);
+        const auto conflicts = random_rows(generator, 4, rows);
+        if (accessor::confirm(walked.columns(), block, conflicts))
+            ++complete;
+        else
+            relabel(walked);
+
+        confirm_by_columns(scanned, block, conflicts);
+        if (walked.cells != scanned.cells)
+            return false;
+
+        if (is_zero(generator() % 2u))
+            continue;
+
+        if (accessor::unconfirm(walked.columns(), block, conflicts))
+            ++complete;
+        else
+            relabel(walked);
+
+        unconfirm_by_columns(scanned, block, conflicts);
+        if (walked.cells != scanned.cells)
+            return false;
+    }
+
+    return is_nonzero(complete);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__admit__contested_row__labeled_into_component)
 {
     auto labeled = label<link_t>();
     labeled.cells = stored(std_array<link_t, rows>{ { 0, 0, 0, 0, absent } });
-    accessor::admit(labeled.columns(), 4);
+    const auto complete = accessor::admit(labeled.columns(), 4);
+    BC_REQUIRE(complete);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 4), 0u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__confirm__q__rivals_excluded_rest_unlabeled)
+BC_AUTO_TEST_CASE(pool_algorithm__admit__absent_parent__absent_for_ancestor)
 {
     auto labeled = label<link_t>();
-    accessor::confirm(labeled.columns(), 0);
+    labeled.cells = stored(std_array<link_t, rows>{ { conflicted, unlabeled, unlabeled, unlabeled, absent } });
+    accessor::admit(labeled.columns(), 4);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 4), inherited);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__admit__conflict__conflicted_and_child_absent)
+{
+    auto labeled = label<link_t>();
+    labeled.cells = stored(std_array<link_t, rows>{ { unlabeled, absent, unlabeled, unlabeled, unlabeled } });
+    accessor::admit(labeled.columns(), 1, true);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), conflicted);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), inherited);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__confirm__q__rival_and_its_child_absent_rest_unlabeled)
+{
+    auto labeled = label<link_t>();
+    const auto complete = accessor::confirm(labeled.columns(), std::vector<link_t>{ 0 }, {});
+    BC_REQUIRE(complete);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 0), boundary);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), absent);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), rivaled);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 2), unlabeled);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), absent);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), inherited);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 4), unlabeled);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__confirm__b__q_loses_rival_unlabeled)
 {
     auto labeled = label<link_t>();
-    accessor::confirm(labeled.columns(), 2);
+    accessor::confirm(labeled.columns(), std::vector<link_t>{ 2 }, {});
     BC_REQUIRE_EQUAL(cell(labeled.cells, 0), unlabeled);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), absent);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), rivaled);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 2), boundary);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), absent);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), inherited);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 4), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__confirm__conflict__conflicted_and_child_absent)
+{
+    auto labeled = label<link_t>();
+    accessor::confirm(labeled.columns(), {}, std::vector<link_t>{ 1 });
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 0), unlabeled);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), conflicted);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 2), unlabeled);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), inherited);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 4), unlabeled);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__unconfirm__q__component_restored)
 {
     auto labeled = label<link_t>();
-    accessor::confirm(labeled.columns(), 0);
-    accessor::unconfirm(labeled.columns(), 0);
+    accessor::confirm(labeled.columns(), std::vector<link_t>{ 0 }, {});
+    accessor::unconfirm(labeled.columns(), std::vector<link_t>{ 0 }, {});
     BC_REQUIRE_EQUAL(cell(labeled.cells, 0), 0u);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 1), 0u);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 2), 0u);
@@ -1767,21 +1942,21 @@ BC_AUTO_TEST_CASE(pool_algorithm__unconfirm__q__component_restored)
 BC_AUTO_TEST_CASE(pool_algorithm__unconfirm__other_boundary__rival_stays_absent)
 {
     auto labeled = label<link_t>();
-    accessor::confirm(labeled.columns(), 2);
-    accessor::confirm(labeled.columns(), 0);
-    accessor::unconfirm(labeled.columns(), 0);
+    accessor::confirm(labeled.columns(), std::vector<link_t>{ 2 }, {});
+    accessor::confirm(labeled.columns(), std::vector<link_t>{ 0 }, {});
+    accessor::unconfirm(labeled.columns(), std::vector<link_t>{ 0 }, {});
     BC_REQUIRE_EQUAL(cell(labeled.cells, 0), unlabeled);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), absent);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), rivaled);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 2), boundary);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), absent);
+    BC_REQUIRE_EQUAL(cell(labeled.cells, 3), inherited);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 4), unlabeled);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__revive__absent_chain__relabeled)
+BC_AUTO_TEST_CASE(pool_algorithm__unconfirm__conflict__component_restored)
 {
     auto labeled = label<link_t>();
-    accessor::exclude(labeled.columns(), 1);
-    accessor::revive(labeled.columns(), 1);
+    accessor::confirm(labeled.columns(), {}, std::vector<link_t>{ 1 });
+    accessor::unconfirm(labeled.columns(), {}, std::vector<link_t>{ 1 });
     BC_REQUIRE_EQUAL(cell(labeled.cells, 0), 0u);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 1), 0u);
     BC_REQUIRE_EQUAL(cell(labeled.cells, 2), 0u);
@@ -1789,11 +1964,21 @@ BC_AUTO_TEST_CASE(pool_algorithm__revive__absent_chain__relabeled)
     BC_REQUIRE_EQUAL(cell(labeled.cells, 4), 0u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__revive__present__unchanged)
+BC_AUTO_TEST_CASE(pool_algorithm__confirm__wide__same_as_columns)
 {
-    auto labeled = label<link_t>();
-    accessor::revive(labeled.columns(), 1);
-    BC_REQUIRE_EQUAL(cell(labeled.cells, 1), 0u);
+    BC_REQUIRE(walks_wide_as_columns({ 0 }, {}));
+    BC_REQUIRE(walks_wide_as_columns({ 1, 12 }, {}));
+    BC_REQUIRE(walks_wide_as_columns({ 3 }, { 9 }));
+    BC_REQUIRE(walks_wide_as_columns({}, { 0, 31 }));
+    BC_REQUIRE(walks_wide_as_columns({ 10, 17, 38 }, { 4 }));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__confirm__random__same_as_columns)
+{
+    BC_REQUIRE(walks_random_as_columns(1));
+    BC_REQUIRE(walks_random_as_columns(2));
+    BC_REQUIRE(walks_random_as_columns(3));
+    BC_REQUIRE(walks_random_as_columns(4));
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__relabel__component__lowest_row)

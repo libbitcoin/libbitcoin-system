@@ -148,6 +148,15 @@ public:
     /// The chunks taken by a block.
     using takes_t = std::vector<take_t>;
 
+    /// Rows to recompute and rows to relabel in a walk of the table, and if
+    /// no component of more than maximum_members was met.
+    struct walk_t
+    {
+        std::vector<link_t> pending{};
+        std::vector<link_t> affected{};
+        bool complete{ true };
+    };
+
     /// Blocks taken in turn from the rows, and the marks that continue them.
     struct projection_t
     {
@@ -293,20 +302,23 @@ public:
     static constexpr void relabel(const columns_t& columns,
         const component_t& component) NOEXCEPT;
 
-    /// The row and its present descendants made absent.
-    static void exclude(const columns_t& columns, link_t row) NOEXCEPT;
+    /// Each transition brings the causes and labels of the rows it reaches up
+    /// to date, and is false if it met a component of more than
+    /// maximum_members, which leaves labels to be made by the columns.
 
-    /// The row made present and labeled into its component.
-    static void admit(const columns_t& columns, link_t row) NOEXCEPT;
+    /// The row made present, or conflicted (a confirmed tx spends its point).
+    static bool admit(const columns_t& columns, link_t row,
+        bool conflict=false) NOEXCEPT;
 
-    /// The row made boundary, its rivals excluded and the rest relabeled.
-    static void confirm(const columns_t& columns, link_t row) NOEXCEPT;
+    /// The rows made boundary and the conflicts conflicted.
+    static bool confirm(const columns_t& columns,
+        const std::span<const link_t>& rows,
+        const std::span<const link_t>& conflicts) NOEXCEPT;
 
-    /// The row made present, its confirmable rivals revived and relabeled.
-    static void unconfirm(const columns_t& columns, link_t row) NOEXCEPT;
-
-    /// The row and its confirmable descendants made present and relabeled.
-    static void revive(const columns_t& columns, link_t row) NOEXCEPT;
+    /// The boundary rows made unconfirmed and the conflicts not conflicted.
+    static bool unconfirm(const columns_t& columns,
+        const std::span<const link_t>& rows,
+        const std::span<const link_t>& conflicts) NOEXCEPT;
 
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
@@ -408,10 +420,6 @@ protected:
     /// The row has a relevant parent.
     static constexpr bool descended(const graph_t& graph, link_t row) NOEXCEPT;
 
-    /// The row has no absent parent and no boundary rival.
-    static constexpr bool confirmable(const graph_t& graph,
-        link_t row) NOEXCEPT;
-
     /// Member index of the row, or maximum_members if not a member.
     static constexpr size_t index(const component_t& component,
         link_t row) NOEXCEPT;
@@ -449,12 +457,21 @@ protected:
         const std::span<const mark>& marks, const graph_t& graph, link_t row,
         size_t depth, const totals_t& available) NOEXCEPT;
 
-    /// The rows made present (if confirmable), with confirmable descendants.
-    static void restore(std::vector<link_t>& out, const columns_t& columns,
-        link_t row) NOEXCEPT;
+    /// The cell of the row with its derived causes recomputed.
+    static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;
 
-    /// Each present row labeled into its component.
-    static void reform(const columns_t& columns,
+    /// The cell of the row set, with the rows that depend on the change left
+    /// pending and those whose labels it affects noted.
+    static void change(walk_t& walk, const columns_t& columns, link_t row,
+        link_t next) NOEXCEPT;
+
+    /// The pending rows recomputed, with those their changes reach, and the
+    /// affected rows relabeled, false if a component is over maximum_members.
+    static bool spread(walk_t& walk, const columns_t& columns) NOEXCEPT;
+
+    /// Each present row labeled into its component, false if one is over
+    /// maximum_members.
+    static bool reform(const columns_t& columns,
         const std::span<const link_t>& rows) NOEXCEPT;
 
     /// The next narrower extended word, else the integral.
