@@ -183,7 +183,7 @@ constexpr void shift_left_into(Value& value, size_t shift=one,
 
 /// Bitwise RIGHT SHIFT (value >> shift) operation.
 /// Set overflow to false to modulo shift by Value width.
-/// Signed overload interpret value as unsigned for shift.
+/// Signed overload is arithmetic (floored, sign extending).
 template <typename Value, if_signed_integral_integer<Value> = true>
 constexpr Value shift_right(Value value, size_t shift=one,
     bool overflow=true) NOEXCEPT;

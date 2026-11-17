@@ -340,20 +340,20 @@ constexpr void shift_right_into(Value& value, size_t shift, bool overflow) NOEXC
     overflow && shift >= span ? value = 0 : value >>= (shift % span);
 }
 
-// signed overloads (shift right of negative is unspecified behavior).
+// signed overloads (shift right of negative was implementation-defined
+// behavior, changed in C++20 to arithmetic). An overflowed shift is the sign.
 template <typename Value, if_signed_integral_integer<Value>>
 constexpr Value shift_right(Value value, size_t shift, bool overflow) NOEXCEPT
 {
     constexpr auto span = bits<Value>;
-    return overflow && shift >= span ? 0 : depromote<Value>(
-        to_signed(to_unsigned(value) >> (shift % span)));
+    const auto count = overflow && shift >= span ? sub1(span) : shift % span;
+    return depromote<Value>(value >> count);
 }
 template <typename Value, if_signed_integral_integer<Value>>
 constexpr void shift_right_into(Value& value, size_t shift,
     bool overflow) NOEXCEPT
 {
-    // Less efficient than =>>, but defined behavior for negative value.
-    value = to_signed<Value>(shift_right(to_unsigned(value), shift, overflow));
+    value = shift_right(value, shift, overflow);
 }
 
 // Rotate (left/right).
@@ -370,10 +370,7 @@ constexpr Value rotate_left(Value value, size_t shift) NOEXCEPT
     }
     else
     {
-        constexpr auto span = bits<Value>;
-        const auto cycle = shift % span;
-        return bit_or(shift_left(value, cycle),
-            shift_right(value, span - cycle));
+        return to_signed(rotate_left(to_unsigned(value), shift));
     }
 }
 
@@ -387,10 +384,7 @@ constexpr void rotate_left_into(Value& value, size_t shift) NOEXCEPT
     }
     else
     {
-        constexpr auto span = bits<Value>;
-        const auto cycle = shift % span;
-        value = bit_or(shift_left(value, cycle),
-            shift_right(value, span - cycle));
+        value = to_signed(rotate_left(to_unsigned(value), shift));
     }
 }
 
@@ -403,10 +397,7 @@ constexpr Value rotate_right(Value value, size_t shift) NOEXCEPT
     }
     else
     {
-        constexpr auto span = bits<Value>;
-        const auto cycle = shift % span;
-        return bit_or(shift_right(value, cycle),
-            shift_left(value, span - cycle));
+        return to_signed(rotate_right(to_unsigned(value), shift));
     }
 }
 
@@ -420,10 +411,7 @@ constexpr void rotate_right_into(Value& value, size_t shift) NOEXCEPT
     }
     else
     {
-        constexpr auto span = bits<Value>;
-        const auto cycle = shift % span;
-        value = bit_or(shift_right(value, cycle),
-            shift_left(value, span - cycle));
+        value = to_signed(rotate_right(to_unsigned(value), shift));
     }
 }
 

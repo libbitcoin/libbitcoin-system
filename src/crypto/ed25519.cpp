@@ -366,8 +366,7 @@ constexpr bool ed25519::is_canonical(const key& scalar) NOEXCEPT
 
 // Reduce modulo l = 2^252 + c. Each digit above 2^256 folds into the digits
 // below it, as 2^256 = -16c (mod l). The sixteen digits of c are followed by
-// four digits of carry. The shift of a signed digit is arithmetic (floored,
-// branchless), and its mask is the floored remainder.
+// four digits of carry. The mask of a signed digit is its floored remainder.
 constexpr ed25519::key ed25519::reduce(product& x) NOEXCEPT
 {
     constexpr auto high_bits = 4_size;
@@ -385,7 +384,7 @@ constexpr ed25519::key ed25519::reduce(product& x) NOEXCEPT
         for (; digit < first + span; ++digit)
         {
             x[digit] += carry - high * x[index] * order[digit - first];
-            carry = (x[digit] + half) >> digit_bits;
+            carry = shift_right(x[digit] + half, digit_bits);
             x[digit] -= carry * digit_radix;
         }
 
@@ -397,9 +396,9 @@ constexpr ed25519::key ed25519::reduce(product& x) NOEXCEPT
     int64_t carry{};
     for (size_t digit{}; digit < key_size; ++digit)
     {
-        const auto top = x[sub1(key_size)] >> high_bits;
+        const auto top = shift_right(x[sub1(key_size)], high_bits);
         x[digit] += carry - top * order[digit];
-        carry = x[digit] >> digit_bits;
+        carry = shift_right(x[digit], digit_bits);
         x[digit] = bit_and(x[digit], mask);
     }
 
@@ -409,7 +408,7 @@ constexpr ed25519::key ed25519::reduce(product& x) NOEXCEPT
     key out{};
     for (size_t digit{}; digit < key_size; ++digit)
     {
-        x[add1(digit)] += x[digit] >> digit_bits;
+        x[add1(digit)] += shift_right(x[digit], digit_bits);
         out[digit] = possible_narrow_and_sign_cast<uint8_t>(
             bit_and(x[digit], mask));
     }

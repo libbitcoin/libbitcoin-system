@@ -41,9 +41,8 @@ constexpr void curve25519::carry(field& out) NOEXCEPT
     {
         // The radix is added so that the floored carry of a negative limb is
         // one less than that of a positive limb, which is then subtracted.
-        // The shift of a signed limb is arithmetic (floored, branchless).
         out[index] += radix;
-        const auto carried = out[index] >> radix_bits;
+        const auto carried = shift_right(out[index], radix_bits);
 
         if (index < sub1(limbs))
             out[add1(index)] += sub1(carried);
