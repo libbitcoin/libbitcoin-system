@@ -52,6 +52,13 @@ BC_AUTO_TEST_CASE(verify__empty_chain__chain_empty)
     BC_REQUIRE_EQUAL(verify({}, anchors, fixture::now, purpose::server), error::chain_empty);
 }
 
+BC_AUTO_TEST_CASE(verify__rsa_server_chain__success)
+{
+    const auto leaves = chain(fixture::rsa_server_pem);
+    const auto anchors = chain(fixture::rsa_root_pem);
+    BC_REQUIRE_EQUAL(verify(leaves, anchors, fixture::now, purpose::server), error::x509_success);
+}
+
 BC_AUTO_TEST_CASE(verify__server_chain__success)
 {
     const auto leaves = chain(fixture::server_pem + fixture::intermediate_pem);

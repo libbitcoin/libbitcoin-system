@@ -26,6 +26,13 @@ namespace libbitcoin {
 namespace system {
 namespace x509 {
 
+/// Public key types.
+enum class key_type : uint8_t
+{
+    ec,
+    rsa
+};
+
 /// Public key curves.
 enum class curve : uint8_t
 {
@@ -37,14 +44,17 @@ enum class curve : uint8_t
 enum class signature_algorithm : uint8_t
 {
     ecdsa_sha256,
-    ecdsa_sha384
+    ecdsa_sha384,
+    rsa_sha256,
+    rsa_sha384,
+    rsa_sha512
 };
 
 /// Key usage flags (rfc5280 4.2.1.3), bit n of the named bit list.
 constexpr uint16_t digital_signature = 0x0001;
 constexpr uint16_t key_certificate_sign = 0x0020;
 
-/// A parsed v3 certificate (rfc5280) with an ECDSA key and signature.
+/// A parsed v3 certificate (rfc5280) with an ECDSA or RSA key and signature.
 struct certificate
 {
     /// Encodings.
@@ -58,11 +68,13 @@ struct certificate
     uint64_t not_before{};
     uint64_t not_after{};
 
-    /// Subject public key (uncompressed sec1 point).
+    /// Subject public key, an uncompressed sec1 point of the curve (ec) or a
+    /// der RSAPublicKey (rsa).
+    x509::key_type key_type{};
     x509::curve curve{};
     data_chunk public_key{};
 
-    /// Issuer signature (der ECDSA-Sig-Value).
+    /// Issuer signature (der ECDSA-Sig-Value, or pkcs1 v1.5 RSA signature).
     signature_algorithm algorithm{};
     data_chunk signature{};
 
