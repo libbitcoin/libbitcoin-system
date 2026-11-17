@@ -361,6 +361,9 @@
     <ClCompile Include="..\..\..\..\src\options\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\options\setting.cpp" />
     <ClCompile Include="..\..\..\..\src\options\variables.cpp" />
+    <ClCompile Include="..\..\..\..\src\pool\label.cpp" />
+    <ClCompile Include="..\..\..\..\src\pool\settle.cpp" />
+    <ClCompile Include="..\..\..\..\src\pool\suffice.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_32.cpp" />
@@ -739,7 +742,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\variables.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\label.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\pool.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\report.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\settle.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\suffice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
@@ -1014,6 +1021,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\options\setting.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\options\value.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\pool\algorithm.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\label.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\settle.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\suffice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />
