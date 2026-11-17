@@ -149,8 +149,6 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/batch/schnorr.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/silent.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/verify.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/cuda/driver.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/cuda/ptx.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/comb_00.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/comb_01.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/comb_02.cpp \
@@ -171,6 +169,8 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_14.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_15.cpp \
     ${srcdir}/../../src/crypto/shamir/rs1024.cpp \
+    ${srcdir}/../../src/cuda/driver.cpp \
+    ${srcdir}/../../src/cuda/ptx.cpp \
     ${srcdir}/../../src/data/data_chunk.cpp \
     ${srcdir}/../../src/data/memory.cpp \
     ${srcdir}/../../src/data/string.cpp \

@@ -289,13 +289,13 @@
     <Filter Include="src\crypto\secp256k1\batch">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\crypto\secp256k1\cuda">
+    <Filter Include="src\crypto\secp256k1\generator">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\crypto\secp256k1\generator">
+    <Filter Include="src\crypto\shamir">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\crypto\shamir">
+    <Filter Include="src\cuda">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\data">
@@ -636,12 +636,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\verify.cpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.cpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.cpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
@@ -731,6 +725,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp">
       <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\cuda\driver.cpp">
+      <Filter>src\cuda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\cuda\ptx.cpp">
+      <Filter>src\cuda</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
       <Filter>src\data</Filter>
@@ -2324,27 +2324,6 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\turns.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClInclude>
@@ -2356,6 +2335,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp">
       <Filter>src\crypto\secp256k1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\context.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\driver.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\kernels.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\layout.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\library.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\ptx.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\turns.hpp">
+      <Filter>src\cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.hpp">
       <Filter>src\wallet\keys\parse_encrypted_keys</Filter>
