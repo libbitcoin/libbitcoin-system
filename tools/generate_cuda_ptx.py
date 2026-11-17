@@ -2,9 +2,9 @@
 """
 Generate the embedded cuda kernels (ptx) for libbitcoin-system.
 
-Source: src/crypto/secp256k1/cuda/kernels.cu, compiled for the device by clang
+Source: src/cuda/kernels.cu, compiled for the device by clang
         (no cuda toolkit), then raw deflated for embedding.
-Output: src/crypto/secp256k1/cuda/ptx.cpp
+Output: src/cuda/ptx.cpp
 
 Run from the repository root, after a build has generated version.hpp:
   python3 tools/generate_cuda_ptx.py
@@ -20,8 +20,8 @@ import sys
 import tempfile
 import zlib
 
-SOURCE = os.path.join("src", "crypto", "secp256k1", "cuda", "kernels.cu")
-OUTPUT = os.path.join("src", "crypto", "secp256k1", "cuda", "ptx.cpp")
+SOURCE = os.path.join("src", "cuda", "kernels.cu")
+OUTPUT = os.path.join("src", "cuda", "ptx.cpp")
 ARCHITECTURE = "sm_75"
 
 LICENSE_HEADER = """\
@@ -115,7 +115,6 @@ def generate_cpp(deflated, size):
         "",
         "namespace libbitcoin {",
         "namespace system {",
-        "namespace secp256k1 {",
         "namespace cuda {",
         "",
         "constexpr std_array<uint8_t, {}> deflated".format(len(deflated)),
@@ -141,7 +140,6 @@ def generate_cpp(deflated, size):
         "}",
         "",
         "} // namespace cuda",
-        "} // namespace secp256k1",
         "} // namespace system",
         "} // namespace libbitcoin",
         "",

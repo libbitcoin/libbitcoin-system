@@ -31,7 +31,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 #if defined(HAVE_CUDA)
@@ -182,6 +181,5 @@ LCOV_EXCL_STOP()
 #endif
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_DRIVER_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_DRIVER_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_DRIVER_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_DRIVER_HPP
 
 #include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
@@ -28,7 +28,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 /// True if gpu verification is compiled in.
@@ -89,7 +88,6 @@ bool suffice(pool::report_t& out, size_t& failed,
     const pool::algorithm::context_t& context, uint32_t required) NOEXCEPT;
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_TURNS_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_TURNS_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_TURNS_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_TURNS_HPP
 
 #include <condition_variable>
 #include <mutex>
@@ -26,7 +26,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 // Turns.
@@ -118,7 +117,6 @@ private:
 };
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

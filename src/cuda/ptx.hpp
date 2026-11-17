@@ -16,15 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_PTX_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_PTX_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_PTX_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_PTX_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 /// The verification kernels (ptx), raw deflate compressed.
@@ -34,7 +33,6 @@ data_slice deflated_ptx() NOEXCEPT;
 size_t ptx_size() NOEXCEPT;
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

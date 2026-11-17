@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_CONTEXT_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_CONTEXT_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_CONTEXT_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_CONTEXT_HPP
 
 #include <atomic>
 #include <chrono>
@@ -35,7 +35,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 BC_PUSH_WARNING(NO_REINTERPRET_CAST)
@@ -741,14 +740,16 @@ private:
             || comb_bytes != shape::comb_bytes)
             return false;
 
-        for (size_t slice{}; slice < generator_slices.size(); ++slice)
+        const auto& slices = secp256k1::generator_slices;
+        for (size_t slice{}; slice < slices.size(); ++slice)
             if (call_.copy_to(table + slice * shape::slice_bytes,
-                generator_slices[slice], shape::slice_bytes) != success)
+                slices[slice], shape::slice_bytes) != success)
                 return false;
 
-        for (size_t part{}; part < comb_parts.size(); ++part)
+        const auto& parts = secp256k1::comb_parts;
+        for (size_t part{}; part < parts.size(); ++part)
             if (call_.copy_to(comb + part * shape::part_bytes,
-                comb_parts[part], shape::part_bytes) != success)
+                parts[part], shape::part_bytes) != success)
                 return false;
 
         size_t free{}, total{};
@@ -983,7 +984,6 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

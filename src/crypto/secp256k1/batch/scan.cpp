@@ -171,7 +171,7 @@ static void scan_transactions(const scan::batch& batch, size_t first,
 // protected
 // ----------------------------------------------------------------------------
 
-static_assert(is_same_type<secp256k1::cuda::prefix, scan::batch::prefix>);
+static_assert(is_same_type<cuda::prefix, scan::batch::prefix>);
 
 // Transactions go to gpu in blocks, and output key prefixes of each block
 // are matched to tx outputs in parallel.
@@ -185,7 +185,7 @@ bool scan::batch::scan_gpu(const stopper& cancel, size_t& resume,
 
     std_vector<size_t> groups(std::min(gpu_groups, count));
     std::iota(groups.begin(), groups.end(), zero);
-    std::vector<secp256k1::cuda::prefix> keys_out{};
+    std::vector<cuda::prefix> keys_out{};
     data_chunk valid{};
     for (size_t base{}; base < count && !cancel; base += gpu_groups)
     {
@@ -193,7 +193,7 @@ bool scan::batch::scan_gpu(const stopper& cancel, size_t& resume,
         const auto block = std::span{ groups }.first(size);
         resume = base;
 
-        if (!secp256k1::cuda::scan(cancel, keys_out, valid,
+        if (!cuda::scan(cancel, keys_out, valid,
             batch.points.subspan(base, size), keys))
             return false;
 
@@ -243,8 +243,8 @@ void scan::batch::scan(const stopper& cancel, const batch& batch,
 
     size_t resume{};
     if (count >= gpu_minimum &&
-        keys.labels.size() <= secp256k1::cuda::maximum_labels &&
-        secp256k1::cuda::available() &&
+        keys.labels.size() <= cuda::maximum_labels &&
+        cuda::available() &&
         scan_gpu(cancel, resume, batch, keys, callback, turbo))
         return;
 

@@ -21,10 +21,10 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
+namespace cuda {
 
 class verifier
-  : public algorithm
+  : public secp256k1::algorithm
 {
 public:
     using algorithm::slice_count;
@@ -363,12 +363,16 @@ public:
     }
 };
 
+} // namespace cuda
+
+namespace secp256k1 {
+
 extern "C"
 {
-    __device__ uint64_t generator_table[verifier::slice_count]
-        [verifier::table_words];
-    __device__ uint64_t comb_table[verifier::comb_part_count]
-        [verifier::comb_part_words];
+    __device__ uint64_t generator_table[cuda::verifier::slice_count]
+        [cuda::verifier::table_words];
+    __device__ uint64_t comb_table[cuda::verifier::comb_part_count]
+        [cuda::verifier::comb_part_words];
 }
 
 __device__ const std_array<const uint64_t*, 16> generator_slices
@@ -381,7 +385,7 @@ __device__ const std_array<const uint64_t*, 16> generator_slices
     generator_table[15]
 };
 
-__device__ const std_array<const uint64_t*, verifier::comb_part_count>
+__device__ const std_array<const uint64_t*, cuda::verifier::comb_part_count>
     comb_parts
 {
     comb_table[0], comb_table[1], comb_table[2]
@@ -391,9 +395,9 @@ __device__ const std_array<const uint64_t*, verifier::comb_part_count>
 } // namespace system
 } // namespace libbitcoin
 
-using namespace libbitcoin::system::secp256k1;
+using namespace libbitcoin::system::cuda;
 
-extern "C" __global__ void verify_ecdsa(cuda::ecdsa_arguments arguments)
+extern "C" __global__ void verify_ecdsa(ecdsa_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -401,7 +405,7 @@ extern "C" __global__ void verify_ecdsa(cuda::ecdsa_arguments arguments)
             arguments.keys[row], arguments.signatures[row]);
 }
 
-extern "C" __global__ void verify_schnorr(cuda::schnorr_arguments arguments)
+extern "C" __global__ void verify_schnorr(schnorr_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -409,7 +413,7 @@ extern "C" __global__ void verify_schnorr(cuda::schnorr_arguments arguments)
             arguments.keys[row], arguments.signatures[row]);
 }
 
-extern "C" __global__ void scan_silent(cuda::scan_arguments arguments)
+extern "C" __global__ void scan_silent(scan_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -418,8 +422,7 @@ extern "C" __global__ void scan_silent(cuda::scan_arguments arguments)
             arguments.points[row], arguments);
 }
 
-extern "C" __global__ void compute_silent(
-    cuda::silent_arguments arguments)
+extern "C" __global__ void compute_silent(silent_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -428,49 +431,49 @@ extern "C" __global__ void compute_silent(
             arguments.hashes[row]);
 }
 
-extern "C" __global__ void prepare_pool(cuda::pool_arguments arguments)
+extern "C" __global__ void prepare_pool(pool_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.row_count)
         labeler::prepare(arguments, row);
 }
 
-extern "C" __global__ void seed_pool(cuda::pool_arguments arguments)
+extern "C" __global__ void seed_pool(pool_arguments arguments)
 {
     const auto input = verifier::row();
     if (input < arguments.input_count)
         labeler::seed(arguments, input);
 }
 
-extern "C" __global__ void label_pool(cuda::pool_arguments arguments)
+extern "C" __global__ void label_pool(pool_arguments arguments)
 {
     const auto input = verifier::row();
     if (input < arguments.input_count)
         labeler::label(arguments, input);
 }
 
-extern "C" __global__ void reduce_pool(cuda::pool_arguments arguments)
+extern "C" __global__ void reduce_pool(pool_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.row_count)
         settler::reduce(arguments, row);
 }
 
-extern "C" __global__ void contest_pool(cuda::pool_arguments arguments)
+extern "C" __global__ void contest_pool(pool_arguments arguments)
 {
     const auto input = verifier::row();
     if (input < arguments.input_count)
         settler::contest(arguments, input);
 }
 
-extern "C" __global__ void descend_pool(cuda::pool_arguments arguments)
+extern "C" __global__ void descend_pool(pool_arguments arguments)
 {
     const auto input = verifier::row();
     if (input < arguments.input_count)
         settler::descend(arguments, input);
 }
 
-extern "C" __global__ void suffice_pool(cuda::context_arguments arguments)
+extern "C" __global__ void suffice_pool(context_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.row_count)

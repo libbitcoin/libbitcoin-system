@@ -27,7 +27,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 constexpr std_array<uint8_t, 293983> deflated
@@ -24544,7 +24543,6 @@ size_t ptx_size() NOEXCEPT
 }
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

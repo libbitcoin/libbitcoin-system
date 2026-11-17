@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_KERNELS_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_KERNELS_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_KERNELS_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_KERNELS_HPP
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
@@ -27,7 +27,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 /// Arguments of the verify_ecdsa kernel, columns in device memory.
@@ -69,7 +68,7 @@ using prefix = data_array<8>;
 
 /// Decoded forms of the receiver keys.
 struct scan_keys
-  : algorithm
+  : secp256k1::algorithm
 {
     using algorithm::scalar_t;
     using affine = affine_t<uint64_t>;
@@ -119,7 +118,6 @@ struct context_arguments
 };
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

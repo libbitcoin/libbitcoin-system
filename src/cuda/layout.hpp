@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LAYOUT_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LAYOUT_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_LAYOUT_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_LAYOUT_HPP
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
@@ -27,11 +27,10 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 struct shape
-  : algorithm
+  : secp256k1::algorithm
 {
     static constexpr auto slice_bytes = table_words * sizeof(uint64_t);
     static constexpr auto table_bytes = slice_count * slice_bytes;
@@ -188,7 +187,7 @@ struct context_layout
 
 /// Receiver keys decoded into scan arguments, false if invalid.
 struct scan_receiver
-  : algorithm
+  : secp256k1::algorithm
 {
     static bool decode(scan_arguments& out,
         const scan::batch::receiver& keys) NOEXCEPT
@@ -208,7 +207,6 @@ struct scan_receiver
 };
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 
