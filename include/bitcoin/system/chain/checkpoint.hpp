@@ -22,6 +22,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -64,6 +65,15 @@ public:
 
     /// Serialization.
     /// -----------------------------------------------------------------------
+
+    static constexpr size_t serialized_size() NOEXCEPT
+    {
+        return hash_size + sizeof(uint32_t);
+    }
+
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
     std::string to_string() const NOEXCEPT;
 
