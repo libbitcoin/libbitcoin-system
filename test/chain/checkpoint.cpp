@@ -330,4 +330,40 @@ BC_AUTO_TEST_CASE(checkpoint__istream__invalid_height__throws_istream_exception)
     BC_REQUIRE_THROW(std::istringstream("0102030405060708090a0102030405060708090a0102030405060708090a0b0c:xx") >> instance, istream_exception);
 }
 
+// to_data
+
+BC_AUTO_TEST_CASE(checkpoint__to_data__default__null_hash_zero_height)
+{
+    const checkpoint instance{};
+    BC_REQUIRE_EQUAL(instance.to_data(), data_chunk(checkpoint::serialized_size(), 0x00));
+}
+
+BC_AUTO_TEST_CASE(checkpoint__to_data__value__hash_then_little_endian_height)
+{
+    const checkpoint instance{ "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 0x01020304 };
+    const auto expected = splice(instance.hash(), base16_array("04030201"));
+    BC_REQUIRE_EQUAL(instance.to_data(), to_chunk(expected));
+    BC_REQUIRE_EQUAL(instance.to_data().size(), checkpoint::serialized_size());
+}
+
+BC_AUTO_TEST_CASE(checkpoint__to_data__stream__expected)
+{
+    const checkpoint instance{ "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 };
+    std::stringstream stream{};
+    instance.to_data(stream);
+    BC_REQUIRE(stream);
+    BC_REQUIRE_EQUAL(to_chunk(stream.str()), instance.to_data());
+}
+
+BC_AUTO_TEST_CASE(checkpoint__to_data__writer__expected)
+{
+    const checkpoint instance{ "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 };
+    data_chunk data(checkpoint::serialized_size());
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    instance.to_data(out);
+    BC_REQUIRE(out);
+    BC_REQUIRE_EQUAL(data, instance.to_data());
+}
+
 BC_AUTO_TEST_SUITE_END()

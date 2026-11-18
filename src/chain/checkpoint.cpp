@@ -167,6 +167,27 @@ std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT
     return stream;
 }
 
+data_chunk checkpoint::to_data() const NOEXCEPT
+{
+    data_chunk data(serialized_size());
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out);
+    return data;
+}
+
+void checkpoint::to_data(std::ostream& stream) const NOEXCEPT
+{
+    write::bytes::ostream out(stream);
+    to_data(out);
+}
+
+void checkpoint::to_data(writer& sink) const NOEXCEPT
+{
+    sink.write_bytes(hash_);
+    sink.write_4_bytes_little_endian(possible_narrow_cast<uint32_t>(height_));
+}
+
 std::string checkpoint::to_string() const NOEXCEPT
 {
     return encode_hash(hash_) + ":" + serialize(height_);
