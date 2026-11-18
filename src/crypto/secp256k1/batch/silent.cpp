@@ -120,8 +120,6 @@ bool silent::batch::compute(const stopper& cancel, bool& used_gpu,
     BC_ASSERT(valid.size() == batch.sums.size());
     BC_ASSERT(out.size() == batch.sums.size());
 
-    namespace cuda = secp256k1::cuda;
-
     used_gpu = cuda::available()
         && cuda::compute(cancel, out, valid, batch.sums, batch.hashes);
 
@@ -139,8 +137,6 @@ bool silent::batch::compute(const stopper& cancel, bool& used_gpu,
     BC_ASSERT(batch.hashes.size() == batch.sums.size());
     BC_ASSERT(valid.size() == batch.sums.size());
     BC_ASSERT(out.size() == batch.sums.size());
-
-    namespace cuda = secp256k1::cuda;
 
     if (!cuda::available())
     {

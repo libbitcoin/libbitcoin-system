@@ -843,6 +843,9 @@
     <ClCompile Include="..\..\..\..\test\pool\algorithm.cpp">
       <Filter>src\pool</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\pool\performance.cpp">
+      <Filter>src\pool</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>

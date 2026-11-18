@@ -29,7 +29,7 @@
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include "../cuda/driver.hpp"
+#include "../../../cuda/driver.hpp"
 
 namespace libbitcoin {
 namespace system {
@@ -105,8 +105,6 @@ template <typename Batch, typename Verify>
 data_chunk batch_verify(const stopper& cancel, bool& used_gpu, Batch& batch,
     Verify&& verify) NOEXCEPT
 {
-    namespace cuda = secp256k1::cuda;
-
     data_chunk results{};
     used_gpu = cuda::available() && cuda::verify(cancel, results, batch);
 

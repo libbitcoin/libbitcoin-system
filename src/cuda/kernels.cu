@@ -21,10 +21,10 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
+namespace cuda {
 
 class verifier
-  : public algorithm
+  : public secp256k1::algorithm
 {
 public:
     using algorithm::slice_count;
@@ -195,12 +195,184 @@ private:
     }
 };
 
+class labeler
+  : public pool::algorithm
+{
+public:
+    static __device__ graph_t graph(
+        const cuda::pool_arguments& arguments) NOEXCEPT
+    {
+        columns_t table{};
+        table.cells = { arguments.cells, arguments.row_count };
+        table.edges = { arguments.edges, arguments.row_count };
+        table.rows = { arguments.rows, arguments.input_count };
+        table.rivals = { arguments.rivals, arguments.input_count };
+
+        // clang (22.1) crashes compiling accessors over null candidate
+        // columns, so the empty candidate columns are at the table's.
+        columns_t extra{};
+        extra.cells = { arguments.cells, zero };
+        extra.edges = { arguments.edges, zero };
+        extra.rows = { arguments.rows, zero };
+        extra.rivals = { arguments.rivals, zero };
+        return { table, extra };
+    }
+
+    /// The row of the input, the given row if no row holds the input.
+    static __device__ link_t owner(const cuda::pool_arguments& arguments,
+        link_t input, link_t row) NOEXCEPT
+    {
+        const auto owning = arguments.owners[input];
+        return holds(graph(arguments), owning, input) ? owning : row;
+    }
+
+    /// The row as owner of its inputs.
+    static __device__ void own(const cuda::pool_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        const auto slice = edges(graph(arguments), row);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+            if (input < arguments.input_count)
+                arguments.owners[input] = row;
+    }
+
+    /// A present cell made unlabeled, and the row as owner of its inputs.
+    static __device__ void prepare(const cuda::pool_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        const auto columns = graph(arguments);
+        if (is_present(cell(columns, row)))
+            set_cell(columns, row, unlabeled);
+
+        own(arguments, row);
+    }
+
+    static __device__ void seed(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (arguments.rivals[input] == none ||
+            !holds(graph(arguments), row, input))
+            return;
+
+        algorithm::seed(graph(arguments), row, input,
+            [&](link_t at) NOEXCEPT
+            {
+                return owner(arguments, at, row);
+            });
+    }
+
+    static __device__ void label(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (!holds(graph(arguments), row, input))
+            return;
+
+        const auto changed = exchange(graph(arguments), row, input,
+            [&](link_t at) NOEXCEPT
+            {
+                return owner(arguments, at, row);
+            },
+            [&](link_t to, link_t value) NOEXCEPT
+            {
+                const auto stored = to_column(value);
+                __nvvm_atom_min_gen_ui(&arguments.cells[to], stored);
+            });
+
+        if (changed)
+            *arguments.changed = 1;
+    }
+};
+
+class settler
+  : public labeler
+{
+public:
+    /// The cell without derived causes, and the row as owner of its inputs.
+    static __device__ void reduce(const cuda::pool_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        const auto columns = graph(arguments);
+        set_cell(columns, row, reduced(cell(columns, row)));
+        own(arguments, row);
+    }
+
+    static __device__ void contest(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (arguments.rivals[input] == none ||
+            !holds(graph(arguments), row, input))
+            return;
+
+        algorithm::contest(graph(arguments), row, input,
+            [&](link_t at) NOEXCEPT
+            {
+                return owner(arguments, at, row);
+            },
+            [&](link_t to, link_t value) NOEXCEPT
+            {
+                raise(arguments, to, value);
+            });
+    }
+
+    static __device__ void descend(const cuda::pool_arguments& arguments,
+        link_t input) NOEXCEPT
+    {
+        const auto row = arguments.owners[input];
+        if (!holds(graph(arguments), row, input))
+            return;
+
+        const auto changed = inherit(graph(arguments), row, input,
+            [&](link_t to, link_t value) NOEXCEPT
+            {
+                raise(arguments, to, value);
+            });
+
+        if (changed)
+            *arguments.changed = 1;
+    }
+
+protected:
+    // A scan raises one cause, so the raised cell is the greater.
+    static __device__ void raise(const cuda::pool_arguments& arguments,
+        link_t to, link_t value) NOEXCEPT
+    {
+        __nvvm_atom_max_gen_ui(&arguments.cells[to], to_column(value));
+    }
+};
+
+class sufficer
+  : public pool::algorithm
+{
+public:
+    static __device__ void suffice(const cuda::context_arguments& arguments,
+        link_t row) NOEXCEPT
+    {
+        columns_t table{};
+        table.cells = { arguments.cells, arguments.row_count };
+        table.flags = { arguments.flags, arguments.row_count };
+        table.heights = { arguments.heights, arguments.row_count };
+        table.medians = { arguments.medians, arguments.row_count };
+        if (algorithm::suffice(table, row, arguments.context,
+            arguments.required))
+            __nvvm_atom_add_gen_i(reinterpret_cast<int*>(arguments.failed),
+                1);
+    }
+};
+
+} // namespace cuda
+
+namespace secp256k1 {
+
 extern "C"
 {
-    __device__ uint64_t generator_table[verifier::slice_count]
-        [verifier::table_words];
-    __device__ uint64_t comb_table[verifier::comb_part_count]
-        [verifier::comb_part_words];
+    __device__ uint64_t generator_table[cuda::verifier::slice_count]
+        [cuda::verifier::table_words];
+    __device__ uint64_t comb_table[cuda::verifier::comb_part_count]
+        [cuda::verifier::comb_part_words];
 }
 
 __device__ const std_array<const uint64_t*, 16> generator_slices
@@ -213,7 +385,7 @@ __device__ const std_array<const uint64_t*, 16> generator_slices
     generator_table[15]
 };
 
-__device__ const std_array<const uint64_t*, verifier::comb_part_count>
+__device__ const std_array<const uint64_t*, cuda::verifier::comb_part_count>
     comb_parts
 {
     comb_table[0], comb_table[1], comb_table[2]
@@ -223,9 +395,9 @@ __device__ const std_array<const uint64_t*, verifier::comb_part_count>
 } // namespace system
 } // namespace libbitcoin
 
-using namespace libbitcoin::system::secp256k1;
+using namespace libbitcoin::system::cuda;
 
-extern "C" __global__ void verify_ecdsa(cuda::ecdsa_arguments arguments)
+extern "C" __global__ void verify_ecdsa(ecdsa_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -233,7 +405,7 @@ extern "C" __global__ void verify_ecdsa(cuda::ecdsa_arguments arguments)
             arguments.keys[row], arguments.signatures[row]);
 }
 
-extern "C" __global__ void verify_schnorr(cuda::schnorr_arguments arguments)
+extern "C" __global__ void verify_schnorr(schnorr_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -241,7 +413,7 @@ extern "C" __global__ void verify_schnorr(cuda::schnorr_arguments arguments)
             arguments.keys[row], arguments.signatures[row]);
 }
 
-extern "C" __global__ void scan_silent(cuda::scan_arguments arguments)
+extern "C" __global__ void scan_silent(scan_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
@@ -250,12 +422,60 @@ extern "C" __global__ void scan_silent(cuda::scan_arguments arguments)
             arguments.points[row], arguments);
 }
 
-extern "C" __global__ void compute_silent(
-    cuda::silent_arguments arguments)
+extern "C" __global__ void compute_silent(silent_arguments arguments)
 {
     const auto row = verifier::row();
     if (row < arguments.count)
         arguments.valid[row] = verifier::compute(
             arguments.points[row], arguments.sums[row],
             arguments.hashes[row]);
+}
+
+extern "C" __global__ void prepare_pool(pool_arguments arguments)
+{
+    const auto row = verifier::row();
+    if (row < arguments.row_count)
+        labeler::prepare(arguments, row);
+}
+
+extern "C" __global__ void seed_pool(pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        labeler::seed(arguments, input);
+}
+
+extern "C" __global__ void label_pool(pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        labeler::label(arguments, input);
+}
+
+extern "C" __global__ void reduce_pool(pool_arguments arguments)
+{
+    const auto row = verifier::row();
+    if (row < arguments.row_count)
+        settler::reduce(arguments, row);
+}
+
+extern "C" __global__ void contest_pool(pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        settler::contest(arguments, input);
+}
+
+extern "C" __global__ void descend_pool(pool_arguments arguments)
+{
+    const auto input = verifier::row();
+    if (input < arguments.input_count)
+        settler::descend(arguments, input);
+}
+
+extern "C" __global__ void suffice_pool(context_arguments arguments)
+{
+    const auto row = verifier::row();
+    if (row < arguments.row_count)
+        sufficer::suffice(arguments, row);
 }

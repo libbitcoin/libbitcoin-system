@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_KERNELS_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_KERNELS_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_KERNELS_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_KERNELS_HPP
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/pool/pool.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 /// Arguments of the verify_ecdsa kernel, columns in device memory.
@@ -68,7 +68,7 @@ using prefix = data_array<8>;
 
 /// Decoded forms of the receiver keys.
 struct scan_keys
-  : algorithm
+  : secp256k1::algorithm
 {
     using algorithm::scalar_t;
     using affine = affine_t<uint64_t>;
@@ -89,8 +89,35 @@ struct scan_arguments
     uint32_t count;
 };
 
+/// Arguments of the pool kernels, columns in device memory. Owners is the
+/// row of each input, written by prepare_pool and reduce_pool.
+struct pool_arguments
+{
+    uint32_t* cells;
+    const pool::algorithm::edges_t* edges;
+    const uint32_t* rows;
+    const uint32_t* rivals;
+    uint32_t* owners;
+    uint32_t* changed;
+    uint32_t row_count;
+    uint32_t input_count;
+};
+
+/// Arguments of the pool context kernel, columns in device memory. Failed
+/// is the count of rows whose context is not sufficient.
+struct context_arguments
+{
+    uint32_t* cells;
+    const uint32_t* flags;
+    const uint32_t* heights;
+    const uint32_t* medians;
+    uint32_t* failed;
+    pool::algorithm::context_t context;
+    uint32_t required;
+    uint32_t row_count;
+};
+
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

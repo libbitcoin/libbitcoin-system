@@ -57,6 +57,14 @@ public:
         link_t count{};
     };
 
+    /// Flags, height and median time past of a validation.
+    struct context_t
+    {
+        uint32_t flags{};
+        uint32_t height{};
+        uint32_t median{};
+    };
+
     /// An edge from a table row or input to a candidate input.
     struct bridge_t
     {
@@ -97,6 +105,11 @@ public:
 
         /// Next input spending the same point (a ring), none if sole.
         std::span<const link_t> rivals{};
+
+        /// Flags, height and median time past of the validation of the row.
+        std::span<const uint32_t> flags{};
+        std::span<const uint32_t> heights{};
+        std::span<const uint32_t> medians{};
     };
 
     /// The table columns with candidate columns and bridging edges appended.
@@ -135,6 +148,15 @@ public:
     /// The chunks taken by a block.
     using takes_t = std::vector<take_t>;
 
+    /// Rows to recompute and rows to relabel in a walk of the table, and if
+    /// no component of more than maximum_members was met.
+    struct walk_t
+    {
+        std::vector<link_t> pending{};
+        std::vector<link_t> affected{};
+        bool complete{ true };
+    };
+
     /// Blocks taken in turn from the rows, and the marks that continue them.
     struct projection_t
     {
@@ -165,6 +187,21 @@ public:
     static constexpr link_t absent = add1(unlabeled);
     static constexpr link_t boundary = shift_left(absent, one);
 
+    /// Cause of absence (flag of an absent cell): a parent is absent.
+    static constexpr link_t ancestor = power2<link_t>(0u);
+
+    /// Cause of absence: a rival has confirmed.
+    static constexpr link_t rivaled = power2<link_t>(1u);
+
+    /// Cause of absence: a confirmed tx spends its point (a block conflict).
+    static constexpr link_t conflicted = power2<link_t>(2u);
+
+    /// Cause of absence: its context is not sufficient.
+    static constexpr link_t insufficient = power2<link_t>(3u);
+
+    /// The causes derived from the columns.
+    static constexpr link_t derived = bit_or(ancestor, rivaled);
+
     /// Cells.
     /// -----------------------------------------------------------------------
 
@@ -176,6 +213,20 @@ public:
 
     /// The row has confirmed.
     static constexpr bool is_boundary(link_t cell) NOEXCEPT;
+
+    /// The row cannot confirm, for the causes it carries.
+    static constexpr bool is_absent(link_t cell) NOEXCEPT;
+
+    /// The cell made absent for the cause.
+    static constexpr link_t raised(link_t cell, link_t cause) NOEXCEPT;
+
+    /// The absent cell without the cause, present if none remains.
+    static constexpr link_t lowered(link_t cell, link_t cause) NOEXCEPT;
+
+    /// The stored context holds under the current: the same flags, with the
+    /// required among them, and neither height nor median time past greater.
+    static constexpr bool is_sufficient(const context_t& stored,
+        const context_t& current, uint32_t required) NOEXCEPT;
 
     /// Chargeable size of a row (virtual size or sigops at bytes per sigop).
     static constexpr uint64_t chargeable(const totals_t& totals,
@@ -251,20 +302,23 @@ public:
     static constexpr void relabel(const columns_t& columns,
         const component_t& component) NOEXCEPT;
 
-    /// The row and its present descendants made absent.
-    static void exclude(const columns_t& columns, link_t row) NOEXCEPT;
+    /// Each transition brings the causes and labels of the rows it reaches up
+    /// to date, and is false if it met a component of more than
+    /// maximum_members, which leaves labels to be made by the columns.
 
-    /// The row made present and labeled into its component.
-    static void admit(const columns_t& columns, link_t row) NOEXCEPT;
+    /// The row made present, or conflicted (a confirmed tx spends its point).
+    static bool admit(const columns_t& columns, link_t row,
+        bool conflict=false) NOEXCEPT;
 
-    /// The row made boundary, its rivals excluded and the rest relabeled.
-    static void confirm(const columns_t& columns, link_t row) NOEXCEPT;
+    /// The rows made boundary and the conflicts conflicted.
+    static bool confirm(const columns_t& columns,
+        const std::span<const link_t>& rows,
+        const std::span<const link_t>& conflicts) NOEXCEPT;
 
-    /// The row made present, its confirmable rivals revived and relabeled.
-    static void unconfirm(const columns_t& columns, link_t row) NOEXCEPT;
-
-    /// The row and its confirmable descendants made present and relabeled.
-    static void revive(const columns_t& columns, link_t row) NOEXCEPT;
+    /// The boundary rows made unconfirmed and the conflicts not conflicted.
+    static bool unconfirm(const columns_t& columns,
+        const std::span<const link_t>& rows,
+        const std::span<const link_t>& conflicts) NOEXCEPT;
 
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
@@ -299,19 +353,26 @@ public:
     /// Columns (whole table).
     /// -----------------------------------------------------------------------
 
-    /// Each value at its index (out[i] = values[indexes[i]]), none for none.
-    template <typename Word = xint512_t>
-    static constexpr void gather(std::span<link_t> out,
-        const std::span<const link_t>& values,
-        const std::span<const link_t>& indexes) NOEXCEPT;
-
     /// Each present cell labeled by its own index if in a clique.
+    template <typename Word = xint512_t>
     static constexpr void initialize(const columns_t& columns) NOEXCEPT;
 
     /// One pass of minimum label propagation, true if any cell changed.
     template <typename Word = xint512_t>
-    static constexpr bool propagate(const columns_t& columns,
-        std::span<link_t> scratch) NOEXCEPT;
+    static constexpr bool propagate(const columns_t& columns) NOEXCEPT;
+
+    /// Each absent cell left its stored causes, rivals of the confirmed absent.
+    template <typename Word = xint512_t>
+    static constexpr void reset(const columns_t& columns) NOEXCEPT;
+
+    /// One pass of absence from parents to children, true if any cell changed.
+    template <typename Word = xint512_t>
+    static constexpr bool descend(const columns_t& columns) NOEXCEPT;
+
+    /// Each unconfirmed cell absent or not for its context, the count absent.
+    template <typename Word = xint512_t>
+    static constexpr size_t suffice(const columns_t& columns,
+        const context_t& context, uint32_t required) NOEXCEPT;
 
     /// Rows with the label, false if more than maximum_members.
     template <typename Word = xint512_t>
@@ -359,10 +420,6 @@ protected:
     /// The row has a relevant parent.
     static constexpr bool descended(const graph_t& graph, link_t row) NOEXCEPT;
 
-    /// The row has no absent parent and no boundary rival.
-    static constexpr bool confirmable(const graph_t& graph,
-        link_t row) NOEXCEPT;
-
     /// Member index of the row, or maximum_members if not a member.
     static constexpr size_t index(const component_t& component,
         link_t row) NOEXCEPT;
@@ -400,12 +457,21 @@ protected:
         const std::span<const mark>& marks, const graph_t& graph, link_t row,
         size_t depth, const totals_t& available) NOEXCEPT;
 
-    /// The rows made present (if confirmable), with confirmable descendants.
-    static void restore(std::vector<link_t>& out, const columns_t& columns,
-        link_t row) NOEXCEPT;
+    /// The cell of the row with its derived causes recomputed.
+    static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;
 
-    /// Each present row labeled into its component.
-    static void reform(const columns_t& columns,
+    /// The cell of the row set, with the rows that depend on the change left
+    /// pending and those whose labels it affects noted.
+    static void change(walk_t& walk, const columns_t& columns, link_t row,
+        link_t next) NOEXCEPT;
+
+    /// The pending rows recomputed, with those their changes reach, and the
+    /// affected rows relabeled, false if a component is over maximum_members.
+    static bool spread(walk_t& walk, const columns_t& columns) NOEXCEPT;
+
+    /// Each present row labeled into its component, false if one is over
+    /// maximum_members.
+    static bool reform(const columns_t& columns,
         const std::span<const link_t>& rows) NOEXCEPT;
 
     /// The next narrower extended word, else the integral.
@@ -424,11 +490,81 @@ protected:
         const std::span<const mask_t>& outcomes, const component_t& component,
         const graph_t& graph, const Visitor& visit) NOEXCEPT;
 
+    /// The first row from the row whose inputs end beyond the input.
+    static constexpr link_t advance(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// The row holds the input.
+    static constexpr bool holds(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// The input's row labeled by its own index if unlabeled with a rival.
+    template <typename Owner>
+    static constexpr void seed(const graph_t& graph, link_t row, link_t input,
+        const Owner& owning) NOEXCEPT;
+
+    /// The input's row and parent lowered to its least label, true if changed.
+    template <typename Owner, typename Lower>
+    static constexpr bool exchange(const graph_t& graph, link_t row,
+        link_t input, const Owner& owning, const Lower& lower) NOEXCEPT;
+
+    /// The seed and exchange of an input over the table columns alone.
+    static constexpr void seed(const graph_t& graph, link_t input) NOEXCEPT;
+    static constexpr bool exchange(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// The cell without its derived causes, present if none remains.
+    static constexpr link_t reduced(link_t cell) NOEXCEPT;
+
+    /// The input's row made absent for a confirmed rival, true if changed.
+    template <typename Owner, typename Raise>
+    static constexpr bool contest(const graph_t& graph, link_t row,
+        link_t input, const Owner& owning, const Raise& raise) NOEXCEPT;
+
+    /// The input's row made absent for an absent parent, true if changed.
+    template <typename Raise>
+    static constexpr bool inherit(const graph_t& graph, link_t row,
+        link_t input, const Raise& raise) NOEXCEPT;
+
+    /// The contest and inherit of an input over the table columns alone.
+    static constexpr bool contest(const graph_t& graph, link_t input) NOEXCEPT;
+    static constexpr bool inherit(const graph_t& graph, link_t row,
+        link_t input) NOEXCEPT;
+
+    /// The row's cell absent or not for its context, true if absent for it.
+    static constexpr bool suffice(const columns_t& columns, link_t row,
+        const context_t& context, uint32_t required) NOEXCEPT;
+
+    /// Lanes of the stored words in native order (and the reverse).
+    template <typename Word>
+    INLINE static constexpr Word native(Word word) NOEXCEPT;
+
+    /// Lanes of the inputs that can lower a cell or that have a rival.
+    template <typename Word>
+    INLINE static constexpr Word active(Word own, Word parents, Word rivals,
+        const link_t* cells) NOEXCEPT;
+
     /// The lane operations, from the index.
     template <typename Word>
-    static constexpr void gather_(size_t index, std::span<link_t> out,
-        const std::span<const link_t>& values,
-        const std::span<const link_t>& indexes) NOEXCEPT;
+    static constexpr void unlabel_(size_t index,
+        std::span<link_t> cells) NOEXCEPT;
+    template <typename Word>
+    static constexpr void seed_(size_t index, const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr bool propagate_(size_t index, link_t& row,
+        const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr void reduce_(size_t index,
+        std::span<link_t> cells) NOEXCEPT;
+    template <typename Word>
+    static constexpr void contest_(size_t index,
+        const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr bool descend_(size_t index, link_t& row,
+        const graph_t& graph) NOEXCEPT;
+    template <typename Word>
+    static constexpr size_t suffice_(size_t index, const columns_t& columns,
+        const context_t& context, uint32_t required) NOEXCEPT;
     template <typename Word>
     static constexpr bool collect_(size_t index, component_t& out,
         link_t label, const std::span<const link_t>& cells) NOEXCEPT;
@@ -448,5 +584,8 @@ protected:
 } // namespace libbitcoin
 
 #include <bitcoin/system/impl/pool/algorithm.ipp>
+#include <bitcoin/system/impl/pool/label.ipp>
+#include <bitcoin/system/impl/pool/settle.ipp>
+#include <bitcoin/system/impl/pool/suffice.ipp>
 
 #endif

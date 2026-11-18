@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_DRIVER_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_DRIVER_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_DRIVER_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_DRIVER_HPP
 
 #include <bitcoin/system/crypto/secp256k1/batch/ecdsa.hpp>
 #include <bitcoin/system/crypto/secp256k1/batch/schnorr.hpp>
@@ -28,7 +28,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 /// True if gpu verification is compiled in.
@@ -63,8 +62,32 @@ bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
     const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT;
 
+/// Label the pool cells in place on gpu, with passes and transfer reported.
+/// False if gpu is not available, cannot hold the columns, or failed, which
+/// disables it.
+bool label(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT;
+
+/// Settle the pool cells in place on gpu, with passes and transfer reported.
+/// False if gpu is not available, cannot hold the columns, or failed, which
+/// disables it.
+bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT;
+
+/// Mark the pool cells by context in place on gpu, with the count
+/// insufficient, passes and transfer reported. False if gpu is not available,
+/// cannot hold the columns, or failed, which disables it.
+bool suffice(pool::report_t& out, size_t& failed,
+    const std::span<uint32_t>& cells, const std::span<const uint32_t>& flags,
+    const std::span<const uint32_t>& heights,
+    const std::span<const uint32_t>& medians,
+    const pool::algorithm::context_t& context, uint32_t required) NOEXCEPT;
+
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

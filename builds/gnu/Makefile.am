@@ -149,8 +149,6 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/batch/schnorr.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/silent.cpp \
     ${srcdir}/../../src/crypto/secp256k1/batch/verify.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/cuda/driver.cpp \
-    ${srcdir}/../../src/crypto/secp256k1/cuda/ptx.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/comb_00.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/comb_01.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/comb_02.cpp \
@@ -171,6 +169,8 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_14.cpp \
     ${srcdir}/../../src/crypto/secp256k1/generator/slice_15.cpp \
     ${srcdir}/../../src/crypto/shamir/rs1024.cpp \
+    ${srcdir}/../../src/cuda/driver.cpp \
+    ${srcdir}/../../src/cuda/ptx.cpp \
     ${srcdir}/../../src/data/data_chunk.cpp \
     ${srcdir}/../../src/data/memory.cpp \
     ${srcdir}/../../src/data/string.cpp \
@@ -203,6 +203,9 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/options/printer.cpp \
     ${srcdir}/../../src/options/setting.cpp \
     ${srcdir}/../../src/options/variables.cpp \
+    ${srcdir}/../../src/pool/label.cpp \
+    ${srcdir}/../../src/pool/settle.cpp \
+    ${srcdir}/../../src/pool/suffice.cpp \
     ${srcdir}/../../src/radix/base_10.cpp \
     ${srcdir}/../../src/radix/base_2048.cpp \
     ${srcdir}/../../src/radix/base_32.cpp \
@@ -829,7 +832,10 @@ include_bitcoin_system_impl_pooldir = \
     ${includedir}/bitcoin/system/impl/pool
 
 include_bitcoin_system_impl_pool_HEADERS = \
-    ${srcdir}/../../include/bitcoin/system/impl/pool/algorithm.ipp
+    ${srcdir}/../../include/bitcoin/system/impl/pool/algorithm.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/pool/label.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/pool/settle.ipp \
+    ${srcdir}/../../include/bitcoin/system/impl/pool/suffice.ipp
 
 include_bitcoin_system_impl_radixdir = \
     ${includedir}/bitcoin/system/impl/radix
@@ -1031,7 +1037,11 @@ include_bitcoin_system_pooldir = \
 
 include_bitcoin_system_pool_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/pool/algorithm.hpp \
-    ${srcdir}/../../include/bitcoin/system/pool/pool.hpp
+    ${srcdir}/../../include/bitcoin/system/pool/label.hpp \
+    ${srcdir}/../../include/bitcoin/system/pool/pool.hpp \
+    ${srcdir}/../../include/bitcoin/system/pool/report.hpp \
+    ${srcdir}/../../include/bitcoin/system/pool/settle.hpp \
+    ${srcdir}/../../include/bitcoin/system/pool/suffice.hpp
 
 include_bitcoin_system_radixdir = \
     ${includedir}/bitcoin/system/radix
@@ -1520,6 +1530,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/options/value.cpp \
     ${srcdir}/../../test/options/variables.cpp \
     ${srcdir}/../../test/pool/algorithm.cpp \
+    ${srcdir}/../../test/pool/performance.cpp \
     ${srcdir}/../../test/radix/base_10.cpp \
     ${srcdir}/../../test/radix/base_16.cpp \
     ${srcdir}/../../test/radix/base_2048.cpp \

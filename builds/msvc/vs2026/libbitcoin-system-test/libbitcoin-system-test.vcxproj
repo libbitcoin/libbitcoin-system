@@ -441,6 +441,9 @@
     <ClCompile Include="..\..\..\..\test\pool\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_pool_algorithm.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\pool\performance.cpp">
+      <ObjectFileName>$(IntDir)test_pool_performance.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />

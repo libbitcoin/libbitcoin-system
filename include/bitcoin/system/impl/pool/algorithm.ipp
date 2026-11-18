@@ -53,6 +53,27 @@ constexpr bool algorithm::is_boundary(link_t cell) NOEXCEPT
     return cell == boundary;
 }
 
+constexpr bool algorithm::is_absent(link_t cell) NOEXCEPT
+{
+    return cell >= absent && cell < boundary;
+}
+
+constexpr algorithm::link_t algorithm::raised(link_t cell,
+    link_t cause) NOEXCEPT
+{
+    return bit_or(is_absent(cell) ? cell : absent, cause);
+}
+
+constexpr algorithm::link_t algorithm::lowered(link_t cell,
+    link_t cause) NOEXCEPT
+{
+    if (!is_absent(cell))
+        return cell;
+
+    const auto left = bit_and(cell, bit_not(cause));
+    return left == absent ? unlabeled : left;
+}
+
 constexpr uint64_t algorithm::chargeable(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
@@ -389,87 +410,59 @@ constexpr void algorithm::relabel(const columns_t& columns,
         columns.cells[component.rows[member]] = label;
 }
 
-inline void algorithm::exclude(const columns_t& columns, link_t row) NOEXCEPT
+inline bool algorithm::admit(const columns_t& columns, link_t row,
+    bool conflict) NOEXCEPT
 {
+    walk_t walk{};
     const graph_t graph{ columns };
-    std::vector<link_t> pending{ row };
-    set_cell(graph, row, absent);
+    set_cell(graph, row, conflict ? bit_or(absent, conflicted) : unlabeled);
 
-    while (!pending.empty())
+    // Its children are the rows adopted by it.
+    walk.affected.push_back(row);
+    walk.pending.push_back(row);
+    each_child(graph, row, [&](link_t down) NOEXCEPT
     {
-        const auto next = pending.back();
-        pending.pop_back();
-        each_child(graph, next, [&](link_t down) NOEXCEPT
-        {
-            if (is_present(cell(graph, down)))
-            {
-                set_cell(graph, down, absent);
-                pending.push_back(down);
-            }
-        });
-    }
+        walk.pending.push_back(down);
+    });
+
+    return spread(walk, columns);
 }
 
-inline void algorithm::admit(const columns_t& columns, link_t row) NOEXCEPT
+inline bool algorithm::confirm(const columns_t& columns,
+    const std::span<const link_t>& rows,
+    const std::span<const link_t>& conflicts) NOEXCEPT
 {
-    const std_array<link_t, one> rows{ { row } };
-    columns.cells[row] = to_column(unlabeled);
-    reform(columns, rows);
+    walk_t walk{};
+    const graph_t graph{ columns };
+    for (const auto row: rows)
+        change(walk, columns, row, boundary);
+
+    for (const auto row: conflicts)
+        if (!is_boundary(cell(graph, row)))
+            change(walk, columns, row, raised(cell(graph, row), conflicted));
+
+    return spread(walk, columns);
 }
 
-inline void algorithm::confirm(const columns_t& columns, link_t row) NOEXCEPT
+inline bool algorithm::unconfirm(const columns_t& columns,
+    const std::span<const link_t>& rows,
+    const std::span<const link_t>& conflicts) NOEXCEPT
 {
+    walk_t walk{};
     const graph_t graph{ columns };
-    component_t former{};
-    const auto labeled = is_labeled(cell(graph, row)) &&
-        collect(former, graph, row);
-
-    set_cell(graph, row, boundary);
-    const auto slice = edges(graph, row);
-    for (auto input = slice.first; input < slice.first + slice.count; ++input)
+    for (const auto row: rows)
     {
-        each_rival(graph, input, [&](link_t other) NOEXCEPT
-        {
-            const auto rival_row = owner(graph, other);
-            if (is_present(cell(graph, rival_row)))
-                exclude(columns, rival_row);
-        });
-    }
+        if (!is_boundary(cell(graph, row)))
+            continue;
 
-    if (!labeled)
-        return;
-
-    std::vector<link_t> rest{};
-    for (size_t member{}; member < former.count; ++member)
-        if (is_present(cell(graph, former.rows[member])))
-            rest.push_back(former.rows[member]);
-
-    reform(columns, rest);
-}
-
-inline void algorithm::unconfirm(const columns_t& columns, link_t row) NOEXCEPT
-{
-    const graph_t graph{ columns };
-    std::vector<link_t> affected{ row };
-    set_cell(graph, row, unlabeled);
-
-    const auto slice = edges(graph, row);
-    for (auto input = slice.first; input < slice.first + slice.count; ++input)
-    {
-        each_rival(graph, input, [&](link_t other) NOEXCEPT
-        {
-            restore(affected, columns, owner(graph, other));
-        });
+        change(walk, columns, row, unlabeled);
+        walk.pending.push_back(row);
     }
 
-    reform(columns, affected);
-}
+    for (const auto row: conflicts)
+        change(walk, columns, row, lowered(cell(graph, row), conflicted));
 
-inline void algorithm::revive(const columns_t& columns, link_t row) NOEXCEPT
-{
-    std::vector<link_t> affected{};
-    restore(affected, columns, row);
-    reform(columns, affected);
+    return spread(walk, columns);
 }
 
 // Template (frontier, table columns).
@@ -579,74 +572,6 @@ inline uint64_t algorithm::estimate(const projection_t& projection,
 
 // Columns (whole table).
 // ----------------------------------------------------------------------------
-
-template <typename Word>
-constexpr void algorithm::gather(std::span<link_t> out,
-    const std::span<const link_t>& values,
-    const std::span<const link_t>& indexes) NOEXCEPT
-{
-    gather_<Word>(zero, out, values, indexes);
-}
-
-constexpr void algorithm::initialize(const columns_t& columns) NOEXCEPT
-{
-    const graph_t graph{ columns };
-    const auto count = columns.cells.size();
-    for (size_t row{}; row < count; ++row)
-    {
-        const auto link = possible_narrow_cast<link_t>(row);
-        if (is_present(cell(graph, link)))
-            set_cell(graph, link, contested(graph, link) ? link : unlabeled);
-    }
-}
-
-template <typename Word>
-constexpr bool algorithm::propagate(const columns_t& columns,
-    std::span<link_t> scratch) NOEXCEPT
-{
-    const graph_t graph{ columns };
-    gather<Word>(scratch, columns.cells, columns.rows);
-
-    auto changed = false;
-    const auto count = columns.cells.size();
-    for (size_t at{}; at < count; ++at)
-    {
-        const auto row = possible_narrow_cast<link_t>(at);
-        const auto own = cell(graph, row);
-        if (!is_present(own))
-            continue;
-
-        auto down = unlabeled;
-        const auto slice = edges(graph, row);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-        {
-            down = std::min(down, from_column(scratch[input]));
-            each_rival(graph, input, [&](link_t other) NOEXCEPT
-            {
-                down = std::min(down, cell(graph, owner(graph, other)));
-            });
-        }
-
-        // An uncontested row without a relevant parent is irrelevant.
-        if (!is_labeled(own) && !is_labeled(down))
-            continue;
-
-        auto label = std::min(own, down);
-        each_child(graph, row, [&](link_t child) NOEXCEPT
-        {
-            label = std::min(label, cell(graph, child));
-        });
-
-        if (label != own)
-        {
-            set_cell(graph, row, label);
-            changed = true;
-        }
-    }
-
-    return changed;
-}
 
 template <typename Word>
 constexpr bool algorithm::collect(component_t& out, link_t label,
@@ -773,31 +698,26 @@ template <typename Visitor>
 constexpr void algorithm::each_rival(const graph_t& graph, link_t input,
     const Visitor& visit) NOEXCEPT
 {
+    // A candidate input enters the ring of its table rival, which excludes it.
     const auto count = graph.table.rows.size();
-    std::vector<link_t> seen{ input };
-    const auto step = [&](link_t next) NOEXCEPT
-    {
-        if (next == none || std::ranges::find(seen, next) != seen.end())
-            return false;
+    const auto next = rival(graph, input);
+    const auto start = (input >= count && next < count) ? next : input;
+    auto at = start;
 
-        seen.push_back(next);
-        return true;
-    };
-
-    // A table input bridges to the candidate inputs spending its point.
-    for (auto at = input;;)
+    do
     {
+        if (at != input)
+            visit(at);
+
+        // A table input bridges to the candidate inputs spending its point.
         if (at < count)
             for (const auto& bridge: graph.rivals)
-                if (bridge.from == at && step(bridge.to))
+                if (bridge.from == at && bridge.to != input)
                     visit(bridge.to);
 
         at = rival(graph, at);
-        if (!step(at))
-            return;
-
-        visit(at);
     }
+    while (at != none && at != start);
 }
 
 constexpr bool algorithm::contested(const graph_t& graph, link_t row) NOEXCEPT
@@ -828,28 +748,6 @@ constexpr bool algorithm::descended(const graph_t& graph, link_t row) NOEXCEPT
     }
 
     return false;
-}
-
-constexpr bool algorithm::confirmable(const graph_t& graph,
-    link_t row) NOEXCEPT
-{
-    auto out = true;
-    const auto slice = edges(graph, row);
-    for (auto input = slice.first; out && input < slice.first + slice.count;
-        ++input)
-    {
-        const auto up = parent(graph, input);
-        if (up != none && cell(graph, up) == absent)
-            return false;
-
-        each_rival(graph, input, [&](link_t other) NOEXCEPT
-        {
-            if (is_boundary(cell(graph, owner(graph, other))))
-                out = false;
-        });
-    }
-
-    return out;
 }
 
 constexpr size_t algorithm::index(const component_t& component,
@@ -1129,22 +1027,91 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
     return !out.empty();
 }
 
-inline void algorithm::restore(std::vector<link_t>& out,
-    const columns_t& columns, link_t row) NOEXCEPT
+inline algorithm::link_t algorithm::resolved(const graph_t& graph,
+    link_t row) NOEXCEPT
 {
-    const graph_t graph{ columns };
-    if (cell(graph, row) != absent || !confirmable(graph, row))
-        return;
+    const auto own = cell(graph, row);
+    if (is_boundary(own))
+        return own;
 
-    set_cell(graph, row, unlabeled);
-    out.push_back(row);
-    each_child(graph, row, [&](link_t down) NOEXCEPT
+    auto next = reduced(own);
+    const auto slice = edges(graph, row);
+    for (auto input = slice.first; input < slice.first + slice.count; ++input)
     {
-        restore(out, columns, down);
-    });
+        const auto up = parent(graph, input);
+        if (up != none && is_absent(cell(graph, up)))
+            next = raised(next, ancestor);
+
+        each_rival(graph, input, [&](link_t other) NOEXCEPT
+        {
+            if (is_boundary(cell(graph, owner(graph, other))))
+                next = raised(next, rivaled);
+        });
+    }
+
+    return next;
 }
 
-inline void algorithm::reform(const columns_t& columns,
+// The children of a row depend on its absence, and its rivals on its
+// confirmation. A labeled row that leaves its component leaves the rest of it
+// to relabel, and a row made present joins one.
+inline void algorithm::change(walk_t& walk, const columns_t& columns,
+    link_t row, link_t next) NOEXCEPT
+{
+    const graph_t graph{ columns };
+    const auto own = cell(graph, row);
+    if (next == own)
+        return;
+
+    if (is_labeled(own) && !is_present(next))
+    {
+        component_t former{};
+        if (collect(former, graph, row))
+            walk.affected.insert(walk.affected.end(), former.rows.cbegin(),
+                std::next(former.rows.cbegin(), former.count));
+        else
+            walk.complete = false;
+    }
+
+    set_cell(graph, row, next);
+    if (is_present(next) && !is_present(own))
+        walk.affected.push_back(row);
+
+    if (is_absent(next) != is_absent(own))
+    {
+        each_child(graph, row, [&](link_t down) NOEXCEPT
+        {
+            walk.pending.push_back(down);
+        });
+    }
+
+    if (is_boundary(next) == is_boundary(own))
+        return;
+
+    const auto slice = edges(graph, row);
+    for (auto input = slice.first; input < slice.first + slice.count; ++input)
+    {
+        each_rival(graph, input, [&](link_t other) NOEXCEPT
+        {
+            walk.pending.push_back(owner(graph, other));
+        });
+    }
+}
+
+inline bool algorithm::spread(walk_t& walk, const columns_t& columns) NOEXCEPT
+{
+    const graph_t graph{ columns };
+    while (!walk.pending.empty())
+    {
+        const auto row = walk.pending.back();
+        walk.pending.pop_back();
+        change(walk, columns, row, resolved(graph, row));
+    }
+
+    return reform(columns, walk.affected) && walk.complete;
+}
+
+inline bool algorithm::reform(const columns_t& columns,
     const std::span<const link_t>& rows) NOEXCEPT
 {
     const graph_t graph{ columns };
@@ -1169,6 +1136,7 @@ inline void algorithm::reform(const columns_t& columns,
         }
     }
 
+    auto complete = true;
     for (const auto row: rows)
     {
         // A row relabeled by a previous component carries a lower label.
@@ -1178,7 +1146,11 @@ inline void algorithm::reform(const columns_t& columns,
         component_t component{};
         if (collect(component, graph, row))
             relabel(columns, component);
+        else
+            complete = false;
     }
+
+    return complete;
 }
 
 template <typename Word>
@@ -1232,38 +1204,12 @@ constexpr void algorithm::each_fee(size_t index,
 }
 
 template <typename Word>
-constexpr void algorithm::gather_(size_t index, std::span<link_t> out,
-    const std::span<const link_t>& values,
-    const std::span<const link_t>& indexes) NOEXCEPT
+INLINE constexpr Word algorithm::native(Word word) NOEXCEPT
 {
-    const auto count = indexes.size();
-    if constexpr (is_extended<Word>)
-    {
-        if constexpr (have<Word> && is_little_endian)
-        {
-            constexpr auto lanes = link_lanes<Word>;
-            const auto nones = f::broadcast<Word>(none);
-            for (; index + lanes <= count; index += lanes)
-            {
-                const auto at = load<Word>(&indexes[index]);
-                const auto missing = f::eq<bits<link_t>>(at, nones);
-                const auto valid = f::andnot(missing, at);
-                const auto found = f::gather(values.data(), valid);
-
-                store(&out[index], f::select(missing, nones, found));
-            }
-        }
-
-        gather_<narrower<Word, link_t>>(index, out, values, indexes);
-    }
+    if constexpr (is_little_endian)
+        return word;
     else
-    {
-        for (; index < count; ++index)
-        {
-            const auto at = from_column(indexes[index]);
-            out[index] = (at == none) ? none : values[at];
-        }
-    }
+        return f::byteswap<link_t>(word);
 }
 
 template <typename Word>

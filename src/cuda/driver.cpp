@@ -31,7 +31,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 #if defined(HAVE_CUDA)
@@ -85,6 +84,34 @@ bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
     return context::instance().compute(cancel, out, valid, sums, hashes);
 }
 
+bool label(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT
+{
+    return available() &&
+        context::instance().label(out, cells, edges, rows, rivals);
+}
+
+bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
+    const std::span<const pool::algorithm::edges_t>& edges,
+    const std::span<const uint32_t>& rows,
+    const std::span<const uint32_t>& rivals) NOEXCEPT
+{
+    return available() &&
+        context::instance().settle(out, cells, edges, rows, rivals);
+}
+
+bool suffice(pool::report_t& out, size_t& failed,
+    const std::span<uint32_t>& cells, const std::span<const uint32_t>& flags,
+    const std::span<const uint32_t>& heights,
+    const std::span<const uint32_t>& medians,
+    const pool::algorithm::context_t& context, uint32_t required) NOEXCEPT
+{
+    return available() && context::instance().suffice(out, failed, cells,
+        flags, heights, medians, context, required);
+}
+
 #else
 
 bool compiled() NOEXCEPT
@@ -125,11 +152,34 @@ bool compute(const stopper&, const std::span<ec_compressed>&,
 {
     return false;
 }
+
+bool label(pool::report_t&, const std::span<uint32_t>&,
+    const std::span<const pool::algorithm::edges_t>&,
+    const std::span<const uint32_t>&,
+    const std::span<const uint32_t>&) NOEXCEPT
+{
+    return false;
+}
+
+bool settle(pool::report_t&, const std::span<uint32_t>&,
+    const std::span<const pool::algorithm::edges_t>&,
+    const std::span<const uint32_t>&,
+    const std::span<const uint32_t>&) NOEXCEPT
+{
+    return false;
+}
+
+bool suffice(pool::report_t&, size_t&, const std::span<uint32_t>&,
+    const std::span<const uint32_t>&, const std::span<const uint32_t>&,
+    const std::span<const uint32_t>&,
+    const pool::algorithm::context_t&, uint32_t) NOEXCEPT
+{
+    return false;
+}
 LCOV_EXCL_STOP()
 
 #endif
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin

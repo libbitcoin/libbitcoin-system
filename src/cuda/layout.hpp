@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LAYOUT_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LAYOUT_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_LAYOUT_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_LAYOUT_HPP
 
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/crypto/secp256k1/algorithm.hpp>
@@ -27,11 +27,10 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 struct shape
-  : algorithm
+  : secp256k1::algorithm
 {
     static constexpr auto slice_bytes = table_words * sizeof(uint64_t);
     static constexpr auto table_bytes = slice_count * slice_bytes;
@@ -138,9 +137,57 @@ struct silent_layout
     const size_t valid;
 };
 
+/// Columns of the pool within its device allocation.
+struct pool_layout
+{
+    using edges_t = pool::algorithm::edges_t;
+    static constexpr size_t align = 256;
+
+    static constexpr size_t round(size_t bytes) NOEXCEPT
+    {
+        return ceilinged_divide(bytes, align) * align;
+    }
+
+    constexpr pool_layout(size_t count, size_t inputs) NOEXCEPT
+      : edges(round(count * sizeof(uint32_t))),
+        rows(round(edges + count * sizeof(edges_t))),
+        rivals(round(rows + inputs * sizeof(uint32_t))),
+        owners(round(rivals + inputs * sizeof(uint32_t))),
+        changed(round(owners + inputs * sizeof(uint32_t))),
+        bytes(round(changed + sizeof(uint32_t)))
+    {
+    }
+
+    const size_t edges;
+    const size_t rows;
+    const size_t rivals;
+    const size_t owners;
+    const size_t changed;
+    const size_t bytes;
+};
+
+/// Columns of the pool contexts within their device allocation.
+struct context_layout
+{
+    constexpr context_layout(size_t count) NOEXCEPT
+      : flags(pool_layout::round(count * sizeof(uint32_t))),
+        heights(pool_layout::round(flags + count * sizeof(uint32_t))),
+        medians(pool_layout::round(heights + count * sizeof(uint32_t))),
+        failed(pool_layout::round(medians + count * sizeof(uint32_t))),
+        bytes(pool_layout::round(failed + sizeof(uint32_t)))
+    {
+    }
+
+    const size_t flags;
+    const size_t heights;
+    const size_t medians;
+    const size_t failed;
+    const size_t bytes;
+};
+
 /// Receiver keys decoded into scan arguments, false if invalid.
 struct scan_receiver
-  : algorithm
+  : secp256k1::algorithm
 {
     static bool decode(scan_arguments& out,
         const scan::batch::receiver& keys) NOEXCEPT
@@ -160,7 +207,6 @@ struct scan_receiver
 };
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

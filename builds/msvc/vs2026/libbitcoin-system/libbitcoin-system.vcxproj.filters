@@ -289,13 +289,13 @@
     <Filter Include="src\crypto\secp256k1\batch">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\crypto\secp256k1\cuda">
+    <Filter Include="src\crypto\secp256k1\generator">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\crypto\secp256k1\generator">
+    <Filter Include="src\crypto\shamir">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\crypto\shamir">
+    <Filter Include="src\cuda">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\data">
@@ -322,50 +322,53 @@
     <Filter Include="src\options">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000014}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\radix">
+    <Filter Include="src\pool">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000015}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\serial">
+    <Filter Include="src\radix">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\serial\json">
+    <Filter Include="src\serial">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\stream">
+    <Filter Include="src\serial\json">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\unicode">
+    <Filter Include="src\stream">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\unicode\utf8_everywhere">
+    <Filter Include="src\unicode">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet">
+    <Filter Include="src\unicode\utf8_everywhere">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000F6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses">
+    <Filter Include="src\wallet">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys">
+    <Filter Include="src\wallet\addresses">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys\parse_encrypted_keys">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\wallet\keys\parse_encrypted_keys">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\psbt">
+    <Filter Include="src\wallet\mnemonics">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words">
+    <Filter Include="src\wallet\psbt">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words\catalogs">
+    <Filter Include="src\words">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\x509">
+    <Filter Include="src\words\catalogs">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\x509">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000015}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -633,12 +636,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\verify.cpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.cpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.cpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClCompile>
@@ -728,6 +725,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp">
       <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\cuda\driver.cpp">
+      <Filter>src\cuda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\cuda\ptx.cpp">
+      <Filter>src\cuda</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
       <Filter>src\data</Filter>
@@ -830,6 +833,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\options\variables.cpp">
       <Filter>src\options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\pool\label.cpp">
+      <Filter>src\pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\pool\settle.cpp">
+      <Filter>src\pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\pool\suffice.cpp">
+      <Filter>src\pool</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp">
       <Filter>src\radix</Filter>
@@ -1877,7 +1889,19 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\algorithm.hpp">
       <Filter>include\bitcoin\system\pool</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\label.hpp">
+      <Filter>include\bitcoin\system\pool</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\pool.hpp">
+      <Filter>include\bitcoin\system\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\report.hpp">
+      <Filter>include\bitcoin\system\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\settle.hpp">
+      <Filter>include\bitcoin\system\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\suffice.hpp">
       <Filter>include\bitcoin\system\pool</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp">
@@ -2300,27 +2324,6 @@
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp">
       <Filter>src\crypto\secp256k1\batch</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\turns.hpp">
-      <Filter>src\crypto\secp256k1\cuda</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp">
       <Filter>src\crypto\secp256k1</Filter>
     </ClInclude>
@@ -2332,6 +2335,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp">
       <Filter>src\crypto\secp256k1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\context.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\driver.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\kernels.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\layout.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\library.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\ptx.hpp">
+      <Filter>src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\cuda\turns.hpp">
+      <Filter>src\cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.hpp">
       <Filter>src\wallet\keys\parse_encrypted_keys</Filter>
@@ -2704,6 +2728,15 @@
       <Filter>include\bitcoin\system\impl\options</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\pool\algorithm.ipp">
+      <Filter>include\bitcoin\system\impl\pool</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\label.ipp">
+      <Filter>include\bitcoin\system\impl\pool</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\settle.ipp">
+      <Filter>include\bitcoin\system\impl\pool</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\suffice.ipp">
       <Filter>include\bitcoin\system\impl\pool</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp">

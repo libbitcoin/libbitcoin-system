@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LIBRARY_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_LIBRARY_HPP
+#ifndef LIBBITCOIN_SYSTEM_SRC_CUDA_LIBRARY_HPP
+#define LIBBITCOIN_SYSTEM_SRC_CUDA_LIBRARY_HPP
 
 #include <bitcoin/system/compression/compression.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -30,7 +30,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
 namespace cuda {
 
 BC_PUSH_WARNING(NO_REINTERPRET_CAST)
@@ -157,7 +156,6 @@ inline bool inflate(std::string& out) NOEXCEPT
 BC_POP_WARNING()
 
 } // namespace cuda
-} // namespace secp256k1
 } // namespace system
 } // namespace libbitcoin
 

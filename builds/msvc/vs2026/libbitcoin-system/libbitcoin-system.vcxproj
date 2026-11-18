@@ -283,8 +283,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\batch\verify.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_batch_verify.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1\ecdsa.cpp">
       <ObjectFileName>$(IntDir)src_crypto_secp256k1_ecdsa.obj</ObjectFileName>
@@ -321,6 +319,8 @@
     <ClCompile Include="..\..\..\..\src\crypto\shamir\rs1024.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\x25519.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\xsalsa20_poly1305.cpp" />
+    <ClCompile Include="..\..\..\..\src\cuda\driver.cpp" />
+    <ClCompile Include="..\..\..\..\src\cuda\ptx.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
     <ClCompile Include="..\..\..\..\src\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
@@ -361,6 +361,9 @@
     <ClCompile Include="..\..\..\..\src\options\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\options\setting.cpp" />
     <ClCompile Include="..\..\..\..\src\options\variables.cpp" />
+    <ClCompile Include="..\..\..\..\src\pool\label.cpp" />
+    <ClCompile Include="..\..\..\..\src\pool\settle.cpp" />
+    <ClCompile Include="..\..\..\..\src\pool\suffice.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_32.cpp" />
@@ -739,7 +742,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\options\variables.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\label.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\pool.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\report.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\settle.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\pool\suffice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
@@ -880,17 +887,17 @@
     <ClInclude Include="..\..\..\..\src\compression\framing.hpp" />
     <ClInclude Include="..\..\..\..\src\compression\rfc1951.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\batch\batch.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\context.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\driver.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\kernels.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\layout.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\library.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\ptx.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1\cuda\turns.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\ec_context.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\generator\generator.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\interface.hpp" />
     <ClInclude Include="..\..\..\..\src\crypto\secp256k1\serialize.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\context.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\driver.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\kernels.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\layout.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\library.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\ptx.hpp" />
+    <ClInclude Include="..\..\..\..\src\cuda\turns.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_key.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_prefix.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\keys\parse_encrypted_keys\parse_encrypted_private.hpp" />
@@ -1014,6 +1021,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\options\setting.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\options\value.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\pool\algorithm.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\label.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\settle.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\pool\suffice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />

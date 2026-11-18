@@ -19,7 +19,7 @@
 #include <bitcoin/system/crypto/secp256k1/batch/verify.hpp>
 
 #include <bitcoin/system/define.hpp>
-#include "../cuda/driver.hpp"
+#include "../../../cuda/driver.hpp"
 
 namespace libbitcoin {
 namespace system {
@@ -29,17 +29,17 @@ namespace system {
 
 bool batched::compiled() NOEXCEPT
 {
-    return secp256k1::cuda::compiled();
+    return cuda::compiled();
 }
 
 void batched::accelerate(bool enable) NOEXCEPT
 {
-    secp256k1::cuda::enable(enable);
+    cuda::enable(enable);
 }
 
 bool batched::accelerated() NOEXCEPT
 {
-    return secp256k1::cuda::available();
+    return cuda::available();
 }
 
 } // namespace system

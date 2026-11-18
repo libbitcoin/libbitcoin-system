@@ -16,25 +16,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_PTX_HPP
-#define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_CUDA_PTX_HPP
+#ifndef LIBBITCOIN_SYSTEM_POOL_REPORT_HPP
+#define LIBBITCOIN_SYSTEM_POOL_REPORT_HPP
 
-#include <bitcoin/system/data/data.hpp>
+#include <chrono>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace secp256k1 {
-namespace cuda {
+namespace pool {
 
-/// The verification kernels (ptx), raw deflate compressed.
-data_slice deflated_ptx() NOEXCEPT;
+/// What a scan of the pool columns did.
+struct report_t
+{
+    using duration = std::chrono::nanoseconds;
 
-/// The size of the inflated verification kernels (ptx).
-size_t ptx_size() NOEXCEPT;
+    /// Rows scanned, and passes over them.
+    size_t rows{};
+    size_t passes{};
 
-} // namespace cuda
-} // namespace secp256k1
+    /// Time of the scan, and of its transfer to and from the device.
+    duration time{};
+    duration transfer{};
+
+    /// The scan ran on the device.
+    bool device{};
+};
+
+} // namespace pool
 } // namespace system
 } // namespace libbitcoin
 
