@@ -26,6 +26,7 @@
             "name": "nix-base",
             "description": "Factored base settings for non-windows *nix based platforms.",
             "hidden": true,
+            "inherits": [ "base-pathing" ],
             "condition": {
                 "type": "inList",
                 "string": "${hostSystemName}",
@@ -39,6 +40,7 @@
             "name": "win-base",
             "description": "Factored base settings for windows platforms (msvc developer environment).",
             "hidden": true,
+            "inherits": [ "base-pathing" ],
             "generator": "Ninja",
             "condition": {
                 "type": "equals",
@@ -66,6 +68,7 @@
             "name": "gnu-debug",
             "description": "Factored gnu specific debug settings.",
             "hidden": true,
+            "inherits": [ "config-debug" ],
             "cacheVariables": {
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g1 --coverage -fprofile-update=atomic",
                 "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g1 --coverage -fprofile-update=atomic"
@@ -75,6 +78,7 @@
             "name": "gnu-release",
             "description": "Factored gnu specific release settings.",
             "hidden": true,
+            "inherits": [ "config-release" ],
             "cacheVariables": {
                 "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3",
                 "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3"
@@ -124,9 +128,10 @@
             "name": "optimization-host-native",
             "description": "Factored settings for march/mtune using for local execution.",
             "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -march=native -mtune=native",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -march=native -mtune=native"
+            "inherits": [ "nix-base" ],
+            "environment": {
+                "CMAKE_C_FLAGS": "$penv{CMAKE_C_FLAGS} -march=native -mtune=native",
+                "CMAKE_CXX_FLAGS": "$penv{CMAKE_CXX_FLAGS} -march=native -mtune=native"
             }
         },
         {
@@ -175,7 +180,7 @@
         },
         {
             "name": "nix-gnu-debug-static-native",
-            "displayName": "*nix/GNU/Debug/Static",
+            "displayName": "*nix/GNU/Debug/Static/Native",
             "description": "Debug build with static linking for native architecture.",
             "hidden": false,
             "inherits": [
@@ -187,7 +192,7 @@
         },
         {
             "name": "nix-gnu-debug-shared-native",
-            "displayName": "*nix/GNU/Debug/Shared",
+            "displayName": "*nix/GNU/Debug/Shared/Native",
             "description": "Debug build with shared linking for native architecture.",
             "hidden": false,
             "inherits": [
@@ -199,7 +204,7 @@
         },
         {
             "name": "nix-gnu-release-static-native",
-            "displayName": "*nix/GNU/Release/Static",
+            "displayName": "*nix/GNU/Release/Static/Native",
             "description": "Release build with static linking and standard optimizations for native architecture.",
             "hidden": false,
             "inherits": [
@@ -211,7 +216,7 @@
         },
         {
             "name": "nix-gnu-release-shared-native",
-            "displayName": "*nix/GNU/Release/Shared",
+            "displayName": "*nix/GNU/Release/Shared/Native",
             "description": "Release build with shared linking and standard optimizations for native architecture.",
             "hidden": false,
             "inherits": [
@@ -354,25 +359,25 @@
         },
         {
             "name": "nix-gnu-debug-static-native",
-            "displayName": "*nix/GNU/Debug/Static",
+            "displayName": "*nix/GNU/Debug/Static/Native",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-debug-static-native"
         },
         {
             "name": "nix-gnu-debug-shared-native",
-            "displayName": "*nix/GNU/Debug/Shared",
+            "displayName": "*nix/GNU/Debug/Shared/Native",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-debug-shared-native"
         },
         {
             "name": "nix-gnu-release-static-native",
-            "displayName": "*nix/GNU/Release/Static",
+            "displayName": "*nix/GNU/Release/Static/Native",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-static-native"
         },
         {
             "name": "nix-gnu-release-shared-native",
-            "displayName": "*nix/GNU/Release/Shared",
+            "displayName": "*nix/GNU/Release/Shared/Native",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-shared-native"
         },

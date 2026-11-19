@@ -573,6 +573,16 @@ jobs:
         if: ${{ startsWith(matrix.image, 'windows') }}
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
+      - name: Prefer Visual Studio LLVM [windows]
+        if: ${{ startsWith(matrix.image, 'windows') }}
+        shell: pwsh
+        run: |
+          $arch = if ($env:RUNNER_ARCH -eq 'ARM64') { 'ARM64' } else { 'x64' }
+          $llvm = Join-Path $env:VCINSTALLDIR Tools Llvm $arch bin
+          if (-not (Test-Path (Join-Path $llvm 'clang-cl.exe'))) { throw "clang-cl not found in $llvm." }
+          Add-Content -Path $env:GITHUB_PATH -Value $llvm
+          & (Join-Path $llvm 'clang-cl.exe') --version
+
       - name: Environmental Computation
         shell: bash
         run: |
@@ -1202,6 +1212,16 @@ jobs:
         if: ${{ startsWith(matrix.image, 'windows') }}
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
+      - name: Prefer Visual Studio LLVM [windows]
+        if: ${{ startsWith(matrix.image, 'windows') }}
+        shell: pwsh
+        run: |
+          $arch = if ($env:RUNNER_ARCH -eq 'ARM64') { 'ARM64' } else { 'x64' }
+          $llvm = Join-Path $env:VCINSTALLDIR Tools Llvm $arch bin
+          if (-not (Test-Path (Join-Path $llvm 'clang-cl.exe'))) { throw "clang-cl not found in $llvm." }
+          Add-Content -Path $env:GITHUB_PATH -Value $llvm
+          & (Join-Path $llvm 'clang-cl.exe') --version
+
       - name: Environmental Computation
         shell: bash
         run: |
@@ -1618,6 +1638,16 @@ jobs:
       - name: Prepare toolchain [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Prefer Visual Studio LLVM [windows]
+        if: ${{ startsWith(matrix.image, 'windows') }}
+        shell: pwsh
+        run: |
+          $arch = if ($env:RUNNER_ARCH -eq 'ARM64') { 'ARM64' } else { 'x64' }
+          $llvm = Join-Path $env:VCINSTALLDIR Tools Llvm $arch bin
+          if (-not (Test-Path (Join-Path $llvm 'clang-cl.exe'))) { throw "clang-cl not found in $llvm." }
+          Add-Content -Path $env:GITHUB_PATH -Value $llvm
+          & (Join-Path $llvm 'clang-cl.exe') --version
 
       - name: Environmental Computation
         shell: bash
