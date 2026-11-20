@@ -199,6 +199,9 @@ public:
     /// Cause of absence: its context is not sufficient.
     static constexpr link_t insufficient = power2<link_t>(3u);
 
+    /// Cause of absence: its tx is pooled again at a later row.
+    static constexpr link_t purged = power2<link_t>(4u);
+
     /// The causes derived from the columns.
     static constexpr link_t derived = bit_or(ancestor, rivaled);
 

@@ -955,6 +955,16 @@ BC_AUTO_TEST_CASE(pool_algorithm__descend__insufficient_with_confirmed_rival__bo
     BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
 }
 
+BC_AUTO_TEST_CASE(pool_algorithm__descend__purged__kept_descendant_inherits)
+{
+    state out{};
+    const auto purged = bit_or(absent, accessor::purged);
+    out.cells[1] = accessor::to_column(purged);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), purged);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__descend__absent_parent_of_conflicted__both_causes)
 {
     state out{};
