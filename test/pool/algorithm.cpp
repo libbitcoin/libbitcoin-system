@@ -978,6 +978,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__settle__wide__same_as_descend)
 constexpr size_t context_rows = 20;
 constexpr accessor::context_t validated{ 7, 100, 1000 };
 constexpr accessor::context_t regained{ 7, 500, 2000 };
+constexpr accessor::context_t widened{ 5, 100, 1000 };
 constexpr uint32_t required = 4;
 constexpr uint32_t missing = 8;
 
@@ -1039,8 +1040,10 @@ static bool suffices_as_integral() NOEXCEPT
 {
     const auto once = suffice_as<link_t>(validated);
     const auto twice = suffice_twice<link_t>();
+    const auto wide = suffice_as<link_t>(widened);
     return suffice_as<Word>(validated).cells == once.cells &&
-        suffice_twice<Word>().cells == twice.cells;
+        suffice_twice<Word>().cells == twice.cells &&
+        suffice_as<Word>(widened).cells == wide.cells;
 }
 
 // The count of rows left insufficient under the validated context.
@@ -1066,6 +1069,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__is_sufficient__contexts__expected)
     BC_REQUIRE(accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, 0));
     BC_REQUIRE(!accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, missing));
     BC_REQUIRE(!accessor::is_sufficient({ 5, 100, 1000 }, { 7, 100, 1000 }, required));
+    BC_REQUIRE(accessor::is_sufficient({ 7, 100, 1000 }, { 5, 100, 1000 }, required));
+    BC_REQUIRE(!accessor::is_sufficient({ 6, 100, 1000 }, { 5, 100, 1000 }, required));
     BC_REQUIRE(!accessor::is_sufficient({ 7, 101, 1000 }, { 7, 100, 1000 }, required));
     BC_REQUIRE(!accessor::is_sufficient({ 7, 100, 1001 }, { 7, 100, 1000 }, required));
 }
@@ -1097,6 +1102,15 @@ BC_AUTO_TEST_CASE(pool_algorithm__suffice__regained__only_flags_insufficient)
     BC_REQUIRE_EQUAL(cell(out.cells, 4), unlabeled);
     BC_REQUIRE_EQUAL(cell(out.cells, 6), unlabeled);
     BC_REQUIRE_EQUAL(cell(out.cells, 17), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__widened__flags_sufficient)
+{
+    context_state out{};
+    BC_REQUIRE_EQUAL(accessor::suffice<link_t>(out.columns(), widened, required), 3u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 4), insufficient);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__suffice__confirmed__unchanged_and_uncounted)

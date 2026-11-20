@@ -223,8 +223,7 @@ public:
     /// The absent cell without the cause, present if none remains.
     static constexpr link_t lowered(link_t cell, link_t cause) NOEXCEPT;
 
-    /// The stored context holds under the current: the same flags, with the
-    /// required among them, and neither height nor median time past greater.
+    /// Stored flags include current and required, height and mtp not greater.
     static constexpr bool is_sufficient(const context_t& stored,
         const context_t& current, uint32_t required) NOEXCEPT;
 
