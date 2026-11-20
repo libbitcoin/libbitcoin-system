@@ -66,8 +66,7 @@ enum flags : uint32_t
     /// Operation nop2 becomes check locktime verify (soft fork, feature).
     bip65_rule = bit_right<uint32_t>(6),
 
-    /// Hard code bip34-based activation heights (hard fork, arbitrary).
-    bip90_rule = bit_right<uint32_t>(7),
+    // Bit 7 is unassigned, as stored contexts may carry it.
 
     /// Enforce relative locktime (soft fork, feature).
     bip68_rule = bit_right<uint32_t>(8),

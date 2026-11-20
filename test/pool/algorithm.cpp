@@ -27,8 +27,12 @@ class accessor
 {
 public:
     using algorithm::best;
+    using algorithm::family;
+    using algorithm::greedy;
     using algorithm::index;
     using algorithm::losers;
+    using algorithm::totals;
+    using algorithm::worth;
 };
 
 using link_t = accessor::link_t;
@@ -163,6 +167,38 @@ struct line_state
     std_array<link_t, 3> parents{ { none, 0, 1 } };
     std_array<link_t, 3> siblings{ { none, none, none } };
     std_array<link_t, 3> rivals{ { none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
+// Rows: P=0 (no fee), C=1 and D=2 (spend P), Q=3. Inputs: 0 P spends X:0,
+// 1 C spends P:0, 2 D spends P:1, 3 Q spends Y:0.
+struct fork_state
+{
+    fork_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 4> cells{ { unlabeled, unlabeled, unlabeled, unlabeled } };
+    std_array<link_t, 4> children{ { 1, none, none, none } };
+    std_array<edges_t, 4> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 } } };
+    std_array<totals_t, 4> totals
+    {
+        { { 0, 100, 0 }, { 60, 100, 0 }, { 60, 100, 0 }, { 35, 100, 0 } }
+    };
+    std_array<link_t, 4> parents{ { none, 0, 0, none } };
+    std_array<link_t, 4> siblings{ { none, 2, none, none } };
+    std_array<link_t, 4> rivals{ { none, none, none, none } };
 
     columns_t columns() NOEXCEPT
     {
@@ -453,12 +489,8 @@ static bool evaluates_as_integral() NOEXCEPT
         return accessor::outcome(out, at++ % 4);
     });
 
-    const std_array<link_t, 1> candidates{ { 4 } };
-    const auto mask = accessor::members(out, candidates);
-    uint64_t best{}, best_without{}, best_x{}, best_without_x{};
-    accessor::evaluate<uint64_t>(best, best_without, masks, mask, out, graph);
-    accessor::evaluate<Word>(best_x, best_without_x, masks, mask, out, graph);
-    return best_x == best && best_without_x == best_without;
+    return accessor::evaluate<Word>(masks, out, graph) ==
+        accessor::evaluate<uint64_t>(masks, out, graph);
 }
 
 template <typename Word>
@@ -474,8 +506,10 @@ static bool bests_as_integral() NOEXCEPT
         return accessor::outcome(out, at++ % 4);
     });
 
-    return accessor::best<Word>(masks, out, graph) ==
-        accessor::best<uint64_t>(masks, out, graph);
+    return accessor::best<Word>(masks, out, graph, 0, 20) ==
+        accessor::best<uint64_t>(masks, out, graph, 0, 20) &&
+        accessor::best<Word>(masks, out, graph, 2'000, 20) ==
+        accessor::best<uint64_t>(masks, out, graph, 2'000, 20);
 }
 
 // The template rows of the resolved scenario within the budget size.
@@ -484,7 +518,7 @@ static std::vector<link_t> template_of(uint32_t size) NOEXCEPT
     auto labeled = label<link_t>();
     std_array<mark, rows> marks{};
     std::vector<link_t> out{};
-    accessor::resolve<link_t>(marks, labeled.columns(), 1'024);
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024, 0, 20);
     accessor::pack(out, marks, labeled.columns(), { 0, size, 100 }, 25, 20);
     return out;
 }
@@ -921,6 +955,16 @@ BC_AUTO_TEST_CASE(pool_algorithm__descend__insufficient_with_confirmed_rival__bo
     BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
 }
 
+BC_AUTO_TEST_CASE(pool_algorithm__descend__purged__kept_descendant_inherits)
+{
+    state out{};
+    const auto purged = bit_or(absent, accessor::purged);
+    out.cells[1] = accessor::to_column(purged);
+    settle<link_t, state>(out);
+    BC_REQUIRE_EQUAL(cell(out.cells, 1), purged);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), inherited);
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__descend__absent_parent_of_conflicted__both_causes)
 {
     state out{};
@@ -978,6 +1022,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__settle__wide__same_as_descend)
 constexpr size_t context_rows = 20;
 constexpr accessor::context_t validated{ 7, 100, 1000 };
 constexpr accessor::context_t regained{ 7, 500, 2000 };
+constexpr accessor::context_t widened{ 5, 100, 1000 };
 constexpr uint32_t required = 4;
 constexpr uint32_t missing = 8;
 
@@ -1039,8 +1084,10 @@ static bool suffices_as_integral() NOEXCEPT
 {
     const auto once = suffice_as<link_t>(validated);
     const auto twice = suffice_twice<link_t>();
+    const auto wide = suffice_as<link_t>(widened);
     return suffice_as<Word>(validated).cells == once.cells &&
-        suffice_twice<Word>().cells == twice.cells;
+        suffice_twice<Word>().cells == twice.cells &&
+        suffice_as<Word>(widened).cells == wide.cells;
 }
 
 // The count of rows left insufficient under the validated context.
@@ -1066,6 +1113,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__is_sufficient__contexts__expected)
     BC_REQUIRE(accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, 0));
     BC_REQUIRE(!accessor::is_sufficient({ 7, 100, 1000 }, { 7, 100, 1000 }, missing));
     BC_REQUIRE(!accessor::is_sufficient({ 5, 100, 1000 }, { 7, 100, 1000 }, required));
+    BC_REQUIRE(accessor::is_sufficient({ 7, 100, 1000 }, { 5, 100, 1000 }, required));
+    BC_REQUIRE(!accessor::is_sufficient({ 6, 100, 1000 }, { 5, 100, 1000 }, required));
     BC_REQUIRE(!accessor::is_sufficient({ 7, 101, 1000 }, { 7, 100, 1000 }, required));
     BC_REQUIRE(!accessor::is_sufficient({ 7, 100, 1001 }, { 7, 100, 1000 }, required));
 }
@@ -1097,6 +1146,15 @@ BC_AUTO_TEST_CASE(pool_algorithm__suffice__regained__only_flags_insufficient)
     BC_REQUIRE_EQUAL(cell(out.cells, 4), unlabeled);
     BC_REQUIRE_EQUAL(cell(out.cells, 6), unlabeled);
     BC_REQUIRE_EQUAL(cell(out.cells, 17), unlabeled);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__widened__flags_sufficient)
+{
+    context_state out{};
+    BC_REQUIRE_EQUAL(accessor::suffice<link_t>(out.columns(), widened, required), 3u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 0), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), unlabeled);
+    BC_REQUIRE_EQUAL(cell(out.cells, 4), insufficient);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__suffice__confirmed__unchanged_and_uncounted)
@@ -1355,18 +1413,12 @@ BC_AUTO_TEST_CASE(pool_algorithm__outcome__each_index__closed_and_conflict_free)
     BC_REQUIRE_EQUAL(accessor::outcome(out, 3), 0b00100u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__evaluate__candidate_p__best_and_best_without)
+BC_AUTO_TEST_CASE(pool_algorithm__evaluate__outcomes__highest_fee)
 {
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
-    const auto masks = outcomes_of(out);
-    const std_array<link_t, 1> candidates{ { 4 } };
-    const auto candidate = accessor::members(out, candidates);
-    uint64_t best{}, best_without{};
-    accessor::evaluate<uint64_t>(best, best_without, masks, candidate, out, graph);
-    BC_REQUIRE_EQUAL(best, 650u);
-    BC_REQUIRE_EQUAL(best_without, 500u);
+    BC_REQUIRE_EQUAL(accessor::evaluate<uint64_t>(outcomes_of(out), out, graph), 650u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__evaluate__extended__same_as_integral)
@@ -1376,16 +1428,62 @@ BC_AUTO_TEST_CASE(pool_algorithm__evaluate__extended__same_as_integral)
     BC_REQUIRE(evaluates_as_integral<xint512_t>());
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__covered__added_fee_at_rate__expected)
+BC_AUTO_TEST_CASE(pool_algorithm__covered__fee_at_rate__expected)
 {
-    BC_REQUIRE(accessor::covered(650, 500, 100, 1'500));
-    BC_REQUIRE(!accessor::covered(650, 500, 100, 1'501));
-    BC_REQUIRE(accessor::covered(500, 650, 0, 1));
-    BC_REQUIRE(!accessor::covered(500, 650, 1, 1));
+    BC_REQUIRE(accessor::covered(150, 100, 1'500));
+    BC_REQUIRE(!accessor::covered(150, 100, 1'501));
+    BC_REQUIRE(accessor::covered(0, 0, 1));
+    BC_REQUIRE(!accessor::covered(0, 1, 1));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    uint64_t expected{};
+    for (size_t member{}; member < out.count; ++member)
+        expected += accessor::chargeable(accessor::totals(graph, out.rows[member]), 20);
+
+    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 20), expected);
 }
 
 // template
 // ----------------------------------------------------------------------------
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__connected__best_outcome_all_bytes)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    const auto bytes = accessor::chargeable(out, graph, 20);
+    uint64_t fee{}, size{};
+    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, bytes, 20, 1'024));
+    BC_REQUIRE_EQUAL(fee, 650u);
+    BC_REQUIRE_EQUAL(size, bytes);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__over_limit__false)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    const auto bytes = accessor::chargeable(out, graph, 20);
+    uint64_t fee{}, size{};
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, sub1(bytes), 20, 1'024));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__outcomes_over_bound__false)
+{
+    auto labeled = label<link_t>();
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    uint64_t fee{}, size{};
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, max_uint64, 20, 1));
+}
+
 
 BC_AUTO_TEST_CASE(pool_algorithm__best__scenario__highest_fee_index)
 {
@@ -1393,7 +1491,34 @@ BC_AUTO_TEST_CASE(pool_algorithm__best__scenario__highest_fee_index)
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     const auto masks = outcomes_of(out);
-    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph), 2u);
+    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph, 0, 20), 2u);
+}
+
+// At two satoshis per vbyte the third row's 150 no longer pays for its 100.
+BC_AUTO_TEST_CASE(pool_algorithm__best__scenario_at_rate__highest_net_index)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const auto masks = outcomes_of(out);
+    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph, 2'000, 20), 0u);
+}
+
+// Row 1 (300) wins both cliques, so rows 0 and 2 lose and row 4 with row 0.
+BC_AUTO_TEST_CASE(pool_algorithm__greedy__scenario__winner_per_clique)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b01010u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__worth__fee_less_rate_on_size__expected)
+{
+    BC_REQUIRE(accessor::worth(500, 200, 650, 300, 2'000));
+    BC_REQUIRE(!accessor::worth(650, 300, 500, 200, 2'000));
+    BC_REQUIRE(accessor::worth(650, 300, 500, 200, 0));
+    BC_REQUIRE(!accessor::worth(500, 200, 500, 200, 2'000));
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__best__extended__same_as_integral)
@@ -1407,7 +1532,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__scenario__highest_fee_outcome)
 {
     auto labeled = label<link_t>();
     std_array<mark, rows> marks{};
-    accessor::resolve<link_t>(marks, labeled.columns(), 1'024);
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024, 0, 20);
     BC_REQUIRE(marks[0] == mark::unmarked);
     BC_REQUIRE(marks[1] == mark::excluded);
     BC_REQUIRE(marks[2] == mark::unmarked);
@@ -1419,7 +1544,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit__best_of_first)
 {
     auto labeled = label<link_t>();
     std_array<mark, rows> marks{};
-    accessor::resolve<link_t>(marks, labeled.columns(), 2);
+    accessor::resolve<link_t>(marks, labeled.columns(), 2, 0, 20);
     BC_REQUIRE(marks[0] == mark::unmarked);
     BC_REQUIRE(marks[1] == mark::excluded);
     BC_REQUIRE(marks[2] == mark::excluded);
@@ -1431,7 +1556,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__no_outcomes__component_excluded)
 {
     auto labeled = label<link_t>();
     std_array<mark, rows> marks{};
-    accessor::resolve<link_t>(marks, labeled.columns(), 0);
+    accessor::resolve<link_t>(marks, labeled.columns(), 0, 0, 20);
     BC_REQUIRE(marks[0] == mark::excluded);
     BC_REQUIRE(marks[1] == mark::excluded);
     BC_REQUIRE(marks[2] == mark::excluded);
@@ -1444,7 +1569,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__boundary_row__excluded)
     line_state line{};
     line.cells[0] = accessor::to_column(boundary);
     std_array<mark, 3> marks{};
-    accessor::resolve<link_t>(marks, line.columns(), 1'024);
+    accessor::resolve<link_t>(marks, line.columns(), 1'024, 0, 20);
     BC_REQUIRE(marks[0] == mark::excluded);
     BC_REQUIRE(marks[1] == mark::unmarked);
     BC_REQUIRE(marks[2] == mark::unmarked);
@@ -1489,7 +1614,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__chain__whole_chunk)
     BC_REQUIRE(marks[2] == mark::taken);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_deeper_than_depth__taken_in_rounds)
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_deeper_than_depth__whole_closure)
 {
     line_state line{};
     std_array<mark, 3> marks{};
@@ -1533,6 +1658,37 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__excluded_parent__descendant_not_taken)
     BC_REQUIRE_EQUAL(out.size(), 1u);
     BC_REQUIRE_EQUAL(out[0], 0u);
     BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+// The parent with both children (400) outrates Q (350), which outrates the
+// parent with one child (300).
+BC_AUTO_TEST_CASE(pool_algorithm__pack__shared_parent__closure_outrates_row)
+{
+    fork_state fork{};
+    std_array<mark, 4> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, fork.columns(), { 0, 300, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+    BC_REQUIRE(marks[3] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__project__shared_parent__closure_then_row)
+{
+    fork_state fork{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks.resize(4);
+    accessor::project(rows, out, fork.columns(), { 0, 1'000, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 4u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
+    BC_REQUIRE_EQUAL(out.blocks[0].size(), 2u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 400u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].size, 300u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 350u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].size, 100u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__pack__empty_budget__empty)

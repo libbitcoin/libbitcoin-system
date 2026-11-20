@@ -571,7 +571,21 @@ jobs:
 
       - name: Prepare toolchain [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        shell: pwsh
+        run: |
+          $arch = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'x64' }
+          $installer = [IO.Path]::Combine(${env:ProgramFiles(x86)}, 'Microsoft Visual Studio', 'Installer')
+          $env:PATH = "$installer;$env:PATH"
+          $vs = vswhere -latest -products * -property installationPath
+          if (-not $vs) { throw "Visual Studio not found." }
+          $vcvars = [IO.Path]::Combine($vs, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "call `"$vcvars`" $arch 1>&2 && set" | ForEach-Object {
+              $name, $value = $_ -split '=', 2
+              if ($value -and $before[$name] -ne $value) { Add-Content -Path $env:GITHUB_ENV -Value "$name=$value" }
+          }
+          if (-not (Select-String -Path $env:GITHUB_ENV -Pattern '^VCToolsInstallDir=' -Quiet)) { throw "vcvarsall $arch failed." }
 
       - name: Prefer Visual Studio LLVM [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}
@@ -1210,7 +1224,21 @@ jobs:
 
       - name: Prepare toolchain [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        shell: pwsh
+        run: |
+          $arch = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'x64' }
+          $installer = [IO.Path]::Combine(${env:ProgramFiles(x86)}, 'Microsoft Visual Studio', 'Installer')
+          $env:PATH = "$installer;$env:PATH"
+          $vs = vswhere -latest -products * -property installationPath
+          if (-not $vs) { throw "Visual Studio not found." }
+          $vcvars = [IO.Path]::Combine($vs, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "call `"$vcvars`" $arch 1>&2 && set" | ForEach-Object {
+              $name, $value = $_ -split '=', 2
+              if ($value -and $before[$name] -ne $value) { Add-Content -Path $env:GITHUB_ENV -Value "$name=$value" }
+          }
+          if (-not (Select-String -Path $env:GITHUB_ENV -Pattern '^VCToolsInstallDir=' -Quiet)) { throw "vcvarsall $arch failed." }
 
       - name: Prefer Visual Studio LLVM [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}
@@ -1637,7 +1665,21 @@ jobs:
 
       - name: Prepare toolchain [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        shell: pwsh
+        run: |
+          $arch = if ($env:RUNNER_ARCH -eq 'ARM64') { 'arm64' } else { 'x64' }
+          $installer = [IO.Path]::Combine(${env:ProgramFiles(x86)}, 'Microsoft Visual Studio', 'Installer')
+          $env:PATH = "$installer;$env:PATH"
+          $vs = vswhere -latest -products * -property installationPath
+          if (-not $vs) { throw "Visual Studio not found." }
+          $vcvars = [IO.Path]::Combine($vs, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "call `"$vcvars`" $arch 1>&2 && set" | ForEach-Object {
+              $name, $value = $_ -split '=', 2
+              if ($value -and $before[$name] -ne $value) { Add-Content -Path $env:GITHUB_ENV -Value "$name=$value" }
+          }
+          if (-not (Select-String -Path $env:GITHUB_ENV -Pattern '^VCToolsInstallDir=' -Quiet)) { throw "vcvarsall $arch failed." }
 
       - name: Prefer Visual Studio LLVM [windows]
         if: ${{ startsWith(matrix.image, 'windows') }}

@@ -199,6 +199,9 @@ public:
     /// Cause of absence: its context is not sufficient.
     static constexpr link_t insufficient = power2<link_t>(3u);
 
+    /// Cause of absence: its tx is pooled again at a later row.
+    static constexpr link_t purged = power2<link_t>(4u);
+
     /// The causes derived from the columns.
     static constexpr link_t derived = bit_or(ancestor, rivaled);
 
@@ -223,13 +226,17 @@ public:
     /// The absent cell without the cause, present if none remains.
     static constexpr link_t lowered(link_t cell, link_t cause) NOEXCEPT;
 
-    /// The stored context holds under the current: the same flags, with the
-    /// required among them, and neither height nor median time past greater.
+    /// Stored flags include current and required, height and mtp not greater.
     static constexpr bool is_sufficient(const context_t& stored,
         const context_t& current, uint32_t required) NOEXCEPT;
 
     /// Chargeable size of a row (virtual size or sigops at bytes per sigop).
     static constexpr uint64_t chargeable(const totals_t& totals,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// Chargeable size of the members of the outcome.
+    static constexpr uint64_t chargeable(mask_t outcome,
+        const component_t& component, const graph_t& graph,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// Fee rate of a row (satoshis per chargeable kilobyte).
@@ -275,6 +282,14 @@ public:
     static bool ancestry(totals_t& out, const graph_t& graph,
         const component_t& component, const totals_t& limit) NOEXCEPT;
 
+    /// Best outcome fee and chargeable size of the present rows reached from
+    /// the rows by parent, child and rival, false if the size exceeds the
+    /// limit or a component is not resolvable within the bounds.
+    template <typename Word = xint512_t>
+    static bool family(uint64_t& fee, uint64_t& bytes, const graph_t& graph,
+        const std::span<const link_t>& rows, uint64_t limit,
+        uint32_t bytes_per_sigop, size_t maximum_outcomes) NOEXCEPT;
+
     /// Outcomes.
     /// -----------------------------------------------------------------------
 
@@ -285,15 +300,18 @@ public:
     static constexpr mask_t outcome(const component_t& component,
         size_t index) NOEXCEPT;
 
-    /// Highest fee over the outcomes, and over those without the candidate.
+    /// Highest fee over the outcomes.
     template <typename Word = xint512_t>
-    static constexpr void evaluate(uint64_t& best, uint64_t& best_without,
-        const std::span<const mask_t>& outcomes, mask_t candidate,
+    static constexpr uint64_t evaluate(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
 
-    /// The fee added by the candidate covers its bytes at the rate.
-    static constexpr bool covered(uint64_t best, uint64_t best_without,
-        uint64_t candidate_bytes, uint64_t rate) NOEXCEPT;
+    /// Chargeable size of every member of the component, conflicts included.
+    static constexpr uint64_t chargeable(const component_t& component,
+        const graph_t& graph, uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// The fee covers the bytes at the rate.
+    static constexpr bool covered(uint64_t fee, uint64_t bytes,
+        uint64_t rate) NOEXCEPT;
 
     /// Transitions (frontier, table columns).
     /// -----------------------------------------------------------------------
@@ -323,10 +341,12 @@ public:
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
 
-    /// Rows absent from the best outcome of their component marked excluded.
+    /// Rows absent from the best outcome of their component, by fee less
+    /// the rate on its size, marked excluded.
     template <typename Word = xint512_t>
     static void resolve(std::span<mark> marks, const columns_t& columns,
-        size_t maximum_outcomes) NOEXCEPT;
+        size_t maximum_outcomes, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// The unmarked rows taken by chunk rate within the budget, ascending.
     static void pack(std::vector<link_t>& out, std::span<mark> marks,
@@ -428,10 +448,21 @@ protected:
     static constexpr mask_t losers(const component_t& component,
         size_t index) NOEXCEPT;
 
-    /// Index of the outcome of highest fee (the first of equals).
+    /// Index of the outcome of highest fee less the rate on its size (the
+    /// first of equals).
     template <typename Word>
     static constexpr size_t best(const std::span<const mask_t>& outcomes,
-        const component_t& component, const graph_t& graph) NOEXCEPT;
+        const component_t& component, const graph_t& graph, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// The outcome of a winner per clique by fee less the rate on its size.
+    static constexpr mask_t greedy(const component_t& component,
+        const graph_t& graph, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// The first fee and size are worth more than the second at the rate.
+    static constexpr bool worth(uint64_t fee, uint64_t size, uint64_t other_fee,
+        uint64_t other_size, uint64_t rate) NOEXCEPT;
 
     /// The row and its descendants marked excluded.
     static void discard(std::span<mark> marks, const graph_t& graph,
@@ -456,6 +487,17 @@ protected:
     static bool chunk(std::vector<link_t>& out, totals_t& sum,
         const std::span<const mark>& marks, const graph_t& graph, link_t row,
         size_t depth, const totals_t& available) NOEXCEPT;
+
+    /// The untaken rows connected to the row by parent and child, false if
+    /// one has an excluded parent or they exceed maximum_members.
+    static bool cluster(std::vector<link_t>& out,
+        const std::span<const mark>& marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
+
+    /// The highest rate ancestry closed subset of the cluster, ascending.
+    static void closure(std::vector<link_t>& out, totals_t& sum,
+        const graph_t& graph, const std::vector<link_t>& cluster,
+        uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// The cell of the row with its derived causes recomputed.
     static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;

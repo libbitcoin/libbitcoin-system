@@ -40,7 +40,7 @@ BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 constexpr bool algorithm::is_sufficient(const context_t& stored,
     const context_t& current, uint32_t required) NOEXCEPT
 {
-    return stored.flags == current.flags &&
+    return bit_and(stored.flags, current.flags) == current.flags &&
         bit_and(stored.flags, required) == required &&
         stored.height <= current.height &&
         stored.median <= current.median;
@@ -115,7 +115,7 @@ constexpr size_t algorithm::suffice_(size_t index, const columns_t& columns,
                 const auto time = native(load<Word>(&columns.medians[index]));
                 const auto low = f::eq<lane>(f::min<lane>(high, height), high);
                 const auto old = f::eq<lane>(f::min<lane>(time, median), time);
-                const auto same = f::eq<lane>(flag, flags);
+                const auto same = f::eq<lane>(f::and_(flag, flags), flags);
                 const auto able = f::eq<lane>(f::and_(flag, needs), needs);
                 const auto sufficient = f::and_(f::and_(same, able),
                     f::and_(low, old));

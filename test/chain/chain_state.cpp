@@ -530,7 +530,6 @@ BC_AUTO_TEST_CASE(chain_state__activation__mainnet_configuration__retarget_diffi
     BC_REQUIRE(to_bool(state.flags & flags::retarget));
     BC_REQUIRE(to_bool(state.flags & flags::difficult));
     BC_REQUIRE(to_bool(state.flags & flags::bip42_rule));
-    BC_REQUIRE(!to_bool(state.flags & flags::bip90_rule));
 }
 
 // median_time_past

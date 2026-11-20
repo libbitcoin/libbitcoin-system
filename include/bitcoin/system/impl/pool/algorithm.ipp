@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_POOL_ALGORITHM_IPP
 
 #include <span>
+#include <unordered_set>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -80,6 +81,23 @@ constexpr uint64_t algorithm::chargeable(const totals_t& totals,
     const auto sigops = totals.sigops;
     const auto cost = ceilinged_multiply<uint64_t>(sigops, bytes_per_sigop);
     return greater(totals.size, cost);
+}
+
+constexpr uint64_t algorithm::chargeable(mask_t outcome,
+    const component_t& component, const graph_t& graph,
+    uint32_t bytes_per_sigop) NOEXCEPT
+{
+    uint64_t bytes{};
+    for (size_t member{}; member < component.count; ++member)
+    {
+        if (!get_right(outcome, member))
+            continue;
+
+        const auto row = totals(graph, component.rows[member]);
+        bytes = ceilinged_add(bytes, chargeable(row, bytes_per_sigop));
+    }
+
+    return bytes;
 }
 
 constexpr uint64_t algorithm::fee_rate(const totals_t& totals,
@@ -349,6 +367,88 @@ inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
     return true;
 }
 
+template <typename Word>
+inline bool algorithm::family(uint64_t& fee, uint64_t& bytes,
+    const graph_t& graph, const std::span<const link_t>& rows,
+    uint64_t limit, uint32_t bytes_per_sigop,
+    size_t maximum_outcomes) NOEXCEPT
+{
+    fee = zero;
+    bytes = zero;
+    std::vector<link_t> found{};
+    std::unordered_set<link_t> visited{};
+    const auto push = [&](link_t row) NOEXCEPT
+    {
+        if (row == none || !is_present(cell(graph, row)) ||
+            !visited.insert(row).second)
+            return true;
+
+        found.push_back(row);
+        const auto size = chargeable(totals(graph, row), bytes_per_sigop);
+        bytes = ceilinged_add(bytes, size);
+        return bytes <= limit;
+    };
+
+    for (const auto row: rows)
+        if (!push(row))
+            return false;
+
+    for (size_t at{}; at < found.size(); ++at)
+    {
+        auto within = true;
+        const auto row = found[at];
+        const auto slice = edges(graph, row);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            within = within && push(parent(graph, input));
+            each_rival(graph, input, [&](link_t other) NOEXCEPT
+            {
+                within = within && push(owner(graph, other));
+            });
+        }
+
+        each_child(graph, row, [&](link_t down) NOEXCEPT
+        {
+            within = within && push(down);
+        });
+
+        if (!within)
+            return false;
+    }
+
+    // Each component pays its best outcome, then each other row its fee.
+    std::vector<mask_t> masks{};
+    std::unordered_set<link_t> resolved{};
+    for (const auto row: found)
+    {
+        if (!is_labeled(cell(graph, row)) || resolved.contains(row))
+            continue;
+
+        component_t component{};
+        if (!collect(component, graph, row) || !relate(component, graph))
+            return false;
+
+        const auto leaves = outcomes(component);
+        if (leaves > maximum_outcomes)
+            return false;
+
+        masks.resize(leaves);
+        for (size_t index{}; index < leaves; ++index)
+            masks[index] = outcome(component, index);
+
+        fee = ceilinged_add(fee, evaluate<Word>(masks, component, graph));
+        for (size_t member{}; member < component.count; ++member)
+            resolved.insert(component.rows[member]);
+    }
+
+    for (const auto row: found)
+        if (!resolved.contains(row))
+            fee = ceilinged_add(fee, totals(graph, row).fee);
+
+    return true;
+}
+
 // Outcomes.
 // ----------------------------------------------------------------------------
 
@@ -374,28 +474,38 @@ constexpr algorithm::mask_t algorithm::outcome(const component_t& component,
 }
 
 template <typename Word>
-constexpr void algorithm::evaluate(uint64_t& best, uint64_t& best_without,
-    const std::span<const mask_t>& outcomes, mask_t candidate,
+constexpr uint64_t algorithm::evaluate(const std::span<const mask_t>& outcomes,
     const component_t& component, const graph_t& graph) NOEXCEPT
 {
-    best = zero;
-    best_without = zero;
+    uint64_t best{};
     each_fee<Word>(zero, outcomes, component, graph,
-        [&](size_t index, uint64_t fee) NOEXCEPT
+        [&](size_t, uint64_t fee) NOEXCEPT
         {
             best = std::max(best, fee);
-            if (is_zero(bit_and(outcomes[index], candidate)))
-                best_without = std::max(best_without, fee);
         });
+
+    return best;
 }
 
-constexpr bool algorithm::covered(uint64_t best, uint64_t best_without,
-    uint64_t candidate_bytes, uint64_t rate) NOEXCEPT
+constexpr uint64_t algorithm::chargeable(const component_t& component,
+    const graph_t& graph, uint32_t bytes_per_sigop) NOEXCEPT
+{
+    uint64_t bytes{};
+    for (size_t member{}; member < component.count; ++member)
+    {
+        const auto row = totals(graph, component.rows[member]);
+        bytes = ceilinged_add(bytes, chargeable(row, bytes_per_sigop));
+    }
+
+    return bytes;
+}
+
+constexpr bool algorithm::covered(uint64_t fee, uint64_t bytes,
+    uint64_t rate) NOEXCEPT
 {
     // Compared in satoshis per virtual kilobyte.
-    const auto added = floored_subtract(best, best_without);
-    return ceilinged_multiply(added, 1'000_u64) >=
-        ceilinged_multiply(rate, candidate_bytes);
+    return ceilinged_multiply(fee, 1'000_u64) >=
+        ceilinged_multiply(rate, bytes);
 }
 
 // Transitions (frontier, table columns).
@@ -470,7 +580,8 @@ inline bool algorithm::unconfirm(const columns_t& columns,
 
 template <typename Word>
 inline void algorithm::resolve(std::span<mark> marks,
-    const columns_t& columns, size_t maximum_outcomes) NOEXCEPT
+    const columns_t& columns, size_t maximum_outcomes, uint64_t rate,
+    uint32_t bytes_per_sigop) NOEXCEPT
 {
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
@@ -493,7 +604,8 @@ inline void algorithm::resolve(std::span<mark> marks,
         const auto collected = collect(component, graph, row);
         const auto related = collected && relate(component, graph);
         const auto limit = related ? maximum_outcomes : zero;
-        const auto total = std::min(outcomes(component), limit);
+        const auto leaves = outcomes(component);
+        const auto total = std::min(leaves, limit);
 
         if (is_zero(total))
         {
@@ -505,7 +617,13 @@ inline void algorithm::resolve(std::span<mark> marks,
         for (size_t index{}; index < total; ++index)
             masks[index] = outcome(component, index);
 
-        const auto chosen = masks[best<Word>(masks, component, graph)];
+        // Leaves past the bound are represented by a greedy leaf.
+        if (leaves > total)
+            masks.push_back(greedy(component, graph, rate, bytes_per_sigop));
+
+        const auto chosen = masks[best<Word>(masks, component, graph, rate,
+            bytes_per_sigop)];
+
         for (size_t member{}; member < component.count; ++member)
             if (!get_right(chosen, member))
                 discard(marks, graph, component.rows[member]);
@@ -785,21 +903,76 @@ constexpr algorithm::mask_t algorithm::losers(const component_t& component,
 
 template <typename Word>
 constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
-    const component_t& component, const graph_t& graph) NOEXCEPT
+    const component_t& component, const graph_t& graph, uint64_t rate,
+    uint32_t bytes_per_sigop) NOEXCEPT
 {
     size_t out{};
     uint64_t most{};
+    uint64_t least{};
+    auto first = true;
     each_fee<Word>(zero, outcomes, component, graph,
         [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            if (fee > most)
+            const auto size = is_zero(rate) ? zero : chargeable(
+                outcomes[index], component, graph, bytes_per_sigop);
+
+            if (first || worth(fee, size, most, least, rate))
             {
+                first = false;
                 most = fee;
+                least = size;
                 out = index;
             }
         });
 
     return out;
+}
+
+constexpr algorithm::mask_t algorithm::greedy(const component_t& component,
+    const graph_t& graph, uint64_t rate, uint32_t bytes_per_sigop) NOEXCEPT
+{
+    mask_t lost{};
+    for (size_t contest{}; contest < component.contests; ++contest)
+    {
+        mask_t winner{};
+        uint64_t fee{};
+        uint64_t size{};
+        const auto clique = component.cliques[contest];
+        for (size_t member{}; member < component.count; ++member)
+        {
+            if (!get_right(clique, member) || get_right(lost, member))
+                continue;
+
+            const auto row = totals(graph, component.rows[member]);
+            const auto bytes = chargeable(row, bytes_per_sigop);
+            if (is_zero(winner) || worth(row.fee, bytes, fee, size, rate))
+            {
+                winner = set_right(mask_t{}, member);
+                fee = row.fee;
+                size = bytes;
+            }
+        }
+
+        lost |= bit_and(clique, bit_not(winner));
+    }
+
+    auto out = bit_and(unmask_right<mask_t>(component.count), bit_not(lost));
+    for (size_t member{}; member < component.count; ++member)
+        if (is_nonzero(bit_and(component.ancestors[member], lost)))
+            out = set_right(out, member, false);
+
+    return out;
+}
+
+constexpr bool algorithm::worth(uint64_t fee, uint64_t size,
+    uint64_t other_fee, uint64_t other_size, uint64_t rate) NOEXCEPT
+{
+    // Fee less the rate on size, compared in satoshis per virtual kilobyte.
+    const auto value = ceilinged_add(ceilinged_multiply(fee, 1'000_u64),
+        ceilinged_multiply(rate, other_size));
+    const auto other = ceilinged_add(ceilinged_multiply(other_fee, 1'000_u64),
+        ceilinged_multiply(rate, size));
+    return value > other;
 }
 
 inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
@@ -871,17 +1044,25 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     {
         link_t row{};
         uint64_t rate{};
-        uint64_t fee{};
-        size_t count{};
+        totals_t sum{};
+        std::vector<link_t> rows{};
+        bool closed{};
     };
 
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
     std::vector<score_t> scores{};
     std::vector<link_t> rows{};
+    std::vector<link_t> group{};
+    std::vector<bool> seen{};
     totals_t used{};
     out.clear();
     takes.clear();
+
+    const auto fits = [](const totals_t& sum, const totals_t& space) NOEXCEPT
+    {
+        return sum.size <= space.size && sum.sigops <= space.sigops;
+    };
 
     const auto available = [&]() NOEXCEPT -> totals_t
     {
@@ -893,20 +1074,44 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         };
     };
 
+    // A row's chunk, as a candidate for the round.
+    const auto score_row = [&](link_t row) NOEXCEPT
+    {
+        totals_t sum{};
+        if (chunk(rows, sum, marks, graph, row, depth, available()))
+            scores.push_back({ row, fee_rate(sum, bytes_per_sigop), sum,
+                rows, false });
+    };
+
     for (auto taken = true; taken;)
     {
         taken = false;
         scores.clear();
+        seen.assign(count, false);
         for (size_t at{}; at < count; ++at)
         {
-            totals_t sum{};
             const auto row = possible_narrow_cast<link_t>(at);
-            if (marks[row] == mark::unmarked &&
-                chunk(rows, sum, marks, graph, row, depth, available()))
+            if (marks[row] != mark::unmarked || seen[row])
+                continue;
+
+            // A cluster offers its best closure, or each row its chunk.
+            const auto whole = cluster(group, marks, graph, row);
+            for (const auto member: group)
+                seen[member] = true;
+
+            totals_t sum{};
+            if (whole)
+                closure(rows, sum, graph, group, bytes_per_sigop);
+
+            if (whole && fits(sum, available()))
             {
-                const auto rate = fee_rate(sum, bytes_per_sigop);
-                scores.push_back({ row, rate, sum.fee, rows.size() });
+                scores.push_back({ rows.front(),
+                    fee_rate(sum, bytes_per_sigop), sum, rows, true });
+                continue;
             }
+
+            for (const auto member: group)
+                score_row(member);
         }
 
         std::sort(scores.begin(), scores.end(),
@@ -920,11 +1125,27 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         {
             totals_t sum{};
             const auto space = available();
-            if (marks[score.row] != mark::unmarked ||
+            const auto unmarked = [&](link_t row) NOEXCEPT
+            {
+                return marks[row] == mark::unmarked;
+            };
+
+            if (score.closed)
+            {
+                if (!std::ranges::all_of(score.rows, unmarked) ||
+                    !fits(score.sum, space))
+                    continue;
+
+                rows = score.rows;
+                sum = score.sum;
+            }
+            else if (!unmarked(score.row) ||
                 !chunk(rows, sum, marks, graph, score.row, depth, space) ||
-                rows.size() != score.count ||
-                sum.fee != score.fee)
+                rows.size() != score.rows.size() ||
+                sum.fee != score.sum.fee)
+            {
                 continue;
+            }
 
             for (const auto row: rows)
                 marks[row] = mark::taken;
@@ -1025,6 +1246,187 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
 
     out.erase(cut, out.end());
     return !out.empty();
+}
+
+inline bool algorithm::cluster(std::vector<link_t>& out,
+    const std::span<const mark>& marks, const graph_t& graph,
+    link_t row) NOEXCEPT
+{
+    out.assign(one, row);
+    auto whole = true;
+    const auto push = [&](link_t found) NOEXCEPT
+    {
+        if (marks[found] != mark::unmarked ||
+            std::ranges::find(out, found) != out.end())
+            return;
+
+        out.push_back(found);
+    };
+
+    for (size_t at{}; at < out.size(); ++at)
+    {
+        const auto member = out[at];
+        const auto slice = edges(graph, member);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            const auto up = parent(graph, input);
+            if (up == none || is_boundary(cell(graph, up)))
+                continue;
+
+            if (marks[up] == mark::excluded)
+                whole = false;
+            else
+                push(up);
+        }
+
+        each_child(graph, member, [&](link_t down) NOEXCEPT
+        {
+            push(down);
+        });
+    }
+
+    return whole && out.size() <= maximum_members;
+}
+
+// Dinkelbach: the maximum weight closure at the rate of the best closure
+// found (fee times its size less size times its fee, a minimum cut) is
+// positive until no closure has a higher rate.
+inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
+    const graph_t& graph, const std::vector<link_t>& cluster,
+    uint32_t bytes_per_sigop) NOEXCEPT
+{
+    const auto count = cluster.size();
+    const auto source = count;
+    const auto sink = add1(count);
+    const auto nodes = count + two;
+    std::vector<uint64_t> fees(count);
+    std::vector<uint64_t> sizes(count);
+    std::vector<std::vector<size_t>> parents(count);
+    for (size_t node{}; node < count; ++node)
+    {
+        const auto& row = totals(graph, cluster[node]);
+        fees[node] = row.fee;
+        sizes[node] = chargeable(row, bytes_per_sigop);
+
+        const auto slice = edges(graph, cluster[node]);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            const auto it = std::ranges::find(cluster, parent(graph, input));
+            if (it != cluster.end())
+                parents[node].push_back(std::distance(cluster.begin(), it));
+        }
+    }
+
+    const auto weigh = [&](const std::vector<bool>& in, uint64_t& fee,
+        uint64_t& size) NOEXCEPT
+    {
+        fee = zero;
+        size = zero;
+        for (size_t node{}; node < count; ++node)
+        {
+            if (in[node])
+            {
+                fee = ceilinged_add(fee, fees[node]);
+                size = ceilinged_add(size, sizes[node]);
+            }
+        }
+    };
+
+    std::vector<bool> best(count, true);
+    uint64_t fee{}, size{};
+    weigh(best, fee, size);
+
+    std::vector<uint128_t> capacity(nodes * nodes);
+    std::vector<size_t> from(nodes);
+    std::vector<bool> reached(nodes);
+    std::vector<size_t> queue{};
+    const auto at = [&](size_t left, size_t right) NOEXCEPT -> uint128_t&
+    {
+        return capacity[left * nodes + right];
+    };
+
+    // Reachability from the source in the residual, the path in from.
+    const auto search = [&]() NOEXCEPT
+    {
+        reached.assign(nodes, false);
+        reached[source] = true;
+        queue.assign(one, source);
+        for (size_t next{}; next < queue.size(); ++next)
+        {
+            const auto node = queue[next];
+            for (size_t other{}; other < nodes; ++other)
+            {
+                if (!reached[other] && at(node, other) != uint128_t{})
+                {
+                    reached[other] = true;
+                    from[other] = node;
+                    queue.push_back(other);
+                }
+            }
+        }
+
+        return reached[sink];
+    };
+
+    while (count > one && size > zero)
+    {
+        uint128_t infinite{ one };
+        std::ranges::fill(capacity, uint128_t{});
+        for (size_t node{}; node < count; ++node)
+        {
+            at(source, node) = uint128_t{ fees[node] } * size;
+            at(node, sink) = uint128_t{ sizes[node] } * fee;
+            infinite += at(source, node);
+        }
+
+        for (size_t node{}; node < count; ++node)
+            for (const auto up: parents[node])
+                at(node, up) = infinite;
+
+        while (search())
+        {
+            auto flow = infinite;
+            for (auto node = sink; node != source; node = from[node])
+                flow = std::min(flow, at(from[node], node));
+
+            for (auto node = sink; node != source; node = from[node])
+            {
+                at(from[node], node) -= flow;
+                at(node, from[node]) += flow;
+            }
+        }
+
+        const std::vector<bool> found(reached.begin(),
+            std::next(reached.begin(), count));
+
+        uint64_t found_fee{}, found_size{};
+        weigh(found, found_fee, found_size);
+        if (is_zero(found_size) || uint128_t{ found_fee } * size <=
+            uint128_t{ found_size } * fee)
+            break;
+
+        best = found;
+        fee = found_fee;
+        size = found_size;
+    }
+
+    out.clear();
+    sum = {};
+    for (size_t node{}; node < count; ++node)
+    {
+        if (best[node])
+        {
+            const auto& add = totals(graph, cluster[node]);
+            out.push_back(cluster[node]);
+            sum.fee = ceilinged_add(sum.fee, add.fee);
+            sum.size = ceilinged_add(sum.size, add.size);
+            sum.sigops = ceilinged_add(sum.sigops, add.sigops);
+        }
+    }
+
+    std::sort(out.begin(), out.end());
 }
 
 inline algorithm::link_t algorithm::resolved(const graph_t& graph,
