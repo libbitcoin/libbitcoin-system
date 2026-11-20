@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_POOL_ALGORITHM_IPP
 
 #include <span>
+#include <unordered_set>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -362,6 +363,88 @@ inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
         if (!charge(row))
             return false;
     }
+
+    return true;
+}
+
+template <typename Word>
+inline bool algorithm::family(uint64_t& fee, uint64_t& bytes,
+    const graph_t& graph, const std::span<const link_t>& rows,
+    uint64_t limit, uint32_t bytes_per_sigop,
+    size_t maximum_outcomes) NOEXCEPT
+{
+    fee = zero;
+    bytes = zero;
+    std::vector<link_t> found{};
+    std::unordered_set<link_t> visited{};
+    const auto push = [&](link_t row) NOEXCEPT
+    {
+        if (row == none || !is_present(cell(graph, row)) ||
+            !visited.insert(row).second)
+            return true;
+
+        found.push_back(row);
+        const auto size = chargeable(totals(graph, row), bytes_per_sigop);
+        bytes = ceilinged_add(bytes, size);
+        return bytes <= limit;
+    };
+
+    for (const auto row: rows)
+        if (!push(row))
+            return false;
+
+    for (size_t at{}; at < found.size(); ++at)
+    {
+        auto within = true;
+        const auto row = found[at];
+        const auto slice = edges(graph, row);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            within = within && push(parent(graph, input));
+            each_rival(graph, input, [&](link_t other) NOEXCEPT
+            {
+                within = within && push(owner(graph, other));
+            });
+        }
+
+        each_child(graph, row, [&](link_t down) NOEXCEPT
+        {
+            within = within && push(down);
+        });
+
+        if (!within)
+            return false;
+    }
+
+    // Each component pays its best outcome, then each other row its fee.
+    std::vector<mask_t> masks{};
+    std::unordered_set<link_t> resolved{};
+    for (const auto row: found)
+    {
+        if (!is_labeled(cell(graph, row)) || resolved.contains(row))
+            continue;
+
+        component_t component{};
+        if (!collect(component, graph, row) || !relate(component, graph))
+            return false;
+
+        const auto leaves = outcomes(component);
+        if (leaves > maximum_outcomes)
+            return false;
+
+        masks.resize(leaves);
+        for (size_t index{}; index < leaves; ++index)
+            masks[index] = outcome(component, index);
+
+        fee = ceilinged_add(fee, evaluate<Word>(masks, component, graph));
+        for (size_t member{}; member < component.count; ++member)
+            resolved.insert(component.rows[member]);
+    }
+
+    for (const auto row: found)
+        if (!resolved.contains(row))
+            fee = ceilinged_add(fee, totals(graph, row).fee);
 
     return true;
 }

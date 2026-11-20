@@ -279,6 +279,14 @@ public:
     static bool ancestry(totals_t& out, const graph_t& graph,
         const component_t& component, const totals_t& limit) NOEXCEPT;
 
+    /// Best outcome fee and chargeable size of the present rows reached from
+    /// the rows by parent, child and rival, false if the size exceeds the
+    /// limit or a component is not resolvable within the bounds.
+    template <typename Word = xint512_t>
+    static bool family(uint64_t& fee, uint64_t& bytes, const graph_t& graph,
+        const std::span<const link_t>& rows, uint64_t limit,
+        uint32_t bytes_per_sigop, size_t maximum_outcomes) NOEXCEPT;
+
     /// Outcomes.
     /// -----------------------------------------------------------------------
 

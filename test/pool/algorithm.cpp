@@ -27,6 +27,7 @@ class accessor
 {
 public:
     using algorithm::best;
+    using algorithm::family;
     using algorithm::greedy;
     using algorithm::index;
     using algorithm::losers;
@@ -1439,6 +1440,40 @@ BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
 
 // template
 // ----------------------------------------------------------------------------
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__connected__best_outcome_all_bytes)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    const auto bytes = accessor::chargeable(out, graph, 20);
+    uint64_t fee{}, size{};
+    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, bytes, 20, 1'024));
+    BC_REQUIRE_EQUAL(fee, 650u);
+    BC_REQUIRE_EQUAL(size, bytes);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__over_limit__false)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    const auto bytes = accessor::chargeable(out, graph, 20);
+    uint64_t fee{}, size{};
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, sub1(bytes), 20, 1'024));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__outcomes_over_bound__false)
+{
+    auto labeled = label<link_t>();
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    uint64_t fee{}, size{};
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, max_uint64, 20, 1));
+}
+
 
 BC_AUTO_TEST_CASE(pool_algorithm__best__scenario__highest_fee_index)
 {
