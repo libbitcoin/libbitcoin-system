@@ -224,8 +224,6 @@ uint32_t chain_state::configured_flags(const forks& forks) NOEXCEPT
         result |= flags::bip66_rule;
     if (forks.bip68)
         result |= flags::bip68_rule;
-    if (forks.bip90)
-        result |= flags::bip90_rule;
     if (forks.bip112)
         result |= flags::bip112_rule;
     if (forks.bip113)
@@ -294,12 +292,6 @@ chain_state::activations chain_state::activation(const data& values,
     if (forks.bip42)
     {
         result.flags |= flags::bip42_rule;
-    }
-
-    // bip90 is activated based on configuration alone (hard fork).
-    if (forks.bip90)
-    {
-        result.flags |= flags::bip90_rule;
     }
 
     // time_warp_patch (testnet4) is activated based on configuration
