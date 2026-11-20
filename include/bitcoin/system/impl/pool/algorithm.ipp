@@ -496,7 +496,7 @@ inline bool algorithm::unconfirm(const columns_t& columns,
 // ----------------------------------------------------------------------------
 
 template <typename Word>
-inline bool algorithm::resolve(std::span<mark> marks,
+inline void algorithm::resolve(std::span<mark> marks,
     const columns_t& columns, size_t maximum_outcomes, uint64_t rate,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
@@ -508,7 +508,6 @@ inline bool algorithm::resolve(std::span<mark> marks,
         marks[row] = present ? mark::unmarked : mark::excluded;
     }
 
-    auto contested = false;
     std::vector<mask_t> masks{};
     for (size_t at{}; at < count; ++at)
     {
@@ -539,7 +538,6 @@ inline bool algorithm::resolve(std::span<mark> marks,
         if (leaves > total)
             masks.push_back(greedy(component, graph, rate, bytes_per_sigop));
 
-        contested |= leaves > one;
         const auto chosen = masks[best<Word>(masks, component, graph, rate,
             bytes_per_sigop)];
 
@@ -547,8 +545,6 @@ inline bool algorithm::resolve(std::span<mark> marks,
             if (!get_right(chosen, member))
                 discard(marks, graph, component.rows[member]);
     }
-
-    return contested;
 }
 
 inline void algorithm::pack(std::vector<link_t>& out, std::span<mark> marks,
@@ -575,15 +571,6 @@ inline void algorithm::project(std::vector<link_t>& out,
 
 // Estimate (projected blocks).
 // ----------------------------------------------------------------------------
-
-constexpr uint64_t algorithm::cutoff(
-    const std::span<const take_t>& takes) NOEXCEPT
-{
-    if (takes.empty())
-        return zero;
-
-    return std::ranges::min(takes, {}, &take_t::rate).rate;
-}
 
 constexpr uint64_t algorithm::above(const std::span<const take_t>& takes,
     uint64_t rate) NOEXCEPT

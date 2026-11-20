@@ -331,9 +331,9 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Rows absent from the best outcome of their component, by fee less
-    /// the rate on its size, marked excluded; true if any had a choice.
+    /// the rate on its size, marked excluded.
     template <typename Word = xint512_t>
-    static bool resolve(std::span<mark> marks, const columns_t& columns,
+    static void resolve(std::span<mark> marks, const columns_t& columns,
         size_t maximum_outcomes, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
@@ -353,10 +353,6 @@ public:
     /// Chargeable size of the takes at or above the rate.
     static constexpr uint64_t above(const std::span<const take_t>& takes,
         uint64_t rate) NOEXCEPT;
-
-    /// Lowest rate of the takes (the cutoff of a block), zero if none.
-    static constexpr uint64_t cutoff(
-        const std::span<const take_t>& takes) NOEXCEPT;
 
     /// Lowest rate taken within the count of blocks, max_uint64 if none.
     template <typename Arrivals>

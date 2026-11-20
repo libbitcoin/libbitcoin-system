@@ -1436,13 +1436,6 @@ BC_AUTO_TEST_CASE(pool_algorithm__greedy__scenario__winner_per_clique)
     BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b01010u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__cutoff__takes__lowest_rate)
-{
-    const std::vector<take_t> takes{ { 5, 1 }, { 3, 1 }, { 4, 1 } };
-    BC_REQUIRE_EQUAL(accessor::cutoff(takes), 3u);
-    BC_REQUIRE_EQUAL(accessor::cutoff({}), 0u);
-}
-
 BC_AUTO_TEST_CASE(pool_algorithm__worth__fee_less_rate_on_size__expected)
 {
     BC_REQUIRE(accessor::worth(500, 200, 650, 300, 2'000));
@@ -1462,7 +1455,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__scenario__highest_fee_outcome)
 {
     auto labeled = label<link_t>();
     std_array<mark, rows> marks{};
-    BC_REQUIRE(accessor::resolve<link_t>(marks, labeled.columns(), 1'024, 0, 20));
+    accessor::resolve<link_t>(marks, labeled.columns(), 1'024, 0, 20);
     BC_REQUIRE(marks[0] == mark::unmarked);
     BC_REQUIRE(marks[1] == mark::excluded);
     BC_REQUIRE(marks[2] == mark::unmarked);
