@@ -391,28 +391,38 @@ constexpr algorithm::mask_t algorithm::outcome(const component_t& component,
 }
 
 template <typename Word>
-constexpr void algorithm::evaluate(uint64_t& best, uint64_t& best_without,
-    const std::span<const mask_t>& outcomes, mask_t candidate,
+constexpr uint64_t algorithm::evaluate(const std::span<const mask_t>& outcomes,
     const component_t& component, const graph_t& graph) NOEXCEPT
 {
-    best = zero;
-    best_without = zero;
+    uint64_t best{};
     each_fee<Word>(zero, outcomes, component, graph,
-        [&](size_t index, uint64_t fee) NOEXCEPT
+        [&](size_t, uint64_t fee) NOEXCEPT
         {
             best = std::max(best, fee);
-            if (is_zero(bit_and(outcomes[index], candidate)))
-                best_without = std::max(best_without, fee);
         });
+
+    return best;
 }
 
-constexpr bool algorithm::covered(uint64_t best, uint64_t best_without,
-    uint64_t candidate_bytes, uint64_t rate) NOEXCEPT
+constexpr uint64_t algorithm::chargeable(const component_t& component,
+    const graph_t& graph, uint32_t bytes_per_sigop) NOEXCEPT
+{
+    uint64_t bytes{};
+    for (size_t member{}; member < component.count; ++member)
+    {
+        const auto row = totals(graph, component.rows[member]);
+        bytes = ceilinged_add(bytes, chargeable(row, bytes_per_sigop));
+    }
+
+    return bytes;
+}
+
+constexpr bool algorithm::covered(uint64_t fee, uint64_t bytes,
+    uint64_t rate) NOEXCEPT
 {
     // Compared in satoshis per virtual kilobyte.
-    const auto added = floored_subtract(best, best_without);
-    return ceilinged_multiply(added, 1'000_u64) >=
-        ceilinged_multiply(rate, candidate_bytes);
+    return ceilinged_multiply(fee, 1'000_u64) >=
+        ceilinged_multiply(rate, bytes);
 }
 
 // Transitions (frontier, table columns).

@@ -30,6 +30,7 @@ public:
     using algorithm::greedy;
     using algorithm::index;
     using algorithm::losers;
+    using algorithm::totals;
     using algorithm::worth;
 };
 
@@ -455,12 +456,8 @@ static bool evaluates_as_integral() NOEXCEPT
         return accessor::outcome(out, at++ % 4);
     });
 
-    const std_array<link_t, 1> candidates{ { 4 } };
-    const auto mask = accessor::members(out, candidates);
-    uint64_t best{}, best_without{}, best_x{}, best_without_x{};
-    accessor::evaluate<uint64_t>(best, best_without, masks, mask, out, graph);
-    accessor::evaluate<Word>(best_x, best_without_x, masks, mask, out, graph);
-    return best_x == best && best_without_x == best_without;
+    return accessor::evaluate<Word>(masks, out, graph) ==
+        accessor::evaluate<uint64_t>(masks, out, graph);
 }
 
 template <typename Word>
@@ -1373,18 +1370,12 @@ BC_AUTO_TEST_CASE(pool_algorithm__outcome__each_index__closed_and_conflict_free)
     BC_REQUIRE_EQUAL(accessor::outcome(out, 3), 0b00100u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__evaluate__candidate_p__best_and_best_without)
+BC_AUTO_TEST_CASE(pool_algorithm__evaluate__outcomes__highest_fee)
 {
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
-    const auto masks = outcomes_of(out);
-    const std_array<link_t, 1> candidates{ { 4 } };
-    const auto candidate = accessor::members(out, candidates);
-    uint64_t best{}, best_without{};
-    accessor::evaluate<uint64_t>(best, best_without, masks, candidate, out, graph);
-    BC_REQUIRE_EQUAL(best, 650u);
-    BC_REQUIRE_EQUAL(best_without, 500u);
+    BC_REQUIRE_EQUAL(accessor::evaluate<uint64_t>(outcomes_of(out), out, graph), 650u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__evaluate__extended__same_as_integral)
@@ -1394,12 +1385,24 @@ BC_AUTO_TEST_CASE(pool_algorithm__evaluate__extended__same_as_integral)
     BC_REQUIRE(evaluates_as_integral<xint512_t>());
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__covered__added_fee_at_rate__expected)
+BC_AUTO_TEST_CASE(pool_algorithm__covered__fee_at_rate__expected)
 {
-    BC_REQUIRE(accessor::covered(650, 500, 100, 1'500));
-    BC_REQUIRE(!accessor::covered(650, 500, 100, 1'501));
-    BC_REQUIRE(accessor::covered(500, 650, 0, 1));
-    BC_REQUIRE(!accessor::covered(500, 650, 1, 1));
+    BC_REQUIRE(accessor::covered(150, 100, 1'500));
+    BC_REQUIRE(!accessor::covered(150, 100, 1'501));
+    BC_REQUIRE(accessor::covered(0, 0, 1));
+    BC_REQUIRE(!accessor::covered(0, 1, 1));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
+{
+    auto labeled = label<link_t>();
+    const auto out = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    uint64_t expected{};
+    for (size_t member{}; member < out.count; ++member)
+        expected += accessor::chargeable(accessor::totals(graph, out.rows[member]), 20);
+
+    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 20), expected);
 }
 
 // template

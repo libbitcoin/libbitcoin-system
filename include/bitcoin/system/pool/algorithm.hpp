@@ -289,15 +289,18 @@ public:
     static constexpr mask_t outcome(const component_t& component,
         size_t index) NOEXCEPT;
 
-    /// Highest fee over the outcomes, and over those without the candidate.
+    /// Highest fee over the outcomes.
     template <typename Word = xint512_t>
-    static constexpr void evaluate(uint64_t& best, uint64_t& best_without,
-        const std::span<const mask_t>& outcomes, mask_t candidate,
+    static constexpr uint64_t evaluate(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
 
-    /// The fee added by the candidate covers its bytes at the rate.
-    static constexpr bool covered(uint64_t best, uint64_t best_without,
-        uint64_t candidate_bytes, uint64_t rate) NOEXCEPT;
+    /// Chargeable size of every member of the component, conflicts included.
+    static constexpr uint64_t chargeable(const component_t& component,
+        const graph_t& graph, uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// The fee covers the bytes at the rate.
+    static constexpr bool covered(uint64_t fee, uint64_t bytes,
+        uint64_t rate) NOEXCEPT;
 
     /// Transitions (frontier, table columns).
     /// -----------------------------------------------------------------------
