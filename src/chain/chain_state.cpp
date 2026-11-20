@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/chain_state.hpp>
 
 #include <chrono>
+#include <optional>
 #include <ranges>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
@@ -60,6 +61,50 @@ constexpr bool is_active(size_t count, size_t bip34_activation_threshold) NOEXCE
 constexpr bool is_enforced(size_t count, size_t bip34_enforcement_threshold) NOEXCEPT
 {
     return count >= bip34_enforcement_threshold;
+}
+
+//*****************************************************************************
+// CONSENSUS: Though unspecified in bip34, the satoshi implementation
+// performed this comparison using the signed integer version value.
+//*****************************************************************************
+constexpr bool is_version(uint32_t value, uint32_t version) NOEXCEPT
+{
+    return sign_cast<int32_t>(value) >= sign_cast<int32_t>(version);
+}
+
+// Count (or uncount) a version against each bip34-based version.
+static void tally(chain_state::data& values, uint32_t value, bool add,
+    const system::settings& settings) NOEXCEPT
+{
+    const auto adjust = [add](size_t& count, bool counted) NOEXCEPT
+    {
+        if (counted)
+            count = add ? add1(count) : sub1(count);
+    };
+
+    adjust(values.version.bip34, is_version(value, settings.bip34_version));
+    adjust(values.version.bip66, is_version(value, settings.bip66_version));
+    adjust(values.version.bip65, is_version(value, settings.bip65_version));
+}
+
+// Append the value, dropping the oldest when the window would exceed count.
+static std::optional<uint32_t> enqueue(std::vector<uint32_t>& ordered,
+    uint32_t value, size_t count) NOEXCEPT
+{
+    std::optional<uint32_t> oldest{};
+    if (ordered.size() >= count)
+    {
+        if (ordered.empty())
+            return value;
+
+        oldest = ordered.front();
+        ordered.erase(ordered.begin());
+    }
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    ordered.push_back(value);
+    BC_POP_WARNING()
+    return oldest;
 }
 
 // Determine the number of blocks back to the closest retarget height.
@@ -286,29 +331,11 @@ chain_state::activations chain_state::activation(const data& values,
 
     const auto height = values.height;
     const auto version = values.version.self;
-    const auto& history = values.version.ordered;
 
-    //*************************************************************************
-    // CONSENSUS: Though unspecified in bip34, the satoshi implementation
-    // performed this comparison using the signed integer version value.
-    //*************************************************************************
-    constexpr auto ge = [](uint32_t value, uint32_t version) NOEXCEPT
-    {
-        return sign_cast<int32_t>(value) >= sign_cast<int32_t>(version);
-    };
-
-    // Declare bip34-based version predicates.
-    const auto ge_2 = [&](uint32_t value) NOEXCEPT
-        { return ge(value, settings.bip34_version); };
-    const auto ge_3 = [&](uint32_t value) NOEXCEPT
-        { return ge(value, settings.bip66_version); };
-    const auto ge_4 = [&](uint32_t value) NOEXCEPT
-        { return ge(value, settings.bip65_version); };
-
-    // Compute bip34-based activation version summaries (empty if disabled).
-    const auto count_2 = std::count_if(history.cbegin(), history.cend(), ge_2);
-    const auto count_3 = std::count_if(history.cbegin(), history.cend(), ge_3);
-    const auto count_4 = std::count_if(history.cbegin(), history.cend(), ge_4);
+    // bip34-based activation version summaries (zero if disabled).
+    const auto count_2 = values.version.bip34;
+    const auto count_3 = values.version.bip66;
+    const auto count_4 = values.version.bip65;
 
     // Frozen activations (require version and enforce above freeze height).
     const auto bip90_bip34 = forks.bip90 && height >= settings.bip90_bip34_height;
@@ -320,7 +347,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip34 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip34 ||
         (is_active(count_2, settings.bip34_activation_threshold) &&
-        ge(version, settings.bip34_version)))
+        is_version(version, settings.bip34_version)))
     {
         result.flags |= flags::bip34_rule;
     }
@@ -328,7 +355,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip66 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip66 ||
         (is_active(count_3, settings.bip34_activation_threshold) &&
-        ge(version, settings.bip66_version)))
+        is_version(version, settings.bip66_version)))
     {
         result.flags |= flags::bip66_rule;
     }
@@ -336,7 +363,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip65 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip65 ||
         (is_active(count_4, settings.bip34_activation_threshold) &&
-        ge(version, settings.bip65_version)))
+        is_version(version, settings.bip65_version)))
     {
         result.flags |= flags::bip65_rule;
     }
@@ -795,6 +822,19 @@ void chain_state::reduce(data::signal& signal, const deployment& deployment,
     signal.ordered.clear();
 }
 
+// Versions.
+// ----------------------------------------------------------------------------
+
+void chain_state::count_versions(data& values,
+    const system::settings& settings) NOEXCEPT
+{
+    values.version.bip34 = zero;
+    values.version.bip66 = zero;
+    values.version.bip65 = zero;
+    for (const auto value: values.version.ordered)
+        tally(values, value, true, settings);
+}
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -811,26 +851,18 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // If this overflows height is zero and result is handled as invalid.
     const auto height = add1(data.height);
 
-    // Enqueue previous block values to collections.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    data.bits.ordered.push_back(data.bits.self);
-    data.version.ordered.push_back(data.version.self);
-    data.timestamp.ordered.push_back(data.timestamp.self);
-    BC_POP_WARNING()
+    // Enqueue previous block values to collections, dequeuing the oldest
+    // member of a collection that overflows.
+    enqueue(data.bits.ordered, data.bits.self,
+        bits_count(height, forks, settings.retargeting_interval()));
+    enqueue(data.timestamp.ordered, data.timestamp.self,
+        timestamp_count(height, forks));
 
-    // If bits collection overflows, dequeue oldest member.
-    if (data.bits.ordered.size() >
-        bits_count(height, forks, settings.retargeting_interval()))
-        data.bits.ordered.pop_front();
-
-    // If version collection overflows, dequeue oldest member.
-    if (data.version.ordered.size() > version_count(height, forks,
-        settings.bip34_activation_sample))
-        data.version.ordered.pop_front();
-
-    // If timestamp collection overflows, dequeue oldest member.
-    if (data.timestamp.ordered.size() > timestamp_count(height, forks))
-        data.timestamp.ordered.pop_front();
+    // Version counts follow the versions entering and leaving the collection.
+    tally(data, data.version.self, true, settings);
+    if (const auto oldest = enqueue(data.version.ordered, data.version.self,
+        version_count(height, forks, settings.bip34_activation_sample)))
+        tally(data, oldest.value(), false, settings);
 
     // Regtest does not retarget, but may require the timestamp for bip54.
     // If promoting from retarget height, move that timestamp into retarget.
@@ -937,6 +969,8 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 chain_state::data chain_state::to_values(data values,
     const system::settings& settings) NOEXCEPT
 {
+    count_versions(values, settings);
+
     const auto period = settings.bip9_activation_period;
     const auto configured = configured_flags(settings.forks);
     const auto list = deployments(settings);

@@ -25,10 +25,16 @@ using namespace system::chain;
 struct test_chain_state
   : chain::chain_state
 {
-    using chain::chain_state::activation;
     using chain::chain_state::median_time_past;
     using chain::chain_state::next_state;
     using chain::chain_state::work_required;
+
+    static activations activation(data values, const forks& forks,
+        const system::settings& settings) NOEXCEPT
+    {
+        count_versions(values, settings);
+        return chain_state::activation(values, forks, settings);
+    }
 };
 
 using state_t = chain_state::deployment_state;
@@ -1021,6 +1027,96 @@ BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header__pool_promotion)
     BC_REQUIRE_EQUAL(state.height(), pool.height());
     BC_REQUIRE_EQUAL(state.previous_timestamp(), pool.previous_timestamp());
     BC_REQUIRE_EQUAL(state.median_time_past(), pool.median_time_past());
+}
+
+// Version promotion.
+// ----------------------------------------------------------------------------
+// Promotions push the parent version into the window, so promoting count blocks
+// of a version leaves count - 1 of them in the window and one as the version.
+
+static chain_state::cptr versioned_state(uint32_t version, size_t count,
+    const settings& settings)
+{
+    auto values = transition_values();
+    values.height = 2000u;
+    values.version.self = version;
+    values.version.ordered = chain_state::versions(count, version);
+    return to_shared<chain_state>(std::move(values), settings);
+}
+
+static chain_state::cptr promote_versions(const chain_state::cptr& state,
+    uint32_t version, size_t count, const settings& settings)
+{
+    auto promoted = state;
+    for (size_t block{}; block < count; ++block)
+    {
+        const chain_state pool{ *promoted, settings };
+        const chain::header header{ version, one_hash, system::hash_digest{},
+            1100u, 0x1e0ffff0u, 0u };
+        promoted = to_shared<chain_state>(pool,
+            chain::block{ header, transactions{} }, settings);
+    }
+
+    return promoted;
+}
+
+static chain_state::versions join_versions(uint32_t first, size_t first_count,
+    uint32_t second, size_t second_count)
+{
+    auto versions = chain_state::versions(first_count, first);
+    versions.insert(versions.end(), second_count, second);
+    return versions;
+}
+
+static chain_state::cptr recounted_state(const chain_state& promoted,
+    uint32_t version, chain_state::versions&& window,
+    const settings& settings)
+{
+    auto values = transition_values();
+    values.height = promoted.height();
+    values.version.self = version;
+    values.version.ordered = std::move(window);
+    return to_shared<chain_state>(std::move(values), settings);
+}
+
+constexpr auto version_rules = flags::bip34_rule | flags::bip66_rule |
+    flags::bip65_rule;
+
+BC_AUTO_TEST_CASE(chain_state__construct__promoted_versions_enter_window__recount_activation)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const auto start = versioned_state(1u, 1000u, settings);
+    const auto promoted = promote_versions(start, 2u, 751u, settings);
+    const auto recounted = recounted_state(*promoted, 2u, join_versions(1u, 250u, 2u, 750u), settings);
+    BC_REQUIRE(to_bool(promoted->flags() & flags::bip34_rule));
+    BC_REQUIRE_EQUAL(promoted->flags() & version_rules, recounted->flags() & version_rules);
+    BC_REQUIRE_EQUAL(promoted->minimum_block_version(), recounted->minimum_block_version());
+}
+
+BC_AUTO_TEST_CASE(chain_state__construct__promoted_versions_enter_window__recount_enforcement)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const auto start = versioned_state(1u, 1000u, settings);
+    const auto promoted = promote_versions(start, 4u, 951u, settings);
+    const auto recounted = recounted_state(*promoted, 4u, join_versions(1u, 50u, 4u, 950u), settings);
+    BC_REQUIRE(to_bool(promoted->flags() & flags::bip65_rule));
+    BC_REQUIRE_EQUAL(promoted->minimum_block_version(), settings.bip65_version);
+    BC_REQUIRE_EQUAL(promoted->flags() & version_rules, recounted->flags() & version_rules);
+    BC_REQUIRE_EQUAL(promoted->minimum_block_version(), recounted->minimum_block_version());
+}
+
+BC_AUTO_TEST_CASE(chain_state__construct__promoted_versions_leave_window__recount_deactivation)
+{
+    settings settings(selection::mainnet);
+    settings.forks.retarget = false;
+    const auto start = versioned_state(4u, 1000u, settings);
+    const auto promoted = promote_versions(start, 1u, 301u, settings);
+    const auto recounted = recounted_state(*promoted, 1u, join_versions(4u, 700u, 1u, 300u), settings);
+    BC_REQUIRE(!to_bool(promoted->flags() & flags::bip65_rule));
+    BC_REQUIRE_EQUAL(promoted->flags() & version_rules, recounted->flags() & version_rules);
+    BC_REQUIRE_EQUAL(promoted->minimum_block_version(), recounted->minimum_block_version());
 }
 
 // Two block periods with a threshold of one: locked in at boundary 2 by the
