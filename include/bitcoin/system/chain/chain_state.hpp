@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 
-#include <deque>
+#include <vector>
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
@@ -45,9 +45,9 @@ class BC_API chain_state
 public:
     DELETE_COPY_MOVE_DESTRUCT(chain_state);
 
-    typedef std::deque<uint32_t> bitss;
-    typedef std::deque<uint32_t> versions;
-    typedef std::deque<uint32_t> timestamps;
+    typedef std::vector<uint32_t> bitss;
+    typedef std::vector<uint32_t> versions;
+    typedef std::vector<uint32_t> timestamps;
     typedef std::shared_ptr<const chain_state> cptr;
     typedef struct { size_t count; size_t high; } range;
 
@@ -184,6 +184,12 @@ public:
         {
             uint32_t self{};
             versions ordered{};
+
+            /// Counts of ordered values at or above the bip34, bip66 and
+            /// bip65 versions.
+            size_t bip34{};
+            size_t bip66{};
+            size_t bip65{};
         } version;
 
         /// Values must be ordered by height with high (block - 1) last.
@@ -271,6 +277,10 @@ protected:
         /// The minimum block version required at this height.
         uint32_t minimum_block_version;
     };
+
+    /// Set the version counts from the ordered versions.
+    static void count_versions(data& values,
+        const system::settings& settings) NOEXCEPT;
 
     /// No failure sentinel.
     static activations activation(const data& values,
