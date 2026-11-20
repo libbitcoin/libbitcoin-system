@@ -173,6 +173,38 @@ struct line_state
     }
 };
 
+// Rows: P=0 (no fee), C=1 and D=2 (spend P), Q=3. Inputs: 0 P spends X:0,
+// 1 C spends P:0, 2 D spends P:1, 3 Q spends Y:0.
+struct fork_state
+{
+    fork_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 4> cells{ { unlabeled, unlabeled, unlabeled, unlabeled } };
+    std_array<link_t, 4> children{ { 1, none, none, none } };
+    std_array<edges_t, 4> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 } } };
+    std_array<totals_t, 4> totals
+    {
+        { { 0, 100, 0 }, { 60, 100, 0 }, { 60, 100, 0 }, { 35, 100, 0 } }
+    };
+    std_array<link_t, 4> parents{ { none, 0, 0, none } };
+    std_array<link_t, 4> siblings{ { none, 2, none, none } };
+    std_array<link_t, 4> rivals{ { none, none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
 // Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
 // 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
@@ -1537,7 +1569,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__chain__whole_chunk)
     BC_REQUIRE(marks[2] == mark::taken);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_deeper_than_depth__taken_in_rounds)
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chain_deeper_than_depth__whole_closure)
 {
     line_state line{};
     std_array<mark, 3> marks{};
@@ -1581,6 +1613,37 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__excluded_parent__descendant_not_taken)
     BC_REQUIRE_EQUAL(out.size(), 1u);
     BC_REQUIRE_EQUAL(out[0], 0u);
     BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+// The parent with both children (400) outrates Q (350), which outrates the
+// parent with one child (300).
+BC_AUTO_TEST_CASE(pool_algorithm__pack__shared_parent__closure_outrates_row)
+{
+    fork_state fork{};
+    std_array<mark, 4> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, fork.columns(), { 0, 300, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+    BC_REQUIRE(marks[3] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__project__shared_parent__closure_then_row)
+{
+    fork_state fork{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks.resize(4);
+    accessor::project(rows, out, fork.columns(), { 0, 1'000, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 4u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
+    BC_REQUIRE_EQUAL(out.blocks[0].size(), 2u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 400u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].size, 300u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 350u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].size, 100u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__pack__empty_budget__empty)

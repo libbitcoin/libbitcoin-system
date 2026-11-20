@@ -477,6 +477,17 @@ protected:
         const std::span<const mark>& marks, const graph_t& graph, link_t row,
         size_t depth, const totals_t& available) NOEXCEPT;
 
+    /// The untaken rows connected to the row by parent and child, false if
+    /// one has an excluded parent or they exceed maximum_members.
+    static bool cluster(std::vector<link_t>& out,
+        const std::span<const mark>& marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
+
+    /// The highest rate ancestry closed subset of the cluster, ascending.
+    static void closure(std::vector<link_t>& out, totals_t& sum,
+        const graph_t& graph, const std::vector<link_t>& cluster,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
     /// The cell of the row with its derived causes recomputed.
     static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;
 
