@@ -231,6 +231,11 @@ public:
     static constexpr uint64_t chargeable(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
+    /// Chargeable size of the members of the outcome.
+    static constexpr uint64_t chargeable(mask_t outcome,
+        const component_t& component, const graph_t& graph,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
     /// Fee rate of a row (satoshis per chargeable kilobyte).
     static constexpr uint64_t fee_rate(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
@@ -322,10 +327,12 @@ public:
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
 
-    /// Rows absent from the best outcome of their component marked excluded.
+    /// Rows absent from the best outcome of their component, by fee less
+    /// the rate on its size, marked excluded; true if any had a choice.
     template <typename Word = xint512_t>
-    static void resolve(std::span<mark> marks, const columns_t& columns,
-        size_t maximum_outcomes) NOEXCEPT;
+    static bool resolve(std::span<mark> marks, const columns_t& columns,
+        size_t maximum_outcomes, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// The unmarked rows taken by chunk rate within the budget, ascending.
     static void pack(std::vector<link_t>& out, std::span<mark> marks,
@@ -343,6 +350,10 @@ public:
     /// Chargeable size of the takes at or above the rate.
     static constexpr uint64_t above(const std::span<const take_t>& takes,
         uint64_t rate) NOEXCEPT;
+
+    /// Lowest rate of the takes (the cutoff of a block), zero if none.
+    static constexpr uint64_t cutoff(
+        const std::span<const take_t>& takes) NOEXCEPT;
 
     /// Lowest rate taken within the count of blocks, max_uint64 if none.
     template <typename Arrivals>
@@ -427,10 +438,21 @@ protected:
     static constexpr mask_t losers(const component_t& component,
         size_t index) NOEXCEPT;
 
-    /// Index of the outcome of highest fee (the first of equals).
+    /// Index of the outcome of highest fee less the rate on its size (the
+    /// first of equals).
     template <typename Word>
     static constexpr size_t best(const std::span<const mask_t>& outcomes,
-        const component_t& component, const graph_t& graph) NOEXCEPT;
+        const component_t& component, const graph_t& graph, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// The outcome of a winner per clique by fee less the rate on its size.
+    static constexpr mask_t greedy(const component_t& component,
+        const graph_t& graph, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
+
+    /// The first fee and size are worth more than the second at the rate.
+    static constexpr bool worth(uint64_t fee, uint64_t size, uint64_t other_fee,
+        uint64_t other_size, uint64_t rate) NOEXCEPT;
 
     /// The row and its descendants marked excluded.
     static void discard(std::span<mark> marks, const graph_t& graph,

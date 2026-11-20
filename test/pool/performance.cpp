@@ -702,7 +702,8 @@ static bool report_template(const std::string& name, size_t count) NOEXCEPT
     {
         links_t out{};
         std_vector<algorithm::mark> marks(count);
-        algorithm::resolve(marks, spans, template_outcomes);
+        algorithm::resolve(marks, spans, template_outcomes, 0,
+            template_sigop_bytes);
         algorithm::pack(out, marks, spans, template_budget, template_depth,
             template_sigop_bytes);
 
@@ -714,7 +715,8 @@ static bool report_template(const std::string& name, size_t count) NOEXCEPT
         links_t out{};
         algorithm::projection_t projection{};
         projection.marks.resize(count);
-        algorithm::resolve(projection.marks, spans, template_outcomes);
+        algorithm::resolve(projection.marks, spans, template_outcomes, 0,
+            template_sigop_bytes);
         for (size_t block{}; block < template_blocks; ++block)
             algorithm::project(out, projection, spans, template_budget,
                 template_depth, template_sigop_bytes);

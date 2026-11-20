@@ -82,6 +82,23 @@ constexpr uint64_t algorithm::chargeable(const totals_t& totals,
     return greater(totals.size, cost);
 }
 
+constexpr uint64_t algorithm::chargeable(mask_t outcome,
+    const component_t& component, const graph_t& graph,
+    uint32_t bytes_per_sigop) NOEXCEPT
+{
+    uint64_t bytes{};
+    for (size_t member{}; member < component.count; ++member)
+    {
+        if (!get_right(outcome, member))
+            continue;
+
+        const auto row = totals(graph, component.rows[member]);
+        bytes = ceilinged_add(bytes, chargeable(row, bytes_per_sigop));
+    }
+
+    return bytes;
+}
+
 constexpr uint64_t algorithm::fee_rate(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
@@ -469,8 +486,9 @@ inline bool algorithm::unconfirm(const columns_t& columns,
 // ----------------------------------------------------------------------------
 
 template <typename Word>
-inline void algorithm::resolve(std::span<mark> marks,
-    const columns_t& columns, size_t maximum_outcomes) NOEXCEPT
+inline bool algorithm::resolve(std::span<mark> marks,
+    const columns_t& columns, size_t maximum_outcomes, uint64_t rate,
+    uint32_t bytes_per_sigop) NOEXCEPT
 {
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
@@ -480,6 +498,7 @@ inline void algorithm::resolve(std::span<mark> marks,
         marks[row] = present ? mark::unmarked : mark::excluded;
     }
 
+    auto contested = false;
     std::vector<mask_t> masks{};
     for (size_t at{}; at < count; ++at)
     {
@@ -493,7 +512,8 @@ inline void algorithm::resolve(std::span<mark> marks,
         const auto collected = collect(component, graph, row);
         const auto related = collected && relate(component, graph);
         const auto limit = related ? maximum_outcomes : zero;
-        const auto total = std::min(outcomes(component), limit);
+        const auto leaves = outcomes(component);
+        const auto total = std::min(leaves, limit);
 
         if (is_zero(total))
         {
@@ -505,11 +525,20 @@ inline void algorithm::resolve(std::span<mark> marks,
         for (size_t index{}; index < total; ++index)
             masks[index] = outcome(component, index);
 
-        const auto chosen = masks[best<Word>(masks, component, graph)];
+        // Leaves past the bound are represented by a greedy leaf.
+        if (leaves > total)
+            masks.push_back(greedy(component, graph, rate, bytes_per_sigop));
+
+        contested |= leaves > one;
+        const auto chosen = masks[best<Word>(masks, component, graph, rate,
+            bytes_per_sigop)];
+
         for (size_t member{}; member < component.count; ++member)
             if (!get_right(chosen, member))
                 discard(marks, graph, component.rows[member]);
     }
+
+    return contested;
 }
 
 inline void algorithm::pack(std::vector<link_t>& out, std::span<mark> marks,
@@ -536,6 +565,15 @@ inline void algorithm::project(std::vector<link_t>& out,
 
 // Estimate (projected blocks).
 // ----------------------------------------------------------------------------
+
+constexpr uint64_t algorithm::cutoff(
+    const std::span<const take_t>& takes) NOEXCEPT
+{
+    if (takes.empty())
+        return zero;
+
+    return std::ranges::min(takes, {}, &take_t::rate).rate;
+}
 
 constexpr uint64_t algorithm::above(const std::span<const take_t>& takes,
     uint64_t rate) NOEXCEPT
@@ -785,21 +823,76 @@ constexpr algorithm::mask_t algorithm::losers(const component_t& component,
 
 template <typename Word>
 constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
-    const component_t& component, const graph_t& graph) NOEXCEPT
+    const component_t& component, const graph_t& graph, uint64_t rate,
+    uint32_t bytes_per_sigop) NOEXCEPT
 {
     size_t out{};
     uint64_t most{};
+    uint64_t least{};
+    auto first = true;
     each_fee<Word>(zero, outcomes, component, graph,
         [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            if (fee > most)
+            const auto size = is_zero(rate) ? zero : chargeable(
+                outcomes[index], component, graph, bytes_per_sigop);
+
+            if (first || worth(fee, size, most, least, rate))
             {
+                first = false;
                 most = fee;
+                least = size;
                 out = index;
             }
         });
 
     return out;
+}
+
+constexpr algorithm::mask_t algorithm::greedy(const component_t& component,
+    const graph_t& graph, uint64_t rate, uint32_t bytes_per_sigop) NOEXCEPT
+{
+    mask_t lost{};
+    for (size_t contest{}; contest < component.contests; ++contest)
+    {
+        mask_t winner{};
+        uint64_t fee{};
+        uint64_t size{};
+        const auto clique = component.cliques[contest];
+        for (size_t member{}; member < component.count; ++member)
+        {
+            if (!get_right(clique, member) || get_right(lost, member))
+                continue;
+
+            const auto row = totals(graph, component.rows[member]);
+            const auto bytes = chargeable(row, bytes_per_sigop);
+            if (is_zero(winner) || worth(row.fee, bytes, fee, size, rate))
+            {
+                winner = set_right(mask_t{}, member);
+                fee = row.fee;
+                size = bytes;
+            }
+        }
+
+        lost |= bit_and(clique, bit_not(winner));
+    }
+
+    auto out = bit_and(unmask_right<mask_t>(component.count), bit_not(lost));
+    for (size_t member{}; member < component.count; ++member)
+        if (is_nonzero(bit_and(component.ancestors[member], lost)))
+            out = set_right(out, member, false);
+
+    return out;
+}
+
+constexpr bool algorithm::worth(uint64_t fee, uint64_t size,
+    uint64_t other_fee, uint64_t other_size, uint64_t rate) NOEXCEPT
+{
+    // Fee less the rate on size, compared in satoshis per virtual kilobyte.
+    const auto value = ceilinged_add(ceilinged_multiply(fee, 1'000_u64),
+        ceilinged_multiply(rate, other_size));
+    const auto other = ceilinged_add(ceilinged_multiply(other_fee, 1'000_u64),
+        ceilinged_multiply(rate, size));
+    return value > other;
 }
 
 inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
