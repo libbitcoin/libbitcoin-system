@@ -245,7 +245,11 @@ bool ipv6::is_loopback() const NOEXCEPT
 
 bool ipv6::is_unspecified() const NOEXCEPT
 {
-    return bytes_ == bytes_type{};
+    // MSVC 14.52 compiles == bytes_type{} to an aligned load (unaligned here).
+    return std::all_of(bytes_.begin(), bytes_.end(), [](uint8_t byte) NOEXCEPT
+    {
+        return is_zero(byte);
+    });
 }
 
 bool ipv6::is_v4_mapped() const NOEXCEPT
