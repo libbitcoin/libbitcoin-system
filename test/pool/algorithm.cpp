@@ -189,7 +189,10 @@ struct fork_state
         rivals = stored(rivals);
     }
 
-    std_array<link_t, 4> cells{ { unlabeled, unlabeled, unlabeled, unlabeled } };
+    std_array<link_t, 4> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled }
+    };
     std_array<link_t, 4> children{ { 1, none, none, none } };
     std_array<edges_t, 4> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 } } };
     std_array<totals_t, 4> totals

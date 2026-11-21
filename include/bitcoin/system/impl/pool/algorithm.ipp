@@ -1079,8 +1079,10 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     {
         totals_t sum{};
         if (chunk(rows, sum, marks, graph, row, depth, available()))
-            scores.push_back({ row, fee_rate(sum, bytes_per_sigop), sum,
-                rows, false });
+        {
+            const auto rate = fee_rate(sum, bytes_per_sigop);
+            scores.push_back({ row, rate, sum, rows, false });
+        }
     };
 
     for (auto taken = true; taken;)
@@ -1105,8 +1107,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
             if (whole && fits(sum, available()))
             {
-                scores.push_back({ rows.front(),
-                    fee_rate(sum, bytes_per_sigop), sum, rows, true });
+                const auto rate = fee_rate(sum, bytes_per_sigop);
+                scores.push_back({ rows.front(), rate, sum, rows, true });
                 continue;
             }
 
