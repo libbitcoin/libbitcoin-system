@@ -78,15 +78,6 @@ bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
     const std::span<const uint32_t>& rows,
     const std::span<const uint32_t>& rivals) NOEXCEPT;
 
-/// Mark the pool cells by context in place on gpu, with the count
-/// insufficient, passes and transfer reported. False if gpu is not available,
-/// cannot hold the columns, or failed, which disables it.
-bool suffice(pool::report_t& out, size_t& failed,
-    const std::span<uint32_t>& cells, const std::span<const uint32_t>& flags,
-    const std::span<const uint32_t>& heights,
-    const std::span<const uint32_t>& medians,
-    const pool::algorithm::context_t& context, uint32_t required) NOEXCEPT;
-
 } // namespace cuda
 } // namespace system
 } // namespace libbitcoin

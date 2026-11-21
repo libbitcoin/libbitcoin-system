@@ -39,6 +39,16 @@ BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 // The derived causes are recomputed from none, so absence only rises during
 // the passes and each pass is monotone.
 
+constexpr bool algorithm::is_clear(
+    const std::span<const link_t>& cells) NOEXCEPT
+{
+    return std::ranges::none_of(cells, [](link_t value) NOEXCEPT
+    {
+        const auto cell = from_column(value);
+        return is_boundary(cell) || is_absent(reduced(cell));
+    });
+}
+
 template <typename Word>
 constexpr void algorithm::reset(const columns_t& columns) NOEXCEPT
 {

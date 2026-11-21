@@ -38,7 +38,9 @@ report_t settle(const algorithm::columns_t& columns) NOEXCEPT
     const auto& rivals = columns.rivals;
     report_t out{ cells.size() };
 
-    out.device = cuda::settle(out, cells, edges, rows, rivals);
+    out.device = !algorithm::is_clear(cells) &&
+        cuda::settle(out, cells, edges, rows, rivals);
+
     if (!out.device)
     {
         algorithm::reset(columns);
