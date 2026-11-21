@@ -528,13 +528,7 @@ static bool report_suffice(const std::string& name,
     const auto lanes256 = report_suffice_as<xint256_t>("256", columns, same, at);
     const auto lanes512 = report_suffice_as<xint512_t>("512", columns, same, at);
     const auto entry = report_entry("entry", columns, same, bytes, sweep);
-
-    // The entry falls back to the lanes with the gpu disabled.
-    batched::accelerate(false);
-    const auto fallback = report_entry("entry", columns, same, bytes, sweep);
-    batched::accelerate(true);
-
-    return scalar && lanes128 && lanes256 && lanes512 && entry && fallback;
+    return scalar && lanes128 && lanes256 && lanes512 && entry;
 }
 
 // The block confirmed (or unconfirmed) by the columns: the cells set, then

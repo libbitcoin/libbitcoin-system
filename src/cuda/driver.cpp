@@ -102,16 +102,6 @@ bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
         context::instance().settle(out, cells, edges, rows, rivals);
 }
 
-bool suffice(pool::report_t& out, size_t& failed,
-    const std::span<uint32_t>& cells, const std::span<const uint32_t>& flags,
-    const std::span<const uint32_t>& heights,
-    const std::span<const uint32_t>& medians,
-    const pool::algorithm::context_t& context, uint32_t required) NOEXCEPT
-{
-    return available() && context::instance().suffice(out, failed, cells,
-        flags, heights, medians, context, required);
-}
-
 #else
 
 bool compiled() NOEXCEPT
@@ -165,14 +155,6 @@ bool settle(pool::report_t&, const std::span<uint32_t>&,
     const std::span<const pool::algorithm::edges_t>&,
     const std::span<const uint32_t>&,
     const std::span<const uint32_t>&) NOEXCEPT
-{
-    return false;
-}
-
-bool suffice(pool::report_t&, size_t&, const std::span<uint32_t>&,
-    const std::span<const uint32_t>&, const std::span<const uint32_t>&,
-    const std::span<const uint32_t>&,
-    const pool::algorithm::context_t&, uint32_t) NOEXCEPT
 {
     return false;
 }

@@ -381,6 +381,10 @@ public:
     template <typename Word = xint512_t>
     static constexpr bool propagate(const columns_t& columns) NOEXCEPT;
 
+    /// No cell confirmed or absent for a stored cause (settles in one pass).
+    static constexpr bool is_clear(
+        const std::span<const link_t>& cells) NOEXCEPT;
+
     /// Each absent cell left its stored causes, rivals of the confirmed absent.
     template <typename Word = xint512_t>
     static constexpr void reset(const columns_t& columns) NOEXCEPT;

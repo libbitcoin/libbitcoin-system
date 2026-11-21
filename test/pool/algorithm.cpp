@@ -896,6 +896,29 @@ BC_AUTO_TEST_CASE(pool_algorithm__lowered__cells__expected)
     BC_REQUIRE_EQUAL(accessor::lowered(absent, accessor::conflicted), unlabeled);
 }
 
+BC_AUTO_TEST_CASE(pool_algorithm__is_clear__present_or_derived__true)
+{
+    state out{};
+    BC_REQUIRE(accessor::is_clear(out.cells));
+    out.cells[1] = accessor::to_column(rivaled);
+    out.cells[3] = accessor::to_column(inherited);
+    BC_REQUIRE(accessor::is_clear(out.cells));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__is_clear__stored_cause__false)
+{
+    state out{};
+    out.cells[1] = accessor::to_column(bit_or(conflicted, accessor::ancestor));
+    BC_REQUIRE(!accessor::is_clear(out.cells));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__is_clear__confirmed__false)
+{
+    state out{};
+    out.cells[0] = accessor::to_column(boundary);
+    BC_REQUIRE(!accessor::is_clear(out.cells));
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__descend__confirmed_rival__rival_and_its_child_absent)
 {
     state out{};
@@ -1011,6 +1034,16 @@ BC_AUTO_TEST_CASE(pool_algorithm__settle__wide__same_as_descend)
     BC_REQUIRE(out.cells == expected.cells);
     BC_REQUIRE_EQUAL(report.rows, wide_rows);
     BC_REQUIRE(is_nonzero(report.passes));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__settle__clear__lanes_one_pass)
+{
+    state out{};
+    out.cells[3] = accessor::to_column(inherited);
+    const auto report = pool::settle(out.columns());
+    BC_REQUIRE(!report.device);
+    BC_REQUIRE_EQUAL(report.passes, 1u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 3), unlabeled);
 }
 
 // suffice (columns)
@@ -1204,6 +1237,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__suffice__entry__same_as_integral)
     BC_REQUIRE_EQUAL(count, 4u);
     BC_REQUIRE_EQUAL(report.rows, context_rows);
     BC_REQUIRE_EQUAL(report.passes, 1u);
+    BC_REQUIRE(!report.device);
 }
 
 // collect (frontier and columns)

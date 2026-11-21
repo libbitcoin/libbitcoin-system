@@ -344,25 +344,6 @@ protected:
     }
 };
 
-class sufficer
-  : public pool::algorithm
-{
-public:
-    static __device__ void suffice(const cuda::context_arguments& arguments,
-        link_t row) NOEXCEPT
-    {
-        columns_t table{};
-        table.cells = { arguments.cells, arguments.row_count };
-        table.flags = { arguments.flags, arguments.row_count };
-        table.heights = { arguments.heights, arguments.row_count };
-        table.medians = { arguments.medians, arguments.row_count };
-        if (algorithm::suffice(table, row, arguments.context,
-            arguments.required))
-            __nvvm_atom_add_gen_i(reinterpret_cast<int*>(arguments.failed),
-                1);
-    }
-};
-
 } // namespace cuda
 
 namespace secp256k1 {
@@ -471,11 +452,4 @@ extern "C" __global__ void descend_pool(pool_arguments arguments)
     const auto input = verifier::row();
     if (input < arguments.input_count)
         settler::descend(arguments, input);
-}
-
-extern "C" __global__ void suffice_pool(context_arguments arguments)
-{
-    const auto row = verifier::row();
-    if (row < arguments.row_count)
-        sufficer::suffice(arguments, row);
 }
