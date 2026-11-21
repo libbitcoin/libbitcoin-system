@@ -325,7 +325,7 @@
     ],
     "buildPresets": [
         {
-            "name": "nix-target-list",
+            "name": "target-list",
             "hidden": true,
             "targets": [
                 "libbitcoin-system",
@@ -336,97 +336,97 @@
         {
             "name": "nix-gnu-debug-static",
             "displayName": "*nix/GNU/Debug/Static",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-debug-static"
         },
         {
             "name": "nix-gnu-debug-shared",
             "displayName": "*nix/GNU/Debug/Shared",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-debug-shared"
         },
         {
             "name": "nix-gnu-release-static",
             "displayName": "*nix/GNU/Release/Static",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-release-static"
         },
         {
             "name": "nix-gnu-release-shared",
             "displayName": "*nix/GNU/Release/Shared",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-release-shared"
         },
         {
             "name": "nix-gnu-debug-static-native",
             "displayName": "*nix/GNU/Debug/Static/Native",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-debug-static-native"
         },
         {
             "name": "nix-gnu-debug-shared-native",
             "displayName": "*nix/GNU/Debug/Shared/Native",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-debug-shared-native"
         },
         {
             "name": "nix-gnu-release-static-native",
             "displayName": "*nix/GNU/Release/Static/Native",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-release-static-native"
         },
         {
             "name": "nix-gnu-release-shared-native",
             "displayName": "*nix/GNU/Release/Shared/Native",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "nix-gnu-release-shared-native"
         },
         {
             "name": "win-msvc-debug-static",
             "displayName": "Windows/MSVC/Debug/Static",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-msvc-debug-static"
         },
         {
             "name": "win-msvc-release-static",
             "displayName": "Windows/MSVC/Release/Static",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-msvc-release-static"
         },
         {
             "name": "win-msvc-debug-shared",
             "displayName": "Windows/MSVC/Debug/Shared",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-msvc-debug-shared"
         },
         {
             "name": "win-msvc-release-shared",
             "displayName": "Windows/MSVC/Release/Shared",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-msvc-release-shared"
         },
         {
             "name": "win-clangcl-debug-static",
             "displayName": "Windows/clang-cl/Debug/Static",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-clangcl-debug-static"
         },
         {
             "name": "win-clangcl-release-static",
             "displayName": "Windows/clang-cl/Release/Static",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-clangcl-release-static"
         },
         {
             "name": "win-clangcl-debug-shared",
             "displayName": "Windows/clang-cl/Debug/Shared",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-clangcl-debug-shared"
         },
         {
             "name": "win-clangcl-release-shared",
             "displayName": "Windows/clang-cl/Release/Shared",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "win-clangcl-release-shared"
         }
     ]
