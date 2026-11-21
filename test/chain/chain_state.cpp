@@ -1050,8 +1050,10 @@ static chain_state::cptr promote_versions(const chain_state::cptr& state,
     for (size_t block{}; block < count; ++block)
     {
         const chain_state pool{ *promoted, settings };
-        const chain::header header{ version, one_hash, system::hash_digest{},
-            1100u, 0x1e0ffff0u, 0u };
+        const chain::header header
+        {
+            version, one_hash, system::hash_digest{}, 1100u, 0x1e0ffff0u, 0u
+        };
         promoted = to_shared<chain_state>(pool,
             chain::block{ header, transactions{} }, settings);
     }
