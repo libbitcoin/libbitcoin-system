@@ -1074,6 +1074,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     visits_t seen{ std::vector<link_t>(live), base };
     visits_t below{ std::vector<link_t>(live), base };
     visits_t walk{ std::vector<link_t>(live), base };
+    flow_t flow{};
     size_t offers{};
     auto heaped = false;
     totals_t used{};
@@ -1171,7 +1172,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         }
         else if (whole)
         {
-            closure(rows, sum, graph, group, bytes_per_sigop);
+            closure(rows, sum, flow, graph, group, bytes_per_sigop);
         }
 
         if (whole && fits(sum, available()))
@@ -1465,115 +1466,160 @@ inline bool algorithm::cluster(std::vector<link_t>& out, visits_t& visits,
 // found (fee times its size less size times its fee, a minimum cut) is
 // positive until no closure has a higher rate.
 inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
-    const graph_t& graph, const std::vector<link_t>& cluster,
+    flow_t& flow, const graph_t& graph, const std::vector<link_t>& cluster,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
+    // A node is a row in ascending order, a link a node to a parent node.
     const auto count = cluster.size();
-    const auto source = count;
-    const auto sink = add1(count);
-    const auto nodes = count + two;
-    std::vector<uint64_t> fees(count);
-    std::vector<uint64_t> sizes(count);
-    std::vector<std::vector<size_t>> parents(count);
+    const auto end = std::next(flow.rows.begin(), count);
+    std::copy(cluster.begin(), cluster.end(), flow.rows.begin());
+    std::sort(flow.rows.begin(), end);
+
+    size_t links{};
+    uint64_t fee{};
+    uint64_t size{};
     for (size_t node{}; node < count; ++node)
     {
-        const auto& row = totals(graph, cluster[node]);
-        fees[node] = row.fee;
-        sizes[node] = chargeable(row, bytes_per_sigop);
+        const auto row = flow.rows[node];
+        const auto own = totals(graph, row);
+        flow.fees[node] = own.fee;
+        flow.sizes[node] = chargeable(own, bytes_per_sigop);
+        fee = ceilinged_add(fee, flow.fees[node]);
+        size = ceilinged_add(size, flow.sizes[node]);
 
-        const auto slice = edges(graph, cluster[node]);
+        mask_t parents{};
+        const auto slice = edges(graph, row);
         for (auto input = slice.first; input < slice.first + slice.count;
             ++input)
         {
-            const auto it = std::ranges::find(cluster, parent(graph, input));
-            if (it != cluster.end())
-                parents[node].push_back(std::distance(cluster.begin(), it));
+            const auto up = parent(graph, input);
+            const auto it = std::lower_bound(flow.rows.begin(), end, up);
+            if (it != end && *it == up)
+                set_right_into(parents, to_unsigned(std::distance(
+                    flow.rows.begin(), it)));
         }
+
+        flow.parents[node] = parents;
+        flow.links[node] = links;
+        links += ones_count(parents);
     }
 
-    const auto weigh = [&](const std::vector<bool>& in, uint64_t& fee,
-        uint64_t& size) NOEXCEPT
+    const auto link = [&](size_t node, size_t up) NOEXCEPT
     {
-        fee = zero;
-        size = zero;
-        for (size_t node{}; node < count; ++node)
+        const auto before = unmask_right<mask_t>(up);
+        return flow.links[node] + ones_count(bit_and(flow.parents[node],
+            before));
+    };
+
+    const auto weigh = [&](mask_t nodes, uint64_t& fees,
+        uint64_t& sizes) NOEXCEPT
+    {
+        fees = zero;
+        sizes = zero;
+        for (; is_nonzero(nodes); nodes &= sub1(nodes))
         {
-            if (in[node])
-            {
-                fee = ceilinged_add(fee, fees[node]);
-                size = ceilinged_add(size, sizes[node]);
-            }
+            const auto node = right_zeros(nodes);
+            fees = ceilinged_add(fees, flow.fees[node]);
+            sizes = ceilinged_add(sizes, flow.sizes[node]);
         }
     };
 
-    std::vector<bool> best(count, true);
-    uint64_t fee{}, size{};
-    weigh(best, fee, size);
-
-    std::vector<uint128_t> capacity(nodes * nodes);
-    std::vector<size_t> from(nodes);
-    std::vector<bool> reached(nodes);
-    std::vector<size_t> queue{};
-    const auto at = [&](size_t left, size_t right) NOEXCEPT -> uint128_t&
+    // The source feeds each node its fee at the size, each node feeds the
+    // sink its size at the fee, and a node feeds its parents without limit.
+    // The nodes reached from the source when no more can flow are the
+    // closure, and a node passes at once what its own two limits allow.
+    const auto cut = [&]() NOEXCEPT
     {
-        return capacity[left * nodes + right];
-    };
-
-    // Reachability from the source in the residual, the path in from.
-    const auto search = [&]() NOEXCEPT
-    {
-        reached.assign(nodes, false);
-        reached[source] = true;
-        queue.assign(one, source);
-        for (size_t next{}; next < queue.size(); ++next)
+        flow.flows.assign(links, uint128_t{});
+        for (size_t node{}; node < count; ++node)
         {
-            const auto node = queue[next];
-            for (size_t other{}; other < nodes; ++other)
+            const auto gain = uint128_t{ flow.fees[node] } * size;
+            const auto cost = uint128_t{ flow.sizes[node] } * fee;
+            const auto both = std::min(gain, cost);
+            flow.source[node] = gain - both;
+            flow.sink[node] = cost - both;
+            flow.fed[node] = {};
+        }
+
+        while (true)
+        {
+            // The path to each node reached is by the node before it, the
+            // source if count.
+            mask_t reached{};
+            size_t head{};
+            size_t tail{};
+            for (size_t node{}; node < count; ++node)
             {
-                if (!reached[other] && at(node, other) != uint128_t{})
+                if (flow.source[node] != uint128_t{})
                 {
-                    reached[other] = true;
-                    from[other] = node;
-                    queue.push_back(other);
+                    set_right_into(reached, node);
+                    flow.before[node] = count;
+                    flow.queue[tail++] = node;
                 }
             }
-        }
 
-        return reached[sink];
-    };
-
-    while (count > one && size > zero)
-    {
-        uint128_t infinite{ one };
-        std::ranges::fill(capacity, uint128_t{});
-        for (size_t node{}; node < count; ++node)
-        {
-            at(source, node) = uint128_t{ fees[node] } * size;
-            at(node, sink) = uint128_t{ sizes[node] } * fee;
-            infinite += at(source, node);
-        }
-
-        for (size_t node{}; node < count; ++node)
-            for (const auto up: parents[node])
-                at(node, up) = infinite;
-
-        while (search())
-        {
-            auto flow = infinite;
-            for (auto node = sink; node != source; node = from[node])
-                flow = std::min(flow, at(from[node], node));
-
-            for (auto node = sink; node != source; node = from[node])
+            auto last = count;
+            while (head < tail && last == count)
             {
-                at(from[node], node) -= flow;
-                at(node, from[node]) += flow;
+                const auto node = flow.queue[head++];
+                if (flow.sink[node] != uint128_t{})
+                {
+                    last = node;
+                    break;
+                }
+
+                // Flow moves to a parent, or back to a child that fed it.
+                const auto next = bit_or(flow.parents[node], flow.fed[node]);
+                for (auto more = bit_and(next, bit_not(reached));
+                    is_nonzero(more); more &= sub1(more))
+                {
+                    const auto other = right_zeros(more);
+                    set_right_into(reached, other);
+                    flow.before[other] = node;
+                    flow.queue[tail++] = other;
+                }
+            }
+
+            if (last == count)
+                return reached;
+
+            auto amount = flow.sink[last];
+            auto node = last;
+            for (; flow.before[node] != count; node = flow.before[node])
+            {
+                const auto from = flow.before[node];
+                if (!get_right(flow.parents[from], node))
+                    amount = std::min(amount, flow.flows[link(node, from)]);
+            }
+
+            amount = std::min(amount, flow.source[node]);
+            flow.source[node] -= amount;
+            flow.sink[last] -= amount;
+            for (node = last; flow.before[node] != count;
+                node = flow.before[node])
+            {
+                const auto from = flow.before[node];
+                if (get_right(flow.parents[from], node))
+                {
+                    flow.flows[link(from, node)] += amount;
+                    set_right_into(flow.fed[node], from);
+                    continue;
+                }
+
+                auto& back = flow.flows[link(node, from)];
+                back -= amount;
+                if (back == uint128_t{})
+                    flow.fed[from] = set_right(flow.fed[from], node, false);
             }
         }
+    };
 
-        const std::vector<bool> found(reached.begin(),
-            std::next(reached.begin(), count));
-
-        uint64_t found_fee{}, found_size{};
+    auto best = unmask_right<mask_t>(count);
+    while (count > one && is_nonzero(size))
+    {
+        uint64_t found_fee{};
+        uint64_t found_size{};
+        const auto found = cut();
         weigh(found, found_fee, found_size);
         if (is_zero(found_size) || uint128_t{ found_fee } * size <=
             uint128_t{ found_size } * fee)
@@ -1586,19 +1632,15 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
 
     out.clear();
     sum = {};
-    for (size_t node{}; node < count; ++node)
+    for (; is_nonzero(best); best &= sub1(best))
     {
-        if (best[node])
-        {
-            const auto& add = totals(graph, cluster[node]);
-            out.push_back(cluster[node]);
-            sum.fee = ceilinged_add(sum.fee, add.fee);
-            sum.size = ceilinged_add(sum.size, add.size);
-            sum.sigops = ceilinged_add(sum.sigops, add.sigops);
-        }
+        const auto row = flow.rows[right_zeros(best)];
+        const auto own = totals(graph, row);
+        out.push_back(row);
+        sum.fee = ceilinged_add(sum.fee, own.fee);
+        sum.size = ceilinged_add(sum.size, own.size);
+        sum.sigops = ceilinged_add(sum.sigops, own.sigops);
     }
-
-    std::sort(out.begin(), out.end());
 }
 
 inline algorithm::link_t algorithm::resolved(const graph_t& graph,

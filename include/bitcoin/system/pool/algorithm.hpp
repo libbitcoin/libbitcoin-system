@@ -517,10 +517,28 @@ protected:
         const std::span<const mark>& marks, const graph_t& graph, link_t row,
         bool bounded) NOEXCEPT;
 
-    /// The highest rate ancestry closed subset of the cluster, ascending.
+    /// The rows of a cluster as nodes, with the flow from their fees to
+    /// their sizes that leaves its best closure.
+    struct flow_t
+    {
+        std_array<link_t, maximum_members> rows{};
+        std_array<uint64_t, maximum_members> fees{};
+        std_array<uint64_t, maximum_members> sizes{};
+        std_array<mask_t, maximum_members> parents{};
+        std_array<mask_t, maximum_members> fed{};
+        std_array<size_t, maximum_members> links{};
+        std_array<size_t, maximum_members> before{};
+        std_array<size_t, maximum_members> queue{};
+        std_array<uint128_t, maximum_members> source{};
+        std_array<uint128_t, maximum_members> sink{};
+        std::vector<uint128_t> flows{};
+    };
+
+    /// The highest rate ancestry closed subset of the cluster, ascending,
+    /// the cluster of no more than maximum_members.
     static void closure(std::vector<link_t>& out, totals_t& sum,
-        const graph_t& graph, const std::vector<link_t>& cluster,
-        uint32_t bytes_per_sigop) NOEXCEPT;
+        flow_t& flow, const graph_t& graph,
+        const std::vector<link_t>& cluster, uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// The cell of the row with its derived causes recomputed.
     static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;
