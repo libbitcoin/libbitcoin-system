@@ -526,6 +526,15 @@ protected:
         const std::span<const mark>& marks, const graph_t& graph, link_t row,
         bool bounded) NOEXCEPT;
 
+    /// What is left to flow from the source, to the sink and over each link.
+    template <typename Capacity>
+    struct residual_t
+    {
+        std_array<Capacity, maximum_members> source{};
+        std_array<Capacity, maximum_members> sink{};
+        std::vector<Capacity> flows{};
+    };
+
     /// The rows of a cluster as nodes, with the flow from their fees to
     /// their sizes that leaves its best closure.
     struct flow_t
@@ -538,10 +547,15 @@ protected:
         std_array<size_t, maximum_members> links{};
         std_array<size_t, maximum_members> before{};
         std_array<size_t, maximum_members> queue{};
-        std_array<uint128_t, maximum_members> source{};
-        std_array<uint128_t, maximum_members> sink{};
-        std::vector<uint128_t> flows{};
+        residual_t<uint64_t> narrow{};
+        residual_t<uint128_t> wide{};
     };
+
+    /// The nodes of the highest rate closure of the flow, by capacities that
+    /// hold the fee times the size.
+    template <typename Capacity>
+    static mask_t closure_(flow_t& flow, residual_t<Capacity>& residual,
+        size_t count, size_t links, uint64_t fee, uint64_t size) NOEXCEPT;
 
     /// The highest rate ancestry closed subset of the cluster, ascending,
     /// the cluster of no more than maximum_members.

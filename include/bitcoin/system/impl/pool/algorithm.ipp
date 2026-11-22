@@ -1461,9 +1461,6 @@ inline bool algorithm::cluster(std::vector<link_t>& out, visits_t& visits,
     return whole && out.size() <= maximum_members;
 }
 
-// Dinkelbach: the maximum weight closure at the rate of the best closure
-// found (fee times its size less size times its fee, a minimum cut) is
-// positive until no closure has a higher rate.
 inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
     flow_t& flow, const graph_t& graph, const std::vector<link_t>& cluster,
     uint32_t bytes_per_sigop) NOEXCEPT
@@ -1503,6 +1500,32 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
         links += ones_count(parents);
     }
 
+    // No capacity exceeds the fee of the cluster times its size.
+    auto best = is_multiply_overflow(fee, size) ?
+        closure_(flow, flow.wide, count, links, fee, size) :
+        closure_(flow, flow.narrow, count, links, fee, size);
+
+    out.clear();
+    sum = {};
+    for (; is_nonzero(best); best &= sub1(best))
+    {
+        const auto row = flow.rows[right_zeros(best)];
+        const auto own = totals(graph, row);
+        out.push_back(row);
+        sum.fee = ceilinged_add(sum.fee, own.fee);
+        sum.size = ceilinged_add(sum.size, own.size);
+        sum.sigops = ceilinged_add(sum.sigops, own.sigops);
+    }
+}
+
+// Dinkelbach: the maximum weight closure at the rate of the best closure
+// found (fee times its size less size times its fee, a minimum cut) is
+// positive until no closure has a higher rate.
+template <typename Capacity>
+inline algorithm::mask_t algorithm::closure_(flow_t& flow,
+    residual_t<Capacity>& residual, size_t count, size_t links, uint64_t fee,
+    uint64_t size) NOEXCEPT
+{
     const auto link = [&](size_t node, size_t up) NOEXCEPT
     {
         const auto before = unmask_right<mask_t>(up);
@@ -1529,14 +1552,14 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
     // closure, and a node passes at once what its own two limits allow.
     const auto cut = [&]() NOEXCEPT
     {
-        flow.flows.assign(links, uint128_t{});
+        residual.flows.assign(links, Capacity{});
         for (size_t node{}; node < count; ++node)
         {
-            const auto gain = uint128_t{ flow.fees[node] } * size;
-            const auto cost = uint128_t{ flow.sizes[node] } * fee;
+            const auto gain = Capacity{ flow.fees[node] } * size;
+            const auto cost = Capacity{ flow.sizes[node] } * fee;
             const auto both = std::min(gain, cost);
-            flow.source[node] = gain - both;
-            flow.sink[node] = cost - both;
+            residual.source[node] = gain - both;
+            residual.sink[node] = cost - both;
             flow.fed[node] = {};
         }
 
@@ -1549,7 +1572,7 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
             size_t tail{};
             for (size_t node{}; node < count; ++node)
             {
-                if (flow.source[node] != uint128_t{})
+                if (residual.source[node] != Capacity{})
                 {
                     set_right_into(reached, node);
                     flow.before[node] = count;
@@ -1561,7 +1584,7 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
             while (head < tail && last == count)
             {
                 const auto node = flow.queue[head++];
-                if (flow.sink[node] != uint128_t{})
+                if (residual.sink[node] != Capacity{})
                 {
                     last = node;
                     break;
@@ -1582,32 +1605,33 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
             if (last == count)
                 return reached;
 
-            auto amount = flow.sink[last];
+            auto amount = residual.sink[last];
             auto node = last;
             for (; flow.before[node] != count; node = flow.before[node])
             {
                 const auto from = flow.before[node];
                 if (!get_right(flow.parents[from], node))
-                    amount = std::min(amount, flow.flows[link(node, from)]);
+                    amount = std::min(amount,
+                        residual.flows[link(node, from)]);
             }
 
-            amount = std::min(amount, flow.source[node]);
-            flow.source[node] -= amount;
-            flow.sink[last] -= amount;
+            amount = std::min(amount, residual.source[node]);
+            residual.source[node] -= amount;
+            residual.sink[last] -= amount;
             for (node = last; flow.before[node] != count;
                 node = flow.before[node])
             {
                 const auto from = flow.before[node];
                 if (get_right(flow.parents[from], node))
                 {
-                    flow.flows[link(from, node)] += amount;
+                    residual.flows[link(from, node)] += amount;
                     set_right_into(flow.fed[node], from);
                     continue;
                 }
 
-                auto& back = flow.flows[link(node, from)];
+                auto& back = residual.flows[link(node, from)];
                 back -= amount;
-                if (back == uint128_t{})
+                if (back == Capacity{})
                     flow.fed[from] = set_right(flow.fed[from], node, false);
             }
         }
@@ -1620,8 +1644,8 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
         uint64_t found_size{};
         const auto found = cut();
         weigh(found, found_fee, found_size);
-        if (is_zero(found_size) || uint128_t{ found_fee } * size <=
-            uint128_t{ found_size } * fee)
+        if (is_zero(found_size) || Capacity{ found_fee } * size <=
+            Capacity{ found_size } * fee)
             break;
 
         best = found;
@@ -1629,17 +1653,7 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
         size = found_size;
     }
 
-    out.clear();
-    sum = {};
-    for (; is_nonzero(best); best &= sub1(best))
-    {
-        const auto row = flow.rows[right_zeros(best)];
-        const auto own = totals(graph, row);
-        out.push_back(row);
-        sum.fee = ceilinged_add(sum.fee, own.fee);
-        sum.size = ceilinged_add(sum.size, own.size);
-        sum.sigops = ceilinged_add(sum.sigops, own.sigops);
-    }
+    return best;
 }
 
 inline algorithm::link_t algorithm::resolved(const graph_t& graph,
