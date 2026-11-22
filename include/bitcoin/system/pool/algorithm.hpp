@@ -487,16 +487,35 @@ protected:
     static bool reaches(const projection_t& projection, size_t count,
         uint64_t space, uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
 
+    /// The rows from the first met by a walk, forgotten by the next.
+    struct visits_t
+    {
+        std::vector<link_t> walks{};
+        link_t first{};
+        link_t walk{};
+    };
+
+    /// A new walk, with no row met.
+    static void restart(visits_t& visits) NOEXCEPT;
+
+    /// The row is met by the walk.
+    static bool visited(const visits_t& visits, link_t row) NOEXCEPT;
+
+    /// The row is first met by the walk.
+    static bool visit(visits_t& visits, link_t row) NOEXCEPT;
+
     /// The rows and totals of the chunk of the row, false if none fits.
     static bool chunk(std::vector<link_t>& out, totals_t& sum,
-        const std::span<const mark>& marks, const graph_t& graph, link_t row,
-        size_t depth, const totals_t& available) NOEXCEPT;
+        visits_t& visits, const std::span<const mark>& marks,
+        const graph_t& graph, link_t row, size_t depth,
+        const totals_t& available) NOEXCEPT;
 
     /// The untaken rows connected to the row by parent and child, false if
-    /// one has an excluded parent or they exceed maximum_members.
-    static bool cluster(std::vector<link_t>& out,
-        const std::span<const mark>& marks, const graph_t& graph,
-        link_t row) NOEXCEPT;
+    /// one has an excluded parent or they exceed maximum_members (where a
+    /// bounded walk ends).
+    static bool cluster(std::vector<link_t>& out, visits_t& visits,
+        const std::span<const mark>& marks, const graph_t& graph, link_t row,
+        bool bounded) NOEXCEPT;
 
     /// The highest rate ancestry closed subset of the cluster, ascending.
     static void closure(std::vector<link_t>& out, totals_t& sum,

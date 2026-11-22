@@ -1055,18 +1055,25 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     // A size or sigops of a row.
     using least_t = std::pair<uint32_t, link_t>;
 
+    // No row before the first unmarked row is met by a walk.
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
+    const auto end = std::next(marks.begin(), count);
+    const auto start = std::find(marks.begin(), end, mark::unmarked);
+    const auto offset = to_unsigned(std::distance(marks.begin(), start));
+    const auto base = possible_narrow_cast<link_t>(offset);
+    const auto live = count - offset;
     std::vector<score_t> scores{};
     std::vector<least_t> sizes{};
     std::vector<least_t> sigops{};
     std::vector<link_t> closed{};
     std::vector<link_t> rows{};
     std::vector<link_t> group{};
+    std::vector<link_t> descent{};
     std::vector<link_t> seeds{};
-    std::vector<size_t> seen(count);
-    std::vector<size_t> below(count);
-    size_t epoch{};
+    visits_t seen{ std::vector<link_t>(live), base };
+    visits_t below{ std::vector<link_t>(live), base };
+    visits_t walk{ std::vector<link_t>(live), base };
     size_t offers{};
     auto heaped = false;
     totals_t used{};
@@ -1139,17 +1146,22 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     const auto score_row = [&](link_t row) NOEXCEPT
     {
         totals_t sum{};
-        if (chunk(rows, sum, marks, graph, row, depth, available()))
+        if (chunk(rows, sum, walk, marks, graph, row, depth, available()))
             push({ row, {}, {}, {}, fee_rate(sum, bytes_per_sigop), sum });
     };
 
     // A whole cluster offers its best closure (itself if one row), else each
     // of its rows its chunk, of a partial cluster only those below the take.
+    // False if the cluster of a take is over maximum_members, with nothing
+    // offered.
     const auto offer = [&](link_t row, bool all) NOEXCEPT
     {
-        const auto whole = cluster(group, marks, graph, row);
+        const auto whole = cluster(group, walk, marks, graph, row, !all);
+        if (!all && group.size() > maximum_members)
+            return false;
+
         for (const auto member: group)
-            seen[member] = epoch;
+            visit(seen, member);
 
         totals_t sum{};
         if (whole && is_one(group.size()))
@@ -1169,16 +1181,19 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             const auto rate = fee_rate(sum, bytes_per_sigop);
             closed.insert(closed.end(), rows.begin(), rows.end());
             push({ rows.front(), size, first, {}, rate, sum });
-            return;
+            return true;
         }
 
         for (const auto member: group)
-            if (all || whole || below[member] == epoch)
+            if (all || whole || visited(below, member))
                 score_row(member);
+
+        return true;
     };
 
-    ++epoch;
-    for (size_t at{}; at < count; ++at)
+    restart(seen);
+    restart(below);
+    for (size_t at = base; at < count; ++at)
     {
         const auto row = possible_narrow_cast<link_t>(at);
         if (!unmarked(row))
@@ -1187,7 +1202,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         const auto own = totals(graph, row);
         sizes.emplace_back(own.size, row);
         sigops.emplace_back(own.sigops, row);
-        if (seen[row] != epoch)
+        if (!visited(seen, row))
             offer(row, true);
     }
 
@@ -1220,7 +1235,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             // cluster, of which none fits unless one of its rows does.
             if (!fits(score.sum, space))
             {
-                cluster(group, marks, graph, score.row);
+                cluster(group, walk, marks, graph, score.row, false);
                 if (std::ranges::any_of(group, alone))
                     for (const auto member: group)
                         score_row(member);
@@ -1233,8 +1248,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         }
         else
         {
-            if (!unmarked(score.row) ||
-                !chunk(rows, sum, marks, graph, score.row, depth, space))
+            if (!unmarked(score.row) || !chunk(rows, sum, walk, marks, graph,
+                score.row, depth, space))
                 continue;
 
             // A changed chunk competes again at its current rate.
@@ -1257,26 +1272,34 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
         // The untaken descendants of the take have changed chunks, and the
         // untaken remainder of its cluster competes again from its children.
-        ++epoch;
+        restart(seen);
+        restart(below);
         seeds.clear();
-        group.assign(rows.begin(), rows.end());
-        for (size_t at{}; at < group.size(); ++at)
+        descent.assign(rows.begin(), rows.end());
+        const auto taken = descent.size();
+        for (size_t at{}; at < descent.size(); ++at)
         {
-            each_child(graph, group[at], [&](link_t down) NOEXCEPT
+            each_child(graph, descent[at], [&](link_t down) NOEXCEPT
             {
-                if (!unmarked(down) || below[down] == epoch)
+                if (!unmarked(down) || !visit(below, down))
                     return;
 
-                below[down] = epoch;
-                group.push_back(down);
-                if (marks[group[at]] == mark::taken)
+                descent.push_back(down);
+                if (marks[descent[at]] == mark::taken)
                     seeds.push_back(down);
             });
         }
 
+        auto walked = true;
         for (const auto seed: seeds)
-            if (seen[seed] != epoch)
-                offer(seed, false);
+            if (!visited(seen, seed) && !offer(seed, false))
+                walked = false;
+
+        // Each descendant that no walk met is of a cluster not walked.
+        if (!walked)
+            for (auto at = taken; at < descent.size(); ++at)
+                if (!visited(seen, descent[at]))
+                    score_row(descent[at]);
     }
 
     std::sort(out.begin(), out.end());
@@ -1311,12 +1334,39 @@ inline bool algorithm::reaches(const projection_t& projection, size_t count,
     return false;
 }
 
+inline void algorithm::restart(visits_t& visits) NOEXCEPT
+{
+    if (is_nonzero(++visits.walk))
+        return;
+
+    std::ranges::fill(visits.walks, link_t{});
+    visits.walk = one;
+}
+
+inline bool algorithm::visited(const visits_t& visits, link_t row) NOEXCEPT
+{
+    return visits.walks[row - visits.first] == visits.walk;
+}
+
+inline bool algorithm::visit(visits_t& visits, link_t row) NOEXCEPT
+{
+    auto& walk = visits.walks[row - visits.first];
+    if (walk == visits.walk)
+        return false;
+
+    walk = visits.walk;
+    return true;
+}
+
 inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
-    const std::span<const mark>& marks, const graph_t& graph, link_t row,
-    size_t depth, const totals_t& available) NOEXCEPT
+    visits_t& visits, const std::span<const mark>& marks,
+    const graph_t& graph, link_t row, size_t depth,
+    const totals_t& available) NOEXCEPT
 {
     sum = {};
     out.assign(one, row);
+    restart(visits);
+    visit(visits, row);
 
     // Each level holds the untaken parents of the previous level.
     for (size_t level{}, begin{}; begin < out.size(); ++level)
@@ -1336,7 +1386,7 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
                 if (marks[up] == mark::excluded)
                     return false;
 
-                if (std::ranges::find(out, up) != out.end())
+                if (!visit(visits, up))
                     continue;
 
                 if (level == depth)
@@ -1368,23 +1418,25 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
     return !out.empty();
 }
 
-inline bool algorithm::cluster(std::vector<link_t>& out,
-    const std::span<const mark>& marks, const graph_t& graph,
-    link_t row) NOEXCEPT
+inline bool algorithm::cluster(std::vector<link_t>& out, visits_t& visits,
+    const std::span<const mark>& marks, const graph_t& graph, link_t row,
+    bool bounded) NOEXCEPT
 {
     out.assign(one, row);
+    restart(visits);
+    visit(visits, row);
     auto whole = true;
     const auto push = [&](link_t found) NOEXCEPT
     {
-        if (marks[found] != mark::unmarked ||
-            std::ranges::find(out, found) != out.end())
-            return;
-
-        out.push_back(found);
+        if (marks[found] == mark::unmarked && visit(visits, found))
+            out.push_back(found);
     };
 
     for (size_t at{}; at < out.size(); ++at)
     {
+        if (bounded && out.size() > maximum_members)
+            return false;
+
         const auto member = out[at];
         const auto slice = edges(graph, member);
         for (auto input = slice.first; input < slice.first + slice.count;
