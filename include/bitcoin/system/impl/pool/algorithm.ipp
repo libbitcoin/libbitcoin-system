@@ -1047,6 +1047,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         totals_t sum{};
         std::vector<link_t> rows{};
         bool closed{};
+        size_t order{};
     };
 
     const graph_t graph{ columns };
@@ -1058,6 +1059,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::vector<size_t> seen(count);
     std::vector<size_t> below(count);
     size_t epoch{};
+    size_t offers{};
     totals_t used{};
     out.clear();
     takes.clear();
@@ -1088,15 +1090,20 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         };
     };
 
-    // The highest rate is on top, the lowest row of equal rates.
+    // The highest rate is on top, the lowest row of equal rates, and the
+    // latest offer of the same row.
     const auto lower = [](const score_t& left, const score_t& right) NOEXCEPT
     {
-        return left.rate == right.rate ? left.row > right.row :
-            left.rate < right.rate;
+        if (left.rate != right.rate)
+            return left.rate < right.rate;
+
+        return left.row == right.row ? left.order < right.order :
+            left.row > right.row;
     };
 
     const auto push = [&](score_t&& score) NOEXCEPT
     {
+        score.order = offers++;
         scores.push_back(std::move(score));
         std::push_heap(scores.begin(), scores.end(), lower);
     };
