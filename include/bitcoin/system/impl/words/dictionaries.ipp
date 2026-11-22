@@ -104,8 +104,8 @@ language dictionaries<Count, Size>::contains(const std::string& word,
     if (identifier != language::none)
     {
         const auto it = to_dictionary(identifier);
-        return it != dictionaries_.cend() && it->contains(word) ?
-            identifier : language::none;
+        const auto found = it != dictionaries_.cend() && it->contains(word);
+        return found ? identifier : language::none;
     }
 
     // std::find_if returns first match, order is guaranteed.
@@ -125,8 +125,8 @@ language dictionaries<Count, Size>::contains(const string_list& words,
     if (identifier != language::none)
     {
         const auto it = to_dictionary(identifier);
-        return it != dictionaries_.cend() && it->contains(words) ?
-            identifier : language::none;
+        const auto found = it != dictionaries_.cend() && it->contains(words);
+        return found ? identifier : language::none;
     }
 
     // std::find_if returns first match, order is guaranteed.

@@ -268,9 +268,9 @@ private:
     friend class uintx_t;
 
     static constexpr size_t top_bits = Bits % limb_bits;
-    static constexpr limb_t top_mask = (top_bits == 0u) ?
-        std::numeric_limits<limb_t>::max() :
-        (limb_t{ 1 } << top_bits) - 1u;
+    static constexpr limb_t limb_max = std::numeric_limits<limb_t>::max();
+    static constexpr limb_t top_ones = (limb_t{ 1 } << top_bits) - 1u;
+    static constexpr limb_t top_mask = (top_bits == 0u) ? limb_max : top_ones;
 
     // construct.ipp
     constexpr void normalize() NOEXCEPT;

@@ -132,8 +132,10 @@ void notify(variables_map& variables) THROWS
 {
     for (const auto& [key, name]: variables.required_)
         if (variables[key].empty())
-            throw validation_exception{ "the option '" + name +
-                "' is required but missing" };
+            throw validation_exception
+            {
+                "the option '" + name + "' is required but missing"
+            };
 
     for (const auto& [key, variable]: variables)
         if (variable.semantic())

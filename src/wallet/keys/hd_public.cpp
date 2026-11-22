@@ -88,8 +88,8 @@ hd_public hd_public::from_secret(const ec_secret& secret,
     const hd_chain_code& chain_code, const hd_lineage& lineage) NOEXCEPT
 {
     ec_compressed point;
-    return secret_to_public(point, secret) ?
-        hd_public(point, chain_code, lineage) : hd_public{};
+    const auto valid = secret_to_public(point, secret);
+    return valid ? hd_public(point, chain_code, lineage) : hd_public{};
 }
 
 hd_public hd_public::from_key(const hd_key& key) NOEXCEPT

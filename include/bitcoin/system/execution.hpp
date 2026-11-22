@@ -135,7 +135,10 @@ std::vector<Iterator> bounds(const policy& policy, Iterator first,
     out.push_back(first);
 
     for (size_t index{}; index < tasks; ++index)
-        out.push_back(std::next(out.back(), to_signed(width + (index < extra ? one : zero))));
+    {
+        const auto size = width + (index < extra ? one : zero);
+        out.push_back(std::next(out.back(), to_signed(size)));
+    }
 
     return out;
 }

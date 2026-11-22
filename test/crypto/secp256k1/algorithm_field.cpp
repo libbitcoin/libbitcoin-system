@@ -91,7 +91,8 @@ constexpr auto top = accessor::top_mask;
 constexpr auto weak_top = bit_or<uint64_t>(shift_left(top), one);
 constexpr uint64_t loose = 0x3fffffffffffffff;
 constexpr field prime_limbs{ accessor::prime };
-constexpr field prime_plus_one{ add1(accessor::prime[0]), mask, mask, mask, top };
+constexpr auto prime_low = add1(accessor::prime[0]);
+constexpr field prime_plus_one{ prime_low, mask, mask, mask, top };
 constexpr field all_limbs{ mask, mask, mask, mask, top };
 constexpr field power_limbs{ 0, 0, 0, 0, add1(top) };
 constexpr field weak_limbs{ mask, mask, mask, mask, weak_top };
@@ -718,8 +719,10 @@ static void check_predicates()
     if constexpr (have<xWord>)
     {
         const auto in = pack<xWord>(normals);
-        check_masks(accessor::is_zero_element(in), expect_masks(field_is_zero, normals));
-        check_masks(accessor::is_odd_element(in), expect_masks(field_is_odd, normals));
+        check_masks(accessor::is_zero_element(in),
+            expect_masks(field_is_zero, normals));
+        check_masks(accessor::is_odd_element(in),
+            expect_masks(field_is_odd, normals));
         check_masks(accessor::equal(in, pack<xWord>(generators)),
             expect_masks(field_equal, normals, generators));
     }

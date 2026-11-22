@@ -391,8 +391,10 @@ public:
     static int bip324(uint8_t* output, const uint8_t* x32,
         const uint8_t* ell_a64, const uint8_t* ell_b64, void*) NOEXCEPT
     {
-        accumulator<sha256> hasher{ tagged_midstate<
-            "bip324_ellswift_xonly_ecdh">, one };
+        accumulator<sha256> hasher
+        {
+            tagged_midstate<"bip324_ellswift_xonly_ecdh">, one
+        };
         hasher.write(unsafe_array_cast<uint8_t, ec_ellswift_size>(ell_a64));
         hasher.write(unsafe_array_cast<uint8_t, ec_ellswift_size>(ell_b64));
         hasher.write(to_array(x32));
@@ -864,10 +866,11 @@ int secp256k1_ecdsa_verify(const secp256k1_context*,
     local::scalar r{}, s{};
     local::affine point{};
     local::load(r, s, sig->data);
-    return !local::is_overflow(r) && !local::is_overflow(s) &&
-        !local::is_high(s) && local::load<zero>(point, pubkey->data) &&
-        local::verify_ecdsa(point, local::to_scalar(msghash32), r, s) ?
-            success : failure;
+    const auto valid = !local::is_overflow(r) && !local::is_overflow(s)
+        && !local::is_high(s) && local::load<zero>(point, pubkey->data)
+        && local::verify_ecdsa(point, local::to_scalar(msghash32), r, s);
+
+    return valid ? success : failure;
 }
 
 int secp256k1_ecdsa_sign(const secp256k1_context*,

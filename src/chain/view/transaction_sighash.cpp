@@ -352,7 +352,8 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_bytes(single_hash_outputs());
     }
 
-    sink.write_byte(chain::transaction::spend_type_v1(annex, !is_null(tapleaf)));
+    const auto tapscript = !is_null(tapleaf);
+    sink.write_byte(chain::transaction::spend_type_v1(annex, tapscript));
 
     if (anyone)
     {
@@ -381,7 +382,8 @@ bool transaction::version1_sighash(hash_digest& out,
     {
         sink.write_bytes(*tapleaf);
         sink.write_byte(to_value(key_version::tapscript));
-        sink.write_4_bytes_little_endian(chain::transaction::subscript_v1(script));
+        const auto code_separator = chain::transaction::subscript_v1(script);
+        sink.write_4_bytes_little_endian(code_separator);
     }
 
     sink.flush();

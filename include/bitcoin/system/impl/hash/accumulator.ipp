@@ -400,7 +400,8 @@ TEMPLATE
 void CLASS::
 double_flush(data_chunk& digest) NOEXCEPT
 {
-    double_flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest.data()));
+    constexpr auto size = array_count<digest_t>;
+    double_flush(unsafe_array_cast<byte_t, size>(digest.data()));
 }
 
 TEMPLATE

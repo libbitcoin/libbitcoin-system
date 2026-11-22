@@ -171,11 +171,8 @@ inline size_t CLASS::index(const rblock_t& rblock) NOEXCEPT
     //    where Integerify (B[0] ... B[2 * r - 1]) is defined
     //    as the result of interpreting B[2 * r - 1] as a
     //    little-endian integer.
-    return
-        possible_narrow_cast<size_t>(
-            native_from_little_end(
-                unsafe_byte_cast<uint64_t>(
-                    rblock.back().data())) % W);
+    const auto value = unsafe_byte_cast<uint64_t>(rblock.back().data());
+    return possible_narrow_cast<size_t>(native_from_little_end(value) % W);
 }
 
 TEMPLATE

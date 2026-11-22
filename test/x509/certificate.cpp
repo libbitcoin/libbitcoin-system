@@ -94,17 +94,27 @@ static parts split(const std::string& text)
 // Join the fields, with extra encodings between the key and extensions.
 static data_chunk join(const parts& fields, const data_chunk& extra={})
 {
-    const auto tbs = build_chunk({ fields.version, fields.serial, fields.algorithm, fields.issuer, fields.validity, fields.subject, fields.key, extra, fields.extensions });
+    const auto tbs = build_chunk
+    ({
+        fields.version, fields.serial, fields.algorithm, fields.issuer,
+        fields.validity, fields.subject, fields.key, extra, fields.extensions
+    });
 
     writer body{};
     body.write(sequence_tag, tbs);
-    const auto signature = wrap(bit_string_tag, splice(base16_chunk("00"), fields.signature));
-    return wrap(sequence_tag, build_chunk({ body.data(), fields.outer_algorithm, signature }));
+    const auto bits = splice(base16_chunk("00"), fields.signature);
+    const auto signature = wrap(bit_string_tag, bits);
+    const auto& outer = fields.outer_algorithm;
+    const auto content = build_chunk({ body.data(), outer, signature });
+    return wrap(sequence_tag, content);
 }
 
-static data_chunk extension(const_byte_span identifier, const data_chunk& flag, const data_chunk& value)
+static data_chunk extension(const_byte_span identifier, const data_chunk& flag,
+    const data_chunk& value)
 {
-    return wrap(sequence_tag, build_chunk({ wrap(oid_tag, chunk(identifier)), flag, wrap(octet_string_tag, value) }));
+    const auto object_id = wrap(oid_tag, chunk(identifier));
+    const auto octets = wrap(octet_string_tag, value);
+    return wrap(sequence_tag, build_chunk({ object_id, flag, octets }));
 }
 
 static data_chunk extensions(const data_loaf& list)
@@ -117,10 +127,14 @@ static data_chunk algorithm(const_byte_span identifier)
     return wrap(sequence_tag, wrap(oid_tag, chunk(identifier)));
 }
 
-static data_chunk key(const_byte_span type, const_byte_span curve, const data_chunk& point)
+static data_chunk key(const_byte_span type, const_byte_span curve,
+    const data_chunk& point)
 {
-    const auto identifiers = wrap(sequence_tag, splice(wrap(oid_tag, chunk(type)), wrap(oid_tag, chunk(curve))));
-    return wrap(sequence_tag, splice(identifiers, wrap(bit_string_tag, splice(base16_chunk("00"), point))));
+    const auto type_id = wrap(oid_tag, chunk(type));
+    const auto curve_id = wrap(oid_tag, chunk(curve));
+    const auto identifiers = wrap(sequence_tag, splice(type_id, curve_id));
+    const auto bits = wrap(bit_string_tag, splice(base16_chunk("00"), point));
+    return wrap(sequence_tag, splice(identifiers, bits));
 }
 
 static data_chunk rsa_key(const data_chunk& parameters,

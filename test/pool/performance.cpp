@@ -708,9 +708,11 @@ static size_t columns_block(table& columns, const links_t& block,
     {
         const auto own = columns.cells[row];
         if (own != boundary)
-            columns.cells[row] = confirm ?
-                algorithm::raised(own, algorithm::conflicted) :
-                algorithm::lowered(own, algorithm::conflicted);
+        {
+            const auto raised = algorithm::raised(own, algorithm::conflicted);
+            const auto lowered = algorithm::lowered(own, algorithm::conflicted);
+            columns.cells[row] = confirm ? raised : lowered;
+        }
     }
 
     const auto spans = columns.columns();

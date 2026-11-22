@@ -86,8 +86,8 @@ bool algorithm::verify_ecdsa(data_chunk& results,
             }
 
             odds[lane] = sign == ec_odd_sign ? max_uint64 : 0_u64;
-            overflows[lane] = is_less(r[row], prime_minus_order) ?
-                max_uint64 : 0_u64;
+            const auto overflow = is_less(r[row], prime_minus_order);
+            overflows[lane] = overflow ? max_uint64 : 0_u64;
 
             multiply(u1[lane], z[row], w[row]);
             multiply(u2[lane], r[row], w[row]);

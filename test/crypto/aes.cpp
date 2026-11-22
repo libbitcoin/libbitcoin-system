@@ -96,21 +96,24 @@ static data_array<16> block_at(const data_slice& data, size_t index)
 }
 
 template <typename Algorithm>
-constexpr data_array<16> encrypted(const typename Algorithm::key_t& key, data_array<16> block)
+constexpr data_array<16> encrypted(const typename Algorithm::key_t& key,
+    data_array<16> block)
 {
     Algorithm::encrypt(block, key);
     return block;
 }
 
 template <typename Algorithm>
-constexpr data_array<16> decrypted(const typename Algorithm::key_t& key, data_array<16> block)
+constexpr data_array<16> decrypted(const typename Algorithm::key_t& key,
+    data_array<16> block)
 {
     Algorithm::decrypt(block, key);
     return block;
 }
 
 template <typename Algorithm>
-static data_chunk crypt(const typename Algorithm::key_t& key, typename Algorithm::block_t& counter, const_byte_span in)
+static data_chunk crypt(const typename Algorithm::key_t& key,
+    typename Algorithm::block_t& counter, const_byte_span in)
 {
     data_chunk out(in.size());
     Algorithm::ctr(out, in, counter, Algorithm::expand(key));
@@ -139,7 +142,8 @@ constexpr data_array<64> quarter(const data_array<256>& table)
 // planes carry 64 independent bytes.
 static data_array<64> substitute(const data_array<64>& bytes)
 {
-    accessor::xplanes_t<uint64_t> q{ from_little_endians(array_cast<uint64_t>(bytes)) };
+    const auto words = from_little_endians(array_cast<uint64_t>(bytes));
+    accessor::xplanes_t<uint64_t> q{ words };
     accessor::ortho(q);
     accessor::sbox(q);
     accessor::ortho(q);
@@ -148,7 +152,8 @@ static data_array<64> substitute(const data_array<64>& bytes)
 
 static data_array<64> inverse_substitute(const data_array<64>& bytes)
 {
-    accessor::xplanes_t<uint64_t> q{ from_little_endians(array_cast<uint64_t>(bytes)) };
+    const auto words = from_little_endians(array_cast<uint64_t>(bytes));
+    accessor::xplanes_t<uint64_t> q{ words };
     accessor::ortho(q);
     accessor::inverse_sbox(q);
     accessor::ortho(q);
@@ -193,7 +198,8 @@ BC_AUTO_TEST_CASE(aes__expand__aes256__fips197_a3)
 // encrypt/decrypt
 
 template <typename Algorithm>
-static void test_cipher(const typename Algorithm::key_t& key, const data_array<16>& in, const data_array<16>& out)
+static void test_cipher(const typename Algorithm::key_t& key,
+    const data_array<16>& in, const data_array<16>& out)
 {
     auto block = in;
     Algorithm::encrypt(block, key);

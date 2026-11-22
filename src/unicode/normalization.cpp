@@ -393,11 +393,10 @@ static std::string apply_case(const std::string& in, bool lower) NOEXCEPT
     out.reserve(points.size());
 
     char32_t buffer[3]{};
+    const auto fold = lower ? fold_lower_one : fold_upper_one;
     for (const auto point: points)
     {
-        const auto count = lower ?
-            fold_lower_one(point, &buffer[0]) :
-            fold_upper_one(point, &buffer[0]);
+        const auto count = fold(point, &buffer[0]);
 
         for (size_t index{}; index < count; ++index)
             out.push_back(buffer[index]);

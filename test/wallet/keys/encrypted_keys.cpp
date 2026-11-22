@@ -259,7 +259,8 @@ BC_AUTO_TEST_SUITE(encrypted__decrypt1)
     ec_secret out_secret; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
-    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, passphrase))
+    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, \
+        passphrase))
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
 BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_0__expected)
@@ -383,10 +384,13 @@ BC_AUTO_TEST_SUITE(encrypted__decrypt_public)
     ec_compressed out_point; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
-    BC_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
+    BC_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, \
+        passphrase)); \
     BC_REQUIRE_EQUAL(out_version, version); \
     BC_REQUIRE(!out_is_compressed); \
-    const auto derived_address = payment_address(ec_public{ out_point, out_is_compressed }, out_version).encoded()
+    const ec_public derived_public{ out_point, out_is_compressed }; \
+    const payment_address derived_payment(derived_public, out_version); \
+    const auto derived_address = derived_payment.encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
 BC_AUTO_TEST_CASE(encrypted__decrypt_public__vector_6_lot__expected)
@@ -439,7 +443,8 @@ BC_AUTO_TEST_SUITE(encrypted__create_key_pair)
 #define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
     ec_compressed out_point; \
     encrypted_private out_private; \
-    BC_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
+    BC_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, \
+        compressed))
 
 BC_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
 {
@@ -514,11 +519,13 @@ BC_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
 
 // TODO: create compressed vector(s).
 
-#define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compressed) \
+#define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, \
+    compressed) \
     ec_compressed out_point; \
     encrypted_public out_public; \
     encrypted_private out_private; \
-    BC_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
+    BC_REQUIRE(create_key_pair(out_private, out_public, out_point, token, \
+        seed, version, compressed))
 
 BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum__false)
 {

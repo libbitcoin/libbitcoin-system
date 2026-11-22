@@ -400,8 +400,8 @@ inflater::step inflater::stored_copy() NOEXCEPT
         return step::next;
     }
 
-    const auto size = std::min({ remaining_, size_ - position_,
-        limit_ - produced_ });
+    const auto available = size_ - position_;
+    const auto size = std::min({ remaining_, available, limit_ - produced_ });
 
     if (is_zero(size))
         return step::more;
@@ -495,8 +495,8 @@ inflater::step inflater::lengths() NOEXCEPT
         if (symbol == repeat_previous && is_zero(index_))
             return step::invalid;
 
-        const auto value = (symbol == repeat_previous) ?
-            lengths_[sub1(index_)] : 0_u8;
+        const auto previous = (symbol == repeat_previous);
+        const auto value = previous ? lengths_[sub1(index_)] : 0_u8;
 
         auto repeat = repeat_base[kind] + possible_narrow_cast<size_t>(
             bit_and<uint64_t>(shift_right(buffer_, length),
@@ -601,9 +601,10 @@ inflater::step inflater::codes() NOEXCEPT
         if (bit_count_ < used + distance_extra_bits)
             return step::more;
 
-        const auto distance = distance_base[code] + possible_narrow_cast<size_t>(
-            bit_and<uint64_t>(shift_right(buffer_, used),
-                sub1(power2(distance_extra_bits))));
+        const auto offset = bit_and<uint64_t>(shift_right(buffer_, used),
+            sub1(power2(distance_extra_bits)));
+        const auto distance = distance_base[code] +
+            possible_narrow_cast<size_t>(offset);
 
         if (distance > window_.size())
             return step::invalid;

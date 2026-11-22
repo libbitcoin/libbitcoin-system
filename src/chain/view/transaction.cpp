@@ -729,15 +729,20 @@ code transaction::connect_input(const context& ctx,
     const input_iterator& it, const signatures& capture) const NOEXCEPT
 {
     using namespace machine;
+    using linked = interpreter<linked_stack,
+        program<linked_stack, transaction>>;
+    using contiguous = interpreter<contiguous_stack,
+        program<contiguous_stack, transaction>>;
+
     if (is_null(it->prevout))
         return error::missing_previous_output;
 
     // Evaluate rolling scripts with linear search but constant erase.
     if (it->is_roller())
-        return interpreter<linked_stack, program<linked_stack, transaction>>::connect(ctx, *this, it, capture);
+        return linked::connect(ctx, *this, it, capture);
 
     // Evaluate non-rolling scripts with constant search but linear erase.
-    return interpreter<contiguous_stack, program<contiguous_stack, transaction>>::connect(ctx, *this, it, capture);
+    return contiguous::connect(ctx, *this, it, capture);
 }
 
 } // namespace view

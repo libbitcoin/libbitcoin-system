@@ -2289,11 +2289,13 @@ BC_AUTO_TEST_CASE(transaction__accept__output_value_overflow__spend_exceeds_valu
 // bip54 limits each transaction to 2500 accurately counted legacy sigops.
 static transaction multisig_spend(size_t count)
 {
-    const inputs ins(count, input{ point{ one_hash, 0 }, script{}, max_input_sequence });
+    const point prevout{ one_hash, 0 };
+    const inputs ins(count, input{ prevout, script{}, max_input_sequence });
     const outputs outs{ output{ 42, script{} } };
     const transaction instance{ 1, ins, outs, 0 };
+    const script multisig{ operations{ operation{ opcode::checkmultisig } } };
     for (const auto& in: *instance.inputs_ptr())
-        in->prevout = to_shared(output{ 1, script{ operations{ operation{ opcode::checkmultisig } } } });
+        in->prevout = to_shared(output{ 1, multisig });
 
     return instance;
 }
@@ -3125,7 +3127,9 @@ BC_AUTO_TEST_CASE(transaction__connect__witness_checksig_after_executed_codesepa
 
 static transaction taproot_tx(const chunk_cptrs& stack) NOEXCEPT
 {
-    const chain::inputs ins{ input{ point{ one_hash, 0 }, script{}, chain::witness{ stack }, 0xffffffff } };
+    const point prevout{ one_hash, 0 };
+    const chain::witness spender{ stack };
+    const chain::inputs ins{ input{ prevout, script{}, spender, 0xffffffff } };
     const chain::outputs outs{ output{ 0, script{} } };
     const transaction out{ 1, ins, outs, 0 };
     out.inputs_ptr()->front()->prevout = to_shared<output>(0, script{});

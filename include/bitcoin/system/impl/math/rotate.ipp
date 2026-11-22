@@ -74,23 +74,27 @@ INLINE constexpr Integral rotr(Integral value, size_t shift) NOEXCEPT
     }
     else if constexpr (is_same_size<Integral, uint8_t>)
     {
-        return possible_narrow_and_sign_cast<Integral>(rotr8(to_unsigned(value),
-            possible_narrow_cast<unsigned char>(shift)));
+        const auto rotated = rotr8(to_unsigned(value),
+            possible_narrow_cast<unsigned char>(shift));
+        return possible_narrow_and_sign_cast<Integral>(rotated);
     }
     else if constexpr (is_same_size<Integral, uint16_t>)
     {
-        return possible_narrow_and_sign_cast<Integral>(rotr16(to_unsigned(value),
-            possible_narrow_cast<unsigned char>(shift)));
+        const auto rotated = rotr16(to_unsigned(value),
+            possible_narrow_cast<unsigned char>(shift));
+        return possible_narrow_and_sign_cast<Integral>(rotated);
     }
     else if constexpr (is_same_size<Integral, uint32_t>)
     {
-        return possible_narrow_and_sign_cast<Integral>(rotr32(to_unsigned(value),
-            possible_narrow_cast<unsigned char>(shift)));
+        const auto rotated = rotr32(to_unsigned(value),
+            possible_narrow_cast<unsigned char>(shift));
+        return possible_narrow_and_sign_cast<Integral>(rotated);
     }
     else if constexpr (is_same_size<Integral, uint64_t>)
     {
-        return possible_narrow_and_sign_cast<Integral>(rotr64(to_unsigned(value),
-            possible_narrow_cast<unsigned char>(shift)));
+        const auto rotated = rotr64(to_unsigned(value),
+            possible_narrow_cast<unsigned char>(shift));
+        return possible_narrow_and_sign_cast<Integral>(rotated);
     }
 }
 

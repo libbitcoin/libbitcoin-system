@@ -32,10 +32,10 @@ object::object() NOEXCEPT
 }
 
 object::object(const object& other) THROWS
-  : members_(other.members_),
-    buckets_(other.buckets_ ?
-        std::make_unique<std::vector<size_t>>(*other.buckets_) : nullptr)
+  : members_(other.members_), buckets_{}
 {
+    if (other.buckets_)
+        buckets_ = std::make_unique<std::vector<size_t>>(*other.buckets_);
 }
 
 object::object(object&& other) NOEXCEPT

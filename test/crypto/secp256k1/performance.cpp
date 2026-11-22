@@ -58,8 +58,16 @@ using scalar = accessor::scalar_t;
 using bytes = accessor::bytes_t;
 
 constexpr size_t count = 1024;
-constexpr scalar left{ 0x123456789abcdef0, 0x0fedcba987654321, 0x1111111111111111, 0x2222222222222222 };
-constexpr scalar right{ 0x0fedcba987654321, 0x123456789abcdef0, 0x3333333333333333, 0x4444444444444444 };
+constexpr scalar left
+{
+    0x123456789abcdef0, 0x0fedcba987654321,
+    0x1111111111111111, 0x2222222222222222
+};
+constexpr scalar right
+{
+    0x0fedcba987654321, 0x123456789abcdef0,
+    0x3333333333333333, 0x4444444444444444
+};
 
 // helpers
 // ----------------------------------------------------------------------------
@@ -377,12 +385,14 @@ static void report_batch(const std::string& name) NOEXCEPT
     data_chunk results{};
     const auto ecdsa = microseconds(one, [&](size_t) NOEXCEPT
     {
-        return accessor::verify_ecdsa<Word>(results, in.keys, in.messages, in.canonicals);
+        return accessor::verify_ecdsa<Word>(results, in.keys, in.messages,
+            in.canonicals);
     });
 
     const auto schnorr = microseconds(one, [&](size_t) NOEXCEPT
     {
-        return accessor::verify_schnorr<Word>(results, in.xonlys, challenges(in), in.schnorrs);
+        return accessor::verify_schnorr<Word>(results, in.xonlys,
+            challenges(in), in.schnorrs);
     });
 
     report("ecdsa batch " + name + " per signature", ecdsa / count);

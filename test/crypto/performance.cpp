@@ -50,7 +50,8 @@ static void report_ctr(const std::string& name)
     report_cipher(name, [&](const data_chunk& in, data_chunk& out) noexcept
     {
         typename Algorithm::block_t counter{};
-        Algorithm::ctr(std::span{ out }.first(in.size()), in, counter, schedule);
+        const auto first = std::span{ out }.first(in.size());
+        Algorithm::ctr(first, in, counter, schedule);
     });
 }
 

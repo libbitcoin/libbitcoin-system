@@ -201,7 +201,8 @@ v1_decoding electrum_v1::decoder(const string_list& words,
 
         // Guard: floored modulo with positive divisor is always positive.
         // Casting away a non-zero (overflow bit) will prevent round trip.
-        out.write_4_bytes_big_endian(possible_narrow_sign_cast<uint32_t>(value));
+        const auto chunk = possible_narrow_sign_cast<uint32_t>(value);
+        out.write_4_bytes_big_endian(chunk);
     }
 
     out.flush();

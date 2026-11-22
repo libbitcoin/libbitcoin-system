@@ -44,7 +44,8 @@ multiply(uint8_t left, uint8_t right) NOEXCEPT
     for (auto bit = zero; bit < byte_bits; ++bit)
     {
         const auto low = bit_and<uint8_t>(multiplier, bit_lo<uint8_t>);
-        const auto addend = bit_and<uint8_t>(multiplicand, twos_complement(low));
+        const auto mask = twos_complement(low);
+        const auto addend = bit_and<uint8_t>(multiplicand, mask);
         product = bit_xor<uint8_t>(product, addend);
 
         const auto high = shift_right<uint8_t>(multiplicand, sub1(byte_bits));

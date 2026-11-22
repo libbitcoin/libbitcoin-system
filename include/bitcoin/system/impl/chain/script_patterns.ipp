@@ -310,7 +310,8 @@ constexpr bool script::is_pay_multisig_standard_pattern(
         return false;
 
     // Standard multisig requires valid public key forms.
-    for (auto op = std::next(ops.cbegin()); op != std::prev(ops.cend(), 2); ++op)
+    const auto end = std::prev(ops.cend(), 2);
+    for (auto op = std::next(ops.cbegin()); op != end; ++op)
         if (!is_public_key(op->data()))
             return false;
 

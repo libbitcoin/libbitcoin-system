@@ -604,8 +604,8 @@ private:
     bool load() NOEXCEPT
     {
         const auto library = load_library();
-        if (is_null(library) || !resolve(call_, library) ||
-            call_.init(0) != success)
+        if (is_null(library) || !resolve(call_, library)
+            || call_.init(0) != success)
             return false;
 
         int count{};
@@ -670,12 +670,12 @@ private:
             return call_.module_function(&out, module_, name) == success;
         };
 
-        pooled_ = found(label_.rows, "prepare_pool") &&
-            found(label_.inputs, "seed_pool") &&
-            found(label_.pass, "label_pool") &&
-            found(settle_.rows, "reduce_pool") &&
-            found(settle_.inputs, "contest_pool") &&
-            found(settle_.pass, "descend_pool");
+        pooled_ = found(label_.rows, "prepare_pool")
+            && found(label_.inputs, "seed_pool")
+            && found(label_.pass, "label_pool")
+            && found(settle_.rows, "reduce_pool")
+            && found(settle_.inputs, "contest_pool")
+            && found(settle_.pass, "descend_pool");
 
         const auto bytes = std::min(maximum_bytes, free / memory_share);
         half_bytes_ = bytes / two;

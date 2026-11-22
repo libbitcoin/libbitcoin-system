@@ -63,7 +63,8 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Deserialize from input stream (throws on invalid format).
-    friend BC_API std::istream& operator>>(std::istream& input, version& argument) THROWS;
+    friend BC_API std::istream& operator>>(std::istream& input,
+        version& argument) THROWS;
 
     /// Serialize to output stream.
     friend BC_API std::ostream& operator<<(std::ostream& output,

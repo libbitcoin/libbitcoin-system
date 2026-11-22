@@ -63,8 +63,10 @@ DEFINE_JSON_FROM_TAG(output::cptr)
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output)
 {
     const auto& out = instance.value;
-    const json::decimal amount{ sign_cast<int64_t>(out.value()),
-        btc_decimal_places };
+    const json::decimal amount
+    {
+        sign_cast<int64_t>(out.value()), btc_decimal_places
+    };
 
     const auto script = bitcoind(out.script(), instance.flags);
 

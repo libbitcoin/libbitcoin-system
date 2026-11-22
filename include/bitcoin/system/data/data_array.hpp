@@ -100,8 +100,8 @@ constexpr data_array<Size> xor_data(const data_array<Size1>& bytes1,
     const data_array<Size2>& bytes2) NOEXCEPT;
 
 /// Perform an exclusive or (xor) on two arrays at specified offsets and length.
-template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2,
-    if_not_lesser<Size1, Offset1 + Size> = true,
+template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1,
+    size_t Size2, if_not_lesser<Size1, Offset1 + Size> = true,
     if_not_lesser<Size2, Offset2 + Size> = true>
 constexpr data_array<Size> xor_offset(const data_array<Size1>& bytes1,
     const data_array<Size2>& bytes2) NOEXCEPT;

@@ -227,9 +227,13 @@ using ghash_sliced = aes::ghash<false>;
 constexpr auto hash_key = base16_array("66e94bd4ef8a2c3b884cfa59ca342b2e");
 
 // Aggregate (4 block) boundaries, with remainders.
-constexpr std_array<size_t, 16> sizes{ 0, 1, 15, 16, 17, 47, 48, 63, 64, 65, 79, 80, 127, 128, 129, 300 };
+constexpr std_array<size_t, 16> sizes
+{
+    0, 1, 15, 16, 17, 47, 48, 63, 64, 65, 79, 80, 127, 128, 129, 300
+};
 
-constexpr data_array<16> sliced_hash(const data_array<16>& key, const data_array<32>& data)
+constexpr data_array<16> sliced_hash(const data_array<16>& key,
+    const data_array<32>& data)
 {
     ghash_sliced hash{ key };
     hash.write(data);

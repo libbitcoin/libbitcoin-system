@@ -471,7 +471,8 @@ code block::populate_internal(const context& ctx) const NOEXCEPT
             if (in->point_hash() == self)
                 return error::coinbase_maturity;
 
-            if (!relative || !chain::input::is_relative_locktime_applied(in->sequence()))
+            if (!relative
+                || !chain::input::is_relative_locktime_applied(in->sequence()))
                 continue;
 
             if (hashes.empty())
@@ -479,8 +480,9 @@ code block::populate_internal(const context& ctx) const NOEXCEPT
                     hashes.emplace(other.hash(false));
 
             // An internal spend has zero age, so any relative lock applies.
-            if (hashes.contains(in->point_hash()) &&
-                chain::input::is_relative_locked(in->sequence(), zero, zero, zero, zero))
+            if (hashes.contains(in->point_hash())
+                && chain::input::is_relative_locked(in->sequence(), zero, zero,
+                    zero, zero))
                 return error::relative_time_locked;
         }
     }

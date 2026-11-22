@@ -293,7 +293,8 @@ constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 #define FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
 constexpr type& operator=(Alternative&& alternative) NOEXCEPT \
 { \
-    inner.template emplace<Alternative>(std::forward<Alternative>(alternative)); \
+    inner.template emplace<Alternative>( \
+        std::forward<Alternative>(alternative)); \
     return *this; \
 }
 

@@ -459,7 +459,8 @@ template <size_t Lane, typename xWord>
 static void check_lane(const xjacobian<xWord>& out, xWord uncomputed,
     const jacobians& expected, const masks& expected_uncomputed)
 {
-    BC_CHECK_EQUAL((f::get<uint64_t, Lane>(uncomputed)), expected_uncomputed[Lane]);
+    const auto uncomputed_lane = f::get<uint64_t, Lane>(uncomputed);
+    BC_CHECK_EQUAL(uncomputed_lane, expected_uncomputed[Lane]);
     if (!f::any(expected_uncomputed[Lane]) && !f::any(expected[Lane].infinity))
     {
         BC_CHECK_EQUAL(flat(unpack<Lane>(out)).x, flat(expected[Lane]).x);

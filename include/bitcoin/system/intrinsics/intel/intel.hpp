@@ -280,7 +280,9 @@ inline void mm_mul52_epu64(auto& lo, auto& hi, auto a, auto b) NOEXCEPT
     const auto y0 = _mm_and_si128(y, mask26);
     const auto x1 = _mm_srli_epi64(x, 26);
     const auto y1 = _mm_srli_epi64(y, 26);
-    const auto mid = _mm_add_epi64(_mm_mul_epu32(x0, y1), _mm_mul_epu32(x1, y0));
+    const auto x0y1 = _mm_mul_epu32(x0, y1);
+    const auto x1y0 = _mm_mul_epu32(x1, y0);
+    const auto mid = _mm_add_epi64(x0y1, x1y0);
     const auto low = _mm_add_epi64(_mm_mul_epu32(x0, y0),
         _mm_slli_epi64(_mm_and_si128(mid, mask26), 26));
     lo = _mm_and_si128(low, mask52);

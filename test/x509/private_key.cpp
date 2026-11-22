@@ -80,7 +80,11 @@ static pbes2 split(const data_chunk& der)
     const auto cipher = encryption.read_oid();
     const auto iv = encryption.read_octet_string();
     const auto encrypted = info.read_octet_string();
-    return { chunk(scheme), chunk(function), chunk(salt), iterations, 0, chunk(hmac), chunk(cipher), chunk(iv), chunk(encrypted) };
+    return
+    {
+        chunk(scheme), chunk(function), chunk(salt), iterations, 0,
+        chunk(hmac), chunk(cipher), chunk(iv), chunk(encrypted)
+    };
 }
 
 // Join the fields, with key length only if nonzero and prf only if nonempty.
@@ -122,7 +126,8 @@ static data_chunk join(const pbes2& fields)
 }
 
 // SEC1 ECPrivateKey with optional (nonempty) parameters and public key.
-static data_chunk sec1(uint64_t version, const_byte_span key, const_byte_span curve, const_byte_span point)
+static data_chunk sec1(uint64_t version, const_byte_span key,
+    const_byte_span curve, const_byte_span point)
 {
     writer parameters{};
     parameters.write_oid(curve);
@@ -143,7 +148,8 @@ static data_chunk sec1(uint64_t version, const_byte_span key, const_byte_span cu
 }
 
 // PKCS8 PrivateKeyInfo with the key octets and optional attributes.
-static data_chunk pkcs8(uint64_t version, const_byte_span curve, const_byte_span key, bool attributes)
+static data_chunk pkcs8(uint64_t version, const_byte_span curve,
+    const_byte_span key, bool attributes)
 {
     writer algorithm{};
     algorithm.write_oid(oid::ec_public_key);

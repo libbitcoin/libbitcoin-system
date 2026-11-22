@@ -32,7 +32,8 @@ static data_chunk chunk(const_byte_span bytes)
 // Element of the tag with the text as content (short form).
 static data_chunk element(uint8_t tag, const std::string& text)
 {
-    return splice(data_chunk{ tag, narrow_cast<uint8_t>(text.size()) }, to_chunk(text));
+    const data_chunk header{ tag, narrow_cast<uint8_t>(text.size()) };
+    return splice(header, to_chunk(text));
 }
 
 // reader

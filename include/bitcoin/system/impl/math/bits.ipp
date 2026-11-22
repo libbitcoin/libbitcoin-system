@@ -334,7 +334,8 @@ constexpr Value shift_right(Value value, size_t shift, bool overflow) NOEXCEPT
         value >> (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr void shift_right_into(Value& value, size_t shift, bool overflow) NOEXCEPT
+constexpr void shift_right_into(Value& value, size_t shift,
+    bool overflow) NOEXCEPT
 {
     constexpr auto span = bits<Value>;
     overflow && shift >= span ? value = 0 : value >>= (shift % span);

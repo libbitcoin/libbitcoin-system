@@ -50,8 +50,8 @@ ek_token ek_token::from_string(const std::string& encoded) NOEXCEPT
     // TODO: incorporate existing parser here, setting new members.
 
     encrypted_token key;
-    return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_token{ key } : ek_token{};
+    const auto valid = decode_base58(key, encoded) && verify_checksum(key);
+    return valid ? ek_token{ key } : ek_token{};
 }
 
 // Cast operators.

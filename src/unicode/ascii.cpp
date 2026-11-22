@@ -55,8 +55,8 @@ std::string ascii_to_lower(const std::string_view& text) NOEXCEPT
     std::transform(text.cbegin(), text.cend(), copy.begin(),
         [](char value) NOEXCEPT
         {
-            return narrow_sign_cast<uint8_t>(is_ascii_upper(value) ?
-                value + ('a' - 'A') : value);
+            const auto offset = is_ascii_upper(value) ? ('a' - 'A') : 0;
+            return narrow_sign_cast<uint8_t>(value + offset);
         });
     return copy;
 }
@@ -67,8 +67,8 @@ std::string ascii_to_upper(const std::string_view& text) NOEXCEPT
     std::transform(text.cbegin(), text.cend(), copy.begin(),
         [](char value) NOEXCEPT
         {
-            return narrow_sign_cast<uint8_t>(is_ascii_lower(value) ?
-                value + ('A' - 'a') : value);
+            const auto offset = is_ascii_lower(value) ? ('A' - 'a') : 0;
+            return narrow_sign_cast<uint8_t>(value + offset);
         });
 
     return copy;

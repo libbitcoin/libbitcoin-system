@@ -227,8 +227,8 @@ protected:
     /// -----------------------------------------------------------------------
     virtual INLINE bool signature_hash(hash_digest& out,
         uint8_t sighash_flags) const NOEXCEPT;
-    virtual INLINE bool signature_hash(hash_digest& out, const script& subscript,
-        uint8_t sighash_flags) const NOEXCEPT;
+    virtual INLINE bool signature_hash(hash_digest& out,
+        const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
 
     /// Multisig signature hash caching.
     /// -----------------------------------------------------------------------

@@ -62,8 +62,8 @@ void foo<T>::f() {} // <= incompatible declaration error
 /// SHA hashing algorithm.
 /// Vectorization of message schedules and merkle hashes.
 /// Native sha160/sha256, and sha512 (single lane).
-template <typename SHA, bool Native = true, bool Vector = true, bool Cached = true,
-    if_same<typename SHA::T, sha::shah_t> = true>
+template <typename SHA, bool Native = true, bool Vector = true,
+    bool Cached = true, if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm
   : algorithm_t
 {
@@ -150,7 +150,8 @@ public:
     static constexpr digest_t double_hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& half) NOEXCEPT;
-    static constexpr digest_t double_hash(const half_t& left, const half_t& right) NOEXCEPT;
+    static constexpr digest_t double_hash(const half_t& left,
+        const half_t& right) NOEXCEPT;
     static digest_t double_hash(iblocks_t&& blocks) NOEXCEPT;
 
     /// Streamed hashing (explicitly finalized).
@@ -289,10 +290,14 @@ protected:
     /// Midstate.
     /// -----------------------------------------------------------------------
 
-    INLINE static constexpr void inject_left_half(auto& buffer, const auto& left) NOEXCEPT;
-    INLINE static constexpr void inject_right_half(auto& buffer, const auto& right) NOEXCEPT;
-    INLINE static constexpr void inject_left_quarter(auto& buffer, const auto& left) NOEXCEPT;
-    INLINE static constexpr void inject_right_quarter(auto& buffer, const auto& right) NOEXCEPT;
+    INLINE static constexpr void inject_left_half(auto& buffer,
+        const auto& left) NOEXCEPT;
+    INLINE static constexpr void inject_right_half(auto& buffer,
+        const auto& right) NOEXCEPT;
+    INLINE static constexpr void inject_left_quarter(auto& buffer,
+        const auto& left) NOEXCEPT;
+    INLINE static constexpr void inject_right_quarter(auto& buffer,
+        const auto& right) NOEXCEPT;
 
     /// Padding.
     /// -----------------------------------------------------------------------
@@ -470,11 +475,14 @@ protected:
     INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         const half_t& left, const chunk_t& pad) NOEXCEPT;
 
-    template <bool Swap, size_t Strength = SHA::strength, bool_if<Strength == 256> = true>
+    template <bool Swap, size_t Strength = SHA::strength,
+        bool_if<Strength == 256> = true>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
-    template <bool Swap, size_t Strength = SHA::strength, bool_if<Strength == 160> = true>
+    template <bool Swap, size_t Strength = SHA::strength,
+        bool_if<Strength == 160> = true>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
-    template <bool Swap, size_t Strength = SHA::strength, bool_if<Strength == 512> = true>
+    template <bool Swap, size_t Strength = SHA::strength,
+        bool_if<Strength == 512> = true>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
     template <size_t Strength = SHA::strength, bool_if<Strength == 256> = true>
     static void native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT;
@@ -508,7 +516,8 @@ protected:
 
     static digest_t native_double_hash(const block_t& block) NOEXCEPT;
     static digest_t native_double_hash(const half_t& half) NOEXCEPT;
-    static digest_t native_double_hash(const half_t& left, const half_t& right) NOEXCEPT;
+    static digest_t native_double_hash(const half_t& left,
+        const half_t& right) NOEXCEPT;
 
     /// Native SHA optimizations (two blocks).
     /// -----------------------------------------------------------------------
@@ -572,8 +581,8 @@ public:
 } // namespace system
 } // namespace libbitcoin
 
-#define TEMPLATE template <typename SHA, bool Native, bool Vector, bool Cached, \
-    if_same<typename SHA::T, sha::shah_t> If>
+#define TEMPLATE template <typename SHA, bool Native, bool Vector, \
+    bool Cached, if_same<typename SHA::T, sha::shah_t> If>
 #define CLASS algorithm<SHA, Native, Vector, Cached, If>
 
 // Bogus warning suggests constexpr when declared consteval.

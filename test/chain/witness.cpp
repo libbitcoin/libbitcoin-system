@@ -602,8 +602,10 @@ static chain::witness annexed_script_path(const data_chunk& control) NOEXCEPT
 {
     const auto script_element = to_shared<data_chunk>(tapleaf_script);
     const auto control_element = to_shared<data_chunk>(control);
-    const auto annex_element = to_shared<data_chunk>(data_chunk{ 0x50_u8, 0x42_u8 });
-    return chain::witness{ chunk_cptrs{ script_element, control_element, annex_element } };
+    const data_chunk annex{ 0x50_u8, 0x42_u8 };
+    const auto annex_element = to_shared<data_chunk>(annex);
+    const chunk_cptrs stack{ script_element, control_element, annex_element };
+    return chain::witness{ stack };
 }
 
 // The annex is discarded before the control block is popped [bip341].

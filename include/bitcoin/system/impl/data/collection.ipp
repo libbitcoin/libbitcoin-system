@@ -133,8 +133,9 @@ typename Collection::difference_type
 constexpr find_position(const Collection& list,
     const typename Collection::value_type& element) NOEXCEPT
 {
-    const auto position = std::find(std::cbegin(list), std::cend(list), element);
-    return position == std::cend(list) ? negative_one :
+    const auto end = std::cend(list);
+    const auto position = std::find(std::cbegin(list), end, element);
+    return position == end ? negative_one :
         std::distance(std::cbegin(list), position);
 }
 

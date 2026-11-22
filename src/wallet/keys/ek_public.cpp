@@ -50,8 +50,8 @@ ek_public ek_public::from_string(const std::string& encoded) NOEXCEPT
     // TODO: incorporate existing parser here, setting new members.
 
     encrypted_public key;
-    return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_public{ key } : ek_public{};
+    const auto valid = decode_base58(key, encoded) && verify_checksum(key);
+    return valid ? ek_public{ key } : ek_public{};
 }
 
 // Cast operators.

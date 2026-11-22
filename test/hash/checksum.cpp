@@ -43,8 +43,10 @@ auto bip173_p2wkh_program() NOEXCEPT
 auto bip173_p2wsh_program() NOEXCEPT
 {
     // BIP173: The P2WSH examples use key OP_CHECKSIG (to_pay_public_key_pattern) as script.
-    static const auto bip173_p2wsh_opcodes = chain::script::to_pay_public_key_pattern(bip173_ec_compressed);
-    static const auto program = sha256_chunk(chain::script(bip173_p2wsh_opcodes).to_data(false));
+    static const auto bip173_p2wsh_opcodes =
+        chain::script::to_pay_public_key_pattern(bip173_ec_compressed);
+    static const auto program = sha256_chunk(
+        chain::script(bip173_p2wsh_opcodes).to_data(false));
     return program;
 }
 

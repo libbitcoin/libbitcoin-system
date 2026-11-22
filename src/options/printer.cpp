@@ -322,7 +322,8 @@ std::string printer::format_usage_parameters() NOEXCEPT
         const auto toggle = is_zero(parameter.args_limit());
 
         // A toggle with a short name gets mashed up in group.
-        const auto is_short = parameter.short_name() != parameter::no_short_name;
+        const auto short_name = parameter.short_name();
+        const auto is_short = short_name != parameter::no_short_name;
 
         const auto& long_name = parameter.long_name();
 

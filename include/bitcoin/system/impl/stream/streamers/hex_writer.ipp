@@ -61,7 +61,8 @@ void hex_writer<OStream>::do_write_bytes(const uint8_t* data,
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     for (const auto end = std::next(data, size); data != end;)
     {
-        const auto count = std::min(to_unsigned(std::distance(data, end)), batch);
+        const auto remaining = to_unsigned(std::distance(data, end));
+        const auto count = std::min(remaining, batch);
         auto digit = chars.begin();
         std::for_each_n(data, count, [&](uint8_t octet) NOEXCEPT
         {

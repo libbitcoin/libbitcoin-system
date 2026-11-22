@@ -1421,8 +1421,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             // A changed chunk competes again at its current rate.
             if (!same(sum, score.sum))
             {
-                push({ score.row, {}, {}, {}, fee_rate(sum.fee,
-                    charged(rows)), sum });
+                const auto rate = fee_rate(sum.fee, charged(rows));
+                push({ score.row, {}, {}, {}, rate, sum });
                 continue;
             }
         }

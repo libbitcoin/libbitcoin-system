@@ -32,7 +32,8 @@ using namespace bc::system::options;
     options_description options; \
     positional_options_description arguments; \
     initializer; \
-    printer help(options, arguments, CONFIG_APPLICATION, CONFIG_DESCRIPTION, CONFIG_COMMAND)
+    printer help(options, arguments, CONFIG_APPLICATION, CONFIG_DESCRIPTION, \
+        CONFIG_COMMAND)
 
 #define CONFIG_PRINTER_SETUP() \
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options())

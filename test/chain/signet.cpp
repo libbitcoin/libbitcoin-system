@@ -44,12 +44,17 @@ static transaction commitment_coinbase(const data_chunk& extra) NOEXCEPT
 
 static bool verify_block(const block& instance, const script& challenge) NOEXCEPT
 {
-    return signet::verify(instance.header(), *instance.transactions_ptr()->front(), instance.transaction_hashes(false), challenge);
+    const auto& coinbase = *instance.transactions_ptr()->front();
+    auto txids = instance.transaction_hashes(false);
+    return signet::verify(instance.header(), coinbase, std::move(txids),
+        challenge);
 }
 
-static bool verify_coinbase(const transaction& coinbase, const script& challenge) NOEXCEPT
+static bool verify_coinbase(const transaction& coinbase,
+    const script& challenge) NOEXCEPT
 {
-    return signet::verify(header{}, coinbase, hashes{ coinbase.hash(false) }, challenge);
+    hashes txids{ coinbase.hash(false) };
+    return signet::verify(header{}, coinbase, std::move(txids), challenge);
 }
 
 // verify

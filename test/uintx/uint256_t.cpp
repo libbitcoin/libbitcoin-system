@@ -45,7 +45,10 @@ static hash_digest shift_left(const hash_digest& from, size_t bits) NOEXCEPT
     {
         auto byte = depromote<uint8_t>(from[index - bytes] << offset);
         if (index > bytes && is_nonzero(offset))
-            byte |= depromote<uint8_t>(from[index - bytes - 1u] >> (byte_bits - offset));
+        {
+            const auto prior = from[index - bytes - 1u];
+            byte |= depromote<uint8_t>(prior >> (byte_bits - offset));
+        }
 
         to[index] = byte;
     }
@@ -62,7 +65,10 @@ static hash_digest shift_right(const hash_digest& from, size_t bits) NOEXCEPT
     {
         auto byte = depromote<uint8_t>(from[index + bytes] >> offset);
         if (index + bytes + 1u < to.size() && is_nonzero(offset))
-            byte |= depromote<uint8_t>(from[index + bytes + 1u] << (byte_bits - offset));
+        {
+            const auto next = from[index + bytes + 1u];
+            byte |= depromote<uint8_t>(next << (byte_bits - offset));
+        }
 
         to[index] = byte;
     }
@@ -71,16 +77,23 @@ static hash_digest shift_right(const hash_digest& from, size_t bits) NOEXCEPT
 }
 
 template <typename Operation>
-static hash_digest bytewise(const hash_digest& left, const hash_digest& right, Operation operation) NOEXCEPT
+static hash_digest bytewise(const hash_digest& left, const hash_digest& right,
+    Operation operation) NOEXCEPT
 {
     hash_digest out{};
-    std::transform(left.begin(), left.end(), right.begin(), out.begin(), [&](uint8_t first, uint8_t second) NOEXCEPT { return depromote<uint8_t>(operation(first, second)); });
+    const auto apply = [&](uint8_t first, uint8_t second) NOEXCEPT
+    {
+        return depromote<uint8_t>(operation(first, second));
+    };
+
+    std::transform(left.begin(), left.end(), right.begin(), out.begin(), apply);
     return out;
 }
 
 static bool almost_equal(double left, double right) NOEXCEPT
 {
-    return std::fabs(left - right) <= 4.0 * std::fabs(left) * std::numeric_limits<double>::epsilon();
+    const auto epsilon = std::numeric_limits<double>::epsilon();
+    return std::fabs(left - right) <= 4.0 * std::fabs(left) * epsilon;
 }
 
 BC_AUTO_TEST_CASE(uint256_t__basics__expected)

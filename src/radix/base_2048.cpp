@@ -32,8 +32,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Use BIP39 dictionary set.
-// Allows encoding to map to BIP39 in any language.
+// Use BIP39 dictionary set. Allows encoding to map to BIP39 in any language.
 static const words::mnemonic::catalogs base2048
 {
     {

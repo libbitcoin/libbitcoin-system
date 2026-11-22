@@ -235,8 +235,8 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
 
             const size_t magnitude = absolute(value);
             const auto entry = to_half(sub1(magnitude));
-            const auto negative = is_negative(value) != negatives[half] ?
-                max_uint64 : 0_u64;
+            const auto inverted = is_negative(value) != negatives[half];
+            const auto negative = inverted ? max_uint64 : 0_u64;
 
             if (half < two)
             {
@@ -246,8 +246,8 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
             }
             else
             {
-                negate(addend, half == two ? a_first[entry] :
-                    a_second[entry], negative);
+                const auto& table = half == two ? a_first : a_second;
+                negate(addend, table[entry], negative);
                 add_point<false>(r, addend, faults);
             }
         }

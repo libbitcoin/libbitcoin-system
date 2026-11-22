@@ -558,8 +558,8 @@ op_equal_verify() NOEXCEPT
     if (this->stack_size() < 2u)
         return error::op_equal_verify1;
 
-    return this->equal_chunks(this->pop_(), this->pop_()) ?
-        error::op_success : error::op_equal_verify2;
+    const auto same = this->equal_chunks(this->pop_(), this->pop_());
+    return same ? error::op_success : error::op_equal_verify2;
 }
 
 TEMPLATE

@@ -131,7 +131,8 @@ constexpr scalar number(const bytes& value) NOEXCEPT
 
 static affine entry(size_t index) NOEXCEPT
 {
-    const auto slice = secp256k1::generator_slices[index / accessor::slice_size];
+    const auto slice_index = index / accessor::slice_size;
+    const auto slice = secp256k1::generator_slices[slice_index];
     const auto offset = accessor::locate(index % accessor::slice_size);
     affine out{};
     const auto size = out.x.size();

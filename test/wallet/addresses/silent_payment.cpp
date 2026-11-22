@@ -1018,19 +1018,22 @@ static inputs simple_send_inputs()
 
 static transaction simple_send()
 {
-    return { 2u, simple_send_inputs(), { to_pay_witness_taproot_output(taproot_key) }, 0u };
+    const auto taproot_output = to_pay_witness_taproot_output(taproot_key);
+    return { 2u, simple_send_inputs(), { taproot_output }, 0u };
 }
 
 static block block_of(const transaction& tx)
 {
-    const input null{ point{ null_hash, point::null_index }, script{}, max_uint32 };
+    const point null_point{ null_hash, point::null_index };
+    const input null{ null_point, script{}, max_uint32 };
     const transaction coinbase{ 1u, { null }, { { 42u, script{} } }, 0u };
     return { header{}, { coinbase, tx } };
 }
 
 static scan::batch::prefix prefix_of(const char* key)
 {
-    return array_cast<uint8_t, scan::batch::prefix_size>(bytes<ec_xonly_size>(key));
+    const auto xonly = bytes<ec_xonly_size>(key);
+    return array_cast<uint8_t, scan::batch::prefix_size>(xonly);
 }
 
 BC_AUTO_TEST_CASE(silent_payment__collect__summarized_tx__summary_record)

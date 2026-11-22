@@ -220,8 +220,9 @@ bool golomb::match_stack(const data_chunk& compressed_set,
     const data_stack& targets, uint64_t set_size, const half_hash& entropy,
     uint8_t bits, uint64_t target_false_positive_rate) NOEXCEPT
 {
-    return match_stack(compressed_set, targets, set_size, to_siphash_key(entropy),
-        bits, target_false_positive_rate);
+    const auto key = to_siphash_key(entropy);
+    return match_stack(compressed_set, targets, set_size, key, bits,
+        target_false_positive_rate);
 }
 
 // private

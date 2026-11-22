@@ -162,12 +162,16 @@ void typed_value<Type>::parse(std::any& value, const string_list& tokens,
     else
     {
         if (value.has_value())
-            throw validation_exception{ "option '" + option +
-                "' cannot be specified more than once" };
+            throw validation_exception
+            {
+                "option '" + option + "' cannot be specified more than once"
+            };
 
         if (tokens.size() > one)
-            throw validation_exception{ "option '" + option +
-                "' only takes a single argument" };
+            throw validation_exception
+            {
+                "option '" + option + "' only takes a single argument"
+            };
 
         if constexpr (is_same_type<Type, bool>)
         {
@@ -176,8 +180,10 @@ void typed_value<Type>::parse(std::any& value, const string_list& tokens,
         else
         {
             if (tokens.empty())
-                throw validation_exception{ "option '" + option +
-                    "' requires at least one argument" };
+                throw validation_exception
+                {
+                    "option '" + option + "' requires at least one argument"
+                };
 
             value = parse_token<Type>(tokens.front(), option);
         }
@@ -270,8 +276,11 @@ Element typed_value<Type>::parse_token(const std::string& token,
         if (text == "off" || text == "no" || text == "0" || text == "false")
             return false;
 
-        throw istream_exception{ token, option, ". Valid choices are "
-            "'on|off', 'yes|no', '1|0' and 'true|false'" };
+        throw istream_exception
+        {
+            token, option, ". Valid choices are "
+            "'on|off', 'yes|no', '1|0' and 'true|false'"
+        };
     }
     else if constexpr (is_integral<Element>)
     {

@@ -92,7 +92,11 @@ static chain::signatures batch_capture(batch_misses& misses) NOEXCEPT
     {
         true,
         [&misses](const script&) NOEXCEPT { ++misses.logged; },
-        [&misses](chain::signatures::miss kind, size_t count) NOEXCEPT { misses.kind = kind; misses.fired += count; }
+        [&misses](chain::signatures::miss kind, size_t count) NOEXCEPT
+        {
+            misses.kind = kind;
+            misses.fired += count;
+        }
     };
 }
 

@@ -330,7 +330,8 @@ BC_AUTO_TEST_CASE(chain_state__is_signal__other_top_bits__false)
 // ----------------------------------------------------------------------------
 // Boundaries descend from the boundary at/below the height.
 
-static chain_state::data::signal::boundary started_boundary(const chain_state::deployment& deployment, size_t count)
+static chain_state::data::signal::boundary started_boundary(
+    const chain_state::deployment& deployment, size_t count)
 {
     return { deployment.start, count };
 }
@@ -1196,8 +1197,10 @@ static chain::chain_state::data storm_values(const settings& settings, uint32_t 
     chain::chain_state::data values{};
     values.height = interval;
     values.timestamp.retarget = 1000000;
-    values.timestamp.ordered.push_back(1000000 + interval * settings.block_spacing_seconds);
-    values.bits.ordered = chain_state::bitss(interval, settings.proof_of_work_limit);
+    const auto spacing = settings.block_spacing_seconds;
+    const auto limit = settings.proof_of_work_limit;
+    values.timestamp.ordered.push_back(1000000 + interval * spacing);
+    values.bits.ordered = chain_state::bitss(interval, limit);
     values.bits.ordered.front() = first;
     return values;
 }

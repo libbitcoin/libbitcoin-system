@@ -67,7 +67,8 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     {
         const auto bit = sub1(index);
         const auto byte = clamped[shift_right(bit, 3)];
-        const auto swap = to_int<int64_t>(get_right(byte, bit_and(bit, 7_size)));
+        const auto offset = bit_and(bit, 7_size);
+        const auto swap = to_int<int64_t>(get_right(byte, offset));
 
         select(a, b, swap);
         select(c, d, swap);

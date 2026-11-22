@@ -361,16 +361,22 @@ static length_tokens run_lengths(const data_chunk& lengths) NOEXCEPT
             while (run >= minimum_long_zeros)
             {
                 const auto count = std::min(run, maximum_long_zeros);
-                out.push_back({ repeat_long_zeros,
-                    narrow_cast<uint16_t>(count - minimum_long_zeros) });
+                out.push_back(
+                {
+                    repeat_long_zeros,
+                    narrow_cast<uint16_t>(count - minimum_long_zeros)
+                });
                 run -= count;
             }
 
             if (run >= minimum_zeros)
             {
                 const auto count = std::min(run, maximum_zeros);
-                out.push_back({ repeat_zeros,
-                    narrow_cast<uint16_t>(count - minimum_zeros) });
+                out.push_back(
+                {
+                    repeat_zeros,
+                    narrow_cast<uint16_t>(count - minimum_zeros)
+                });
                 run -= count;
             }
         }
@@ -381,8 +387,11 @@ static length_tokens run_lengths(const data_chunk& lengths) NOEXCEPT
             while (run >= minimum_repeat)
             {
                 const auto count = std::min(run, maximum_repeat);
-                out.push_back({ repeat_previous,
-                    narrow_cast<uint16_t>(count - minimum_repeat) });
+                out.push_back(
+                {
+                    repeat_previous,
+                    narrow_cast<uint16_t>(count - minimum_repeat)
+                });
                 run -= count;
             }
         }

@@ -208,8 +208,10 @@ Variant to_variant(const value& from) THROWS
 template <typename Tuple, size_t ...Index>
 Tuple to_tuple(const array& from, std::index_sequence<Index...>) THROWS
 {
-    return Tuple{ value_to<std::tuple_element_t<Index, Tuple>>(
-        from.at(Index))... };
+    return Tuple
+    {
+        value_to<std::tuple_element_t<Index, Tuple>>(from.at(Index))...
+    };
 }
 
 template <typename Type>

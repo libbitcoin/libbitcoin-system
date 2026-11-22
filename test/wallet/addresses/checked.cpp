@@ -42,19 +42,28 @@ const long_hash test_long_hash = base16_hash("0908070605040302010009080706050403
 
 auto mini_valid_value() NOEXCEPT
 {
-    static const auto value = insert_checksum<mini_checked::value_size, 2>({ mini_prefix,  test_mini_hash });
+    static const auto value = insert_checksum<mini_checked::value_size, 2>
+    ({
+        mini_prefix, test_mini_hash
+    });
     return value;
 }
 
 auto short_valid_value() NOEXCEPT
 {
-    static const auto value = insert_checksum<short_checked::value_size, 4>({ short_prefix, test_short_hash });
+    static const auto value = insert_checksum<short_checked::value_size, 4>
+    ({
+        short_prefix, test_short_hash
+    });
     return value;
 }
 
 auto long_valid_value() NOEXCEPT
 {
-    static const auto value = insert_checksum<long_checked::value_size, 8>({ long_prefix,  test_long_hash });
+    static const auto value = insert_checksum<long_checked::value_size, 8>
+    ({
+        long_prefix, test_long_hash
+    });
     return value;
 }
 

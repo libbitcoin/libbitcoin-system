@@ -1952,7 +1952,8 @@ BC_AUTO_TEST_CASE(interpreter__run__tapscript_budget_exceeded__op_check_sig_budg
 
 // <sig> <0> <key> OP_CHECKSIGADD <1> OP_NUMEQUAL.
 // Success pushes number+1, so script is true only when sigop passed.
-static script to_checksigadd_script(const data_chunk& key, const data_chunk& endorsement) NOEXCEPT
+static script to_checksigadd_script(const data_chunk& key,
+    const data_chunk& endorsement) NOEXCEPT
 {
     operations ops{};
     ops.emplace_back(endorsement, false);
@@ -2514,9 +2515,13 @@ BC_AUTO_TEST_CASE(interpreter__op_max__one_operand__op_max)
 // Tapscript checksig failure codes [bip342].
 // ----------------------------------------------------------------------------
 
-static script to_checksig_script(const data_chunk& key, const data_chunk& endorsement, opcode checksig) NOEXCEPT
+static script to_checksig_script(const data_chunk& key,
+    const data_chunk& endorsement, opcode checksig) NOEXCEPT
 {
-    return script{ operations{ operation{ endorsement, false }, operation{ key, false }, operation{ checksig } } };
+    const operation push_endorsement{ endorsement, false };
+    const operation push_key{ key, false };
+    const operation check{ checksig };
+    return script{ operations{ push_endorsement, push_key, check } };
 }
 
 BC_AUTO_TEST_CASE(interpreter__run__checksigadd_low_stack__op_check_sig_add1)

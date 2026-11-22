@@ -64,7 +64,8 @@ static bool is_member(const ipv6& ip, const ipv6& net, uint8_t cidr) NOEXCEPT
     {
         const auto prefix = to_bits(index);
         const auto masked = cidr > prefix ? cidr - prefix : zero;
-        const auto mask = unmask_left<uint8_t>(std::min<size_t>(masked, byte_bits));
+        const auto width = std::min<size_t>(masked, byte_bits);
+        const auto mask = unmask_left<uint8_t>(width);
 
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         if (bit_and(host[index], mask) != bit_and(network[index], mask))
