@@ -1040,19 +1040,27 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::span<mark> marks, const columns_t& columns, const totals_t& budget,
     size_t depth, uint32_t bytes_per_sigop) NOEXCEPT
 {
+    // The chunk of the row, or the closure of its cluster (count rows from
+    // first of the closed rows).
     struct score_t
     {
         link_t row{};
+        link_t count{};
+        size_t first{};
+        size_t order{};
         uint64_t rate{};
         totals_t sum{};
-        std::vector<link_t> rows{};
-        bool closed{};
-        size_t order{};
     };
+
+    // A size or sigops of a row.
+    using least_t = std::pair<uint32_t, link_t>;
 
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
     std::vector<score_t> scores{};
+    std::vector<least_t> sizes{};
+    std::vector<least_t> sigops{};
+    std::vector<link_t> closed{};
     std::vector<link_t> rows{};
     std::vector<link_t> group{};
     std::vector<link_t> seeds{};
@@ -1060,6 +1068,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::vector<size_t> below(count);
     size_t epoch{};
     size_t offers{};
+    auto heaped = false;
     totals_t used{};
     out.clear();
     takes.clear();
@@ -1090,6 +1099,23 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         };
     };
 
+    const auto alone = [&](link_t row) NOEXCEPT
+    {
+        return fits(totals(graph, row), available());
+    };
+
+    // An unmarked row of no more than the value is left (least on top).
+    const auto remains = [&](std::vector<least_t>& least, uint32_t value) NOEXCEPT
+    {
+        while (!least.empty() && !unmarked(least.front().second))
+        {
+            std::pop_heap(least.begin(), least.end(), std::greater<>{});
+            least.pop_back();
+        }
+
+        return !least.empty() && least.front().first <= value;
+    };
+
     // The highest rate is on top, the lowest row of equal rates, and the
     // latest offer of the same row.
     const auto lower = [](const score_t& left, const score_t& right) NOEXCEPT
@@ -1101,22 +1127,24 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             left.row > right.row;
     };
 
+    // The first offers are heaped at once.
     const auto push = [&](score_t&& score) NOEXCEPT
     {
         score.order = offers++;
-        scores.push_back(std::move(score));
-        std::push_heap(scores.begin(), scores.end(), lower);
+        scores.push_back(score);
+        if (heaped)
+            std::push_heap(scores.begin(), scores.end(), lower);
     };
 
     const auto score_row = [&](link_t row) NOEXCEPT
     {
         totals_t sum{};
         if (chunk(rows, sum, marks, graph, row, depth, available()))
-            push({ row, fee_rate(sum, bytes_per_sigop), sum, {}, false });
+            push({ row, {}, {}, {}, fee_rate(sum, bytes_per_sigop), sum });
     };
 
-    // A whole cluster offers its best closure, else each of its rows its
-    // chunk, of a partial cluster only those below the take.
+    // A whole cluster offers its best closure (itself if one row), else each
+    // of its rows its chunk, of a partial cluster only those below the take.
     const auto offer = [&](link_t row, bool all) NOEXCEPT
     {
         const auto whole = cluster(group, marks, graph, row);
@@ -1124,13 +1152,23 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             seen[member] = epoch;
 
         totals_t sum{};
-        if (whole)
+        if (whole && is_one(group.size()))
+        {
+            rows.assign(one, row);
+            sum = totals(graph, row);
+        }
+        else if (whole)
+        {
             closure(rows, sum, graph, group, bytes_per_sigop);
+        }
 
         if (whole && fits(sum, available()))
         {
+            const auto first = closed.size();
+            const auto size = possible_narrow_cast<link_t>(rows.size());
             const auto rate = fee_rate(sum, bytes_per_sigop);
-            push({ rows.front(), rate, sum, rows, true });
+            closed.insert(closed.end(), rows.begin(), rows.end());
+            push({ rows.front(), size, first, {}, rate, sum });
             return;
         }
 
@@ -1143,35 +1181,54 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     for (size_t at{}; at < count; ++at)
     {
         const auto row = possible_narrow_cast<link_t>(at);
-        if (unmarked(row) && seen[row] != epoch)
+        if (!unmarked(row))
+            continue;
+
+        const auto own = totals(graph, row);
+        sizes.emplace_back(own.size, row);
+        sigops.emplace_back(own.sigops, row);
+        if (seen[row] != epoch)
             offer(row, true);
     }
 
+    std::make_heap(scores.begin(), scores.end(), lower);
+    std::make_heap(sizes.begin(), sizes.end(), std::greater<>{});
+    std::make_heap(sigops.begin(), sigops.end(), std::greater<>{});
+    heaped = true;
+
     while (!scores.empty())
     {
+        // A take holds an unmarked row, so none is left when none fits.
+        const auto space = available();
+        if (!remains(sizes, space.size) || !remains(sigops, space.sigops))
+            break;
+
         std::pop_heap(scores.begin(), scores.end(), lower);
-        auto score = std::move(scores.back());
+        const auto score = scores.back();
         scores.pop_back();
 
         totals_t sum{};
-        const auto space = available();
-        if (score.closed)
+        if (is_nonzero(score.count))
         {
-            if (!std::ranges::all_of(score.rows, unmarked))
+            const auto taken = std::span<const link_t>{ closed }.subspan(
+                score.first, score.count);
+
+            if (!std::ranges::all_of(taken, unmarked))
                 continue;
 
             // A closure that no longer fits falls back to the chunks of its
-            // cluster.
+            // cluster, of which none fits unless one of its rows does.
             if (!fits(score.sum, space))
             {
                 cluster(group, marks, graph, score.row);
-                for (const auto member: group)
-                    score_row(member);
+                if (std::ranges::any_of(group, alone))
+                    for (const auto member: group)
+                        score_row(member);
 
                 continue;
             }
 
-            rows = std::move(score.rows);
+            rows.assign(taken.begin(), taken.end());
             sum = score.sum;
         }
         else
@@ -1183,8 +1240,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             // A changed chunk competes again at its current rate.
             if (!same(sum, score.sum))
             {
-                push({ score.row, fee_rate(sum, bytes_per_sigop), sum, {},
-                    false });
+                push({ score.row, {}, {}, {}, fee_rate(sum, bytes_per_sigop),
+                    sum });
                 continue;
             }
         }
