@@ -646,14 +646,15 @@ inline uint64_t algorithm::estimate(const projection_t& projection,
 {
     uint64_t low{};
     auto high = max_uint64;
-    if (!reaches(projection, count, space, high, arrivals))
+    const auto sized = levels(projection, count);
+    if (!reaches(projection, sized, count, space, high, arrivals))
         return high;
 
     // A rate that is taken implies that each higher rate is taken.
     while (low < high)
     {
         const auto middle = low + to_half(high - low);
-        if (reaches(projection, count, space, middle, arrivals))
+        if (reaches(projection, sized, count, space, middle, arrivals))
             high = middle;
         else
             low = add1(middle);
@@ -1379,27 +1380,60 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::sort(out.begin(), out.end());
 }
 
-template <typename Arrivals>
-inline bool algorithm::reaches(const projection_t& projection, size_t count,
-    uint64_t space, uint64_t rate, const Arrivals& arrivals) NOEXCEPT
+// Takes are in about descending order of rate as taken.
+inline std::vector<algorithm::takes_t> algorithm::levels(
+    const projection_t& projection, size_t count) NOEXCEPT
 {
     const auto& blocks = projection.blocks;
-    const auto arriving = arrivals(rate);
+    std::vector<takes_t> out(std::min(count, blocks.size()));
+    for (size_t block{}; block < out.size(); ++block)
+    {
+        auto& level = out[block];
+        level.assign(blocks[block].rbegin(), blocks[block].rend());
+        if (!std::ranges::is_sorted(level, {}, &take_t::rate))
+            std::ranges::sort(level, {}, &take_t::rate);
+
+        uint64_t size{};
+        for (auto take = level.rbegin(); take != level.rend(); ++take)
+            take->size = size = ceilinged_add(size, take->size);
+    }
+
+    return out;
+}
+
+template <typename Arrivals>
+inline bool algorithm::reaches(const projection_t& projection,
+    const std::vector<takes_t>& levels, size_t count, uint64_t space,
+    uint64_t rate, const Arrivals& arrivals) NOEXCEPT
+{
+    const auto blocks = projection.blocks.size();
+    uint64_t arriving{};
     uint64_t carry{};
 
     // A block that leaves rows is full, so its takes are its capacity.
     for (size_t block{}; block < count; ++block)
     {
-        std::span<const take_t> takes{};
-        if (block < blocks.size())
-            takes = blocks[block];
+        std::span<const take_t> level{};
+        if (block < levels.size())
+            level = levels[block];
 
-        const auto last = add1(block) >= blocks.size();
-        const auto full = !takes.empty() && !(last && projection.exhausted);
-        const auto capacity = full ? above(takes, 0_u64) : space;
-        const auto demand = ceilinged_add(carry, above(takes, rate));
+        const auto from = std::ranges::lower_bound(level, rate, {},
+            &take_t::rate);
+
+        const auto last = add1(block) >= blocks;
+        const auto full = !level.empty() && !(last && projection.exhausted);
+        const auto capacity = full ? level.front().size : space;
+        const auto over = from == level.end() ? 0_u64 : from->size;
+        const auto demand = ceilinged_add(carry, over);
         if (demand < capacity)
             return true;
+
+        // Arrivals join what the first block leaves, and each block after.
+        if (add1(block) == count)
+            break;
+
+        if (is_zero(block))
+            arriving = arrivals(rate);
 
         const auto excess = floored_subtract(demand, capacity);
         carry = ceilinged_add(excess, arriving);

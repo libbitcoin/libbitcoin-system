@@ -491,10 +491,16 @@ protected:
         const totals_t& budget, size_t depth,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The rate is taken within the count of blocks.
+    /// The takes of each of the count of blocks by ascending rate, the size
+    /// of each that of the takes at or above its rate.
+    static std::vector<takes_t> levels(const projection_t& projection,
+        size_t count) NOEXCEPT;
+
+    /// The rate is taken within the count of blocks, by their levels.
     template <typename Arrivals>
-    static bool reaches(const projection_t& projection, size_t count,
-        uint64_t space, uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
+    static bool reaches(const projection_t& projection,
+        const std::vector<takes_t>& levels, size_t count, uint64_t space,
+        uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
 
     /// The rows from the first met by a walk, forgotten by the next.
     struct visits_t

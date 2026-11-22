@@ -1999,6 +1999,13 @@ BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_last_block__above_lowest_take)
     BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
 }
 
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__takes_out_of_rate_order__above_lowest_take)
+{
+    projection_t projection{};
+    projection.blocks = { { { 100, 50 }, { 300, 100 }, { 200, 50 } }, { { 50, 10 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__open_block__zero)
 {
     const auto projection = projection_of(2);
