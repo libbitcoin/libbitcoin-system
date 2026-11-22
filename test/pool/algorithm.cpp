@@ -2062,63 +2062,87 @@ BC_AUTO_TEST_CASE(pool_algorithm__estimate__empty_pool__zero)
 {
     projection_t projection{};
     projection.exhausted = true;
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 0u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 0u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_block__above_lowest_take)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_last_block__above_lowest_take)
 {
     const auto projection = projection_of(1);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__takes_out_of_rate_order__above_lowest_take)
 {
     projection_t projection{};
     projection.blocks = { { { 100, 50 }, { 300, 100 }, { 200, 50 } }, { { 50, 10 } } };
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__open_block__zero)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, no_arrivals), 0u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, no_arrivals), 0u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__beyond_blocks__zero)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 3, 200, no_arrivals), 0u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 3, 200, 1, no_arrivals), 0u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__low_arrivals_fill_open_block__above_arrivals)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, low_arrivals), 51u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, low_arrivals), 51u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__high_arrivals_fill_open_block__above_first_block)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, high_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, high_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__no_space__maximum)
 {
     projection_t projection{};
     projection.exhausted = true;
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 0, no_arrivals), max_uint64);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 0, 1, no_arrivals), max_uint64);
+}
+
+// The tail take of 10 bytes leaves room for one byte at its rate, not for 100.
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__room_within_low_tail_take__above_tail_take)
+{
+    projection_t projection{};
+    projection.blocks = { { { 500, 990 }, { 10, 10 } }, { { 5, 1'000 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 1, no_arrivals), 11u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 10, no_arrivals), 11u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__room_over_low_tail_take__above_take_before_it)
+{
+    projection_t projection{};
+    projection.blocks = { { { 500, 990 }, { 10, 10 } }, { { 5, 1'000 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 11, no_arrivals), 501u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 100, no_arrivals), 501u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__room_over_block__maximum)
+{
+    projection_t projection{};
+    projection.blocks = { { { 500, 990 }, { 10, 10 } }, { { 5, 1'000 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 1'001, no_arrivals), max_uint64);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__no_blocks__maximum)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 0, 200, no_arrivals), max_uint64);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 0, 200, 1, no_arrivals), max_uint64);
 }
 
 // transitions

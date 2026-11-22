@@ -67,9 +67,11 @@ constexpr size_t template_outcomes = 1'024;
 constexpr uint32_t template_sigop_bytes = 20;
 constexpr size_t template_blocks = 6;
 
-// The blocks of each fee estimate from the projection, and the chargeable
-// bytes arriving a block at a rate of 1,000 (less in proportion above it).
+// The blocks of each fee estimate from the projection and the bytes it finds
+// room for, and the chargeable bytes arriving a block at a rate of 1,000 (less
+// in proportion above it).
 constexpr std_array<size_t, 4> template_targets{ 1, 2, 3, 6 };
+constexpr uint64_t template_room = 1'000;
 constexpr uint64_t template_arrivals = 500'000;
 
 // A pool of chains: its rows alone, its chains and their greatest length, and
@@ -902,7 +904,7 @@ static bool report_template(const std::string& name, table& columns,
         size_t reached{};
         for (const auto target: template_targets)
             if (algorithm::estimate(projection, target, template_budget.size,
-                arrivals) != max_uint64)
+                template_room, arrivals) != max_uint64)
                 ++reached;
 
         return reached;

@@ -645,19 +645,20 @@ constexpr uint64_t algorithm::above(const std::span<const take_t>& takes,
 
 template <typename Arrivals>
 inline uint64_t algorithm::estimate(const projection_t& projection,
-    size_t count, uint64_t space, const Arrivals& arrivals) NOEXCEPT
+    size_t count, uint64_t space, uint64_t room,
+    const Arrivals& arrivals) NOEXCEPT
 {
     uint64_t low{};
     auto high = max_uint64;
     const auto sized = levels(projection, count);
-    if (!reaches(projection, sized, count, space, high, arrivals))
+    if (!reaches(projection, sized, count, space, room, high, arrivals))
         return high;
 
-    // A rate that is taken implies that each higher rate is taken.
+    // A rate that has room implies that each higher rate has.
     while (low < high)
     {
         const auto middle = low + to_half(high - low);
-        if (reaches(projection, sized, count, space, middle, arrivals))
+        if (reaches(projection, sized, count, space, room, middle, arrivals))
             high = middle;
         else
             low = add1(middle);
@@ -1496,7 +1497,7 @@ inline std::vector<algorithm::takes_t> algorithm::levels(
 template <typename Arrivals>
 inline bool algorithm::reaches(const projection_t& projection,
     const std::vector<takes_t>& levels, size_t count, uint64_t space,
-    uint64_t rate, const Arrivals& arrivals) NOEXCEPT
+    uint64_t room, uint64_t rate, const Arrivals& arrivals) NOEXCEPT
 {
     const auto blocks = projection.blocks.size();
     uint64_t arriving{};
@@ -1517,7 +1518,7 @@ inline bool algorithm::reaches(const projection_t& projection,
         const auto capacity = full ? level.front().size : space;
         const auto over = from == level.end() ? 0_u64 : from->size;
         const auto demand = ceilinged_add(carry, over);
-        if (demand < capacity)
+        if (floored_subtract(capacity, demand) >= room)
             return true;
 
         // Arrivals join what the first block leaves, and each block after.

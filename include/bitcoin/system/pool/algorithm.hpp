@@ -413,10 +413,10 @@ public:
     static constexpr uint64_t above(const std::span<const take_t>& takes,
         uint64_t rate) NOEXCEPT;
 
-    /// Lowest rate taken within the count of blocks, max_uint64 if none.
+    /// Lowest rate with room (bytes) within count of blocks, else max_uint64.
     template <typename Arrivals>
     static uint64_t estimate(const projection_t& projection, size_t count,
-        uint64_t space, const Arrivals& arrivals) NOEXCEPT;
+        uint64_t space, uint64_t room, const Arrivals& arrivals) NOEXCEPT;
 
     /// Columns (whole table).
     /// -----------------------------------------------------------------------
@@ -541,11 +541,11 @@ protected:
     static std::vector<takes_t> levels(const projection_t& projection,
         size_t count) NOEXCEPT;
 
-    /// The rate is taken within the count of blocks, by their levels.
+    /// Rate has room within count of blocks, by their levels.
     template <typename Arrivals>
     static bool reaches(const projection_t& projection,
         const std::vector<takes_t>& levels, size_t count, uint64_t space,
-        uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
+        uint64_t room, uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
 
     /// The rows from the first met by a walk, forgotten by the next.
     struct visits_t
