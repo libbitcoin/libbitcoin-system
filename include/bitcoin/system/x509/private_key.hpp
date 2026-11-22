@@ -39,15 +39,15 @@ BC_API bool decode_sec1(secret384& out, const_byte_span der) NOEXCEPT;
 BC_API bool decode_pkcs8(secret& out, const_byte_span der) NOEXCEPT;
 BC_API bool decode_pkcs8(secret384& out, const_byte_span der) NOEXCEPT;
 
-/// Decode an EncryptedPrivateKeyInfo (pkcs8) of pbes2 with pbkdf2,
-/// hmacWithSHA256 and aes-128-cbc or aes-256-cbc (rfc8018).
+/// Decode EncryptedPrivateKeyInfo (pkcs8) of pbes2 with pbkdf2, hmacWithSHA256
+/// and aes-128-cbc or aes-256-cbc (rfc8018).
 BC_API bool decode_encrypted_pkcs8(secret& out, const_byte_span der,
     const std::string& password) NOEXCEPT;
 BC_API bool decode_encrypted_pkcs8(secret384& out, const_byte_span der,
     const std::string& password) NOEXCEPT;
 
-/// Decode the first "EC PRIVATE KEY", "PRIVATE KEY" or
-/// "ENCRYPTED PRIVATE KEY" block of the text, false if of another curve.
+/// Decode first "EC PRIVATE KEY", "PRIVATE KEY" or "ENCRYPTED PRIVATE KEY"
+/// block of text, false if of another curve.
 BC_API bool decode_private_key(secret& out, const std::string& text,
     const std::string& password={}) NOEXCEPT;
 BC_API bool decode_private_key(secret384& out, const std::string& text,

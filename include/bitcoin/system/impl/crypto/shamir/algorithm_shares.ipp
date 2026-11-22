@@ -21,10 +21,10 @@
 
 // Shares
 // ============================================================================
-// A sharing of threshold t is a polynomial of degree t-1 over GF(256), given
-// by t-2 random shares, the digest share and the secret. The secret and its
-// digest are interpolated from any t shares, and the digest authenticates the
-// secret, so an incorrect or substituted share is detected on recovery.
+// Sharing of threshold t is polynomial of degree t-1 over GF(256), given by t-2
+// random shares, digest share and secret. Secret and its digest are
+// interpolated from any t shares, and digest authenticates secret, so incorrect
+// or substituted share is detected on recovery.
 
 namespace libbitcoin {
 namespace system {
@@ -67,8 +67,8 @@ split(shares_t& out, const secret_t& secret, size_t threshold, size_t count,
         return true;
     }
 
-    // The random shares are shares, and with the digest share and the secret
-    // define the polynomial from which the remaining shares are interpolated.
+    // Random shares are shares, and with digest share and secret define
+    // polynomial from which remaining shares are interpolated.
     shares_t base{};
     base.reserve(threshold);
     const auto randoms = sub1(sub1(threshold));

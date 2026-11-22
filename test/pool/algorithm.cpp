@@ -430,9 +430,9 @@ struct ring_state
     }
 };
 
-// Rows 0..39, each with one input, and a second where row % 7 is 3. A row
-// spends the row three before it unless row % 3 is 0. Rings: first inputs of
-// rows (0, 1) and (9, 12), second inputs of rows (3, 10, 17) and (31, 38).
+// Rows 0..39, each with one input, and a second where row % 7 is 3. Row spends
+// row three before it unless row % 3 is 0. Rings: first inputs of rows (0, 1)
+// and (9, 12), second inputs of rows (3, 10, 17) and (31, 38).
 constexpr size_t wide_rows = 40;
 constexpr size_t wide_inputs = 46;
 
@@ -706,8 +706,8 @@ static uint64_t high_arrivals(uint64_t rate) NOEXCEPT
     return rate > 500 ? 0 : 200;
 }
 
-// A table of the scenario less P, with P as the candidate (row 4, input 5
-// spending Q:0), bridged from Q.
+// Table of scenario less P, with P as candidate
+// (row 4, input 5 spending Q:0), bridged from Q.
 struct child_candidate
 {
     child_candidate() NOEXCEPT
@@ -764,7 +764,7 @@ struct child_candidate
     }
 };
 
-// The full scenario with a candidate C (row 5, input 6) spending X:0,
+// Full scenario with candidate C (row 5, input 6) spending X:0,
 // bridged from input 0.
 struct rival_candidate
 {
@@ -1848,8 +1848,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__excluded_parent__descendant_not_taken)
     BC_REQUIRE(marks[2] == mark::unmarked);
 }
 
-// The parent with both children (400) outrates Q (350), which outrates the
-// parent with one child (300).
+// Parent with both children (400) outrates Q (350),
+// which outrates parent with one child (300).
 BC_AUTO_TEST_CASE(pool_algorithm__pack__shared_parent__closure_outrates_row)
 {
     fork_state fork{};
@@ -1891,8 +1891,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__chunk_descendant__outrates_next_cluster)
     BC_REQUIRE(marks[5] == mark::unmarked);
 }
 
-// The chunk of C with P (750, each row charged alone) is outrated by E
-// (1200) and by P alone (1000), which fill the block.
+// Chunk of C with P (750, each row charged alone) is outrated by E (1200) and
+// by P alone (1000), which fill block.
 BC_AUTO_TEST_CASE(pool_algorithm__pack__sigop_charged_child__chunk_rated_by_rows)
 {
     charged_state charged{};
@@ -2177,8 +2177,7 @@ static void confirm_by_columns(State& out,
     relabel(out);
 }
 
-// The boundary rows made unconfirmed and the conflicts not conflicted, by the
-// columns.
+// Boundary rows made unconfirmed and conflicts not conflicted, by columns.
 template <typename State>
 static void unconfirm_by_columns(State& out,
     const std::span<const link_t>& block,
@@ -2196,8 +2195,8 @@ static void unconfirm_by_columns(State& out,
     relabel(out);
 }
 
-// The wide table after the rows confirm with the conflicts, and then after
-// they unconfirm, by the walk and by the columns.
+// Wide table after rows confirm with conflicts, and then after they unconfirm,
+// by walk and by columns.
 static bool walks_wide_as_columns(const std::vector<link_t>& block,
     const std::vector<link_t>& conflicts) NOEXCEPT
 {
@@ -2213,9 +2212,9 @@ static bool walks_wide_as_columns(const std::vector<link_t>& block,
     return complete && same && restored && walked.cells == scanned.cells;
 }
 
-// A random table. A row has one to three inputs, each spending an earlier row
-// or none with equal odds. One in four of the first inputs that spend no row
-// starts a ring of two or three of them.
+// Random table. Row has one to three inputs, each spending earlier row or none
+// with equal odds. One in four of first inputs that spend no row starts ring of
+// two or three of them.
 struct random_state
 {
     random_state(size_t count, uint32_t seed) NOEXCEPT
@@ -2304,9 +2303,9 @@ static std::vector<link_t> random_rows(std::mt19937& generator, size_t count,
     return out;
 }
 
-// Random blocks, confirmed and half of them unconfirmed, by the walk and by
-// the columns. A walk that meets an oversized component is relabeled by the
-// columns, and at least one walk must not.
+// Random blocks, confirmed and half unconfirmed, by walk and by columns.
+// Walk that meets oversized component is relabeled by columns,
+// and at least one walk must not.
 static bool walks_random_as_columns(uint32_t seed) NOEXCEPT
 {
     constexpr size_t rows = 300;

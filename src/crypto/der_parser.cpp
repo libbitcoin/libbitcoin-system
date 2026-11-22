@@ -79,8 +79,8 @@ bool is_valid_bip66_signature_encoding(const data_slice& sig) NOEXCEPT
 // Lax
 // ----------------------------------------------------------------------------
 
-// Locates a tagged integer and advances past it. Leading zeros of a long form
-// length are ignored and the length is bounded by the remaining input.
+// Locates tagged integer and advances past it. Leading zeros of long form
+// length ignored, length bounded by remaining input.
 static bool read_integer(size_t& start, size_t& size, size_t& position,
     const uint8_t* input, size_t length) NOEXCEPT
 {
@@ -133,8 +133,8 @@ static bool copy_scalar(uint8_t* scalar, const uint8_t* input, size_t start,
     return true;
 }
 
-// The signature is set to a valid encoding of an invalid signature whenever
-// parsing fails or a scalar is out of range.
+// Signature set to valid encoding of invalid signature whenever parsing fails
+// or scalar out of range.
 bool ecdsa_signature_parse_der_lax(ec_signature& out, const uint8_t* input,
     size_t inputlen) NOEXCEPT
 {

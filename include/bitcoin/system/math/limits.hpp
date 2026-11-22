@@ -49,14 +49,14 @@ template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value) NOEXCEPT;
 
-/// Cast a value to Result, constrained to the type and upper limit.
-/// Casting positive to/from negative may change the sign of the result.
+/// Cast value to Result, constrained to type and upper limit.
+/// Casting positive to/from negative may change sign of result.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value, Result maximum) NOEXCEPT;
 
-/// Cast a value to Result, constrained to the specified limits.
-/// Casting positive to/from negative may change the sign of the result.
+/// Cast value to Result, constrained to specified limits.
+/// Casting positive to/from negative may change sign of result.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT;

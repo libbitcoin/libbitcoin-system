@@ -21,9 +21,9 @@
 
 // Multiplication
 // ============================================================================
-// Fixed four bit windows, most significant first. The secret multiplication
-// reads every table entry for each window and adds each window's entry, so
-// its sequence of operations is independent of the scalar.
+// Fixed four bit windows, most significant first. Secret multiplication reads
+// every table entry for each window and adds each window's entry, so its
+// sequence of operations is independent of scalar.
 
 namespace libbitcoin {
 namespace system {

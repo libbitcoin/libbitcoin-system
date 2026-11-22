@@ -21,8 +21,8 @@
 
 // Limbs
 // ============================================================================
-// Carries and masks are computed without branches, so that the time of an
-// operation does not depend on its operands.
+// Carries and masks are computed without branches, so time of operation does
+// not depend on its operands.
 
 namespace libbitcoin {
 namespace system {

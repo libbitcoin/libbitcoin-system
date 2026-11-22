@@ -930,7 +930,7 @@ const script_test_list invalid_context_free_scripts
     { "", "0xac 1", "op_checksig with empty stack must fail" }
 }};
 
-// These parse errors cannot happen in the libbitcoin syntax.
+// Parse errors that cannot happen in libbitcoin syntax.
 // Minimal encoding is not required for input (or consensus).
 const script_test_list not_invalid_parse_scripts
 {{

@@ -101,8 +101,8 @@ long_hash mnemonic::seeder(const string_list& words,
 
 uint8_t mnemonic::checksum_byte(const data_chunk& entropy) NOEXCEPT
 {
-    // The high order bits of the first sha256_hash byte are the checksum.
-    // Only 4, 5, 6, 7, or 8 bits of the hash are used (based on size).
+    // High order bits of first sha256_hash byte are checksum.
+    // Only 4, 5, 6, 7, or 8 bits of hash are used (based on size).
     const auto mask_bits = byte_bits - checksum_bits(entropy);
     const auto checksum_mask = max_uint8 << mask_bits;
     return sha256_hash(entropy).front() & checksum_mask;
@@ -147,7 +147,7 @@ size_t mnemonic::word_count(const data_slice& entropy) NOEXCEPT
 bool mnemonic::is_ambiguous(const string_list& words, language requested,
     language derived) NOEXCEPT
 {
-    // HACK: There are 100 same words in en/fr, all with distinct indexes.
+    // HACK: 100 same words in en/fr, all with distinct indexes.
     // If matches en and unspecified then check fr, since en is searched first.
     return
         derived == language::en &&

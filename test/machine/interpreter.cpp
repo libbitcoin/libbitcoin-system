@@ -117,7 +117,7 @@ BC_AUTO_TEST_CASE(interpreter__op_push_four_size__underclaimed__op_push_four_siz
 
 // Reserved and disabled operations.
 // ----------------------------------------------------------------------------
-// op_nop retains both fork-history branches (currently both succeed).
+// op_nop retains both fork-history branches (both succeed).
 
 BC_AUTO_TEST_CASE(interpreter__op_unevaluated__invalid_code__op_invalid)
 {
@@ -1848,9 +1848,9 @@ constexpr uint64_t prevout_value = 42u;
 constexpr auto taproot_rules = flags::bip141_rule | flags::bip143_rule |
     flags::bip341_rule | flags::bip342_rule;
 
-// A non-empty signature charges the budget. A key that is neither empty nor
-// 32 bytes is an unknown (upgradable) type, for which signature validation is
-// considered successful, so no valid signature is required here [bip342].
+// Non-empty signature charges budget. Key neither empty nor 32 bytes is unknown
+// (upgradable) type, for which signature validation is considered successful,
+// so no valid signature is required here [bip342].
 static const data_chunk dummy_signature{ 0x01 };
 static const data_chunk unknown_key(add1(ec_xonly_size), 0x02);
 
@@ -1869,9 +1869,9 @@ static script to_budget_script(size_t sigops) NOEXCEPT
     return script{ std::move(ops) };
 }
 
-// The tx spending the tapscript. The signature hash does not cover the witness
-// (apart from an annex), so a tx built with an empty witness produces the same
-// hashes as one carrying the signatures over which those hashes are taken.
+// Tx spending tapscript. Signature hash does not cover witness (apart from
+// annex), so tx built with empty witness produces same hashes as one carrying
+// signatures over which those hashes are taken.
 static transaction to_spending_transaction(const chunk_cptrs& stack) NOEXCEPT
 {
     // A non-null point, so the tx is not taken for a coinbase.
@@ -1886,10 +1886,10 @@ static transaction to_spending_transaction(const chunk_cptrs& stack) NOEXCEPT
     return tx;
 }
 
-// Run a tapscript exactly as connect_witness does: the input carries the full
-// witness, while the program is handed the stack with the control block and
-// leaf script already popped. Elements are the witness stack-elements, in
-// witness order (the last is the top of the execution stack).
+// Run tapscript exactly as connect_witness does: input carries full
+// witness, while program is handed stack with control block and
+// leaf script already popped. Elements are witness stack-elements,
+// in witness order (last is top of execution stack).
 static code run_tapscript(const script& leaf, const chunk_cptrs& elements={}) NOEXCEPT
 {
     // Witness of the input: [elements] <script> <control>.
@@ -1928,30 +1928,30 @@ static code run_budget_script(size_t sigops) NOEXCEPT
     return run_tapscript(to_budget_script(sigops));
 }
 
-// Two sigops against a 75 byte leaf script. The full witness serializes to 111
-// bytes, so the budget is 162 and two sigops (100) fit. Deriving the budget
-// from the empty execution stack instead yields 51, which stops at one sigop.
+// Two sigops against 75 byte leaf script. Full witness serializes to 111 bytes,
+// so budget is 162 and two sigops (100) fit. Deriving budget from empty
+// execution stack instead yields 51, which stops at one sigop.
 BC_AUTO_TEST_CASE(interpreter__run__tapscript_budget_from_full_witness__success)
 {
     BC_REQUIRE_EQUAL(run_budget_script(2), error::script_success);
 }
 
-// Six sigops (300) still fit a 223 byte leaf script, whose witness serializes
-// to 259 bytes for a budget of 310.
+// Six sigops (300) still fit 223 byte leaf script, whose witness serializes
+// to 259 bytes for budget of 310.
 BC_AUTO_TEST_CASE(interpreter__run__tapscript_budget_at_limit__success)
 {
     BC_REQUIRE_EQUAL(run_budget_script(6), error::script_success);
 }
 
-// Seven sigops (350) exceed the 349 budget of a 260 byte leaf script, whose
-// witness serializes to 298 bytes. The budget remains enforced.
+// Seven sigops (350) exceed 349 budget of 260 byte leaf script, whose witness
+// serializes to 298 bytes. Budget remains enforced.
 BC_AUTO_TEST_CASE(interpreter__run__tapscript_budget_exceeded__op_check_sig_budget)
 {
     BC_REQUIRE_EQUAL(run_budget_script(7), error::op_check_sig_budget);
 }
 
 // <sig> <0> <key> OP_CHECKSIGADD <1> OP_NUMEQUAL.
-// Success pushes number+1, so the script is true only when the sigop passed.
+// Success pushes number+1, so script is true only when sigop passed.
 static script to_checksigadd_script(const data_chunk& key, const data_chunk& endorsement) NOEXCEPT
 {
     operations ops{};
@@ -1972,8 +1972,8 @@ static data_chunk to_undefined_sighash_endorsement() NOEXCEPT
     return endorsement;
 }
 
-// An endorsement of neither 64 nor 65 bytes is not a schnorr signature, but
-// with an unknown key type it is never parsed, so the sigop passes.
+// Endorsement of neither 64 nor 65 bytes is not schnorr signature, but with
+// unknown key type it is never parsed, so sigop passes.
 BC_AUTO_TEST_CASE(interpreter__run__checksigadd_unknown_key_unparsable_endorsement__success)
 {
     const data_chunk endorsement(10, 0x11);
@@ -2026,9 +2026,9 @@ BC_AUTO_TEST_CASE(interpreter__run__checksigadd_xonly_key_invalid_signature__op_
 }
 
 // OP_0 <key> OP_CHECKSIGADD OP_DROP OP_CODESEPARATOR OP_0 <key> OP_CHECKSIGADD
-// Both sigops take their signature from the witness. The second signs over the
-// codeseparator position of 4, the first over none (0xffffffff). The offset is
-// the op following the codeseparator, from which that position is derived.
+// Both sigops take signature from witness. Second signs over codeseparator
+// position of 4, first over none (0xffffffff). Offset is op following
+// codeseparator, from which that position is derived.
 constexpr size_t after_codeseparator = 5;
 
 static script to_codeseparator_script(const ec_xonly& key) NOEXCEPT
@@ -2064,8 +2064,8 @@ BC_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__succ
     constexpr auto version = script_version::taproot;
     constexpr auto sighash = coverage::hash_default;
 
-    // The signature hash is taken over a tx without the signatures, which it
-    // does not cover, and is identical to that of the tx that carries them.
+    // Signature hash taken over tx without signatures, which it does not cover,
+    // and is identical to that of tx carrying them.
     const auto tx = to_spending_transaction({});
     const auto in = tx.inputs_ptr()->cbegin();
 
@@ -2074,8 +2074,8 @@ BC_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__succ
     leaf.clear_offset();
     BC_REQUIRE(tx.signature_hash(first, in, leaf, prevout_value, tapleaf, version, sighash, taproot_rules));
 
-    // The second executes after the codeseparator, which the interpreter
-    // records by advancing the offset to the op following it.
+    // Second executes after codeseparator, which interpreter records by
+    // advancing offset to op following it.
     hash_digest second{};
     leaf.offset = std::next(leaf.ops().cbegin(), after_codeseparator);
     BC_REQUIRE(tx.signature_hash(second, in, leaf, prevout_value, tapleaf, version, sighash, taproot_rules));
@@ -2095,8 +2095,8 @@ BC_AUTO_TEST_CASE(interpreter__run__tapscript_codeseparator_signature_hash__succ
     const data_chunk first_chunk{ first_signature.cbegin(), first_signature.cend() };
     const chunk_cptrs elements{ to_shared<data_chunk>(second_chunk), to_shared<data_chunk>(first_chunk) };
 
-    // Both signatures verify only if the second sigop takes its own hash. A
-    // cache retained across the codeseparator hands it the first instead.
+    // Both signatures verify only if second sigop takes its own hash. Cache
+    // retained across codeseparator hands it first instead.
     BC_REQUIRE_EQUAL(run_tapscript(leaf, elements), error::script_success);
 }
 

@@ -31,8 +31,8 @@ namespace libbitcoin {
 namespace system {
 namespace shamir {
 
-/// The slip39 share word checksum, a Reed-Solomon codeword over GF(1024),
-/// which detects any error in three words. This is not the bech32 checksum.
+/// Slip39 share word checksum, Reed-Solomon codeword over GF(1024), detecting
+/// any error in three words. Not the bech32 checksum.
 class BC_API rs1024
 {
 public:

@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A wallet mnemonic, as defined by BIP39.
+/// Wallet mnemonic, as defined by BIP39.
 /// Generates menemonic from entropy.
 /// Converts valid menemonic to entropy.
 /// Derives master keys from menemonic or entropy, and optional passphrase.
@@ -54,9 +54,9 @@ public:
     static constexpr size_t word_minimum = 4u * word_multiple;
     static constexpr size_t word_maximum = 8u * word_multiple;
 
-    /// The dictionary, limited by identifier, that contains all words.
-    /// If 'none' is specified all dictionaries are searched.
-    /// If 'none' is specified and contained by both en and fr, returns en.
+    /// Dictionary, limited by identifier, that contains all words.
+    /// If 'none' specified all dictionaries are searched.
+    /// If 'none' specified and contained by both en and fr, returns en.
     static language contained_by(const string_list& words,
         language identifier=language::none) NOEXCEPT;
 
@@ -72,8 +72,8 @@ public:
     mnemonic() NOEXCEPT;
 
     /// wiki.trezor.io/recovery_seed
-    /// Construct from the "recovery seed" (mnemonic phrase or entropy).
-    /// Validity and should be checked after construction.
+    /// Construct from "recovery seed" (mnemonic phrase or entropy).
+    /// Validity should be checked after construction.
     mnemonic(const std::string& sentence,
         language identifier=language::none) NOEXCEPT;
     mnemonic(const string_list& words,
@@ -82,14 +82,14 @@ public:
         language identifier=language::en) NOEXCEPT;
 
     /// wiki.trezor.io/recovery_seed
-    /// Derive the "master binary seed" from the "recovery seed" and passphrase.
+    /// Derive "master binary seed" from "recovery seed" and passphrase.
     long_hash to_seed(const std::string& passphrase="") const NOEXCEPT;
 
     /// wiki.trezor.io/account_private_key
-    /// Derive the "account private key" from the "master binary seed".
-    /// This is also known as the wallet "root key" or "master private key".
+    /// Derive "account private key" from "master binary seed".
+    /// Also known as wallet "root key" or "master private key".
     /// hd_private.to_public() is the "master public key".
-    /// The "master binary seed" cannot be obtained from the key.
+    /// "master binary seed" cannot be obtained from key.
     hd_private to_key(const std::string& passphrase="",
         const context& context=btc_mainnet) const NOEXCEPT;
 

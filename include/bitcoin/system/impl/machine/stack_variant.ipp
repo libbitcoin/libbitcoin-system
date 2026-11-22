@@ -67,7 +67,7 @@ peek_signed(Integer& value) const NOEXCEPT
 /// Variant data conversions.
 /// ---------------------------------------------------------------------------
 /// P2SH and P2WSH redeem scripts and P2TR tapscripts are not subjectable to
-/// standardness and are therefore not considered "stadnard" in comments below.
+/// standardness, so not considered "stadnard" in comments below.
 
 TEMPLATE
 bool CLASS::
@@ -128,7 +128,7 @@ peek_strict_bool() const NOEXCEPT
     return value;
 }
 
-// This is the only convertor with both a return value and a result.
+// Only convertor with both return value and result.
 // A chunk false must be [] and chunk true must be [0x01], otherwise fails.
 TEMPLATE
 bool CLASS::
@@ -197,10 +197,10 @@ peek_chunk() const NOEXCEPT
     using namespace number;
     chunk_xptr value{};
 
-    // The following script operations will ONLY tether chunks in case where
-    // the *popped* element was originally bool/int64_t but required as chunk.
-    // This is never the case in standard scripts. make_external attaches moved
-    // chunk to tether and returns weak pointer (chunk_xptr).
+    // Following script operations ONLY tether chunks where *popped*
+    // element was originally bool/int64_t but required as chunk,
+    // never the case in standard scripts. make_external attaches
+    // moved chunk to tether and returns weak pointer (chunk_xptr).
     //
     // op_ripemd160         (0..1)
     // op_sha1              (0..1)

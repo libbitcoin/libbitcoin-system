@@ -144,7 +144,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data,
         return false;
 
     // TIFF encoding limit is max_uint32.
-    // This method is otherwise limited only by the stream capacity.
+    // Otherwise limited only by stream capacity.
     if (data.size() > max_image_bytes)
         return false;
 
@@ -164,7 +164,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data,
 
     // =============== Header ===============
 
-    // These sentinals are symmetrical, so order does not matter.
+    // Sentinals are symmetrical, so order does not matter.
     // But all writes with endianness below must conform to this setting.
     writer.write_2_bytes_big_endian(tiff_header::big_endian);
     
@@ -180,7 +180,7 @@ bool tiff::to_image(std::ostream& out, const data_chunk& data,
     writer.write_2_bytes_big_endian(entry_count);
 
     // Write all required fields in required order.
-    // An IFDE is always 12 bytes long (the set is an array).
+    // IFDE is always 12 bytes long (set is an array).
     // ............... IFDE[0] ..............
     writer.write_2_bytes_big_endian(field_tag::image_width);
     writer.write_2_bytes_big_endian(field_type::full);

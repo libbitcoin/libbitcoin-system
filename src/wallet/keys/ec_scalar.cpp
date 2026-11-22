@@ -77,8 +77,8 @@ ec_scalar ec_scalar::from_int64(int64_t value) NOEXCEPT
         secret.end()
     });
 
-    // All hashes and secrets are stored as big-endian by convention.
-    // absolute(minimum<int64_t>) is 2^63, which negates to the scalar -2^63.
+    // All hashes and secrets stored big-endian by convention.
+    // absolute(minimum<int64_t>) is 2^63, negating to scalar -2^63.
     writer.write_8_bytes_big_endian(absolute(value));
 
     return value > 0 ? ec_scalar{ secret } : -ec_scalar{ secret };
@@ -168,8 +168,8 @@ bool operator!=(const ec_scalar& left, int64_t right) NOEXCEPT
 
 bool operator==(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
-    // Compare arrays from left and right in reverse order since scalars are
-    // encoded in big endian format, with leading bytes zero for small scalars.
+    // Compare left and right in reverse order since scalars are big endian,
+    // with leading bytes zero for small scalars.
     return std::equal(left.secret().crbegin(), left.secret().crend(),
         right.secret().crbegin());
 }

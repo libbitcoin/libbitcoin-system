@@ -54,9 +54,9 @@ unicode_streambuf::~unicode_streambuf() NOEXCEPT
 }
 
 // Read characters from input buffer.
-// This invokes wide_buffer_.xsgetn() which requires a patch for
-// console (keyboard) input on Windows, so ensure this class is
-// initialized with a patched std::wcin when std::wcin is used.
+// Invokes wide_buffer_.xsgetn(), which requires patch for
+// console (keyboard) input on Windows, so ensure class is
+// initialized with patched std::wcin when std::wcin is used.
 std::streambuf::int_type unicode_streambuf::underflow() THROWS
 {
     // streamsize is signed.
@@ -85,25 +85,23 @@ std::streambuf::int_type unicode_streambuf::underflow() THROWS
 }
 
 // Write characters to output buffer.
-// We compensate for character-splitting. This is necessary because
-// MSVC does not support a UTF8 locale and as such streams interpret
-// narrow characters in the default locale. This implementation
-// assumes the stream will treat each byte of a multibyte narrow
-// character as an individual single byte character.
+// Compensates for character-splitting, necessary because MSVC does not support
+// UTF8 locale and as such streams interpret narrow characters in default
+// locale. Assumes stream treats each byte of multibyte narrow character as
+// individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
     std::streambuf::int_type character) THROWS
 {
-    // Add a single explicitly read byte to the buffer.
-    // The narrow buffer is underexposed by 1 byte to accomodate this.
+    // Add single explicitly read byte to buffer.
+    // Narrow buffer is underexposed by 1 byte to accomodate this.
     if (character != traits_type::eof())
     {
         *pptr() = static_cast<char>(character);
         pbump(sizeof(char));
     }
 
-    // This will be in the range 0..4, indicating the number of bytes that were
-    // not written in the conversion. A nonzero value results when the buffer
-    // terminates within a utf8 multiple byte character.
+    // In range 0..4, number of bytes not written in conversion. Nonzero when
+    // buffer terminates within utf8 multiple byte character.
     size_t unwritten = 0;
     const auto next = pptr();
     const auto first = pbase();
@@ -134,16 +132,16 @@ std::streambuf::int_type unicode_streambuf::overflow(
     }
 
     // write is necessarily no greater than unwritten.
-    // Copy the fractional character to the beginning of the buffer.
+    // Copy fractional character to beginning of buffer.
     std::copy_n(&narrow_[write - unwritten], unwritten, narrow_);
 
     // narrow_size_ is necessarily greater than 1 (constructor guard).
-    // Reset the pptr to the buffer start, leave pbase and epptr.
-    // We could use just pbump for this if it wasn't limited to 'int' width.
+    // Reset pptr to buffer start, leave pbase and epptr.
+    // pbump alone would suffice if it were not limited to 'int' width.
     setp(narrow_, &narrow_[sub1(narrow_size_)]);
 
     // Guard: unwritten has range of [0..3].
-    // Reset pptr just after the fractional character.
+    // Reset pptr just after fractional character.
     pbump(static_cast<int>(unwritten));
 
     // Return the overflow byte or EOF sentinel.

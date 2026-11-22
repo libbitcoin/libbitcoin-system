@@ -109,11 +109,11 @@ inline const tapscript::keys_t& tapscript::keys() const NOEXCEPT
     BC_ASSERT(is_valid() && is_control(*control_));
     constexpr auto first = add1(ec_xonly_size);
 
-    // This is an exceptional case of casting the contiguous buffer to an array
-    // reference of a potentially larger (bounded) size. The actual extent of
-    // the buffer is exposed by the count() member, and the caller must ensure
-    // that the resulting array reference is not read past the count() value.
-    // This is the purpose of vector cast however that imposes allocation cost.
+    // Exceptional case of casting contiguous buffer to array reference
+    // of potentially larger (bounded) size. Actual extent of buffer is
+    // exposed by count() member, and caller must ensure resulting
+    // array reference is not read past count() value. This is the
+    // purpose of vector cast however that imposes allocation cost.
     const auto start = std::next(control_->data(), first);
     return unsafe_array_cast<ec_xonly, taproot_max_keys>(start);
 }

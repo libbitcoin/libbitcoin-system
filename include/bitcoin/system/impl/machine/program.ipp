@@ -78,11 +78,11 @@ initialize() const NOEXCEPT
     if (!bip342 && script_->is_oversized())
         return error::invalid_script_size;
 
-    // Fail if any op invalid (invalid codes reduced in tapscript).
-    // Should be after underflow check since underflow is also an invalid op.
-    // Promoted success codes are not reachable here due to is_prevalid above.
-    // So only op_verif/op_vernotif (unpromoted invalids) are caught here for
-    // tapscript, otherwise is_prevalid bypassed and all invalids caught here.
+    // Fail if any op invalid (invalid codes reduced in tapscript). Should
+    // follow underflow check, as underflow is also invalid op. Promoted success
+    // codes are not reachable here due to is_prevalid above, so only
+    // op_verif/op_vernotif (unpromoted invalids) are caught here for tapscript,
+    // otherwise is_prevalid bypassed and all invalids caught here.
     if (script_->is_prefail())
         return error::prefail_script;
 
@@ -167,8 +167,8 @@ push_chunk(data_chunk&& datum) NOEXCEPT
     primary_.push(std::move(datum));
 }
 
-// Passing data_chunk& would be poor interface design, as it would allow
-// derived callers to (unsafely) store raw pointers to unshared data_chunk.
+// Passing data_chunk& would allow derived callers to (unsafely) store raw
+// pointers to unshared data_chunk.
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 TEMPLATE
@@ -306,12 +306,12 @@ pop_ternary32(int32_t& upper, int32_t& lower,
 }
 
 // ****************************************************************************
-// CONSENSUS: Satoshi limits this value to the int32_t domain (getint()).
-// This value is only used for stack indexing (key/sig counts & pick/roll).
-// The upper bound of int32_t always exceeds the possible stack size, which
-// is checked downstream. Similarly, a negative causes a downstream script
-// failure. As such it is sufficient to fail on non-indexability here,
-// allowing the value to be returned as a valid and unsigned stack index.
+// CONSENSUS: Satoshi limits value to int32_t domain (getint()). Value
+// is only used for stack indexing (key/sig counts & pick/roll). Upper
+// bound of int32_t always exceeds possible stack size, which is
+// checked downstream. Similarly, negative causes downstream script
+// failure. So it is sufficient to fail on non-indexability here,
+// allowing value to be returned as valid and unsigned stack index.
 // ****************************************************************************
 TEMPLATE
 INLINE bool CLASS::
@@ -349,8 +349,8 @@ peek_signed40_(int64_t& value) const NOEXCEPT
 
 // ****************************************************************************
 // CONSENSUS: Read of 40 bit (vs. 32 bit) value for comparison against uint32_t
-// input.sequence allows use of the full unsigned 32 bit domain, without use of
-// the negative range.
+// input.sequence allows use of full unsigned 32 bit domain,
+// without use of negative range.
 // ****************************************************************************
 TEMPLATE
 INLINE bool CLASS::
@@ -370,9 +370,9 @@ peek_unsigned32(uint32_t& value) const NOEXCEPT
 
 // ****************************************************************************
 // CONSENSUS: Read of 40 bit (vs. 32 bit) value for comparison against uint32_t
-// input.locktime allows use of the full unsigned 32 bit domain, without use of
-// the negative range. Otherwise a 2038 limit (vs. the inherent 2106 limit)
-// would have been introduced.
+// input.locktime allows use of full unsigned 32 bit domain,
+// without use of negative range. Otherwise 2038 limit (vs.
+// inherent 2106 limit) would have been introduced.
 // ****************************************************************************
 TEMPLATE
 INLINE bool CLASS::
@@ -594,10 +594,9 @@ if_(const operation& op) const NOEXCEPT
 
 // ****************************************************************************
 // CONSENSUS:
-// Satoshi compares the count to 200 with a composed postfix increment, which
-// makes the actual maximum 201, not the presumably-intended 200. The code was
-// later revised to make this explicit, by use of a prefix increment against a
-// limit of 201.
+// Satoshi compares count to 200 with composed postfix increment, making actual
+// maximum 201, not presumably-intended 200. Code was later revised to make this
+// explicit, by prefix increment against limit of 201.
 // ****************************************************************************
 INLINE constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
 {
@@ -611,7 +610,7 @@ sigops_increment() NOEXCEPT
     BC_ASSERT(is_enabled(flags::bip342_rule));
 
     // Executing signature op with non-empty signature decrements budget by 50.
-    // If the budget falls below zero script fails immediately [bip342].
+    // If budget falls below zero script fails immediately [bip342].
 
     // Budget initialized add1(50) to make it zero-based, avoiding signed type.
     budget_ = floored_subtract(budget_, chain::signature_cost);

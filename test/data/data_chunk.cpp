@@ -87,16 +87,16 @@ BC_AUTO_TEST_CASE(data_chunk__types__all__expected)
     const chunk_ptrs_cptr copy1 = p5;
     const chunk_cptrs_cptr copy2 = p7;
 
-    // The fully immutable chunk_cptrs_cptr can ony be publicly exposed
-    // by pointer copy (or const&) from chunk_cptrs_ptr.
+    // Fully immutable chunk_cptrs_cptr can only be publicly exposed by pointer
+    // copy (or const&) from chunk_cptrs_ptr.
     const chunk_cptrs_cptr& reference3 = p7;
 
     // Use reference to suppress warning.
     BC_REQUIRE(reference3);
 
-    // There is no way to expose a container of pointers to mutable data as
-    // pointers to immutable data without at least a vector copy. Cast copies
-    // contents, though a move overload could be added as necessary. So usage:
+    // No way to expose container of pointers to mutable data as pointers to
+    // immutable data without at least vector copy. Cast copies contents, though
+    // move overload could be added as necessary. So usage:
     // [chunk_cptrs_cptr] non-mutable internal storage.
     // [chunk_ptrs_ptr] internal mutable container not exposed publicly.
 }

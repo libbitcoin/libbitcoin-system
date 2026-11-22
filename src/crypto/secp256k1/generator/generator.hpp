@@ -19,10 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_GENERATOR_GENERATOR_HPP
 #define LIBBITCOIN_SYSTEM_SRC_CRYPTO_SECP256K1_GENERATOR_GENERATOR_HPP
 
-// The generator table is computed at compile time in slices, one translation
-// unit each, as compiler memory grows with the arithmetic evaluated in a unit.
-// This header includes no library headers, as each unit otherwise pays for
-// parsing them.
+// Generator table computed at compile time in slices, one translation unit
+// each, as compiler memory grows with arithmetic evaluated in a unit. Header
+// includes no library headers, as each unit otherwise pays for parsing them.
 
 #include <array>
 #include <cstddef>
@@ -298,8 +297,7 @@ struct forward
     element products[block_size]{};
 };
 
-/// Affine odd multiples of a block, and inverse of the product before the
-/// block.
+/// Affine odd multiples of block, and inverse of product before block.
 struct backward
 {
     affine points[block_size]{};
@@ -366,8 +364,8 @@ constexpr forward forwarded() noexcept
     return out;
 }
 
-// The block after the last holds only the inverse of the slice product, and
-// each block unwinds its prefix products into affine points.
+// Block after last holds only inverse of slice product, and each block unwinds
+// its prefix products into affine points.
 template <size Slice, size Block>
 constexpr backward backwarded() noexcept
 {
@@ -416,8 +414,7 @@ constexpr void limbs52(word* out, size stride, const element& a) noexcept
     out[4 * stride] = a.value[3] >> 16;
 }
 
-// Block b of a table holds x limbs then y limbs, each as a column of the block
-// size.
+// Block b of table holds x limbs then y limbs, each as column of block size.
 template <size Slice, size Block>
 constexpr void emit(std::array<word, slice_words>& out) noexcept
 {
@@ -538,8 +535,8 @@ constexpr forward comb_forwarded() noexcept
     return out;
 }
 
-// The block after the last holds only the inverse of the window product, and
-// each block unwinds its prefix products into affine points.
+// Block after last holds only inverse of window product, and each block unwinds
+// its prefix products into affine points.
 template <size Window, size Block>
 constexpr backward comb_backwarded() noexcept
 {

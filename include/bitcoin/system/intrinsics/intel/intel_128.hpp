@@ -250,7 +250,7 @@ INLINE Word get(xint128_t a) NOEXCEPT
 }
 
 // SSE2
-// Low order word to the left.
+// Low order word to left.
 template <typename xWord, if_same<xWord, xint128_t> = true>
 INLINE xint128_t set(uint64_t x01, uint64_t x02) NOEXCEPT
 {
@@ -362,7 +362,7 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 
 /// compare/select
 /// ---------------------------------------------------------------------------
-/// Masks are all bits set (true) or unset (false) per word.
+/// Masks all bits set (true) or unset (false) per word.
 
 // SSE2
 INLINE xint128_t andnot(xint128_t a, xint128_t b) NOEXCEPT
@@ -397,7 +397,7 @@ INLINE bool any(xint128_t a) NOEXCEPT
 }
 
 // SSE2
-// The index of the first unequal byte, or the word size if equal.
+// Index of first unequal byte, or word size if equal.
 INLINE size_t first_unequal(xint128_t a, xint128_t b) NOEXCEPT
 {
     const auto equal = _mm_movemask_epi8(_mm_cmpeq_epi8(a, b));

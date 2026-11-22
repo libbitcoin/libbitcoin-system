@@ -20,8 +20,7 @@
 
 BC_AUTO_TEST_SUITE(stream_tests)
 
-// Sequence tests fail on clang, possibly std::pair wraps members.
-// Now failing on MSC as well.
+// Sequence tests fail on clang (possibly std::pair wraps members) and MSC.
 ////#if defined (HAVE_MSC)
 ////
 ////BC_AUTO_TEST_CASE(flip_sink__input_sequence__not_empty__expected)

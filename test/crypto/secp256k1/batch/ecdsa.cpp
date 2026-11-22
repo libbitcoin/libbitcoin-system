@@ -334,7 +334,7 @@ BC_AUTO_TEST_CASE(ecdsa_batch__meets_threshold__2_of_2__failure)
 
 // chunked
 // ----------------------------------------------------------------------------
-// Rows beyond a chunk boundary, with failures in and beyond the first chunk.
+// Rows beyond chunk boundary, with failures in and beyond first chunk.
 
 constexpr size_t chunked_rows = 300;
 constexpr size_t chunked_fail1 = 3;
@@ -392,8 +392,8 @@ BC_AUTO_TEST_CASE(secp256k1__ecdsa_batch_verify__chunked_two_invalid__expected)
 
 // distinct rows
 // ----------------------------------------------------------------------------
-// Rows of distinct keys and digests, verified on gpu where available,
-// with failures at the first, a middle and the last row.
+// Rows of distinct keys and digests, verified on gpu where available, with
+// failures at first, middle and last row.
 
 constexpr size_t distinct_rows = 512;
 constexpr size_t distinct_fail1 = 0;

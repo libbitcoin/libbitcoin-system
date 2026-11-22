@@ -25,8 +25,7 @@ const auto fox = to_chunk(std::string{ "The quick brown fox jumps over the lazy 
 const auto fox_zlib = base16_chunk("789c0bc94855282ccd4cce56482aca2fcf5348cbaf50c82acd2d2856c82f4b2d5228014ae72456552aa4e4a7eb29840c0ec500fa60409d");
 
 
-// The output of a decoder fed one byte at a time, false if invalid or
-// incomplete.
+// Output of decoder fed one byte at a time, false if invalid or incomplete.
 template <typename Decoder>
 static bool fed(data_chunk& out, const data_chunk& data)
 {

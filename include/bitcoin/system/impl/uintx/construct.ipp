@@ -105,8 +105,8 @@ constexpr CLASS::operator Integral() const NOEXCEPT
     return static_cast<Integral>(static_cast<unsigned_t>(limbs_.front()));
 }
 
-// The top 64 bits carry a sticky bit for all lower bits, which preserves the
-// rounding decision of the hardware conversion from 64 bits.
+// Top 64 bits carry sticky bit for all lower bits, preserving rounding decision
+// of hardware conversion from 64 bits.
 TEMPLATE
 template <typename Float, if_uintx_floating<Float>>
 CLASS::operator Float() const NOEXCEPT

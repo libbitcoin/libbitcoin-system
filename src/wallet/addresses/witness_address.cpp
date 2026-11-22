@@ -319,8 +319,8 @@ witness_address witness_address::from_short(const short_hash& hash,
     if (parse_prefix(prefix) != parse_result::valid)
         return {};
 
-    // If the version byte is 0, and the witness program is 20 bytes it is
-    // interpreted as a pay-to-witness-public-key-hash (P2WPKH) program.
+    // If version byte is 0 and witness program is 20 bytes, it is interpreted
+    // as pay-to-witness-public-key-hash (P2WPKH) program.
     return { prefix, version0, to_chunk(hash) };
 }
 
@@ -353,8 +353,8 @@ witness_address witness_address::from_long(const hash_digest& hash,
     if (parse_prefix(prefix) != parse_result::valid)
         return {};
 
-    // If the version byte is 0, and the witness program is 32 bytes it is
-    // interpreted as a pay-to-witness-script-hash (P2WSH) program.
+    // If version byte is 0 and witness program is 32 bytes, it is interpreted
+    // as pay-to-witness-script-hash (P2WSH) program.
     return { prefix, version0, to_chunk(hash) };
 }
 

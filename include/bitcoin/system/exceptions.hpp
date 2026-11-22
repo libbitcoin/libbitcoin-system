@@ -31,22 +31,21 @@ namespace libbitcoin {
 /// We do not use exceptions for general purpose error handling.
 
 /// Dependencies may throw.
-/// We try to avoid the use of external API calls that throw.
-/// If an external API is documented to throw for non-exceptional results, we
-/// catch and squash. If an external API throws unepxectedly, our pervasize use
-/// of NOEXCEPT will cause a call to std::terminate.
+/// We try to avoid external API calls that throw.
+/// If external API is documented to throw for non-exceptional results, we catch
+/// and squash. If external API throws unexpectedly, our pervasive use of
+/// NOEXCEPT causes call to std::terminate.
 
 /// We throw for istream >> read failures, given the nature of streams.
 
 /// We throw for division by zero and other basic math parameterization errors
-/// because the functions are public and are otherwise unguarded. When calling
-/// them internally we first verify parameters to prevent hitting the exception.
-/// This behavior is no different than when using C++ math operators directly.
+/// because functions are public and otherwise unguarded. When calling them
+/// internally we first verify parameters to prevent hitting exception. Behavior
+/// no different than when using C++ math operators directly.
 
 /// We do not generally catch or throw for out of memory conditions as they are
-/// pervasive and it would be impractical to attempt to inject an allocator for
-/// all possible external API memory allocations. Long term objective: inject
-/// all allocation.
+/// pervasive and impractical to inject allocator for all possible external API
+/// memory allocations. Long term objective: inject all allocation.
 
 /// UTF8 Everywhere initialization failure.
 using runtime_exception = std::runtime_error;

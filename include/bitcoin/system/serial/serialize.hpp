@@ -29,9 +29,9 @@ namespace system {
 /// Convert specified Value to text, return fallback for empty results.
 /// Value may be any non-specialized serializable type (that implements <<).
 /// Any type that casts to a specialization will be specialized.
-/// The data_slice must either be explicitly sized to array serialize or
-/// it will deserialize as a data_chunk, due to its cast operators. Both work
-/// though its array serialization can truncate or zero-pad the output by Size.
+/// data_slice must either be explicitly sized to array serialize or it will
+/// deserialize as data_chunk, due to its cast operators. Both work though its
+/// array serialization can truncate or zero-pad output by Size.
 
 /// Call serialize(Value, fallback) and send to ostream.
 /// Stream configuration is not honored for value conversion to text.
@@ -76,15 +76,15 @@ template <typename Value, if_non_integral<Value> = true>
 std::string serialize(const Value& value,
     const std::string& fallback="") NOEXCEPT;
 
-/// The decimal places sufficient to express any finite floating point value
-/// in fixed notation, such that the text deserializes to the value.
+/// Decimal places sufficient to express any finite floating point value in
+/// fixed notation, such that text deserializes to value.
 template <typename Float, if_floating_point<Float> = true>
 constexpr size_t fixed_decimals = to_unsigned(
     std::numeric_limits<Float>::max_digits10 -
     std::numeric_limits<Float>::min_exponent10);
 
-/// Shortest fixed notation, with a decimal, that deserializes to the value.
-/// Any non-finite value is serialized by the general serializer.
+/// Shortest fixed notation, with decimal, that deserializes to value.
+/// Any non-finite value is serialized by general serializer.
 template <typename Float, if_floating_point<Float> = true>
 std::string serialize_fixed(Float value) NOEXCEPT;
 

@@ -34,7 +34,7 @@
 
 // Based on:
 // FIPS PUB 180-4 [Secure Hash Standard (SHS)].
-// All aspects of FIPS180 are supported within the implmentation.
+// All aspects of FIPS180 supported within implementation.
 // nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
 namespace libbitcoin {
@@ -101,7 +101,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// count_t is uint64_t (sha160/256) or uint128_t (sha512).
-    /// All extended integer intrinsics currently have a "64 on 32" limit.
+    /// All extended integer intrinsics have "64 on 32" limit.
     static constexpr auto count_bits    = SHA::block_words * SHA::word_bytes;
     static constexpr auto count_bytes   = bytes<count_bits>;
     using count_t = unsigned_exact_type<bytes<count_bits>>;
@@ -125,8 +125,8 @@ public:
     static constexpr digest_t hash(uint8_t byte) NOEXCEPT;
     static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
-    /// Hash array of any size up to the space available in a single sha block.
-    /// This allows for variable length constexpr hashing (avoids accumulator).
+    /// Hash array of any size up to space available in single sha block.
+    /// Allows variable length constexpr hashing (avoids accumulator).
     template <size_t Size, if_not_greater<Size, CLASSIF::space> = true>
     static constexpr digest_t simple_hash(const bytes_t<Size>& bytes) NOEXCEPT;
 
@@ -193,7 +193,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Expand is multiple of buffer/state for Lane concurrent blocks.
-    /// Multiple blocks are "striped" across the expanded buffer in xWords.
+    /// Multiple blocks are "striped" across expanded buffer in xWords.
     template <size_t Lanes, bool_if<is_valid_lanes<Lanes>> = true>
     using xblock_t = std_array<words_t, Lanes>;
 
@@ -207,7 +207,7 @@ protected:
     using xchunk_t = aligned_array<xWord, SHA::state_words>;
 
     /// Wide is casting of buffer_t to xWord for single block concurrency.
-    /// This is not multi-block or block striping, just larger words.
+    /// Not multi-block or block striping, just larger words.
     template <typename xWord, if_extended<xWord> = true>
     using wbuffer_t = aligned_array<xWord, sizeof(buffer_t) / sizeof(xWord)>;
 

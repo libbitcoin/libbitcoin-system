@@ -33,7 +33,7 @@ typedef std::unordered_map<language, const char*> language_map;
 
 // All languages, dictionary-independent.
 // Dictionaries are collections of words in one of these languages.
-// There can be multiple dictionaries for a given language identifier.
+// There can be multiple dictionaries for a language identifier.
 
 static const language_map map
 {
@@ -97,7 +97,7 @@ string_list languages::try_normalize(const string_list& words) NOEXCEPT
 {
     string_list normal(words.size());
 
-    // This is only used for dictionary matching.
+    // Only used for dictionary matching.
     // All dictionaries are confirmed via test cases to be lower/nfkd.
     std::transform(words.cbegin(), words.cend(), normal.begin(),
         [](const std::string& word) NOEXCEPT
@@ -179,8 +179,8 @@ bool languages::operator<(const languages& other) const NOEXCEPT
 
 bool languages::operator==(const languages& other) const NOEXCEPT
 {
-    // Words and entropy are equivalent except in the case of electrum_v1
-    // overflows. Comparing here prevents the need for electrum_v1 override.
+    // Words and entropy are equivalent except for electrum_v1 overflows.
+    // Comparing here avoids need for electrum_v1 override.
     return entropy_ == other.entropy_ && identifier_ == other.identifier_ &&
         words_ == other.words_;
 }

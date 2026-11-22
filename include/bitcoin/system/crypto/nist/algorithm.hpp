@@ -42,8 +42,8 @@ namespace libbitcoin {
 namespace system {
 namespace nist {
 
-/// ECDSA over a short Weierstrass curve with a = -3. Secret key operations
-/// (key derivation, signing) are constant time.
+/// ECDSA over short Weierstrass curve with a = -3. Secret key operations (key
+/// derivation, signing) are constant time.
 template <typename Curve, if_same<typename Curve::T, nist::curve_t> = true>
 class algorithm
 {
@@ -78,8 +78,8 @@ public:
     /// ECDH (sp800-56a).
     /// -----------------------------------------------------------------------
 
-    /// The x coordinate of secret * point, false if the uncompressed (sec1)
-    /// point is not on the curve or the secret is not in range.
+    /// x coordinate of secret * point, false if uncompressed (sec1) point is
+    /// not on curve or secret is not in range.
     static bool agree(shared_t& out, const secret_t& secret,
         const point_t& point) NOEXCEPT;
 

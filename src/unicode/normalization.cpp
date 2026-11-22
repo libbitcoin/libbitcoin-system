@@ -562,7 +562,7 @@ std::string to_compressed_form(const std::string& value) NOEXCEPT
     // Copy the first character to output.
     std::u32string compressed{ points.front() };
 
-    // Remove a single ascii whitespace between CJK characters.
+    // Remove single ascii whitespace between CJK characters.
     // Front and back cannot be between two characters, so skip them.
     for (auto point{ one }; point < sub1(points.size()); point++)
     {

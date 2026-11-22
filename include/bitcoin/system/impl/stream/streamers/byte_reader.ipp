@@ -227,7 +227,7 @@ size_t byte_reader<IStream>::read_size(size_t limit) NOEXCEPT
 {
     const auto size = read_variable();
 
-    // This facilitates safely passing the size into a follow-on reader.
+    // Facilitates safely passing size into follow-on reader.
     // Return zero allows follow-on use before testing reader state.
     if (size > limit)
     {
@@ -267,7 +267,7 @@ template <size_t Size>
 data_array<Size> byte_reader<IStream>::read_forward() NOEXCEPT
 {
     // Truncated bytes are populated with 0x00.
-    // Reader supports directly populating an array, this avoids a copy.
+    // Reader supports directly populating array, avoiding copy.
     data_array<Size> out{};
     do_read_bytes(out.data(), Size);
     return out;
@@ -297,7 +297,7 @@ data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
     LCOV_EXCL_STOP()
 
     // Truncated bytes are populated with 0x00.
-    // Reader supports directly populating an array, this avoids a copy.
+    // Reader supports directly populating array, avoiding copy.
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     do_read_bytes(to_non_const_raw_ptr(cptr)->data(), Size);
     BC_POP_WARNING()
@@ -556,8 +556,8 @@ std::string byte_reader<IStream>::read_line(const std::string& end) NOEXCEPT
 template <typename IStream>
 std::ostream& byte_reader<IStream>::read(std::ostream& out) NOEXCEPT
 {
-    // This creates an intermediate buffer the size of the stream.
-    // This is presumed to be more optimal than looping individual bytes.
+    // Creates intermediate buffer the size of stream.
+    // Presumed more optimal than looping individual bytes.
     byte_writer<std::ostream>(out).write_bytes(read_bytes());
     return out;
 }
@@ -665,8 +665,8 @@ void byte_reader<IStream>::invalidate() NOEXCEPT
 template <typename IStream>
 byte_reader<IStream>::operator bool() const NOEXCEPT
 {
-    // True if any call created an error state, even if there have been
-    // subsequent calls, or if any error state preexists on the stream.
+    // True if any call created error state, even with subsequent calls, or if
+    // any error state preexists on stream.
     return valid();
 }
 
@@ -703,10 +703,10 @@ uint8_t byte_reader<IStream>::do_peek_byte() NOEXCEPT
         return pad();
     }
 
-    // This sets eofbit (or badbit) on empty and eofbit if otherwise at end.
-    // eofbit does not cause !!eofbit == true, but badbit does, so we validate
-    // the call the achieve consistent behavior. The reader will be invalid if
-    // the stream is peeked past end, including when empty.
+    // Sets eofbit (or badbit) on empty and eofbit if otherwise at end. eofbit
+    // does not cause !!eofbit == true, but badbit does, so call is validated to
+    // achieve consistent behavior. Reader is invalid if stream is peeked past
+    // end, including when empty.
     const auto value =
         possible_narrow_and_sign_cast<uint8_t>(stream_->peek());
 
@@ -721,11 +721,11 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
     if (limiter(size))
         return;
 
-    // It is not generally more efficient to call stream_->get() for one byte.
-    // Partially-failed reads here will be populated by the stream, not padded.
-    // However, both copy_source and stringstream will zero-fill partial reads.
-    // Read on empty is inconsistent, so validate the result. The reader will be
-    // invalid if the stream is get past end, including when empty.
+    // Calling stream_->get() for one byte is not generally more efficient.
+    // Partially-failed reads here are populated by stream, not padded. However,
+    // both copy_source and stringstream zero-fill partial reads. Read on empty
+    // is inconsistent, so result is validated. Reader is invalid if stream is
+    // get past end, including when empty.
 
     // Read past stream end invalidates stream unless size exceeds maximum.
     BC_ASSERT(size <= maximum);
@@ -749,10 +749,10 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) NOEXCEPT
 template <typename IStream>
 void byte_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
 {
-    // Given that the stream size is unknown to the reader, the limit may be
-    // arbitrarily high. This prevents an overflow if sum exceeds max_size_t.
-    // max_size_t is presumed to exceed the range of IStream::pos_type, in 
-    // which case this constraint does not affect the limiting behavior.
+    // Stream size is unknown to reader, so limit may be arbitrarily
+    // high. Prevents overflow if sum exceeds max_size_t. max_size_t
+    // is presumed to exceed range of IStream::pos_type, in which
+    // case this constraint does not affect limiting behavior.
     remaining_ = ceilinged_add(remaining_, size);
 
     // Rewind past stream start invalidates stream unless size exceeds maximum.
@@ -767,14 +767,14 @@ bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
         return true;
 
     // Empty behavior is broadly inconsistent across implementations.
-    // It is also necessary to start many reads, including initial reads, with
-    // an exhaustion check, which must be consistent and not state-changing.
-    // A state change would preclude testing for errors after testing for end.
-    // This method is const because it reliably creates no net state change.
-    // Streams are valid unless read or peeked. Peek does not change stream
-    // position, so it is used to force the stream into a failure state when
-    // empty. peek past end always sets eofbit but peek state on empty is
-    // inconsistent across streams, though a flag is always set.
+    // Many reads, including initial reads, must also start with an
+    // exhaustion check, which must be consistent and not state-changing.
+    // State change would preclude testing for errors after testing for
+    // end. Method is const, as it reliably creates no net state change.
+    // Streams are valid unless read or peeked. Peek does not change
+    // stream position, so it is used to force stream into failure state
+    // when empty. peek past end always sets eofbit but peek state on
+    // empty is inconsistent across streams, though a flag is always set.
 
     if (!valid())
         return true;
@@ -816,10 +816,10 @@ void byte_reader<IStream>::invalid() NOEXCEPT
 template <typename IStream>
 void byte_reader<IStream>::validate() NOEXCEPT
 {
-    // Ensure that any failure in the call fully invalidates the stream/reader.
-    // Some errors are recoverable, so a sequence of operations without testing
-    // for validity could miss an error on intervening operations. For example,
-    // seekg can reset eofbit and read past doesn't set badbit (recoverable).
+    // Ensure any failure in call fully invalidates stream/reader. Some errors
+    // are recoverable, so sequence of operations without testing for validity
+    // could miss error on intervening operations. For example, seekg can reset
+    // eofbit and read past doesn't set badbit (recoverable).
     if (!valid())
         invalid();
 }

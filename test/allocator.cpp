@@ -85,8 +85,8 @@ struct hierarchy_arena
 };
 
 // std_vector and data_chunk are automatically allocator-injected.
-// A std_vector of emplaced shared_ptr will be allocator allocated, with
-// constructing pointer, deleter copied to allocation.
+// std_vector of emplaced shared_ptr is allocator allocated, with constructing
+// pointer, deleter copied to allocation.
 static_assert(!std::uses_allocator_v<hierarchy, arena>);
 static_assert(!std::uses_allocator_v<std::vector<uint8_t>, allocator<>>);
 static_assert(!std::uses_allocator_v<std::array<uint8_t, 42>, allocator<>>);
@@ -558,9 +558,9 @@ BC_AUTO_TEST_CASE(allocator__delete_object__compound_struct__expected)
 
 BC_AUTO_TEST_CASE(allocator__delete_object__hierarchy_struct__expected)
 {
-    // data_chunk (vector) element allocations are independent of allocator
-    // because the allocator doesn't propagate into the struct elements,
-    // because the struct does not satisfy std::uses_allocator_v.
+    // data_chunk (vector) element allocations are independent of allocator,
+    // since allocator doesn't propagate into struct elements, since struct
+    // does not satisfy std::uses_allocator_v.
     const auto ptr = ::new hierarchy{ { 42, { 0x01, 0x02, 0x03 } }, { 0x24, 0x25 } };
     BC_REQUIRE(!is_null(ptr));
 

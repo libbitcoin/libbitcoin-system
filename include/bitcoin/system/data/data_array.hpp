@@ -58,7 +58,7 @@ template <size_t Size>
 const data_stack to_stack(
     const std_vector<data_array<Size>>& values) NOEXCEPT;
 
-/// Concatenate several data slices into a single array.
+/// Concatenate several data slices into single array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
 constexpr data_array<Size> build_array(const data_loaf& slices) NOEXCEPT;

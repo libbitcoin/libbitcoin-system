@@ -26,10 +26,10 @@ namespace libbitcoin {
 namespace system {
 
 // Smart pointer of shared_ptr<const T>, where T is shared and non-nullable.
-// Copy/assignable, shares ownership of its reference, models shared_ptr with
-// the exception of non-nullability. A null obtains a shared default instance,
-// as does a moved-from instance, so both remain safe to dereference.
-// The address of the default instance remains consistent for a given type T.
+// Copy/assignable, shares ownership of its reference, models shared_ptr except
+// non-nullability. Null obtains shared default instance, as does moved-from
+// instance, so both remain safe to dereference.
+// Address of default instance remains consistent for given type T.
 template <typename Type, if_default_constructible<Type> = true>
 class default_ptr
 {

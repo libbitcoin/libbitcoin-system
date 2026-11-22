@@ -24,7 +24,7 @@ using namespace system::chain;
 
 // opcode_to_mnemonic
 // ----------------------------------------------------------------------------
-// Partial coverage includes those with aliases and samples of each "range" of codes.
+// Partial coverage includes aliases and samples of each "range" of codes.
 
 // Use the traditional serializations for all codes (in this case 'zero' vs. 'push_0').
 BC_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__zero_any_forks__zero)
@@ -189,7 +189,7 @@ BC_AUTO_TEST_CASE(opcode__opcode_to_mnemonic__reserved_186_to_255_any_forks__hex
 
 // opcode_from_mnemonic
 // ----------------------------------------------------------------------------
-// Partial coverage includes all aliases and boundaries of each "range" of codes.
+// Partial coverage includes all aliases and boundaries of each "range".
 
 // zero
 

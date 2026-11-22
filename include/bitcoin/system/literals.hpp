@@ -23,11 +23,11 @@
 
 namespace libbitcoin {
 
-/// This uses no libbitcoin utilities, so that it may have few dependencies and
-/// therefore be useful everywhere in the library. It is also important that it
-/// not be subject to regressions in other code, as a break here causes a large
-/// number of test and other failures. See tests for usage and detailed info.
-/// Functions should all be consteval for safety, but waiting on clang++ v17.
+/// Uses no libbitcoin utilities, to have few dependencies and be useful
+/// everywhere in library. Also must not be subject to regressions in other
+/// code, as a break here causes many test and other failures. See tests for
+/// usage and detailed info. Functions should all be consteval for safety, but
+/// waiting on clang++ v17.
 /// ---------------------------------------------------------------------------
 
 // Functions are consteval where available (bogus warning).
@@ -129,21 +129,20 @@ consteval auto operator ""_t() noexcept
 
 /// Integer representations.
 /// ---------------------------------------------------------------------------
-/// All integer literals are positive, so this is what there is to customize.
-/// Literals do not have negative signs, and applying the negative operator to
-/// a literal creates an aritmetic expression which promotes the literal type.
-/// To achieve negative representation we use a positive domain with the
-/// magnitide of the negative domain, and all values entered as absolute. All
-/// numeric representations are possible (binary, octal, hex, decimal) as are
-/// digit separators. A built-in suffix cannot be used with a user-defined
-/// suffix, and there would be no reason to do so.
+/// All integer literals positive, so this is what there is to customize.
+/// Literals have no negative sign, and applying negative operator to literal
+/// creates arithmetic expression which promotes literal type. For negative
+/// representation, positive domain with magnitude of negative domain is used,
+/// all values entered as absolute. All numeric representations are possible
+/// (binary, octal, hex, decimal) as are digit separators. Built-in suffix
+/// cannot be used with user-defined suffix, and there would be no reason to.
 
 #define DECLARE_INTEGER_LITERAL(name, sign, type) \
 consteval type operator ""##name(integer_type value) noexcept \
 { return sign<type>(value); }
 
 /// Literals suppress exception, causing runtime abort if !defined(consteval).
-/// This precludes unnecessary warning on each literal in noexcept functions.
+/// Precludes unnecessary warning on each literal in noexcept functions.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 /// positive signed integer

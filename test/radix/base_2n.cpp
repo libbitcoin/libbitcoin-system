@@ -20,9 +20,10 @@
 
 // zero => zero.
 // small values are left-shifted with negative (1..2) exponent.
-// 3 byte values values are not shifted zero exponent (3) exponent.
-// > 3 byte values are right-shifted with positive (4..32) exponent, losing the precision of all bytes of order > 3.
-// A shift of >32 cannot be produced, since there are only 32 bytes of input.
+// 3 byte values are not shifted zero exponent (3) exponent.
+// > 3 byte values are right-shifted with positive (4..32) exponent, losing
+// precision of all bytes of order > 3.
+// Shift of >32 cannot be produced, as there are only 32 bytes of input.
 
 // Half byte steps (leading bit unset).
 static_assert(base256e::compress(to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000"))) == 0x00000000ul);

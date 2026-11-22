@@ -23,18 +23,17 @@
 #include <bitcoin/system/math/math.hpp>
 
 /// C++20: std::bit_cast is a copy, not a cast, these are true casts.
-/// True casts (not projections) of arrays, with total size and element
-/// size constraints to preclude referencing fractional elements. A const
-/// reference parameter returns a const array reference, non-const returns
-/// a non-const array reference, and an rvalue array parameter returns a cast
-/// instance. These enable C/pointer-style performance (no copies) with full
-/// type safety at no cost (reinterpret_cast does not compile to any CPU
-/// instructions).
+/// True casts (not projections) of arrays, with total size and element size
+/// constraints to preclude referencing fractional elements. Const reference
+/// parameter returns const array reference, non-const returns non-const array
+/// reference, and rvalue array parameter returns cast instance. These enable
+/// C/pointer-style performance (no copies) with full type safety at no cost
+/// (reinterpret_cast does not compile to any CPU instructions).
 
-/// Only arrays of integrals (or arrays of arrays of integrals) may currently
-/// be cast (constrained by the size_of() typelet). Overloads to this function
-/// alone can enable array-casting other types. Use byte_cast for casting
-/// integrals to/from arrays of single byte types.
+/// Only arrays of integrals (or arrays of arrays of integrals) may be cast
+/// (constrained by size_of() typelet). Overloads to this function alone can
+/// enable array-casting other types. Use byte_cast for casting integrals
+/// to/from arrays of single byte types.
 
 /// Casting between element types is safe under the following constraints.
 /// Aliasing: one side must be a single byte type or an x86 intrinsic vector

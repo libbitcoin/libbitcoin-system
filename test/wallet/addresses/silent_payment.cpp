@@ -759,8 +759,8 @@ BC_AUTO_TEST_CASE(silent_payment__summarize__future_segwit_prevout__false)
     BC_REQUIRE(!silent_payment::summarize(out, tx));
 }
 
-// Summary from the bip352 reference (key and outpoint of the first
-// "Simple send: two inputs" input, without the second).
+// Summary from bip352 reference (key and outpoint of first "Simple send: two
+// inputs" input, without second).
 constexpr auto key_hash_summary = "02b04034f00da0678507d1345b7d56fecef825a1151f9dc7d8ca6946452a9e1f43";
 constexpr auto key_hash_secret = base16_array("eadc78165ff1f8ea94ad7cfdc54990738a4c53f6e0507b42154201b8e5dff3b1");
 constexpr auto key_hash_key = base16_array("025a1e61f898173040e20616d43e9f496fba90338a39faa1ed98fcbaeee4dd9be5");

@@ -602,7 +602,7 @@ BC_AUTO_TEST_CASE(block__is_malleable32__various__expected)
 
 // is_malleated64
 // ----------------------------------------------------------------------------
-// Malleated64 additionally requires a non-null first input point.
+// Malleated64 additionally requires non-null first input point.
 
 static transaction tx64_spend(uint32_t index) NOEXCEPT
 {
@@ -669,7 +669,7 @@ BC_AUTO_TEST_CASE(block__is_malleated__neither_shape__false)
 
 // malleated_or
 // ----------------------------------------------------------------------------
-// A malleated block is reported as a commitment failure.
+// Malleated block is reported as commitment failure.
 
 BC_AUTO_TEST_CASE(block__malleated_or__unmalleated__given_code)
 {

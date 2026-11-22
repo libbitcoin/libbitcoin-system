@@ -71,8 +71,8 @@ constexpr bool is_utf8_leading_byte(char byte, size_t size) NOEXCEPT
 }
 
 // TODO: walk backwards to the first leading byte (performance).
-// The number of bytes of a partial utf8 character at the end of text.
-// This assumes that the text is well formed utf8 but truncated at any point.
+// Number of bytes of partial utf8 character at end of text.
+// Assumes text is well formed utf8 but truncated at any point.
 size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT
 {
     if (is_zero(size) || is_null(text))
@@ -96,7 +96,7 @@ size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT
 }
 
 // Convert utf16 wchar_t buffer to utf8 char buffer.
-// This is used in wmain for conversion of wide args and environ on Win32.
+// Used in wmain for conversion of wide args and environ on Win32.
 size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     size_t from_chars) NOEXCEPT
 {
@@ -115,7 +115,7 @@ size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
 }
 
 // Convert utf8 char buffer to utf16 wchar_t buffer, with truncation handling.
-// Truncation results from having split the input buffer arbitrarily (stream).
+// Truncation results from splitting input buffer arbitrarily (stream).
 size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes) NOEXCEPT
 {

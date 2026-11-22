@@ -309,8 +309,8 @@ bool descriptor::key_expression::derive(psbt::derivation& out,
     if (!derive(out.point, index))
         return false;
 
-    // An origin provides the fingerprint and leading path elements. Without
-    // one an extended key is its own origin and a bare key its fingerprint.
+    // Origin provides fingerprint and leading path elements. Without one, an
+    // extended key is its own origin and a bare key its fingerprint.
     auto& to = out.origin;
     to.path.clear();
     if (origin.has_value())

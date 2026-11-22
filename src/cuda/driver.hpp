@@ -39,40 +39,36 @@ void enable(bool enabled) NOEXCEPT;
 /// True if gpu is enabled, loaded and has not failed.
 bool available() NOEXCEPT;
 
-/// Verify rows on gpu, one result byte per row, empty if all rows are valid
-/// or if canceled. False if gpu failed, which disables it.
+/// Verify rows on gpu, one result byte per row, empty if all rows valid or if
+/// canceled. False if gpu failed, which disables it.
 bool verify(const stopper& cancel, data_chunk& out,
     const ecdsa::batch& batch) NOEXCEPT;
 bool verify(const stopper& cancel, data_chunk& out,
     const schnorr::batch& batch) NOEXCEPT;
 
-/// Output key prefixes of receiver for each point on gpu, one
-/// then one per label key (at most maximum_labels), with valid for each
-/// point computed. False if gpu failed, which disables it, or if
-/// there are too many labels.
+/// Output key prefixes of receiver for each point on gpu, one then one per
+/// label key (at most maximum_labels), with valid for each point computed.
+/// False if gpu failed, which disables it, or if too many labels.
 bool scan(const stopper& cancel, std::vector<prefix>& prefixes,
     data_chunk& valid, const std::span<const ec_compressed>& points,
     const scan::batch::receiver& keys) NOEXCEPT;
 
-/// Point (hash * sum) of each row on gpu, with valid for each row
-/// computed, into spans sized to rows. False if gpu failed,
-/// which disables it.
+/// Point (hash * sum) of each row on gpu, with valid for each row computed,
+/// into spans sized to rows. False if gpu failed, which disables it.
 bool compute(const stopper& cancel, const std::span<ec_compressed>& out,
     const std::span<uint8_t>& valid,
     const std::span<const ec_compressed>& sums,
     const std::span<const ec_secret>& hashes) NOEXCEPT;
 
-/// Label the pool cells in place on gpu, with passes and transfer reported.
-/// False if gpu is not available, cannot hold the columns, or failed, which
-/// disables it.
+/// Label pool cells in place on gpu, with passes and transfer reported.
+/// False if gpu unavailable, cannot hold columns, or failed, which disables it.
 bool label(pool::report_t& out, const std::span<uint32_t>& cells,
     const std::span<const pool::algorithm::edges_t>& edges,
     const std::span<const uint32_t>& rows,
     const std::span<const uint32_t>& rivals) NOEXCEPT;
 
-/// Settle the pool cells in place on gpu, with passes and transfer reported.
-/// False if gpu is not available, cannot hold the columns, or failed, which
-/// disables it.
+/// Settle pool cells in place on gpu, with passes and transfer reported.
+/// False if gpu unavailable, cannot hold columns, or failed, which disables it.
 bool settle(pool::report_t& out, const std::span<uint32_t>& cells,
     const std::span<const pool::algorithm::edges_t>& edges,
     const std::span<const uint32_t>& rows,

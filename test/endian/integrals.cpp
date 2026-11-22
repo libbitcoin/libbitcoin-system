@@ -47,7 +47,7 @@ static_assert(to_big   (0x0102030405060708_u64) == data_array<8>{ 1, 2, 3, 4, 5,
 static_assert(to_little(0x0102030405060708_u64) == data_array<8>{ 8, 7, 6, 5, 4, 3, 2, 1 });
 
 // Test offset into data parameter.
-// Offsetting into data array requires test helper as only constexpr parameters are allowed.
+// Offset into data array requires test helper (constexpr parameters only).
 static_assert(to_big_test<1>   (0x01_u8) == data_array<2>{ 0, 1 });
 static_assert(to_little_test<1>(0x01_u8) == data_array<2>{ 0, 1 });
 static_assert(to_big_test<1>   (0x0102_u16) == data_array<3>{ 0, 1, 2 });

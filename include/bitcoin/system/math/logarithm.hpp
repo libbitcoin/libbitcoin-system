@@ -21,10 +21,9 @@
 
 #include <bitcoin/system/define.hpp>
 
-/// These functions manage type promotion but do not manage overflow.
-/// It is possible to create an overflow condition by overconstraining the
-/// return (Exponent) type. However, since the smallest integral exponent is
-/// one byte, it is not possible for log2 to overflow an unsigned exponent
+/// These functions manage type promotion but do not manage overflow. Overflow
+/// may be created by overconstraining return (Exponent) type. As smallest
+/// integral exponent is one byte, log2 cannot overflow unsigned exponent
 /// (uint8_t) unless value > 2^255, which implies Value > uint256_t.
 /// Overflowing signed exponent int8_t implies Value > uint128_t.
 
@@ -37,7 +36,7 @@ template <typename Value,
 constexpr bool is_power2(Value value) NOEXCEPT;
 
 /// Ceilinged logarithms.
-/// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
+/// Obtain ceilinged (rounded up) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
 
 /// ceilinged_log(Base, Value).
@@ -70,7 +69,7 @@ template <typename Exponent = size_t, typename Value,
 constexpr Exponent ceilinged_log256(Value value) NOEXCEPT;
 
 /// Floored logarithms.
-/// Obtain the floored (rounded down) integer logarithm of given value and base.
+/// Obtain floored (rounded down) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
 
 /// floored_log(Base, Value).

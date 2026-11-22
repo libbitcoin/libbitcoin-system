@@ -74,8 +74,8 @@ static const option_description& declared_option(const std::string& name,
     return *option;
 }
 
-// Take the least number of tokens of the option from the arguments. An
-// argument that is exactly a declared short option name is not a token.
+// Take least number of tokens of option from arguments. Argument exactly a
+// declared short option name is not a token.
 static void take_tokens(parsed_option& parsed,
     const option_description& option, const string_list& arguments,
     size_t& index, const options_description& options) THROWS
@@ -183,8 +183,8 @@ parsed_options parse_command_line(int argc, const char* argv[],
 
         if (is_short(argument))
         {
-            // Switches may be grouped, the first other option takes the rest
-            // of the argument as its token.
+            // Switches may be grouped, first other option takes rest of
+            // argument as its token.
             auto name = argument.substr(zero, two);
             auto rest = argument.substr(two);
             while (true)

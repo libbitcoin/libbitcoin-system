@@ -110,8 +110,8 @@ string_list setting_value<Type>::values() const NOEXCEPT
         out.push_back(setting_text(*store_));
     }
 
-    // A set secret reports one empty value, so that it displays as configured
-    // without disclosure, and an unset secret remains indistinguishable.
+    // Set secret reports one empty value, so it displays as configured without
+    // disclosure, and unset secret remains indistinguishable.
     if (secret_ && !out.empty())
         out = string_list{ {} };
 

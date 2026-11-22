@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 namespace config {
     
-/// Container for a [scheme, host, port] tuple (URLs).
+/// Container for [scheme, host, port] tuple (URLs).
 /// IPv6 URIs encoded with literal host (en.wikipedia.org/wiki/IPv6_address).
 /// Provided for serialization of network URLs such as for ZeroMQ.
 class BC_API url
@@ -38,9 +38,9 @@ public:
 
     url() NOEXCEPT;
 
-    /// The scheme and port may be undefined, in which case the port is
-    /// reported as zero and the scheme is reported as an empty string.
-    /// The value is of the form: [scheme://]host[:port] (dns name or ip).
+    /// Scheme and port may be undefined, in which case port is reported as zero
+    /// and scheme as empty string.
+    /// Value is of form: [scheme://]host[:port] (dns name or ip).
     url(const std::string& uri) THROWS;
     url(const std::string& host, uint16_t port) NOEXCEPT;
     url(const std::string& scheme, const std::string& host,
@@ -64,13 +64,12 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    /// An empty scheme and/or empty (zero) port is omitted.
-    /// The url is of the form: [scheme://]host[:port]
+    /// Empty scheme and/or empty (zero) port is omitted.
+    /// Url is of form: [scheme://]host[:port]
     std::string to_uri() const NOEXCEPT;
 
-    /// Return a new url that replaces host instances of "*" with "localhost".
-    /// This is intended for clients that wish to connect to a service that has
-    /// been configured to bind to all interfaces.
+    /// Return new url replacing host instances of "*" with "localhost".
+    /// For clients connecting to service configured to bind to all interfaces.
     url to_local() const NOEXCEPT;
 
     /// Operators.

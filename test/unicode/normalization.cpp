@@ -736,10 +736,9 @@ BC_AUTO_TEST_CASE(normalization__is_diacritic__points__836)
 // is_combining
 // ----------------------------------------------------------------------------
 
-// The combining points count reported (872) by Unicode publication is off by 10.
-// Our internal count is based on Python's Unicode sources, which are authoritative
-// for Electrum normalization, and is the standard on which we rely for BIP39
-// normalization.
+// Combining points count reported (872) by Unicode publication off by 10.
+// Internal count based on Python's Unicode sources, authoritative for
+// Electrum normalization, and the standard relied on for BIP39 normalization.
 BC_AUTO_TEST_CASE(normalization__is_combining__points__882)
 {
     size_t points = 0;

@@ -68,10 +68,10 @@ public:
 
     /// Categories of operations.
     /// -----------------------------------------------------------------------
-    /// The is_invalid() method pertains only to opcode consensus validity and
-    /// should not be confused with the inversion of is_valid (serialization).
-    /// A final opdata code that fails to deserialze sets any is_valid opcode
-    /// and the is_underflow sentinel, so both is_invalid() and is_underflow().
+    /// is_invalid() pertains only to opcode consensus validity, not to be
+    /// confused with inversion of is_valid (serialization). Final opdata code
+    /// that fails to deserialize sets any is_valid opcode and is_underflow
+    /// sentinel, so both is_invalid() and is_underflow().
 
     inline bool is_relaxed_push() const NOEXCEPT;
     inline bool is_push() const NOEXCEPT;
@@ -102,8 +102,8 @@ public:
     /// Use data constructors for push_data ops.
     operation(opcode code) NOEXCEPT;
 
-    /// These construct from push-data, not serialized operations (no codes).
-    /// When minimal is true the data is interpreted as minimally-encoded push.
+    /// Construct from push-data, not serialized operations (no codes).
+    /// When minimal is true data is interpreted as minimally-encoded push.
     operation(data_chunk&& push_data, bool minimal) NOEXCEPT;
     operation(const data_chunk& push_data, bool minimal) NOEXCEPT;
     operation(const chunk_cptr& push_data, bool minimal) NOEXCEPT;

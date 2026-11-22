@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 namespace config {
     
-/// Container for a [scheme, host, port] tuple.
+/// Container for [scheme, host, port] tuple.
 /// IPv6 URIs encoded with literal host (en.wikipedia.org/wiki/IPv6_address).
 /// Provided for serialization of network endpoints in URI format.
 class BC_API endpoint
@@ -39,9 +39,9 @@ public:
 
     endpoint() NOEXCEPT;
 
-    /// The scheme and port may be undefined, in which case the port is
-    /// reported as zero and the scheme is reported as an empty string.
-    /// The value is of the form: [scheme://]host[:port] (dns name or ip).
+    /// Scheme and port may be undefined, in which case port is reported as zero
+    /// and scheme as empty string.
+    /// Value is of form: [scheme://]host[:port] (dns name or ip).
     endpoint(const std::string& uri) THROWS;
     endpoint(const std::string& host, uint16_t port) NOEXCEPT;
     endpoint(const ip::endpoint& uri) NOEXCEPT;
@@ -60,14 +60,13 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    /// The endpoint is of the form host[:port], empty port if zero (default).
+    /// Endpoint is of form host[:port], empty port if zero (default).
     /// Specify non-zero default to explicitly serialize in case of default.
     std::string to_string(uint16_t default_port=0) const NOEXCEPT;
     std::string to_lower(uint16_t default_port=0) const NOEXCEPT;
 
-    /// Return a new endpoint that replaces host instances of "*" with
-    /// "localhost". This is intended for clients that wish to connect
-    /// to a service that has been configured to bind to all interfaces.
+    /// Return new endpoint replacing host instances of "*" with "localhost".
+    /// For clients connecting to service configured to bind to all interfaces.
     endpoint to_local() const NOEXCEPT;
 
     /// Operators.

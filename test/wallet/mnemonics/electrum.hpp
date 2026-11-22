@@ -119,9 +119,9 @@ static ptrdiff_t abnormals(const electrum_vectors& vectors,
 }
 
 // All mnemonics here are 12 words.
-// Japanese mnemonics are ascii space delimited (not ideographic space).
-// Electrum tests cases show 20 bytes of entropy where there is only 17 usable.
-// This may be an intial seed for grinding over the prng.
+// Japanese mnemonics ascii space delimited (not ideographic space).
+// Electrum test cases show 20 bytes of entropy where only 17 usable.
+// May be initial seed for grinding over prng.
 
 // TODO: add vertical vectors
 // github.com/spesmilo/electrum/blob/master/electrum/tests/test_wallet_vertical.py
@@ -331,8 +331,8 @@ const string_list similar_words
     "ábaco", "abaco", "ábaco", "abaco", "ábaco", "abaco",
 };
 
-// The electrum test vectors do not include 2fa/2faw prefixes, so these are added.
-// Menomics generated using seed prefixer, with following parameters.
+// Electrum test vectors do not include 2fa/2faw prefixes, so these are added.
+// Mnemonics generated using seed prefixer, with following parameters.
 
 // 17 null bytes, seed_prefix:standard, language::it, 340 iterations.
 const auto mnemonic_standard = "amarena viola sciarpa movimento trabocco cosmico montato dogma ossa tara muffa emozione";
@@ -346,8 +346,9 @@ const auto mnemonic_two_factor_authentication = "orfano verbale vessillo sabato 
 // 17 null bytes, seed_prefix:two_factor_authentication_witness, language::it, 331 iterations.
 const auto mnemonic_two_factor_authentication_witness = "appetito brindare sussurro leva femmina connesso nucleo freccetta leggero tariffa virologo roccia";
 
-// The electrum test vectors do not include 2fa negative test vectors, so these are added.
-// Menomics generated using seed prefixer, with 2fa hack disabled, with following parameters.
+// Electrum test vectors do not include 2fa negative test
+// vectors, so these are added. Mnemonics generated using seed
+// prefixer, with 2fa hack disabled, with following parameters.
 
 // 16 null bytes, seed_prefix:two_factor_authentication, language::pt, 734 iterations.
 const auto mnemonic_two_factor_authentication11 = "pneu jararaca olhar labareda extrato engenho descanso maroto coquetel roxo mestre";

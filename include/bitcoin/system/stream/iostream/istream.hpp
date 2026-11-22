@@ -26,9 +26,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// Support for high level input operations on a byte buffer.
-/// Cannot derive from istream and cannot make both share an interface.
-/// So this is duck-typed to the subset of std::istream required by readers.
+/// Support for high level input operations on byte buffer.
+/// Cannot derive from istream and cannot make both share an interface, so
+/// duck-typed to subset of std::istream required by readers.
 template <typename Character = char>
 class istream
 {

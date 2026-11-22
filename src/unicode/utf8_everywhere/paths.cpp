@@ -116,23 +116,23 @@ std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
     BC_POP_WARNING()
 
     // GetFullPathName is not thread safe. If another thread calls
-    // SetCurrentDirectory during a call of GetFullPathName the value may be
-    // corrupted as process-static storage is used to retain the directory.
+    // SetCurrentDirectory during call of GetFullPathName, value may be
+    // corrupted, as process-static storage is used to retain directory.
     auto size = GetFullPathNameW(normal.c_str(), 0, NULL, NULL);
     if (is_zero(size))
         return {};
 
-    // Despite contradictory documentation, this accepts long relative paths
-    // and converts them to fully-qualified, without an extension prefix.
-    // This also converts "considered relative" paths (with ".." segments).
-    // Add the prefix after calling as required in order to use a long path.
+    // Despite contradictory documentation, accepts long relative paths and
+    // converts them to fully-qualified, without extension prefix. Also converts
+    // "considered relative" paths (with ".." segments). Add prefix after
+    // calling as required to use long path.
     std::vector<wchar_t> directory(size);
     size = GetFullPathNameW(normal.c_str(), size, directory.data(), NULL);
     if (is_zero(size))
         return {};
 
-    // The returned size does not include the null terminator, and cannot
-    // exceed the original, but does become smaller, so resize accordingly.
+    // Returned size does not include null terminator, cannot exceed original,
+    // but does become smaller, so resize accordingly.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return { directory.cbegin(), std::next(directory.cbegin(), size) };
     BC_POP_WARNING()
@@ -140,11 +140,11 @@ std::filesystem::path qualified_path(const std::filesystem::path& path) NOEXCEPT
 
 std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
 {
-    // The length extension prefix works only with a fully-qualified path.
+    // Length extension prefix works only with fully-qualified path.
     // However this includes "considered relative" paths (with ".." segments).
-    // That is of no consequence here because those will also be converted.
-    // MAX_PATH includes the terminator, so a path of that length requires it.
-    // An already extended path (e.g. by a shell) is not extended again.
+    // No consequence here, as those are also converted.
+    // MAX_PATH includes terminator, so path of that length requires it.
+    // Already extended path (e.g. by shell) is not extended again.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     constexpr std::wstring_view prefix{ L"\\\\?\\" };
     const auto full = qualified_path(path).wstring();

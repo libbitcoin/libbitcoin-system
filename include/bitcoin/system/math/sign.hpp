@@ -24,8 +24,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// If negate is called with the domain minimum value, this aborts the process,
-/// as this is undefinable behavior in twos complement representation.
+/// Negate of domain minimum value aborts process, as this is undefinable
+/// behavior in twos complement representation.
 
 /// Conversions.
 /// ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ template <typename Integer,
 constexpr bool is_negative(Integer) NOEXCEPT;
 
 /// Use !is_lesser(left, right) for (left >= right).
-/// Determine whether the left integer is greater than the right.
+/// Determine whether left integer is greater than right.
 template <typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr bool is_greater(Left left, Right right) NOEXCEPT;
@@ -86,7 +86,7 @@ template <typename Left, typename Right,
 constexpr bool is_greater(Left left, Right right) NOEXCEPT;
 
 /// Use !is_greater(left, right) for (left <= right).
-/// Determine whether the left integer is less than the right.
+/// Determine whether left integer is less than right.
 template <typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr bool is_lesser(Left left, Right right) NOEXCEPT;
@@ -107,7 +107,7 @@ template <place1 = place1{}, typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr to_greater_type<Left, Right> lesser(Left left, Right right) NOEXCEPT;
 
-/// Return greater/lesser of two opposite-sign integers, cast to the Result.
+/// Return greater/lesser of two opposite-sign integers, cast to Result.
 /// Result type may not be of lesser size than either operand (non-narrowing).
 template<typename Result, typename Left, typename Right,
     if_not_lesser_size<Result, Left> = true,

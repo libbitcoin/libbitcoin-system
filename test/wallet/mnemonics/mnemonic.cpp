@@ -44,9 +44,8 @@ BC_AUTO_TEST_CASE(mnemonic__contained_by__invalid__none)
 
 BC_AUTO_TEST_CASE(mnemonic__contained_by__ambiguous__expected)
 {
-    // contained_by returns the first matching language.
-    // The only ambiguous set is en-fr (100 words).
-    // So an en match should be explicitly tested against fr.
+    // contained_by returns first matching language. Only ambiguous set is
+    // en-fr (100 words), so en match should be explicitly tested against fr.
     BC_CHECK(mnemonic::contained_by(ambiguous_en_fr, language::none) == language::en);
     BC_CHECK(mnemonic::contained_by(ambiguous_en_fr, language::en) == language::en);
     BC_CHECK(mnemonic::contained_by(ambiguous_en_fr, language::fr) == language::fr);
@@ -54,8 +53,8 @@ BC_AUTO_TEST_CASE(mnemonic__contained_by__ambiguous__expected)
 
 BC_AUTO_TEST_CASE(mnemonic__contained_by__redundant__expected)
 {
-    // contained_by returns the first matching language.
-    // The only redundant set is zh_Hans-zh_Hant (1275 words).
+    // contained_by returns first matching language.
+    // Only redundant set is zh_Hans-zh_Hant (1275 words).
     BC_CHECK(mnemonic::contained_by(redundant_hans_hant, language::none) == language::zh_Hans);
     BC_CHECK(mnemonic::contained_by(redundant_hans_hant, language::zh_Hans) == language::zh_Hans);
     BC_CHECK(mnemonic::contained_by(redundant_hans_hant, language::zh_Hant) == language::zh_Hant);
@@ -544,8 +543,8 @@ BC_AUTO_TEST_CASE(mnemonic__verify_vectors__keys__match_hd_keys)
 {
     for (const auto& vector: vectors_ja)
     {
-        // The seed is hex encoded input to BIP32 key generation.
-        // The key is constructed from BIP32 encoding, e.g. "xprv..."
+        // Seed is hex encoded input to BIP32 key generation.
+        // Key constructed from BIP32 encoding, e.g. "xprv..."
         BC_CHECK_EQUAL(hd_private(to_chunk(vector.seed())), vector.hd_key());
     }
 }

@@ -26,24 +26,24 @@
 // C++ now allows only vectors of "any non-const object type".
 // stackoverflow.com/questions/6954906/does-c11-allow-vectorconst-t
 // Since const std_vector<T> implies all elements are const, this is ok.
-// The following naming conventions are applied to pointers and vectors.
+// Following naming conventions apply to pointers and vectors.
 //
 // T::ptr implies shared_ptr<T>.
 // name is an arbitrary alias for T.
 //
 // [name]_ptr implies ptr<T>.
-// [name]_cptr implies a ptr<const T>.
+// [name]_cptr implies ptr<const T>.
 //
-// [name]s_ptr implies a ptr<collection<T>>.
-// [name]s_cptr implies a ptr<const collection<T>>.
+// [name]s_ptr implies ptr<collection<T>>.
+// [name]s_cptr implies ptr<const collection<T>>.
 //
 // [name]s implies collection<T>.
 // [name]_ptrs implies collection<[name]_ptr>.
-// [name]_cptrs implies a collection<[name]_cptr>.
+// [name]_cptrs implies collection<[name]_cptr>.
 //
-// [name]_ptrs_ptr implies a ptr<[name]s_ptr>.
-// [name]_cptrs_ptr implies a ptr<[name]s_cptr>.
-// [name]_cptrs_cptr implies a ptr<const [name]s_cptr>.
+// [name]_ptrs_ptr implies ptr<[name]s_ptr>.
+// [name]_cptrs_ptr implies ptr<[name]s_cptr>.
+// [name]_cptrs_cptr implies ptr<const [name]s_cptr>.
 //
 // [name]_xptr implies external_ptr<T>.
 
@@ -80,11 +80,11 @@ typedef std_vector<chunk_xptr> chunk_xptrs;
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) NOEXCEPT;
 
-/// Create a data chunk from data slice.
+/// Create data chunk from data slice.
 /// to_chunk(to_string(data)) == data.
 BC_API data_chunk to_chunk(const data_slice& bytes) NOEXCEPT;
 
-/// Concatenate several data slices into a single data_chunk.
+/// Concatenate several data slices into single data_chunk.
 /// extra_reserve reserves but does not allocate additional bytes.
 BC_API data_chunk build_chunk(const data_loaf& slices,
     size_t extra_reserve=zero) NOEXCEPT;

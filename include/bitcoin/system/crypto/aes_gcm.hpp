@@ -30,8 +30,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// AES-GCM authenticated encryption with associated data (sp800-38d),
-/// 96-bit nonce and 128-bit tag. The nonce MUST not be repeated for a key.
+/// AES-GCM authenticated encryption with associated data (sp800-38d), 96-bit
+/// nonce and 128-bit tag. Nonce MUST not be repeated for a key.
 template <typename Aes>
 class aes_gcm final
 {
@@ -55,13 +55,13 @@ public:
     void encrypt(const_byte_span plain, const_byte_span aad,
         const nonce& iv, byte_span cipher) NOEXCEPT;
 
-    /// Encrypt plain1 || plain2 with aad into cipher, avoiding the caller
+    /// Encrypt plain1 || plain2 with aad into cipher, avoiding caller
     /// concatenation copy (cipher = sum of plain sizes + expansion).
     void encrypt(const_byte_span plain1, const_byte_span plain2,
         const_byte_span aad, const nonce& iv, byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher with aad into plain (cipher = plain size + expansion).
-    /// False if the tag does not authenticate, in which case plain is cleared.
+    /// False if tag does not authenticate, in which case plain is cleared.
     bool decrypt(byte_span plain, const_byte_span aad, const nonce& iv,
         const_byte_span cipher) NOEXCEPT;
 

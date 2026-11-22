@@ -41,7 +41,7 @@ bool clear(const std::filesystem::path& file_directory) NOEXCEPT
 {
     // remove_all returns count removed, and error code if fails.
     // create_directories returns true if path exists or created.
-    // used for setup, with no expectations of file/directory existence.
+    // Used for setup, no expectation of file/directory existence.
     const auto path = extended_path(file_directory);
     code ec;
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)

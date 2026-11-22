@@ -184,7 +184,7 @@ BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__single_one_invalid__expected)
 
 // chunked
 // ----------------------------------------------------------------------------
-// Rows beyond a chunk boundary, with failures in and beyond the first chunk.
+// Rows beyond chunk boundary, with failures in and beyond first chunk.
 
 constexpr size_t chunked_rows = 300;
 constexpr size_t chunked_fail1 = 3;
@@ -243,8 +243,8 @@ BC_AUTO_TEST_CASE(secp256k1__schnorr_batch_verify__chunked_two_invalid__expected
 
 // distinct rows
 // ----------------------------------------------------------------------------
-// Rows of distinct keys and digests, verified on gpu where available,
-// with failures at the first, a middle and the last row.
+// Rows of distinct keys and digests, verified on gpu where available, with
+// failures at first, middle and last row.
 
 constexpr size_t distinct_rows = 512;
 constexpr size_t distinct_fail1 = 0;

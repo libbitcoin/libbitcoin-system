@@ -86,8 +86,8 @@ schnorr_split(uint8_t& sighash_flags,
     }
     else
     {
-        // This makes an invalid return safe to dereference, and may be
-        // compiled out unless a caller does in fact access it.
+        // Makes invalid return safe to dereference, and may be compiled out
+        // unless caller accesses it.
         static constexpr ec_signature empty{};
         return empty;
     }
@@ -118,7 +118,7 @@ decode_signature(ec_signature& out, const data_slice& der_signature,
 // Signature subscripting.
 // ----------------------------------------------------------------------------
 
-// Subscripts are referenced by script.offset mutable metadata. This allows for
+// Subscripts are referenced by script.offset mutable metadata, allowing
 // efficient subscripting with no copying. As a result concurrent execution of
 // any one input script instance is not thread safe.
 TEMPLATE
@@ -128,8 +128,8 @@ set_subscript(const op_iterator& op) NOEXCEPT
     // Not possible unless op is not an element of script_.
     BC_ASSERT(!script_->ops().empty() && op != script_->ops().cend());
 
-    // Advance the offset to the op following the found code separator.
-    // This is non-const because changes script state (despite being mutable).
+    // Advance offset to op following found code separator.
+    // Non-const because changes script state (despite being mutable).
     script_->offset = std::next(op);
 
     // The subscript is changed, so any cached signature hash is stale.
@@ -161,9 +161,9 @@ create_strip_ops(const chunk_xptr& endorsement) NOEXCEPT
 
 // ****************************************************************************
 // CONSENSUS: Endorsement and code separator stripping are always performed in
-// conjunction and are limited to non-witness signature hash subscripts.
-// The order of operations is inconsequential, as they are all removed.
-// Subscripts are not evaluated, they are limited to signature hash creation.
+// conjunction and are limited to non-witness signature hash subscripts. Order
+// of operations is inconsequential, as all are removed. Subscripts are not
+// evaluated, they are limited to signature hash creation.
 // ****************************************************************************
 TEMPLATE
 inline chain::script::cptr CLASS::
@@ -232,10 +232,10 @@ signature_hash(hash_digest& out, const script& subscript,
 // ----------------------------------------------------------------------------
 
 // ****************************************************************************
-// CONSENSUS: The cache is keyed only on sighash flags, so it is valid only
-// while the subscript is unchanged. A v1 signature hash commits to the
-// op_codeseparator position and a v0 subscript is stripped of the endorsements
-// of the op that created it, so both invalidate the cache.
+// CONSENSUS: Cache is keyed only on sighash flags, so it is valid only while
+// subscript is unchanged. v1 signature hash commits to op_codeseparator
+// position and v0 subscript is stripped of endorsements of op that created it,
+// so both invalidate cache.
 // ****************************************************************************
 TEMPLATE
 INLINE bool CLASS::

@@ -93,8 +93,8 @@ BC_AUTO_TEST_CASE(payment_address__construct__secret_testnet__valid_expected)
     ec_secret secret;
     BC_REQUIRE(decode_base16(secret, SECRET));
 
-    // MSVC CTP loses the MSB (WIF prefix) byte of the literal version when
-    // using this initializer, but the MSB isn't used by payment_address.
+    // MSVC CTP loses MSB (WIF prefix) byte of literal version with this
+    // initializer, but MSB isn't used by payment_address.
     const payment_address address({ secret, 0x806f, true });
     BC_REQUIRE(address);
     BC_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
@@ -115,8 +115,8 @@ BC_AUTO_TEST_CASE(payment_address__construct__secret_testnet_uncompressed__valid
     ec_secret secret;
     BC_REQUIRE(decode_base16(secret, SECRET));
 
-    // MSVC CTP loses the MSB (WIF prefix) byte of the literal version when
-    // using this initializer, but the MSB isn't used by payment_address.
+    // MSVC CTP loses MSB (WIF prefix) byte of literal version with this
+    // initializer, but MSB isn't used by payment_address.
     const payment_address address({ secret, 0x806f, false });
     BC_REQUIRE(address);
     BC_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);

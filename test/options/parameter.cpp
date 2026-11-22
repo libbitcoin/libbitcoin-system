@@ -226,9 +226,9 @@ BC_AUTO_TEST_CASE(parameter__initialize__short_only__sets_limit_0)
     BC_REQUIRE_EQUAL(parameter.required(), false);
     BC_REQUIRE_EQUAL(parameter.short_name(), 'm');
     BC_REQUIRE_EQUAL(parameter.long_name(), "");
-    // A boost 1.49 bug causes this test failure:
+    // Boost 1.49 bug causes this test failure:
     // parameter.format_name() == "-m" failed [-m [ -- ] != -m]
-    // But this behavior is not critical to operations, so we overlook it.
+    // Behavior not critical to operations, so overlooked.
     // BC_REQUIRE_EQUAL(parameter.format_name(), "-m");
     BC_REQUIRE_EQUAL(parameter.format_parameter(), "");
     BC_REQUIRE_EQUAL(parameter.description(), "Short name only.");
@@ -275,8 +275,8 @@ BC_AUTO_TEST_CASE(parameter__initialize__defaulted__sets_limit_3)
     BC_REQUIRE_EQUAL(parameter.description(), "Defaulted bool.");
 
     // The (=1) appears to be the default value (as int), i.e. (=true)
-    // This makes the bool type indistinguishable at the metadata level from
-    // an integer. So we must use zero_tokens() instead (see 'toggled' case).
+    // Makes bool type indistinguishable at metadata level from integer, so
+    // zero_tokens() must be used instead (see 'toggled' case).
     BC_REQUIRE_EQUAL(parameter.format_parameter(), "arg (=1)");
 }
 

@@ -23,10 +23,10 @@
 #include <bitcoin/system/unicode/unicode.hpp>
 
 // base32
-// Base 32 is an ascii data encoding with a domain of 32 symbols (characters).
-// 32 is 2^5 so this is a 5<=>8 bit mapping.
-// The 5 bit encoding is authoritative as byte encoding is padded.
-// Invalid padding results in a decoding error.
+// Base 32 is ascii data encoding with domain of 32 symbols (characters).
+// 32 is 2^5 so this is 5<=>8 bit mapping.
+// 5 bit encoding is authoritative as byte encoding is padded.
+// Invalid padding results in decoding error.
 
 namespace libbitcoin {
 namespace system {
@@ -118,17 +118,17 @@ data_chunk base32b_pack(const base32b_chunk& unpacked) NOEXCEPT
 
     sink.flush();
 
-    // Remove an element that is only padding, assumes base32b_unpack encoding.
-    // The bit writer writes zeros past end as padding.
-    // This is a ((n * 5) / 8) operation, so (8 - ((n * 5) % 8)) are pad.
-    // This padding is in addition to that added by unpacking. When unpacked
-    // and then packed this will always result in either no pad bits or a full
-    // element of zeros that is padding. This should be apparent from the fact
-    // that the number of used bits is unchanged. Remainder indicates padding.
+    // Remove element that is only padding, assumes base32b_unpack encoding.
+    // Bit writer writes zeros past end as padding.
+    // This is ((n * 5) / 8) operation, so (8 - ((n * 5) % 8)) are pad.
+    // This padding is in addition to that added by unpacking. When unpacked and
+    // then packed this always results in either no pad bits or full element of
+    // zeros that is padding, apparent from number of used bits being unchanged.
+    // Remainder indicates padding.
     if (!is_zero((unpacked.size() * 5) % 8))
     {
-        // If pad byte is non-zero the unpacking was not base32b_unpack.
-        // So we return an failure where the condition is detecable.
+        // If pad byte is non-zero, unpacking was not base32b_unpack,
+        // so return failure where condition is detectable.
         packed.resize(packed.back() == 0x00 ? sub1(packed.size()) : 0);
     }
 
@@ -144,8 +144,8 @@ base32b_chunk base32b_unpack(const data_chunk& packed) NOEXCEPT
     while (!source.is_exhausted())
         unpacked.push_back(source.read_bits(5));
 
-    // The bit reader reads zeros past end as padding.
-    // This is a ((n * 8) / 5) operation, so ((n * 8) % 5)) bits are pad.
+    // Bit reader reads zeros past end as padding.
+    // This is ((n * 8) / 5) operation, so ((n * 8) % 5)) bits are pad.
     ////const auto padded = (packed.size() * 8) % 5 != 0;
     return unpacked;
 }

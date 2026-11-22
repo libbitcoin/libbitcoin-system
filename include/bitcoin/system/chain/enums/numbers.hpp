@@ -26,8 +26,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// These are STACK representations of the numbers -1..16.
-// This differs from integral numbers only for negative_1.
+// STACK representations of numbers -1..16.
+// Differs from integral numbers only for negative_1.
 enum numbers : uint8_t
 {
     // b10000001 : -1 is represented as 0x01 | 0x80 sign bit.

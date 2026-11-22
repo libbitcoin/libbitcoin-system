@@ -31,7 +31,7 @@ namespace system {
 template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr size_t byte_width(Integer value) NOEXCEPT;
 
-/// The number of bytes required to store value.
+/// Number of bytes required to store value.
 /// Negative value always returns sizeof Value (zero returns zero).
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr size_t byte_width(Integer value) NOEXCEPT;

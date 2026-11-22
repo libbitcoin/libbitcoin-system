@@ -63,7 +63,7 @@ DEFINE_JSON_FROM_TAG(block::cptr)
 
 // bitcoind
 // ----------------------------------------------------------------------------
-// There is no json mapping for a block as hex.
+// No json mapping for block as hex.
 
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, block)
 {

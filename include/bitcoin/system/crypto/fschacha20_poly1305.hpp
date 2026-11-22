@@ -28,8 +28,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Forward-secure ChaCha20-Poly1305 (bip324).
-/// The nonce is automatically incremented for each message, and the key is
-/// rotated after every interval of messages.
+/// Nonce is automatically incremented for each message, and key is rotated
+/// after every interval of messages.
 class BC_API fschacha20_poly1305 final
 {
 public:
@@ -45,13 +45,13 @@ public:
     void encrypt(const_byte_span plain, const_byte_span aad,
         byte_span cipher) NOEXCEPT;
 
-    /// Encrypt plain1 || plain2 with aad into cipher, avoiding the caller
+    /// Encrypt plain1 || plain2 with aad into cipher, avoiding caller
     /// concatenation copy (cipher = sum of plain sizes + expansion).
     void encrypt(const_byte_span plain1, const_byte_span plain2,
         const_byte_span aad, byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher with aad into plain (cipher = plain size + expansion).
-    /// False if the tag does not authenticate, in which case plain is cleared.
+    /// False if tag does not authenticate, in which case plain is cleared.
     bool decrypt(byte_span plain, const_byte_span aad,
         const_byte_span cipher) NOEXCEPT;
 

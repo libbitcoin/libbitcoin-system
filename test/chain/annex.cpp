@@ -108,7 +108,7 @@ BC_AUTO_TEST_CASE(annex__constructor__stack__expected)
 }
 
 // hash
-// The annex is hashed inclusive of its 0x50 prefix byte [bip341].
+// Annex is hashed inclusive of its 0x50 prefix byte [bip341].
 
 BC_AUTO_TEST_CASE(annex__hash__prefixed__expected)
 {

@@ -34,9 +34,9 @@ enum class purpose : uint8_t
     client
 };
 
-/// Verify the chain (leaf first, then issuers in order) to a configured
-/// anchor at the time (unix seconds). An anchor is trusted as an issuer, and
-/// a leaf that is itself an anchor is trusted (pinned). There are no roots.
+/// Verify chain (leaf first, then issuers in order) to configured anchor at
+/// time (unix seconds). Anchor is trusted as issuer, and leaf that is itself an
+/// anchor is trusted (pinned). No roots.
 BC_API code verify(const certificates& chain, const certificates& anchors,
     uint64_t time, purpose intent) NOEXCEPT;
 

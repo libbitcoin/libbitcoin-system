@@ -651,8 +651,8 @@ protected:
     /// Generator table.
     /// -----------------------------------------------------------------------
     /// Odd multiples of G (normal) in slices, each computed at compile time in
-    /// its own translation unit. A slice is blocks of limb columns, x then y.
-    /// Multiples of lambda * G are those of G by the endomorphism.
+    /// its own translation unit. Slice is blocks of limb columns, x then y.
+    /// Multiples of lambda * G are those of G by endomorphism.
 
     static constexpr size_t block_size = 16;
     static constexpr size_t slice_size = 512;
@@ -676,7 +676,7 @@ protected:
     /// -----------------------------------------------------------------------
     /// Multiples j * 2^(comb_bits * w) * G (normal) for j in 1..comb_size, of
     /// each window w, in parts each computed at compile time in its own
-    /// translation unit. An entry is x limbs then y limbs.
+    /// translation unit. Entry is x limbs then y limbs.
 
     static constexpr size_t comb_bits = 6;
     static constexpr size_t comb_size = power2(sub1(comb_bits));
@@ -799,7 +799,7 @@ protected:
     using naf_t = std_array<int16_t, add1(half_bits)>;
 
     /// Odd digits below 2^Bits in magnitude, each followed by at least Bits
-    /// zeros, returning the number of positions through the last digit.
+    /// zeros, returning number of positions through last digit.
     template <size_t Bits>
     static constexpr size_t naf(naf_t& r, const scalar_t& magnitude) NOEXCEPT;
 
@@ -862,12 +862,12 @@ protected:
 
     /// Keys and signing (constant time, secrets blinded).
     /// -----------------------------------------------------------------------
-    /// A secret multiple k * G is computed as (k - m) * G + m * G, and k * a
-    /// as (k / m) * (m * a), for a random blind m, so that each multiplication
-    /// is of a value independent of k. Table lookups read every entry, each
-    /// addition and correction is computed and taken by mask, and inversions
-    /// are by fixed exponent, so that time and memory access do not depend on
-    /// the secrets (excepting negligible fallbacks for exceptional sums).
+    /// Secret multiple k * G is computed as (k - m) * G + m * G, and k * a as
+    /// (k / m) * (m * a), for random blind m, so each multiplication is of
+    /// value independent of k. Table lookups read every entry, each addition
+    /// and correction is computed and taken by mask, and inversions are by
+    /// fixed exponent, so time and memory access do not depend on secrets
+    /// (excepting negligible fallbacks for exceptional sums).
 
     /// r = g * G + k * a (normal), false if infinity.
     static constexpr bool linear(affine_t<uint64_t>& r, const scalar_t& g,

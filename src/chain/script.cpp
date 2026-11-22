@@ -37,12 +37,11 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // static
-// This would be inlined but machine is a circular include.
+// Would be inlined, but machine is a circular include.
 //*****************************************************************************
 // CONSENSUS: BIP34 requires coinbase input script to begin with one byte
-// that indicates height size. This is inconsistent with an extreme future
-// where the size byte overflows. However satoshi actually requires minimal
-// encoding.
+// indicating height size. Inconsistent with an extreme future where size byte
+// overflows. However satoshi actually requires minimal encoding.
 //*****************************************************************************
 bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
@@ -308,8 +307,8 @@ script script::from_string(const std::string_view& mnemonic) NOEXCEPT
     // There is always one operation per non-empty string token.
     auto tokens = split(mnemonic);
 
-    // Split always returns at least one token, and when trimming it will be
-    // empty only if there was nothing but whitespace in the mnemonic.
+    // Split always returns at least one token, and when trimming it is empty
+    // only if mnemonic was nothing but whitespace.
     if (tokens.front().empty())
         tokens.clear();
 
@@ -393,7 +392,7 @@ void script::clear_offset() const NOEXCEPT
 bool script::is_valid() const NOEXCEPT
 {
     // Any byte vector is a valid script.
-    // This is false only if the byte count did not match the size prefix.
+    // False only if byte count did not match size prefix.
     return valid_;
 }
 
@@ -425,9 +424,9 @@ bool script::is_oversized() const NOEXCEPT
     return serialized_size(false) > max_script_size;
 }
 
-// An unspendable script is any that can provably not be spent under any
-// circumstance. This allows for exclusion of the output as unspendable.
-// The criteria below are not comprehensive but are fast to evaluate.
+// Unspendable script is any that can provably not be spent under any
+// circumstance, allowing exclusion of output as unspendable. Criteria below are
+// not comprehensive but are fast to evaluate.
 bool script::is_unspendable() const NOEXCEPT
 {
     if (ops_.empty())
@@ -435,9 +434,9 @@ bool script::is_unspendable() const NOEXCEPT
 
     const auto& code = ops_.front().code();
 
-    // There is no condition prior to the first opcode in a script, so
-    // is_reserved must be checked. is_invalid short-circuits evaluation for
-    // scripts that fail to parse, but would otherwise be caught in evaluation.
+    // No condition prior to first opcode in a script, so is_reserved must be
+    // checked. is_invalid short-circuits evaluation for scripts that fail to
+    // parse, but would otherwise be caught in evaluation.
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
 

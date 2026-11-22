@@ -27,8 +27,8 @@ const int parameter::not_positional = -1;
 const char parameter::no_short_name = 0x00;
 const char parameter::option_prefix_char = '-';
 
-// A required argument may only be preceded by required arguments.
-// Requiredness may be in error if the metadata is inconsistent.
+// Required argument may only be preceded by required arguments.
+// Requiredness may be in error if metadata is inconsistent.
 void parameter::initialize(const option_metadata& option,
     const argument_list& arguments, const variables_map& variables) NOEXCEPT
 {

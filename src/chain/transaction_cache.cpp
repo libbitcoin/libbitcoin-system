@@ -35,7 +35,7 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 // static
-// Compute the desegregated hash from a segregated buffer (used by network).
+// Compute desegregated hash from segregated buffer (used by network).
 hash_digest transaction::desegregated_hash(size_t witnessed,
     size_t unwitnessed, const uint8_t* data) NOEXCEPT
 {

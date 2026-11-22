@@ -52,7 +52,7 @@ BC_AUTO_TEST_CASE(byteswap__unsigned___not_constant_evaluated_unsigned__swapped)
 // ----------------------------------------------------------------------------
 
 // inline for std::swap intrinsic compile
-// This approach is the slowest of the three.
+// Slowest of the three approaches.
 template <size_t Size, if_integral_size<Size> = true>
 inline unsigned_type<Size> byte_swap_slow(const data_array<Size>& data) NOEXCEPT
 {

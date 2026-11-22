@@ -126,7 +126,7 @@ public:
     void set_nominal_hash(const hash_digest& hash) const NOEXCEPT;
 
     /// Initialize with externally-produced witness hash value, as from store.
-    /// This need not be set if the transaction is not segmented.
+    /// Need not be set if transaction is not segmented.
     void set_witness_hash(const hash_digest& hash) const NOEXCEPT;
 
     /// Reference used to avoid copy, sets cache if not set.

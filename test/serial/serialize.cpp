@@ -23,8 +23,8 @@ BC_AUTO_TEST_SUITE(serialize_tests)
 
 // <uint8_t>
 
-// The template specialization must be observed before the template
-// or the specialization will be lost and this will return char value.
+// Template specialization must be observed before template, or specialization
+// is lost and this returns char value.
 BC_AUTO_TEST_CASE(serialize__uint8__uint8__base10)
 {
     uint8_t value = 0;

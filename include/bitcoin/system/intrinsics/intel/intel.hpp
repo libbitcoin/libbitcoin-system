@@ -30,9 +30,9 @@ namespace system {
 
 /// Byte shuffle selector for rotation (see f::ror/f::rol).
 /// ---------------------------------------------------------------------------
-/// The selector for byte at index for rotate right by B bits of S-bit words,
-/// where B is byte-aligned (B % 8 == 0). A single byte shuffle then performs
-/// the rotation of all words in the vector.
+/// Selector for byte at index for rotate right by B bits
+/// of S-bit words, where B is byte-aligned (B % 8 == 0).
+/// Single byte shuffle then rotates all words in vector.
 
 template <auto B, auto S>
 constexpr uint8_t mm_ror_selector(uint8_t index) NOEXCEPT
@@ -46,7 +46,7 @@ constexpr uint8_t mm_ror_selector(uint8_t index) NOEXCEPT
 
 /// Provide 8 bit shifts to complete matrix.
 /// ---------------------------------------------------------------------------
-/// These are no epi8 versions of these.
+/// No epi8 versions of these.
 
 #if defined(HAVE_128)
 
@@ -116,7 +116,7 @@ inline auto mm512_slli_epi8(auto a) NOEXCEPT
 
 /// Provide upper ymm/zmm clear to avoid SSE/AVX transition penalties.
 /// ---------------------------------------------------------------------------
-/// This is a no-op in builds without AVX.
+/// No-op in builds without AVX.
 
 // AVX
 inline void mm256_zeroupper() NOEXCEPT
@@ -128,7 +128,7 @@ inline void mm256_zeroupper() NOEXCEPT
 
 /// Provide 64 bit extractors in 32 bit builds to complete matrix.
 /// ---------------------------------------------------------------------------
-/// There are no 32 bit build versions of these.
+/// No 32 bit build versions of these.
 
 #if defined(HAVE_128)
 
@@ -162,7 +162,7 @@ inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
 
 /// Provide mm512 extractors to complete matrix.
 /// ---------------------------------------------------------------------------
-/// There are no intrisic versions of these.
+/// No intrinsic versions of these.
 
 #if defined(HAVE_512)
 
@@ -237,7 +237,7 @@ inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
 
 /// Provide 52 bit fused multiply-add to complete matrix.
 /// ---------------------------------------------------------------------------
-/// Emulated from 26 bit halves where there is no ifma for the width.
+/// Emulated from 26 bit halves where width has no ifma.
 
 #if defined(HAVE_AVX512IFMA)
 

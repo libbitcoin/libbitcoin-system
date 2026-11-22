@@ -222,9 +222,9 @@ BC_AUTO_TEST_SUITE_END()
 
 BC_AUTO_TEST_SUITE(ed25519_ctime_tests)
 
-// Under valgrind a secret is undefined, so a branch or memory address that
-// depends on it is reported as an error, and each output is defined before it
-// is compared to the expected value.
+// Under valgrind secret is undefined, so branch or memory
+// address depending on it is reported as error, and each
+// output is defined before comparison to expected value.
 
 BC_AUTO_TEST_CASE(ed25519_ctime__expand__undefined_seed__expected)
 {

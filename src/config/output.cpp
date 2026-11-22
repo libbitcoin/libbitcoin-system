@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-// Outputs format is currently private to bx:
+// Outputs format private to bx:
 // "script:value"
 
 static bool decode_output(chain::output& output,

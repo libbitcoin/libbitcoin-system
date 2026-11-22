@@ -228,20 +228,19 @@ uint256_t header::proof(uint32_t bits) NOEXCEPT
 
     //*************************************************************************
     // CONSENSUS: bits may be overflowed, which is guarded here.
-    // A target of zero is disallowed so is useful as a sentinel value.
+    // Zero target is disallowed, so useful as sentinel value.
     //*************************************************************************
     if (is_zero(target))
         return target;
 
     //*************************************************************************
     // CONSENSUS: If target is (2^256)-1, division would fail, however compact
-    // compression is lossy, and therefore unable to produce negative one.
+    // compression is lossy, so unable to produce negative one.
     //*************************************************************************
 
-    // We need to compute 2**256 / (target + 1), but we can't represent 2**256
-    // as it's too large for uint256. However as 2**256 is at least as large as
-    // target + 1, it is equal to ((2**256 - target - 1) / (target + 1)) + 1, or
-    // (~target / (target + 1)) + 1.
+    // Compute 2**256 / (target + 1), but 2**256 is too large for uint256. As
+    // 2**256 is at least as large as target + 1, it is equal to ((2**256 -
+    // target - 1) / (target + 1)) + 1, or (~target / (target + 1)) + 1.
     return ++(~target / (target + one));
 }
 
@@ -329,7 +328,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 
     //*************************************************************************
     // CONSENSUS: bits_ may be overflowed, which is guarded here.
-    // A target of zero is disallowed so is useful as a sentinel value.
+    // Zero target is disallowed, so useful as sentinel value.
     //*************************************************************************
     if (is_zero(target))
         return true;
@@ -369,7 +368,7 @@ code header::check(uint32_t timestamp_limit_seconds,
 // work_required
 
 // Checkpoints and previous_block_hash are chain validation (not here).
-// bits_ below is the consensus direct comparison of the header.bits value.
+// bits_ below is consensus direct comparison of header.bits value.
 // All other work comparisons performed on expanded/normalized bits values.
 code header::accept(const context& ctx,
     uint32_t retargeting_interval) const NOEXCEPT

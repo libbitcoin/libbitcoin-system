@@ -28,11 +28,11 @@ namespace libbitcoin {
 namespace system {
 
 /// Lifetime:
-/// No prvalues are accepted, allowing extended lifetime.
+/// No prvalues accepted, allowing extended lifetime.
 /// See discussion of lifetime considerations in data_slice comments.
-/// The slab does not extend the lifetime of any rvalue passed to it.
-/// A data_reference can be used as a data_slice, but a data_slice cannot be
-/// used as a data_reference, which is why the inheritance is reductive.
+/// Slab does not extend lifetime of any rvalue passed to it.
+/// data_reference can be used as data_slice, but data_slice cannot be used as
+/// data_reference, which is why inheritance is reductive.
 /// Deleting prvalue constructors prevents passage or materialization of
 /// temporaries.
 

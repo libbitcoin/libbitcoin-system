@@ -36,8 +36,8 @@ public:
 
     typedef std::shared_ptr<const point> cptr;
 
-    /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
-    /// This value is serialized and defined by consensus, not implementation.
+    /// Sentinel used in .index to indicate no output, e.g. coinbase.
+    /// Value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
 
     static constexpr size_t serialized_size() NOEXCEPT
@@ -92,8 +92,8 @@ protected:
 private:
     static point from_data(reader& source) NOEXCEPT;
 
-    // The index is consensus-serialized as a fixed 4 bytes, however it is
-    // effectively bound to 2^17 by the block byte size limit.
+    // Index is consensus-serialized as fixed 4 bytes, however it is effectively
+    // bound to 2^17 by block byte size limit.
 
     // Point should be stored as shared (adds 16 bytes).
     // copy: 256 + 32 + 1 = 37 bytes (vs. 16 when shared).

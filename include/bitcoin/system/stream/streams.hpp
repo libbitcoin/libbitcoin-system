@@ -35,10 +35,10 @@ namespace system {
     
 /// Streams are not copyable, so factory cannot be used for type inference.
 /// All sources and sinks (devices) accept only const and non-const references.
-/// Insert requires the container type, but there are only two (string/chunk).
+/// Insert requires container type, but there are only two (string/chunk).
 /// Container.reserve() may improve performance for all push streaming.
 /// push_sink is buffered/indirect (inefficient) and requires flush.
-/// For better performance, use Container.resize() and use a copy_sink.
+/// For better performance, use Container.resize() and copy_sink.
 namespace stream
 {
     namespace in

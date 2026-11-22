@@ -39,8 +39,8 @@ constexpr void curve25519::carry(field& out) NOEXCEPT
 {
     for (size_t index{}; index < limbs; ++index)
     {
-        // The radix is added so that the floored carry of a negative limb is
-        // one less than that of a positive limb, which is then subtracted.
+        // Radix is added so floored carry of negative limb is one less than
+        // that of positive limb, which is then subtracted.
         out[index] += radix;
         const auto carried = shift_right(out[index], radix_bits);
 

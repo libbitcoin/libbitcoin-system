@@ -40,8 +40,8 @@ public:
     /// Default view is invalid.
     input() NOEXCEPT;
 
-    /// Data must point to the first byte of a wire-encoded input (point).
-    /// Witness must point to the prefixed witness stack of the input (or null).
+    /// Data must point to first byte of wire-encoded input (point).
+    /// Witness must point to prefixed witness stack of input (or null).
     input(const uint8_t* data, const uint8_t* witness,
         size_t witness_size) NOEXCEPT;
 

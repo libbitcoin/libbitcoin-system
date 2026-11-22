@@ -25,15 +25,15 @@
 namespace libbitcoin {
 namespace system {
 
-/// Unlike native operators, these functions do not promote integer types.
-/// and have well-defined behavior for any type-enabled parameterization.
+/// Unlike native operators, these functions do not promote integer types, and
+/// have well-defined behavior for any type-enabled parameterization.
 
 /// Widths.
 /// ---------------------------------------------------------------------------
     
-/// Same as std::bit_width (C++20) except this supports signed and unitx.
-/// See constants.hpp for width<>(), which provides the integral bit domain.
-/// A negative value always returns bits<Value>.
+/// Same as std::bit_width (C++20) except supports signed and unitx.
+/// See constants.hpp for width<>(), providing integral bit domain.
+/// Negative value always returns bits<Value>.
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr size_t bit_width(Value value) NOEXCEPT;
 template <typename Value, if_signed_integer<Value> = true>
@@ -61,7 +61,7 @@ constexpr size_t zeros_count(Value value) NOEXCEPT;
 /// ---------------------------------------------------------------------------
 
 /// Bitwise NOT (~value) operation.
-/// One's complement, the bit inversion of any value.
+/// One's complement, bit inversion of any value.
 template <typename Value, if_integer<Value> = true>
 constexpr Value bit_not(Value value) NOEXCEPT;
 
@@ -199,17 +199,17 @@ constexpr void shift_right_into(Value& value, size_t shift=one,
 
 /// Rotate (left/right).
 /// ---------------------------------------------------------------------------
-/// A negative rotation is a positive shift of the corresponding function.
+/// Negative rotation is positive shift of corresponding function.
 
 /// Bitwise left rotation of value by shift.
-/// Rotation by any shift behaves as a continuous rotation.
+/// Rotation by any shift behaves as continuous rotation.
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value rotate_left(Value value, size_t shift=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void rotate_left_into(Value& value, size_t shift=one) NOEXCEPT;
 
 /// Bitwise right rotation of value by shift.
-/// Rotation by any shift behaves as a continuous rotation.
+/// Rotation by any shift behaves as continuous rotation.
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value rotate_right(Value value, size_t shift=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>

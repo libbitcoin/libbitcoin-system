@@ -21,8 +21,8 @@
 
 // Bitsliced rounds
 // ============================================================================
-// The S-box is the depth 16 circuit of [Boyar, Peralta] "A depth-16 circuit
-// for the AES S-box" (113 gates), with plane 7 the most significant bit.
+// S-box is depth 16 circuit of [Boyar, Peralta] "A depth-16 circuit for the AES
+// S-box" (113 gates), with plane 7 most significant bit.
 
 // Based on BearSSL aes_ct64.c, aes_ct64_enc.c and aes_ct64_dec.c by Thomas Pornin.
 
@@ -180,8 +180,8 @@ sbox(xplanes_t<Word>& q) NOEXCEPT
     q[0] = s7;
 }
 
-// The inverse of the affine transformation, including its constant (0x63),
-// so that the inverse substitution is the substitution between two of these.
+// Inverse of affine transformation, including its constant (0x63), so inverse
+// substitution is substitution between two of these.
 TEMPLATE
 template <typename Word>
 INLINE constexpr void CLASS::
@@ -218,8 +218,8 @@ inverse_sbox(xplanes_t<Word>& q) NOEXCEPT
 
 // Rows.
 // ----------------------------------------------------------------------------
-// Row r of the state occupies bits [16r, 16r + 16) of each plane, as four
-// columns of four blocks. Row r rotates left (right for inverse) r columns.
+// Row r of state occupies bits [16r, 16r + 16) of each plane, as four columns
+// of four blocks. Row r rotates left (right for inverse) r columns.
 
 TEMPLATE
 template <typename Word>

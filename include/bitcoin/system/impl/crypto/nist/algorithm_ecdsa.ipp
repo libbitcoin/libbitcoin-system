@@ -21,9 +21,8 @@
 
 // ECDSA
 // ============================================================================
-// The digest is converted to a scalar from its leftmost bits (bits2int),
-// reduced modulo the order. The nonce is the rfc6979 derivation with the
-// curve hash.
+// Digest is converted to scalar from its leftmost bits (bits2int), reduced
+// modulo order. Nonce is rfc6979 derivation with curve hash.
 
 namespace libbitcoin {
 namespace system {

@@ -38,10 +38,10 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 
 // Seed prefixes.
-// The values for old, bip39 and none are not actual prefixes but included
-// here for consistency when handling electrum exceptional conditions.
-// The values are selected such that they contain invalid hexidecimal
-// characters and therefore cannot match an actual seed prefix.
+// Values for old, bip39 and none are not actual prefixes but
+// included for consistency when handling electrum exceptional
+// conditions. Values contain invalid hexidecimal characters
+// and therefore cannot match an actual seed prefix.
 static const auto version_old = "old";
 static const auto version_bip39 = "bip39";
 static const auto version_standard = "01";
@@ -93,15 +93,14 @@ data_chunk electrum::decoder(const string_list& words,
     return encode_base2048_list(out, words, identifier) ? out : data_chunk{};
 }
 
-// Electrum also grinds randoms on a sequential nonce until the entropy is high
-// enough to ensure population of words that represent the intended bit
-// strength of the seed. But we do not use an internal PRNG and instead
-// only accept base entropy from the caller. We want determinism from the
-// entropy, and we cannot truly increase randomness. So we maintain entropy
-// strength by using full provided entropy and produce exact word count.
-// This is done by iterating a hash function so an arbitrary limit is required.
-// The Electrum prng minimum value technique sacrifices 11 bits of entropy by
-// discarding any prng value that is below 2^(strength-11).
+// Electrum also grinds randoms on a sequential nonce until entropy is high
+// enough to ensure population of words representing intended bit strength
+// of seed. No internal PRNG is used, only base entropy from caller, for
+// determinism from entropy (randomness cannot truly be increased). Entropy
+// strength is maintained by using full provided entropy and producing exact
+// word count. This iterates a hash function, so arbitrary limit is required.
+// Electrum prng minimum value technique sacrifices 11 bits of entropy by
+// discarding any prng value below 2^(strength-11).
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L190-L205
 electrum::grinding electrum::grinder(const data_chunk& entropy,
     seed_prefix prefix, language identifier, size_t limit) NOEXCEPT
@@ -117,20 +116,20 @@ electrum::grinding electrum::grinder(const data_chunk& entropy,
     // Create a byte mask for zeroizing entropy pad bits.
     const auto padding_mask = 0xff << unused_bits(hash);
 
-    // This just grinds away until exhausted or prefix found.
-    // Previously-discovered entropy round-trips, matching on the first pass.
+    // Grinds until exhausted or prefix found.
+    // Previously-discovered entropy round-trips, matching on first pass.
     do
     {
-        // Normalize entropy to the wordlist by managing its pad bits.
-        // Electrum pads to the left, but entropy is a private format for
-        // electrum and public for bip39, so we use the bip39/mnemonic format.
-        // This results in any electrum entropy/prefix value producing the same
-        // words as that same entropy/checksum value in bip39/mnemonic.
+        // Normalize entropy to wordlist by managing its pad bits.
+        // Electrum pads left, but entropy is private format for
+        // electrum and public for bip39, so bip39/mnemonic format is
+        // used. Any electrum entropy/prefix value thus produces same
+        // words as that entropy/checksum value in bip39/mnemonic.
         hash[sub1(entropy_size)] &= padding_mask;
         words = encoder(hash, identifier);
 
         // Avoid collisions with Electrum v1 (en) and BIP39 mnemonics.
-        // Run validator first because conflict checks can be costly.
+        // Run validator first, conflict checks can be costly.
         if (validator(words, prefix) && !is_conflict(words))
             return { hash, words, start - limit };
 
@@ -155,7 +154,7 @@ bool electrum::validator(const string_list& words, seed_prefix prefix) NOEXCEPT
     return starts_with(encode_base16(seed), to_version(prefix));
 }
 
-// Electrum uses the same normalization function for words and passphrases.
+// Electrum uses same normalization function for words and passphrases.
 // Passpharse entropy loss from lowering (and normalizing) should be considered.
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L77
 long_hash electrum::seeder(const string_list& words,
@@ -171,16 +170,16 @@ long_hash electrum::seeder(const string_list& words,
     to_compatibility_decomposition(phrase);
     to_lower(phrase);
 
-    // Python's unicodedata.combining returns true if the character is of the
-    // canonical combining class (which may or may not be a diacritic).
+    // Python's unicodedata.combining returns true if character is of canonical
+    // combining class (may or may not be a diacritic).
     // Libbitcoin uses Python's unicodedata implementation for consistency.
     // ------------------------------------------------------------------------
     // seed = u''.join([c for c in seed if not unicodedata.combining(c)])
     // ------------------------------------------------------------------------
-    // Remove combining class characters (from the nfkd form converted above).
+    // Remove combining class characters (from nfkd form converted above).
     phrase = to_non_combining_form(phrase);
 
-    // Python string.whitespace represents the 6 ascii/C whitespace chars:
+    // Python string.whitespace represents 6 ascii/C whitespace chars:
     // print(string.whitespace) => 09 0d 0a 0b 0c 0d 0a 20 (two duplicates).
     // Libbitcoin uses CJK intervals from Electrum sources for consistency.
     // ------------------------------------------------------------------------
@@ -193,7 +192,7 @@ long_hash electrum::seeder(const string_list& words,
 
     // Python unicode splits on all unicode separators:
     // print(u'x\u3000y z'.split()) => [u'x', u'y', u'z']
-    // Electrum joins with an ascii space (0x20) as confirmed by test results.
+    // Electrum joins with ascii space (0x20), as confirmed by test results.
     // ------------------------------------------------------------------------
     // seed = u' '.join(seed.split())
     // ------------------------------------------------------------------------
@@ -271,9 +270,8 @@ bool electrum::is_ambiguous(size_t count, seed_prefix prefix) NOEXCEPT
     constexpr size_t minimum_two_factor_authentication_words = 20;
 
     // HACK: github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L258
-    // In Electrum 2.7, there was a breaking change in key derivation for
-    // two_factor_authentication. Unfortunately the seed prefix was reused,
-    // and now we can only distinguish them based on number of words. :(
+    // Electrum 2.7 broke key derivation for two_factor_authentication but
+    // reused seed prefix, so they are distinguished only by number of words.
     if (prefix != seed_prefix::two_factor_authentication)
         return false;
 
@@ -285,7 +283,7 @@ bool electrum::is_ambiguous(size_t count, seed_prefix prefix) NOEXCEPT
 bool electrum::is_ambiguous(const string_list& words, language requested,
     language derived) NOEXCEPT
 {
-    // HACK: There are 100 same words in en/fr, all with distinct indexes.
+    // HACK: 100 same words in en/fr, all with distinct indexes.
     // If matches en and unspecified then check fr, since en is searched first.
     return
         derived == language::en &&
@@ -305,8 +303,8 @@ electrum::seed_prefix electrum::to_conflict(const string_list& words) NOEXCEPT
     if (electrum_v1(words, language::en))
         return seed_prefix::old;
 
-    // Generating a mnemonic checksum is unlikely but possible. But a generated
-    // mnemonic (with valid checksum) can more easily match an electrum prefix.
+    // Generating mnemonic checksum is unlikely but possible. A generated
+    // mnemonic (with valid checksum) more easily matches an electrum prefix.
     if (mnemonic(words))
         return seed_prefix::bip39;
 
@@ -371,14 +369,14 @@ bool electrum::is_valid_dictionary(language identifier) NOEXCEPT
 bool electrum::is_valid_entropy_size(size_t size) NOEXCEPT
 {
     // Electrum has no explicit minimum or maximum strengths.
-    // Upper bounds here are based on use of a 512 bit hash function
-    // in grind() and transportation of entropy in byte vectors.
-    // A 64 byte seed (512 / 11) is 46 words (6 unused bits).
+    // Upper bounds based on use of 512 bit hash function in grind() and
+    // transportation of entropy in byte vectors.
+    // 64 byte seed (512 / 11) is 46 words (6 unused bits).
     // This limits strength to 506 bits (BIP39 is 256).
-    // Lower bounds here are based on seed strength.
-    // A 132 bit (exactly 12 word) seed is the Electrum default.
-    // A 128 bit seed is the BIP39 minium, but this 11 Electrum words.
-    // So our limits are 132 to 506 bits (12 to 46) words.
+    // Lower bounds based on seed strength.
+    // 132 bit (exactly 12 word) seed is Electrum default.
+    // 128 bit seed is BIP39 minium, but this 11 Electrum words.
+    // So limits are 132 to 506 bits (12 to 46) words.
 
     return size >= entropy_size(strength_minimum) &&
         size <= entropy_size(strength_maximum);
@@ -560,9 +558,9 @@ electrum electrum::from_words(const string_list& words,
     if (is_ambiguous(tokens, identifier, lexicon))
         return {};
 
-    // Above prioritizes electrum matching, but if that fails then this will
-    // be identified as a valid bip39 if the checksum validates. This is likely
-    // in the case where a valid bip39 mnemonic is passed via the constructor.
+    // Above prioritizes electrum matching, failing that
+    // identified as valid bip39 if checksum validates (likely
+    // when valid bip39 mnemonic is passed via constructor).
     const auto prefix = normalized_to_prefix(tokens);
 
     // Save derived entropy and dictionary words, originals are discarded.

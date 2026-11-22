@@ -203,7 +203,7 @@ bool ec_private::compressed() const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // Conversion to ec_public loses all version information.
-// In the case of failure the key is always compressed (ec_compressed_null).
+// On failure key is always compressed (ec_compressed_null).
 ec_public ec_private::to_public() const NOEXCEPT
 {
     if (!(*this))

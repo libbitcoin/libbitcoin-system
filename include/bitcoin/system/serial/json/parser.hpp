@@ -38,10 +38,10 @@ struct parse_options
     size_t max_object{ max_size_t };
 };
 
-/// Incremental RFC 8259 parser of a single json text (UTF-8 validated).
-/// write_some consumes through the end of the text and any whitespace that
-/// follows it, leaving subsequent characters unconsumed. A top-level number
-/// completes only upon a following character or finish.
+/// Incremental RFC 8259 parser of single json text (UTF-8 validated).
+/// write_some consumes through end of text and any whitespace following it,
+/// leaving subsequent characters unconsumed. Top-level number completes only
+/// upon following character or finish.
 class BC_API parser
 {
 public:

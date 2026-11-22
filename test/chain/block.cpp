@@ -843,8 +843,7 @@ BC_AUTO_TEST_CASE(block__check_context__bip54_txsize_off__not_invalid_transactio
     BC_REQUIRE_NE(instance.check(ctx, false), error::invalid_transaction_size);
 }
 
-// bip54 requires the coinbase locktime to be the parent height and the
-// coinbase sequence to be non-final.
+// bip54 requires coinbase locktime of parent height and non-final sequence.
 static transaction locked_coinbase(uint32_t locktime, uint32_t sequence)
 {
     const inputs ins{ input{ point{}, script{}, sequence } };
@@ -1762,7 +1761,7 @@ BC_AUTO_TEST_CASE(block__transaction_hashes__block2a__witness_distinguished)
 
 // set_hashes
 // ----------------------------------------------------------------------------
-// Caches the header hash and each transaction hash from the serialization.
+// Caches header hash and each transaction hash from serialization.
 
 BC_AUTO_TEST_CASE(block__set_hashes__genesis__matches_computed)
 {

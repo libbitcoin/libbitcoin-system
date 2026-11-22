@@ -411,7 +411,7 @@ op_pick() NOEXCEPT
 // 1 {999 times}, 998 OP_ROLL{ 200 times }"
 // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
 // Shifting larger chunks does not change time, as vector stores references.
-// This remains in the current satoshi implementation (std_vector).
+// This remains in satoshi implementation (std_vector).
 // ****************************************************************************
 TEMPLATE
 error::op_error_t CLASS::
@@ -968,7 +968,7 @@ op_check_sig_verify() NOEXCEPT
         if (endorsement->empty())
             return error::op_check_sig_verify1;
 
-        // If public key is 32 bytes it is a bip340 schnorr key.
+        // If public key is 32 bytes it is bip340 schnorr key.
         // If signature is not empty, it is validated against public key.
         if (key->size() == ec_xonly_size)
         {
@@ -991,7 +991,7 @@ op_check_sig_verify() NOEXCEPT
         if (!this->sigops_increment())
             return error::op_check_sig_budget;
 
-        // If public key size is neither 0 nor 32 bytes, it is an unknown type.
+        // If public key size is neither 0 nor 32 bytes, it is unknown type.
         // During script execution of signature opcodes these behave exactly as
         // known types except that signature validation considered successful.
         return error::op_success;
@@ -1095,8 +1095,8 @@ op_check_multisig_verify() NOEXCEPT
     const auto subscript = this->subscript(endorsements);
     const auto bip66 = this->is_enabled(flags::bip66_rule);
 
-    // This subscript is stripped of these endorsements, so a hash cached by a
-    // previous signature op (with a different subscript) cannot be reused.
+    // Subscript is stripped of these endorsements, so hash cached by previous
+    // signature op (with different subscript) cannot be reused.
     this->uncache();
 
     // Keys may be empty.

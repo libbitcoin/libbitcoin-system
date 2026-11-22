@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Use bc::system::ofstream in place of std::ofstream.
-/// This provides unicode and long path translation for Win32.
+/// Provides unicode and long path translation for Win32.
 class BC_API ofstream
   : public std::ofstream
 {

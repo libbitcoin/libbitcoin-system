@@ -29,9 +29,9 @@ static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
 static_assert(sha512::hash(sha512::half_t{})  == sha_half512);
 static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 
-// Currently sha::algorithm schedule pads are cached for 1,2,3,4 blocks.
-// This verifies that sha::algorithm::schedule_n() is properly configured.
-// Testing any sha algorithm is sufficient to verify the configuration for all.
+// sha::algorithm schedule pads cached for 1,2,3,4 blocks.
+// Verifies sha::algorithm::schedule_n() is properly configured.
+// Testing any sha algorithm suffices to verify configuration for all.
 BC_AUTO_TEST_CASE(verify_array_cache)
 {
     // Empty block scheduled pad is not currently cached, but included here for completeness.
@@ -53,8 +53,8 @@ BC_AUTO_TEST_CASE(verify_array_cache)
     static_assert(sha256::hash(blocks3) == expected3);
     static_assert(sha256::hash(blocks4) == expected4);
 
-    // Array caching is performed independently from chunk caching, though if
-    // configured correctly the cache for each is the same values/locations.
+    // Array caching independent of chunk caching, though if configured
+    // correctly cache for each is same values/locations.
     BC_CHECK_EQUAL(sha256::hash(blocks0), expected0);
     BC_CHECK_EQUAL(sha256::hash(blocks1), expected1);
     BC_CHECK_EQUAL(sha256::hash(blocks2), expected2);
@@ -468,8 +468,8 @@ constexpr auto sigma_ex(auto x) noexcept
     );
 }
 
-// sigma is symmtrical in AB, but not ABC. While the reversed order produces the same result,
-// it is an incorrect result in 64 bits. C must remain in place in the optimization.
+// sigma is symmetrical in AB, but not ABC. Reversed order produces same result,
+// but it is incorrect in 64 bits. C must remain in place in optimization.
 ////static_assert(sigma< 7,  8, 1>(563567345_u64) == sigma_ex< 7,  8,  1, false>(563567345_u64));  // s0_512
 ////static_assert(sigma< 7,  8, 1>(563567345_u64) == sigma_ex< 7,  8,  1, false>(563567345_u64));  // s0_512
 static_assert(sigma< 1,  8,  7>(563567345_u64) == sigma_ex< 1,  8,  7, true>(563567345_u64));      // s0_512

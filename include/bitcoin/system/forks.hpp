@@ -23,7 +23,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Chain state accepts configured forks and maps them onto active flags
-/// for the a given validaton context (i.e. block). These are exposed as
+/// for given validaton context (i.e. block). Exposed as
 /// chain::chain_state.flags() and chain::context.flags.
 struct forks
 {

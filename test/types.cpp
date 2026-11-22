@@ -57,8 +57,8 @@ static_assert(
     is_same_size<signed_size_t, int32_t> ||
     is_same_size<signed_size_t, int64_t>);
 
-// Depends on construction of signed_size_t using std::make_signed_t<size_t>,
-// as this is how the to_signed_type/to_unsigned_type conversions also work.
+// Depends on signed_size_t construction via std::make_signed_t<size_t>, as
+// to_signed_type/to_unsigned_type conversions also work this way.
 static_assert(
     is_same_type<to_signed_type<size_t>, signed_size_t>&&
     is_same_type<to_unsigned_type<signed_size_t>, size_t>);
@@ -66,8 +66,8 @@ static_assert(
 // This is implied by above.
 static_assert(is_same_size<size_t, signed_size_t>);
 
-// signed_size_t may not be the same type as either, despite having same size.
-// For example, long and int may both be 32 bit types, but not the same type.
+// signed_size_t may not be same type as either, despite having same size.
+// For example, long and int may both be 32 bit types, but not same type.
 ////static_assert(
 ////    is_same_type<signed_size_t, int32_t> ||
 ////    is_same_type<signed_size_t, int64_t>);

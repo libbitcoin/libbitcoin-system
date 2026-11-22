@@ -22,9 +22,9 @@
 
 // 5.1 Padding the Message
 // ============================================================================
-// All elements big endian (normal form) because endianness is on input.
-// However for block padding endianness is performed in algorithm. So either
-// must reverse that here and undo in algorithm, or bypass in algorithm.
+// All elements big endian (normal form), as endianness is on input. However for
+// block padding endianness is performed in algorithm, so must either reverse
+// here and undo in algorithm, or bypass in algorithm.
 
 namespace libbitcoin {
 namespace system {
@@ -58,9 +58,9 @@ constexpr void CLASS::
 schedule_n(buffer_t& buffer) NOEXCEPT
 {
     // Scheduled padding for n whole blocks.
-    // This will compile in 4*64 (sha256) or 4*128 (sha512) bytes for each
-    // unique size of blocks array hashed by callers (by template expansion).
-    // and one for each that is cached for block vectors in schedule_n().
+    // Compiles in 4*64 (sha256) or 4*128 (sha512) bytes for each unique size of
+    // blocks array hashed by callers (by template expansion), and one for each
+    // cached for block vectors in schedule_n().
     constexpr auto pad = scheduled_pad<Blocks>();
     buffer = pad;
 }
@@ -69,13 +69,12 @@ TEMPLATE
 constexpr void CLASS::
 schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
 {
-    // This optimization saves ~30% in message scheduling for one out of N
-    // blocks: (N + 70%)/(N + 100%). So benefit decreases with increasing N.
-    // For arbitrary data lengths this will benefit 1/64 hashes on average.
-    // All array-sized n-block hashes have precomputed schedules - this
-    // benefits only finalized chunk hashing. Testing shows a 5% performance
-    // improvement for 128 byte chunk hashes. Accumulator passes all write()
-    // of more than one block here.
+    // Saves ~30% in message scheduling for one of N blocks: (N + 70%)/(N +
+    // 100%), so benefit decreases with increasing N. For arbitrary data lengths
+    // benefits 1/64 hashes on average. All array-sized n-block hashes have
+    // precomputed schedules, so this benefits only finalized chunk hashing.
+    // Testing shows 5% performance improvement for 128 byte chunk hashes.
+    // Accumulator passes all write() of more than one block here.
     if constexpr (caching)
     {
         switch (blocks)

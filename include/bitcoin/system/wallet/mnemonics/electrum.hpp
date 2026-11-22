@@ -34,7 +34,7 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A wallet mnemonic, as defined by the second Electrum implementation.
+/// Wallet mnemonic, as defined by second Electrum implementation.
 /// Generates menemonic with desired prefix from entropy.
 /// Converts menemonic to entropy and prefix.
 /// Converts entropy and valid prefix to menemonic.
@@ -46,8 +46,8 @@ public:
     DEFAULT_COPY_MOVE(electrum);
 
     /// Seed prefix types.
-    /// The values for old, bip39 and none are not actual prefixes but 
-    /// here for consistency when handling electrum exceptional conditions.
+    /// Values for old, bip39 and none are not actual prefixes but here for
+    /// consistency when handling electrum exceptional conditions.
     enum class seed_prefix: uint8_t
     {
         old,
@@ -67,9 +67,9 @@ public:
     static constexpr size_t strength_minimum = 132;
     static constexpr size_t strength_maximum = 506;
 
-    /// The dictionary, limited by identifier, that contains all words.
-    /// If 'none' is specified all dictionaries are searched.
-    /// If 'none' is specified and contained by both en and fr, returns en.
+    /// Dictionary, limited by identifier, that contains all words.
+    /// If 'none' specified all dictionaries are searched.
+    /// If 'none' specified and contained by both en and fr, returns en.
     static language contained_by(const string_list& words,
         language identifier=language::none) NOEXCEPT;
 
@@ -82,48 +82,48 @@ public:
     /// Valid word counts (12 to 46 words).
     static bool is_valid_word_count(size_t count) NOEXCEPT;
 
-    /// Returns true if the seed of the words has the given prefix.
-    /// Will also match 'old', 'bip39' and 'none', as specified.
+    /// True if seed of words has given prefix.
+    /// Also matches 'old', 'bip39' and 'none', as specified.
     static bool is_prefix(const string_list& words,
         seed_prefix prefix) NOEXCEPT;
     static bool is_prefix(const std::string& sentence,
         seed_prefix prefix) NOEXCEPT;
 
-    /// Obtain the enumerated prefix corresponding to the words.
-    /// Returns 'old', 'bip39' or 'none' if not a valid electrum v2 seed.
-    /// A prefix other than 'none' implies the words represent a valid seed.
+    /// Obtain enumerated prefix corresponding to words.
+    /// Returns 'old', 'bip39' or 'none' if not valid electrum v2 seed.
+    /// Prefix other than 'none' implies words represent valid seed.
     static seed_prefix to_prefix(const string_list& words) NOEXCEPT;
     static seed_prefix to_prefix(const std::string& sentence) NOEXCEPT;
 
-    /// Convert a raw for "root seed" to its hd form.
-    /// The "root seed" is also referred to by electrum as the "master key".
-    /// There is no way to determine if this is a valid "root seed".
-    /// The prefix cannot be verified, which requires the "recovery seed".
+    /// Convert raw form "root seed" to its hd form.
+    /// "root seed" also referred to by electrum as "master key".
+    /// No way to determine if this is valid "root seed".
+    /// Prefix cannot be verified, which requires "recovery seed".
     static hd_private to_key(const long_hash& seed,
         const context& context) NOEXCEPT;
 
-    /// Convert an hd form "root seed" to its raw form (loses context).
-    /// The "root seed" is also referred to by electrum as the "master key".
-    /// There is no way to determine if this is a valid "root seed".
-    /// The prefix cannot be verified, which requires the "recovery seed".
+    /// Convert hd form "root seed" to its raw form (loses context).
+    /// "root seed" also referred to by electrum as "master key".
+    /// No way to determine if this is valid "root seed".
+    /// Prefix cannot be verified, which requires "recovery seed".
     static long_hash to_seed(const hd_private& key) NOEXCEPT;
 
     electrum() NOEXCEPT;
     electrum(const electrum_v1& old) NOEXCEPT;
 
-    /// Construct from the "recovery seed" (mnemonic phrase).
+    /// Construct from "recovery seed" (mnemonic phrase).
     /// Validity and prefix should be checked after construction.
-    /// Any valid length of words from a single dictionary will be valid.
+    /// Any valid length of words from single dictionary is valid.
     electrum(const string_list& words,
         language identifier=language::none) NOEXCEPT;
     electrum(const std::string& sentence,
         language identifier=language::none) NOEXCEPT;
 
-    /// Construct from the "recovery seed" (mnemonic entropy).
+    /// Construct from "recovery seed" (mnemonic entropy).
     /// Validity should be checked after construction.
-    /// By default this only verifies entropy against the prefix.
+    /// By default only verifies entropy against prefix.
     /// Set grind limit to allow entropy mutation for prefix discovery.
-    /// The instance will be invalid if the prefix not found within the limit.
+    /// Instance invalid if prefix not found within limit.
     electrum(const data_chunk& entropy, seed_prefix prefix, language lexicon,
         size_t grind_limit=0) NOEXCEPT;
 
@@ -131,15 +131,15 @@ public:
     seed_prefix prefix() const NOEXCEPT;
 
     /// Derive raw form "root seed" from mnemonic entropy and passphrase.
-    /// The "root seed" is also referred to by electrum as the "master key".
+    /// "root seed" also referred to by electrum as "master key".
     /// Returns null result if current prefix is 'none', 'bip39, or 'old'.
     long_hash to_seed(const std::string& passphrase="") const NOEXCEPT;
 
     /// Derive hd form "root seed" from mnemonic entropy and passphrase.
-    /// The "root seed" is also referred to as the "master private key".
+    /// "root seed" also referred to as "master private key".
     /// hd_private.to_public() is the "master public key".
     /// hd_private.secret() + .chain_code() is the raw form "root seed".
-    /// Context affects the hd form but does not affect the contained seed.
+    /// Context affects hd form but not contained seed.
     /// Returns invalid result if current prefix is 'none', 'bip39, or 'old'.
     hd_private to_key(const std::string& passphrase="",
         const context& context=btc_mainnet) const NOEXCEPT;

@@ -38,7 +38,7 @@ public:
     }
 
     // ************************************************************************
-    // CONSENSUS: Soft forks imposed minimum block versioning using a signed
+    // CONSENSUS: Soft forks imposed minimum block versioning using signed
     // interpretation of header.version, which would otherwise be unsigned.
     // ************************************************************************
     inline bool is_insufficient_version(uint32_t version) const NOEXCEPT
@@ -71,8 +71,8 @@ public:
             && (block_timestamp < earliest);
     }
 
-    // The block's timestamp is before that of the first block of its period,
-    // on the last block of the period (bip54).
+    // Block timestamp is before that of first block of its period, on last
+    // block of period (bip54).
     inline bool is_negative_timespan(uint32_t block_timestamp,
         uint32_t retargeting_interval) const NOEXCEPT
     {

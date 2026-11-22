@@ -39,19 +39,18 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // Push data revalidation (op.is_underclaimed()):
 // Gotta set something when invalid minimal result, check is_valid().
 // Incorrectly-sized push data is validated upon op parse, setting an invalid
-// opcode, the underflow bit, and the op data. This invalid opcode will result
-// in script execution failure if the script is evaluated, but is otherwise
-// valid (such as for a coinbase input script). Underflow can only occur at the
-// end of a script. All bytes are valid script, but as scripts have finite
-// length, the last operation may be an undersized push data. The retention of
-// the undersized data within an invalid op allows for the script to be
-// serialized and for the proper size and hash of the transaction computed.
-// The invalid opcode with underflow data is serialized as data bytes with the
-// original opcode stored in the data member, but seen as op_verif. By design
-// it is not possible to populate an op.data size that does not correspond to
-// the op.code. Size mismatch is revalidated here as final insurance against
-// derived classes that may alter this behavior. This ensures that an opcode
-// that does not push correctly-sized data will fail.
+// opcode, the underflow bit, and the op data. Invalid opcode results in script
+// execution failure if script is evaluated, but is otherwise valid (such as for
+// a coinbase input script). Underflow can only occur at end of a script. All
+// bytes are valid script, but as scripts have finite length, the last operation
+// may be an undersized push data. Retaining undersized data within an invalid
+// op allows script to be serialized and proper size and hash of transaction
+// computed. Invalid opcode with underflow data is serialized as data bytes with
+// original opcode stored in data member, but seen as op_verif. By design it is
+// not possible to populate an op.data size that does not correspond to op.code.
+// Size mismatch is revalidated here as final insurance against derived classes
+// that may alter this behavior. Ensures an opcode that does not push
+// correctly-sized data will fail.
 static constexpr auto any_invalid = opcode::op_verif;
 static_assert(operation::is_invalid(any_invalid));
 
@@ -198,14 +197,14 @@ operation operation::from_data(reader& source) NOEXCEPT
     if (!source)
         return {};
 
-    // If stream is not empty then a non-data opcode will always deserialize.
-    // A push-data opcode may indicate more bytes than are available. In this
-    // case the the script is invalid, but it may not be evaluated, such as
-    // with a coinbase input. So if an operation fails to deserialize it is
-    // re-read and retained as an "underflow" operation. An underflow op
-    // serializes as data only, and fails evaluation. Only the last operation
-    // in a script could become an underflow, which may possibly contain the
-    // entire script. This retains the read position in case of underflow.
+    // If stream is not empty, a non-data opcode always deserializes. A
+    // push-data opcode may indicate more bytes than are available. In this case
+    // script is invalid, but may not be evaluated, such as with a coinbase
+    // input. So if an operation fails to deserialize it is re-read and retained
+    // as an "underflow" operation. Underflow op serializes as data only, and
+    // fails evaluation. Only the last operation in a script could become an
+    // underflow, which may possibly contain the entire script. Retains read
+    // position in case of underflow.
     const auto start = source.get_read_position();
 
     // Size of a push-data opcode is not retained, as this is inherent in data.
@@ -222,12 +221,12 @@ operation operation::from_data(reader& source) NOEXCEPT
 
     const auto underflow = !source;
 
-    // This requires that provided stream terminates at the end of the script.
-    // When passing ops as part of a stream longer than the script, such as for
-    // a transaction, caller should apply source.set_limit(prefix_size), and
-    // clear the stream limit upon return. Stream invalidation and set_position
-    // do not alter a stream limit, it just behaves as a smaller stream buffer.
-    // Without a limit, source.read_bytes() below consumes the remaining stream.
+    // Requires that provided stream terminates at end of script. When passing
+    // ops as part of a stream longer than script, such as for a transaction,
+    // caller should apply source.set_limit(prefix_size), and clear stream limit
+    // upon return. Stream invalidation and set_position do not alter a stream
+    // limit, it behaves as a smaller stream buffer. Without a limit,
+    // source.read_bytes() below consumes remaining stream.
     if (underflow)
     {
         code = any_invalid;
@@ -272,8 +271,8 @@ void operation::to_data(std::ostream& stream) const NOEXCEPT
 
 void operation::to_data(writer& sink) const NOEXCEPT
 {
-    // Underflow is op-undersized data, it is serialized with no opcode.
-    // An underflow could only be a final token in a script deserialization.
+    // Underflow is op-undersized data, serialized with no opcode.
+    // Underflow could only be final token in a script deserialization.
     if (is_underflow())
     {
         sink.write_bytes(get_data());
@@ -577,7 +576,7 @@ std::string operation::to_string(uint32_t active_flags, bool bitcoind,
 bool operation::is_valid() const NOEXCEPT
 {
     // Push data not possible with any is_invalid, combination is invalid.
-    // This is necessary because there can be no invalid sentinel value.
+    // Necessary because there can be no invalid sentinel value.
     return !(code_ == any_invalid && !underflow_ && !data_empty());
 }
 

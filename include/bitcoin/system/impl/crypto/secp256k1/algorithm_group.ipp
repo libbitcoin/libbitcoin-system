@@ -168,8 +168,8 @@ constexpr Word algorithm::add(jacobian_t<Word>& r, const jacobian_t<Word>& a,
     }
 }
 
-// An uncomputed sum is of an infinite operand, or of equal x, where equal y
-// doubles and opposite y is infinity.
+// Uncomputed sum is of infinite operand, or of equal x, where equal y doubles
+// and opposite y is infinity.
 constexpr void algorithm::add_complete(jacobian_t<uint64_t>& r,
     const jacobian_t<uint64_t>& a, const affine_t<uint64_t>& b) NOEXCEPT
 {

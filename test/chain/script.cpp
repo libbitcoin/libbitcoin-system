@@ -228,8 +228,8 @@ BC_AUTO_TEST_CASE(script__multisig__valid)
         const auto name = test_name(test);
         BC_REQUIRE_MESSAGE(tx.is_valid(), name);
 
-        // These are always valid.
-        // These are scripts potentially affected by bip66 (but should not be).
+        // Always valid.
+        // Scripts potentially affected by bip66 (but should not be).
         BC_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) == error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) == error::script_success, name);
@@ -259,8 +259,8 @@ BC_AUTO_TEST_CASE(script__multisig__invalid)
         const auto name = test_name(test);
         BC_REQUIRE_MESSAGE(tx.is_valid(), name);
 
-        // These are always invalid.
-        // These are scripts potentially affected by bip66 (but should not be).
+        // Always invalid.
+        // Scripts potentially affected by bip66 (but should not be).
         BC_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) != error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) != error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) != error::script_success, name);

@@ -40,16 +40,16 @@ const auto divergences_ja = 644;
 
 BC_AUTO_TEST_CASE(catalogs_electrum__count__all__expected)
 {
-    // Any new dictionary must be added below to guarantee lack of normalization.
-    // Failure to do so may lead to invalid seed generation, which is very bad.
+    // New dictionary must be added below to guarantee lack of normalization.
+    // Failure to do so may lead to invalid seed generation.
     BC_CHECK_MESSAGE(electrum::catalogs::count() == dictionary_count, "new dictionary");
 }
 
 // subset
 
-// Identities are the same as the mnemonic dictionaries.
-// nfkd testing is performed on the mnemonic dictionaries.
-// This test ensures electrum dictionaries are a subset of mnemonic dictionaries.
+// Identities same as mnemonic dictionaries.
+// nfkd testing performed on mnemonic dictionaries.
+// Ensures electrum dictionaries are subset of mnemonic dictionaries.
 BC_AUTO_TEST_CASE(catalogs_electrum__mnemonic__subset__true)
 {
     BC_CHECK_EQUAL(electrum::en.word, mnemonic::en.word);
@@ -65,8 +65,8 @@ BC_AUTO_TEST_CASE(catalogs_electrum__mnemonic__subset__true)
 }
 // combined
 
-// The spanish, french and japanese dictionaries contain combining characters.
-// This requires combinings removal in these (only) for wordlist-based seedings.
+// Spanish, french and japanese dictionaries contain combining characters.
+// Requires combinings removal in these (only) for wordlist-based seedings.
 BC_AUTO_TEST_CASE(catalogs_electrum__combinings__combininged_words__true)
 {
     BC_CHECK_EQUAL(combinings(electrum::es), combinings_es);
@@ -75,7 +75,7 @@ BC_AUTO_TEST_CASE(catalogs_electrum__combinings__combininged_words__true)
 }
 
 // No words in these dictionaries contain combining characters.
-// So there is no need to normalize combinings these for wordlist-based seedings.
+// So no need to normalize combinings in these for wordlist-based seedings.
 BC_AUTO_TEST_CASE(catalogs_electrum__combined__not_combininged_words__false)
 {
     BC_CHECK(!combined(electrum::en));
@@ -90,7 +90,7 @@ BC_AUTO_TEST_CASE(catalogs_electrum__combined__not_combininged_words__false)
 // compressed_cjk
 
 // No words in any supported dictionaries are uncompressed.
-// So there is no need to normalize compression for wordlist-based seeding.
+// So no need to normalize compression for wordlist-based seeding.
 BC_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 {
     BC_CHECK(!compressed(electrum::en));
@@ -107,10 +107,9 @@ BC_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 
 // abnormal
 // ----------------------------------------------------------------------------
-// These dictionaries from the electrum repo are not in nfkd form, but are
-// otherwise identical to BIP39 dictionaries. We do not use these words within
-// electrum sources, we use BIP39 words. These tests verify that the BIP39
-// dictionaries are functionally identical.
+// These electrum repo dictionaries not in nfkd form, but otherwise identical
+// to BIP39 dictionaries. Electrum sources use BIP39 words, not these. Tests
+// verify BIP39 dictionaries functionally identical.
 
 // This verifies the number of abnormals in the two divergent dictionaries.
 BC_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
@@ -121,7 +120,7 @@ BC_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
 
 // divergence
 
-// This verifies that the differences are only in nfkd normalization.
+// Verifies differences only in nfkd normalization.
 // Otherwise there could be differences in word value and/or position.
 BC_AUTO_TEST_CASE(catalogs_electrum__divergences__unused_words__false)
 {

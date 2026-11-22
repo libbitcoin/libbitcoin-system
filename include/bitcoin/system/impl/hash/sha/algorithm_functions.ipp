@@ -21,7 +21,7 @@
 
 // 4.1 Functions
 // ============================================================================
-// The integral [f]unction namespace is implemented in math/function.hpp.
+// Integral [f]unction namespace is implemented in math/function.hpp.
 // When available vector overrides (e.g. xint128_t, xint256_t, xint512_t) are
 // implemented in `intrinsics/xcpu/...` and `intrinsics/arm/...` (for example).
 

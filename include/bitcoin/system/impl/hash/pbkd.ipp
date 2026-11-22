@@ -88,7 +88,7 @@ key(data_array<Size>& out, const data_slice& password,
 
     // rfc8018
     // applied to the password P and the concatenation of the salt S [PS].
-    // [salted and unsalted hmac accumulators are saved here for reuse.]
+    // [salted and unsalted hmac accumulators saved for reuse.]
     hmac<Algorithm> hmac_p(password);
     auto hmac_ps = hmac_p;
     hmac_ps.write(salt);

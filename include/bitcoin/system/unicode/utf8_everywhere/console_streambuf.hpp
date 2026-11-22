@@ -26,8 +26,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Not thread safe, virtual.
-/// Class to patch Windows stdin keyboard input, file input is not a problem.
-/// This class and members are no-ops when called in non-vc++ builds.
+/// Patches Windows stdin keyboard input, file input is not a problem.
+/// Class and members are no-ops in non-vc++ builds.
 /// When working in Windows console set font to "Lucida Console".
 class BC_API console_streambuf
   : public std::wstreambuf

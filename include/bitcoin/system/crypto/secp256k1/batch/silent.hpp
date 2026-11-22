@@ -38,7 +38,10 @@ struct BC_API batch
     std::span<const ec_secret> hashes;
 
     /// Each out = hash * sum of the tx, with valid set for each.
-    /// The out and valid spans are sized to the batch. False if canceled.
+    /// Out and valid spans are sized to batch. False if canceled.
+    /// Sets used_gpu true if computed on gpu.
+    /// Invokes write once, concurrently with or apart from compute, so write
+    /// must not read out or valid.
     static bool compute(const stopper& cancel,
         const std::span<ec_compressed>& out,
         const std::span<uint8_t>& valid, const batch& batch) NOEXCEPT;

@@ -222,8 +222,8 @@ BC_AUTO_TEST_CASE(ec_point__multiply_assign__invalid_self__unchanged)
     BC_REQUIRE(!instance);
 }
 
-// Validity is a prefix test only, so a valid point may not be on the curve.
-// The x coordinate here exceeds the field prime, so it cannot be parsed.
+// Validity is prefix test only, so valid point may not be on curve.
+// x coordinate here exceeds field prime, so cannot be parsed.
 const ec_compressed off_curve = base16_array("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
 BC_AUTO_TEST_CASE(ec_point__negate__off_curve__invalid)

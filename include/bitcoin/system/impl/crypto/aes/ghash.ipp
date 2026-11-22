@@ -95,10 +95,9 @@ next(const_byte_span data, size_t start) NOEXCEPT
 
 // Portable.
 // ----------------------------------------------------------------------------
-// Each 64 bit product is computed from four integer multiplications of
-// operands masked to every fourth bit, so that carries fall into the holes.
-// The high half of the 128 bit product is the bit reversed low half of the
-// product of the bit reversed operands.
+// Each 64 bit product is computed from four integer multiplications of operands
+// masked to every fourth bit, so carries fall into holes. High half of 128 bit
+// product is bit reversed low half of product of bit reversed operands.
 
 TEMPLATE
 constexpr uint64_t CLASS::
@@ -217,9 +216,9 @@ write_sliced(const_byte_span data) NOEXCEPT
 
 // Native.
 // ----------------------------------------------------------------------------
-// Operands are byte reflected, so that the reduction applies to the bit
-// reflected field representation. Four blocks are multiplied by descending
-// powers of the key and summed before a single reduction.
+// Operands are byte reflected, so reduction applies to bit reflected field
+// representation. Four blocks are multiplied by descending powers of key and
+// summed before single reduction.
 
 TEMPLATE
 INLINE xint128_t CLASS::

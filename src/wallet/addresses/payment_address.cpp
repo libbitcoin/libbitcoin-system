@@ -237,8 +237,8 @@ payment_address::list payment_address::extract_input(
     switch (pattern)
     {
         // Given lack of context (prevout) sign_key_hash is always ambiguous
-        // with sign_script_hash, so this address may not be the correct one.
-        // A server can differentiate by extracting from the previous output.
+        // with sign_script_hash, so this address may not be correct one.
+        // Server can differentiate by extracting from previous output.
         case chain::script_pattern::sign_key_hash:
         {
             return
@@ -254,18 +254,18 @@ payment_address::list payment_address::extract_input(
             };
         }
 
-        // There is no address in sign_public_key script (signature only)
-        // and the public key cannot be extracted from the signature.
-        // Given lack of context (prevout) sign_public_key is always ambiguous
-        // with sign_script_hash (though actual conflict seems very unlikely).
-        // A server can obtain by extracting from the previous output.
+        // No address in sign_public_key script (signature only), and
+        // public key cannot be extracted from signature. Given lack of
+        // context (prevout) sign_public_key is always ambiguous with
+        // sign_script_hash (though actual conflict seems unlikely).
+        // Server can obtain by extracting from previous output.
         case chain::script_pattern::sign_public_key:
 
-        // There are no addresses in sign_multisig script, signatures only.
-        // Nonstandard (non-zero) first op sign_multisig may conflict with
-        // sign_key_hash and/or sign_script_hash (or will be non_standard).
-        // A server can obtain the public keys extracting from the previous
-        // output, but bare multisig does not associate a payment address.
+        // No addresses in sign_multisig script, signatures only. Nonstandard
+        // (non-zero) first op sign_multisig may conflict with sign_key_hash
+        // and/or sign_script_hash (or will be non_standard). Server can obtain
+        // public keys extracting from previous output, but bare multisig does
+        // not associate payment address.
         case chain::script_pattern::sign_multisig:
         case chain::script_pattern::non_standard:
         default:

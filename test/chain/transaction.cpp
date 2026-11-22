@@ -2404,8 +2404,8 @@ BC_AUTO_TEST_CASE(transaction__confirm__confirmed_double_spend__confirmed_double
     BC_REQUIRE_EQUAL(instance.confirm(ctx), error::confirmed_double_spend);
 }
 
-// The immaturity condition subsumes the unconfirmed spend condition
-// (height < prevout_height), so the more specific error is evaluated first.
+// Immaturity condition subsumes unconfirmed spend condition
+// (height < prevout_height), so more specific error is evaluated first.
 BC_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__unconfirmed_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
@@ -2442,7 +2442,7 @@ BC_AUTO_TEST_CASE(transaction__confirm__relative_locked_version_one__transaction
 // connect
 // ----------------------------------------------------------------------------
 
-// A witness carrying input does not connect when bip141 is inactive, so a
+// Witness carrying input does not connect when bip141 is inactive, so
 // pre-segwit block carrying witness data cannot validate.
 BC_AUTO_TEST_CASE(transaction__connect__witness_bip141_off__unexpected_witness)
 {
@@ -2871,8 +2871,8 @@ BC_AUTO_TEST_CASE(transaction__connect__coinbase__transaction_success)
     BC_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
 }
 
-// Taproot eliminates the one_hash return, so a single sigop without a
-// corresponding output fails the signature hash [bip341].
+// Taproot eliminates one_hash return, so single sigop without corresponding
+// output fails signature hash [bip341].
 BC_AUTO_TEST_CASE(transaction__check_signature__taproot_single_overflow__false)
 {
     const auto instance = spends_transaction();

@@ -58,8 +58,8 @@ BC_AUTO_TEST_CASE(deserialize__string__istream_padded__untrimmed)
 
 // <uint8_t>
 
-// The template specialization must be observed before the template
-// or the specialization will be lost and this will return char value.
+// Template specialization must be observed before template, or specialization
+// is lost and this returns char value.
 BC_AUTO_TEST_CASE(deserialize__uint8__empty__false)
 {
     uint8_t out;

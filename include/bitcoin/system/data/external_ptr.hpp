@@ -26,10 +26,10 @@ namespace system {
     
 // Smart pointer of const T*, where T has an externally-guaranteed lifetime.
 // Copy/assignable, non-nullable, does not create/destroy its reference.
-// This models C const pointer with the exception of non-nullability.
-// The default value is T* to a static T{}, allowing deferred assignment.
-// The address of the default value remains consistent for a given type T.
-// The bool cast is false only if the pointer is initialized to default.
+// Models C const pointer except non-nullability.
+// Default value is T* to static T{}, allowing deferred assignment.
+// Address of default value remains consistent for given type T.
+// Bool cast is false only if pointer is initialized to default.
 // external_ptr<data_chunk>{} models bitcoin value zero (data_chunk{}).
 template <typename Type, if_default_constructible<Type> = true>
 class external_ptr

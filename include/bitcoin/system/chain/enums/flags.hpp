@@ -113,8 +113,8 @@ enum flags : uint32_t
     // bitcoind consensus changes, not specified before release.
     // ------------------------------------------------------------------------
 
-    // [0.8.0] The LevelDB store drops the Berkeley DB lock limit, chain split
-    // at block 225,430 (hard fork, determinism).
+    // [0.8.0] LevelDB store drops Berkeley DB lock limit, chain split at block
+    // 225,430 (hard fork, determinism).
     // github.com/bitcoin/bitcoin/pull/1677
 
     // [0.8.1] Max 4,500 tx and input hashes per block before 2013-05-15 (soft
@@ -127,8 +127,8 @@ enum flags : uint32_t
     // fork, deflation).
     // github.com/bitcoin/bitcoin/pull/6931
 
-    // [0.15.0] The inflation bug, duplicate inputs accepted in blocks (hard
-    // fork, inflation). The check was removed from blocks in [0.14.0].
+    // [0.15.0] Inflation bug, duplicate inputs accepted in blocks (hard fork,
+    // inflation). Check removed from blocks in [0.14.0].
     // github.com/bitcoin/bitcoin/pull/9049
     // github.com/bitcoin/bitcoin/pull/10195
 
@@ -136,7 +136,7 @@ enum flags : uint32_t
     // fork, arbitrary).
     // github.com/bitcoin/bitcoin/pull/11389
 
-    // [0.16.3] The inflation bug fixed (soft fork, inflation).
+    // [0.16.3] Inflation bug fixed (soft fork, inflation).
     // github.com/bitcoin/bitcoin/pull/14247
 
     // [0.17.0] bip16 and bip141 script rules from genesis, one bip16 block
@@ -155,12 +155,12 @@ enum flags : uint32_t
     // genesis, one block excepted by hash (soft fork, arbitrary).
     // github.com/bitcoin/bitcoin/pull/23536
 
-    // [30.0] Checkpoints removed, forks below the last checkpoint accepted
+    // [30.0] Checkpoints removed, forks below last checkpoint accepted
     // (hard fork, security).
     // github.com/bitcoin/bitcoin/pull/31649
 
-    // bip91 was implemented, and proposed for [0.14.3] on 2017-07-21, but was
-    // never merged or released.
+    // bip91 implemented, and proposed for [0.14.3] on 2017-07-21,
+    // but never merged or released.
     // github.com/bitcoin/bitcoin/pull/10444
     // github.com/bitcoin/bitcoin/pull/10900
 

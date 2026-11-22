@@ -73,8 +73,8 @@ INLINE constexpr void chacha20::double_round(state_t<Word>& x) NOEXCEPT
     quarter<3, 4,  9, 14>(x);
 }
 
-// ChaCha20 runs 20 rounds, alternating between column and diagonal rounds,
-// and then adds the original input words to the output words.
+// ChaCha20 runs 20 rounds, alternating column and diagonal rounds, then adds
+// original input words to output words.
 template <size_t Index, typename Word>
 INLINE constexpr void chacha20::summate(state_t<Word>& x,
     const state_t<Word>& start) NOEXCEPT
@@ -118,9 +118,9 @@ INLINE constexpr void chacha20::rounds(state_t<Word>& x) NOEXCEPT
 
 // vectorization
 // ----------------------------------------------------------------------------
-// One block is computed per 32 bit lane, so the words of a given block are
-// distributed across the state vectors. Transposition of each group of lanes
-// vectors, and sequencing of those groups, produces sequential blocks.
+// One block computed per 32 bit lane, so words of given block distributed
+// across state vectors. Transposition of each group of lanes vectors, and
+// sequencing of those groups, produces sequential blocks.
 
 // The block counter of each lane is offset by its lane number.
 template <typename xWord>
@@ -357,8 +357,8 @@ INLINE size_t chacha20::xcrypt(const_byte_span in, byte_span out, size_t start,
             xnext(keystream, key, nonce, counter);
             counter += lanes<xWord>;
 
-            // Caller buffers are not vector aligned, so the keystream is
-            // applied from the aligned state.
+            // Caller buffers not vector aligned,
+            // so keystream applied from aligned state.
             const auto& stream = array_cast<uint8_t>(keystream);
 
             if (in.empty())
@@ -392,8 +392,8 @@ chacha20::~chacha20() NOEXCEPT
 
 void chacha20::set_key(const secret& key) NOEXCEPT
 {
-    // The next eight words (4-11) are taken from the 256-bit key by reading
-    // the bytes in little-endian order, in 4-byte chunks.
+    // Next eight words (4-11) taken from 256-bit key by reading bytes in
+    // little-endian order, in 4-byte chunks.
     from_little_endians(key_, key);
     nonce_ = {};
     counter_ = {};

@@ -45,9 +45,8 @@ BC_AUTO_TEST_CASE(electrum__contained_by__invalid__none)
 
 BC_AUTO_TEST_CASE(electrum__contained_by__ambiguous__expected)
 {
-    // contained_by returns the first matching language.
-    // The only ambiguous set is en-fr (100 words).
-    // So an en match should be explicitly tested against fr.
+    // contained_by returns first matching language. Only ambiguous set is
+    // en-fr (100 words), so en match should be explicitly tested against fr.
     BC_REQUIRE(electrum::contained_by(ambiguous_en_fr, language::none) == language::en);
     BC_REQUIRE(electrum::contained_by(ambiguous_en_fr, language::en) == language::en);
     BC_REQUIRE(electrum::contained_by(ambiguous_en_fr, language::fr) == language::fr);
@@ -55,8 +54,8 @@ BC_AUTO_TEST_CASE(electrum__contained_by__ambiguous__expected)
 
 BC_AUTO_TEST_CASE(electrum__contained_by__redundant__expected)
 {
-    // contained_by returns the first matching language.
-    // The only redundant set is zh_Hans-zh_Hant (1275 words).
+    // contained_by returns first matching language.
+    // Only redundant set is zh_Hans-zh_Hant (1275 words).
     BC_REQUIRE(electrum::contained_by(redundant_hans_hant, language::none) == language::zh_Hans);
     BC_REQUIRE(electrum::contained_by(redundant_hans_hant, language::zh_Hans) == language::zh_Hans);
     BC_REQUIRE(electrum::contained_by(redundant_hans_hant, language::zh_Hant) == language::zh_Hant);
@@ -196,8 +195,8 @@ BC_AUTO_TEST_CASE(electrum__is_prefix_sentence__valid__true)
 // to_prefix
 
 // TODO: grind on mnemonics and electrum_v1 to find conflict test vectors.
-// It's very possible that a BIP39-created mnemonic may conflict with electrum,
-// but harder to create in the other direction.
+// BIP39-created mnemonic may well conflict with electrum, but harder to
+// create in other direction.
 
 BC_AUTO_TEST_CASE(electrum__to_prefix_words__electrum__expected)
 {
@@ -353,8 +352,8 @@ BC_AUTO_TEST_CASE(electrum__grinder__prefix_none__not_found)
 {
     const auto limit = 40u;
 
-    // This grinds to the limit but cannot match since "none" is not hexidecimal.
-    // The same holds for 'bip39' and 'old'. These are guarded in from_entropy().
+    // Grinds to limit but cannot match since "none" is not hexidecimal. Same
+    // holds for 'bip39' and 'old', guarded in from_entropy().
     const auto result = accessor::grinder(data_chunk(17, 0x00), prefix::none, language::en, limit);
     BC_REQUIRE_EQUAL(result.iterations, limit);
 }
@@ -414,8 +413,8 @@ BC_AUTO_TEST_CASE(electrum__entropy_bits2__boundaries__expected)
 
 BC_AUTO_TEST_CASE(electrum__entropy_size1__boundaries__expected)
 {
-    // This must round up to the next byte.
-    // The required number of bytes to achieve the given bit strength.
+    // Must round up to next byte.
+    // Required number of bytes to achieve given bit strength.
     BC_REQUIRE_EQUAL(accessor::entropy_size(132), 132u / 8u + 1u);
     BC_REQUIRE_EQUAL(accessor::entropy_size(506), 506u / 8u + 1u);
 }
@@ -426,8 +425,8 @@ BC_AUTO_TEST_CASE(electrum__entropy_size2__boundaries__expected)
     BC_REQUIRE_EQUAL((12 * 11) % 8, 4);
     BC_REQUIRE_EQUAL((46 * 11) % 8, 2);
 
-    // This must round up to the next byte.
-    // The required number of bytes for the given number of words.
+    // Must round up to next byte.
+    // Required number of bytes for given number of words.
     BC_REQUIRE_EQUAL(accessor::entropy_size(string_list(12, "")), (12u * 11u) / 8u + 1u);
     BC_REQUIRE_EQUAL(accessor::entropy_size(string_list(46, "")), (46u * 11u) / 8u + 1u);
 }
@@ -672,8 +671,8 @@ BC_AUTO_TEST_CASE(electrum__from_words__unknown_prefix__true)
     // The instance is valid in relation to the discovered prefix.
     const auto instance = accessor::from_words(split(extended), language::it);
 
-    // Electrum does not incorporate a checksum.
-    // Words construction does not validate a prefix, it computes the prefix.
+    // Electrum does not incorporate checksum.
+    // Words construction does not validate prefix, it computes prefix.
     BC_REQUIRE(instance);
 
     // The modified mnemonic is valid but does not have a known prefix.
@@ -695,8 +694,8 @@ BC_AUTO_TEST_CASE(electrum__from_words__uppercase_standard_italian__true)
 
 BC_AUTO_TEST_CASE(electrum__from_words__standard_none__true)
 {
-    // With 'none' specified the mnemonic is valid if contained in exactly one dictionary
-    // (only en-fr) or is the same in multiple dictionaries (only chinese).
+    // With 'none' specified, mnemonic valid if contained in exactly one
+    // dictionary (only en-fr) or same in multiple dictionaries (only chinese).
     const auto instance = accessor::from_words(split(mnemonic_standard), language::none);
     BC_REQUIRE(instance);
     BC_REQUIRE(instance.prefix() == prefix::standard);
@@ -737,9 +736,9 @@ BC_AUTO_TEST_CASE(electrum__from_words__incorrect_explicit_language__false)
 
 BC_AUTO_TEST_CASE(electrum__from_words__conflicting_english_french__false)
 {
-    // There are 100 common words in en and fr dictionaries, but all of the
-    // common words occupy a different index in their respective dictionaries.
-    // No other dictionary pair exibits conflicting behavior.
+    // 100 common words in en and fr dictionaries, but all common words occupy
+    // different index in their respective dictionaries. No other dictionary
+    // pair exhibits conflicting behavior.
     const auto english = accessor::from_words(ambiguous_en_fr, language::en);
     const auto french = accessor::from_words(ambiguous_en_fr, language::fr);
 
@@ -766,9 +765,9 @@ BC_AUTO_TEST_CASE(electrum__from_words__conflicting_english_french__false)
 
 BC_AUTO_TEST_CASE(electrum__from_words__conflicting_chinese__true)
 {
-    // There are 1275 common words in the zh_Hans and zh_Hant dictionaries, but
-    // all common words occupy the same index in both dictionaries.
-    // No other dictionary pair exibits this partial symmetry.
+    // 1275 common words in zh_Hans and zh_Hant dictionaries, but all common
+    // words occupy same index in both dictionaries. No other dictionary pair
+    // exhibits this partial symmetry.
     const auto simplified = accessor::from_words(redundant_hans_hant, language::zh_Hans);
     const auto traditional = accessor::from_words(redundant_hans_hant, language::zh_Hant);
 
@@ -1354,8 +1353,8 @@ BC_AUTO_TEST_CASE(electrum__deserialize__valid__expected)
     in >> instance;
     BC_REQUIRE(instance);
 
-    // The sentence is serialized according to documentation (ideographic_space),
-    // but the Electrum test vector japanese mnemonics are joined with ascii spaces.
+    // Sentence serialized according to documentation (ideographic_space), but
+    // Electrum test vector japanese mnemonics are joined with ascii spaces.
     BC_REQUIRE_EQUAL(instance.sentence(), join(split(vector.mnemonic), ideographic_space));
 }
 
@@ -1424,10 +1423,10 @@ BC_AUTO_TEST_CASE(electrum__verify_vectors__strings__match_chunks)
 }
 
 // Full round trip Electrum repo tests, constructed from mnemonic and entropy.
-// Electrum test vector mnemonics just happen to be prenormalized, even though
-// the Electrum repo dictionaries are not all normalized. But our dictionaries
-// are fully-normalized, so construction from mnemonics succeeds with all
-// non-ascii passphrases now supported via embedded Unicode tables.
+// Electrum test vector mnemonics happen to be prenormalized, though Electrum
+// repo dictionaries are not all normalized. Our dictionaries are
+// fully-normalized, so construction from mnemonics succeeds with all
+// non-ascii passphrases, supported via embedded Unicode tables.
 
 BC_AUTO_TEST_CASE(electrum__construct_entropy__to_key__expected)
 {

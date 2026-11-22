@@ -32,8 +32,8 @@ namespace chain {
 
 namespace {
 
-// Witnessed serialization hash for the bitcoind verbose "hash" field. The
-// wtxid of a coinbase is null_hash (BIP141), but bitcoind displays this value.
+// Witnessed serialization hash for bitcoind verbose "hash" field. wtxid of
+// coinbase is null_hash (BIP141), but bitcoind displays this value.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 inline hash_digest witnessed_hash(const transaction& tx) NOEXCEPT
 {
@@ -139,7 +139,7 @@ DEFINE_JSON_FROM_TAGGED(bitcoind_verbose_tag, transaction)
     value = value_from(tx);
 }
 
-// The tag wrapper masks the vector, so these must be explicit.
+// Tag wrapper masks vector, so these must be explicit.
 // ----------------------------------------------------------------------------
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)

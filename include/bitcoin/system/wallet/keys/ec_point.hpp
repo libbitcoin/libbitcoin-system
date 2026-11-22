@@ -26,9 +26,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// ec_point is initialized to an invalid state.
-/// Failed operations return an invalid state.
-/// The bool operator reflects the validity state.
+/// ec_point initialized to invalid state.
+/// Failed operations return invalid state.
+/// Bool operator reflects validity state.
 /// Does not implement string serialization.
 class BC_API ec_point
 {

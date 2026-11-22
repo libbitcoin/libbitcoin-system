@@ -46,7 +46,7 @@ constexpr CLASS& CLASS::operator%=(const uintx_t& other) NOEXCEPT
 }
 
 // private
-// Digits are 32 bits so that each step divides 64 by 32 bits.
+// Digits 32 bits so each step divides 64 by 32 bits.
 TEMPLATE
 constexpr void CLASS::divide(uintx_t& quotient, uintx_t& remainder,
     const uintx_t& dividend, const uintx_t& divisor) NOEXCEPT

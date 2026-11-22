@@ -27,8 +27,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Exclusive slice hides data_array and data_chunk constructors.
-/// This allows overloading with slice/array/chunk for performance optimization.
-/// This has no member data, so should act merely as a compiler guide.
+/// Allows overloading with slice/array/chunk for performance optimization.
+/// Has no member data, so should act merely as compiler guide.
 class exclusive_slice
   : public data_slice
 {

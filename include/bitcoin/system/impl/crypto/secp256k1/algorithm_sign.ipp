@@ -180,8 +180,8 @@ constexpr void algorithm::declassify(const uint8_t* data,
         system::declassify(data, size);
 }
 
-// R = kG, r = x(R) mod n, s = (z + r d) / k, with s made low. The recovery id
-// is the parity of y(R), and 2 where x(R) is not below n.
+// R = kG, r = x(R) mod n, s = (z + r d) / k, with s made low. Recovery id is
+// parity of y(R), and 2 where x(R) is not below n.
 constexpr bool algorithm::sign_ecdsa(scalar_t& r, scalar_t& s, uint8_t& id,
     const scalar_t& d, const scalar_t& z, const scalar_t& k,
     const scalar_t& m, const scalar_t& b) NOEXCEPT

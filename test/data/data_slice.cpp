@@ -374,9 +374,9 @@ BC_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
     ////BC_WARN_EQUAL(slice6.encoded(), encoded + "00");
 
     // construct(initializer - text)
-    // All characters is picked up by the char array initializer.
-    // But unlike literal char arrays, it is not automatically null terminated.
-    // Because data_slice sees this as a literal, it removes the last character.
+    // All characters picked up by char array initializer.
+    // But unlike literal char arrays, not automatically null terminated.
+    // Because data_slice sees this as literal, it removes last character.
     // So this initializer requires explicit null termination.
     const data_slice slice7({ 'f', 'o', 'o', 'b', 'a', 'r', '\0' });
     BC_WARN(!slice7.empty());

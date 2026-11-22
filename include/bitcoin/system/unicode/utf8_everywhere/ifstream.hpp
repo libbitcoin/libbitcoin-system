@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Use bc::system::ifstream in place of std::ifstream.
-/// This provides unicode and long path translation for Win32.
+/// Provides unicode and long path translation for Win32.
 class BC_API ifstream
   : public std::ifstream
 {

@@ -25,8 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// The bitcoin hash format is base16 with the bytes reversed.
-/// This reversed format is used by this library only for display formatting.
+/// Bitcoin hash format is base16 with bytes reversed.
+/// Reversed format used by this library only for display formatting.
 
 /// Utilities.
 /// ---------------------------------------------------------------------------
@@ -52,18 +52,18 @@ constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT;
 /// Decoding of hex string to data_array or data_chunk.
 /// ---------------------------------------------------------------------------
 
-/// Convert a hexidecimal string to a byte vector.
-/// False if the input is malformed.
+/// Convert hexidecimal string to byte vector.
+/// False if input is malformed.
 constexpr bool decode_base16(data_chunk& out, const std::string_view& in) NOEXCEPT;
 
-/// Convert a hexidecimal string to a byte array.
-/// False if the input is malformed, or the wrong length.
+/// Convert hexidecimal string to byte array.
+/// False if input is malformed, or wrong length.
 template <size_t Size>
 constexpr bool decode_base16(data_array<Size>& out,
     const std::string_view& in) NOEXCEPT;
 
-/// Convert a reversed byte order hexidecimal string to a byte array.
-/// False if the input is malformed, or the wrong length.
+/// Convert reversed byte order hexidecimal string to byte array.
+/// False if input is malformed, or wrong length.
 template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
     const std::string_view& in) NOEXCEPT;
@@ -75,23 +75,23 @@ constexpr data_array<Size> decode_hash(const std::string_view& in) THROWS;
 /// Literal decodings of hex string, errors reflected as zero-filled data.
 /// ---------------------------------------------------------------------------
 
-/// Convert a literal hex string to a string (bytes are cast to string chars).
+/// Convert literal hex string to string (bytes cast to string chars).
 /// Empty string returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
 constexpr std::string base16_string(const char(&string)[Size]) NOEXCEPT;
 
-/// Convert a literal hexidecimal string literal to pmr vector (not constexpr).
+/// Convert literal hexidecimal string literal to pmr vector (not constexpr).
 /// Empty chunk returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
 data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT;
 
-/// Convert a hexidecimal string literal to a byte array.
+/// Convert hexidecimal string literal to byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
 constexpr data_array<to_half(sub1(Size))>
 base16_array(const char(&string)[Size]) NOEXCEPT;
 
-/// Convert a reversed byte order hexidecimal string literal to a byte array.
+/// Convert reversed byte order hexidecimal string literal to byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
 constexpr data_array<to_half(sub1(Size))>

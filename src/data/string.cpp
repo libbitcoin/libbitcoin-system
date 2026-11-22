@@ -150,8 +150,8 @@ string_list split(const std::string_view& text, const std::string& delimiter,
 
 string_list split(const std::string_view& text) NOEXCEPT
 {
-    // Splitting is prioritized over trimming, because each token is trimmed.
-    // So trimming is not an option when splitting on the trim characters.
+    // Splitting prioritized over trimming, as each token is trimmed, so
+    // trimming is not an option when splitting on trim characters.
     return split(text, ascii_whitespace, ascii_whitespace, true);
 }
 

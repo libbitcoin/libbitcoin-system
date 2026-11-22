@@ -105,8 +105,8 @@ static const std::vector<serialized> models
     { value{ { "k", { { "k", { { "k", { 1.5 } } } } } } }, R"({"k":{"k":{"k":[1.5]}}})" }
 };
 
-// Read with the chunk size, true if every read but the last is full and the
-// reassembly matches the expectation.
+// Read with chunk size, true if every read but last is full
+// and reassembly matches expectation.
 static bool chunks_match(const value& model, size_t chunk,
     const std::string& expected)
 {

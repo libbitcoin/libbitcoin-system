@@ -247,8 +247,8 @@ public:
     // Blinds.
     // ------------------------------------------------------------------------
 
-    // Nonzero scalar keyed by the secret, over entropy, a context and a call
-    // count, so that it remains secret and unrepeated where entropy is not.
+    // Nonzero scalar keyed by secret, over entropy, context and call count, so
+    // it remains secret and unrepeated where entropy is not.
     static scalar blind(const scalar& secret, const data_slice& context,
         uint8_t tag) NOEXCEPT
     {
@@ -292,7 +292,7 @@ public:
     // ------------------------------------------------------------------------
 
     // HMAC-SHA256 generator of RFC6979 3.2, over key, message, and optional
-    // data and algorithm, returning the output of attempt + 1 calls.
+    // data and algorithm, returning output of attempt + 1 calls.
     static int rfc6979(uint8_t* nonce32, const uint8_t* msg32,
         const uint8_t* key32, const uint8_t* algo16, void* data,
         unsigned int attempt) NOEXCEPT
@@ -356,8 +356,8 @@ public:
         return success;
     }
 
-    // BIP340 nonce of secret, x-only public key and message, where the secret
-    // is masked by the tagged hash of the auxiliary data (zeros if null).
+    // BIP340 nonce of secret, x-only public key and message, where secret is
+    // masked by tagged hash of auxiliary data (zeros if null).
     static hash_digest bip340(const bytes& secret, const bytes& key,
         const uint8_t* msg32, const uint8_t* aux32) NOEXCEPT
     {
@@ -482,8 +482,8 @@ public:
         declassify(out);
     }
 
-    // Draws branches and nonzero u below p from hasher until the branch
-    // inverts x, then matches the parity of t to that of y.
+    // Draws branches and nonzero u below p from hasher until branch inverts x,
+    // then matches parity of t to that of y.
     static void encode(uint8_t* ell64, const affine& point,
         const accumulator<sha256>& hasher) NOEXCEPT
     {
@@ -775,8 +775,7 @@ int secp256k1_ecdsa_signature_parse_compact(const secp256k1_context*,
     return success;
 }
 
-// Big-endian integers without leading zeros, other than one where the high
-// bit is set.
+// Big-endian integers without leading zeros, other than one where high bit set.
 int secp256k1_ecdsa_signature_serialize_der(const secp256k1_context*,
     uint8_t* output, size_t* outputlen,
     const secp256k1_ecdsa_signature* sig) NOEXCEPT
@@ -1081,8 +1080,8 @@ int secp256k1_ellswift_decode(const secp256k1_context*,
     return success;
 }
 
-// An invalid secret encodes the key of one, with false returned and zeroed
-// output. Randomness is H(secret || zeros || auxiliary || counter).
+// Invalid secret encodes key of one, with false returned and zeroed output.
+// Randomness is H(secret || zeros || auxiliary || counter).
 int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
     const uint8_t* seckey32, const uint8_t* auxrnd32) NOEXCEPT
 {
@@ -1103,8 +1102,8 @@ int secp256k1_ellswift_create(const secp256k1_context*, uint8_t* ell64,
     return local::to_result(valid);
 }
 
-// The shared x is that of secret times their point, whose x is decoded as a
-// fraction (y does not affect x of the product). An invalid secret is one.
+// Shared x is that of secret times their point, its x decoded as fraction (y
+// does not affect x of product). Invalid secret is one.
 int secp256k1_ellswift_xdh(const secp256k1_context*, uint8_t* output,
     const uint8_t* ell_a64, const uint8_t* ell_b64, const uint8_t* seckey32,
     int party, secp256k1_ellswift_xdh_hash_function hashfp,

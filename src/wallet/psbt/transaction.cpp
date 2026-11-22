@@ -599,8 +599,8 @@ std::optional<uint32_t> transaction::locktime() const NOEXCEPT
     if (version_ == version_0)
         return tx_.locktime();
 
-    // BIP370: the field available to all constrained inputs is chosen,
-    // preferring height, and its value is the greatest requirement.
+    // BIP370: field available to all constrained inputs is chosen, preferring
+    // height, and its value is greatest requirement.
     uint32_t height{};
     uint32_t time{};
     auto constrained = false;

@@ -97,7 +97,7 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    /// Copy data to an array.
+    /// Copy data to array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
     constexpr std_array<value_type, Size> to_array() const NOEXCEPT;
@@ -108,9 +108,9 @@ public:
     /// Convert data to a string (casts uint8_t to char).
     constexpr std::string to_string() const NOEXCEPT;
 
-    /// Resize the slice by decrementing the end pointer.
-    /// This is the only mutable action that can be taken on the slice.
-    /// Returns true if the size was reduced (expansion is not allowed).
+    /// Resize slice by decrementing end pointer.
+    /// Only mutable action that can be taken on slice.
+    /// Returns true if size was reduced (expansion not allowed).
     constexpr bool resize(size_t size) NOEXCEPT;
 
     /// Properties.

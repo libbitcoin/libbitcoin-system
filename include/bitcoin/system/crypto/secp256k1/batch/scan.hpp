@@ -67,8 +67,8 @@ struct BC_API batch
     /// Default minimum transactions of a scan that runs on gpu.
     static constexpr size_t gpu_txs = power2(16_size);
 
-    /// Invoke callback for each tx with an output paying receiver, on the gpu
-    /// where available for scans of at least gpu_minimum.
+    /// Invoke callback for each tx with output paying receiver, on gpu where
+    /// available for scans of at least gpu_minimum.
     static void scan(const stopper& cancel, const batch& batch,
         const receiver& keys, size_t gpu_minimum, const handler& callback,
         bool turbo) NOEXCEPT;

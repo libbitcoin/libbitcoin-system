@@ -32,24 +32,24 @@ namespace chain {
 /// Script helper for schnorr threshold capture.
 struct threshold
 {
-    /// Capture fabricates success for every sigop, and bip342 terminates the
-    /// script on any failing non-empty signature, so a committed capture
-    /// always implies the terminal comparison evaluates at exactly
-    /// `expected`. This decides script satisfaction at capture time, before
-    /// allocation, unsatisfiable spends decline capture and evaluate inline.
+    /// Capture fabricates success for every sigop, and bip342 terminates script
+    /// on any failing non-empty signature, so committed capture always implies
+    /// terminal comparison evaluates at exactly `expected`. This decides script
+    /// satisfaction at capture time, before allocation, unsatisfiable spends
+    /// decline capture and evaluate inline.
     static constexpr bool is_satisfied(opcode code, size_t expected,
         size_t minimum, size_t maximum) NOEXCEPT
     {
         switch (code)
         {
-            // checksig denotes the tapscript multisig (checksigverify
-            // chain) pattern, minimum == pair count (all must verify).
+            // checksig denotes tapscript multisig (checksigverify chain)
+            // pattern, minimum == pair count (all must verify).
             case opcode::checksig:
             case opcode::numequal:
                 return expected == minimum;
 
             // Verify variant pops both operands and pushes nothing, leaving
-            // an empty stack, which can never satisfy clean-true [bip342].
+            // empty stack, which can never satisfy clean-true [bip342].
             case opcode::numequalverify:
                 return false;
 

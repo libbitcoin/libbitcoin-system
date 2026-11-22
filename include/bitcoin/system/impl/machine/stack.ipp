@@ -88,9 +88,9 @@ TEMPLATE
 INLINE void CLASS::
 push(data_chunk&& value) NOEXCEPT
 {
-    // The following script operations will ALWAYS tether chunks, as the result
-    // of a computed hash is *pushed* to the weak pointer (xptr) variant stack.
-    // make_external attaches value to tether returns weak pointer (chunk_xptr).
+    // Following script operations ALWAYS tether chunks, as result of computed
+    // hash is *pushed* to weak pointer (xptr) variant stack. make_external
+    // attaches value to tether returns weak pointer (chunk_xptr).
     //
     // op_ripemd160         (1)
     // op_sha1              (1)
@@ -138,7 +138,7 @@ emplace_chunk(const chunk_xptr& value) NOEXCEPT
 
 // Positional (stack cheats).
 // ----------------------------------------------------------------------------
-// These optimizations prevent used of std::stack.
+// Optimizations prevent use of std::stack.
 
 TEMPLATE
 INLINE void CLASS::

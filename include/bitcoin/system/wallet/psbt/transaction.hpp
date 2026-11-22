@@ -32,9 +32,9 @@ namespace system {
 namespace wallet {
 namespace psbt {
 
-/// A partially signed bitcoin transaction, as defined by BIP174 (version 0)
-/// and BIP370 (version 2). Finalization covers legacy and version 0 witness
-/// programs; taproot fields are parsed and preserved but not satisfied.
+/// Partially signed bitcoin transaction, as defined by BIP174 (version 0) and
+/// BIP370 (version 2). Finalization covers legacy and version 0 witness
+/// programs; taproot fields parsed and preserved but not satisfied.
 class BC_API transaction
 {
 public:
@@ -88,7 +88,7 @@ public:
     /// The fee implied by input prevouts and outputs (null if unavailable).
     std::optional<uint64_t> fee() const NOEXCEPT;
 
-    /// The computed lock time (BIP370), or the unsigned tx lock time.
+    /// Computed lock time (BIP370), or unsigned tx lock time.
     /// Unsatisfiable input lock time requirements return nullopt.
     std::optional<uint32_t> locktime() const NOEXCEPT;
 
@@ -101,8 +101,8 @@ public:
     /// Merge the inputs and outputs of a distinct transaction.
     bool join(const transaction& other) NOEXCEPT;
 
-    /// Convert complete signature sets into final scripts, false if any
-    /// input cannot be finalized (finalized inputs are retained).
+    /// Convert complete signature sets into final scripts, false if any input
+    /// cannot be finalized (finalized inputs retained).
     bool finalize() NOEXCEPT;
 
     /// The network transaction (invalid unless is_final()).

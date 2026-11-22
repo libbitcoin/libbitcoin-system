@@ -31,8 +31,8 @@ namespace system {
 #if (defined(HAVE_WINDOWS) || defined(HAVE_LINUX)) && \
     (defined(HAVE_X64) || defined(HAVE_ARM64))
 
-// The cuda runtime installs with the device driver, so its device count
-// answers for the backend that batch acceleration requires when compiled.
+// Cuda runtime installs with device driver, so its device count answers for
+// backend that batch acceleration requires when compiled.
 using cu_init_t = int32_t(*)(uint32_t);
 using cu_count_t = int32_t(*)(int32_t*);
 using cu_get_t = int32_t(*)(int32_t*, int32_t);
@@ -43,8 +43,8 @@ using nvml_shutdown_t = int32_t(*)();
 using nvml_handle_t = int32_t(*)(const char*, void**);
 using nvml_ecc_t = int32_t(*)(void*, int32_t*, int32_t*);
 
-// CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR/MINOR, and the floor of the
-// compiled cuda kernels (turing).
+// CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR/MINOR,
+// and floor of compiled cuda kernels (turing).
 constexpr int32_t cu_major = 75;
 constexpr int32_t cu_minor = 76;
 constexpr int32_t cuda_major = 7;

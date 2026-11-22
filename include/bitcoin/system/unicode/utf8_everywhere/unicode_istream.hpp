@@ -24,7 +24,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Class to expose a narrowing input stream.
+/// Narrowing input stream.
 /// std::wcin must be patched by console_streambuf if used for Windows input.
 class BC_API unicode_istream
   : public std::istream

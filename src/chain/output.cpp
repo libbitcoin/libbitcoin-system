@@ -242,9 +242,9 @@ size_t output::signature_operations(bool bip141) const NOEXCEPT
 
 bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
 {
-    // If provably unspendable it does not expand the unspent output set. Dust
-    // is all about prunability. Miners can be expected take the largest fee
-    // independent of dust, so this is an attempt to prevent miners from seeing
+    // If provably unspendable it does not expand unspent output set. Dust is
+    // all about prunability. Miners can be expected take the largest fee
+    // independent of dust, so this attempts to prevent miners from seeing
     // transactions with unprunable outputs.
     return value_ < minimum_value && !script_->is_unspendable();
 }

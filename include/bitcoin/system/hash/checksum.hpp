@@ -30,15 +30,15 @@ namespace system {
 // p2p message checksum is implemented independently.
 // ----------------------------------------------------------------------------
 
-/// These utilities are used for bitcoin payment addresses and other standards
-/// that leverage the same technique. A bitcoin checksum is the leading bytes
-/// of a double sha256 hash of any data. Bitcoin standards typically use a four
-/// byte checksum, though any length up to min(Size, 256) is allowed here.
-/// Accessing Checksum (length) parameter requires explicitly specifying both.
+/// Utilities for bitcoin payment addresses and other standards leveraging same
+/// technique. Bitcoin checksum is leading bytes of double sha256 hash of any
+/// data. Bitcoin standards typically use four byte checksum, though any length
+/// up to min(Size, 256) is allowed here. Accessing Checksum (length) parameter
+/// requires explicitly specifying both.
 
 static constexpr size_t checksum_default_size = sizeof(uint32_t);
 
-/// Append the bitcoin checksum of slices to end of new Size array.
+/// Append bitcoin checksum of slices to end of new Size array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size, size_t Checksum = checksum_default_size>
 data_array<Size> insert_checksum(const data_loaf& slices) NOEXCEPT;
@@ -63,13 +63,13 @@ BC_API void append_checksum(data_chunk& data) NOEXCEPT;
 // bech32 checksum, used by versioned bech32 encodings.
 // ----------------------------------------------------------------------------
 
-/// These utilities are used for witness payment addresses and other standards
-/// that leverage the same technique. These hide the complexities of data
-/// expansion and contraction inherent to BIP173. base_32b class is a typical
-/// byte encoder/decoder, yet fully complaint with BIP173. The output from
+/// Utilities for witness payment addresses and other standards
+/// leveraging same technique. These hide complexities of data expansion
+/// and contraction inherent to BIP173. base_32b class is typical byte
+/// encoder/decoder, yet fully compliant with BIP173. Output from
 /// decode_base32b can be fed directly to bech32_verify_checked(data) and
-/// the output of bech32_build_checked can be fed directly to encode_base32b.
-/// The implementation does not support unversioned bech32 payloads as there
+/// output of bech32_build_checked can be fed directly to encode_base32b.
+/// Implementation does not support unversioned bech32 payloads as there
 /// is no use case and support requires exposure of bech32 internals.
 
 /// Checksum constant of a bech32 encoding.
@@ -79,24 +79,23 @@ enum class checksum_constant
     bech32m
 };
 
-/// Combine witness version, program and checksum.
-/// The result may be passed to encode_base32b when creating a witness address.
-/// For implementation details see wallet::witness_address. Version is limited
-/// to 5 bits (less than 32) by bech32 design and is otherwise truncated. Non-
-/// zero versions select bech32m (vs. bech32), resulting in distinct checksum
-/// constants.
+/// Combine witness version, program and checksum. Result may be passed to
+/// encode_base32b when creating witness address. For implementation details see
+/// wallet::witness_address. Version limited to 5 bits (less than 32) by bech32
+/// design and otherwise truncated. Non-zero versions select bech32m (vs.
+/// bech32), resulting in distinct checksum constants.
 BC_API base32b_chunk bech32_build_checked(uint8_t version,
     const data_chunk& program, const std::string& prefix) NOEXCEPT;
 
 /// Combine version, program and checksum with explicit checksum constant.
-/// This supports encodings whose checksum constant is not selected by the
-/// witness address version rule.
+/// Supports encodings whose checksum constant
+/// is not selected by witness address version rule.
 BC_API base32b_chunk bech32_build_checked(uint8_t version,
     const data_chunk& program, const std::string& prefix,
     checksum_constant constant) NOEXCEPT;
 
-/// Verify the bech32 checksum and extract witness version and program.
-/// The data parameter may obtained from a witness address using decode_base32b.
+/// Verify bech32 checksum and extract witness version and program.
+/// Data parameter may be obtained from witness address using decode_base32b.
 /// For implementation details see wallet::witness_address.
 BC_API bool bech32_verify_checked(uint8_t& out_version,
     data_chunk& out_program, const std::string& prefix,

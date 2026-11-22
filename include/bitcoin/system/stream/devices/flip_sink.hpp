@@ -27,8 +27,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Sink for make_stream, copies bytes to/from Container.
-// The only derivation is override of copy_sink::category.
-// This allows copy_sink to avoid an unnecessary output_sequence invocation.
+// Only derivation is override of copy_sink::category.
+// Allows copy_sink to avoid unnecessary output_sequence invocation.
 template <typename Container>
 class flip_sink
   : public copy_sink<Container>

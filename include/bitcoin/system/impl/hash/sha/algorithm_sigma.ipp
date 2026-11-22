@@ -51,7 +51,7 @@ INLINE void CLASS::
 prepare_8(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
-    // The simplicity of sha160 message prepare precludes this optimization.
+    // Simplicity of sha160 message prepare precludes this optimization.
     static_assert(SHA::strength != 160);
 
     // sigma0x8 message scheduling for single block iteration.
@@ -113,7 +113,7 @@ schedule_sigma(buffer_t& buffer) NOEXCEPT
 
 // Scheduling interleaved with compression (single blocks).
 // ----------------------------------------------------------------------------
-// Each group of eight words is prepared one group ahead of its rounds, so that
+// Each group of eight words is prepared one group ahead of its rounds, so
 // vector scheduling executes alongside scalar compression.
 
 TEMPLATE

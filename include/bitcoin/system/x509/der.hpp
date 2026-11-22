@@ -53,8 +53,8 @@ constexpr uint8_t implicit_tag(uint8_t number) NOEXCEPT
     return bit_or<uint8_t>(0x80, number);
 }
 
-/// Strict (distinguished) encoding reader over a byte span.
-/// A failed read invalidates the reader, and all later reads return empty.
+/// Strict (distinguished) encoding reader over byte span.
+/// Failed read invalidates reader, and all later reads return empty.
 class BC_API reader
 {
 public:

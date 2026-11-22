@@ -21,8 +21,8 @@
 
 // Key schedule
 // ============================================================================
-// Words are little-endian, so RotWord is a right rotation by one byte and
-// the round constant is applied to the low order byte.
+// Words are little-endian, so RotWord is right rotation by one byte and round
+// constant is applied to low order byte.
 
 namespace libbitcoin {
 namespace system {

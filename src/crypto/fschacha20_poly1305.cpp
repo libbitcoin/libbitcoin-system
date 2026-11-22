@@ -39,8 +39,8 @@ fschacha20_poly1305::fschacha20_poly1305(const chacha20::secret& key,
 // private
 void fschacha20_poly1305::next() NOEXCEPT
 {
-    // The key is rotated after every rekey_interval messages, to the
-    // keystream of nonce { 0xffffffff, rekey counter }.
+    // Key rotated after every rekey_interval messages, to keystream of nonce {
+    // 0xffffffff, rekey counter }.
     if (++packets_ == interval_)
     {
         chacha20::secret key{};

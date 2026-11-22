@@ -33,7 +33,7 @@ namespace machine {
 // Signature verify (with batching).
 // ----------------------------------------------------------------------------
 // Store declines (allocation/commit) set faulted and verify inline. All other
-// capture fallbacks under a batchable pattern are counted as missed.
+// capture fallbacks under batchable pattern are counted as missed.
 
 TEMPLATE
 inline bool CLASS::
@@ -181,8 +181,8 @@ is_threshold_batchable() const NOEXCEPT
     size_t min{}, max{};
     const auto op = script_->extract_tapscript_threshold(min, max);
 
-    // All non-empty elements (sigs) on the stack (plus self) must be
-    // evaluated in a captured sigop. Underflow/overflow imply failure.
+    // All non-empty elements (sigs) on stack (plus self) must be evaluated in
+    // captured sigop. Underflow/overflow imply failure.
     const auto expected = add1(stack_nonempty());
     if (!chain::threshold::is_satisfied(op, expected, min, max))
         return false;

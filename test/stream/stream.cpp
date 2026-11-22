@@ -43,7 +43,7 @@ constexpr bool is_set(int state, int flag)
 }
 
 // Stream state flags (bitmasks).
-// iostream flag behavior is inconsistent (despite documentation).
+// iostream flag behavior inconsistent (despite documentation).
 
 // no error, standardized.
 static_assert(std::ios_base::goodbit == 0);
@@ -63,8 +63,8 @@ static_assert(std::ios_base::badbit == 4);
 
 #ifdef STREAM_ISTREAM
 
-// Verify input stream behavior with our copy_source and istringstream.
-// These test all of the istream methods utilized by byte_reader (all readers).
+// Verify input stream behavior with copy_source and istringstream, testing
+// all istream methods used by byte_reader (all readers).
 
 BC_AUTO_TEST_CASE(istream__bool__empty__true)
 {
@@ -592,9 +592,9 @@ BC_AUTO_TEST_CASE(istream__seekg__past_end__failbit)
 
 #ifdef STREAM_OSTREAM
 
-// Verify output stream behavior with our two sinks and ostringstream.
-// These test all of the ostream methods utilized by byte_writer (all writers).
-// Failure state when sink is "empty" is inconsistent across implementations.
+// Verify output stream behavior with two sinks and ostringstream, testing all
+// ostream methods used by byte_writer (all writers). Failure state when sink
+// is "empty" inconsistent across implementations.
 
 BC_AUTO_TEST_CASE(ostream__bool__empty__true)
 {
@@ -954,7 +954,7 @@ BC_AUTO_TEST_CASE(stream__out__push__expected)
 }
 
 // stream::flip
-// flip streams are direct (flush not required).
+// flip streams direct (flush not required).
 
 BC_AUTO_TEST_CASE(stream__out__flip__expected)
 {

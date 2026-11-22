@@ -307,9 +307,8 @@ bool inflater::pull() NOEXCEPT
     return true;
 }
 
-// Fills the buffer to at least 56 bits from eight bytes of input. Bits of the
-// partially taken byte above the count are those that the next refill or pull
-// sets in the same position.
+// Fills buffer to at least 56 bits from eight bytes of input. Bits of partially
+// taken byte above count are those next refill or pull sets in same position.
 void inflater::refill() NOEXCEPT
 {
     const auto bytes = unsafe_from_little_endian<uint64_t>(std::next(in_,
@@ -524,8 +523,8 @@ inflater::step inflater::lengths() NOEXCEPT
     return step::next;
 }
 
-// The match of size at distance, copied in whole parts that do not overlap,
-// each the pattern so far (a distance less than the size repeats).
+// Match of size at distance, copied in whole parts that do not overlap, each
+// pattern so far (distance less than size repeats).
 void inflater::copy(size_t size, size_t distance) NOEXCEPT
 {
     const auto end = window_.size();
@@ -545,7 +544,7 @@ void inflater::copy(size_t size, size_t distance) NOEXCEPT
 }
 
 // Literals and length/distance pairs, each decoded whole (rfc1951 3.2.5).
-// Each is decoded from a refilled buffer while eight bytes of input remain.
+// Each decoded from refilled buffer while eight bytes of input remain.
 inflater::step inflater::codes() NOEXCEPT
 {
     while (!full())

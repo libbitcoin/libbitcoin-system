@@ -382,7 +382,7 @@ array_props::array_props(const std::string& name) NOEXCEPT
   : props(type::array_, name)
 {
     // Unused value_ member overloaded to store all-element name.
-    // Name is then propagated to each child element upon add.
+    // Name then propagated to each child element upon add.
 }
 
 array_props::array_props(const std::string& name,

@@ -58,8 +58,8 @@ public:
     }
 };
 
-// Integral rows verify by one random linear combination, which identifies no
-// failing row, so rows verify alone where it fails.
+// Integral rows verify by one random linear combination, identifying no failing
+// row, so rows verify alone where it fails.
 inline bool verify_rows(data_chunk& results,
     const std::span<const ec_xonly>& keys,
     const std::span<const hash_digest>& digests,
@@ -92,8 +92,8 @@ inline bool verify_rows(data_chunk& results,
 // ----------------------------------------------------------------------------
 
 // Schnorr (single sig and threshold sigs) correlation.
-// Capture is gated on the comparison outcome at full success (see
-// is_threshold_batchable), and bip342 terminates the script on any failing
+// Capture gated on comparison outcome at full success (see
+// is_threshold_batchable), and bip342 terminates script on any failing
 // non-empty signature, so any failed row fails its block. No group or category
 // correlation required (contrast ecdsa::get_failures, where op_checkmultisig
 // has combinatorial semantics).
@@ -103,8 +103,8 @@ links_t schnorr::batch::get_failures(const stopper& cancel,
     const auto& correlates = in.correlates;
     BC_ASSERT(out.empty() || out.size() == correlates.size());
 
-    // Empty implies fully-verified batch (or canceled, which the caller
-    // gates on the stopper, discarding the links).
+    // Empty implies fully-verified batch
+    // (or canceled, which caller gates on stopper, discarding links).
     links_t fails{};
     if (out.empty())
         return fails;

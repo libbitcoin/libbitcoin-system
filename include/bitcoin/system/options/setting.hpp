@@ -29,16 +29,16 @@ namespace system {
 namespace options {
 
 /// True if set by command line, environment, or configuration file.
-/// False if unset or obtained from a declared option default value.
+/// False if unset or obtained from declared option default value.
 BC_API bool is_configured(const variables_map& variables,
     const std::string& name) NOEXCEPT;
 
-/// The integer of the text, with optional comma digit grouping (1,000,000),
-/// as decimal text, or the text unchanged if it is not such an integer.
+/// Integer of text, with optional comma digit grouping (1,000,000), as decimal
+/// text, or text unchanged if not such an integer.
 BC_API std::string ungroup(const std::string& text) NOEXCEPT;
 
 /// Not thread safe, virtual.
-/// Interface for obtaining the current value of a bound option.
+/// Interface for obtaining current value of bound option.
 class BC_API printable
 {
 public:
@@ -52,8 +52,8 @@ public:
 };
 
 /// Not thread safe, virtual.
-/// Option value that reports the current value of its store, and declares
-/// the value of its store at construction as its default.
+/// Option value reporting current value of its store, declaring value of its
+/// store at construction as its default.
 template <typename Type>
 class setting_value
   : public typed_value<Type>,
@@ -62,12 +62,12 @@ class setting_value
 public:
     setting_value(Type* store, bool secret=false) THROWS;
 
-    /// The bound value(s), one per entry, empty only for a collection.
-    /// A secret reports one empty value, disclosing only that it is set.
+    /// Bound value(s), one per entry, empty only for collection.
+    /// Secret reports one empty value, disclosing only that it is set.
     string_list values() const NOEXCEPT override;
 
-    /// The declared default value, quoted, or 'empty' if it has no text.
-    /// A secret reports empty text, disclosing nothing.
+    /// Declared default value, quoted, or 'empty' if it has no text.
+    /// Secret reports empty text, disclosing nothing.
     std::string default_text() const NOEXCEPT override;
 
     /// Parse the tokens, accepting comma digit grouping of an integer.
@@ -80,8 +80,8 @@ private:
     std::string default_text_;
 };
 
-/// Declare a configuration file setting bound to store, defaulted to its value.
-/// The default text replaces "{}" in the setting description.
+/// Declare configuration file setting bound to store, defaulted to its value.
+/// Default text replaces "{}" in setting description.
 template <typename Type>
 setting_value<Type>* setting(Type* store) THROWS;
 

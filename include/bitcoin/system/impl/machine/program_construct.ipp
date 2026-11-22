@@ -33,8 +33,8 @@ namespace machine {
 // ----------------------------------------------------------------------------
 
 // Input script run (default/empty stack).
-// 'tx' must remain in scope, this holds state referenced by weak pointers.
-// This expectation is guaranteed by the retained tx reference.
+// 'tx' must remain in scope, holds state referenced by weak pointers.
+// Guaranteed by retained tx reference.
 TEMPLATE
 CLASS::program(const transaction& tx, const input_iterator& input,
     uint32_t active_flags, const chain::signatures& capture) NOEXCEPT
@@ -52,9 +52,9 @@ CLASS::program(const transaction& tx, const input_iterator& input,
 }
 
 // Legacy p2sh or prevout script run (copied input stack - use first).
-// 'other' must remain in scope, this holds state referenced by weak pointers.
-// This expectation is guaranteed by the retained transaction_ member reference
-// and copied program tether (which is not tx state).
+// 'other' must remain in scope, holds state referenced by weak pointers.
+// Guaranteed by retained transaction_ member reference and copied program
+// tether (which is not tx state).
 TEMPLATE
 CLASS::program(const program& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
@@ -85,9 +85,9 @@ CLASS::program(program&& other, const script::cptr& script) NOEXCEPT
 }
 
 // Segwit script run (witness-initialized stack).
-// 'tx', 'input' (and iterated chain::input) must remain in scope, as these
-// hold chunk state weak references. A witness pointer is explicitly retained
-// to guarantee the lifetime of its elements.
+// 'tx', 'input' (and iterated chain::input) must remain in scope, as these hold
+// chunk state weak references. Witness pointer is explicitly retained to
+// guarantee lifetime of its elements.
 TEMPLATE
 CLASS::program(const transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags,
@@ -109,8 +109,8 @@ CLASS::program(const transaction& tx, const input_iterator& input,
 // Taproot script run (witness-initialized stack).
 // Same as segwit but with tapleaf, budget, and unstripped bip342 flag.
 // Sigop budget is 50 plus size of prefixed serialized witness [bip342].
-// Budget is initialized add1(50) to make it zero-based, avoiding signed type.
-// This program is never used to construct another, so masked flags_ never mix.
+// Budget initialized add1(50) to make it zero-based, avoiding signed type.
+// Program never used to construct another, so masked flags_ never mix.
 TEMPLATE
 CLASS::program(const transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags,

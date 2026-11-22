@@ -47,8 +47,8 @@ constexpr auto identity_zh_Hant = base16_array("11ef479f2f44b6d4f7fb6239dff06e3c
 
 BC_AUTO_TEST_CASE(catalogs_mnemonic__count__all__expected)
 {
-    // Any new dictionary must be added below to guarantee lack of normalization.
-    // Failure to do so may lead to invalid seed generation, which is very bad.
+    // New dictionary must be added below to guarantee lack of normalization.
+    // Failure to do so may lead to invalid seed generation.
     BC_CHECK_MESSAGE(mnemonic::catalogs::count() == dictionary_count, "new dictionary");
 }
 
@@ -129,9 +129,9 @@ BC_AUTO_TEST_CASE(catalogs_mnemonic__sorted8__unsorted__false)
 
 // abnormal
 
-// These dictionaries are in normal form.
-// So there is no need to nfkd normalize these for wordlist-based seedings.
-// This also removes the ICU dependency for these languages.
+// These dictionaries in normal form.
+// So no need to nfkd normalize these for wordlist-based seedings.
+// Also removes ICU dependency for these languages.
 BC_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 {
     BC_CHECK(!abnormal(mnemonic::en));
@@ -151,8 +151,8 @@ BC_AUTO_TEST_CASE(catalogs_mnemonic__normal__normal_words__true)
 // INTERSECTION/DEVIATION IS ALWAYS ZERO IN MSVC DEBUG BUILD TEST RUNS. ???
 
 // All zh_Hans/zh_Hant collisions are interchangeable.
-// None of the en/fr collisions are interchangeable.
-// It is unsafe to deduce en/fr dictionary, but only if all words collide.
+// None of en/fr collisions are interchangeable.
+// Unsafe to deduce en/fr dictionary, but only if all words collide.
 // Always check both dictionaries in both zh_Hans/zh_Hant and en/fr.
 // If zh_Hans/zh_Hant collide, may pick either (but should be consistent).
 // If en/fr collide, must fail as decode requires explicit language identifier.

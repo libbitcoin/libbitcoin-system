@@ -67,9 +67,9 @@ BC_AUTO_TEST_CASE(accumulator__write_flush__one_under_padding_boundary__pad_one)
     BC_REQUIRE_EQUAL(writer.flush(), expected);
 }
 
-// Notice that as bytes go from 55 to 56, padding goes from 1 to 64 (not zero).
-// This is because sha always requires a pad bit, and given that were are supporting
-// only byte-alignment, that means one byte pf padding is always required.
+// As bytes go from 55 to 56, padding goes from 1 to 64 (not zero). Sha always
+// requires pad bit, and given only byte-alignment is supported, one byte of
+// padding is always required.
 BC_AUTO_TEST_CASE(accumulator__write_flush__at_padding_boundary__pad_64)
 {
     // 56 is the first overflow byte (56 + 1 + 8 = 65).
@@ -168,7 +168,7 @@ BC_AUTO_TEST_CASE(accumulator__stream_pad__always__expected)
 BC_AUTO_TEST_CASE(accumulator__serialize__default__initial)
 {
     // Test expectation limited to sha256.
-    // Test state is bogus, so expecatation is not hash of zero data.
+    // Test state bogus, so expectation is not hash of zero data.
     using access = accessor<sha256>;
     constexpr auto count = 42u;
     constexpr auto count_bits = to_bits<uint16_t>(count);
@@ -182,7 +182,7 @@ BC_AUTO_TEST_CASE(accumulator__serialize__default__initial)
 
 // write (captures test of add_data1/2, accumulate, pad, flush, double_flush)
 // ----------------------------------------------------------------------------
-// write is not constexpr due to unsafe_array_cast, which ensures algorithm
+// write not constexpr due to unsafe_array_cast, which ensures algorithm
 // remains fully constexpr (by not accepting byte*).
 
 BC_AUTO_TEST_CASE(accumulator__write__zero__true)
@@ -195,7 +195,7 @@ BC_AUTO_TEST_CASE(accumulator__write__zero__true)
 BC_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
-    // Test state is bogus, so expecatation is not hash of data_array<42>{}.
+    // Test state bogus, so expectation is not hash of data_array<42>{}.
     using access = accessor<sha256>;
     constexpr auto size = array_count<sha256::block_t>;
     constexpr auto expected = base16_array("729e145a50396134c294aaf8e2daea0b7c89bb617cd58379ba4c2abdec2d1da7");
@@ -214,7 +214,7 @@ BC_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
 BC_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
-    // Test state is bogus, so expecatation is not hash of data_array<42>{}.
+    // Test state bogus, so expectation is not hash of data_array<42>{}.
     using access = accessor<sha256>;
     constexpr auto expected = base16_array("19b7f210d600599fe35dc4516dac5acb82bb4040f8de6f54e889455fd0b9b106");
     constexpr auto bytes = 42u;
@@ -226,8 +226,8 @@ BC_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
     BC_REQUIRE_EQUAL(writer.double_flush(), expected);
 }
 
-// Runtime instances, as distinct from the constexpr cases above, which the
-// compiler evaluates without generating code.
+// Runtime instances, distinct from constexpr cases above, which compiler
+// evaluates without generating code.
 
 BC_AUTO_TEST_CASE(accumulator__serialize__runtime__matches_constexpr)
 {

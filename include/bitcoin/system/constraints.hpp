@@ -27,10 +27,10 @@ template <bool Expression>
 using bool_if = std::enable_if_t<Expression, bool>;
 
 /// Sizes.
-/// These were originally typed to size_t, but this causes implicit narrow
-/// casting from uint64_t when sizeof(size_t) == 32. This results in truncated
-/// constant warnings and unexpected template matching failures. So these are
-/// now typed to the largest integral size, since they do not return values.
+/// Typed to largest integral size, since they do not return
+/// values. Typing to size_t causes implicit narrow casting from
+/// uint64_t when sizeof(size_t) == 32, resulting in truncated
+/// constant warnings and unexpected template matching failures.
 
 template <uint64_t Value>
 using if_odd = bool_if<

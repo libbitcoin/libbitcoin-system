@@ -162,9 +162,9 @@ template <typename xWord>
 INLINE void CLASS::
 sequential_compress(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
-    // Each lane is a block, processed sequentially. This is necessary because
-    // of the expanded buffer used to obtain vectorized message scheduling.
-    // Sequential compression uses non-expanded state (normal form).
+    // Each lane is a block, processed sequentially, as required by expanded
+    // buffer used to obtain vectorized message scheduling. Sequential
+    // compression uses non-expanded state (normal form).
     constexpr auto lanes = capacity<xWord, word_t>;
 
     compress_<0>(state, xbuffer);
@@ -222,7 +222,7 @@ vector_schedule_sequential_compress(state_t& state, iblocks_t& blocks) NOEXCEPT
                 schedule_(xbuffer);
 
                 // message scheduling (above) is vectorized but compression is
-                // sequential, though it must operate over the expanded buffer.
+                // sequential, though it must operate over expanded buffer.
                 sequential_compress(state, xbuffer);
             } while (blocks.size() >= lanes);
         }
@@ -275,8 +275,8 @@ template <size_t Size>
 INLINE void CLASS::
 iterate_native(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    // Native hash() does not have an optimal array override because there is
-    // no advantage to array sizing without the benefit of prescheduling.
+    // Native hash() has no optimal array override,
+    // as array sizing has no advantage without prescheduling.
     iblocks_t iblocks{ array_cast<byte_t>(blocks) };
     native_transform(state, iblocks);
 }

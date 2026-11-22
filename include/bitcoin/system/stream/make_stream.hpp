@@ -35,7 +35,7 @@ constexpr bool is_device_category = std::is_base_of_v<Category,
 
 /// std::streambuf over a device.
 /// Direct input or output devices are buffered by their sequence.
-/// Direct input/output devices share a single position, and are unbuffered.
+/// Direct input/output devices share single position, and are unbuffered.
 /// Indirect devices are output only, buffered by optimal_buffer_size().
 template <typename Device>
 class device_buffer
@@ -278,8 +278,8 @@ using device_stream = std::conditional_t<device_buffer<Device>::input,
     std::conditional_t<device_buffer<Device>::output, std::iostream,
         std::istream>, std::ostream>;
 
-/// A std::istream, std::ostream or std::iostream (by category) over a device.
-/// Constructor arguments are forwarded to the device constructor.
+/// std::istream, std::ostream or std::iostream (by category) over device.
+/// Constructor arguments forwarded to device constructor.
 template <typename Device>
 class make_stream
   : public device_stream<Device>

@@ -55,7 +55,7 @@ private:
 
 /// ===========================================================================
 
-/// A wallet mnemonic, as defined by the first Electrum implementation.
+/// Wallet mnemonic, as defined by first Electrum implementation.
 /// Converts menemonic to entropy.
 /// Converts entropy to mnemonic.
 /// Derives master keys from menemonic or entropy.
@@ -82,8 +82,8 @@ public:
     typedef data_array<entropy_minimum> minimum_entropy;
     typedef data_array<entropy_maximum> maximum_entropy;
 
-    /// The dictionary, limited by identifier, that contains all words.
-    /// If 'none' is specified all dictionaries are searched.
+    /// Dictionary, limited by identifier, that contains all words.
+    /// If 'none' specified all dictionaries are searched.
     static language contained_by(const string_list& words,
         language identifier=language::none) NOEXCEPT;
 
@@ -98,7 +98,7 @@ public:
 
     electrum_v1() NOEXCEPT;
 
-    /// Construct from the "recovery seed" (mnemonic phrase or entropy).
+    /// Construct from "recovery seed" (mnemonic phrase or entropy).
     /// Validity should be checked after construction.
     electrum_v1(const std::string& sentence,
         language identifier=language::none) NOEXCEPT;
@@ -111,24 +111,24 @@ public:
     electrum_v1(const maximum_entropy& entropy,
         language identifier=language::en) NOEXCEPT;
 
-    /// Derive the "wallet seed"/"master private key" from mnemonic entropy.
+    /// Derive "wallet seed"/"master private key" from mnemonic entropy.
     /// ec_private.secret() is the "wallet seed"/"master private key".
     /// ec_private.to_public().point() is the compressed "master public key".
-    /// Context sets the version byte for derived payment addresses.
+    /// Context sets version byte for derived payment addresses.
     ec_private to_seed(const context& context=btc_mainnet) const NOEXCEPT;
 
-    /// Derive the wallet "master public key" from entropy.
+    /// Derive wallet "master public key" from entropy.
     /// ec_public.point() is the compressed "master public key".
-    /// Context sets the version byte for derived payment addresses.
+    /// Context sets version byte for derived payment addresses.
     ec_public to_public_key(
         const context& context=btc_mainnet) const NOEXCEPT;
 
-    /// True if the mnemonic words were incorrectly generated.
-    /// An overflow does not affect the validity of the object.
-    /// If true then entropy will not round trip, but the seed is considered
-    /// valid by Electrum (for reasons of backward compatibility). This can only
-    /// result from manually-generated menmonics, which were inadvertently
-    /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
+    /// True if mnemonic words were incorrectly generated.
+    /// Overflow does not affect validity of object.
+    /// If true, entropy will not round trip, but seed is considered valid by
+    /// Electrum (for backward compatibility). Can only result from
+    /// manually-generated menmonics, inadvertently accepted by Electrum.
+    /// github.com/spesmilo/electrum/issues/3149
     bool overflow() const NOEXCEPT;
 
 protected:
@@ -136,15 +136,15 @@ protected:
     /// github.com/spesmilo/electrum/issues/3149
     /// =======================================================================
 
-    /// One overflow flag for each word triplet. If overflow() is false then
-    /// is all false. Can be used to construct actual entropy by prepending 0x1
-    /// ("1" in base16 digits) to the corresponding triplet entropy. Value is
-    /// populated to the length [word-count / word_multiple] if the instance is
-    /// word-initialized and valid, otherwise the value is empty.
+    /// One overflow flag for each word triplet, all false if
+    /// overflow() is false. Can be used to construct actual entropy by
+    /// prepending 0x1 ("1" in base16 digits) to corresponding triplet
+    /// entropy. Populated to length [word-count / word_multiple] if
+    /// instance is word-initialized and valid, otherwise empty.
     const v1_decoding::overflow& overflows() const NOEXCEPT;
 
-    /// This is the denormalized entropy, used for seeding.
-    /// The base16 entropy encoding is converted to data with overflows.
+    /// Denormalized entropy, used for seeding.
+    /// Base16 entropy encoding is converted to data with overflows.
     data_chunk seed_entropy() const NOEXCEPT;
 
     /// =======================================================================

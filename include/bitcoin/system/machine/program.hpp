@@ -62,8 +62,8 @@ struct transaction_traits<chain::view::transaction>
     }
 };
 
-/// A set of three stacks (primary, alternate, conditional) for script state.
-/// Primary stack is optimized by peekable, swappable, and eraseable elements.
+/// Set of three stacks (primary, alternate, conditional) for script state.
+/// Primary stack optimized by peekable, swappable, and eraseable elements.
 template <typename Stack, typename Tx = chain::transaction>
 class program
 {

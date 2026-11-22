@@ -110,8 +110,8 @@ inline hashes get_digests(size_t count) NOEXCEPT
 
 // workloads
 // ----------------------------------------------------------------------------
-// Each call feeds its result into the next call's input, so no call can be
-// elided and each workload's final state identifies the computation.
+// Each call feeds its result into next call's input, so no call can be elided
+// and each workload's final state identifies computation.
 
 // Streamed hash of 1,000,000 bytes, digest written over the leading bytes.
 template <typename Algorithm>

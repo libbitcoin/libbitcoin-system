@@ -25,9 +25,8 @@
 
 BC_AUTO_TEST_SUITE(pool_performance_tests)
 
-// Each scan is timed alone over the columns of a random pool, on the integral
-// path, on each lane width built, and through its entry (the gpu if there is
-// one, otherwise the widest lanes).
+// Each scan timed alone over columns of random pool, on integral path, on each
+// lane width built, and through its entry (gpu if any, otherwise widest lanes).
 
 using link_t = pool::algorithm::link_t;
 using edges_t = pool::algorithm::edges_t;
@@ -47,20 +46,19 @@ constexpr size_t repeats = 5;
 constexpr size_t table_rows = 1'000'000;
 constexpr uint32_t table_seed = 11;
 
-// Rows are validated at a height and median time past below this, under these
-// flags.
+// Rows validated at height and median time past below this, under these flags.
 constexpr uint32_t table_heights = 1'000;
 constexpr uint32_t table_flags = 1;
 
-// A pool of confirmed rows with a tail of live rows, a block of the live rows
-// with its conflicts, and the rows sampled for the walks of one row.
+// Pool of confirmed rows with tail of live rows, block of live rows with its
+// conflicts, and rows sampled for walks of one row.
 constexpr size_t pool_live = 100'000;
 constexpr size_t pool_block = 3'000;
 constexpr size_t pool_conflicts = 10;
 constexpr size_t pool_samples = 10'000;
 
-// A template: the block less its coinbase, the chunk depth, the outcomes of a
-// component, the bytes charged a sigop, and the blocks of a fee projection.
+// Template: block less its coinbase, chunk depth, outcomes of component, bytes
+// charged a sigop, and blocks of fee projection.
 constexpr totals_t template_budget{ 0, 999'000, 80'000 };
 constexpr size_t template_depth = 25;
 constexpr size_t template_outcomes = 1'024;
@@ -74,8 +72,8 @@ constexpr std_array<size_t, 4> template_targets{ 1, 2, 3, 6 };
 constexpr uint64_t template_room = 1'000;
 constexpr uint64_t template_arrivals = 500'000;
 
-// A pool of chains: its rows alone, its chains and their greatest length, and
-// its parents with children.
+// Pool of chains: its rows alone, its chains and their greatest length,
+// and its parents with children.
 constexpr size_t chains_alone = 3'000;
 constexpr size_t chains_count = 2'300;
 constexpr size_t chains_length = 25;
@@ -89,10 +87,10 @@ constexpr uint32_t dense = 4;
 // helpers
 // ----------------------------------------------------------------------------
 
-// A random pool. A row has one to three inputs, each spending an earlier row
-// or none with equal odds, and one row in fifty is conflicted (if conflicts).
-// First inputs that spend no row are joined in rings of two to four, one ring
-// in every odds. Each row is validated at a random height.
+// Random pool. Row has one to three inputs, each spending earlier row or none
+// with equal odds, and one row in fifty is conflicted (if conflicts). First
+// inputs that spend no row are joined in rings of two to four, one ring in
+// every odds. Each row is validated at random height.
 struct table
 {
     table() NOEXCEPT = default;
@@ -201,12 +199,12 @@ struct table
     links_t medians{};
 };
 
-// A pool as it stands between prunes: confirmed rows, then a tail of live
-// rows. A row has one to three inputs. An input of a live row spends a live
-// row at one in eight, and otherwise (as any input of a confirmed row) an
-// earlier confirmed row or none with about equal odds. One in two hundred of
-// the live first inputs that spend no row starts a ring of two or three. A
-// row pays 100 to 10,099 for 100 to 499 virtual bytes.
+// Pool as it stands between prunes: confirmed rows, then tail of
+// live rows. Row has one to three inputs. Input of live row spends
+// live row at one in eight, and otherwise (as any input of confirmed
+// row) earlier confirmed row or none with about equal odds. One in
+// two hundred of live first inputs that spend no row starts ring of
+// two or three. Row pays 100 to 10,099 for 100 to 499 virtual bytes.
 struct pooled
   : table
 {
@@ -280,16 +278,16 @@ struct pooled
     }
 };
 
-// A pool of chains, as mainnet on 21 November 2026 (ancestor counts of 1 to
-// 25 about equally common, one tx in twenty alone): confirmed rows, then rows
-// alone, chains of 20 to 25 rows laid out by depth, and parents of one to
-// four children. A row has one input, or two at one in three, the first
-// spending its parent if it has one and any other a confirmed row or none
-// with equal odds. One in two hundred of the live first inputs that spend no
-// row starts a ring of two or three. Seven rows in ten pay 1,000 to 1,299 a
-// virtual kilobyte, two up to 3,299 and one up to 32,999, for 110 to 409
-// virtual bytes. A chain pays one rate, varied by row in one chain of three,
-// and a parent of children pays 500 to 1,499.
+// Pool of chains, as mainnet on 21 November 2026 (ancestor counts of 1
+// to 25 about equally common, one tx in twenty alone): confirmed rows,
+// then rows alone, chains of 20 to 25 rows laid out by depth, and
+// parents of one to four children. Row has one input, or two at one in
+// three, first spending its parent if it has one and any other confirmed
+// row or none with equal odds. One in two hundred of live first inputs
+// that spend no row starts ring of two or three. Seven rows in ten pay
+// 1,000 to 1,299 a virtual kilobyte, two up to 3,299 and one up to
+// 32,999, for 110 to 409 virtual bytes. Chain pays one rate, varied by
+// row in one chain of three, and parent of children pays 500 to 1,499.
 struct chained
   : table
 {
@@ -696,8 +694,8 @@ static bool report_suffice(const std::string& name,
     return scalar && lanes128 && lanes256 && lanes512 && entry;
 }
 
-// The block confirmed (or unconfirmed) by the columns: the cells set, then
-// settled and labeled by the entries.
+// Block confirmed (or unconfirmed) by columns:
+// cells set, then settled and labeled by entries.
 static size_t columns_block(table& columns, const links_t& block,
     const links_t& conflicts, bool confirm) NOEXCEPT
 {
@@ -719,8 +717,8 @@ static size_t columns_block(table& columns, const links_t& block,
     return pool::settle(spans).passes + pool::label(spans).passes;
 }
 
-// The block confirmed (or unconfirmed) by the walk, labeled by the columns
-// if the walk meets a component over the member limit.
+// Block confirmed (or unconfirmed) by walk, labeled by columns if walk meets
+// component over member limit.
 static size_t walk_block(table& columns, const links_t& block,
     const links_t& conflicts, bool confirm) NOEXCEPT
 {
@@ -769,8 +767,8 @@ static bool report_block(const std::string& name, table& columns,
     return walked == scanned && columns.cells == scanned;
 }
 
-// Nanoseconds a row for the row's cell made absent and then admitted, and
-// for the component of the row collected and related, over sampled live rows.
+// Nanoseconds a row for row's cell made absent and then admitted, and for
+// component of row collected and related, over sampled live rows.
 static void report_rows(table& columns, const links_t& samples) NOEXCEPT
 {
     using algorithm = pool::algorithm;
@@ -847,8 +845,8 @@ static bool report_walk(const std::string& name, size_t count) NOEXCEPT
     return in && out;
 }
 
-// One template of the pool, a fee projection of blocks from it, and the fee
-// estimates from a projection.
+// One template of pool, fee projection of blocks from it,
+// and fee estimates from projection.
 static bool report_template(const std::string& name, table& columns,
     size_t live) NOEXCEPT
 {

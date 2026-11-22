@@ -29,7 +29,7 @@ namespace system {
 
 /// Provide 52 bit fused multiply-add to complete matrix.
 /// ---------------------------------------------------------------------------
-/// Emulated from 26 bit halves as there is no neon ifma.
+/// Emulated from 26 bit halves, as no neon ifma.
 
 inline void vmul52q_u64(uint64x2_t& lo, uint64x2_t& hi, uint64x2_t a,
     uint64x2_t b) NOEXCEPT

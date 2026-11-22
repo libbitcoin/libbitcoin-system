@@ -66,14 +66,15 @@ BC_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
     BC_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
-// These fail on a presumably-correct out_token expectation.
-// While the out_token round trips properly, the value does not match published test vectors.
-// However the test vectors are not explicit about the salt value, which is four arbitrary bytes.
-// It is implied that the salt is the expected bitcoin address, but that is based on a value
-// generated using the salt (circular dependency). Bitcoinjs (referenced by BIP38) tests do not
-// verify the token. Casascius (referenced by BIP38) also does not implement lot/sequence. So we
-// rely on our interpretation of BIP38 for lot/sequence intermediate encoding, and the fact that
-// it round trips as expected. This feature has no valid use case, so this is largely educational.
+// These fail on presumably-correct out_token expectation. While out_token
+// round trips properly, value does not match published test vectors. However
+// test vectors are not explicit about salt value, which is four arbitrary
+// bytes. Salt implied to be expected bitcoin address, but that is based on
+// value generated using salt (circular dependency). Bitcoinjs (referenced by
+// BIP38) tests do not verify token. Casascius (referenced by BIP38) also does
+// not implement lot/sequence. So relies on own interpretation of BIP38 for
+// lot/sequence intermediate encoding, and that it round trips as expected.
+// Feature has no valid use case, so this is largely educational.
 
 // BIP38 TEST1: EC multiply, no compression, lot/sequence numbers
 BC_AUTO_TEST_CASE(encrypted__create_token_lot__test1_lot_sequence__expected)
@@ -642,15 +643,15 @@ BC_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testnet_
     BC_REQUIRE_EQUAL(out_is_compressed, is_compressed);
     BC_REQUIRE_EQUAL(out_version, version);
 
-    // Validate the point derived from key creation against the secret-derived point.
-    // The out point is always compressed, since the user can always decompress it.
+    // Validate point derived from key creation against secret-derived point.
+    // Out point always compressed, since user can always decompress it.
     ec_compressed compressed{};
     BC_REQUIRE(secret_to_public(compressed, out_secret));
     BC_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
 }
 
-// This tests a potentially-incorrect out_token expectation. See comments above.
-// However the value round-trips as expected and there is no reference implementation.
+// Tests potentially-incorrect out_token expectation, see comments above.
+// However value round-trips as expected, and no reference implementation.
 BC_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.

@@ -100,8 +100,8 @@ static void matched(const scan::batch& batch, size_t tx,
     callback({}, link, batch.points[tx]);
 }
 
-// The shared secret of each transaction (k = 0) tweaks the spend key, and each
-// output key (and labeled key) is matched by prefix to the transaction outputs.
+// Shared secret of each transaction (k = 0) tweaks spend key, and each output
+// key (and labeled key) matched by prefix to transaction outputs.
 static void scan_transactions(const scan::batch& batch, size_t first,
     size_t count, const parsed& keys,
     const scan::batch::handler& callback) NOEXCEPT
@@ -173,8 +173,8 @@ static void scan_transactions(const scan::batch& batch, size_t first,
 
 static_assert(is_same_type<cuda::prefix, scan::batch::prefix>);
 
-// Transactions go to gpu in blocks, and output key prefixes of each block
-// are matched to tx outputs in parallel.
+// Transactions go to gpu in blocks, output key prefixes of each block matched
+// to tx outputs in parallel.
 bool scan::batch::scan_gpu(const stopper& cancel, size_t& resume,
     const batch& batch, const receiver& keys, const handler& callback,
     bool turbo) NOEXCEPT
@@ -223,8 +223,8 @@ bool scan::batch::scan_gpu(const stopper& cancel, size_t& resume,
 
 // scan
 // ----------------------------------------------------------------------------
-// The callback provides granular response when the query is very long-running,
-// which is consistent with the push notification public interface.
+// Callback provides granular response for long-running query, consistent with
+// push notification public interface.
 
 void scan::batch::scan(const stopper& cancel, const batch& batch,
     const receiver& keys, size_t gpu_minimum, const handler& callback,

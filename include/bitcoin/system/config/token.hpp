@@ -25,9 +25,9 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Serialization helper for an enumeration as one of a list of words.
-/// Words::words is an array of string_view in enumeration value order, where
-/// an empty word is a value that is serialized as empty and is not parsed.
+/// Serialization helper for enumeration as one of list of words.
+/// Words::words is array of string_view in enumeration value order, where empty
+/// word is value serialized as empty and not parsed.
 template <typename Enum, typename Words>
 class token
 {

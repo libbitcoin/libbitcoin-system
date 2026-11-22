@@ -176,7 +176,7 @@ const string_list unicode_whitespace
 
 // Based on Electrum source (not Unicode standard).
 // github.com/spesmilo/electrum/blob/master/electrum/mnemonic.py#L41-L71
-// Lines were L41-L69, shifted by other edits, the intervals are unchanged.
+// Lines were L41-L69, shifted by other edits, intervals unchanged.
 const char32_interval char32_chinese_japanese_korean[]
 {
     { 0x00004e00, 0x00009fff }, // cjk unified ideographs
@@ -211,7 +211,7 @@ const char32_interval char32_chinese_japanese_korean[]
 };
 
 // unicode.org/Public/UNIDATA/PropList.txt [Diacritic (882 code points)]
-// This is not used by Electrum, instead it uses Python's unicodedata.combining.
+// Not used by Electrum, which uses Python's unicodedata.combining.
 const char32_interval char32_diacritics[]
 {
     { 0x0000005e, 0x0000005e }, // circumflex accent

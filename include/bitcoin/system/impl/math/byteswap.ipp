@@ -28,7 +28,7 @@ namespace system {
 
 // Byteswap (platform independent byte reversal).
 // ----------------------------------------------------------------------------
-// If wrong overload is selected (such as for a literal) result is unexpected.
+// If wrong overload selected (such as for literal), result is unexpected.
 // C++23 std::byteswap does not support signed integrals.
 
 template <typename Integral,

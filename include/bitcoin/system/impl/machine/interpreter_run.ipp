@@ -67,7 +67,7 @@ run() NOEXCEPT
 
 // Operation disatch.
 // ----------------------------------------------------------------------------
-// It is expected that the compiler will produce a very efficient jump table.
+// Compiler is expected to produce efficient jump table.
 
 // protected
 TEMPLATE

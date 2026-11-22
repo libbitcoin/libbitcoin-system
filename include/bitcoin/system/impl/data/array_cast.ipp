@@ -118,7 +118,7 @@ array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 }
 
 // Avoids cast of rvalue to reference, which would dangle.
-// Cannot offset into move assignment as the whole instance must be moved.
+// Cannot offset into move assignment as whole instance must be moved.
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From>>
 HOST_DEVICE inline std_array<To, ToCount>

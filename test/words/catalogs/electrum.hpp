@@ -84,8 +84,8 @@ static ptrdiff_t abnormals(const electrum::catalog::words& words)
         });
 }
 
-// This differs from BIP39 in nfkd normalization.
-// This was normalized after publication, so probably not updated.
+// Differs from BIP39 in nfkd normalization.
+// Normalized after publication, so probably not updated.
 const electrum::catalog::words electrum_es
 {
     false,
@@ -2141,8 +2141,8 @@ const electrum::catalog::words electrum_es
     }
 };
 
-// This differs from BIP39 in nfkd normalization.
-// This was normalized after publication, so probably not updated.
+// Differs from BIP39 in nfkd normalization.
+// Normalized after publication, so probably not updated.
 const electrum::catalog::words electrum_ja
 {
     false,

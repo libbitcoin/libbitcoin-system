@@ -382,9 +382,9 @@ BC_AUTO_TEST_SUITE_END()
 
 BC_AUTO_TEST_SUITE(nist_ctime_tests)
 
-// Under valgrind a secret is undefined, so a branch or memory address that
-// depends on it is reported as an error, and each output is defined before it
-// is compared to the same computation on the defined secret.
+// Under valgrind secret is undefined, so branch or memory address depending
+// on it is reported as error, and each output is defined before comparison
+// to same computation on defined secret.
 
 const auto ctime_p256_secret = base16_array("c9afa9d845ba75166b5c215767b1d6934e50c3db36e89b127b8a622b120f6721");
 const auto ctime_p384_secret = base16_array("6b9d3dad2e1b8c1c05b19875b6659f4de23c3b667bf297ba9aa47740787137d896d5724e4c70a825f872c9ea60d2edf5");

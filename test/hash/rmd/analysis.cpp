@@ -18,12 +18,12 @@
  */
 #include "../../test.hpp"
 
-// This can be integrated into round() using a [bool Trace = false] template
-// argument. Dumping each round to a normal form provides a common view between
-// the two common implementation approaches (buffer vs. circular queue), as
-// described in FIPS180. This applies to both SHA and MD algorithm families.
-// This may be useful when implementing vectorization and sha-ni/neon, as all
-// reference/example code is implemented using the latter approach.
+// Can be integrated into round() using [bool Trace = false] template argument.
+// Dumping each round to normal form provides common view between the two
+// common implementation approaches (buffer vs. circular queue), as described
+// in FIPS180. Applies to both SHA and MD algorithm families. May be useful when
+// implementing vectorization and sha-ni/neon, as all reference/example code is
+// implemented using the latter approach.
 ////if constexpr (Trace)
 ////{
 ////    if (!std::is_constant_evaluated())

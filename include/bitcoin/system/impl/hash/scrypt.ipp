@@ -196,7 +196,7 @@ TEMPLATE
 inline typename CLASS::block_t& CLASS::
 salsa_8(block_t& block) NOEXCEPT
 {
-    // Save a copy of the block and make a block of working space.
+    // Save copy of block and make block of working space.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (2 * 64)] bytes stack allocated.
     // rfc7914: #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
@@ -315,7 +315,7 @@ TEMPLATE
 inline bool CLASS::
 block_mix(rblock_t& rblock) NOEXCEPT
 {
-    // Make a working block initialized from rblock.back().
+    // Make working block initialized from rblock.back().
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (1 *  64)] bytes stack allocated.
     // rfc7914
@@ -432,7 +432,7 @@ TEMPLATE
 inline bool CLASS::
 romix(rblock_t& rblock) NOEXCEPT
 {
-    // Make a working set of W rblocks.
+    // Make working set of W rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (W * (R * 128))] bytes heap allocated.
     const auto ptr = to_shared<wrblock_t>();
@@ -475,7 +475,7 @@ bool
 CLASS::hash(data_array<Size>& out, const data_slice& password,
     const data_slice& salt) NOEXCEPT
 {
-    // Make a working set of P rblocks.
+    // Make working set of P rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
     const auto ptr = to_shared<prblock_t>();

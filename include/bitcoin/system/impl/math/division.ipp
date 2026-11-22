@@ -68,7 +68,7 @@ ceilinged_divide(Dividend dividend, Divisor divisor) NOEXCEPT
         (is_ceilinged_(dividend, divisor) ? 0 : 1);
 }
 
-// The native % operator is truncated and the common type is unsigned.
+// Native % operator is truncated and common type is unsigned.
 // But ceilinged modulo is logically negative, so type is changed to signed.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>

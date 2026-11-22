@@ -42,8 +42,7 @@ INLINE xint128_t fold(xint128_t a, xint128_t k, xint128_t b) NOEXCEPT
     return _mm_xor_si128(_mm_xor_si128(low, high), b);
 }
 
-/// The crc register continued over size bytes, a multiple of 16 of at least
-/// 64.
+/// crc register continued over size bytes, multiple of 16 of at least 64.
 INLINE uint32_t checksum(uint32_t crc, const uint8_t* data,
     size_t size) NOEXCEPT
 {

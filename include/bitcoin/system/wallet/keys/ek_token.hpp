@@ -62,7 +62,7 @@ private:
     static ek_token from_string(const std::string& encoded) NOEXCEPT;
 
     /// Members.
-    /// These should be const, apart from the need to implement assignment.
+    /// These should be const, apart from need to implement assignment.
     bool valid_;
     encrypted_token token_;
 };

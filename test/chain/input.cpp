@@ -323,8 +323,8 @@ BC_AUTO_TEST_CASE(input__is_relative_locked__disabled_time_type_sequence_age_bel
     BC_REQUIRE(!instance.is_relative_locked(0, instance.metadata.median_time_past + age_seconds));
 }
 
-// These express the sequence as a literal, so they pin the bit layout that
-// the parameterized cases above take from the same constants as the code.
+// These express sequence as literal, so they pin bit layout that parameterized
+// cases above take from same constants as code.
 
 // BIP68: only the low 16 bits of the sequence encode the lock.
 BC_AUTO_TEST_CASE(input__is_relative_locked__block_type_bit_above_mask__false)
@@ -581,7 +581,7 @@ BC_AUTO_TEST_CASE(input__signature_operations__no_prevout__input_script_only)
 
 // prevout_signature_operations
 // ----------------------------------------------------------------------------
-// bip54 counts accurately, so a preceding OP_1..OP_16 bounds a multisig.
+// bip54 counts accurately, so preceding OP_1..OP_16 bounds multisig.
 
 BC_AUTO_TEST_CASE(input__prevout_signature_operations__no_prevout__input_script_only)
 {

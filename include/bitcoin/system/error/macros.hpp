@@ -24,8 +24,8 @@
 #include <unordered_map>
 #include <bitcoin/system/define.hpp>
 
-// The category parameter must be namespaced. The category name must correspond
-// to the error type by the naming convention: category_t as the error type.
+// Category parameter must be namespaced. Category name must correspond to error
+// type by naming convention: category_t as error type.
 // std::hash specialization is unrelated to error registration.
 #define DECLARE_STD_ERROR_REGISTRATION(cat) \
 namespace std { \
@@ -65,7 +65,7 @@ public: \
 api std::error_code make_error_code(cat##_t value) noexcept; \
 api std::error_condition make_error_condition(cat##_t value) noexcept
 
-// This adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires the
+// Adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires
 // corresponding DEFINE_ERROR_T_EQUIVALENCE. For use of codes with conditions.
 #define DECLARE_ERROR_T_CONDITION_CATEGORY(cat, api) \
 enum cat##_condition_t {};\

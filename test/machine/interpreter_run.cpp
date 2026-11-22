@@ -26,7 +26,7 @@ using namespace system::machine;
 
 // run
 // ----------------------------------------------------------------------------
-// Dispatch is faked, isolating iteration, counting and conditional scope.
+// Dispatch faked, isolating iteration, counting and conditional scope.
 
 using runner = mock_runner<contiguous_stack>;
 
@@ -127,7 +127,7 @@ BC_AUTO_TEST_CASE(interpreter__run__unbalanced_condition__invalid_stack_scope)
 
 // run_op
 // ----------------------------------------------------------------------------
-// Handlers are faked, isolating the opcode to handler mapping.
+// Handlers faked, isolating opcode to handler mapping.
 
 using dispatcher = mock_handlers<contiguous_stack>;
 

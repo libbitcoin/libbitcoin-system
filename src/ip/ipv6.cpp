@@ -162,9 +162,9 @@ const ipv6::bytes_type& ipv6::to_bytes() const NOEXCEPT
     return bytes_;
 }
 
-// The longest run of two or more zero words is elided, the first of equal
-// runs (rfc5952 4.2). IPv4-mapped and IPv4-compatible addresses write the low
-// four bytes in dotted decimal (rfc4291 2.2, rfc5952 5).
+// Longest run of two or more zero words is elided, first of equal runs (rfc5952
+// 4.2). IPv4-mapped and IPv4-compatible addresses write low four bytes in
+// dotted decimal (rfc4291 2.2, rfc5952 5).
 std::string ipv6::to_string() const NOEXCEPT
 {
     std_array<uint16_t, words> word{};

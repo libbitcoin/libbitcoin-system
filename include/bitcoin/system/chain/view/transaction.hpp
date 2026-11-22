@@ -46,8 +46,8 @@ public:
     typedef std::shared_ptr<const transaction> cptr;
     using input_iterator = view::inputs::const_iterator;
 
-    /// Source must be set to a tx position within the block buffer.
-    /// Source position zero must be at the first byte of the block buffer.
+    /// Source must be set to tx position within block buffer.
+    /// Source position zero must be at first byte of block buffer.
     transaction(reader& source, const data_chunk& block_buffer,
         bool coinbase, bool witness) NOEXCEPT;
 

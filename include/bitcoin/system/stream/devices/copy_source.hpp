@@ -50,9 +50,9 @@ public:
 protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
-        // input_sequence/output_sequence both require non-const buffer
-        // ptrs, but the data member is const, so we must cast it for direct
-        // devices. As a source the buffer should/must never be mutated.
+        // input_sequence/output_sequence both require non-const buffer ptrs,
+        // but data member is const, so it is cast for direct devices. As source
+        // buffer should/must never be mutated.
         BC_PUSH_WARNING(NO_CONST_CAST)
         using value_type = typename device<Container>::value_type;
         const auto begin = const_cast<value_type*>(&(*container_.begin()));

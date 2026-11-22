@@ -28,8 +28,7 @@ namespace system {
 namespace wallet {
 
 /// Prefix namespace tree.
-/// Values are those emitted by each network, provide an authoritative URL for
-/// any values added here.
+/// Values emitted by each network; give authoritative URL for any added here.
 namespace prefix
 {
     typedef struct hds
@@ -188,8 +187,8 @@ namespace prefix
     }
 }
 
-/// Portable context for keys and addresses, the set of consistent prefixes
-/// for one network.
+/// Portable context for keys and addresses,
+/// set of consistent prefixes for one network.
 struct BC_API context
 {
     /// Extended (hd) private/public key prefixes.
@@ -222,7 +221,7 @@ struct BC_API context
 };
 
 /// Predefined wallet contexts.
-/// Custom contexts can also be defined by simply populating a context struct.
+/// Custom contexts can also be defined by populating context struct.
 namespace ctx
 {
     namespace btc

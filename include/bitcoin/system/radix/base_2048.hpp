@@ -28,32 +28,32 @@ namespace system {
 
 typedef std_vector<uint11_t> base2048_chunk;
 
-// This is the encoding used by both BIP39 and Electrum mnemonics.
+// Encoding used by both BIP39 and Electrum mnemonics.
 // Dictionaries are unicode lower case and nfkd normalized.
 // Words must be space (0x20) delimited and match dictionary (bytewise).
-// The packing direction is reversed from base32 encoding, since base2048
-// elements are larger than byte elements. This means that round trip must
-// start with words, not bytes. Coding in the reverse direction is ambiguous
-// and will lead to full pad bytes in 3 out of every 12 bit lengths. Words are
-// encoded as bytes, not bytes as words. Words are authoritative for entropy.
+// Packing direction is reversed from base32 encoding, since base2048 elements
+// are larger than byte elements, so round trip must start with words, not
+// bytes. Coding in reverse direction is ambiguous and leads to full pad bytes
+// in 3 out of every 12 bit lengths. Words are encoded as bytes, not bytes as
+// words. Words are authoritative for entropy.
 
-/// Convert a base2048 sentence to bytes.
-/// False if any word is not from the specified dictionary.
+/// Convert base2048 sentence to bytes.
+/// False if any word is not from specified dictionary.
 BC_API bool encode_base2048(data_chunk& out, const std::string& in,
     language language =language::en) NOEXCEPT;
 
-/// Convert bytes to a base2048 sentence in the specified language.
-/// Returns empty if language is not a supported dictionary.
+/// Convert bytes to base2048 sentence in specified language.
+/// Returns empty if language is not supported dictionary.
 BC_API std::string decode_base2048(const data_chunk& data,
     language language=language::en) NOEXCEPT;
 
-/// Convert a base2048 word list to bytes.
-/// False if any word is not from the specified dictionary.
+/// Convert base2048 word list to bytes.
+/// False if any word is not from specified dictionary.
 BC_API bool encode_base2048_list(data_chunk& out, const string_list& in,
     language language=language::en) NOEXCEPT;
 
-/// Convert bytes to a base2048 word list in the specified language.
-/// Returns empty if language is not a supported dictionary.
+/// Convert bytes to base2048 word list in specified language.
+/// Returns empty if language is not supported dictionary.
 BC_API string_list decode_base2048_list(const data_chunk& data,
     language language=language::en) NOEXCEPT;
 

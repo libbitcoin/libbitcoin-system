@@ -22,8 +22,8 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/macros.hpp>
 
-// Transaction sequences are limited to 0xff for single byte store encoding.
-// With the uint8_t domain specified the compiler enforces this guard.
+// Transaction sequences limited to 0xff for single byte store encoding.
+// With uint8_t domain specified compiler enforces this guard.
 
 namespace libbitcoin {
 namespace system {

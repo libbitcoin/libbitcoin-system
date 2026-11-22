@@ -41,7 +41,7 @@ const der_signature der_signature2 = base16_chunk(
     "a33a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f6b8bb67d");
 
 // scenario 3
-// signature3 is the private format low-s ECDSA signature associated with der_signature3.
+// signature3, private format low-s ECDSA signature for der_signature3.
 const ec_secret secret3 = base16_array(
     "33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce");
 const hash_digest sighash3 = base16_hash(

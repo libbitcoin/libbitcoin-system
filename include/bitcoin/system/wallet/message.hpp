@@ -36,36 +36,36 @@ typedef data_array<message_signature_size> message_signature;
 /// Hashes a messages in preparation for signing.
 BC_API hash_digest hash_message(const data_slice& message) NOEXCEPT;
 
-/// Signs a message using deterministic signature.
-/// @param[out] out_signature The signature in Bitcoin's own format.
-/// This should be base64 encoded for presentation to the user.
+/// Signs message using deterministic signature.
+/// @param[out] out_signature Signature in Bitcoin's own format.
+/// Should be base64 encoded for presentation to user.
 /// @return true if wif is valid and signature encoding is successful.
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const ec_private& secret) NOEXCEPT;
 
-/// Signs a message using deterministic signature.
-/// @param[out] out_signature The signature in Bitcoin's own format.
-/// This should be base64 encoded for presentation to the user.
+/// Signs message using deterministic signature.
+/// @param[out] out_signature Signature in Bitcoin's own format.
+/// Should be base64 encoded for presentation to user.
 /// @return true if wif is valid and signature encoding is successful.
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const std::string& wif) NOEXCEPT;
 
-/// Signs a message using deterministic signature.
-/// @param[out] out_signature The signature in Bitcoin's own format.
-/// This should be base64 encoded for presentation to the user.
-/// @param[in] compressed true if the bitcoin address derived from the
+/// Signs message using deterministic signature.
+/// @param[out] out_signature Signature in Bitcoin's own format.
+/// Should be base64 encoded for presentation to user.
+/// @param[in] compressed true if bitcoin address derived from
 /// private key is in compressed format.
 /// @return true if signature encoding is successful.
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const ec_secret& secret,
     bool compressed=true) NOEXCEPT;
 
-/// Verifies a message.
-/// @param[in] signature a message signature in Bitcoin's own format.
-/// The user will generally provide this as a base64 string,
-/// which the user interface must decode.
-/// @return false if the signature does not match the address or if there are
-/// any errors in the signature encoding.
+/// Verifies message.
+/// @param[in] signature Message signature in Bitcoin's own format.
+/// User generally provides this as base64 string,
+/// which user interface must decode.
+/// @return false if signature does not match address
+/// or if any errors in signature encoding.
 BC_API bool verify_message(const data_slice& message,
     const payment_address& address,
     const message_signature& signature) NOEXCEPT;

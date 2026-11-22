@@ -32,8 +32,8 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A bip380 output script descriptor. The script function set is pk, pkh,
-/// wpkh, sh, wsh, multi, sortedmulti, combo, tr (key path), addr and raw.
+/// bip380 output script descriptor. Script function set is pk, pkh, wpkh, sh,
+/// wsh, multi, sortedmulti, combo, tr (key path), addr and raw.
 class BC_API descriptor
 {
 public:
@@ -82,12 +82,12 @@ public:
     bool solvable() const NOEXCEPT;
 
     /// Methods.
-    /// The output script(s) at the index (multiple for combo, empty on a
-    /// hardened wildcard or derivation failure). Index applies to wildcards.
+    /// Output script(s) at index (multiple for combo, empty on hardened
+    /// wildcard or derivation failure). Index applies to wildcards.
     chain::scripts scripts(uint32_t index) const NOEXCEPT;
 
-    /// The signing metadata at the index (the scripts(index) set, retaining
-    /// embedded scripts and derived key origins).
+    /// Signing metadata at index (scripts(index) set, retaining embedded
+    /// scripts and derived key origins).
     signing::list signings(uint32_t index) const NOEXCEPT;
 
 protected:

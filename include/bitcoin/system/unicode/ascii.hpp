@@ -52,8 +52,8 @@ BC_API bool is_ascii(const std::string_view& text) NOEXCEPT;
 /// True if all characters are in the ASCII subset 'a'..'z' and 'A'..'Z'.
 BC_API bool is_ascii_alphabet(const std::string_view& text) NOEXCEPT;
 
-/// True if all characters are in the ASCII subset '0'..'9' with a leading '-'
-/// character if specified. Leaving zeroes allowed, including after negative.
+/// True if all characters are in ASCII subset '0'..'9' with leading '-'
+/// character if specified. Leading zeroes allowed, including after negative.
 BC_API bool is_ascii_numeric(const std::string_view& text) NOEXCEPT;
 
 } // namespace system

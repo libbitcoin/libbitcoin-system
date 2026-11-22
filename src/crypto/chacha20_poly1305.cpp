@@ -60,14 +60,14 @@ void chacha20_poly1305::authenticate(poly1305::tag& out,
 {
     constexpr data_array<poly1305::block_size> zero_pad{};
 
-    // First, a Poly1305 one-time key is generated from the 256-bit key and
-    // nonce: the ChaCha20 block function with block counter zero, taking the
-    // first 256 bits of the 512-bit state [cipher_ must be at block zero].
+    // First, Poly1305 one-time key generated from 256-bit key and nonce:
+    // ChaCha20 block function with block counter zero, taking first 256 bits of
+    // 512-bit state [cipher_ must be at block zero].
     poly1305::secret key{};
     cipher_.stream(key);
 
-    // The Poly1305 message is the aad zero-padded to a multiple of sixteen,
-    // the ciphertext likewise padded, the aad length, and then the ciphertext
+    // Poly1305 message is aad zero-padded to multiple of sixteen,
+    // ciphertext likewise padded, aad length, then ciphertext
     // length, both in octets as 64-bit little-endian words.
     poly1305 mac{ key };
     mac.write(aad);
@@ -94,8 +94,8 @@ void chacha20_poly1305::encrypt(const_byte_span plain1,
     BC_ASSERT(cipher.size() == plain1.size() + plain2.size() + expansion);
     const auto text = cipher.first(plain1.size() + plain2.size());
 
-    // Encryption uses the ChaCha20 block counter starting at one.
-    // Keystream continuity concatenates the plaintext segments.
+    // Encryption uses ChaCha20 block counter starting at one.
+    // Keystream continuity concatenates plaintext segments.
     cipher_.seek(nonce32, nonce64, one);
     cipher_.crypt(plain1, text.first(plain1.size()));
     cipher_.crypt(plain2, text.subspan(plain1.size()));

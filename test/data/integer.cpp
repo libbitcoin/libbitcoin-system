@@ -252,22 +252,19 @@ BC_AUTO_TEST_CASE(integer__uint256_not__odd_hash__expected)
 
 BC_AUTO_TEST_CASE(integer__uint256_twos_compliment__null_hash__null_hash)
 {
-    // Note that we use 0 - VALUE to negate, as there is a static
-    // assert that fails when you negate a uint256_t alone.
+    // Use 0 - VALUE to negate, as static assert fails negating uint256_t alone.
     BC_REQUIRE_EQUAL(0 - uint256_t(), uint256_t());
 }
 
 BC_AUTO_TEST_CASE(integer__uint256_twos_compliment__unit_hash__max_hash)
 {
-    // Note that we use 0 - VALUE to negate, as there is a static
-    // assert that fails when you negate a uint256_t alone.
+    // Use 0 - VALUE to negate, as static assert fails negating uint256_t alone.
     BC_REQUIRE_EQUAL(0 - uint256_t(unit_hash), uint256_t(max_hash));
 }
 
 BC_AUTO_TEST_CASE(integer__uint256_twos_compliment__odd_hash__expected)
 {
-    // Note that we use 0 - VALUE to negate, as there is a static
-    // assert that fails when you negate a uint256_t alone.
+    // Use 0 - VALUE to negate, as static assert fails negating uint256_t alone.
     static const auto compliment = 0 - uint256_t(odd_hash);
     BC_REQUIRE_EQUAL(compliment, uint256_t("-0x8437390223499ab234bf128e8cd092343485898923aaaaabbcbcc4874353fff5") + 1);
 }

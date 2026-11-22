@@ -31,7 +31,7 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 /// shared_ptr
 /// ---------------------------------------------------------------------------
-/// Some of these are just used to suppress noexcept warnings.
+/// Some used only to suppress noexcept warnings.
 
 /// Create shared pointer to non-const from moved instance.
 template <typename Type>
@@ -86,7 +86,7 @@ inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 /// Obtain non constant pointer from shared_ptr to const.
-/// This is useful when allocating objects to shared const before population.
+/// Useful when allocating objects to shared const before population.
 template <typename Type>
 inline Type* to_non_const_raw_ptr(const std::shared_ptr<const Type>& cptr) NOEXCEPT
 {

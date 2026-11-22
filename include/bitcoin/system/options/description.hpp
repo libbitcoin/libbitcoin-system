@@ -28,7 +28,7 @@ namespace system {
 namespace options {
 
 /// Not thread safe, non-virtual.
-/// The names, value and description of one option.
+/// Names, value and description of one option.
 class BC_API option_description
 {
 public:
@@ -77,7 +77,7 @@ private:
 };
 
 /// Not thread safe, non-virtual.
-/// A captioned collection of option descriptions.
+/// Captioned collection of option descriptions.
 class BC_API options_description
 {
 public:
@@ -117,8 +117,8 @@ public:
     /// The options, in order of addition.
     const option_ptrs& options() const NOEXCEPT;
 
-    /// The option of the name, or of the long name it uniquely abbreviates if
-    /// abbreviation is allowed, or null. Throws if ambiguous.
+    /// Option of name, or of long name it uniquely abbreviates if abbreviation
+    /// is allowed, or null. Throws if ambiguous.
     const option_description* find_nothrow(const std::string& name,
         bool abbreviated) const THROWS;
 
@@ -132,7 +132,7 @@ private:
 };
 
 /// Not thread safe, non-virtual.
-/// The option names of positional arguments, in order.
+/// Option names of positional arguments, in order.
 class BC_API positional_options_description
 {
 public:

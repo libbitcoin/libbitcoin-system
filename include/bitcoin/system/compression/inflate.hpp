@@ -27,8 +27,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Not thread safe.
-/// Raw deflate (rfc1951) decoder of a stream received in parts. Memory is
-/// bounded by the window, independent of the stream size.
+/// Raw deflate (rfc1951) decoder of stream received in parts. Memory is bounded
+/// by window, independent of stream size.
 class BC_API inflater
 {
 public:
@@ -52,9 +52,9 @@ public:
 
     inflater() NOEXCEPT;
 
-    /// Decode from in, appending to out, until in is consumed, the stream
-    /// ends, or out has grown by at least limit (zero is unlimited), setting
-    /// the bytes of in consumed. False if the stream is invalid.
+    /// Decode from in, appending to out, until in is consumed, stream ends, or
+    /// out has grown by at least limit (zero is unlimited), setting bytes of in
+    /// consumed. False if stream is invalid.
     bool write(data_chunk& out, size_t& consumed, const data_slice& in,
         size_t limit=zero) NOEXCEPT;
 
@@ -123,14 +123,14 @@ private:
     huffman distances_{};
 };
 
-/// Raw deflate (rfc1951) decode of the entire input. False if invalid, not
-/// entirely consumed, or the output would exceed limit (zero is unlimited).
+/// Raw deflate (rfc1951) decode of entire input. False if invalid, not entirely
+/// consumed, or output would exceed limit (zero is unlimited).
 BC_API bool inflate(data_chunk& out, const data_slice& in,
     size_t limit=zero) NOEXCEPT;
 
-/// Raw deflate (rfc1951) decode of the stream that begins the input, setting
-/// the byte size of the stream. False if invalid, or the output would exceed
-/// limit (zero is unlimited).
+/// Raw deflate (rfc1951) decode of stream that begins input,
+/// setting byte size of stream. False if invalid, or output would
+/// exceed limit (zero is unlimited).
 BC_API bool inflate(data_chunk& out, size_t& consumed, const data_slice& in,
     size_t limit=zero) NOEXCEPT;
 

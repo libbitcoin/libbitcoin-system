@@ -22,11 +22,11 @@
 #include <bitcoin/system/math/math.hpp>
 
 // base32
-// Base 32 is an ascii data encoding with a domain of 32 symbols (characters).
-// 32 is 2^5 so base32 is a 5<=>8 bit mapping.
+// Base 32 is ascii data encoding with domain of 32 symbols (characters).
+// 32 is 2^5 so base32 is 5<=>8 bit mapping.
 // 8 characters (32^8) are encoded into one 5 byte (8^5) chunk before mapping.
-// So after 5 byte encoding base32 is a 40<=>40 bit mapping.
-// The 5 bit encoding is authoritative as byte encoding is padded.
+// So after 5 byte encoding base32 is 40<=>40 bit mapping.
+// 5 bit encoding is authoritative as byte encoding is padded.
 // Encoding is canonical RFC 4648 (upper case, padded to 8 characters).
 // Decoding accepts either case and unpadded input (as in .onion and .i2p).
 

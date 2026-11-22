@@ -69,8 +69,8 @@ uint64_t bit_reader<IStream>::read_bits(size_t bits) NOEXCEPT
     uint64_t out = 0;
     bits = lesser(bc::bits<size_t>, bits);
 
-    // 'bits' refers to the count of the rightmost bits in 'out'.
-    // Those bits are written from left to right using a right-relative offset.
+    // 'bits' is count of rightmost bits in 'out'.
+    // Bits written from left to right using right-relative offset.
     // Subtract one for size-to-index translation, avoiding iterator underflow.
     for (auto bit = bits; !is_zero(bit); --bit)
         set_right_into(out, sub1(bit), read_bit());

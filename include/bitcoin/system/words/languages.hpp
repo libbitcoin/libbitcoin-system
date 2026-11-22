@@ -47,7 +47,7 @@ public:
     static std::string join(const string_list& words,
         language identifier) NOEXCEPT;
 
-    /// There is no trimming or token compression for reference::ja.
+    /// No trimming or token compression for reference::ja.
     /// All other languages are split and trimmed on ASCII whitespace.
     static string_list split(const std::string& sentence,
         language identifier) NOEXCEPT;
@@ -88,7 +88,7 @@ protected:
         language identifier) NOEXCEPT;
 
     // Normalizes ascii whitespace and attempts nfkd and case lowering.
-    // This is only used to improve the chance of wordlist matching.
+    // Only used to improve chance of wordlist matching.
     static string_list try_normalize(const string_list& words) NOEXCEPT;
 
     // These should be const, apart from the need to implement assignment.

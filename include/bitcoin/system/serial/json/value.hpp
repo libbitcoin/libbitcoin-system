@@ -97,9 +97,9 @@ constexpr bool is_json_convertible =
     !is_same_type<Type, value_ref> &&
     !is_same_type<Type, std::initializer_list<value_ref>>;
 
-/// A reference to a value source within an initializer list.
-/// A list of two elements with a string first is a key/value pair, and a list
-/// of only key/value pairs is an object, otherwise an array.
+/// Reference to value source within initializer list.
+/// List of two elements with string first is key/value pair, and list of only
+/// key/value pairs is object, otherwise array.
 class BC_API value_ref
 {
 public:
@@ -271,9 +271,9 @@ private:
     std::vector<value> values_;
 };
 
-/// A json object, members in insertion order with unique keys.
-/// Erase moves the last member into the erased position, stable_erase does
-/// not reorder. Lookup is indexed by hash above a small member count.
+/// Json object, members in insertion order with unique keys.
+/// Erase moves last member into erased position, stable_erase does not
+/// reorder. Lookup is indexed by hash above small member count.
 class BC_API object
 {
 public:

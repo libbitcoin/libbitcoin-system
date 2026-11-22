@@ -21,10 +21,10 @@
 
 // Field
 // ============================================================================
-// Multiplication is shift and reduce, with the addend and the reduction
-// polynomial masked by the multiplier and carry bits. Inversion is
-// exponentiation over the same multiplication, so neither the operands nor
-// the share coordinates index memory or select a branch.
+// Multiplication is shift and reduce, with addend and reduction
+// polynomial masked by multiplier and carry bits. Inversion is
+// exponentiation over same multiplication, so neither operands
+// nor share coordinates index memory or select a branch.
 
 namespace libbitcoin {
 namespace system {

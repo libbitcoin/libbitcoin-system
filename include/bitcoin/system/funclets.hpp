@@ -24,7 +24,7 @@
 
 /// Simple type safe functions over value parameter.
 /// All values converted and specified domain and reconverted to domain.
-/// This isolates integral promotion, and caller controls operating domain.
+/// Isolates integral promotion, and caller controls operating domain.
 
 namespace libbitcoin {
 
@@ -88,8 +88,8 @@ constexpr bool is_null(Type value) noexcept
     return value == nullptr;
 }
 
-// This is future-proofing against larger integrals or language features that
-// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
+// Future-proofing against larger integrals or language features that promote 3,
+// 5, 6, 7 byte-sized types to integral (see std::is_integral).
 constexpr bool is_byte_sized(size_t value) noexcept
 {
     return !is_zero(value) && is_zero(value % 8);
@@ -110,8 +110,8 @@ constexpr bool is_integral_sized(size_t bytes) noexcept
 /// Native operators promote all operands to at least signed/unsigned int.
 /// Overflows do not cause promotion, so native 8/16 bit operations do not
 /// overflow, but 32 (and 64) do. Forcing promotion to 64 bit makes this
-/// unexpected behavior more consistent, producing overflow only at the
-/// maximal integral domain (64), as opposed to 32/64 but not 8/16.
+/// unexpected behavior more consistent, producing overflow only at maximal
+/// integral domain (64), as opposed to 32/64 but not 8/16.
 /// See also: bc::system::promote.
 
 template <typename Type>

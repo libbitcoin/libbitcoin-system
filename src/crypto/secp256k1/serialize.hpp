@@ -27,9 +27,9 @@
 namespace libbitcoin {
 namespace system {
 
-// secp256k1_ec_pubkey_parse supports compressed (33 bytes, header byte 0x02
-// or 0x03), uncompressed (65 bytes, header byte 0x04), or hybrid (65 bytes,
-// header byte 0x06 or 0x07) format public keys.
+// secp256k1_ec_pubkey_parse supports compressed (33 bytes, header byte 0x02 or
+// 0x03), uncompressed (65 bytes, header byte 0x04), or hybrid (65 bytes, header
+// byte 0x06 or 0x07) format public keys.
 inline bool ec_public_key_parse(const secp256k1_context* context,
     secp256k1_pubkey& out, const data_slice& point) NOEXCEPT
 {

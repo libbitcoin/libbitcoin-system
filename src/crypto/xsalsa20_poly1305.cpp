@@ -51,8 +51,8 @@ void xsalsa20_poly1305::encrypt(const_byte_span plain, const nonce& nonce,
     BC_ASSERT(cipher.size() == plain.size() + expansion);
     salsa20 stream{ key_, nonce };
 
-    // The first 32 bytes of keystream are the one-time authentication key,
-    // and the remainder of the keystream encrypts the message.
+    // First 32 bytes of keystream are one-time authentication key, and
+    // remainder of keystream encrypts message.
     poly1305::secret key{};
     stream.stream(key);
     const auto text = cipher.subspan(expansion);

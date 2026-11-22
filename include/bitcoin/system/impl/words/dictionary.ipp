@@ -29,7 +29,7 @@ namespace libbitcoin {
 namespace system {
 namespace words {
 
-// Ensure that dictionary word lists remain POD types.
+// Ensure dictionary word lists remain POD types.
 // C++20: std::is_pod deprecated, implied by is_trivial + is_standard_layout.
 static_assert(std::is_trivial<dictionary<1>::words>(), "performance");
 static_assert(std::is_standard_layout<dictionary<1>::words>(), "performance");
@@ -84,7 +84,7 @@ template <size_t Size>
 int32_t dictionary<Size>::index(const std::string& word) const NOEXCEPT
 {
     // Dictionary sort is configured on each dictionary, verified by tests.
-    // Dictionary is char* elements but using std::string (word) for compares.
+    // Dictionary of char* elements, std::string (word) used for compares.
     if (words_.sorted)
         return possible_narrow_cast<int32_t>(binary_search(words_.word, word));
 

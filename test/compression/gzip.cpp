@@ -29,8 +29,7 @@ const auto hello_extra_comment = base16_chunk("1f8b08140000000000ff03006162636e6
 const auto bang_gzip = base16_chunk("1f8b08000000000002ff530400d3ff6b9e01000000");
 
 
-// The output of a decoder fed one byte at a time, false if invalid or
-// incomplete.
+// Output of decoder fed one byte at a time, false if invalid or incomplete.
 template <typename Decoder>
 static bool fed(data_chunk& out, const data_chunk& data)
 {

@@ -154,7 +154,7 @@ INLINE hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
 template <size_t Size = hash_size>
 struct unique_hash_t;
 
-/// This is used in critical database indexation, modify with great care.
+/// Used in critical database indexation, modify with great care.
 /// Assumes high degree of uniqueness in low order sizeof(size_t) bytes of key.
 template <size_t Size>
 INLINE constexpr size_t unique_hash(const data_array<Size>& key) NOEXCEPT;
@@ -202,7 +202,7 @@ inline bool operator!=(const bc::system::hash_cref& left,
 
 /// Extend std namespace with djb2_hash.
 /// ---------------------------------------------------------------------------
-/// This allows data_array/chunk to be incorporated into std hash tables.
+/// Allows data_array/chunk to be incorporated into std hash tables.
 
 namespace std
 {

@@ -95,9 +95,9 @@ BC_AUTO_TEST_CASE(v1_decoding__seed_entropy__false_overflows__expected)
     const data_chunk entropy(3 * sizeof(uint32_t), 0x42);
 
     // to_chunk(text) is not decode_base16(out, text)
-    // It casts char directly to uint8_t.
-    // This is the value that electrum hashes to obtain the seed.
-    // We refer to this as the "seed entropy", as opposed to the "entropy".
+    // Casts char directly to uint8_t.
+    // Value electrum hashes to obtain seed.
+    // Referred to as "seed entropy", as opposed to "entropy".
     const auto expected_seed_entropy = to_chunk(encode_base16(entropy));
 
     const v1_decoding::overflow overflows(3, false);
@@ -149,20 +149,18 @@ BC_AUTO_TEST_CASE(v1_decoding__construct__even_overflows__expected)
         0xaa, 0xbb, 0xcc, 0xdd
     };
 
-    // This is a byte encoded example of an even number of overflow bits.
-    // Note that a single overflow bit cannot be represened in byte encoding.
-    // Note also that a single overflow bit consumes 4 bits in the electrum
-    // encoding because of electrum's concatenation of presumed 4 byte hex
-    // strings. The overflow consumes a full hex character in the string
-    // encoding is then concatenated with the next chunks. Electrum's own
-    // entropy decoder cannot decode an overflowed value as it successively
-    // divides the entropy by 1626 (the dictionary size), which is based on the
-    // assumption that each chunk is limited to [0-1625]. But overflowed values
-    // violate this assumption. For these reasons we carry overflow flags in a
-    // distinct data structure and truncate the overflow for entropy.
-    // Fortunately the overflows are limited to one bit, which simplifies this
-    // techique. For this reason overflowed entropy will not round trip to the
-    // original seed words (which were invalid - manually generated).
+    // Byte encoded example of even number of overflow bits. Single overflow
+    // bit cannot be represented in byte encoding. Single overflow bit also
+    // consumes 4 bits in electrum encoding because of electrum's
+    // concatenation of presumed 4 byte hex strings. Overflow consumes full hex
+    // character in string encoding, then concatenated with next chunks.
+    // Electrum's own entropy decoder cannot decode overflowed value, as it
+    // successively divides entropy by 1626 (dictionary size), which assumes
+    // each chunk limited to [0-1625]. Overflowed values violate this
+    // assumption. Hence overflow flags carried in distinct data structure and
+    // overflow truncated for entropy. Overflows limited to one bit, which
+    // simplifies this technique. Hence overflowed entropy will not round trip
+    // to original seed words (which were invalid - manually generated).
     const data_chunk malformed_entropy
     {
         0xaa, 0xbb, 0xcc, 0xdd,

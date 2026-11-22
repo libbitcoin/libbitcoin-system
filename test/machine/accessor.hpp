@@ -302,8 +302,8 @@ protected:
     }
 };
 
-// Isolates run() from dispatch, recording the operations dispatched to it.
-// Conditional scope is modeled, as run() predicates dispatch upon it.
+// Isolates run() from dispatch, recording operations dispatched to it.
+// Conditional scope modeled, as run() predicates dispatch upon it.
 template <typename Stack>
 class mock_runner
   : public interpreter_accessor<Stack>
@@ -335,8 +335,8 @@ protected:
     }
 };
 
-// Isolates run_op() from handler behavior, recording the handler dispatched
-// and the argument passed to those handlers that take one.
+// Isolates run_op() from handler behavior, recording handler dispatched and
+// argument passed to handlers that take one.
 template <typename Stack>
 class mock_handlers
   : public interpreter_accessor<Stack>

@@ -40,7 +40,7 @@ namespace system {
 namespace chain {
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
-// As bip30 exceptions apply only to bitcoin mainnet these can be embedded.
+// bip30 exceptions apply only to bitcoin mainnet, so can be embedded.
 static const checkpoint mainnet_bip30_exception_checkpoint1
 {
     "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
@@ -64,8 +64,8 @@ constexpr bool is_enforced(size_t count, size_t bip34_enforcement_threshold) NOE
 }
 
 //*****************************************************************************
-// CONSENSUS: Though unspecified in bip34, the satoshi implementation
-// performed this comparison using the signed integer version value.
+// CONSENSUS: Though unspecified in bip34, satoshi implementation performed this
+// comparison using signed integer version value.
 //*****************************************************************************
 constexpr bool is_version(uint32_t value, uint32_t version) NOEXCEPT
 {
@@ -121,9 +121,9 @@ constexpr bool is_retarget_height(size_t height,
     return is_zero(retarget_distance(height, retargeting_interval));
 }
 
-// bip30 is active for all but two mainnet blocks that violate the rule.
-// These two blocks each have a coinbase transaction that exactly duplicates
-// another that is not spent by the arrival of the corresponding duplicate.
+// bip30 is active for all but two mainnet blocks that violate the rule. Each
+// has a coinbase transaction that exactly duplicates another not spent by
+// arrival of the corresponding duplicate.
 // Exceptions: block 91842 (duplicates 91812), 91880 (duplicates 91722).
 inline bool is_bip30_exception(const hash_digest& hash,
     size_t height) NOEXCEPT
@@ -294,15 +294,13 @@ chain_state::activations chain_state::activation(const data& values,
         result.flags |= flags::bip42_rule;
     }
 
-    // time_warp_patch (testnet4) is activated based on configuration
-    // alone (hard fork).
+    // time_warp_patch (testnet4) activated by configuration alone (hard fork).
     if (forks.time_warp_patch)
     {
         result.flags |= flags::time_warp_patch;
     }
 
-    // block_storm_patch (testnet4) is activated based on configuration
-    // alone (hard fork).
+    // block_storm_patch (testnet4) activated by configuration only (hard fork).
     if (forks.block_storm_patch)
     {
         result.flags |= flags::block_storm_patch;
@@ -335,7 +333,7 @@ chain_state::activations chain_state::activation(const data& values,
     const auto bip90_bip66 = forks.bip90 && height >= settings.bip90_bip66_height;
 
     // bip34 activations oscillate until enforced by minimum_block_version.
-    // bip90 does not require that the corresponding rules be defined.
+    // bip90 does not require that corresponding rules be defined.
     // bip34 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_bip34 ||
         (is_active(count_2, settings.bip34_activation_threshold) &&
@@ -502,10 +500,10 @@ size_t chain_state::retarget_height(size_t height, const forks& forks,
 // ----------------------------------------------------------------------------
 
 //*****************************************************************************
-// CONSENSUS: satoshi associates the median time past for block N with block
-// N-1, as opposed to block N. This is unnecessarily confusing. We associate
-// the median time past for block N with block N. This is intuitive but
-// requires care when comparing code.
+// CONSENSUS: satoshi associates median time past for block N with
+// block N-1, as opposed to block N. This is unnecessarily confusing.
+// Here median time past for block N is associated with block N,
+// which is intuitive but requires care when comparing code.
 //*****************************************************************************
 uint32_t chain_state::median_time_past(const data& values,
     const forks&) NOEXCEPT
@@ -557,8 +555,8 @@ uint32_t chain_state::retarget_timespan(const data& values,
 {
     //*************************************************************************
     // CONSENSUS: "Subtract unsigned 32 bit numbers in signed 64 bit space".
-    // This is done order to prevent underflow before applying the range
-    // constraint. This is properly just a floored subtraction in 32 bit space.
+    // Done to prevent underflow before applying range constraint. Properly just
+    // a floored subtraction in 32 bit space.
     //*************************************************************************
     const auto timespan = floored_subtract(timestamp_high(values),
         values.timestamp.retarget);
@@ -582,7 +580,7 @@ constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
     uint32_t proof_of_work_limit) NOEXCEPT
 {
     // Zero is a retarget height, termination required before height underflow.
-    // This is guaranteed, just a comment here because it may not be obvious.
+    // This is guaranteed, though may not be obvious.
     return bits != proof_of_work_limit ||
         is_retarget_height(height, retargeting_interval);
 }
@@ -629,7 +627,7 @@ uint32_t chain_state::work_required_retarget(const data& values,
     target <<= timewarp;
 
     // Disallow target from falling below minimum configured.
-    // All targets are a bits value normalized by compress here.
+    // All targets are bits value normalized by compress here.
     return target > limit ? proof_of_work_limit : compact::compress(target);
 }
 
@@ -659,8 +657,8 @@ uint32_t chain_state::easy_work_required(const data& values,
             return bit;
     }
 
-    // Since the set of heights is either a full retarget range or ends at
-    // zero this is not reachable unless the data set is invalid.
+    // Since set of heights is either full retarget range or ends at zero, not
+    // reachable unless data set is invalid.
     BC_ASSERT(false);
     return proof_of_work_limit;
 }
@@ -725,7 +723,7 @@ chain_state::map chain_state::get_map(size_t height,
 }
 
 // Consensus defines median time using modulo 2 element selection.
-// This differs from arithmetic median which averages two middle values.
+// Differs from arithmetic median, which averages two middle values.
 uint32_t chain_state::median(const timestamps& times) NOEXCEPT
 {
     const auto sorted = sort_copy(times);
@@ -741,9 +739,9 @@ bool chain_state::is_signal(uint32_t version, uint32_t base,
         && get_right(version, bit);
 }
 
-// Only a miner signals, in the version of a block templated on the pool
-// state. Configured bip9 groups are signaled unconditionally, where bip9
-// defines signaling only while a deployment is started or locked in.
+// Only a miner signals, in version of a block templated on pool state.
+// Configured bip9 groups are signaled unconditionally, where bip9 defines
+// signaling only while deployment is started or locked in.
 uint32_t chain_state::signal_version(const system::settings& settings) NOEXCEPT
 {
     const auto& forks = settings.forks;
@@ -843,8 +841,8 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // If this overflows height is zero and result is handled as invalid.
     const auto height = add1(data.height);
 
-    // Enqueue previous block values to collections, dequeuing the oldest
-    // member of a collection that overflows.
+    // Enqueue previous block values to collections, dequeuing oldest member of
+    // a collection that overflows.
     enqueue(data.bits.ordered, data.bits.self,
         bits_count(height, forks, settings.retargeting_interval()));
     enqueue(data.timestamp.ordered, data.timestamp.self,
@@ -876,7 +874,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
                 data.version.self, mtp, height, settings);
 
     // Replace previous block state with tx pool chain state for next height
-    // Preserve top block timestamp for use in computation of staleness.
+    // Preserve top block timestamp for computing staleness.
     // bits.self is unused.
     data.height = height;
     data.hash = {};
@@ -886,7 +884,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 }
 
 // Top to pool.
-// This generates a state for the pool above the presumed top block state.
+// Generates state for pool above presumed top block state.
 chain_state::chain_state(const chain_state& top,
     const system::settings& settings) NOEXCEPT
   : data_(to_pool(top, settings)),
@@ -916,7 +914,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 }
 
 // Pool to block.
-// This assumes that the pool state is the same height as the block.
+// Assumes pool state is same height as block.
 chain_state::chain_state(const chain_state& pool, const block& block,
     const system::settings& settings) NOEXCEPT
   : data_(to_block(pool, block)),
@@ -935,7 +933,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent, settings);
 
-    // Replace the parent (pool or previous) block state with given state.
+    // Replace parent (pool or previous) block state with given state.
     // Preserve data.timestamp.retarget promotion.
     data.hash = header.hash();
     data.bits.self = header.bits();
@@ -947,7 +945,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
 }
 
 // Parent to header.
-// This assumes that parent is the state of the header's previous block.
+// Assumes parent is state of header's previous block.
 chain_state::chain_state(const chain_state& parent, const header& header,
     const system::settings& settings) NOEXCEPT
   : data_(to_header(parent, header, settings)),

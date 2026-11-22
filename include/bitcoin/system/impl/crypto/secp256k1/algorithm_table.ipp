@@ -29,10 +29,10 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 // protected
 
-// Odd multiples by repeated addition of 2a, on the curve isomorphic by the z
-// of 2a (where 2a is affine). Each multiple is then scaled to the z of the
-// last by the product of later z ratios, so that all are affine on the curve
-// isomorphic by scale (the z of 2a times the z of the last).
+// Odd multiples by repeated addition of 2a, on curve isomorphic
+// by z of 2a (where 2a is affine). Each multiple is then scaled
+// to z of last by product of later z ratios, so all are affine
+// on curve isomorphic by scale (z of 2a times z of last).
 template <size_t Size, typename Word>
 constexpr void algorithm::multiples(std_array<affine_t<Word>, Size>& r,
     field_t<Word>& scale, const affine_t<Word>& a) NOEXCEPT
@@ -82,9 +82,9 @@ constexpr size_t algorithm::locate(size_t entry) NOEXCEPT
     return (entry / block_size) * stride + (entry % block_size);
 }
 
-// Limb i of x of entry e of window w is at 10 * (w * comb_size + e) + i in
-// the part of the window, and limb i of y follows at 5 + i. Every entry of
-// the window is read, and the entry is taken by mask.
+// Limb i of x of entry e of window w is at 10 * (w * comb_size + e) + i in part
+// of window, and limb i of y follows at 5 + i. Every entry of window is read,
+// and entry is taken by mask.
 constexpr void algorithm::lookup_comb(affine_t<uint64_t>& r, size_t window,
     size_t entry, uint64_t negative) NOEXCEPT
 {

@@ -227,8 +227,8 @@ constexpr void algorithm::scale(field_t<Word>& r,
     r = out;
 }
 
-// An odd value is made even by adding p, then each limb takes the low bit of
-// the next as its top bit.
+// Odd value is made even by adding p,
+// then each limb takes low bit of next as its top bit.
 constexpr void algorithm::halve(field_t<uint64_t>& r,
     const field_t<uint64_t>& a) NOEXCEPT
 {
@@ -349,7 +349,7 @@ constexpr void algorithm::multiply(field_t<Word>& r,
 }
 
 // Integral products accumulate in two 128 bit columns, where each column above
-// 2^256 folds into a column below it as it completes.
+// 2^256 folds into column below it as it completes.
 template <>
 INLINE constexpr void algorithm::multiply<uint64_t>(field_t<uint64_t>& r,
     const field_t<uint64_t>& a, const field_t<uint64_t>& b) NOEXCEPT

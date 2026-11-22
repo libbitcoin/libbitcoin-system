@@ -43,7 +43,7 @@ authority::authority(const std::string& authority) THROWS
     std::stringstream(authority) >> *this;
 }
 
-// This allows unusable CIDR values (ok).
+// Allows unusable CIDR values (ok).
 // IPv6-mapped IPv4 are normalized to IPv4.
 authority::authority(const ip::address& ip, uint16_t port,
     uint8_t cidr) NOEXCEPT

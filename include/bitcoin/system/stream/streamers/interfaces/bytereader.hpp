@@ -108,10 +108,10 @@ public:
     virtual std::string read_string(size_t limit=max_size_t) NOEXCEPT = 0;
 
     /// Read string, truncated at size or first null.
-    /// This is only used for reading Bitcoin heading command text.
+    /// Only used for reading Bitcoin heading command text.
     virtual std::string read_string_buffer(size_t size) NOEXCEPT = 0;
 
-    /// Read a line up to specified terminator (skip and exclude terminator).
+    /// Read line up to specified terminator (skip and exclude terminator).
     /// Returns empty and invalidates stream if terminator is not found.
     virtual std::string read_line(const std::string& end="\r\n") NOEXCEPT = 0;
 

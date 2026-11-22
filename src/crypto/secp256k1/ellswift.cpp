@@ -53,8 +53,8 @@ bool decode(ec_compressed& out, const ec_ellswift& key) NOEXCEPT
         ec_public_key_serialize(context, out, pubkey);
 }
 
-// BIP324: v2_ecdh, the tagged hash of the x-only shared point and the two
-// encoded public keys, initiating party first (party a).
+// BIP324: v2_ecdh, tagged hash of x-only shared point and two encoded public
+// keys, initiating party first (party a).
 bool exchange(hash_digest& out, const ec_secret& secret,
     const ec_ellswift& key_a, const ec_ellswift& key_b,
     bool responding) NOEXCEPT

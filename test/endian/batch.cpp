@@ -78,8 +78,8 @@ constexpr auto reversed = numbers<size>
 
     0x01020304_u32
 };
-// This is the perspective of a little-endian machine.
-// The normalize() helper reverses the expecation on a big-endian machine.
+// Perspective of little-endian machine.
+// normalize() helper reverses expectation on big-endian machine.
 static_assert(to_big_endians(native) == normalize(reversed, native));
 static_assert(from_big_endians(reversed) == normalize(native, reversed));
 static_assert(to_little_endians(native) == normalize(native, reversed));

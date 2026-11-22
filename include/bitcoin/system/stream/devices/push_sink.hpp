@@ -28,7 +28,7 @@ namespace system {
 
 /// Sink for make_stream, appends bytes to Container.
 /// Container may be any insertable object with contiguous byte data.
-/// This is limited to std::string and std_vector of uint8_t.
+/// Limited to std::string and std_vector of uint8_t.
 /// Push streams are buffered, indirect (inefficient) and require flush.
 template <typename Container, if_byte_insertable<Container> = true>
 class push_sink
@@ -61,9 +61,9 @@ protected:
     typename device<Container>::size_type do_optimal_buffer_size()
         const NOEXCEPT override
     {
-        // This is only called at stream construct.
-        // The compiler determines capacity, so this may be unreliable to test.
-        // Create a buffer equal to the reserved but unused space, or default.
+        // Only called at stream construct.
+        // Compiler determines capacity, so this may be unreliable to test.
+        // Create buffer equal to reserved but unused space, or default.
         auto space = floored_subtract(container_.capacity(), container_.size());
         return is_zero(space) ? default_buffer_size : space;
     }

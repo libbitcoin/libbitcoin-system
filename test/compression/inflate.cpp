@@ -25,8 +25,7 @@ const auto fox = to_chunk(std::string{ "The quick brown fox jumps over the lazy 
 const auto fox_fixed = base16_chunk("0bc94855282ccd4cce56482aca2fcf5348cbaf50c82acd2d2856c82f4b2d5228014ae72456552aa4e4a7eb29840c0ec500");
 const auto counted = to_chunk(std::string{ "0=,1=a,2=aa,3=aaa,4=aaaa,5=aaaaa,6=aaaaab,7=aaaaabb,8=aaaaabbb,9=aaaaabbbc,10=,11=a,12=aa,13=aaa,14=aaaa,15=aaaaa,16=aaaaab,17=aaaaabb,18=aaaaabbb,19=aaaaabbbc,20=,21=a,22=aa,23=aaa,24=aaaa,25=aaaaa,26=aaaaab,27=aaaaabb,28=aaaaabbb,29=aaaaabbbc,30=,31=a,32=aa,33=aaa,34=aaaa,35=aaaaa,36=aaaaab,37=aaaaabb,38=aaaaabbb,39=aaaaabbbc,40=,41=a,42=aa,43=aaa,44=aaaa,45=aaaaa,46=aaaaab,47=aaaaabb,48=aaaaabbb,49=aaaaabbbc,50=,51=a,52=aa,53=aaa,54=aaaa,55=aaaaa,56=aaaaab,57=aaaaabb,58=aaaaabbb,59=aaaaabbbc," });
 
-// The output of a decoder fed one byte at a time, false if invalid or
-// incomplete.
+// Output of decoder fed one byte at a time, false if invalid or incomplete.
 template <typename Decoder>
 static bool fed(data_chunk& out, const data_chunk& data)
 {
@@ -41,8 +40,8 @@ static bool fed(data_chunk& out, const data_chunk& data)
     return decoder.done();
 }
 
-// The output of a decoder fed parts of step bytes, each part followed by any
-// it did not consume, false if invalid or incomplete.
+// Output of decoder fed parts of step bytes, each part followed by any it did
+// not consume, false if invalid or incomplete.
 static bool parted(data_chunk& out, const data_chunk& data, size_t step)
 {
     size_t offset{};
@@ -62,7 +61,7 @@ static bool parted(data_chunk& out, const data_chunk& data, size_t step)
     return decoder.done();
 }
 
-// The output of a decoder of limited growth per write, false if invalid or
+// Output of decoder of limited growth per write, false if invalid or
 // incomplete.
 static bool paused(data_chunk& out, const data_chunk& data, size_t limit)
 {

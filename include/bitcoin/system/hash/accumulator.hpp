@@ -62,7 +62,7 @@ public:
     bool write(size_t size, const byte_t* data) NOEXCEPT;
 
     /// Flush accumulator state to digest (not idempotent, not destructive).
-    /// Flush does not reset the accumulator (writes may continue as in pbkd).
+    /// Flush does not reset accumulator (writes may continue as in pbkd).
     /// -----------------------------------------------------------------------
 
     digest_t flush() NOEXCEPT;

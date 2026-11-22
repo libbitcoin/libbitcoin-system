@@ -26,7 +26,7 @@ using namespace system::machine;
 
 // connect
 // ----------------------------------------------------------------------------
-// Signature verification is faked, isolating script and witness dispatch.
+// Signature verification faked, isolating script and witness dispatch.
 
 using mocked = mock_program<contiguous_stack>;
 using connector = interpreter_accessor<contiguous_stack, mocked>;
@@ -306,7 +306,7 @@ BC_AUTO_TEST_CASE(interpreter__connect_witness__taproot_invalid_sighash__op_chec
 
 // connect_embedded
 // ----------------------------------------------------------------------------
-// The embedded script is popped from the input script evaluation stack.
+// Embedded script popped from input script evaluation stack.
 
 BC_AUTO_TEST_CASE(interpreter__connect_embedded__non_push_input_script__invalid_script_embed)
 {

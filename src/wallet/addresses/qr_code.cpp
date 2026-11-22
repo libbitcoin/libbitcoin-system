@@ -68,8 +68,8 @@ bool qr_code::encode(std::ostream& out, const std::string& value,
 }
 
 // TODO: accept and return stream and split out scaling and margining.
-// Scale may move the image off of a byte-aligned square of pixels in bytes.
-// So the dimensions cannot be derived from the result, caller must retain.
+// Scale may move image off of byte-aligned square of pixels in bytes.
+// So dimensions cannot be derived from result, caller must retain.
 // pixel_width = 2 * margin + scale * coded_width.
 data_chunk qr_code::to_pixels(const data_chunk& coded, uint32_t width_coded,
     uint16_t scale, uint16_t margin) NOEXCEPT

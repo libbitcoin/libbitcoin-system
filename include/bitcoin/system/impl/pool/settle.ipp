@@ -36,8 +36,8 @@ BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 // Columns (whole table).
 // ----------------------------------------------------------------------------
-// The derived causes are recomputed from none, so absence only rises during
-// the passes and each pass is monotone.
+// Derived causes are recomputed from none, so absence only rises during passes
+// and each pass is monotone.
 
 constexpr bool algorithm::is_clear(
     const std::span<const link_t>& cells) NOEXCEPT

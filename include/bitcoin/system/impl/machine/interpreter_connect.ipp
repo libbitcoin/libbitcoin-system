@@ -108,7 +108,7 @@ code CLASS::connect_embedded(const chain::context& state,
     if (!script::is_relaxed_push_pattern(ops))
         return error::invalid_script_embed;
 
-    // Embedded script must be at the top of the stack [bip16].
+    // Embedded script must be at top of stack [bip16].
     // Evaluate embedded script using stack moved from input script.
     const auto embedded = to_shared<script>(in_program.pop(), false);
     interpreter out_program(std::move(in_program), embedded);

@@ -1073,8 +1073,8 @@ BC_AUTO_TEST_CASE(bloom__screen__4_bits_forward__16_screens)
     auto next = bloom_t::empty;
     size_t count{};
 
-    // This exhausts the full uint32_t domain and returns exactly limit values.
-    // The count < limit condition just speeds up the test, still slow though.
+    // Exhausts full uint32_t domain and returns exactly limit values.
+    // count < limit condition speeds up test, still slow though.
     for (uint32_t finger{}; count < limit; ++finger)
     {
         const auto previous = next;

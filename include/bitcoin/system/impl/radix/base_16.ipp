@@ -25,12 +25,12 @@
 #include <bitcoin/system/math/math.hpp>
 
 // base16 (hexidecimal):
-// Base 16 is an ascii data encoding with a domain of 16 symbols (characters).
-// 16 is 2^4 so base16 is a 4<=>4 bit mapping.
+// Base 16 is ascii data encoding with domain of 16 symbols (characters).
+// 16 is 2^4 so base16 is 4<=>4 bit mapping.
 // Invalid padding in byte packing is not detectable as it is byte-aligned.
-// So this implementation is limited to an 8<=>8 bit mapping.
-// There is no need for bit streaming or padding, and both sides are
-// authoritative. Therefore base16 is our canonical byte encoding.
+// So this implementation is limited to 8<=>8 bit mapping.
+// No need for bit streaming or padding, and both sides are authoritative.
+// Therefore base16 is canonical byte encoding.
 
 namespace libbitcoin {
 namespace system {
@@ -75,7 +75,7 @@ constexpr uint8_t from_base16_characters(char high, char low) NOEXCEPT
 // published
 // ============================================================================
 
-// The C standard library function 'isxdigit' is more trouble than it is worth.
+// C standard library function 'isxdigit' is more trouble than it is worth.
 // "Some implementations (e.g. Microsoft in 1252 codepage) may classify
 // additional single-byte characters as digits...To use these functions safely
 // with plain chars (or signed chars), the argument should first be converted

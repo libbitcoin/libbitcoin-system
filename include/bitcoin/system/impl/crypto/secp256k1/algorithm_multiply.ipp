@@ -62,10 +62,10 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     return multiply_windows<Bits, false, true>(r, {}, a, k);
 }
 
-// Each scalar splits into two halves, each window of each half adds a table
-// point, and halves made odd are corrected at the end. Lanes in which an
-// addition was exceptional are reported, not computed. Without the generator
-// its windows, recoding and corrections are omitted.
+// Each scalar splits into two halves, each window of each half adds table
+// point, and halves made odd are corrected at end. Lanes in which addition was
+// exceptional are reported, not computed. Without generator its windows,
+// recoding and corrections are omitted.
 template <size_t Bits, bool Generator, bool Secret, typename Word>
 constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
     const scalars_t<Word>& g, const affine_t<Word>& a,
@@ -94,8 +94,8 @@ constexpr Word algorithm::multiply_windows(jacobian_t<Word>& r,
         recode(k_second[lane], second);
     }
 
-    // Point multiples are affine on the curve isomorphic by scale, where
-    // the sum is computed, so generator multiples are added by that scale.
+    // Point multiples are affine on curve isomorphic by scale, where sum is
+    // computed, so generator multiples are added by that scale.
     points_t<Word, Bits> a_first{}, a_second{};
     field_t<Word> scale{};
     multiples(a_first, scale, a);
@@ -183,8 +183,8 @@ constexpr void algorithm::multiply_complete(jacobian_t<uint64_t>& r,
     r = sum;
 }
 
-// Each half adds a table point at each of its nonzero digits, with doubling
-// from the highest digit of any half.
+// Each half adds table point at each of its nonzero digits, with doubling from
+// highest digit of any half.
 constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
     const scalar_t& g, const affine_t<uint64_t>& a,
     const scalar_t& k) NOEXCEPT
@@ -257,9 +257,9 @@ constexpr uint64_t algorithm::multiply_naf(jacobian_t<uint64_t>& r,
     return faults;
 }
 
-// Each window adds the entry of its signed digit, where a digit above half the
-// window span is taken negative with a carry into the next window. A zero
-// digit adds the first entry and keeps the prior sum.
+// Each window adds entry of its signed digit, where digit above half window
+// span is taken negative with carry into next window. Zero digit adds first
+// entry and keeps prior sum.
 constexpr void algorithm::add_comb(jacobian_t<uint64_t>& r, const scalar_t& k,
     uint64_t& faults) NOEXCEPT
 {
@@ -320,8 +320,8 @@ constexpr void algorithm::recode(recoded_t<Bits>& r,
     recode<Bits, digit_count<Bits>>(r.digits, magnitude);
 }
 
-// Each digit is the next Bits + 1 bits with a carry from the last, made
-// negative with a carry where its top bit is set.
+// Each digit is next Bits + 1 bits with carry from last, made negative with
+// carry where its top bit is set.
 template <size_t Bits>
 constexpr size_t algorithm::naf(naf_t& r, const scalar_t& magnitude) NOEXCEPT
 {
@@ -385,7 +385,7 @@ constexpr Word algorithm::pack(const words_t<Word>& values) NOEXCEPT
 }
 
 // Tables hold odd multiples 1, 3, ..., so digit d is entry (|d| - 1) / 2, and
-// a point table interleaves lanes within each of the ten limbs of an entry.
+// point table interleaves lanes within each of ten limbs of entry.
 template <size_t Bits, typename Word>
 constexpr void algorithm::digit(Word& index, Word& negative,
     const recodes_t<Bits, Word>& halves, size_t position,
@@ -462,8 +462,8 @@ constexpr void algorithm::lookup(affine_t<Word>& r, Word entry, bool mapped,
 }
 
 // Limb i of lane l of point table entry e is at (10e + i) * lanes + l, where
-// offset is 10e * lanes + l. Where Secret every entry is read and the entry
-// is taken by mask.
+// offset is 10e * lanes + l.
+// Where Secret every entry is read and entry is taken by mask.
 template <bool Secret, size_t Size, typename Word>
 constexpr void algorithm::lookup(affine_t<Word>& r,
     const std_array<affine_t<Word>, Size>& table, Word offset,
@@ -515,8 +515,8 @@ constexpr void algorithm::lookup(affine_t<Word>& r,
 }
 
 // Lanes at infinity take b, and other exceptional lanes are faults.
-// An integral sum from infinity is lifted by branch, or where Secret is
-// computed and taken by mask.
+// Integral sum from infinity is lifted by branch, or where Secret is computed
+// and taken by mask.
 template <bool Secret, typename Word>
 constexpr void algorithm::add_point(jacobian_t<Word>& r,
     const affine_t<Word>& b, Word& faults) NOEXCEPT
@@ -556,8 +556,7 @@ constexpr void algorithm::add_point(jacobian_t<Word>& r,
     }
 }
 
-// Lanes at infinity take b mapped by scale, and other exceptional lanes are
-// faults.
+// Lanes at infinity take b mapped by scale, other exceptional lanes are faults.
 template <bool Secret, typename Word>
 constexpr void algorithm::add_point(jacobian_t<Word>& r,
     const affine_t<Word>& b, const field_t<Word>& scale, Word& faults) NOEXCEPT

@@ -27,8 +27,8 @@ namespace libbitcoin {
 namespace system {
 
 /// ChaCha20 stream cipher (rfc8439), 96-bit nonce and 32-bit block counter.
-/// The nonce is expressed as a 32-bit and a 64-bit little-endian segment
-/// (bip324 convention). Keystream is continuous across crypt/stream calls.
+/// Nonce is expressed as 32-bit and 64-bit little-endian segment (bip324
+/// convention). Keystream is continuous across crypt/stream calls.
 class BC_API chacha20
 {
 public:
@@ -59,8 +59,8 @@ public:
     void stream(byte_span out) NOEXCEPT;
 
 protected:
-    /// The state is sixteen words, over integral or extended integral words,
-    /// the latter computing one block per 32 bit lane.
+    /// State is sixteen words, over integral or extended integral words, latter
+    /// computing one block per 32 bit lane.
     static constexpr size_t state_words = 16;
     typedef std_array<uint32_t, 8> keys_t;
     typedef std_array<uint32_t, 3> nonce_t;

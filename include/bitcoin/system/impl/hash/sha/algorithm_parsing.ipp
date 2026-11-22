@@ -56,9 +56,9 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        // This optimization is neutral in 4/8/16 lane sha256 perf.
-        // Enabling requires vector aligned storage, as a vector cast of
-        // storage not so aligned may emit aligned moves, which fault.
+        // Optimization is neutral in 4/8/16 lane sha256 perf. Enabling requires
+        // vector aligned storage, as vector cast of storage not so aligned may
+        // emit aligned moves, which fault.
         ////if constexpr (have_lanes<word_t, 16>)
         ////{
         ////    using xword_t = to_extended<word_t, 16>;
@@ -130,9 +130,9 @@ input_left(auto& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        // This optimization is neutral in 4/8 lane sha256 perf.
-        // Enabling requires vector aligned storage, as a vector cast of
-        // storage not so aligned may emit aligned moves, which fault.
+        // Optimization is neutral in 4/8 lane sha256 perf. Enabling requires
+        // vector aligned storage, as vector cast of storage not so aligned may
+        // emit aligned moves, which fault.
         ////if constexpr (have_lanes<word_t, 8>)
         ////{
         ////    using xword_t = to_extended<word_t, 8>;
@@ -185,9 +185,9 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        // This optimization is neutral in 4/8 lane sha256 perf.
-        // Enabling requires vector aligned storage, as a vector cast of
-        // storage not so aligned may emit aligned moves, which fault.
+        // Optimization is neutral in 4/8 lane sha256 perf. Enabling requires
+        // vector aligned storage, as vector cast of storage not so aligned may
+        // emit aligned moves, which fault.
         ////if constexpr (have_lanes<word_t, 8>)
         ////{
         ////    using xword_t = to_extended<word_t, 8>;
@@ -352,14 +352,14 @@ output(const state_t& state) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        // Below could be optimized to remove conversions that truncate, but
-        // 224 truncates on a half word boundary, complicating implementation.
+        // Below could be optimized to remove conversions that truncate, but 224
+        // truncates on half word boundary, complicating implementation.
 
         if constexpr (SHA::strength != 160)
         {
-            // This optimization is neutral in 4/8 lane sha256 perf.
-            // Enabling requires vector aligned storage, as a vector cast of
-            // storage not so aligned may emit aligned moves, which fault.
+            // Optimization is neutral in 4/8 lane sha256 perf. Enabling
+            // requires vector aligned storage, as vector cast of storage not so
+            // aligned may emit aligned moves, which fault.
             ////if constexpr (have_lanes<word_t, 8>)
             ////{
             ////    using xword_t = to_extended<word_t, 8>;

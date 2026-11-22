@@ -57,8 +57,8 @@ INLINE constexpr auto not_(Word a) NOEXCEPT
 
 /// mathematical primitives
 /// ---------------------------------------------------------------------------
-// S arguments are set for common overload with intrisic functionals.
-// rotr/rotl are implemented as intrinsic where available, otherwise shift/or.
+// S arguments set for common overload with intrinsic functionals.
+// rotr/rotl implemented as intrinsic where available, otherwise shift/or.
 
 template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto shr(Word a) NOEXCEPT
@@ -137,7 +137,7 @@ INLINE constexpr Word madd52hi(Word c, Word a, Word b) NOEXCEPT
 
 /// compare/select
 /// ---------------------------------------------------------------------------
-/// Masks are all bits set (true) or unset (false) per word.
+/// Masks all bits set (true) or unset (false) per word.
 
 template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto andnot(Word a, Word b) NOEXCEPT

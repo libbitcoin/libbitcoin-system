@@ -1161,8 +1161,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             push({ row, {}, {}, {}, fee_rate(sum.fee, charged(rows)), sum });
     };
 
-    // Each row of the group offers its chunk (unless every, only the rows
-    // below the take), none of which fits unless one of the rows does.
+    // Each row of group offers its chunk (unless every, only rows below take),
+    // none of which fits unless one of the rows does.
     const auto score_rows = [&](bool every) NOEXCEPT
     {
         if (!std::ranges::any_of(group, alone))
@@ -1173,9 +1173,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
                 score_row(member);
     };
 
-    // A whole cluster offers its best closure (itself if one row), else each
-    // of its rows its chunk, of a partial cluster of a take only those below
-    // the take.
+    // Whole cluster offers its best closure (itself if one row), else each of
+    // its rows its chunk, of partial cluster of take only those below take.
     const auto propose = [&](bool whole, bool every) NOEXCEPT
     {
         totals_t sum{};
@@ -1203,8 +1202,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         score_rows(every || whole);
     };
 
-    // The cluster of a row below a take, false if over maximum_members with
-    // nothing offered.
+    // Cluster of row below take,
+    // false if over maximum_members with nothing offered.
     const auto offer = [&](link_t row) NOEXCEPT
     {
         const auto whole = cluster(group, walk, marks, graph, row);
@@ -1402,8 +1401,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             if (!std::ranges::all_of(held, unmarked))
                 continue;
 
-            // A closure that no longer fits falls back to the chunks of its
-            // cluster.
+            // Closure that no longer fits falls back to chunks of its cluster.
             if (!fits(score.sum, space))
             {
                 cluster(group, walk, marks, graph, score.row);
@@ -1437,8 +1435,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         used.size = ceilinged_add(used.size, sum.size);
         used.sigops = ceilinged_add(used.sigops, sum.sigops);
 
-        // The untaken descendants of the take have changed chunks, and the
-        // untaken remainder of its cluster competes again from its children.
+        // Untaken descendants of take have changed chunks, and untaken
+        // remainder of its cluster competes again from its children.
         restart(seen);
         restart(below);
         seeds.clear();
@@ -1719,9 +1717,9 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
     }
 }
 
-// Dinkelbach: the maximum weight closure at the rate of the best closure
-// found (fee times its size less size times its fee, a minimum cut) is
-// positive until no closure has a higher rate.
+// Dinkelbach: maximum weight closure at rate of best closure
+// found (fee times its size less size times its fee, a
+// minimum cut) is positive until no closure has higher rate.
 template <typename Capacity>
 inline algorithm::mask_t algorithm::closure_(flow_t& flow,
     residual_t<Capacity>& residual, size_t count, size_t links, uint64_t fee,
@@ -1747,10 +1745,10 @@ inline algorithm::mask_t algorithm::closure_(flow_t& flow,
         }
     };
 
-    // The source feeds each node its fee at the size, each node feeds the
-    // sink its size at the fee, and a node feeds its parents without limit.
-    // The nodes reached from the source when no more can flow are the
-    // closure, and a node passes at once what its own two limits allow.
+    // Source feeds each node its fee at the size, each node feeds sink its size
+    // at the fee, and a node feeds its parents without limit. Nodes reached
+    // from source when no more can flow are the closure, and a node passes at
+    // once what its own two limits allow.
     const auto cut = [&]() NOEXCEPT
     {
         residual.flows.assign(links, Capacity{});
@@ -1766,8 +1764,7 @@ inline algorithm::mask_t algorithm::closure_(flow_t& flow,
 
         while (true)
         {
-            // The path to each node reached is by the node before it, the
-            // source if count.
+            // Path to each node reached is by node before it, source if count.
             mask_t reached{};
             size_t head{};
             size_t tail{};
@@ -1882,9 +1879,9 @@ inline algorithm::link_t algorithm::resolved(const graph_t& graph,
     return next;
 }
 
-// The children of a row depend on its absence, and its rivals on its
-// confirmation. A labeled row that leaves its component leaves the rest of it
-// to relabel, and a row made present joins one.
+// Children of row depend on its absence, and its rivals on its confirmation.
+// Labeled row that leaves its component leaves rest of it to relabel, and row
+// made present joins one.
 inline void algorithm::change(walk_t& walk, const columns_t& columns,
     link_t row, link_t next) NOEXCEPT
 {

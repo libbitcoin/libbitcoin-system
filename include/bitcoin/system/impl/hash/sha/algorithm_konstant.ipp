@@ -251,9 +251,9 @@ TEMPLATE
 INLINE constexpr void CLASS::
 konstant(buffer_t& buffer) NOEXCEPT
 {
-    // This optimization is neutral in 4/8/16 lane sha256 perf.
-    // Enabling requires vector aligned storage, as a vector cast of
-    // storage not so aligned may emit aligned moves, which fault.
+    // Optimization is neutral in 4/8/16 lane sha256 perf. Enabling requires
+    // vector aligned storage, as vector cast of storage not so aligned may emit
+    // aligned moves, which fault.
     ////if (std::is_constant_evaluated())
     ////{
     ////    konstant_(buffer);

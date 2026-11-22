@@ -113,8 +113,8 @@ inline std::vector<std::string> build_suffix(const build_tags& tags) NOEXCEPT
     return out;
 }
 
-/// Release file name of the program build for the tags on this platform, or
-/// empty if there are no release builds for this platform.
+/// Release file name of program build for tags on this platform, or empty if
+/// no release builds for this platform.
 inline std::string build_name(const std::string& program,
     const build_tags& tags) NOEXCEPT
 {

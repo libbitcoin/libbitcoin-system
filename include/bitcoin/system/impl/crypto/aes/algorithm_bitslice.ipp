@@ -22,8 +22,8 @@
 // Bitslicing
 // ============================================================================
 // Four blocks are sliced into eight 64 bit planes, plane i holding bit i of
-// each of the 64 state bytes, at position 16 * row + 4 * column + block. An
-// extended word carries one such group of four blocks in each 64 bit lane.
+// each of 64 state bytes, at position 16 * row + 4 * column + block. Extended
+// word carries one such group of four blocks in each 64 bit lane.
 
 // Based on BearSSL aes_ct64.c by Thomas Pornin.
 
@@ -105,8 +105,8 @@ ortho(xplanes_t<Word>& q) NOEXCEPT
     swap<lo4, hi4, 4>(q[3], q[7]);
 }
 
-// Spreads the four words of a block across two words, bytes of the first
-// (and third) words to even byte positions, second (and fourth) to odd.
+// Spreads four words of block across two words, bytes of first (and third)
+// words to even byte positions, second (and fourth) to odd.
 TEMPLATE
 INLINE constexpr void CLASS::
 interleave_in(uint64_t& q0, uint64_t& q1, const words_t& w) NOEXCEPT

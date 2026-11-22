@@ -32,7 +32,7 @@ namespace f {
 
 /// bitwise primitives
 /// ---------------------------------------------------------------------------
-/// 32 bit functions are applied because xint128_t is typed as uint32x4_t.
+/// 32 bit functions applied because xint128_t typed as uint32x4_t.
 
 INLINE xint128_t and_(xint128_t a, xint128_t b) NOEXCEPT
 {
@@ -428,7 +428,7 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 
 /// compare/select
 /// ---------------------------------------------------------------------------
-/// Masks are all bits set (true) or unset (false) per word.
+/// Masks all bits set (true) or unset (false) per word.
 
 INLINE xint128_t andnot(xint128_t a, xint128_t b) NOEXCEPT
 {
@@ -463,8 +463,8 @@ INLINE bool any(xint128_t a) NOEXCEPT
     return !is_zero(vget_lane_u32(vpmax_u32(halves, halves), 0));
 }
 
-// The index of the first unequal byte, or the word size if equal.
-// Each byte of the comparison narrows to a four bit nibble of the mask.
+// Index of first unequal byte, or word size if equal.
+// Each comparison byte narrows to four bit nibble of mask.
 INLINE size_t first_unequal(xint128_t a, xint128_t b) NOEXCEPT
 {
     constexpr auto nibble = to_half(byte_bits);

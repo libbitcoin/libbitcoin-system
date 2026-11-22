@@ -21,14 +21,14 @@
 #include <bitcoin/system/data/data.hpp>
 
 // base64
-// Base 64 is an ascii data encoding with a domain of 64 symbols (characters).
-// 64 is 2^6 so base64 is a 6<=>8 bit mapping.
+// Base 64 is ascii data encoding with domain of 64 symbols (characters).
+// 64 is 2^6 so base64 is 6<=>8 bit mapping.
 // 4 characters (64^4) are encoded into one 8 byte (8^8) chunk before mapping.
-// So after 8 byte encoding base64 is a 64<=>64 bit mapping.
-// The 6 bit encoding is authoritative as byte encoding is padded.
-// Invalid padding results in a decoding error.
+// So after 8 byte encoding base64 is 64<=>64 bit mapping.
+// 6 bit encoding is authoritative as byte encoding is padded.
+// Invalid padding results in decoding error.
 
-// This implementation derived from public domain:
+// Derived from public domain:
 // en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64
 
 namespace libbitcoin {

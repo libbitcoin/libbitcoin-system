@@ -216,8 +216,8 @@ void byte_writer<OStream>::write_error_code(const code& ec) NOEXCEPT
 template <typename OStream>
 std::istream& byte_writer<OStream>::write(std::istream& in) NOEXCEPT
 {
-    // This creates an intermediate buffer the size of the stream.
-    // This is presumed to be more optimal than looping individual bytes.
+    // Creates intermediate buffer the size of stream.
+    // Presumed more optimal than looping individual bytes.
     write_bytes(byte_reader<std::istream>(in).read_bytes());
     return in;
 }
@@ -368,9 +368,9 @@ void byte_writer<OStream>::invalid() NOEXCEPT
 template <typename OStream>
 void byte_writer<OStream>::validate() NOEXCEPT
 {
-    // Ensure that any failure in the call fully invalidates the stream/writer.
-    // Some errors are recoverable, so a sequence of operations without testing
-    // for validity could miss an error on intervening operations.
+    // Ensure any failure in call fully invalidates stream/writer. Some errors
+    // are recoverable, so sequence of operations without testing for validity
+    // could miss error on intervening operations.
     if (!valid())
         invalid();
 }

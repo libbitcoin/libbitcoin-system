@@ -58,7 +58,7 @@ struct BC_API parsed_options
 };
 
 /// Not thread safe, non-virtual.
-/// The value of a variable, and whether it was declared as a default.
+/// Value of variable, and whether it was declared as default.
 class BC_API variable_value
 {
 public:
@@ -115,16 +115,16 @@ private:
         variables_map& variables) THROWS;
     friend BC_API void notify(variables_map& variables) THROWS;
 
-    // Variables set explicitly by a non-composing option, which preclude
-    // their assignment by subsequently stored sources.
+    // Variables set explicitly by non-composing option, precluding their
+    // assignment by subsequently stored sources.
     std::set<std::string> final_{};
 
     // Required variables, by name for display.
     std::map<std::string, std::string> required_{};
 };
 
-/// Store the parsed options, not overriding final values of preceding
-/// sources, then store the defaults of declared options not yet present.
+/// Store parsed options, not overriding final values of preceding sources,
+/// then store defaults of declared options not yet present.
 BC_API void store(const parsed_options& options,
     variables_map& variables) THROWS;
 

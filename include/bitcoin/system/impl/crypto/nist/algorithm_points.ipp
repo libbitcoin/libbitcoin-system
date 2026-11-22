@@ -21,7 +21,7 @@
 
 // Points
 // ============================================================================
-// The addition and doubling formulas are complete: correct for all inputs,
+// Addition and doubling formulas are complete: correct for all inputs,
 // including infinity and equal points, without branches.
 
 namespace libbitcoin {

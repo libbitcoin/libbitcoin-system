@@ -61,8 +61,8 @@ inline size_t count_to_rows(size_t count) NOEXCEPT
     return greater(minimum, ceilinged_divide(count, two * threads));
 }
 
-// Chunks of rows verify in parallel, each into its own results, sized to
-// occupy the processors twice over but not below a few lane groups.
+// Chunks of rows verify in parallel, each into own results, sized to occupy
+// processors twice over but not below a few lane groups.
 template <typename Batch, typename Verify>
 data_chunk batch_verify_(const stopper& cancel, const Batch& batch,
     Verify&& verify) NOEXCEPT

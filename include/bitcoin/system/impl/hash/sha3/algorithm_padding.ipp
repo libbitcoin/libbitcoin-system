@@ -21,8 +21,8 @@
 
 // 5.1 Specification of pad10*1 (with 6.1 domain separation)
 // ============================================================================
-// The domain byte follows the message, the final rate byte carries the 1.
-// When both land on the same byte (tail is one byte short) they are xored.
+// Domain byte follows message, final rate byte carries the 1.
+// When both land on same byte (tail is one byte short) they are xored.
 
 namespace libbitcoin {
 namespace system {

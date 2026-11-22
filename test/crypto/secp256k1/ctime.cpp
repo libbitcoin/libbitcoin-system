@@ -20,9 +20,9 @@
 
 BC_AUTO_TEST_SUITE(secp256k1_ctime_tests)
 
-// Under valgrind a secret is undefined, so a branch or memory address that
-// depends on it is reported as an error, and each output is defined before it
-// is compared to the same computation on the defined secret.
+// Under valgrind secret is undefined, so branch or memory address depending on
+// it is reported as error, and each output is defined before comparison to
+// same computation on defined secret.
 
 const ec_secret secret1 = base16_array("8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536");
 const ec_secret secret2 = base16_array("33436393f770d9b3f5d11c20be561837300f89515284008965d2fd3f714b8fce");

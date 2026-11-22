@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-// Input format is currently private to bx:
+// Input format private to bx:
 // "txhash:index:sequence=max_input_sequence"
 
 static bool decode_input(chain::input& input,

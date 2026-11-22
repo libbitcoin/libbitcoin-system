@@ -35,7 +35,7 @@ template <typename Type>
 constexpr bool is_whole_token = is_whole_token_t<Type>::value;
 
 /// Not thread safe, virtual.
-/// The type, token arity, default and notification of an option value.
+/// Type, token arity, default and notification of option value.
 class BC_API value_semantic
 {
 public:
@@ -68,7 +68,7 @@ public:
 };
 
 /// Not thread safe, virtual.
-/// An option value of the given type, optionally bound to a store.
+/// Option value of given type, optionally bound to store.
 template <typename Type>
 class typed_value
   : public value_semantic

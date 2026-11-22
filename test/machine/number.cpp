@@ -91,9 +91,9 @@ BC_AUTO_TEST_CASE(number__8_from_chunk__negative_2__expected)
 
 BC_AUTO_TEST_CASE(number__4_from_chunk__most_negative__expected)
 {
-    // 4-byte encoding of the most negative value representable with Size == 4
-    // (sign bit occupies the high bit of the final byte; magnitude uses the
-    // remaining 31 bits). This is the lower bound for integer<4>.
+    // 4-byte encoding of most negative value representable with Size == 4 (sign
+    // bit occupies high bit of final byte; magnitude uses remaining 31 bits).
+    // Lower bound for integer<4>.
     int32_t value32{};
     BC_CHECK(number::integer<4>::from_chunk(value32, { 0xff, 0xff, 0xff, 0xff }));
     BC_CHECK(is_negative(value32));
@@ -102,9 +102,9 @@ BC_AUTO_TEST_CASE(number__4_from_chunk__most_negative__expected)
 
 BC_AUTO_TEST_CASE(number__5_from_chunk__min_int32__expected)
 {
-    // 5-byte encoding of min_int32 (requires the extra sign byte because
-    // magnitude bit 31 would otherwise share the sign-bit position).
-    // This is representable with Size == 5 but not with Size == 4.
+    // 5-byte encoding of min_int32 (requires extra sign byte because magnitude
+    // bit 31 would otherwise share sign-bit position). Representable with
+    // Size == 5 but not with Size == 4.
     int64_t value64{};
     BC_CHECK(number::integer<5>::from_chunk(value64, { 0x00, 0x00, 0x00, 0x80, 0x80 }));
     BC_CHECK(is_negative(value64));
@@ -200,7 +200,7 @@ BC_AUTO_TEST_CASE(number__from_integer__round_trip__int64_max)
 }
 
 // Causes an implementation assertion.
-// min_int64 is out of range because of the 1 bit domain reduction (+0/-0).
+// min_int64 out of range due to 1 bit domain reduction (+0/-0).
 ////BC_AUTO_TEST_CASE(number__from_integer__round_trip__int64_min_fails)
 ////{
 ////    int64_t restored{};
@@ -228,7 +228,7 @@ BC_AUTO_TEST_CASE(number__is_overflow__int64__expected)
     BC_CHECK(!number_test_accessor<8>::is_overflow(max_int64));
 
     // Causes an implementation assertion.
-    // min_int64 is out of range because of the 1 bit domain reduction (+0/-0).
+    // min_int64 out of range due to 1 bit domain reduction (+0/-0).
     ////BC_CHECK( number_test_accessor<8>::is_overflow(min_int64));
 }
 

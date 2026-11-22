@@ -95,8 +95,8 @@ struct certificate
 
 using certificates = std::vector<certificate>;
 
-/// Parse a der encoded certificate, false if malformed, not v3, of an
-/// unsupported key or signature, or with an unsupported critical extension.
+/// Parse der encoded certificate, false if malformed, not v3, of unsupported
+/// key or signature, or with unsupported critical extension.
 BC_API bool parse(certificate& out, const_byte_span der) NOEXCEPT;
 
 /// Parse all "CERTIFICATE" blocks of the text (at least one).

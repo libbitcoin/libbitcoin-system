@@ -24,7 +24,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// This is for Win32 environment support, exposed for test.
+/// For Win32 environment support, exposed for test.
 /// Use /unicode/conversion.hpp for unicode conversions.
 constexpr size_t utf8_max_character_size = 4;
 BC_API size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT;

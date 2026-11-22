@@ -105,7 +105,7 @@ bool deserialize(Value& out, const std::string_view& text) NOEXCEPT
 {
     // Trimming is useful for type conversion, which otherwise fails.
     // So trimming of string types (pass-thru) is avoided by template override.
-    // This can convert garbage to zero, use is_ascii_number for pre-assurance.
+    // Can convert garbage to zero, use is_ascii_number for pre-assurance.
     try
     {
         auto trimmed = trim_copy(text);

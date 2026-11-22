@@ -144,10 +144,10 @@ public:
     std::string read_string(size_t limit=max_size_t) NOEXCEPT override;
 
     /// Read string, truncated at size or first null.
-    /// This is only used for reading Bitcoin heading command text.
+    /// Only used for reading Bitcoin heading command text.
     std::string read_string_buffer(size_t size) NOEXCEPT override;
 
-    /// Read a line up to specified terminator (skip and exclude terminator).
+    /// Read line up to specified terminator (skip and exclude terminator).
     /// Returns empty and invalidates stream if terminator is not found.
     std::string read_line(const std::string& end="\r\n") NOEXCEPT override;
 
@@ -204,10 +204,10 @@ public:
 protected:
     static constexpr uint8_t pad() { return 0x00; };
 
-    // The maximum addressable stream position.
-    // Should be defined on IStream::pos_type, however that is implementation
-    // defined and is not an integer domain. Could rely on std::streamsize,
-    // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
+    // Maximum addressable stream position.
+    // Should be defined on IStream::pos_type, but that is implementation
+    // defined and not integer domain. Could rely on std::streamsize, but this
+    // exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum = system::maximum<size_t>;
 
     // For make_streamer<>.

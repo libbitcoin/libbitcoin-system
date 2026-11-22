@@ -292,9 +292,9 @@ private:
         return result;
     }
 
-    // Stage each chunk in a half while the prior computes in the other,
-    // collecting the prior before staging the next, and yielding the device
-    // between chunks to a caller that would be served ahead.
+    // Stage each chunk in one half while prior computes in other, collecting
+    // prior before staging next, yielding device between chunks to caller that
+    // would be served ahead.
     template <typename Stage, typename Collect>
     bool pipeline(size_t count, size_t rows, bool urgent,
         const stopper& cancel, Stage&& stage, Collect&& collect) NOEXCEPT
@@ -466,8 +466,8 @@ private:
             parameters, nullptr);
     }
 
-    // Kernels of a pool scan: once over the rows, once over the inputs, and
-    // over the inputs to the fixed point.
+    // Kernels of pool scan: once over rows, once over inputs,
+    // and over inputs to fixed point.
     struct pool_kernels
     {
         handle_t rows;
@@ -475,8 +475,7 @@ private:
         handle_t pass;
     };
 
-    // Run the staged scan over an allocation of the bytes, with passes and
-    // transfer reported.
+    // Run staged scan over allocation of bytes, passes and transfer reported.
     template <typename Scan>
     bool staged(pool::report_t& out, size_t bytes, const Scan& scan) NOEXCEPT
     {
@@ -783,7 +782,7 @@ private:
     }
 
     // BIP352 receiving vector "Simple send: two inputs", whose point pays
-    // the receiver's unlabeled output key 3e9fce73d4e77a48...
+    // receiver's unlabeled output key 3e9fce73d4e77a48...
     bool calibrate_scan(size_t bytes, bool limited) NOEXCEPT
     {
         constexpr ec_compressed point = base16_array(

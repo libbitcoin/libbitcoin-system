@@ -129,7 +129,7 @@ bool silent::batch::compute(const stopper& cancel, bool& used_gpu,
     return !cancel;
 }
 
-// Gpu computes while caller writes, cpu computes before.
+// Write runs during gpu compute, after cpu-only compute, or before cpu fallback.
 bool silent::batch::compute(const stopper& cancel, bool& used_gpu,
     const std::span<ec_compressed>& out, const std::span<uint8_t>& valid,
     const batch& batch, const std::function<void()>& write) NOEXCEPT

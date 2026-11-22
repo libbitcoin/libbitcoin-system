@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 
 /// UTF8/UTF32 are useful when iterating over Unicode characters.
-/// A single char32_t generally maps to a single Unicode code point.
+/// Single char32_t generally maps to single Unicode code point.
 /// However "combining characters" (e.g. diacritics) introduce complications.
 /// UTF8/UTF16 are useful when it is necessary to interface with Win32.
 /// UTF16/UTF32 are useful when iterating over Unicode characters when
@@ -35,9 +35,9 @@ namespace system {
 /// Win32 APIs support UTF16 (and formerly UCS2) but not UTF8.
 /// All other platforms are presumed to provide UTF8 interfaces.
 /// See "utf8_everywhere" in this library for more info on Win32 compatibility.
-/// UFT16 is not a single character per wchar_t as sometimes assumed.
-/// No char (byte) within a UTF8 character can be misinterpreted as an
-/// ASCII character, as all UTF8 bytes are above 0x7f.
+/// UTF16 is not single character per wchar_t as sometimes assumed.
+/// No char (byte) within UTF8 character can be misinterpreted as ASCII
+/// character, as all UTF8 bytes are above 0x7f.
 
 typedef std::vector<std::wstring> wstring_list;
 typedef std::vector<std::u32string> u32string_list;
