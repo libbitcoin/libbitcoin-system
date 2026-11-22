@@ -108,7 +108,7 @@ constexpr uint64_t algorithm::fee_rate(const totals_t& totals,
 
 constexpr uint64_t algorithm::fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT
 {
-    return ceilinged_multiply(fee, 1'000_u64) / greater(bytes, one);
+    return ceilinged_multiply(fee, 1'000_u64) / greater(bytes, 1_u64);
 }
 
 // Column values.
@@ -377,8 +377,8 @@ inline bool algorithm::family(uint64_t& fee, uint64_t& bytes,
     uint64_t limit, uint32_t bytes_per_sigop,
     size_t maximum_outcomes) NOEXCEPT
 {
-    fee = zero;
-    bytes = zero;
+    fee = 0_u64;
+    bytes = 0_u64;
     std::vector<link_t> found{};
     std::unordered_set<link_t> visited{};
     const auto push = [&](link_t row) NOEXCEPT
@@ -917,7 +917,7 @@ constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
     each_fee<Word>(zero, outcomes, component, graph,
         [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            const auto size = is_zero(rate) ? zero : chargeable(
+            const auto size = is_zero(rate) ? 0_u64 : chargeable(
                 outcomes[index], component, graph, bytes_per_sigop);
 
             if (first || worth(fee, size, most, least, rate))
@@ -1128,7 +1128,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     };
 
     // An unmarked row of no more than the value is left (least on top).
-    const auto remains = [&](std::vector<least_t>& least, uint32_t value) NOEXCEPT
+    const auto remains = [&](std::vector<least_t>& least,
+        uint32_t value) NOEXCEPT
     {
         while (!least.empty() && !unmarked(least.front().second))
         {
@@ -1209,7 +1210,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
     restart(seen);
     restart(below);
-    for (size_t at = base; at < count; ++at)
+    for (auto at = offset; at < count; ++at)
     {
         const auto row = possible_narrow_cast<link_t>(at);
         if (!unmarked(row))
@@ -1338,7 +1339,7 @@ inline bool algorithm::reaches(const projection_t& projection, size_t count,
 
         const auto last = add1(block) >= blocks.size();
         const auto full = !takes.empty() && !(last && projection.exhausted);
-        const auto capacity = full ? above(takes, zero) : space;
+        const auto capacity = full ? above(takes, 0_u64) : space;
         const auto demand = ceilinged_add(carry, above(takes, rate));
         if (demand < capacity)
             return true;
@@ -1356,7 +1357,7 @@ inline void algorithm::restart(visits_t& visits) NOEXCEPT
         return;
 
     std::ranges::fill(visits.walks, link_t{});
-    visits.walk = one;
+    visits.walk = 1_u32;
 }
 
 inline bool algorithm::visited(const visits_t& visits, link_t row) NOEXCEPT
@@ -1529,8 +1530,8 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
     const auto weigh = [&](mask_t nodes, uint64_t& fees,
         uint64_t& sizes) NOEXCEPT
     {
-        fees = zero;
-        sizes = zero;
+        fees = 0_u64;
+        sizes = 0_u64;
         for (; is_nonzero(nodes); nodes &= sub1(nodes))
         {
             const auto node = right_zeros(nodes);
