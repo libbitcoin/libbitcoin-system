@@ -30,7 +30,8 @@ namespace json {
 /// Each read fills the buffer unless the text completes within it, so memory
 /// is bounded by the buffer and the nesting depth. Doubles are written in
 /// shortest round-trip decimal form (e.g. 1.5, 1.0), non-finite as null or
-/// [-]1e99999, and strings escape only quote, reverse solidus and controls.
+/// [-]1e99999, decimals with exactly their places (e.g. 1.50000000), and
+/// strings escape only quote, reverse solidus and controls.
 class BC_API serializer
 {
 public:

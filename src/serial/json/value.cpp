@@ -59,6 +59,11 @@ value::value(double number) NOEXCEPT
 {
 }
 
+value::value(const decimal& number) NOEXCEPT
+  : inner_(std::in_place_type<decimal>, number)
+{
+}
+
 value::value(std::string_view text) THROWS
   : inner_(std::in_place_type<string>, text)
 {
@@ -150,6 +155,12 @@ value& value::operator=(bool boolean) NOEXCEPT
 value& value::operator=(double number) NOEXCEPT
 {
     inner_.emplace<double>(number);
+    return *this;
+}
+
+value& value::operator=(const decimal& number) NOEXCEPT
+{
+    inner_.emplace<decimal>(number);
     return *this;
 }
 

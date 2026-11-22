@@ -77,6 +77,46 @@ static size_t format_double(char* data, char* end, double number) NOEXCEPT
     return possible_narrow_and_sign_cast<size_t>(std::distance(data, out));
 }
 
+// Sign, "0.", the most places and the digits of the largest magnitude.
+static_assert(is_same_type<decltype(decimal::units), int64_t>);
+static_assert(is_same_type<decltype(decimal::places), uint8_t>);
+constexpr auto decimal_bytes = 3_size + max_uint8 +
+    add1(std::numeric_limits<int64_t>::digits10);
+
+// Exactly places fraction digits, zero padded (e.g. 0.00000100, 1.50000000).
+static size_t format_decimal(char* data, const decimal& number) NOEXCEPT
+{
+    auto out = data;
+    if (is_negative(number.units))
+        *out++ = '-';
+
+    // Unsigned negation is the magnitude of any signed value.
+    const auto units = to_unsigned(number.units);
+    const auto magnitude = is_negative(number.units) ? 0_u64 - units : units;
+
+    char digits[std::numeric_limits<uint64_t>::digits10 + 1]{};
+    const auto first = &digits[0];
+    const auto last = std::to_chars(first, std::end(digits), magnitude).ptr;
+    const auto span = std::distance(first, last);
+    const auto count = possible_narrow_and_sign_cast<size_t>(span);
+
+    const size_t places = number.places;
+    const auto whole = count > places ? count - places : zero;
+    if (is_zero(whole))
+        *out++ = '0';
+    else
+        out = std::copy_n(first, whole, out);
+
+    if (!is_zero(places))
+    {
+        *out++ = '.';
+        out = std::fill_n(out, places - (count - whole), '0');
+        out = std::copy(std::next(first, whole), last, out);
+    }
+
+    return possible_narrow_and_sign_cast<size_t>(std::distance(data, out));
+}
+
 serializer::serializer() NOEXCEPT
 {
 }
@@ -121,8 +161,8 @@ std::string_view serializer::read(char* data, size_t size) THROWS
             next();
     }
 
-    return { data, possible_narrow_and_sign_cast<size_t>(
-        std::distance(data, out)) };
+    const auto span = std::distance(data, out);
+    return { data, possible_narrow_and_sign_cast<size_t>(span) };
 }
 
 // private
@@ -136,14 +176,19 @@ size_t serializer::format(char* data, const value& element) NOEXCEPT
         case kind::int64:
         {
             const auto result = std::to_chars(data, end, element.get_int64());
-            return possible_narrow_and_sign_cast<size_t>(
-                std::distance(data, result.ptr));
+            const auto span = std::distance(data, result.ptr);
+            return possible_narrow_and_sign_cast<size_t>(span);
         }
         case kind::uint64:
         {
             const auto result = std::to_chars(data, end, element.get_uint64());
-            return possible_narrow_and_sign_cast<size_t>(
-                std::distance(data, result.ptr));
+            const auto span = std::distance(data, result.ptr);
+            return possible_narrow_and_sign_cast<size_t>(span);
+        }
+        case kind::decimal:
+        {
+            static_assert(pending_bytes >= decimal_bytes);
+            return format_decimal(data, element.get_decimal());
         }
         case kind::double_:
         default:
@@ -178,6 +223,7 @@ void serializer::begin(const value& element) THROWS
         case kind::int64:
         case kind::uint64:
         case kind::double_:
+        case kind::decimal:
         {
             pending_size_ = format(&pending_[0], element);
             pending_offset_ = zero;
@@ -290,8 +336,8 @@ void serializer::next() THROWS
 
 char* serializer::write_pending(char* out, const char* end) NOEXCEPT
 {
-    const auto space = possible_narrow_and_sign_cast<size_t>(
-        std::distance<const char*>(out, end));
+    const auto span = std::distance<const char*>(out, end);
+    const auto space = possible_narrow_and_sign_cast<size_t>(span);
     const auto size = std::min(pending_size_ - pending_offset_, space);
     std::memcpy(out, &pending_[pending_offset_], size);
     pending_offset_ += size;
@@ -304,8 +350,8 @@ char* serializer::write_text(char* out, const char* end) NOEXCEPT
     while (out != end && offset_ < text.size())
     {
         // The scan for an escape is bounded by the space, as is the copy.
-        const auto space = possible_narrow_and_sign_cast<size_t>(
-            std::distance<const char*>(out, end));
+        const auto span = std::distance<const char*>(out, end);
+        const auto space = possible_narrow_and_sign_cast<size_t>(span);
         const auto limit = std::min(text.size(), offset_ + space);
         auto run = offset_;
         while (run < limit && is_zero(escapes[to_unsigned(text[run])]))

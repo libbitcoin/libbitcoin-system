@@ -23,6 +23,7 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -62,13 +63,15 @@ DEFINE_JSON_FROM_TAG(output::cptr)
 DEFINE_JSON_FROM_TAGGED(bitcoind_tag, output)
 {
     const auto& out = instance.value;
-    const auto satoshis = out.value() / to_floating(satoshi_per_bitcoin);
+    const json::decimal amount{ sign_cast<int64_t>(out.value()),
+        btc_decimal_places };
+
     const auto script = bitcoind(out.script(), instance.flags);
 
     // "address" and "desc" require network context (added by the server).
     value =
     {
-        { "value", satoshis},
+        { "value", amount },
         { "scriptPubKey", value_from(script) }
 
         // In what parallel universe does serializing position make sense?
