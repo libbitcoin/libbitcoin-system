@@ -157,12 +157,57 @@ public:
         bool complete{ true };
     };
 
+    /// Offer of chunk of row, or closure of its cluster (count from first).
+    struct offer_t
+    {
+        link_t row{};
+        link_t count{};
+        size_t first{};
+        size_t order{};
+        uint64_t rate{};
+        totals_t sum{};
+    };
+
+    /// Size or sigops of row.
+    using least_t = std::pair<uint32_t, link_t>;
+
+    /// Clusters of unmarked rows and their first offers, kept between blocks.
+    struct packing_t
+    {
+        /// Rows and limits kept for.
+        size_t rows{};
+        size_t depth{};
+        totals_t budget{};
+        uint32_t bytes_per_sigop{};
+
+        /// First unmarked row, and place among unmarked of each row from it.
+        link_t base{};
+        std::vector<link_t> places{};
+
+        /// By place: row, earlier place of cluster, next place of cluster,
+        /// and (at first place) cluster has row with excluded parent.
+        std::vector<link_t> open{};
+        std::vector<link_t> joined{};
+        std::vector<link_t> ring{};
+        std::vector<bool> partial{};
+
+        /// Unmarked rows by least size and by least sigops.
+        std::vector<least_t> sizes{};
+        std::vector<least_t> sigops{};
+
+        /// First offers, rows of their closures, and rows of last block.
+        std::vector<offer_t> offers{};
+        std::vector<link_t> closed{};
+        std::vector<link_t> taken{};
+    };
+
     /// Blocks taken in turn from the rows, and the marks that continue them.
     struct projection_t
     {
         std::vector<mark> marks{};
         std::vector<takes_t> blocks{};
         bool exhausted{};
+        packing_t packing{};
     };
 
     /// Lane counts of a word.
@@ -485,9 +530,9 @@ protected:
     static void forfeit(std::span<mark> marks, const graph_t& graph,
         link_t row) NOEXCEPT;
 
-    /// As pack, with the rate and chargeable size of each chunk taken.
+    /// As pack, with rate and chargeable size of each chunk taken.
     static void pack_(std::vector<link_t>& out, takes_t& takes,
-        std::span<mark> marks, const columns_t& columns,
+        packing_t& kept, std::span<mark> marks, const columns_t& columns,
         const totals_t& budget, size_t depth,
         uint32_t bytes_per_sigop) NOEXCEPT;
 

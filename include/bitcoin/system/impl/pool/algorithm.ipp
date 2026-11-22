@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_POOL_ALGORITHM_IPP
 #define LIBBITCOIN_SYSTEM_POOL_ALGORITHM_IPP
 
+#include <ranges>
 #include <span>
 #include <unordered_set>
 #include <bitcoin/system/data/data.hpp>
@@ -609,7 +610,8 @@ inline void algorithm::pack(std::vector<link_t>& out, std::span<mark> marks,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
     takes_t takes{};
-    pack_(out, takes, marks, columns, budget, depth, bytes_per_sigop);
+    packing_t kept{};
+    pack_(out, takes, kept, marks, columns, budget, depth, bytes_per_sigop);
 }
 
 inline void algorithm::project(std::vector<link_t>& out,
@@ -618,7 +620,8 @@ inline void algorithm::project(std::vector<link_t>& out,
 {
     takes_t takes{};
     auto& marks = projection.marks;
-    pack_(out, takes, marks, columns, budget, depth, bytes_per_sigop);
+    pack_(out, takes, projection.packing, marks, columns, budget, depth,
+        bytes_per_sigop);
 
     const auto left = std::ranges::find(marks, mark::unmarked) != marks.end();
     projection.exhausted = takes.empty() || !left;
@@ -1020,41 +1023,52 @@ inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
 }
 
 inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
-    std::span<mark> marks, const columns_t& columns, const totals_t& budget,
-    size_t depth, uint32_t bytes_per_sigop) NOEXCEPT
+    packing_t& kept, std::span<mark> marks, const columns_t& columns,
+    const totals_t& budget, size_t depth, uint32_t bytes_per_sigop) NOEXCEPT
 {
-    // The chunk of the row, or the closure of its cluster (count rows from
-    // first of the closed rows).
-    struct score_t
+    const auto same = [](const totals_t& left, const totals_t& right) NOEXCEPT
     {
-        link_t row{};
-        link_t count{};
-        size_t first{};
-        size_t order{};
-        uint64_t rate{};
-        totals_t sum{};
+        return left.fee == right.fee && left.size == right.size &&
+            left.sigops == right.sigops;
     };
 
-    // A size or sigops of a row.
-    using least_t = std::pair<uint32_t, link_t>;
-
-    // No row before the first unmarked row is met by a walk.
+    // What is kept is of the rows and the limits it was made for, with no
+    // row before the first unmarked row met by a walk.
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
-    const auto end = std::next(marks.begin(), count);
-    const auto start = std::find(marks.begin(), end, mark::unmarked);
-    const auto offset = to_unsigned(std::distance(marks.begin(), start));
-    const auto base = possible_narrow_cast<link_t>(offset);
-    const auto live = count - offset;
-    std::vector<score_t> scores{};
-    std::vector<least_t> sizes{};
-    std::vector<least_t> sigops{};
+    const auto current = kept.rows == count && same(kept.budget, budget) &&
+        kept.depth == depth && kept.bytes_per_sigop == bytes_per_sigop;
+
+    if (!current)
+    {
+        const auto end = std::next(marks.begin(), count);
+        const auto start = std::find(marks.begin(), end, mark::unmarked);
+        const auto offset = to_unsigned(std::distance(marks.begin(), start));
+        kept = {};
+        kept.rows = count;
+        kept.budget = budget;
+        kept.depth = depth;
+        kept.bytes_per_sigop = bytes_per_sigop;
+        kept.base = possible_narrow_cast<link_t>(offset);
+        kept.places.resize(count - offset);
+    }
+
+    const auto base = kept.base;
+    const auto live = kept.places.size();
+    auto& places = kept.places;
+    auto& open = kept.open;
+    auto& joined = kept.joined;
+    auto& ring = kept.ring;
+    auto& partial = kept.partial;
+    auto& firsts = kept.offers;
+    std::vector<offer_t> others{};
     std::vector<link_t> closed{};
     std::vector<link_t> rows{};
     std::vector<link_t> group{};
+    std::vector<link_t> fresh{};
+    std::vector<link_t> lost{};
     std::vector<link_t> descent{};
     std::vector<link_t> seeds{};
-    std::vector<link_t> places(live);
     visits_t seen{ std::vector<link_t>(live), base };
     visits_t below{ std::vector<link_t>(live), base };
     visits_t walk{ std::vector<link_t>(live), base };
@@ -1068,12 +1082,6 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     const auto fits = [](const totals_t& sum, const totals_t& space) NOEXCEPT
     {
         return sum.size <= space.size && sum.sigops <= space.sigops;
-    };
-
-    const auto same = [](const totals_t& left, const totals_t& right) NOEXCEPT
-    {
-        return left.fee == right.fee && left.size == right.size &&
-            left.sigops == right.sigops;
     };
 
     const auto unmarked = [&](link_t row) NOEXCEPT
@@ -1122,7 +1130,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
     // The highest rate is on top, the lowest row of equal rates, and the
     // latest offer of the same row.
-    const auto lower = [](const score_t& left, const score_t& right) NOEXCEPT
+    const auto lower = [](const offer_t& left, const offer_t& right) NOEXCEPT
     {
         if (left.rate != right.rate)
             return left.rate < right.rate;
@@ -1131,13 +1139,18 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             left.row > right.row;
     };
 
-    // The first offers are heaped at once.
-    const auto push = [&](score_t&& score) NOEXCEPT
+    // The first offers are kept and heaped at once, the others as offered.
+    const auto push = [&](offer_t&& score) NOEXCEPT
     {
         score.order = offers++;
-        scores.push_back(score);
-        if (heaped)
-            std::push_heap(scores.begin(), scores.end(), lower);
+        if (!heaped)
+        {
+            firsts.push_back(score);
+            return;
+        }
+
+        others.push_back(score);
+        std::push_heap(others.begin(), others.end(), lower);
     };
 
     const auto score_row = [&](link_t row) NOEXCEPT
@@ -1177,10 +1190,11 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
         if (whole && fits(sum, available()))
         {
-            const auto first = closed.size();
+            auto& held = heaped ? closed : kept.closed;
+            const auto first = held.size();
             const auto size = possible_narrow_cast<link_t>(rows.size());
             const auto rate = fee_rate(sum.fee, charged(rows));
-            closed.insert(closed.end(), rows.begin(), rows.end());
+            held.insert(held.end(), rows.begin(), rows.end());
             push({ rows.front(), size, first, {}, rate, sum });
             return;
         }
@@ -1203,29 +1217,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return true;
     };
 
-    // The unmarked rows in order, each with its place among them.
-    for (auto at = offset; at < count; ++at)
-    {
-        const auto row = possible_narrow_cast<link_t>(at);
-        if (!unmarked(row))
-            continue;
-
-        const auto own = totals(graph, row);
-        places[row - base] = possible_narrow_cast<link_t>(sizes.size());
-        sizes.emplace_back(own.size, row);
-        sigops.emplace_back(own.sigops, row);
-    }
-
-    // Each place is joined to an earlier place of its cluster (the first to
-    // itself) and is in a ring of the places of its cluster, which is partial
-    // (at its first place) if a row of it has an excluded parent.
-    const auto candidates = possible_narrow_cast<link_t>(sizes.size());
-    std::vector<link_t> joined(candidates);
-    std::vector<link_t> ring(candidates);
-    std::vector<bool> partial(candidates);
-    for (link_t place{}; place < candidates; ++place)
-        joined[place] = ring[place] = place;
-
+    // The first place of the cluster of the place.
     const auto lowest = [&](link_t place) NOEXCEPT
     {
         while (joined[place] != place)
@@ -1237,74 +1229,173 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return place;
     };
 
-    for (link_t place{}; place < candidates; ++place)
+    // Each place is joined to an earlier place of its cluster (the first to
+    // itself) and is in a ring of the places of its cluster, which is partial
+    // (at its first place) if a row of it has an excluded parent. Each
+    // cluster of the places then makes its first offer.
+    const auto form = [&](const auto& set) NOEXCEPT
     {
-        const auto slice = edges(graph, sizes[place].second);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
+        for (const auto place: set)
         {
-            const auto up = parent(graph, input);
-            if (up == none || is_boundary(cell(graph, up)) ||
-                marks[up] == mark::taken)
-                continue;
+            joined[place] = ring[place] = place;
+            partial[place] = false;
+        }
 
-            auto low = lowest(place);
-            if (marks[up] == mark::excluded)
+        for (const auto place: set)
+        {
+            const auto slice = edges(graph, open[place]);
+            for (auto input = slice.first; input < slice.first + slice.count;
+                ++input)
             {
-                partial[low] = true;
-                continue;
+                const auto up = parent(graph, input);
+                if (up == none || is_boundary(cell(graph, up)) ||
+                    marks[up] == mark::taken)
+                    continue;
+
+                auto low = lowest(place);
+                if (marks[up] == mark::excluded)
+                {
+                    partial[low] = true;
+                    continue;
+                }
+
+                auto high = lowest(places[up - base]);
+                if (high == low)
+                    continue;
+
+                if (high < low)
+                    std::swap(low, high);
+
+                joined[high] = low;
+                std::swap(ring[low], ring[high]);
+                partial[low] = partial[low] || partial[high];
             }
+        }
 
-            auto high = lowest(places[up - base]);
-            if (high == low)
+        for (const auto place: set)
+        {
+            if (joined[place] != place)
                 continue;
 
-            if (high < low)
-                std::swap(low, high);
+            group.clear();
+            auto member = place;
+            do
+            {
+                group.push_back(open[member]);
+                member = ring[member];
+            }
+            while (member != place);
 
-            joined[high] = low;
-            std::swap(ring[low], ring[high]);
-            partial[low] = partial[low] || partial[high];
+            propose(!partial[place] && group.size() <= maximum_members, true);
         }
-    }
+    };
 
-    for (link_t place{}; place < candidates; ++place)
+    if (!current)
     {
-        if (joined[place] != place)
-            continue;
+        // The unmarked rows in order, each with its place among them.
+        const auto start = std::next(marks.begin(), count - live);
+        const auto end = std::next(marks.begin(), count);
+        const auto total = std::count(start, end, mark::unmarked);
+        const auto all = possible_narrow_cast<link_t>(to_unsigned(total));
+        open.resize(all);
+        joined.resize(all);
+        ring.resize(all);
+        partial.resize(all);
+        kept.sizes.resize(all);
+        kept.sigops.resize(all);
 
-        group.clear();
-        auto member = place;
-        do
+        link_t place{};
+        for (auto at = count - live; at < count; ++at)
         {
-            group.push_back(sizes[member].second);
-            member = ring[member];
-        }
-        while (member != place);
+            const auto row = possible_narrow_cast<link_t>(at);
+            if (!unmarked(row))
+                continue;
 
-        propose(!partial[place] && group.size() <= maximum_members, true);
+            const auto own = totals(graph, row);
+            places[row - base] = place;
+            open[place] = row;
+            kept.sizes[place] = { own.size, row };
+            kept.sigops[place] = { own.sigops, row };
+            ++place;
+        }
+
+        std::make_heap(kept.sizes.begin(), kept.sizes.end(),
+            std::greater<>{});
+        std::make_heap(kept.sigops.begin(), kept.sigops.end(),
+            std::greater<>{});
+        form(std::views::iota(link_t{}, all));
+    }
+    else
+    {
+        // A cluster that lost rows to the last block is formed again from
+        // those left, and the first offers of the others are kept.
+        restart(seen);
+        for (const auto row: kept.taken)
+        {
+            const auto first = lowest(places[row - base]);
+            if (visit(seen, open[first]))
+                lost.push_back(first);
+        }
+
+        std::erase_if(firsts, [&](const offer_t& score) NOEXCEPT
+        {
+            return visited(seen, open[lowest(places[score.row - base])]);
+        });
+
+        for (auto& score: firsts)
+            score.order = offers++;
+
+        for (const auto first: lost)
+        {
+            auto member = first;
+            do
+            {
+                if (unmarked(open[member]))
+                    fresh.push_back(member);
+
+                member = ring[member];
+            }
+            while (member != first);
+        }
+
+        form(fresh);
     }
 
-    std::make_heap(scores.begin(), scores.end(), lower);
-    std::make_heap(sizes.begin(), sizes.end(), std::greater<>{});
-    std::make_heap(sigops.begin(), sigops.end(), std::greater<>{});
+    std::make_heap(firsts.begin(), firsts.end(), lower);
+    auto left = firsts.size();
     heaped = true;
 
-    while (!scores.empty())
+    // A first offer leaves the heap and is kept.
+    while (is_nonzero(left) || !others.empty())
     {
         // A take holds an unmarked row, so none is left when none fits.
         const auto space = available();
-        if (!remains(sizes, space.size) || !remains(sigops, space.sigops))
+        if (!remains(kept.sizes, space.size) ||
+            !remains(kept.sigops, space.sigops))
             break;
 
-        std::pop_heap(scores.begin(), scores.end(), lower);
-        const auto score = scores.back();
-        scores.pop_back();
+        const auto first = is_nonzero(left) && (others.empty() ||
+            lower(others.front(), firsts.front()));
+
+        offer_t score{};
+        if (first)
+        {
+            std::pop_heap(firsts.begin(), std::next(firsts.begin(), left),
+                lower);
+            score = firsts[--left];
+        }
+        else
+        {
+            std::pop_heap(others.begin(), others.end(), lower);
+            score = others.back();
+            others.pop_back();
+        }
 
         totals_t sum{};
         if (is_nonzero(score.count))
         {
-            const auto held = std::span<const link_t>{ closed }.subspan(
+            const auto& from = first ? kept.closed : closed;
+            const auto held = std::span<const link_t>{ from }.subspan(
                 score.first, score.count);
 
             if (!std::ranges::all_of(held, unmarked))
@@ -1377,6 +1468,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
                     score_row(descent[at]);
     }
 
+    kept.taken = out;
     std::sort(out.begin(), out.end());
 }
 

@@ -325,6 +325,41 @@ struct charged_state
     }
 };
 
+// Rows: S=0, L=1, M=2 (spends L), N=3 (spends M).
+// Inputs: 0 S spends X:0, 1 L spends Y:0, 2 M spends L:0, 3 N spends M:0.
+struct apart_state
+{
+    apart_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 4> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled }
+    };
+    std_array<link_t, 4> children{ { none, 2, 3, none } };
+    std_array<edges_t, 4> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 } } };
+    std_array<totals_t, 4> totals
+    {
+        { { 500, 100, 0 }, { 10, 100, 0 }, { 10, 100, 0 }, { 400, 100, 0 } }
+    };
+    std_array<link_t, 4> parents{ { none, none, 1, 2 } };
+    std_array<link_t, 4> siblings{ { none, none, none, none } };
+    std_array<link_t, 4> rivals{ { none, none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
 // Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
 // 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
@@ -1955,6 +1990,49 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__second_block__rows_of_block)
     accessor::project(rows, out, line.columns(), { 0, 200, 100 }, 2, 20);
     BC_REQUIRE_EQUAL(rows.size(), 1u);
     BC_REQUIRE_EQUAL(rows[0], 2u);
+}
+
+// S, then the chain L, M, N a row a block, its cluster kept and formed again.
+BC_AUTO_TEST_CASE(pool_algorithm__project__blocks_of_one_row__cluster_row_by_row)
+{
+    apart_state apart{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks.resize(4);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 0u);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 1u);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 2u);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 3u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 4u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 5'000u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[2][0].rate, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[3][0].rate, 4'000u);
+    BC_REQUIRE(out.exhausted);
+}
+
+// The chain does not fit the first budget, and is one take of the second.
+BC_AUTO_TEST_CASE(pool_algorithm__project__budget_raised_between_blocks__whole_cluster_one_take)
+{
+    apart_state apart{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks.resize(4);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    accessor::project(rows, out, apart.columns(), { 0, 1'000, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 3u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 2u);
+    BC_REQUIRE_EQUAL(out.blocks[1].size(), 1u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 1'400u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].size, 300u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__project__unfit_row__exhausted)
