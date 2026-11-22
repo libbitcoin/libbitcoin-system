@@ -1054,7 +1054,10 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::vector<score_t> scores{};
     std::vector<link_t> rows{};
     std::vector<link_t> group{};
-    std::vector<bool> seen{};
+    std::vector<link_t> seeds{};
+    std::vector<size_t> seen(count);
+    std::vector<size_t> below(count);
+    size_t epoch{};
     totals_t used{};
     out.clear();
     takes.clear();
@@ -1062,6 +1065,17 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     const auto fits = [](const totals_t& sum, const totals_t& space) NOEXCEPT
     {
         return sum.size <= space.size && sum.sigops <= space.sigops;
+    };
+
+    const auto same = [](const totals_t& left, const totals_t& right) NOEXCEPT
+    {
+        return left.fee == right.fee && left.size == right.size &&
+            left.sigops == right.sigops;
+    };
+
+    const auto unmarked = [&](link_t row) NOEXCEPT
+    {
+        return marks[row] == mark::unmarked;
     };
 
     const auto available = [&]() NOEXCEPT -> totals_t
@@ -1074,91 +1088,131 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         };
     };
 
-    // A row's chunk, as a candidate for the round.
+    // The highest rate is on top, the lowest row of equal rates.
+    const auto lower = [](const score_t& left, const score_t& right) NOEXCEPT
+    {
+        return left.rate == right.rate ? left.row > right.row :
+            left.rate < right.rate;
+    };
+
+    const auto push = [&](score_t&& score) NOEXCEPT
+    {
+        scores.push_back(std::move(score));
+        std::push_heap(scores.begin(), scores.end(), lower);
+    };
+
     const auto score_row = [&](link_t row) NOEXCEPT
     {
         totals_t sum{};
         if (chunk(rows, sum, marks, graph, row, depth, available()))
-        {
-            const auto rate = fee_rate(sum, bytes_per_sigop);
-            scores.push_back({ row, rate, sum, rows, false });
-        }
+            push({ row, fee_rate(sum, bytes_per_sigop), sum, {}, false });
     };
 
-    for (auto taken = true; taken;)
+    // A whole cluster offers its best closure, else each of its rows its
+    // chunk, of a partial cluster only those below the take.
+    const auto offer = [&](link_t row, bool all) NOEXCEPT
     {
-        taken = false;
-        scores.clear();
-        seen.assign(count, false);
-        for (size_t at{}; at < count; ++at)
+        const auto whole = cluster(group, marks, graph, row);
+        for (const auto member: group)
+            seen[member] = epoch;
+
+        totals_t sum{};
+        if (whole)
+            closure(rows, sum, graph, group, bytes_per_sigop);
+
+        if (whole && fits(sum, available()))
         {
-            const auto row = possible_narrow_cast<link_t>(at);
-            if (marks[row] != mark::unmarked || seen[row])
-                continue;
+            const auto rate = fee_rate(sum, bytes_per_sigop);
+            push({ rows.front(), rate, sum, rows, true });
+            return;
+        }
 
-            // A cluster offers its best closure, or each row its chunk.
-            const auto whole = cluster(group, marks, graph, row);
-            for (const auto member: group)
-                seen[member] = true;
-
-            totals_t sum{};
-            if (whole)
-                closure(rows, sum, graph, group, bytes_per_sigop);
-
-            if (whole && fits(sum, available()))
-            {
-                const auto rate = fee_rate(sum, bytes_per_sigop);
-                scores.push_back({ rows.front(), rate, sum, rows, true });
-                continue;
-            }
-
-            for (const auto member: group)
+        for (const auto member: group)
+            if (all || whole || below[member] == epoch)
                 score_row(member);
-        }
+    };
 
-        std::sort(scores.begin(), scores.end(),
-            [](const score_t& left, const score_t& right) NOEXCEPT
-            {
-                return left.rate == right.rate ? left.row < right.row :
-                    left.rate > right.rate;
-            });
+    ++epoch;
+    for (size_t at{}; at < count; ++at)
+    {
+        const auto row = possible_narrow_cast<link_t>(at);
+        if (unmarked(row) && seen[row] != epoch)
+            offer(row, true);
+    }
 
-        for (const auto& score: scores)
+    while (!scores.empty())
+    {
+        std::pop_heap(scores.begin(), scores.end(), lower);
+        auto score = std::move(scores.back());
+        scores.pop_back();
+
+        totals_t sum{};
+        const auto space = available();
+        if (score.closed)
         {
-            totals_t sum{};
-            const auto space = available();
-            const auto unmarked = [&](link_t row) NOEXCEPT
-            {
-                return marks[row] == mark::unmarked;
-            };
+            if (!std::ranges::all_of(score.rows, unmarked))
+                continue;
 
-            if (score.closed)
+            // A closure that no longer fits falls back to the chunks of its
+            // cluster.
+            if (!fits(score.sum, space))
             {
-                if (!std::ranges::all_of(score.rows, unmarked) ||
-                    !fits(score.sum, space))
-                    continue;
+                cluster(group, marks, graph, score.row);
+                for (const auto member: group)
+                    score_row(member);
 
-                rows = score.rows;
-                sum = score.sum;
-            }
-            else if (!unmarked(score.row) ||
-                !chunk(rows, sum, marks, graph, score.row, depth, space) ||
-                rows.size() != score.rows.size() ||
-                sum.fee != score.sum.fee)
-            {
                 continue;
             }
 
-            for (const auto row: rows)
-                marks[row] = mark::taken;
-
-            out.insert(out.end(), rows.begin(), rows.end());
-            takes.push_back({ score.rate, chargeable(sum, bytes_per_sigop) });
-            used.fee = ceilinged_add(used.fee, sum.fee);
-            used.size = ceilinged_add(used.size, sum.size);
-            used.sigops = ceilinged_add(used.sigops, sum.sigops);
-            taken = true;
+            rows = std::move(score.rows);
+            sum = score.sum;
         }
+        else
+        {
+            if (!unmarked(score.row) ||
+                !chunk(rows, sum, marks, graph, score.row, depth, space))
+                continue;
+
+            // A changed chunk competes again at its current rate.
+            if (!same(sum, score.sum))
+            {
+                push({ score.row, fee_rate(sum, bytes_per_sigop), sum, {},
+                    false });
+                continue;
+            }
+        }
+
+        for (const auto row: rows)
+            marks[row] = mark::taken;
+
+        out.insert(out.end(), rows.begin(), rows.end());
+        takes.push_back({ score.rate, chargeable(sum, bytes_per_sigop) });
+        used.fee = ceilinged_add(used.fee, sum.fee);
+        used.size = ceilinged_add(used.size, sum.size);
+        used.sigops = ceilinged_add(used.sigops, sum.sigops);
+
+        // The untaken descendants of the take have changed chunks, and the
+        // untaken remainder of its cluster competes again from its children.
+        ++epoch;
+        seeds.clear();
+        group.assign(rows.begin(), rows.end());
+        for (size_t at{}; at < group.size(); ++at)
+        {
+            each_child(graph, group[at], [&](link_t down) NOEXCEPT
+            {
+                if (!unmarked(down) || below[down] == epoch)
+                    return;
+
+                below[down] = epoch;
+                group.push_back(down);
+                if (marks[group[at]] == mark::taken)
+                    seeds.push_back(down);
+            });
+        }
+
+        for (const auto seed: seeds)
+            if (seen[seed] != epoch)
+                offer(seed, false);
     }
 
     std::sort(out.begin(), out.end());

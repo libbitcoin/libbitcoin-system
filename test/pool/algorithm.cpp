@@ -209,6 +209,80 @@ struct fork_state
     }
 };
 
+// Rows: A=0, B=1 spends A:0, Q=2. Inputs: 0 A spends X:0, 1 B spends A:0,
+// 2 Q spends Y:0.
+struct deferred_state
+{
+    deferred_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 3> cells{ { unlabeled, unlabeled, unlabeled } };
+    std_array<link_t, 3> children{ { 1, none, none } };
+    std_array<edges_t, 3> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 } } };
+    std_array<totals_t, 3> totals
+    {
+        { { 70, 100, 0 }, { 60, 100, 0 }, { 50, 100, 0 } }
+    };
+    std_array<link_t, 3> parents{ { none, 0, none } };
+    std_array<link_t, 3> siblings{ { none, none, none } };
+    std_array<link_t, 3> rivals{ { none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
+// Rows: E=0, L=1, J=2 and K=3 (spend L), M=4 (spends E and L), Q=5.
+// Inputs: 0 E spends Z:0, 1 L spends X:0, 2 J spends L:0, 3 K spends L:1,
+// 4 M spends E:0, 5 M spends L:2, 6 Q spends Y:0.
+struct partial_state
+{
+    partial_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 6> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled, unlabeled, unlabeled }
+    };
+    std_array<link_t, 6> children{ { 4, 2, none, none, none, none } };
+    std_array<edges_t, 6> edges
+    {
+        { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 }, { 4, 2 }, { 6, 1 } }
+    };
+    std_array<totals_t, 6> totals
+    {
+        {
+            { 0, 100, 0 }, { 0, 100, 0 }, { 100, 100, 0 }, { 70, 100, 0 },
+            { 10, 100, 0 }, { 40, 100, 0 }
+        }
+    };
+    std_array<link_t, 7> parents{ { none, none, 1, 1, 0, 1, none } };
+    std_array<link_t, 7> siblings{ { none, none, 3, 5, none, none, none } };
+    std_array<link_t, 7> rivals{ { none, none, none, none, none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
 // Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
 // 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
@@ -1710,6 +1784,34 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__shared_parent__closure_outrates_row)
     BC_REQUIRE_EQUAL(out[1], 1u);
     BC_REQUIRE_EQUAL(out[2], 2u);
     BC_REQUIRE(marks[3] == mark::unmarked);
+}
+
+// The closure of A (700) leaves B (600), which outrates Q (500).
+BC_AUTO_TEST_CASE(pool_algorithm__pack__closure_remainder__outrates_next_cluster)
+{
+    deferred_state deferred{};
+    std_array<mark, 3> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, deferred.columns(), { 0, 200, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+// The chunk of J with L (500) leaves K alone (700), which outrates Q (400).
+BC_AUTO_TEST_CASE(pool_algorithm__pack__chunk_descendant__outrates_next_cluster)
+{
+    partial_state partial{};
+    std_array<mark, 6> marks{ { mark::excluded, mark::unmarked, mark::unmarked, mark::unmarked, mark::unmarked, mark::unmarked } };
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, partial.columns(), { 0, 300, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 1u);
+    BC_REQUIRE_EQUAL(out[1], 2u);
+    BC_REQUIRE_EQUAL(out[2], 3u);
+    BC_REQUIRE(marks[4] == mark::unmarked);
+    BC_REQUIRE(marks[5] == mark::unmarked);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__project__shared_parent__closure_then_row)

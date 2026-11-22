@@ -401,9 +401,14 @@ inline bool value::is_double() const NOEXCEPT
     return std::holds_alternative<double>(inner_);
 }
 
+inline bool value::is_decimal() const NOEXCEPT
+{
+    return std::holds_alternative<decimal>(inner_);
+}
+
 inline bool value::is_number() const NOEXCEPT
 {
-    return is_int64() || is_uint64() || is_double();
+    return is_int64() || is_uint64() || is_double() || is_decimal();
 }
 
 inline bool value::is_string() const NOEXCEPT
@@ -469,6 +474,16 @@ inline double* value::if_double() NOEXCEPT
 inline const double* value::if_double() const NOEXCEPT
 {
     return std::get_if<double>(&inner_);
+}
+
+inline decimal* value::if_decimal() NOEXCEPT
+{
+    return std::get_if<decimal>(&inner_);
+}
+
+inline const decimal* value::if_decimal() const NOEXCEPT
+{
+    return std::get_if<decimal>(&inner_);
 }
 
 inline string* value::if_string() NOEXCEPT
@@ -549,6 +564,18 @@ inline double value::get_double() const NOEXCEPT
     return *if_double();
 }
 
+inline decimal& value::get_decimal() NOEXCEPT
+{
+    BC_ASSERT(is_decimal());
+    return *if_decimal();
+}
+
+inline const decimal& value::get_decimal() const NOEXCEPT
+{
+    BC_ASSERT(is_decimal());
+    return *if_decimal();
+}
+
 inline string& value::get_string() NOEXCEPT
 {
     BC_ASSERT(is_string());
@@ -598,6 +625,9 @@ Number value::to_number(code& ec) const NOEXCEPT
             return to_floating<Number>(*number);
         if (const auto number = if_double())
             return *number;
+        if (const auto number = if_decimal())
+            return to_floating<Number>(number->units) /
+                std::pow(10.0, number->places);
 
         ec = error::json_not_number;
         return {};
@@ -623,6 +653,19 @@ Number value::to_number(code& ec) const NOEXCEPT
             const auto whole = std::trunc(*real) == *real;
             if (whole && *real >= lower && *real < upper)
                 return to_integer<Number>(*real);
+        }
+        else if (const auto fixed = if_decimal())
+        {
+            auto units = fixed->units;
+            auto places = fixed->places;
+            while (!is_zero(places) && is_zero(units % 10))
+            {
+                units /= 10;
+                --places;
+            }
+
+            if (is_zero(places) && !is_limited<Number>(units))
+                return limit<Number>(units);
         }
         else
         {

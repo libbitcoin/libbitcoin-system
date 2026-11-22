@@ -111,7 +111,8 @@ void value_from(Type&& from, value& to) THROWS
     {
         to = std::forward<Type>(from);
     }
-    else if constexpr (is_same_type<type, bool> || is_json_number<type>)
+    else if constexpr (is_same_type<type, bool> || is_json_number<type> ||
+        is_same_type<type, decimal>)
     {
         to = from;
     }

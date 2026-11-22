@@ -38,7 +38,8 @@ enum class kind : uint8_t
     double_,
     string,
     array,
-    object
+    object,
+    decimal
 };
 
 class value;
@@ -48,6 +49,15 @@ class object;
 class key_value_pair;
 
 using string = std::string;
+
+/// A fixed-point number, units scaled down by ten to the places.
+struct decimal
+{
+    int64_t units{};
+    uint8_t places{};
+
+    bool operator==(const decimal& other) const NOEXCEPT = default;
+};
 
 /// Customization tags for value_from/value_to (found by ADL tag_invoke).
 struct value_from_tag {};
@@ -370,6 +380,7 @@ public:
     value(std::nullptr_t) NOEXCEPT;
     value(bool boolean) NOEXCEPT;
     value(double number) NOEXCEPT;
+    value(const decimal& number) NOEXCEPT;
     value(std::string_view text) THROWS;
     value(const char* text) THROWS;
     value(const string& text) THROWS;
@@ -393,6 +404,7 @@ public:
     value& operator=(std::nullptr_t) NOEXCEPT;
     value& operator=(bool boolean) NOEXCEPT;
     value& operator=(double number) NOEXCEPT;
+    value& operator=(const decimal& number) NOEXCEPT;
     value& operator=(std::string_view text) THROWS;
     value& operator=(const char* text) THROWS;
     value& operator=(const string& text) THROWS;
@@ -414,6 +426,7 @@ public:
     bool is_int64() const NOEXCEPT;
     bool is_uint64() const NOEXCEPT;
     bool is_double() const NOEXCEPT;
+    bool is_decimal() const NOEXCEPT;
     bool is_number() const NOEXCEPT;
     bool is_string() const NOEXCEPT;
     bool is_array() const NOEXCEPT;
@@ -446,6 +459,8 @@ public:
     uint64_t get_uint64() const NOEXCEPT;
     double& get_double() NOEXCEPT;
     double get_double() const NOEXCEPT;
+    decimal& get_decimal() NOEXCEPT;
+    const decimal& get_decimal() const NOEXCEPT;
     string& get_string() NOEXCEPT;
     const string& get_string() const NOEXCEPT;
     array& get_array() NOEXCEPT;
@@ -462,6 +477,8 @@ public:
     const uint64_t* if_uint64() const NOEXCEPT;
     double* if_double() NOEXCEPT;
     const double* if_double() const NOEXCEPT;
+    decimal* if_decimal() NOEXCEPT;
+    const decimal* if_decimal() const NOEXCEPT;
     string* if_string() NOEXCEPT;
     const string* if_string() const NOEXCEPT;
     array* if_array() NOEXCEPT;
@@ -506,7 +523,8 @@ private:
         double,
         string,
         array,
-        object
+        object,
+        decimal
     >;
 
     inner inner_;

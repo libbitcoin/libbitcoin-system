@@ -73,6 +73,16 @@ static const std::vector<serialized> models
     { value{ infinity }, "1e99999" },
     { value{ -infinity }, "-1e99999" },
 
+    // decimals
+    { value{ decimal{ 100, 8 } }, "0.00000100" },
+    { value{ decimal{ 150'000'000, 8 } }, "1.50000000" },
+    { value{ decimal{ 0, 8 } }, "0.00000000" },
+    { value{ decimal{ -1, 8 } }, "-0.00000001" },
+    { value{ decimal{ 42, 0 } }, "42" },
+    { value{ decimal{ 42, 1 } }, "4.2" },
+    { value{ decimal{ min_int64, 8 } }, "-92233720368.54775808" },
+    { value{ decimal{ max_int64, 20 } }, "0.09223372036854775807" },
+
     // strings
     { value{ "" }, R"("")" },
     { value{ "abc" }, R"("abc")" },

@@ -78,6 +78,16 @@ BC_AUTO_TEST_CASE(json_value__construct__double__double)
     BC_REQUIRE_EQUAL(instance.as_double(), 1.5);
 }
 
+BC_AUTO_TEST_CASE(json_value__construct__decimal__decimal)
+{
+    const decimal expected{ 150, 2 };
+    const value instance(expected);
+    BC_REQUIRE(instance.is_decimal());
+    BC_REQUIRE(instance.is_number());
+    BC_REQUIRE(instance.kind() == kind::decimal);
+    BC_REQUIRE(instance.get_decimal() == expected);
+}
+
 BC_AUTO_TEST_CASE(json_value__construct__texts__string)
 {
     const std::string text{ "abc" };
@@ -283,6 +293,9 @@ BC_AUTO_TEST_CASE(json_value__to_number__exact__expected)
     BC_REQUIRE_EQUAL(value(0.5).to_number<double>(), 0.5);
     BC_REQUIRE_EQUAL(value(min_int64).to_number<int64_t>(), min_int64);
     BC_REQUIRE_EQUAL(value(-9223372036854775808.0).to_number<int64_t>(), min_int64);
+    BC_REQUIRE_EQUAL(value(decimal{ 150, 2 }).to_number<double>(), 1.5);
+    BC_REQUIRE_EQUAL(value(decimal{ 4200, 2 }).to_number<int32_t>(), 42);
+    BC_REQUIRE_EQUAL(value(decimal{ 0, 8 }).to_number<uint8_t>(), 0u);
 }
 
 BC_AUTO_TEST_CASE(json_value__to_number__inexact__json_not_exact)
@@ -295,6 +308,9 @@ BC_AUTO_TEST_CASE(json_value__to_number__inexact__json_not_exact)
     BC_REQUIRE(ec == error::json_not_exact);
 
     BC_REQUIRE_EQUAL(value(max_uint64).to_number<int64_t>(ec), 0);
+    BC_REQUIRE(ec == error::json_not_exact);
+
+    BC_REQUIRE_EQUAL(value(decimal{ 150, 2 }).to_number<int32_t>(ec), 0);
     BC_REQUIRE(ec == error::json_not_exact);
 
     BC_REQUIRE_EQUAL(value(0.5).to_number<int32_t>(ec), 0);
@@ -360,6 +376,13 @@ BC_AUTO_TEST_CASE(json_value__equality__integers_by_value__equal)
 BC_AUTO_TEST_CASE(json_value__equality__integer_double__not_equal)
 {
     BC_REQUIRE(value(1) != value(1.0));
+}
+
+BC_AUTO_TEST_CASE(json_value__equality__decimal__by_units_and_places)
+{
+    BC_REQUIRE(value(decimal{ 150, 2 }) == value(decimal{ 150, 2 }));
+    BC_REQUIRE(value(decimal{ 150, 2 }) != value(decimal{ 1500, 3 }));
+    BC_REQUIRE(value(decimal{ 150, 2 }) != value(1.5));
 }
 
 BC_AUTO_TEST_CASE(json_value__equality__kinds__expected)
